@@ -1,34 +1,32 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { Box, Flex, IconButton, useBreakpointValue, Image, Text } from "@chakra-ui/react"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
-import { gmNfts } from "@/constants/gmNfts"
+import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { useGMMaxLevel, UserGM } from "@/api"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+
+import { gmNfts } from "@/constants/gmNfts"
+
+import { UserGM } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
 
 type Props = {
   setSelectedGMLevel: (GMLevel: string) => void
   usersGM?: UserGM
 }
-
 export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
   const { t } = useTranslation()
   const { data: maxGmLevel } = useGMMaxLevel()
-
   const upgradableNfts = useMemo(() => {
     return gmNfts.filter(
       nft => parseInt(nft.level, 10) >= Number(usersGM?.tokenLevel) && parseInt(nft.level, 10) <= Number(maxGmLevel),
     )
   }, [usersGM?.tokenLevel, maxGmLevel])
-
   const visibleCards = useBreakpointValue({ base: 3, md: 3, lg: 3 }) || 1
   const initialIndex = upgradableNfts.findIndex(nft => nft.level === usersGM?.tokenLevel)
   const [currentIndex, setCurrentIndex] = useState(initialIndex !== -1 ? initialIndex - 1 : 0)
   const [centeredNFT, setCenteredNFT] = useState<string | undefined>(usersGM?.tokenLevel)
-
   const getVisibleNFTs = useCallback(() => {
     const visibleNFTs = []
     const totalNFTs = upgradableNfts.length
-
     const normalizedIndex = ((currentIndex % totalNFTs) + totalNFTs) % totalNFTs
     for (let i = 0; i < Math.min(visibleCards, totalNFTs); i++) {
       const index = (normalizedIndex + i) % totalNFTs
@@ -36,14 +34,12 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
     }
     return visibleNFTs
   }, [currentIndex, visibleCards, upgradableNfts])
-
   const handleSelect = useCallback(
     (GMLevel: string) => {
       setSelectedGMLevel(GMLevel)
     },
     [setSelectedGMLevel],
   )
-
   const nextCard = () => {
     setCurrentIndex(prevIndex => {
       const nextIndex = prevIndex + 1

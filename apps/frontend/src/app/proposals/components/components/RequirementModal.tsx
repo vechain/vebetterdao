@@ -1,11 +1,15 @@
-import { useCurrentAllocationsRoundId, useGetUserGMs, useGMRequiredByProposalType } from "@/api"
-import { BaseModal } from "@/components/BaseModal"
-import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
-import { gmNfts } from "@/constants/gmNfts"
 import { Button, Heading, Icon, List, SimpleGrid, Text, UseDisclosureProps, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
+import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
+import { gmNfts } from "@/constants/gmNfts"
+
+import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMRequiredByProposalType } from "../../../../api/contracts/governance/hooks/useGMRequiredByProposalType"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 type Props = {
   isOpen: UseDisclosureProps["open"]
@@ -13,25 +17,20 @@ type Props = {
   hasNft: boolean
   isGrants?: boolean
 }
-
 export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, isGrants }: Props) => {
   const { t } = useTranslation()
-
   const { data: gmRequired } = useGMRequiredByProposalType()
   const { data: userGMs } = useGetUserGMs()
   const router = useRouter()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   const userHasAnyGm = useMemo(() => {
     return !!userGMs?.length
   }, [userGMs])
-
   const userHighestGm = useMemo(() => {
     if (!userHasAnyGm) return null
     if (userGMs?.length === 1) return userGMs[0]
     return userGMs?.sort((a, b) => Number(a.tokenLevel) - Number(b.tokenLevel))[0]
   }, [userGMs, userHasAnyGm])
-
   const getNftOrApplyButtonText = useMemo(() => {
     if (hasNft) {
       return t("Apply")
@@ -41,7 +40,6 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
     }
     return t("Upgrade NFT")
   }, [userHasAnyGm, hasNft, t])
-
   const handleGetNftOrApply = useCallback(() => {
     if (!userHasAnyGm) {
       router.push(`/rounds/${currentRoundId}`)

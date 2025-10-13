@@ -1,16 +1,14 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
-import { ethers } from "ethers"
 import { FormattingUtils } from "@repo/utils"
+import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 
 const abi = X2EarnRewardsPool__factory.abi
 const address = getConfig().x2EarnRewardsPoolContractAddress
 const method = "rewardsPoolBalance" as const
-
 export const getAppRewardsBalanceQueryKey = (xAppId: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [xAppId as `0x${string}`] })
-
 /**
  * Get the rewards balance in the x2Earn rewards pool contract
  *

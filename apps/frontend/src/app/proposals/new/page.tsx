@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import { MotionVStack } from "../../../components/MotionVStack"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 const NewProposalPageContent = dynamic(
   () => import("./components/NewProposalPageContent").then(mod => mod.NewProposalPageContent),
   {
@@ -17,12 +16,10 @@ const NewProposalPageContent = dynamic(
     ),
   },
 )
-
 export default function NewProposalPage() {
   useEffect(() => {
     AnalyticsUtils.trackPage("NewProposal")
   }, [])
-
   return (
     <MotionVStack>
       <NewProposalPageContent />

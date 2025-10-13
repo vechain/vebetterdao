@@ -1,23 +1,21 @@
 import { Alert, Button, Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
-import { useProposalFormStore } from "@/store"
-
-import { useCanProposalStartInNextRound, useCurrentAllocationsRoundId } from "@/api"
-import dayjs from "dayjs"
-import { SelectedRoundRadioCard } from "./SelectedRoundRadioCard"
 import { useTranslation } from "react-i18next"
-import { isUndefined } from "lodash"
 
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
+import { useCanProposalStartInNextRound } from "../../../../../../api/contracts/governance/hooks/useCanProposalStartInNextRound"
+import { useCurrentAllocationsRoundId } from "../../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+
+import { SelectedRoundRadioCard } from "./SelectedRoundRadioCard"
 
 const roundsToRender = 3
-
 export const NewProposalRoundPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
-
   const {
     data: currentRoundId,
     isLoading: isCurrentRoundIdLoading,
@@ -28,9 +26,7 @@ export const NewProposalRoundPageContent = () => {
     isLoading: isCanStartInNextRoundLoading,
     error: canStartInNextRoundError,
   } = useCanProposalStartInNextRound()
-
   const { votingStartRoundId, setData } = useProposalFormStore()
-
   const onContinue = useCallback(() => {
     router.push("/proposals/new/form/support")
     AnalyticsUtils.trackEvent(
@@ -38,9 +34,8 @@ export const NewProposalRoundPageContent = () => {
       buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_ROUND_SELECTION),
     )
   }, [router])
-
   const rounds = useMemo(() => {
-    if (!currentRoundId || isUndefined(canStartInNextRound)) return []
+    if (!currentRoundId || typeof canStartInNextRound === "undefined") return []
     return Array.from({ length: roundsToRender }, (_, index) => {
       const roundId = canStartInNextRound ? Number(currentRoundId) + index + 1 : Number(currentRoundId) + index + 2
       return {

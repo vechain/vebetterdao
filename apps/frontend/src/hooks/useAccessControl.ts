@@ -1,9 +1,12 @@
-import { DEFAULT_ADMIN_ROLE, hasRoleQueryKey } from "@/api/contracts/account"
 import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
-import { EnhancedClause } from "@vechain/vechain-kit"
+
+import { hasRoleQueryKey, DEFAULT_ADMIN_ROLE } from "../api/contracts/account/hooks/useHasRole"
+
 import { useBuildTransaction } from "./useBuildTransaction"
+
 type Props = {
   contractAddress: string
   walletAddress: string
@@ -11,9 +14,7 @@ type Props = {
   onSuccess?: () => void
   invalidateCache?: boolean
 }
-
 const accessControlInterface = AccessControl__factory.createInterface()
-
 /**
  * Hook to grant or revoke roles to a wallet address
  * @param contractAddress address of the contract
@@ -26,7 +27,6 @@ export const useAccessControl = ({ contractAddress, walletAddress, role, onSucce
     () => (role === "DEFAULT_ADMIN_ROLE" ? DEFAULT_ADMIN_ROLE : ethers.solidityPackedKeccak256(["string"], [role])),
     [role],
   )
-
   const buildGrantClause = useCallback(() => {
     return [
       {
@@ -38,7 +38,6 @@ export const useAccessControl = ({ contractAddress, walletAddress, role, onSucce
       },
     ] as EnhancedClause[]
   }, [contractAddress, walletAddress, bytes32Role, role])
-
   const buildRevokeClause = useCallback(() => {
     return [
       {

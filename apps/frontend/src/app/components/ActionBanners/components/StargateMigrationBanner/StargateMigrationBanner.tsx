@@ -1,17 +1,16 @@
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
-import { t } from "i18next"
-import { UilArrowRight } from "@iconscout/react-unicons"
 import { Button, Icon } from "@chakra-ui/react"
+import { UilArrowRight } from "@iconscout/react-unicons"
+import { t } from "i18next"
+
+import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 export type Props = {
   isLegacyNode?: boolean
 }
-
 export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
   const GOTOSTARGATE = () => {
     window.open("https://app.stargate.vechain.org/", "_blank", "noopener noreferrer")
   }
-
   return (
     <GenericBanner
       variant="info"

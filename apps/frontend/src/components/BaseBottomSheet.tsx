@@ -1,6 +1,7 @@
 import { Box, VisuallyHidden } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
 import { Drawer } from "vaul"
+
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 type Props = {
   isOpen: boolean
@@ -12,7 +13,6 @@ type Props = {
   isDismissable?: boolean
   customBgColor?: string
 }
-
 export const BaseBottomSheet = ({
   isOpen,
   onClose,

@@ -1,5 +1,5 @@
-import type { ReactNode } from "react"
 import { Card, Image, Heading, Text, TextProps } from "@chakra-ui/react"
+import { ReactNode } from "react"
 
 type BannerType = "info" | "success" | "warning"
 

@@ -1,13 +1,15 @@
-import { VoteType } from "@/api"
+import { Box, HStack, Icon, Text } from "@chakra-ui/react"
+import { humanNumber } from "@repo/utils/FormattingUtils"
+import { ethers } from "ethers"
+import type { ElementType, ReactNode } from "react"
+import { useTranslation } from "react-i18next"
+
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import HeartIconFilled from "@/components/Icons/svg/heart-solid.svg"
 import ThumbsDownIconFilled from "@/components/Icons/svg/thumbs-down-solid.svg"
 import ThumbsUpIconFilled from "@/components/Icons/svg/thumbs-up-solid.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
-import { Box, HStack, Icon, Text } from "@chakra-ui/react"
-import { humanNumber } from "@repo/utils/FormattingUtils"
-import { ethers } from "ethers"
-import { useTranslation } from "react-i18next"
+import { VoteType } from "@/types/voting"
 
 export interface UserInteractionBadgesProps {
   userDeposits?: bigint
@@ -18,12 +20,12 @@ export interface UserInteractionBadgesProps {
 type BadgeConfig = {
   label: string
   color: string
-  icon: React.ElementType
+  icon: ReactNode
   text: string
 }
 
 // Define badge configurations for each interaction type
-const VOTE_CONFIG: { [key in VoteType]: Omit<BadgeConfig, "label" | "text"> & { translationKey: string } } = {
+const VOTE_CONFIG: Record<VoteType, { color: string; icon: ReactNode; translationKey: string }> = {
   [VoteType.VOTE_FOR]: {
     color: "status.positive.primary",
     icon: ThumbsUpIconFilled,
@@ -78,9 +80,9 @@ export const UserInteractionBadges = ({ userDeposits, userVoteOption, proposalSt
   return (
     <HStack>
       <Text color="text.subtle">{config.label}</Text>
-      <Box border="2px solid" borderColor={config.color} color={config.color} borderRadius="lg">
+      <Box border="md" borderColor={config.color} color={config.color} borderRadius="lg">
         <HStack gap={2} px="12px" py="8px">
-          <Icon as={config.icon} boxSize={5} />
+          <Icon as={config.icon as ElementType} boxSize={5} />
           <Text color={config.color}>{config.text}</Text>
         </HStack>
       </Box>

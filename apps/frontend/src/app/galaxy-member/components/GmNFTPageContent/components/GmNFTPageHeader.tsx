@@ -1,6 +1,3 @@
-import { UserGM } from "@/api"
-import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { GmActionButton } from "@/components/GmActionButton"
 import {
   Box,
   Card,
@@ -22,24 +19,25 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useGetB3trBalance } from "@/hooks"
-import { gmNfts } from "@/constants/gmNfts"
+
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { GmActionButton } from "@/components/GmActionButton"
+import { gmNfts } from "@/constants/gmNfts"
+
+import { UserGM } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
+import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
 
 const compactFormatter = getCompactFormatter(4)
-
 export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
   const { account } = useWallet()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
-
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
   const { data: gmMaxLevel } = useGMMaxLevel()
-
   const { multiplier = 0, tokenLevel, b3trToUpgrade, metadata } = gm
   const b3trLeftover = Number(gmNfts[Number(tokenLevel)]?.b3trToUpgrade || 0) - Number(b3trToUpgrade)
-
   const actionDescription = useMemo(() => {
     if (Number(tokenLevel) >= (gmMaxLevel ?? 0)) {
       return (

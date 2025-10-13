@@ -5,11 +5,9 @@ import { useTranslation } from "react-i18next"
 export const CreatorApplicationApproved = () => {
   const { t } = useTranslation()
   const router = useRouter()
-
   const goToAppCreation = () => {
     router.push("/apps/new")
   }
-
   return (
     <Card.Root
       variant="primary"
@@ -35,7 +33,6 @@ export const CreatorApplicationApproved = () => {
               borderRadius="9px"
             />
           </Box>
-
           <Stack direction={{ base: "column" }} w="full" h="full" align={"center"} justify={"center"} py={4}>
             {/* Right Section: Image, Title, and Description */}
             <Stack align={"center"} justify={"center"}>

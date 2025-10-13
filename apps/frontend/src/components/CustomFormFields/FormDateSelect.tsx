@@ -1,6 +1,6 @@
+import { Field, HStack, Text, NativeSelect } from "@chakra-ui/react"
 import { Control, Controller, UseFormRegisterReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Field, HStack, Text, NativeSelect } from "@chakra-ui/react"
 
 type FormDateSelectProps = {
   label?: string
@@ -13,7 +13,6 @@ type FormDateSelectProps = {
   placeholder?: string
   defaultValue?: number
 }
-
 export const FormDateSelect = ({
   label,
   description,
@@ -26,7 +25,6 @@ export const FormDateSelect = ({
   defaultValue,
 }: FormDateSelectProps) => {
   const { t } = useTranslation()
-
   return (
     <Field.Root invalid={!!error}>
       {label && (
@@ -46,7 +44,6 @@ export const FormDateSelect = ({
           {description}
         </Text>
       )}
-
       <Controller
         name={register.name}
         control={control}

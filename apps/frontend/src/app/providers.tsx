@@ -1,16 +1,15 @@
 "use client"
 // app/providers.tsx
-
-import { persister, queryClient } from "@/api"
-import { Provider } from "@/components/ui/provider"
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
-
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
+import { Analytics } from "@vercel/analytics/react"
 import dynamic from "next/dynamic"
 
+import { Provider } from "@/components/ui/provider"
 import { AuthSessionProvider } from "@/providers/AuthSessionProvider"
-import { Analytics } from "@vercel/analytics/react"
 import { TransactionModalProvider } from "@/providers/TransactionModalProvider"
+
+import { queryClient, persister } from "../api/QueryProvider"
 
 const VechainKitProviderWrapper = dynamic(
   async () => (await import("../providers/VechainKitProviderWrapper")).VechainKitProviderWrapper,

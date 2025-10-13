@@ -4,10 +4,8 @@ type ValidationResult = {
   isValid: boolean
   error?: string
 }
-
 export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIREMENTS): Promise<ValidationResult> => {
   const requirements = IMAGE_REQUIREMENTS[type]
-
   // Check MIME type
   if (file.type !== requirements.mimeType) {
     return {
@@ -15,17 +13,14 @@ export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIRE
       error: `File must be a ${requirements.extension.toUpperCase()} image`,
     }
   }
-
   // Check dimensions
   return new Promise((resolve, reject) => {
     const img = new Image()
     const objectUrl = URL.createObjectURL(file)
-
     img.onload = () => {
       URL.revokeObjectURL(objectUrl)
       const { width, height } = img
       const ratio = width / height
-
       if (width < requirements.dimensions.minWidth || height < requirements.dimensions.minHeight) {
         resolve({
           isValid: false,
@@ -33,7 +28,6 @@ export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIRE
         })
         return
       }
-
       // Allow for small rounding differences in ratio
       const ratioTolerance = 0.01
       if (Math.abs(ratio - requirements.dimensions.ratio) > ratioTolerance) {
@@ -43,10 +37,8 @@ export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIRE
         })
         return
       }
-
       resolve({ isValid: true })
     }
-
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl)
       reject(new Error("Invalid image file"))

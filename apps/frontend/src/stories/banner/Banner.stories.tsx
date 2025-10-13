@@ -1,7 +1,8 @@
-import type { Meta } from "@storybook/nextjs-vite"
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { Button, VStack, Text, Icon } from "@chakra-ui/react"
 import { UilArrowRight, UilInfoCircle, UilGift } from "@iconscout/react-unicons"
+import { Meta } from "@storybook/nextjs-vite"
+
+import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 const meta = {
   title: "b3tr/components/Banner",
@@ -35,7 +36,6 @@ export const Default = () => (
     />
   </VStack>
 )
-
 // TODO: import as component after you fix mocking
 export const ActionBanners = () => (
   <VStack gap="4">

@@ -1,15 +1,3 @@
-import { XApp } from "@/api"
-import { WalletAddressInput } from "@/app/components/Input"
-import { CategorySelector } from "@/components/CategorySelector"
-import {
-  AVG_PHONE_WIDTH,
-  BANNER_UPLOAD_GUIDELINES,
-  LOGO_UPLOAD_GUIDELINES,
-  notFoundImage,
-  VE_WOLRD_SCALING_FACTOR,
-  VEWORLD_BANNER_UPLOAD_GUIDELINES,
-} from "@/constants"
-import { blobToBase64 } from "@/utils/BlobUtils"
 import { Button, Card, Field, Heading, Image, InputGroup, Stack, Text, VStack } from "@chakra-ui/react"
 import { ChangeEvent, useCallback, useRef } from "react"
 import {
@@ -24,9 +12,24 @@ import {
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
+import { CategorySelector } from "@/components/CategorySelector"
+import { notFoundImage } from "@/constants"
+import { blobToBase64 } from "@/utils/BlobUtils"
+
+import { XApp } from "../../api/contracts/xApps/getXApps"
+import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
+import {
+  AVG_PHONE_WIDTH,
+  VEWORLD_BANNER_UPLOAD_GUIDELINES,
+  BANNER_UPLOAD_GUIDELINES,
+  LOGO_UPLOAD_GUIDELINES,
+  VE_WOLRD_SCALING_FACTOR,
+} from "../../constants/XAppsMedia"
 import { AddressIcon } from "../AddressIcon"
-import { FormItem, genericValidation, patternUrlCheck } from "../CustomFormFields"
-import { UploadFileButton } from "../UploadFileButton"
+import { FormItem } from "../CustomFormFields/FormItem"
+import { genericValidation, patternUrlCheck } from "../CustomFormFields/validators"
+import { UploadFileButton } from "../UploadFileButton/UploadFileButton"
+
 import { VeWorldFeaturedImageGuidelines } from "./VeWorldFeaturedImageGuidelines"
 
 // Validate image uploads with size and type

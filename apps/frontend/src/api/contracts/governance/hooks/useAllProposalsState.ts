@@ -1,14 +1,15 @@
-import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor, type MultipleClausesCallParameters } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
+import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
 import { B3TRGovernor__factory, GrantsManager__factory } from "@vechain/vebetterdao-contracts"
-import { getProposalStateQueryKey } from "./useProposalState"
-import { getGrantProposalStateQueryKey } from "./useGrantProposalState"
+import { executeMultipleClausesCall, useThor, type MultipleClausesCallParameters } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
-export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
+import { getGrantProposalStateQueryKey } from "./useGrantProposalState"
+import { getProposalStateQueryKey } from "./useProposalState"
 
+export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
 export const useAllProposalsState = ({
   grantProposalsIds,
   standardProposalsIds,
@@ -23,7 +24,6 @@ export const useAllProposalsState = ({
   const queryClient = useQueryClient()
   const grantsManagerContractAddress = getConfig().grantsManagerContractAddress as `0x${string}`
   const b3trGovernorAddress = getConfig().b3trGovernorAddress as `0x${string}`
-
   const grantProposalsCalls = useMemo(() => {
     return grantProposalsIds.map(proposalId => ({
       abi: GrantsManager__factory.abi,
@@ -32,7 +32,6 @@ export const useAllProposalsState = ({
       args: [proposalId] as const,
     }))
   }, [grantProposalsIds, grantsManagerContractAddress])
-
   const standardProposalsCalls = useMemo(() => {
     return standardProposalsIds.map(proposalId => ({
       abi: B3TRGovernor__factory.abi,
@@ -41,7 +40,6 @@ export const useAllProposalsState = ({
       args: [proposalId] as const,
     }))
   }, [b3trGovernorAddress, standardProposalsIds])
-
   return useQuery({
     queryKey: getAllProposalsStateQueryKey(),
     queryFn: async () => {

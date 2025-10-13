@@ -1,29 +1,25 @@
-import { ProposalMetadata, useProposalState } from "@/api"
-import { ProposalStatusBadge } from "@/components"
 import { Card, Icon, LinkBox, LinkOverlay, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import NextLink from "next/link"
 import { useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
-import NextLink from "next/link"
+
+import { ProposalMetadata } from "../../../../../api/contracts/governance/getProposalsEvents"
+import { useProposalState } from "../../../../../api/contracts/governance/hooks/useProposalState"
+import { ProposalStatusBadge } from "../../../../../components/Proposal/ProposalStatusBadge"
 
 type Props = {
   proposalId: string
   metadata?: ProposalMetadata
 }
-
 export const ProposalBox = ({ proposalId, metadata }: Props) => {
   const { data: proposalState } = useProposalState(proposalId)
-
   const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
-
   const title = useMemo(() => {
     if (!metadata?.title) return "Proposal title temporarily unavailable"
-
     if (isDesktop && metadata.title.length > 95) return metadata.title.slice(0, 95) + "..."
     if (!isDesktop && metadata.title.length > 38) return metadata.title.slice(0, 38) + "..."
-
     return metadata.title
   }, [metadata?.title, isDesktop])
-
   return (
     <LinkBox asChild>
       <Card.Root w={"full"} variant="subtle" p="3">

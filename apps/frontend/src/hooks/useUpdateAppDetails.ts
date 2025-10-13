@@ -1,19 +1,21 @@
-import { useCallback, useMemo } from "react"
-import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
-import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
+
+import { getXAppMetadataQueryKey } from "../api/contracts/xApps/hooks/useXAppMetadata"
+import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-
 type useUpdateAppDetailsProps = {
   appId: string
   onSuccess?: () => void
   onFailure?: () => void
 }
-
 type BuildClausesProps = {
   metadataUri: string
   teamWalletAddress?: string
@@ -21,7 +23,6 @@ type BuildClausesProps = {
 export type useUpdateAppMetadataReturnValue = {
   sendTransaction: (data: BuildClausesProps) => Promise<void>
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
-
 /**
  *  Hook to update the metadata of an app
  * @param param0 appId, onSuccess, invalidateCache

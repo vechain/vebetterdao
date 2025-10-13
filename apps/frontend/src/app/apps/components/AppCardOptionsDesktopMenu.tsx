@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { FaExternalLinkAlt } from "react-icons/fa"
 import { FaEllipsisVertical, FaCheck, FaCopy, FaRegImage } from "react-icons/fa6"
+
 import { toaster } from "@/components/ui/toaster"
 
 type Props = {
@@ -23,7 +24,6 @@ export const AppCardOptionsDesktopMenu = ({
   const { copy: onCopy, copied: hasCopied } = useClipboard({
     value: teamWalletAddress ?? "",
   })
-
   const handleOnCopy = () => {
     onCopy()
     toaster.success({
@@ -32,12 +32,10 @@ export const AppCardOptionsDesktopMenu = ({
       closable: true,
     })
   }
-
   const router = useRouter()
   const navigateToAppDetail = () => {
     router.push(`/apps/${xAppId}`)
   }
-
   return (
     <Menu.Root>
       <Menu.Trigger asChild>

@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVoting__factory.abi
 const method = "roundSnapshot" as const
-
 /**
  * Returns the query key for fetching the round snapshot.
  * @param roundId - The round id.
@@ -14,7 +13,6 @@ const method = "roundSnapshot" as const
 export const getAllocationRoundSnapshotQueryKey = (roundId: string) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
 }
-
 /**
  * Hook to get the round snapshot from the XAllocationVoting contract.
  * @param roundId - The round id.

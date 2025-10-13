@@ -1,6 +1,3 @@
-import { CustomModalContent, ExclamationTriangle } from "@/components"
-import { AddressIcon } from "@/components/AddressIcon"
-
 import {
   Button,
   Heading,
@@ -17,11 +14,15 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+
 type Props = {
   moderator: string
   handleDeleteModerator: () => void
 }
-
 export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose } = useDisclosure()

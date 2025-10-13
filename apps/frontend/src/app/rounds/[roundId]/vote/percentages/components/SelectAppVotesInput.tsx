@@ -1,11 +1,13 @@
-import { useXAppMetadata } from "@/api"
 import { Box, Field, HStack, Heading, Image, Input, InputGroup, Skeleton, Stack, Text } from "@chakra-ui/react"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
-import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
 import { t } from "i18next"
-import { CastAllocationVoteFormData } from "@/store"
+
+import { useXAppMetadata } from "../../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../../api/ipfs/hooks/useIpfsImage"
+import { CastAllocationVoteFormData } from "../../../../../../store/useCastAllocationFormStore"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 const estimateVotes = (value: number | string, totalVotesAvailable: number | string) => {
   return scaledDivision(Number(value) * Number(totalVotesAvailable), 100)

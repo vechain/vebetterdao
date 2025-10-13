@@ -1,9 +1,11 @@
 import { Heading, Text, VStack } from "@chakra-ui/react"
+import { useCallback } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../../AdminAppPageContent"
+
 import { AddModeratorButton } from "./components/AddModeratorButton"
-import { useCallback } from "react"
 import { ModeratorItem } from "./components/ModeratorItem"
 
 interface Props {
@@ -12,7 +14,6 @@ interface Props {
 export const EditAppModerators = ({ form }: Props) => {
   const { t } = useTranslation()
   const moderators = form.watch("moderators")
-
   const handleDeleteModerator = useCallback(
     (index: number) => () =>
       form.setValue(
@@ -21,7 +22,6 @@ export const EditAppModerators = ({ form }: Props) => {
       ),
     [form, moderators],
   )
-
   return (
     <VStack align="stretch">
       <Heading size="2xl">{t("Moderators")}</Heading>

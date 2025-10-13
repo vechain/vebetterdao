@@ -1,8 +1,10 @@
-import { useAccountLinking } from "@/api"
-import { NoLinkedAccount } from "./components/NoLinkedAccount"
-import { PendingLinkingProposal } from "./components/PendingLinkingProposal"
-import { LinkedAccounts } from "./components/LinkedAccounts"
 import { VStack } from "@chakra-ui/react"
+
+import { useAccountLinking } from "../../../../api/contracts/vePassport/hooks/useAccountLinking"
+
+import { LinkedAccounts } from "./components/LinkedAccounts/LinkedAccounts"
+import { NoLinkedAccount } from "./components/NoLinkedAccount/NoLinkedAccount"
+import { PendingLinkingProposal } from "./components/PendingLinkingProposal/PendingLinkingProposal"
 
 type Props = {
   address: string

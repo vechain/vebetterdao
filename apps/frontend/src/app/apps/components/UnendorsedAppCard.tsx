@@ -13,29 +13,31 @@ import {
   LinkBox,
   LinkOverlay,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
-import { useTranslation } from "react-i18next"
-import { useAppEndorsementStatus, useGetUserNodes, useIpfsImage, useXAppMetadata } from "@/api"
-import { notFoundImage } from "@/constants"
-import { useXAppStatusConfig } from "../[appId]/hooks"
-import NewAppIcon from "@/components/Icons/svg/new-app.svg"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import NextLink from "next/link"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import NewAppIcon from "@/components/Icons/svg/new-app.svg"
+
+import { useAppEndorsementStatus } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+const notFoundImage = "/assets/images/image-not-found.webp"
+import { useXAppStatusConfig } from "../[appId]/hooks/useXAppStatusConfig"
 
 type Props = {
   appId: string
   isNewApp: boolean
   layout?: "endorser" | "default"
 }
-
 export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props) => {
   const { t } = useTranslation()
-
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(appId)
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
   const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)
-
   const {
     score: endorsementScore,
     threshold: endorsementThreshold,

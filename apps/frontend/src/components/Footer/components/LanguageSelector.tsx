@@ -1,6 +1,7 @@
-import { languages } from "@/i18n"
 import { Box, createListCollection, HStack, Select, useSelectContext } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { languages } from "@/i18n"
 
 const languageCollection = createListCollection({
   items: languages.map(language => ({
@@ -8,11 +9,9 @@ const languageCollection = createListCollection({
     name: language.name,
     avatar: language.flag,
   })),
-
   itemToString: item => item.name,
   itemToValue: item => item.id,
 })
-
 const SelectValue = () => {
   const select = useSelectContext()
   const items = select.selectedItems as Array<{ name: string; avatar: string }>
@@ -26,10 +25,8 @@ const SelectValue = () => {
     </Select.ValueText>
   )
 }
-
 export const LanguageSelector: React.FC = () => {
   const { i18n } = useTranslation()
-
   return (
     <Select.Root
       variant="subtle"

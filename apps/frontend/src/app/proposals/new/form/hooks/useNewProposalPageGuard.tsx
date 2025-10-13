@@ -1,8 +1,9 @@
-import { useProposalFormStore } from "@/store"
 import { useWallet } from "@vechain/vechain-kit"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
-import { useMetProposalCriteria } from "@/api/contracts/governance"
+
+import { useMetProposalCriteria } from "../../../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { useProposalFormStore } from "../../../../../store/useProposalFormStore"
 
 /**
  * This hook is used to guard the proposal page.
@@ -15,7 +16,6 @@ export const useNewProposalPageGuard = () => {
   const { hasMetProposalCriteria } = useMetProposalCriteria()
   const { title, shortDescription, markdownDescription, actions, votingStartRoundId, depositAmount } =
     useProposalFormStore()
-
   const isVisitAuthorized = useMemo(() => {
     if (!account?.address || !hasMetProposalCriteria) return false
     switch (pathname) {
@@ -43,7 +43,6 @@ export const useNewProposalPageGuard = () => {
     depositAmount,
     hasMetProposalCriteria,
   ])
-
   const redirectPath = useMemo(() => {
     if (!account?.address || !hasMetProposalCriteria) return "/proposals"
     return "/proposals/new"

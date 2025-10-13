@@ -1,18 +1,23 @@
-import { useContractVersion } from "@/api"
-import { AddressButton } from "@/components/AddressButton"
-import { B3TRIcon, VETIcon, VOT3Icon, VTHOIcon } from "@/components"
 import { Card, Grid, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useHasRoles } from "@/api/contracts/account"
 import { useWallet, useAccountBalance } from "@vechain/vechain-kit"
-import { getContractByAddress } from "@/constants"
-import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+import { useMemo } from "react"
+
+import { AddressButton } from "@/components/AddressButton"
+
+import { useHasRoles } from "../../../api/contracts/account/hooks/useHasRoles"
+import { useContractVersion } from "../../../api/contracts/common/useContractVersion"
+import { B3TRIcon } from "../../../components/Icons/B3TRIcon"
+import { VETIcon } from "../../../components/Icons/VETIcon"
+import { VOT3Icon } from "../../../components/Icons/VOT3Icon"
+import { VTHOIcon } from "../../../components/Icons/VTHOIcon"
+import { getContractByAddress } from "../../../constants/contractList"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)
-
 export const ContractsDetails = () => {
   const config = getConfig()
   return (

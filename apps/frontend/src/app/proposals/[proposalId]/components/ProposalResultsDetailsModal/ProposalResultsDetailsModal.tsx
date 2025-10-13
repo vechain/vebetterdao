@@ -1,9 +1,3 @@
-import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
-import { MulticolorBar, RegularModal, ResultsDisplay } from "@/components"
-import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
-import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
-import { ProposalState } from "@/hooks"
-import { VotingSegment } from "@/types/voting"
 import { Box, HStack, Icon, Link, Stack, Table, Text, VStack } from "@chakra-ui/react"
 import { UilCheckCircle } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
@@ -11,6 +5,16 @@ import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { formatEther, parseEther } from "viem"
+
+import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
+import { VotingSegment } from "@/types/voting"
+
+import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
+import { RegularModal } from "../../../../../components/RegularModal"
+import { ProposalState } from "../../../../../hooks/proposals/grants/types"
 
 // Types
 interface ProgressBarSegment {
@@ -21,25 +25,21 @@ interface ProgressBarSegment {
   color: string
   icon: React.ElementType
 }
-
 interface ProposalVotesData {
   totalVoters: number
   totalPower: bigint
   totalWeight: bigint
   votes: GroupedProposalVotes
 }
-
 // Base interfaces
 interface BaseModalProps {
   isResultsModalOpen: boolean
   onClose: () => void
 }
-
 interface BaseProposalProps {
   proposalId: string
   progressBarSegments: ProgressBarSegment[]
 }
-
 interface BaseVotingProps {
   proposalQuorum: bigint
   proposalQuorumNumerator: bigint

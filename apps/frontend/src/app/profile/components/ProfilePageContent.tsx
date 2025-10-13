@@ -1,20 +1,22 @@
 import { VStack, Icon, Text, Link, Tabs } from "@chakra-ui/react"
-import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useMemo, useCallback, useEffect } from "react"
-import { ProfileBetterActions } from "./ProfileBetterActions"
-import { useTranslation } from "react-i18next"
-import { ProfileBalance } from "./ProfileBalance"
-import { ProfileGovernance } from "./ProfileGovernance"
-import { useRouter, useSearchParams } from "next/navigation"
-import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts"
-import { AnalyticsUtils } from "@/utils"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { FaAngleLeft } from "react-icons/fa6"
-import { ProfileGMLevel } from "./ProfileGMLevel"
-import { ProfileNodes } from "./ProfileNodes"
+import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useMemo, useCallback, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { FaAngleLeft } from "react-icons/fa6"
+
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+
+import { ProfileBalance } from "./ProfileBalance/ProfileBalance"
+import { ProfileBetterActions } from "./ProfileBetterActions/ProfileBetterActions"
+import { ProfileGMLevel } from "./ProfileGMLevel/ProfileGMLevel"
+import { ProfileGovernance } from "./ProfileGovernance/ProfileGovernance"
+import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
+import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts/ProfileLinkedAcounts"
+import { ProfileNodes } from "./ProfileNodes/ProfileNodes"
 
 enum Tab {
   Balance = "balance",
@@ -24,20 +26,16 @@ enum Tab {
   GM = "gm",
   Nodes = "nodes",
 }
-
 interface ProfilePageContentProps {
   address?: string
 }
-
 export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
-
   const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
   const parsedAddress = address ?? account?.address ?? ""
   const searchParams = useSearchParams()
-
   useEffect(() => {
     if (!parsedAddress) {
       router.push("/error")

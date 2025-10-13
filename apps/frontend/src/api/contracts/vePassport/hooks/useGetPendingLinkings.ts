@@ -1,11 +1,10 @@
-import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().veBetterPassportContractAddress
 const abi = VeBetterPassport__factory.abi
 const method = "getPendingLinkings" as const
-
 /**
  * Returns the query key for fetching pending linkings.
  * @param user - The user address.
@@ -14,7 +13,6 @@ const method = "getPendingLinkings" as const
 export const getPendingLinkingsQueryKey = (user?: string) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [user as `0x${string}`] })
 }
-
 /**
  * Hook to get pending linkings from the VeBetterPassport contract.
  * @param user - The user address.
@@ -35,7 +33,6 @@ export const useGetPendingLinkings = (user?: string) => {
     },
   })
 }
-
 /**
  * Hook to get pending linkings from the VeBetterPassport contract for the current user.
  * @returns An object containing incoming and outgoing pending linkings for the current user.

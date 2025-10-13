@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import { MotionVStack } from "../../../../components/MotionVStack"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
 const NewCreatorPageFormContent = dynamic(
   () => import("./components/NewCreatorPageFormContent").then(mod => mod.NewCreatorPageFormContent),
   {
@@ -17,12 +16,10 @@ const NewCreatorPageFormContent = dynamic(
     ),
   },
 )
-
 export default function NewCreatorPageForm() {
   useEffect(() => {
     AnalyticsUtils.trackPage("NewCreatorForm")
   }, [])
-
   return (
     <MotionVStack>
       <NewCreatorPageFormContent />

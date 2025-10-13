@@ -1,10 +1,11 @@
-import { StepCardProps, StepCard } from "@/components/StepCard"
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import SignIcon from "@/components/Icons/svg/sign.svg"
+
 import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
+import SignIcon from "@/components/Icons/svg/sign.svg"
 import VoteIcon from "@/components/Icons/svg/vote.svg"
+import { StepCardProps, StepCard } from "@/components/StepCard"
 
 const Steps: StepCardProps[] = [
   {
@@ -32,7 +33,6 @@ const Steps: StepCardProps[] = [
 export const NewAppPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
-
   const LINK_TO_DOCS = () => {
     window.open(
       "https://docs.vebetterdao.org/vebetterdao/x2earn-apps#voting-eligibility-and-endorsement-status",
@@ -40,7 +40,6 @@ export const NewAppPageContent = () => {
       "noopener",
     )
   }
-
   const onContinueClick = () => {
     router.push("/apps/new/form")
   }

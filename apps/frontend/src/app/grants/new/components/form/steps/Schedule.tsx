@@ -1,15 +1,19 @@
-import { useCanProposalStartInNextRound, useCurrentAllocationsRoundDeadline, useCurrentAllocationsRoundId } from "@/api"
-import { GenericAlert } from "@/app/components/Alert"
-import { CountdownBoxes } from "@/components"
-import { FormSelect } from "@/components/CustomFormFields"
-import { useEstimateBlockTimestamp } from "@/hooks"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { Grid, GridItem, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { Calendar } from "iconoir-react"
 import dayjs from "dayjs"
+import { Calendar } from "iconoir-react"
 import { useCallback, useMemo } from "react"
 import { Control, FieldErrors, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+
+import { useCanProposalStartInNextRound } from "../../../../../../api/contracts/governance/hooks/useCanProposalStartInNextRound"
+import { useCurrentAllocationsRoundDeadline } from "../../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
+import { useCurrentAllocationsRoundId } from "../../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { CountdownBoxes } from "../../../../../../components/CountdownBoxes/CountdownBoxes"
+import { FormSelect } from "../../../../../../components/CustomFormFields/FormSelect"
+import { useEstimateBlockTimestamp } from "../../../../../../hooks/useEstimateBlockTimestamp"
+import { GenericAlert } from "../../../../../components/Alert/GenericAlert"
 
 const FEW_DAYS_LEFT_THRESHOLD = 4
 interface ScheduleProps {
@@ -26,22 +30,18 @@ type Option = {
 }
 export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => {
   const { t } = useTranslation()
-
   const { data: currentRoundId, isLoading: isCurrentRoundIdLoading } = useCurrentAllocationsRoundId()
   const { data: currentRoundDeadline } = useCurrentAllocationsRoundDeadline()
   const currentRoundDeadlineDate = useEstimateBlockTimestamp({ blockNumber: currentRoundDeadline })
   const { data: canStartInNextRound, isLoading: isCanStartInNextRoundLoading } = useCanProposalStartInNextRound()
   const options = useMemo(() => {
     if (!currentRoundId) return []
-
     const optionsArray: Option[] = []
     const baseRoundId = Number(currentRoundId)
     // Options:
-
     //(if proposal can start in next round)
     // Option 1: Current round + 1
     // Option 2: Current round + 2
-
     //(if proposal can't start in next round)
     // Option 1: Current round + 2
     // Option 2: Current round + 3

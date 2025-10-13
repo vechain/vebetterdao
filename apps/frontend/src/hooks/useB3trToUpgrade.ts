@@ -6,10 +6,8 @@ import { ethers } from "ethers"
 const abi = GalaxyMember__factory.abi
 const address = getConfig().galaxyMemberContractAddress
 const method = "getB3TRtoUpgrade" as const
-
 export const getB3trToUpgradeQueryKey = (tokenId?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(tokenId ?? 0)] })
-
 /**
  * Retrieves the amount of B3TR tokens required to upgrade a specific token.
  *

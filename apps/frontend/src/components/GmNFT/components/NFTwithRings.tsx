@@ -1,11 +1,11 @@
 import { Box, Image } from "@chakra-ui/react"
+
 import { AnimatedStar } from "./AnimatedStar"
 
 type Props = {
   image: string
   tokenID?: string
 }
-
 export const NFTWithRings = ({ image, tokenID }: Props) => {
   return (
     <Box

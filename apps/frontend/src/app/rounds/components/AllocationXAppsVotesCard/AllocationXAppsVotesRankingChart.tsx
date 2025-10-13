@@ -1,34 +1,28 @@
-import {
-  useAllocationAmount,
-  useAllocationBaseAmount,
-  useMaxAllocationAmount,
-  useRoundXApps,
-  useXAppsShares,
-} from "@/api"
 import { Spinner, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
+
+import { useAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { useAllocationBaseAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationBaseAmount"
+import { useMaxAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useMaxAllocationAmount"
+import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { useXAppsShares } from "../../../../api/contracts/xApps/hooks/useXAppShares"
+
 import { AppVotesHorizontalChart } from "./AppVotesHorizontalChart"
 
 export const AllocationXAppsVotesRankingChart = ({ roundId }: { roundId: string }) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
-
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
   const { data: allocationAmount } = useAllocationAmount(roundId)
   const { data: baseAmount } = useAllocationBaseAmount(roundId)
-
   const xAppsSharesQuery = useXAppsShares(xApps?.map(app => app.id) ?? [], roundId)
-
   const maxAllocationPercentage = useMemo(() => {
     const maxAmountWithVotes = Number(maxAllocation) - Number(baseAmount)
     const totalVotesAllocation = Number(allocationAmount?.voteXAllocations) - Number(baseAmount) * (xApps?.length ?? 0)
     const maxAllocationPercentage = (maxAmountWithVotes / totalVotesAllocation) * 100
-
     return maxAllocationPercentage
   }, [maxAllocation, baseAmount, allocationAmount, xApps])
-
   const sortedData = useMemo(() => {
     if (!xAppsSharesQuery.data || !xApps) return []
-
     return xAppsSharesQuery.data
       .map(appShares => ({
         percentage: appShares.share + appShares.unallocatedShare,
@@ -36,11 +30,8 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: { roundId: string 
       }))
       .sort((a, b) => Number(b.percentage) - Number(a.percentage))
   }, [xAppsSharesQuery, xApps])
-
   const isLoading = xAppsLoading || xAppsSharesQuery.isLoading
-
   if (isLoading) return <Spinner size={"lg"} alignSelf="center" />
-
   return (
     <VStack gap={8} align={"flex-start"} w="full">
       {sortedData.map((app, index) => (

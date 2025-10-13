@@ -1,9 +1,11 @@
-import { useAllocationsRound, useAllocationsRoundState } from "@/api"
 import { BadgeProps, Badge as ChakraBadge, Icon, Skeleton } from "@chakra-ui/react"
 import { ReactNode, useMemo } from "react"
-import { DotSymbol } from "../DotSymbol"
-import { FaThumbsUp } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
+import { FaThumbsUp } from "react-icons/fa6"
+
+import { useAllocationsRound } from "../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { DotSymbol } from "../DotSymbol"
 
 type Props = {
   roundId: string
@@ -16,7 +18,6 @@ export const AllocationStateBadge = ({ roundId, renderIcon = true }: Props) => {
   const isActive = useMemo(() => {
     return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
   }, [allocationRound])
-
   if (isLoading)
     return (
       <Skeleton>
@@ -31,7 +32,6 @@ export const AllocationStateBadge = ({ roundId, renderIcon = true }: Props) => {
         icon={renderIcon ? <DotSymbol size={4} /> : undefined}
       />
     )
-
   if (isActive)
     return (
       <Badge

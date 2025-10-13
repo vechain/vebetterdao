@@ -1,5 +1,3 @@
-import { useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 import {
   Box,
   HStack,
@@ -13,17 +11,25 @@ import {
   Button,
   CloseButton,
 } from "@chakra-ui/react"
-import { XApp, UnendorsedApp, useGetUserNodes, useNodesEndorsedApps } from "@/api"
-import { UnendorsedAppCard } from "../UnendorsedAppCard"
+import { UilSearch } from "@iconscout/react-unicons"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { FILTER_ACTIVE_APPS } from "@/types/appDetails"
+
+import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
+import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { usePagination } from "../../../../hooks/usePagination"
+import { useAppsFiltering } from "../../hooks/useAppsFiltering"
+import { useAppsSearch } from "../../hooks/useAppsSearch"
+import { useAppsSorting } from "../../hooks/useAppsSorting"
 import { AppsEmptyState } from "../AppsEmptyState"
 import { CreatorBanner } from "../CreatorBanner"
-import { UilSearch } from "@iconscout/react-unicons"
-import { FILTER_ACTIVE_APPS } from "@/types/appDetails"
-import { SortingMenu } from "./SortingMenu"
-import { FilteringMenu } from "./FilteringMenu"
+import { UnendorsedAppCard } from "../UnendorsedAppCard"
 
-import { useAppsSorting, useAppsSearch, useAppsFiltering } from "../../hooks"
-import { usePagination } from "@/hooks"
+import { FilteringMenu } from "./FilteringMenu"
+import { SortingMenu } from "./SortingMenu"
 
 type Props = {
   currentActiveApps: XApp[]

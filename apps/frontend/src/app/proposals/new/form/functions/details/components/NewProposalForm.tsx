@@ -1,15 +1,16 @@
 import { VStack, Heading, Field, Input, Textarea } from "@chakra-ui/react"
-
+import MDEditor from "@uiw/react-md-editor"
+import { ethers } from "ethers"
 import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
-import { abi } from "thor-devkit"
-import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
-import { ProposalFormStoreState, useProposalFormStore } from "@/store"
-import { FunctionParamsField } from "@/components"
-import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import MDEditor from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
+import { abi } from "thor-devkit"
+
+import { FunctionParamsField } from "../../../../../../../components/GenerateFunctionToCallParamsInput/GenerateFunctionToCallParamsInput"
+import { useProposalFormStore, ProposalFormStoreState } from "../../../../../../../store/useProposalFormStore"
+
+import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
 
 export type FormData = {
   title: string
@@ -17,7 +18,6 @@ export type FormData = {
   actions: (ProposalFormStoreState["actions"][0] & { params: Omit<FunctionParamsField, "id">[] })[]
   markdownDescription: string
 }
-
 /**
  * This component is a form to create a new proposal
  * @param onSubmit - function to call when the form is submitted
@@ -38,7 +38,6 @@ type Props = {
   renderActions?: boolean
   canAddAnotherTransaction?: boolean
 }
-
 /**
  * This component read/write from/to useFormStore and renders a form to create a new proposal
  * @param see {@link Props}

@@ -1,15 +1,14 @@
-import { useAppAllocations } from "@/api/contracts/governance/hooks/useAppAllocations"
 import { Card, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useParams } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter(2)
+import { useAppAllocations } from "@/api/contracts/governance/hooks/useAppAllocations"
 
+const compactFormatter = getCompactFormatter(2)
 export const AppDetailAllocationInfo = () => {
   const { appId } = useParams<{ appId: string }>()
   const { totalAllocationReceived, lastRoundAllocationReceived, averageAllocationReceived } = useAppAllocations(appId)
-
   const { t } = useTranslation()
   return (
     <Card.Root bg="card.subtle" h={"full"} rounded="8px" flex={1.5}>

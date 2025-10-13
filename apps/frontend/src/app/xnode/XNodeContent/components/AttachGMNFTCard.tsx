@@ -1,10 +1,3 @@
-import { useGetUserGMs, UserNode } from "@/api"
-import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
-import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { FeatureFlagWrapper } from "@/components"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
 import {
   Box,
   Button,
@@ -21,17 +14,25 @@ import {
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
+import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+
+import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getLevelGradient } from "../../../../api/contracts/galaxyMember/utils/getLevelGradient"
+import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { FeatureFlagWrapper } from "../../../../components/FeatureFlagWrapper"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../constants/AnalyticsEvents"
+import { FeatureFlag } from "../../../../constants/featureFlag"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+
 export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { data: userGms, isLoading: isUserGmsLoading } = useGetUserGMs()
-
   const isXNodeDelegator = xNode.isXNodeDelegator
   const isXNodeAttachedToGM = !!xNode.gmTokenIdAttachedToNode
   const attachedGMNFT = userGms?.find(gm => gm.tokenId === xNode.gmTokenIdAttachedToNode)
-
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
-
   const handleDetachOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     detachGmToXNodeModal.onOpen()

@@ -7,14 +7,12 @@ enum AlertType {
   error = "error",
   info = "info",
 }
-
 type Props = {
   isLoading: boolean
   title?: string
   message: string
   type: AlertType | keyof typeof AlertType // Allow both enum and string
 }
-
 export const GenericAlert = ({ isLoading = false, title, message, type }: Props) => {
   const iconMap = {
     [AlertType.warning]: UilExclamationCircle,
@@ -22,9 +20,7 @@ export const GenericAlert = ({ isLoading = false, title, message, type }: Props)
     [AlertType.success]: UilInfoCircle,
     [AlertType.info]: UilInfoCircle,
   }
-
   const IconComponent = iconMap[type] || iconMap.info
-
   return (
     <Skeleton loading={isLoading}>
       <Alert.Root status={type} my={3}>

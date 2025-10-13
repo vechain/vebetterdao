@@ -1,13 +1,10 @@
 declare module "@iconscout/react-unicons" {
   import { SVGProps } from "react"
-
   export type IconProps = {
     color?: string
     size?: string | number
   } & SVGProps<SVGElement>
-
   export type Icon = (props: IconProps) => JSX.Element
-
   export const Uil0Plus: Icon
   export const Uil10Plus: Icon
   export const Uil12Plus: Icon

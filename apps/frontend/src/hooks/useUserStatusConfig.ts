@@ -1,6 +1,7 @@
 import { TFunction } from "i18next"
 import { useTranslation } from "react-i18next"
-import { UserStatus } from "@/hooks"
+
+import { UserStatus } from "./useWhitelistBlacklistUser"
 
 type UserStatusConfigType = {
   buttonText: string
@@ -9,7 +10,6 @@ type UserStatusConfigType = {
   modalPendingTitle: string
   modalErrorTitle: string
 }
-
 const getUserStatusConfig = (t: TFunction): Record<UserStatus, UserStatusConfigType> => {
   return {
     [UserStatus.NONE]: {
@@ -35,7 +35,6 @@ const getUserStatusConfig = (t: TFunction): Record<UserStatus, UserStatusConfigT
     },
   }
 }
-
 export const useUserStatusConfig = () => {
   const { t } = useTranslation()
   return getUserStatusConfig(t)

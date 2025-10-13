@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next"
 
 export const SuccessToastModal = ({ onClose }: { onClose: () => void }) => {
   const { t } = useTranslation()
-
   return (
     <Flex
       maxWidth="500px"

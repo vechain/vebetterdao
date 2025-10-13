@@ -1,4 +1,3 @@
-import { BaseModal } from "@/components/BaseModal"
 import { UseDisclosureProps, VStack, Heading, Button, Flex, SimpleGrid, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
@@ -7,20 +6,18 @@ import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 
 import { VotingRequirementsList } from "@/app/components/CantVoteCard/CantVoteCard"
+import { BaseModal } from "@/components/BaseModal"
 
 const VEPASSPORT_DOCS_URL = "https://docs.vebetterdao.org/vepassport/vepassport"
-
 type Props = {
   doActionModal: UseDisclosureProps
 }
-
 export const DoActionModal = ({ doActionModal }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const goToApps = useCallback(() => {
     router.push("/apps")
   }, [router])
-
   return (
     <BaseModal isOpen={doActionModal.open || false} onClose={doActionModal.onClose || (() => {})}>
       <VStack align="stretch" gap="2">
@@ -31,7 +28,6 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <Flex textStyle="lg">
           <VotingRequirementsList />
         </Flex>
-
         <SimpleGrid columns={{ base: 1, md: 2 }} gap="4" mt="4">
           <Button w="full" variant="primary" onClick={goToApps}>
             <IoGridOutline />

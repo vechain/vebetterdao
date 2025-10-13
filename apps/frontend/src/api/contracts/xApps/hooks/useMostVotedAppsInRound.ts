@@ -1,12 +1,16 @@
 import { useMemo } from "react"
-import { useXApps, XApp, useRoundXApps, useXAppsShares } from "@/api"
+
+import { XApp } from "../getXApps"
+
+import { useRoundXApps } from "./useRoundXApps"
+import { useXApps } from "./useXApps"
+import { useXAppsShares } from "./useXAppShares"
 
 export type MostVotedAppsInRoundReturnType = {
   percentage: number
   id: string
   app: XApp
 }
-
 /**
  * Get the most voted apps in a round
  *
@@ -18,15 +22,12 @@ export const useMostVotedAppsInRound = (
 ): { data: MostVotedAppsInRoundReturnType[]; isLoading: boolean } => {
   // get apps from round
   const { data: roundXApps } = useRoundXApps(roundId)
-
   // Notice: this trick is used because when starting the project in the local environment,
   // the roundId is "0" and the roundXApps is undefined, which will cause the app to not render apps info.
   const { data: allXApps } = useXApps()
   const apps = roundId === "0" ? allXApps?.active : roundXApps
-
   // get shares of apps
   const xAppsShares = useXAppsShares(apps?.map(app => app.id) ?? [], roundId)
-
   const mostVotedApps = useMemo(
     () =>
       xAppsShares.data
@@ -38,7 +39,6 @@ export const useMostVotedAppsInRound = (
         .sort((a, b) => Number(b.percentage) - Number(a.percentage)) ?? [],
     [xAppsShares.data, apps],
   )
-
   return {
     data: mostVotedApps,
     isLoading: xAppsShares.isLoading,

@@ -1,5 +1,3 @@
-import { useCurrentAllocationsRoundId, useUserActionOverview, useUserActionLeaderboard } from "@/api"
-import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
 import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -9,31 +7,30 @@ import { useEffect, useMemo, useState } from "react"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
 
+import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
+import { useUserActionOverview } from "../../api/indexer/actions/useUserActionOverview"
+import { MockLeaderboard } from "../../components/Leaderboard/Leaderboard"
+import { LeaderboardRankingComponent } from "../../components/Leaderboard/LeaderboardRankingComponent"
+
 type Props = { roundId: string }
 export const LeaderboardPageContent = ({ roundId }: Props) => {
   const { account } = useWallet()
-
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
-
   const isLastRound = selectedRoundId === currentRoundId
   const isFirstRound = selectedRoundId === "1"
-
   useEffect(() => {
     if (roundId && !selectedRoundId) {
       setSelectedRoundId(roundId)
     }
   }, [roundId, selectedRoundId])
-
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
-
   const userRoundOverview = useUserActionOverview(account?.address ?? "", {
     roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
   })
-
   const yourRaking = useMemo(() => {
     if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined

@@ -1,26 +1,26 @@
-import { useTranslation } from "react-i18next"
+import { Stack, HStack, VStack, Text, Button, useDisclosure } from "@chakra-ui/react"
+import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
 import { AddressIcon } from "@/components/AddressIcon"
+
+import { useCanUserVote } from "../../../../../../../../api/contracts/governance/hooks/useCanUserVote"
+import { QualificationBadge } from "../../QualificationBadges"
+
 import { AcceptDelegationModal } from "./AcceptDelegationModal"
 import { RejectDelegationModal } from "./RejectDelegationModal"
-import { Stack, HStack, VStack, Text, Button, useDisclosure } from "@chakra-ui/react"
-import { QualificationBadge } from "../../QualificationBadges"
-import { UilCheck, UilTimes } from "@iconscout/react-unicons"
-import { useCanUserVote } from "@/api"
-import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = { address: string; isConnectedUser: boolean; delegationAddress: string }
 export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, delegationAddress }: Props) => {
   const { t } = useTranslation()
   //TODo: IS this right?
   const { isPerson, isLoading: isScoreLoading } = useCanUserVote(address, delegationAddress)
-
   const { data: vnsData } = useVechainDomain(delegationAddress)
   const domain = vnsData?.domain
-
   const acceptDelegationModal = useDisclosure()
   const rejectDelegationModal = useDisclosure()
-
   return (
     <Stack direction={["column", "column", "row"]} justify={"space-between"} bg="#F8F8F8" rounded="xl" p={3}>
       <HStack gap={4}>

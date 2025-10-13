@@ -2,7 +2,6 @@ import type { NextAuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 // import DiscordProvider from "next-auth/providers/discord"
 import TwitterProvider from "next-auth/providers/twitter"
-
 const githubClientId = process.env.GITHUB_CLIENT_ID
 const githubClientSecret = process.env.GITHUB_CLIENT_SECRET
 const twitterClientId = process.env.TWITTER_CLIENT_ID

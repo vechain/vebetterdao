@@ -1,14 +1,13 @@
-import { AddressIcon } from "@/components/AddressIcon"
 import { Flex, HStack, Text } from "@chakra-ui/react"
 import { t } from "i18next"
+
+import { AddressIcon } from "@/components/AddressIcon"
 
 export const EndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: string[]; maxToRender?: number }) => {
   const boxSize = 20
   const marginleft = boxSize / 2
-
   const endorsersToRender = endorsers.slice(0, maxToRender)
   const remainingEndorsers = endorsers.length - maxToRender
-
   const otherAppsBoxColor = "#C9EAA3"
   const otherAppsTextColor = "#5C6C4A"
   return (

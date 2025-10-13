@@ -1,12 +1,16 @@
-import { AddressIcon } from "@/components/AddressIcon"
 import { Card, VStack, Heading, Text, HStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
-import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
-import { QualificationBadge } from "../QualificationBadges"
-import { useCanUserVote, useGetDelegator } from "@/api"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { useCanUserVote } from "../../../../../../../api/contracts/governance/hooks/useCanUserVote"
+import { useGetDelegator } from "../../../../../../../api/contracts/vePassport/hooks/useGetDelegator"
+import { QualificationBadge } from "../QualificationBadges"
+
+import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
 
 type Props = {
   address: string
@@ -17,14 +21,10 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(address)
   const isDelegated = !isDelegatorLoading && !!delegatorAddress
   const { isPerson, isLoading } = useCanUserVote(address)
-
   const { data: vnsData } = useVechainDomain(delegatorAddress)
   const domain = vnsData?.domain
-
   const delegationModal = useDisclosure()
-
   if (isDelegatorLoading || isLoading || !isDelegated) return null
-
   return (
     <Card.Root variant="primary" w="full">
       <Card.Body borderRadius="xl">

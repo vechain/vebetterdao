@@ -1,13 +1,3 @@
-import { useEffect, useState } from "react"
-import {
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
-  Path,
-  FieldValues,
-  RegisterOptions,
-  PathValue,
-} from "react-hook-form"
 import {
   Box,
   Text,
@@ -24,16 +14,25 @@ import {
   TagCloseTrigger,
   Portal,
 } from "@chakra-ui/react"
-import { FaSearch, FaPlus } from "react-icons/fa"
+import { useEffect, useState } from "react"
+import {
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+  Path,
+  FieldValues,
+  RegisterOptions,
+  PathValue,
+} from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
+import { FaSearch, FaPlus } from "react-icons/fa"
 
+import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 type CategoryType = {
   id: string
   name: string
   color: string
 }
-
 type CategorySelectorProps<T extends FieldValues> = {
   fieldName: Path<T>
   register: UseFormRegister<T>
@@ -44,7 +43,6 @@ type CategorySelectorProps<T extends FieldValues> = {
   categories?: CategoryType[]
   registerOptions?: RegisterOptions<T, Path<T>>
 }
-
 export const CategorySelector = <T extends FieldValues>({
   fieldName,
   register,

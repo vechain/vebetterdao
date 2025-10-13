@@ -8,7 +8,6 @@ export enum XAppsCreationStepStatus {
   ACTIVE = "ACTIVE",
   PENDING = "PENDING",
 }
-
 export enum XAppStatus {
   BLACKLISTED = "BLACKLISTED",
   LOOKING_FOR_ENDORSEMENT = "LOOKING_FOR_ENDORSEMENT", // New app, needs endorsement score above threshold
@@ -18,7 +17,6 @@ export enum XAppStatus {
   UNENDORSED_NOT_ELIGIBLE = "UNENDORSED_NOT_ELIGIBLE", // Endorsement score below threshold, not eligible (endorsement lost)
   UNKNOWN = "UNKNOWN",
 }
-
 export const APP_CATEGORIES = [
   { id: "nutrition", name: "Food & Drinks", color: "#CEF5D1" },
   { id: "plastic-waste-recycling", name: "Recycling", color: "#FFD4E0" },
@@ -31,10 +29,8 @@ export const APP_CATEGORIES = [
   { id: "green-finance-defi", name: "Web3", color: "#ffe0cd" },
   { id: "others", name: "Others", color: "#feeab6" },
 ]
-
 // Track deprecated categories that should not count towards the category limit if present in metadata
 export const DEPRECATED_IDS = ["social-community-activism", "carbon-footprint"]
-
 // SORTING
 export type SortOption = "newest" | "rewards" | "alphabetical" | "default"
 export interface SortOptionProps {

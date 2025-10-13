@@ -5,10 +5,8 @@ import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-k
 const address = getConfig().voterRewardsContractAddress
 const abi = VoterRewards__factory.abi
 const method = "levelToMultiplier" as const
-
 export const getLevelMultiplierQueryKey = (level?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(level || "0")] })
-
 export const useLevelMultiplier = (level?: string, enabled = true) => {
   return useCallClause({
     abi,

@@ -5,7 +5,6 @@ import { GrantStep } from "./GrantsNewFormStepCard"
 
 export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: number; steps: GrantStep[] }) => {
   const [isMobile] = useMediaQuery(["(max-width: 768px)"])
-
   return (
     <Flex
       w="full"
@@ -31,7 +30,6 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
           {steps.map((step, index) => {
             const isActiveStep = activeStep === index
             const showStepTitle = (isMobile && isActiveStep) || !isMobile
-
             return (
               <Steps.Item key={step.key} index={index}>
                 <Steps.Indicator
@@ -39,7 +37,6 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
                   _complete={{ bg: "blue.100", color: "blue.500" }}
                   _incomplete={{ bg: "card.subtle", color: "text.subtle" }}
                 />
-
                 {showStepTitle && (
                   <Steps.Title
                     textStyle={{ base: "sm", md: "sm" }}

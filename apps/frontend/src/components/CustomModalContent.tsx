@@ -1,5 +1,6 @@
-import { useBreakpoints } from "@/hooks"
 import { Dialog, Portal } from "@chakra-ui/react"
+
+import { useBreakpoints } from "../hooks/useBreakpoints"
 
 export const CustomModalContent = ({ children, ...others }: Dialog.ContentProps) => {
   const { isMobile } = useBreakpoints()

@@ -1,10 +1,7 @@
 /* eslint-disable react/no-array-index-key */
-import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { RequirementModal } from "@/app/proposals/components/components"
-import { BaseBottomSheet } from "@/components/BaseBottomSheet"
-import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { Box, Button, Card, Flex, Heading, HStack, Icon, List, Steps, Text, VStack } from "@chakra-ui/react"
 import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { motion, AnimatePresence, useAnimate } from "framer-motion"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -12,8 +9,13 @@ import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
+import { BaseBottomSheet } from "@/components/BaseBottomSheet"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+
+import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { RequirementModal } from "../../proposals/components/components/RequirementModal"
+
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
-import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 
 export type Step = {
   key: string
@@ -22,7 +24,6 @@ export type Step = {
   heading: string
   listItems: string[]
 }
-
 export const GrantsStepsCard = ({
   steps,
   isOpen,
@@ -37,11 +38,9 @@ export const GrantsStepsCard = ({
   const { isMobile } = useBreakpoints()
   const { account } = useWallet()
   const { open: openWalletModal } = useWalletModal()
-
   //MIMIC USE STEPS HOOK
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [scope, animate] = useAnimate()
-
   const goToNext = useCallback(() => {
     // Trigger button shrink animation before step change
     if (currentStepIndex === 0 && !isMobile) {

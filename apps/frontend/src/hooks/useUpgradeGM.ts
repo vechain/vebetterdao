@@ -1,23 +1,25 @@
-import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/factories/GalaxyMember__factory"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
 import { buildClause } from "@/utils/buildClause"
-import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getUserGMsQueryKey } from "@/api"
+
+import { getUserGMsQueryKey } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
+import { getNFTMetadataUriQueryKey } from "../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
+
 import { getB3trDonatedQueryKey } from "./useB3trDonated"
 import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
-
-import { B3TR__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { ethers } from "ethers"
-import { useWallet } from "@vechain/vechain-kit"
+import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 const B3trInterface = B3TR__factory.createInterface()
 const galaxyMemberContractAddress = getConfig().galaxyMemberContractAddress
-
 type Props = { tokenId: string; b3trToUpgrade: string; onSuccess?: () => void }
-
 /**
  * Hook to upgrade a Galaxy Member NFT token
  * @param tokenId  the token id to upgrade
@@ -26,7 +28,6 @@ type Props = { tokenId: string; b3trToUpgrade: string; onSuccess?: () => void }
  */
 export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
   const { account } = useWallet()
-
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({

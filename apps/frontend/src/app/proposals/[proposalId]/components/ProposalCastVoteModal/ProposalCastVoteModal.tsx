@@ -1,12 +1,13 @@
+import { Button, Heading, HStack, Icon, RadioCard, Text, Textarea, VStack } from "@chakra-ui/react"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
 import { BaseModal } from "@/components/BaseModal"
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { Button, Heading, HStack, Icon, RadioCard, Text, Textarea, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 
 type Props = {
   isVoteModalOpen: boolean
@@ -18,7 +19,6 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
   const { isTxModalOpen } = useTransactionModal()
   const [selectedVote, setSelectedVote] = useState<string | null>(null)
   const [comment, setComment] = useState("")
-
   const voteOptions = useMemo(
     () => [
       {
@@ -52,6 +52,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
       setComment("")
     },
   })
+
   const handleCastVote = useCallback(() => {
     if (!selectedVote) return
     castVoteMutation.sendTransaction({

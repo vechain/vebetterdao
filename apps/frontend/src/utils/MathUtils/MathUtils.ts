@@ -1,7 +1,6 @@
 import BigNumber from "bignumber.js"
 
 const SCALING_FACTOR = 1_000_000
-
 /**
  * scaledDivision
  * @param numerator
@@ -15,7 +14,6 @@ export const scaledDivision = (numerator: number, denominator: number, scalingFa
   const scaledNumerator = numerator * scalingFactor
   return Math.floor(scaledNumerator / denominator) / scalingFactor
 }
-
 /**
  * removingExcessDecimals
  * @param amount

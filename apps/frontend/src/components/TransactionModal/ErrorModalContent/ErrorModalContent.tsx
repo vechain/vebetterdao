@@ -1,11 +1,14 @@
 import { Heading, VStack, Text, Button, Link } from "@chakra-ui/react"
-import errorAnimation from "./error.json"
-import { ReactNode } from "react"
-import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
-import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
+
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import { ModalAnimation } from "../ModalAnimation"
+
+import errorAnimation from "./error.json"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
@@ -15,7 +18,6 @@ export type ErrorModalContentProps = {
   showExplorerButton?: boolean
   txId?: string
 }
-
 export const ErrorModalContent = ({
   title = "Error",
   description = "Something went wrong 😕",

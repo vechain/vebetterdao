@@ -1,22 +1,22 @@
-import React from "react"
 import { VStack, HStack, Heading, Text, IconButton, Card, Box } from "@chakra-ui/react"
+import React from "react"
 import { useTranslation } from "react-i18next"
-import { UnendorsedApp } from "@/api"
-import { UnendorsedAppCard } from "./UnendorsedAppCard"
-import { Swiper, SwiperSlide } from "swiper/react"
-import { A11y, Navigation } from "swiper/modules"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
+import { A11y, Navigation } from "swiper/modules"
+import { Swiper, SwiperSlide } from "swiper/react"
+
+import { UnendorsedApp } from "../../../api/contracts/xApps/getXApps"
+
+import { UnendorsedAppCard } from "./UnendorsedAppCard"
+
 import "swiper/css"
 import "swiper/css/navigation"
 import "@/app/theme/swiper-custom.css"
-
 type Props = {
   filteredApps: UnendorsedApp[]
 }
-
 export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   const { t } = useTranslation()
-
   return (
     <Card.Root w="full" variant="primary">
       <Card.Body gap={4}>
@@ -28,7 +28,6 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
             </Text>
           </VStack>
         </HStack>
-
         <Box position="relative">
           <Swiper
             modules={[A11y, Navigation]}

@@ -1,7 +1,8 @@
-import { ProposalType } from "@/hooks/proposals/grants/types"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
+
+import { ProposalType } from "@/hooks/proposals/grants/types"
 
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi

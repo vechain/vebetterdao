@@ -1,8 +1,9 @@
-import { useBreakpoints } from "@/hooks"
 import { Stack, HStack, Button } from "@chakra-ui/react"
 import { UilArrowLeft, UilArrowRight } from "@iconscout/react-unicons"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
+
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
 
 type Props = {
   onContinue: () => void
@@ -11,7 +12,6 @@ type Props = {
 export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Props) => {
   const router = useRouter()
   const { isMobile } = useBreakpoints()
-
   if (isMobile)
     return (
       <Stack
@@ -45,7 +45,6 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         </HStack>
       </Stack>
     )
-
   return (
     <Stack direction={["column", "column", "row"]} w="full" gap={4} justify={"space-between"} align={"center"}>
       {helperText}

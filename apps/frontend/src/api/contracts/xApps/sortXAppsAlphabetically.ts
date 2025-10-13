@@ -1,5 +1,5 @@
-import { GetAllApps, XApp, UnendorsedApp } from "./getXApps"
 import { getXAppMetadata } from "./getXAppMetadata"
+import { GetAllApps, XApp, UnendorsedApp } from "./getXApps"
 
 export const sortXAppsAlphabetically = async ({
   apps,
@@ -9,7 +9,6 @@ export const sortXAppsAlphabetically = async ({
   baseUri: string
 }): Promise<GetAllApps> => {
   if (!apps) return {} as GetAllApps
-
   // Modifying the apps name with the metadata names, instead of using the name from the contract
   const replaceAppsNameWithMetadata = async <T extends XApp | UnendorsedApp>(apps: T[]): Promise<T[]> => {
     return Promise.all(
@@ -20,11 +19,9 @@ export const sortXAppsAlphabetically = async ({
       }),
     )
   }
-
   // Sorting the apps name
   const sortByName = <T extends { name: string }>(apps: T[]): T[] =>
     [...apps].sort((a, b) => a.name.localeCompare(b.name))
-
   return {
     allApps: sortByName(await replaceAppsNameWithMetadata(apps.allApps)),
     active: sortByName(await replaceAppsNameWithMetadata(apps.active)),

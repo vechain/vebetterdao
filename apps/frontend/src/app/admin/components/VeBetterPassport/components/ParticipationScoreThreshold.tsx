@@ -1,37 +1,31 @@
-import { useParticipationScoreThreshold } from "@/api"
-import { useSetParticipationThreshold } from "@/hooks"
 import { Button, Card, Field, Heading, HStack, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useParticipationScoreThreshold } from "../../../../../api/contracts/vePassport/hooks/useParticipationScoreThreshold"
+import { useSetParticipationThreshold } from "../../../../../hooks/useSetParticipationThreshold"
+
 export const ParticipationScoreThreshold = () => {
   const [threshold, setThresholdPoPScore] = useState<string>("")
   const [isThresholdFieldDirty, setIsThresholdFieldDirty] = useState<boolean>(false)
-
   const isThresholdValid = useMemo(() => {
     if (!threshold) return false
     return Number(threshold) >= 0
   }, [threshold])
-
   const { data: participationScoreThreshold } = useParticipationScoreThreshold()
   const { t } = useTranslation()
-
   const { sendTransaction, isTransactionPending, status } = useSetParticipationThreshold({
     participationThreshold: Number(threshold) ?? 0,
   })
-
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
-
       sendTransaction()
     },
     [sendTransaction],
   )
-
   const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(() => isThresholdValid, [isThresholdValid])
-
   return (
     <Card.Root w={"full"}>
       <Card.Header>
@@ -46,7 +40,6 @@ export const ParticipationScoreThreshold = () => {
                 {t("Current participation score threshold:")} {participationScoreThreshold}
               </Text>
             </VStack>
-
             <HStack gap={4} w={"full"} justify={"space-between"} align={"start"}>
               <Field.Root invalid={!isThresholdValid && isThresholdFieldDirty} w={"full"}>
                 <Field.Label>

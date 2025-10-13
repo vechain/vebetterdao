@@ -18,7 +18,6 @@ export const radioGroupSlotRecipe = defineSlotRecipe({
             bg: "actions.primary.default",
             borderColor: "actions.primary.default",
           },
-
           _disabled: {
             borderColor: "border.disabled",
             bg: "bg.disabled",

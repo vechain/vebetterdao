@@ -1,50 +1,47 @@
 import { Button, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { AdminAppForm } from "../../AdminAppPageContent"
-import { useCurrentAppAdmin } from "@/app/apps/[appId]/hooks"
+
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
-import { useCallback, useState } from "react"
-import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
-import { UilPen } from "@iconscout/react-unicons"
+
+import { WalletAddressInput } from "../../../../../../../components/Input/WalletAddressInput"
+import { useCurrentAppAdmin } from "../../../../../hooks/useCurrentAppAdmin"
+import { AdminAppForm } from "../../AdminAppPageContent"
+
 import { ModalEditAdminAddress } from "./components/ModalEditAdminAddress"
-import { WalletAddressInput } from "@/app/components/Input"
+import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
 
 type Props = { form: UseFormReturn<AdminAppForm> }
-
 export const EditAppAddresses = ({ form }: Props) => {
   const { t } = useTranslation()
   const { admin } = useCurrentAppAdmin()
   const { app } = useCurrentAppInfo()
   const [editAdminAddress, setEditAdminAddress] = useState(false)
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
-
   const modalEditAdminAddress = useDisclosure()
   const handleEditAdminAddress = useCallback(() => {
     modalEditAdminAddress.onClose()
     setEditAdminAddress(true)
   }, [modalEditAdminAddress, setEditAdminAddress])
-
   const modalEditTeamWalletAddress = useDisclosure()
   const handleEditTeamWalletAddress = useCallback(() => {
     modalEditTeamWalletAddress.onClose()
     setEditTeamWalletAddress(true)
   }, [modalEditTeamWalletAddress, setEditTeamWalletAddress])
-
   const handleTeamWalletAddressResolved = useCallback(
     (address?: string) => {
       form.setValue("teamWalletAddress", address ?? "")
     },
     [form],
   )
-
   const handleAdminAddressResolved = useCallback(
     (address?: string) => {
       form.setValue("adminAddress", address ?? "")
     },
     [form],
   )
-
   return (
     <VStack align="stretch" gap="32px">
       <Text color="#D23F63" textStyle="2xl" fontWeight="bold">

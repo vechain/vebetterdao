@@ -1,4 +1,5 @@
 import { humanAddress } from "@repo/utils/FormattingUtils"
+
 interface DomainOrAddressProps {
   domain: string
   address: string
@@ -7,13 +8,11 @@ interface DomainOrAddressProps {
     suffixLength: number
   }
 }
-
 /**
  * Custom hook to fallback address if the domain is not defined.
  *
  * @returns {string | null} The domain, or the address if the above is not defined, or null if neither is provided.
  */
-
 export const useDomainOrAddress = ({
   domain,
   address,
@@ -25,8 +24,6 @@ export const useDomainOrAddress = ({
     }
     return humanAddress(address, options.prefixLength, options.suffixLength)
   }
-
   const formattedDomain = domain.trim()
-
   return formattedDomain
 }

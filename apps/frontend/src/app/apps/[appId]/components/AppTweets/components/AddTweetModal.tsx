@@ -1,18 +1,21 @@
-import { useTweet } from "@/api/twitter/hooks/useTweets"
 import { Button, Field, Heading, Input, InputGroup, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiTwitterXFill } from "react-icons/ri"
+import Lottie from "react-lottie"
 import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
-import "./tweetStyle.css"
-import { useCurrentAppMetadata } from "../../../hooks"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+
+import { useTweet } from "@/api/twitter/hooks/useTweets"
 import { StepModal } from "@/components/StepModal/StepModal"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import { useUpdateAppMetadataReturnValue } from "@/hooks/useUpdateAppDetails"
 import { UseUploadAppMetadataReturnValue } from "@/hooks/useUploadAppMetadata"
-import Lottie from "react-lottie"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+
+import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
+
+import "./tweetStyle.css"
 
 type Props = {
   onClose: () => void
