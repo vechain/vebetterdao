@@ -239,10 +239,17 @@ library AutoVotingLogic {
     finalAppIds = new bytes32[](count);
     voteWeights = new uint256[](count);
     uint256 votePerApp = votingPower / count;
+    uint256 remainingVotes = votingPower % count;
 
     for (uint256 i; i < count; ++i) {
       finalAppIds[i] = tempAppIds[i];
       voteWeights[i] = votePerApp;
+
+      // Distribute remainder: give 1 extra wei to first N apps
+      // Edge case: when user has 1 VOT3 and select 3 apps, this will give 1 extra wei to the first app
+      if (i < remainingVotes) {
+        voteWeights[i] += 1;
+      }
     }
 
     return (finalAppIds, voteWeights, votingPower);

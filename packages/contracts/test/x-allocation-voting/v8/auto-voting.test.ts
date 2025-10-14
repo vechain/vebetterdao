@@ -931,24 +931,29 @@ describe("AutoVoting - @shard14b", function () {
       const hasVoted = await xAllocationVoting.hasVoted(roundId2, user1.address)
       expect(hasVoted).to.be.true
 
-      // // Verify votes were distributed (33 VOT3 each, 1 VOT3 dust remains)
+      // Verify votes were distributed with remainder handling
       const app1Votes = await xAllocationVoting.getAppVotes(roundId2, app1Id)
       const app2Votes = await xAllocationVoting.getAppVotes(roundId2, app2Id)
       const app3Votes = await xAllocationVoting.getAppVotes(roundId2, app3Id)
 
-      // All apps should get the same amount
-      expect(app1Votes).to.equal(app2Votes)
-      expect(app2Votes).to.equal(app3Votes)
-
-      // Total distributed should be less than original (proving dust exists)
-      const totalVotes = app1Votes + app2Votes + app3Votes
       const originalAmount = ethers.parseEther("100")
-      expect(totalVotes).to.be.lessThan(originalAmount)
+      const baseAmount = originalAmount / 3n // 33333333333333333333n
+      const remainder = originalAmount % 3n // 1n
 
-      // Each app should get roughly 33.33 VOT3 (but as integer division)
-      const totalDistributed = app1Votes + app2Votes + app3Votes
-      const dust = originalAmount - totalDistributed // 1  wei of VOT3 dust
-      expect(dust).to.equal(1)
+      // First app gets the remainder (1 extra wei)
+      expect(app1Votes).to.equal(baseAmount + 1n)
+
+      // Other apps get the base amount
+      expect(app2Votes).to.equal(baseAmount)
+      expect(app3Votes).to.equal(baseAmount)
+
+      // Total distributed should equal original amount exactly (no dust lost)
+      const totalVotes = app1Votes + app2Votes + app3Votes
+      expect(totalVotes).to.equal(originalAmount)
+
+      // Verify no dust is lost
+      const dust = originalAmount - totalVotes
+      expect(dust).to.equal(0n)
     })
 
     it("[Edge Case] should skip auto-vote and disable autovoting when user has no eligible apps to vote for", async function () {
