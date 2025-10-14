@@ -2005,5 +2005,7 @@
   "eligible": "đủ điều kiện",
   "ineligible": "không đủ điều kiện",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bằng cách làm điều này, {{appName}} với id {{appId}} sẽ bị {{status}} cho vòng tiếp theo.",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)",
+  "Uploading...": "Đang tải lên...",
+  "Stored": "Đã lưu trữ"
 }
