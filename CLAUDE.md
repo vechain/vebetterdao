@@ -6,7 +6,8 @@ Sacrifice grammar for concision.
 ## PR Creation
 
 When I say "PR" (uppercase):
-- Run: `gh pr create -a="@me" -B main -r vechain/b3tr`
+- **ALWAYS push commits first**: `git push -u origin <branch>`
+- Then run: `gh pr create -a="@me" -B main -r vechain/b3tr`
 - Description: Bare minimum necessary info only
 - Format: Bullet points
 - NO EMOJIS
