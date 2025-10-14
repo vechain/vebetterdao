@@ -2005,5 +2005,7 @@
   "eligible": "पात्र",
   "ineligible": "अ-पात्र",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "ऐसा करने से, आईडी {{appId}} के साथ {{appName}} अगले दौर के लिए {{status}} होगा।",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "न्यूनतम <Link>कोरम</Link> ({{quorumNumerator}}%) पूरा हुआ"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "न्यूनतम <Link>कोरम</Link> ({{quorumNumerator}}%) पूरा हुआ",
+  "Uploading...": "अपलोड हो रहा है...",
+  "Stored": "संग्रहीत"
 }

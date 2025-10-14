@@ -2005,5 +2005,7 @@
   "eligible": "berechtigt",
   "ineligible": "nicht berechtigt",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Dadurch wird {{appName}} mit der ID {{appId}} für die nächste Runde {{status}}.",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimales <Link>Quorum</Link> ({{quorumNumerator}}%) erreicht"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimales <Link>Quorum</Link> ({{quorumNumerator}}%) erreicht",
+  "Uploading...": "Hochladen...",
+  "Stored": "Gespeichert"
 }

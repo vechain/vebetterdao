@@ -2005,5 +2005,7 @@
   "eligible": "idoneo",
   "ineligible": "non idoneo",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Facendo questo, {{appName}} con id {{appId}} sarà {{status}} per il prossimo turno.",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Raggiunto il <Link>quorum</Link> minimo ({{quorumNumerator}}%)"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Raggiunto il <Link>quorum</Link> minimo ({{quorumNumerator}}%)",
+  "Uploading...": "Caricamento in corso...",
+  "Stored": "Memorizzato"
 }

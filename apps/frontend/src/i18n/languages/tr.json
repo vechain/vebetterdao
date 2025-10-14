@@ -2005,5 +2005,7 @@
   "eligible": "uygun",
   "ineligible": "uygun olmayan",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bunu yaparak, kimliği {{appId}} olan {{appName}}, bir sonraki tur için {{status}} olacaktır.",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı",
+  "Uploading...": "Yükleniyor...",
+  "Stored": "Saklandı"
 }
