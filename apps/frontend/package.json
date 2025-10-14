@@ -88,6 +88,7 @@
     "@repo/typescript-config": "*",
     "@storybook/addon-a11y": "^9.1.5",
     "@storybook/addon-docs": "^9.1.5",
+    "@storybook/addon-mcp": "^0.0.5",
     "@storybook/addon-vitest": "^9.1.5",
     "@storybook/nextjs-vite": "^9.1.5",
     "@types/mixpanel-browser": "^2.49.0",
