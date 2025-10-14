@@ -219,6 +219,9 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user1.address)).to.be.true
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user2.address)).to.be.true
       expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(3)
+      expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(await xAllocationVoting.currentRoundId())).to.equal(
+        3,
+      )
 
       await xAllocationVoting.connect(user2).toggleAutoVoting(user2.address)
       // remaining 3 until the next cycle
@@ -383,6 +386,9 @@ describe("AutoVoting - @shard14b", function () {
         .to.emit(xAllocationVoting, "AutoVoteSkipped")
         .withArgs(user.address, roundId2, true, 0, ethers.parseEther("0.5"))
       await expect(castVoteTx).to.emit(relayerRewardsPool, "ExpectedActionsReduced").withArgs(roundId2, 1, 0, 0)
+
+      // Reduced to 0 expected actions
+      expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId2)).to.equal(0)
     })
 
     it("should revert non-relayers from claiming rewards during early access period for auto-voting users", async function () {
@@ -1070,6 +1076,7 @@ describe("AutoVoting - @shard14b", function () {
 
       expect(totalActionsBefore - totalActionsAfter).to.equal(2) // 1 vote + 1 claim
       expect(totalWeightedActionsBefore - totalWeightedActionsAfter).to.equal(expectedReduction)
+      expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId4)).to.equal(0) // Expected actions reduced to 0
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -1447,6 +1454,9 @@ describe("AutoVoting - @shard14b", function () {
       await voterRewards.connect(relayer1).claimReward(roundId, user1.address)
       await voterRewards.connect(relayer1).claimReward(roundId, user2.address)
 
+      // No missed auto-voting users
+      expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(0)
+
       expect(await b3tr.balanceOf(user.address)).to.not.equal(0)
       expect(await b3tr.balanceOf(user1.address)).to.not.equal(0)
       expect(await b3tr.balanceOf(user2.address)).to.not.equal(0)
@@ -1495,9 +1505,13 @@ describe("AutoVoting - @shard14b", function () {
       await xAllocationVoting.connect(manualUser1).castVote(roundId1, [app1Id], [manualUser1Balance])
       await xAllocationVoting.connect(manualUser2).castVote(roundId1, [app1Id], [manualUser2Balance])
 
+      expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId1)).to.equal(2) // 2 auto users pending
+
       // Auto users vote via autovoting
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser1, roundId1)
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser2, roundId1)
+
+      expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId1)).to.equal(0)
 
       await waitForRoundToEnd(roundId1)
 

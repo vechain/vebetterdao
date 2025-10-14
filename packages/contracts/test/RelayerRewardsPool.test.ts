@@ -876,6 +876,354 @@ describe("RelayerRewardsPool - @shard18", function () {
       await relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, usersToReduce)
       expect(await relayerRewardsPool.isRewardClaimable(roundId)).to.be.true
     })
+
+    describe("Missed Auto-Voting Users Count", function () {
+      it("should return correct count when no actions are completed", async function () {
+        const roundId = 1
+        const totalAutoVotingUsers = 5
+
+        await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+        // No actions completed yet
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(totalAutoVotingUsers)
+      })
+
+      it("should return zero when all actions are completed", async function () {
+        const roundId = 1
+        const totalAutoVotingUsers = 2
+
+        await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+        // Complete all actions for all users
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user2.address, roundId, 0) // VOTE
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user2.address, roundId, 1) // CLAIM
+
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(0)
+      })
+
+      it("should return zero when over-completed", async function () {
+        const roundId = 1
+        const totalAutoVotingUsers = 1
+
+        await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+        // Register more actions than expected
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // Extra VOTE
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // Extra CLAIM
+
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(0)
+      })
+
+      it("should correctly calculate missed users with partial completion", async function () {
+        const roundId = 1
+        const totalAutoVotingUsers = 3
+
+        await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+        // Complete actions for 1 user only
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM
+
+        // 2 users missed
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(2)
+      })
+
+      it("should not count partial user actions as a full missed user", async function () {
+        const roundId = 1
+        const totalAutoVotingUsers = 2
+
+        await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+        // voteWeight = 3, claimWeight = 1, total per user = 4
+        // Expected: 2 users * 4 = 8 weighted actions
+
+        // Complete one full user (vote + claim) = 4 weighted actions
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE (weight 3)
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM (weight 1)
+
+        // Add only partial action for second user (just vote) = 3 weighted actions
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user2.address, roundId, 0) // VOTE (weight 3)
+
+        // Completed: 4 + 3 = 7 weighted actions
+        // Deficit: 8 - 7 = 1
+        // Missed users: 1 / 4 = 0 (integer division floors, partial user not counted)
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(0)
+      })
+
+      it("should handle different weight configurations correctly", async function () {
+        const roundId = 1
+        const totalAutoVotingUsers = 5
+
+        // Change weights
+        await relayerRewardsPool.connect(owner).setVoteWeight(5)
+        await relayerRewardsPool.connect(owner).setClaimWeight(2)
+
+        await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+        // Complete actions for 2 users (each has vote + claim = 7 weighted actions per user)
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE (weight 5)
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM (weight 2)
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user2.address, roundId, 0) // VOTE (weight 5)
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user2.address, roundId, 1) // CLAIM (weight 2)
+
+        // Expected: 5 users * 7 = 35 weighted actions
+        // Completed: 2 users * 7 = 14 weighted actions
+        // Deficit: 35 - 14 = 21
+        // Missed users: 21 / 7 = 3
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(3)
+      })
+
+      it("should update missed count as actions are reduced", async function () {
+        const roundId = 1
+        const totalAutoVotingUsers = 5
+
+        await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+        // Initially all users are missed
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(5)
+
+        // Reduce expected actions by 2 users
+        await relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, 2)
+
+        // Now only 3 users are expected and all are still missed
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(3)
+
+        // Complete actions for 1 user
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE
+        await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM
+
+        // Now 2 users are missed
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(2)
+      })
+
+      it("should return zero for round with no auto-voting users set", async function () {
+        const roundId = 999 // Round with no setup
+
+        expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId)).to.equal(0)
+      })
+    })
+  })
+
+  describe("Calculate Relayer Fee", function () {
+    it("should calculate 10% fee correctly for normal amounts", async function () {
+      const reward1000 = ethers.parseEther("1000")
+      const expectedFee = ethers.parseEther("100") // 10% of 1000
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(reward1000)
+      expect(fee).to.equal(expectedFee)
+    })
+
+    it("should calculate fee correctly for small amounts", async function () {
+      const reward5 = ethers.parseEther("5")
+      const expectedFee = ethers.parseEther("0.5") // 10% of 5
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(reward5)
+      expect(fee).to.equal(expectedFee)
+    })
+
+    it("should cap fee at 100 B3TR when calculated fee exceeds cap", async function () {
+      const largeReward = ethers.parseEther("10000") // 10% would be 1000 B3TR
+      const feeCap = ethers.parseEther("100") // Default cap
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(largeReward)
+      expect(fee).to.equal(feeCap)
+    })
+
+    it("should return exact cap when calculated fee equals cap", async function () {
+      const reward1000 = ethers.parseEther("1000") // 10% = 100 B3TR (exactly at cap)
+      const feeCap = ethers.parseEther("100")
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(reward1000)
+      expect(fee).to.equal(feeCap)
+    })
+
+    it("should return zero fee for zero reward", async function () {
+      const fee = await relayerRewardsPool.calculateRelayerFee(0)
+      expect(fee).to.equal(0)
+    })
+
+    it("should handle very small amounts with integer division", async function () {
+      // 0.5 ether * 10 / 100 = 0.05 ether
+      const smallReward = ethers.parseEther("0.5")
+      const expectedFee = ethers.parseEther("0.05")
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(smallReward)
+      expect(fee).to.equal(expectedFee)
+    })
+
+    it("should use multiply-first approach to preserve precision", async function () {
+      // Test that (amount * percent) / denominator preserves precision
+      // vs (amount / denominator) * percent which would lose precision
+
+      const reward = ethers.parseEther("999")
+      // (999 * 10) / 100 = 99.9 ether
+      const expectedFee = ethers.parseEther("99.9")
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+      expect(fee).to.equal(expectedFee)
+    })
+
+    it("should calculate correctly after fee percentage is changed", async function () {
+      // Change fee to 20%
+      await relayerRewardsPool.connect(owner).setRelayerFeePercentage(20)
+
+      const reward = ethers.parseEther("500")
+      const expectedFee = ethers.parseEther("100") // 20% of 500 = 100, but capped at 100
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+      expect(fee).to.equal(expectedFee)
+
+      // Reset to default
+      await relayerRewardsPool.connect(owner).setRelayerFeePercentage(10)
+    })
+
+    it("should calculate correctly after fee cap is changed", async function () {
+      // Change cap to 200 B3TR
+      const newCap = ethers.parseEther("200")
+      await relayerRewardsPool.connect(owner).setFeeCap(newCap)
+
+      const largeReward = ethers.parseEther("10000") // 10% = 1000, but capped at 200
+      const fee = await relayerRewardsPool.calculateRelayerFee(largeReward)
+      expect(fee).to.equal(newCap)
+
+      // Test amount where fee is below new cap
+      const reward1500 = ethers.parseEther("1500") // 10% = 150 (below 200 cap)
+      const fee2 = await relayerRewardsPool.calculateRelayerFee(reward1500)
+      expect(fee2).to.equal(ethers.parseEther("150"))
+
+      // Reset to default
+      await relayerRewardsPool.connect(owner).setFeeCap(ethers.parseEther("100"))
+    })
+
+    it("should calculate correctly with custom denominator", async function () {
+      // Change to 1000 denominator (allows more granular percentages)
+      await relayerRewardsPool.connect(owner).setRelayerFeeDenominator(1000)
+      await relayerRewardsPool.connect(owner).setRelayerFeePercentage(25) // 25/1000 = 2.5%
+
+      const reward = ethers.parseEther("1000")
+      const expectedFee = ethers.parseEther("25") // 2.5% of 1000
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+      expect(fee).to.equal(expectedFee)
+
+      // Reset to defaults
+      await relayerRewardsPool.connect(owner).setRelayerFeeDenominator(100)
+      await relayerRewardsPool.connect(owner).setRelayerFeePercentage(10)
+    })
+
+    it("should handle edge case of 1 wei reward", async function () {
+      // 1 wei * 10 / 100 = 0 (integer division)
+      const fee = await relayerRewardsPool.calculateRelayerFee(1)
+      expect(fee).to.equal(0)
+    })
+
+    it("should handle large reward amounts", async function () {
+      const largeReward = ethers.parseEther("1000000") // 1 million B3TR
+      const feeCap = ethers.parseEther("100")
+
+      const fee = await relayerRewardsPool.calculateRelayerFee(largeReward)
+      expect(fee).to.equal(feeCap) // Should be capped
+    })
+
+    describe("Real-world reward amounts", function () {
+      it("should calculate fee for 1.2536 B3TR reward", async function () {
+        const reward = ethers.parseEther("1.2536")
+        // 1.2536 * 10 / 100 = 0.12536
+        const expectedFee = ethers.parseEther("0.12536")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+
+      it("should calculate fee for 47.89213 B3TR reward", async function () {
+        const reward = ethers.parseEther("47.89213")
+        // 47.89213 * 10 / 100 = 4.789213
+        const expectedFee = ethers.parseEther("4.789213")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+
+      it("should calculate fee for 238.456789123456789 B3TR reward", async function () {
+        const reward = ethers.parseEther("238.456789123456789")
+        // 238.456789123456789 * 10 / 100 = 23.8456789123456789
+        const expectedFee = ethers.parseEther("23.8456789123456789")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+
+      it("should calculate fee for 0.00123456789 B3TR reward (very small)", async function () {
+        const reward = ethers.parseEther("0.00123456789")
+        // 0.00123456789 * 10 / 100 = 0.000123456789
+        const expectedFee = ethers.parseEther("0.000123456789")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+
+      it("should calculate fee for 999.99999999999999 B3TR reward", async function () {
+        const reward = ethers.parseEther("999.99999999999999")
+        // 999.99999999999999 * 10 / 100 = 99.999999999999999
+        const expectedFee = ethers.parseEther("99.999999999999999")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+
+      it("should cap fee for 1234.56789012345678 B3TR reward", async function () {
+        const reward = ethers.parseEther("1234.56789012345678")
+        // 1234.56789012345678 * 10 / 100 = 123.456789012345678 (but capped at 100)
+        const feeCap = ethers.parseEther("100")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(feeCap) // Should be capped
+      })
+
+      it("should maintain precision for 3.14159265358979323 B3TR (Pi)", async function () {
+        const reward = ethers.parseEther("3.14159265358979323")
+        // 3.14159265358979323 * 10 / 100 = 0.314159265358979323
+        const expectedFee = ethers.parseEther("0.314159265358979323")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+
+      it("should handle 0.987654321 B3TR reward with multiply-first precision", async function () {
+        const reward = ethers.parseEther("0.987654321")
+        // (0.987654321 * 10) / 100 = 0.0987654321
+        const expectedFee = ethers.parseEther("0.0987654321")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+
+        // Verify multiply-first preserves precision
+        // If we did divide-first: 0.987654321 / 100 = 0.00987654321, then * 10 = 0.0987654321
+        // Both work here, but multiply-first is safer for integer division edge cases
+      })
+
+      it("should handle typical voter reward of 156.789 B3TR", async function () {
+        const reward = ethers.parseEther("156.789")
+        // 156.789 * 10 / 100 = 15.6789
+        const expectedFee = ethers.parseEther("15.6789")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+
+      it("should calculate fee for edge case 9.99999999999999999 B3TR", async function () {
+        const reward = ethers.parseEther("9.99999999999999999")
+        // 9.99999999999999999 * 10 / 100 = 0.999999999999999999
+        const expectedFee = ethers.parseEther("0.999999999999999999")
+
+        const fee = await relayerRewardsPool.calculateRelayerFee(reward)
+        expect(fee).to.equal(expectedFee)
+      })
+    })
   })
 
   describe("Version", function () {

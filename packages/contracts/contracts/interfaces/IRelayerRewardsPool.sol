@@ -333,6 +333,13 @@ interface IRelayerRewardsPool {
    */
   function calculateRelayerFee(uint256 totalReward) external view returns (uint256);
 
+  /**
+   * @notice Get the number of missed auto-voting users for a round
+   * @param roundId The round ID
+   * @return The number of missed auto-voting users
+   */
+  function getMissedAutoVotingUsersCount(uint256 roundId) external view returns (uint256);
+
   // =========================== Setters ===========================
 
   /**

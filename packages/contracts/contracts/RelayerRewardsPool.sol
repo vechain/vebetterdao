@@ -391,6 +391,35 @@ contract RelayerRewardsPool is
   }
 
   /**
+   * @notice Calculates the number of auto-voting users who were completely missed (no vote cast)
+   * @dev Only counts users where BOTH vote AND claim actions were missed
+   * @dev Partial completions (vote done but claim missing) are NOT counted as missed users
+   * @param roundId The round ID to check
+   * @return The number of auto-voting users who were completely missed
+   */
+  function getMissedAutoVotingUsersCount(uint256 roundId) external view returns (uint256) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    uint256 expected = $.totalWeightedActions[roundId];
+    uint256 completed = $.completedWeightedActions[roundId];
+
+    // If all actions completed or over-completed, no missed users
+    if (completed >= expected) return 0;
+
+    uint256 deficit = expected - completed;
+
+    // Convert weighted deficit back to user count
+    // Each user requires: voteWeight (for voting) + claimWeight (for claiming)
+    uint256 weightPerUser = $.voteWeight + $.claimWeight;
+
+    // Only count FULL users missed (both vote AND claim)
+    // Integer division automatically floors, so partial users are not counted
+    uint256 missedUsers = deficit / weightPerUser;
+
+    return missedUsers;
+  }
+
+  /**
    * @notice Validates if an action can proceed for an auto-voting user
    * @param roundId The round ID
    * @param voter The voter whose action is being performed
