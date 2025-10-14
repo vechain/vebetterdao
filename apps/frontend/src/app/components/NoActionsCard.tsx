@@ -2,6 +2,7 @@ import { Button, Icon } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { PiSquaresFourFill } from "react-icons/pi"
+
 import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
 import { EmptyState } from "@/components/ui/empty-state"
 

@@ -1,11 +1,12 @@
 import { Card, HStack, Box, Text, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { t } from "i18next"
+import NextLink from "next/link"
 import { useMemo } from "react"
 import { Trans } from "react-i18next"
+
 import { AddressIcon } from "../AddressIcon"
-import { useVechainDomain } from "@vechain/vechain-kit"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import NextLink from "next/link"
 
 export type LeaderboardRanking = {
   position: number
@@ -19,7 +20,6 @@ type LeaderboardRankingComponentProps = {
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
   const { data: vnsData } = useVechainDomain(ranking.address)
   const domain = vnsData?.domain
-
   const positionStyles = useMemo(() => {
     if (ranking.position === 1)
       return {
@@ -70,13 +70,18 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                   <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
 
                   <Box>
-                    <HStack
+                    <Text
                       textStyle="sm"
                       fontWeight={isYourRanking ? "bold" : "semibold"}
                       gap={1}
-                      color={isYourRanking ? "white" : "text.default"}>
-                      {domain ? domain : humanAddress(ranking.address, 6, 4) || ""} {isYourRanking && ` (${t("You")})`}
-                    </HStack>
+                      color={isYourRanking ? "white" : "text.default"}
+                      lineClamp={1}
+                      wordBreak="break-all"
+                      overflow="hidden"
+                      textOverflow="ellipsis">
+                      {domain ? humanDomain(domain) : humanAddress(ranking.address, 6, 4) || ""}{" "}
+                      {isYourRanking && ` (${t("You")})`}
+                    </Text>
 
                     <Text textStyle="sm" color={isYourRanking ? "white" : "text.default"}>
                       <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />

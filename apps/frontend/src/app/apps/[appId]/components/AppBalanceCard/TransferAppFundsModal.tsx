@@ -1,12 +1,12 @@
 import { Button, Dialog, VStack, useDisclosure, Text, Alert, Box, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-import { WithdrawModal } from "./WithdrawModal"
+import { XApp, UnendorsedApp } from "../../../../../api/contracts/xApps/getXApps"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+
 import { DepositModal } from "./DepositModal"
 import { FundsManagementModal } from "./FundsManagementModal"
-
-import { XApp, UnendorsedApp } from "@/api/contracts/xApps"
-import { useBreakpoints } from "@/hooks"
+import { WithdrawModal } from "./WithdrawModal"
 
 type Props = {
   app: XApp | UnendorsedApp
@@ -17,11 +17,9 @@ type Props = {
   isAppAdmin?: boolean
   isTreasuryAddress?: boolean
 }
-
 export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-
   const { open: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
   const { open: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
   const {
@@ -29,7 +27,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
     onOpen: onOpenFundsManagement,
     onClose: onCloseFundsManagement,
   } = useDisclosure()
-
   return (
     <>
       <Dialog.Root

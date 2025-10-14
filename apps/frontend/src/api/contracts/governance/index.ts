@@ -1,5 +1,0 @@
-export * from "./utils"
-export * from "./hooks"
-export * from "./getEvents"
-export * from "./getProposalsEvents"
-export * from "./getProposalsVotesEvents"

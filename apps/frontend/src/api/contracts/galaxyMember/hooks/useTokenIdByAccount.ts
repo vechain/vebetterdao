@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().galaxyMemberContractAddress
 const abi = GalaxyMember__factory.abi
 const method = "tokenOfOwnerByIndex" as const
-
 /**
  * Returns the query key for fetching the token ID by account.
  * @param userAddress The user address to get the token ID for
@@ -14,7 +13,6 @@ const method = "tokenOfOwnerByIndex" as const
  */
 export const getTokenIdByAccountQueryKey = (userAddress?: string, index: number = 0) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(userAddress || "0x") as `0x${string}`, BigInt(index)] })
-
 /**
  * Hook to get the token ID for an address given an index
  * @param userAddress The address to get the token ID for

@@ -1,11 +1,16 @@
-import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory, GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
-import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, UserNode } from "@/api"
+import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
+import { buildClause } from "@/utils/buildClause"
+
+import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
+import { getUserNodesQueryKey, UserNode } from "../api/contracts/xNodes/useGetUserNodes"
+import { getIsNodeHolderQueryKey } from "../api/contracts/xNodes/useIsNodeHolder"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const GmInterface = GalaxyMember__factory.createInterface()
@@ -13,16 +18,13 @@ const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
 const gmContractAddress = getConfig().galaxyMemberContractAddress
 const method = "removeNodeDelegation"
 const detachMethod = "detachNode"
-
 type UseRevokeXNodeDelegationProps = {
   xNode: UserNode
   onSuccess?: () => void
 }
-
 type ClausesParams = {
   isAttachedToGM?: boolean
 }
-
 /**
  * Provides a React hook to revoke an Node delegation using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
@@ -32,7 +34,6 @@ type ClausesParams = {
  */
 export const useRevokeXNodeDelegation = ({ xNode, onSuccess }: UseRevokeXNodeDelegationProps) => {
   const { account } = useWallet()
-
   // Memoize the node data to prevent changes during transaction
   const nodeData = useMemo(
     () => ({

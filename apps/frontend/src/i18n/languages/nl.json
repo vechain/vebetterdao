@@ -2005,5 +2005,8 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Weet u zeker dat u <b>'{{appName}}'</b>  <b>{{status}}</b> wilt maken voor de volgende ronde?",
   "eligible": "in aanmerking komend",
   "ineligible": "niet in aanmerking komend",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Hierdoor zal {{appName}} met id {{appId}} {{status}} zijn voor de volgende ronde."
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Hierdoor zal {{appName}} met id {{appId}} {{status}} zijn voor de volgende ronde.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) bereikt",
+  "Uploading...": "Uploaden...",
+  "Stored": "Opgeslagen"
 }

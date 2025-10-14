@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import {
   Box,
   Text,
@@ -14,30 +13,28 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
-import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
-import { EditAppForm } from "../../EditAppPageContent"
+import { FaSearch, FaPlus } from "react-icons/fa"
+
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
+
+import { EditAppForm } from "../../EditAppPageContent"
 
 type EditAppCategoriesProps = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
-
 export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose, setOpen } = useDisclosure()
   const [searchQuery, setSearchQuery] = useState<string>("")
-
   const { setValue, watch, register } = form
   const selectedCategories = watch("categories") ?? []
-
   const filteredCategories = APP_CATEGORIES.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
-
   const maxAllowedCategories = MAX_CATEGORIES
-
   const handleSelectCategory = (categoryId: string) => {
     if (selectedCategories.includes(categoryId)) {
       setValue(

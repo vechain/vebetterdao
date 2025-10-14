@@ -1,12 +1,12 @@
 "use-client"
 import { Button, useClipboard, VStack, Skeleton, Dialog, CloseButton, Link } from "@chakra-ui/react"
-import { FaCopy, FaRegImage } from "react-icons/fa6"
-import { CustomModalContent } from "@/components/CustomModalContent"
-import { FaExternalLinkAlt } from "react-icons/fa"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { toaster } from "@/components/ui/toaster"
+import { FaExternalLinkAlt } from "react-icons/fa"
+import { FaCopy, FaRegImage } from "react-icons/fa6"
 
+import { CustomModalContent } from "@/components/CustomModalContent"
+import { toaster } from "@/components/ui/toaster"
 export type Props = {
   isOpen: boolean
   onClose: () => void
@@ -16,7 +16,6 @@ export type Props = {
   isLoading?: boolean
   showViewDetails?: boolean
 }
-
 export const AppCardOptionsMobileModal = ({
   isOpen,
   onClose,
@@ -37,12 +36,10 @@ export const AppCardOptionsMobileModal = ({
       closable: true,
     })
   }
-
   const router = useRouter()
   const navigateToAppDetail = () => {
     router.push(`/apps/${xAppId}`)
   }
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose} placement="center">
       <CustomModalContent>

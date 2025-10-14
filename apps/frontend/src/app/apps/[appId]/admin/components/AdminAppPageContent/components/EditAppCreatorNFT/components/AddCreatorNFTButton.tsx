@@ -1,4 +1,3 @@
-import { CustomModalContent } from "@/components"
 import {
   Button,
   Field,
@@ -13,13 +12,14 @@ import {
 } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { AdminAppForm } from "../../../AdminAppPageContent"
-import { useVechainDomain } from "@vechain/vechain-kit"
-import { WalletAddressInput } from "@/app/components/Input"
 
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
+import { AdminAppForm } from "../../../AdminAppPageContent"
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
 }
@@ -28,13 +28,10 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
   const { open: isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ creatorAddress: string }>()
   const { watch, setValue, handleSubmit, formState } = addressForm
-
   const creatorAddress = watch("creatorAddress")
   const { isValid } = formState
-
   const { data: vnsData } = useVechainDomain(creatorAddress)
   const domain = vnsData?.domain
-
   const onSubmit = useCallback(
     (data: { creatorAddress: string }) => {
       editAdminForm.setValue("creators", [...editAdminForm.getValues("creators"), data.creatorAddress])
@@ -43,7 +40,6 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
     },
     [addressForm, editAdminForm, onClose],
   )
-
   const handleClose = useCallback(() => {
     addressForm.reset()
     onClose()

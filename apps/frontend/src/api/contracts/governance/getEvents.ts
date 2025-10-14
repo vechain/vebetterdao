@@ -2,7 +2,6 @@ import { EventLogs, FilterEventLogsOptions, ThorClient } from "@vechain/sdk-netw
 import { Abi, decodeEventLog as viemDecodeEventLog, Hex as ViemHex } from "viem"
 
 type Topics = [] | [signature: ViemHex, ...args: ViemHex[]]
-
 export const decodeEventLog = <TAbi extends Abi>(
   event: EventLogs,
   abi: TAbi,
@@ -15,13 +14,11 @@ export const decodeEventLog = <TAbi extends Abi>(
     data: event.data.toString() as ViemHex,
     topics: event.topics.map(topic => topic.toString()) as Topics,
   })
-
   return {
     meta: event.meta,
     decodedData,
   }
 }
-
 const MAX_EVENTS_PER_QUERY = 1000
 /**
  * Params for getEvents function

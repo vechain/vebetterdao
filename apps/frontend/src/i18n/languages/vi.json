@@ -2004,5 +2004,8 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Bạn có chắc chắn muốn làm cho <b>'{{appName}}'</b> <b>{{status}}</b> cho vòng tiếp theo không?",
   "eligible": "đủ điều kiện",
   "ineligible": "không đủ điều kiện",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bằng cách làm điều này, {{appName}} với id {{appId}} sẽ bị {{status}} cho vòng tiếp theo."
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bằng cách làm điều này, {{appName}} với id {{appId}} sẽ bị {{status}} cho vòng tiếp theo.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)",
+  "Uploading...": "Đang tải lên...",
+  "Stored": "Đã lưu trữ"
 }

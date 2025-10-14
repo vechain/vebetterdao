@@ -1,22 +1,20 @@
 import { HStack, VStack, Text, Image, Button } from "@chakra-ui/react"
-import { B3TRIcon } from "@/components/Icons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-const compactFormatter = getCompactFormatter(4)
 
+import { B3TRIcon } from "../../../../Icons/B3TRIcon"
+
+const compactFormatter = getCompactFormatter(4)
 type Props = {
   b3trBalanceAfterSwap: string
   vot3BalanceAfterSwap: string
   onSubmitTx: () => void
 }
-
 export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, onSubmitTx }: Props) => {
   const { t } = useTranslation()
-
   return (
     <VStack align={"center"} p={0} gap={2}>
       <Image src="/assets/tokens/b3trvot3-tokens.webp" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
-
       <Text textStyle="md" textAlign={"center"}>
         {t("By confirming the operation in your wallet, you will complete the conversion")}
       </Text>
@@ -24,7 +22,6 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
         {Number(b3trBalanceAfterSwap) >= 0 && (
           <HStack w="full" bg="bg.primary" borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text textStyle="md">{t("Your new B3TR balance")}</Text>
-
             <HStack>
               <B3TRIcon boxSize={"20px"} />
               <Text textStyle="xl" fontWeight="bold">
@@ -36,7 +33,6 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
         {Number(vot3BalanceAfterSwap) >= 0 && (
           <HStack w="full" bg="bg.primary" borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text textStyle="md">{t("Your new VOT3 balance")}</Text>
-
             <HStack>
               <Image src="/assets/tokens/vot3-token.webp" boxSize={"20px"} alt="VOT3 Icon" />
               <Text textStyle="xl" fontWeight="bold">

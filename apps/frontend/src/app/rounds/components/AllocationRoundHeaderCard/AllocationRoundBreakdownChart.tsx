@@ -1,20 +1,18 @@
-import { useAllocationAmount } from "@/api"
-import { B3TRIcon, DotSymbol } from "@/components"
 import { VStack, HStack, Heading, Text, Box, Card, Skeleton, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { DotSymbol } from "../../../../components/DotSymbol"
+import { B3TRIcon } from "../../../../components/Icons/B3TRIcon"
+
 const compactFormatter = getCompactFormatter(2)
-
 type Props = { roundId: string }
-
 export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
-
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
-
   const totalDistributed = useMemo(() => {
     if (!roundAmount) return 0
     return (
@@ -24,7 +22,6 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
       Number(roundAmount.gm)
     )
   }, [roundAmount])
-
   const baseAmountsPercentage = useMemo(() => {
     return {
       treasury: (Number(roundAmount?.treasury) / totalDistributed) * 100,
@@ -33,7 +30,6 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
       gm: (Number(roundAmount?.gm) / totalDistributed) * 100,
     }
   }, [totalDistributed, roundAmount])
-
   const baseAmountsInfo = useMemo(() => {
     return [
       {

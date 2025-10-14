@@ -1,29 +1,28 @@
-import { getAllProposalsStateQueryKey, getProposalClaimableUserDepositsQueryKey, getProposalStateQueryKey } from "@/api"
-import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
+import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
+import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useProposalState"
+
 import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
-
 type Props = { proposalId: string; onSuccess?: () => void }
-
 export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
   const { account } = useWallet()
-
   const { data: proposal } = useProposalEnrichedById(proposalId)
   const proposalValues = proposal?.values
-
   const grantValues = useMemo(() => {
     return Array(proposal?.targets.length).fill("0")
   }, [proposal?.targets])
   const values = Array.isArray(proposalValues) ? proposalValues : grantValues
-
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
@@ -40,7 +39,6 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
       }),
     ]
   }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, values])
-
   const refetchQueryKeys = useMemo(
     () => [
       getProposalStateQueryKey(proposalId),

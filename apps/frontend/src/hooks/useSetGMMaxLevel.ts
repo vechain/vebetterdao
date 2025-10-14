@@ -1,15 +1,14 @@
-import { useCallback } from "react"
-import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
+import { useCallback } from "react"
+
+import { getGMMaxLevelQueryKey } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { buildClause } from "@/utils/buildClause"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 
-import { buildClause } from "@/utils/buildClause"
-import { getGMMaxLevelQueryKey } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
-
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
-
 type Props = { maxLevel: number; onSuccess?: () => void }
-
 /**
  * Hook to set the GM max level
  * @param maxLevel  the max level to set
@@ -28,9 +27,7 @@ export const useSetGMMaxLevel = ({ maxLevel, onSuccess }: Props) => {
       }),
     ]
   }, [maxLevel])
-
   const refetchQueryKeys = [getGMMaxLevelQueryKey()]
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

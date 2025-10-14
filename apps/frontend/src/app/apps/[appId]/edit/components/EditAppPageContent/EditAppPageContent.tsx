@@ -11,39 +11,41 @@ import {
   useDisclosure,
   Heading,
 } from "@chakra-ui/react"
-import { URL_REGEX } from "@/constants"
-import { useTranslation } from "react-i18next"
-import { useForm } from "react-hook-form"
-import { useCallback, useEffect } from "react"
 import { UilCheck } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/vechain-kit"
+import { useParams, useRouter } from "next/navigation"
+import { useCallback, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import Lottie from "react-lottie"
+
+import { StepModal } from "@/components/StepModal/StepModal"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { DEPRECATED_IDS } from "@/types/appDetails"
+
+import { useAccountPermissions } from "../../../../../../api/contracts/account/hooks/useAccountPermissions"
+import { URL_REGEX } from "../../../../../../constants/url"
+import { useUpdateAppDetails } from "../../../../../../hooks/useUpdateAppDetails"
+import { useUploadAppMetadata } from "../../../../../../hooks/useUploadAppMetadata"
+import { useCurrentAppBanner } from "../../../hooks/useCurrentAppBanner"
+import { useCurrentAppLogo } from "../../../hooks/useCurrentAppLogo"
+import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
+import { useCurrentAppRole } from "../../../hooks/useCurrentAppRole"
+import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
+import { useCurrentAppVeWorldBanner } from "../../../hooks/useCurrentAppVeWorldBanner"
+import { useCurrentAppVeWorldFeaturedImage } from "../../../hooks/useCurrentAppVeWorldFeaturedImage"
+
+import { EditAppBanner } from "./components/EditAppBanner"
+import { EditAppCategories } from "./components/EditAppCategories/EditAppCategories"
+import { EditAppLogo } from "./components/EditAppLogo"
 import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
 import { EditScreenshots } from "./components/EditScreenshots"
-import { useParams, useRouter } from "next/navigation"
-import { EditAppLogo } from "./components/EditAppLogo"
-import {
-  useCurrentAppBanner,
-  useCurrentAppLogo,
-  useCurrentAppMetadata,
-  useCurrentAppRole,
-  useCurrentAppVeWorldBanner,
-  useCurrentAppVeWorldFeaturedImage,
-} from "../../../hooks"
-import { EditAppBanner } from "./components/EditAppBanner"
-import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
-import { useSocialUrls } from "./hooks/useSocialUrls"
-import { useIsFormChanged } from "./hooks/useIsFormChanged"
-import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { useAccountPermissions } from "@/api/contracts/account"
-import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
 import { EditVeWorldFeatureImage } from "./components/EditVeWorldFeatureImage"
-import { EditAppCategories } from "./components/EditAppCategories"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { StepModal } from "@/components/StepModal/StepModal"
-import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import Lottie from "react-lottie"
-import { DEPRECATED_IDS } from "@/types/appDetails"
+import { useIsFormChanged } from "./hooks/useIsFormChanged"
+import { useSocialUrls } from "./hooks/useSocialUrls"
 
 export type EditAppForm = {
   name: string

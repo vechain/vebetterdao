@@ -8,7 +8,6 @@ type EndorsementInfoBadgeProps = {
   endorsementMaxDate: dayjs.Dayjs
   endorsementLost: boolean
 }
-
 export const EndorsementInfoBadge = ({
   endorsementThreshold,
   endorsementMaxDate,

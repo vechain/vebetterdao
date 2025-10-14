@@ -1,24 +1,22 @@
-import { useUserActionOverview } from "@/api"
 import { Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
-
 import { TbLeaf } from "react-icons/tb"
+
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
+
+import { useUserActionOverview } from "../../../api/indexer/actions/useUserActionOverview"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)
-
 type Props = {
   address: string
 }
 export const UserSustainabilityOverviewStats = ({ address }: Props) => {
   const { t } = useTranslation()
-
   const { data, isLoading } = useUserActionOverview(address ?? "")
-
   //TOOD: Indexer should return aggregated data
   const parsedData = useMemo(() => {
     return {
@@ -27,7 +25,6 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
       apps: data?.uniqueXAppInteractions.length ?? 0,
     }
   }, [data])
-
   return (
     <HStack gap={8} justify="space-between">
       <VStack align="flex-start" gap={1}>
@@ -37,7 +34,6 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
             <Heading size="xl">{compactFormatter.format(parsedData.totalActions)}</Heading>
           </Skeleton>
         </HStack>
-
         <Text textStyle={["xs", "sm"]} color="text.subtle">
           {t("total actions")}
         </Text>

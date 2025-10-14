@@ -7,7 +7,6 @@ export const TIKTOK_URL = "https://tiktok.com/@vechain_official"
 export const YOUTUBE_URL = "https://www.youtube.com/@vechainofficial"
 export const INSTAGRAM_URL = "https://instagram.com/vechainofficial_"
 export const LINKEDIN_URL = "https://www.linkedin.com/company/vechain-foundation/"
-
 export const PRIVACY_POLICY_LINK = "https://www.vechain.org/privacy-policy/"
 export const TERMS_AND_CONDITIONS_LINK = "https://www.vebetterdao.org/terms-of-service"
 export const GRANT_TERMS_AND_CONDITIONS_LINK =

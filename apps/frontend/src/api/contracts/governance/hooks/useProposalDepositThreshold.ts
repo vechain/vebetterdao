@@ -5,7 +5,6 @@ import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-k
 const address = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi
 const method = "proposalDepositThreshold" as const
-
 /**
  * Returns the query key for fetching the deposit threshold from the governor contract.
  * @param proposalId - The id of the proposal to get the threshold for.
@@ -13,7 +12,6 @@ const method = "proposalDepositThreshold" as const
  */
 export const getProposalDepositThresholdQueryKey = (proposalId: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(proposalId)] })
-
 /**
  * Hook to get the proposal deposit threshold from the governor contract (i.e the number of votes required to go to voting phase)
  * @param proposalId - The id of the proposal to get the threshold for.

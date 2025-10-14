@@ -1,13 +1,12 @@
-import { FormattingUtils } from "@repo/utils"
-import { getCallClauseQueryKeyWithArgs, TokenBalance, useCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
+import { FormattingUtils } from "@repo/utils"
 import { VOT3__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { getCallClauseQueryKeyWithArgs, TokenBalance, useCallClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 const abi = VOT3__factory.abi
 const address = getConfig().vot3ContractAddress
 const method = "convertedB3trOf" as const
-
 /**
  * Returns a unique query key for the converted balance of a B3TR token.
  *
@@ -17,7 +16,6 @@ const method = "convertedB3trOf" as const
  */
 export const getConvertedB3TRQueryKey = (userAddress?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [userAddress as `0x${string}`] })
-
 /**
  * Returns the converted balance of a B3TR token for a given address.
  *

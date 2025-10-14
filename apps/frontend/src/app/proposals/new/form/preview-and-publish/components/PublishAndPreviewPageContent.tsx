@@ -1,20 +1,23 @@
 "use client"
-
+import { Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
 import MDEditor from "@uiw/react-md-editor"
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
-import { useProposalFormStore } from "@/store"
-import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
-import { useRouter } from "next/navigation"
-import { useTranslation } from "react-i18next"
-import { useCreateStandardProposal, useUploadProposalMetadata } from "@/hooks"
-import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
-import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
-import { useDepositThreshold, useHashProposal } from "@/api"
 import { ethers } from "ethers"
-import { AnalyticsUtils } from "@/utils"
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
+
+import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
+import { useHashProposal } from "../../../../../../api/contracts/governance/hooks/useHashProposal"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import { useCreateStandardProposal } from "../../../../../../hooks/proposals/standard/useCreateStandardProposal"
+import { useUploadProposalMetadata } from "../../../../../../hooks/useUploadProposalMetadata"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
+import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
 
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
@@ -22,9 +25,7 @@ export const PublishAndPreviewPageContent = () => {
   const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount, metadataUri } =
     useProposalFormStore()
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
-
   const { data: threshold } = useDepositThreshold()
-
   // We call the hashProposal function to precalculate the proposal id
   // so we can redirect the user to the proposal page after the tx is confirmed
   const { data: expectedProposalId } = useHashProposal(
@@ -34,12 +35,10 @@ export const PublishAndPreviewPageContent = () => {
     })),
     proposalDescriptionUriHash ?? "",
   )
-
   const onSuccess = useCallback(() => {
     //Redirect to the proposal page
     router.push(`/proposals/${expectedProposalId}`)
   }, [router, expectedProposalId])
-
   const createProposalMutation = useCreateStandardProposal({
     onSuccess,
     transactionModalCustomUI: {

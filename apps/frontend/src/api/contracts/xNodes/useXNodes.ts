@@ -1,9 +1,10 @@
-import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/dapp-kit-react"
 import { ThorClient } from "@vechain/sdk-network"
+import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall } from "@vechain/vechain-kit"
+
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 
 /**
@@ -19,7 +20,6 @@ export type UserXNode = {
   image: string
   name: string
 }
-
 /**
  * Returns all the available (owned and delegated) xNodes from the NodeManagement contract
  * @param thor  the thor client
@@ -30,7 +30,6 @@ export type UserXNode = {
 export const getUserXNodes = async (thor: ThorClient, user?: string): Promise<UserXNode[]> => {
   if (!user) throw new Error("User address is required")
   const contractAddress = getConfig().nodeManagementContractAddress as `0x${string}`
-
   const [nodeIds = [], levels = []] = await executeMultipleClausesCall({
     thor,
     calls: [

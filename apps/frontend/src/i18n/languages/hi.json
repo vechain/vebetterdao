@@ -2004,5 +2004,8 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "क्या आप वाकई सुनिश्चित हैं कि आप <b>'{{appName}}'</b> को अगले दौर के लिए <b>{{status}}</b> बनाना चाहते हैं?",
   "eligible": "पात्र",
   "ineligible": "अ-पात्र",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "ऐसा करने से, आईडी {{appId}} के साथ {{appName}} अगले दौर के लिए {{status}} होगा।"
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "ऐसा करने से, आईडी {{appId}} के साथ {{appName}} अगले दौर के लिए {{status}} होगा।",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "न्यूनतम <Link>कोरम</Link> ({{quorumNumerator}}%) पूरा हुआ",
+  "Uploading...": "अपलोड हो रहा है...",
+  "Stored": "संग्रहीत"
 }

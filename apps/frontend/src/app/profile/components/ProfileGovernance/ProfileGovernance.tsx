@@ -1,28 +1,31 @@
-import { useUserVotedProposals, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
-import { useCallback, useMemo, useState } from "react"
-import {
-  EmptyStateGovernance,
-  PaginatedProposals,
-  PaginatedTopVotedApps,
-  PreviewCreatedProposals,
-  TopVotedApps,
-} from "./components"
-import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
-import { useRouter } from "next/navigation"
-import { VoteBoxIcon } from "@/components"
-import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV"
-import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
-import { VotingQualification } from "./components/delegation/VotingQualification"
-import { AnalyticsUtils } from "@/utils"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { t } from "i18next"
-import { useUserCreatedProposal } from "@/hooks/proposals/common"
-import { useWallet } from "@vechain/vechain-kit"
 import { Button, Icon, VStack, Card } from "@chakra-ui/react"
-import { EmptyState } from "@/components/ui/empty-state"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
+import { t } from "i18next"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
+
 import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import { EmptyState } from "@/components/ui/empty-state"
+
+import { useUserProposalsVoteEvents } from "../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useUserVotedProposals } from "../../../../api/contracts/governance/hooks/useUserVotedProposals"
+import { useUserTopVotedApps } from "../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
+import { VoteBoxIcon } from "../../../../components/VoteBoxIcon"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../constants/AnalyticsEvents"
+import { useUserCreatedProposal } from "../../../../hooks/proposals/common/useUserCreatedProposal"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useRetrieveProfilIdentity } from "../utils/useRetrieveProfilIdentity"
+
+import { CurrentDelegation } from "./components/delegation/CurrentDelegation/CurrentDelegation"
+import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV/PendingDelegationDelegateePOV"
+import { VotingQualification } from "./components/delegation/VotingQualification/VotingQualification"
+import { EmptyStateGovernance } from "./components/EmptyStateGovernance"
+import { PaginatedProposals } from "./components/PaginatedProposals"
+import { PaginatedTopVotedApps } from "./components/PaginatedTopVotedApps"
+import { PreviewCreatedProposals } from "./components/PreviewCreatedProposals"
+import { TopVotedApps } from "./components/TopVotedApps"
 
 enum ListView {
   ALL,
@@ -30,9 +33,7 @@ enum ListView {
   VOTED,
   APPS_VOTED,
 }
-
 const PREVIEW_SIZE = 3 // The number of proposals to show in the preview
-
 type Props = {
   address: string
 }

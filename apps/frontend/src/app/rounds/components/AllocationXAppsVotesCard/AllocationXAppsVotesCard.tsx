@@ -1,33 +1,29 @@
 import { Alert, Card, Flex, HStack, Heading, Spinner, VStack } from "@chakra-ui/react"
-import { useAllocationsRound, useRoundXApps, useXAppsShares } from "@/api"
-import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
-import { useTranslation } from "react-i18next"
-import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
+
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { useXAppsShares } from "../../../../api/contracts/xApps/hooks/useXAppShares"
+
+import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
+import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 
 type Props = {
   roundId: string
 }
-
 export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { data: xApps } = useRoundXApps(roundId)
-
   const xAppsSharesQuery = useXAppsShares(xApps?.map(app => app.id) ?? [], roundId)
-
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
-
   const error = xAppsSharesQuery.error
-
   const isLoading = xAppsSharesQuery.isLoading || roundInfoLoading
-
   const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
-
   const renderContent = () => {
     if (isLoading) {
       return <Spinner size="lg" />
     }
-
     if (error) {
       return (
         <Alert.Root

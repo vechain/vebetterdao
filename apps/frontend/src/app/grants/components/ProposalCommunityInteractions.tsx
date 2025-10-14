@@ -1,4 +1,6 @@
-import { VoteType } from "@/api"
+import { HStack, Icon, Text } from "@chakra-ui/react"
+import { useMemo } from "react"
+
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
@@ -7,8 +9,7 @@ import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
-import { HStack, Icon, Text } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { VoteType } from "@/types/voting"
 
 export const ProposalCommunityInteractions = ({
   proposalId,
@@ -39,12 +40,16 @@ export const ProposalCommunityInteractions = ({
       abstainColor: userVoteOption === VoteType.ABSTAIN ? "status.warning.strong" : "icon.subtle",
     }
   }, [userVoteOption])
-
   if (state === ProposalState.Pending) {
-    const formattedDepositPercentage = Math.floor(Number(depositPercentage))
+    //If the deposit percentage is less than 1, show 2 decimal places, otherwise show the whole number
+    const numberDepositPercent = Number(depositPercentage)
+    const formattedDepositPercentage =
+      numberDepositPercent > 0 && numberDepositPercent < 1
+        ? numberDepositPercent.toFixed(2)
+        : Math.floor(numberDepositPercent)
+
     const heartIcon = hasUserDeposited ? HeartSolidIcon : HeartIcon
     const heartColor = hasUserDeposited ? "actions.primary.default" : "icon.subtle"
-
     return (
       <HStack key={`${proposalId}-depositPercentage`} textStyle={{ base: "sm", md: "md" }} gap={1} color={heartColor}>
         <Icon as={heartIcon} boxSize={5} />

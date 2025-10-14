@@ -1,4 +1,5 @@
 import { Box, HStack } from "@chakra-ui/react"
+
 import { Step } from "./GrantsStepCard"
 
 export const GrantsStepIndicator = ({

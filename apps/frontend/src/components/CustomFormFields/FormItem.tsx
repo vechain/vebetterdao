@@ -1,8 +1,9 @@
-import { Tooltip } from "@/components/ui/tooltip"
 import { Box, Field, HStack, Icon, Input, InputGroup, Text, Textarea } from "@chakra-ui/react"
-import { UseFormRegisterReturn } from "react-hook-form"
 import { useState } from "react"
+import { UseFormRegisterReturn } from "react-hook-form"
 import { GoQuestion } from "react-icons/go"
+
+import { Tooltip } from "@/components/ui/tooltip"
 
 type FormItemProps = {
   label?: string
@@ -18,7 +19,6 @@ type FormItemProps = {
   tooltip?: string
   maxLength?: number
 }
-
 export const FormItem = ({
   label,
   description,
@@ -35,7 +35,6 @@ export const FormItem = ({
 }: FormItemProps) => {
   const InputComponent = type === "textarea" ? Textarea : Input
   const [charCount, setCharCount] = useState(defaultValue?.length ?? 0)
-
   return (
     <Field.Root p={1} invalid={!!error} h={type === "textarea" ? "full" : "auto"}>
       {label && (

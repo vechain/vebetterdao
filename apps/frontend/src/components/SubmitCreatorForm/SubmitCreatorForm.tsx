@@ -1,5 +1,3 @@
-import { WalletAddressInput } from "@/app/components/Input"
-import { useCreatorSubmissionFormStore } from "@/store"
 import { Button, Card, Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import { signIn, signOut, useSession } from "next-auth/react"
@@ -17,9 +15,11 @@ import {
 import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
 
-import { FormCheckbox, FormItem } from "../CustomFormFields"
+import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
+import { useCreatorSubmissionFormStore } from "../../store/useCreatorSubmissionFormStore"
+import { FormCheckbox } from "../CustomFormFields/FormCheckbox"
+import { FormItem } from "../CustomFormFields/FormItem"
 import { genericValidation, patternUrlCheck, validateAppId, validateEmail } from "../CustomFormFields/validators"
-
 export type SubmitCreatorFormData = {
   appName: string
   appDescription: string
@@ -38,7 +38,6 @@ export type SubmitCreatorFormData = {
   securitySecureKeyManagement: boolean
   securityAntiFarming: boolean
 }
-
 type Props = {
   register: UseFormRegister<SubmitCreatorFormData>
   watch: UseFormWatch<SubmitCreatorFormData>

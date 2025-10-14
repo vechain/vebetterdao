@@ -1,5 +1,5 @@
-import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
+
 import { convertUriToUrl } from "@/utils/uri"
 
 /**
@@ -8,27 +8,26 @@ import { convertUriToUrl } from "@/utils/uri"
  * @param parseJson - Whether to parse the JSON
  * @returns The metadata
  */
-export const getIpfsMetadata = async <T>(uri?: string, parseJson = false): Promise<T> => {
+export const getIpfsMetadata = async <T>(uri?: string): Promise<T> => {
   if (!uri) throw new Error("No URI provided")
   const newUri = convertUriToUrl(uri)
-  const metadata = await axios.get<string>(newUri)
-
-  if (parseJson) return JSON.parse(metadata.data)
-
-  return metadata.data as unknown as T
+  const response = await fetch(newUri)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch IPFS metadata: ${response.status}`)
+  }
+  const data = await response.json()
+  return data as unknown as T
 }
-
 export const getIpfsMetadataQueryKey = (ipfsUri?: string) => ["IPFS_METADATA", ipfsUri]
-
 /**
  * Fetches metadata from IPFS for a given URI
  * @param ipfsUri - The IPFS URI
  * @returns The metadata from IPFS
  */
-export const useIpfsMetadata = <T>(ipfsUri?: string, parseJson = false) => {
+export const useIpfsMetadata = <T>(ipfsUri?: string) => {
   return useQuery({
     queryKey: getIpfsMetadataQueryKey(ipfsUri),
-    queryFn: () => getIpfsMetadata<T>(ipfsUri, parseJson),
+    queryFn: () => getIpfsMetadata<T>(ipfsUri),
     enabled: !!ipfsUri,
     staleTime: Infinity,
   })

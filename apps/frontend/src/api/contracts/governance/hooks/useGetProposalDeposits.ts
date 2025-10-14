@@ -5,7 +5,6 @@ import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-k
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress
 const method = "getProposalDeposits" as const
-
 export const getGetProposalDepositsQueryKey = (proposalId: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -13,7 +12,6 @@ export const getGetProposalDepositsQueryKey = (proposalId: string) =>
     method,
     args: [BigInt(proposalId)],
   })
-
 export const useGetProposalDeposits = (proposalId: string) => {
   return useCallClause({
     abi,

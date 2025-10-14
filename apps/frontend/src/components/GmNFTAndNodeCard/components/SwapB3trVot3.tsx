@@ -1,34 +1,31 @@
-import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
-import { B3TRIcon } from "@/components/Icons"
 import { Button, Heading, Image, Skeleton, useDisclosure, Card, Stat, Icon, GridItem, Grid } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
-import { CountdownVoting } from "@/app/components/Countdown"
+
 import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
-import { useDomainOrAddress, useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
+
+import { CountdownVoting } from "../../../app/components/Countdown/CountdownVoting"
+import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
+import { useDomainOrAddress } from "../../../hooks/useDomainOrAddress"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 const compactFormatter = getCompactFormatter(4)
-
 export const SwapB3trVot3 = ({ address }: { address: string }) => {
   const { t } = useTranslation()
-
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(address)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useGetVot3Balance(address)
-
   const { open: isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
-
   const isSwapDisabled = isLoading || hasNoBalance
-
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
   const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
-
   const { open: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
-
   return (
     <>
       <Grid

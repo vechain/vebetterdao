@@ -1,8 +1,4 @@
 "use client"
-import { useAllocationsRound, useIsQuadraticFundingDisabled, useTotalVotesOnBlock } from "@/api"
-import { VOT3Icon } from "@/components"
-import { Tooltip } from "@/components/ui/tooltip"
-import { useBreakpoints } from "@/hooks"
 import { Card, VStack, Heading, Box, HStack, Skeleton, Text, Icon } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -10,17 +6,23 @@ import { useWallet } from "@vechain/vechain-kit"
 import { Trans, useTranslation } from "react-i18next"
 import { FaQuestionCircle } from "react-icons/fa"
 
+import { Tooltip } from "@/components/ui/tooltip"
+
+import { useTotalVotesOnBlock } from "../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useIsQuadraticFundingDisabled } from "../../../../../api/contracts/xAllocationPool/hooks/useIsQuadraticFundingDisabled"
+import { useAllocationsRound } from "../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { VOT3Icon } from "../../../../../components/Icons/VOT3Icon"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+
 const compactFormatter = getCompactFormatter(2)
 type Props = {
   roundId: string
 }
-
 export const YourVoteBalanceCard = ({ roundId }: Props) => {
   const { isDesktop } = useBreakpoints()
   const { account } = useWallet()
   const { t } = useTranslation()
   const { data: roundInfo } = useAllocationsRound(roundId)
-
   const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? "",
@@ -28,9 +30,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
   const depositsVotes = totalVotesAtSnapshotQuery.data?.depositsVotes
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
-
   const { data: isQuadraticFundingDisabled } = useIsQuadraticFundingDisabled()
-
   return (
     <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
       <VStack gap={4} align="flex-start">

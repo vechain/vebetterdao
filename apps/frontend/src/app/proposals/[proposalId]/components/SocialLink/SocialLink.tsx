@@ -7,7 +7,6 @@ type SocialLinkProps = {
   label: string
   value?: string
 }
-
 export const SocialLink: React.FC<SocialLinkProps> = ({ icon, href, label, value }) => {
   return (
     <HStack>

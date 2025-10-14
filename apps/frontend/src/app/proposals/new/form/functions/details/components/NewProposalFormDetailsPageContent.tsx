@@ -1,27 +1,27 @@
 import { Button, Card, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-import { FormData, NewProposalForm } from "./NewProposalForm"
-import { abi } from "thor-devkit"
-import { useProposalFormStore } from "@/store"
-import { ethers } from "ethers"
-import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+import { abi } from "thor-devkit"
 
 import {
   buttonClicked,
   buttonClickActions,
   ButtonClickProperties,
-  updateMarkdownTemplatePlaceholders,
-} from "@/constants"
-import { AnalyticsUtils } from "@/utils"
+} from "../../../../../../../constants/AnalyticsEvents"
+import { updateMarkdownTemplatePlaceholders } from "../../../../../../../constants/GovernanceProposalTemplate"
+import { useProposalFormStore } from "../../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+
+import { FormData, NewProposalForm } from "./NewProposalForm"
 
 export const NewProposalFormDetailsPageContent: React.FC = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
   const { setData } = useProposalFormStore()
-
   const onSubmit = useCallback(
     (data: FormData) => {
       const markdownDescription = updateMarkdownTemplatePlaceholders({

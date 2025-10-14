@@ -1,5 +1,3 @@
-import axios from "axios"
-import FormData from "form-data"
 import { getConfig } from "@repo/config"
 
 /**
@@ -14,7 +12,6 @@ export const validateIpfsUri = (uri: string): boolean => {
   const trimmedUri = uri.trim()
   return /^ipfs:\/\/[a-zA-Z0-9]+(\/[^/]+)*\/?$/.test(trimmedUri)
 }
-
 /**
  * Converts a CID to an IPFS native URL.
  *
@@ -26,7 +23,6 @@ export const validateIpfsUri = (uri: string): boolean => {
 export function toIPFSURL(cid: string, fileName?: string): string {
   return `ipfs://${cid}/${fileName ?? ""}`
 }
-
 /**
  * Uploads a blob to IPFS.
  * @param blob The Blob object to upload.
@@ -37,10 +33,17 @@ export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<st
   try {
     const form = new FormData()
     form.append("file", blob, filename)
-    const response = await axios.post(getConfig().ipfsPinningService, form)
-
-    // Extract the IPFS hash from the response
-    const ipfsHash = response.data.IpfsHash
+    const response = await fetch(getConfig().ipfsPinningService, {
+      method: "POST",
+      body: form,
+    })
+    if (!response.ok) {
+      throw new Error(`Failed to upload blob to IPFS: ${response.status}`)
+    }
+    const { IpfsHash: ipfsHash } = (await response.json()) as { IpfsHash?: string }
+    if (!ipfsHash) {
+      throw new Error("IPFS pinning service response missing IpfsHash")
+    }
     console.info("IPFS Hash:", ipfsHash)
 
     return ipfsHash

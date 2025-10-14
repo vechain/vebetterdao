@@ -1472,7 +1472,7 @@
   "Approve": "Approve",
   "Option": "Option",
   "Voters": "Voters",
-  "Minimum <Link>quorum</Link> (30%) reached": "Minimum <Link>quorum</Link> (30%) reached",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached",
   "{{percentage}}% (your support)": "{{percentage}}% (your support)",
   "grant": "grant",
   "From": "From",
@@ -1511,5 +1511,7 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?",
   "eligible": "eligible",
   "ineligible": "ineligible",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round."
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.",
+  "Uploading...": "Uploading...",
+  "Stored": "Stored"
 }

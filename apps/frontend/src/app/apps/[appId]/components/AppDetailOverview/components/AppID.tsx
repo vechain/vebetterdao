@@ -1,16 +1,15 @@
 import { HStack, Text, VStack } from "@chakra-ui/react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
-import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { UilCheck, UilCopy } from "@iconscout/react-unicons"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 
 export const AppID = () => {
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
-
   const [showCopiedLink, setShowCopiedLink] = useState(false)
-
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(app?.id || "")
     setShowCopiedLink(true)
@@ -18,7 +17,6 @@ export const AppID = () => {
       setShowCopiedLink(false)
     }, 2000)
   }, [app?.id])
-
   return (
     <VStack align={"stretch"}>
       <Text textStyle={"sm"} color="text.subtle">

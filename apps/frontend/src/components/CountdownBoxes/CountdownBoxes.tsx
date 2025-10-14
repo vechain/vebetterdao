@@ -5,7 +5,6 @@ type CountdownUnitProps = {
   label: string
   bgColor?: string
 }
-
 const CountdownUnit = ({ value, label, bgColor }: CountdownUnitProps) => {
   return (
     <Card.Root w="full" p="3" {...(bgColor ? { bg: bgColor } : {})}>
@@ -18,14 +17,12 @@ const CountdownUnit = ({ value, label, bgColor }: CountdownUnitProps) => {
     </Card.Root>
   )
 }
-
 type CountdownBoxesProps = {
   days: number
   hours: number
   minutes: number
   bgColor?: string
 }
-
 export const CountdownBoxes = ({ days, hours, minutes, bgColor }: CountdownBoxesProps) => {
   return (
     <HStack w="full">

@@ -1,17 +1,18 @@
-import { getIpfsMetadata } from "@/api/ipfs"
+import { getConfig } from "@repo/config"
 import { useQueries } from "@tanstack/react-query"
-import { GrantsManager__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
+import { Treasury__factory } from "@vechain/vebetterdao-contracts/factories/Treasury__factory"
+import { executeCallClause, useThor } from "@vechain/vechain-kit"
 import BigNumber from "bignumber.js"
 import { formatEther } from "ethers"
 import { useMemo } from "react"
 
+import { getIpfsMetadata } from "../../../api/ipfs/hooks/useIpfsMetadata"
+
 import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
-import { executeCallClause, useThor } from "@vechain/vechain-kit"
-import { getConfig } from "@repo/config"
 
 const abi = GrantsManager__factory.abi
 const contractAddress = getConfig().grantsManagerContractAddress
-
 const treasuryInterface = Treasury__factory.createInterface()
 
 const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
@@ -20,6 +21,7 @@ const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
   const formattedAmount = formatEther(decodedData?.[1]?.toString() ?? "0")
   return BigNumber(formattedAmount)
 }
+
 /**
  * Returns the query key for fetching proposal metadata details.
  * @returns The query key for fetching proposal metadata details
@@ -97,16 +99,18 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
   }
 }
 
-const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = false): Promise<T | undefined> => {
+const safeFetchIpfsMetadata = async <T>(ipfsUri?: string): Promise<T | undefined> => {
   if (!ipfsUri) return undefined
 
   try {
-    const result = await getIpfsMetadata<T>(ipfsUri, parseJson)
+    const result = await getIpfsMetadata<T>(ipfsUri)
+
     // Validate that we got actual data, not just an empty object
     if (result && typeof result === "object" && Object.keys(result).length > 0) {
       return result
     }
-    // If we got an empty object or null, treat it as a failure to trigger retry
+
+    // If we got an empty object/string or null, treat it as a failure to trigger retry
     throw new Error(`Empty or invalid metadata received for ${ipfsUri}`)
   } catch (error) {
     console.error("Error fetching proposal IPFS metadata for", ipfsUri, ":", error)
@@ -136,10 +140,7 @@ export const useStandardOrGrantProposalDetails = ({
       queryFn: async () => {
         if (!proposal.ipfsDescription) return undefined
 
-        const proposalDetails = await safeFetchIpfsMetadata<GrantProposalEnriched>(
-          `ipfs://${proposal.ipfsDescription}`,
-          false,
-        )
+        const proposalDetails = await safeFetchIpfsMetadata<GrantProposalEnriched>(`ipfs://${proposal.ipfsDescription}`)
         const [milestoneMetadataURI] = await executeCallClause({
           thor,
           abi,
@@ -151,7 +152,6 @@ export const useStandardOrGrantProposalDetails = ({
         if (milestoneMetadataURI) {
           const milestones = await safeFetchIpfsMetadata<GrantProposalEnriched["milestones"]>(
             `ipfs://${milestoneMetadataURI}`,
-            false,
           )
           if (milestones && proposalDetails) proposalDetails.milestones = milestones
         }
@@ -168,7 +168,7 @@ export const useStandardOrGrantProposalDetails = ({
       queryKey: getStandardProposalMetadataQueryKey(proposal.id, proposal.ipfsDescription),
       queryFn: async () => {
         if (!proposal.ipfsDescription) return undefined
-        return await safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${proposal.ipfsDescription}`, false)
+        return await safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${proposal.ipfsDescription}`)
       },
     })),
   })

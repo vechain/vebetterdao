@@ -1,18 +1,21 @@
-import { useAccountLinking, useUserActionCurrentRoundOverview } from "@/api"
-import { AddressIcon } from "@/components/AddressIcon"
-import { LeafIcon } from "@/components/Icons/LeafIcon"
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack } from "@chakra-ui/react"
+import { UilLinkBroken } from "@iconscout/react-unicons"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
-import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
-import { UilLinkBroken } from "@iconscout/react-unicons"
-import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
+
+import { AddressIcon } from "@/components/AddressIcon"
+import { LeafIcon } from "@/components/Icons/LeafIcon"
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+
+import { useAccountLinking } from "../../../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useUserActionCurrentRoundOverview } from "../../../../../../../../api/indexer/actions/useUserActionOverview"
+
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
+import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
+import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 
 type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
-
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
@@ -29,11 +32,8 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
   const removeLinkModalPassportPOV = useDisclosure()
   const removeLinkModalEntityPOV = useDisclosure()
   const removePendingRequestModal = useDisclosure()
-
   const canUnlinkAccount = isConnectedUser && ((isPassport && !isUserAccountCard) || (isEntity && isUserAccountCard))
-
   if (isUserOverviewLoading || isAccountLinkingLoading) return null
-
   return (
     <Stack
       direction={["column", "column", "row"]}

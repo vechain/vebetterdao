@@ -12,7 +12,6 @@ type FormSocialConnectButtonProps = {
   leftIcon: React.ReactElement
   value: string
 }
-
 export const FormSocialConnectButton = ({
   label,
   register,

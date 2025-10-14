@@ -1,31 +1,31 @@
-import { useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
-import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
 import { Box, Card, Grid, Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { Trans, useTranslation } from "react-i18next"
-import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { StepBoxes } from "./components/StepBoxes"
 import { useRouter } from "next/navigation"
+import { Trans, useTranslation } from "react-i18next"
+
+import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
+
+import { useIsAppUnendorsed } from "../../../../../api/contracts/xApps/hooks/endorsement/useIsAppUnendorsed"
+import { useEndorsementScoreThreshold } from "../../../../../api/contracts/xApps/hooks/useEndorsementScoreThreshold"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+
+import { StepBoxes } from "./components/StepBoxes"
 
 export const AppCreationSteps = () => {
   const { t } = useTranslation()
   const router = useRouter()
-
   const { app } = useCurrentAppInfo()
   const { data: isAppUnendorsed, isLoading } = useIsAppUnendorsed(app?.id ?? "")
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
   const currentStep = isAppUnendorsed ? XAppsCreationSteps.ENDORSEMENT : XAppsCreationSteps.ALLOCATION
-
   const getXAppsCreationStepStatus = (step: XAppsCreationSteps): XAppsCreationStepStatus => {
     if (step < currentStep) return XAppsCreationStepStatus.COMPLETED
     if (step === currentStep) return XAppsCreationStepStatus.ACTIVE
     return XAppsCreationStepStatus.PENDING
   }
-
   const redirectToEditPage = () => {
     router.push(`/apps/${app?.id}/edit`)
   }
-
   return (
     <Box>
       <Card.Root>

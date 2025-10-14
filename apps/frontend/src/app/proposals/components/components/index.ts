@@ -1,5 +1,0 @@
-export * from "./CreateProposalCard"
-export * from "./ClaimDeposits"
-export * from "./NoProposalsCard"
-export * from "./RequirementModal"
-export * from "./HowToSupportCard"

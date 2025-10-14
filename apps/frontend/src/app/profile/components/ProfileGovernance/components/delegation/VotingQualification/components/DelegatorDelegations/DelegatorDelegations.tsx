@@ -1,31 +1,28 @@
-import { useGetDelegatee } from "@/api"
-import { AddressIcon } from "@/components/AddressIcon"
 import { Separator, HStack, Heading, Text, VStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
-import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { useGetDelegatee } from "../../../../../../../../../api/contracts/vePassport/hooks/useGetDelegatee"
+
+import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 
 type Props = {
   address: string
 }
 export const DelegatorDelegations = ({ address }: Props) => {
   const { t } = useTranslation()
-
   const { account: connectedAccount } = useWallet()
-
   const isConnectedUser = compareAddresses(connectedAccount?.address ?? "", address)
-
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
-
   const { data: vnsData } = useVechainDomain(delegateeAddress)
   const delegateeDomain = vnsData?.domain
-
   const revokeDelegationModal = useDisclosure()
-
   if (!isDelegator) return null
   return (
     <>
@@ -49,13 +46,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
             )}
           </Text>
         </VStack>
-        <Stack
-          direction={["column", "column", "row"]}
-          justify={"space-between"}
-          bg="#F8F8F8"
-          rounded="xl"
-          p={3}
-          gap={[2, 2, 6]}>
+        <Stack direction={["column", "column", "row"]} justify={"space-between"} rounded="xl" p={3} gap={[2, 2, 6]}>
           <HStack gap={4}>
             <AddressIcon address={delegateeAddress} w={12} h={12} rounded="full" />
             <VStack align="start" gap={0}>

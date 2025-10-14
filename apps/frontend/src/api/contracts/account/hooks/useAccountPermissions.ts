@@ -1,12 +1,12 @@
 import { getConfig } from "@repo/config"
-import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
+import { AccessControl__factory } from "@vechain/vebetterdao-contracts/@openzeppelin/access/AccessControl__factory"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+
 import { getBytes32Role } from "./useHasRole"
 
 const abi = AccessControl__factory.abi
 const method = "hasRole" as const
-
 const config = getConfig()
 type AccountPermissionResponse = {
   isAdminOfB3tr: boolean
@@ -45,7 +45,6 @@ type AccountPermissionResponse = {
   isGrantApprover: boolean
   isGrantRejector: boolean
 }
-
 const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; contractAddress: string }> = {
   isAdminOfB3tr: {
     role: "DEFAULT_ADMIN_ROLE",

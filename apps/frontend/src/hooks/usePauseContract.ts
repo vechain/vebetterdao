@@ -1,5 +1,3 @@
-import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import {
   GalaxyMember__factory,
@@ -7,28 +5,24 @@ import {
   VOT3__factory,
   B3TRGovernor__factory,
 } from "@vechain/vebetterdao-contracts"
-import {
-  getIsGMPausedQueryKey,
-  getIsB3trPausedQueryKey,
-  getIsVot3PausedQueryKey,
-  getIsB3TRGovernorPausedQueryKey,
-} from "@/api"
-import { useBuildTransaction } from "./useBuildTransaction"
+import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
 
+import { getIsB3trPausedQueryKey } from "../api/contracts/b3tr/hooks/useB3trPaused"
+import { getIsGMPausedQueryKey } from "../api/contracts/galaxyMember/hooks/useIsGMpaused"
+import { getIsB3TRGovernorPausedQueryKey } from "../api/contracts/governance/hooks/useB3TRGovernorPaused"
+import { getIsVot3PausedQueryKey } from "../api/contracts/vot3/hooks/useVot3Paused"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 type Props = {
   contract: string
   contractName: string
   onSuccess?: () => void
 }
-
 const B3TRInterface = B3TR__factory.createInterface()
-
 const VOT3Interface = VOT3__factory.createInterface()
-
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
-
 const B3TRGovernorInterface = B3TRGovernor__factory.createInterface()
-
 /**
  * getInterface is a function that returns the contract interface based on the contract address.
  * @param contract - The contract address

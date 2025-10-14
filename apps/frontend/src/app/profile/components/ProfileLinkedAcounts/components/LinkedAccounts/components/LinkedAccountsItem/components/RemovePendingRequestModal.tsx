@@ -1,27 +1,25 @@
-import { BaseModal } from "@/components/BaseModal"
 import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle } from "@/components"
-import { useRemoveLinkingRequestToPassport } from "@/hooks"
+import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+import { useRemoveLinkingRequestToPassport } from "../../../../../../../../../hooks/useRemoveLinkingRequestToPassport"
 
 export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDisclosureProps; passport: string }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const removeLinkingRequest = useRemoveLinkingRequestToPassport({})
-
   const handleRemoveLink = useCallback(() => {
     removeLinkingRequest.sendTransaction()
   }, [removeLinkingRequest])
-
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
-
   const handleClose = useCallback(() => {
     modal.onClose?.()
     removeLinkingRequest.resetStatus()
   }, [modal, removeLinkingRequest])
-
   return (
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack alignItems="stretch" gap={6}>

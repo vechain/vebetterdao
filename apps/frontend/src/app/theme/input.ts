@@ -21,14 +21,12 @@ export const inputRecipe = defineRecipe({
         },
         bg: "transparent",
       },
-
       outline: {
         borderColor: "border.primary",
       },
     },
   },
 })
-
 export const numberInputSlotRecipe = defineSlotRecipe({
   slots: numberInputAnatomy.keys(),
   base: {

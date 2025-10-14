@@ -2004,5 +2004,8 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "다음 라운드를 위해 <b>'{{appName}}'</b>을 <b>{{status}}</b> 상태로 변경하시겠습니까?",
   "eligible": "자격 있음",
   "ineligible": "자격 없음",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "이렇게 하면 {{appId}}의 ID를 가진 {{appName}}이(가) 다음 라운드에서 {{status}} 상태가 됩니다."
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "이렇게 하면 {{appId}}의 ID를 가진 {{appName}}이(가) 다음 라운드에서 {{status}} 상태가 됩니다.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "최소 <Link>정족수</Link> ({{quorumNumerator}}%) 달성",
+  "Uploading...": "업로드 중...",
+  "Stored": "저장됨"
 }

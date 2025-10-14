@@ -6,11 +6,9 @@ type Props = {
   currentFilter: string
   setFilter: (filter: string) => void
 }
-
 export const FilterAppsTypeButton = ({ filterType, currentFilter, setFilter }: Props) => {
   const { t } = useTranslation()
   const isActive = filterType === currentFilter
-
   return (
     <Button
       w="auto"

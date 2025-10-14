@@ -9,7 +9,6 @@ type Props = {
   buttonIcon?: IconType
   onClick: () => void
 }
-
 export const EmptyStateGovernance = ({ title, description, illustration, buttonText, buttonIcon, onClick }: Props) => {
   return (
     <VStack w={"full"}>

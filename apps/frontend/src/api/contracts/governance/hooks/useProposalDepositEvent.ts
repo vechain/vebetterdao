@@ -1,8 +1,9 @@
-import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useMemo } from "react"
+
+import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
 
 import { useProposalsEvents } from "./useProposalsEvents"
 
@@ -15,34 +16,28 @@ export const useProposalDepositEvent = (proposalId: string) => {
   const { account } = useWallet()
   const { data: proposal } = useProposalEnrichedById(proposalId)
   const events = useProposalsEvents()
-
   const proposalDeposits = useMemo(
     () => events.data?.deposits.filter(deposit => deposit.proposalId === proposalId) || [],
     [events.data?.deposits, proposalId],
   )
-
   // Get the number of supports
   const supportingUserCount = useMemo(
     () => [...new Set(proposalDeposits.map(deposit => deposit.depositor))].length,
     [proposalDeposits],
   )
-
   // Get the deposit threshold
   const proposalDepositThresholdBN = useMemo(
     () => BigInt(proposal?.depositThreshold || 0),
     [proposal?.depositThreshold],
   )
-
   // Get the community deposits
   const communityDepositsBN = useMemo(() => {
     return proposalDeposits.reduce((acc, deposit) => acc + BigInt(deposit.amount), BigInt(0))
   }, [proposalDeposits])
-
   // How many missing support
   const missingSupport = useMemo(() => {
     return ethers.formatEther(proposalDepositThresholdBN - communityDepositsBN)
   }, [proposalDepositThresholdBN, communityDepositsBN])
-
   // Get the community deposits
   const communityDeposits = useMemo(() => {
     return Number(ethers.formatEther(communityDepositsBN))

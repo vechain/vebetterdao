@@ -1,8 +1,12 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps } from "@/api"
 import { VStack, Button, Field, Heading, NativeSelect, HStack, Text, Card } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
 import { useCheckEndorsement } from "@/hooks/useCheckEndorsement"
+
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
 
 export const XAppCheckEndorsement = () => {
   const [appId, setAppId] = useState<string | undefined>()
@@ -10,12 +14,10 @@ export const XAppCheckEndorsement = () => {
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
-
   const { sendTransaction, isTransactionPending, status } = useCheckEndorsement({
     appId: appId ?? "",
   })
   const isLoading = isTransactionPending || status === "pending"
-
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
       if (event) event?.preventDefault()
@@ -27,9 +29,7 @@ export const XAppCheckEndorsement = () => {
     if (currentRoundId === undefined || !currentRound) return false
     return true
   }, [currentRoundId, currentRound])
-
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
-
   return (
     <Card.Root w={"full"}>
       <Card.Header>

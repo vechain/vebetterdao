@@ -1,4 +1,5 @@
 import { useAppIdsOfRound } from "../getAppIdsOfRound"
+
 import { useCurrentAllocationsRoundId } from "./useCurrentAllocationsRoundId"
 
 /**
@@ -7,6 +8,5 @@ import { useCurrentAllocationsRoundId } from "./useCurrentAllocationsRoundId"
  */
 export const useCurrentAllocationAppIds = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   return useAppIdsOfRound(currentRoundId?.toString())
 }

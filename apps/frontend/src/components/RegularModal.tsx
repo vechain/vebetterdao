@@ -13,7 +13,6 @@ type Props = {
   isCloseable?: boolean
   size?: Dialog.RootProps["size"]
 }
-
 export const RegularModal = ({
   isOpen,
   onClose,

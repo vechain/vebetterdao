@@ -5,7 +5,6 @@ export type Props = {
     appId: string
   }
 }
-
 export default function AppDetail({ params }: Readonly<Props>) {
   return <AppDetailPage params={params} />
 }

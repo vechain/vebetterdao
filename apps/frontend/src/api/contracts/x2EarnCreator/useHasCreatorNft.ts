@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnCreator__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().x2EarnCreatorContractAddress as `0x${string}`
 const abi = X2EarnCreator__factory.abi
 const method = "balanceOf" as const
-
 /**
  * Returns the query key for fetching the creator NFT.
  * @returns The query key for fetching the creator NFT.
@@ -13,7 +12,6 @@ const method = "balanceOf" as const
 export const getHasCreatorNFTQueryKey = (walletAddress?: string) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(walletAddress ?? "0x") as `0x${string}`] })
 }
-
 /**
  * Hook to get the creator NFT from the X2EarnCreator contract.
  * @param walletAddress The wallet address to check for the creator NFT.

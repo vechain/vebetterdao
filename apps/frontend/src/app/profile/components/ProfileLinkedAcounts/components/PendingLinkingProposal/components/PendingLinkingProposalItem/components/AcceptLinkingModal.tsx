@@ -1,11 +1,13 @@
-import { BaseModal } from "@/components/BaseModal"
 import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { useCallback } from "react"
-import { ExclamationTriangle } from "@/components"
-import { useAcceptEntityLink } from "@/hooks"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+import { useAcceptEntityLink } from "../../../../../../../../../hooks/useAcceptEntityLink"
 
 export const AcceptLinkingModal = ({
   modal,
@@ -18,20 +20,15 @@ export const AcceptLinkingModal = ({
   const { isTxModalOpen } = useTransactionModal()
   const { data: vnsData } = useVechainDomain(secondaryAccount || "")
   const domain = vnsData?.domain
-
   const acceptLinking = useAcceptEntityLink({})
-
   const handleDelegate = useCallback(() => {
     acceptLinking.sendTransaction({ entity: secondaryAccount })
   }, [acceptLinking, secondaryAccount])
-
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
-
   const handleClose = useCallback(() => {
     modal.onClose?.()
     acceptLinking.resetStatus()
   }, [modal, acceptLinking])
-
   return (
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack alignItems="stretch" gap={6}>

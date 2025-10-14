@@ -1,18 +1,4 @@
 import {
-  useAllocationsRound,
-  useAppEndorsementStatus,
-  useAppEndorsers,
-  useCurrentAllocationsRoundId,
-  UserNode,
-  useNodesEndorsedApps,
-} from "@/api"
-import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
-import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
-import { GenericAlert } from "@/app/components/Alert"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import {
   Button,
   Card,
   Separator,
@@ -22,7 +8,6 @@ import {
   Image,
   Stack,
   Text,
-  useBreakpointValue,
   useDisclosure,
   VStack,
   Icon,
@@ -34,15 +19,27 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
+import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { EmptyState } from "@/components/ui/empty-state"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useAppEndorsers } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { GenericAlert } from "../../../components/Alert/GenericAlert"
+
 export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const isEndorsingApp = !!xNode.endorsedAppId
-
   const { data: endorsedApps } = useNodesEndorsedApps([xNode.nodeId])
   const endorsedApp = endorsedApps?.[0]?.endorsedApp
-
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(xNode.endorsedAppId ?? "")
   // get app status and score
@@ -67,7 +64,6 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
-  const searchIconSize = useBreakpointValue({ base: "4rem", md: "6rem" })
   const shouldDisableEndorsementButton = useMemo(() => {
     return xNode.isXNodeDelegated || xNode.isXNodeOnCooldown
   }, [xNode.isXNodeDelegated, xNode.isXNodeOnCooldown])
@@ -82,7 +78,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading textStyle="xl">{t("Endorsed app")}</Heading>
-              {!isEndorsingApp && <Icon as={UilInfoCircle} color="actions.tertiary.default" />}
+              {!isEndorsingApp && <Icon as={UilInfoCircle} color="icon.default" />}
             </HStack>
             {!isEndorsingApp && (
               <Text textStyle="sm">
@@ -180,32 +176,25 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
               </VStack>
             </Card.Root>
           ) : (
-            <Flex align="center" justify={"center"} p={["8", "8", "12"]} bg="#F8F8F8" rounded="2xl" mt="2">
-              <VStack align="center" gap={2} maxW="27rem" textAlign={"center"}>
-                <UilSearch size={searchIconSize} color="#757575" />
-                <Heading textStyle="xl" color="#757575" fontWeight="semibold">
-                  {t("You’re not endorsing any app")}
-                </Heading>
-                {xNode.isXNodeDelegator ? (
-                  <Text color="#757575">
-                    {t(
+            <EmptyState
+              bg="transparent"
+              icon={<Icon as={UilSearch} boxSize={{ base: "16", md: "24" }} />}
+              title={t("You’re not endorsing any app")}
+              description={
+                xNode.isXNodeDelegator
+                  ? t(
                       "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
-                    )}
-                  </Text>
-                ) : (
-                  <>
-                    <Text color="#757575">
-                      {t(
-                        "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
-                      )}
-                    </Text>
-                    <Button variant="primary" asChild mt={4} w={["full", "full", "auto"]}>
-                      <NextLink href="/apps">{t("Browse apps")}</NextLink>
-                    </Button>
-                  </>
-                )}
-              </VStack>
-            </Flex>
+                    )
+                  : t(
+                      "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
+                    )
+              }>
+              {!xNode.isXNodeDelegator && (
+                <Button variant="primary" asChild mt={4} w={["full", "full", "auto"]}>
+                  <NextLink href="/apps">{t("Browse apps")}</NextLink>
+                </Button>
+              )}
+            </EmptyState>
           )}
         </VStack>
       </Card.Body>

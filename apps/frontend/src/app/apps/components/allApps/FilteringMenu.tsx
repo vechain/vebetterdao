@@ -1,6 +1,7 @@
-import { useTranslation } from "react-i18next"
 import { IconButton, Menu, Text, Flex, VStack, Portal, Button, Badge, Checkbox } from "@chakra-ui/react"
 import { UilFilter } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
+
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 type Props = {
@@ -11,7 +12,6 @@ type Props = {
   onCategoryChange: (categoryId: string) => void
   onStatusFilterChange: (status: string) => void
 }
-
 export const FilteringMenu = ({
   selectedCategories,
   statusFilter,
@@ -22,7 +22,6 @@ export const FilteringMenu = ({
 }: Props) => {
   const { t } = useTranslation()
   const activeFiltersCount = selectedCategories.length || 0
-
   return (
     <Menu.Root closeOnSelect={false} positioning={{ placement: "bottom" }} lazyMount>
       <Menu.Trigger>
@@ -36,7 +35,6 @@ export const FilteringMenu = ({
           borderColor="border.primary">
           <UilFilter />
         </IconButton>
-
         {activeFiltersCount > 0 && (
           <Flex
             position="absolute"

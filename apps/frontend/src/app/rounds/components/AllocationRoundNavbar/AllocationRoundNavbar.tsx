@@ -1,5 +1,3 @@
-import { useAllocationsRound, useAllocationsRoundState } from "@/api"
-import { AllocationStateBadge } from "@/components"
 import {
   HStack,
   Button,
@@ -19,49 +17,43 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
 export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const router = useRouter()
   const { t } = useTranslation()
   const { data, isLoading } = useAllocationsRound(roundId)
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
-
   const prevButtonDisabled = !data.roundId || data.roundId === "1"
   const goToPreviousRound = () => {
     if (prevButtonDisabled) return
     const prevRoud = Number(data?.roundId) - 1
     router.push(`/rounds/${prevRoud}`)
   }
-
   const { data: state } = useAllocationsRoundState(roundId)
   const isActive = state === 0
-
   const nextButtonDisabled = !data.roundId || data.isCurrent
-
   const goToNextRound = () => {
     if (nextButtonDisabled) return
     const nextRound = Number(data?.roundId) + 1
     router.push(`/rounds/${nextRound}`)
   }
-
   const bgColor = data.state === 0 ? "banner.green" : "bg.primary"
-
   // State to store the client width
-  const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
+  const [clientWidth, setClientWidth] = useState(0)
 
-  // Effect to update the clientWidth state on window resize
+  // Effect to update the clientWidth state using ResizeObserver
   useEffect(() => {
-    const updateWidth = () => {
-      setClientWidth(document.body.clientWidth)
-    }
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setClientWidth(entry.contentRect.width)
+      }
+    })
 
-    // Set initial width
-    updateWidth()
+    resizeObserver.observe(document.body)
 
-    // Add window resize event listener
-    window.addEventListener("resize", updateWidth)
-
-    // Clean up listener on component unmount
-    return () => window.removeEventListener("resize", updateWidth)
+    return () => resizeObserver.disconnect()
   }, [])
 
   if (isDesktop)
