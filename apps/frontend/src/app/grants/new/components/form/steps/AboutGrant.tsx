@@ -127,9 +127,9 @@ export const AboutGrant = ({
   }
   //Handle file removal
   const onRemoveFile = useCallback(
-    (file: File) => {
+    (fileName: string) => {
       const currentAttachments = getValues("outcomesAttachment") || []
-      const updatedAttachments = currentAttachments.filter(attachment => attachment.name !== file.name)
+      const updatedAttachments = currentAttachments.filter(attachment => attachment.name !== fileName)
       setValue("outcomesAttachment", updatedAttachments)
       setData({ outcomesAttachment: updatedAttachments })
     },
@@ -148,7 +148,8 @@ export const AboutGrant = ({
         try {
           // Check for duplicates
           if (isFileDuplicate(file.name, currentAttachments)) {
-            return
+            //Skip duplicate
+            continue
           }
 
           // Validate file
@@ -668,16 +669,43 @@ export const AboutGrant = ({
                       </FileUpload.Dropzone>
                       <FileUpload.ItemGroup>
                         <FileUpload.Context>
-                          {({ acceptedFiles }) =>
-                            acceptedFiles.map(file => (
+                          {({ acceptedFiles }) => {
+                            const storedFiles = getValues("outcomesAttachment") || []
+                            const currentFiles = acceptedFiles
+
+                            // Create a map of stored files by name
+                            const storedFileMap = new Map(storedFiles.map(file => [file.name, file]))
+
+                            // Filter out current files that are already stored
+                            const uniqueCurrentFiles = currentFiles.filter(file => !storedFileMap.has(file.name))
+
+                            const FileComponent = ({ file, isUploading }: { file: File; isUploading: boolean }) => (
                               <FileUpload.Item key={file.name} file={file}>
                                 <FileUpload.ItemPreview />
                                 <FileUpload.ItemName />
-                                <FileUpload.ItemSizeText />
-                                <FileUpload.ItemDeleteTrigger onClick={() => onRemoveFile(file)} />
+                                <Text textStyle="xs" color="text.subtle">
+                                  {isUploading ? t("Uploading...") : t("Stored")}
+                                </Text>
+                                <FileUpload.ItemDeleteTrigger onClick={() => onRemoveFile(file.name)} />
                               </FileUpload.Item>
-                            ))
-                          }
+                            )
+                            return (
+                              <>
+                                {/* Render stored files */}
+                                {storedFiles.map(file => {
+                                  const fileInstance = new File([""], file?.name ?? "", {
+                                    type: file?.type ?? "application/octet-stream",
+                                  })
+                                  return <FileComponent key={file.name} file={fileInstance} isUploading={false} />
+                                })}
+
+                                {/* Render current files that aren't stored yet */}
+                                {uniqueCurrentFiles.map(file => (
+                                  <FileComponent key={file.name} file={file} isUploading={true} />
+                                ))}
+                              </>
+                            )
+                          }}
                         </FileUpload.Context>
                       </FileUpload.ItemGroup>
                     </FileUpload.Root>

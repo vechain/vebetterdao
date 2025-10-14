@@ -108,6 +108,8 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
             onChange={e => setComment(e.target.value)}
             resize="none"
             rows={4}
+            // This prevents zooming on mobile
+            fontSize={"16px"}
           />
         </VStack>
 

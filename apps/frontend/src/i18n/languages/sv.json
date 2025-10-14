@@ -2005,5 +2005,7 @@
   "eligible": "kvalificerad",
   "ineligible": "inte kvalificerad",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Genom att göra detta kommer {{appName}} med id {{appId}} att vara {{status}} för nästa omgång.",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minsta <Link>kvorum</Link> ({{quorumNumerator}}%) nått"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minsta <Link>kvorum</Link> ({{quorumNumerator}}%) nått",
+  "Uploading...": "Laddar upp...",
+  "Stored": "Sparad"
 }

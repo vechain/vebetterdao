@@ -16,7 +16,7 @@ import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMe
 import { GRANT_PROPOSAL_FORM_STORE_NAME } from "@/store/useGrantProposalFormStore"
 
 import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useGrantProposalFormStore, useDraftGrantProposalStore } from "../../../../../store/useGrantProposalFormStore"
+import { useDraftGrantProposalStore, useGrantProposalFormStore } from "../../../../../store/useGrantProposalFormStore"
 import { GrantTypeSelection } from "../GrantTypeSelection"
 
 import { GrantsNewFormStepIndicator } from "./GrantsNewFormStepIndicator"

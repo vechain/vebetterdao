@@ -1511,5 +1511,7 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?",
   "eligible": "eligible",
   "ineligible": "ineligible",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round."
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.",
+  "Uploading...": "Uploading...",
+  "Stored": "Stored"
 }

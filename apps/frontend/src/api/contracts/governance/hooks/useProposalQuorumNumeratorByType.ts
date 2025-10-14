@@ -24,7 +24,6 @@ export const useProposalQuorumNumeratorByType = (proposalType: ProposalType) => 
     method,
     args: [proposalType],
     queryOptions: {
-      enabled: !!proposalType,
       select: data => data[0],
     },
   })

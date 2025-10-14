@@ -126,7 +126,13 @@ export const ProposalInteractionCard = ({
     const current = Number(ethers.formatEther(currentDepositAmount))
     const threshold = Number(ethers.formatEther(proposalDepositThreshold))
 
-    return ((current / threshold) * 100).toFixed(0)
+    const result = (current / threshold) * 100
+
+    if (result < 1 && result > 0) {
+      return result.toFixed(2)
+    }
+
+    return result.toFixed(0)
   }, [currentDepositAmount, proposalDepositThreshold])
 
   // ===== BUSINESS LOGIC =====

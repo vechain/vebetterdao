@@ -2005,5 +2005,7 @@
   "eligible": "適格",
   "ineligible": "不適格",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "これにより、ID {{appId}} の{{appName}} は次のラウンドで{{status}}になります。",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達しました"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達しました",
+  "Uploading...": "アップロード中...",
+  "Stored": "保存済み"
 }

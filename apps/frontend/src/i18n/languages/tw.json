@@ -2006,5 +2006,7 @@
   "eligible": "合格",
   "ineligible": "不合格",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "這樣做，ID為{{appId}}的{{appName}}將在下一輪被設定為{{status}}。",
-  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)"
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)",
+  "Uploading...": "上傳中...",
+  "Stored": "已存儲"
 }

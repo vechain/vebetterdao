@@ -1,4 +1,4 @@
-import { Button, Heading, HStack, Icon, Image, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
+import CircleGreenVot3Icon from "@/components/Icons/svg/circle-green-vot3.svg"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
@@ -132,7 +133,6 @@ export const ProposalSupportModal = ({
     const expectedPercentage = BigNumber(forecastedTotal).div(thresholdNumber)
     return expectedPercentage.times(100).toNumber()
   }, [proposalDeposits, proposalThreshold, inputAmount])
-
   // Display data for progress and results
   const displayPercent = Number(amount || "0") > 0 ? predictedPercent : currentPercent
   const progressData = useMemo(
@@ -167,6 +167,7 @@ export const ProposalSupportModal = ({
       showCloseButton
       isCloseable
       ariaTitle="Support this grant"
+      modalProps={{ size: "md" }}
       isOpen={isSupportModalOpen && !isTxModalOpen}
       onClose={onClose}>
       <VStack w="full" align="stretch" gap={6}>
@@ -177,7 +178,7 @@ export const ProposalSupportModal = ({
             endElement={
               <HStack>
                 <Text>{"VOT3"}</Text>
-                <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"20px"} alt="VOT3 Icon" />
+                <Icon as={CircleGreenVot3Icon} />
               </HStack>
             }>
             <Input placeholder="0" size={"lg"} value={amount} onChange={handleChange} />
