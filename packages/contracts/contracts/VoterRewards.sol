@@ -726,7 +726,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
    */
   function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    $.relayerRewardsPool.validateAutoVotingActionEarlyAccessPeriod(roundId, voter, msg.sender);
+    $.relayerRewardsPool.validateClaimDuringEarlyAccess(roundId, voter, msg.sender);
   }
 
   /// @notice Scales the vote power based on the quadratic rewarding status.

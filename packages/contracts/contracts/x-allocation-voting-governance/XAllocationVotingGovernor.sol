@@ -228,7 +228,7 @@ abstract contract XAllocationVotingGovernor is
    * @param roundId The current round ID
    */
   function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
-    relayerRewardsPool().validateAutoVotingActionEarlyAccessPeriod(roundId, voter, _msgSender());
+    relayerRewardsPool().validateVoteDuringEarlyAccess(roundId, voter, _msgSender());
   }
 
   /**

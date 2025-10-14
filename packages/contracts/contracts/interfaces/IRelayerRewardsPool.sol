@@ -317,7 +317,14 @@ interface IRelayerRewardsPool {
    * @param roundId The round ID
    * @return True if early access period is still active
    */
-  function isEarlyAccessActive(uint256 roundId) external view returns (bool);
+  function isVoteEarlyAccessActive(uint256 roundId) external view returns (bool);
+
+  /**
+   * @notice Check if claim early access period is active for a given round
+   * @param roundId The round ID
+   * @return True if claim early access period is still active
+   */
+  function isClaimEarlyAccessActive(uint256 roundId) external view returns (bool);
 
   /**
    * @notice Calculate relayer fee from total reward
@@ -379,5 +386,13 @@ interface IRelayerRewardsPool {
    * @param voter The voter address
    * @param caller The caller address
    */
-  function validateAutoVotingActionEarlyAccessPeriod(uint256 roundId, address voter, address caller) external view;
+  function validateVoteDuringEarlyAccess(uint256 roundId, address voter, address caller) external view;
+
+  /**
+   * @notice Validates if a claim can proceed for an auto-voting user
+   * @param roundId The round ID
+   * @param voter The voter address
+   * @param caller The caller address
+   */
+  function validateClaimDuringEarlyAccess(uint256 roundId, address voter, address caller) external view;
 }
