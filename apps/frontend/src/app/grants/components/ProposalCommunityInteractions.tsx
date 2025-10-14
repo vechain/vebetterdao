@@ -41,7 +41,13 @@ export const ProposalCommunityInteractions = ({
     }
   }, [userVoteOption])
   if (state === ProposalState.Pending) {
-    const formattedDepositPercentage = Math.floor(Number(depositPercentage))
+    //If the deposit percentage is less than 1, show 2 decimal places, otherwise show the whole number
+    const numberDepositPercent = Number(depositPercentage)
+    const formattedDepositPercentage =
+      numberDepositPercent > 0 && numberDepositPercent < 1
+        ? numberDepositPercent.toFixed(2)
+        : Math.floor(numberDepositPercent)
+
     const heartIcon = hasUserDeposited ? HeartSolidIcon : HeartIcon
     const heartColor = hasUserDeposited ? "actions.primary.default" : "icon.subtle"
     return (
