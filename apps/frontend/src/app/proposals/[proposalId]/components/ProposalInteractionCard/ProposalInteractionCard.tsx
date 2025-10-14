@@ -132,7 +132,7 @@ export const ProposalInteractionCard = ({
       return result.toFixed(2)
     }
 
-    return ((current / threshold) * 100).toFixed(0)
+    return result.toFixed(0)
   }, [currentDepositAmount, proposalDepositThreshold])
 
   // ===== BUSINESS LOGIC =====
