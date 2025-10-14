@@ -1,6 +1,6 @@
 import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { Treasury__factory } from "@vechain/vebetterdao-contracts/factories/Treasury__factory"
 import { ethers } from "ethers"
 import { useRouter } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"

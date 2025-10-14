@@ -5,6 +5,7 @@ import { useEffect } from "react"
 
 import { MotionVStack } from "../../components/MotionVStack"
 import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
+
 const GrantsPageContent = dynamic(() => import("./components/GrantsPageContent").then(mod => mod.GrantsPageContent), {
   ssr: false,
   loading: () => (
@@ -13,10 +14,12 @@ const GrantsPageContent = dynamic(() => import("./components/GrantsPageContent")
     </VStack>
   ),
 })
+
 export default function Grants() {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Grants`)
   }, [])
+
   return (
     <MotionVStack>
       <GrantsPageContent />

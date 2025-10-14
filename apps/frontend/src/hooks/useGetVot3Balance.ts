@@ -1,12 +1,13 @@
 import { getConfig } from "@repo/config"
 import { humanNumber } from "@repo/utils/FormattingUtils"
-import { VOT3__factory } from "@vechain/vebetterdao-contracts"
+import { VOT3__factory } from "@vechain/vebetterdao-contracts/factories/VOT3__factory"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
 
 const abi = VOT3__factory.abi
 const address = getConfig().vot3ContractAddress as `0x${string}`
 const method = "balanceOf"
+
 export const getVot3BalanceQueryKey = (userAddress?: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -14,6 +15,7 @@ export const getVot3BalanceQueryKey = (userAddress?: string) =>
     method,
     args: [userAddress as `0x${string}`],
   })
+
 export const useGetVot3Balance = (userAddress?: string) => {
   return useCallClause({
     abi,

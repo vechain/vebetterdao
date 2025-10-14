@@ -10,6 +10,8 @@ import { useState, useEffect } from "react"
 export const useScript = (url: string, isAsync = true, runBeforeInit?: () => void, runAfterInit?: () => void) => {
   const [loaded, setLoaded] = useState(false)
   useEffect(() => {
+    if (!url) return
+
     runBeforeInit?.()
     const script = document.createElement("script")
     script.src = url
