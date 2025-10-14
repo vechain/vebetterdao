@@ -167,6 +167,7 @@ export const ProposalSupportModal = ({
       showCloseButton
       isCloseable
       ariaTitle="Support this grant"
+      modalProps={{ size: "md" }}
       isOpen={isSupportModalOpen && !isTxModalOpen}
       onClose={onClose}>
       <VStack w="full" align="stretch" gap={6}>
