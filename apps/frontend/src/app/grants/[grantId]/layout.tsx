@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { ResolvingMetadata, Metadata } from "next"
 
 import { decodeEventLog } from "@/api/contracts/governance/getEvents"

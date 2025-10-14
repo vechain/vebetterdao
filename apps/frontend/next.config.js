@@ -14,12 +14,14 @@ const nextConfig = {
       "@chakra-ui/react",
       "@vechain/vebetterdao-contracts/*",
       "react-icons",
+      "react-icons/bs",
       "react-icons/fa",
       "react-icons/fa6",
       "react-icons/md",
       "react-icons/io",
       "react-icons/io5",
       "iconoir-react",
+      "react-hook-form",
     ],
     turbo: {
       rules: {
