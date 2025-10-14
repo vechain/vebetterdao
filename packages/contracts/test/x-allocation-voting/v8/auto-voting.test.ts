@@ -421,11 +421,11 @@ describe("AutoVoting - @shard14b", function () {
       await expect(voterRewards.connect(nonRelayer).claimReward(roundId, manualUser.address)).to.not.be.reverted
 
       // Early access period is still active
-      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.true
+      expect(await relayerRewardsPool.isClaimEarlyAccessActive(roundId)).to.be.true
 
       // Auto user cannot be claimed by non-relayer
       await expect(voterRewards.connect(nonRelayer).claimReward(roundId, autoUser.address)).to.be.revertedWith(
-        "RelayerRewardsPool: caller is not a registered relayer during early access period",
+        "RelayerRewardsPool: caller is not a registered relayer during claim early access period",
       )
 
       // Auto user can be claimed by registered relayer during early access period
@@ -458,11 +458,11 @@ describe("AutoVoting - @shard14b", function () {
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser.address, roundId)
       await waitForRoundToEnd(roundId)
 
-      // Set early access period to 5 blocks to make it expire quickly
-      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(5)
+      // Set early access period to 0 blocks to make it expire quickly
+      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(0)
 
       // Verify early access period has ended
-      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.false
+      expect(await relayerRewardsPool.isClaimEarlyAccessActive(roundId)).to.be.false
 
       // Auto user should now be able to claim their own rewards
       await expect(voterRewards.connect(autoUser).claimReward(roundId, autoUser.address)).to.not.be.reverted
@@ -630,6 +630,53 @@ describe("AutoVoting - @shard14b", function () {
 
       // Verify autovoting is disabled
       expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
+    })
+
+    it("should correctly report claim early access status throughout round lifecycle", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await endorseApp(app1Id, otherAccounts[0])
+
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+
+      const autoUser = user1
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      await xAllocationVoting.connect(autoUser).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(autoUser).toggleAutoVoting(autoUser.address)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // During round - both vote and claim early access should be active
+      expect(await relayerRewardsPool.isVoteEarlyAccessActive(roundId)).to.be.true
+      expect(await relayerRewardsPool.isClaimEarlyAccessActive(roundId)).to.be.true
+
+      // Cast auto vote and wait for round to end
+      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser.address, roundId)
+      await waitForRoundToEnd(roundId)
+
+      // After round ends
+      expect(await relayerRewardsPool.isClaimEarlyAccessActive(roundId)).to.be.true
+
+      // Set early access to 5 blocks and mine past it
+      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(5)
+      for (let i = 0; i < 6; i++) {
+        await ethers.provider.send("evm_mine", [])
+      }
+
+      // After claim early access expires - both should be false
+      expect(await relayerRewardsPool.isVoteEarlyAccessActive(roundId)).to.be.false
+      expect(await relayerRewardsPool.isClaimEarlyAccessActive(roundId)).to.be.false
+
+      // Reset to default
+      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(432000)
     })
   })
 
@@ -1141,7 +1188,7 @@ describe("AutoVoting - @shard14b", function () {
       const roundId = await xAllocationVoting.currentRoundId()
 
       // Early access period is still active
-      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.true
+      expect(await relayerRewardsPool.isVoteEarlyAccessActive(roundId)).to.be.true
 
       // Non-relayer cannot vote on behalf during early access
       await expect(
@@ -1168,13 +1215,13 @@ describe("AutoVoting - @shard14b", function () {
       const roundId = await xAllocationVoting.currentRoundId()
 
       // Early access period is still active
-      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.true
+      expect(await relayerRewardsPool.isVoteEarlyAccessActive(roundId)).to.be.true
 
       // Auto-voting user cannot vote for themselves during early access period
       await expect(
         xAllocationVoting.connect(autoUser).castVoteOnBehalfOf(autoUser.address, roundId),
       ).to.be.revertedWith(
-        "RelayerRewardsPool: auto-voting users cannot perform actions for themselves during early access period",
+        "RelayerRewardsPool: auto-voting users cannot vote for themselves during early access period",
       )
 
       // Registered relayer CAN vote on behalf of auto-voting user
@@ -1200,7 +1247,7 @@ describe("AutoVoting - @shard14b", function () {
       await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(0)
 
       // Verify early access period has ended
-      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.false
+      expect(await relayerRewardsPool.isVoteEarlyAccessActive(roundId)).to.be.false
 
       // Auto-voting user should now be able to vote for themselves after early access
       await expect(xAllocationVoting.connect(autoUser).castVoteOnBehalfOf(autoUser.address, roundId)).to.not.be.reverted
@@ -1301,6 +1348,45 @@ describe("AutoVoting - @shard14b", function () {
       expect(await relayerRewardsPool.completedWeightedActions(round3)).to.equal(
         await relayerRewardsPool.totalRelayerWeightedActions(relayer1.address, round3),
       )
+    })
+
+    it("should not emit TotalAutoVotingActionsSet event when starting a new round and no users have auto-voting enabled", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      // Start a cycle with NO auto-voting users
+      await waitForNextCycle(emissions)
+      const tx = await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Verify event is NOT emitted
+      await expect(tx).to.not.emit(relayerRewardsPool, "TotalAutoVotingActionsSet")
+
+      // Verify no actions were set for the round
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(0)
+      expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(0)
+
+      // Now enable auto-voting for one user
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
+
+      // Start new cycle - NOW it should emit
+      await waitForNextCycle(emissions)
+      const tx2 = await emissions.connect(minterAccount).distribute()
+      const roundId2 = await xAllocationVoting.currentRoundId()
+
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+
+      // Verify event IS emitted this time
+      await expect(tx2)
+        .to.emit(relayerRewardsPool, "TotalAutoVotingActionsSet")
+        .withArgs(roundId2, 1, 2, voteWeight + claimWeight, 0) // 1 user, 2 actions, weighted actions, 0 relayers
+
+      expect(await relayerRewardsPool.totalActions(roundId2)).to.equal(2)
+      expect(await relayerRewardsPool.totalWeightedActions(roundId2)).to.equal(voteWeight + claimWeight)
     })
   })
 

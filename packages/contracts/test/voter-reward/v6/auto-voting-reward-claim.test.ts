@@ -230,7 +230,7 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       // User claims their own rewards
       await expect(voterRewards.connect(user).claimReward(roundId, user.address)).to.be.revertedWith(
-        "RelayerRewardsPool: auto-voting users cannot perform actions for themselves during early access period",
+        "RelayerRewardsPool: auto-voting users cannot claim for themselves during early access period",
       )
     })
 
