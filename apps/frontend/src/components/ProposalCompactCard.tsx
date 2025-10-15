@@ -1,28 +1,25 @@
 import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
+import NextLink from "next/link"
 import React, { useMemo } from "react"
-import { ProposalMetadata, useProposalInteractionDates } from "@/api"
-import { useIpfsMetadata } from "@/api/ipfs"
-import { toIPFSURL } from "@/utils"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
-import dayjs from "dayjs"
-import { useWallet } from "@vechain/vechain-kit"
+
+import { useProposalInteractionDates } from "../api/contracts/governance/hooks/useProposalInteractionDates"
+import { ProposalEnriched, ProposalState } from "../hooks/proposals/grants/types"
+
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
-import NextLink from "next/link"
-import { ProposalEnriched, ProposalState } from "@/hooks"
 
 type Props = {
   proposal: ProposalEnriched
   proposalState?: ProposalState
 }
-
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
-  const { id: proposalId, ipfsDescription } = proposal
-  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(ipfsDescription))
+  const { id: proposalId, title: proposalTitle } = proposal
   const { supportEndDate } = useProposalInteractionDates(proposalId)
-
   const { t } = useTranslation()
 
   const proposalExtraInfo = useMemo(() => {
@@ -71,21 +68,14 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
             <Card.Body p="0">
               <HStack justifyContent={"space-between"} w="full">
                 <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
-                  <ProposalStatusBadge proposalId={proposal.id} proposalState={proposalState} />
+                  <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
                   <VStack w="full" gap="1" align={"flex-start"}>
-                    <Skeleton
-                      loading={proposalMetadata.isLoading}
-                      lineClamp={3}
-                      flex={2.5}
-                      mr={{ base: 0, md: 10 }}
-                      alignSelf={"flex-start"}>
-                      <VStack alignItems="flex-start">
-                        <Text textStyle={"sm"} fontWeight="semibold">
-                          {proposalMetadata.data?.title}
-                        </Text>
-                        {proposalExtraInfo}
-                      </VStack>
-                    </Skeleton>
+                    <VStack alignItems="flex-start">
+                      <Text textStyle={"sm"} fontWeight="semibold">
+                        {proposalTitle}
+                      </Text>
+                      {proposalExtraInfo}
+                    </VStack>
                   </VStack>
                 </VStack>
                 <IconButton aria-label="Go to proposal" variant="ghost">

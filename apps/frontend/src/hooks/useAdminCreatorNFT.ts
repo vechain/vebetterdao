@@ -1,15 +1,15 @@
-import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { getConfig } from "@repo/config"
 import { X2EarnCreator__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { getConfig } from "@repo/config"
 import { useCallback, useMemo } from "react"
-import { useBuildTransaction } from "./useBuildTransaction"
+
+import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { buildClause } from "@/utils/buildClause"
 
+import { useBuildTransaction } from "./useBuildTransaction"
+
 const X2EarnCreatorNftInterface = X2EarnCreator__factory.createInterface()
-
 type Props = { walletAddress: string; tokenId: string; onSuccess?: () => void; invalidateCache?: boolean }
-
 /**
  *  Hook to mint or burn creator NFT
  * @param walletAddress address of the wallet
@@ -19,7 +19,6 @@ type Props = { walletAddress: string; tokenId: string; onSuccess?: () => void; i
  */
 export const useAdminCreatorNFT = ({ walletAddress, tokenId, onSuccess }: Props) => {
   const { account: signerAccount } = useWallet()
-
   const buildMintClause = useCallback(() => {
     return [
       buildClause({
@@ -31,7 +30,6 @@ export const useAdminCreatorNFT = ({ walletAddress, tokenId, onSuccess }: Props)
       }),
     ] as EnhancedClause[]
   }, [walletAddress])
-
   const buildBurnClause = useCallback(() => {
     return [
       buildClause({
@@ -43,7 +41,6 @@ export const useAdminCreatorNFT = ({ walletAddress, tokenId, onSuccess }: Props)
       }),
     ] as EnhancedClause[]
   }, [tokenId])
-
   const refetchQueryKeys = useMemo(() => {
     return [getHasCreatorNFTQueryKey(walletAddress), getHasCreatorNFTQueryKey(signerAccount?.address ?? "")]
   }, [walletAddress, signerAccount])

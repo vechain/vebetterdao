@@ -1,7 +1,10 @@
-import { XApp, useXAppMetadata } from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
 import { HStack, Text, Skeleton, Image, CheckboxCard } from "@chakra-ui/react"
+
+import { XApp } from "../../../../../../../api/contracts/xApps/getXApps"
+import { useXAppMetadata } from "../../../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../../../api/ipfs/hooks/useIpfsImage"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 type Props = {
   app: XApp

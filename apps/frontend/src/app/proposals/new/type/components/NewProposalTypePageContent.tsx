@@ -1,14 +1,16 @@
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
+import { TFunction } from "i18next"
 import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useState } from "react"
-import { CheckableCard, CheckableCardProps } from "@/components"
-import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
-import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
-import { TFunction } from "i18next"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
 import { v4 as uuid } from "uuid"
+
+import { CheckableCard, CheckableCardProps } from "../../../../../components/CheckableCard/CheckableCard"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "../../../../../constants/AnalyticsEvents"
+import { useProposalFormStore } from "../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
+
 export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
 })[] = t => [
@@ -33,7 +35,6 @@ export const NewProposalTypePageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const pageGuardResult = useNewProposalPageGuard()
-
   const { clearData } = useProposalFormStore()
   const [selectedRoute, setSelectedRoute] = useState<string>(Steps(t)[0]?.route as string)
   const onChange = useCallback(
@@ -42,7 +43,6 @@ export const NewProposalTypePageContent = () => {
     },
     [],
   )
-
   const onContinue = useCallback(() => {
     if (selectedRoute) {
       clearData()

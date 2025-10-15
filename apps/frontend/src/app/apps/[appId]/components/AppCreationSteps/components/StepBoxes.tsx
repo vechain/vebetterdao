@@ -1,7 +1,10 @@
-import { Handshake, SignIcon, VoteCheckmarkIcon } from "@/components"
-import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types"
 import { Circle, Heading, HStack, Stack, Text, VStack } from "@chakra-ui/react"
 import { UilCheck } from "@iconscout/react-unicons"
+
+import { Handshake } from "../../../../../../components/Icons/Handshake"
+import { SignIcon } from "../../../../../../components/Icons/SignIcon"
+import { VoteCheckmarkIcon } from "../../../../../../components/Icons/VoteCheckmarkIcon"
+import { XAppsCreationSteps, XAppsCreationStepStatus } from "../../../../../../types/appDetails"
 
 type StepBoxesProps = {
   title: string
@@ -15,13 +18,11 @@ const statusIcon = {
   [XAppsCreationStepStatus.ACTIVE]: <Circle size="80%" bg="#004CFC" />,
   [XAppsCreationStepStatus.COMPLETED]: <UilCheck size={20} color="#004CFC" />,
 }
-
 const stepIcon = {
   [XAppsCreationSteps.SUBMISSION]: SignIcon,
   [XAppsCreationSteps.ENDORSEMENT]: Handshake,
   [XAppsCreationSteps.ALLOCATION]: VoteCheckmarkIcon,
 }
-
 export const StepBoxes = ({
   stepText,
   title,
@@ -32,7 +33,6 @@ export const StepBoxes = ({
   const borderColor = status === XAppsCreationStepStatus.ACTIVE ? "#004CFC" : "transparent"
   const IconComponent = stepIcon[type]
   const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "black"
-
   return (
     <Stack
       minW={["60vw", "45vw", "15vw", "5vw"]}

@@ -1,13 +1,15 @@
 import { Button, Circle, Icon, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { UserB3trActions, useXApps } from "@/api"
-import dayjs from "dayjs"
-import { TbLeaf } from "react-icons/tb"
-import { useTranslation } from "react-i18next"
-import { ActionModal } from "./components/ActionModal"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import dayjs from "dayjs"
+import { useTranslation } from "react-i18next"
+import { TbLeaf } from "react-icons/tb"
+
+import { useXApps } from "../../../../api/contracts/xApps/hooks/useXApps"
+import { UserB3trActions } from "../../../../api/indexer/actions/useUsersB3trActions"
+
+import { ActionModal } from "./components/ActionModal"
 
 const compactFormatter = getCompactFormatter(2)
-
 type Props = {
   appId?: string
   blockNumber?: number
@@ -15,17 +17,13 @@ type Props = {
   amountB3tr?: number
   proof?: UserB3trActions[number]["proof"]
 }
-
 export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3tr, proof }: Props) => {
   const { data: apps } = useXApps()
   const { t } = useTranslation()
-
   const getAppName = (appId: string) => {
     return apps?.allApps.find(app => app.id === appId)?.name ?? ""
   }
-
   const actionModal = useDisclosure()
-
   return (
     <>
       <Button
@@ -44,7 +42,6 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
         <Circle size={10} bg="brand.secondary-strong">
           <Icon as={TbLeaf} color="brand.secondary" boxSize={4} />
         </Circle>
-
         <VStack gap={0} alignItems="flex-start" flex={1}>
           <HStack gap={1} flexWrap={"wrap"}>
             <Text textStyle={"sm"}>{t("Better action on")}</Text>

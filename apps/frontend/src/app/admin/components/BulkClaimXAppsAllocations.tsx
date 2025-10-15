@@ -1,23 +1,20 @@
-import {
-  useAllocationsRound,
-  useCurrentAllocationsRoundId,
-  useHaveXAppsClaimed,
-  useMultipleXAppRoundEarnings,
-  useRoundXApps,
-} from "@/api"
-import { useClaimXAppsAllocations } from "@/hooks"
 import { VStack, Button, Field, InputGroup, Input, Heading, Text, NumberInput, Card } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useHaveXAppsClaimed } from "../../../api/contracts/xAllocationPool/hooks/useHaveXAppsClaimed"
+import { useMultipleXAppRoundEarnings } from "../../../api/contracts/xAllocationPool/hooks/useMultipleXAppRoundEarnings"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useRoundXApps } from "../../../api/contracts/xApps/hooks/useRoundXApps"
+import { useClaimXAppsAllocations } from "../../../hooks/useClaimXAppsAllocations"
+
 export const BulkClaimXAppsAllocations = () => {
   const [roundId, setRoundId] = useState<string>("1")
   const { t } = useTranslation()
-
   const { data: xApps } = useRoundXApps(roundId?.toString() ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
-
   // Calculate total amount that is avaialble to claim in this round
   const { data: totalAmounts = [] } = useMultipleXAppRoundEarnings(
     roundId?.toString() ?? "",
@@ -26,7 +23,6 @@ export const BulkClaimXAppsAllocations = () => {
   const total = useMemo(() => {
     return totalAmounts.reduce((acc, cur) => acc + parseInt(cur?.amount ?? "0"), 0)
   }, [totalAmounts])
-
   // Retrieve all apps that have claimed for the round and the ones that still needs to claim
   const { data: claims } = useHaveXAppsClaimed(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
   const allClaimed = useMemo(() => {
@@ -35,7 +31,6 @@ export const BulkClaimXAppsAllocations = () => {
   const xAppsLeft = useMemo(() => {
     return xApps?.filter(app => !claims?.find(claim => claim?.appId === app.id)?.claimed)
   }, [claims, xApps])
-
   // Calculate remaining amount to claim excluding already claimed
   const { data: remainingAmounts = [] } = useMultipleXAppRoundEarnings(
     roundId?.toString() ?? "",
@@ -44,7 +39,6 @@ export const BulkClaimXAppsAllocations = () => {
   const amountToClaim = useMemo(() => {
     return remainingAmounts?.reduce((acc, cur) => acc + parseInt(cur?.amount ?? "0"), 0)
   }, [remainingAmounts])
-
   // Handle submitting the transaction
   const { sendTransaction, isTransactionPending, status } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",

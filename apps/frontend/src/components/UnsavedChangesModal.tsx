@@ -7,18 +7,14 @@ interface UnsavedChangesModalProps {
   onSaveDraft: () => void
   onLeaveAnyway: () => void
 }
-
 export const UnsavedChangesModal = ({ isOpen, onClose, onSaveDraft, onLeaveAnyway }: UnsavedChangesModalProps) => {
   const { t } = useTranslation()
-
   const handleSaveDraft = () => {
     onSaveDraft()
   }
-
   const handleLeaveAnyway = () => {
     onLeaveAnyway()
   }
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={() => onClose()}>
       <Dialog.Backdrop />

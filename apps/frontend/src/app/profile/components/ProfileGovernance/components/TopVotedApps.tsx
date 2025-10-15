@@ -1,7 +1,9 @@
-import { AppVotesGiven } from "@/api"
 import { HStack, VStack, Text, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
+
+import { AppVotesGiven } from "../../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
+
 import { AppVotedBox } from "./AppVotedBox"
 
 type Props = {
@@ -9,10 +11,8 @@ type Props = {
   isMoreTopVotedApps: boolean
   onSeeAllAppsVoted?: () => void
 }
-
 export const TopVotedApps = ({ votedApps, isMoreTopVotedApps, onSeeAllAppsVoted }: Props) => {
   const { t } = useTranslation()
-
   return (
     <Card.Root w={"full"} variant="primary">
       <Card.Body>

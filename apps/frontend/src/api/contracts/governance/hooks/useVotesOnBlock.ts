@@ -1,12 +1,11 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { ethers } from "ethers"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress
 const method = "getVotes" as const
-
 export const getVotesOnBlockQueryKey = (userAddress: string, blockNumber: number) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -14,7 +13,6 @@ export const getVotesOnBlockQueryKey = (userAddress: string, blockNumber: number
     method,
     args: [userAddress as `0x${string}`, BigInt(blockNumber)],
   })
-
 /**
  *  Hook to get the number of votes of the given address (with deciamls removed)  - includes the delegated ones
  * @returns the number of votes of the given address (with deciamls removed)  - includes the delegated ones

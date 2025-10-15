@@ -6,11 +6,9 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
-
 const getSafePercentage = (value: number) => {
   return isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100)
 }
-
 type Props = {
   quorumQuery: UseQueryResult<string, unknown>
   currentVotesQuery: UseQueryResult<string, unknown>
@@ -19,30 +17,24 @@ type Props = {
 }
 export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, showQuorumNeeded = true }: Props) => {
   const { t } = useTranslation()
-
   const isQuorumReached = useMemo(() => {
     if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
       return false
     }
     return Number(currentVotesQuery.data) >= Number(quorumQuery.data)
   }, [quorumQuery.data, currentVotesQuery.data])
-
   const votesToQuorumPercentage = useMemo(() => {
     if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
       return 0
     }
     return (Number(currentVotesQuery.data) / Number(quorumQuery.data)) * 100
   }, [quorumQuery.data, currentVotesQuery.data])
-
   const stateColor = useMemo(() => {
     if (isQuorumReached) return "status.positive.primary"
-
     if (isEnded) return "status.negative.primary"
     return "status.info.primary"
   }, [isQuorumReached, isEnded])
-
   const isEndedAndQuorumNotReached = isEnded && !isQuorumReached
-
   return (
     <VStack align="stretch">
       <Text color="text.subtle" textStyle="sm">

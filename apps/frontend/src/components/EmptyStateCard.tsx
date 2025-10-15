@@ -14,7 +14,6 @@ interface EmptyStateRootProps {
     onClick: () => void
   } & Omit<ButtonProps, "children" | "onClick">
 }
-
 interface EmptyStateCardProps extends EmptyStateRootProps {
   /** EmptyState.Root props - size, py, and all other Chakra props */
   rootProps?: React.ComponentProps<typeof EmptyState.Root>
@@ -29,7 +28,6 @@ interface EmptyStateCardProps extends EmptyStateRootProps {
   /** EmptyState.Description props */
   descriptionProps?: React.ComponentProps<typeof EmptyState.Description>
 }
-
 export const EmptyStateCard = ({
   icon,
   title,
@@ -43,7 +41,6 @@ export const EmptyStateCard = ({
   descriptionProps = {},
 }: EmptyStateCardProps) => {
   const { label, onClick, ...buttonProps } = action || {}
-
   return (
     <EmptyState.Root size="lg" py={16} {...rootProps}>
       <EmptyState.Content {...contentProps}>

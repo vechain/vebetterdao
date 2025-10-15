@@ -1,35 +1,33 @@
-import { WalletAddressInput } from "@/app/components/Input"
-import { BaseModal } from "@/components/BaseModal"
-import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
 import { UseDisclosureReturn, VStack, Heading, Box, Text, Field, Button } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
+import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
+import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useCallback } from "react"
+
+import { WalletAddressInput } from "../../../../../../components/Input/WalletAddressInput"
+
 type FormData = {
   accountToConnect: string
 }
-
 export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
   const { t } = useTranslation()
   const { handleSubmit, setValue, watch } = useForm<FormData>()
   const { isTxModalOpen } = useTransactionModal()
   const accountToConnect = watch("accountToConnect")
   const { open: isOpen = false, onClose } = modal
-
   const handleClose = useCallback(() => {
     onClose?.()
   }, [onClose])
-
   const linkEntityToPassport = useLinkEntityToPassport({
     onSuccess: handleClose,
   })
-
   const onSubmit = (data: FormData) => {
     linkEntityToPassport.sendTransaction({ passport: data.accountToConnect })
   }
-
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>

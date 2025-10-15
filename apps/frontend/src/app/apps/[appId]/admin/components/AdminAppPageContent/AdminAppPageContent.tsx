@@ -1,27 +1,28 @@
 import { Button, Card, Separator, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
-import {
-  useCurrentAppAdmin,
-  useCurrentAppCreators,
-  useCurrentAppMetadata,
-  useCurrentAppModerators,
-  useCurrentAppRewardDistributors,
-} from "../../../hooks"
-import { useTranslation } from "react-i18next"
-import { EditAppModerators } from "./components/EditAppModerators"
-import { EditAppAddresses } from "./components/EditAppAddresses"
-import { useForm } from "react-hook-form"
-import { useCallback, useEffect, useMemo, useRef } from "react"
-import { useRouter } from "next/navigation"
-import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
-import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
 import { useWallet } from "@vechain/vechain-kit"
-import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
-import { useAccountPermissions } from "@/api/contracts/account"
-import { EditAppCreatorNFT } from "./components/EditAppCreatorNFT"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useRef } from "react"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
+
+import { useAccountPermissions } from "../../../../../../api/contracts/account/hooks/useAccountPermissions"
+import { useCurrentAppAdmin } from "../../../hooks/useCurrentAppAdmin"
+import { useCurrentAppCreators } from "../../../hooks/useCurrentAppCreators"
+import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
+import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
+import { useCurrentAppModerators } from "../../../hooks/useCurrentAppModerators"
+import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
 import { useCurrentAppSignalers } from "../../../hooks/useCurrentAppSignalers"
-import { EditAppSignalers } from "./components/EditAppSignalers"
+
+import { EditAppAddresses } from "./components/EditAppAddresses/EditAppAddresses"
+import { EditAppCreatorNFT } from "./components/EditAppCreatorNFT/EditAppCreatorNFT"
+import { EditAppModerators } from "./components/EditAppModerators/EditAppModerators"
+import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors/EditAppRewardDistributors"
+import { EditAppSignalers } from "./components/EditAppSignalers/EditAppSignalers"
+import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 
 export type AdminAppForm = {
   adminAddress: string
@@ -31,14 +32,11 @@ export type AdminAppForm = {
   distributors: string[]
   signalers: string[]
 }
-
 export const AdminAppPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
-
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address || "")
-
   const { admin } = useCurrentAppAdmin()
   const { moderators } = useCurrentAppModerators()
   const { creators } = useCurrentAppCreators()

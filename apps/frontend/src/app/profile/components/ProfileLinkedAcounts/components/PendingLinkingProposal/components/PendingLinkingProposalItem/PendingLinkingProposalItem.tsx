@@ -1,11 +1,13 @@
 import { Stack, HStack, VStack, Text, Button, Badge, useDisclosure } from "@chakra-ui/react"
-import { AddressIcon } from "@/components/AddressIcon"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
+
+import { AddressIcon } from "@/components/AddressIcon"
+
 import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
 import { RejectLinkingModal } from "./components/RejectLinkingModal"
-import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = { isConnectedUser: boolean; secondaryAccount: string }
 export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }: Props) => {

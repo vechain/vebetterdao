@@ -1,23 +1,21 @@
 "use client"
 import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
-import { MobileNavBar } from "./MobileNavbar"
-import { DesktopNavBar } from "./DesktopNavbar"
-import { useAllocationsRoundsEvents } from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account"
-import { useHideOnScroll } from "@/hooks"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
-import { Routes } from "./Routes"
 
+import { useAccountPermissions } from "../../api/contracts/account/hooks/useAccountPermissions"
+import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { useHideOnScroll } from "../../hooks/useHideOnScroll"
+
+import { DesktopNavBar } from "./DesktopNavbar"
+import { MobileNavBar } from "./MobileNavbar"
+import { Routes } from "./Routes"
 export const Navbar: React.FC = () => {
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
-
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
-
   const isNavbarVisible = useHideOnScroll()
-
   // Filter routes based on user's role and if there are any allocation rounds
   const routesToRender = useMemo(
     () =>
@@ -32,12 +30,10 @@ export const Navbar: React.FC = () => {
       }),
     [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
   )
-
   const parsedRoutesToRender = useMemo(() => {
     if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []
     return routesToRender
   }, [routesToRender])
-
   return (
     <Box
       bg="bg.secondary"

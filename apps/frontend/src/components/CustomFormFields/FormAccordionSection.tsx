@@ -5,7 +5,6 @@ export type FormAccordionSectionProps = {
   customTitle?: React.ReactNode
   children: React.ReactNode
 }
-
 export const FormAccordionSection = ({ title, customTitle, children }: FormAccordionSectionProps) => {
   return (
     <Accordion.Item borderTop="none" value={title || "section"}>

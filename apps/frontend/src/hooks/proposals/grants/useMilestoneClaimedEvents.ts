@@ -1,12 +1,12 @@
-import { useMemo } from "react"
-import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 import { formatEther } from "ethers"
+import { useMemo } from "react"
+
+import { useEvents } from "../../useEvents"
 
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 const abi = GrantsManager__factory.abi
-
 export type MilestoneClaimedEvent = {
   proposalId: string
   milestoneIndex: number
@@ -15,7 +15,6 @@ export type MilestoneClaimedEvent = {
   blockTimestamp: number
   blockNumber: number
 }
-
 export const useMilestoneClaimedEvents = () => {
   const milestoneClaimedEvents = useEvents({
     contractAddress: grantsManagerAddress,
@@ -30,15 +29,12 @@ export const useMilestoneClaimedEvents = () => {
       blockNumber: response.meta.blockNumber,
     }),
   })
-
   // Group claimed events by proposal ID for easy lookup
   const claimedAmountsByProposal = useMemo(() => {
     const grouped: Record<string, { totalClaimed: string; events: MilestoneClaimedEvent[] }> = {}
-
     if (!milestoneClaimedEvents.data) {
       return grouped
     }
-
     milestoneClaimedEvents.data.forEach(event => {
       if (!grouped[event.proposalId]) {
         grouped[event.proposalId] = {
@@ -46,7 +42,6 @@ export const useMilestoneClaimedEvents = () => {
           events: [],
         }
       }
-
       const proposalGroup = grouped[event.proposalId]
       if (proposalGroup) {
         proposalGroup.events.push(event)

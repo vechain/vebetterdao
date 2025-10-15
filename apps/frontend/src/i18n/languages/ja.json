@@ -1994,5 +1994,18 @@
   "Created": "作成済み",
   "You have been signalled by": "あなたは以下の方からシグナルされました。",
   "You have reached the maximum GM NFT level.": "最大のGM NFTレベルに達しました。",
-  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "アプリから承認を削除すると、配分の対象に選ばれなくなる可能性があります。"
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "アプリから承認を削除すると、配分の対象に選ばれなくなる可能性があります。",
+  "Current Status": "現在のステータス",
+  "Status After Transaction": "取引後のステータス",
+  "Reset Form": "フォームをリセット",
+  "Apps eligible in next round": "次回に該当するアプリ",
+  "App not found": "アプリが見つかりません",
+  "Confirm Eligibility Change": "適格性の変更を確認",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "次のラウンドで<b>'{{appName}}'</b> を<b>{{status}}</b>にしますか？",
+  "eligible": "適格",
+  "ineligible": "不適格",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "これにより、ID {{appId}} の{{appName}} は次のラウンドで{{status}}になります。",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達しました",
+  "Uploading...": "アップロード中...",
+  "Stored": "保存済み"
 }

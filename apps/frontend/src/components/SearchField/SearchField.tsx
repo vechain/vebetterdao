@@ -8,7 +8,6 @@ interface SearchFieldProps {
   disabled?: boolean
   inputProps?: InputProps
 }
-
 export const SearchField = ({ placeholder = "Search", value, onChange, disabled, inputProps }: SearchFieldProps) => {
   return (
     <InputGroup flex="1" startElement={<LuSearch />}>

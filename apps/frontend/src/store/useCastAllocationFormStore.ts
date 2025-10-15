@@ -6,14 +6,12 @@ export type CastAllocationVoteFormData = {
   value: string | number
   rawValue: number
 }
-
 export type CastAllocationFormStoreState = {
   data: CastAllocationVoteFormData[]
   setData: (_data: CastAllocationVoteFormData[]) => void
   clearData: () => void
   filterValidApps: (validAppIds: string[]) => void
 }
-
 /**
  * Store for the multi-step proposal form data
  */

@@ -1,5 +1,6 @@
-import { TogglePassportCheck } from "@/constants"
-import { useIsPassportCheckEnabled } from "."
+import { TogglePassportCheck } from "../../../../constants/Passport"
+
+import { useIsPassportCheckEnabled } from "./useIsPassportCheckEnabled"
 
 /**
  * Hook to get the status of all passport checks
@@ -13,7 +14,6 @@ export const usePassportChecks = () => {
     TogglePassportCheck.ParticipationScoreCheck,
   )
   const { data: isGMOwnershipCheckEnabled } = useIsPassportCheckEnabled(TogglePassportCheck.GmOwnershipCheck)
-
   return {
     isWhiteListCheckEnabled,
     isBlackListCheckEnabled,

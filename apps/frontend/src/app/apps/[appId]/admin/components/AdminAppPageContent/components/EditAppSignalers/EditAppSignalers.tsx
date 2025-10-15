@@ -1,9 +1,11 @@
 import { Heading, Text, VStack } from "@chakra-ui/react"
+import { useCallback } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../../AdminAppPageContent"
+
 import { AddSignalerButton } from "./components/AddSignalerButton"
-import { useCallback } from "react"
 import { SignalerItem } from "./components/SignalerItem"
 
 interface Props {
@@ -12,7 +14,6 @@ interface Props {
 export const EditAppSignalers = ({ form }: Props) => {
   const { t } = useTranslation()
   const signalers = form.watch("signalers")
-
   const handleDeleteSignaler = useCallback(
     (index: number) => () =>
       form.setValue(
@@ -21,7 +22,6 @@ export const EditAppSignalers = ({ form }: Props) => {
       ),
     [form, signalers],
   )
-
   return (
     <VStack align="stretch">
       <Heading size="2xl">{t("Signalers")}</Heading>

@@ -1,29 +1,27 @@
-import { BaseModal } from "@/components/BaseModal"
 import { Heading, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue, Text } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle } from "@/components"
-import { useRevokeXNodeDelegation } from "@/hooks"
-import { UserNode } from "@/api"
+import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
+import { useRevokeXNodeDelegation } from "../../../../../hooks/useRevokeXNodeDelegation"
 
 export const RevokeXNodeDelegationModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { open = false, onClose } = modal
   const isXNodeAttachedToGM = !!xNode?.gmTokenIdAttachedToNode
-
   const handleClose = useCallback(() => {
     onClose?.()
   }, [onClose])
-
   const revokeXNodeDelegation = useRevokeXNodeDelegation({ xNode, onSuccess: handleClose })
   const handleRevoke = useCallback(() => {
     revokeXNodeDelegation.sendTransaction({ isAttachedToGM: isXNodeAttachedToGM })
   }, [revokeXNodeDelegation, isXNodeAttachedToGM])
-
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
-
   return (
     <BaseModal onClose={handleClose} isOpen={open && !isTxModalOpen}>
       <VStack align="stretch" gap={6}>

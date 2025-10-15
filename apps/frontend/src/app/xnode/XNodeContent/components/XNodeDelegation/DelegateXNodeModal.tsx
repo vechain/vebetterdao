@@ -1,6 +1,3 @@
-import { UserNode } from "@/api"
-import { ExclamationTriangle } from "@/components"
-import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import {
   Alert,
   Box,
@@ -18,27 +15,28 @@ import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
+import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { StepModal, type Step } from "@/components/StepModal"
+
+import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
+import { Step, StepModal } from "../../../../../components/StepModal/StepModal"
 
 type FormData = {
   walletAddress: string
 }
-
 enum DelegateXNodeStep {
   ENTER_ADDRESS = "ENTER_ADDRESS",
   CONFIRM_DELEGATION = "CONFIRM_DELEGATION",
 }
-
 const STEP_COUNT = Object.keys(DelegateXNodeStep).length
-
 export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { account } = useWallet()
   const { open: isOpen = false, onClose } = modal
   const isXNodeAttachedToGM = !!xNode?.gmTokenIdAttachedToNode
-
   const [step, setStep] = useState(0)
   const goToNext = useCallback(() => {
     const nextStep = step + 1

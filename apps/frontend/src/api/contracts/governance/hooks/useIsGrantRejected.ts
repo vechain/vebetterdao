@@ -5,7 +5,6 @@ import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-k
 const abi = GrantsManager__factory.abi
 const address = getConfig().grantsManagerContractAddress as `0x${string}`
 const method = "isGrantRejected" as const
-
 export const getIsGrantRejectedQueryKey = (proposalId: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -13,7 +12,6 @@ export const getIsGrantRejectedQueryKey = (proposalId: string) =>
     method,
     args: [BigInt(proposalId)],
   })
-
 export const useIsGrantRejected = (proposalId: string, enabled: boolean = false) => {
   return useCallClause({
     abi,

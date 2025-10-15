@@ -11,7 +11,6 @@ type FormCheckboxProps<T extends FieldValues> = {
   onBlur?: () => void
   rules?: RegisterOptions<T>
 }
-
 export const FormCheckbox = <T extends FieldValues>({
   label,
   name,

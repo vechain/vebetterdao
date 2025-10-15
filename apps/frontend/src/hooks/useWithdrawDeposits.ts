@@ -1,12 +1,10 @@
-import {
-  ProposalDeposit,
-  buildClaimDepositsTx,
-  getProposalUserDepositQueryKey,
-  getProposalClaimableUserDepositsQueryKey,
-} from "@/api"
-
-import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
+import { ProposalDeposit, buildClaimDepositsTx } from "../api/contracts/governance/utils/buildClaimDepositsTx"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
@@ -19,7 +17,6 @@ type useClaimRewardsProps = {
   onFailure?: () => void
   onSuccessMessageTitle?: string
 }
-
 /**
  * A custom React hook that enables a user to withdraw deposits associated with proposals.
  * The hook provides functionality to send transactions for withdrawing deposits and to optionally
@@ -33,22 +30,17 @@ type useClaimRewardsProps = {
  */
 export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: useClaimRewardsProps) => {
   const { account } = useWallet()
-
   const buildClauses = useCallback(() => {
     if (!account?.address) throw new Error("address is required")
-
     const clauses = buildClaimDepositsTx(proposalDeposits, account?.address ?? "")
-
     return clauses
   }, [account?.address, proposalDeposits])
-
   const refetchQueryKeys = useMemo(() => {
     const queryKeys = proposalDeposits.map(proposalDeposit =>
       getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
     )
     queryKeys.push(getProposalClaimableUserDepositsQueryKey(account?.address ?? ""))
     queryKeys.push(getVot3BalanceQueryKey(account?.address ?? ""))
-
     return queryKeys
   }, [account, proposalDeposits])
 

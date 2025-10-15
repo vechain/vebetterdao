@@ -1,14 +1,13 @@
 import { getConfig } from "@repo/config"
-import dayjs from "@/utils/dayjsConfig"
-import { ThorClient, XAppMetadata, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { ThorClient, XAppMetadata, executeMultipleClausesCall } from "@vechain/vechain-kit"
+
+import dayjs from "@/utils/dayjsConfig"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
-
 // Considering a new app is defined as 7 days
 const NEW_APP_PERIOD_SECONDS = dayjs.duration(7, "days").asSeconds()
-
 /**
  * xApp type
  * @property id - the xApp id
@@ -26,11 +25,9 @@ export type XApp = {
   createdAtTimestamp: string
   isNew: boolean
 }
-
 export type XAppWithMetadata = XApp & {
   metadata: XAppMetadata
 }
-
 /**
  * UnendorsedApp type
  * @property appAvailableForAllocationVoting - whether the app is available for allocation voting
@@ -38,9 +35,7 @@ export type XAppWithMetadata = XApp & {
 export type UnendorsedApp = XApp & {
   appAvailableForAllocationVoting?: boolean
 }
-
 export type AllApps = XApp | UnendorsedApp
-
 export type GetAllApps = {
   allApps: AllApps[]
   active: XApp[] // Historically active apps

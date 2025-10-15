@@ -11,12 +11,10 @@ import { useProposalEnriched } from "./useProposalEnriched"
  */
 export const useProposalEnrichedById = (proposalId: string) => {
   const { data: { enrichedProposals } = { enrichedProposals: [] }, isLoading } = useProposalEnriched()
-
   // Find the enriched proposal by ID using useMemo for performance
   const proposal = useMemo(() => {
     return enrichedProposals?.find(p => p.id === proposalId)
   }, [enrichedProposals, proposalId])
-
   return {
     data: proposal,
     isLoading,

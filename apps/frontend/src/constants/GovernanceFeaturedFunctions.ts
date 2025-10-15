@@ -1,27 +1,18 @@
+import { getConfig, getContractsConfig } from "@repo/config"
+import { EnvConfig } from "@repo/config/contracts"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
 import {
-  B3trContractJson,
   B3TRGovernorJson,
   TimeLockContractJson,
-  Vot3ContractJson,
-  XAllocationPoolJson,
   XAllocationVotingJson,
-  VoterRewardsContractJson,
-  GalaxyMemberContractJson,
-  EmissionsContractJson,
   TreasuryContractJson,
   X2EarnAppsJson,
-  TreasuryJson,
 } from "@vechain/vebetterdao-contracts"
-
-import { getConfig, getContractsConfig } from "@repo/config"
 import { abi } from "thor-devkit"
-import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
-import { ProposalFormAction } from "@/store"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { EnvConfig } from "@repo/config/contracts"
 
+import { ProposalFormAction } from "../store/useProposalFormStore"
 const config = getConfig()
-
 /**
  * Used in GovernanceFeaturedFunctions to display the function name and the parameters
  */
@@ -29,21 +20,6 @@ export type ExecutorAvailableContracts = {
   abi: JsonContractType
   address: string
 }
-
-export const governanceAvailableContracts: ExecutorAvailableContracts[] = [
-  { abi: B3trContractJson, address: config.b3trContractAddress },
-  { abi: TreasuryContractJson, address: config.treasuryContractAddress },
-  { abi: Vot3ContractJson, address: config.vot3ContractAddress },
-  { abi: B3TRGovernorJson, address: config.b3trGovernorAddress },
-  { abi: TimeLockContractJson, address: config.timelockContractAddress },
-  { abi: XAllocationPoolJson, address: config.xAllocationPoolContractAddress },
-  { abi: XAllocationVotingJson, address: config.xAllocationVotingContractAddress },
-  { abi: VoterRewardsContractJson, address: config.voterRewardsContractAddress },
-  { abi: GalaxyMemberContractJson, address: config.galaxyMemberContractAddress },
-  { abi: EmissionsContractJson, address: config.emissionsContractAddress },
-  { abi: TreasuryJson, address: config.treasuryContractAddress },
-]
-
 /**
  *  Get a function definition from the contract ABI using the function name
  * @param jsonContract  The contract ABI
@@ -55,7 +31,6 @@ export const getFunctionDefinitionFromAbi = (jsonContract: JsonContractType, fun
   if (!abiDefinition) throw new Error(`${functionName} not found in contract ${jsonContract.contractName}`)
   return abiDefinition
 }
-
 /**
  * Given a list of targets and calldatas, it returns a list of actions with the contract address, calldata, name, description and abiDefinition
  * @param targets The list of contract addresses

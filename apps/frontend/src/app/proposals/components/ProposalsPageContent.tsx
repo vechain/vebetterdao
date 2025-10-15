@@ -1,13 +1,3 @@
-import { useProposalClaimableUserDeposits } from "@/api"
-import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { GrantsProposalCard } from "@/app/grants/components"
-import { MobileFilterDrawer, SearchField, SelectField } from "@/components"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useBreakpoints, useDebounce } from "@/hooks"
-import { useProposalEnriched, useProposalSearch } from "@/hooks/proposals/common"
-import { ProposalEnriched } from "@/hooks/proposals/grants/types"
-import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
-import { AnalyticsUtils } from "@/utils"
 import {
   Grid,
   Card,
@@ -24,8 +14,27 @@ import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
+
+import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { useProposalClaimableUserDeposits } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/MobileFilterDrawer"
+import { SearchField } from "../../../components/SearchField/SearchField"
+import { SelectField } from "../../../components/SelectField/SelectField"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
+import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
+import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
+import { useBreakpoints } from "../../../hooks/useBreakpoints"
+import { useDebounce } from "../../../hooks/useDebounce"
+import { ProposalFilter, StateFilter, useProposalFilters } from "../../../store/useProposalFilters"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { GrantsProposalCard } from "../../grants/components/GrantsProposalCard"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
-import { ClaimDeposits, CreateProposalCard, NoProposalsCard, RequirementModal } from "./components"
+
+import { ClaimDeposits } from "./components/ClaimDeposits"
+import { CreateProposalCard } from "./components/CreateProposalCard"
+import { NoProposalsCard } from "./components/NoProposalsCard"
+import { RequirementModal } from "./components/RequirementModal"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -38,7 +47,6 @@ export const ProposalsPageContent = () => {
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
   const { hasMetProposalCriteria } = useMetProposalCriteria()
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
-
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)

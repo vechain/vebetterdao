@@ -1,17 +1,16 @@
-import { useAllocationPoolEvents } from "@/api"
 import { HStack, Heading, Image, Skeleton, Stat } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { ethers } from "ethers"
-import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { ethers } from "ethers"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useAllocationPoolEvents } from "../../../api/contracts/xAllocationPool/hooks/useAllocationPoolEvents"
 
 const compactFormatter = getCompactFormatter(2)
-
 export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
   const { t } = useTranslation()
   const { data, isLoading } = useAllocationPoolEvents()
-
   const appAllocations = useMemo(
     () =>
       data?.claimedRewards
@@ -33,7 +32,6 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
     () => Number(appAllocations[appAllocations.length - 2]?.scaledAmount) || 0,
     [appAllocations],
   )
-
   const percentageChange = useMemo(
     () =>
       // cannot divide by 0
@@ -42,7 +40,6 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
         : ((lastRoundAllocationReceived - secondLastRoundAllocationReceived) / secondLastRoundAllocationReceived) * 100,
     [lastRoundAllocationReceived, secondLastRoundAllocationReceived],
   )
-
   return (
     <Skeleton loading={isLoading} w={"full"}>
       <Stat.Root>

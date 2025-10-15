@@ -1,9 +1,9 @@
-import { notFoundImage } from "@/constants"
+const notFoundImage = "/assets/images/image-not-found.webp"
 import { Container, Heading, Image, Dialog, VStack, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
-import { useColorModeValue } from "@/components/ui/color-mode"
 
+import { useColorModeValue } from "@/components/ui/color-mode"
 type Props = {
   images: string[]
   isOpen: boolean
@@ -12,7 +12,6 @@ type Props = {
 export const AppScreenshotModal = ({ images, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const headerBg = useColorModeValue("white", "gray.700")
-
   return (
     <Dialog.Root size={"full"} open={isOpen} onOpenChange={details => !details.open && onClose()}>
       <Portal>

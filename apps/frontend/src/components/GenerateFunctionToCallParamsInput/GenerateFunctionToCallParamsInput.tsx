@@ -1,9 +1,10 @@
 import { Field, FieldLabelProps, Input, NativeSelect, InputProps } from "@chakra-ui/react"
-import { Control, Controller, FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
 import { AddressUtils } from "@repo/utils"
 import { useMemo } from "react"
-import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
+import { Control, Controller, FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
+import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
 
 /**
  * Represent a single parameter of the function to call in the smart contract
@@ -17,7 +18,6 @@ export type FunctionParamsField = {
   value: any
   requiresEthParse?: boolean
 }
-
 type Props = {
   actionIndex: number
   field: Omit<FunctionParamsField, "id">
@@ -30,7 +30,6 @@ type Props = {
   humanizeLabels?: boolean
   control: Control<ProposalFunctionFormData, any>
 }
-
 export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
   actionIndex,
   field,
@@ -44,7 +43,6 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
   control,
 }) => {
   const { t } = useTranslation()
-
   const label = useMemo(() => {
     //TODO: handle this with humanName field in the featured fucntion param itself
     if (humanizeLabels) {

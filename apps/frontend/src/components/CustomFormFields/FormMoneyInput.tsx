@@ -1,7 +1,8 @@
-import { MAX_DAPP_GRANT_AMOUNT } from "@/constants"
 import { Box, Field, HStack, Input, InputGroup, Text } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { UseFormRegisterReturn } from "react-hook-form"
+
+import { MAX_DAPP_GRANT_AMOUNT } from "../../constants/proposals"
 
 type FormMoneyInputProps = {
   label?: string
@@ -17,7 +18,6 @@ type FormMoneyInputProps = {
   initialValue?: number
   max?: number
 }
-
 /**
  * FormMoneyInput component for USD input with automatic token conversion
  *

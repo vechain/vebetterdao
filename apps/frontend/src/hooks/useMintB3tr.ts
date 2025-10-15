@@ -1,11 +1,14 @@
-import { getB3TrTokenDetailsQueryKey, buildMintB3trTx } from "@/api"
-
-import { useCallback, useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet, UseSendTransactionReturnValue, useThor } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { toaster } from "@/components/ui/toaster"
+
+import { getB3TrTokenDetailsQueryKey } from "../api/contracts/b3tr/hooks/useB3trTokenDetails"
+import { buildMintB3trTx } from "../api/contracts/b3tr/utils/buildMintB3trTx"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
-import { toaster } from "@/components/ui/toaster"
 
 type useMintB3trProps = {
   address?: string
@@ -22,20 +25,16 @@ type useMintB3trProps = {
 export const useMintB3tr = ({ address, amount, onSuccess }: useMintB3trProps): UseSendTransactionReturnValue => {
   const thor = useThor()
   const { account } = useWallet()
-
   const clauseBuilder = useCallback(() => {
     if (!address) throw new Error("address is required")
     if (!amount) throw new Error("amount is required")
-
     const clauses = buildMintB3trTx(thor, address, amount)
     return [clauses]
   }, [thor, address, amount])
-
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
     const formattedAddress = FormattingUtils.humanAddress(address ?? "")
-
     toaster.success({
       title: "Tokens minted succesfully",
       description: `You have minted ${formattedAmount} B3TR to ${formattedAddress}`,

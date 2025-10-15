@@ -1,46 +1,39 @@
-import { WalletAddressInput } from "@/app/components/Input"
-import { useUpdateXAppReceiverAddress } from "@/hooks"
 import { VStack, Button, Field, InputGroup, Input, Heading, NativeSelect, Card } from "@chakra-ui/react"
-import { useXApps } from "@/api"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useUpdateXAppReceiverAddress } from "../../../hooks/useUpdateXAppReceiverAddress"
+import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
 
 export const UpdateReceiverAddress = () => {
   const [appId, setAppId] = useState<string>("")
   const [newAddress, setNewAddress] = useState("")
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
-
   const { sendTransaction, isTransactionPending, status } = useUpdateXAppReceiverAddress({
     appId: appId ?? "",
     newAddress,
   })
   const isLoading = isTransactionPending || status === "pending"
-
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
-
       sendTransaction()
     },
     [sendTransaction],
   )
-
   const allApps = useMemo(() => [...(xApps?.active ?? []), ...(xApps?.unendorsed ?? [])], [xApps])
-
   const currentAddress = useMemo(() => {
     if (appId === undefined) return ""
     const app = allApps.find(item => item.id === appId)
     return app?.teamWalletAddress
   }, [appId, allApps])
-
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(newAddress)
   }, [newAddress])
-
   const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
-
   return (
     <Card.Root w={"full"}>
       <Card.Header>

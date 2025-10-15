@@ -1,9 +1,10 @@
 import { Alert, Card, Separator, Heading, VStack } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { ProposalQuorumStatus } from "./components/ProposalQuorumStatus"
-import { ProposalSessionVot3 } from "./components/ProposalSessionVot3"
-import { UseQueryResult } from "@tanstack/react-query"
 import { UilClock } from "@iconscout/react-unicons"
+import { UseQueryResult } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
+
+import { ProposalQuorumStatus } from "./components/ProposalQuorumStatus/ProposalQuorumStatus"
+import { ProposalSessionVot3 } from "./components/ProposalSessionVot3/ProposalSessionVot3"
 
 type Props = {
   quorumQuery: UseQueryResult<string, unknown>
@@ -22,7 +23,6 @@ type Props = {
   renderTimeline?: React.ReactNode
   showQuorumNeeded?: boolean
 }
-
 export const ProposalSessionSection = ({
   quorumQuery,
   currentVotesQuery,
@@ -34,7 +34,6 @@ export const ProposalSessionSection = ({
   showQuorumNeeded = true,
 }: Props) => {
   const { t } = useTranslation()
-
   return (
     <Card.Root variant="primary">
       <Card.Body>

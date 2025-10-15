@@ -1,5 +1,5 @@
-import { useTranslation } from "react-i18next"
 import { Dialog, Button, Text, VStack, Heading, Box, Portal, CloseButton, SimpleGrid, Icon } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
@@ -8,17 +8,14 @@ interface GetFreeNFTModalProps {
   onClose: () => void
   onCtaClick: () => void
 }
-
 export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClose, onCtaClick }) => {
   const { t } = useTranslation()
-
   const listItems = [
     t("Complete 3 sustainable actions before the snapshot."),
     t("Swap B3TR for VOT3 tokens so you’re ready to vote."),
     t("Vote in an allocation or proposal round."),
     t("Mint your free GM Earth NFT after voting."),
   ] as string[]
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"2xl"}>
       <Portal>

@@ -16,7 +16,6 @@ export const cardSlotRecipe = defineSlotRecipe({
     header: { padding: "0", pb: "4" },
     footer: { padding: "0" },
   },
-
   variants: {
     variant: {
       primary: {

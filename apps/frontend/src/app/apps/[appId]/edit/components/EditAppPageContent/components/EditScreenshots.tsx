@@ -1,20 +1,21 @@
 import { Button, HStack, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
+import { UilDraggabledots, UilTrash, UilUpload } from "@iconscout/react-unicons"
+import { Reorder, useDragControls } from "framer-motion"
+import { ChangeEvent, useCallback, useRef, useState } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { ChangeEvent, useCallback, useRef, useState } from "react"
-import { UilDraggabledots, UilTrash, UilUpload } from "@iconscout/react-unicons"
-import { EditAppForm } from ".."
-import { imageListCompression } from "@/utils/imageListCompression"
-import { blobToBase64 } from "@/utils/BlobUtils"
-import { Reorder, useDragControls } from "framer-motion"
-import { IMAGE_REQUIREMENTS, SCREENSHOT_UPLOAD_GUIDELINES } from "@/constants"
-import { validateImage } from "@/utils"
+
 import { toaster } from "@/components/ui/toaster"
+import { blobToBase64 } from "@/utils/BlobUtils"
+import { imageListCompression } from "@/utils/imageListCompression"
+
+import { IMAGE_REQUIREMENTS, SCREENSHOT_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
+import { validateImage } from "../../../../../../../utils/ImageValidation"
+import { EditAppForm } from "../EditAppPageContent"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
-
 export const EditScreenshots = ({ form }: Props) => {
   const { t } = useTranslation()
   const inputFile = useRef<HTMLInputElement>(null)
@@ -23,17 +24,14 @@ export const EditScreenshots = ({ form }: Props) => {
   const [invalidFormat, setInvalidFormat] = useState(false)
   const [invalidMessage, setInvalidMessage] = useState("Invalid image format")
   const accept = IMAGE_REQUIREMENTS.screenshot.mimeType
-
   const handleUpload = useCallback(() => {
     inputFile.current?.click()
   }, [])
-
   const handleImageUpload = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       try {
         setLoadingScreenshot(true)
         const files = Array.from(e.target.files || [])
-
         // Validate each file
         for (const file of files) {
           const validation = await validateImage(file, "screenshot")
@@ -44,7 +42,6 @@ export const EditScreenshots = ({ form }: Props) => {
             return
           }
         }
-
         const compressedFiles = await imageListCompression(files)
         const base64Files = await Promise.all(compressedFiles.map(blobToBase64))
         form.setValue("screenshots", [...screenshots, ...base64Files])

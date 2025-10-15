@@ -1,7 +1,8 @@
-import { XAppStatus } from "@/types"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { TFunction } from "i18next"
 import { useTranslation } from "react-i18next"
+
+import { XAppStatus } from "../../../../types/appDetails"
 
 type ConfigType = {
   title: string
@@ -10,7 +11,6 @@ type ConfigType = {
   color: string
   icon: typeof UilExclamationCircle | typeof UilCheckCircle
 }
-
 const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> => {
   return {
     [XAppStatus.LOOKING_FOR_ENDORSEMENT]: {

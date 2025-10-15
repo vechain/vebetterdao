@@ -1,7 +1,8 @@
-import { usePassportChecks } from "@/api"
-import { TogglePassportCheck } from "@/constants"
-import { useTogglePassportCheck } from "@/hooks"
 import { Card, Separator, Field, Heading, HStack, SimpleGrid, Switch, VStack } from "@chakra-ui/react"
+
+import { usePassportChecks } from "../../../../../api/contracts/vePassport/hooks/usePassportChecks"
+import { TogglePassportCheck } from "../../../../../constants/Passport"
+import { useTogglePassportCheck } from "../../../../../hooks/useTogglePassportCheck"
 
 export const PassportToggles = () => {
   const {
@@ -11,7 +12,6 @@ export const PassportToggles = () => {
     isParticipationScoreCheckEnabled,
     isGMOwnershipCheckEnabled,
   } = usePassportChecks()
-
   return (
     <Card.Root>
       <Card.Header>

@@ -1,19 +1,3 @@
-import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { GrantsProposalCard } from "@/app/grants/components"
-import { HowToSupportCard } from "@/app/proposals"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { ConvertModal, EmptyStateCard, MobileFilterDrawer, SearchField, SelectField } from "@/components"
-import {
-  GrantProposalEnriched,
-  ProposalState,
-  useBreakpoints,
-  useDebounce,
-  useMilestoneClaimedEvents,
-  useProposalEnriched,
-  useProposalSearch,
-} from "@/hooks"
-import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
-import { ProposalType } from "@/types"
 import {
   Button,
   ButtonGroup,
@@ -40,7 +24,26 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
+
+import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { ConvertModal } from "../../../components/Convert/components/Modal/ConvertModal"
+import { EmptyStateCard } from "../../../components/EmptyStateCard"
+import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/MobileFilterDrawer"
+import { SearchField } from "../../../components/SearchField/SearchField"
+import { SelectField } from "../../../components/SelectField/SelectField"
+import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
+import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
+import { GrantProposalEnriched, ProposalState } from "../../../hooks/proposals/grants/types"
+import { useMilestoneClaimedEvents } from "../../../hooks/proposals/grants/useMilestoneClaimedEvents"
+import { useBreakpoints } from "../../../hooks/useBreakpoints"
+import { useDebounce } from "../../../hooks/useDebounce"
+import { ProposalType } from "../../../types/proposals"
+import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
+
 import { GrantsBanners } from "./Banner/GrantsBanners"
+import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
 
@@ -52,6 +55,13 @@ enum GrantsStep {
   COMMUNITY_VOTE = "COMMUNITY_VOTE",
   RECEIVE_FUNDS = "RECEIVE_FUNDS",
 }
+//All filters except Canceled
+const DEFAULT_FILTERS = [
+  ProposalFilter.ApprovalPhase,
+  ProposalFilter.SupportPhase,
+  StateFilter.InDevelopment,
+  StateFilter.Completed,
+]
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
@@ -59,6 +69,7 @@ export const GrantsPageContent = () => {
   const router = useRouter()
 
   //CONSTANTS
+
   const filterOptions = useMemo(() => {
     return createListCollection({
       items: [
@@ -137,7 +148,11 @@ export const GrantsPageContent = () => {
     isLoading: isLoadingEnrichedGrantProposals,
   } = useProposalEnriched()
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
-  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as GrantProposalEnriched[])
+  const { filteredProposals } = useFilteredProposals(
+    selectedFilter,
+    searchedProposals as GrantProposalEnriched[],
+    DEFAULT_FILTERS,
+  )
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const visibleProposal = filteredProposals?.slice(startRange, endRange)
@@ -287,8 +302,10 @@ export const GrantsPageContent = () => {
                     options={filterOptions}
                     defaultValue={[]}
                     showReset
-                    onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
                     isMultiOption
+                    onChange={(value: string[]) =>
+                      setSelectedFilter(value.map(item => item as ProposalFilter | StateFilter))
+                    }
                   />
                 )}
               </HStack>

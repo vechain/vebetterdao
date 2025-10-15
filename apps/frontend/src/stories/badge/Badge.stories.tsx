@@ -1,12 +1,10 @@
-import type { Meta } from "@storybook/nextjs-vite"
-
 import { Badge, For, VStack } from "@chakra-ui/react"
+import { Meta } from "@storybook/nextjs-vite"
 
 const meta = {
   title: "b3tr/components/Badge",
   component: Badge,
 } satisfies Meta<typeof Badge>
-
 export default meta
 
 const variants = ["warning", "info", "negative", "neutral", "positive", "outline"] as const

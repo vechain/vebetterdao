@@ -1,37 +1,36 @@
-import { APP_SECURITY_LEVELS, useAppSecurityLevel, useXApps } from "@/api"
-import { useUpdateAppSecurityLevel } from "@/hooks"
 import { Button, Card, Field, Heading, HStack, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import {
+  APP_SECURITY_LEVELS,
+  useAppSecurityLevel,
+} from "../../../../../api/contracts/vePassport/hooks/useAppSecurityLevel"
+import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
+import { useUpdateAppSecurityLevel } from "../../../../../hooks/useUpdateAppSecurityLevel"
+
 export const AppSecurity = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [appSecurityLevel, setAppSecurityLevel] = useState<number | undefined>()
-
   const { data: xApps } = useXApps()
   const { data: selectedAppSecurityLevel } = useAppSecurityLevel(appId ?? "")
   const { t } = useTranslation()
-
   const { sendTransaction, isTransactionPending, status } = useUpdateAppSecurityLevel({
     appId: appId ?? "",
     securityLevel: appSecurityLevel ?? 0,
   })
-
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
-
       sendTransaction()
     },
     [sendTransaction],
   )
-
   const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(
     () => appSecurityLevel && appSecurityLevel !== selectedAppSecurityLevel,
     [appSecurityLevel, selectedAppSecurityLevel],
   )
-
   return (
     <Card.Root w={"full"}>
       <Card.Header>

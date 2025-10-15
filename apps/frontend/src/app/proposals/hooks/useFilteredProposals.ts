@@ -1,7 +1,9 @@
-import { useAllProposalsDepositReached } from "@/api"
+import { useCallback, useMemo } from "react"
+
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { ProposalFilter, StateFilter } from "@/store/useProposalFilters"
-import { useCallback, useMemo } from "react"
+
+import { useAllProposalsDepositReached } from "../../../api/contracts/governance/hooks/useAllProposalsDepositReached"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
@@ -9,6 +11,7 @@ import { useCallback, useMemo } from "react"
 export const useFilteredProposals = (
   selectedFilter?: (ProposalFilter | StateFilter)[],
   proposals?: ProposalEnriched[] | GrantProposalEnriched[],
+  defaultFilters?: (ProposalFilter | StateFilter)[],
 ) => {
   type ProposalWithStateAndDeposit = (ProposalEnriched | GrantProposalEnriched) & { isDepositReached?: boolean }
 
@@ -21,7 +24,6 @@ export const useFilteredProposals = (
 
   const proposalsWithStateAndDeposit = useMemo(() => {
     if (!proposals?.length) return []
-
     return proposals.map(proposal => ({
       ...proposal,
       isDepositReached: allProposalsDepositReached?.find(
@@ -32,7 +34,11 @@ export const useFilteredProposals = (
 
   const filteredProposals: ProposalWithStateAndDeposit[] = useMemo(() => {
     if (!proposalsWithStateAndDeposit?.length) return []
-    if (!selectedFilter || selectedFilter.length === 0) return proposalsWithStateAndDeposit
+
+    // Use default filter if no filter is selected
+    const activeFilter = !selectedFilter || selectedFilter?.length === 0 ? defaultFilters : selectedFilter
+
+    if (!activeFilter || activeFilter?.length === 0) return proposalsWithStateAndDeposit
 
     // Create filter condition mapping
     const getFilterCondition = (
@@ -68,12 +74,12 @@ export const useFilteredProposals = (
     // Check if proposal matches any active filter
     const matchesAnyFilter = (proposal: (typeof proposalsWithStateAndDeposit)[0]): boolean => {
       const conditions = getFilterCondition(proposal)
-      return selectedFilter.some(filter => conditions[filter])
+      return activeFilter.some(filter => conditions[filter])
     }
 
     // Single pass filter - O(n) instead of O(n*m) where m is number of filters
     return proposalsWithStateAndDeposit.filter(matchesAnyFilter)
-  }, [selectedFilter, proposalsWithStateAndDeposit])
+  }, [selectedFilter, proposalsWithStateAndDeposit, defaultFilters])
 
   const sortByPhase = useCallback((proposals: ProposalWithStateAndDeposit[]) => {
     const stateOrder = [

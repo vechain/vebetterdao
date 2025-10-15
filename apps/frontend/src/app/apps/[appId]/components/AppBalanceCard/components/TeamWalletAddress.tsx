@@ -1,4 +1,3 @@
-import { Tooltip } from "@/components/ui/tooltip"
 import { Flex, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -6,10 +5,11 @@ import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiInfo } from "react-icons/fi"
 
+import { Tooltip } from "@/components/ui/tooltip"
+
 export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: string }) => {
   const { t } = useTranslation()
   const [showCopiedLink, setShowCopiedLink] = useState(false)
-
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(teamWalletAddress)
     setShowCopiedLink(true)
@@ -17,7 +17,6 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
       setShowCopiedLink(false)
     }, 2000)
   }, [teamWalletAddress])
-
   return (
     <VStack w={"full"} gap={4} align={"flex-start"}>
       <VStack align={"stretch"} w={"full"} justify={"start"}>
@@ -36,7 +35,6 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
             </HStack>
           </Flex>
         </Tooltip>
-
         <HStack>
           {showCopiedLink ? (
             <UilCheck size={"18px"} color="#6DCB09" />

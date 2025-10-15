@@ -1,20 +1,20 @@
 "use client"
 import { VStack, Text, Container, HStack, Box, Link, Flex } from "@chakra-ui/react"
-import { BeBetterVeBetterIcon } from "../Icons"
-import { DiscordButton } from "./components/DiscordButton"
-import { TelegramButton } from "./components/TelegramButton"
-import { FreshDeskButton } from "./components/FreshDeskButton"
-import { Socials } from "./components/Socials"
-import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
-import { useTranslation } from "react-i18next"
-import { LanguageSelector } from "./components/LanguageSelector"
-import packageJson from "../../../package.json"
 import dayjs from "dayjs"
+import { useTranslation } from "react-i18next"
 
+import packageJson from "../../../package.json"
+import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "../../constants/links"
+import { BeBetterVeBetterIcon } from "../Icons/BeBetterVeBetterIcon"
+
+import { DiscordButton } from "./components/DiscordButton"
+import { FreshDeskButton } from "./components/FreshDeskButton"
+import { LanguageSelector } from "./components/LanguageSelector"
+import { Socials } from "./components/Socials"
+import { TelegramButton } from "./components/TelegramButton"
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
   const currentYear = dayjs().format("YYYY")
-
   const desktopContent = (
     <VStack hideBelow="md">
       <HStack justifyContent={"space-between"} w="full" gap={4} my={4}>

@@ -3,7 +3,6 @@ export const IMAGE_DIMENSION = {
   height: 630,
 }
 export const APPLICATION_NAME = "VeBetter"
-
 export const pagesMetadata = {
   platform: {
     path: "/",

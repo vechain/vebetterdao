@@ -1,11 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react"
-import { TransactionStatus, TransactionStatusErrorType } from "@vechain/vechain-kit"
 import { useDisclosure } from "@chakra-ui/react"
+import { TransactionStatus, TransactionStatusErrorType } from "@vechain/vechain-kit"
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react"
 
 type TransactionCustomUIProps = {
   title?: string
 }
-
 export type TransactionCustomUI = Partial<Record<TransactionStatus, TransactionCustomUIProps>>
 interface TransactionState {
   customUI?: TransactionCustomUI
@@ -16,7 +15,6 @@ interface TransactionState {
   onClose: () => void
   tryAgain?: () => Promise<void>
 }
-
 interface TransactionContextType {
   transactionModalState: TransactionState | null
   setupModal: (tryAgain?: () => Promise<void>, customUI?: TransactionCustomUI) => void
@@ -25,15 +23,12 @@ interface TransactionContextType {
   isTxModalOpen: boolean
   onClose: () => void
 }
-
 const initialState: TransactionState = {
   status: "pending",
   isTxModalOpen: false,
   onClose: () => {},
 }
-
 const TransactionContext = createContext<TransactionContextType | null>(null)
-
 export const useTransactionModal = () => {
   const context = useContext(TransactionContext)
   if (!context) {
@@ -41,11 +36,9 @@ export const useTransactionModal = () => {
   }
   return context
 }
-
 interface TransactionModalProviderProps {
   children: ReactNode
 }
-
 export const TransactionModalProvider: React.FC<TransactionModalProviderProps> = ({ children }) => {
   const [transactionModalState, setTransactionModalState] = useState<TransactionState | null>(null)
   const { open: isTxModalOpen, onOpen, onClose } = useDisclosure()

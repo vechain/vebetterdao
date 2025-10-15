@@ -9,7 +9,6 @@ export const badgeRecipe = defineRecipe({
     alignItems: "center",
     gap: "6px",
   },
-
   variants: {
     size: {
       sm: {
@@ -28,7 +27,6 @@ export const badgeRecipe = defineRecipe({
         py: "6px",
       },
     },
-
     variant: {
       warning: { bg: "status.warning.subtle", color: "status.warning.strong" },
       info: { bg: "status.info.subtle", color: "status.info.strong" },
@@ -38,6 +36,5 @@ export const badgeRecipe = defineRecipe({
       outline: { bg: "transparent", borderColor: "border.secondary" },
     },
   },
-
   defaultVariants: { size: "md" },
 })

@@ -5,7 +5,6 @@ export type Props = {
     grantId: string
   }
 }
-
 export default function Grant({ params }: Readonly<Props>) {
   return <GrantPage params={params} />
 }

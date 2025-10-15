@@ -1,20 +1,19 @@
-import { useTranslation } from "react-i18next"
-import { UilArrowRight } from "@iconscout/react-unicons"
-import { useCurrentAllocationsRoundId } from "@/api"
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-import { GenericBanner } from "../../Banners/GenericBanner"
 import { Button } from "@chakra-ui/react"
+import { UilArrowRight } from "@iconscout/react-unicons"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { GenericBanner } from "../../Banners/GenericBanner"
 
 export const CastVoteBanner = () => {
   const { t } = useTranslation()
   const { data: roundId } = useCurrentAllocationsRoundId()
-
   const router = useRouter()
   const handleVote = useCallback(() => {
     router.push(`/rounds/${roundId}/vote`)
   }, [router, roundId])
-
   return (
     <GenericBanner
       variant="warning"

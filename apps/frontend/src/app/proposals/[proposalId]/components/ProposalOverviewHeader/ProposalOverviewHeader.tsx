@@ -1,7 +1,9 @@
-import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
-import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { Heading, HStack, VStack } from "@chakra-ui/react"
+
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+
+import { GrantsProposalStatusBadge } from "../../../../../components/Proposal/Grants/GrantsProposalStatusBadge"
+import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
 
 type ProposalOverviewHeaderProps = {
   proposal: ProposalEnriched | GrantProposalEnriched
@@ -10,7 +12,6 @@ type ProposalOverviewHeaderProps = {
   depositReached: boolean
   proposerAddress: string
 }
-
 export const ProposalOverviewHeader = ({
   proposal,
   hasUserDeposited,
@@ -28,10 +29,8 @@ export const ProposalOverviewHeader = ({
           hasUserVoted={hasUserVoted}
           depositReached={depositReached ?? false}
         />
-
         <AddressWithProfilePicture address={proposerAddress} />
       </HStack>
-
       {/* Proposal title */}
       <Heading
         w="full"

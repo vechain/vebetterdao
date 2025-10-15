@@ -1,19 +1,19 @@
-import { useAccountLinking } from "@/api"
 import { Card, VStack, Heading, Text, HStack } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { PendingLinkingProposalItem } from "./components/PendingLinkingProposalItem/PendingLinkingProposalItem"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
+import { useAccountLinking } from "../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
+
+import { PendingLinkingProposalItem } from "./components/PendingLinkingProposalItem/PendingLinkingProposalItem"
 
 type Props = {
   address: string
 }
 export const PendingLinkingProposal = ({ address }: Props) => {
   const { t } = useTranslation()
-
   const { account: connectedAccount } = useWallet()
   const isConnectedUser = compareAddresses(connectedAccount?.address ?? "", address)
-
   const { incomingPendingLinkings, isLoading } = useAccountLinking(address)
   if (isLoading || !incomingPendingLinkings?.length) return null
   return (

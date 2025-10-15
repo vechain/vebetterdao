@@ -1,6 +1,10 @@
-import { CheckableCard } from "@/components"
-import { GovernanceFeaturedFunction, notFoundImage, GovernanceFeaturedContractWithFunctions } from "@/constants"
 import { Grid, GridItem, VStack, Heading, Separator, Card, HStack, Checkbox, Box, Text } from "@chakra-ui/react"
+
+import { CheckableCard } from "../../../../../../components/CheckableCard/CheckableCard"
+import {
+  GovernanceFeaturedFunction,
+  GovernanceFeaturedContractWithFunctions,
+} from "../../../../../../constants/GovernanceFeaturedFunctions"
 
 /**
  * Map the number of functions to the grid size
@@ -10,6 +14,8 @@ const functionsNumberGridSizeMapping = {
   2: 2,
   3: 3,
 }
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 export type SelectedFunction = GovernanceFeaturedFunction & {
   contractAddress: string
@@ -21,6 +27,7 @@ type Props = {
   handleAddFunction: (func: SelectedFunction) => () => void
   handleRemoveFunction: (index: number) => () => void
 }
+
 export const ContractsWithFunctions: React.FC<Props> = ({
   contractsWithFunctionsToRender,
   actions,
@@ -40,7 +47,6 @@ export const ContractsWithFunctions: React.FC<Props> = ({
                 action => action.contractAddress === contract.contract.address && action.name === func.name,
               )
               const isSelected = isSelectedIndex !== -1
-
               const step = {
                 title: func.name,
                 description: func.description,

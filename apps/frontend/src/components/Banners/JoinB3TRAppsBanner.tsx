@@ -1,12 +1,12 @@
 import { Card, Heading, HStack, Image, Text, VStack, Link, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { GoPlus } from "react-icons/go"
-import { useBreakpoints } from "@/hooks"
+
+import { useBreakpoints } from "../../hooks/useBreakpoints"
 
 export const JoinB3TRAppsBanner = () => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-
   return (
     <Card.Root w={"full"} bg="banner.green" color="black" overflow={"hidden"} borderRadius={"xl"} p={6}>
       <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">

@@ -1,48 +1,44 @@
-import { useCallback, useMemo } from "react"
-import { useWallet, currentBlockQueryKey } from "@vechain/vechain-kit"
-import { Emissions__factory, XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { Emissions__factory, XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
+import { useWallet, currentBlockQueryKey } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
 import { buildClause } from "@/utils/buildClause"
-import { useBuildTransaction } from "./useBuildTransaction"
+
+import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
+import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { getHasXAppClaimedQueryKey } from "../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
+import { useHaveXAppsClaimed } from "../api/contracts/xAllocationPool/hooks/useHaveXAppsClaimed"
+import { getAllocationAmountQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { getAllocationsRoundsEventsQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 import {
   getCurrentAllocationsRoundIdQueryKey,
-  getAllocationsRoundsEventsQueryKey,
   useCurrentAllocationsRoundId,
-  getAllocationAmountQueryKey,
-  getAllProposalsStateQueryKey,
-  getProposalClaimableUserDepositsQueryKey,
-  getRoundXAppsQueryKey,
-  useRoundXApps,
-  useHaveXAppsClaimed,
-} from "@/api"
-import { getHasXAppClaimedQueryKey } from "@/api/contracts/xAllocationPool/hooks"
+} from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { getRoundXAppsQueryKey, useRoundXApps } from "../api/contracts/xApps/hooks/useRoundXApps"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 
 const EmissionsInterface = Emissions__factory.createInterface()
 const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
-
 interface UseStartRoundAndClaimWorkflowProps {
   roundId: string
   onSuccess?: () => void
 }
-
 export const useStartRoundAndClaimWorkflow = ({ roundId, onSuccess }: UseStartRoundAndClaimWorkflowProps) => {
   const { account } = useWallet()
   const config = getConfig()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: xApps } = useRoundXApps(currentRoundId?.toString() ?? "")
-
   // Get apps that haven't claimed yet
   const { data: claims } = useHaveXAppsClaimed(currentRoundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
   const xAppsLeft = useMemo(() => {
     return xApps?.filter(app => !claims?.find(claim => claim?.appId === app.id)?.claimed) ?? []
   }, [xApps, claims])
-
   const clauseBuilder = useCallback(() => {
     if (!account?.address) throw new Error("Account is required")
-
     const clauses = []
-
     // First clause: Distribute emissions
     clauses.push(
       buildClause({

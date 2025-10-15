@@ -1,21 +1,20 @@
-import { useColorModeValue } from "@/components/ui/color-mode"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { Card, CardBody, Grid, Icon, List, Text, VStack } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { Control, Controller, UseFormSetValue } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
+import { useColorModeValue } from "@/components/ui/color-mode"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
+
 interface GrantTypeSelectionProps {
   control: Control<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   setData: (data: Partial<GrantFormData>) => void
 }
-
 export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSelectionProps) => {
   const { t } = useTranslation()
   const notSelectedBorder = useColorModeValue("#D5D5D5", "#2D2D2F")
-
   const handleGrantTypeChange = useCallback(
     (type: string) => {
       setValue("grantType", type)
@@ -23,7 +22,6 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
     },
     [setValue, setData],
   )
-
   const grantTypes = {
     dapp: {
       title: t("App grant"),

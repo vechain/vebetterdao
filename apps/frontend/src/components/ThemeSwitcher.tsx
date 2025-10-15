@@ -1,12 +1,12 @@
-import React from "react"
 import { Button, ButtonProps, Icon, IconButton } from "@chakra-ui/react"
-import { useColorMode } from "@/components/ui/color-mode"
+import React from "react"
 import { FaMoon, FaSun } from "react-icons/fa"
+
+import { useColorMode } from "@/components/ui/color-mode"
 
 type Props = {
   withText?: boolean
 } & ButtonProps
-
 export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
   const { colorMode, toggleColorMode } = useColorMode()
   const isDark = colorMode === "dark"
@@ -24,7 +24,6 @@ export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
         <Icon as={isDark ? FaSun : FaMoon} />
       </IconButton>
     )
-
   return (
     <Button
       data-cy="theme-switcher-with-text"

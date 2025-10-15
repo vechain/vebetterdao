@@ -1,7 +1,8 @@
 import { Button, Card, Heading, Image, Stack, Text, Link, useDisclosure } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { SubmitCreatorFormModal } from "../SubmitCreatorFormModal"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
+
+import { SubmitCreatorFormModal } from "../SubmitCreatorFormModal"
 
 export const CreatorApplicationRejected = () => {
   const { t } = useTranslation()
@@ -34,7 +35,6 @@ export const CreatorApplicationRejected = () => {
                 minH="90px"
                 borderRadius="9px"
               />
-
               <Stack w={{ base: "full", md: "90%", lg: "80%" }} align="flex-start" justify="center">
                 <Heading size="sm">{t("Your Creator's NFT application was rejected")}</Heading>
                 <Text textStyle="sm" color="text.subtle">
@@ -42,7 +42,6 @@ export const CreatorApplicationRejected = () => {
                 </Text>
               </Stack>
             </Stack>
-
             {/* Right Section: Score */}
             <Stack
               direction={{ base: "row", md: "column" }}

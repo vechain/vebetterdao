@@ -1,13 +1,12 @@
-import { UserNode } from "@/api"
 import { Card, HStack, Image, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
 export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-
   const { image: xNodeImage, name: xNodeName, nodeType, xNodePoints, isXNodeDelegator, isXNodeDelegatee } = xNode
-
   return (
     <Card.Root variant="primary" p="0">
       <Image
@@ -44,7 +43,6 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
             <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="#FFFFFF80">
               {nodeType}
             </Text>
-
             <Text color="white" fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
               {xNodeName}
             </Text>

@@ -2,7 +2,6 @@ import { useWallet, useUpgradeRequired } from "@vechain/vechain-kit"
 
 export const useSmartAccountUpgradeRequired = () => {
   const { smartAccount, connectedWallet } = useWallet()
-
   const { data: isSmartAccountUpgradeRequired } = useUpgradeRequired(
     smartAccount?.address ?? "",
     connectedWallet?.address ?? "",

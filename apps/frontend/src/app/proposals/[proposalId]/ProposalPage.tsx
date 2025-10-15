@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import { MotionVStack } from "../../../components/MotionVStack"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 const ProposalPageContent = dynamic(
   () => import("./components/ProposalPageContent").then(mod => mod.ProposalPageContent),
   {
@@ -17,7 +16,6 @@ const ProposalPageContent = dynamic(
     ),
   },
 )
-
 type Props = {
   params: {
     proposalId: string

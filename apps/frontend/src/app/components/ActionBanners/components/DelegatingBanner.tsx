@@ -1,19 +1,17 @@
 import { Button, Text, Icon } from "@chakra-ui/react"
-import { useTranslation, Trans } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useTranslation, Trans } from "react-i18next"
+
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 export const DelegatingBanner = () => {
   const { t } = useTranslation()
-
   const whatIsVeDelegate = () => {
     window.open("https://docs.vedelegate.vet/faq#what-is-a-vepassport", "_blank", "noopener noreferrer")
   }
-
   const goToVeDelegate = () => {
     window.open("https://vedelegate.vet", "_blank", "noopener noreferrer")
   }
-
   const description = (
     <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold">
       <Trans
@@ -24,7 +22,6 @@ export const DelegatingBanner = () => {
       />
     </Text>
   )
-
   return (
     <>
       <GenericBanner

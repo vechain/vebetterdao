@@ -1,13 +1,12 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
 const address = getConfig().voterRewardsContractAddress as `0x${string}`
 const abi = VoterRewards__factory.abi
 const method = "getGMReward" as const
-
 /**
  * Returns the query key for fetching the GM rewards.
  * @returns The query key for fetching the GM rewards.
@@ -20,7 +19,6 @@ export const getGMRewardsQueryKey = (roundId: number, userAddress: string) => {
     args: [BigInt(roundId), userAddress as `0x${string}`],
   })
 }
-
 /**
  * Hook to get the GM rewards for a given round and voter.
  * @param currentRoundId The current round id.

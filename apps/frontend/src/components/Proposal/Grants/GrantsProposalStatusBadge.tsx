@@ -1,13 +1,14 @@
-import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
-import HeartIcon from "@/components/Icons/svg/heart.svg"
-import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
-import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
-import { ProposalState } from "@/hooks/proposals/grants/types"
 import { Badge, BadgeProps, Icon } from "@chakra-ui/react"
 import { Prohibition } from "iconoir-react"
 import { useMemo } from "react"
 import { FaRegCircleCheck } from "react-icons/fa6"
 import { IoIosCode } from "react-icons/io"
+
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   state: ProposalState
@@ -15,7 +16,6 @@ type Props = {
   hasUserSupported?: boolean
   hasUserVoted?: boolean
 }
-
 /**
  * Extract the variant type from Chakra UI's Badge component props
  * This ensures type safety with the theme's badge variants
@@ -27,9 +27,8 @@ type BadgeConfig = {
   icon: React.ElementType
   filledIcon?: React.ElementType
 }
-
 // Define the badge configuration for each proposal state
-const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
+const BADGE_CONFIG: Record<ProposalState, BadgeConfig> = {
   [ProposalState.Pending]: {
     text: "Support phase",
     icon: HeartIcon,

@@ -1,12 +1,16 @@
-import { useRoundAppVotes, useXAppMetadata, useXAppRoundEarnings } from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
-import { B3TRIcon } from "@/components"
-import { notFoundImage } from "@/constants"
 import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useXAppRoundEarnings } from "../../../../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
+import { useXAppMetadata } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useRoundAppVotes } from "../../../../api/indexer/xallocations/useAppVotesRound"
+import { useIpfsImage } from "../../../../api/ipfs/hooks/useIpfsImage"
+import { B3TRIcon } from "../../../../components/Icons/B3TRIcon"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 type AppVotesData = {
   percentage: number
@@ -39,9 +43,7 @@ Props) => {
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-
   const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
-
   const roundIdNumber = useMemo(() => {
     try {
       return Number(roundId)

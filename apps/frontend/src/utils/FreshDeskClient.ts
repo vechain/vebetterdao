@@ -1,7 +1,6 @@
 type FreshdeskQueryResult<T> = {
   results: T[]
 }
-
 export type FreshdeskTicket = {
   id: number
   description?: string
@@ -30,7 +29,6 @@ export type FreshdeskTicket = {
   }
   created_at: string
 }
-
 export type FreshdeskTicketBody = {
   description: string
   subject: string

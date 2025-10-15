@@ -1,5 +1,6 @@
-import { useXAppMetadata } from "@/api"
 import { useParams } from "next/navigation"
+
+import { useXAppMetadata } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"
 
 /**
  * Custom hook to fetch and manage the current app metadata.
@@ -8,7 +9,6 @@ import { useParams } from "next/navigation"
 export const useCurrentAppMetadata = () => {
   const { appId } = useParams<{ appId: string }>()
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
-
   return {
     appMetadata,
     appMetadataLoading,

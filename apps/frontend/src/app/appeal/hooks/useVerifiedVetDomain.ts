@@ -28,7 +28,6 @@ const abi = [
 ] as const
 const address = getConfig().externalContractIntegrations?.vetDomainsContractAddress as `0x${string}`
 const method = "isVerified" as const
-
 export const getVerifiedVetDomainQueryKey = (walletAddress?: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -36,7 +35,6 @@ export const getVerifiedVetDomainQueryKey = (walletAddress?: string) =>
     method,
     args: [walletAddress as `0x${string}`],
   })
-
 /**
  * Custom hook to fetch the verified vet domain for a given wallet address.
  *

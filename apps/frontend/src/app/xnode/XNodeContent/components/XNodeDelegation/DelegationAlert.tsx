@@ -9,11 +9,9 @@ export const DelegationAlert = ({
   isXNodeDelegated: boolean
 }) => {
   const { t } = useTranslation()
-
   if (!isXNodeDelegated) {
     return null
   }
-
   if (isXNodeDelegator) {
     return (
       <Alert.Root status="warning" borderRadius="2xl">
@@ -29,7 +27,6 @@ export const DelegationAlert = ({
       </Alert.Root>
     )
   }
-
   return (
     <Alert.Root status="info" borderRadius="2xl">
       <Alert.Indicator />

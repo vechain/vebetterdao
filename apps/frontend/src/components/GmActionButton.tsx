@@ -1,16 +1,23 @@
-import { useCallback, useMemo } from "react"
 import { Button, ButtonProps, useDisclosure } from "@chakra-ui/react"
-import NextLink from "next/link"
-import { useMintNFT, useUpgradeGM } from "@/hooks"
-import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
-import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useGMMaxLevel, useGetUserGMs } from "@/api"
-import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
-import { MintNFTModal } from "./MintNFTModal"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import NextLink from "next/link"
+import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+
+import { useGetUserGMs } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { useParticipatedInGovernance } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
+import { useCurrentAllocationsRoundId } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../constants/AnalyticsEvents"
+import { useMintNFT } from "../hooks/useMintNFT"
+import { useUpgradeGM } from "../hooks/useUpgradeGM"
+
 import { GetFreeNFTModal } from "./GmNFTAndNodeCard/GetFreeNFTModal"
+import { MintNFTModal } from "./MintNFTModal"
 import { Tooltip } from "./ui/tooltip"
 
 export const GmActionButton = ({
@@ -22,12 +29,10 @@ export const GmActionButton = ({
 }) => {
   const { t } = useTranslation()
   const { resetModal: resetTransactionModal, onClose: closeTransactionModal } = useTransactionModal()
-
   // Wallet and user data
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   // GM NFT data
   const { data: maxGMLevel } = useGMMaxLevel()
   const { data: userGms } = useGetUserGMs()
@@ -36,7 +41,6 @@ export const GmActionButton = ({
   const isMaxGmLevelReached = selectedGM && maxGMLevel === Number(selectedGM.tokenLevel)
   const isEnoughBalanceToUpgradeGM =
     b3trBalanceScaled && Number(b3trBalanceScaled || 0) >= Number(selectedGM?.b3trToUpgrade)
-
   // Modal controls
   const { open: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
   const { open: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()

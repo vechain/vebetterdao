@@ -5,7 +5,6 @@ export const BalancePill = ({ variant, children }: PropsWithChildren<{ variant: 
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
   const fill = variant === "b3tr" ? "actions.primary.default" : "brand.secondary"
   const pillHeight = isDesktop ? "34px" : "26px"
-
   return (
     <Box position="relative" height={pillHeight} display="flex" alignItems="center" bg={fill} m="0 1rem">
       {variant === "b3tr" ? (
@@ -35,9 +34,7 @@ export const BalancePill = ({ variant, children }: PropsWithChildren<{ variant: 
           <path d="M7.94954 6C9.18055 2.61473 12.3979 0 16 0V34H6.5662C2.40241 34 -0.495506 29.8626 0.927439 25.9495L7.94954 6Z" />
         </chakra.svg>
       )}
-
       {children}
-
       {variant === "b3tr" ? (
         <chakra.svg
           pos="absolute"

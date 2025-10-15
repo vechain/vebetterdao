@@ -1,5 +1,6 @@
-import { useAppCreators } from "@/api"
 import { useParams } from "next/navigation"
+
+import { useAppCreators } from "../../../../api/contracts/xApps/hooks/useAppCreators"
 
 /**
  * Custom hook to fetch the current app creators.
@@ -8,7 +9,6 @@ import { useParams } from "next/navigation"
 export const useCurrentAppCreators = () => {
   const { appId } = useParams<{ appId: string }>()
   const { data: creators, isLoading, error } = useAppCreators(appId)
-
   return {
     creators: creators || [],
     isLoading,

@@ -1994,5 +1994,18 @@
   "Created": "创建",
   "You have been signalled by": "您已被...通知",
   "You have reached the maximum GM NFT level.": "您已达到GM NFT的最高等级。",
-  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "从应用程序中移除您的认可可能会导致其不再被选中进行分配。"
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "从应用程序中移除您的认可可能会导致其不再被选中进行分配。",
+  "Current Status": "当前状态",
+  "Status After Transaction": "交易后的状态",
+  "Reset Form": "重置表单",
+  "Apps eligible in next round": "下轮符合条件的应用",
+  "App not found": "应用未找到",
+  "Confirm Eligibility Change": "确认资格更改",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "您确定要让 <b>'{{appName}}'</b> 在下轮中变为 <b>{{status}}</b> 吗？",
+  "eligible": "符合条件",
+  "ineligible": "不符合条件",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "这样做的话，ID为{{appId}}的{{appName}}将在下轮中变为{{status}}。",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "达到最低<Link>法定人数</Link> ({{quorumNumerator}}%)",
+  "Uploading...": "上传中...",
+  "Stored": "已存储"
 }
