@@ -24,7 +24,7 @@
     "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
     "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build && mv ./storybook-static ./public/storybook",
+    "build-storybook": "storybook build",
     "generate:schema": "npx openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
   },
   "dependencies": {

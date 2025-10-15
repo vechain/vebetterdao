@@ -15,6 +15,7 @@ import { selectSlotRecipe } from "./select"
 import { separatorRecipe } from "./separator"
 import { skeletonRecipe } from "./skeleton"
 import { stepsSlotRecipe } from "./steps"
+import { switchSlotRecipe } from "./switch"
 import { tableSlotRecipe } from "./table"
 import { tabsSlotRecipe } from "./tabs"
 import { textRecipe } from "./text"
@@ -65,6 +66,7 @@ const config = defineConfig({
       popover: popoverSlotRecipe,
       checkbox: checkboxSlotRecipe,
       radioGroup: radioGroupSlotRecipe,
+      switch: switchSlotRecipe,
       table: tableSlotRecipe,
       tabs: tabsSlotRecipe,
     },
