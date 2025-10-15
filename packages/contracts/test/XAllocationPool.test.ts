@@ -396,11 +396,15 @@ describe("X-Allocation Pool - @shard13", async function () {
         },
       )) as XAllocationPool
 
-      const storageSlotsAfter = []
+      let storageSlotsAfter = []
 
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
         storageSlotsAfter.push(await ethers.provider.getStorage(await xAllocationPool.getAddress(), i))
       }
+
+      storageSlotsAfter = storageSlotsAfter.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ) // removing empty slots
 
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
@@ -522,11 +526,15 @@ describe("X-Allocation Pool - @shard13", async function () {
         },
       )) as XAllocationPool
 
-      const storageSlotsAfterV7 = []
+      let storageSlotsAfterV7 = []
 
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
         storageSlotsAfterV7.push(await ethers.provider.getStorage(await xAllocationPoolV7.getAddress(), i))
       }
+
+      storageSlotsAfterV7 = storageSlotsAfterV7.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ) // removing empty slots
 
       // Check if storage slots are the same after upgrade to V7
       for (let i = 0; i < storageSlotsBeforeV7.length; i++) {
