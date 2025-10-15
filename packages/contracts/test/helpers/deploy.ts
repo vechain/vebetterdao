@@ -1,136 +1,140 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import {
-  B3TR,
-  TimeLock,
-  VOT3,
-  GalaxyMember,
-  Emissions,
-  XAllocationVoting,
-  XAllocationPool,
-  VoterRewards,
-  Treasury,
-  X2EarnApps,
-  GovernorClockLogicV1,
-  GovernorConfiguratorV1,
-  GovernorDepositLogicV1,
-  GovernorFunctionRestrictionsLogicV1,
-  GovernorProposalLogicV1,
-  GovernorQuorumLogicV1,
-  GovernorStateLogicV1,
-  GovernorVotesLogicV1,
-  X2EarnRewardsPool,
-  MyERC20,
-  MyERC721,
-  MyERC1155,
-  TokenAuction,
-  B3TRGovernor,
-  NodeManagementV3,
-  B3TRGovernorV1,
-  B3TRGovernorV2,
-  VoterRewardsV1,
-  GovernorClockLogic,
-  GovernorConfigurator,
-  GovernorDepositLogic,
-  GovernorFunctionRestrictionsLogic,
-  GovernorProposalLogic,
-  GovernorQuorumLogic,
-  GovernorStateLogic,
-  GovernorVotesLogic,
-  EmissionsV1,
-  VeBetterPassport,
-  B3TRGovernorV3,
-  GovernorClockLogicV3,
-  GovernorConfiguratorV3,
-  GovernorFunctionRestrictionsLogicV3,
-  GovernorProposalLogicV3,
-  GovernorDepositLogicV3,
-  GovernorQuorumLogicV3,
-  GovernorVotesLogicV3,
-  GovernorStateLogicV3,
-  GovernorClockLogicV5,
-  GovernorConfiguratorV5,
-  GovernorDepositLogicV5,
-  GovernorFunctionRestrictionsLogicV5,
-  GovernorProposalLogicV5,
-  GovernorQuorumLogicV5,
-  GovernorStateLogicV5,
-  PassportChecksLogic,
-  PassportEntityLogic,
-  PassportPoPScoreLogic,
-  PassportSignalingLogic,
-  PassportWhitelistAndBlacklistLogic,
-  PassportPersonhoodLogic,
-  PassportDelegationLogic,
-  PassportChecksLogicV1,
-  PassportDelegationLogicV1,
-  PassportEntityLogicV1,
-  PassportPersonhoodLogicV1,
-  PassportPoPScoreLogicV1,
-  PassportSignalingLogicV1,
-  PassportWhitelistAndBlacklistLogicV1,
-  VeBetterPassportV1,
-  PassportConfiguratorV1,
-  AdministrationUtils,
-  VoteEligibilityUtils,
-  EndorsementUtils,
-  AdministrationUtilsV2,
-  VoteEligibilityUtilsV2,
-  EndorsementUtilsV2,
-  AdministrationUtilsV3,
-  VoteEligibilityUtilsV3,
-  EndorsementUtilsV3,
-  AdministrationUtilsV4,
-  VoteEligibilityUtilsV4,
-  EndorsementUtilsV4,
-  AdministrationUtilsV5,
-  VoteEligibilityUtilsV5,
-  EndorsementUtilsV5,
-  X2EarnCreator,
-  VeBetterPassportV2,
-  PassportConfiguratorV2,
-  PassportWhitelistAndBlacklistLogicV2,
-  PassportPoPScoreLogicV2,
-  PassportPersonhoodLogicV2,
-  PassportEntityLogicV2,
-  PassportDelegationLogicV2,
-  PassportChecksLogicV2,
-  PassportSignalingLogicV2,
-  B3TRMultiSig,
-  GovernorVotesLogicV5,
-  VeBetterPassportV3,
-  PassportPersonhoodLogicV3,
-  PassportEntityLogicV3,
-  PassportChecksLogicV3,
-  PassportConfiguratorV3,
-  PassportDelegationLogicV3,
-  PassportSignalingLogicV3,
-  PassportPoPScoreLogicV3,
-  PassportWhitelistAndBlacklistLogicV3,
-  GovernorQuorumLogicV6,
-  GovernorVotesLogicV6,
-  GovernorStateLogicV6,
-  GovernorFunctionRestrictionsLogicV6,
-  GovernorProposalLogicV6,
-  GovernorDepositLogicV6,
-  GovernorConfiguratorV6,
-  GovernorClockLogicV6,
-  StargateNFT,
-  GrantsManager,
-} from "../../typechain-types"
-import { createLocalConfig } from "@repo/config/contracts/envs/local"
+
+import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
+import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
+import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
+import { APPS } from "../../scripts/deploy/setup"
 import {
   deployAndUpgrade,
   deployProxy,
   deployProxyOnly,
+  deployStargateProxyWithoutInitialization,
   initializeProxy,
   upgradeProxy,
-  deployStargateProxyWithoutInitialization,
 } from "../../scripts/helpers"
-import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
-import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
+import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
+import {
+  AdministrationUtils,
+  AdministrationUtilsV2,
+  AdministrationUtilsV3,
+  AdministrationUtilsV4,
+  AdministrationUtilsV5,
+  B3TR,
+  B3TRGovernor,
+  B3TRGovernorV1,
+  B3TRGovernorV2,
+  B3TRGovernorV3,
+  B3TRMultiSig,
+  Emissions,
+  EmissionsV1,
+  EndorsementUtils,
+  EndorsementUtilsV2,
+  EndorsementUtilsV3,
+  EndorsementUtilsV4,
+  EndorsementUtilsV5,
+  GalaxyMember,
+  GovernorClockLogic,
+  GovernorClockLogicV1,
+  GovernorClockLogicV3,
+  GovernorClockLogicV5,
+  GovernorClockLogicV6,
+  GovernorConfigurator,
+  GovernorConfiguratorV1,
+  GovernorConfiguratorV3,
+  GovernorConfiguratorV5,
+  GovernorConfiguratorV6,
+  GovernorDepositLogic,
+  GovernorDepositLogicV1,
+  GovernorDepositLogicV3,
+  GovernorDepositLogicV5,
+  GovernorDepositLogicV6,
+  GovernorFunctionRestrictionsLogic,
+  GovernorFunctionRestrictionsLogicV1,
+  GovernorFunctionRestrictionsLogicV3,
+  GovernorFunctionRestrictionsLogicV5,
+  GovernorFunctionRestrictionsLogicV6,
+  GovernorProposalLogic,
+  GovernorProposalLogicV1,
+  GovernorProposalLogicV3,
+  GovernorProposalLogicV5,
+  GovernorProposalLogicV6,
+  GovernorQuorumLogic,
+  GovernorQuorumLogicV1,
+  GovernorQuorumLogicV3,
+  GovernorQuorumLogicV5,
+  GovernorQuorumLogicV6,
+  GovernorStateLogic,
+  GovernorStateLogicV1,
+  GovernorStateLogicV3,
+  GovernorStateLogicV5,
+  GovernorStateLogicV6,
+  GovernorVotesLogic,
+  GovernorVotesLogicV1,
+  GovernorVotesLogicV3,
+  GovernorVotesLogicV5,
+  GovernorVotesLogicV6,
+  GrantsManager,
+  MyERC1155,
+  MyERC20,
+  MyERC721,
+  NodeManagementV3,
+  PassportChecksLogic,
+  PassportChecksLogicV1,
+  PassportChecksLogicV2,
+  PassportChecksLogicV3,
+  PassportConfiguratorV1,
+  PassportConfiguratorV2,
+  PassportConfiguratorV3,
+  PassportDelegationLogic,
+  PassportDelegationLogicV1,
+  PassportDelegationLogicV2,
+  PassportDelegationLogicV3,
+  PassportEntityLogic,
+  PassportEntityLogicV1,
+  PassportEntityLogicV2,
+  PassportEntityLogicV3,
+  PassportPersonhoodLogic,
+  PassportPersonhoodLogicV1,
+  PassportPersonhoodLogicV2,
+  PassportPersonhoodLogicV3,
+  PassportPoPScoreLogic,
+  PassportPoPScoreLogicV1,
+  PassportPoPScoreLogicV2,
+  PassportPoPScoreLogicV3,
+  PassportSignalingLogic,
+  PassportSignalingLogicV1,
+  PassportSignalingLogicV2,
+  PassportSignalingLogicV3,
+  PassportWhitelistAndBlacklistLogic,
+  PassportWhitelistAndBlacklistLogicV1,
+  PassportWhitelistAndBlacklistLogicV2,
+  PassportWhitelistAndBlacklistLogicV3,
+  StargateNFT,
+  TimeLock,
+  TokenAuction,
+  Treasury,
+  VeBetterPassport,
+  VeBetterPassportV1,
+  VeBetterPassportV2,
+  VeBetterPassportV3,
+  VOT3,
+  VoteEligibilityUtils,
+  VoteEligibilityUtilsV2,
+  VoteEligibilityUtilsV3,
+  VoteEligibilityUtilsV4,
+  VoteEligibilityUtilsV5,
+  VoterRewards,
+  VoterRewardsV1,
+  X2EarnApps,
+  X2EarnCreator,
+  X2EarnRewardsPool,
+  XAllocationPool,
+  XAllocationVoting,
+} from "../../typechain-types"
 import {
   GovernorClockLogicV4,
   GovernorConfiguratorV4,
@@ -141,11 +145,10 @@ import {
   GovernorStateLogicV4,
   GovernorVotesLogicV4,
 } from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
-import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
-import { APPS } from "../../scripts/deploy/setup"
-import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
-import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
+import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
+// Type helper to ensure all properties of an async function's return type are defined
+type EnsureDefined<T extends (...args: any[]) => any> = Required<Awaited<ReturnType<T>>>
 export interface DeployInstance {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
@@ -294,7 +297,7 @@ export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels
 export const multipliers = [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400] // Galaxy Member contract percentage multipliers (in basis points)
 
-let cachedDeployInstance: DeployInstance | undefined = undefined
+let cachedDeployInstance: DeployInstance = {} as DeployInstance
 export const getOrDeployContractInstances = async ({
   forceDeploy = false,
   config = createLocalConfig(),
@@ -302,7 +305,7 @@ export const getOrDeployContractInstances = async ({
   bootstrapAndStartEmissions = false,
   deployMocks = false,
 }) => {
-  if (!forceDeploy && cachedDeployInstance !== undefined) {
+  if (!forceDeploy && Object.keys(cachedDeployInstance).length > 0) {
     return cachedDeployInstance
   }
 
@@ -360,7 +363,7 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV6,
     GovernorStateLogicLibV6,
     GovernorVotesLogicLibV6,
-  } = await governanceLibraries()
+  } = (await governanceLibraries()) as EnsureDefined<typeof governanceLibraries>
 
   // Deploy Passport Libraries
   const {
@@ -400,7 +403,7 @@ export const getOrDeployContractInstances = async ({
     PassportPoPScoreLogic,
     PassportSignalingLogic,
     PassportWhitelistAndBlacklistLogic,
-  } = await passportLibraries()
+  } = (await passportLibraries()) as EnsureDefined<typeof passportLibraries>
 
   // Deploy X2Earn AppLibraries
   const {
@@ -424,7 +427,7 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV5,
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
-  } = await x2EarnLibraries()
+  } = (await x2EarnLibraries()) as EnsureDefined<typeof x2EarnLibraries>
 
   // ---------------------- Deploy Mocks ----------------------
 
@@ -535,7 +538,7 @@ export const getOrDeployContractInstances = async ({
       versions: [undefined, 2, 3],
       logOutput: false,
     },
-  )
+  ) as NodeManagementV3
 
   let myErc1155, myErc721
   if (deployMocks) {
