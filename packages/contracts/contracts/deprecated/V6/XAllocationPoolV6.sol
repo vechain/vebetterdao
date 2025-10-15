@@ -23,7 +23,7 @@
 
 pragma solidity 0.8.20;
 
-import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
+import { IXAllocationPoolV6 as IXAllocationPool } from "./interfaces/IXAllocationPoolV6.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
