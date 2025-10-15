@@ -499,6 +499,111 @@ describe("X-Allocation Pool - @shard13", async function () {
       expect(app1round1Earnings1[0]).to.eql(1144n)
       expect(app2round1Earnings2[0]).to.eql(5993n)
       expect(app3round1Earnings3[0]).to.eql(2861n)
+
+      // Capture storage slots before upgrading to V7
+      let storageSlotsBeforeV7 = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsBeforeV7.push(await ethers.provider.getStorage(await xAllocationPool.getAddress(), i))
+      }
+
+      storageSlotsBeforeV7 = storageSlotsBeforeV7.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ) // removing empty slots
+
+      // Upgrade to V7
+      const xAllocationPoolV7 = (await upgradeProxy(
+        "XAllocationPoolV6",
+        "XAllocationPool",
+        await xAllocationPool.getAddress(),
+        [[], []],
+        {
+          version: 7,
+        },
+      )) as XAllocationPool
+
+      const storageSlotsAfterV7 = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfterV7.push(await ethers.provider.getStorage(await xAllocationPoolV7.getAddress(), i))
+      }
+
+      // Check if storage slots are the same after upgrade to V7
+      for (let i = 0; i < storageSlotsBeforeV7.length; i++) {
+        expect(storageSlotsBeforeV7[i]).to.equal(storageSlotsAfterV7[i])
+      }
+
+      // Verify all historical round earnings are still intact after V7 upgrade
+      const app1round1EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round1, app1Id)
+      const app2round1EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round1, app2Id)
+      const app3round1EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round1, app3Id)
+
+      expect(app1round1EarningsAfterV7[0]).to.eql(1144n)
+      expect(app2round1EarningsAfterV7[0]).to.eql(5993n)
+      expect(app3round1EarningsAfterV7[0]).to.eql(2861n)
+
+      const app1round2EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round2, app1Id)
+      const app2round2EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round2, app2Id)
+      const app3round2EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round2, app3Id)
+
+      expect(app1round2EarningsAfterV7[0]).to.eql(1144n)
+      expect(app2round2EarningsAfterV7[0]).to.eql(5993n)
+      expect(app3round2EarningsAfterV7[0]).to.eql(2861n)
+
+      const app1round3EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round3, app1Id)
+      const app2round3EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round3, app2Id)
+      const app3round3EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round3, app3Id)
+
+      expect(app1round3EarningsAfterV7[0]).to.eql(1144n)
+      expect(app2round3EarningsAfterV7[0]).to.eql(5993n)
+      expect(app3round3EarningsAfterV7[0]).to.eql(2861n)
+
+      const app1round4EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round4, app1Id)
+      const app2round4EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round4, app2Id)
+      const app3round4EarningsAfterV7 = await xAllocationPoolV7.roundEarnings(round4, app3Id)
+
+      expect(app1round4EarningsAfterV7[0]).to.eql(3225n)
+      expect(app2round4EarningsAfterV7[0]).to.eql(5161n)
+      expect(app3round4EarningsAfterV7[0]).to.eql(1612n)
+
+      // Verify quadratic funding state persists after V7 upgrade
+      expect(await xAllocationPoolV7.isQuadraticFundingDisabledForCurrentRound()).to.eql(true)
+      expect(await xAllocationPoolV7.isQuadraticFundingDisabledForRound(round4)).to.eql(true)
+
+      // Run a new round after V7 upgrade to verify functionality
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      const round5 = await startNewAllocationRound()
+
+      // Vote in round 5
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(round5, [app2Id, app3Id], [ethers.parseEther("900"), ethers.parseEther("100")])
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(round5, [app2Id, app3Id], [ethers.parseEther("500"), ethers.parseEther("100")])
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(round5, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(round5, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(round5, [app1Id, app3Id], [ethers.parseEther("1000"), ethers.parseEther("100")])
+
+      await waitForRoundToEnd(round5)
+
+      const app1round5Earnings = await xAllocationPoolV7.roundEarnings(round5, app1Id)
+      const app2round5Earnings = await xAllocationPoolV7.roundEarnings(round5, app2Id)
+      const app3round5Earnings = await xAllocationPoolV7.roundEarnings(round5, app3Id)
+
+      // Should use linear calculation since quadratic funding is disabled
+      expect(app1round5Earnings[0]).to.eql(3225n)
+      expect(app2round5Earnings[0]).to.eql(5161n)
+      expect(app3round5Earnings[0]).to.eql(1612n)
     })
   })
 
@@ -537,14 +642,15 @@ describe("X-Allocation Pool - @shard13", async function () {
           .reverted
       })
 
-      it("Cannot set treasury address to zero address", async function () {
+      it("Cannot set the unallocated funds receiver address to zero address", async function () {
         const { xAllocationPool, owner } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
 
         const newTreasuryAddress = ZERO_ADDRESS
 
-        await expect(xAllocationPool.connect(owner).setTreasuryAddress(newTreasuryAddress)).to.be.reverted
+        await expect(xAllocationPool.connect(owner).setUnallocatedFundsReceiverAddress(newTreasuryAddress)).to.be
+          .reverted
       })
     })
 
