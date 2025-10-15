@@ -866,23 +866,28 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as B3TRGovernor
 
-  // Deploy GrantsManager
-  const grantsManager = (await deployAndUpgrade(
-    ["GrantsManagerV1", "GrantsManager"],
-    [
-      //Version 1 parameters
-      [
-        await governor.getAddress(),
-        await treasury.getAddress(),
-        TEMP_ADMIN,
-        await b3tr.getAddress(),
-        config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
-      ],
-      //Version 2 parameters
-      [],
-    ],
+  // Deploy GrantsManager V1 first
+  const grantsManagerV1 = (await deployProxy("GrantsManagerV1", [
+    // ← Change to GrantsManagerV1
+    await governor.getAddress(), // governor address
+    await treasury.getAddress(), // treasury address
+    TEMP_ADMIN, // admin
+    await b3tr.getAddress(), // b3tr address
+    config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
+  ])) as GrantsManagerV1
+
+  // Grant UPGRADER_ROLE to deployer
+  await grantsManagerV1.connect(deployer).grantRole(await grantsManagerV1.UPGRADER_ROLE(), deployer.address)
+
+  // Then upgrade from V1 to V2
+  const grantsManager = (await upgradeProxy(
+    "GrantsManagerV1",
+    "GrantsManager",
+    await grantsManagerV1.getAddress(),
+    [],
     {
-      versions: [undefined, 2],
+      version: 2,
+      libraries: {},
     },
   )) as GrantsManager
 
@@ -986,6 +991,11 @@ export async function deployAll(config: ContractsConfig) {
   // Grant GrantsManager admin role to GrantsManager contract
   await governor.connect(deployer).setGrantsManager(await grantsManager.getAddress())
   console.log("GrantsManager address set in B3TRGovernor contract")
+
+  //Grant GrantsManager APPROVER and REJECTOR roles to deployer
+  await grantsManager.connect(deployer).grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), deployer.address)
+  await grantsManager.connect(deployer).grantRole(await grantsManager.GRANTS_REJECTOR_ROLE(), deployer.address)
+  console.log("GrantsManager admin role granted to GrantsManager contract")
 
   // Grant GOVERNANCE_ROLE to deployer in XAllocationVoting contract
   await xAllocationVoting

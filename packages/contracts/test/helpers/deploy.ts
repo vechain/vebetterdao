@@ -126,6 +126,7 @@ import {
   GovernorDepositLogicV7,
   GovernorConfiguratorV7,
   GovernorClockLogicV7,
+  GrantsManagerV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -999,22 +1000,29 @@ export const getOrDeployContractInstances = async ({
 
   // Set the TEMP governor address before deploying the governor
   const TEMP_GOVERNOR_ADDRESS = owner.address
-  const grantsManager = (await deployAndUpgrade(
-    ["GrantsManagerV1", "GrantsManager"],
-    [
-      //Version 1 parameters
-      [
-        TEMP_GOVERNOR_ADDRESS, // governor address
-        await treasury.getAddress(), // treasury address
-        owner.address, // admin
-        await b3tr.getAddress(), // b3tr address
-        config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
-      ],
-      //Version 2 parameters
-      [],
-    ],
+
+  // Deploy GrantsManager V1 first
+  const grantsManagerV1 = (await deployProxy("GrantsManagerV1", [
+    // ← Change to GrantsManagerV1
+    await TEMP_GOVERNOR_ADDRESS, // governor address
+    await treasury.getAddress(), // treasury address
+    owner.address, // admin
+    await b3tr.getAddress(), // b3tr address
+    config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
+  ])) as GrantsManagerV1
+
+  // Grant UPGRADER_ROLE to deployer
+  await grantsManagerV1.connect(owner).grantRole(await grantsManagerV1.UPGRADER_ROLE(), owner.address)
+
+  // Then upgrade from V1 to V2
+  const grantsManager = (await upgradeProxy(
+    "GrantsManagerV1",
+    "GrantsManager",
+    await grantsManagerV1.getAddress(),
+    [],
     {
-      versions: [undefined, 2],
+      version: 2,
+      libraries: {},
     },
   )) as GrantsManager
 

@@ -16,13 +16,14 @@ import {
   VeBetterPassport,
   X2EarnCreator,
   GrantsManager,
+  GrantsManagerV1,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, APPS } from "./setup"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { shouldEndorseXApps } from "@repo/config/contracts"
-import { deployAndInitializeLatest, deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
+import { deployAndInitializeLatest, deployAndUpgrade, deployProxy, saveContractsToFile, upgradeProxy } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import {
   transferAdminRole,
@@ -531,22 +532,28 @@ export async function deployLatest(config: ContractsConfig) {
     true,
   )) as B3TRGovernor
 
-  const grantsManager = (await deployAndUpgrade(
-    ["GrantsManagerV1", "GrantsManager"],
-    [
-      //Version 1 parameters
-      [
-        await governor.getAddress(),
-        await treasury.getAddress(),
-        TEMP_ADMIN,
-        await b3tr.getAddress(),
-        config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
-      ],
-      //Version 2 parameters
-      [],
-    ],
+  // Deploy GrantsManager V1 first
+  const grantsManagerV1 = (await deployProxy("GrantsManagerV1", [
+    // ← Change to GrantsManagerV1
+    await governor.getAddress(), // governor address
+    await treasury.getAddress(), // treasury address
+    deployer.address, // admin
+    await b3tr.getAddress(), // b3tr address
+    config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
+  ])) as GrantsManagerV1
+
+  // Grant UPGRADER_ROLE to deployer
+  await grantsManagerV1.connect(deployer).grantRole(await grantsManagerV1.UPGRADER_ROLE(), deployer.address)
+
+  // Then upgrade from V1 to V2
+  const grantsManager = (await upgradeProxy(
+    "GrantsManagerV1",
+    "GrantsManager",
+    await grantsManagerV1.getAddress(),
+    [],
     {
-      versions: [undefined, 2],
+      version: 2,
+      libraries: {},
     },
   )) as GrantsManager
 
