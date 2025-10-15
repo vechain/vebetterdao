@@ -37,6 +37,10 @@
       "dependsOn": ["@vechain/vebetterdao-contracts#compile"],
       "outputs": ["packages/contracts/artifacts/**", "packages/contracts/typechain-types/**"]
     },
+    "build-storybook": {
+      "cache": true,
+      "outputs": ["storybook-static/**"]
+    },
     "build": {
       "cache": true,
       "dependsOn": ["prepare-contracts"],
