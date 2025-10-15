@@ -118,6 +118,14 @@ import {
   GovernorClockLogicV6,
   StargateNFT,
   GrantsManager,
+  GovernorVotesLogicV7,
+  GovernorStateLogicV7,
+  GovernorQuorumLogicV7,
+  GovernorFunctionRestrictionsLogicV7,
+  GovernorProposalLogicV7,
+  GovernorDepositLogicV7,
+  GovernorConfiguratorV7,
+  GovernorClockLogicV7,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -222,6 +230,14 @@ export interface DeployInstance {
   governorQuorumLogicLibV6: GovernorQuorumLogicV6
   governorStateLogicLibV6: GovernorStateLogicV6
   governorVotesLogicLibV6: GovernorVotesLogicV6
+  governorClockLogicLibV7: GovernorClockLogicV7
+  governorConfiguratorLibV7: GovernorConfiguratorV7
+  governorDepositLogicLibV7: GovernorDepositLogicV7
+  governorFunctionRestrictionsLogicLibV7: GovernorFunctionRestrictionsLogicV7
+  governorProposalLogicLibV7: GovernorProposalLogicV7
+  governorQuorumLogicLibV7: GovernorQuorumLogicV7
+  governorStateLogicLibV7: GovernorStateLogicV7
+  governorVotesLogicLibV7: GovernorVotesLogicV7
 
   // GrantsManager
   grantsManager: GrantsManager
@@ -1321,6 +1337,14 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV6: GovernorQuorumLogicLibV6,
     governorStateLogicLibV6: GovernorStateLogicLibV6,
     governorVotesLogicLibV6: GovernorVotesLogicLibV6,
+    governorClockLogicLibV7: GovernorClockLogicLibV7,
+    governorConfiguratorLibV7: GovernorConfiguratorLibV7,
+    governorDepositLogicLibV7: GovernorDepositLogicLibV7,
+    governorFunctionRestrictionsLogicLibV7: GovernorFunctionRestrictionsLogicLibV7,
+    governorProposalLogicLibV7: GovernorProposalLogicLibV7,
+    governorQuorumLogicLibV7: GovernorQuorumLogicLibV7,
+    governorStateLogicLibV7: GovernorStateLogicLibV7,
+    governorVotesLogicLibV7: GovernorVotesLogicLibV7,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,
