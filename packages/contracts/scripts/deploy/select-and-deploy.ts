@@ -31,9 +31,13 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "grants-manager",
     description: "Deploy only this contract",
   },
+  "Dynamic Base Allocation Pool": {
+    name: "dba-pool",
+    description: "Deploy only this contract",
+  },
 } as const
 
-async function upgradeContract() {
+async function deployContract() {
   try {
     const env = process.env.NEXT_PUBLIC_APP_ENV
     if (!env) throw new Error("Environment variable NEXT_PUBLIC_APP_ENV is not set.")
@@ -97,6 +101,13 @@ async function upgradeContract() {
         // Run the upgrade script
         execSync(`turbo run deploy:${env}`, { stdio: "inherit" })
         break
+      case "dba-pool":
+        console.log("Deploying Dynamic Base Allocation Pool")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
       default:
         throw new Error("Invalid choice")
     }
@@ -108,4 +119,4 @@ async function upgradeContract() {
   }
 }
 
-upgradeContract()
+deployContract()
