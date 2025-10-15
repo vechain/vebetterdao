@@ -32,7 +32,7 @@ import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEn
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IVeBetterPassport } from "../../../../interfaces/IVeBetterPassport.sol";
-import { IGrantsManager } from "../../../../interfaces/IGrantsManager.sol";
+import { IGrantsManagerV1 } from "../../../V1/interfaces/IGrantsManagerV1.sol";
 import { IGalaxyMember } from "../../../../interfaces/IGalaxyMember.sol";
 
 /// @title GovernorStorageTypesV7
@@ -111,7 +111,7 @@ library GovernorStorageTypesV7 {
     // mapping to store the deposit threshold cap for each proposal type
     mapping(GovernorTypesV7.ProposalType => uint256) proposalTypeDepositThresholdCap;
     // GrantsManager contract
-    IGrantsManager grantsManager;
+    IGrantsManagerV1 grantsManager;
     // GalaxyMember contract
     IGalaxyMember galaxyMember;
     // mapping to store the GM weight required for each proposal type

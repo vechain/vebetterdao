@@ -49,7 +49,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
-import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
+import { IGrantsManagerV1 } from "../V1/interfaces/IGrantsManagerV1.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 
 /**
@@ -752,7 +752,7 @@ contract B3TRGovernorV7 is
    * @notice Get the GrantsManager contract
    * @return The current GrantsManager contract
    */
-  function getGrantsManagerContract() external view returns (IGrantsManager) {
+  function getGrantsManagerContract() external view returns (IGrantsManagerV1) {
     GovernorStorageTypesV7.GovernorStorage storage $ = getGovernorStorage();
     return $.grantsManager;
   }
@@ -1145,7 +1145,7 @@ contract B3TRGovernorV7 is
    * @param newGrantsManager The new GrantsManager contract
    */
   function setGrantsManager(
-    IGrantsManager newGrantsManager
+    IGrantsManagerV1 newGrantsManager
   ) external onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     GovernorStorageTypesV7.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfiguratorV7.setGrantsManagerContract($, newGrantsManager);

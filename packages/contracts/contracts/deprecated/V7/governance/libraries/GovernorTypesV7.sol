@@ -29,7 +29,7 @@ import { IB3TR } from "../../../../interfaces/IB3TR.sol";
 import { IVOT3 } from "../../../../interfaces/IVOT3.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { IGalaxyMember } from "../../../../interfaces/IGalaxyMember.sol";
-import { IGrantsManager } from "../../../../interfaces/IGrantsManager.sol";
+import { IGrantsManagerV1 } from "../../../V1/interfaces/IGrantsManagerV1.sol";
 
 library GovernorTypesV7 {
   /**
@@ -127,7 +127,7 @@ library GovernorTypesV7 {
     uint256 standardGMWeight;
     uint256 grantGMWeight;
     IGalaxyMember galaxyMember;
-    IGrantsManager grantsManager;
+    IGrantsManagerV1 grantsManager;
   }
 
   // ProposalType enum to distinguish between different types of proposals

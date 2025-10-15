@@ -33,7 +33,7 @@ import { GovernorFunctionRestrictionsLogicV7 } from "./GovernorFunctionRestricti
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
-import { IGrantsManager } from "../../../../interfaces/IGrantsManager.sol";
+import { IGrantsManagerV1 } from "../../../V1/interfaces/IGrantsManagerV1.sol";
 
 /// @title GovernorProposalLogicV7
 /// @notice Library for managing proposals in the Governor contract.
@@ -351,7 +351,7 @@ library GovernorProposalLogicV7 {
     );
 
     //Instantiate the grants manager contract inline to avoid stack too deep errors
-    IGrantsManager(self.grantsManager).createMilestones(
+    IGrantsManagerV1(self.grantsManager).createMilestones(
       milestonesDetailsMetadataURI,
       proposalId,
       msg.sender, //Proposer

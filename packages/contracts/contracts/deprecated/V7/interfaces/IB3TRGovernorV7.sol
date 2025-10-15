@@ -11,7 +11,7 @@ import { IXAllocationVotingGovernor } from "../../../interfaces/IXAllocationVoti
 import { GovernorTypesV7 } from "../governance/libraries/GovernorTypesV7.sol";
 import { IVeBetterPassport } from "../../../interfaces/IVeBetterPassport.sol";
 import { IGalaxyMember } from "../../../interfaces/IGalaxyMember.sol";
-import { IGrantsManager } from "../../../interfaces/IGrantsManager.sol";
+import { IGrantsManagerV1 } from "../../V1/interfaces/IGrantsManagerV1.sol";
 
 /**
  * @dev Interface of the {B3TRGovernor} core.
@@ -630,13 +630,13 @@ interface IB3TRGovernorV7 is IERC165, IERC6372 {
    * @notice Set the GrantsManager contract
    * @param newGrantsManager The new GrantsManager contract
    */
-  function setGrantsManager(IGrantsManager newGrantsManager) external;
+  function setGrantsManager(IGrantsManagerV1 newGrantsManager) external;
 
   /**
    * @notice Get the GrantsManager contract
    * @return The current GrantsManager contract
    */
-  function getGrantsManagerContract() external view returns (IGrantsManager);
+  function getGrantsManagerContract() external view returns (IGrantsManagerV1);
 
   /**
    * @notice Get the GM weight for a proposal type

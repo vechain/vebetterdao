@@ -33,7 +33,7 @@ import { IVeBetterPassport } from "../../../../interfaces/IVeBetterPassport.sol"
 import { GovernorProposalLogicV7 } from "./GovernorProposalLogicV7.sol";
 import { GovernorTypesV7 } from "./GovernorTypesV7.sol";
 import { IGalaxyMember } from "../../../../interfaces/IGalaxyMember.sol";
-import { IGrantsManager } from "../../../../interfaces/IGrantsManager.sol";
+import { IGrantsManagerV1 } from "../../../V1/interfaces/IGrantsManagerV1.sol";
 
 /// @title GovernorConfigurator Library
 /// @notice Library for managing the configuration of a Governor contract.
@@ -298,7 +298,7 @@ library GovernorConfiguratorV7 {
 
   function setGrantsManagerContract(
     GovernorStorageTypesV7.GovernorStorage storage self,
-    IGrantsManager newGrantsManager
+    IGrantsManagerV1 newGrantsManager
   ) external {
     require(address(newGrantsManager) != address(0), "GovernorConfigurator: GrantsManager address cannot be zero");
     _setGrantsManagerContract(self, newGrantsManager);
@@ -311,7 +311,7 @@ library GovernorConfiguratorV7 {
    */
   function _setGrantsManagerContract(
     GovernorStorageTypesV7.GovernorStorage storage self,
-    IGrantsManager newGrantsManager
+    IGrantsManagerV1 newGrantsManager
   ) internal {
     require(address(newGrantsManager) != address(0), "GovernorConfigurator: GrantsManager address cannot be zero");
     self.grantsManager = newGrantsManager;
@@ -398,7 +398,7 @@ library GovernorConfiguratorV7 {
    */
   function getGrantsManagerContract(
     GovernorStorageTypesV7.GovernorStorage storage self
-  ) internal view returns (IGrantsManager) {
+  ) internal view returns (IGrantsManagerV1) {
     return self.grantsManager;
   }
 
