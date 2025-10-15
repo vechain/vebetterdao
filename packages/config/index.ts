@@ -61,6 +61,7 @@ export type AppConfig = {
   b3trMultiSigAddress?: string
   stargateNFTContractAddress: string
   grantsManagerContractAddress: string
+  dbaPoolContractAddress: string
   nodeUrl: string
   indexerUrl?: string
   network: Network

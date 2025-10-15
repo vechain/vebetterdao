@@ -15,11 +15,8 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
-  TokenAuction,
-  StargateNFT,
-  StargateDelegation,
-  NodeManagementV3,
   GrantsManager,
+  DBAPool,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -32,7 +29,6 @@ import {
   initializeProxy,
   saveContractsToFile,
   upgradeProxy,
-  deployStargateProxyWithoutInitialization,
 } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import {
@@ -47,8 +43,6 @@ import {
   validateContractRole,
 } from "../helpers/roles"
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
-import { deployStargateNFTLibraries } from "./deploys/deployStargateNftLibraries"
-import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -471,6 +465,7 @@ export async function deployAll(config: ContractsConfig) {
       "XAllocationPoolV3",
       "XAllocationPoolV4",
       "XAllocationPoolV5",
+      "XAllocationPoolV6",
       "XAllocationPool",
     ],
     [
@@ -488,9 +483,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [[], []], // roundIds and amounts for historical unallocated funds
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       logOutput: true,
     },
   )) as XAllocationPool
@@ -875,6 +871,17 @@ export async function deployAll(config: ContractsConfig) {
     config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
   ])) as GrantsManager
 
+  // DynamicBaseAllocationPool
+  const dynamicBaseAllocationPool = (await deployProxy("DBAPool", [
+    {
+      admin: TEMP_ADMIN, // admin
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationPool: await xAllocationPool.getAddress(),
+      b3tr: await b3tr.getAddress(),
+      distributionStartRound: 1, // startRound
+    },
+  ])) as DBAPool
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -895,6 +902,7 @@ export async function deployAll(config: ContractsConfig) {
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
     GrantsManager: await grantsManager.getAddress(),
+    DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
   }
 
   const libraries: {
@@ -1481,6 +1489,7 @@ export async function deployAll(config: ContractsConfig) {
     veBetterPassport: veBetterPassport,
     x2EarnCreator: x2EarnCreator,
     grantsManager: grantsManager,
+    dynamicBaseAllocationPool: dynamicBaseAllocationPool,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,
