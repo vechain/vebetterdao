@@ -70,31 +70,20 @@ const getNetworkConfig = (): NetworkConfig => {
     case AppEnv.MAINNET:
       return {
         nodeUrl: MAINNET_URL,
-        config: {
-          ...mainnetConfig,
-          // TODO: Add the actual DBAPool contract address once deployed
-          dbaPoolContractAddress: process.env.DBA_POOL_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000",
-        },
+        config: mainnetConfig,
       }
 
     case AppEnv.TESTNET_STAGING:
       return {
         nodeUrl: TESTNET_URL,
-        config: {
-          ...testnetStagingConfig,
-          // TODO: Add the actual DBAPool contract address once deployed
-          dbaPoolContractAddress: process.env.DBA_POOL_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000",
-        },
+        config: testnetStagingConfig,
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
         nodeUrl: TESTNET_URL,
-        config: {
-          ...testnetStagingConfig,
-          dbaPoolContractAddress: process.env.DBA_POOL_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000",
-        },
+        config: testnetStagingConfig,
       }
   }
 }

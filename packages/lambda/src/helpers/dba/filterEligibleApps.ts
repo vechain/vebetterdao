@@ -4,6 +4,7 @@ import {
   X2EarnApps__factory as X2EarnApps,
   XAllocationVoting__factory as XAllocationVoting,
   XAllocationPool__factory as XAllocationPool,
+  X2EarnRewardsPool__factory as X2EarnRewardsPool,
 } from "@vechain/vebetterdao-contracts"
 import { AppConfig } from "@repo/config"
 
@@ -28,13 +29,13 @@ async function hadEndorsementChangesDuringRound(
 
   const roundStartRes = await thor.contracts.executeCall(
     config.xAllocationVotingContractAddress,
-    votingContract.getFunction("roundStart"),
+    votingContract.getFunction("roundSnapshot"),
     [roundId],
   )
 
   const roundEndRes = await thor.contracts.executeCall(
     config.xAllocationVotingContractAddress,
-    votingContract.getFunction("roundEnd"),
+    votingContract.getFunction("roundDeadline"),
     [roundId],
   )
 
@@ -47,20 +48,31 @@ async function hadEndorsementChangesDuringRound(
 
   // Get the AppEndorsementStatusUpdated events for this app during this round
   const x2EarnAppsContract = ABIContract.ofAbi(X2EarnApps.abi as any)
-  const eventSignature = x2EarnAppsContract.getEvent("AppEndorsementStatusUpdated").signature
+  const eventAbi = x2EarnAppsContract.getEvent("AppEndorsementStatusUpdated")
+  const topics = eventAbi.encodeFilterTopicsNoNull({ appId })
 
-  const eventCriteria = {
-    address: config.x2EarnAppsContractAddress,
-    topic0: eventSignature,
-    topic1: appId, // Filter by appId (indexed parameter)
+  const logs = await thor.logs.filterEventLogs({
     range: {
       unit: "block" as const,
       from: roundStartBlock,
       to: roundEndBlock,
     },
-  }
-
-  const logs = await thor.logs.filterRawEventLogs(eventCriteria)
+    options: {
+      offset: 0,
+      limit: 256,
+    },
+    order: "asc",
+    criteriaSet: [
+      {
+        criteria: {
+          address: config.x2EarnAppsContractAddress,
+          topic0: topics[0],
+          topic1: topics[1],
+        },
+        eventAbi,
+      },
+    ],
+  })
 
   // If there are any endorsement status change events for this app during the round, it changed
   return logs.length > 0
@@ -86,13 +98,15 @@ async function hasRewardedActions(
 
   const roundStartRes = await thor.contracts.executeCall(
     config.xAllocationVotingContractAddress,
-    votingContract.getFunction("roundStart"),
+    votingContract.getFunction("roundSnapshot"),
     [roundId],
   )
 
+  console.log("Round started in block: ", roundStartRes.result?.array?.[0])
+
   const roundEndRes = await thor.contracts.executeCall(
     config.xAllocationVotingContractAddress,
-    votingContract.getFunction("roundEnd"),
+    votingContract.getFunction("roundDeadline"),
     [roundId],
   )
 
@@ -103,34 +117,33 @@ async function hasRewardedActions(
   const roundStartBlock = Number(roundStartRes.result?.array?.[0] ?? 0)
   const roundEndBlock = Number(roundEndRes.result?.array?.[0] ?? 0)
 
-  // Event signature: RewardDistributed(uint256 amount, bytes32 indexed appId, address indexed receiver, string proof, address indexed distributor)
-  const eventAbi = [
-    {
-      anonymous: false,
-      inputs: [
-        { indexed: false, name: "amount", type: "uint256" },
-        { indexed: true, name: "appId", type: "bytes32" },
-        { indexed: true, name: "receiver", type: "address" },
-        { indexed: false, name: "proof", type: "string" },
-        { indexed: true, name: "distributor", type: "address" },
-      ],
-      name: "RewardDistributed",
-      type: "event" as const,
-    },
-  ]
+  // Get the RewardDistributed event from the X2EarnRewardsPool contract
+  const rewardsPoolContract = ABIContract.ofAbi(X2EarnRewardsPool.abi as any)
+  const rewardEventAbi = rewardsPoolContract.getEvent("RewardDistributed")
+  const topics = rewardEventAbi.encodeFilterTopicsNoNull({ appId })
 
-  const eventCriteria = {
-    address: config.x2EarnRewardsPoolContractAddress,
-    topic0: ABIContract.ofAbi(eventAbi).getEvent("RewardDistributed").signature,
-    topic1: appId, // Filter by appId (indexed parameter)
+  const logs = await thor.logs.filterEventLogs({
     range: {
       unit: "block" as const,
       from: roundStartBlock,
       to: roundEndBlock,
     },
-  }
-
-  const logs = await thor.logs.filterRawEventLogs(eventCriteria)
+    options: {
+      offset: 0,
+      limit: 256,
+    },
+    order: "asc",
+    criteriaSet: [
+      {
+        criteria: {
+          address: config.x2EarnRewardsPoolContractAddress,
+          topic0: topics[0],
+          topic1: topics[1],
+        },
+        eventAbi: rewardEventAbi,
+      },
+    ],
+  })
 
   return logs.length > 0
 }
@@ -212,13 +225,13 @@ export async function filterEligibleAppsForDBA(
     }
 
     // Check current endorsement status
-    const isEndorsedRes = await thor.contracts.executeCall(
+    const isUnendorsedRes = await thor.contracts.executeCall(
       config.x2EarnAppsContractAddress,
-      ABIContract.ofAbi(X2EarnApps.abi as any).getFunction("isAppEndorsed"),
+      ABIContract.ofAbi(X2EarnApps.abi as any).getFunction("isAppUnendorsed"),
       [appId],
     )
 
-    const currentlyEndorsed = Boolean(isEndorsedRes.result?.array?.[0] ?? false)
+    const currentlyEndorsed = !(isUnendorsedRes.result?.array?.[0] ?? false)
 
     // Check if endorsement changed during the round
     const hadEndorsementChanges = await hadEndorsementChangesDuringRound(thor, config, roundId, appId)
