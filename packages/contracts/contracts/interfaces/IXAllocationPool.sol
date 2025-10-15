@@ -26,6 +26,41 @@ interface IXAllocationPool {
     uint256 teamAllocationAmount,
     uint256 rewardsAllocationAmount
   );
+  /**
+   * @dev Emit when the xAllocationVoting contract is set
+   * @param oldContractAddress The old contract address
+   * @param newContractAddress The new contract address
+   */
+  event XAllocationVotingSet(address oldContractAddress, address newContractAddress);
+  /**
+   * @dev Emit when the emissions contract is set
+   * @param oldContractAddress The old contract address
+   * @param newContractAddress The new contract address
+   */
+  event EmissionsContractSet(address oldContractAddress, address newContractAddress);
+  /**
+   * @dev Emit when the treasury contract is set (deprecated after version 7)
+   * @param oldContractAddress The old contract address
+   * @param newContractAddress The new contract address
+   */
+  event TreasuryContractSet(address oldContractAddress, address newContractAddress);
+  /**
+   * @dev Emit when the x2EarnApps contract is set
+   * @param oldContractAddress The old contract address
+   * @param newContractAddress The new contract address
+   */
+  event X2EarnAppsContractSet(address oldContractAddress, address newContractAddress);
+  /**
+   * @dev Emit when the unallocated funds receiver contract or wallet is set
+   * @param oldContractAddress The old contract address
+   * @param newContractAddress The new contract address
+   */
+  event UnallocatedFundsReceiverSet(address oldContractAddress, address newContractAddress);
+  /**
+   * @dev Emit when quadratic funding is disabled or enabled
+   * @param isDisabled The flag to enable or disable quadratic funding
+   */
+  event QuadraticFundingToggled(bool indexed isDisabled);
 
   /**
    * @dev Fetches the id of the current round and calculates the earnings.
@@ -127,7 +162,7 @@ interface IXAllocationPool {
 
   /**
    * @dev Check if quadratic funding is disabled at a given round
-    * @param roundId The round ID
+   * @param roundId The round ID
    * @return true if quadratic funding is disabled at the given round
    */
   function isQuadraticFundingDisabledForRound(uint256 roundId) external view returns (bool);
@@ -142,4 +177,19 @@ interface IXAllocationPool {
    * @dev Function to toggle quadratic funding on/off
    */
   function toggleQuadraticFunding() external;
+
+  /**
+   * @dev Returns the unallocated funds for a given round.
+   * This value is provisional until all the funds for the round have been claimed.
+   * @param roundId The round ID for which to return the unallocated funds.
+   * @return The unallocated funds for the given round.
+   */
+  function unallocatedFunds(uint256 roundId) external view returns (uint256);
+
+  /**
+   * @dev Returns true if all the funds for a given round have been claimed.
+   * @param roundId The round ID for which to return the all funds claimed status.
+   * @return True if all the funds for the given round have been claimed, false otherwise.
+   */
+  function allFundsClaimed(uint256 roundId) external view returns (bool);
 }
