@@ -752,7 +752,7 @@ contract GrantsManager is
    * @return The version of the contract
    */
   function version() external pure returns (uint256) {
-    return 1;
+    return 2;
   }
 
   // ------------------ Overrides ------------------ //
