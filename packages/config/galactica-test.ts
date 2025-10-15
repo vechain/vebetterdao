@@ -22,6 +22,7 @@ const config: AppConfig = {
   tokenAuctionContractAddress: "0x0000000000000000000000000000000000000000",
   stargateNFTContractAddress: "0xe88d4b189b58ee90751498b6033f63b497cfa97d",
   grantsManagerContractAddress: "0x0000000000000000000000000000000000000001",
+  dbaPoolContractAddress: "0x0000000000000000000000000000000000000000",
   indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://galactica.live.dev.node.vechain.org",
   network: {
