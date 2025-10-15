@@ -3,7 +3,7 @@
   "version": "1.28.10",
   "private": true,
   "scripts": {
-    "postinstall": "yarn chakra:typegen && yarn generate:schema",
+    "prebuild": "yarn chakra:typegen && yarn generate:schema",
     "typecheck": "tsc --noEmit",
     "chakra:typegen": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
     "chakra:typegen:watch": "npx @chakra-ui/cli typegen src/app/theme/theme.ts --watch",
@@ -24,7 +24,7 @@
     "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
     "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build && mv ./storybook-static ./public/storybook",
+    "build-storybook": "storybook build",
     "generate:schema": "npx openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
   },
   "dependencies": {
@@ -88,6 +88,7 @@
     "@repo/typescript-config": "*",
     "@storybook/addon-a11y": "^9.1.5",
     "@storybook/addon-docs": "^9.1.5",
+    "@storybook/addon-mcp": "^0.0.5",
     "@storybook/addon-vitest": "^9.1.5",
     "@storybook/nextjs-vite": "^9.1.5",
     "@types/mixpanel-browser": "^2.49.0",
