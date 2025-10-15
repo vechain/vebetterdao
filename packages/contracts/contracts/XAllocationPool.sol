@@ -144,6 +144,26 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
   }
 
+  /**
+   * @dev Initializes version 7 of the contract with historical unallocated funds data.
+   * This function seeds the unallocatedFunds mapping with historical data for past rounds.
+   *
+   * @param roundIds Array of round IDs for which to set unallocated funds.
+   * @param amounts Array of unallocated fund amounts corresponding to each round ID.
+   */
+  function initializeV7(
+    uint256[] memory roundIds,
+    uint256[] memory amounts
+  ) public onlyRole(UPGRADER_ROLE) reinitializer(7) {
+    require(roundIds.length == amounts.length, "XAllocationPool: arrays length mismatch");
+
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    for (uint256 i = 0; i < roundIds.length; i++) {
+      $.unallocatedFunds[roundIds[i]] = amounts[i];
+    }
+  }
+
   // ---------- Authorizers ---------- //
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
@@ -296,21 +316,6 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
       teamAllocationsAmount,
       x2EarnRewardsPoolAmount
     );
-  }
-
-  /**
-   * @dev Set the unallocated funds for a given round.
-   * This function is used to manually set the unallocated funds for a given round.
-   * It can only be called by the admin and the round cannot be in the future or current.
-   * @param roundId The round ID for which to set the unallocated funds.
-   * @param amount The amount of unallocated funds to set.
-   */
-  function setUnallocatedFunds(uint256 roundId, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    // round cannot be in the future or current
-    require(roundId < xAllocationVoting().currentRoundId(), "XAllocationPool: round cannot be in the future");
-
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $.unallocatedFunds[roundId] = amount;
   }
 
   // ---------- Internal and private ---------- //
