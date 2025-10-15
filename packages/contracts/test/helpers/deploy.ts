@@ -1042,7 +1042,7 @@ export const getOrDeployContractInstances = async ({
           grantsManager: await grantsManager.getAddress(), //GrantsManager contract
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
-      [],
+      [], // Reserved for future configuration parameters; currently no values required
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
