@@ -3,7 +3,7 @@
   "version": "1.28.10",
   "private": true,
   "scripts": {
-    "postinstall": "yarn chakra:typegen && yarn generate:schema",
+    "prebuild": "yarn chakra:typegen && yarn generate:schema",
     "typecheck": "tsc --noEmit",
     "chakra:typegen": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
     "chakra:typegen:watch": "npx @chakra-ui/cli typegen src/app/theme/theme.ts --watch",
