@@ -37,7 +37,7 @@ describe("X-Allocation Pool - @shard13", async function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationPool.treasury()).to.eql(await treasury.getAddress())
+      expect(await xAllocationPool.unallocatedFundsReceiver()).to.eql(await treasury.getAddress())
       expect(await xAllocationPool.b3tr()).to.eql(await b3tr.getAddress())
       expect(await xAllocationPool.emissions()).to.eql(await emissions.getAddress())
       expect(await xAllocationPool.x2EarnApps()).to.eql(await x2EarnApps.getAddress())
@@ -234,7 +234,7 @@ describe("X-Allocation Pool - @shard13", async function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationPool.version()).to.equal("6")
+      expect(await xAllocationPool.version()).to.equal("7")
     })
 
     it("Should not have state conflict after upgrading to V6", async () => {
@@ -503,8 +503,8 @@ describe("X-Allocation Pool - @shard13", async function () {
   })
 
   describe("Settings", async function () {
-    describe("Treasury address", async function () {
-      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set treasury address", async function () {
+    describe("Unallocated funds receiver address", async function () {
+      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set the unallocated funds receiver address", async function () {
         const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -515,14 +515,14 @@ describe("X-Allocation Pool - @shard13", async function () {
 
         const newTreasuryAddress = otherAccount.address
 
-        await xAllocationPool.connect(owner).setTreasuryAddress(newTreasuryAddress)
+        await xAllocationPool.connect(owner).setUnallocatedFundsReceiverAddress(newTreasuryAddress)
 
-        const treasuryAddress = await xAllocationPool.treasury()
+        const unallocatedFundsReceiver = await xAllocationPool.unallocatedFundsReceiver()
 
-        expect(treasuryAddress).to.eql(newTreasuryAddress)
+        expect(unallocatedFundsReceiver).to.eql(newTreasuryAddress)
       })
 
-      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set treasury address", async function () {
+      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set the unallocated funds receiver address", async function () {
         const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -533,7 +533,8 @@ describe("X-Allocation Pool - @shard13", async function () {
 
         const newTreasuryAddress = otherAccount.address
 
-        await expect(xAllocationPool.connect(otherAccount).setTreasuryAddress(newTreasuryAddress)).to.be.reverted
+        await expect(xAllocationPool.connect(otherAccount).setUnallocatedFundsReceiverAddress(newTreasuryAddress)).to.be
+          .reverted
       })
 
       it("Cannot set treasury address to zero address", async function () {
