@@ -1,5 +1,5 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { ABIContract } from "@vechain/sdk-core"
+import { ABIContract, Revision } from "@vechain/sdk-core"
 import {
   X2EarnApps__factory as X2EarnApps,
   XAllocationVoting__factory as XAllocationVoting,
@@ -65,7 +65,7 @@ async function getEndorsementStatusForRound(
     config.x2EarnAppsContractAddress,
     x2EarnAppsContract.getFunction("isAppUnendorsed"),
     [appId],
-    { revision: roundStartBlock.toString() } as any,
+    { revision: Revision.of(roundStartBlock.toString()) },
   )
 
   // Query the endorsement status at the round end block
@@ -73,7 +73,7 @@ async function getEndorsementStatusForRound(
     config.x2EarnAppsContractAddress,
     x2EarnAppsContract.getFunction("isAppUnendorsed"),
     [appId],
-    { revision: roundEndBlock.toString() } as any,
+    { revision: Revision.of(roundEndBlock.toString()) },
   )
 
   const wasUnendorsedAtStart = Boolean(unendorsedAtStartRes.result?.array?.[0] ?? false)
