@@ -867,13 +867,24 @@ export async function deployAll(config: ContractsConfig) {
   )) as B3TRGovernor
 
   // Deploy GrantsManager
-  const grantsManager = (await deployProxy("GrantsManager", [
-    await governor.getAddress(), // governor address
-    await treasury.getAddress(), // treasury address
-    TEMP_ADMIN, // admin
-    await b3tr.getAddress(), // b3tr address
-    config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
-  ])) as GrantsManager
+  const grantsManager = (await deployAndUpgrade(
+    ["GrantsManagerV1", "GrantsManager"],
+    [
+      //Version 1 parameters
+      [
+        await governor.getAddress(),
+        await treasury.getAddress(),
+        TEMP_ADMIN,
+        await b3tr.getAddress(),
+        config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
+      ],
+      //Version 2 parameters
+      [],
+    ],
+    {
+      versions: [undefined, 2],
+    },
+  )) as GrantsManager
 
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)

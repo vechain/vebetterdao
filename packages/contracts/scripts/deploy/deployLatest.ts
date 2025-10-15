@@ -531,22 +531,23 @@ export async function deployLatest(config: ContractsConfig) {
     true,
   )) as B3TRGovernor
 
-  const grantsManager = (await deployAndInitializeLatest(
-    "GrantsManager",
+  const grantsManager = (await deployAndUpgrade(
+    ["GrantsManagerV1", "GrantsManager"],
     [
-      {
-        name: "initialize",
-        args: [
-          await governor.getAddress(),
-          await treasury.getAddress(),
-          TEMP_ADMIN,
-          await b3tr.getAddress(),
-          config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
-        ],
-      },
+      //Version 1 parameters
+      [
+        await governor.getAddress(),
+        await treasury.getAddress(),
+        TEMP_ADMIN,
+        await b3tr.getAddress(),
+        config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
+      ],
+      //Version 2 parameters
+      [],
     ],
-    {},
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as GrantsManager
 
   const date = new Date(performance.now() - start)
