@@ -1,4 +1,4 @@
-import { Checkbox, VStack, HStack, Text } from "@chakra-ui/react"
+import { Checkbox, VStack, HStack, Text, For } from "@chakra-ui/react"
 import { Meta } from "@storybook/nextjs-vite"
 
 const meta = {
@@ -8,26 +8,26 @@ const meta = {
 
 export default meta
 
+const sizes = [
+  { size: "sm", label: "Small (18px)" },
+  { size: "md", label: "Medium (20px)" },
+  { size: "lg", label: "Large (24px)" },
+] as const
+
 export const AllSizesAndStates = () => (
   <VStack alignItems="flex-start" gap="8">
     <VStack alignItems="flex-start" gap="4">
       <Text fontWeight="bold">All Sizes</Text>
       <HStack gap="4">
-        <Checkbox.Root size="sm">
-          <Checkbox.HiddenInput />
-          <Checkbox.Control />
-          <Checkbox.Label>Small (18px)</Checkbox.Label>
-        </Checkbox.Root>
-        <Checkbox.Root size="md">
-          <Checkbox.HiddenInput />
-          <Checkbox.Control />
-          <Checkbox.Label>Medium (20px)</Checkbox.Label>
-        </Checkbox.Root>
-        <Checkbox.Root size="lg">
-          <Checkbox.HiddenInput />
-          <Checkbox.Control />
-          <Checkbox.Label>Large (24px)</Checkbox.Label>
-        </Checkbox.Root>
+        <For each={sizes}>
+          {({ size, label }) => (
+            <Checkbox.Root size={size}>
+              <Checkbox.HiddenInput />
+              <Checkbox.Control />
+              <Checkbox.Label>{label}</Checkbox.Label>
+            </Checkbox.Root>
+          )}
+        </For>
       </HStack>
     </VStack>
 
@@ -100,21 +100,15 @@ export const States = () => (
 
 export const Sizes = () => (
   <VStack alignItems="flex-start" gap="4">
-    <Checkbox.Root size="sm">
-      <Checkbox.HiddenInput />
-      <Checkbox.Control />
-      <Checkbox.Label>Small (18px)</Checkbox.Label>
-    </Checkbox.Root>
-    <Checkbox.Root size="md">
-      <Checkbox.HiddenInput />
-      <Checkbox.Control />
-      <Checkbox.Label>Medium (20px)</Checkbox.Label>
-    </Checkbox.Root>
-    <Checkbox.Root size="lg">
-      <Checkbox.HiddenInput />
-      <Checkbox.Control />
-      <Checkbox.Label>Large (24px)</Checkbox.Label>
-    </Checkbox.Root>
+    <For each={sizes}>
+      {({ size, label }) => (
+        <Checkbox.Root size={size}>
+          <Checkbox.HiddenInput />
+          <Checkbox.Control />
+          <Checkbox.Label>{label}</Checkbox.Label>
+        </Checkbox.Root>
+      )}
+    </For>
   </VStack>
 )
 
@@ -133,27 +127,17 @@ export const WithoutLabel = () => (
 
 export const CheckedStates = () => (
   <VStack alignItems="flex-start" gap="4">
-    <HStack gap="4">
-      <Checkbox.Root size="sm" defaultChecked>
-        <Checkbox.HiddenInput />
-        <Checkbox.Control />
-        <Checkbox.Label>Small Checked</Checkbox.Label>
-      </Checkbox.Root>
-    </HStack>
-    <HStack gap="4">
-      <Checkbox.Root size="md" defaultChecked>
-        <Checkbox.HiddenInput />
-        <Checkbox.Control />
-        <Checkbox.Label>Medium Checked</Checkbox.Label>
-      </Checkbox.Root>
-    </HStack>
-    <HStack gap="4">
-      <Checkbox.Root size="lg" defaultChecked>
-        <Checkbox.HiddenInput />
-        <Checkbox.Control />
-        <Checkbox.Label>Large Checked</Checkbox.Label>
-      </Checkbox.Root>
-    </HStack>
+    <For each={sizes}>
+      {({ size, label }) => (
+        <HStack gap="4">
+          <Checkbox.Root size={size} defaultChecked>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+            <Checkbox.Label>{label.replace(/\(.*\)/, "Checked")}</Checkbox.Label>
+          </Checkbox.Root>
+        </HStack>
+      )}
+    </For>
   </VStack>
 )
 

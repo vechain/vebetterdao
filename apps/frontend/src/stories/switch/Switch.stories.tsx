@@ -1,4 +1,4 @@
-import { Switch, VStack, HStack, Text } from "@chakra-ui/react"
+import { Switch, VStack, HStack, Text, For } from "@chakra-ui/react"
 import { Meta } from "@storybook/nextjs-vite"
 
 const meta = {
@@ -8,32 +8,28 @@ const meta = {
 
 export default meta
 
+const sizes = [
+  { size: "sm", label: "Small" },
+  { size: "md", label: "Medium" },
+  { size: "lg", label: "Large" },
+] as const
+
 export const AllSizesAndStates = () => (
   <VStack alignItems="flex-start" gap="8">
     <VStack alignItems="flex-start" gap="4">
       <Text fontWeight="bold">All Sizes</Text>
       <HStack gap="4">
-        <Switch.Root size="sm">
-          <Switch.HiddenInput />
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-          <Switch.Label>Small</Switch.Label>
-        </Switch.Root>
-        <Switch.Root size="md">
-          <Switch.HiddenInput />
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-          <Switch.Label>Medium</Switch.Label>
-        </Switch.Root>
-        <Switch.Root size="lg">
-          <Switch.HiddenInput />
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-          <Switch.Label>Large</Switch.Label>
-        </Switch.Root>
+        <For each={sizes}>
+          {({ size, label }) => (
+            <Switch.Root size={size}>
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <Switch.Label>{label}</Switch.Label>
+            </Switch.Root>
+          )}
+        </For>
       </HStack>
     </VStack>
 
@@ -122,27 +118,17 @@ export const States = () => (
 
 export const Sizes = () => (
   <VStack alignItems="flex-start" gap="4">
-    <Switch.Root size="sm">
-      <Switch.HiddenInput />
-      <Switch.Control>
-        <Switch.Thumb />
-      </Switch.Control>
-      <Switch.Label>Small</Switch.Label>
-    </Switch.Root>
-    <Switch.Root size="md">
-      <Switch.HiddenInput />
-      <Switch.Control>
-        <Switch.Thumb />
-      </Switch.Control>
-      <Switch.Label>Medium</Switch.Label>
-    </Switch.Root>
-    <Switch.Root size="lg">
-      <Switch.HiddenInput />
-      <Switch.Control>
-        <Switch.Thumb />
-      </Switch.Control>
-      <Switch.Label>Large</Switch.Label>
-    </Switch.Root>
+    <For each={sizes}>
+      {({ size, label }) => (
+        <Switch.Root size={size}>
+          <Switch.HiddenInput />
+          <Switch.Control>
+            <Switch.Thumb />
+          </Switch.Control>
+          <Switch.Label>{label}</Switch.Label>
+        </Switch.Root>
+      )}
+    </For>
   </VStack>
 )
 

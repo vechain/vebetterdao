@@ -140,9 +140,10 @@ MCP servers configured in `.mcp.json`:
 
 1. Start Storybook: `yarn storybook`
 2. Create story files in `apps/frontend/src` alongside components
-3. Use Storybook MCP for automated component testing
-4. Use Figma MCP to sync designs with components
-5. Build static docs: `yarn build-storybook`
+3. **ALWAYS use Chakra's `For` component for rendering multiple story variants** (in `apps/frontend/src/stories/`)
+4. Use Storybook MCP for automated component testing
+5. Use Figma MCP to sync designs with components
+6. Build static docs: `yarn build-storybook`
 
 ## Figma to Code
 
