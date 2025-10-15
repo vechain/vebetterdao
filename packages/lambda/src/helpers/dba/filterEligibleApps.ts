@@ -9,24 +9,32 @@ import {
 import { AppConfig } from "@repo/config"
 
 /**
- * Checks if an app had endorsement changes during a round by looking for
- * AppEndorsementStatusUpdated events during the round's block range
+ * Checks the endorsement status of an app during a round by querying contract state
+ * at specific block numbers using the revision parameter.
+ *
+ * Strategy:
+ * 1. Query isAppUnendorsed at the round start block (roundSnapshot)
+ * 2. Query isAppUnendorsed at the round end block (roundDeadline)
+ * 3. Compare the two states to determine if there were changes
+ *
+ * This approach is efficient (2 contract calls) and accurate (directly queries
+ * blockchain state at specific blocks) without needing to parse events.
  *
  * @param thor - The ThorClient instance
  * @param config - The application configuration
  * @param roundId - The round ID to check
  * @param appId - The app ID to check
- * @returns True if the app had endorsement status changes during the round
+ * @returns Object with wasUnendorsedAtStart and hadEndorsementChanges flags
  */
-async function hadEndorsementChangesDuringRound(
+async function getEndorsementStatusForRound(
   thor: ThorClient,
   config: AppConfig,
   roundId: number,
   appId: string,
-): Promise<boolean> {
-  // Get round start and end blocks
+): Promise<{ wasUnendorsedAtStart: boolean; hadEndorsementChanges: boolean }> {
   const votingContract = ABIContract.ofAbi(XAllocationVoting.abi as any)
 
+  // Get round start and end blocks
   const roundStartRes = await thor.contracts.executeCall(
     config.xAllocationVotingContractAddress,
     votingContract.getFunction("roundSnapshot"),
@@ -40,42 +48,45 @@ async function hadEndorsementChangesDuringRound(
   )
 
   if (!roundStartRes.success || !roundEndRes.success) {
-    return false
+    return { wasUnendorsedAtStart: false, hadEndorsementChanges: false }
   }
 
   const roundStartBlock = Number(roundStartRes.result?.array?.[0] ?? 0)
   const roundEndBlock = Number(roundEndRes.result?.array?.[0] ?? 0)
 
-  // Get the AppEndorsementStatusUpdated events for this app during this round
+  console.log(
+    `    Checking endorsement status for app ${appId} at round ${roundId} (blocks ${roundStartBlock}-${roundEndBlock})`,
+  )
+
+  // Query the endorsement status at the round start block
   const x2EarnAppsContract = ABIContract.ofAbi(X2EarnApps.abi as any)
-  const eventAbi = x2EarnAppsContract.getEvent("AppEndorsementStatusUpdated")
-  const topics = eventAbi.encodeFilterTopicsNoNull({ appId })
 
-  const logs = await thor.logs.filterEventLogs({
-    range: {
-      unit: "block" as const,
-      from: roundStartBlock,
-      to: roundEndBlock,
-    },
-    options: {
-      offset: 0,
-      limit: 256,
-    },
-    order: "asc",
-    criteriaSet: [
-      {
-        criteria: {
-          address: config.x2EarnAppsContractAddress,
-          topic0: topics[0],
-          topic1: topics[1],
-        },
-        eventAbi,
-      },
-    ],
-  })
+  const unendorsedAtStartRes = await thor.contracts.executeCall(
+    config.x2EarnAppsContractAddress,
+    x2EarnAppsContract.getFunction("isAppUnendorsed"),
+    [appId],
+    { revision: roundStartBlock.toString() } as any,
+  )
 
-  // If there are any endorsement status change events for this app during the round, it changed
-  return logs.length > 0
+  // Query the endorsement status at the round end block
+  const unendorsedAtEndRes = await thor.contracts.executeCall(
+    config.x2EarnAppsContractAddress,
+    x2EarnAppsContract.getFunction("isAppUnendorsed"),
+    [appId],
+    { revision: roundEndBlock.toString() } as any,
+  )
+
+  const wasUnendorsedAtStart = Boolean(unendorsedAtStartRes.result?.array?.[0] ?? false)
+  const wasUnendorsedAtEnd = Boolean(unendorsedAtEndRes.result?.array?.[0] ?? false)
+
+  // If the endorsement status changed during the round, there were changes
+  const hadEndorsementChanges = wasUnendorsedAtStart !== wasUnendorsedAtEnd
+
+  console.log(
+    `    Status at start: ${wasUnendorsedAtStart ? "UNENDORSED" : "ENDORSED"}, at end: ${wasUnendorsedAtEnd ? "UNENDORSED" : "ENDORSED"}${hadEndorsementChanges ? " (CHANGED)" : " (no change)"}`,
+  )
+
+  return { wasUnendorsedAtStart, hadEndorsementChanges }
 }
 
 /**
@@ -224,26 +235,23 @@ export async function filterEligibleAppsForDBA(
       continue
     }
 
-    // Check current endorsement status
-    const isUnendorsedRes = await thor.contracts.executeCall(
-      config.x2EarnAppsContractAddress,
-      ABIContract.ofAbi(X2EarnApps.abi as any).getFunction("isAppUnendorsed"),
-      [appId],
+    // Check endorsement status at round start and during the round
+    const { wasUnendorsedAtStart, hadEndorsementChanges } = await getEndorsementStatusForRound(
+      thor,
+      config,
+      roundId,
+      appId,
     )
 
-    const currentlyEndorsed = !(isUnendorsedRes.result?.array?.[0] ?? false)
-
-    // Check if endorsement changed during the round
-    const hadEndorsementChanges = await hadEndorsementChangesDuringRound(thor, config, roundId, appId)
-
-    // Exclude apps that remained in grace period for the entire round
-    // Accept apps that:
-    // - Are currently endorsed (either started endorsed or became endorsed during round)
-    // - Had endorsement changes during the round (went from endorsed to unendorsed or vice versa)
-    // Reject apps that:
-    // - Are currently unendorsed AND had no endorsement changes (remained in grace period entire round)
-    if (!currentlyEndorsed && !hadEndorsementChanges) {
-      console.log(`  - App ${appId} remained in grace period entire round, skipping`)
+    // Exclude apps that remained in grace period (unendorsed) for the entire round
+    // An app is considered to have been in grace period for the entire round if:
+    // - It was unendorsed at the round start block, AND
+    // - It had no endorsement status changes during the round
+    //
+    // This means the app stayed unendorsed throughout the entire round duration.
+    // Apps that became endorsed during the round (had changes) are eligible.
+    if (wasUnendorsedAtStart && !hadEndorsementChanges) {
+      console.log(`  - App ${appId} remained in grace period (unendorsed) for entire round, skipping`)
       continue
     }
 
