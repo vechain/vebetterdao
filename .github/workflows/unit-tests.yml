@@ -127,7 +127,9 @@ jobs:
           - shard: shard4e
             label: Governance - Compatibility & Thresholds
           - shard: shard4f
-            label: Governance - Upgrades
+            label: Governance - V7 Upgrade
+          - shard: shard4g
+            label: Governance - V8 Upgrade
           - shard: shard5
             label: Node Management
           - shard: shard6
