@@ -209,7 +209,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user1.address)).to.be.false
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user2.address)).to.be.false
-      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(0)
+      expect(await xAllocationVoting.getTotalAutoVotingUsersAtRoundStart()).to.equal(0)
 
       // Wait for the next cycle to be distributable
       await waitForNextCycle(emissions)
@@ -218,20 +218,20 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user1.address)).to.be.true
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user2.address)).to.be.true
-      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(3)
+      expect(await xAllocationVoting.getTotalAutoVotingUsersAtRoundStart()).to.equal(3)
       expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(await xAllocationVoting.currentRoundId())).to.equal(
         3,
       )
 
       await xAllocationVoting.connect(user2).toggleAutoVoting(user2.address)
       // remaining 3 until the next cycle
-      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(3)
+      expect(await xAllocationVoting.getTotalAutoVotingUsersAtRoundStart()).to.equal(3)
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user2.address)).to.be.false
-      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(2)
+      expect(await xAllocationVoting.getTotalAutoVotingUsersAtRoundStart()).to.equal(2)
     })
 
     it("should revert if app preferences are empty before enabling autovoting", async function () {

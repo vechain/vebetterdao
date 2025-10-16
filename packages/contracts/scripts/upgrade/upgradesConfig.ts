@@ -42,7 +42,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Fix casting votes multiple times for same app in single transaction",
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards and IEmissions)",
       v7: "Proposal Execution: Count proposal deposits to x-allocation voting power",
-      v8: "Add autovoting functionality",
+      v8: "Add Auto-Voting functionality",
     },
   },
   "XAllocation Pool": {

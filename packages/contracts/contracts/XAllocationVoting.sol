@@ -315,7 +315,7 @@ contract XAllocationVoting is
   /**
    * @dev Get the total number of users who enabled auto-voting at the last emission block
    */
-  function getTotalAutoVotingUsers() public view returns (uint208) {
+  function getTotalAutoVotingUsersAtRoundStart() public view returns (uint208) {
     uint256 lastEmissionBlock = emissions().lastEmissionBlock();
     return _getTotalAutoVotingUsersAtTimepoint(uint48(lastEmissionBlock));
   }

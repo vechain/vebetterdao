@@ -458,9 +458,6 @@ contract RelayerRewardsPool is
   function validateClaimDuringEarlyAccess(uint256 roundId, address voter, address caller) external view {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
-    // Get when the round end block
-    uint256 roundEndBlock = $.xAllocationVoting.roundDeadline(roundId);
-
     if (!isClaimEarlyAccessActive(roundId)) {
       // After early access period, anyone can claim
       return;
