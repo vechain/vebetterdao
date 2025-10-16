@@ -16,7 +16,7 @@ import { DBAPool } from "../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("DBA Pool - @shard7", async function () {
+describe("DBA Pool - @shard7b", async function () {
   // Environment params
   let owner: HardhatEthersSigner
   let otherAccount: HardhatEthersSigner
