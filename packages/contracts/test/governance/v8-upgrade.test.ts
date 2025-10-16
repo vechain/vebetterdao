@@ -15,8 +15,14 @@ import {
   B3TRGovernorV7,
 } from "../../typechain-types"
 import { DeployInstance, getOrDeployContractInstances } from "../helpers"
-import { waitForBlock } from "../helpers/common"
-import { setupProposer, startNewRoundAndGetRoundId } from "./fixture.test"
+import {
+  getVot3Tokens,
+  moveBlocks,
+  startNewAllocationRound,
+  waitForBlock,
+  waitForCurrentRoundToEnd,
+} from "../helpers/common"
+import { setupProposer, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
 
 describe.only("Governance - V8 Upgrade - @shard4fg", function () {
   it("Should preserve proposal data through version upgrades and add proposal state in development support", async () => {
@@ -389,7 +395,7 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
     expect(await governorV8.proposalType(proposalIdV2)).to.equal(ethers.toBigInt(0)) // Standard type
     expect(await governorV8.proposalType(proposalIdV5)).to.equal(ethers.toBigInt(0)) // Standard type
 
-    // Create new proposals in V7 with explicit proposal types
+    // Create new proposals in V8 with explicit proposal types
     await waitForBlock(1)
     const roundIdforV8 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
 
@@ -413,14 +419,42 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
     expect(proposerV8).to.equal(proposer.address)
     expect(stateV8).to.equal(ethers.toBigInt(0)) // Pending state
 
-    // Verify new proposals have correct types
+    // Verify new proposal has correct type
     expect(await governorV8.proposalType(proposalIdV8)).to.equal(ethers.toBigInt(0))
+
+    // Get deposit threshold and fully support the proposal
+    const depositThreshold = await governorV8.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+    await getVot3Tokens(proposer, ethers.formatEther(depositThreshold))
+    await vot3.connect(proposer).approve(await governorV8.getAddress(), depositThreshold)
+    await governorV8.connect(proposer).deposit(depositThreshold, proposalIdV8)
+
+    // Verify deposit reached
+    expect(await governorV8.proposalDepositReached(proposalIdV8)).to.be.true
+
+    // Wait 10 blocks
+    await moveBlocks(10)
+
+    // Start a new round
+    await waitForCurrentRoundToEnd({ emissions, xAllocationVoting })
+    await startNewAllocationRound({
+      emissions,
+      xAllocationVoting,
+      minterAccount,
+    })
 
     // Verify all proposal data is still accessible
     expect(await governorV8.proposalProposer(proposalIdV8)).to.equal(proposer.address)
-    expect(await governorV8.state(proposalIdV8)).to.equal(ethers.toBigInt(0))
-    console.log("proposalIdV8", proposalIdV8)
-    console.log("stateV8", stateV8)
-    //TODO: Should be able to move from executed to In development
+    expect(await governorV8.proposalDepositReached(proposalIdV8)).to.be.true
+
+    //Proposal should be in the active state (Meaning it requires votes)
+    expect(await governorV8.state(proposalIdV8)).to.be.equal(ethers.toBigInt(1))
+
+    //TODO: Vote for proposal
+    //TODO: Check if succeeded
+    //TODO: Since it's not a executable proposal, we can mark it as in development
+    //TODO: It should emit an event
+    //TODO: We should be able to mark it as completed
+    //TODO: It should emit an event
+    //DONE
   })
 })
