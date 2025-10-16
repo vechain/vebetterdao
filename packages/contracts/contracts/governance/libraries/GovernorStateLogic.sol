@@ -110,7 +110,7 @@ library GovernorStateLogic {
   ) internal view returns (GovernorTypes.ProposalState) {
     // Load the proposal into memory
     GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
-    GovernorStorageTypes.ProposalDevelopmentState proposalDevelopmentState = self.proposalDevelopmentState[proposalId];
+    GovernorTypes.ProposalDevelopmentState proposalDevelopmentState = self.proposalDevelopmentState[proposalId];
     bool proposalExecuted = proposal.executed;
     bool proposalCanceled = proposal.canceled;
 
