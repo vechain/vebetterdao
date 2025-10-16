@@ -3,7 +3,7 @@ import { expect } from "chai"
 import { ethers } from "hardhat"
 import { describe, it } from "mocha"
 
-import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
+import { deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import {
   B3TRGovernor,
   B3TRGovernorV1,
@@ -15,17 +15,10 @@ import {
   B3TRGovernorV7,
 } from "../../typechain-types"
 import { DeployInstance, getOrDeployContractInstances } from "../helpers"
-import {
-  getProposalIdFromTx,
-  getVot3Tokens,
-  startNewAllocationRound,
-  waitForBlock,
-  waitForCurrentRoundToEnd,
-  waitForNextBlock,
-} from "../helpers/common"
-import { GRANT_PROPOSAL_TYPE, setupProposer, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
+import { waitForBlock } from "../helpers/common"
+import { setupProposer, startNewRoundAndGetRoundId } from "./fixture.test"
 
-describe("Governance - V8 Upgrade - @shard4fg", function () {
+describe.only("Governance - V8 Upgrade - @shard4fg", function () {
   it("Should preserve proposal data through version upgrades and add proposal state in development support", async () => {
     const config = createLocalConfig()
     const {
@@ -367,7 +360,7 @@ describe("Governance - V8 Upgrade - @shard4fg", function () {
     expect(await governorV7.version()).to.equal("7")
 
     // Upgrade V7 -> V8
-    const governorV8 = (await upgradeProxy("B3TRGovernorV7", "B3TRGovernorV8", governorContractAddress, [], {
+    const governorV8 = (await upgradeProxy("B3TRGovernorV7", "B3TRGovernor", governorContractAddress, [], {
       version: 8,
       libraries: {
         GovernorClockLogic: await governorClockLogicLib.getAddress(),
@@ -426,7 +419,8 @@ describe("Governance - V8 Upgrade - @shard4fg", function () {
     // Verify all proposal data is still accessible
     expect(await governorV8.proposalProposer(proposalIdV8)).to.equal(proposer.address)
     expect(await governorV8.state(proposalIdV8)).to.equal(ethers.toBigInt(0))
-
+    console.log("proposalIdV8", proposalIdV8)
+    console.log("stateV8", stateV8)
     //TODO: Should be able to move from executed to In development
   })
 })
