@@ -15,6 +15,7 @@ import { selectSlotRecipe } from "./select"
 import { separatorRecipe } from "./separator"
 import { skeletonRecipe } from "./skeleton"
 import { stepsSlotRecipe } from "./steps"
+import { switchSlotRecipe } from "./switch"
 import { tableSlotRecipe } from "./table"
 import { tabsSlotRecipe } from "./tabs"
 import { textRecipe } from "./text"
@@ -65,6 +66,7 @@ const config = defineConfig({
       popover: popoverSlotRecipe,
       checkbox: checkboxSlotRecipe,
       radioGroup: radioGroupSlotRecipe,
+      switch: switchSlotRecipe,
       table: tableSlotRecipe,
       tabs: tabsSlotRecipe,
     },
@@ -204,13 +206,29 @@ const config = defineConfig({
             "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
           },
           tertiary: {
-            default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.300}" } },
-            hover: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.400}" } },
-            pressed: { value: { base: "{colors.blue.800}", _dark: "{colors.blue.500}" } },
-            disabled: { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
-            text: { value: { base: "white", _dark: "white" } },
-            "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
+            default: { value: { base: "transparent", _dark: "transparent" } },
+            hover: { value: { base: "{colors.gray.50}", _dark: "{colors.gray.800}" } },
+            pressed: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.700}" } },
+            disabled: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.800}" } },
+            text: { value: { base: "{colors.gray.600}", _dark: "{colors.gray.400}" } },
+            "text-disabled": { value: { base: "{colors.gray.400}", _dark: "{colors.gray.500}" } },
           },
+          negative: {
+            default: { value: { base: "{colors.red.500}", _dark: "{colors.red.400}" } },
+            hover: { value: { base: "{colors.red.600}", _dark: "{colors.red.500}" } },
+            pressed: { value: { base: "{colors.red.600}", _dark: "{colors.red.600}" } },
+            text: { value: { base: "{colors.red.50}", _dark: "white" } },
+          },
+          disabled: {
+            disabled: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" } },
+            text: { value: { base: "{colors.gray.400}", _dark: "{colors.gray.500}" } },
+          },
+        },
+
+        borders: {
+          primary: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.600}" } },
+          secondary: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" } },
+          active: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
         },
 
         text: {
