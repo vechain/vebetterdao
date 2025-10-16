@@ -14,6 +14,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 import { DBAPool } from "../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { endorseApp } from "./helpers/xnodes"
 
 describe("DBA Pool - @shard7", async function () {
   // Environment params
@@ -688,7 +689,7 @@ describe("DBA Pool - @shard7", async function () {
       expect(fundsForRound).to.be.a("bigint")
     })
 
-    it("Should handle edge case with single app distribution", async function () {
+    it("Should handle edge case where app does not exist", async function () {
       const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -717,6 +718,151 @@ describe("DBA Pool - @shard7", async function () {
       // The actual validation is in the contract
       const fundsForRound = await dynamicBaseAllocationPool.fundsForRound(roundId)
       expect(fundsForRound).to.be.a("bigint")
+    })
+
+    it("Should distribute DBA rewards when one app exceeds cap and generates unallocated funds for other eligible apps", async function () {
+      this.timeout(120000) // Increase timeout for complex test
+
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 10
+      config.INITIAL_X_ALLOCATION = ethers.parseEther("10000")
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 50 // 50% max cap so we can exceed it
+
+      const {
+        dynamicBaseAllocationPool,
+        owner,
+        x2EarnApps,
+        xAllocationPool,
+        xAllocationVoting,
+        emissions,
+        b3tr,
+        minterAccount,
+        otherAccounts,
+        veBetterPassport,
+        creators,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // Setup voters with VOT3 tokens
+      await veBetterPassport.whitelist(otherAccounts[0].address)
+      await veBetterPassport.whitelist(otherAccounts[1].address)
+      await veBetterPassport.whitelist(otherAccounts[2].address)
+      await veBetterPassport.whitelist(otherAccounts[3].address)
+      await veBetterPassport.whitelist(otherAccounts[4].address)
+      await veBetterPassport.toggleCheck(1)
+
+      await getVot3Tokens(otherAccounts[0], "10000")
+      await getVot3Tokens(otherAccounts[1], "10000")
+      await getVot3Tokens(otherAccounts[2], "10000")
+      await getVot3Tokens(otherAccounts[3], "10000")
+      await getVot3Tokens(otherAccounts[4], "10000")
+
+      // Create three apps - use different creators for each
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("app1"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("app2"))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("app3"))
+
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[5].address, otherAccounts[5].address, "app1", "metadataURI")
+      await x2EarnApps
+        .connect(creators[1])
+        .submitApp(otherAccounts[6].address, otherAccounts[6].address, "app2", "metadataURI")
+      await x2EarnApps
+        .connect(creators[2])
+        .submitApp(otherAccounts[7].address, otherAccounts[7].address, "app3", "metadataURI")
+
+      // Endorse apps so they can be voted on
+      await endorseApp(app1Id, otherAccounts[0])
+      await endorseApp(app2Id, otherAccounts[1])
+      await endorseApp(app3Id, otherAccounts[2])
+
+      // Start new allocation round
+      await emissions.connect(minterAccount).start()
+      const round1 = await xAllocationVoting.currentRoundId()
+
+      // Vote heavily on app1 to exceed the max cap (50%)
+      // This will generate unallocated funds
+      await xAllocationVoting.connect(otherAccounts[0]).castVote(round1, [app1Id], [ethers.parseEther("8000")])
+
+      // Vote moderately on app2 and app3 - these will be eligible for DBA distribution
+      await xAllocationVoting.connect(otherAccounts[1]).castVote(round1, [app2Id], [ethers.parseEther("1000")])
+      await xAllocationVoting.connect(otherAccounts[2]).castVote(round1, [app3Id], [ethers.parseEther("1000")])
+
+      // Wait for round to end
+      await waitForRoundToEnd(round1)
+
+      // Set DBA pool as the unallocated funds receiver
+      await xAllocationPool
+        .connect(owner)
+        .setUnallocatedFundsReceiverAddress(await dynamicBaseAllocationPool.getAddress())
+
+      // Have all apps claim their rewards
+      // When app1 claims, it will hit the max cap and send unallocated funds to DBA pool
+      await xAllocationPool.claim(round1, app1Id)
+      await xAllocationPool.claim(round1, app2Id)
+      await xAllocationPool.claim(round1, app3Id)
+
+      // Get the unallocated funds that were sent to DBA pool
+      const unallocatedAmount = await xAllocationPool.unallocatedFunds(round1)
+
+      // Verify DBA pool received the unallocated funds
+      const dbaPoolBalance = await dynamicBaseAllocationPool.b3trBalance()
+      expect(dbaPoolBalance).to.be.gt(0n)
+      expect(dbaPoolBalance).to.equal(unallocatedAmount)
+
+      // Grant distributor role
+      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
+
+      // Verify can distribute (should return true now)
+      const canDistribute = await dynamicBaseAllocationPool.canDistributeDBARewards(round1)
+      expect(canDistribute).to.equal(true)
+
+      // Get initial balances of team wallets for app2 and app3
+      const app2TeamWallet = otherAccounts[6].address
+      const app3TeamWallet = otherAccounts[7].address
+      const initialApp2Balance = await b3tr.balanceOf(app2TeamWallet)
+      const initialApp3Balance = await b3tr.balanceOf(app3TeamWallet)
+
+      // Distribute DBA rewards to app2 and app3 (the eligible apps)
+      const eligibleApps = [app2Id, app3Id]
+      const expectedAmountPerApp = dbaPoolBalance / BigInt(eligibleApps.length)
+
+      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, eligibleApps)
+
+      // Verify events were emitted for each app
+      await expect(tx)
+        .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
+        .withArgs(app2Id, app2TeamWallet, expectedAmountPerApp, round1)
+
+      await expect(tx)
+        .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
+        .withArgs(app3Id, app3TeamWallet, expectedAmountPerApp, round1)
+
+      // Verify balances increased correctly
+      const finalApp2Balance = await b3tr.balanceOf(app2TeamWallet)
+      const finalApp3Balance = await b3tr.balanceOf(app3TeamWallet)
+
+      // Verify both apps received their DBA allocation
+      expect(finalApp2Balance - initialApp2Balance).to.equal(expectedAmountPerApp)
+      expect(finalApp3Balance - initialApp3Balance).to.equal(expectedAmountPerApp)
+
+      // Verify DBA pool balance decreased to 0 or near 0 (accounting for rounding)
+      expect(await dynamicBaseAllocationPool.b3trBalance()).to.be.lte(1n)
+
+      // Verify round is marked as distributed
+      expect(await dynamicBaseAllocationPool.isDBARewardsDistributed(round1)).to.equal(true)
+
+      // Verify cannot distribute again for same round
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, eligibleApps),
+      ).to.be.revertedWith("DBAPool: Round invalid or not ready to distribute")
     })
   })
 
