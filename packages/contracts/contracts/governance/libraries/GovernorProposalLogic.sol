@@ -75,6 +75,14 @@ library GovernorProposalLogic {
    * @dev Emitted when a proposal is queued.
    */
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
+  /**
+   * @dev Emitted when a proposal is marked as in development.
+   */
+  event ProposalInDevelopment(uint256 proposalId);
+  /**
+   * @dev Emitted when a proposal is marked as completed.
+   */
+  event ProposalCompleted(uint256 proposalId);
 
   /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
@@ -545,6 +553,38 @@ library GovernorProposalLogic {
     }
 
     return _cancel(self, proposalId);
+  }
+
+  function markAsInDevelopment(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) external returns (uint256) {
+    //Can only mark as in development if proposal is executed or succeeded
+    GovernorStateLogic.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) |
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded)
+    );
+
+    self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
+    //Emit event
+    emit ProposalInDevelopment(proposalId);
+  }
+
+  function markAsCompleted(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) external returns (uint256) {
+    //Can only mark as in development if proposal is executed or succeeded
+    GovernorStateLogic.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment)
+    );
+    self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.Completed;
+    //Emit event
+    emit ProposalCompleted(proposalId);
   }
 
   /** ------------------ INTERNAL FUNCTIONS ------------------ **/

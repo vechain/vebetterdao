@@ -1033,6 +1033,24 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Mark a proposal as in development
+   * @param proposalId The id of the proposal
+   */
+  function markAsInDevelopment(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_EXECUTOR_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorProposalLogic.markAsInDevelopment($, proposalId);
+  }
+
+  /**
+   * @notice Mark a proposal as completed
+   * @param proposalId The id of the proposal
+   */
+  function markAsCompleted(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_EXECUTOR_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorProposalLogic.markAsCompleted($, proposalId);
+  }
+
+  /**
    * @notice Changes the quorum numerator for a specific proposal type.
    * This operation can only be performed through a governance proposal.
    * Emits a {QuorumNumeratorUpdatedByType} event.
