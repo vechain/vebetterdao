@@ -596,128 +596,265 @@ describe("DBA Pool - @shard7", async function () {
       // This will fail validation checks before getting to app existence check
       await catchRevert(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [nonExistentAppId]))
     })
-
-    // Note: Full integration tests for successful distribution would require:
-    // 1. Bootstrap emissions
-    // 2. Create and register apps
-    // 3. Start allocation round
-    // 4. Vote on apps
-    // 5. End round
-    // 6. Have apps claim (but not all to leave unallocated funds)
-    // 7. Transfer unallocated funds to DBA pool
-    // 8. Then distribute
-    // These are covered in integration tests or will be added as needed
   })
 
   describe("Integration Tests - Full Distribution Flow", () => {
-    it("Should verify DBA pool setup and fund reception", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, b3tr, minterAccount, otherAccounts, creators } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+    it("Should successfully distribute rewards to a single eligible app", async function () {
+      this.timeout(120000)
 
-      // Grant distributor role
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 10
+      config.INITIAL_X_ALLOCATION = ethers.parseEther("10000")
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 50
 
-      // Create and register apps - use different creators for each app
-      await x2EarnApps
-        .connect(creators[0])
-        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
-      await x2EarnApps
-        .connect(creators[1])
-        .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      const {
+        dynamicBaseAllocationPool,
+        owner,
+        x2EarnApps,
+        xAllocationPool,
+        xAllocationVoting,
+        emissions,
+        b3tr,
+        minterAccount,
+        otherAccounts,
+        veBetterPassport,
+        creators,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
-      // Get the app IDs
-      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
-      const app2Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
+      await bootstrapEmissions()
 
-      // Simulate unallocated funds being sent to DBA pool
-      const testAmount = ethers.parseEther("1000")
-      await b3tr.connect(minterAccount).mint(await dynamicBaseAllocationPool.getAddress(), testAmount)
+      await veBetterPassport.whitelist(otherAccounts[0].address)
+      await veBetterPassport.whitelist(otherAccounts[1].address)
+      await veBetterPassport.toggleCheck(1)
 
-      // Verify DBA pool has received the funds
-      expect(await dynamicBaseAllocationPool.b3trBalance()).to.eql(testAmount)
+      await getVot3Tokens(otherAccounts[0], "10000")
+      await getVot3Tokens(otherAccounts[1], "10000")
 
-      // Verify distributor role is set
-      expect(await dynamicBaseAllocationPool.hasRole(DISTRIBUTOR_ROLE, owner.address)).to.eql(true)
-
-      // Note: Full distribution test would require:
-      // 1. Complete an allocation voting round
-      // 2. Have apps claim rewards (but not all apps)
-      // 3. Wait for allFundsClaimed to be true
-      // 4. Then call distributeDBARewards with eligible app IDs
-      // This test verifies the basic setup that would enable such distribution
-    })
-
-    it("Should correctly calculate amount per app with proper division", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, b3tr, minterAccount, otherAccounts, creators } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      // Grant distributor role
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
-
-      // Create apps - use different creators for each app
+      // Create two apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("app1"))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("app2"))
-      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("app3"))
 
       await x2EarnApps
         .connect(creators[0])
-        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .submitApp(otherAccounts[5].address, otherAccounts[5].address, "app1", "metadataURI")
       await x2EarnApps
         .connect(creators[1])
-        .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
-      await x2EarnApps
-        .connect(creators[2])
-        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+        .submitApp(otherAccounts[6].address, otherAccounts[6].address, "app2", "metadataURI")
 
-      // Simulate a scenario with unallocated funds
-      const testAmount = ethers.parseEther("1000")
-      await b3tr.connect(minterAccount).mint(await dynamicBaseAllocationPool.getAddress(), testAmount)
+      await endorseApp(app1Id, otherAccounts[0])
+      await endorseApp(app2Id, otherAccounts[1])
 
-      // Note: This test verifies the calculation logic exists
-      // Actual distribution would require full round completion as shown in previous test
-      const balance = await dynamicBaseAllocationPool.b3trBalance()
-      expect(balance).to.eql(testAmount)
+      await emissions.connect(minterAccount).start()
+      const round1 = await xAllocationVoting.currentRoundId()
 
-      // Verify funds can be queried
-      const fundsForRound = await dynamicBaseAllocationPool.fundsForRound(1)
-      expect(fundsForRound).to.be.a("bigint")
-    })
+      // Vote heavily on app1 to exceed cap, lightly on app2
+      await xAllocationVoting.connect(otherAccounts[0]).castVote(round1, [app1Id], [ethers.parseEther("9000")])
+      await xAllocationVoting.connect(otherAccounts[1]).castVote(round1, [app2Id], [ethers.parseEther("1000")])
 
-    it("Should handle edge case where app does not exist", async function () {
-      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      await waitForRoundToEnd(round1)
+
+      await xAllocationPool
+        .connect(owner)
+        .setUnallocatedFundsReceiverAddress(await dynamicBaseAllocationPool.getAddress())
+
+      await xAllocationPool.claim(round1, app1Id)
+      await xAllocationPool.claim(round1, app2Id)
+
+      const unallocatedAmount = await xAllocationPool.unallocatedFunds(round1)
+      expect(unallocatedAmount).to.equal(ethers.parseEther("2800"))
 
       const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
 
-      // Verify single app scenario is handled (validation will fail on other checks)
-      const singleAppId = [ethers.encodeBytes32String("single")]
-      await catchRevert(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, singleAppId))
+      const app2TeamWallet = otherAccounts[6].address
+      const initialBalance = await b3tr.balanceOf(app2TeamWallet)
+
+      // Distribute to single app - should receive all unallocated funds
+      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
+
+      await expect(tx)
+        .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
+        .withArgs(app2Id, app2TeamWallet, ethers.parseEther("2800"), round1)
+
+      const finalBalance = await b3tr.balanceOf(app2TeamWallet)
+      expect(finalBalance - initialBalance).to.equal(ethers.parseEther("2800"))
+      expect(await dynamicBaseAllocationPool.b3trBalance()).to.equal(0n)
+      expect(await dynamicBaseAllocationPool.isDBARewardsDistributed(round1)).to.equal(true)
     })
 
-    it("Should verify distribution only happens after all claims are done", async function () {
-      const { dynamicBaseAllocationPool, xAllocationPool } = await getOrDeployContractInstances({
+    it("Should revert when trying to distribute to non-existent app", async function () {
+      this.timeout(120000)
+
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 10
+      config.INITIAL_X_ALLOCATION = ethers.parseEther("10000")
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 50
+
+      const {
+        dynamicBaseAllocationPool,
+        owner,
+        x2EarnApps,
+        xAllocationPool,
+        xAllocationVoting,
+        emissions,
+        b3tr,
+        minterAccount,
+        otherAccounts,
+        veBetterPassport,
+        creators,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
-      // This test verifies the allFundsClaimed check is in place
-      const roundId = 1
-      const allClaimed = await xAllocationPool.allFundsClaimed(roundId)
-      const canDistribute = await dynamicBaseAllocationPool.canDistributeDBARewards(roundId)
+      await bootstrapEmissions()
 
-      // If not all claimed, should not be able to distribute
-      expect(canDistribute).to.be.a("boolean")
+      await veBetterPassport.whitelist(otherAccounts[0].address)
+      await veBetterPassport.toggleCheck(1)
+      await getVot3Tokens(otherAccounts[0], "10000")
 
-      // The actual validation is in the contract
-      const fundsForRound = await dynamicBaseAllocationPool.fundsForRound(roundId)
-      expect(fundsForRound).to.be.a("bigint")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("app1"))
+      const nonExistentAppId = ethers.keccak256(ethers.toUtf8Bytes("nonExistentApp"))
+
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[5].address, otherAccounts[5].address, "app1", "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[0])
+
+      await emissions.connect(minterAccount).start()
+      const round1 = await xAllocationVoting.currentRoundId()
+
+      await xAllocationVoting.connect(otherAccounts[0]).castVote(round1, [app1Id], [ethers.parseEther("8000")])
+
+      await waitForRoundToEnd(round1)
+
+      await xAllocationPool
+        .connect(owner)
+        .setUnallocatedFundsReceiverAddress(await dynamicBaseAllocationPool.getAddress())
+
+      await xAllocationPool.claim(round1, app1Id)
+
+      const unallocatedAmount = await xAllocationPool.unallocatedFunds(round1)
+      expect(unallocatedAmount).to.equal(ethers.parseEther("3500"))
+
+      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
+
+      // Try to distribute to non-existent app
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [nonExistentAppId]),
+      ).to.be.revertedWith("DBAPool: app does not exist")
+
+      // Verify can still distribute to existing app after failed attempt
+      const app1TeamWallet = otherAccounts[5].address
+      const initialBalance = await b3tr.balanceOf(app1TeamWallet)
+
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app1Id])
+
+      const finalBalance = await b3tr.balanceOf(app1TeamWallet)
+      expect(finalBalance - initialBalance).to.equal(ethers.parseEther("3500"))
+    })
+
+    it("Should not allow distribution before all apps have claimed their rewards", async function () {
+      this.timeout(120000)
+
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 10
+      config.INITIAL_X_ALLOCATION = ethers.parseEther("10000")
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 50
+
+      const {
+        dynamicBaseAllocationPool,
+        owner,
+        x2EarnApps,
+        xAllocationPool,
+        xAllocationVoting,
+        emissions,
+        b3tr,
+        minterAccount,
+        otherAccounts,
+        veBetterPassport,
+        creators,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await bootstrapEmissions()
+
+      await veBetterPassport.whitelist(otherAccounts[0].address)
+      await veBetterPassport.whitelist(otherAccounts[1].address)
+      await veBetterPassport.toggleCheck(1)
+
+      await getVot3Tokens(otherAccounts[0], "10000")
+      await getVot3Tokens(otherAccounts[1], "10000")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("app1"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("app2"))
+
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[5].address, otherAccounts[5].address, "app1", "metadataURI")
+      await x2EarnApps
+        .connect(creators[1])
+        .submitApp(otherAccounts[6].address, otherAccounts[6].address, "app2", "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[0])
+      await endorseApp(app2Id, otherAccounts[1])
+
+      await emissions.connect(minterAccount).start()
+      const round1 = await xAllocationVoting.currentRoundId()
+
+      await xAllocationVoting.connect(otherAccounts[0]).castVote(round1, [app1Id], [ethers.parseEther("8000")])
+      await xAllocationVoting.connect(otherAccounts[1]).castVote(round1, [app2Id], [ethers.parseEther("2000")])
+
+      await waitForRoundToEnd(round1)
+
+      await xAllocationPool
+        .connect(owner)
+        .setUnallocatedFundsReceiverAddress(await dynamicBaseAllocationPool.getAddress())
+
+      // Only app1 claims, app2 does not
+      await xAllocationPool.claim(round1, app1Id)
+
+      const allFundsClaimed = await xAllocationPool.allFundsClaimed(round1)
+      expect(allFundsClaimed).to.equal(false)
+
+      const canDistribute = await dynamicBaseAllocationPool.canDistributeDBARewards(round1)
+      expect(canDistribute).to.equal(false)
+
+      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
+
+      // Should not be able to distribute yet
+      await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])).to.be.revertedWith(
+        "DBAPool: Round invalid or not ready to distribute",
+      )
+
+      // After app2 claims, should be able to distribute
+      await xAllocationPool.claim(round1, app2Id)
+
+      const allFundsClaimedAfter = await xAllocationPool.allFundsClaimed(round1)
+      expect(allFundsClaimedAfter).to.equal(true)
+
+      const canDistributeAfter = await dynamicBaseAllocationPool.canDistributeDBARewards(round1)
+      expect(canDistributeAfter).to.equal(true)
+
+      const unallocatedAmount = await xAllocationPool.unallocatedFunds(round1)
+      expect(unallocatedAmount).to.equal(ethers.parseEther("2100"))
+
+      // Now distribution should succeed
+      const app2TeamWallet = otherAccounts[6].address
+      const initialBalance = await b3tr.balanceOf(app2TeamWallet)
+
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
+
+      const finalBalance = await b3tr.balanceOf(app2TeamWallet)
+      expect(finalBalance - initialBalance).to.equal(ethers.parseEther("2100"))
     })
 
     it("Should distribute DBA rewards when one app exceeds cap and generates unallocated funds for other eligible apps", async function () {
@@ -810,10 +947,11 @@ describe("DBA Pool - @shard7", async function () {
 
       // Get the unallocated funds that were sent to DBA pool
       const unallocatedAmount = await xAllocationPool.unallocatedFunds(round1)
+      expect(unallocatedAmount).to.equal(ethers.parseEther("2100"))
 
-      // Verify DBA pool received the unallocated funds
+      // Verify DBA pool received the exact unallocated funds
       const dbaPoolBalance = await dynamicBaseAllocationPool.b3trBalance()
-      expect(dbaPoolBalance).to.be.gt(0n)
+      expect(dbaPoolBalance).to.equal(ethers.parseEther("2100"))
       expect(dbaPoolBalance).to.equal(unallocatedAmount)
 
       // Grant distributor role
@@ -832,7 +970,8 @@ describe("DBA Pool - @shard7", async function () {
 
       // Distribute DBA rewards to app2 and app3 (the eligible apps)
       const eligibleApps = [app2Id, app3Id]
-      const expectedAmountPerApp = dbaPoolBalance / BigInt(eligibleApps.length)
+      const expectedAmountPerApp = ethers.parseEther("1050")
+      expect(dbaPoolBalance / BigInt(eligibleApps.length)).to.equal(expectedAmountPerApp)
 
       const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, eligibleApps)
 
@@ -849,12 +988,14 @@ describe("DBA Pool - @shard7", async function () {
       const finalApp2Balance = await b3tr.balanceOf(app2TeamWallet)
       const finalApp3Balance = await b3tr.balanceOf(app3TeamWallet)
 
-      // Verify both apps received their DBA allocation
+      // Verify both apps received their exact DBA allocation
+      expect(finalApp2Balance - initialApp2Balance).to.equal(ethers.parseEther("1050"))
+      expect(finalApp3Balance - initialApp3Balance).to.equal(ethers.parseEther("1050"))
       expect(finalApp2Balance - initialApp2Balance).to.equal(expectedAmountPerApp)
       expect(finalApp3Balance - initialApp3Balance).to.equal(expectedAmountPerApp)
 
-      // Verify DBA pool balance decreased to 0 or near 0 (accounting for rounding)
-      expect(await dynamicBaseAllocationPool.b3trBalance()).to.be.lte(1n)
+      // Verify DBA pool balance is exactly 0
+      expect(await dynamicBaseAllocationPool.b3trBalance()).to.equal(0n)
 
       // Verify round is marked as distributed
       expect(await dynamicBaseAllocationPool.isDBARewardsDistributed(round1)).to.equal(true)
