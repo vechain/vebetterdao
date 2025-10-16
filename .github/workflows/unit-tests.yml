@@ -144,8 +144,6 @@ jobs:
             label: VeBetterPassport - Reset Signal Count
           - shard: shard9
             label: VOT3
-          - shard: shard9a
-            label: VOT3 - Upgrade
           - shard: shard10
             label: VoterRewards
           - shard: shard10a
