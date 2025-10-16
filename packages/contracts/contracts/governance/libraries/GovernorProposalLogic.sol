@@ -524,7 +524,9 @@ library GovernorProposalLogic {
       proposalId,
       GovernorStateLogic.ALL_PROPOSAL_STATES_BITMAP ^
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Canceled) ^
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed)
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) ^
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment) ^
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
     );
 
     if (account == proposalProposer(self, proposalId)) {
