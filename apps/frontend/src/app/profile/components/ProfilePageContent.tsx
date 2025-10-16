@@ -126,6 +126,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
       )}
       <ProfileHeader address={parsedAddress} />
       <Tabs.Root
+        variant="line"
         size="lg"
         defaultValue={getInitialTab()}
         lazyMount
