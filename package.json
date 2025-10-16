@@ -46,6 +46,7 @@
     "contracts:select-and-deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/deploy/select-and-deploy.ts",
     "contracts:select-and-deploy:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/deploy/select-and-deploy.ts",
     "contracts:upgrade": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
+    "contracts:setup-environment": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @vechain/vebetterdao-contracts setup-environment:local",
     "contracts:upgrade:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
