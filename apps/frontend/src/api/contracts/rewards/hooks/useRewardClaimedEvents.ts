@@ -1,10 +1,11 @@
 import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
+import { FilterCriteria } from "@vechain/sdk-network"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
-import { FilterCriteria } from "@vechain/sdk-network"
-import { useQuery } from "@tanstack/react-query"
 import { ethers } from "ethers"
-import { decodeEventLog } from "../../governance"
+
+import { decodeEventLog } from "@/api/contracts/governance/getEvents"
 
 export type RewardClaimed = {
   cycle: number
@@ -12,9 +13,7 @@ export type RewardClaimed = {
   reward: number
   gmReward?: number
 }
-
 const abi = VoterRewards__factory.abi
-
 /**
  * Fetches all RewardClaimed events
  * @param {ThorClient} thor - The thor client
@@ -27,20 +26,16 @@ export const getRewardClaimedEvents = async (
 ): Promise<RewardClaimed[]> => {
   const voterRewardsContractAddress = getConfig().voterRewardsContractAddress
   const contract = thor.contracts.load(voterRewardsContractAddress, VoterRewards__factory.abi)
-
   const rewardClaimedEventAbi = contract.getEventAbi("RewardClaimed")
   const rewardClaimedV2EventAbi = contract.getEventAbi("RewardClaimedV2")
-
   const rewardClaimedTopics = rewardClaimedEventAbi.encodeFilterTopicsNoNull({
     cycle: filterOptions?.cycle ?? undefined,
     voter: filterOptions?.voter ?? undefined,
   })
-
   const rewardClaimedV2Topics = rewardClaimedV2EventAbi.encodeFilterTopicsNoNull({
     cycle: filterOptions?.cycle ?? undefined,
     voter: filterOptions?.voter ?? undefined,
   })
-
   const filterCriteria: FilterCriteria[] = [
     {
       criteria: {

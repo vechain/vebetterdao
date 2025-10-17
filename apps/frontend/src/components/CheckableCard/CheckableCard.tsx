@@ -23,7 +23,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
   return (
     <Card.Root
       data-testid={`checkable-card__${title}`}
-      variant="baseWithBorder"
+      variant="primary"
       rounded={"3xl"}
       borderColor={checked ? "primary.500" : "inherit"}
       _hover={{
@@ -70,7 +70,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
           </HStack>
           <Box>
             <Heading size={["sm", "md"]}>{title}</Heading>
-            <Text fontSize={["sm", "md"]} mt={2}>
+            <Text textStyle={["sm", "md"]} mt={2}>
               {description}
             </Text>
           </Box>

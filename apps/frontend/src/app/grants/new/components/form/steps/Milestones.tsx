@@ -1,16 +1,3 @@
-import { GenericAlert } from "@/app/components/Alert"
-import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
-import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
-import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
-import {
-  validateMilestoneAmountTotal,
-  validateMilestoneEndDate,
-  validateMilestoneStartDate,
-} from "@/components/CustomFormFields/validators"
-import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "@/constants"
-import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
-import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
 import {
   Accordion,
   Badge,
@@ -41,6 +28,22 @@ import {
 } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { LuArrowRight } from "react-icons/lu"
+
+import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
+import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
+import {
+  validateMilestoneAmountTotal,
+  validateMilestoneEndDate,
+  validateMilestoneStartDate,
+} from "@/components/CustomFormFields/validators"
+import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+
+import { FormItem } from "../../../../../../components/CustomFormFields/FormItem"
+import { FormMoneyInput } from "../../../../../../components/CustomFormFields/FormMoneyInput"
+import { MAX_TOOLING_GRANT_AMOUNT, MAX_DAPP_GRANT_AMOUNT } from "../../../../../../constants/proposals"
+import { useMilestoneMinimumAmount } from "../../../../../../hooks/proposals/grants/useMilestoneMinimumAmount"
+import { GenericAlert } from "../../../../../components/Alert/GenericAlert"
 
 // ============================================================================
 // Constants & Utilities
@@ -144,11 +147,12 @@ const MilestoneTips = ({ index }: { index: number }) => {
         {t("Tips")}
       </Heading>
       {}
-      <Text fontSize="sm" color="text.subtle" alignSelf="start">
+      <Text textStyle="sm" color="text.subtle" alignSelf="start">
         {tips?.[index]?.title}
       </Text>
-      <List.Root listStyle="disc" alignSelf="end" fontSize="sm" color="text.subtle" textAlign="justify" px={5}>
+      <List.Root listStyle="disc" alignSelf="end" textStyle="sm" color="text.subtle" textAlign="justify" px={5}>
         {tips?.[index]?.items.map((tip, index) => (
+          // eslint-disable-next-line react/no-array-index-key
           <List.Item key={index}>{tip}</List.Item>
         ))}
       </List.Root>
@@ -175,7 +179,7 @@ const MilestoneHeader = ({
     <HStack w="full" gap={4}>
       <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
       {hasDurationInfo && !isMobile && (
-        <Badge variant="outline" fontSize="sm" fontWeight="regular">
+        <Badge variant="outline" textStyle="sm" fontWeight="regular">
           <Text>{formattedDurationFrom}</Text>
           <LuArrowRight color="subtle.active" size={16} />
           <Text>{formattedDurationTo}</Text>
@@ -332,7 +336,7 @@ export const MilestoneSection = ({
         <Accordion.ItemIndicator />
       </Accordion.ItemTrigger>
       <Accordion.ItemContent>
-        <Text fontSize="sm" color="gray.500">
+        <Text textStyle="sm" color="gray.500">
           {t("Define the milestones for your project. Funds will be released as milestones are completed.")}
         </Text>
         <Accordion.ItemBody>
@@ -423,7 +427,7 @@ export const MilestoneSection = ({
             </GridItem>
             {canRemoveAnyMilestone && (
               <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
-                <Button variant="whiteAction" borderRadius="full" onClick={() => removeMilestone(index)}>
+                <Button variant="secondary" borderRadius="full" onClick={() => removeMilestone(index)}>
                   <Icon as={UilTrash} />
                   {t("Remove")}
                 </Button>
@@ -524,7 +528,7 @@ export const Milestones = ({
       </Accordion.Root>
       <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
         <GridItem>
-          <Button variant="primaryLink" onClick={handleAddMilestone}>
+          <Button variant="plain" color="actions.tertiary.default" onClick={handleAddMilestone}>
             <Icon as={UilPlus} />
             {t("Add milestone")}
           </Button>

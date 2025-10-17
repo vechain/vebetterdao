@@ -215,6 +215,12 @@ interface IVoterRewards {
   /// @return uint256 The multiplier value
   function levelToMultiplier(uint256 level) external view returns (uint256);
 
+  /// @notice Gets relayer fee for voter in cycle
+  /// @param cycle The reward cycle
+  /// @param voter The voter's address
+  /// @return uint256 The relayer fee amount
+  function getRelayerFee(uint256 cycle, address voter) external view returns (uint256);
+
   /// @notice Gets the proxiable UUID
   /// @return bytes32 The UUID
   function proxiableUUID() external view returns (bytes32);

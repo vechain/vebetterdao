@@ -1,4 +1,5 @@
-import { useIpfsImageList } from "@/api/ipfs"
+import { useIpfsImageList } from "../../../ipfs/hooks/useIpfsImage"
+
 import { useXAppMetadata } from "./useXAppMetadata"
 
 /**
@@ -9,14 +10,12 @@ import { useXAppMetadata } from "./useXAppMetadata"
  * @returns An object containing the screenshots, loading state, and error state.
  *
  */
-
 export const useXAppScreenshots = (xAppId?: string) => {
   const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
   const screenshotsQuery = useIpfsImageList(appMetadata?.screenshots ?? [])
   const screenshots = screenshotsQuery.map(query => query.data?.image || "")
   const isScreenshotLoading = appMetadataLoading || screenshotsQuery.some(query => query.isLoading)
   const screenshotError = screenshotsQuery.find(query => query.error)?.error
-
   return {
     screenshots,
     isScreenshotLoading,

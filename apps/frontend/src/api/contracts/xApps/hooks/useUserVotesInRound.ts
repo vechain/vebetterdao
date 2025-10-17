@@ -1,32 +1,28 @@
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { decodeEventLog, useThor } from "@vechain/vechain-kit"
 
 const abi = XAllocationVoting__factory.abi
 const address = getConfig().xAllocationVotingContractAddress as `0x${string}`
 const eventName = "AllocationVoteCast" as const
-
 export type AllocationVoteCastEvent = {
   voter: string
   roundId: string
   appsIds: string[]
   voteWeights: string[]
 }
-
 export const getUserVotesInRoundQueryKey = (roundId: string, userAddress: string) => [
   "USER_VOTES",
   userAddress,
   roundId,
 ]
-
 /**
  *  Hook to get the user votes in a given round from the xAllocationVoting contract
  * @returns the user votes in a given round from the xAllocationVoting contract
  */
 export const useUserVotesInRound = (roundId: string, userAddress?: string) => {
   const thor = useThor()
-
   return useQuery({
     queryKey: getUserVotesInRoundQueryKey(roundId, userAddress ?? ""),
     queryFn: async () => {
@@ -35,7 +31,6 @@ export const useUserVotesInRound = (roundId: string, userAddress?: string) => {
         voter: userAddress,
         roundId,
       })
-
       const [eventLog] = await thor.logs.filterEventLogs({
         criteriaSet: [
           {

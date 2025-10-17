@@ -342,10 +342,21 @@ contract RelayerRewardsPool is
    * @param roundId The round ID
    * @return True if early access period is still active
    */
-  function isEarlyAccessActive(uint256 roundId) public view returns (bool) {
+  function isVoteEarlyAccessActive(uint256 roundId) public view returns (bool) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
     uint256 roundStartBlock = $.xAllocationVoting.roundSnapshot(roundId);
     return block.number < roundStartBlock + $.earlyAccessBlocks;
+  }
+
+  /**
+   * @notice Check if claim early access period is active for a given round
+   * @param roundId The round ID
+   * @return True if claim early access period is still active
+   */
+  function isClaimEarlyAccessActive(uint256 roundId) public view returns (bool) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 roundEndBlock = $.xAllocationVoting.roundDeadline(roundId);
+    return block.number < roundEndBlock + $.earlyAccessBlocks;
   }
 
   /**
@@ -380,23 +391,116 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Check if a relayer can perform an action during early access
-   * @param relayer The relayer address
-   * @param roundId The round ID
+   * @notice Calculates the number of auto-voting users who were completely missed (no vote cast)
+   * @dev Only counts users where BOTH vote AND claim actions were missed
+   * @dev Partial completions (vote done but claim missing) are NOT counted as missed users
+   * @param roundId The round ID to check
+   * @return The number of auto-voting users who were completely missed
    */
-  function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view {
+  function getMissedAutoVotingUsersCount(uint256 roundId) external view returns (uint256) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
-    // if early access period ended, anyone can call vote/claim on auto-voting user's behalf
-    if (!isEarlyAccessActive(roundId)) {
+    uint256 expected = $.totalWeightedActions[roundId];
+    uint256 completed = $.completedWeightedActions[roundId];
+
+    // If all actions completed or over-completed, no missed users
+    if (completed >= expected) return 0;
+
+    uint256 deficit = expected - completed;
+
+    // Convert weighted deficit back to user count
+    // Each user requires: voteWeight (for voting) + claimWeight (for claiming)
+    uint256 weightPerUser = $.voteWeight + $.claimWeight;
+
+    // Only count FULL users missed (both vote AND claim)
+    // Integer division automatically floors, so partial users are not counted
+    uint256 missedUsers = deficit / weightPerUser;
+
+    return missedUsers;
+  }
+
+  /**
+   * @notice Validates if an action can proceed for an auto-voting user
+   * @param roundId The round ID
+   * @param voter The voter whose action is being performed
+   * @param caller The address attempting to perform the action
+   * @dev Reverts if action is not allowed during early access period
+   */
+  function validateVoteDuringEarlyAccess(uint256 roundId, address voter, address caller) external view {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    // Check if early access period is still active
+    if (!isVoteEarlyAccessActive(roundId)) {
+      // After early access, anyone can perform actions
       return;
     }
 
-    // During early access, check if relayer is registered
+    // During early access period, user cannot perform actions for themselves
     require(
-      $.registeredRelayers[relayer],
+      caller != voter,
+      "RelayerRewardsPool: auto-voting users cannot vote for themselves during early access period"
+    );
+
+    // Only registered relayers can perform actions during early access
+    require(
+      $.registeredRelayers[caller],
       "RelayerRewardsPool: caller is not a registered relayer during early access period"
     );
+  }
+
+  /**
+   * @notice Validates if a claim can proceed for an auto-voting user
+   * @param roundId The round ID
+   * @param voter The voter whose action is being performed
+   * @param caller The address attempting to perform the action
+   * @dev Reverts if action is not allowed during early access period
+   */
+  function validateClaimDuringEarlyAccess(uint256 roundId, address voter, address caller) external view {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    if (!isClaimEarlyAccessActive(roundId)) {
+      // After early access period, anyone can claim
+      return;
+    }
+
+    // During early access period, user cannot claim for themselves
+    require(
+      caller != voter,
+      "RelayerRewardsPool: auto-voting users cannot claim for themselves during early access period"
+    );
+
+    // Only registered relayers can claim during early access
+    require(
+      $.registeredRelayers[caller],
+      "RelayerRewardsPool: caller is not a registered relayer during claim early access period"
+    );
+  }
+
+  /**
+   * @notice Get the B3TR contract address
+   * @return The B3TR contract address
+   */
+  function getB3trAddress() external view returns (address) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return address($.b3tr);
+  }
+
+  /**
+   * @notice Get the Emissions contract address
+   * @return The Emissions contract address
+   */
+  function getEmissionsAddress() external view returns (address) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return address($.emissions);
+  }
+
+  /**
+   * @notice Get the XAllocationVoting contract address
+   * @return The XAllocationVoting contract address
+   */
+  function getXAllocationVotingAddress() external view returns (address) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return address($.xAllocationVoting);
   }
 
   // ----------------------- Actions -----------------------
@@ -548,11 +652,13 @@ contract RelayerRewardsPool is
   /**
    * @notice Registers an action performed by a relayer in a specific round
    * @param relayer The relayer address
+   * @param voter The voter address
    * @param roundId The round ID
    * @param action The type of action performed (VOTE or CLAIM)
    */
   function registerRelayerAction(
     address relayer,
+    address voter,
     uint256 roundId,
     RelayerAction action
   ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
@@ -571,7 +677,7 @@ contract RelayerRewardsPool is
     $.relayerWeightedActions[roundId][relayer] += weight;
     $.completedWeightedActions[roundId] += weight;
 
-    emit RelayerActionRegistered(relayer, roundId, $.relayerActions[roundId][relayer], weight);
+    emit RelayerActionRegistered(relayer, voter, roundId, $.relayerActions[roundId][relayer], weight);
   }
 
   /**
@@ -604,7 +710,6 @@ contract RelayerRewardsPool is
 
   /**
    * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
-   * @dev This should be called when a user has auto-voting enabled but no eligible apps to vote for
    * @param roundId The round ID
    * @param userCount The number of users to remove from expected actions (typically 1)
    */

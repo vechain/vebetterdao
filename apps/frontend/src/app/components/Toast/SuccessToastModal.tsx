@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next"
 
 export const SuccessToastModal = ({ onClose }: { onClose: () => void }) => {
   const { t } = useTranslation()
-
   return (
     <Flex
       maxWidth="500px"
@@ -18,7 +17,7 @@ export const SuccessToastModal = ({ onClose }: { onClose: () => void }) => {
       borderColor="#3DBA67"
       background="#E9FDF1">
       <Icon as={UilCheckCircle} color="#3DBA67" boxSize={6} />
-      <Box flex="1" color="#047857" fontWeight="500">
+      <Box flex="1" color="#047857" fontWeight="semibold">
         {t("Grant application saved successfully.")}
       </Box>
       <Button

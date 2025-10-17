@@ -197,13 +197,14 @@ library AutoVotingLogic {
    *
    * @return finalAppIds Array of eligible app IDs
    * @return voteWeights Array of equal vote weights
+   * @return votingPower The voting power of the voter
    */
   function prepareAutoVoteArrays(
     address xAllocationVotingGovernorAddress,
     address voter,
     uint256 roundId,
     bytes32[] memory preferredApps
-  ) external view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
+  ) external view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights, uint256 votingPower) {
     IXAllocationVotingGovernor xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernorAddress);
 
     (uint256 voterAvailableVotes, bool isValid) = xAllocationVotingGovernor.getAndValidateVotingPower(
@@ -211,9 +212,11 @@ library AutoVotingLogic {
       xAllocationVotingGovernor.roundSnapshot(roundId)
     );
 
+    votingPower = voterAvailableVotes;
+
     // If voter has insufficient voting power, return empty arrays
     if (!isValid) {
-      return (new bytes32[](0), new uint256[](0));
+      return (new bytes32[](0), new uint256[](0), votingPower);
     }
 
     // Count and collect eligible apps
@@ -229,17 +232,26 @@ library AutoVotingLogic {
 
     // If no eligible apps found, return empty arrays
     if (count == 0) {
-      return (new bytes32[](0), new uint256[](0));
+      return (new bytes32[](0), new uint256[](0), votingPower);
     }
 
     // Create final arrays with exact size
     finalAppIds = new bytes32[](count);
     voteWeights = new uint256[](count);
-    uint256 votePerApp = voterAvailableVotes / count;
+    uint256 votePerApp = votingPower / count;
+    uint256 remainingVotes = votingPower % count;
 
     for (uint256 i; i < count; ++i) {
       finalAppIds[i] = tempAppIds[i];
       voteWeights[i] = votePerApp;
+
+      // Distribute remainder: give 1 extra wei to first N apps
+      // Edge case: when user has 1 VOT3 and select 3 apps, this will give 1 extra wei to the first app
+      if (i < remainingVotes) {
+        voteWeights[i] += 1;
+      }
     }
+
+    return (finalAppIds, voteWeights, votingPower);
   }
 }

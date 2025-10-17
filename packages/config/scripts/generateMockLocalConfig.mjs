@@ -90,9 +90,9 @@ export const generateMockLocalConfig = () => {
       passportWhitelistAndBlacklistLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
     },
     xAllocationVotingLibraries: {
-      autoVotingLogicAddress: "0x0000000000000000000000000000000000000000",
+      autoVotingLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
     },
-  }
+    }
     export default config;
     `
 

@@ -23,7 +23,6 @@ export const lighSecondary = {
   "800": "#758D42",
   "900": "#606B34",
 }
-
 export const lightTertiary = {
   100: "#c0d98c", // Lighter shade
   200: "#a6cf75",
@@ -34,7 +33,6 @@ export const lightTertiary = {
   700: "#249e00",
   800: "#0a9400", // Darker shade
 }
-
 export const darkPrimary = {
   "50": "#98A3FF",
   "100": "#7F8CFF",
@@ -49,22 +47,13 @@ export const darkPrimary = {
   active: "#004cfc",
 }
 
-export const lightSubtle = {
-  active: "#6A6A6A",
-}
-export const darkSubtle = {
-  active: "#979797",
-}
-
 export const lightThemeColors = {
   primary: lightPrimary,
   secondary: lighSecondary,
   tertiary: lightTertiary,
-  subtle: lightSubtle,
 }
 export const darkThemeColors = {
   primary: darkPrimary,
   secondary: lighSecondary,
   tertiary: lightTertiary,
-  subtle: darkSubtle,
 }

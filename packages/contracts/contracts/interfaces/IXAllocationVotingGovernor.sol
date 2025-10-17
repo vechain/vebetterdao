@@ -107,9 +107,15 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error InvalidCaller(address caller);
 
   /**
-   * @dev Emitted when auto-voting is disabled.
+   * @dev Emitted when auto-voting is skipped.
    */
-  event AutoVotingDisabled(address voter, uint256 roundId);
+  event AutoVoteSkipped(
+    address indexed voter,
+    uint256 indexed roundId,
+    bool isPerson,
+    uint256 appCount,
+    uint256 votingPower
+  );
 
   /**
    * @dev Emitted when a round is created.
@@ -306,10 +312,25 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @dev Check if autovoting is enabled for an account
+   * @param user The address to check
+   * @return Whether autovoting is enabled for the account
+   */
+  function isUserAutoVotingEnabled(address user) external view returns (bool);
+
+  /**
+   * @dev Check if autovoting is enabled for an account
    * @param account The address to check
    * @return Whether autovoting is enabled for the account
    */
-  function isUserAutoVotingEnabledForCurrentCycle(address account) external view returns (bool);
+  function isUserAutoVotingEnabledInCurrentRound(address account) external view returns (bool);
+
+  /**
+   * @dev Check if autovoting is enabled for an account at a specific round
+   * @param account The address to check
+   * @param roundId The round id to check
+   * @return Whether autovoting is enabled for the account at the specific round
+   */
+  function isUserAutoVotingEnabledForRound(address account, uint256 roundId) external view returns (bool);
 
   /**
    * @dev Check if autovoting is enabled for an account at a specific timepoint
@@ -386,4 +407,9 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev Get the total voting power (VOT3 tokens + deposits) for a voter at a given timepoint
    */
   function getTotalVotingPower(address voter, uint256 roundStart) external view returns (uint256);
+
+  /**
+   * @dev Get the total number of users who enabled auto-voting at the round start
+   */
+  function getTotalAutoVotingUsersAtRoundStart() external view returns (uint208);
 }

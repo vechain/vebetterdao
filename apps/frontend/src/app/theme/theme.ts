@@ -12,25 +12,47 @@ import { nativeSelectSlotRecipe } from "./native-select"
 import { popoverSlotRecipe } from "./popover"
 import { radioGroupSlotRecipe } from "./radio-group"
 import { selectSlotRecipe } from "./select"
+import { separatorRecipe } from "./separator"
+import { skeletonRecipe } from "./skeleton"
 import { stepsSlotRecipe } from "./steps"
+import { switchSlotRecipe } from "./switch"
 import { tableSlotRecipe } from "./table"
+import { tabsSlotRecipe } from "./tabs"
+import { textRecipe } from "./text"
 
 const config = defineConfig({
   preflight: true,
   cssVarsPrefix: "vbd",
-
   globalCss: {
-    ":where(button, [role=button], a)": {
+    "html,body": { bg: "bg.secondary" },
+    ":where(button, [role=button], [type=button], a)": {
       cursor: "pointer",
     },
   },
-
+  // TODO: use this to force using tokens
+  // strictTokens: true,
   theme: {
+    textStyles: {
+      "6xl": { value: { fontSize: "3.75rem", lineHeight: "3.75rem" } }, //60px
+      "5xl": { value: { fontSize: "3rem", lineHeight: "3.25rem" } }, //48px
+      "4xl": { value: { fontSize: "2.25rem", lineHeight: "2.75rem" } }, //36px
+      "3xl": { value: { fontSize: "1.75rem", lineHeight: "2.25rem" } }, //28px
+      "2xl": { value: { fontSize: "1.5rem", lineHeight: "2rem" } }, //24px
+      xl: { value: { fontSize: "1.25rem", lineHeight: "1.875rem" } }, //20px
+      lg: { value: { fontSize: "1.125rem", lineHeight: "1.75rem" } }, //18px
+      md: { value: { fontSize: "1rem", lineHeight: "1.5rem" } }, //16px
+      sm: { value: { fontSize: "0.875rem", lineHeight: "1.25rem" } }, //14px
+      xs: { value: { fontSize: "0.75rem", lineHeight: "1rem" } }, //12px
+      xxs: { value: { fontSize: "0.625rem", lineHeight: "0.875rem" } }, //10px
+    },
     recipes: {
       heading: headingRecipe,
       button: buttonRecipe,
       input: inputRecipe,
       badge: badgeRecipe,
+      skeleton: skeletonRecipe,
+      separator: separatorRecipe,
+      text: textRecipe,
     },
 
     slotRecipes: {
@@ -44,7 +66,9 @@ const config = defineConfig({
       popover: popoverSlotRecipe,
       checkbox: checkboxSlotRecipe,
       radioGroup: radioGroupSlotRecipe,
+      switch: switchSlotRecipe,
       table: tableSlotRecipe,
+      tabs: tabsSlotRecipe,
     },
 
     keyframes: {
@@ -63,652 +87,237 @@ const config = defineConfig({
     },
 
     tokens: {
+      spacing: {
+        "0": { value: "0" },
+      },
       colors: {
-        primary: {
-          DEFAULT: { value: "#3237FF" },
-          100: { value: "#98A3FF" },
-          200: { value: "#7F8CFF" },
-          300: { value: "#6575FF" },
-          400: { value: "#4C5EFF" },
-          500: { value: "#3237FF" },
-          600: { value: "#373EDF" },
-          700: { value: "#2428B6" },
-          800: { value: "#001665" },
-          900: { value: "#000B3C" },
+        transparency: {
+          DEFAULT: { value: "rgba(255, 255, 255, 0.15)" },
+          100: { value: "rgba(255, 255, 255, 0.15)" },
+          200: { value: "rgba(255, 255, 255, 0.20)" },
+          300: { value: "rgba(255, 255, 255, 0.30)" },
+          400: { value: "rgba(255, 255, 255, 0.40)" },
+          500: { value: "rgba(255, 255, 255, 0.50)" },
+          600: { value: "rgba(255, 255, 255, 0.60)" },
+          700: { value: "rgba(255, 255, 255, 0.70)" },
+          800: { value: "rgba(255, 255, 255, 0.80)" },
+          900: { value: "rgba(255, 255, 255, 0.90)" },
+        },
+        opacity: {
+          DEFAULT: { value: "rgba(0, 0, 0, 0.15)" },
+          100: { value: "rgba(0, 0, 0, 0.15)" },
+          200: { value: "rgba(0, 0, 0, 0.20)" },
+          300: { value: "rgba(0, 0, 0, 0.30)" },
+          400: { value: "rgba(0, 0, 0, 0.40)" },
+          500: { value: "rgba(0, 0, 0, 0.50)" },
+          600: { value: "rgba(0, 0, 0, 0.60)" },
+          700: { value: "rgba(0, 0, 0, 0.70)" },
+          800: { value: "rgba(0, 0, 0, 0.80)" },
+          900: { value: "rgba(0, 0, 0, 0.90)" },
+        },
+        gray: {
+          DEFAULT: { value: "#525860" },
+          50: { value: "#F9F9FA" },
+          100: { value: "#F1F2F3" },
+          200: { value: "#E7E9EB" },
+          300: { value: "#D2D5D9" },
+          400: { value: "#AAAFB6" },
+          500: { value: "#747C89" },
+          600: { value: "#525860" },
+          700: { value: "#363A3F" },
+          800: { value: "#272A2E" },
+          900: { value: "#1B1D1F" },
+        },
+        blue: {
+          DEFAULT: { value: "#004CFC" },
+          50: { value: "#E6EEFF" },
+          100: { value: "#D4E2FF" },
+          200: { value: "#B3CCFF" },
+          300: { value: "#80AAFF" },
+          400: { value: "#4D88FF" },
+          500: { value: "#1A66FF" },
+          600: { value: "#004CFC" },
+          700: { value: "#003ECC" },
+          800: { value: "#003199" },
+          900: { value: "#002466" },
+        },
+        red: {
+          DEFAULT: { value: "#D44145" },
+          50: { value: "#FCEEF1" },
+          100: { value: "#F4CCCF" },
+          200: { value: "#E99A9E" },
+          300: { value: "#DF6A6E" },
+          400: { value: "#D44145" },
+          500: { value: "#C53030" },
+          600: { value: "#9B2323" },
+          700: { value: "#7F1C1C" },
+          800: { value: "#631616" },
+          900: { value: "#400E0E" },
         },
       },
     },
 
     semanticTokens: {
-      fonts: {
-        body: {
-          value: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
-        },
-        heading: {
-          value: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
-        },
-      },
-
       colors: {
-        "chakra-body-text": {
-          value: {
-            base: "#1E1E1E",
-            _dark: "#E4E4E4",
-          },
+        // for the places use "colorPalette"
+        blue: {
+          contrast: { value: { _light: "white", _dark: "white" } },
+          fg: { value: { _light: "{colors.blue.700}", _dark: "{colors.blue.300}" } },
+          subtle: { value: { _light: "{colors.blue.100}", _dark: "{colors.blue.900}" } },
+          muted: { value: { _light: "{colors.blue.200}", _dark: "{colors.blue.800}" } },
+          emphasized: { value: { _light: "{colors.blue.300}", _dark: "{colors.blue.700}" } },
+          solid: { value: { _light: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
+          focusRing: { value: { _light: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
         },
-        "chakra-body-bg": {
-          value: {
-            base: "#F7F7F7",
-            _dark: "#131313",
-          },
-        },
-        "info-bg": {
-          value: {
-            base: "#F8F8F8",
-            _dark: "#1E1E1E",
-          },
-        },
-        "dark-contrast-on-card-bg": {
-          value: {
-            base: "#F8F8F8",
-            _dark: "#131313",
-          },
-        },
-        "profile-bg": {
-          value: {
-            base: "#FFFFFF",
-            _dark: "#2D2D2F",
-          },
-        },
-        "contrast-on-dark-bg": {
-          value: {
-            base: "#FFFFFF",
-            _dark: "#1A1A1A",
-          },
-        },
-        "light-contrast-on-card-bg": {
-          value: {
-            base: "#FAFAFA",
-            _dark: "#2D2D2F",
-          },
-        },
-        "your-ranking-hover": {
-          value: {
-            base: "#005EFF",
-            _dark: "#005EFF",
-          },
-        },
-        "b3tr-balance-bg": {
-          value: {
-            base: "#E5EEFF",
-            _dark: "#1A2547",
-          },
-        },
-        "vot3-balance-bg": {
-          value: {
-            base: "#E3FFC4",
-            _dark: "#1A2E0F",
-          },
-        },
-        "contrast-bg-strong": {
-          value: {
-            base: "#000000",
-            _dark: "#E2E8F0",
-          },
-        },
-        "contrast-bg-muted": {
-          value: {
-            base: "#FFFFFF",
-            _dark: "#2D3748",
-          },
-        },
-        "contrast-bg-muted-hover": {
-          value: {
-            base: "#EFEFEF",
-            _dark: "#A0AEC0",
-          },
-        },
-        "contrast-bg-strong-hover": {
-          value: {
-            base: "#1A1A1A",
-            _dark: "#CBD5E0",
-          },
-        },
-        "contrast-fg-on-strong": {
-          value: {
-            base: "#FFFFFF",
-            _dark: "#000000",
-          },
-        },
-        "contrast-fg-on-muted": {
-          value: {
-            base: "#000000",
-            _dark: "#FFFFFF",
-          },
-        },
-        "hover-contrast-bg": {
-          value: {
-            base: "#F8F8F8",
-            _dark: "#2D2F31",
-          },
-        },
-        "contrast-border": {
-          value: {
-            base: "#EFEFEF",
-            _dark: "#4A5568",
-          },
-        },
-        "layout-bg": {
-          value: {
-            base: "#F7F7F7",
-            _dark: "#131313",
-          },
-        },
-
-        // --- new colors ---
-
-        // TODO: add these colors to the theme to use primary as color palette
-        // primary: {
-        //   solid: { value: "{colors.primary.500}" },
-        //   contrast: { value: "{colors.primary.100}" },
-        //   fg: { value: "{colors.primary.700}" },
-        //   muted: { value: "{colors.primary.100}" },
-        //   subtle: { value: "{colors.primary.200}" },
-        //   emphasized: { value: "{colors.primary.300}" },
-        //   focusRing: { value: "{colors.primary.500}" },
-        // },
-
-        // Logo
-        logo: {
-          value: {
-            _dark: "#277CDF",
-            base: "#004CFC",
-          },
+        red: {
+          contrast: { value: { _light: "white", _dark: "white" } },
+          fg: { value: { _light: "{colors.red.400}", _dark: "{colors.red.300}" } },
+          subtle: { value: { _light: "{colors.red.100}", _dark: "{colors.red.900}" } },
+          muted: { value: { _light: "{colors.red.200}", _dark: "{colors.red.800}" } },
+          emphasized: { value: { _light: "{colors.red.300}", _dark: "{colors.red.700}" } },
+          solid: { value: { _light: "{colors.red.600}", _dark: "{colors.red.400}" } },
+          focusRing: { value: { _light: "{colors.red.400}", _dark: "{colors.red.400}" } },
         },
 
         brand: {
-          primary: {
-            value: {
-              _dark: "#277CDF",
-              base: "#004CFC",
-            },
-          },
-          secondary: {
-            _dark: { value: "#B4EA82" },
-            base: { value: "#B1F16C" },
-          },
-          tertiary: {
-            _dark: { value: "#FFFFFF" },
-            base: { value: "#000000" },
-          },
-        },
-        "secondary-strong": {
-          value: {
-            _dark: "#4F5945",
-            base: "#6DCB09",
-          },
-        },
-        "secondary-stronger": {
-          value: {
-            _dark: "#383F31",
-            base: "#448300",
-          },
-        },
-        "secondary-subtle": {
-          value: {
-            _dark: "#CDFF9F",
-            base: "#CDFF9F",
-          },
+          primary: { value: { base: "{colors.blue.600}", _dark: "white" } },
+          secondary: { value: { base: "#B1F16C", _dark: "#B4EA82" } },
+          tertiary: { value: { base: "white", _dark: "black" } },
+          "secondary-strong": { value: { base: "#6DCB09", _dark: "#4F5945" } },
+          "secondary-stronger": { value: { base: "#448300", _dark: "#383F31" } },
+          "secondary-subtle": { value: { base: "#CDFF9F", _dark: "#CDFF9F" } },
         },
 
-        // Actions
         actions: {
           primary: {
-            default: {
-              value: {
-                _dark: "#277CDF",
-                base: "#004CFC",
-              },
-            },
-            hover: {
-              value: {
-                _dark: "#2E67EA",
-                base: "#0F58FF",
-              },
-            },
-            pressed: {
-              value: {
-                _dark: "#0945D0",
-                base: "#0045E5",
-              },
-            },
-            disabled: {
-              value: {
-                _dark: "#272E37",
-                base: "#E1E1E1",
-              },
-            },
-            text: {
-              value: {
-                _dark: "#FFFFFF",
-                base: "#FFFFFF",
-              },
-            },
-            "text-disabled": {
-              value: {
-                _dark: "#828282",
-                base: "#757575",
-              },
-            },
+            default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
+            hover: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.500}" } },
+            pressed: { value: { base: "{colors.blue.800}", _dark: "{colors.blue.600}" } },
+            disabled: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.700}" } },
+            text: { value: { base: "white", _dark: "white" } },
+            "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
           },
           secondary: {
-            default: {
-              value: {
-                _dark: "rgba(255, 255, 255, 0.2)",
-                base: "#E0E9FE",
-              },
-            },
-            hover: {
-              value: {
-                _dark: "#404B5E",
-                base: "#EBF1FE",
-              },
-            },
-            pressed: {
-              value: {
-                _dark: "#303746",
-                base: "#CEDCFD",
-              },
-            },
-            disabled: {
-              value: {
-                _dark: "#272E37",
-                base: "#E1E1E1",
-              },
-            },
-            text: {
-              value: {
-                _dark: "#FFFFFF",
-                base: "#004CFC",
-              },
-            },
-            "text-lighter": {
-              value: {
-                _dark: "#7CB7FC",
-                base: "#004CFC",
-              },
-            },
-            "text-disabled": {
-              value: {
-                _dark: "#828282",
-                base: "#757575",
-              },
-            },
+            default: { value: { base: "{colors.blue.50}", _dark: "{colors.transparency.300}" } },
+            hover: { value: { base: "{colors.blue.100}", _dark: "{colors.transparency.200}" } },
+            pressed: { value: { base: "{colors.blue.200}", _dark: "{colors.transparency.100}" } },
+            disabled: { value: { base: "{colors.gray.300}", _dark: "{colors.transparency.100}" } },
+            text: { value: { base: "{colors.blue.600}", _dark: "white" } },
+            "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
           },
           tertiary: {
-            default: {
-              value: {
-                _dark: "#4D88FF",
-                base: "#004CFC",
-              },
-            },
-            hover: {
-              value: {
-                _dark: "#1A66FF",
-                base: "#003ECC",
-              },
-            },
-            pressed: {
-              value: {
-                _dark: "#004CFC",
-                base: "#003199",
-              },
-            },
-            disabled: {
-              value: {
-                _dark: "#747C89",
-                base: "#747C89",
-              },
-            },
+            default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.300}" } },
+            hover: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.400}" } },
+            pressed: { value: { base: "{colors.blue.800}", _dark: "{colors.blue.500}" } },
+            disabled: { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
+            text: { value: { base: "white", _dark: "white" } },
+            "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
+          },
+          negative: {
+            default: { value: { base: "{colors.red.500}", _dark: "{colors.red.400}" } },
+            hover: { value: { base: "{colors.red.600}", _dark: "{colors.red.500}" } },
+            pressed: { value: { base: "{colors.red.600}", _dark: "{colors.red.600}" } },
+            text: { value: { base: "{colors.red.50}", _dark: "white" } },
+          },
+          disabled: {
+            disabled: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" } },
+            text: { value: { base: "{colors.gray.400}", _dark: "{colors.gray.500}" } },
           },
         },
 
-        // Text Colors
+        borders: {
+          primary: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.600}" } },
+          secondary: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" } },
+          active: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
+        },
+
         text: {
-          default: {
-            value: {
-              _dark: "#E4E4E4",
-              base: "#252525",
-            },
-          },
-          subtle: {
-            value: {
-              _dark: "#AAAFB6",
-              base: "#525860",
-            },
-          },
-          lighter: {
-            value: {
-              _dark: "#979797",
-              base: "#6A6A6A",
-            },
-          },
-          strong: {
-            value: {
-              _dark: "#FFFFFF",
-              base: "#000000",
-            },
-          },
-          darker: {
-            value: {
-              _dark: "#FFFFFF",
-              base: "#000000",
-            },
-          },
-          alt: {
-            value: {
-              _dark: "#000000",
-              base: "#FFFFFF",
-            },
-          },
-          "alt-subtle": {
-            value: {
-              _dark: "rgba(0, 0, 0, 0.7)",
-              base: "rgba(255, 255, 255, 0.7)",
-            },
-          },
+          default: { value: { base: "{colors.gray.800}", _dark: "white" } },
+          subtle: { value: { base: "{colors.gray.600}", _dark: "{colors.gray.400}" } },
+          alt: { value: { base: "white", _dark: "black" } },
+          "alt-subtle": { value: { base: "{colors.transparency.700}", _dark: "{colors.opacity.700}" } },
         },
-
-        // Background Colors
         bg: {
-          primary: {
-            value: {
-              _dark: "#1D1D1D",
-              base: "#FFFFFF",
-            },
-          },
-          secondary: {
-            value: {
-              _dark: "#131313",
-              base: "#FAFAFA",
-            },
-          },
-          tertiary: {
-            value: {
-              _dark: "#2F2F2F",
-              base: "#F8F8F8",
-            },
-          },
+          primary: { value: { base: "white", _dark: "{colors.gray.900}" } },
+          secondary: { value: { base: "{colors.gray.50}", _dark: "black" } },
+          tertiary: { value: { base: "#F5F5F5", _dark: "#262626" } },
         },
-
-        // Border Colors
+        banner: {
+          blue: { value: { base: "{colors.blue.200}", _dark: "{colors.blue.900}" } },
+          green: { value: { base: "#B1F16C", _dark: "#383F31" } },
+          yellow: { value: { base: "#FFD979", _dark: "#54441A" } },
+          "dashboard-tokens": { value: { base: "#0153F2", _dark: "{colors.blue.900}" } },
+        },
+        card: {
+          default: { value: { base: "white", _dark: "{colors.gray.900}" } },
+          subtle: { value: { base: "{colors.gray.50}", _dark: "{colors.gray.700}" } },
+          hover: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
+          "active-border": { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
+        },
         border: {
-          primary: {
-            value: {
-              _dark: "#2D2D2F",
-              base: "#D5D5D5",
-            },
-          },
-          secondary: {
-            value: {
-              _dark: "#2E2E32",
-              base: "#EFEFEF",
-            },
-          },
-          tertiary: {
-            value: {
-              _dark: "#4B4B4B",
-              base: "rgba(255, 255, 255, 0.5)",
-            },
-          },
+          primary: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" } },
+          secondary: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
+          tertiary: { value: { base: "{colors.transparency.500}", _dark: "#4B4B4B" } },
+          active: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
         },
-
-        // Icon Colors
         icon: {
-          default: {
-            value: {
-              _dark: "#FFFFFF",
-              base: "#2D3748",
-            },
-          },
-          subtle: {
-            value: {
-              _dark: "#AAAFB6",
-              base: "#525860",
-            },
-          },
-          darker: {
-            value: {
-              _dark: "#767676",
-              base: "#171923",
-            },
-          },
-          lighter: {
-            value: {
-              _dark: "#FFFFFF",
-              base: "#6A6A6A",
-            },
-          },
+          default: { value: { base: "{colors.gray.800}", _dark: "white" } },
+          subtle: { value: { base: "{colors.gray.600}", _dark: "{colors.gray.400}" } },
         },
-
-        // Status Colors - Info
-        info: {
-          strong: {
-            value: {
-              _dark: "#CBDDFF",
-              base: "#0046CB",
-            },
+        status: {
+          positive: {
+            strong: { value: { base: "#047229", _dark: "#A3E706" } },
+            primary: { value: { base: "#3DBA67", _dark: "#26C9A1" } },
+            secondary: { value: { base: "#99E0B1", _dark: "#1EA181" } },
+            subtle: { value: { base: "#E9FDF1", _dark: "#212A23" } },
           },
-          primary: {
-            value: {
-              _dark: "#A2C2FF",
-              base: "#6194F5",
-            },
+          negative: {
+            strong: { value: { base: "#B6244C", _dark: "#EC4D9C" } },
+            primary: { value: { base: "#C84868", _dark: "#D23F63" } },
+            secondary: { value: { base: "#EC98AF", _dark: "#9C354E" } },
+            subtle: { value: { base: "#FCEEF1", _dark: "#2C1D21" } },
           },
-          secondary: {
-            value: {
-              _dark: "#A2C2FF",
-              base: "#CBDDFF",
-            },
-          },
-          subtle: {
-            value: {
-              _dark: "#2A303A",
-              base: "#E5EEFF",
-            },
-          },
-        },
-
-        // Status Colors - Warning
-        warning: {
-          strong: {
-            value: {
-              _dark: "#FFC885",
-              base: "#AF5F00",
-            },
-          },
-          primary: {
-            value: {
-              _dark: "#F2A54E",
-              base: "#F29B32",
-            },
-          },
-          secondary: {
-            value: {
-              _dark: "#B2752C",
-              base: "#FFE4C3",
-            },
-          },
-          subtle: {
-            value: {
-              _dark: "#402404",
-              base: "#FFF3E5",
-            },
-          },
-        },
-
-        // Status Colors - Error/Negative
-        error: {
-          strong: {
-            value: {
-              _dark: "#FC6D90",
-              base: "#B62A4C",
-            },
-          },
-          primary: {
-            value: {
-              _dark: "#D23F63",
-              base: "#C84968",
-            },
-          },
-          secondary: {
-            value: {
-              _dark: "#9C354E",
-              base: "#EC9BAF",
-            },
-          },
-          subtle: {
-            value: {
-              _dark: "#2C1D21",
-              base: "#FCEEF1",
-            },
-          },
-          "subtle-2": {
-            value: {
-              _dark: "#2C1D21",
-              base: "#FCEEF1",
-            },
-          },
-        },
-
-        // Status Colors - Success/Positive
-        success: {
-          strong: {
-            value: {
-              _dark: "#A3E7D6",
-              base: "#047229",
-            },
-          },
-          primary: {
-            value: {
-              _dark: "#26C9A1",
-              base: "#3DBA67",
-            },
-          },
-          secondary: {
-            value: {
-              _dark: "#1EA181",
-              base: "#99E0B1",
-            },
-          },
-          subtle: {
-            value: {
-              _dark: "#212A23",
-              base: "#E9FDF1",
-            },
-          },
-        },
-
-        // Status Colors - Neutral
-        neutral: {
-          subtle: {
-            value: {
-              _dark: "#363A3F",
-              base: "#F1F2F3",
-            },
-          },
-          strong: {
-            value: {
-              _dark: "#D2D5D9",
-              base: "#525860",
-            },
-          },
-        },
-
-        // System Feedback
-        feedback: {
           info: {
-            value: {
-              _dark: "#CBDDFF",
-              base: "#CBDDFF",
-            },
+            strong: { value: { base: "#2D65D1", _dark: "#CBD0FF" } },
+            primary: { value: { base: "#6194F5", _dark: "#A2C2FF" } },
+            secondary: { value: { base: "#CBD0FF", _dark: "#8930CE" } },
+            subtle: { value: { base: "#E5E5FF", _dark: "#2A303A" } },
           },
-          error: {
-            value: {
-              _dark: "#2C1D21",
-              base: "#FCEEF1",
-            },
+          warning: {
+            strong: { value: { base: "#AF5F00", _dark: "#FFC985" } },
+            primary: { value: { base: "#F29832", _dark: "#F29832" } },
+            secondary: { value: { base: "#FFE4C3", _dark: "#B2752C" } },
+            subtle: { value: { base: "#FFF3E5", _dark: "#36322D" } },
           },
-          success: {
-            primary: {
-              value: {
-                _dark: "#26C9A1",
-                base: "#26B491",
-              },
-            },
-            tertiary: {
-              value: {
-                _dark: "#212A23",
-                base: "#E2FDF6",
-              },
-            },
+          neutral: {
+            strong: { value: { base: "{colors.gray.600}", _dark: "{colors.gray.300}" } },
+            primary: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.400}" } },
+            secondary: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.500}" } },
+            subtle: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
           },
         },
-
-        // Graphs
-        graphs: {
-          "1": {
-            value: {
-              _dark: "#F0F4F7",
-              base: "#203A87",
-            },
-          },
-          "2": {
-            value: {
-              _dark: "#4BA0FD",
-              base: "#225EED",
-            },
-          },
-          "3": {
-            value: {
-              _dark: "#2C87F3",
-              base: "#307AE6",
-            },
-          },
-          "4": {
-            value: {
-              _dark: "#337BEA",
-              base: "#5FA5F9",
-            },
-          },
-          "5": {
-            value: {
-              _dark: "#1145CD",
-              base: "#BEDBFE",
-            },
-          },
-          "6": {
-            value: {
-              _dark: "#06308A",
-              base: "#DBE9FD",
-            },
-          },
+        // graph colors will change after allocations redesign
+        graph: {
+          1: { value: { base: "#203A87", _dark: "#F0F4F7" } },
+          2: { value: { base: "#225EED", _dark: "#4BA0FD" } },
+          3: { value: { base: "#307AE6", _dark: "#2C87F3" } },
+          4: { value: { base: "#5FA5F9", _dark: "#337BEA" } },
+          5: { value: { base: "#BEDBFE", _dark: "#1145CD" } },
+          6: { value: { base: "#DBE9FD", _dark: "#06308A" } },
+        },
+        calendar: {
+          1: { value: { base: "#739E45", _dark: "#B4EA82" } },
+          2: { value: { base: "#97CE5B", _dark: "#B4EA82B3" } },
+          3: { value: { base: "#B1F16C", _dark: "#B4EA8266" } },
+          4: { value: { base: "#B1F16C80", _dark: "#B4EA8233" } },
         },
 
-        // Votes
-        votes: {
-          "abstain-default": {
-            value: {
-              _dark: "#FFFFFF",
-              base: "#B59525",
-            },
-          },
-          "abstain-strong": {
-            value: {
-              _dark: "#FFFFFF",
-              base: "#A27112",
-            },
-          },
+        social: {
+          telegram: { value: { base: "#0088cc", _dark: "#0088cc" } },
+          discord: { value: { base: "#5865F2", _dark: "#5865F2" } },
+          youtube: { value: { base: "#FF0000", _dark: "#FF0000" } },
+          medium: { value: { base: "black", _dark: "black" } },
+          twitter: { value: { base: "black", _dark: "black" } },
         },
       },
       animations: {

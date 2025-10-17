@@ -25,29 +25,23 @@ export const CONTACT_INFORMATION_PLACEHOLDER = "[Your Contact Information]"
 export const REMOVED_PLACEHOLDER = "[Removed]"
 export const MODIFIED_PLACEHOLDER = "[Modified]"
 export const ADDED_FEATURES_PLACEHOLDER = "[Added]"
-
 /**
  * Governance markdown Proposal Template for VebetterDAO
  */
 export const GovernanceProposalTemplate = `
 # ${TITLE_PLACEHOLDER}
-
 ## Proposal Summary
 ${SUMMARY_PLACEHOLDER}
-
 ## Proposal Type
 Specify the type of proposal:
 - [${ONCHAIN_ACTION_PLACEHOLDER}] On-chain Action
 - [${TEXT_ONLY_PLACEHOLDER}] Text-only Proposal
-
 ## Proposal Changes
 - Removed : ${REMOVED_PLACEHOLDER}
 - Modified: ${MODIFIED_PLACEHOLDER}
 - Added: ${ADDED_FEATURES_PLACEHOLDER}
-
 ## Motivation
 ${MOTIVATION_PLACEHOLDER}
-
 ## Detailed Specification
 ${DETAILED_SPECIFICATION_PLACEHOLDER}
 

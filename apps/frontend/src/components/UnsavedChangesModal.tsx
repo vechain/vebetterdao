@@ -7,18 +7,14 @@ interface UnsavedChangesModalProps {
   onSaveDraft: () => void
   onLeaveAnyway: () => void
 }
-
 export const UnsavedChangesModal = ({ isOpen, onClose, onSaveDraft, onLeaveAnyway }: UnsavedChangesModalProps) => {
   const { t } = useTranslation()
-
   const handleSaveDraft = () => {
     onSaveDraft()
   }
-
   const handleLeaveAnyway = () => {
     onLeaveAnyway()
   }
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={() => onClose()}>
       <Dialog.Backdrop />
@@ -38,7 +34,7 @@ export const UnsavedChangesModal = ({ isOpen, onClose, onSaveDraft, onLeaveAnywa
                   fill="currentColor"
                 />
               </Icon>
-              <Heading fontSize="24px">{t("Leave without saving?")}</Heading>
+              <Heading size="2xl">{t("Leave without saving?")}</Heading>
               <Text color="#6A6A6A">
                 {t(
                   "You're in the middle of your grant application. If you leave now, your progress won’t be saved. What would you like to do?",
@@ -51,7 +47,7 @@ export const UnsavedChangesModal = ({ isOpen, onClose, onSaveDraft, onLeaveAnywa
               <Button variant="secondary" onClick={handleLeaveAnyway} w="full">
                 {t("Leave anyway")}
               </Button>
-              <Button variant="primaryAction" onClick={handleSaveDraft} w="full">
+              <Button variant="primary" onClick={handleSaveDraft} w="full">
                 {t("Save draft")}
               </Button>
             </HStack>

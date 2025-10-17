@@ -2,25 +2,29 @@ import {
   Card,
   Stack,
   VStack,
-  Image,
   Text,
-  Box,
   Heading,
   Button,
   useDisclosure,
   Spinner,
   useMediaQuery,
+  Avatar,
+  Badge,
 } from "@chakra-ui/react"
-import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
-import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
-import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
-import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
-import { UserNode, useGetUserGMs, useGetUserNodes } from "@/api"
-import { useTranslation } from "react-i18next"
-import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { Tooltip } from "@/components/ui/tooltip"
+
+import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { UserNode, useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+
+import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
+import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
+import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
+import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
 
 export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { t } = useTranslation()
@@ -63,13 +67,13 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
         {!!userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
-          <Card.Root flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"} maxH={"fit-content"}>
-            <Card.Header p="1.25rem" pb="0">
-              <Heading fontSize="lg" lineHeight={1}>
+          <Card.Root flex={3} variant="primary" maxH={"fit-content"}>
+            <Card.Header>
+              <Heading textStyle="lg">
                 {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
               </Heading>
             </Card.Header>
-            <Card.Body p={isAbove800 ? "1.25rem" : "0.5rem"}>
+            <Card.Body>
               <VStack align={"stretch"} gap="4">
                 {userNodes?.allNodes
                   ?.sort((a, b) => {
@@ -81,44 +85,47 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                   ?.map(node => (
                     <Card.Root
                       key={node.nodeId}
-                      variant="outline"
+                      variant="subtle"
+                      _hover={{ bg: "card.subtle" }}
                       alignItems="center"
                       flexDirection="row"
                       gap="8px"
-                      p="16px"
+                      p="4"
                       rounded="8px">
                       <Card.Header p="0">
-                        <Image
-                          src={node?.image}
-                          // fallbackSrc="/assets/icons/not-found-image-fallback.svg"
-                          alt={node?.name}
-                          boxSize="62px"
-                          rounded="8px"
-                        />
+                        <Avatar.Root shape="rounded" boxSize="16" borderRadius="0.75rem">
+                          <Avatar.Image
+                            boxSize="16"
+                            src={node?.image}
+                            alt={node?.name}
+                            borderRadius="0.75rem"
+                            objectFit="contain"
+                          />
+                          <Avatar.Fallback name={node?.name} />
+                        </Avatar.Root>
                       </Card.Header>
 
-                      <Card.Body p="0" gap="8px">
-                        <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                      <Card.Body gap="0">
+                        <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
                           {t("Node")}
                         </Text>
                         <Text
-                          fontSize={isAbove800 ? "sm" : "xs"}
-                          fontWeight={700}
+                          textStyle={isAbove800 ? "sm" : "xs"}
                           lineHeight={isAbove800 ? 1.6 : 1.2}
                           lineClamp={isAbove800 ? 1 : undefined}>
                           {`${node.name} #${node.nodeId}`}
                         </Text>
-                        <Box display="inline-block" w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                          <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
+                        <Badge w="fit-content" mt="1">
+                          <Text textStyle="xs" fontWeight="semibold" _dark={{ color: "#FFFFFFB2" }}>
                             {t("{{value}} points", { value: node.xNodePoints })}
                           </Text>
-                        </Box>
+                        </Badge>
                       </Card.Body>
 
                       <Card.Footer p="0">
                         {attachedNode?.nodeId === node.nodeId ? (
                           <Button
-                            variant="dangerFilledTonal"
+                            colorPalette="red"
                             size={isAbove800 ? "sm" : "xs"}
                             onClick={onDetachGMToXNodeModalOpen}>
                             {t("Detach")}
@@ -128,7 +135,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                             <span>
                               <Button
                                 disabled={!!nodesAttachedToGMs?.[node.nodeId]}
-                                variant="whiteAction"
+                                variant="secondary"
                                 size={isAbove800 ? "sm" : "xs"}
                                 onClick={() => {
                                   setSelectedNode(node)
@@ -143,7 +150,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                             <span>
                               <Button
                                 disabled={!!attachedNode}
-                                variant="whiteAction"
+                                variant="secondary"
                                 size={isAbove800 ? "sm" : "xs"}
                                 onClick={() => {
                                   setSelectedNode(node)

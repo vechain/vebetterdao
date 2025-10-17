@@ -13,7 +13,6 @@ type Props = {
   moveAmplitudeX?: number // Amplitude of the movement along the axes
   moveAmplitudeY?: number // Amplitude of the movement along the axes
 }
-
 export const AnimatedStar = ({
   size,
   left,

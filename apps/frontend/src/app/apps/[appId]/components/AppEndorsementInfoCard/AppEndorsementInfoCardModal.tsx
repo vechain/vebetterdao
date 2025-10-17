@@ -1,11 +1,3 @@
-import { useAppEndorsers, useAppEndorsementStatus, useIsAppAdmin, UserNode } from "@/api"
-import { EndorsersItem } from "./EndorsersItem"
-import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
-import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { normalize } from "@repo/utils/HexUtils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { UilTrash } from "@iconscout/react-unicons"
 import {
   VStack,
   HStack,
@@ -20,12 +12,26 @@ import {
   Flex,
   Card,
 } from "@chakra-ui/react"
-import { useTranslation, Trans } from "react-i18next"
-import { useMemo, useState } from "react"
-import { BaseModal } from "@/components/BaseModal"
+import { UilTrash } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { normalize } from "@repo/utils/HexUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { useMemo, useState } from "react"
+import { useTranslation, Trans } from "react-i18next"
+
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { BaseModal } from "@/components/BaseModal"
+
+import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
+import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+
 import { EndorsementDetails } from "./EndorsementDetails"
+import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
+import { EndorsersItem } from "./EndorsersItem"
 import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
 
 type Props = {
@@ -34,11 +40,9 @@ type Props = {
   appId: string
   userNode?: UserNode
 }
-
 export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
@@ -86,9 +90,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
     <BaseModal isOpen={isOpen} onClose={onClose} modalProps={{ size: "6xl" }}>
       <VStack gap={6} align="flex-start" w="full">
         <HStack w="full" justify="space-between">
-          <Heading fontSize={"24px"} fontWeight="bold">
-            {t("Endorsement history")}
-          </Heading>
+          <Heading size={"2xl"}>{t("Endorsement history")}</Heading>
           <Flex>
             <EndorsementStatusCallout
               endorsementStatus={endorsementStatus}
@@ -115,20 +117,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
             <Separator hideFrom="md" w="full" />
-            <Card.Root
-              variant="subtle"
-              bg="info-bg"
-              rounded={"16px"}
-              p={{
-                base: 0,
-                lg: 4,
-              }}
-              gap={4}
-              w={"full"}
-              height={["auto", "auto", "40vh"]}
-              overflowY="auto">
+            <Card.Root variant="primary" p="4" gap={4} w={"full"} height={["auto", "auto", "40vh"]} overflowY="auto">
               <Card.Header p={0}>
-                <Heading fontWeight="700" fontSize="20px" alignSelf="flex-start">
+                <Heading size="xl" alignSelf="flex-start">
                   {t("Endorsers")}
                 </Heading>
               </Card.Header>
@@ -151,7 +142,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                               endorsedAddress: humanAddress(normalize(selectedEndorserAddress), 6, 3),
                               value: selectedEndorserNodePoints,
                             }}
-                            components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                            components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                           />
                         </Text>
                         <HStack>
@@ -196,7 +187,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                 ) : (
                   <Center w="full" h="full">
                     <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No endorsement" />
-                    <Text fontSize="14px" color="#6A6A6A">
+                    <Text textStyle="sm" color="text.subtle">
                       {t("There is nothing to show here !")}
                     </Text>
                   </Center>
@@ -206,8 +197,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
           </VStack>
           <Separator hideFrom="md" w="full" />
           <Card.Root
-            variant="subtle"
-            bg="info-bg"
+            bg="bg.primary"
             flex={1}
             p={4}
             rounded={"16px"}
@@ -215,7 +205,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
             minHeight={["auto", "auto", "50vh"]}
             maxH={["auto", "auto", "50vh"]}>
             <Card.Header p={0}>
-              <Heading fontWeight="bold" fontSize="20px" alignSelf={"flex-start"}>
+              <Heading size="xl" alignSelf={"flex-start"}>
                 {t("Endorsement history")}
               </Heading>
             </Card.Header>
@@ -233,7 +223,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               ) : (
                 <Center w="full" h="full">
                   <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No endorsement" />
-                  <Text fontSize="14px" color="#6A6A6A">
+                  <Text textStyle="sm" color="text.subtle">
                     {t("There is nothing to show here !")}
                   </Text>
                 </Center>

@@ -1,5 +1,3 @@
-import { useAllocationsRound, useAllocationsRoundState } from "@/api"
-import { AllocationStateBadge } from "@/components"
 import {
   HStack,
   Button,
@@ -19,49 +17,43 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
 export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const router = useRouter()
   const { t } = useTranslation()
   const { data, isLoading } = useAllocationsRound(roundId)
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
-
   const prevButtonDisabled = !data.roundId || data.roundId === "1"
   const goToPreviousRound = () => {
     if (prevButtonDisabled) return
     const prevRoud = Number(data?.roundId) - 1
     router.push(`/rounds/${prevRoud}`)
   }
-
   const { data: state } = useAllocationsRoundState(roundId)
   const isActive = state === 0
-
   const nextButtonDisabled = !data.roundId || data.isCurrent
-
   const goToNextRound = () => {
     if (nextButtonDisabled) return
     const nextRound = Number(data?.roundId) + 1
     router.push(`/rounds/${nextRound}`)
   }
-
-  const bgColor = data.state === 0 ? "#B1F16C" : "#E1E1E1"
-
+  const bgColor = data.state === 0 ? "banner.green" : "bg.primary"
   // State to store the client width
-  const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
+  const [clientWidth, setClientWidth] = useState(0)
 
-  // Effect to update the clientWidth state on window resize
+  // Effect to update the clientWidth state using ResizeObserver
   useEffect(() => {
-    const updateWidth = () => {
-      setClientWidth(document.body.clientWidth)
-    }
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setClientWidth(entry.contentRect.width)
+      }
+    })
 
-    // Set initial width
-    updateWidth()
+    resizeObserver.observe(document.body)
 
-    // Add window resize event listener
-    window.addEventListener("resize", updateWidth)
-
-    // Clean up listener on component unmount
-    return () => window.removeEventListener("resize", updateWidth)
+    return () => resizeObserver.disconnect()
   }, [])
 
   if (isDesktop)
@@ -83,32 +75,28 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           px={20}>
           <Button
             data-testid="prev-round-button"
-            color={prevButtonDisabled ? "#757575" : "#004CFC"}
+            color="icon.default"
             size="sm"
             variant={"plain"}
             aria-label="Go to previous round"
             disabled={prevButtonDisabled}
             onClick={goToPreviousRound}>
-            <FaArrowLeft />
+            <Icon as={FaArrowLeft} color="icon.default" />
             {t("Previous round")}
           </Button>
 
           <Stack direction={["column", "column", "row"]} gap={4} align={"center"}>
             <Skeleton loading={isLoading}>
-              <Heading size="lg" color={"#131313"}>
-                {t("Round #{{round}}", {
-                  round: data?.roundId,
-                })}
-              </Heading>
+              <Heading size="lg">{t("Round #{{round}}", { round: data?.roundId })}</Heading>
             </Skeleton>
-            <Box w={1.5} h={1.5} borderRadius={"full"} bg={"#252525"} />
+            <Box w={1.5} h={1.5} borderRadius={"full"} bg={"text.subtle"} />
             <HStack gap={2} align={"center"}>
               <Skeleton loading={isLoading}>
-                <Text color={"#131313"}>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
-              <Icon as={FaArrowRight} color={"#131313"} />
+              <Icon as={FaArrowRight} color="icon.default" />
               <Skeleton loading={isLoading}>
-                <Text color={"#131313"}>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
             </HStack>
             <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
@@ -117,12 +105,13 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             data-testid="next-round-button"
             variant={"plain"}
             size="sm"
-            color={nextButtonDisabled ? "#757575" : "#004CFC"}
+            color="icon.default"
             aria-label="Go to next round"
             disabled={nextButtonDisabled}
             onClick={goToNextRound}>
             {t("Next round")}
-            <FaArrowRight />
+
+            <Icon as={FaArrowRight} color="icon.default" />
           </Button>
         </Container>
       </HStack>
@@ -136,10 +125,11 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       bgColor={bgColor}
       px={4}
       py={2}
+      mt={-2}
       data-testid={`allocation-round-${roundId}-nav-mobile`}>
       <IconButton
         data-testid="prev-round-button"
-        color={prevButtonDisabled ? "#757575" : "#004CFC"}
+        color="icon.default"
         variant={"ghost"}
         disabled={prevButtonDisabled}
         onClick={goToPreviousRound}
@@ -149,10 +139,8 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack gap={4}>
           <Skeleton loading={isLoading}>
-            <Heading size="xl" color={"#131313"}>
-              {t("Round #{{round}}", {
-                round: data?.roundId ?? 0,
-              })}
+            <Heading size="xl" color="text.default">
+              {t("Round #{{round}}", { round: data?.roundId ?? 0 })}
             </Heading>
           </Skeleton>
           <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
@@ -160,17 +148,17 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
         <HStack gap={2} align={"center"}>
           <Skeleton loading={isLoading}>
-            <Text color={"#131313"}>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+            <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
-          <Icon as={FaArrowRight} color={"#131313"} />
+          <Icon as={FaArrowRight} color="icon.default" />
           <Skeleton loading={isLoading}>
-            <Text color={"#131313"}>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+            <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
         </HStack>
       </VStack>
       <IconButton
         data-testid="next-round-button"
-        color={nextButtonDisabled ? "#757575" : "#004CFC"}
+        color="icon.default"
         variant={"ghost"}
         aria-label="Go to next round"
         onClick={goToNextRound}

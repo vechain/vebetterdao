@@ -1,35 +1,31 @@
-import { useUserStatus } from "@/api"
-import { WalletAddressInput } from "@/app/components/Input"
-import { UserStatus, useWhitelistBlacklistUser, useUserStatusConfig } from "@/hooks"
 import { Button, Card, Field, Heading, HStack, InputGroup, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useUserStatus } from "../../../../../api/contracts/vePassport/hooks/useUserStatus"
+import { useUserStatusConfig } from "../../../../../hooks/useUserStatusConfig"
+import { UserStatus, useWhitelistBlacklistUser } from "../../../../../hooks/useWhitelistBlacklistUser"
+import { WalletAddressInput } from "../../../../components/Input/WalletAddressInput"
+
 export const ManageUserStatus = () => {
   const [user, setUser] = useState<string>("")
   const [actionType, setActionType] = useState(UserStatus.NONE)
-
   const userStatus = useUserStatus(user)
-
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(user)
   }, [user])
-
   const { t } = useTranslation()
   const statusConfig = useUserStatusConfig()
   const currentConfig = statusConfig[actionType]
-
   const { sendTransaction, isTransactionPending, status } = useWhitelistBlacklistUser({
     address: user,
     currentStatus: userStatus,
     newStatus: actionType,
   })
-
   const handleSetActionType = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setActionType(e.target.value as UserStatus)
   }, [])
-
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
@@ -37,15 +33,13 @@ export const ManageUserStatus = () => {
     },
     [sendTransaction],
   )
-
   const isLoading = isTransactionPending || status === "pending"
   const isFormValid = isValidAddress
-
   return (
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("Manage User Status")}</Heading>
-        <Text fontSize="sm">
+        <Text textStyle="sm">
           {t("Manage user participation by adding them to a whitelist, blacklist, or removing their status")}
         </Text>
       </Card.Header>

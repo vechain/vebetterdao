@@ -1,13 +1,13 @@
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useAllocationPoolEvents } from "../../xAllocationPool"
 import { ethers } from "ethers"
+
+import { useAllocationPoolEvents } from "@/api/contracts/xAllocationPool/hooks/useAllocationPoolEvents"
 
 /**
  * Fetches all allocation pool events
  * @param ThorClient
  * @returns {Promise<{ claimedRewards: AllocationRewardsClaimed[] >}
  */
-
 export const useAppAllocations = (appId: string) => {
   const { data, error, isLoading } = useAllocationPoolEvents()
   const appAllocations =
@@ -23,7 +23,6 @@ export const useAppAllocations = (appId: string) => {
   const totalAllocationReceived = appAllocations.reduce((acc, curr) => acc + Number(curr.scaledAmount), 0)
   const lastRoundAllocationReceived = Number(appAllocations[appAllocations.length - 1]?.scaledAmount) || 0
   const averageAllocationReceived = appAllocations.length ? totalAllocationReceived / appAllocations.length : 0
-
   return {
     data,
     error,

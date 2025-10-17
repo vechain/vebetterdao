@@ -1,13 +1,17 @@
-import { UseFormReturn } from "react-hook-form"
-import { EditAppForm } from ".."
 import { Flex, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { BANNER_UPLOAD_GUIDELINES, IMAGE_REQUIREMENTS, notFoundImage } from "@/constants"
-import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useRef } from "react"
+import { UseFormReturn } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { toaster } from "@/components/ui/toaster"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
-import { useTranslation } from "react-i18next"
-import { toaster } from "@/components/ui/toaster"
+
+import { IMAGE_REQUIREMENTS, BANNER_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
+import { EditAppForm } from "../EditAppPageContent"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -42,10 +46,9 @@ export const EditAppBanner = ({ form }: Props) => {
     },
     [form],
   )
-
   return (
     <VStack gap={2} align={"start"}>
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("Banner")}
       </Text>
       <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px">
@@ -74,11 +77,11 @@ export const EditAppBanner = ({ form }: Props) => {
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
           <IconButton aria-label="Edit banner" rounded={"full"} bg={"#00000033"} _hover={{ bg: "#00000033" }}>
-            <UilPen color="#FFFFFF" />
+            <UilPen color="white" />
           </IconButton>
         </Flex>
       </Flex>
-      <Text fontSize={14} color={"gray"} pt={0}>
+      <Text textStyle="sm" color={"gray"} pt={0}>
         {t(BANNER_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>

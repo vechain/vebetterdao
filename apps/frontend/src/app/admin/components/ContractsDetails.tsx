@@ -1,18 +1,23 @@
-import { useContractVersion } from "@/api"
-import { AddressButton } from "@/components/AddressButton"
-import { B3TRIcon, VETIcon, VOT3Icon, VTHOIcon } from "@/components"
 import { Card, Grid, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useHasRoles } from "@/api/contracts/account"
 import { useWallet, useAccountBalance } from "@vechain/vechain-kit"
-import { getContractByAddress } from "@/constants"
-import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+import { useMemo } from "react"
+
+import { AddressButton } from "@/components/AddressButton"
+
+import { useHasRoles } from "../../../api/contracts/account/hooks/useHasRoles"
+import { useContractVersion } from "../../../api/contracts/common/useContractVersion"
+import { B3TRIcon } from "../../../components/Icons/B3TRIcon"
+import { VETIcon } from "../../../components/Icons/VETIcon"
+import { VOT3Icon } from "../../../components/Icons/VOT3Icon"
+import { VTHOIcon } from "../../../components/Icons/VTHOIcon"
+import { getContractByAddress } from "../../../constants/contractList"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)
-
 export const ContractsDetails = () => {
   const config = getConfig()
   return (
@@ -102,6 +107,11 @@ export const ContractsDetails = () => {
         address={config.stargateNFTContractAddress}
         roles={getContractByAddress(config.stargateNFTContractAddress)?.roles}
       />
+      <ContractDetailsCard
+        title="RelayerRewardsPool"
+        address={config.relayerRewardsPoolContractAddress}
+        roles={getContractByAddress(config.relayerRewardsPoolContractAddress)?.roles}
+      />
     </Grid>
   )
 }
@@ -142,62 +152,62 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
   }))
 
   return (
-    <Card.Root w="full" borderRadius={"2xl"} p={2}>
+    <Card.Root variant="primary" w="full" borderRadius={"2xl"}>
       <Card.Header>
         <Heading size={"md"}>{title}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={4}>
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Address"}
             </Text>
             <AddressButton address={address} size={"sm"} showAddressIcon={false} />
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Version"}
             </Text>
             <Skeleton loading={!version}>
-              <Text fontSize="md">{version}</Text>
+              <Text textStyle="md">{version}</Text>
             </Skeleton>
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Balance"}
             </Text>
           </HStack>
           <HStack w="full" justify={"space-between"}>
             <HStack gap={1}>
               <Skeleton loading={b3trBalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(b3trBalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(b3trBalanceScaled))}</Text>
               </Skeleton>
               <B3TRIcon boxSize={5} />
             </HStack>
             <HStack gap={1}>
               <Skeleton loading={vot3BalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(vot3BalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(vot3BalanceScaled))}</Text>
               </Skeleton>
               <VOT3Icon boxSize={5} />
             </HStack>
             <HStack gap={1}>
               <Skeleton loading={accountBalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(vetBalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(vetBalanceScaled))}</Text>
               </Skeleton>
               <VETIcon boxSize={5} />
             </HStack>
             <HStack gap={1}>
               <Skeleton loading={accountBalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(vthoBalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(vthoBalanceScaled))}</Text>
               </Skeleton>
               <VTHOIcon boxSize={5} />
             </HStack>
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Roles"}
             </Text>
           </HStack>
@@ -205,8 +215,8 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
             <VStack align="flex-start" w={"full"}>
               {userRoles.map(role => (
                 <HStack key={role.name + address} w={"full"} justify={"space-between"}>
-                  <Text fontSize="xs">{role.name}</Text>
-                  <Text fontSize="xs" justifyContent={"flex-end"}>
+                  <Text textStyle="xs">{role.name}</Text>
+                  <Text textStyle="xs" justifyContent={"flex-end"}>
                     {role.hasRole ? "✅" : "❌"}
                   </Text>
                 </HStack>

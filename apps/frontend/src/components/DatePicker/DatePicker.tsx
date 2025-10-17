@@ -1,4 +1,3 @@
-import { useCallback, useMemo, useState } from "react"
 import {
   Box,
   Button,
@@ -14,17 +13,16 @@ import {
   useMediaQuery,
   useBreakpointValue,
 } from "@chakra-ui/react"
-import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa"
-import { useTranslation } from "react-i18next"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
-
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa"
 // Starting the week on Monday
 dayjs.extend(updateLocale)
 dayjs.updateLocale("en", {
   weekStart: 1,
 })
-
 export type DatePickerProps = {
   // Start date in ISO format (YYYY-MM-DD)
   startDate?: string
@@ -41,7 +39,6 @@ export type DatePickerProps = {
   variant?: "range" | "single"
   value?: string
 }
-
 export const DatePicker = ({
   startDate = "",
   endDate = "",
@@ -233,7 +230,7 @@ export const DatePicker = ({
             <Grid templateColumns="repeat(7, 1fr)" gap={1}>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                 <Box key={day} textAlign="center">
-                  <Text fontSize="xs" fontWeight="medium" color="#D9D9D9">
+                  <Text textStyle="xs" color="#D9D9D9">
                     {day}
                   </Text>
                 </Box>
@@ -263,8 +260,7 @@ export const DatePicker = ({
                     p="0"
                     disabled={!isSelectable}
                     unstyled
-                    fontSize={isMobile ? "2xs" : "xs"}
-                    fontWeight="medium"
+                    textStyle={isMobile ? "2xs" : "xs"}
                     bg={isStartOrEnd ? "#004CFC" : isInRange ? "#E0E9FE" : "transparent"}
                     color={isStartOrEnd ? "white" : "inherit"}
                     borderRadius="md"
@@ -290,7 +286,7 @@ export const DatePicker = ({
 
             {/* Reminder to select an end date */}
             {variant === "range" && tempStartDate && !tempEndDate && (
-              <Text fontSize="sm" color="#D9D9D9" textAlign="center">
+              <Text textStyle="sm" color="#D9D9D9" textAlign="center">
                 {t("Select end date")}
               </Text>
             )}

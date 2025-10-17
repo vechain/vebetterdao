@@ -281,6 +281,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   ) external reinitializer(6) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
+    require(address(_xAllocationVoting) != address(0), "VoterRewards: invalid xAllocationVoting");
+    require(address(_relayerRewardsPool) != address(0), "VoterRewards: invalid relayerRewardsPool");
+
     $.xAllocationVoting = _xAllocationVoting;
     $.relayerRewardsPool = _relayerRewardsPool;
   }
@@ -390,16 +393,23 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     require($.emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
 
-    if ($.xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(voter)) {
-      _checkRelayerEarlyAccessEligibility(cycle);
+    uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
+    bool hadAutoVotingEnabled = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
+
+    if (hadAutoVotingEnabled) {
+      _checkEarlyAccessEligibility(cycle, voter);
     }
 
     (uint256 netReward, uint256 netGmReward, uint256 fee) = _getRewardsAndFees(cycle, voter);
     uint256 totalNetReward = netReward + netGmReward;
+    uint256 totalRequiredNetReward = totalNetReward + fee;
 
+    // Ensure user has actual rewards to claim (not just fees to pay)
     require(totalNetReward > 0, "VoterRewards: reward must be greater than 0");
+
+    // Ensure contract has enough balance for both user rewards and relayer fees
     require(
-      $.b3tr.balanceOf(address(this)) >= totalNetReward,
+      $.b3tr.balanceOf(address(this)) >= totalRequiredNetReward,
       "VoterRewards: not enough B3TR in the contract to pay reward"
     );
 
@@ -412,7 +422,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
       $.relayerRewardsPool.deposit(fee, cycle);
 
       // Register CLAIM action for the relayer
-      $.relayerRewardsPool.registerRelayerAction(msg.sender, cycle, RelayerAction.CLAIM);
+      $.relayerRewardsPool.registerRelayerAction(msg.sender, voter, cycle, RelayerAction.CLAIM);
+
+      emit RelayerFeeTaken(msg.sender, fee, cycle, voter);
     }
 
     // Transfer the remaining reward to the voter
@@ -468,7 +480,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice Get the fee for a user in a specific cycle.
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
-  function getFee(uint256 cycle, address voter) public view virtual returns (uint256) {
+  function getRelayerFee(uint256 cycle, address voter) public view virtual returns (uint256) {
     (, , uint256 fee) = _getRewardsAndFees(cycle, voter);
     return fee;
   }
@@ -601,6 +613,12 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     return $.relayerRewardsPool;
   }
 
+  /// @notice Get the XAllocationVoting contract.
+  function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.xAllocationVoting;
+  }
+
   /// @notice Check if quadratic rewarding is disabled at a specific block number.
   /// @dev To check if quadratic rewarding was disabled for a cycle, use the block number the cycle started.
   /// @param blockNumber - The block number to check the quadratic rewarding status.
@@ -702,6 +720,14 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   }
 
   // ----------------- Private Functions ----------------- //
+  /**
+   * @dev Check if the caller is eligible to perform relayer actions during early access period
+   * @param roundId The current round ID
+   */
+  function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    $.relayerRewardsPool.validateClaimDuringEarlyAccess(roundId, voter, msg.sender);
+  }
 
   /**
    * @dev Check if the caller is eligible to perform relayer actions during early access period

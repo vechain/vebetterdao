@@ -1,6 +1,7 @@
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
+
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 
 export type GrantFormStoreState = GrantFormData & {
   currentStep: number
@@ -8,7 +9,6 @@ export type GrantFormStoreState = GrantFormData & {
   setCurrentStep: (step: number) => void
   clearData: () => void
 }
-
 const initialState: GrantFormData = {
   grantType: "dapp",
   proposerAddress: "",
@@ -69,6 +69,7 @@ const initialState: GrantFormData = {
   votingRoundId: "",
 
   grantsReceiverAddress: "",
+  outcomesAttachment: [],
 }
 
 export const GRANT_PROPOSAL_FORM_STORE_NAME = "GRANT_PROPOSAL_FORM_STORE"

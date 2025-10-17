@@ -1,32 +1,22 @@
-import {
-  Card,
-  Heading,
-  HStack,
-  Stack,
-  useMediaQuery,
-  VStack,
-  Flex,
-  Image,
-  Skeleton,
-  useDisclosure,
-  Box,
-  Icon,
-} from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { NotConnectedWallet } from "./components/NotConnectedWallet"
+import { Card, Heading, Stack, Flex, Image, Skeleton, useDisclosure, Box, Icon } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { SwapB3trVot3 } from "./components/SwapB3trVot3"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { useMemo } from "react"
-import { useBreakpoints, useGetB3trBalance } from "@/hooks"
-import { useGetUserGMs, useGetUserNodes } from "@/api"
-import { GmEmptyStateCard } from "./GmEmptyStateCard"
-import { GmActionButton } from "../GmActionButton"
-import { GmCard } from "./GmCard"
-import { useRouter } from "next/navigation"
-import { GetNodeModal } from "./GetNodeModal"
+import { useTranslation } from "react-i18next"
 
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
+
+import { useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGetUserNodes } from "../../api/contracts/xNodes/useGetUserNodes"
+import { useRetrieveProfilIdentity } from "../../app/profile/components/utils/useRetrieveProfilIdentity"
+import { useBreakpoints } from "../../hooks/useBreakpoints"
+import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
+import { GmActionButton } from "../GmActionButton"
+
+import { NotConnectedWallet } from "./components/NotConnectedWallet"
+import { SwapB3trVot3 } from "./components/SwapB3trVot3"
+import { GetNodeModal } from "./GetNodeModal"
+import { GmCard } from "./GmCard"
+import { GmEmptyStateCard } from "./GmEmptyStateCard"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
@@ -42,136 +32,101 @@ export const GmNFTAndNodeCard = () => {
     onOpen: onOpenGetGMAndNodeModal,
     onClose: onCloseGetGMAndNodeModal,
   } = useDisclosure()
-
-  const router = useRouter()
-
   const isLoading = isUserGMsLoading || isNodesLoading
   const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && nodes?.allNodes?.length === 0
-
   const totalPoints = useMemo(() => {
     return nodes?.allNodes?.reduce((acc, node) => acc + node.xNodePoints, 0) || 0
   }, [nodes])
-
-  const [isAbove1200] = useMediaQuery(["(min-width: 1200px)"])
-  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-
   if (!account?.address && !viewMode) {
     return <NotConnectedWallet />
   }
-
   if (isLoading) {
-    return <Skeleton height={isMobile ? "400px" : "250px"} width="100%" rounded="12px" />
+    return <Skeleton height={isMobile ? "96" : "64"} width="full" rounded="xl" />
   }
 
   return (
     <Card.Root
-      bg="#004CFC"
-      rounded="12px"
-      p="24px"
+      asChild
+      bg="banner.dashboard-tokens"
+      rounded="xl"
+      p="6"
       color="white"
       position="relative"
-      overflow={"hidden"}
-      bgImage="url('/assets/backgrounds/cloud-background.webp')"
-      bgSize="cover"
-      backgroundPosition="center"
-      bgRepeat="no-repeat">
-      <Card.Body p={0}>
-        <Stack
-          gap={8}
-          align="stretch"
-          justify={userHasNoNodeOrGm ? "center" : "stretch"}
-          direction={isAbove1200 ? "row" : "column-reverse"}>
-          <VStack flex="3" align={"stretch"} gap="24px" px="2px">
-            <HStack gap="40px" align={"baseline"} justify={"space-between"}>
-              <Heading fontSize="xl" fontWeight={600} lineHeight={"30px"}>
-                {t("Your NFTs")}
-              </Heading>
-            </HStack>
+      overflow={"hidden"}>
+      <Flex direction={{ base: "column-reverse", md: "row" }} gap="8">
+        <Stack flex={1} gap="4">
+          <Heading textStyle="xl" color="white" fontWeight="bold">
+            {t("Your NFTs")}
+          </Heading>
 
-            {userHasNoNodeOrGm ? (
-              <GmEmptyStateCard
-                icon={
-                  <Icon boxSize="60px" color="white">
-                    <NFTEarthIcon />
-                  </Icon>
-                }
-                text={t(
-                  "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.",
-                )}
-              />
-            ) : (
-              <Stack
-                gap="1.5rem"
-                direction={isAbove800 ? "row" : "column"}
-                align={isAbove800 ? "center" : "stretch"}
-                justify="center">
-                {userGMs && userGMs?.length > 0 ? (
-                  <GmCard
-                    subtitle={t("Galaxy Member")}
-                    title={selectedGM?.metadata?.name || "name"}
-                    footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
-                    images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
-                    onCardClick={() => router.push(`/galaxy-member/${selectedGM?.tokenId}`)}
-                  />
-                ) : (
-                  <GmEmptyStateCard
-                    icon={
-                      <Icon boxSize="60px" color="white">
-                        <NFTEarthIcon />
-                      </Icon>
-                    }
-                    text={t("Get NFT and start receiving rewards.")}
-                  />
-                )}
-
-                {nodes?.allNodes && nodes?.allNodes?.length > 0 ? (
-                  <GmCard
-                    title={`${nodes?.allNodes?.[0]?.name || ""} #${nodes?.allNodes?.[0]?.nodeId || ""}`}
-                    subtitle={"Nodes"}
-                    footer={`Total: ${totalPoints} points`}
-                    images={nodes?.allNodes?.map(node => node.image)}
-                    onCardClick={() => router.push(`/profile?tab=nodes`)}
-                  />
-                ) : (
-                  <GmEmptyStateCard
-                    icon={<Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />}
-                    text={t("You have no nodes yet.")}
-                    onCardClick={onOpenGetGMAndNodeModal}
-                  />
-                )}
-              </Stack>
-            )}
-
-            <Box>
-              <GmActionButton
-                b3trBalanceScaled={b3trBalance?.scaled}
-                buttonProps={{
-                  size: "md",
-                  variant: "whiteAction",
-                  w: "fit-content",
-                }}
-              />
-            </Box>
-          </VStack>
-          {!isOnProfilePage && <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />}
-
-          {account?.address && !isOnProfilePage && (
-            <SwapB3trVot3
-              address={account?.address}
-              containerProps={
-                userHasNoNodeOrGm && !isMobile
-                  ? {
-                      maxW: "fit-content",
-                      minW: "40%",
-                    }
-                  : undefined
+          {userHasNoNodeOrGm ? (
+            <GmEmptyStateCard
+              icon={
+                <Icon boxSize="60px" color="white">
+                  <NFTEarthIcon />
+                </Icon>
               }
+              text={t(
+                "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.",
+              )}
             />
+          ) : (
+            <Stack
+              gap="4"
+              direction={{ base: "column", md: "row" }}
+              align={{ base: "stretch", md: "center" }}
+              justify="center">
+              {userGMs && userGMs?.length > 0 ? (
+                <GmCard
+                  subtitle={t("Galaxy Member")}
+                  title={selectedGM?.metadata?.name || "name"}
+                  footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
+                  images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
+                  href={`/galaxy-member/${selectedGM?.tokenId}`}
+                />
+              ) : (
+                <GmEmptyStateCard
+                  icon={
+                    <Icon boxSize="60px" color="white">
+                      <NFTEarthIcon />
+                    </Icon>
+                  }
+                  text={t("Get NFT and start receiving rewards.")}
+                />
+              )}
+
+              {nodes?.allNodes && nodes?.allNodes?.length > 0 ? (
+                <GmCard
+                  title={`${nodes?.allNodes?.[0]?.name || ""} #${nodes?.allNodes?.[0]?.nodeId || ""}`}
+                  subtitle={"Nodes"}
+                  footer={`Total: ${totalPoints} points`}
+                  images={nodes?.allNodes?.map(node => node.image)}
+                  href={`/profile?tab=nodes`}
+                />
+              ) : (
+                <GmEmptyStateCard
+                  icon={<Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />}
+                  text={t("You have no nodes yet.")}
+                  onCardClick={onOpenGetGMAndNodeModal}
+                />
+              )}
+            </Stack>
           )}
+
+          <Box alignSelf="flex-end">
+            <GmActionButton
+              b3trBalanceScaled={b3trBalance?.scaled}
+              buttonProps={{
+                size: "md",
+                variant: "secondary",
+              }}
+            />
+          </Box>
         </Stack>
 
-        <GetNodeModal isOpen={isGetGMAndNodeModalOpen} onClose={onCloseGetGMAndNodeModal} />
-      </Card.Body>
+        {account?.address && !isOnProfilePage && <SwapB3trVot3 address={account?.address} />}
+      </Flex>
+      <GetNodeModal isOpen={isGetGMAndNodeModalOpen} onClose={onCloseGetGMAndNodeModal} />
     </Card.Root>
   )
 }

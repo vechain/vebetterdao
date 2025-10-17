@@ -1,34 +1,32 @@
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
 import { Card, VStack, HStack, Skeleton, IconButton, Image, Text, Box, useDisclosure } from "@chakra-ui/react"
-import { FaEllipsisVertical } from "react-icons/fa6"
-import { AppCardInnerDetails } from "./AppCardInnerDetails"
-import { useBreakpoints } from "@/hooks"
-import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
-import { AppCardOptionsDesktopMenu } from "./AppCardOptionsDesktopMenu"
 import { useRouter } from "next/navigation"
-import { useXAppMetadata, XApp } from "@/api"
+import { FaEllipsisVertical } from "react-icons/fa6"
+
+import { notFoundImage } from "@/constants"
+
+import { XApp } from "../../../api/contracts/xApps/getXApps"
+import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+import { useBreakpoints } from "../../../hooks/useBreakpoints"
+
+import { AppCardInnerDetails } from "./AppCardInnerDetails"
+import { AppCardOptionsDesktopMenu } from "./AppCardOptionsDesktopMenu"
+import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {
   const { isMobile } = useBreakpoints()
-
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
-
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(appMetadata?.banner)
-
   const { open: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
-
   const router = useRouter()
-
   const navigateToAppDetail = () => {
     router.push(`/apps/${xApp.id}`)
   }
-
   return (
     <Card.Root
-      variant={"baseWithBorder"}
+      variant="primary"
       w="full"
       onClick={navigateToAppDetail}
       _hover={{
@@ -55,7 +53,7 @@ export const AppCard = ({ xApp }: Props) => {
           <VStack gap={1} align="flex-start" w="full">
             <HStack gap={1} justifyContent={"space-between"} align="center" w={"full"}>
               <Skeleton loading={appMetadataLoading}>
-                <Text fontWeight={"600"} textStyle={"xs"}>
+                <Text fontWeight="semibold" textStyle={"xs"}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>
@@ -91,7 +89,7 @@ export const AppCard = ({ xApp }: Props) => {
               )}
             </HStack>
             <Skeleton loading={appMetadataLoading}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text textStyle={"sm"} color={"gray.500"}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>

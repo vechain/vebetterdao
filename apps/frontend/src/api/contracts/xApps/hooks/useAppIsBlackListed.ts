@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const contractAddress = getConfig().x2EarnAppsContractAddress
 const abi = X2EarnApps__factory.abi
 const method = "isBlacklisted" as const
-
 export const getAppIsBlackListedQueryKey = (appId: string) => {
   return getCallClauseQueryKeyWithArgs({
     abi,
@@ -14,7 +13,6 @@ export const getAppIsBlackListedQueryKey = (appId: string) => {
     args: [appId as `0x${string}`],
   })
 }
-
 export const useAppIsBlackListed = (appId?: string) => {
   return useCallClause({
     abi,

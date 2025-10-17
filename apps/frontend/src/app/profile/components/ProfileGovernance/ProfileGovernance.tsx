@@ -1,25 +1,31 @@
-import { useUserVotedProposals, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
-import { useCallback, useMemo, useState } from "react"
-import {
-  EmptyStateGovernance,
-  PaginatedProposals,
-  PaginatedTopVotedApps,
-  PreviewCreatedProposals,
-  TopVotedApps,
-} from "./components"
-import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
-import { useRouter } from "next/navigation"
-import { HandPlantIcon, VoteBoxIcon } from "@/components"
-import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV"
-import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
-import { VotingQualification } from "./components/delegation/VotingQualification"
-import { AnalyticsUtils } from "@/utils"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+import { Button, Icon, VStack, Card } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { t } from "i18next"
-import { useUserCreatedProposal } from "@/hooks/proposals/common"
 import { useWallet } from "@vechain/vechain-kit"
+import { t } from "i18next"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
+
+import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import { EmptyState } from "@/components/ui/empty-state"
+
+import { useUserProposalsVoteEvents } from "../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useUserVotedProposals } from "../../../../api/contracts/governance/hooks/useUserVotedProposals"
+import { useUserTopVotedApps } from "../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
+import { VoteBoxIcon } from "../../../../components/VoteBoxIcon"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../constants/AnalyticsEvents"
+import { useUserCreatedProposal } from "../../../../hooks/proposals/common/useUserCreatedProposal"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useRetrieveProfilIdentity } from "../utils/useRetrieveProfilIdentity"
+
+import { CurrentDelegation } from "./components/delegation/CurrentDelegation/CurrentDelegation"
+import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV/PendingDelegationDelegateePOV"
+import { VotingQualification } from "./components/delegation/VotingQualification/VotingQualification"
+import { EmptyStateGovernance } from "./components/EmptyStateGovernance"
+import { PaginatedProposals } from "./components/PaginatedProposals"
+import { PaginatedTopVotedApps } from "./components/PaginatedTopVotedApps"
+import { PreviewCreatedProposals } from "./components/PreviewCreatedProposals"
+import { TopVotedApps } from "./components/TopVotedApps"
 
 enum ListView {
   ALL,
@@ -27,9 +33,7 @@ enum ListView {
   VOTED,
   APPS_VOTED,
 }
-
 const PREVIEW_SIZE = 3 // The number of proposals to show in the preview
-
 type Props = {
   address: string
 }
@@ -37,8 +41,8 @@ export const ProfileGovernance = ({ address }: Props) => {
   const { account } = useWallet()
   const profileWalletAddress = address ?? account?.address ?? ""
 
-  const { data: createdProposals, isLoading: isCreatedProposalsLoading } = useUserCreatedProposal(profileWalletAddress)
-  const { data: votedProposals, isLoading: isVotedProposalsLoading } = useUserProposalsVoteEvents(profileWalletAddress)
+  const { data: createdProposals } = useUserCreatedProposal(profileWalletAddress)
+  const { data: votedProposals } = useUserProposalsVoteEvents(profileWalletAddress)
 
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
@@ -99,14 +103,10 @@ export const ProfileGovernance = ({ address }: Props) => {
   const isFirstVotedProposalsAvailable = firstVotedProposals && firstVotedProposals.length > 0
   const isFirstTopVotedAppsAvailable = firstTopVotedApps && firstTopVotedApps.length > 0
 
-  const isLoading = useMemo(() => {
-    return isCreatedProposalsLoading || isVotedProposalsLoading
-  }, [isCreatedProposalsLoading, isVotedProposalsLoading])
-
   switch (listView) {
     case ListView.ALL:
       return (
-        <>
+        <VStack gap="8" w="full">
           <PendingDelegationDelegateePOV address={address} isConnectedUser={isConnectedUser} />
           <CurrentDelegation address={address} isConnectedUser={isConnectedUser} />
           <VotingQualification address={address} isConnectedUser={isConnectedUser} />
@@ -115,7 +115,6 @@ export const ProfileGovernance = ({ address }: Props) => {
               firstProposals={firstCreatedProposals}
               isMoreProposals={isMoreCreatedProposals}
               isCreatedProposals
-              isLoading={isLoading}
               onSeeAllProposals={onSeeAllCreatedProposals}
             />
           )}
@@ -123,20 +122,31 @@ export const ProfileGovernance = ({ address }: Props) => {
             <PreviewCreatedProposals
               firstProposals={firstVotedProposals}
               isMoreProposals={isMoreVotedProposals}
-              isLoading={isLoading}
               onSeeAllProposals={onSeeAllVotedProposals}
             />
           ) : (
-            <EmptyStateGovernance
-              title={t("Voted Proposals")}
-              description={t("{{subject}} voted proposals will appear here.", {
-                subject: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}`,
-              })}
-              buttonText={t("Explore governance")}
-              illustration={<HandPlantIcon color="rgba(117, 117, 117, 1)" />}
-              buttonIcon={FaScaleBalanced}
-              onClick={onExploreGovernance}
-            />
+            <Card.Root variant="primary" w="full">
+              <Card.Title textStyle="xl">{t("Voted Proposals")}</Card.Title>
+              <Card.Body asChild>
+                <EmptyState
+                  title={t("Voted Proposals")}
+                  description={t("{{subject}} voted proposals will appear here.", {
+                    subject: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}`,
+                  })}
+                  icon={
+                    <Icon boxSize={20} color="actions.secondary.text-lighter">
+                      <HandPlantIcon color="rgba(117, 117, 117, 1)" />
+                    </Icon>
+                  }>
+                  <Button rounded={"full"} variant={"primary"} onClick={() => router.push("/apps")}>
+                    <Icon color="actions.secondary.text-lighter">
+                      <FaScaleBalanced />
+                    </Icon>
+                    {t("Explore governance")}
+                  </Button>
+                </EmptyState>
+              </Card.Body>
+            </Card.Root>
           )}
           {isFirstTopVotedAppsAvailable ? (
             <TopVotedApps
@@ -156,14 +166,12 @@ export const ProfileGovernance = ({ address }: Props) => {
               onClick={onExploreGovernance}
             />
           )}
-        </>
+        </VStack>
       )
     case ListView.CREATED:
-      return <PaginatedProposals proposals={createdProposals ?? []} isLoading={isLoading} goBack={onGoBack} />
+      return <PaginatedProposals proposals={createdProposals ?? []} goBack={onGoBack} />
     case ListView.VOTED:
-      return (
-        <PaginatedProposals proposals={votedProposalsWithDescription ?? []} isLoading={isLoading} goBack={onGoBack} />
-      )
+      return <PaginatedProposals proposals={votedProposalsWithDescription ?? []} goBack={onGoBack} />
     case ListView.APPS_VOTED:
       return <PaginatedTopVotedApps topVotedApps={topVotedApps ?? []} goBack={onGoBack} />
   }

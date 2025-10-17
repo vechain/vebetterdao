@@ -12,7 +12,6 @@ type FormSocialConnectButtonProps = {
   leftIcon: React.ReactElement
   value: string
 }
-
 export const FormSocialConnectButton = ({
   label,
   register,
@@ -39,7 +38,9 @@ export const FormSocialConnectButton = ({
         justifyContent="center"
         gap={2}>
         {leftIcon}
-        <Text truncate>{label}</Text>
+        <Text truncate color={color}>
+          {label}
+        </Text>
         {isConnected && <Icon as={BsCheck} />}
       </Button>
       <Input type="hidden" {...register} />

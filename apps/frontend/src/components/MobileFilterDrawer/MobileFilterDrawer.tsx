@@ -2,6 +2,7 @@ import { Button, Checkbox, HStack, Icon, ListCollection, type StackProps, Text, 
 import { UilFilter } from "@iconscout/react-unicons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+
 import { BaseModal } from "../BaseModal"
 
 interface MobileFilterDrawerProps extends StackProps {
@@ -10,7 +11,6 @@ interface MobileFilterDrawerProps extends StackProps {
   onApply: (values: any[]) => void
   placeholder?: string
 }
-
 export const MobileFilterDrawer = ({
   options,
   selectedValues,
@@ -21,44 +21,39 @@ export const MobileFilterDrawer = ({
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [tempSelectedValues, setTempSelectedValues] = useState<any[]>(selectedValues)
-
   const selectedCount = selectedValues.length
-
   const handleToggleOption = (value: any) => {
     setTempSelectedValues(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]))
   }
-
   const handleReset = () => {
     setTempSelectedValues([])
   }
-
   const handleApply = () => {
     onApply(tempSelectedValues)
     setIsOpen(false)
   }
-
   const handleOpen = () => {
     setTempSelectedValues(selectedValues)
     setIsOpen(true)
   }
-
   const handleClose = () => {
     setIsOpen(false)
     setTempSelectedValues(selectedValues) // Reset temp values when closing
   }
-
   return (
     <VStack {...boxProps}>
       {/* Filter Icon Button */}
       <Button
         size="md"
         variant="outline"
-        borderRadius="lg"
-        p={3}
+        rounded="full"
         minW="auto"
         aspectRatio="1"
         onClick={handleOpen}
-        position="relative">
+        position="relative"
+        bg="bg.primary"
+        border="sm"
+        borderColor="border.primary">
         <Icon as={UilFilter} boxSize={5} />
         {selectedCount > 0 && (
           <Text
@@ -70,8 +65,8 @@ export const MobileFilterDrawer = ({
             borderRadius="full"
             minW="20px"
             h="20px"
-            fontSize="xs"
-            fontWeight="600"
+            textStyle="xs"
+            fontWeight="semibold"
             display="flex"
             alignItems="center"
             justifyContent="center">
@@ -80,11 +75,10 @@ export const MobileFilterDrawer = ({
         )}
       </Button>
 
-      {/* Filter Modal */}
       <BaseModal isOpen={isOpen} onClose={handleClose} ariaTitle={placeholder} ariaDescription="Filter options">
         <VStack align="stretch" gap={6} w="full">
           {/* Header */}
-          <Text fontSize="md" fontWeight="bold">
+          <Text textStyle="md" fontWeight="bold">
             {placeholder}
           </Text>
 
@@ -103,7 +97,7 @@ export const MobileFilterDrawer = ({
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                   </Checkbox.Root>
-                  <Text fontSize="md">{option.label}</Text>
+                  <Text textStyle="md">{option.label}</Text>
                 </HStack>
               )
             })}
@@ -114,7 +108,7 @@ export const MobileFilterDrawer = ({
             <Button variant="secondary" flex={1} onClick={handleReset}>
               {t("Reset")}
             </Button>
-            <Button variant="primaryAction" flex={1} onClick={handleApply}>
+            <Button variant="primary" flex={1} onClick={handleApply}>
               {t("Apply")}
             </Button>
           </HStack>

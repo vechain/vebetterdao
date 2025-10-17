@@ -9,11 +9,8 @@ import { ethers } from "hardhat"
  * This must be deployed BEFORE upgrading XAllocationVoting to v8 and VoterRewards to v6.
  */
 export async function main() {
-  const config = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
   const envConfig = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
   const deployer = (await ethers.getSigners())[0]
-
-  const TEMP_ADMIN = envConfig.network.name === "solo" ? config.CONTRACTS_ADMIN_ADDRESS : deployer.address
 
   console.log(
     `================  Deploying RelayerRewardsPool on ${envConfig.network.name} (${envConfig.nodeUrl}) with ${envConfig.environment} configurations `,
@@ -37,8 +34,8 @@ export async function main() {
       {
         name: "initialize",
         args: [
-          TEMP_ADMIN, // admin
-          TEMP_ADMIN, // upgrader
+          deployer.address, // admin
+          deployer.address, // upgrader
           envConfig.b3trContractAddress, // b3trAddress
           envConfig.emissionsContractAddress, // emissionsAddress
           envConfig.xAllocationVotingContractAddress, // xAllocationVotingAddress
@@ -57,6 +54,15 @@ export async function main() {
   // Verify deployment
   const version = await relayerRewardsPool.version()
   console.log(`RelayerRewardsPool version: ${version}`)
+
+  // Register a relayer
+  console.log("Registering a relayer...")
+  const RELAYER_ADDRESS = "0xd15C50eC31d8a4FEe3d168b447efe7BEdA8AE750"
+  await relayerRewardsPool.connect(deployer).registerRelayer(RELAYER_ADDRESS)
+
+  // Verify the relayer is registered
+  const isRegistered = await relayerRewardsPool.isRegisteredRelayer(RELAYER_ADDRESS)
+  console.log(`${RELAYER_ADDRESS} is now registered: ${isRegistered}`)
 
   console.log("================  RelayerRewardsPool deployment completed")
   console.log("================  Next steps:")

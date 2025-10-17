@@ -1,7 +1,9 @@
-import { AppVotesGiven } from "@/api"
-import { HStack, VStack, Text } from "@chakra-ui/react"
+import { HStack, VStack, Text, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
+
+import { AppVotesGiven } from "../../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
+
 import { AppVotedBox } from "./AppVotedBox"
 
 type Props = {
@@ -9,28 +11,30 @@ type Props = {
   isMoreTopVotedApps: boolean
   onSeeAllAppsVoted?: () => void
 }
-
 export const TopVotedApps = ({ votedApps, isMoreTopVotedApps, onSeeAllAppsVoted }: Props) => {
   const { t } = useTranslation()
-
   return (
-    <VStack w={"full"}>
-      <HStack w={"full"} justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
-        <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"}>
-          {t("Most Voted Apps")}
-        </Text>
-        {isMoreTopVotedApps && (
-          <HStack color={"#004CFC"} cursor={"pointer"} onClick={onSeeAllAppsVoted}>
-            <Text fontSize={{ base: 14, md: 16 }}>{t("See All")}</Text>
-            <FiArrowUpRight size={16} />
-          </HStack>
-        )}
-      </HStack>
-      <VStack w={"full"} gap={4}>
-        {votedApps.map(app => (
-          <AppVotedBox key={app.appId} appVoted={app} />
-        ))}
-      </VStack>
-    </VStack>
+    <Card.Root w={"full"} variant="primary">
+      <Card.Body>
+        <HStack w={"full"} alignItems="center" justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
+          <Text textStyle={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
+            {t("Most Voted Apps")}
+          </Text>
+          {isMoreTopVotedApps && (
+            <Button variant="ghost" size="sm" color="actions.tertiary.default" onClick={onSeeAllAppsVoted}>
+              <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
+                {t("See All")}
+              </Text>
+              <FiArrowUpRight size={16} />
+            </Button>
+          )}
+        </HStack>
+        <VStack w={"full"} gap={4}>
+          {votedApps.map(app => (
+            <AppVotedBox key={app.appId} appVoted={app} />
+          ))}
+        </VStack>
+      </Card.Body>
+    </Card.Root>
   )
 }

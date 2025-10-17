@@ -1,12 +1,12 @@
 import { VStack, Flex } from "@chakra-ui/react"
 import { motion } from "framer-motion"
+
 import { TokenInfoCard } from "../../TokenInfoCard"
 
 type Props = {
   setIsB3trToVot3: (isB3trToVot3: boolean) => void
   onSubmit: (e?: React.FormEvent<HTMLFormElement>) => void
 }
-
 export const TokenSelectionContent = ({ setIsB3trToVot3, onSubmit }: Props) => {
   return (
     <form onSubmit={onSubmit}>

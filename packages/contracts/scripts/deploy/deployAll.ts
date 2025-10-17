@@ -672,10 +672,6 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as XAllocationVoting
 
-  vot3 = (await upgradeProxy("VOT3V1", "VOT3", await vot3.getAddress(), [await xAllocationVoting.getAddress()], {
-    version: 2,
-  })) as VOT3
-
   voterRewards = (await upgradeProxy(
     "VoterRewardsV5",
     "VoterRewards",
@@ -1036,6 +1032,20 @@ export async function deployAll(config: ContractsConfig) {
   // Grant GrantsManager admin role to GrantsManager contract
   await governor.connect(deployer).setGrantsManager(await grantsManager.getAddress())
   console.log("GrantsManager address set in B3TRGovernor contract")
+
+  // Grant GOVERNANCE_ROLE to deployer in XAllocationVoting contract
+  await xAllocationVoting
+    .connect(deployer)
+    .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), deployer.address)
+    .then(async tx => await tx.wait())
+  console.log("GOVERNANCE_ROLE granted to deployer in XAllocationVoting contract")
+
+  //Update xAllocationVoting B3TRGovernor address
+  await xAllocationVoting
+    .connect(deployer)
+    .setB3TRGovernor(await governor.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("B3TRGovernor address set in XAllocationVoting contract")
 
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards

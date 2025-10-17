@@ -1,10 +1,3 @@
-import { useAccountPermissions } from "@/api/contracts/account"
-import { DatePicker } from "@/components"
-import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
-import { useApproveMilestone } from "@/hooks/useApproveMilestone"
-import { useClaimMilestone } from "@/hooks/useClaimMilestone"
-import { useRejectGrant } from "@/hooks/useRejectGrant"
 import { Button, Field, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -14,6 +7,15 @@ import dayjs from "dayjs"
 import { Calendar } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
+import B3trIcon from "@/components/Icons/svg/b3tr.svg"
+import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
+import { useApproveMilestone } from "@/hooks/useApproveMilestone"
+import { useClaimMilestone } from "@/hooks/useClaimMilestone"
+import { useRejectGrant } from "@/hooks/useRejectGrant"
+
+import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
+import { DatePicker } from "../../../components/DatePicker/DatePicker"
 
 type MilestoneWithState = {
   milestone?: {
@@ -26,7 +28,6 @@ type MilestoneWithState = {
   index: number
   mode?: "read" | "edit"
 }
-
 type MilestoneItemProps = {
   milestoneData: MilestoneWithState
   proposal: GrantProposalEnriched
@@ -35,20 +36,18 @@ type MilestoneItemProps = {
   mode?: "read" | "edit"
   onDateChange: (durationFrom: string, durationTo: string) => void
 }
-
 const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType; title: string; value?: string }) => (
   <HStack w="full" align="flex">
     <Icon as={icon} boxSize={4} color="icon.subtle" />
     <HStack w="full">
       <VStack w="full" align="flex-start">
-        <Text fontSize="sm" fontWeight={"semibold"}>
+        <Text textStyle="sm" fontWeight={"semibold"}>
           {title}
         </Text>
-
         {value && (
           <Text
             w="full"
-            fontSize="sm"
+            textStyle="sm"
             fontWeight={"regular"}
             lineHeight={"1.5"}
             wordBreak="break-word"
@@ -223,7 +222,7 @@ export const MilestoneItem = ({
           <Button variant="secondary" onClick={handleReject}>
             {t("Reject")}
           </Button>
-          <Button variant="primaryAction" onClick={handleApprove}>
+          <Button variant="primary" onClick={handleApprove}>
             {t("Approve & Fund")}
           </Button>
         </HStack>
@@ -232,7 +231,7 @@ export const MilestoneItem = ({
       {/* Grant receiver actions (claim) - available on any approved milestone */}
       {shouldShowClaimAction && (
         <HStack w="full">
-          <Button variant="primaryAction" onClick={handleClaim}>
+          <Button variant="primary" onClick={handleClaim}>
             {t("Claim Reward")}
           </Button>
         </HStack>

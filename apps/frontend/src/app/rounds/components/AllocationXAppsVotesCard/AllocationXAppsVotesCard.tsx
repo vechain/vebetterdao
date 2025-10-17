@@ -1,33 +1,29 @@
 import { Alert, Card, Flex, HStack, Heading, Spinner, VStack } from "@chakra-ui/react"
-import { useAllocationsRound, useRoundXApps, useXAppsShares } from "@/api"
-import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
-import { useTranslation } from "react-i18next"
-import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
+
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { useXAppsShares } from "../../../../api/contracts/xApps/hooks/useXAppShares"
+
+import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
+import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 
 type Props = {
   roundId: string
 }
-
 export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { data: xApps } = useRoundXApps(roundId)
-
   const xAppsSharesQuery = useXAppsShares(xApps?.map(app => app.id) ?? [], roundId)
-
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
-
   const error = xAppsSharesQuery.error
-
   const isLoading = xAppsSharesQuery.isLoading || roundInfoLoading
-
   const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
-
   const renderContent = () => {
     if (isLoading) {
       return <Spinner size="lg" />
     }
-
     if (error) {
       return (
         <Alert.Root
@@ -41,7 +37,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           height="200px"
           borderRadius={"xl"}>
           <Alert.Indicator boxSize="40px" mr={0} />
-          <Alert.Title mt={4} mb={1} fontSize="lg">
+          <Alert.Title mt={4} mb={1} textStyle="lg">
             {t("Error loading votes")}
           </Alert.Title>
           <Alert.Description maxWidth="sm">
@@ -55,26 +51,34 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   }
 
   return (
-    <Card.Root flex={1} h="full" w="full" variant={"baseWithBorder"}>
+    <Card.Root flex={1} h="full" w="full" variant="primary">
       <Card.Header>
         <HStack justify={"space-between"} w="full">
-          <Heading fontSize="24px" fontWeight={700}>
-            {title}
-          </Heading>
+          <Heading size="2xl">{title}</Heading>
         </HStack>
       </Card.Header>
       <Card.Body>
         <VStack gap={12} align={"flex-start"} w="full">
           {roundInfo.state === 1 && (
-            <Alert.Root status="error" borderRadius="16px" border={"1px solid #D23F63"} bg="#FCEEF1">
+            <Alert.Root
+              status="error"
+              borderRadius="16px"
+              border="sm"
+              borderColor="status.negative.primary"
+              bg="status.negative.subtle">
               <Alert.Indicator>
                 <UilInfoCircle size={"36px"} color="#D23F63" />
               </Alert.Indicator>
               <Alert.Content>
-                <Alert.Title color="#D23F63" ml={2} fontSize="14px" fontWeight={600} data-testid={"round-error-msg"}>
+                <Alert.Title
+                  color="status.negative.primary"
+                  ml={2}
+                  textStyle="md"
+                  fontWeight="semibold"
+                  data-testid={"round-error-msg"}>
                   {t("Quorum was not reached for this round")}
                 </Alert.Title>
-                <Alert.Description color="#D23F63" ml={2} fontSize="14px">
+                <Alert.Description color="status.negative.primary" ml={2} textStyle="md">
                   {t("B3TR allocation will be distributed according to the votes of the previous round")}
                 </Alert.Description>
               </Alert.Content>

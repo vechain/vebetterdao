@@ -1,29 +1,20 @@
 import { Card, VStack, Heading, HStack, Button, Text } from "@chakra-ui/react"
-import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-import { useProposalFormStore } from "@/store"
-import { useTranslation } from "react-i18next"
-import {
-  buttonClickActions,
-  buttonClicked,
-  ButtonClickProperties,
-  updateMarkdownTemplatePlaceholders,
-} from "@/constants"
 import { useWallet } from "@vechain/vechain-kit"
-import { AnalyticsUtils } from "@/utils"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
+import { updateMarkdownTemplatePlaceholders } from "../../../../../../constants/GovernanceProposalTemplate"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const { account } = useWallet()
   const router = useRouter()
-
   const { t } = useTranslation()
   const { setData } = useProposalFormStore()
-
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const onSubmit = useCallback(
     (data: FormData) => {
       const markdownDescription = updateMarkdownTemplatePlaceholders({
@@ -37,7 +28,6 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
         markdownDescription,
         actions: [],
       })
-
       router.push("/proposals/new/form/content")
       AnalyticsUtils.trackEvent(
         buttonClicked,
@@ -46,16 +36,13 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
     },
     [setData, router, account],
   )
-
   return (
     <Card.Root w="full" data-testid="new-proposal-textonly-page">
       <Card.Body py={8}>
         <VStack gap={[6, 8]} alignItems="flex-start">
           <VStack gap={[4, 6]} alignItems="flex-start">
-            <Heading size={["xl", "2xl"]} fontWeight="bold">
-              {t("General proposal")}
-            </Heading>
-            <Text fontSize={["sm", "md"]} color="gray.500">
+            <Heading size={["xl", "2xl"]}>{t("General proposal")}</Heading>
+            <Text textStyle={["sm", "md"]} color="gray.500">
               {t(
                 "Choose a title a short description for your proposal. You will be able to provide more details in the next step.",
               )}
@@ -72,10 +59,10 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       </Card.Body>
       <Card.Footer>
         <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-          <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+          <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
             {t("Go back")}
           </Button>
-          <Button data-testid="continue" variant="primaryAction" type="submit" form="new-proposal-form">
+          <Button data-testid="continue" variant="primary" type="submit" form="new-proposal-form">
             {t("Continue")}
           </Button>
         </HStack>

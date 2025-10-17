@@ -1991,5 +1991,21 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Om du avbryter nu kommer ditt bidrag att tas bort och inte visas i nästa röstomgång. När omgången börjar kommer avbokning inte längre vara möjlig.",
   "Showing": "Visar",
   "Search by proposal name": "Sök efter förslagsnamn",
-  "Created": "Skapad"
+  "Created": "Skapad",
+  "You have been signalled by": "Du har blivit signalerad av",
+  "You have reached the maximum GM NFT level.": "Du har nått den maximala GM NFT-nivån.",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Om du tar bort din rekommendation från en app kan det leda till att den inte längre väljs ut för allokeringar.",
+  "Current Status": "Nuvarande status",
+  "Status After Transaction": "Status efter transaktion",
+  "Reset Form": "Återställ formulär",
+  "Apps eligible in next round": "Appar kvalificerade i nästa omgång",
+  "App not found": "App hittades inte",
+  "Confirm Eligibility Change": "Bekräfta ändring av kvalificering",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Är du säker på att du vill göra <b>'{{appName}}'</b> <b>{{status}}</b> för nästa omgång?",
+  "eligible": "kvalificerad",
+  "ineligible": "inte kvalificerad",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Genom att göra detta kommer {{appName}} med id {{appId}} att vara {{status}} för nästa omgång.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minsta <Link>kvorum</Link> ({{quorumNumerator}}%) nått",
+  "Uploading...": "Laddar upp...",
+  "Stored": "Sparad"
 }

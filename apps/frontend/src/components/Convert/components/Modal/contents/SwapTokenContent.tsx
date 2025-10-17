@@ -1,10 +1,11 @@
 import { Text, HStack, Flex, Button } from "@chakra-ui/react"
+import { TokenBalance } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { UseFormReturn } from "react-hook-form"
 import { FiInfo } from "react-icons/fi"
-import { TokenCards } from "../../TokenCards"
+
 import { BalanceInfo } from "../../BalanceInfo"
-import { TokenBalance } from "@vechain/vechain-kit"
+import { TokenCards } from "../../TokenCards"
 
 type Props = {
   amount: string
@@ -17,7 +18,6 @@ type Props = {
   vot3BalanceScaled: string
   disableSubmitButton: boolean
 }
-
 export const SwapTokenContent = ({
   amount,
   goToNextStep,
@@ -39,25 +39,14 @@ export const SwapTokenContent = ({
         w={"full"}
         gap={4}
         mt={{ base: 2, md: 4 }}
-        hideBelow={!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR ? "md" : "none"}
-        // hide if below 667px height
-        // css={
-        //   !isB3trToVot3 &&
-        //   isVOT3BalanceMoreThanStakedB3TR && {
-        //     "@media (max-height: 667px)": {
-        //       display: "none",
-        //     },
-        //   }
-        // }
-      >
+        hideBelow={!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR ? "md" : "none"}>
         <BalanceInfo isB3TR={true} balanceScaled={b3trBalanceScaled} />
         <BalanceInfo isB3TR={false} balanceScaled={vot3BalanceScaled} />
       </Flex>
-
       {!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR && (
         <HStack px={4} py={3} bg={"dark-contrast-on-card-bg"} borderRadius={8} mt={2}>
-          <FiInfo size={36} color="#6a6a6a" />
-          <Text fontSize={{ base: 14 }} fontWeight={400}>
+          <FiInfo size={36} color="text.subtle" />
+          <Text textStyle={{ base: "sm" }}>
             {t("The maximum amount of VOT3 you can convert is ")}
             <b>{swappableVot3Balance?.formatted}</b>
             {t(". You can’t convert VOT3 that ")}
@@ -76,14 +65,14 @@ export const SwapTokenContent = ({
 
       <Button
         mt={2}
-        variant={"primaryAction"}
+        variant={"primary"}
         w={"full"}
         rounded={"full"}
         disabled={disableSubmitButton}
         onClick={goToNextStep}
         size={"lg"}
         data-testid={"confirm-swap-button"}>
-        <Text fontSize={{ base: 14, md: 18 }}>{t("Review operation")}</Text>
+        <Text textStyle={{ base: "sm", md: "lg" }}>{t("Review operation")}</Text>
       </Button>
     </>
   )

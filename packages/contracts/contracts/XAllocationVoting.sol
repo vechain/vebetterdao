@@ -162,13 +162,11 @@ contract XAllocationVoting is
    * @dev Toggle autovoting for the caller
    */
   function toggleAutoVoting(address user) public {
-    // Allow VOT3 contract to toggle for any user or the user themselves
-    if (_msgSender() == address(token()) || _msgSender() == user) {
-      _toggleAutoVoting(user);
-      return;
+    if (_msgSender() != user) {
+      revert InvalidCaller(_msgSender());
     }
 
-    revert InvalidCaller(_msgSender());
+    _toggleAutoVoting(user);
   }
 
   /**
@@ -273,16 +271,35 @@ contract XAllocationVoting is
   // ---------- Getters ---------- //
 
   /**
-   * @dev Checks if auto-voting is enabled for an account at the start of the current cycle
-   * Status changes mid-cycle will only take effect in the next cycle
+   * @dev Checks if auto-voting is enabled for an account
+   * @param user The address to check
+   * @return Whether auto-voting is enabled for the account
    */
-  function isUserAutoVotingEnabledForCurrentCycle(address account) public view returns (bool) {
+  function isUserAutoVotingEnabled(address user) public view returns (bool) {
+    return _isAutoVotingEnabled(user);
+  }
+
+  /**
+   * @dev Checks if auto-voting is enabled for an account at the start of the current cycle
+   * @notice Status changes mid-cycle will only take effect in the next cycle
+   */
+  function isUserAutoVotingEnabledInCurrentRound(address account) public view returns (bool) {
     uint256 lastEmissionBlock = emissions().lastEmissionBlock();
     return _isAutoVotingEnabledAtTimepoint(account, uint48(lastEmissionBlock));
   }
 
   /**
-   * @dev Check if autovoting is enabled for an account at a specific timepoint
+   * @dev Checks if auto-voting is enabled for an account at the start of a specific round
+   * @notice Useful function for frontend to consume
+   */
+  function isUserAutoVotingEnabledForRound(address account, uint256 roundId) public view returns (bool) {
+    return _isAutoVotingEnabledAtTimepoint(account, uint48(roundSnapshot(roundId)));
+  }
+
+  /**
+   * @dev Check if auto-voting is enabled for an account at a specific
+   * @param account The address to check
+   * @param timepoint block number
    */
   function isUserAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) public view returns (bool) {
     return _isAutoVotingEnabledAtTimepoint(account, timepoint);
@@ -296,9 +313,9 @@ contract XAllocationVoting is
   }
 
   /**
-   * @dev Get the total number of users who enabled autovoting at the last emission block
+   * @dev Get the total number of users who enabled auto-voting at the last emission block
    */
-  function getTotalAutoVotingUsers() public view returns (uint208) {
+  function getTotalAutoVotingUsersAtRoundStart() public view returns (uint208) {
     uint256 lastEmissionBlock = emissions().lastEmissionBlock();
     return _getTotalAutoVotingUsersAtTimepoint(uint48(lastEmissionBlock));
   }

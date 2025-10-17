@@ -14,17 +14,16 @@ import { Menu } from "iconoir-react"
 import dynamic from "next/dynamic"
 
 import { ColorModeButton } from "../ui/color-mode"
+
 import { NavbarBalance } from "./NavbarBalance"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import { ProfileButton } from "./ProfileButton"
 import { Route } from "./Routes"
-
 const ConnectWalletButton = dynamic(
-  () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
+  () => import("../../components/ConnectWalletButton/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
   { ssr: false },
 )
-
 const MobileMenuDrawer: React.FC<Omit<Drawer.RootProps & Props, "children">> = ({
   routesToRender,
   isNotMobile,

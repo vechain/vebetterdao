@@ -1,18 +1,28 @@
-import { CustomModalContent } from "@/components"
-import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, CloseButton } from "@chakra-ui/react"
+import {
+  Button,
+  Field,
+  HStack,
+  Heading,
+  Dialog,
+  Text,
+  VStack,
+  useDisclosure,
+  CloseButton,
+  Icon,
+} from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { AdminAppForm } from "../../../AdminAppPageContent"
-import { useVechainDomain } from "@vechain/vechain-kit"
-import { WalletAddressInput } from "@/app/components/Input"
 
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
+import { AdminAppForm } from "../../../AdminAppPageContent"
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
 }
-
 export const AddModeratorButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onClose, onOpen } = useDisclosure()
@@ -29,12 +39,10 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
     },
     [addressForm, editAdminForm, onClose],
   )
-
   const handleClose = useCallback(() => {
     addressForm.reset()
     onClose()
   }, [addressForm, onClose])
-
   return (
     <>
       <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
@@ -44,13 +52,15 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
           </Dialog.CloseTrigger>
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
-              <UilUser size="54px" color="#004CFC" />
-              <Heading fontSize="28px">{t("Add a new moderator")}</Heading>
+              <Icon color="logo" boxSize={14}>
+                <UilUser />
+              </Icon>
+              <Heading size="3xl">{t("Add a new moderator")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>
-                  <Text fontSize="14px">{t("User wallet address")}</Text>
+                  <Text textStyle="sm">{t("User wallet address")}</Text>
                   {domain && (
-                    <Text fontSize="14px" fontWeight={"600"}>
+                    <Text textStyle="sm" fontWeight="semibold">
                       {"@"}
                       {domain}
                     </Text>
@@ -73,12 +83,12 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
               <VStack align="stretch">
                 <Button
                   disabled={!moderatorAddress}
-                  variant="primaryAction"
+                  variant="primary"
                   type="submit"
                   onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add moderator")}
                 </Button>
-                <Button variant="primaryGhost" onClick={onClose}>
+                <Button variant="ghost" color="actions.tertiary.default" onClick={onClose}>
                   {t("Cancel")}
                 </Button>
               </VStack>
@@ -89,7 +99,8 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
       <Button
         mt={4}
         onClick={onOpen}
-        variant="primarySubtle"
+        variant="ghost"
+        color="actions.tertiary.default"
         disabled={editAdminForm.getValues("moderators").length >= 3}
         alignSelf={"flex-start"}>
         <UilPlus size="14px" />

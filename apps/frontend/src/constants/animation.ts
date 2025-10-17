@@ -9,7 +9,6 @@ export const pulseAnimation = {
     },
   },
 }
-
 export const flipAnimation = {
   animate: {
     rotateY: [0, 360],
@@ -23,7 +22,6 @@ export const flipAnimation = {
     },
   },
 }
-
 export const coinFlipAnimation = {
   animate: {
     rotateY: [0, 180, 360], // Complete flip

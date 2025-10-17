@@ -1,14 +1,22 @@
-import { useIsCreatorOfAnyApp, useSortXappAlphabetically, useXApps, useGetUserNodes, useNodesEndorsedApps } from "@/api"
-import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
-import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
+import { VStack, Heading, Text, Box, HStack, useMediaQuery, Card } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
+
+import { useCurrentAllocationAppIds } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationAppIds"
+
+import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
+import { useSortXappAlphabetically } from "../../../api/contracts/xApps/hooks/useSortXappAlphabetically"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { AppsBanner } from "../../../components/Banners/AppsBanner"
+import { JoinB3TRAppsBanner } from "../../../components/Banners/JoinB3TRAppsBanner"
+
+import { AllApps } from "./allApps/AllApps"
+import { AppsDisclaimer } from "./AppsDisclaimer"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
-import { AllApps } from "./AllApps"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
-import { AppsDisclaimer } from "./AppsDisclaimer"
-import { useCurrentAllocationAppIds } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationAppIds"
-import { useWallet } from "@vechain/vechain-kit"
 
 export type XAppInformations = {
   key?: string
@@ -18,26 +26,21 @@ export type XAppInformations = {
   variant?: string
   status?: string
 }
-
 export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-
   const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: endorsedApps, isLoading: isEndorsedAppsLoading } = useNodesEndorsedApps(
     nodes?.allNodes?.map(node => node.nodeId) ?? [],
   )
   const isXNodeLoading = isUserNodesLoading || isEndorsedAppsLoading
   const isEndorsingApp = !!endorsedApps?.length && endorsedApps?.length > 0
-
   const { data: xAppsNotSorted, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
   const appsLoading = isXAppsLoading || isCurrentAllocationAppIdsLoading
-
   const { data: isCreatorOfAnyApp } = useIsCreatorOfAnyApp(account?.address ?? "")
   const { data: xApps } = useSortXappAlphabetically(xAppsNotSorted)
-
   // New apps looking for endorsement
   const newLookingForEndorsementApps = xApps?.newLookingForEndorsement ?? []
   const hasLookingForEndorsementApps = newLookingForEndorsementApps.length > 0
@@ -61,12 +64,14 @@ export const AppsPageContent = () => {
       <AppsBanner />
 
       {!isXNodeLoading && isEndorsingApp && (
-        <VStack alignItems={"flex-start"} gap={4}>
-          <Heading size="3xl">{t("Your endorsed apps")}</Heading>
-          <Text color="#6a6a6a">
-            {t("With your Node, you endorse apps to allow them to participate in governance")}
-          </Text>
-          <VStack gap={4}>
+        <Card.Root variant="primary" gap="4">
+          <VStack alignItems={"flex-start"}>
+            <Heading size="2xl">{t("Your endorsed apps")}</Heading>
+            <Text color="text.subtle">
+              {t("With your Node, you endorse apps to allow them to participate in governance")}
+            </Text>
+          </VStack>
+          <VStack gap={4} alignItems="stretch">
             {endorsedApps?.map(endorsedApp => (
               <UnendorsedAppCard
                 key={endorsedApp.endorsedApp.id}
@@ -76,36 +81,38 @@ export const AppsPageContent = () => {
               />
             ))}
           </VStack>
-        </VStack>
+        </Card.Root>
       )}
 
       {hasLookingForEndorsementApps && <AppsLookingForEndorsement filteredApps={newLookingForEndorsementApps} />}
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
-      {!isAbove800 ? (
-        <VStack alignItems={"flex-start"} gap={4} w="full">
-          <Heading size="3xl">{t("Sustainability apps")}</Heading>
-          <AllApps
-            newApps={newApps}
-            currentActiveApps={activeAppsWithoutGracePeriod}
-            gracePeriodApps={gracePeriodApps}
-            endorsementLostApps={endorsementLostApps}
-            isXAppsLoading={appsLoading}
-          />
-        </VStack>
-      ) : (
-        <HStack w="full" alignItems={"flex-start"} gap={0}>
-          <AllApps
-            headingComponent={<Heading size="3xl">{t("Sustainability apps")}</Heading>}
-            newApps={newApps}
-            currentActiveApps={activeAppsWithoutGracePeriod}
-            gracePeriodApps={gracePeriodApps}
-            endorsementLostApps={endorsementLostApps}
-            isXAppsLoading={appsLoading}
-          />
-        </HStack>
-      )}
+      <Card.Root variant="primary" w="full">
+        {!isAbove800 ? (
+          <VStack alignItems={"flex-start"} gap={4} w="full">
+            <Heading size={{ base: "xl", md: "2xl" }}>{t("Sustainability apps")}</Heading>
+            <AllApps
+              newApps={newApps}
+              currentActiveApps={activeAppsWithoutGracePeriod}
+              gracePeriodApps={gracePeriodApps}
+              endorsementLostApps={endorsementLostApps}
+              isXAppsLoading={appsLoading}
+            />
+          </VStack>
+        ) : (
+          <HStack w="full" alignItems={"flex-start"} gap={0}>
+            <AllApps
+              headingComponent={<Heading size={{ base: "xl", md: "2xl" }}>{t("Sustainability apps")}</Heading>}
+              newApps={newApps}
+              currentActiveApps={activeAppsWithoutGracePeriod}
+              gracePeriodApps={gracePeriodApps}
+              endorsementLostApps={endorsementLostApps}
+              isXAppsLoading={appsLoading}
+            />
+          </HStack>
+        )}
+      </Card.Root>
 
       {!isCreatorOfAnyApp && <JoinB3TRAppsBanner />}
 

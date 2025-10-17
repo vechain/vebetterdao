@@ -1,18 +1,16 @@
 "use client"
 import { Button, Icon, HoverCard, Portal, Text, useMediaQuery, VStack, Collapsible, HStack } from "@chakra-ui/react"
+import { motion } from "framer-motion"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
-import { Route } from "./Routes"
 import { FaChevronDown } from "react-icons/fa6"
-import { motion } from "framer-motion"
 
+import { Route } from "./Routes"
 type Props = {
   onMenuClick?: () => void
   routesToRender: Route[]
 }
-
 const MotionVStack = motion(VStack)
-
 const isSelected = (route: Route, pathname: string) => {
   if (route.onClick === "/") return pathname === "/"
   if (typeof route.onClick === "string") {
@@ -27,7 +25,6 @@ const isSelected = (route: Route, pathname: string) => {
   }
   return false
 }
-
 const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () => {
   if (!route.onClick) return
   if (typeof route.onClick === "string") {
@@ -40,7 +37,6 @@ const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () 
 const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: boolean }) => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-
   return (
     <HoverCard.Root
       positioning={{ placement: "bottom-start" }}
@@ -49,12 +45,8 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
       open={isOpen}
       onOpenChange={e => setIsOpen(e.open)}>
       <HoverCard.Trigger asChild>
-        <Button
-          w={{ base: "full", md: "auto" }}
-          colorScheme={selected ? "primary" : "gray"}
-          variant={selected ? "primaryAction" : "ghost"}
-          rounded="full">
-          <Text fontSize="sm" fontWeight={selected ? "bold" : "normal"}>
+        <Button w={{ base: "full", md: "auto" }} variant={selected ? "subtle" : "ghost"} rounded="full">
+          <Text textStyle="sm" fontWeight={selected ? "bold" : "normal"}>
             {route.name}
           </Text>
           <Icon
@@ -90,8 +82,8 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
                       handleClick(subRoute, router)()
                       setIsOpen(false)
                     }}>
-                    <Text fontSize={"md"}>{subRoute.name}</Text>
-                    <Text fontSize={"sm"}>{subRoute.description}</Text>
+                    <Text textStyle={"md"}>{subRoute.name}</Text>
+                    <Text textStyle={"sm"}>{subRoute.description}</Text>
                   </VStack>
                 )
               })}
@@ -122,7 +114,7 @@ const MobileAccordionWithSubRoutes = ({
           <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
             <HStack w="full" gap={3}>
               <Icon as={route.icon} color="text.subtle" size={"2xl"} />
-              <Text fontSize="lg">{route.name}</Text>
+              <Text textStyle="lg">{route.name}</Text>
             </HStack>
             <Icon
               size="xs"
@@ -150,7 +142,7 @@ const MobileAccordionWithSubRoutes = ({
                   flexDirection="column"
                   textAlign="left"
                   onClick={handleClick(subRoute, router, onMenuClick)}>
-                  <Text fontSize="sm">{subRoute.name}</Text>
+                  <Text textStyle="sm">{subRoute.name}</Text>
                 </Button>
               )
             })}
@@ -179,20 +171,20 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         return <DesktopButtonWithSubRoutes key={route.name} route={route} selected={selected} />
       }
 
-      const fontWeight = selected ? 600 : 400
       return (
         <Button
           border="none"
-          colorPalette={selected ? "primary" : "gray"}
           rounded={"full"}
           w={["full", "full", "auto"]}
           key={route.name}
-          variant={selected ? "primaryAction" : "ghost"}
+          variant={selected ? "subtle" : "ghost"}
           onClick={onClick}
-          size="md"
-          fontWeight={fontWeight}
-          fontSize="sm"
-          data-testid={selected ? "current-section" : ""}>
+          size="sm"
+          fontWeight={selected ? "bold" : "normal"}
+          textStyle="sm"
+          data-testid={selected ? "current-section" : ""}
+          px="4"
+          py="2">
           {route.name}
         </Button>
       )
@@ -208,6 +200,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
     return (
       <Button
         variant="ghost"
+        size="sm"
         w={"full"}
         display="flex"
         justifyContent="flex-start"
@@ -217,7 +210,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         data-testid={selected ? "current-section" : ""}
         gap={4}>
         <Icon as={route.icon} color="text.subtle" size={"xl"} />
-        <Text textAlign="left" fontSize="lg">
+        <Text textAlign="left" textStyle="lg">
           {route.name}
         </Text>
       </Button>
@@ -229,7 +222,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
       {isLargerThan1200 ? (
         routesToRender.map(renderRoute)
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" gap={7} pt={5} w="full">
+        <MotionVStack initial={"hidden"} animate="visible" gap="2" pt={5} w="full">
           {routesToRender.map(renderRoute)}
         </MotionVStack>
       )}

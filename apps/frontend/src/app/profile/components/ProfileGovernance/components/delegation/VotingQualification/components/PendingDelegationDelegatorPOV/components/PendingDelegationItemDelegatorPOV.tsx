@@ -1,23 +1,22 @@
-import { useTranslation } from "react-i18next"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { AddressIcon } from "@/components/AddressIcon"
-import { RemoveDelegationModal } from "./RemoveDelegationModal"
 import { Stack, HStack, VStack, Text, Button, useDisclosure, Badge } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { RemoveDelegationModal } from "./RemoveDelegationModal"
 
 type Props = {
   delegationAddress: string
   isConnectedUser: boolean
 }
-
 export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const removeDelegationModal = useDisclosure()
-
   const { data: vnsData } = useVechainDomain(delegationAddress)
   const domain = vnsData?.domain
-
   return (
     <Stack
       direction={["column", "column", "row"]}
@@ -30,7 +29,7 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnect
         <HStack gap={4}>
           <AddressIcon address={delegationAddress} w={12} h={12} rounded="full" />
           <VStack align="start">
-            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+            <Text fontWeight="semibold" textStyle={["sm", "sm", "lg"]}>
               {domain ?? humanAddress(delegationAddress, 4, 4)}
             </Text>
           </VStack>
@@ -41,8 +40,8 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnect
       </HStack>
       <HStack gap={4}>
         {isConnectedUser && (
-          <Button variant={"dangerGhost"} p={3} onClick={removeDelegationModal.onOpen}>
-            <UilTimes color="#C84968" />
+          <Button variant={"ghost"} colorPalette="red" p={3} onClick={removeDelegationModal.onOpen}>
+            <UilTimes color="status.negative.primary" />
             {t("Cancel request")}
           </Button>
         )}

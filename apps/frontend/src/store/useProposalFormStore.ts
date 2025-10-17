@@ -1,6 +1,8 @@
-import { GovernanceProposalTemplate, GovernanceFeaturedFunction } from "@/constants"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
+
+import { GovernanceFeaturedFunction } from "../constants/GovernanceFeaturedFunctions"
+import { GovernanceProposalTemplate } from "../constants/GovernanceProposalTemplate"
 
 export type ProposalFormAction = GovernanceFeaturedFunction & {
   contractAddress: string
@@ -17,7 +19,6 @@ export type ProposalFormStoreState = {
   setData: (data: Partial<ProposalFormStoreState>) => void
   clearData: () => void
 }
-
 /**
  * Store for the multi-step proposal form data
  */

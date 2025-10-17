@@ -1,31 +1,27 @@
 import { Button, Card, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-import { FormData, NewProposalForm } from "./NewProposalForm"
-import { abi } from "thor-devkit"
-import { useProposalFormStore } from "@/store"
-import { ethers } from "ethers"
-import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+import { abi } from "thor-devkit"
 
 import {
   buttonClicked,
   buttonClickActions,
   ButtonClickProperties,
-  updateMarkdownTemplatePlaceholders,
-} from "@/constants"
-import { AnalyticsUtils } from "@/utils"
+} from "../../../../../../../constants/AnalyticsEvents"
+import { updateMarkdownTemplatePlaceholders } from "../../../../../../../constants/GovernanceProposalTemplate"
+import { useProposalFormStore } from "../../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+
+import { FormData, NewProposalForm } from "./NewProposalForm"
 
 export const NewProposalFormDetailsPageContent: React.FC = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
   const { setData } = useProposalFormStore()
-
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const onSubmit = useCallback(
     (data: FormData) => {
       const markdownDescription = updateMarkdownTemplatePlaceholders({
@@ -64,17 +60,17 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
   )
 
   return (
-    <Card.Root w="full" data-testid="new-proposal-form" variant="baseWithBorder">
+    <Card.Root w="full" data-testid="new-proposal-form" variant="primary">
       <Card.Body py={8}>
         <VStack gap={[4, 8]} align="flex-start">
           <Heading size="3xl">{t("What is your proposal about?")}</Heading>
           <Heading size="md">{t("Basic information")}</Heading>
           <NewProposalForm onSubmit={onSubmit} formId="new-proposal-form" />
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
               {t("Go back")}
             </Button>
-            <Button data-testid="continue" variant="primaryAction" type="submit" form="new-proposal-form">
+            <Button data-testid="continue" variant="primary" type="submit" form="new-proposal-form">
               {t("Continue")}
             </Button>
           </HStack>

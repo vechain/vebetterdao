@@ -1,11 +1,13 @@
-import { useXAppMetadata } from "@/api"
 import { Box, Field, HStack, Heading, Image, Input, InputGroup, Skeleton, Stack, Text } from "@chakra-ui/react"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
-import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
 import { t } from "i18next"
-import { CastAllocationVoteFormData } from "@/store"
+
+import { useXAppMetadata } from "../../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../../api/ipfs/hooks/useIpfsImage"
+import { CastAllocationVoteFormData } from "../../../../../../store/useCastAllocationFormStore"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 const estimateVotes = (value: number | string, totalVotesAvailable: number | string) => {
   return scaledDivision(Number(value) * Number(totalVotesAvailable), 100)
@@ -33,12 +35,12 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
       px={[4, 4, "24px"]}
       borderRadius={"16px"}
       w="full"
-      bg="light-contrast-on-card-bg">
+      bg="bg.primary">
       <HStack gap={[2, 2, 3]} align="center" flex={1}>
         <Skeleton loading={isLogoLoading}>
           <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"64px"} borderRadius="9px" />
         </Skeleton>
-        <Heading size="md" fontWeight={500}>
+        <Heading size="md" fontWeight="semibold">
           {appMetadata?.name}
         </Heading>
       </HStack>
@@ -46,18 +48,15 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
         <Field.Root invalid={!!error} disabled={isDisabled}>
           <InputGroup
             endElement={
-              <Text fontWeight={400} color="#6A6A6A" fontSize={"16px"}>
+              <Text color="text.subtle" textStyle="md">
                 {t("%")}
               </Text>
             }>
             <Input
               borderRadius={"12px"}
               borderWidth={1}
-              borderColor={"#D5D5D5"}
-              bg="#FFFFFF"
               data-testid={`${appMetadata?.name}-vote-input`}
               w="full"
-              color="#6A6A6A"
               placeholder="0"
               value={vote.value}
               onChange={e => {
@@ -89,9 +88,8 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
           {totalVotesAvailable && !error ? (
             <Field.HelperText
               data-testid={`${appMetadata?.name}-vote-estimated-votes`}
-              fontWeight={400}
-              fontSize={"16px"}
-              color="#6A6A6A">
+              textStyle="md"
+              color="text.subtle">
               {t("=~ {{value}} votes", {
                 value: new BigNumber(estimateVotes(vote.rawValue, totalVotesAvailable)).toFixed(
                   2,
@@ -100,7 +98,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
               })}
             </Field.HelperText>
           ) : (
-            <Field.ErrorText data-testid={`${appMetadata?.name}-vote-error`} fontWeight={400} fontSize={"16px"}>
+            <Field.ErrorText data-testid={`${appMetadata?.name}-vote-error`} textStyle="md">
               {error}
             </Field.ErrorText>
           )}

@@ -1485,10 +1485,10 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     // Test V6 reward calculations and track rewards
     const voter1Reward = await voterRewardsV6.getReward(roundIdV6, voter1.address)
     const voter1GMReward = await voterRewardsV6.getGMReward(roundIdV6, voter1.address)
-    const voter1Fee = await voterRewardsV6.getFee(roundIdV6, voter1.address)
+    const voter1Fee = await voterRewardsV6.getRelayerFee(roundIdV6, voter1.address)
 
     const voter2Reward = await voterRewardsV6.getReward(roundIdV6, voter2.address)
-    const voter2Fee = await voterRewardsV6.getFee(roundIdV6, voter2.address)
+    const voter2Fee = await voterRewardsV6.getRelayerFee(roundIdV6, voter2.address)
 
     // Verify V6 rewards are calculated correctly
     expect(voter1Reward).to.be.gt(0, "V6: Auto-voting user should have rewards")

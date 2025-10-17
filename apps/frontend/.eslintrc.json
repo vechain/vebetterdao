@@ -1,8 +1,9 @@
 {
-  "extends": "next",
+  "extends": ["next", "plugin:storybook/recommended"],
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "react-hooks"],
   "rules": {
+    "@next/next/no-html-link-for-pages": "off",
     "react/display-name": "off",
     "import/no-anonymous-default-export": "off",
     "react/no-children-prop": "warn",
@@ -14,15 +15,45 @@
       {
         "args": "all",
         "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
         "destructuredArrayIgnorePattern": "^_"
       }
     ],
-    "no-duplicate-imports": "error",
     "no-console": [
       "error",
       {
         "allow": ["error", "warn", "info"]
       }
-    ]
-  }
+    ],
+    "no-duplicate-imports": "error",
+    "import/no-named-as-default-member": 0,
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "unknown"],
+        "pathGroups": [
+          {
+            "pattern": "@/**",
+            "group": "internal",
+            "position": "before"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["builtin"],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.stories.{ts,tsx}"],
+      "rules": {
+        "react/jsx-no-literals": "off"
+      }
+    }
+  ]
 }

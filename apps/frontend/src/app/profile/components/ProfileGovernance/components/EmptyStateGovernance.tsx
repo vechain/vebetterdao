@@ -9,17 +9,16 @@ type Props = {
   buttonIcon?: IconType
   onClick: () => void
 }
-
 export const EmptyStateGovernance = ({ title, description, illustration, buttonText, buttonIcon, onClick }: Props) => {
   return (
     <VStack w={"full"}>
-      <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"} alignSelf={"start"}>
+      <Text textStyle={{ base: "lg", md: "xl" }} fontWeight={"bold"} alignSelf={"start"}>
         {title}
       </Text>
       <VStack w={"full"} borderRadius={12} borderWidth={1} borderColor={"#D5D5D5"} p={10}>
         {illustration}
         <Text>{description}</Text>
-        <Button mt={2} rounded={"full"} variant={"primaryAction"} colorPalette="primary" onClick={onClick}>
+        <Button mt={2} rounded={"full"} variant={"primary"} colorPalette="primary" onClick={onClick}>
           {buttonIcon && <Icon as={buttonIcon} />}
           {buttonText}
         </Button>

@@ -1,32 +1,25 @@
 "use client"
 import { VStack, Text, Container, HStack, Box, Link, Flex } from "@chakra-ui/react"
-import { BeBetterVeBetterIcon } from "../Icons"
-import { DiscordButton } from "./components/DiscordButton"
-import { TelegramButton } from "./components/TelegramButton"
-import { FreshDeskButton } from "./components/FreshDeskButton"
-import { Socials } from "./components/Socials"
-import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
-import { useTranslation } from "react-i18next"
-import { LanguageSelector } from "./components/LanguageSelector"
-import packageJson from "../../../package.json"
 import dayjs from "dayjs"
+import { useTranslation } from "react-i18next"
 
+import packageJson from "../../../package.json"
+import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "../../constants/links"
+import { BeBetterVeBetterIcon } from "../Icons/BeBetterVeBetterIcon"
+
+import { DiscordButton } from "./components/DiscordButton"
+import { FreshDeskButton } from "./components/FreshDeskButton"
+import { LanguageSelector } from "./components/LanguageSelector"
+import { Socials } from "./components/Socials"
+import { TelegramButton } from "./components/TelegramButton"
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
   const currentYear = dayjs().format("YYYY")
-
   const desktopContent = (
     <VStack hideBelow="md">
       <HStack justifyContent={"space-between"} w="full" gap={4} my={4}>
         <Box my={14}>
-          <BeBetterVeBetterIcon
-            beBetterProps={{
-              width: "80%",
-            }}
-            veBetterProps={{
-              width: "100%",
-            }}
-          />
+          <BeBetterVeBetterIcon />
         </Box>
         <VStack gap={4} alignItems={"flex-end"}>
           <DiscordButton />
@@ -43,21 +36,21 @@ export const Footer: React.FC = () => {
         borderTopWidth={1}
         py={8}>
         <VStack align={"start"}>
-          <Text fontWeight={400} fontSize="14px" color="#8c8c8c">
+          <Text textStyle="md" color="#8c8c8c">
             {t("{{currentYear}} VeBetter. All rights reserved.", { currentYear })}
           </Text>
-          <Text fontSize="14px" color="#8c8c8c">
+          <Text textStyle="sm" color="#8c8c8c">
             {t("Version")} {packageJson.version}
           </Text>
         </VStack>
         <HStack gap={4}>
           <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
-            <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+            <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Privacy & Policy")}
             </Text>
           </Link>
           <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
-            <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+            <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Terms & Conditions")}
             </Text>
           </Link>
@@ -71,14 +64,7 @@ export const Footer: React.FC = () => {
     <VStack hideFrom="md">
       <VStack gap={4} my={4}>
         <Box my={8}>
-          <BeBetterVeBetterIcon
-            beBetterProps={{
-              width: "80%",
-            }}
-            veBetterProps={{
-              width: "100%",
-            }}
-          />
+          <BeBetterVeBetterIcon />
         </Box>
         <VStack gap={4} alignItems={"center"}>
           <DiscordButton />
@@ -92,19 +78,19 @@ export const Footer: React.FC = () => {
       </VStack>
       <VStack borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
         <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
-          <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+          <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Privacy & Policy")}
           </Text>
         </Link>
         <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
-          <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+          <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Terms & Conditions")}
           </Text>
         </Link>
-        <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" mt={6}>
+        <Text textStyle="md" lineHeight="17px" color="#8c8c8c" mt={6}>
           {t("{{currentYear}} VeBetter. All rights reserved.", { currentYear })}
         </Text>
-        <Text fontSize="14px" color="#8c8c8c">
+        <Text textStyle="sm" color="#8c8c8c">
           {t("Version")} {packageJson.version}
         </Text>
       </VStack>
@@ -112,7 +98,7 @@ export const Footer: React.FC = () => {
   )
 
   return (
-    <Flex bgColor={"#191714"}>
+    <Flex bgColor="bg.secondary" borderTop="sm" borderColor="border.secondary">
       <Container
         maxW="breakpoint-xl"
         display={"flex"}

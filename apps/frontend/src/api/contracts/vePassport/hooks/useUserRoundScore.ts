@@ -1,12 +1,12 @@
-import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { useCurrentAllocationsRoundId } from "../../xAllocations"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "userRoundScore" as const
-
 /**
  * Returns the query key for fetching the user round score.
  * @param user - The user address.
@@ -16,7 +16,6 @@ const method = "userRoundScore" as const
 export const getUserRoundScoreQueryKey = (user: string, round: number) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [user as `0x${string}`, BigInt(round)] })
 }
-
 /**
  * Hook to get the user round score from the VeBetterPassport contract.
  * @param user - The user address.
@@ -35,7 +34,6 @@ export const useUserRoundScore = (user?: string | null, round?: number) => {
     },
   })
 }
-
 /**
  * Hook to get the user current round score from the VeBetterPassport contract.
  * @returns The user current round score.

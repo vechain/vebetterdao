@@ -1,22 +1,23 @@
-import { useCallback, useMemo } from "react"
-import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { getIsPassportCheckEnabledQueryKey } from "@/api"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { useCallback, useMemo } from "react"
+
 import { buildClause } from "@/utils/buildClause"
+
+import { getIsPassportCheckEnabledQueryKey } from "../api/contracts/vePassport/hooks/useIsPassportCheckEnabled"
+import { TogglePassportCheck } from "../constants/Passport"
+
 import { useBuildTransaction } from "./useBuildTransaction"
-import { TogglePassportCheck } from "@/constants"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress
 const method = "toggleCheck"
-
 type Props = {
   checkToToggle: TogglePassportCheck
   onSuccess?: () => void
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
-
 /**
  * Toggle a passport check in the VeBetterPassport contract
  *
@@ -33,12 +34,9 @@ export const useTogglePassportCheck = ({ checkToToggle, onSuccess }: Props) => {
       args: [checkToToggle],
       comment: `Toggle check with id ${checkToToggle}`,
     })
-
     return [clauses]
   }, [checkToToggle])
-
   const refetchQueryKeys = useMemo(() => [getIsPassportCheckEnabledQueryKey(checkToToggle)], [checkToToggle])
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

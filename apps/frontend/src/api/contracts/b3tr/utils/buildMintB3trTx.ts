@@ -1,12 +1,11 @@
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts"
-import { ethers } from "ethers"
 import { EnhancedClause, ThorClient } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 
 const abi = B3TR__factory.abi
 const contractAddress = getConfig().b3trContractAddress
-
 /**
  * Build the clause to mint B3TR tokens for the given address and amount
  * @param thor thor instance
@@ -19,9 +18,7 @@ export const buildMintB3trTx = (thor: ThorClient, address: string, amount: strin
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
   const formattedAddress = FormattingUtils.humanAddress(address)
   const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
-
   const { clause } = thor.contracts.load(contractAddress, abi).clause.mint(address, amountWithDecimals)
-
   return {
     ...clause,
     comment: `Mint ${formattedAmount} B3TR to ${formattedAddress}`,

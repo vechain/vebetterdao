@@ -5,13 +5,11 @@ import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-k
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi
 const method = "getUsersEndorsementScore" as const
-
 /**
  * Get the query key the user endorsement score
  */
 export const getUserEndorsementScoreQueryKey = (user?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(user ?? "0x") as `0x${string}`] })
-
 /**
  *  Hook to get the endorsement score of the user
  * @returns The endorsement score of the user

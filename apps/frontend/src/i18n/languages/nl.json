@@ -1992,5 +1992,21 @@
   "Showing": "Weergeven",
   "To support and vote for your favourite projects  Apps through Grants and for Proposals, you first need B3TR tokens.": "Om uw favoriete projecten en apps te ondersteunen en erop te stemmen via subsidies en voorstellen, heeft u eerst B3TR-tokens nodig.",
   "Search by proposal name": "Zoek op voorstelnaam",
-  "Created": "Gemaakt"
+  "Created": "Gemaakt",
+  "You have been signalled by": "Je bent gesignaleerd door",
+  "You have reached the maximum GM NFT level.": "Je hebt het maximale GM NFT-niveau bereikt.",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Het verwijderen van je goedkeuring van een app kan ertoe leiden dat deze niet meer wordt geselecteerd voor toewijzingen.",
+  "Current Status": "Huidige status",
+  "Status After Transaction": "Status na transactie",
+  "Reset Form": "Formulier opnieuw instellen",
+  "Apps eligible in next round": "Apps in aanmerking komende in de volgende ronde",
+  "App not found": "App niet gevonden",
+  "Confirm Eligibility Change": "Bevestig geschiktheidswijziging",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Weet u zeker dat u <b>'{{appName}}'</b>  <b>{{status}}</b> wilt maken voor de volgende ronde?",
+  "eligible": "in aanmerking komend",
+  "ineligible": "niet in aanmerking komend",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Hierdoor zal {{appName}} met id {{appId}} {{status}} zijn voor de volgende ronde.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) bereikt",
+  "Uploading...": "Uploaden...",
+  "Stored": "Opgeslagen"
 }

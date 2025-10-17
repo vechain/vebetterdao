@@ -1,13 +1,11 @@
-import { useCallback, useMemo } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
 import { useWallet, getAccountBalanceQueryKey } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
 
 const isProduction = process.env.NODE_ENV === "production"
 const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
-
 export type TransakCrypto = "VTHO" | "VOT3" | "VET"
-
 export interface UseTransakOptions {
   defaultCryptoCurrency: TransakCrypto
   defaultFiatAmount?: number
@@ -15,13 +13,10 @@ export interface UseTransakOptions {
   cryptoCurrencyList?: string
   onClose?: () => void
 }
-
 export const useTransak = (options: UseTransakOptions) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
-
   const { defaultCryptoCurrency, defaultFiatAmount = 5, exchangeScreenTitle, cryptoCurrencyList, onClose } = options
-
   const transakConfig: TransakConfig = useMemo(
     () => ({
       apiKey,
@@ -45,7 +40,6 @@ export const useTransak = (options: UseTransakOptions) => {
     }),
     [account, defaultCryptoCurrency, defaultFiatAmount, exchangeScreenTitle, cryptoCurrencyList],
   )
-
   const initTransak = useCallback(() => {
     const transak = new Transak(transakConfig)
     transak.init()

@@ -1,15 +1,13 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
-import { ethers } from "ethers"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 
 const abi = GalaxyMember__factory.abi
 const address = getConfig().galaxyMemberContractAddress as `0x${string}`
 const method = "getB3TRdonated" as const
-
 export const getB3trDonatedQueryKey = (tokenId?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(tokenId ?? 0)] })
-
 /**
  * Custom hook to fetch the amount of B3TR tokens donated for a given token ID.
  *

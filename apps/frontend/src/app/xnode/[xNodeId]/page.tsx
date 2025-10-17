@@ -1,12 +1,11 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const XNodeContent = dynamic(() => import("../XNodeContent").then(mod => mod.XNodeContent), {
+import { MotionVStack } from "../../../components/MotionVStack"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+const XNodeContent = dynamic(() => import("../XNodeContent/XNodeContent").then(mod => mod.XNodeContent), {
   ssr: false,
   loading: () => (
     <VStack w="full" gap={12} h="80vh" justify="center">
@@ -14,18 +13,15 @@ const XNodeContent = dynamic(() => import("../XNodeContent").then(mod => mod.XNo
     </VStack>
   ),
 })
-
 type Props = {
   params: {
     xNodeId: string
   }
 }
-
 export default function XNodePage({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage("XNodePage")
   }, [])
-
   return (
     <MotionVStack>
       <XNodeContent xNodeId={params.xNodeId} />

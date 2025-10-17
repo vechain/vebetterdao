@@ -73,11 +73,18 @@ interface IRelayerRewardsPool {
   /**
    * @notice Emitted when a relayer action is registered
    * @param relayer The relayer address
+   * @param voter The voter address
    * @param roundId The round ID
    * @param actionCount The new total action count for the relayer
    * @param weight The weight of the action
    */
-  event RelayerActionRegistered(address indexed relayer, uint256 indexed roundId, uint256 actionCount, uint256 weight);
+  event RelayerActionRegistered(
+    address indexed relayer,
+    address indexed voter,
+    uint256 indexed roundId,
+    uint256 actionCount,
+    uint256 weight
+  );
 
   /**
    * @notice Emitted when rewards are deposited for a round
@@ -310,7 +317,14 @@ interface IRelayerRewardsPool {
    * @param roundId The round ID
    * @return True if early access period is still active
    */
-  function isEarlyAccessActive(uint256 roundId) external view returns (bool);
+  function isVoteEarlyAccessActive(uint256 roundId) external view returns (bool);
+
+  /**
+   * @notice Check if claim early access period is active for a given round
+   * @param roundId The round ID
+   * @return True if claim early access period is still active
+   */
+  function isClaimEarlyAccessActive(uint256 roundId) external view returns (bool);
 
   /**
    * @notice Calculate relayer fee from total reward
@@ -318,6 +332,13 @@ interface IRelayerRewardsPool {
    * @return Relayer fee in wei
    */
   function calculateRelayerFee(uint256 totalReward) external view returns (uint256);
+
+  /**
+   * @notice Get the number of missed auto-voting users for a round
+   * @param roundId The round ID
+   * @return The number of missed auto-voting users
+   */
+  function getMissedAutoVotingUsersCount(uint256 roundId) external view returns (uint256);
 
   // =========================== Setters ===========================
 
@@ -345,10 +366,11 @@ interface IRelayerRewardsPool {
   /**
    * @notice Registers an action performed by a relayer in a specific round
    * @param relayer The relayer address
+   * @param voter The voter address
    * @param roundId The round ID
    * @param action The type of action performed (VOTE or CLAIM)
    */
-  function registerRelayerAction(address relayer, uint256 roundId, RelayerAction action) external;
+  function registerRelayerAction(address relayer, address voter, uint256 roundId, RelayerAction action) external;
 
   /**
    * @notice Allows a relayer to claim their rewards for a specific round
@@ -367,8 +389,17 @@ interface IRelayerRewardsPool {
 
   /**
    * @notice Check if a relayer can perform an action during early access
-   * @param relayer The relayer address
    * @param roundId The round ID
+   * @param voter The voter address
+   * @param caller The caller address
    */
-  function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view;
+  function validateVoteDuringEarlyAccess(uint256 roundId, address voter, address caller) external view;
+
+  /**
+   * @notice Validates if a claim can proceed for an auto-voting user
+   * @param roundId The round ID
+   * @param voter The voter address
+   * @param caller The caller address
+   */
+  function validateClaimDuringEarlyAccess(uint256 roundId, address voter, address caller) external view;
 }

@@ -1,40 +1,34 @@
 import { VStack, Heading } from "@chakra-ui/react"
-
+import { ethers } from "ethers"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { abi } from "thor-devkit"
-import { ProposalFormAction } from "@/store"
-import { ethers } from "ethers"
-import { ExecutableFunctionCard } from "@/app/proposals/new/form/functions/details/components/ExecutableFunctionCard"
 
+import { ExecutableFunctionCard } from "@/app/proposals/new/form/functions/details/components/ExecutableFunctionCard"
 // This is to reuse the same components of the form. This is a read-only version of the form
 import { FormData as NewProposalFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
-import { useTranslation } from "react-i18next"
+
+import { ProposalFormAction } from "../../store/useProposalFormStore"
 
 type Props = {
   actions: ProposalFormAction[]
 }
-
 const getParamValue = (decoded: abi.Decoded, paramName: string, requiresEthParse?: boolean) => {
   if (!decoded[paramName]) return
-
   if (requiresEthParse) {
     return ethers.formatEther(decoded[paramName])
   }
-
   return decoded[paramName]
 }
-
 export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
   const { t } = useTranslation()
   // This is to reuse the same components of the form. This is a read-only version of the form
   const { register, control, setValue } = useForm<NewProposalFormData>()
-
   const { fields } = useFieldArray({
     control,
     name: "actions",
   })
-
   //parse actions from store and set them in the form, decoding calldata inf available
   useEffect(() => {
     const formActions = actions.map(action => {
@@ -45,7 +39,6 @@ export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
       } catch (e) {
         console.error("Error decoding call data", e)
       }
-
       return {
         ...action,
         params: action.abiDefinition.inputs.map(param => ({

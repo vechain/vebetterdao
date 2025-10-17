@@ -1,15 +1,3 @@
-import { XApp } from "@/api"
-import { WalletAddressInput } from "@/app/components/Input"
-import { CategorySelector } from "@/components/CategorySelector"
-import {
-  AVG_PHONE_WIDTH,
-  BANNER_UPLOAD_GUIDELINES,
-  LOGO_UPLOAD_GUIDELINES,
-  notFoundImage,
-  VE_WOLRD_SCALING_FACTOR,
-  VEWORLD_BANNER_UPLOAD_GUIDELINES,
-} from "@/constants"
-import { blobToBase64 } from "@/utils/BlobUtils"
 import { Button, Card, Field, Heading, Image, InputGroup, Stack, Text, VStack } from "@chakra-ui/react"
 import { ChangeEvent, useCallback, useRef } from "react"
 import {
@@ -24,9 +12,24 @@ import {
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
+import { CategorySelector } from "@/components/CategorySelector"
+import { notFoundImage } from "@/constants"
+import { blobToBase64 } from "@/utils/BlobUtils"
+
+import { XApp } from "../../api/contracts/xApps/getXApps"
+import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
+import {
+  AVG_PHONE_WIDTH,
+  VEWORLD_BANNER_UPLOAD_GUIDELINES,
+  BANNER_UPLOAD_GUIDELINES,
+  LOGO_UPLOAD_GUIDELINES,
+  VE_WOLRD_SCALING_FACTOR,
+} from "../../constants/XAppsMedia"
 import { AddressIcon } from "../AddressIcon"
-import { FormItem, genericValidation, patternUrlCheck } from "../CustomFormFields"
-import { UploadFileButton } from "../UploadFileButton"
+import { FormItem } from "../CustomFormFields/FormItem"
+import { genericValidation, patternUrlCheck } from "../CustomFormFields/validators"
+import { UploadFileButton } from "../UploadFileButton/UploadFileButton"
+
 import { VeWorldFeaturedImageGuidelines } from "./VeWorldFeaturedImageGuidelines"
 
 // Validate image uploads with size and type
@@ -143,9 +146,7 @@ export const CreateEditAppForm = ({
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="3xl" fontWeight="bold">
-          {isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}
-        </Heading>
+        <Heading size="3xl">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} w="full">
@@ -235,7 +236,7 @@ export const CreateEditAppForm = ({
 
           <Field.Root invalid={!treasuryWalletAddress}>
             <Field.Label>{t("Treasury address")}</Field.Label>
-            <Text fontSize="xs" color="gray.500" mb={2}>
+            <Text textStyle="xs" color="gray.500" mb={2}>
               {t(`The wallet address where you will receive your app's B3TR`)}
             </Text>
             <InputGroup>
@@ -261,7 +262,7 @@ export const CreateEditAppForm = ({
 
           <Field.Root invalid={!adminWalletAddress}>
             <Field.Label>{t("Admin address")}</Field.Label>
-            <Text fontSize="xs" color="gray.500" mb={2}>
+            <Text textStyle="xs" color="gray.500" mb={2}>
               {t("The wallet address which will be used to manage your app")}
             </Text>
             <InputGroup>

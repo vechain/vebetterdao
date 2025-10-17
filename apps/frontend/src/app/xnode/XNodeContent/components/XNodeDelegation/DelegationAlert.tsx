@@ -9,16 +9,14 @@ export const DelegationAlert = ({
   isXNodeDelegated: boolean
 }) => {
   const { t } = useTranslation()
-
   if (!isXNodeDelegated) {
     return null
   }
-
   if (isXNodeDelegator) {
     return (
       <Alert.Root status="warning" borderRadius="2xl">
         <Alert.Indicator />
-        <Alert.Content lineHeight="1.20rem" fontSize="sm">
+        <Alert.Content textStyle="sm">
           <Alert.Title as="span">{t("Your Node can be currently used only by the manager")}</Alert.Title>
           <Alert.Description>
             {t(
@@ -29,11 +27,10 @@ export const DelegationAlert = ({
       </Alert.Root>
     )
   }
-
   return (
     <Alert.Root status="info" borderRadius="2xl">
       <Alert.Indicator />
-      <Alert.Content lineHeight="1.20rem" fontSize="sm">
+      <Alert.Content textStyle="sm">
         <Alert.Title as="span">{t("You have been added as a manager for this node")}</Alert.Title>
         <Alert.Description>{t("Only the owner can remove you as a manager.")}</Alert.Description>
       </Alert.Content>

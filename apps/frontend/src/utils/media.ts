@@ -1,4 +1,4 @@
-import { NFTMediaType } from "@/types"
+import { NFTMediaType } from "../types/media"
 
 const isValidMimeType = (mime: string, type: NFTMediaType[]) => {
   const found = type.find(t => {
@@ -6,13 +6,10 @@ const isValidMimeType = (mime: string, type: NFTMediaType[]) => {
       return true
     }
   })
-
   return !!found
 }
-
 export const resolveMediaTypeFromMimeType = (mimeType: string): NFTMediaType => {
   if (isValidMimeType(mimeType, [NFTMediaType.IMAGE])) return NFTMediaType.IMAGE
   else if (isValidMimeType(mimeType, [NFTMediaType.VIDEO])) return NFTMediaType.VIDEO
-
   return NFTMediaType.UNKNOWN
 }

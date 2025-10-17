@@ -1,15 +1,16 @@
 import { useWallet } from "@vechain/vechain-kit"
-import { useTokenIdByAccount } from "./useTokenIdByAccount"
-import { useNFTMetadataUri } from "./useNFTMetadataUri"
+
 import { useIpfsImage } from "@/api/ipfs/hooks/useIpfsImage"
 import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
+
+import { useNFTMetadataUri } from "./useNFTMetadataUri"
+import { useTokenIdByAccount } from "./useTokenIdByAccount"
 
 /**
  * Fetches NFT image from IPFS
  * @param fetchNFT - Whether to fetch the NFT
  * @returns The NFT image
  */
-
 export type NFTMetadata = {
   name: string
   description: string
@@ -19,7 +20,6 @@ export type NFTMetadata = {
     value: string
   }[]
 }
-
 export const useNFTImage = (profile?: string) => {
   const { account } = useWallet()
   const {
@@ -28,21 +28,18 @@ export const useNFTImage = (profile?: string) => {
     isError: isErrorTokenID,
     error: errorTokenID,
   } = useTokenIdByAccount(profile ?? account?.address ?? "", 0)
-
   const {
     data: metadataURI,
     isLoading: isLoadingMetadataUri,
     isError: isErrorMetadataUri,
     error: errorMetadataURI,
   } = useNFTMetadataUri(tokenID)
-
   const {
     data: imageMetadata,
     isLoading: isLoadingMetadata,
     isError: isErrorMetadata,
     error: errorMetadata,
   } = useIpfsMetadata<NFTMetadata>(metadataURI)
-
   const {
     data: imageData,
     isLoading: isLoadingImageData,

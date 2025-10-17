@@ -1,13 +1,11 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
-
 import { getConfig } from "@repo/config"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress as `0x${string}`
 const functionName = "hasVoted" as const
-
 /**
  * Check if the given address has voted on the given proposal
  * @param thor  the thor client
@@ -17,7 +15,6 @@ const functionName = "hasVoted" as const
  */
 export const getHasVoted = async (thor: ThorClient, proposalIds: string[], address?: string) => {
   if (!address) throw new Error("address is required")
-
   const hasVoted = await executeMultipleClausesCall({
     thor,
     calls: proposalIds.map(
@@ -30,17 +27,14 @@ export const getHasVoted = async (thor: ThorClient, proposalIds: string[], addre
         }) as const,
     ),
   })
-
   return proposalIds.reduce(
     (acc, proposalId, index) => {
       acc[proposalId] = hasVoted[index] || false
-
       return acc
     },
     {} as Record<string, boolean>,
   )
 }
-
 export const getHasVotedQueryKey = (proposalIds: string[], address?: string) => ["hasVoted", proposalIds, address]
 /**
  * Hook to check if the given address has voted on the given proposals

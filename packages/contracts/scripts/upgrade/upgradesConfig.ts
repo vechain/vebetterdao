@@ -9,12 +9,13 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Voter Rewards": {
     name: "voter-rewards",
     configAddressField: "voterRewardsContractAddress",
-    versions: ["v2", "v3", "v4", "v5"],
+    versions: ["v2", "v3", "v4", "v5", "v6"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
       v3: "Vechain Nodes x GM upgrades feature",
       v4: "Update GalaxyMember interface to use version 3",
       v5: "Proposal Execution: Add GM Pool for GM Holder Rewards",
+      v6: "Integrate Auto-voting relayer rewards pool and fees",
     },
   },
   B3TRGovernor: {
@@ -41,7 +42,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Fix casting votes multiple times for same app in single transaction",
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards and IEmissions)",
       v7: "Proposal Execution: Count proposal deposits to x-allocation voting power",
-      v8: "Add autovoting functionality",
+      v8: "Add Auto-Voting functionality",
     },
   },
   "XAllocation Pool": {

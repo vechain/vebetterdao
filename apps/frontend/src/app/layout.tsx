@@ -1,6 +1,8 @@
 import { getConfig } from "@repo/config"
-import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
 import { Metadata, Viewport } from "next"
+
+import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
+
 import { ClientWrapper } from "./client-wrapper"
 
 // Get metadata of the platform
@@ -10,12 +12,10 @@ const title = platformMetadata?.title
 const metadataDesc = platformMetadata?.description
 const imageUrl = `${basePath}${platformMetadata?.image}`
 const imageExtension = platformMetadata?.imageExtension
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
 }
-
 // Export proper metadata for the platform with template support
 export const metadata: Metadata = {
   title: title || "VeBetter Governance | Shape the Ecosystem and Earn B3TR Rewards",
@@ -57,7 +57,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       style={{
         scrollBehavior: "smooth",
       }}>
-      <head />
+      <head>
+        <link rel="dns-prefetch" href="https://indexer.mainnet.vechain.org" />
+        <link rel="dns-prefetch" href="https://euc-widget.freshworks.com" />
+        <link rel="dns-prefetch" href="https://datadoghq.eu" />
+        <link rel="preconnect" href="https://indexer.mainnet.vechain.org" crossOrigin="anonymous" />
+      </head>
       <body>
         <ClientWrapper>{children}</ClientWrapper>
       </body>

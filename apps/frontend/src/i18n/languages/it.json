@@ -1991,5 +1991,21 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Se annulli ora, la tua sovvenzione verrà rimossa e non apparirà nel prossimo turno di votazione. Una volta iniziato il turno, l'annullamento non sarà più possibile.",
   "Showing": "Mostrando",
   "Search by proposal name": "Cerca per nome proposta",
-  "Created": "Creato"
+  "Created": "Creato",
+  "You have been signalled by": "Sei stato segnalato da",
+  "You have reached the maximum GM NFT level.": "Hai raggiunto il livello massimo di GM NFT.",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Rimuovere il tuo appoggio da un'app potrebbe comportare il fatto che non venga più selezionata per le allocazioni.",
+  "Current Status": "Stato attuale",
+  "Status After Transaction": "Stato dopo la transazione",
+  "Reset Form": "Reimposta modulo",
+  "Apps eligible in next round": "App ammissibili nel prossimo turno",
+  "App not found": "App non trovata",
+  "Confirm Eligibility Change": "Conferma modifica idoneità",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Sei sicuro di voler rendere <b>'{{appName}}'</b>  <b>{{status}}</b> per il prossimo turno?",
+  "eligible": "idoneo",
+  "ineligible": "non idoneo",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Facendo questo, {{appName}} con id {{appId}} sarà {{status}} per il prossimo turno.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Raggiunto il <Link>quorum</Link> minimo ({{quorumNumerator}}%)",
+  "Uploading...": "Caricamento in corso...",
+  "Stored": "Memorizzato"
 }

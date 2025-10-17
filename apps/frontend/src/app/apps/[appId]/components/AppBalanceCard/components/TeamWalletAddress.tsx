@@ -1,15 +1,15 @@
-import { Tooltip } from "@/components/ui/tooltip"
-import { Flex, HStack, Text, VStack } from "@chakra-ui/react"
+import { Flex, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiInfo } from "react-icons/fi"
 
+import { Tooltip } from "@/components/ui/tooltip"
+
 export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: string }) => {
   const { t } = useTranslation()
   const [showCopiedLink, setShowCopiedLink] = useState(false)
-
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(teamWalletAddress)
     setShowCopiedLink(true)
@@ -17,7 +17,6 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
       setShowCopiedLink(false)
     }, 2000)
   }, [teamWalletAddress])
-
   return (
     <VStack w={"full"} gap={4} align={"flex-start"}>
       <VStack align={"stretch"} w={"full"} justify={"start"}>
@@ -27,23 +26,22 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
           }>
           <Flex w={"fit-content"} justifyContent={"center"} mt={1}>
             <HStack alignSelf={"center"} w={"fit-content"}>
-              <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A" w={"full"}>
+              <Text textStyle={"sm"} color="text.subtle" w={"full"}>
                 {t("Treasury address")}
               </Text>
-              <FiInfo color="rgba(0, 76, 252, 1)" size={14} />
+              <Icon color="logo" boxSize={14}>
+                <FiInfo />
+              </Icon>
             </HStack>
           </Flex>
         </Tooltip>
-
         <HStack>
           {showCopiedLink ? (
             <UilCheck size={"18px"} color="#6DCB09" />
           ) : (
-            <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyLink} cursor="pointer" />
+            <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyLink} cursor="pointer" />
           )}
-          <Text fontSize={"20px"} fontWeight={400}>
-            {humanAddress(teamWalletAddress, 6, 6)}
-          </Text>
+          <Text textStyle={"xl"}>{humanAddress(teamWalletAddress, 6, 6)}</Text>
         </HStack>
       </VStack>
     </VStack>

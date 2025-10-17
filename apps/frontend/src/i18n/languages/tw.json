@@ -1992,5 +1992,21 @@
   "Showing": "显示",
   "Core Web3 features and sustainability (sutainable proofs) live on VeChain": "核心的 Web3 功能和可持續性（可持續證明）在唯鏈上運行",
   "Search by proposal name": "按提案名稱搜索",
-  "Created": "已建立"
+  "Created": "已建立",
+  "You have been signalled by": "您已被通知",
+  "You have reached the maximum GM NFT level.": "您已達到GM NFT的最高級別。",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "從應用程式中移除您的認可可能會導致其不再被選中進行分配。",
+  "Current Status": "目前狀態",
+  "Status After Transaction": "交易後狀態",
+  "Reset Form": "重設表單",
+  "Apps eligible in next round": "下一輪可參加的應用程序",
+  "App not found": "未找到應用程序",
+  "Confirm Eligibility Change": "確認資格變更",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "您確定要將<b>'{{appName}}'</b>設定為<b>{{status}}</b>參加下一輪嗎？",
+  "eligible": "合格",
+  "ineligible": "不合格",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "這樣做，ID為{{appId}}的{{appName}}將在下一輪被設定為{{status}}。",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)",
+  "Uploading...": "上傳中...",
+  "Stored": "已存儲"
 }

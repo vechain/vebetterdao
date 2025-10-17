@@ -1,13 +1,13 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { ethers } from "ethers"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+
 import { useGetVotesOnBlock } from "./useVotesOnBlock"
 
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress
 const method = "getDepositVotingPower" as const
-
 export const getDepositsVotesOnBlockQueryKey = (userAddress: string, blockNumber: number) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -15,14 +15,12 @@ export const getDepositsVotesOnBlockQueryKey = (userAddress: string, blockNumber
     method,
     args: [userAddress as `0x${string}`, BigInt(blockNumber)],
   })
-
 /**
  *  Hook to get the total number of deposits votes of the given address (with decimals removed)
  * @returns the number of deposits votes of the given address (with decimals removed)
  */
 export const useTotalVotesOnBlock = (block?: number, address?: string, enabled = true) => {
   const { data: votes } = useGetVotesOnBlock(block, address, enabled)
-
   return useCallClause({
     abi,
     address: contractAddress,

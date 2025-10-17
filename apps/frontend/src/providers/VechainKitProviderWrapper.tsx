@@ -1,11 +1,10 @@
 "use client"
-
-import { useColorMode } from "@/components/ui/color-mode"
 import { getConfig } from "@repo/config"
 import { NETWORK_TYPE } from "@repo/constants"
 import dynamic from "next/dynamic"
 import { useTranslation } from "react-i18next"
 
+import { useColorMode } from "@/components/ui/color-mode"
 // Dynamic import is used here for several reasons:
 // 1. The VechainKit component uses browser-specific APIs that aren't available during server-side rendering
 // 2. Code splitting - this component will only be loaded when needed, reducing initial bundle size
@@ -13,24 +12,17 @@ import { useTranslation } from "react-i18next"
 const VeChainKitProvider = dynamic(() => import("@vechain/vechain-kit").then(mod => mod.VeChainKitProvider), {
   ssr: false,
 })
-
 interface Props {
   readonly children: React.ReactNode
 }
-
 export function VechainKitProviderWrapper({ children }: Props) {
   const { colorMode } = useColorMode()
   const { i18n } = useTranslation()
-
   const isDarkMode = colorMode === "dark"
-
   const vebetterLogo = "https://i.ibb.co/7tBkpgvW/Ve-Better-Blue-300ppi.png"
   const vechainLogo = "https://vechain.org/wp-content/uploads/2025/02/VeChain_Icon_Quartz_300ppi.png"
-
   const networkType = getConfig().network.type
-
   const allowCustomTokens = networkType === ("test" as NETWORK_TYPE)
-
   return (
     <VeChainKitProvider
       privy={{

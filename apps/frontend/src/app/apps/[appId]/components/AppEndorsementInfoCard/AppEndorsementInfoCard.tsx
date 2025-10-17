@@ -1,26 +1,28 @@
-import {
-  useAllocationsRound,
-  useAppEndorsers,
-  useCurrentAllocationsRoundId,
-  useIsAppAdmin,
-  useIsAppModerator,
-} from "@/api"
-import { XAppStatus } from "@/types"
 import { Button, Card, Heading, HStack, Link, Skeleton, Stack, VStack, useDisclosure } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { useWallet } from "@vechain/vechain-kit"
-import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
-import { EndorsementDetails } from "./EndorsementDetails"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import dayjs from "dayjs"
-import { GenericAlert } from "@/app/components/Alert"
+
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+
+import { useAllocationsRound } from "../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
+import { useIsAppModerator } from "../../../../../api/contracts/xApps/hooks/useIsAppModerator"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../../constants/AnalyticsEvents"
+import { DISCORD_URL } from "../../../../../constants/links"
+import { XAppStatus } from "../../../../../types/appDetails"
+import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { GenericAlert } from "../../../../components/Alert/GenericAlert"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
+import { EndorsementDetails } from "./EndorsementDetails"
+import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 
 type Props = {
   endorsementScore?: string
@@ -28,7 +30,6 @@ type Props = {
   endorsementThreshold?: string
   isEndorsementStatusLoading: boolean
 }
-
 export const AppEndorsementInfoCard = ({
   endorsementScore,
   endorsementStatus,
@@ -38,7 +39,6 @@ export const AppEndorsementInfoCard = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
-
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -71,8 +71,6 @@ export const AppEndorsementInfoCard = ({
   const shouldRenderLookForEndorsersButton = useMemo(() => {
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
-
-  const lookForEndorsersButtonVariant = !shouldRenderEndorseButton ? "primaryAction" : "primarySubtle"
 
   const shouldDisableEndorsementButton = useMemo(() => {
     return (
@@ -120,7 +118,7 @@ export const AppEndorsementInfoCard = ({
       buttonComponents.push(
         <Button
           key="endorseButton"
-          variant="primaryAction"
+          variant="primary"
           onClick={onOpenEndorsementModal}
           disabled={shouldDisableEndorsementButton}
           w="full">
@@ -140,7 +138,7 @@ export const AppEndorsementInfoCard = ({
           onClick={() =>
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))
           }>
-          <Button w="full" variant={lookForEndorsersButtonVariant}>
+          <Button w="full" variant={shouldRenderEndorseButton ? "secondary" : "primary"}>
             {t("Look for endorsers")}
           </Button>
         </Link>,
@@ -152,9 +150,11 @@ export const AppEndorsementInfoCard = ({
         <Link asChild>
           <Button
             key="removeEndorsementButton"
-            variant="plain"
-            color="red.300"
-            fontSize="md"
+            rounded="xl"
+            mt="4"
+            variant="outline"
+            colorPalette="red"
+            textStyle="md"
             fontWeight="semibold"
             onClick={onOpenUnendorsementModal}
             w="full"
@@ -177,17 +177,20 @@ export const AppEndorsementInfoCard = ({
     onOpenEndorsementModal,
     shouldDisableEndorsementButton,
     totalXNodePoints,
-    lookForEndorsersButtonVariant,
     onOpenUnendorsementModal,
   ])
 
   return (
     <>
-      <Card.Root w={"full"} variant="baseWithBorder">
+      <Card.Root w={"full"} variant="primary">
         <Card.Header>
           <HStack justifyContent="space-between" alignItems="center" w="full">
             <Heading size="xl">{t("Endorsement")}</Heading>
-            <Link fontSize="16px" fontWeight={600} color="#004CFC" onClick={onOpenEndorsementInfoModal}>
+            <Link
+              textStyle="md"
+              fontWeight="semibold"
+              color="actions.secondary.text-lighter"
+              onClick={onOpenEndorsementInfoModal}>
               {t("History")}
             </Link>
           </HStack>

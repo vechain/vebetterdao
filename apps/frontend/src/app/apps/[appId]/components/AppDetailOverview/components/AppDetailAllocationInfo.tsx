@@ -1,47 +1,46 @@
-import { useAppAllocations } from "@/api/contracts/governance/hooks/useAppAllocations"
 import { Card, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useParams } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter(2)
+import { useAppAllocations } from "@/api/contracts/governance/hooks/useAppAllocations"
 
+const compactFormatter = getCompactFormatter(2)
 export const AppDetailAllocationInfo = () => {
   const { appId } = useParams<{ appId: string }>()
   const { totalAllocationReceived, lastRoundAllocationReceived, averageAllocationReceived } = useAppAllocations(appId)
-
   const { t } = useTranslation()
   return (
-    <Card.Root variant="subtle" h={"full"} rounded="8px" flex={1.5} borderWidth={1}>
+    <Card.Root bg="card.subtle" h={"full"} rounded="8px" flex={1.5}>
       <Card.Body gap={6}>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
             <Image h="36px" w="36px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Text fontSize={"36px"} fontWeight={700}>
+            <Text textStyle={"4xl"} fontWeight="bold">
               {compactFormatter.format(totalAllocationReceived)}
             </Text>
           </HStack>
-          <Text color="#6A6A6A">{t("Total B3TR received in allocations")}</Text>
+          <Text color="text.subtle">{t("Total B3TR received in allocations")}</Text>
         </VStack>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
             <Image h="18px" w="18px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Text fontSize={"18px"} fontWeight={600}>
+            <Text textStyle={"lg"} fontWeight="semibold">
               {compactFormatter.format(lastRoundAllocationReceived)}
             </Text>
           </HStack>
-          <Text color="#6A6A6A" fontSize="14px">
+          <Text color="text.subtle" textStyle="sm">
             {t("Received in latest allocation")}
           </Text>
         </VStack>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
             <Image h="18px" w="18px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Text fontSize={"18px"} fontWeight={600}>
+            <Text textStyle={"lg"} fontWeight="semibold">
               {compactFormatter.format(averageAllocationReceived)}
             </Text>
           </HStack>
-          <Text color="#6A6A6A" fontSize="14px">
+          <Text color="text.subtle" textStyle="sm">
             {t("Average allocation distribution")}
           </Text>
         </VStack>

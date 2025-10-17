@@ -1,13 +1,14 @@
-import { buttonClickActions, ButtonClickProperties, buttonClicked, TELEGRAM_URL } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
 import { Button, Link, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaTelegram } from "react-icons/fa6"
 
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "../../../constants/AnalyticsEvents"
+import { TELEGRAM_URL } from "../../../constants/links"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+
 type Props = {
   isFullWidth?: boolean
 }
-
 export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
   const { t } = useTranslation()
   return (
@@ -15,14 +16,9 @@ export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
       href={TELEGRAM_URL}
       w={isFullWidth ? "full" : undefined}
       onClick={() => AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_TELEGRAM))}>
-      <Button
-        color={"white"}
-        bgColor={`#27a6e7`}
-        _hover={{ bg: "#0088cc" }}
-        borderRadius={22}
-        w={isFullWidth ? "full" : undefined}>
+      <Button variant="secondary" w={isFullWidth ? "full" : undefined}>
         <FaTelegram size={24} />
-        <Text fontWeight={500} fontSize="16px" lineHeight="19px">
+        <Text fontWeight="semibold" textStyle="md">
           {t("Join Telegram")}
         </Text>
       </Button>
