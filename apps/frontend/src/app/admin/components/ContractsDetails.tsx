@@ -107,6 +107,11 @@ export const ContractsDetails = () => {
         address={config.stargateNFTContractAddress}
         roles={getContractByAddress(config.stargateNFTContractAddress)?.roles}
       />
+      <ContractDetailsCard
+        title="RelayerRewardsPool"
+        address={config.relayerRewardsPoolContractAddress}
+        roles={getContractByAddress(config.relayerRewardsPoolContractAddress)?.roles}
+      />
     </Grid>
   )
 }

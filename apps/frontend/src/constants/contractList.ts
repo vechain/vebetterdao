@@ -132,4 +132,9 @@ export const CONTRACT_LIST = [
       "WHITELISTER_ROLE",
     ],
   },
+  {
+    name: "RelayerRewardsPool",
+    contractAddress: config.relayerRewardsPoolContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "POOL_ADMIN_ROLE"],
+  },
 ]
