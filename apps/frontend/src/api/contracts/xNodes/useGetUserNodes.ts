@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { NodeManagementV3__factory as NodeManagement__factory } from "@vechain/vebetterdao-contracts/factories/mocks/Stargate/NodeManagement/NodeManagementV3__factory"
 import {
   GalaxyMember__factory,
   StargateNFT__factory,
@@ -88,7 +88,7 @@ export const useGetUserNodes = (user?: string) => {
                 address,
                 functionName: "isLegacyNode",
                 args: [node.nodeId],
-              }) as const,
+              } as const),
           ),
         }),
         executeMultipleClausesCall({
@@ -100,7 +100,7 @@ export const useGetUserNodes = (user?: string) => {
                 address: x2EarnAppsAddress,
                 functionName: "checkCooldown",
                 args: [node.nodeId],
-              }) as const,
+              } as const),
           ),
         }),
         executeMultipleClausesCall({
@@ -112,7 +112,7 @@ export const useGetUserNodes = (user?: string) => {
                 address: x2EarnAppsAddress,
                 functionName: "nodeToEndorsedApp",
                 args: [node.nodeId],
-              }) as const,
+              } as const),
           ),
         }),
         executeMultipleClausesCall({
@@ -124,7 +124,7 @@ export const useGetUserNodes = (user?: string) => {
                 address: galaxyMemberAddress,
                 functionName: "getIdAttachedToNode",
                 args: [node.nodeId],
-              }) as const,
+              } as const),
           ),
         }),
       ])
@@ -160,7 +160,7 @@ export const useGetUserNodes = (user?: string) => {
               address: stargateNFTContractAddress,
               functionName: "tokenURI",
               args: [node.nodeId],
-            }) as const,
+            } as const),
         ),
       })
       const stargateTokenURIList = stargateTokenURIs?.map(uri => uri?.toString() ?? "") ?? []

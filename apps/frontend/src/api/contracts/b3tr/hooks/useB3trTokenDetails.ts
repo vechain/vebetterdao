@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { B3TR__factory } from "@vechain/vebetterdao-contracts"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
 import { getCallClauseQueryKey, useCallClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
@@ -28,7 +28,7 @@ export const useB3trTokenDetails = () => {
           decimals: data[2],
           circulatingSupply: ethers.formatEther(data[3]),
           totalSupply: ethers.formatEther(data[4]),
-        }) as TokenDetails,
+        } as TokenDetails),
     },
   })
 }

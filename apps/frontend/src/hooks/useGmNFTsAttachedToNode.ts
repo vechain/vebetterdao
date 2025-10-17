@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/factories/GalaxyMember__factory"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
@@ -54,7 +55,7 @@ export const useGmNFTsAttachedToNode = (
               address: galaxyMemberAddress,
               functionName: "levelOf",
               args: [tokenId],
-            }) as const,
+            } as const),
         ),
       })
 
@@ -67,7 +68,7 @@ export const useGmNFTsAttachedToNode = (
               address: voterRewardsAddress,
               functionName: voterRewardsMethod,
               args: [level],
-            }) as const,
+            } as const),
         ),
       })
 
@@ -84,7 +85,7 @@ export const useGmNFTsAttachedToNode = (
                 address: galaxyMemberAddress,
                 functionName: "tokenURI",
                 args: [tokenId],
-              }) as const,
+              } as const),
           ),
         })
 

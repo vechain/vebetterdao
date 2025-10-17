@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 
 const abi = B3TRGovernor__factory.abi
@@ -24,16 +24,13 @@ export const getHasVoted = async (thor: ThorClient, proposalIds: string[], addre
           address: contractAddress,
           functionName,
           args: [id, address as `0x${string}`],
-        }) as const,
+        } as const),
     ),
   })
-  return proposalIds.reduce(
-    (acc, proposalId, index) => {
-      acc[proposalId] = hasVoted[index] || false
-      return acc
-    },
-    {} as Record<string, boolean>,
-  )
+  return proposalIds.reduce((acc, proposalId, index) => {
+    acc[proposalId] = hasVoted[index] || false
+    return acc
+  }, {} as Record<string, boolean>)
 }
 export const getHasVotedQueryKey = (proposalIds: string[], address?: string) => ["hasVoted", proposalIds, address]
 /**

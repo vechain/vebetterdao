@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { B3TR__factory } from "@vechain/vebetterdao-contracts"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
 

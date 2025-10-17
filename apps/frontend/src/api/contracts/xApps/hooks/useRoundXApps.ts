@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
 import { AllApps, isNewApp } from "../getXApps"
