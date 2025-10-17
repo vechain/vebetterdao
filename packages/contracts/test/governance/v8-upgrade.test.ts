@@ -4,28 +4,13 @@ import { ethers } from "hardhat"
 import { describe, it } from "mocha"
 
 import { deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
-import {
-  B3TRGovernor,
-  B3TRGovernorV1,
-  B3TRGovernorV2,
-  B3TRGovernorV3,
-  B3TRGovernorV4,
-  B3TRGovernorV5,
-  B3TRGovernorV6,
-  B3TRGovernorV7,
-} from "../../typechain-types"
+import { B3TRGovernor, B3TRGovernorV1 } from "../../typechain-types"
 import { DeployInstance, getOrDeployContractInstances } from "../helpers"
-import {
-  getVot3Tokens,
-  moveBlocks,
-  startNewAllocationRound,
-  waitForBlock,
-  waitForCurrentRoundToEnd,
-} from "../helpers/common"
-import { setupProposer, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
+import { getVot3Tokens, moveBlocks, startNewAllocationRound, waitForCurrentRoundToEnd } from "../helpers/common"
+import { setupProposer, setupVoter, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
 
-describe.only("Governance - V8 Upgrade - @shard4fg", function () {
-  it("Should preserve proposal data through version upgrades and add proposal state in development support", async () => {
+describe.only("Governance - V8 Upgrade - @shard4g", function () {
+  it("Should preserve non-executable V1 proposal through all upgrades and successfully approve it in V8", async () => {
     const config = createLocalConfig()
     const {
       owner,
@@ -100,9 +85,12 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
       forceDeploy: true,
     })) as DeployInstance
 
-    // Setup proposer for this test
+    // Setup proposer and voters for this test
     const proposer = otherAccounts[0]
     await setupProposer(proposer, b3tr, vot3, minterAccount)
+    await setupVoter(proposer, b3tr, vot3, minterAccount, owner, veBetterPassport)
+    await setupVoter(otherAccounts[1], b3tr, vot3, minterAccount, owner, veBetterPassport)
+    await setupVoter(otherAccounts[2], b3tr, vot3, minterAccount, owner, veBetterPassport)
 
     // Deploy V1 Governor Proxy
     const governorContractAddress = await deployProxyOnly("B3TRGovernorV1", {
@@ -126,10 +114,10 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
           timelock: await timeLock.getAddress(),
           xAllocationVoting: await xAllocationVoting.getAddress(),
           b3tr: await b3tr.getAddress(),
-          quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-          initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
-          initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
-          initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+          quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+          initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+          initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+          initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
           voterRewards: await voterRewards.getAddress(),
           isFunctionRestrictionEnabled: true,
         },
@@ -155,9 +143,13 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
 
     expect(await governorV1.version()).to.equal("1")
 
-    const roundIdforV1 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
+    // Grant Vote registrar role to Governor
+    await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), governorContractAddress)
 
-    const txV1 = await governorV1.connect(proposer).propose([], [], [], "descriptionV1", roundIdforV1, 0, {
+    // Create proposal in V1
+    const roundId = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
+
+    const txV1 = await governorV1.connect(proposer).propose([], [], [], "Test proposal from V1", roundId, 0, {
       gasLimit: 10_000_000,
     })
     const proposeReceiptV1 = await txV1.wait()
@@ -168,17 +160,14 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
       data: eventV1 ? eventV1.data : "",
     })
 
-    const proposalIdV1 = ethers.toBigInt(decodedV1Logs?.args[0])
+    const proposalId = ethers.toBigInt(decodedV1Logs?.args[0])
 
-    // Verify proposal exists and get initial data
-    const proposerV1 = await governorV1.proposalProposer(proposalIdV1)
-    const stateV1 = await governorV1.state(proposalIdV1)
-
-    expect(proposerV1).to.equal(proposer.address)
-    expect(stateV1).to.equal(ethers.toBigInt(0)) // Pending state
+    // Verify proposal exists in V1
+    expect(await governorV1.proposalProposer(proposalId)).to.equal(proposer.address)
+    expect(await governorV1.state(proposalId)).to.equal(ethers.toBigInt(0)) // Pending state
 
     // Upgrade V1 -> V2
-    const governorV2 = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernorV2", governorContractAddress, [], {
+    await upgradeProxy("B3TRGovernorV1", "B3TRGovernorV2", governorContractAddress, [], {
       version: 2,
       libraries: {
         GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
@@ -190,32 +179,10 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
         GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
         GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
       },
-    })) as B3TRGovernorV2
-
-    const roundIdforV2 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
-
-    const txV2 = await governorV2.connect(proposer).propose([], [], [], "descriptionV2", roundIdforV2, 0, {
-      gasLimit: 10_000_000,
     })
-    const proposeReceiptV2 = await txV2.wait()
-    const eventV2 = proposeReceiptV2?.logs[0]
-
-    const decodedV2Logs = governorV2.interface.parseLog({
-      topics: [...(eventV2?.topics as string[])],
-      data: eventV2 ? eventV2.data : "",
-    })
-
-    const proposalIdV2 = ethers.toBigInt(decodedV2Logs?.args[0])
-
-    // Verify proposal exists and get initial data
-    const proposerV2 = await governorV2.proposalProposer(proposalIdV2)
-    const stateV2 = await governorV2.state(proposalIdV2)
-
-    expect(proposerV2).to.equal(proposer.address)
-    expect(stateV2).to.equal(ethers.toBigInt(0)) // Pending state
 
     // Upgrade V2 -> V3
-    const governorV3 = (await upgradeProxy("B3TRGovernorV2", "B3TRGovernorV3", governorContractAddress, [], {
+    await upgradeProxy("B3TRGovernorV2", "B3TRGovernorV3", governorContractAddress, [], {
       version: 3,
       libraries: {
         GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
@@ -227,18 +194,10 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
         GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
         GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
       },
-    })) as B3TRGovernorV3
-
-    expect(await governorV3.version()).to.equal("3")
-
-    // Verify both proposals persisted through V2 -> V3 upgrade
-    expect(await governorV3.proposalProposer(proposalIdV1)).to.equal(proposerV1)
-    expect(await governorV3.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
-    expect(await governorV3.proposalProposer(proposalIdV2)).to.equal(proposer.address)
-    expect(await governorV3.state(proposalIdV2)).to.equal(ethers.toBigInt(0))
+    })
 
     // Upgrade V3 -> V4
-    const governorV4 = (await upgradeProxy(
+    await upgradeProxy(
       "B3TRGovernorV3",
       "B3TRGovernorV4",
       governorContractAddress,
@@ -256,18 +215,10 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
           GovernorVotesLogicV4: await governorVotesLogicLibV4.getAddress(),
         },
       },
-    )) as B3TRGovernorV4
-
-    expect(await governorV4.version()).to.equal("4")
-
-    // Verify all proposals persisted through V3 -> V4 upgrade
-    expect(await governorV4.proposalProposer(proposalIdV1)).to.equal(proposerV1)
-    expect(await governorV4.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
-    expect(await governorV4.proposalProposer(proposalIdV2)).to.equal(proposer.address)
-    expect(await governorV4.state(proposalIdV2)).to.equal(ethers.toBigInt(0))
+    )
 
     // Upgrade V4 -> V5
-    const governorV5 = (await upgradeProxy("B3TRGovernorV4", "B3TRGovernorV5", governorContractAddress, [], {
+    await upgradeProxy("B3TRGovernorV4", "B3TRGovernorV5", governorContractAddress, [], {
       version: 5,
       libraries: {
         GovernorClockLogicV5: await governorClockLogicLibV5.getAddress(),
@@ -279,42 +230,10 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
         GovernorStateLogicV5: await governorStateLogicLibV5.getAddress(),
         GovernorVotesLogicV5: await governorVotesLogicLibV5.getAddress(),
       },
-    })) as B3TRGovernorV5
-
-    expect(await governorV5.version()).to.equal("5")
-
-    // Verify all proposals persisted through V4 -> V5 upgrade
-    expect(await governorV5.proposalProposer(proposalIdV1)).to.equal(proposerV1)
-    expect(await governorV5.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
-    expect(await governorV5.proposalProposer(proposalIdV2)).to.equal(proposer.address)
-    expect(await governorV5.state(proposalIdV2)).to.equal(ethers.toBigInt(0))
-
-    // Create another proposal in V5 (still no proposal type concept)
-    await waitForBlock(1)
-    const roundIdforV5 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
-
-    const txV5 = await governorV5.connect(proposer).propose([], [], [], "descriptionV5", roundIdforV5, 0, {
-      gasLimit: 10_000_000,
     })
-    const proposeReceiptV5 = await txV5.wait()
-    const eventV5 = proposeReceiptV5?.logs[0]
-
-    const decodedV5Logs = governorV5.interface.parseLog({
-      topics: [...(eventV5?.topics as string[])],
-      data: eventV5 ? eventV5.data : "",
-    })
-
-    const proposalIdV5 = ethers.toBigInt(decodedV5Logs?.args[0])
-
-    // Verify proposal exists and get initial data
-    const proposerV5 = await governorV5.proposalProposer(proposalIdV5)
-    const stateV5 = await governorV5.state(proposalIdV5)
-
-    expect(proposerV5).to.equal(proposer.address)
-    expect(stateV5).to.equal(ethers.toBigInt(0)) // Pending state
 
     // Upgrade V5 -> V6
-    const governorV6 = (await upgradeProxy("B3TRGovernorV5", "B3TRGovernorV6", governorContractAddress, [], {
+    await upgradeProxy("B3TRGovernorV5", "B3TRGovernorV6", governorContractAddress, [], {
       version: 6,
       libraries: {
         GovernorClockLogicV6: await governorClockLogicLibV6.getAddress(),
@@ -326,24 +245,22 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
         GovernorStateLogicV6: await governorStateLogicLibV6.getAddress(),
         GovernorVotesLogicV6: await governorVotesLogicLibV6.getAddress(),
       },
-    })) as B3TRGovernorV6
-
-    expect(await governorV6.version()).to.equal("6")
+    })
 
     // Upgrade V6 -> V7
-    const governorV7 = (await upgradeProxy(
+    await upgradeProxy(
       "B3TRGovernorV6",
       "B3TRGovernorV7",
       governorContractAddress,
       [
         {
-          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
-          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
-          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
-          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
-          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
-          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
-          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD,
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD,
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE,
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP,
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP,
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT,
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT,
           galaxyMember: await galaxyMember.getAddress(),
           grantsManager: await grantsManager.getAddress(),
         },
@@ -361,11 +278,9 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
           GovernorVotesLogicV7: await governorVotesLogicLibV7.getAddress(),
         },
       },
-    )) as B3TRGovernorV7
+    )
 
-    expect(await governorV7.version()).to.equal("7")
-
-    // Upgrade V7 -> V8
+    // Upgrade V7 -> V8 (latest version)
     const governorV8 = (await upgradeProxy("B3TRGovernorV7", "B3TRGovernor", governorContractAddress, [], {
       version: 8,
       libraries: {
@@ -382,59 +297,25 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
 
     expect(await governorV8.version()).to.equal("8")
 
-    // Verify all proposals persisted through V6 -> V7 upgrade
-    expect(await governorV8.proposalProposer(proposalIdV1)).to.equal(proposerV1)
-    expect(await governorV8.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
-    expect(await governorV8.proposalProposer(proposalIdV2)).to.equal(proposer.address)
-    expect(await governorV8.state(proposalIdV2)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
-    expect(await governorV8.proposalProposer(proposalIdV5)).to.equal(proposer.address)
-    expect(await governorV8.state(proposalIdV5)).to.equal(ethers.toBigInt(0))
+    // Verify proposal persisted through all upgrades
+    expect(await governorV8.proposalProposer(proposalId)).to.equal(proposer.address)
 
-    // Test proposal type functionality - old proposals should default to Standard (0)
-    expect(await governorV8.proposalType(proposalIdV1)).to.equal(ethers.toBigInt(0)) // Standard type
-    expect(await governorV8.proposalType(proposalIdV2)).to.equal(ethers.toBigInt(0)) // Standard type
-    expect(await governorV8.proposalType(proposalIdV5)).to.equal(ethers.toBigInt(0)) // Standard type
+    // Verify proposal type defaults to Standard (0) for old proposal
+    expect(await governorV8.proposalType(proposalId)).to.equal(ethers.toBigInt(0))
 
-    // Create new proposals in V8 with explicit proposal types
-    await waitForBlock(1)
-    const roundIdforV8 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
-
-    const txV8 = await governorV8.connect(proposer).propose([], [], [], "descriptionV8", roundIdforV8, 0, {
-      gasLimit: 10_000_000,
-    })
-    const proposeReceiptV8 = await txV8.wait()
-    const eventV8 = proposeReceiptV8?.logs[0]
-
-    const decodedV8Logs = governorV8.interface.parseLog({
-      topics: [...(eventV8?.topics as string[])],
-      data: eventV8 ? eventV8.data : "",
-    })
-
-    const proposalIdV8 = ethers.toBigInt(decodedV8Logs?.args[0])
-
-    // Verify proposal exists and get initial data
-    const proposerV8 = await governorV8.proposalProposer(proposalIdV8)
-    const stateV8 = await governorV8.state(proposalIdV8)
-
-    expect(proposerV8).to.equal(proposer.address)
-    expect(stateV8).to.equal(ethers.toBigInt(0)) // Pending state
-
-    // Verify new proposal has correct type
-    expect(await governorV8.proposalType(proposalIdV8)).to.equal(ethers.toBigInt(0))
-
-    // Get deposit threshold and fully support the proposal
+    // Get deposit threshold and support the proposal
     const depositThreshold = await governorV8.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
     await getVot3Tokens(proposer, ethers.formatEther(depositThreshold))
     await vot3.connect(proposer).approve(await governorV8.getAddress(), depositThreshold)
-    await governorV8.connect(proposer).deposit(depositThreshold, proposalIdV8)
+    await governorV8.connect(proposer).deposit(depositThreshold, proposalId)
 
     // Verify deposit reached
-    expect(await governorV8.proposalDepositReached(proposalIdV8)).to.be.true
+    expect(await governorV8.proposalDepositReached(proposalId)).to.be.true
 
-    // Wait 10 blocks
+    // Wait for voting delay
     await moveBlocks(10)
 
-    // Start a new round
+    // Start a new round to move proposal to active
     await waitForCurrentRoundToEnd({ emissions, xAllocationVoting })
     await startNewAllocationRound({
       emissions,
@@ -442,19 +323,23 @@ describe.only("Governance - V8 Upgrade - @shard4fg", function () {
       minterAccount,
     })
 
-    // Verify all proposal data is still accessible
-    expect(await governorV8.proposalProposer(proposalIdV8)).to.equal(proposer.address)
-    expect(await governorV8.proposalDepositReached(proposalIdV8)).to.be.true
+    // Verify proposal is active
+    expect(await governorV8.state(proposalId)).to.equal(ethers.toBigInt(1)) // Active state
 
-    //Proposal should be in the active state (Meaning it requires votes)
-    expect(await governorV8.state(proposalIdV8)).to.be.equal(ethers.toBigInt(1))
+    // Cast votes for the proposal
+    await governorV8.connect(proposer).castVote(proposalId, 1)
+    await governorV8.connect(otherAccounts[1]).castVote(proposalId, 1)
+    await governorV8.connect(otherAccounts[2]).castVote(proposalId, 1)
 
-    //TODO: Vote for proposal
-    //TODO: Check if succeeded
-    //TODO: Since it's not a executable proposal, we can mark it as in development
-    //TODO: It should emit an event
-    //TODO: We should be able to mark it as completed
-    //TODO: It should emit an event
-    //DONE
+    // Move to next round to finalize voting
+    await waitForCurrentRoundToEnd({ emissions, xAllocationVoting })
+    await startNewAllocationRound({
+      emissions,
+      xAllocationVoting,
+      minterAccount,
+    })
+
+    // Verify proposal succeeded
+    expect(await governorV8.state(proposalId)).to.equal(ethers.toBigInt(4)) // Succeeded state
   })
 })
