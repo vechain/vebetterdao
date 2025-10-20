@@ -1049,6 +1049,10 @@ export async function deployAll(config: ContractsConfig) {
   await governor.connect(deployer).setGrantsManager(await grantsManager.getAddress())
   console.log("GrantsManager address set in B3TRGovernor contract")
 
+  // Grant PROPOSAL_STATE_MANAGER_ROLE to deployer in B3TRGovernor contract
+  await governor.connect(deployer).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), deployer.address)
+  console.log("PROPOSAL_STATE_MANAGER_ROLE granted to deployer in B3TRGovernor contract")
+
   //Grant GrantsManager APPROVER and REJECTOR roles to deployer
   await grantsManager.connect(deployer).grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), deployer.address)
   await grantsManager.connect(deployer).grantRole(await grantsManager.GRANTS_REJECTOR_ROLE(), deployer.address)

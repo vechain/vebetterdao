@@ -771,6 +771,10 @@ export async function deployLatest(config: ContractsConfig) {
     .then(async tx => await tx.wait())
   console.log("GrantsManager address set in Governor contract")
 
+  // Grant PROPOSAL_STATE_MANAGER_ROLE to deployer in B3TRGovernor contract
+  await governor.connect(deployer).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), deployer.address)
+  console.log("PROPOSAL_STATE_MANAGER_ROLE granted to deployer in B3TRGovernor contract")
+
   // Set up X2EarnApps contract
   await x2EarnCreator.grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
   await x2EarnCreator.grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
