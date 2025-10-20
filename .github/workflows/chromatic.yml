@@ -1,23 +1,18 @@
 name: Chromatic
 
 on:
-  push:
-    branches:
-      - main
-      - feat/**
-    paths:
-      - 'apps/frontend/**'
-      - '.github/workflows/chromatic.yml'
   pull_request:
     branches:
       - main
     paths:
-      - 'apps/frontend/**'
+      - "apps/frontend/**"
+      - ".github/workflows/chromatic.yml"
 
 jobs:
   chromatic:
     name: Run Chromatic
     runs-on: ubuntu-latest
+    if: "!startsWith(github.head_ref, 'release/')"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -48,7 +43,7 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: apps/frontend
           buildScriptName: build-storybook
-          exitZeroOnChanges: true
+          exitZeroOnChanges: false
           onlyChanged: true
           zip: true
         env:
