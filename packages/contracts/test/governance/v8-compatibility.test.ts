@@ -14,7 +14,7 @@ import {
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory } from "ethers"
 
-describe.only("Governance - V8 Compatibility - @shard4h", function () {
+describe("Governance - V8 Compatibility - @shard4h", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
