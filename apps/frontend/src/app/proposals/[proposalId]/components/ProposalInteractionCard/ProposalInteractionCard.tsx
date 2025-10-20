@@ -159,7 +159,7 @@ export const ProposalInteractionCard = ({
 
     //User has permissions to execute or queue
     if (isQueuable || isExecutable) {
-      return isQueuable || (isExecutable && currentUserCanExecute)
+      return isQueuable || currentUserCanExecute
     }
 
     return false
