@@ -44,7 +44,7 @@ jobs:
           workingDir: apps/frontend
           buildScriptName: build-storybook
           exitZeroOnChanges: false
-          onlyChanged: true
+          onlyStoryNames: ["apps/frontend/src/stories/**"]
           zip: true
         env:
           NEXT_PUBLIC_APP_ENV: staging

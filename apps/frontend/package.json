@@ -25,7 +25,6 @@
     "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
     "storybook": "NEXT_PUBLIC_APP_ENV=local storybook dev -p 6006",
     "build-storybook": "NEXT_PUBLIC_APP_ENV=staging storybook build",
-    "chromatic": "chromatic --config-file=chromatic.config.json --exit-zero-on-changes",
     "generate:schema": "npx openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
   },
   "dependencies": {
