@@ -6,16 +6,10 @@ interface IDynamicBaseAllocationPool {
   /**
    * @notice Emitted when funds are distributed to an app
    * @param appId The ID of the app
-   * @param teamWallet The team wallet address
    * @param amount The amount of funds distributed
    * @param roundId The round ID
    */
-  event FundsDistributedToApp(
-    bytes32 indexed appId,
-    address indexed teamWallet,
-    uint256 amount,
-    uint256 indexed roundId
-  );
+  event FundsDistributedToApp(bytes32 indexed appId, uint256 amount, uint256 indexed roundId);
 
   function canDistributeDBARewards(uint256 _roundId) external view returns (bool);
 

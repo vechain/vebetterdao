@@ -9,6 +9,7 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
+import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IDynamicBaseAllocationPool } from "./interfaces/IDynamicBaseAllocationPool.sol";
 
 /**
@@ -36,6 +37,7 @@ contract DBAPool is
   struct DBAPoolStorage {
     IX2EarnApps x2EarnApps;
     IXAllocationPool xAllocationPool;
+    IX2EarnRewardsPool x2EarnRewardsPool;
     IB3TR b3tr;
     uint256 distributionStartRound; // The round from which DBA rewards distribution starts
     mapping(uint256 roundId => bool) dbaRewardsDistributed; // Tracks if DBA rewards have been distributed for a round
@@ -61,16 +63,18 @@ contract DBAPool is
     address admin;
     address x2EarnApps;
     address xAllocationPool;
+    address x2earnRewardsPool;
     address b3tr;
     uint256 distributionStartRound;
   }
 
   function initialize(InitializeV1Params memory params) public initializer {
-    require(params.admin != address(0), "DynamicBaseAllocationPool: admin is the zero address");
-    require(params.x2EarnApps != address(0), "DynamicBaseAllocationPool: x2EarnApps is the zero address");
-    require(params.xAllocationPool != address(0), "DynamicBaseAllocationPool: xAllocationPool is the zero address");
-    require(params.b3tr != address(0), "DynamicBaseAllocationPool: b3tr is the zero address");
-    require(params.distributionStartRound != 0, "DynamicBaseAllocationPool: distribution start round is zero");
+    require(params.admin != address(0), "DBAPool: admin is the zero address");
+    require(params.x2EarnApps != address(0), "DBAPool: x2EarnApps is the zero address");
+    require(params.xAllocationPool != address(0), "DBAPool: xAllocationPool is the zero address");
+    require(params.x2earnRewardsPool != address(0), "DBAPool: x2EarnRewardsPool is the zero address");
+    require(params.b3tr != address(0), "DBAPool: b3tr is the zero address");
+    require(params.distributionStartRound != 0, "DBAPool: distribution start round is zero");
 
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -82,6 +86,7 @@ contract DBAPool is
     DBAPoolStorage storage $ = _getDBAPoolStorage();
     $.x2EarnApps = IX2EarnApps(params.x2EarnApps);
     $.xAllocationPool = IXAllocationPool(params.xAllocationPool);
+    $.x2EarnRewardsPool = IX2EarnRewardsPool(params.x2earnRewardsPool);
     $.b3tr = IB3TR(params.b3tr);
     $.distributionStartRound = params.distributionStartRound;
   }
@@ -132,14 +137,18 @@ contract DBAPool is
       // Validate app exists
       require($.x2EarnApps.appExists(appId), "DBAPool: app does not exist");
 
-      // Get team wallet address
-      address teamWallet = $.x2EarnApps.teamWalletAddress(appId);
-
-      // Transfer tokens
-      require($.b3tr.transfer(teamWallet, amountPerApp), "DBAPool: transfer failed");
+      // Deposit the rewards to the X2EarnRewardsPool contract
+      require(
+        $.b3tr.approve(address($.x2EarnRewardsPool), amountPerApp),
+        "DBAPool: Approval of B3TR token to x2EarnRewardsPool failed"
+      );
+      require(
+        $.x2EarnRewardsPool.deposit(amountPerApp, appId),
+        "DBAPool: Deposit of rewards allocation to x2EarnRewardsPool failed"
+      );
 
       // Emit event for each app
-      emit FundsDistributedToApp(appId, teamWallet, amountPerApp, _roundId);
+      emit FundsDistributedToApp(appId, amountPerApp, _roundId);
     }
   }
 
