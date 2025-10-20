@@ -37,12 +37,14 @@ describe("DBA Pool - @shard7b", async function () {
 
   describe("Deployment and Initialization", async function () {
     it("Contract is correctly initialized", async function () {
-      const { dynamicBaseAllocationPool, x2EarnApps, xAllocationPool, b3tr } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { dynamicBaseAllocationPool, x2EarnApps, xAllocationPool, x2EarnRewardsPool, b3tr } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       expect(await dynamicBaseAllocationPool.x2EarnApps()).to.eql(await x2EarnApps.getAddress())
       expect(await dynamicBaseAllocationPool.xAllocationPool()).to.eql(await xAllocationPool.getAddress())
+      expect(await dynamicBaseAllocationPool.x2EarnRewardsPool()).to.eql(await x2EarnRewardsPool.getAddress())
       expect(await dynamicBaseAllocationPool.b3tr()).to.eql(await b3tr.getAddress())
       expect(await dynamicBaseAllocationPool.distributionStartRound()).to.eql(1n)
 
@@ -60,7 +62,7 @@ describe("DBA Pool - @shard7b", async function () {
 
     it("Should revert if admin is set to zero address in initialization", async () => {
       const config = createLocalConfig()
-      const { b3tr, x2EarnApps, xAllocationPool } = await getOrDeployContractInstances({
+      const { b3tr, x2EarnApps, xAllocationPool, x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -71,16 +73,17 @@ describe("DBA Pool - @shard7b", async function () {
             admin: ZERO_ADDRESS,
             x2EarnApps: await x2EarnApps.getAddress(),
             xAllocationPool: await xAllocationPool.getAddress(),
+            x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
             b3tr: await b3tr.getAddress(),
             distributionStartRound: 1,
           },
         ]),
-      ).to.be.revertedWith("DynamicBaseAllocationPool: admin is the zero address")
+      ).to.be.revertedWith("DBAPool: admin is the zero address")
     })
 
     it("Should revert if x2EarnApps is set to zero address in initialization", async () => {
       const config = createLocalConfig()
-      const { owner, b3tr, xAllocationPool } = await getOrDeployContractInstances({
+      const { owner, b3tr, xAllocationPool, x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -91,16 +94,17 @@ describe("DBA Pool - @shard7b", async function () {
             admin: owner.address,
             x2EarnApps: ZERO_ADDRESS,
             xAllocationPool: await xAllocationPool.getAddress(),
+            x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
             b3tr: await b3tr.getAddress(),
             distributionStartRound: 1,
           },
         ]),
-      ).to.be.revertedWith("DynamicBaseAllocationPool: x2EarnApps is the zero address")
+      ).to.be.revertedWith("DBAPool: x2EarnApps is the zero address")
     })
 
     it("Should revert if xAllocationPool is set to zero address in initialization", async () => {
       const config = createLocalConfig()
-      const { owner, b3tr, x2EarnApps } = await getOrDeployContractInstances({
+      const { owner, b3tr, x2EarnApps, x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -111,34 +115,15 @@ describe("DBA Pool - @shard7b", async function () {
             admin: owner.address,
             x2EarnApps: await x2EarnApps.getAddress(),
             xAllocationPool: ZERO_ADDRESS,
+            x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
             b3tr: await b3tr.getAddress(),
             distributionStartRound: 1,
           },
         ]),
-      ).to.be.revertedWith("DynamicBaseAllocationPool: xAllocationPool is the zero address")
+      ).to.be.revertedWith("DBAPool: xAllocationPool is the zero address")
     })
 
-    it("Should revert if b3tr is set to zero address in initialization", async () => {
-      const config = createLocalConfig()
-      const { owner, x2EarnApps, xAllocationPool } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
-
-      await expect(
-        deployProxy("DBAPool", [
-          {
-            admin: owner.address,
-            x2EarnApps: await x2EarnApps.getAddress(),
-            xAllocationPool: await xAllocationPool.getAddress(),
-            b3tr: ZERO_ADDRESS,
-            distributionStartRound: 1,
-          },
-        ]),
-      ).to.be.revertedWith("DynamicBaseAllocationPool: b3tr is the zero address")
-    })
-
-    it("Should revert if distributionStartRound is zero in initialization", async () => {
+    it("Should revert if x2earnRewardsPool is set to zero address in initialization", async () => {
       const config = createLocalConfig()
       const { owner, b3tr, x2EarnApps, xAllocationPool } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -151,11 +136,54 @@ describe("DBA Pool - @shard7b", async function () {
             admin: owner.address,
             x2EarnApps: await x2EarnApps.getAddress(),
             xAllocationPool: await xAllocationPool.getAddress(),
+            x2earnRewardsPool: ZERO_ADDRESS,
+            b3tr: await b3tr.getAddress(),
+            distributionStartRound: 1,
+          },
+        ]),
+      ).to.be.revertedWith("DBAPool: x2EarnRewardsPool is the zero address")
+    })
+
+    it("Should revert if b3tr is set to zero address in initialization", async () => {
+      const config = createLocalConfig()
+      const { owner, x2EarnApps, xAllocationPool, x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("DBAPool", [
+          {
+            admin: owner.address,
+            x2EarnApps: await x2EarnApps.getAddress(),
+            xAllocationPool: await xAllocationPool.getAddress(),
+            x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+            b3tr: ZERO_ADDRESS,
+            distributionStartRound: 1,
+          },
+        ]),
+      ).to.be.revertedWith("DBAPool: b3tr is the zero address")
+    })
+
+    it("Should revert if distributionStartRound is zero in initialization", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, x2EarnApps, xAllocationPool, x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("DBAPool", [
+          {
+            admin: owner.address,
+            x2EarnApps: await x2EarnApps.getAddress(),
+            xAllocationPool: await xAllocationPool.getAddress(),
+            x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
             b3tr: await b3tr.getAddress(),
             distributionStartRound: 0,
           },
         ]),
-      ).to.be.revertedWith("DynamicBaseAllocationPool: distribution start round is zero")
+      ).to.be.revertedWith("DBAPool: distribution start round is zero")
     })
   })
 
@@ -292,6 +320,14 @@ describe("DBA Pool - @shard7b", async function () {
       })
 
       expect(await dynamicBaseAllocationPool.b3tr()).to.eql(await b3tr.getAddress())
+    })
+
+    it("Should return correct x2EarnRewardsPool address", async function () {
+      const { dynamicBaseAllocationPool, x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await dynamicBaseAllocationPool.x2EarnRewardsPool()).to.eql(await x2EarnRewardsPool.getAddress())
     })
 
     it("Should return correct distributionStartRound", async function () {
@@ -619,6 +655,7 @@ describe("DBA Pool - @shard7b", async function () {
         otherAccounts,
         veBetterPassport,
         creators,
+        x2EarnRewardsPool,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -669,18 +706,17 @@ describe("DBA Pool - @shard7b", async function () {
       const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
 
-      const app2TeamWallet = otherAccounts[6].address
-      const initialBalance = await b3tr.balanceOf(app2TeamWallet)
+      const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
 
-      // Distribute to single app - should receive all unallocated funds
+      // Distribute to single app - should deposit all unallocated funds to X2EarnRewardsPool
       const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
 
       await expect(tx)
         .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
-        .withArgs(app2Id, app2TeamWallet, ethers.parseEther("2800"), round1)
+        .withArgs(app2Id, ethers.parseEther("2800"), round1)
 
-      const finalBalance = await b3tr.balanceOf(app2TeamWallet)
-      expect(finalBalance - initialBalance).to.equal(ethers.parseEther("2800"))
+      const finalApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
+      expect(finalApp2Funds - initialApp2Funds).to.equal(ethers.parseEther("2800"))
       expect(await dynamicBaseAllocationPool.b3trBalance()).to.equal(0n)
       expect(await dynamicBaseAllocationPool.isDBARewardsDistributed(round1)).to.equal(true)
     })
@@ -705,6 +741,7 @@ describe("DBA Pool - @shard7b", async function () {
         otherAccounts,
         veBetterPassport,
         creators,
+        x2EarnRewardsPool,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -750,13 +787,12 @@ describe("DBA Pool - @shard7b", async function () {
       ).to.be.revertedWith("DBAPool: app does not exist")
 
       // Verify can still distribute to existing app after failed attempt
-      const app1TeamWallet = otherAccounts[5].address
-      const initialBalance = await b3tr.balanceOf(app1TeamWallet)
+      const initialApp1Funds = await x2EarnRewardsPool.availableFunds(app1Id)
 
       await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app1Id])
 
-      const finalBalance = await b3tr.balanceOf(app1TeamWallet)
-      expect(finalBalance - initialBalance).to.equal(ethers.parseEther("3500"))
+      const finalApp1Funds = await x2EarnRewardsPool.availableFunds(app1Id)
+      expect(finalApp1Funds - initialApp1Funds).to.equal(ethers.parseEther("3500"))
     })
 
     it("Should not allow distribution before all apps have claimed their rewards", async function () {
@@ -779,6 +815,7 @@ describe("DBA Pool - @shard7b", async function () {
         otherAccounts,
         veBetterPassport,
         creators,
+        x2EarnRewardsPool,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -848,13 +885,12 @@ describe("DBA Pool - @shard7b", async function () {
       expect(unallocatedAmount).to.equal(ethers.parseEther("2100"))
 
       // Now distribution should succeed
-      const app2TeamWallet = otherAccounts[6].address
-      const initialBalance = await b3tr.balanceOf(app2TeamWallet)
+      const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
 
       await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
 
-      const finalBalance = await b3tr.balanceOf(app2TeamWallet)
-      expect(finalBalance - initialBalance).to.equal(ethers.parseEther("2100"))
+      const finalApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
+      expect(finalApp2Funds - initialApp2Funds).to.equal(ethers.parseEther("2100"))
     })
 
     it("Should distribute DBA rewards when one app exceeds cap and generates unallocated funds for other eligible apps", async function () {
@@ -877,6 +913,7 @@ describe("DBA Pool - @shard7b", async function () {
         otherAccounts,
         veBetterPassport,
         creators,
+        x2EarnRewardsPool,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -962,11 +999,9 @@ describe("DBA Pool - @shard7b", async function () {
       const canDistribute = await dynamicBaseAllocationPool.canDistributeDBARewards(round1)
       expect(canDistribute).to.equal(true)
 
-      // Get initial balances of team wallets for app2 and app3
-      const app2TeamWallet = otherAccounts[6].address
-      const app3TeamWallet = otherAccounts[7].address
-      const initialApp2Balance = await b3tr.balanceOf(app2TeamWallet)
-      const initialApp3Balance = await b3tr.balanceOf(app3TeamWallet)
+      // Get initial available funds in X2EarnRewardsPool for app2 and app3
+      const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
+      const initialApp3Funds = await x2EarnRewardsPool.availableFunds(app3Id)
 
       // Distribute DBA rewards to app2 and app3 (the eligible apps)
       const eligibleApps = [app2Id, app3Id]
@@ -978,21 +1013,21 @@ describe("DBA Pool - @shard7b", async function () {
       // Verify events were emitted for each app
       await expect(tx)
         .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
-        .withArgs(app2Id, app2TeamWallet, expectedAmountPerApp, round1)
+        .withArgs(app2Id, expectedAmountPerApp, round1)
 
       await expect(tx)
         .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
-        .withArgs(app3Id, app3TeamWallet, expectedAmountPerApp, round1)
+        .withArgs(app3Id, expectedAmountPerApp, round1)
 
-      // Verify balances increased correctly
-      const finalApp2Balance = await b3tr.balanceOf(app2TeamWallet)
-      const finalApp3Balance = await b3tr.balanceOf(app3TeamWallet)
+      // Verify available funds increased correctly in X2EarnRewardsPool
+      const finalApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
+      const finalApp3Funds = await x2EarnRewardsPool.availableFunds(app3Id)
 
       // Verify both apps received their exact DBA allocation
-      expect(finalApp2Balance - initialApp2Balance).to.equal(ethers.parseEther("1050"))
-      expect(finalApp3Balance - initialApp3Balance).to.equal(ethers.parseEther("1050"))
-      expect(finalApp2Balance - initialApp2Balance).to.equal(expectedAmountPerApp)
-      expect(finalApp3Balance - initialApp3Balance).to.equal(expectedAmountPerApp)
+      expect(finalApp2Funds - initialApp2Funds).to.equal(ethers.parseEther("1050"))
+      expect(finalApp3Funds - initialApp3Funds).to.equal(ethers.parseEther("1050"))
+      expect(finalApp2Funds - initialApp2Funds).to.equal(expectedAmountPerApp)
+      expect(finalApp3Funds - initialApp3Funds).to.equal(expectedAmountPerApp)
 
       // Verify DBA pool balance is exactly 0
       expect(await dynamicBaseAllocationPool.b3trBalance()).to.equal(0n)

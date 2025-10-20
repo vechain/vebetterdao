@@ -29,12 +29,14 @@ export async function deployDBAPool() {
 
   const X2_EARN_APPS_ADDRESS = envConfig.x2EarnAppsContractAddress
   const X_ALLOCATION_POOL_ADDRESS = envConfig.xAllocationPoolContractAddress
+  const X2_EARN_REWARDS_POOL_ADDRESS = envConfig.x2EarnRewardsPoolContractAddress
   const B3TR_CONTRACT_ADDRESS = envConfig.b3trContractAddress
   const DISTRIBUTION_START_ROUND = 68
 
   console.log("Deploying proxy for DBA Pool with params:")
   console.log("X2EarnApps Address: ", X2_EARN_APPS_ADDRESS)
   console.log("XAllocationPool Address: ", X_ALLOCATION_POOL_ADDRESS)
+  console.log("X2EarnRewardsPool Address: ", X2_EARN_REWARDS_POOL_ADDRESS)
   console.log("B3TR Contract Address: ", B3TR_CONTRACT_ADDRESS)
   console.log("Distribution Start Round: ", DISTRIBUTION_START_ROUND)
 
@@ -43,6 +45,7 @@ export async function deployDBAPool() {
       admin: TEMP_ADMIN,
       x2EarnApps: X2_EARN_APPS_ADDRESS,
       xAllocationPool: X_ALLOCATION_POOL_ADDRESS,
+      x2earnRewardsPool: X2_EARN_REWARDS_POOL_ADDRESS,
       b3tr: B3TR_CONTRACT_ADDRESS,
       distributionStartRound: DISTRIBUTION_START_ROUND,
     },
@@ -53,12 +56,14 @@ export async function deployDBAPool() {
   console.log("Checking that params are set correctly")
   const x2EarnApps = await dbaPool.x2EarnApps()
   const xAllocationPool = await dbaPool.xAllocationPool()
+  const x2EarnRewardsPool = await dbaPool.x2EarnRewardsPool()
   const b3tr = await dbaPool.b3tr()
   const distributionStartRound = await dbaPool.distributionStartRound()
 
   if (
     x2EarnApps.toLowerCase() !== X2_EARN_APPS_ADDRESS.toLowerCase() ||
     xAllocationPool.toLowerCase() !== X_ALLOCATION_POOL_ADDRESS.toLowerCase() ||
+    x2EarnRewardsPool.toLowerCase() !== X2_EARN_REWARDS_POOL_ADDRESS.toLowerCase() ||
     b3tr.toLowerCase() !== B3TR_CONTRACT_ADDRESS.toLowerCase() ||
     distributionStartRound !== BigInt(DISTRIBUTION_START_ROUND)
   ) {

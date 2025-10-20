@@ -1158,6 +1158,7 @@ export const getOrDeployContractInstances = async ({
       admin: owner.address,
       x2EarnApps: await x2EarnApps.getAddress(),
       xAllocationPool: await xAllocationPool.getAddress(),
+      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
       b3tr: await b3tr.getAddress(),
       distributionStartRound: 1,
     },

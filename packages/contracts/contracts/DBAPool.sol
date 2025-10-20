@@ -248,6 +248,15 @@ contract DBAPool is
   }
 
   /**
+   * @notice Gets the X2EarnRewardsPool contract
+   * @return The contract interface
+   */
+  function x2EarnRewardsPool() external view returns (IX2EarnRewardsPool) {
+    DBAPoolStorage storage $ = _getDBAPoolStorage();
+    return $.x2EarnRewardsPool;
+  }
+
+  /**
    * @notice Gets the contract version
    * @return The version string
    */

@@ -932,6 +932,7 @@ export async function deployAll(config: ContractsConfig) {
       admin: TEMP_ADMIN, // admin
       x2EarnApps: await x2EarnApps.getAddress(),
       xAllocationPool: await xAllocationPool.getAddress(),
+      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
       b3tr: await b3tr.getAddress(),
       distributionStartRound: 1, // startRound
     },
