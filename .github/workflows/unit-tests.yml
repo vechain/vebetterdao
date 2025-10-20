@@ -119,17 +119,19 @@ jobs:
           - shard: shard4a
             label: Governor & TimeLock
           - shard: shard4b
-            label: Governance - Voting Power
+            label: Governance - Voting power with proposal deposit
           - shard: shard4c
             label: Governance - Milestone Creation
           - shard: shard4d
             label: Governance - Proposer Requirement
           - shard: shard4e
-            label: Governance - Compatibility & Thresholds
+            label: Governance - V7 Compatibility & Thresholds
           - shard: shard4f
             label: Governance - V7 Upgrade
           - shard: shard4g
             label: Governance - V8 Upgrade
+          - shard: shard4h
+            label: Governance - V8 Compatibility
           - shard: shard5
             label: Node Management
           - shard: shard6
