@@ -534,7 +534,9 @@ library GovernorProposalLogic {
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Canceled) ^
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) ^
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment) ^
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed) ^
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.DepositNotMet) ^
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Defeated)
     );
 
     if (account == proposalProposer(self, proposalId)) {
