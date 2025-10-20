@@ -14,7 +14,7 @@ import {
 } from "../../helpers/common"
 import { setupProposer, setupSupporter, setupVoter } from "../fixture.test"
 
-describe("GrantsManager - V2 Upgrade - @shard4g", function () {
+describe("GrantsManager - V2 Upgrade - @shard4i", function () {
   it("Should preserve grant proposal data through V1 -> V2 upgrade with Governor V7 -> V8 upgrade", async () => {
     const config = createLocalConfig()
     const {
