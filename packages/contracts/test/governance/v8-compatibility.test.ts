@@ -366,7 +366,7 @@ describe("Governance - V8 Compatibility - @shard4h", function () {
       )
 
       //Mark the proposal as in development
-      await governor.markAsInDevelopment(proposalId)
+      await governor.connect(owner).markAsInDevelopment(proposalId)
 
       //Proposal should be in in development state
       const stateBeforeCancel = await governor.state(proposalId)
@@ -443,10 +443,10 @@ describe("Governance - V8 Compatibility - @shard4h", function () {
       )
 
       //Mark the proposal as in development
-      await governor.markAsInDevelopment(proposalId)
+      await governor.connect(owner).markAsInDevelopment(proposalId)
 
       //Mark the proposal as completed
-      await governor.markAsCompleted(proposalId)
+      await governor.connect(owner).markAsCompleted(proposalId)
 
       //Proposal should be in completed state
       const stateBeforeCancel = await governor.state(proposalId)
