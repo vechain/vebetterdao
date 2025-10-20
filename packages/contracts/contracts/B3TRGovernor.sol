@@ -100,6 +100,8 @@ contract B3TRGovernor is
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   /// @notice The role that can execute a proposal
   bytes32 public constant PROPOSAL_EXECUTOR_ROLE = keccak256("PROPOSAL_EXECUTOR_ROLE");
+  /// @notice The role that can mark a proposal in development/completed state
+  bytes32 public constant PROPOSAL_STATE_MANAGER_ROLE = keccak256("PROPOSAL_STATE_MANAGER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -1036,7 +1038,7 @@ contract B3TRGovernor is
    * @notice Mark a proposal as in development
    * @param proposalId The id of the proposal
    */
-  function markAsInDevelopment(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_EXECUTOR_ROLE) {
+  function markAsInDevelopment(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_STATE_MANAGER_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorProposalLogic.markAsInDevelopment($, proposalId);
   }
@@ -1045,7 +1047,7 @@ contract B3TRGovernor is
    * @notice Mark a proposal as completed
    * @param proposalId The id of the proposal
    */
-  function markAsCompleted(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_EXECUTOR_ROLE) {
+  function markAsCompleted(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_STATE_MANAGER_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorProposalLogic.markAsCompleted($, proposalId);
   }
