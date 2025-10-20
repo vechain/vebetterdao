@@ -209,6 +209,11 @@ export async function setupVoter(
   expect(await veBetterPassport.isPerson(voter.address)).to.deep.equal([true, "User is whitelisted"])
 }
 
+export async function setupSupporter(supporter: SignerWithAddress, vot3: VOT3, amount: bigint, governor: B3TRGovernor) {
+  await getVot3Tokens(supporter, ethers.formatEther(amount))
+  await vot3.connect(supporter).approve(await governor.getAddress(), amount)
+}
+
 export async function startNewRoundAndGetRoundId(
   emissions: Emissions,
   xAllocationVoting: XAllocationVoting,
