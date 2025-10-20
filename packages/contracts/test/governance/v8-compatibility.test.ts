@@ -3,7 +3,7 @@ import { ethers } from "hardhat"
 import { describe, it } from "mocha"
 
 import { B3TR, B3TRGovernor, Emissions, VeBetterPassport, VOT3, XAllocationVoting } from "../../typechain-types"
-import { createProposal, getProposalIdFromTx, getVot3Tokens, waitForCurrentRoundToEnd } from "../helpers/common"
+import { createProposal, getProposalIdFromTx, waitForCurrentRoundToEnd } from "../helpers/common"
 import {
   setupGovernanceFixtureWithEmissions,
   setupProposer,
