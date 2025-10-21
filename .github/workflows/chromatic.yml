@@ -1,18 +1,13 @@
 name: Chromatic
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
-    paths:
-      - "apps/frontend/**"
-      - ".github/workflows/chromatic.yml"
   push:
     branches:
       - main
-    paths:
-      - "apps/frontend/**"
-      - ".github/workflows/chromatic.yml"
+  workflow_dispatch:
 
 jobs:
   chromatic:
@@ -24,6 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Use Node v20
         uses: actions/setup-node@v3
@@ -50,6 +46,7 @@ jobs:
           workingDir: apps/frontend
           buildScriptName: build-storybook
           exitZeroOnChanges: false
+          autoAcceptChanges: "main"
           onlyStoryNames: "apps/frontend/src/stories/**"
           zip: true
         env:
