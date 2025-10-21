@@ -15,12 +15,9 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
-  TokenAuction,
-  StargateNFT,
-  StargateDelegation,
-  NodeManagementV3,
   GrantsManager,
   RelayerRewardsPool,
+  GrantsManagerV1,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -125,6 +122,15 @@ export async function deployAll(config: ContractsConfig) {
     GovernorVotesLogicLibV6,
     GovernorDepositLogicLibV6,
     GovernorStateLogicLibV6,
+    GovernorClockLogicLibV7,
+    GovernorConfiguratorLibV7,
+    GovernorDepositLogicLibV7,
+    GovernorFunctionRestrictionsLogicLibV7,
+    GovernorProposalLogicLibV7,
+    GovernorQuorumLogicLibV7,
+    GovernorStateLogicLibV7,
+    GovernorVotesLogicLibV7,
+    GovernorGovernanceLogicLibV7,
   } = await governanceLibraries()
 
   if (
@@ -797,6 +803,7 @@ export async function deployAll(config: ContractsConfig) {
       "B3TRGovernorV4",
       "B3TRGovernorV5",
       "B3TRGovernorV6",
+      "B3TRGovernorV7",
       "B3TRGovernor",
     ],
     [
@@ -839,9 +846,10 @@ export async function deployAll(config: ContractsConfig) {
           grantsManager: TEMP_ADMIN, //GrantsManager contract
         },
       ],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -902,6 +910,16 @@ export async function deployAll(config: ContractsConfig) {
           GovernorQuorumLogicV6: await GovernorQuorumLogicLibV6.getAddress(),
           GovernorStateLogicV6: await GovernorStateLogicLibV6.getAddress(),
           GovernorVotesLogicV6: await GovernorVotesLogicLibV6.getAddress(),
+        },
+        {
+          GovernorClockLogicV7: await GovernorClockLogicLibV7.getAddress(),
+          GovernorConfiguratorV7: await GovernorConfiguratorLibV7.getAddress(),
+          GovernorDepositLogicV7: await GovernorDepositLogicLibV7.getAddress(),
+          GovernorFunctionRestrictionsLogicV7: await GovernorFunctionRestrictionsLogicLibV7.getAddress(),
+          GovernorProposalLogicV7: await GovernorProposalLogicLibV7.getAddress(),
+          GovernorQuorumLogicV7: await GovernorQuorumLogicLibV7.getAddress(),
+          GovernorStateLogicV7: await GovernorStateLogicLibV7.getAddress(),
+          GovernorVotesLogicV7: await GovernorVotesLogicLibV7.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
