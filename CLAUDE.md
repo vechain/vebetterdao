@@ -154,3 +154,4 @@ MCP servers configured in `.mcp.json`:
 2. Use Figma MCP tools to get code/variables from designs
 3. Map Figma components to codebase with Code Connect
 4. Generate UI code matching design system
+5. Use uppercase for hex colors.

@@ -100,7 +100,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     return [
       {
         label: t("Approval phase"),
-        state: [ProposalState.Active],
+        state: [ProposalState.Active, ProposalState.Succeeded],
         description: timelineDates.hasValidDates
           ? t("Round #{{roundId}}: {{dateString}}", {
               roundId: Number(proposalVotingRoundId),
