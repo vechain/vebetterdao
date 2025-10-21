@@ -49,6 +49,5 @@ jobs:
           autoAcceptChanges: "main"
           onlyStoryNames: "apps/frontend/src/stories/**"
           zip: true
-          autoAcceptChanges: "main"
         env:
           NEXT_PUBLIC_APP_ENV: staging
