@@ -301,6 +301,16 @@ contract DBAPool is
   }
 
   /**
+   * @notice Updates the X2EarnRewardsPool contract
+   * @param _x2EarnRewardsPool The new contract interface
+   */
+  function setX2EarnRewardsPool(IX2EarnRewardsPool _x2EarnRewardsPool) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(address(_x2EarnRewardsPool) != address(0), "DBAPool: zero address");
+    DBAPoolStorage storage $ = _getDBAPoolStorage();
+    $.x2EarnRewardsPool = _x2EarnRewardsPool;
+  }
+
+  /**
    * @notice Updates the distribution start round
    * @param _distributionStartRound The new distribution start round
    */

@@ -476,6 +476,38 @@ describe("DBA Pool - @shard7b", async function () {
       })
     })
 
+    describe("setX2EarnRewardsPool", () => {
+      it("Admin should be able to update x2EarnRewardsPool", async function () {
+        const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newAddress = ethers.Wallet.createRandom().address
+        await dynamicBaseAllocationPool.connect(owner).setX2EarnRewardsPool(newAddress)
+
+        expect(await dynamicBaseAllocationPool.x2EarnRewardsPool()).to.eql(newAddress)
+      })
+
+      it("Non-admin should not be able to update x2EarnRewardsPool", async function () {
+        const { dynamicBaseAllocationPool, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newAddress = ethers.Wallet.createRandom().address
+        await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).setX2EarnRewardsPool(newAddress))
+      })
+
+      it("Should revert if x2EarnRewardsPool is set to zero address", async function () {
+        const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        await expect(dynamicBaseAllocationPool.connect(owner).setX2EarnRewardsPool(ZERO_ADDRESS)).to.be.revertedWith(
+          "DBAPool: zero address",
+        )
+      })
+    })
+
     describe("setDistributionStartRound", () => {
       it("Admin should be able to update distributionStartRound", async function () {
         const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
@@ -1085,6 +1117,9 @@ describe("DBA Pool - @shard7b", async function () {
       await catchRevert(
         dynamicBaseAllocationPool.connect(otherAccount).setXAllocationPool(ethers.Wallet.createRandom().address),
       )
+      await catchRevert(
+        dynamicBaseAllocationPool.connect(otherAccount).setX2EarnRewardsPool(ethers.Wallet.createRandom().address),
+      )
       await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).setDistributionStartRound(5))
 
       // Test distributor function
@@ -1102,6 +1137,9 @@ describe("DBA Pool - @shard7b", async function () {
         "DBAPool: zero address",
       )
       await expect(dynamicBaseAllocationPool.connect(owner).setXAllocationPool(ZERO_ADDRESS)).to.be.revertedWith(
+        "DBAPool: zero address",
+      )
+      await expect(dynamicBaseAllocationPool.connect(owner).setX2EarnRewardsPool(ZERO_ADDRESS)).to.be.revertedWith(
         "DBAPool: zero address",
       )
 
