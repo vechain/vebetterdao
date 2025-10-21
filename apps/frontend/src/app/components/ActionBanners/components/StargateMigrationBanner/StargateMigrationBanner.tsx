@@ -20,7 +20,7 @@ export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
           ? t("Migrate your legacy node to discover the new stargate universe !")
           : t("Start staking VET to explore the new stargate universe !")
       }
-      logoSrc="/assets/images/b3mo-stargate.svg"
+      illustration="/assets/images/b3mo-stargate.svg"
       cta={
         <Button variant="primary" onClick={GOTOSTARGATE}>
           {t("Explore")}

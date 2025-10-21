@@ -5,7 +5,7 @@ import { cloneElement } from "react"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 const meta = {
-  title: "b3tr/components/Banner",
+  title: "design-system/components/Banner",
   component: GenericBanner,
 } satisfies Meta<typeof GenericBanner>
 

@@ -28,7 +28,7 @@ export const DelegatingBanner = () => {
         variant="info"
         title={t("Voting Power Delegated").toUpperCase()}
         description={description}
-        logoSrc="/assets/logos/veDelegate.svg"
+        illustration="/assets/logos/veDelegate.svg"
         cta={
           <Button variant="secondary" onClick={whatIsVeDelegate}>
             <Icon as={UilInfoCircle} />

@@ -16,7 +16,7 @@ export const CreatorApplicationApprovedBanner = () => {
       variant="info"
       title={t("CREATOR'S NFT RECEIVED")}
       description={t("Your Creator application was approved. Submit your app!")}
-      logoSrc="/assets/images/creator-nft.webp"
+      illustration="/assets/images/creator-nft.webp"
       cta={
         <Button onClick={navigateToSubmitAppForm} variant="primary">
           <Icon as={UilArrowRight} color="white" />

@@ -13,10 +13,10 @@ export const CreatorApplicationRejectedBanner = () => {
   }
   return (
     <GenericBanner
-      variant="warning"
+      variant="info"
       title={t("CREATOR APPLICATION REJECTED")}
       description={t("Your Creator's NFT application was rejected")}
-      logoSrc="/assets/mascot/mascot-warning-head.webp"
+      illustration="/assets/mascot/mascot-warning-head.webp"
       cta={
         <Button onClick={navigateToCreatorForm} variant="primary">
           <Icon as={UilArrowRight} color="white" />

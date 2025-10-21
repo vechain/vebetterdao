@@ -52,7 +52,7 @@ export const UserSignaledBanner = () => {
   return (
     <>
       <GenericBanner
-        variant="warning"
+        variant="info"
         title={t("You have been signalled").toUpperCase()}
         description={
           <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold">
@@ -63,7 +63,7 @@ export const UserSignaledBanner = () => {
             )}
           </Text>
         }
-        logoSrc="/assets/icons/info-bell.webp"
+        illustration="/assets/icons/info-bell.webp"
         cta={
           <Button variant="secondary" onClick={onOpen}>
             {t("Appeal here")}

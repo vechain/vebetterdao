@@ -14,11 +14,12 @@ export const CastVoteBanner = () => {
   const handleVote = useCallback(() => {
     router.push(`/rounds/${roundId}/vote`)
   }, [router, roundId])
+
   return (
     <GenericBanner
-      variant="warning"
+      variant="info"
       title={t("CAST YOUR VOTE NOW! ⚖️")}
-      logoSrc="/assets/icons/vote-icon.webp"
+      illustration="/assets/icons/vote-icon.webp"
       description={t("It’s time to make your voice heard in this round and earn exciting rewards!")}
       cta={
         <Button variant="primary" onClick={handleVote}>

@@ -9,7 +9,7 @@ export const CreatorApplicationUnderReviewBanner = () => {
       variant="info"
       title={t("CREATOR APPLICATION UNDER REVIEW")}
       description={t("Your Creator's NFT application is currently under review.")}
-      logoSrc="/assets/images/creator-nft.webp"
+      illustration="/assets/images/creator-nft.webp"
     />
   )
 }

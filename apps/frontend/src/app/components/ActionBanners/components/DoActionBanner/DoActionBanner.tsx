@@ -21,10 +21,10 @@ export const DoActionBanner = () => {
   return (
     <>
       <GenericBanner
-        variant="warning"
+        variant="info"
         title={t("TIME TO STEP UP! 🏃🏼‍♂️")}
         description={description}
-        logoSrc="/assets/icons/info-bell.webp"
+        illustration="/assets/icons/info-bell.webp"
         cta={
           <Button variant="primary" onClick={doActionModal.onOpen}>
             <UilInfoCircle />

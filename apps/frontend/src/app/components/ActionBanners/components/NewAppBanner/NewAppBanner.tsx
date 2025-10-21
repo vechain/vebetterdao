@@ -45,7 +45,7 @@ export const NewAppBanner = () => {
       variant="info"
       title={t("NEW APP AVAILABLE")}
       description={description}
-      logoSrc="/assets/icons/new-app-gold.svg"
+      illustration="/assets/icons/new-app-gold.svg"
       cta={
         <Button onClick={GOTOAPPS} variant="primary">
           {t("Explore")}

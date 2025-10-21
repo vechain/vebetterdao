@@ -32,7 +32,7 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Prop
     <GenericBanner
       variant="info"
       title={t("CLAIM YOUR REWARDS")}
-      logoSrc="/assets/icons/claim-b3tr-icon.webp"
+      illustration="/assets/icons/claim-b3tr-icon.webp"
       description={
         hasGMRewards
           ? t("Congratulations! You have B3TR to claim for casting your vote in governance and holding GM.")
