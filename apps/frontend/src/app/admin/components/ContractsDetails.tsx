@@ -112,6 +112,11 @@ export const ContractsDetails = () => {
         address={config.relayerRewardsPoolContractAddress}
         roles={getContractByAddress(config.relayerRewardsPoolContractAddress)?.roles}
       />
+      <ContractDetailsCard
+        title="Dynamic Base Allocation Pool"
+        address={config.dbaPoolContractAddress}
+        roles={getContractByAddress(config.dbaPoolContractAddress)?.roles}
+      />
     </Grid>
   )
 }
@@ -152,7 +157,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
   }))
 
   return (
-    <Card.Root variant="primary" w="full" borderRadius={"2xl"}>
+    <Card.Root variant="elevated" w="full" borderRadius={"2xl"}>
       <Card.Header>
         <Heading size={"md"}>{title}</Heading>
       </Card.Header>
