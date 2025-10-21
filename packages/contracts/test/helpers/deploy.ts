@@ -1025,7 +1025,7 @@ export const getOrDeployContractInstances = async ({
   // Deploy GrantsManager V1 first
   const grantsManagerV1 = (await deployProxy("GrantsManagerV1", [
     // ← Change to GrantsManagerV1
-    await TEMP_GOVERNOR_ADDRESS, // governor address
+    TEMP_GOVERNOR_ADDRESS, // governor address
     await treasury.getAddress(), // treasury address
     owner.address, // admin
     await b3tr.getAddress(), // b3tr address
