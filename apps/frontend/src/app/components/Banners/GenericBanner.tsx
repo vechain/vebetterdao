@@ -1,26 +1,25 @@
-import { Card, Image, Heading, Text, TextProps } from "@chakra-ui/react"
+import { Card, Image, Heading, Text, Box, CloseButton, Flex, CardRootProps } from "@chakra-ui/react"
 import { ReactNode } from "react"
 
-type BannerType = "info" | "success" | "warning"
+type BannerVariant = "info" | "success"
+type BannerSize = "S" | "M" | "L"
 
-const bannerColors: Record<
-  BannerType,
-  {
-    bg: Card.RootProps["bg"]
-    color: TextProps["color"]
-  }
-> = {
+interface BannerConfig {
+  bg: string
+  illustration: string
+  bgImage: string
+}
+
+const variantConfig: Record<BannerVariant, BannerConfig> = {
   info: {
     bg: "banner.blue",
-    color: "status.info.strong",
+    illustration: "/assets/images/grants/step-1.webp",
+    bgImage: "/assets/backgrounds/blue-cloud-full.webp",
   },
   success: {
     bg: "banner.green",
-    color: "status.positive.strong",
-  },
-  warning: {
-    bg: "banner.yellow",
-    color: "status.warning.strong",
+    illustration: "/assets/mascot/mascot-welcoming.webp",
+    bgImage: "/assets/backgrounds/community-green-blob.webp",
   },
 }
 
@@ -28,46 +27,112 @@ export const GenericBanner = ({
   variant,
   title,
   description,
-  logoSrc,
   cta,
+  size = "M",
+  onClose,
+  illustration,
 }: {
-  variant: BannerType
+  variant: BannerVariant
   title: string
   description: ReactNode
-  logoSrc?: string
   cta?: ReactNode
+  size?: BannerSize
+  onClose?: () => void
+  illustration?: string
 }) => {
+  const config = variantConfig[variant]
+
+  const paddings: Record<BannerSize, CardRootProps["p"]> = {
+    S: "4", // 16px
+    M: "6", // 24px
+    L: "10", // 40px
+  }
+
+  const titleSizes = {
+    S: "md",
+    M: "xl",
+    L: "2xl",
+  }
+
+  const descSizes = {
+    S: "sm",
+    M: "sm",
+    L: "md",
+  }
+
+  const gaps = {
+    S: "2",
+    M: "6",
+    L: "6",
+  }
+
   return (
     <Card.Root
       flex={1}
       w="full"
       h="full"
       borderRadius="xl"
-      flexDirection={{ base: "column", md: "row" }}
-      alignItems={{ base: "flex-start", md: "center" }}
-      gap="4"
       overflow="hidden"
-      bg={bannerColors[variant].bg}
-      px="6"
-      py="4">
-      <Image hideBelow="md" src={logoSrc} alt="logo" objectFit="cover" w="24" h="24" />
-      <Card.Body gap={{ base: "2", md: "0" }}>
-        <Card.Title>
-          <Text textStyle="sm" color={bannerColors[variant].color}>
+      bg={config.bg}
+      border="sm"
+      borderColor="border.secondary"
+      position="relative"
+      p={paddings[size]}>
+      <Box
+        position="absolute"
+        top="0"
+        bottom="0"
+        right="0"
+        // inset={"-14.19% -25.62% -18.8% -27.72%"}
+        display="flex"
+        alignItems="center"
+        justifyContent="center">
+        <Box w={"405.505px"} h={"426.178px"} transform={"rotate(150deg)"}>
+          <Image src={config.bgImage} alt="" w="full" h="full" objectFit="cover" opacity={{ base: 0.8, _dark: 0.4 }} />
+        </Box>
+      </Box>
+
+      <Flex
+        position="absolute"
+        right={{ base: "20px", md: "40px" }}
+        top="50%"
+        transform="translateY(-50%)"
+        w="140px"
+        h="140px"
+        zIndex={1}>
+        <Image src={illustration || config.illustration} alt="" w="full" h="full" objectFit="contain" />
+      </Flex>
+
+      {onClose && (
+        <CloseButton
+          onClick={onClose}
+          position="absolute"
+          top="4"
+          right="4"
+          size="2xs"
+          bgColor="white"
+          color="black"
+          zIndex={2}
+          _hover={{ opacity: 0.8 }}
+          transition="all 0.2s"
+        />
+      )}
+
+      <Flex position="relative" zIndex={1} flex={1} flexDirection="column" gap={gaps[size]} maxW="60%">
+        <Box display="flex" flexDirection="column" gap="2">
+          <Heading size={titleSizes[size] as any} fontWeight="bold" color="text.default">
             {title}
-          </Text>
-        </Card.Title>
-        <Card.Description display="flex" alignItems="center" gap="1">
+          </Heading>
           {typeof description === "string" ? (
-            <Heading size={{ base: "lg", md: "2xl" }} color="text.default" fontWeight="bold" lineClamp={3}>
+            <Text textStyle={descSizes[size]} color="text.subtle">
               {description}
-            </Heading>
+            </Text>
           ) : (
             description
           )}
-        </Card.Description>
-      </Card.Body>
-      {cta && <Card.Footer>{cta}</Card.Footer>}
+        </Box>
+        {cta && <Box>{cta}</Box>}
+      </Flex>
     </Card.Root>
   )
 }

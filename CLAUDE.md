@@ -6,6 +6,7 @@ Sacrifice grammar for concision.
 ## PR Creation
 
 When I say "PR" (uppercase):
+
 - **ALWAYS push commits first**: `git push -u origin <branch>`
 - Then run: `gh pr create -a="@me" -B main -r vechain/b3tr`
 - Description: Bare minimum necessary info only
@@ -126,6 +127,8 @@ MCP servers configured in `.mcp.json`:
 - Integrated with Storybook dev server via `@storybook/addon-mcp`
 
 # Component Development
+
+- DO NOT use comments during development
 
 ## Chakra UI v3
 

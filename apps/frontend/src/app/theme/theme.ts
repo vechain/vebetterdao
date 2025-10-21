@@ -243,8 +243,8 @@ const config = defineConfig({
           tertiary: { value: { base: "#F5F5F5", _dark: "#262626" } },
         },
         banner: {
-          blue: { value: { base: "{colors.blue.200}", _dark: "{colors.blue.900}" } },
-          green: { value: { base: "#B1F16C", _dark: "#383F31" } },
+          blue: { value: { base: "{colors.blue.50}", _dark: "{colors.blue.900}" } },
+          green: { value: { base: "#B1F16C", _dark: "#0E3A02" } },
           yellow: { value: { base: "#FFD979", _dark: "#54441A" } },
           "dashboard-tokens": { value: { base: "#0153F2", _dark: "{colors.blue.900}" } },
         },
