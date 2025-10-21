@@ -1,5 +1,6 @@
 // Zustand to save the selected filters for the proposals
 import { create } from "zustand"
+
 export enum ProposalFilter {
   State = "State",
   InThisRound = "In this round",
@@ -9,6 +10,7 @@ export enum ProposalFilter {
   SupportPhase = "Support phase",
   StandardProposalCompleted = "Standard proposal completed",
   FailedStates = "Failed states",
+  InDevelopment = "In development or queued",
 }
 export enum StateFilter {
   Canceled = "Canceled",

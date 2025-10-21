@@ -59,7 +59,7 @@ enum GrantsStep {
 const DEFAULT_FILTERS = [
   ProposalFilter.ApprovalPhase,
   ProposalFilter.SupportPhase,
-  StateFilter.InDevelopment,
+  ProposalFilter.InDevelopment,
   StateFilter.Completed,
 ]
 
@@ -75,7 +75,7 @@ export const GrantsPageContent = () => {
       items: [
         { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
         { label: t("Support phase"), value: ProposalFilter.SupportPhase },
-        { label: t("In development"), value: StateFilter.InDevelopment },
+        { label: t("In development"), value: ProposalFilter.InDevelopment },
         { label: t("Completed"), value: StateFilter.Completed },
         { label: t("Cancelled"), value: ProposalFilter.FailedStates },
       ],
