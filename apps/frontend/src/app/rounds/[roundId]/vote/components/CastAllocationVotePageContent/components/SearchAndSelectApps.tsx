@@ -15,23 +15,25 @@ type Props = {
   onSelectedAppsChange: (_selectedApps: CastAllocationVoteFormData[]) => void
   xApps?: XApp[]
   isLoading?: boolean
+  maxSelections?: number
 }
 const searchApp = (app: XApp, query: string) => {
   return app.name.toLowerCase().includes(query.toLowerCase())
 }
-export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps, isLoading }: Props) => {
+export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps, isLoading, maxSelections }: Props) => {
   const { t } = useTranslation()
   const [appsToSearch, setAppsToSearch] = useState("")
   const onCheckboxChange = useCallback(
     (checked: boolean) => {
       if (!xApps) return
       if (checked) {
-        const data = xApps.map(xApp => ({ appId: xApp.id, ...splitEvenly(xApps.length) }))
+        const appsToSelect = maxSelections ? xApps.slice(0, maxSelections) : xApps
+        const data = appsToSelect.map(xApp => ({ appId: xApp.id, ...splitEvenly(appsToSelect.length) }))
         return onSelectedAppsChange(data)
       }
       return onSelectedAppsChange([])
     },
-    [onSelectedAppsChange, xApps],
+    [onSelectedAppsChange, xApps, maxSelections],
   )
   const isSelectAllChecked = useMemo(() => {
     if (!xApps) return false
@@ -72,18 +74,29 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
         ) : (
           filteredApps.map(xApp => {
             const isSelected = selectedApps.some(selectedApp => selectedApp.appId === xApp.id)
+            const isAtLimit = maxSelections !== undefined && selectedApps.length >= maxSelections
             const onSelect = () => {
               if (isSelected) {
                 const newApps = selectedApps.filter(selectedApp => selectedApp.appId !== xApp.id)
                 const newAppsWithPercentages = newApps.map(app => ({ ...app, ...splitEvenly(newApps.length) }))
                 onSelectedAppsChange(newAppsWithPercentages)
               } else {
+                // Prevent selecting if at limit
+                if (isAtLimit) return
                 const newApps = [...selectedApps, { appId: xApp.id, value: 0, rawValue: 0 }]
                 const newAppsWithPercentages = newApps.map(app => ({ ...app, ...splitEvenly(newApps.length) }))
                 onSelectedAppsChange(newAppsWithPercentages)
               }
             }
-            return <AppSelectableCard key={xApp.id} app={xApp} isSelected={isSelected} onSelect={onSelect} />
+            return (
+              <AppSelectableCard
+                key={xApp.id}
+                app={xApp}
+                isSelected={isSelected}
+                onSelect={onSelect}
+                disabled={!isSelected && isAtLimit}
+              />
+            )
           })
         )}
       </VStack>

@@ -10,9 +10,10 @@ type Props = {
   app: XApp
   isSelected: boolean
   onSelect: () => void
+  disabled?: boolean
 }
 
-export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
+export const AppSelectableCard = ({ app, isSelected, onSelect, disabled }: Props) => {
   const { data: appMetadata } = useXAppMetadata(app.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
@@ -23,7 +24,9 @@ export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
       borderColor="border.primary"
       checked={isSelected}
       onCheckedChange={() => onSelect()}
-      cursor="pointer">
+      cursor={disabled ? "not-allowed" : "pointer"}
+      disabled={disabled}
+      opacity={disabled ? 0.5 : 1}>
       <CheckboxCard.HiddenInput />
       <CheckboxCard.Control alignItems="center">
         <CheckboxCard.Label>

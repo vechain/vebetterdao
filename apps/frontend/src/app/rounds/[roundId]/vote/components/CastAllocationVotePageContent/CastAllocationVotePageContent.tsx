@@ -1,5 +1,5 @@
 "use client"
-import { Card, Heading, Text, VStack } from "@chakra-ui/react"
+import { Alert, Card, Heading, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useMemo, useState, useEffect } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -14,7 +14,10 @@ import {
 import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { CastAllocationControlsBottomBar } from "../CastAllocationControlsBottomBar"
 
+import { AutomationCard } from "./components/AutomationCard"
 import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
+
+const MAX_AUTOMATED_APPS_SELECTION = 2
 
 type Props = {
   roundId: string
@@ -38,6 +41,19 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
       })
   }, [selectedApps, xAppsQuery])
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
+  const [isAutomationEnabled, setIsAutomationEnabled] = useState(false)
+
+  const handleAutomationChange = useCallback(
+    (enabled: boolean) => {
+      setIsAutomationEnabled(enabled)
+      // If automation is enabled and user has more apps selected than the limit, trim to max
+      if (enabled && selectedApps.length > MAX_AUTOMATED_APPS_SELECTION) {
+        onSelectedAppsChange(selectedApps.slice(0, MAX_AUTOMATED_APPS_SELECTION))
+      }
+    },
+    [selectedApps, onSelectedAppsChange],
+  )
+
   const handleOnSelectedAppsChange = useCallback(
     (data: CastAllocationVoteFormData[]) => {
       setOnContinueError(null)
@@ -82,12 +98,25 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           )}
         </Text>
 
+        <AutomationCard isAutomationEnabled={isAutomationEnabled} onAutomationChange={handleAutomationChange} />
+
         <SearchAndSelectApps
           selectedApps={parsedVotes}
           onSelectedAppsChange={handleOnSelectedAppsChange}
           xApps={xAppsQuery.data}
           isLoading={xAppsQuery.isLoading}
+          maxSelections={isAutomationEnabled ? MAX_AUTOMATED_APPS_SELECTION : undefined}
         />
+
+        {isAutomationEnabled && selectedApps.length >= MAX_AUTOMATED_APPS_SELECTION && (
+          <Alert.Root status="info" borderRadius="2xl" w="full">
+            <Alert.Indicator />
+            <Alert.Content textStyle="sm">
+              {`You can select up to {MAX_AUTOMATED_APPS_SELECTION} dApps when automation is on. To add more, disable
+              automation.`}
+            </Alert.Content>
+          </Alert.Root>
+        )}
 
         <CastAllocationControlsBottomBar
           onContinue={onContinue}
