@@ -98,6 +98,7 @@ export const ProposalInteractionCard = ({
   const handleExecuteProposal = useCallback(() => executeProposal(), [executeProposal])
 
   // ===== COMPUTED VALUES =====
+  const isProposer = compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? "0")
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
   const proposalQuorumBigInt = BigInt(proposalQuorum ?? "0")
@@ -105,7 +106,7 @@ export const ProposalInteractionCard = ({
   const hasUserAlreadyVoted = userHasAlreadyVotedInProposal?.[proposalId] ?? false
   const userVot3Balance = Number(userVot3BalanceQueryData?.original ?? 0)
   const proposalDepositReached = isDepositReached ?? false
-  const currentUserCanQueueOrExecute = permissions?.isProposalExecutor ?? false
+  const currentUserCanExecute = permissions?.isProposalExecutor ?? false
   const proposalHasTargets = proposal?.targets && proposal?.targets.length > 0
   const userVoteOption = userVoteEvent?.userVote
   const totalVotesAtSnapshot = votesAtSnapshotQueryData ?? ethers.formatEther("0")
@@ -138,11 +139,10 @@ export const ProposalInteractionCard = ({
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
     if (proposal?.state !== ProposalState.Pending) return false
-    const isProposer = compareAddresses(proposal?.proposerAddress, account?.address)
     const isAdmin = permissions?.isAdminOfB3TRGovernor
     //Proposal is pending, and either the proposer or the account is the admin
     return proposal?.state === ProposalState.Pending && (isProposer || isAdmin)
-  }, [account?.address, permissions?.isAdminOfB3TRGovernor, proposal?.proposerAddress, proposal?.state])
+  }, [isProposer, permissions?.isAdminOfB3TRGovernor, proposal?.state])
 
   const shouldShowActionButton = useMemo(() => {
     if (!account?.address) {
@@ -154,30 +154,26 @@ export const ProposalInteractionCard = ({
     }
 
     if (proposal?.state === ProposalState.Pending) {
-      return (
-        !proposalDepositReached &&
-        userVot3Balance > 0 &&
-        !compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
-      )
+      return !proposalDepositReached && userVot3Balance > 0 && !isProposer
     }
 
     //User has permissions to execute or queue
-    if ((isQueuable || isExecutable) && currentUserCanQueueOrExecute) {
-      return isQueuable || isExecutable
+    if (isQueuable || isExecutable) {
+      return isQueuable || currentUserCanExecute
     }
 
     return false
   }, [
+    account?.address,
     proposal?.state,
     isQueuable,
     isExecutable,
+    currentUserCanExecute,
     hasUserAlreadyVoted,
     userVotingPower,
     proposalDepositReached,
     userVot3Balance,
-    currentUserCanQueueOrExecute,
-    account?.address,
-    proposal?.proposerAddress,
+    isProposer,
   ])
 
   const isActionButtonDisabled = useMemo(() => {
@@ -199,20 +195,19 @@ export const ProposalInteractionCard = ({
     }
 
     //User has permissions to execute or queue
-    if (isQueuable || isExecutable) {
-      return !currentUserCanQueueOrExecute
+    if (isExecutable) {
+      return !currentUserCanExecute
     }
 
     return false
   }, [
     proposal?.state,
-    isQueuable,
     isExecutable,
     hasUserAlreadyVoted,
     userVotingPower,
     userVot3Balance,
     proposalDepositReached,
-    currentUserCanQueueOrExecute,
+    currentUserCanExecute,
   ])
 
   // ===== VOTING DATA PROCESSING =====
