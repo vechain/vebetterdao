@@ -664,6 +664,60 @@ describe("DBA Pool - @shard7b", async function () {
       // This will fail validation checks before getting to app existence check
       await catchRevert(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [nonExistentAppId]))
     })
+
+    it("Should revert if duplicate app IDs are provided", async function () {
+      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
+
+      // Create random app IDs
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("app1"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("app2"))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("app3"))
+
+      // Try to distribute with duplicate app IDs - should revert before any other checks
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [app1Id, app2Id, app1Id]),
+      ).to.be.revertedWith("DBAPool: duplicate app IDs not allowed")
+
+      // Verify with consecutive duplicates
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [app2Id, app2Id]),
+      ).to.be.revertedWith("DBAPool: duplicate app IDs not allowed")
+
+      // Verify with duplicates at the end
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [app1Id, app2Id, app3Id, app2Id]),
+      ).to.be.revertedWith("DBAPool: duplicate app IDs not allowed")
+    })
+
+    it("Should handle large number of app IDs efficiently (scalability test)", async function () {
+      this.timeout(180000) // 3 minutes timeout for this test
+
+      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
+
+      // Create 1000 unique app IDs
+      const appIds = []
+      for (let i = 0; i < 1000; i++) {
+        appIds.push(ethers.keccak256(ethers.toUtf8Bytes(`app${i}`)))
+      }
+
+      // Add a duplicate at the end to test worst-case scenario
+      appIds.push(appIds[0])
+
+      // This should detect the duplicate even with 1001 items
+      await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, appIds)).to.be.revertedWith(
+        "DBAPool: duplicate app IDs not allowed",
+      )
+    })
   })
 
   describe("Integration Tests - Full Distribution Flow", () => {

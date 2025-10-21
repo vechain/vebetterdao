@@ -115,6 +115,15 @@ contract DBAPool is
   ) external nonReentrant onlyRole(DISTRIBUTOR_ROLE) whenNotPaused {
     require(_appIds.length > 0, "DBAPool: no apps to distribute to");
 
+    // Validate no duplicate appIds
+    // While O(n²) time complexity, this is actually more gas-efficient than
+    // storage-based approaches for typical array sizes in smart contracts
+    for (uint256 i = 0; i < _appIds.length; i++) {
+      for (uint256 j = i + 1; j < _appIds.length; j++) {
+        require(_appIds[i] != _appIds[j], "DBAPool: duplicate app IDs not allowed");
+      }
+    }
+
     DBAPoolStorage storage $ = _getDBAPoolStorage();
 
     // Validate that round can be distributed based on different criteria
