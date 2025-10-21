@@ -31,7 +31,7 @@ export async function deployDBAPool() {
   const X_ALLOCATION_POOL_ADDRESS = envConfig.xAllocationPoolContractAddress
   const X2_EARN_REWARDS_POOL_ADDRESS = envConfig.x2EarnRewardsPoolContractAddress
   const B3TR_CONTRACT_ADDRESS = envConfig.b3trContractAddress
-  const DISTRIBUTION_START_ROUND = 68
+  const DISTRIBUTION_START_ROUND = 66
 
   console.log("Deploying proxy for DBA Pool with params:")
   console.log("X2EarnApps Address: ", X2_EARN_APPS_ADDRESS)
