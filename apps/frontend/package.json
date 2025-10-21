@@ -23,8 +23,8 @@
     "clean": "rm -rf .next node_modules dist",
     "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
     "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "storybook": "NEXT_PUBLIC_APP_ENV=local storybook dev -p 6006",
+    "build-storybook": "NEXT_PUBLIC_APP_ENV=staging storybook build",
     "generate:schema": "npx openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
   },
   "dependencies": {
@@ -108,6 +108,7 @@
     "storybook": "^9.1.5",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
+    "vite-plugin-svgr": "^4.5.0",
     "vite-tsconfig-paths": "^4.3.2"
   }
 }
