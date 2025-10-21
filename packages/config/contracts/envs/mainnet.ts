@@ -194,5 +194,6 @@ export function createMainnetConfig() {
       168129850245120000000000n,
       179381993472000000000000n,
     ],
+    DBA_DISTRIBUTION_START_ROUND: 66,
   })
 }
