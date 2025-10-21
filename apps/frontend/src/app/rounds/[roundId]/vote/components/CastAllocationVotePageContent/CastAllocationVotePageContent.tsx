@@ -12,6 +12,7 @@ import {
   CastAllocationVoteFormData,
 } from "../../../../../../store/useCastAllocationFormStore"
 import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { splitEvenly } from "../../utils/splitEvenly"
 import { CastAllocationControlsBottomBar } from "../CastAllocationControlsBottomBar"
 
 import { AutomationCard } from "./components/AutomationCard"
@@ -46,9 +47,14 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const handleAutomationChange = useCallback(
     (enabled: boolean) => {
       setIsAutomationEnabled(enabled)
-      // If automation is enabled and user has more apps selected than the limit, trim to max
-      if (enabled && selectedApps.length > MAX_AUTOMATED_APPS_SELECTION) {
-        onSelectedAppsChange(selectedApps.slice(0, MAX_AUTOMATED_APPS_SELECTION))
+      // If automation is enabled, ensure apps are equally split and limit to max selection
+      if (enabled) {
+        const appsToKeep = selectedApps.slice(0, MAX_AUTOMATED_APPS_SELECTION)
+        const equallyDistributedApps = appsToKeep.map(app => ({
+          ...app,
+          ...splitEvenly(appsToKeep.length),
+        }))
+        onSelectedAppsChange(equallyDistributedApps)
       }
     },
     [selectedApps, onSelectedAppsChange],
@@ -64,9 +70,16 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
   const onContinue = useCallback(() => {
     if (!selectedApps.length) return setOnContinueError(t("Select at least one app to continue"))
-    router.push(`/rounds/${roundId}/vote/percentages`)
+
+    // If automation is enabled, skip percentage page and go directly to confirm with equal splits
+    if (isAutomationEnabled) {
+      router.push(`/rounds/${roundId}/vote/confirm`)
+    } else {
+      router.push(`/rounds/${roundId}/vote/percentages`)
+    }
+
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_SELECTION))
-  }, [router, roundId, selectedApps, t])
+  }, [router, roundId, selectedApps, t, isAutomationEnabled])
 
   const shouldSeeThePage = useCanUserVote()
 
@@ -112,7 +125,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           <Alert.Root status="info" borderRadius="2xl" w="full">
             <Alert.Indicator />
             <Alert.Content textStyle="sm">
-              {`You can select up to {MAX_AUTOMATED_APPS_SELECTION} dApps when automation is on. To add more, disable
+              {`You can select up to ${MAX_AUTOMATED_APPS_SELECTION} dApps when automation is on. To add more, disable
               automation.`}
             </Alert.Content>
           </Alert.Root>
