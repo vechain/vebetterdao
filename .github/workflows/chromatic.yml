@@ -1,19 +1,13 @@
 name: Chromatic
 
 on:
-  workflow_dispatch:
-  pull_request:
+  pull_request_target:
     branches:
       - main
-    paths:
-      - "apps/frontend/**"
-      - ".github/workflows/chromatic.yml"
   push:
     branches:
       - main
-    paths:
-      - "apps/frontend/**"
-      - ".github/workflows/chromatic.yml"
+  workflow_dispatch:
 
 jobs:
   chromatic:
@@ -52,6 +46,7 @@ jobs:
           workingDir: apps/frontend
           buildScriptName: build-storybook
           exitZeroOnChanges: false
+          autoAcceptChanges: "main"
           onlyStoryNames: "apps/frontend/src/stories/**"
           zip: true
           autoAcceptChanges: "main"
