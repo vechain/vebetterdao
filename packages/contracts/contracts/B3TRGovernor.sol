@@ -1038,7 +1038,7 @@ contract B3TRGovernor is
    * @notice Mark a proposal as in development
    * @param proposalId The id of the proposal
    */
-  function markAsInDevelopment(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_STATE_MANAGER_ROLE) {
+  function markAsInDevelopment(uint256 proposalId) public onlyRole(PROPOSAL_STATE_MANAGER_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorProposalLogic.markAsInDevelopment($, proposalId);
   }
@@ -1047,7 +1047,7 @@ contract B3TRGovernor is
    * @notice Mark a proposal as completed
    * @param proposalId The id of the proposal
    */
-  function markAsCompleted(uint256 proposalId) public onlyRoleOrGovernance(PROPOSAL_STATE_MANAGER_ROLE) {
+  function markAsCompleted(uint256 proposalId) public onlyRole(PROPOSAL_STATE_MANAGER_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorProposalLogic.markAsCompleted($, proposalId);
   }
