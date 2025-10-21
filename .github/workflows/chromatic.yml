@@ -7,6 +7,12 @@ on:
     paths:
       - "apps/frontend/**"
       - ".github/workflows/chromatic.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/frontend/**"
+      - ".github/workflows/chromatic.yml"
 
 jobs:
   chromatic:
