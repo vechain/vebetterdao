@@ -38,7 +38,9 @@ export const buttonRecipe = defineRecipe({
         _focus: { bg: "actions.secondary.pressed" },
       },
       tertiary: {
-        color: "actions.tertiary.text",
+        color: "text.default",
+        // TODO: tertiary button needs to be updated acc. to DS
+        // color: "actions.tertiary.text",
         bgColor: "transparent",
         borderWidth: "1px",
         borderStyle: "solid",
