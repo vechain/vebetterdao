@@ -8,7 +8,9 @@ export type CastAllocationVoteFormData = {
 }
 export type CastAllocationFormStoreState = {
   data: CastAllocationVoteFormData[]
+  isAutomationEnabled: boolean
   setData: (_data: CastAllocationVoteFormData[]) => void
+  setIsAutomationEnabled: (_isAutomationEnabled: boolean) => void
   clearData: () => void
   filterValidApps: (validAppIds: string[]) => void
 }
@@ -20,13 +22,19 @@ export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()
     persist(
       set => ({
         data: [],
+        isAutomationEnabled: false,
         setData: (data: CastAllocationVoteFormData[]) =>
           set({
             data,
           }),
+        setIsAutomationEnabled: (isAutomationEnabled: boolean) =>
+          set({
+            isAutomationEnabled,
+          }),
         clearData: () =>
           set({
             data: [],
+            isAutomationEnabled: false,
           }),
         filterValidApps: (validAppIds: string[]) =>
           set(state => ({

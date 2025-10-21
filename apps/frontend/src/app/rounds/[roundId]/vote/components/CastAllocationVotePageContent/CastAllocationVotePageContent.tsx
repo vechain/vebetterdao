@@ -28,7 +28,13 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const xAppsQuery = useRoundXApps(roundId)
-  const { data: selectedApps, setData: onSelectedAppsChange, filterValidApps } = useCastAllocationFormStore()
+  const {
+    data: selectedApps,
+    setData: onSelectedAppsChange,
+    filterValidApps,
+    isAutomationEnabled,
+    setIsAutomationEnabled,
+  } = useCastAllocationFormStore()
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return selectedApps
@@ -42,7 +48,6 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
       })
   }, [selectedApps, xAppsQuery])
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
-  const [isAutomationEnabled, setIsAutomationEnabled] = useState(false)
 
   const handleAutomationChange = useCallback(
     (enabled: boolean) => {
