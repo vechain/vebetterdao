@@ -33,6 +33,11 @@ type useCastAllocationVotesProps = {
   onSuccess?: () => void
   onSuccessMessageTitle?: string
   transactionModalCustomUI?: TransactionCustomUI
+  automation?: {
+    enabled: boolean
+    appIds: string[]
+    userAddress: string
+  }
 }
 const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
 /**
@@ -46,6 +51,7 @@ export const useCastAllocationVotes = ({
   roundId,
   onSuccess,
   transactionModalCustomUI,
+  automation,
 }: useCastAllocationVotesProps) => {
   const { account } = useWallet()
 
@@ -56,17 +62,41 @@ export const useCastAllocationVotes = ({
       const apps = filteredData.map(value => value.appId)
       const votes = filteredData.map(value => ethers.parseEther(value.votes.toString()))
 
-      const clause: EnhancedClause = {
+      const clauses: EnhancedClause[] = []
+
+      // If automation is enabled, add automation clauses first
+      if (automation?.enabled && automation.appIds.length > 0) {
+        // 1. Set user voting preferences
+        clauses.push({
+          to: getConfig().xAllocationVotingContractAddress,
+          value: 0,
+          data: XAllocationVotingInterface.encodeFunctionData("setUserVotingPreferences", [automation.appIds]),
+          comment: "Set voting preferences for automation",
+          abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("setUserVotingPreferences"))),
+        })
+
+        // 2. Toggle auto voting
+        clauses.push({
+          to: getConfig().xAllocationVotingContractAddress,
+          value: 0,
+          data: XAllocationVotingInterface.encodeFunctionData("toggleAutoVoting", [automation.userAddress]),
+          comment: "Enable automatic voting",
+          abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("toggleAutoVoting"))),
+        })
+      }
+
+      // 3. Cast vote
+      clauses.push({
         to: getConfig().xAllocationVotingContractAddress,
         value: 0,
         data: XAllocationVotingInterface.encodeFunctionData("castVote", [roundId, apps, votes]),
         comment: `Cast your vote on round ${roundId}`,
         abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("castVote"))),
-      }
+      })
 
-      return [clause]
+      return clauses
     },
-    [roundId],
+    [roundId, automation],
   )
 
   const refetchQueryKeys = useMemo(() => {

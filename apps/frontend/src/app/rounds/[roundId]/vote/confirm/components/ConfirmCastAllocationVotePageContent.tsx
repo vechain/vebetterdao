@@ -39,7 +39,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { onClose: closeTxModal } = useTransactionModal()
   const router = useRouter()
   const xAppsQuery = useRoundXApps(roundId)
-  const { data: votes } = useCastAllocationFormStore()
+  const { data: votes, isAutomationEnabled } = useCastAllocationFormStore()
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return votes
@@ -93,6 +93,13 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         title: t("Error casting your vote!"),
       },
     },
+    automation: isAutomationEnabled
+      ? {
+          enabled: true,
+          appIds: votes.map(vote => vote.appId),
+          userAddress: account?.address ?? "",
+        }
+      : undefined,
   })
 
   const totalVotesToCast = useMemo(() => {
