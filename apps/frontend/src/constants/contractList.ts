@@ -137,4 +137,9 @@ export const CONTRACT_LIST = [
     contractAddress: config.relayerRewardsPoolContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "POOL_ADMIN_ROLE"],
   },
+  {
+    name: "Dynamic Base Allocation Pool",
+    contractAddress: config.dbaPoolContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "DISTRIBUTOR_ROLE"],
+  },
 ]
