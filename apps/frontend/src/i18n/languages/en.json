@@ -1513,5 +1513,7 @@
   "ineligible": "ineligible",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.",
   "Uploading...": "Uploading...",
-  "Stored": "Stored"
+  "Stored": "Stored",
+  "Mark as in development": "Mark as in development",
+  "Mark as completed": "Mark as completed"
 }
