@@ -20,7 +20,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Give ability to contract admins to call governance only functions",
@@ -29,6 +29,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Vechain Nodes x GM upgrades feature",
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards)",
       v7: "Proposal Execution + Grants Feature: Add extra voting power based on support tokens + deposit threshold cap + proposal type concept",
+      v8: "Give ability to mark proposals as in development/completed",
     },
   },
   XAllocationVoting: {
@@ -48,13 +49,14 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "XAllocation Pool": {
     name: "x-allocation-pool",
     configAddressField: "xAllocationPoolContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
     descriptions: {
       v2: "Add the abilty to toggle quadratic funding on and off.",
       v3: "Update X2Earn interface to include new endorsement feature",
       v4: "Update X2Earn interface to include node cooldown feature",
       v5: "Updated X2EarnRewardsPool interface to support app rewards management feature",
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IEmissions)",
+      v7: "Proposal Execution: Store unallocated funds for each round",
     },
   },
   X2EarnApps: {
@@ -118,6 +120,14 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     versions: ["v2"],
     descriptions: {
       v2: "Vechain Nodes x GM upgrades feature",
+    },
+  },
+  "Grants Manager": {
+    name: "grants-manager",
+    configAddressField: "grantsManagerContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Align with B3TRGovernor v8 new proposal state management",
     },
   },
 } as const

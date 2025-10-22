@@ -24,7 +24,8 @@ const config: AppConfig = {
   b3trMultiSigAddress: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
   stargateNFTContractAddress: "0x1856c533ac2d94340aaa8544d35a5c1d4a21dee7",
   grantsManagerContractAddress: "0x055d20914657834c914d7c44bf65b566ab4b45a2",
-  relayerRewardsPoolContractAddress: "0x0000000000000000000000000000000000000000",
+  relayerRewardsPoolContractAddress: "0x34b56f892c9e977b9ba2e43ba64c27d368ab3c86",
+  dbaPoolContractAddress: "0x0000000000000000000000000000000000000000",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "0xed6137b125bc40834fa06e800c5a72013ef9d91c",
     governorConfiguratorAddress: "0xc2428c4608f97d21034ae32f104587c9c045a8a2",
@@ -46,7 +47,7 @@ const config: AppConfig = {
     passportWhitelistAndBlacklistLogicAddress: "0x2D326f99e4251436F03eaab8b1af6875D984fD84",
   },
   xAllocationVotingLibraries: {
-    autoVotingLogicAddress: "0x0000000000000000000000000000000000000000",
+    autoVotingLogicAddress: "0x5584e3aab6a24e66959147ce3eee3b1698294a9b",
   },
   externalContractIntegrations: {
     vetDomainsContractAddress: "0xbd7832FdacCB89FAB522e5B4Afb415A999b8a201",

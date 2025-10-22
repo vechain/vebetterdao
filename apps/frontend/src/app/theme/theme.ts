@@ -206,9 +206,9 @@ const config = defineConfig({
             "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
           },
           tertiary: {
-            default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.300}" } },
-            hover: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.400}" } },
-            pressed: { value: { base: "{colors.blue.800}", _dark: "{colors.blue.500}" } },
+            default: { value: { base: "white", _dark: "{colors.transparency.100}" } },
+            hover: { value: { base: "{colors.gray.50}", _dark: "{colors.gray.800}" } },
+            pressed: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.700}" } },
             disabled: { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
             text: { value: { base: "white", _dark: "white" } },
             "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },

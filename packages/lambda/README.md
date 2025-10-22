@@ -31,6 +31,18 @@ Here's a list of the current lambda functions and their primary responsibilities
     - **Trigger**: API Gateway (HTTP POST request).
     - **Key Operations**: Takes a `walletAddress` in the request body.
 
+6.  **`distributeDBA`**:
+    - **Purpose**: Distributes Dynamic Base Allocation (DBA) rewards to eligible apps after a round completes. The lambda filters apps based on specific eligibility criteria and calls the DBAPool contract to distribute surplus allocations.
+    - **Trigger**: Scheduled (once per week, after round starts and allocations are claimed).
+    - **Key Operations**:
+      - Checks if the previous round is ready for DBA distribution (all funds claimed, unallocated funds exist)
+      - Filters eligible apps based on:
+        - App was eligible for voting in the round
+        - App rewarded at least 1 action with proofs during the round
+        - App received less than 7.5% of total votes
+        - App was fully endorsed during the round (not in grace period for entire round)
+      - Calls `distributeDBARewards` on the DBAPool contract with filtered app IDs
+
 ## Development
 
 Follow these guidelines for developing and maintaining lambdas:

@@ -142,6 +142,8 @@ jobs:
             label: TimeLock
           - shard: shard7
             label: Treasury
+          - shard: shard7b
+            label: Dynamic Base Allocation Pool
           - shard: shard8
             label: VeBetterPassport
           - shard: shard8a

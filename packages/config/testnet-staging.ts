@@ -21,8 +21,9 @@ const config: AppConfig = {
   x2EarnCreatorContractAddress: "0x375d1a53ef8d9b5255fc32de28e4a3281f015dea",
   tokenAuctionContractAddress: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c",
   stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
-  grantsManagerContractAddress: "0x0a11dca078f37c08314843203664902349d21425",
-  relayerRewardsPoolContractAddress: "0x0000000000000000000000000000000000000000",
+  grantsManagerContractAddress: "0x005af71e9b2d629c0c6e2f9d39fdfd1bb967c0ea",
+  relayerRewardsPoolContractAddress: "0x92b5a7484970d9b2ad981e8135ff14e6f996dc04",
+  dbaPoolContractAddress: "0x328710f4925c3e4c04961882b96c50cc7cd9d958",
   indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
@@ -78,11 +79,10 @@ const config: AppConfig = {
     passportWhitelistAndBlacklistLogicAddress: "0x8001bf12243875de3103b5487c7ef46675f8aa04",
   },
   xAllocationVotingLibraries: {
-    autoVotingLogicAddress: "0x0000000000000000000000000000000000000000",
+    autoVotingLogicAddress: "0x6a69d971f78fcc31d79bc1216f86c212def17b25",
   },
   externalContractIntegrations: {
     vetDomainsContractAddress: "0xE27C72E252D5C3B2daf871aB7628F29370438589",
   },
-  dbaPoolContractAddress: "0x0000000000000000000000000000000000000000",
 }
 export default config
