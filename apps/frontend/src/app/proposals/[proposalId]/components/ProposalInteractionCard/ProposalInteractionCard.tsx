@@ -1,6 +1,6 @@
 import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
@@ -36,6 +36,7 @@ import {
   ProposalType,
 } from "@/hooks/proposals/grants/types"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useMarkProposalCompleted } from "@/hooks/useMarkProposalCompleted"
 import { useMarkProposalInDevelopment } from "@/hooks/useMarkProposalInDevelopment"
 import { useQueueProposal } from "@/hooks/useQueueProposal"
