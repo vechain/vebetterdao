@@ -44,6 +44,21 @@ Here's a list of the current lambda functions and their primary responsibilities
     - **Trigger**: API Gateway (HTTP POST request).
     - **Key Operations**: Takes a `walletAddress` in the request body.
 
+6.  **`distributeDBA`** (Manual/Fallback - NO SCHEDULER):
+    - **Purpose**: Standalone DBA distribution lambda for manual/fallback use only.
+    - **Trigger**: Manual invocation only (NO automated scheduler configured).
+    - **When to Use**: This lambda should ONLY be triggered manually in the following scenarios:
+      - The `startRound` lambda fails after starting the round but before DBA distribution completes
+      - DBA rewards need to be distributed separately for any exceptional reason
+      - Testing DBA distribution in isolation
+    - **Note**: DBA distribution is now integrated into the `startRound` lambda and happens automatically as part of the round start process. This standalone version serves as a fallback mechanism and should not be part of normal operations.
+    - **Key Operations**:
+      - Determines the previous round that needs DBA distribution
+      - Checks if the round is ready and hasn't been distributed yet (via `canDistributeDBARewards`)
+      - Filters eligible apps using the same criteria as `startRound`
+      - Distributes DBA rewards to eligible apps
+      - Sends Slack notifications on success/failure
+
 ## Development
 
 Follow these guidelines for developing and maintaining lambdas:
