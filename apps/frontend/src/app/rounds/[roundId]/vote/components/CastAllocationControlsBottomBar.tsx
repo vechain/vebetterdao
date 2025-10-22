@@ -8,8 +8,9 @@ import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
 type Props = {
   onContinue: () => void
   helperText?: React.ReactNode
+  continueDisabled?: boolean
 }
-export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Props) => {
+export const CastAllocationControlsBottomBar = ({ onContinue, helperText, continueDisabled }: Props) => {
   const router = useRouter()
   const { isMobile } = useBreakpoints()
   if (isMobile)
@@ -34,11 +35,24 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
           justify={["space-between", "space-between", "flex-end"]}
           gap={4}
           w={["full", "full", "auto"]}>
-          <Button flex={1} size="lg" data-testid="go-back" variant="secondary" onClick={router.back}>
+          <Button
+            flex={1}
+            size="lg"
+            data-testid="go-back"
+            variant="outline"
+            borderColor="borders.primary"
+            onClick={router.back}>
             <UilArrowLeft />
             {t("Go back")}
           </Button>
-          <Button flex={1} size="lg" data-testid="continue" variant="primary" onClick={onContinue}>
+          <Button
+            flex={1}
+            size="lg"
+            data-testid="continue"
+            variant="solid"
+            colorPalette="blue"
+            onClick={onContinue}
+            disabled={continueDisabled}>
             {t("Continue")}
             <UilArrowRight />
           </Button>
@@ -57,13 +71,20 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
           flex={1}
           size="lg"
           data-testid="go-back"
-          variant="ghost"
-          color="actions.tertiary.default"
+          variant="outline"
+          borderColor="border.default"
           onClick={router.back}>
           <UilArrowLeft />
           {t("Go back")}
         </Button>
-        <Button flex={1} size="lg" data-testid="continue" variant="primary" onClick={onContinue}>
+        <Button
+          flex={1}
+          size="lg"
+          data-testid="continue"
+          variant="solid"
+          colorPalette="blue"
+          onClick={onContinue}
+          disabled={continueDisabled}>
           {t("Continue")}
           <UilArrowRight />
         </Button>
