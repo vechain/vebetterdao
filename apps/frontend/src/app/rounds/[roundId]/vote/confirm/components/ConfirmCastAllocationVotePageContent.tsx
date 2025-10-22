@@ -12,16 +12,14 @@ import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/App
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { useTotalVotesOnBlock } from "../../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useVotingThreshold } from "../../../../../../api/contracts/governance/hooks/useVotingThreshold"
 import { useAllocationsRound } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useAllocationsRoundState } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { useIsAutoVotingEnabled } from "../../../../../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
-import { useIsAutoVotingEnabledInCurrentRound } from "../../../../../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
 import { useUserVotingPreferences } from "../../../../../../api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
 import { useCastAllocationVotes, CastAllocationVotesProps } from "../../../../../../hooks/useCastAllocationVotes"
+import { useVotingFlowState } from "../../../../../../hooks/useVotingFlowState"
 import {
   CastAllocationVoteFormData,
   useCastAllocationFormStore,
@@ -43,9 +41,15 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const router = useRouter()
   const xAppsQuery = useRoundXApps(roundId)
   const { data: votes, isAutomationEnabled, setHasInitializedFromBlockchain } = useCastAllocationFormStore()
-  const { data: currentAutoVotingStatusInCurrentRound } = useIsAutoVotingEnabledInCurrentRound(account?.address)
-  const { data: currentAutoVotingStatus } = useIsAutoVotingEnabled(account?.address)
   const { data: currentVotingPreferences } = useUserVotingPreferences(account?.address)
+
+  // Centralized voting flow state
+  const votingFlow = useVotingFlowState({
+    roundId,
+    account: account?.address,
+    selectedApps: votes,
+    isAutomationEnabled,
+  })
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return votes
@@ -69,13 +73,8 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
-  const { data: threshold } = useVotingThreshold()
-
-  const hasVotesAtSnapshot = useMemo(() => {
-    return Number(votesAtSnapshot ?? 0) >= Number(threshold ?? 0)
-  }, [votesAtSnapshot, threshold])
-
-  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)
+  // Only need loading state here - hasVoted data comes from votingFlow.userStatus.hasVoted
+  const { isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
 
   const seeAllModal = useDisclosure()
@@ -105,8 +104,8 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
       enabled: isAutomationEnabled,
       appIds: votes.map(vote => vote.appId),
       userAddress: account?.address ?? "",
-      isAlreadyAutoVotingEnabledInCurrentRound: currentAutoVotingStatusInCurrentRound,
-      currentAutoVotingStatus: currentAutoVotingStatus,
+      isAlreadyAutoVotingEnabledInCurrentRound: votingFlow.automationStatus.activeInCurrentRound,
+      currentAutoVotingStatus: votingFlow.automationStatus.currentlyEnabled,
       currentAppPreferences: currentVotingPreferences,
     },
   })
@@ -115,32 +114,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     return (votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0) * Number(votesAtSnapshot)) / 100
   }, [votes, votesAtSnapshot])
 
-  // Check if user is disabling auto-voting when it's active in current round
-  const isDisablingAutoVote = useMemo(() => {
-    return currentAutoVotingStatusInCurrentRound && !isAutomationEnabled
-  }, [currentAutoVotingStatusInCurrentRound, isAutomationEnabled])
-
-  // Check if there are any actual changes to submit
-  const hasChanges = useMemo(() => {
-    // Check if automation status is changing
-    const automationStatusChanging = currentAutoVotingStatus !== isAutomationEnabled
-
-    // Check if app preferences are changing
-    const preferencesChanging =
-      isAutomationEnabled &&
-      JSON.stringify(currentVotingPreferences?.sort()) !== JSON.stringify(votes.map(vote => vote.appId).sort())
-
-    // Check if vote will be cast (only if auto-voting is NOT active in current round)
-    const willCastVote = !currentAutoVotingStatusInCurrentRound
-
-    return automationStatusChanging || preferencesChanging || willCastVote
-  }, [
-    currentAutoVotingStatus,
-    isAutomationEnabled,
-    currentVotingPreferences,
-    votes,
-    currentAutoVotingStatusInCurrentRound,
-  ])
+  // Use centralised voting flow state for UI decisions
+  const isDisablingAutoVote = votingFlow.ui.showDisablingAutoVoteAlert
+  const hasChanges = votingFlow.changes.hasAnyChanges
 
   const onContinue = useCallback(() => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
@@ -158,10 +134,16 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const shouldSeeThePage = useMemo(() => {
     return {
-      value: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && votes.length > 0,
+      value: votingFlow.navigation.canAccessConfirmPage && !isVotingConcluded,
       loading: hasVotedLoading || stateLoading || votesAtSnapshotLoading,
     }
-  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasVotesAtSnapshot, stateLoading, votesAtSnapshotLoading, votes])
+  }, [
+    votingFlow.navigation.canAccessConfirmPage,
+    hasVotedLoading,
+    isVotingConcluded,
+    stateLoading,
+    votesAtSnapshotLoading,
+  ])
 
   //   redirect to round page if user already voted or voting is concluded
   useLayoutEffect(() => {
@@ -183,6 +165,21 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
             {t("Review and confirm")}
           </Heading>
 
+          {/* Show info if user has already voted and is updating preferences */}
+          {votingFlow.ui.showUpdatingPreferencesAlert && (
+            <Alert.Root status="info" borderRadius="2xl" w="full">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>{t("Updating automation preferences")}</Alert.Title>
+                <Alert.Description textStyle="sm">
+                  {t(
+                    "You have already voted in this round. This transaction will only update your automation preferences.",
+                  )}
+                </Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )}
+
           {/* Show different content based on whether user is disabling auto-vote */}
           {isDisablingAutoVote ? (
             <>
@@ -198,9 +195,11 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
             </>
           ) : (
             <>
-              <Text textStyle={"md"} color="text.subtle">
-                {t("Review your vote details below. Go back if you need to make changes.")}
-              </Text>
+              {!votingFlow.userStatus.hasVoted && (
+                <Text textStyle={"md"} color="text.subtle">
+                  {t("Review your vote details below. Go back if you need to make changes.")}
+                </Text>
+              )}
 
               {!hasChanges && (
                 <Alert.Root status="warning" borderRadius="2xl" w="full">
@@ -211,31 +210,49 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                 </Alert.Root>
               )}
 
-              <Card.Root bg={{ base: "transparent", md: "card.subtle" }} px={{ base: "0", md: "6" }} w="full">
-                <VStack flex={1} w="full" gap={8} align={"flex-start"}>
-                  <VStack gap={2} align="flex-start" w="full">
-                    <HStack w="full" justify="space-between">
-                      <Heading size={["xl", "xl", "2xl"]} fontWeight="bold">
-                        {t("Your vote")}
-                      </Heading>
-                      <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
-                        {t("See details")}
-                        <FiArrowUpRight />
-                      </Button>
-                    </HStack>
-                    <Skeleton loading={votesAtSnapshotLoading}>
-                      <Text textStyle="md">
-                        <Trans
-                          i18nKey={"{{amount}} distributed among {{apps}} apps"}
-                          values={{ amount: compactFormatter.format(totalVotesToCast ?? 0), apps: votes.length }}
-                          t={t}
-                        />
-                      </Text>
-                    </Skeleton>
+              {!votingFlow.userStatus.hasVoted && (
+                <Card.Root bg={{ base: "transparent", md: "card.subtle" }} px={{ base: "0", md: "6" }} w="full">
+                  <VStack flex={1} w="full" gap={8} align={"flex-start"}>
+                    <VStack gap={2} align="flex-start" w="full">
+                      <HStack w="full" justify="space-between">
+                        <Heading size={["xl", "xl", "2xl"]} fontWeight="bold">
+                          {t("Your vote")}
+                        </Heading>
+                        <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
+                          {t("See details")}
+                          <FiArrowUpRight />
+                        </Button>
+                      </HStack>
+                      <Skeleton loading={votesAtSnapshotLoading}>
+                        <Text textStyle="md">
+                          <Trans
+                            i18nKey={"{{amount}} distributed among {{apps}} apps"}
+                            values={{ amount: compactFormatter.format(totalVotesToCast ?? 0), apps: votes.length }}
+                            t={t}
+                          />
+                        </Text>
+                      </Skeleton>
+                    </VStack>
+                    <AppVotesBreakdown votes={parsedVotes} />
                   </VStack>
-                  <AppVotesBreakdown votes={parsedVotes} />
-                </VStack>
-              </Card.Root>
+                </Card.Root>
+              )}
+
+              {votingFlow.userStatus.hasVoted && (
+                <Card.Root bg={{ base: "transparent", md: "card.subtle" }} px={{ base: "0", md: "6" }} w="full">
+                  <VStack flex={1} w="full" gap={8} align={"flex-start"}>
+                    <VStack gap={2} align="flex-start" w="full">
+                      <Heading size={["xl", "xl", "2xl"]} fontWeight="bold">
+                        {t("Your automation preferences")}
+                      </Heading>
+                      <Text textStyle="md">
+                        <Trans i18nKey={"{{apps}} apps selected"} values={{ apps: votes.length }} t={t} />
+                      </Text>
+                    </VStack>
+                    <AppVotesBreakdown votes={parsedVotes} />
+                  </VStack>
+                </Card.Root>
+              )}
             </>
           )}
 

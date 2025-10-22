@@ -5,16 +5,10 @@ import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useMemo, useState, useEffect } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-
-import { useCanUserVote } from "../../../../../../api/contracts/governance/hooks/useCanUserVote"
-import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { useIsAutoVotingEnabled } from "../../../../../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
-import { useIsAutoVotingEnabledInCurrentRound } from "../../../../../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
 import { useUserVotingPreferences } from "../../../../../../api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
-import { useUpdateAutomationPreferences } from "../../../../../../hooks/useUpdateAutomationPreferences"
+import { useVotingFlowState } from "../../../../../../hooks/useVotingFlowState"
 import {
   useCastAllocationFormStore,
   CastAllocationVoteFormData,
@@ -36,7 +30,6 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
-  const { onClose: closeTxModal } = useTransactionModal()
   const xAppsQuery = useRoundXApps(roundId)
   const {
     data: selectedApps,
@@ -48,14 +41,16 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
     setHasInitializedFromBlockchain,
   } = useCastAllocationFormStore()
 
-  // Check if user has already voted in this round
-  const { data: hasVotedInRound } = useHasVotedInRound(roundId, account?.address)
-  // Get current automation status
-  const { data: currentAutoVotingStatus } = useIsAutoVotingEnabled(account?.address)
-  // Check if auto-voting was enabled at the start of current round
-  const { data: isAutoVotingEnabledInCurrentRound } = useIsAutoVotingEnabledInCurrentRound(account?.address)
-  // Get current voting preferences
+  // Get current voting preferences for loading existing preferences
   const { data: currentVotingPreferences } = useUserVotingPreferences(account?.address)
+
+  // Centralised voting flow state
+  const votingFlow = useVotingFlowState({
+    roundId,
+    account: account?.address,
+    selectedApps,
+    isAutomationEnabled,
+  })
 
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
@@ -74,15 +69,20 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   // Sync toggle state from blockchain ONCE on initial load
   // After that, preserve user's intent (uncommitted changes) during navigation
   useEffect(() => {
-    if (currentAutoVotingStatus !== undefined && !hasInitializedFromBlockchain) {
-      setIsAutomationEnabled(currentAutoVotingStatus)
+    if (votingFlow.automationStatus.currentlyEnabled !== undefined && !hasInitializedFromBlockchain) {
+      setIsAutomationEnabled(votingFlow.automationStatus.currentlyEnabled)
       setHasInitializedFromBlockchain(true)
     }
-  }, [currentAutoVotingStatus, setIsAutomationEnabled, hasInitializedFromBlockchain, setHasInitializedFromBlockchain])
+  }, [
+    votingFlow.automationStatus.currentlyEnabled,
+    setIsAutomationEnabled,
+    hasInitializedFromBlockchain,
+    setHasInitializedFromBlockchain,
+  ])
 
   // Load existing preferences when user has voted
   useEffect(() => {
-    if (hasVotedInRound && currentVotingPreferences && currentVotingPreferences.length > 0) {
+    if (votingFlow.userStatus.hasVoted && currentVotingPreferences && currentVotingPreferences.length > 0) {
       // Set app selections with equal distribution
       const equallyDistributedPrefs = currentVotingPreferences.map(appId => ({
         appId,
@@ -90,31 +90,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
       }))
       onSelectedAppsChange(equallyDistributedPrefs)
     }
-  }, [hasVotedInRound, currentVotingPreferences, onSelectedAppsChange])
-
-  // Setup update automation preferences hook
-  const onUpdateSuccess = useCallback(() => {
-    closeTxModal()
-    // Reset initialization flag so next visit syncs fresh data from blockchain
-    setHasInitializedFromBlockchain(false)
-    router.push(`/rounds/${roundId}`)
-  }, [router, roundId, closeTxModal, setHasInitializedFromBlockchain])
-
-  // TODO: Add translation
-  const updateAutomationPreferences = useUpdateAutomationPreferences({
-    onSuccess: onUpdateSuccess,
-    transactionModalCustomUI: {
-      waitingConfirmation: {
-        title: "Updating automation preferences...",
-      },
-      success: {
-        title: "Automation preferences updated successfully!",
-      },
-      error: {
-        title: "Error updating automation preferences!",
-      },
-    },
-  })
+  }, [votingFlow.userStatus.hasVoted, currentVotingPreferences, onSelectedAppsChange])
 
   const handleAutomationChange = useCallback(
     (enabled: boolean) => {
@@ -143,56 +119,17 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const onContinue = useCallback(() => {
     if (!selectedApps.length) return setOnContinueError(t("Select at least one app to continue"))
 
-    // If user has already voted, update automation preferences directly
-    if (hasVotedInRound) {
-      const automationStateChanged = currentAutoVotingStatus !== isAutomationEnabled
-      const appPreferencesChanged =
-        JSON.stringify(currentVotingPreferences?.sort()) !== JSON.stringify(selectedApps.map(app => app.appId).sort())
+    // Determine next page based on voting flow state
+    const nextPage = votingFlow.navigation.shouldGoToConfirm
+      ? `/rounds/${roundId}/vote/confirm`
+      : `/rounds/${roundId}/vote/percentages`
 
-      // Only send transaction if something changed
-      if (automationStateChanged || appPreferencesChanged) {
-        updateAutomationPreferences.sendTransaction({
-          appIds: selectedApps.map(app => app.appId),
-          toggleAutomation: automationStateChanged,
-          userAddress: account?.address ?? "",
-        })
-      } else {
-        // Nothing changed, just go back
-        router.push(`/rounds/${roundId}`)
-      }
-      return
-    }
-
-    // Skip to confirm page if:
-    // 1. Auto-voting was enabled at round start (locked in for this round), OR
-    // 2. User is enabling automation now (first time or re-enabling)
-    // This prevents bypassing automation flow while allowing new users to enable it
-    if (isAutoVotingEnabledInCurrentRound || isAutomationEnabled) {
-      router.push(`/rounds/${roundId}/vote/confirm`)
-    } else {
-      router.push(`/rounds/${roundId}/vote/percentages`)
-    }
-
+    router.push(nextPage)
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_SELECTION))
-  }, [
-    router,
-    roundId,
-    selectedApps,
-    t,
-    isAutomationEnabled,
-    isAutoVotingEnabledInCurrentRound,
-    hasVotedInRound,
-    currentAutoVotingStatus,
-    currentVotingPreferences,
-    updateAutomationPreferences,
-    account?.address,
-  ])
+  }, [router, roundId, selectedApps, t, votingFlow.navigation.shouldGoToConfirm])
 
-  const shouldSeeThePage = useCanUserVote()
-
-  // Determine if page should be accessible
-  // Allow access if: user can vote OR user has already voted
-  const canAccessPage = shouldSeeThePage.data || hasVotedInRound
+  // Determine if page should be accessible based on voting flow state
+  const canAccessPage = votingFlow.navigation.canAccessSelectionPage
 
   // Clean up invalid app selections when xApps data is loaded
   useEffect(() => {
@@ -204,13 +141,13 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
   // Redirect to round page if user can't access this page
   useLayoutEffect(() => {
-    if (shouldSeeThePage.isLoading) return
-    if (!canAccessPage) {
+    // Wait for votingFlow to load (canAccessPage will be false/undefined while loading)
+    if (canAccessPage === false) {
       router.push(`/rounds/${roundId}`)
     }
-  }, [canAccessPage, shouldSeeThePage.isLoading, roundId, router])
+  }, [canAccessPage, roundId, router])
 
-  if (!canAccessPage && !shouldSeeThePage.isLoading) return null
+  if (canAccessPage === false) return null
 
   return (
     <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
@@ -226,7 +163,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
         {/* Show info if auto-voting is enabled for current round */}
         {/* User can still disable auto-voting (takes effect next round) and update preferences */}
-        {isAutoVotingEnabledInCurrentRound && (
+        {votingFlow.ui.showAutoVotingActiveAlert && (
           <Alert.Root status="info" borderRadius="2xl" w="full">
             <Alert.Indicator />
             <Alert.Content>
@@ -261,10 +198,18 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
         <CastAllocationControlsBottomBar
           onContinue={onContinue}
+          continueDisabled={(() => {
+            const disabled = !votingFlow.changes.hasAnyChanges || !selectedApps.length
+            return disabled
+          })()}
           helperText={
             onContinueError ? (
               <Text textStyle={"md"} fontWeight="semibold" color="status.negative.primary">
                 {onContinueError}
+              </Text>
+            ) : !votingFlow.changes.hasAnyChanges ? (
+              <Text textStyle={"md"} color="text.subtle">
+                {t("Modify your preferences to continue")}
               </Text>
             ) : (
               <Text textStyle={"md"}>

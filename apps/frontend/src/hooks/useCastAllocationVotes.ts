@@ -10,7 +10,7 @@ import { getParticipatedInGovernanceQueryKey } from "../api/contracts/galaxyMemb
 import { getXAppRoundEarningsQueryKey } from "../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
 import { getAllocationVotersQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationVoters"
 import { getAllocationVotesQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationVotes"
-import { getHasVotedInRoundQueryKey } from "../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { getHasVotedInRoundQueryKey, useHasVotedInRound } from "../api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { getUserVotesInRoundQueryKey } from "../api/contracts/xApps/hooks/useUserVotesInRound"
 import { getXAppsSharesQueryKey } from "../api/contracts/xApps/hooks/useXAppShares"
 
@@ -57,6 +57,7 @@ export const useCastAllocationVotes = ({
   automation,
 }: useCastAllocationVotesProps) => {
   const { account } = useWallet()
+  const { data: hasVotedInRound } = useHasVotedInRound(roundId, account?.address ?? undefined)
 
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
@@ -94,8 +95,9 @@ export const useCastAllocationVotes = ({
         })
       }
 
-      // 3. Cast vote - only if auto-voting is NOT active in current round
-      if (!automation.isAlreadyAutoVotingEnabledInCurrentRound) {
+      // 3. Cast vote - only if user hasn't voted yet AND auto-voting is NOT active in current round
+      // (If auto-voting is active, the relayer will cast the vote automatically)
+      if (!hasVotedInRound && !automation.isAlreadyAutoVotingEnabledInCurrentRound) {
         clauses.push({
           to: getConfig().xAllocationVotingContractAddress,
           value: 0,
@@ -107,7 +109,7 @@ export const useCastAllocationVotes = ({
 
       return clauses
     },
-    [roundId, automation],
+    [roundId, automation, hasVotedInRound],
   )
 
   const refetchQueryKeys = useMemo(() => {
