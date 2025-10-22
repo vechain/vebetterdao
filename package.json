@@ -119,7 +119,9 @@
     "slice-ansi": "4.0.0",
     "color": "3.2.1",
     "color-string": "1.9.1",
-    "simple-swizzle": "0.2.2"
+    "simple-swizzle": "0.2.2",
+    "elliptic": "^6.6.1",
+    "parse-duration": "^2.1.3"
   },
   "packageManager": "yarn@1.22.22",
   "workspaces": [
