@@ -43,7 +43,7 @@ Our contracts are upgradeable and versioned. See the [contracts changelog](/pack
   "XAllocationPool": "0x9B9CA9D0C41Add1d204f90BA0E9a6844f1843A84",
   "XAllocationVoting": "0x5859ff910d8b0c127364c98E24233b0af7443c1c",
   "B3TRFaucet": "0x5e9c1F0f52aC6b5004122059053b00017EAfB561",
-  "RelayerRewardsPool": "0x34b56f892c9e977b9ba2e43ba64c27d368ab3c86"
+  "RelayerRewardsPool": "0x92b5a7484970d9b2ad981e8135ff14e6f996dc04"
 ```
 
 Notice: _VeBetter Passport contract deployed only on mainnet._
