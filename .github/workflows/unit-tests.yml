@@ -134,6 +134,8 @@ jobs:
             label: Governance - V8 Compatibility
           - shard: shard4i
             label: Governance - Grants Manager V2 Upgrade
+          - shard: shard4j
+            label: Governance - Grants Manager V2 Compatibility
           - shard: shard5
             label: Node Management
           - shard: shard6
