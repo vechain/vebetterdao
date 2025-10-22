@@ -165,6 +165,13 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GranteeCannotDepositOwnGrant(uint256 proposalId);
 
   /**
+   * @dev Thrown when a proposal type is not allowed to perform a specific action.
+   * Some actions are restricted to Standard proposals only, others to Grant proposals only.
+   */
+  error GovernorRestrictedProposalType(GovernorTypes.ProposalType proposalType);
+
+
+  /**
    * @dev Emitted when a proposal is created
    */
   event ProposalCreated(
