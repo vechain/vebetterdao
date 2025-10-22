@@ -143,13 +143,6 @@ const DBAPoolAbi = [
     stateMutability: "view",
     type: "function",
   },
-  {
-    inputs: [{ internalType: "uint256", name: "_roundId", type: "uint256" }],
-    name: "isDBARewardsDistributed",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "view",
-    type: "function",
-  },
 ] as const
 
 /**
@@ -287,17 +280,26 @@ export async function distributeXAllocations(thor: ThorClient) {
  * This should be called after emissions are distributed and x-allocations are claimed.
  *
  * @param thor - The ThorClient instance
- * @param roundId - The round ID to distribute DBA rewards for
  * @returns the transaction receipt of the DBA distribution if successful
  */
-async function distributeDBARewards(thor: ThorClient, roundId: number) {
-  console.log(`Starting DBA distribution for round ${roundId}`)
-
+async function distributeDBARewards(thor: ThorClient) {
   // Check if DBA Pool is deployed (address is not zero)
   if (CONFIG.dbaPoolContractAddress === "0x0000000000000000000000000000000000000000") {
     console.log("DBA Pool is not deployed yet, skipping DBA distribution")
     return { receipt: null, eligibleAppsCount: 0, skipped: true, notDeployed: true }
   }
+
+  // Get the current round number from the Emissions contract
+  const currentRoundRes = await thor.contracts.executeCall(
+    CONFIG.emissionsContractAddress,
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("getCurrentCycle"),
+    [],
+  )
+  // Get the previous round number for which the DBA rewards are to be distributed
+  const currentRound = Number(currentRoundRes.result?.array?.[0] ?? 0)
+  const roundId = currentRound - 1
+
+  console.log(`Current round: ${currentRound}, distributing DBA for previous round: ${roundId}`)
 
   const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
@@ -527,26 +529,10 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
     )
 
-    // Get the previous round number for DBA distribution
-    const currentRoundRes = await thorClient.contracts.executeCall(
-      CONFIG.emissionsContractAddress,
-      ABIContract.ofAbi(Emissions__factory.abi).getFunction("getCurrentCycle"),
-      [],
-    )
-    const currentRound = Number(currentRoundRes.result?.array?.[0] ?? 0)
-    const previousRound = currentRound - 1
-
-    console.log(`Current round: ${currentRound}, distributing DBA for previous round: ${previousRound}`)
-
     // Distribute DBA rewards for the previous round with retry
     let dbaResult
     try {
-      dbaResult = await withRetry(
-        () => distributeDBARewards(thorClient, previousRound),
-        maxRetries,
-        delayMs,
-        "Distribute DBA Rewards",
-      )
+      dbaResult = await withRetry(() => distributeDBARewards(thorClient), maxRetries, delayMs, "Distribute DBA Rewards")
     } catch (error) {
       console.log("Failed to distribute DBA rewards after all retries:", error)
       await publishMessage(
@@ -580,7 +566,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: Round ${previousRound} is not ready for DBA distribution (already distributed or round not ready yet)`,
+        `${SLACK_MESSAGE_PREFIX}:information_source: DBA distribution not ready (already distributed or round not ready yet)`,
       )
     } else if (skipped) {
       console.log("DBA distribution skipped (no eligible apps)")
@@ -588,14 +574,14 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: DBA distribution transaction reverted for round ${previousRound}`,
+        `${SLACK_MESSAGE_PREFIX}:alert: DBA distribution transaction reverted`,
       )
     } else {
       console.log("DBA distribution successful")
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:white_check_mark: DBA rewards distributed successfully for round ${previousRound} to ${eligibleAppsCount} apps`,
+        `${SLACK_MESSAGE_PREFIX}:white_check_mark: DBA rewards distributed successfully to ${eligibleAppsCount} apps`,
       )
     }
 
