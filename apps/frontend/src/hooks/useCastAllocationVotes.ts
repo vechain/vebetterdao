@@ -33,10 +33,13 @@ type useCastAllocationVotesProps = {
   onSuccess?: () => void
   onSuccessMessageTitle?: string
   transactionModalCustomUI?: TransactionCustomUI
-  automation?: {
+  automation: {
     enabled: boolean
     appIds: string[]
     userAddress: string
+    isAlreadyAutoVotingEnabledInCurrentRound?: boolean
+    currentAutoVotingStatus?: boolean
+    currentAppPreferences?: string[]
   }
 }
 const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
@@ -64,35 +67,43 @@ export const useCastAllocationVotes = ({
 
       const clauses: EnhancedClause[] = []
 
-      // If automation is enabled, add automation clauses first
-      if (automation?.enabled && automation.appIds.length > 0) {
-        // 1. Set user voting preferences
-        clauses.push({
-          to: getConfig().xAllocationVotingContractAddress,
-          value: 0,
-          data: XAllocationVotingInterface.encodeFunctionData("setUserVotingPreferences", [automation.appIds]),
-          comment: "Set voting preferences for automation",
-          abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("setUserVotingPreferences"))),
-        })
+      // 1. Set user voting preferences (only if automation is enabled and app preferences are changing)
+      if (automation.enabled) {
+        const preferencesChanging =
+          JSON.stringify(automation.currentAppPreferences?.sort()) !== JSON.stringify(automation.appIds.sort())
+        if (preferencesChanging && automation.appIds.length > 0) {
+          clauses.push({
+            to: getConfig().xAllocationVotingContractAddress,
+            value: 0,
+            data: XAllocationVotingInterface.encodeFunctionData("setUserVotingPreferences", [automation.appIds]),
+            comment: "Set voting preferences for automation",
+            abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("setUserVotingPreferences"))),
+          })
+        }
+      }
 
-        // 2. Toggle auto voting
+      // 2. Toggle auto voting (only if automation status is changing)
+      const automationStatusChanging = automation.currentAutoVotingStatus !== automation.enabled
+      if (automationStatusChanging) {
         clauses.push({
           to: getConfig().xAllocationVotingContractAddress,
           value: 0,
           data: XAllocationVotingInterface.encodeFunctionData("toggleAutoVoting", [automation.userAddress]),
-          comment: "Enable automatic voting",
+          comment: "Toggle automatic voting",
           abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("toggleAutoVoting"))),
         })
       }
 
-      // 3. Cast vote
-      clauses.push({
-        to: getConfig().xAllocationVotingContractAddress,
-        value: 0,
-        data: XAllocationVotingInterface.encodeFunctionData("castVote", [roundId, apps, votes]),
-        comment: `Cast your vote on round ${roundId}`,
-        abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("castVote"))),
-      })
+      // 3. Cast vote - only if auto-voting is NOT active in current round
+      if (!automation.isAlreadyAutoVotingEnabledInCurrentRound) {
+        clauses.push({
+          to: getConfig().xAllocationVotingContractAddress,
+          value: 0,
+          data: XAllocationVotingInterface.encodeFunctionData("castVote", [roundId, apps, votes]),
+          comment: `Cast your vote on round ${roundId}`,
+          abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("castVote"))),
+        })
+      }
 
       return clauses
     },
