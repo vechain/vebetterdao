@@ -303,6 +303,7 @@ async function distributeDBARewards(thor: ThorClient, roundId: number) {
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
 
   // Check if we can distribute for this round
+  // This function already checks if rewards were distributed, if round is ready, etc.
   const canDistributeRes = await thor.contracts.executeCall(
     CONFIG.dbaPoolContractAddress,
     ABIContract.ofAbi(DBAPoolAbi).getFunction("canDistributeDBARewards"),
@@ -316,26 +317,8 @@ async function distributeDBARewards(thor: ThorClient, roundId: number) {
   const canDistribute = canDistributeRes.result?.array?.[0] ?? false
 
   if (!canDistribute) {
-    console.log(`Round ${roundId} is not ready for DBA distribution yet`)
+    console.log(`Round ${roundId} is not ready for DBA distribution (already distributed or not ready yet)`)
     return { receipt: null, eligibleAppsCount: 0, skipped: true, notReady: true }
-  }
-
-  // Check if already distributed
-  const isDistributedRes = await thor.contracts.executeCall(
-    CONFIG.dbaPoolContractAddress,
-    ABIContract.ofAbi(DBAPoolAbi).getFunction("isDBARewardsDistributed"),
-    [roundId],
-  )
-
-  if (!isDistributedRes.success) {
-    throw new Error("Failed to check if DBA was already distributed")
-  }
-
-  const isDistributed = isDistributedRes.result?.array?.[0] ?? false
-
-  if (isDistributed) {
-    console.log(`Round ${roundId} has already been distributed`)
-    return { receipt: null, eligibleAppsCount: 0, skipped: true, alreadyDistributed: true }
   }
 
   // Filter eligible apps
@@ -583,7 +566,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       }
     }
 
-    const { receipt: receiptDBA, eligibleAppsCount, skipped, notDeployed, notReady, alreadyDistributed } = dbaResult
+    const { receipt: receiptDBA, eligibleAppsCount, skipped, notDeployed, notReady } = dbaResult
 
     if (notDeployed) {
       console.log("DBA Pool not deployed yet, skipping")
@@ -593,18 +576,11 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         `${SLACK_MESSAGE_PREFIX}:information_source: DBA Pool not deployed yet, skipping DBA distribution`,
       )
     } else if (notReady) {
-      console.log("DBA distribution not ready yet")
+      console.log("DBA distribution not ready yet (already distributed or round not ready)")
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: Round ${previousRound} is not ready for DBA distribution yet`,
-      )
-    } else if (alreadyDistributed) {
-      console.log("DBA already distributed for this round")
-      await publishMessage(
-        client,
-        SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: DBA rewards already distributed for round ${previousRound}`,
+        `${SLACK_MESSAGE_PREFIX}:information_source: Round ${previousRound} is not ready for DBA distribution (already distributed or round not ready yet)`,
       )
     } else if (skipped) {
       console.log("DBA distribution skipped (no eligible apps)")
