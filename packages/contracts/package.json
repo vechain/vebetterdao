@@ -137,5 +137,13 @@
     "hardhat": "2.19.1",
     "nft.storage": "^7.1.1",
     "prettier": "^3.2.4"
+  },
+  "resolutions": {
+    "elliptic": "^6.6.1",
+    "parse-duration": "^2.1.3",
+    "axios": "^1.11.0",
+    "cookie": "^0.7.1",
+    "tmp": "^0.2.4",
+    "hono": "^4.10.2"
   }
 }
