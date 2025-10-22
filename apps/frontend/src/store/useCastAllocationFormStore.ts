@@ -9,8 +9,10 @@ export type CastAllocationVoteFormData = {
 export type CastAllocationFormStoreState = {
   data: CastAllocationVoteFormData[]
   isAutomationEnabled: boolean
+  hasInitializedFromBlockchain: boolean
   setData: (_data: CastAllocationVoteFormData[]) => void
   setIsAutomationEnabled: (_isAutomationEnabled: boolean) => void
+  setHasInitializedFromBlockchain: (_hasInitialized: boolean) => void
   clearData: () => void
   filterValidApps: (validAppIds: string[]) => void
 }
@@ -23,6 +25,7 @@ export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()
       set => ({
         data: [],
         isAutomationEnabled: false,
+        hasInitializedFromBlockchain: false,
         setData: (data: CastAllocationVoteFormData[]) =>
           set({
             data,
@@ -31,10 +34,15 @@ export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()
           set({
             isAutomationEnabled,
           }),
+        setHasInitializedFromBlockchain: (hasInitialized: boolean) =>
+          set({
+            hasInitializedFromBlockchain: hasInitialized,
+          }),
         clearData: () =>
           set({
             data: [],
             isAutomationEnabled: false,
+            hasInitializedFromBlockchain: false,
           }),
         filterValidApps: (validAppIds: string[]) =>
           set(state => ({
@@ -43,6 +51,12 @@ export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()
       }),
       {
         name: "CAST_ALLOCATION_FORM_STORE",
+        // Exclude hasInitializedFromBlockchain: resets on page reload to sync fresh blockchain data,
+        // but persists during navigation to preserve uncommitted user changes
+        partialize: state => ({
+          data: state.data,
+          isAutomationEnabled: state.isAutomationEnabled,
+        }),
       },
     ),
   ),
