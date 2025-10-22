@@ -129,6 +129,7 @@ import {
   GrantsManagerV1,
   RelayerRewardsPool,
   AutoVotingLogic,
+  DBAPool,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -178,6 +179,7 @@ export interface DeployInstance {
   veBetterPassportV1: VeBetterPassportV1
   veBetterPassportV2: VeBetterPassportV2
   veBetterPassportV3: VeBetterPassportV3
+  dynamicBaseAllocationPool: DBAPool
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -772,6 +774,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationPoolV3",
       "XAllocationPoolV4",
       "XAllocationPoolV5",
+      "XAllocationPoolV6",
       "XAllocationPool",
     ],
     [
@@ -789,9 +792,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [[], []],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
     },
   )) as XAllocationPool
 
@@ -1204,6 +1208,17 @@ export const getOrDeployContractInstances = async ({
     },
   )) as RelayerRewardsPool
 
+  const dynamicBaseAllocationPool = (await deployProxy("DBAPool", [
+    {
+      admin: owner.address,
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationPool: await xAllocationPool.getAddress(),
+      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+      b3tr: await b3tr.getAddress(),
+      distributionStartRound: 1,
+    },
+  ])) as DBAPool
+
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
@@ -1218,6 +1233,7 @@ export const getOrDeployContractInstances = async ({
     X2EarnApps: await x2EarnApps.getAddress(),
     VeBetterPassport: veBetterPassportContractAddress,
     StargateNFT: await stargateNftMock.getAddress(),
+    DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
   }
 
   const libraries = {
@@ -1358,6 +1374,7 @@ export const getOrDeployContractInstances = async ({
     xAllocationPool,
     emissions,
     voterRewards,
+    dynamicBaseAllocationPool,
     owner,
     otherAccount,
     minterAccount,
