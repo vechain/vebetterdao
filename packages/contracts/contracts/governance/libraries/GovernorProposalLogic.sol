@@ -128,6 +128,12 @@ library GovernorProposalLogic {
    */
   error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
 
+  /**
+   * @dev Thrown when a proposal type is not allowed to perform a specific action.
+   * Some actions are restricted to Standard proposals only, others to Grant proposals only.
+   */
+  error GovernorRestrictedProposalType(GovernorTypes.ProposalType proposalType);
+
   /** ------------------ GETTERS ------------------ **/
 
   /**
@@ -561,6 +567,14 @@ library GovernorProposalLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) external returns (uint256) {
+    GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
+
+    // Only Standard proposals are allowed here.
+    // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
+    if (proposalType != GovernorTypes.ProposalType.Standard) {
+      revert GovernorRestrictedProposalType(proposalType);
+    }
+
     //Can only mark as in development if proposal is executed or succeeded
     GovernorStateLogic.validateStateBitmap(
       self,
@@ -578,6 +592,14 @@ library GovernorProposalLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) external returns (uint256) {
+    GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
+
+    // Only Standard proposals are allowed here.
+    // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
+    if (proposalType != GovernorTypes.ProposalType.Standard) {
+      revert GovernorRestrictedProposalType(proposalType);
+    }
+    
     //Can only mark as in development if proposal is executed or succeeded
     GovernorStateLogic.validateStateBitmap(
       self,
