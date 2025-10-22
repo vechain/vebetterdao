@@ -15,6 +15,7 @@ import { useVotingThreshold } from "../../../../api/contracts/governance/hooks/u
 import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useAllocationsRoundState } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { useHasVotedInRound } from "../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useIsAutoVotingEnabledInCurrentRound } from "../../../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
 import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
 import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
 import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
@@ -50,6 +51,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: roundApps, isLoading: roundAppsLoading } = useRoundXApps(roundId)
 
   const { data: roundState, isLoading: roundStateLoading } = useAllocationsRoundState(roundId)
+  const { data: isAutoVotingEnabledInCurrentRound } = useIsAutoVotingEnabledInCurrentRound(account?.address)
 
   const hasVotesAtSnapshot = useMemo(() => {
     return Number(votesAtSnapshot ?? 0) >= Number(threshold ?? 0)
@@ -157,17 +159,39 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Box>
                 )}
               </Stack>
-              {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && !isFinished && (
-                <Button
-                  data-testid="cast-your-vote-button"
-                  variant={"primary"}
-                  onClick={navigateToVote}
-                  size={"lg"}
-                  colorPalette={"primary"}
-                  w={["full", "auto"]}>
-                  <Icon as={MdHowToVote} boxSize={4} />
-                  {t("Cast your vote")}
-                </Button>
+              {!shouldSeeVoteButtonLoading && !isFinished && (
+                <>
+                  {/* TODO: Add translation */}
+                  {/* Show Automation button if user has already voted OR auto-voting is active in current round */}
+                  {/* This allows them to toggle auto-voting on/off and update app preferences */}
+                  {(hasVoted || isAutoVotingEnabledInCurrentRound) && (
+                    <Button
+                      data-testid="automation-button"
+                      variant={"solid"}
+                      colorPalette={"blue"}
+                      onClick={navigateToVote}
+                      size={"lg"}
+                      w={["full", "auto"]}>
+                      <Icon as={MdHowToVote} boxSize={4} />
+                      {t("Automation")}
+                    </Button>
+                  )}
+                  {/* TODO: Add translation */}
+                  {/* Show Cast your vote button if user hasn't voted AND auto-voting is not active */}
+                  {/* User will follow the standard voting flow */}
+                  {!hasVoted && !isAutoVotingEnabledInCurrentRound && shouldSeeVoteButton && (
+                    <Button
+                      data-testid="cast-your-vote-button"
+                      variant={"solid"}
+                      colorPalette={"blue"}
+                      onClick={navigateToVote}
+                      size={"lg"}
+                      w={["full", "auto"]}>
+                      <Icon as={MdHowToVote} boxSize={4} />
+                      {t("Cast your vote")}
+                    </Button>
+                  )}
+                </>
               )}
             </Stack>
           </VStack>
