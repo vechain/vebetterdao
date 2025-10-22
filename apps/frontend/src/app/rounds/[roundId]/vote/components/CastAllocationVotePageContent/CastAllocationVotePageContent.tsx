@@ -26,7 +26,7 @@ import { CastAllocationControlsBottomBar } from "../CastAllocationControlsBottom
 import { AutomationCard } from "./components/AutomationCard"
 import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
 
-const MAX_AUTOMATED_APPS_SELECTION = 2
+const MAX_AUTOMATED_APPS_SELECTION = 15
 
 type Props = {
   roundId: string
