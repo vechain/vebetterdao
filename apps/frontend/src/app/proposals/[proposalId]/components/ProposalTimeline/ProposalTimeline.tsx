@@ -22,9 +22,7 @@ type TimelineStep = {
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
 }
-//TODO: This should be fixed by the smart contract logic
-//This is a temporary fix to show the correct timeline for the proposals
-const maxVotingRoundCompleted = 48
+
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
@@ -172,7 +170,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     return [
       {
         label: t("Approval phase"),
-        state: [ProposalState.Active, ProposalState.Defeated],
+        state: [ProposalState.Active, ProposalState.Succeeded, ProposalState.Queued, ProposalState.Executed],
         description: timelineDates.hasValidDates
           ? t("Round #{{roundId}}: {{dateString}}", {
               roundId: Number(proposalVotingRoundId),
@@ -182,12 +180,12 @@ export const ProposalTimeline = ({ proposal }: Props) => {
       },
       {
         label: t("In development"),
-        state: [ProposalState.Succeeded, ProposalState.Queued],
+        state: [ProposalState.InDevelopment],
         description: timelineDates.hasValidDates ? dayjs(timelineDates.votingEndDate).format("MMM D, YYYY") : "---",
       },
       {
         label: t("Completed"),
-        state: [ProposalState.Executed],
+        state: [ProposalState.Completed],
       },
     ]
   }, [
@@ -232,18 +230,10 @@ export const ProposalTimeline = ({ proposal }: Props) => {
 
   const currentStep = useMemo(() => {
     if (!proposal) return 0
-    if (
-      maxVotingRoundCompleted >= Number(proposalVotingRoundId) &&
-      proposal.state === ProposalState.Succeeded &&
-      !isGrant
-    ) {
-      //TODO: This should be fixed by the smart contract logic
-      //This is a temporary fix to show the correct timeline for the proposals
-      return 4
-    }
+
     const stepIndex = timelineSteps.findIndex(step => step.state.includes(proposal.state as ProposalState | "Created"))
     return stepIndex >= 0 ? stepIndex : 0
-  }, [isGrant, proposal, proposalVotingRoundId, timelineSteps])
+  }, [proposal, timelineSteps])
 
   return (
     <Card.Root variant="primary" w="full" p="6" gap={0}>
