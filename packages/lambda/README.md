@@ -44,10 +44,6 @@ Here's a list of the current lambda functions and their primary responsibilities
     - **Trigger**: API Gateway (HTTP POST request).
     - **Key Operations**: Takes a `walletAddress` in the request body.
 
-6.  **`distributeDBA`** (Legacy - for testing/manual execution):
-    - **Purpose**: Standalone version of DBA distribution logic, kept for local testing and manual execution if needed.
-    - **Note**: DBA distribution is now integrated into the `startRound` lambda (see above). This standalone version is primarily used for development and testing purposes.
-
 ## Development
 
 Follow these guidelines for developing and maintaining lambdas:
