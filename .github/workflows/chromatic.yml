@@ -1,12 +1,10 @@
 name: Chromatic
 
 on:
-  pull_request_target:
-    branches:
-      - main
+  pull_request:
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -47,7 +45,7 @@ jobs:
           buildScriptName: build-storybook
           exitZeroOnChanges: false
           autoAcceptChanges: "main"
-          onlyStoryNames: "apps/frontend/src/stories/**"
+          onlyStoryFiles: "apps/frontend/src/stories/**"
           zip: true
         env:
           NEXT_PUBLIC_APP_ENV: staging
