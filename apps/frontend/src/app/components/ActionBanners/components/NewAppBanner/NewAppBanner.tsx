@@ -42,8 +42,7 @@ export const NewAppBanner = () => {
 
   return (
     <GenericBanner
-      variant="info"
-      title={t("NEW APP AVAILABLE")}
+      title={t("New app available")}
       description={description}
       illustration="/assets/icons/new-app-gold.svg"
       cta={

@@ -10,9 +10,8 @@ export const LowVthoBanner = () => {
   const { initTransak } = useBuyVtho()
   return (
     <GenericBanner
-      variant="info"
       illustration="/assets/icons/lightning.webp"
-      title={t("NOT ENOUGH VTHO")}
+      title={t("Not enough VTHO")}
       description={t("Get more VTHO to be able to vote and perform transactions!")}
       cta={
         <Button variant="secondary" onClick={initTransak}>

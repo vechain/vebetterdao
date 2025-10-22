@@ -12,3 +12,18 @@
 .swiper-slide-next {
   opacity: 0.5; /* Faded for the next/prev slides */
 }
+
+/* .swiper-pagination { */
+/*   --swiper-pagination-top: 0; */
+/*   text-align: left !important; */
+/*   left: var(--swiper-pagination-left) !important; */
+/* } */
+
+.swiper-pagination-bullets.swiper-pagination-horizontal {
+  --swiper-pagination-top: 0;
+  left: 40px;
+}
+
+.swiper-pagination-horizontal.swiper-pagination {
+  text-align: left;
+}

@@ -21,8 +21,7 @@ export const DoActionBanner = () => {
   return (
     <>
       <GenericBanner
-        variant="info"
-        title={t("TIME TO STEP UP! 🏃🏼‍♂️")}
+        title={t("Time to step up!")}
         description={description}
         illustration="/assets/icons/info-bell.webp"
         cta={

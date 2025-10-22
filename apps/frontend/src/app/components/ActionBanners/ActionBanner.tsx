@@ -1,8 +1,7 @@
-import { IconButton, Box } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
-import { A11y, Navigation } from "swiper/modules"
+import { A11y, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
@@ -42,7 +41,7 @@ import { StargateMigrationBanner } from "./components/StargateMigrationBanner/St
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 
 import "swiper/css"
-import "swiper/css/navigation"
+import "swiper/css/pagination"
 import "@/app/theme/swiper-custom.css"
 
 // VTHO threshold for low VTHO that triggers the banner
@@ -234,21 +233,23 @@ export const ActionBanner = () => {
     showStargateBanner,
   ])
 
-  const slidesPerView = slides.length === 1 ? 1 : 1.1
-
   if (slides.length === 0) return null
 
   return (
-    <Box position="relative">
+    <Box
+      position="relative"
+      css={{
+        "--swiper-pagination-top": 0,
+        "--swiper-pagination-left": "10px",
+        ".swiper-pagination": {
+          bg: "magenta",
+        },
+      }}>
       <Swiper
-        modules={[A11y, Navigation]}
+        modules={[A11y, Pagination]}
         spaceBetween={20} // Space between slides
-        slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
-        navigation={{
-          nextEl: ".custom-swiper-button-next",
-          prevEl: ".custom-swiper-button-prev",
-        }}
-        pagination={{ clickable: true }}
+        slidesPerView={1}
+        pagination={true}
         scrollbar={{ draggable: true }}
         style={{
           position: "relative",
@@ -256,6 +257,7 @@ export const ActionBanner = () => {
           height: "100%",
           overflow: "hidden",
           display: "flex",
+          textAlign: "left",
         }}>
         {slides.map(slide => (
           <SwiperSlide
@@ -274,34 +276,34 @@ export const ActionBanner = () => {
           </SwiperSlide>
         ))}
       </Swiper>
-
-      <IconButton
-        className="custom-swiper-button-prev"
-        hideBelow="md"
-        pos={"absolute"}
-        zIndex={2} // Ensure it's above the slides
-        variant="subtle"
-        color="actions.tertiary.default"
-        left={0}
-        top={"50%"}
-        transform={"translate(-50%, -50%)"}
-        aria-label="Prev slide">
-        <FaChevronLeft />
-      </IconButton>
-
-      <IconButton
-        className="custom-swiper-button-next"
-        hideBelow="md"
-        pos={"absolute"}
-        zIndex={2} // Ensure it's above the slides
-        variant="subtle"
-        color="actions.tertiary.default"
-        right={0}
-        top={"50%"}
-        transform={"translate(50%,-50%)"}
-        aria-label="Next slide">
-        <FaChevronRight />
-      </IconButton>
+      {/**/}
+      {/* <IconButton */}
+      {/*   className="custom-swiper-button-prev" */}
+      {/*   hideBelow="md" */}
+      {/*   pos={"absolute"} */}
+      {/*   zIndex={2} // Ensure it's above the slides */}
+      {/*   variant="subtle" */}
+      {/*   color="actions.tertiary.default" */}
+      {/*   left={0} */}
+      {/*   top={"50%"} */}
+      {/*   transform={"translate(-50%, -50%)"} */}
+      {/*   aria-label="Prev slide"> */}
+      {/*   <FaChevronLeft /> */}
+      {/* </IconButton> */}
+      {/**/}
+      {/* <IconButton */}
+      {/*   className="custom-swiper-button-next" */}
+      {/*   hideBelow="md" */}
+      {/*   pos={"absolute"} */}
+      {/*   zIndex={2} // Ensure it's above the slides */}
+      {/*   variant="subtle" */}
+      {/*   color="actions.tertiary.default" */}
+      {/*   right={0} */}
+      {/*   top={"50%"} */}
+      {/*   transform={"translate(50%,-50%)"} */}
+      {/*   aria-label="Next slide"> */}
+      {/*   <FaChevronRight /> */}
+      {/* </IconButton> */}
     </Box>
   )
 }

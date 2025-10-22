@@ -1,5 +1,4 @@
-import { Button, Text, Icon } from "@chakra-ui/react"
-import { UilInfoCircle } from "@iconscout/react-unicons"
+import { Button, Text } from "@chakra-ui/react"
 import { useTranslation, Trans } from "react-i18next"
 
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
@@ -25,13 +24,11 @@ export const DelegatingBanner = () => {
   return (
     <>
       <GenericBanner
-        variant="info"
-        title={t("Voting Power Delegated").toUpperCase()}
+        title={t("Voting power delegated")}
         description={description}
         illustration="/assets/logos/veDelegate.svg"
         cta={
           <Button variant="secondary" onClick={whatIsVeDelegate}>
-            <Icon as={UilInfoCircle} />
             {t("Learn more")}
           </Button>
         }

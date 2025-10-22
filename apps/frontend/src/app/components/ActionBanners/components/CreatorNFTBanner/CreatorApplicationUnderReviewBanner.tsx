@@ -6,8 +6,7 @@ export const CreatorApplicationUnderReviewBanner = () => {
   const { t } = useTranslation()
   return (
     <GenericBanner
-      variant="info"
-      title={t("CREATOR APPLICATION UNDER REVIEW")}
+      title={t("Creator application under review")}
       description={t("Your Creator's NFT application is currently under review.")}
       illustration="/assets/images/creator-nft.webp"
     />

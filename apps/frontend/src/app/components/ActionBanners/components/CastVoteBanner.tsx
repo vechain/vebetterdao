@@ -1,5 +1,4 @@
 import { Button } from "@chakra-ui/react"
-import { UilArrowRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -17,14 +16,12 @@ export const CastVoteBanner = () => {
 
   return (
     <GenericBanner
-      variant="info"
-      title={t("CAST YOUR VOTE NOW! ⚖️")}
+      title={t("Cast your vote now!")}
       illustration="/assets/icons/vote-icon.webp"
       description={t("It’s time to make your voice heard in this round and earn exciting rewards!")}
       cta={
         <Button variant="primary" onClick={handleVote}>
           {t("See round")}
-          <UilArrowRight color="white" />
         </Button>
       }
     />
