@@ -15,7 +15,7 @@ jobs:
           target: 'packages/contracts/'
           fail-on: 'none'
           cache: 'yarn'
-          compile-command: 'yarn contracts:compile'
+#          compile-command: 'yarn contracts:compile'
           ignore-compile: true
           slither-args: |
             --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --config-file slither.config.json --checklist --json slither.raw.json --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
