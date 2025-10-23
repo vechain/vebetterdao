@@ -1526,6 +1526,7 @@
   "You can select up to {{amount}} dApps when automation is on. To add more, disable automation.": "You can select up to {{amount}} dApps when automation is on. To add more, disable automation.",
   "No changes detected": "No changes detected",
   "Disabling automation": "Disabling automation",
+  "You are about to disable auto-voting. This action will take effect starting from next round.": "You are about to disable auto-voting. This action will take effect starting from next round.",
   "Automation": "Automation",
   "Once your transaction is submitted, you will not be able to revert it.": "Once your transaction is submitted, you will not be able to revert it.",
   "Review your vote details below. Go back if you need to make changes.": "Review your vote details below. Go back if you need to make changes.",

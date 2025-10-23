@@ -186,7 +186,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                 <Alert.Content>
                   <Alert.Title>{t("Disabling automation")}</Alert.Title>
                   <Alert.Description textStyle="sm">
-                    {t("This action will take effect starting next round.")}
+                    {t("You are about to disable auto-voting. This action will take effect starting from next round.")}
                   </Alert.Description>
                 </Alert.Content>
               </Alert.Root>
