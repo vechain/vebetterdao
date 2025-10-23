@@ -39,7 +39,7 @@ import {
   waitForVotingPeriodToEnd,
 } from "../helpers/common"
 
-describe.only("Governance - Mark in development/completed - @shard4k", function () {
+describe("Governance - Mark in development/completed - @shard4k", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -106,6 +106,64 @@ describe.only("Governance - Mark in development/completed - @shard4k", function 
     governorProposalLogicInterface = GovernorProposalLogic__factory.createInterface()
     governorInterface = B3TRGovernor__factory.createInterface()
     b3trContract = await ethers.getContractFactory("B3TR")
+  })
+
+  describe("State Transitions - Mark as IN-DEVELOPMENT", function () {
+    it("(EXECUTABLE PROPOSAL) Should NOT be able to mark as IN-DEVELOPMENT from SUCCEEDED state - must execute first", async function () {
+      const functionToCall = "tokenDetails"
+      const encodedFunctionCall = b3trContract.interface.encodeFunctionData(functionToCall, [])
+      const targets = [await b3tr.getAddress()]
+      const values = [0]
+      const calldatas = [encodedFunctionCall]
+      const description = `description-${this.test?.title}`
+      const startRoundId = (await getRoundId()) + 1
+
+      // Create executable proposal
+      const tx = await governor.connect(proposer).propose(targets, values, calldatas, description, startRoundId, 0)
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // Deposit and support
+      const proposalDepositThreshold = await governor.proposalDepositThreshold(proposalId)
+      await setupSupporter(proposer, vot3, proposalDepositThreshold, governor)
+      await governor.connect(proposer).deposit(proposalDepositThreshold, proposalId)
+
+      await waitForCurrentRoundToEnd()
+
+      // Setup voters
+      await setupVoter(otherAccounts[0], b3tr, vot3, minterAccount, owner, veBetterPassport)
+      await setupVoter(otherAccounts[1], b3tr, vot3, minterAccount, owner, veBetterPassport)
+      await setupVoter(otherAccounts[2], b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      // Start voting round
+      await startNewAllocationRound({ emissions, xAllocationVoting })
+
+      // Wait for proposal to be active
+      await waitForProposalToBeActive(proposalId, { governor })
+
+      // Vote
+      await governor.connect(otherAccounts[0]).castVote(proposalId, 1)
+      await governor.connect(otherAccounts[1]).castVote(proposalId, 1)
+      await governor.connect(otherAccounts[2]).castVote(proposalId, 1)
+
+      // Wait for voting period to end
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Start queue/execution round
+      await startNewAllocationRound({ emissions, xAllocationVoting })
+
+      // Proposal should be succeeded
+      expect(await governor.state(proposalId)).to.equal(4) // Succeeded
+
+      // Should NOT be able to mark as IN-DEVELOPMENT from Succeeded state
+      await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
+      await expect(governor.connect(owner).markAsInDevelopment(proposalId)).to.be.revertedWithCustomError(
+        governor,
+        "GovernorRestrictedProposal",
+      )
+
+      // State should remain Succeeded
+      expect(await governor.state(proposalId)).to.equal(4) // Succeeded
+    })
   })
 
   describe("Permissions - Mark as IN-DEVELOPMENT", function () {
