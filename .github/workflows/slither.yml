@@ -8,7 +8,7 @@ on:
    pull_request:
 
 jobs:
-   run-slither:
+   compile-slither:
     name: Slither Analysis
     runs-on: ubuntu-latest
     #needs: check-changes
@@ -37,7 +37,7 @@ jobs:
       - name: Compile contracts
         run: yarn contracts:compile
 
-      - name: Run Slither
+   run-slither:
         uses: vechain/github-actions/.github/workflows/slither.yaml@feature/waqar/add-falsepositive-slither  #v1.10.0
         with:
           solc-version: '0.8.20'
