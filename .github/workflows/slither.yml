@@ -7,11 +7,11 @@ on:
        - add-slither
    pull_request:
 
- jobs:
+jobs:
    run-slither:
     name: Slither Analysis
     runs-on: ubuntu-latest
-    needs: check-changes
+    #needs: check-changes
     if: false
     steps:
       - name: Checkout repository
