@@ -172,9 +172,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               <Alert.Content>
                 <Alert.Title>{t("Updating automation preferences")}</Alert.Title>
                 <Alert.Description textStyle="sm">
-                  {t(
-                    "You have already voted in this round. This transaction will only update your automation preferences.",
-                  )}
+                  {t("This will update your automation preferences.")}
                 </Alert.Description>
               </Alert.Content>
             </Alert.Root>

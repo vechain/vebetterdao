@@ -19,6 +19,7 @@ import { useIsAutoVotingEnabledInCurrentRound } from "../../../../api/contracts/
 import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
 import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
 import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
+import { AutomationStatusBadge } from "../../../../components/AutomationStatusBadge"
 import { VOT3Icon } from "../../../../components/Icons/VOT3Icon"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../constants/AnalyticsEvents"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
@@ -108,6 +109,10 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
               </Text>
             </Skeleton>
             <Separator color={"#D5D5D5"} />
+
+            {!!account?.address && <AutomationStatusBadge />}
+
+            <Separator color={"#D5D5D5"} />
             <Stack
               direction={["column", "column", "row"]}
               w="full"
@@ -161,7 +166,6 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
               </Stack>
               {!shouldSeeVoteButtonLoading && !isFinished && (
                 <>
-                  {/* TODO: Add translation */}
                   {/* Show Automation button if user has already voted OR auto-voting is active in current round */}
                   {/* This allows them to toggle auto-voting on/off and update app preferences */}
                   {(hasVoted || isAutoVotingEnabledInCurrentRound) && (
@@ -176,8 +180,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                       {t("Automation")}
                     </Button>
                   )}
-                  {/* TODO: Add translation */}
-                  {/* Show Cast your vote button if user hasn't voted AND auto-voting is not active */}
+                  {/* Show Cast your vote button if user hasn't voted AND auto-voting is not active in current round */}
                   {/* User will follow the standard voting flow */}
                   {!hasVoted && !isAutoVotingEnabledInCurrentRound && shouldSeeVoteButton && (
                     <Button

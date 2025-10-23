@@ -1515,7 +1515,7 @@
   "Uploading...": "Uploading...",
   "Stored": "Stored",
   "Updating automation preferences": "Updating automation preferences",
-  "You have already voted in this round. This transaction will only update your automation preferences.": "You have already voted in this round. This transaction will only update your automation preferences.",
+  "This will update your automation preferences.": "This will update your automation preferences.",
   "Your automation preferences": "Your automation preferences",
   "{{apps}} apps selected": "{{apps}} apps selected",
   "Modify your preferences to continue": "Modify your preferences to continue",
@@ -1528,5 +1528,11 @@
   "Disabling automation": "Disabling automation",
   "Automation": "Automation",
   "Once your transaction is submitted, you will not be able to revert it.": "Once your transaction is submitted, you will not be able to revert it.",
-  "Review your vote details below. Go back if you need to make changes.": "Review your vote details below. Go back if you need to make changes."
+  "Review your vote details below. Go back if you need to make changes.": "Review your vote details below. Go back if you need to make changes.",
+  "Automation Active": "Automation Active",
+  "Auto-voting active": "Auto-voting active",
+  "Automation Pending": "Automation Pending",
+  "Starting next round": "Starting next round",
+  "No Automation": "No Automation",
+  "Manual voting": "Manual voting"
 }
