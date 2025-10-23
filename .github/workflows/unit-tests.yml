@@ -134,6 +134,8 @@ jobs:
             label: TimeLock
           - shard: shard7
             label: Treasury
+          - shard: shard7b
+            label: Dynamic Base Allocation Pool
           - shard: shard8
             label: VeBetterPassport
           - shard: shard8a
@@ -146,6 +148,10 @@ jobs:
             label: VOT3
           - shard: shard10
             label: VoterRewards
+          - shard: shard10a
+            label: VoterRewards - Upgrade
+          - shard: shard10b
+            label: VoterRewards - Relayer Claim Rewards
           - shard: shard11
             label: X2EarnCreator
           - shard: shard12
@@ -154,6 +160,10 @@ jobs:
             label: X-Allocation Pool
           - shard: shard14
             label: X-Allocation Voting
+          - shard: shard14a
+            label: X-Allocation Voting - Upgrade
+          - shard: shard14b
+            label: X-Allocation Voting - Auto Voting
           - shard: shard15
             label: X-Apps
           - shard: shard16
@@ -162,6 +172,8 @@ jobs:
             label: X-Apps Additional Tests A
           - shard: shard17b
             label: X-Apps Additional Tests B
+          - shard: shard18
+            label: RelayerRewardsPool
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -255,71 +267,44 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-#  run-slither:
-#    name: Slither Analysis
-#    runs-on: ubuntu-latest
-#    needs: check-changes
-#    if: false
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v3
-#
-#      - name: Use Node v20
-#        uses: actions/setup-node@v3
-#        with:
-#          node-version-file: .nvmrc
-#          cache: "yarn"
+  run-slither:
+    name: Slither Analysis
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#      - name: Install dependencies
-#       run: yarn install --frozen-lockfile
-#
-#      - name: Cache Solidity compilers
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.cache/hardhat-nodejs
-#          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
-#          restore-keys: |
-#            ${{ runner.os }}-solc-
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
 
-#      - name: Compile contracts
-#        run: yarn contracts:compile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-      #- name: Run Slither
-      #  uses: crytic/slither-action@v0.4.0
-      #  id: slither
-      #  with:
-      #    ignore-compile: true
-      #    target: "packages/contracts/"
-      #    solc-version: "0.8.20"
-      #    fail-on: none
-      #    slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+      - name: Cache Solidity compilers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/hardhat-nodejs
+          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-solc-
 
-#      - name: Run Slither
-#        uses: vechain/github-actions/.github/workflows/slither.yaml@57aaf426374fa4d13d91d6039c1cc063a59bbf3c
-#        with:
-#          solc-version: '0.8.20'
-#          target: 'packages/contracts/'
-#          fail-on: 'none'
-#          cache: 'yarn'
-          #compile-command: 'yarn contracts:compile'
-#          ignore-compile: true
-#          slither-args: |
-#            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+      - name: Compile contracts
+        run: yarn contracts:compile
 
-#      - name: Upload Slither report
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: slither-report
-#          path: slither-report.md
-
-#      - name: Create/update checklist as PR comment
-#        uses: actions/github-script@v7
-#        if: github.event_name == 'pull_request'
-#        env:
-#          REPORT: ${{ steps.slither.outputs.stdout }}
-#        with:
-#          script: |
-#            const script = require('.github/scripts/comment')
-#            const header = '# Slither report'
-#            const body = process.env.REPORT
-#            await script({ github, context, header, body })
+      - name: Run Slither
+        uses: vechain/github-actions/.github/workflows/slither.yaml@feature/waqar/add-falsepositive-slither  #v1.10.0
+        with:
+          solc-version: '0.8.20'
+          target: 'packages/contracts/'
+          fail-on: 'none'
+          cache: 'yarn'
+#          compile-command: 'yarn contracts:compile'
+          ignore-compile: true
+          slither-args: |
+            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --config-file slither.config.json --checklist --json slither.raw.json --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+#           --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
