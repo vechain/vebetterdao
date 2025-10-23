@@ -13,17 +13,12 @@
   opacity: 0.5; /* Faded for the next/prev slides */
 }
 
-/* .swiper-pagination { */
-/*   --swiper-pagination-top: 0; */
-/*   text-align: left !important; */
-/*   left: var(--swiper-pagination-left) !important; */
-/* } */
-
-.swiper-pagination-bullets.swiper-pagination-horizontal {
-  --swiper-pagination-top: 0;
-  left: 40px;
+.action-banner ~ .swiper-pagination {
+  line-height: 0;
+  text-align: var(--swiper-pagination-text-align, "center") !important;
+  left: var(--swiper-pagination-left, 0) !important;
 }
 
-.swiper-pagination-horizontal.swiper-pagination {
-  text-align: left;
+.action-banner > .swiper-slide {
+  height: auto;
 }

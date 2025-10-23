@@ -1,5 +1,7 @@
-import { Card, Image, Heading, Text, Box, CloseButton, Flex, CardRootProps } from "@chakra-ui/react"
+import { Card, Image, Heading, Text, Box, CloseButton, Flex, BoxProps, Float } from "@chakra-ui/react"
 import { ReactNode } from "react"
+
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 type BannerVariant = "default" | "b3mo"
 type BannerSize = "S" | "M" | "L"
@@ -7,34 +9,23 @@ type BannerSize = "S" | "M" | "L"
 interface BannerConfig {
   bg: string
   illustration: string
-  bgImage: string
+  bgImageLight: string
+  bgImageDark: string
 }
 
 const variantConfig: Record<BannerVariant, BannerConfig> = {
   default: {
     bg: "banner.blue",
     illustration: "/assets/images/grants/step-1.webp",
-    bgImage: "/assets/backgrounds/clouds-blue.webp",
+    bgImageLight: "/assets/backgrounds/banner-bg-blue-light.webp",
+    bgImageDark: "/assets/backgrounds/banner-bg-blue-dark.webp",
   },
   b3mo: {
     bg: "banner.green",
     illustration: "/assets/mascot/mascot-welcoming.webp",
-    bgImage: "/assets/backgrounds/clouds-blue.webp",
+    bgImageLight: "/assets/backgrounds/banner-bg-green-light.webp",
+    bgImageDark: "/assets/backgrounds/banner-bg-green-dark.webp",
   },
-}
-
-const bgPositioning = {
-  top: { base: "-86.5%", lg: "50%" },
-  right: { base: "-63.4%", lg: "-14.5%" },
-  w: { base: "127%", lg: "56%" },
-  h: { base: "273%", lg: "380%" },
-  transform: { base: "none", lg: "translateY(-50%)" },
-}
-
-const paddings: Record<BannerSize, CardRootProps["p"]> = {
-  S: "4", // 16px
-  M: "6", // 24px
-  L: "10", // 40px
 }
 
 const titleSizes = {
@@ -64,6 +55,18 @@ type B3MOIllustration =
   | "/assets/mascot/mascot-welcoming.webp"
   | "/assets/images/b3mo-stargate-greet.webp"
 
+type GenericBannerProps = {
+  title: string
+  description: ReactNode
+  cta?: ReactNode
+  size?: BannerSize
+  onClose?: () => void
+  illustrationDimensions?: {
+    width?: BoxProps["width"]
+    height?: BoxProps["height"]
+  }
+} & ({ variant?: "default"; illustration?: string } | { variant: "b3mo"; illustration?: B3MOIllustration })
+
 export const GenericBanner = ({
   variant = "default",
   title,
@@ -72,14 +75,11 @@ export const GenericBanner = ({
   size = "M",
   onClose,
   illustration,
-}: {
-  title: string
-  description: ReactNode
-  cta?: ReactNode
-  size?: BannerSize
-  onClose?: () => void
-} & ({ variant?: "default"; illustration?: string } | { variant: "b3mo"; illustration?: B3MOIllustration })) => {
+  illustrationDimensions,
+}: GenericBannerProps) => {
   const config = variantConfig[variant]
+  const bgImage = useColorModeValue(config.bgImageLight, config.bgImageDark)
+
   return (
     <Card.Root
       flex={1}
@@ -91,29 +91,23 @@ export const GenericBanner = ({
       border="sm"
       borderColor="border.secondary"
       position="relative"
-      p={paddings[size]}>
-      <Box position="absolute" {...bgPositioning} display="flex" alignItems="center" justifyContent="center">
-        <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center" position="relative">
-          <Image
-            src="/assets/backgrounds/cloud-blue.webp"
-            alt=""
-            w="full"
-            h="auto"
-            aspectRatio={{ base: "1.068", lg: "1.079" }}
-            objectFit="cover"
-            objectPosition="center"
-            opacity={{ base: 1, _dark: 0.2 }}
-          />
-        </Box>
-      </Box>
+      px={{ base: 4, lg: 10 }}
+      py={{ base: 4, lg: 6 }}
+      pt={{
+        base: 4 + 4,
+        lg: 6,
+      }}>
+      <Float right={{ base: "20px", md: "175px" }} placement="middle-end" height="100%">
+        <Image src={bgImage} alt="bg-image-banner" h="full" w="auto" />
+      </Float>
 
       <Flex
         position="absolute"
-        right={{ base: "20px", md: "40px" }}
+        right={{ base: "4", md: "16" }}
         top="50%"
         transform="translateY(-50%)"
-        w="140px"
-        h="140px"
+        w={illustrationDimensions?.width || (variant === "b3mo" ? "150px" : "128px")}
+        h={illustrationDimensions?.height || (variant === "b3mo" ? "150px" : "128px")}
         zIndex={1}>
         <Image src={illustration || config.illustration} alt="" w="full" h="full" objectFit="contain" />
       </Flex>
@@ -133,7 +127,14 @@ export const GenericBanner = ({
         />
       )}
 
-      <Flex position="relative" zIndex={1} flex={1} flexDirection="column" gap={gaps[size]} maxW="60%">
+      <Flex
+        position="relative"
+        zIndex={1}
+        flex={1}
+        flexDirection="column"
+        gap={gaps[size]}
+        maxW="60%"
+        justifyContent="space-between">
         <Box display="flex" flexDirection="column" gap="2">
           <Heading size={titleSizes[size] as any} fontWeight="bold" color="text.default">
             {title}

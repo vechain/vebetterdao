@@ -11,7 +11,7 @@ export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
   return (
     <GenericBanner
       variant="b3mo"
-      illustration="/assets/images/b3mo-stargate-greet.webp"
+      illustration="/assets/mascot/mascot-explore-dapps@1x.webp"
       title={t("Stargate is live")}
       description={
         isLegacyNode
@@ -19,7 +19,7 @@ export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
           : t("Start staking VET to explore the new stargate universe !")
       }
       cta={
-        <Button asChild variant="primary">
+        <Button asChild variant="primary" maxWidth="max-content">
           <Link href="https://app.stargate.vechain.org/" target="_blank" rel="noopener noreferrer">
             {t("Explore")}
           </Link>

@@ -244,7 +244,7 @@ const config = defineConfig({
         },
         banner: {
           blue: { value: { base: "{colors.blue.50}", _dark: "{colors.blue.900}" } },
-          green: { value: { base: "#B1F16C", _dark: "#0E3A02" } },
+          green: { value: { base: "#F3FFE1", _dark: "#062E00" } },
           yellow: { value: { base: "#FFD979", _dark: "#54441A" } },
           "dashboard-tokens": { value: { base: "#0153F2", _dark: "{colors.blue.900}" } },
         },

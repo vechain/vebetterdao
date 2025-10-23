@@ -1,7 +1,17 @@
-import { Button, VStack, Text, Box, For } from "@chakra-ui/react"
+import { VStack, Button } from "@chakra-ui/react"
 import { Meta } from "@storybook/nextjs-vite"
 import { cloneElement } from "react"
 
+import { CastVoteBanner } from "@/app/components/ActionBanners/components/CastVoteBanner"
+import { CreatorApplicationApprovedBanner } from "@/app/components/ActionBanners/components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
+import { CreatorApplicationRejectedBanner } from "@/app/components/ActionBanners/components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
+import { CreatorApplicationUnderReviewBanner } from "@/app/components/ActionBanners/components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
+import { DelegatingBanner } from "@/app/components/ActionBanners/components/DelegatingBanner"
+import { DoActionBanner } from "@/app/components/ActionBanners/components/DoActionBanner/DoActionBanner"
+import { LowVthoBanner } from "@/app/components/ActionBanners/components/LowVthoBanner/LowVthoBanner"
+import { NewAppBanner } from "@/app/components/ActionBanners/components/NewAppBanner/NewAppBanner"
+import { StargateMigrationBanner } from "@/app/components/ActionBanners/components/StargateMigrationBanner/StargateMigrationBanner"
+import { UserSignaledBanner } from "@/app/components/ActionBanners/components/UserSignaledBanner/UserSignaledBanner"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 const meta = {
@@ -13,26 +23,20 @@ export default meta
 
 export const LightMode = () => (
   <VStack gap="8" w="full">
-    <For
-      each={[
-        { variant: "default" as const, color: "Blue" },
-        { variant: "b3mo" as const, color: "Green" },
-      ]}>
-      {({ variant, color }) => (
-        <Box w="full">
-          <Text textStyle="xl" fontWeight="bold" mb="2">
-            {color} Variant
-          </Text>
-          <GenericBanner
-            variant={variant}
-            title="Lorem ipsum"
-            description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
-            cta={<Button variant="primary">Button</Button>}
-            onClose={() => alert(`Closed ${color}`)}
-          />
-        </Box>
-      )}
-    </For>
+    <GenericBanner
+      variant="default"
+      title="Lorem ipsum"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+      cta={<Button variant="primary">Button</Button>}
+      onClose={() => alert("Closed")}
+    />
+    <GenericBanner
+      variant="b3mo"
+      title="Lorem ipsum"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+      cta={<Button variant="primary">Button</Button>}
+      onClose={() => alert("Closed")}
+    />
   </VStack>
 )
 
@@ -47,59 +51,10 @@ MobileDarkMode.globals = { theme: "dark", viewport: { value: "mobile2" } }
 
 export const ActionBannersLightMode = () => (
   <VStack gap="8" w="full">
-    <For
-      each={
-        [
-          {
-            variant: "default",
-            title: "Not enough VTHO",
-            description: "Get more VTHO to be able to vote and perform transaction!",
-            buttonText: "Get VTHO",
-            buttonVariant: "primary",
-          },
-          {
-            variant: "default",
-            title: "Voting power delegated",
-            description: (
-              <>
-                Your voting power is currently delegated to{" "}
-                <Text as="span" textDecoration="underline">
-                  veDelegate.vet
-                </Text>
-                . To vote directly here, please remove the delegation before the snapshot.
-              </>
-            ),
-            buttonText: "Learn more",
-            buttonVariant: "secondary",
-          },
-          {
-            variant: "default",
-            title: "Time to step up!",
-            description: "Complete Better Actions in our apps and unlock your right to vote. Make your impact count!",
-            buttonText: "Learn more",
-            buttonVariant: "ghost",
-          },
-          {
-            variant: "default",
-            title: "Cast your vote now!",
-            description: "It's time to make your voice heard in this round and earn extra exiting rewards!",
-            buttonText: "See round",
-            buttonVariant: "primary",
-          },
-        ] as const
-      }>
-      {({ variant, title, description, buttonText, buttonVariant }) => (
-        <Box w="full">
-          <GenericBanner
-            variant={variant}
-            title={title}
-            description={description}
-            cta={<Button variant={buttonVariant as any}>{buttonText}</Button>}
-            onClose={() => alert(`Closed ${title}`)}
-          />
-        </Box>
-      )}
-    </For>
+    <LowVthoBanner />
+    <DelegatingBanner />
+    <DoActionBanner />
+    <CastVoteBanner />
   </VStack>
 )
 
@@ -114,44 +69,9 @@ ActionBannersMobileDarkMode.globals = { theme: "dark", viewport: { value: "mobil
 
 export const CreatorBannersLightMode = () => (
   <VStack gap="8" w="full">
-    <For
-      each={
-        [
-          {
-            variant: "default",
-            title: "Creators NFT received",
-            description: "Your Creator application was approved. Submit your app!",
-            buttonText: "Submit app",
-            buttonVariant: "primary",
-          },
-          {
-            variant: "default",
-            title: "Creators Application rejected",
-            description: "Your Creator' NFT application was rejected",
-            buttonText: "Apply again",
-            buttonVariant: "primary",
-          },
-          {
-            variant: "default",
-            title: "Creators Application under review",
-            description: "Your Creator' application is being reviewed",
-            buttonText: "Check status",
-            buttonVariant: "ghost",
-          },
-        ] as const
-      }>
-      {({ variant, title, description, buttonText, buttonVariant }) => (
-        <Box w="full">
-          <GenericBanner
-            variant={variant}
-            title={title}
-            description={description}
-            cta={<Button variant={buttonVariant as any}>{buttonText}</Button>}
-            onClose={() => alert(`Closed ${title}`)}
-          />
-        </Box>
-      )}
-    </For>
+    <CreatorApplicationApprovedBanner />
+    <CreatorApplicationRejectedBanner />
+    <CreatorApplicationUnderReviewBanner />
   </VStack>
 )
 
@@ -166,53 +86,8 @@ CreatorBannersMobileDarkMode.globals = { theme: "dark", viewport: { value: "mobi
 
 export const AnnouncementBannersLightMode = () => (
   <VStack gap="8" w="full">
-    <For
-      each={
-        [
-          {
-            variant: "default",
-            title: "Active proposal",
-            description: "Sample proposal title for testing",
-            buttonText: "View proposal",
-            buttonVariant: "primary",
-          },
-          {
-            variant: "default",
-            title: "New App available",
-            description: "Sample App just joined the DAO! Get involved in the app now!",
-            buttonText: "Explore",
-            buttonVariant: "primary",
-          },
-          {
-            variant: "default",
-            title: "You have been signalled",
-            description: (
-              <>
-                You have been signalled by{" "}
-                <Text as="span" fontWeight="semibold">
-                  Mugshot
-                </Text>
-                . If you believe this signal is unfair, please reach out to the app that signalled you to resolve the
-                issue.
-              </>
-            ),
-            buttonText: "Appeal",
-            buttonVariant: "ghost",
-          },
-        ] as const
-      }>
-      {({ variant, title, description, buttonText, buttonVariant }) => (
-        <Box w="full">
-          <GenericBanner
-            variant={variant}
-            title={title}
-            description={description}
-            cta={<Button variant={buttonVariant as any}>{buttonText}</Button>}
-            onClose={() => alert(`Closed ${title}`)}
-          />
-        </Box>
-      )}
-    </For>
+    <NewAppBanner />
+    <UserSignaledBanner />
   </VStack>
 )
 
@@ -227,35 +102,8 @@ AnnouncementBannersMobileDarkMode.globals = { theme: "dark", viewport: { value: 
 
 export const StargateAnnouncementsLightMode = () => (
   <VStack gap="8" w="full">
-    <For
-      each={
-        [
-          {
-            variant: "b3mo",
-            title: "Stargate is live",
-            description: "Start staking VET to explore the new Stargate universe!",
-            buttonText: "Explore",
-          },
-          {
-            variant: "b3mo",
-            title: "Stargate is live",
-            description: "Migrate your legacy node to discover the new Stargate universe",
-            buttonText: "Explore",
-          },
-        ] as const
-      }>
-      {({ variant, title, description, buttonText }) => (
-        <Box w="full">
-          <GenericBanner
-            variant={variant}
-            title={title}
-            description={description}
-            cta={<Button variant="primary">{buttonText}</Button>}
-            onClose={() => alert(`Closed ${title}`)}
-          />
-        </Box>
-      )}
-    </For>
+    <StargateMigrationBanner isLegacyNode={false} />
+    <StargateMigrationBanner isLegacyNode={true} />
   </VStack>
 )
 

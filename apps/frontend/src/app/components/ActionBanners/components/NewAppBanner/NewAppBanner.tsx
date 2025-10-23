@@ -1,5 +1,4 @@
-import { Button, Icon } from "@chakra-ui/react"
-import { UilArrowRight } from "@iconscout/react-unicons"
+import { Button } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
@@ -48,7 +47,6 @@ export const NewAppBanner = () => {
       cta={
         <Button onClick={GOTOAPPS} variant="primary">
           {t("Explore")}
-          <Icon as={UilArrowRight} />
         </Button>
       }
     />

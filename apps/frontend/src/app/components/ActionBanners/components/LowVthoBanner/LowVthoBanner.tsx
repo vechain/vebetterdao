@@ -1,5 +1,4 @@
-import { Button, Icon } from "@chakra-ui/react"
-import { UilArrowRight } from "@iconscout/react-unicons"
+import { Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
@@ -14,9 +13,8 @@ export const LowVthoBanner = () => {
       title={t("Not enough VTHO")}
       description={t("Get more VTHO to be able to vote and perform transactions!")}
       cta={
-        <Button variant="secondary" onClick={initTransak}>
+        <Button variant="primary" onClick={initTransak}>
           {t("Get more VTHO")}
-          <Icon as={UilArrowRight} />
         </Button>
       }
     />

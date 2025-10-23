@@ -1,5 +1,4 @@
 import { Button, useDisclosure } from "@chakra-ui/react"
-import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -25,9 +24,8 @@ export const DoActionBanner = () => {
         description={description}
         illustration="/assets/icons/info-bell.webp"
         cta={
-          <Button variant="primary" onClick={doActionModal.onOpen}>
-            <UilInfoCircle />
-            {t("Know more")}
+          <Button variant="secondary" onClick={doActionModal.onOpen}>
+            {t("Learn more")}
           </Button>
         }
       />

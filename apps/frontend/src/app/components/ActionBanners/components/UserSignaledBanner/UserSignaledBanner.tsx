@@ -63,7 +63,7 @@ export const UserSignaledBanner = () => {
         }
         illustration="/assets/icons/info-bell.webp"
         cta={
-          <Button variant="secondary" onClick={onOpen}>
+          <Button padding="0" variant="link" onClick={onOpen}>
             {t("Appeal here")}
           </Button>
         }
