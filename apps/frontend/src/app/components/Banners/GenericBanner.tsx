@@ -4,7 +4,6 @@ import { ReactNode } from "react"
 import { useColorModeValue } from "@/components/ui/color-mode"
 
 type BannerVariant = "default" | "b3mo"
-type BannerSize = "S" | "M" | "L"
 
 interface BannerConfig {
   bg: string
@@ -28,24 +27,6 @@ const variantConfig: Record<BannerVariant, BannerConfig> = {
   },
 }
 
-const titleSizes = {
-  S: "md",
-  M: "xl",
-  L: "2xl",
-}
-
-const descSizes = {
-  S: "sm",
-  M: "sm",
-  L: "md",
-}
-
-const gaps = {
-  S: "2",
-  M: "6",
-  L: "6",
-}
-
 type B3MOIllustration =
   | "/assets/mascot/mascot-explore-dapps@1x.webp"
   | "/assets/mascot/mascot-explore-dapps@2x.webp"
@@ -59,7 +40,6 @@ type GenericBannerProps = {
   title: string
   description: ReactNode
   cta?: ReactNode
-  size?: BannerSize
   onClose?: () => void
   illustrationDimensions?: {
     width?: BoxProps["width"]
@@ -72,7 +52,6 @@ export const GenericBanner = ({
   title,
   description,
   cta,
-  size = "M",
   onClose,
   illustration,
   illustrationDimensions,
@@ -85,6 +64,7 @@ export const GenericBanner = ({
       flex={1}
       w="full"
       h="full"
+      minH="40"
       borderRadius="xl"
       overflow="hidden"
       bg={config.bg}
@@ -97,7 +77,7 @@ export const GenericBanner = ({
         base: 4 + 4,
         lg: 6,
       }}>
-      <Float right={{ base: "20px", md: "175px" }} placement="middle-end" height="100%">
+      <Float right={{ base: "20px", md: "175px" }} placement="middle-end" height="full" w="full">
         <Image src={bgImage} alt="bg-image-banner" h="full" w="auto" />
       </Float>
 
@@ -132,15 +112,14 @@ export const GenericBanner = ({
         zIndex={1}
         flex={1}
         flexDirection="column"
-        gap={gaps[size]}
-        maxW="60%"
+        gap={{ base: 2, md: 6 }}
         justifyContent="space-between">
-        <Box display="flex" flexDirection="column" gap="2">
-          <Heading size={titleSizes[size] as any} fontWeight="bold" color="text.default">
+        <Box display="flex" flexDirection="column" gap="2" maxW={{ base: "60%", lg: "80%" }}>
+          <Heading size={{ base: "md", md: "xl", lg: "2xl" }} fontWeight="bold" color="text.default">
             {title}
           </Heading>
           {typeof description === "string" ? (
-            <Text textStyle={descSizes[size]} color="text.subtle">
+            <Text textStyle={{ base: "sm", lg: "md" }} color="text.subtle">
               {description}
             </Text>
           ) : (

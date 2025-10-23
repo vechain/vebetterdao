@@ -17,9 +17,9 @@ export const useUserActionLeaderboard = (queryOptions: UserActionLeaderboardQuer
       getNextPageParam: (
         lastPage: UserActionLeaderboardQueryResponse,
         _allPages: UserActionLeaderboardQueryResponse[],
-        lastPageParam: number,
+        lastPageParam: unknown,
       ) => {
-        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+        return lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined
       },
     },
   )

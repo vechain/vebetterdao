@@ -12,7 +12,7 @@ export const CreatorApplicationRejectedBanner = () => {
   }
   return (
     <GenericBanner
-      title={t("CREATOR APPLICATION REJECTED")}
+      title={t("Creator application rejected")}
       description={t("Your Creator's NFT application was rejected")}
       illustration="/assets/mascot/mascot-warning-head.webp"
       cta={
