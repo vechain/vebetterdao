@@ -567,7 +567,7 @@ library GovernorProposalLogic {
   function markAsInDevelopment(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
-  ) external returns (uint256) {
+  ) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
     GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
 
@@ -596,7 +596,7 @@ library GovernorProposalLogic {
   function markAsCompleted(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
-  ) external returns (uint256) {
+  ) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
 
     // Only Standard proposals are allowed here.
