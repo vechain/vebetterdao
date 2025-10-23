@@ -61,11 +61,36 @@ const config: StorybookConfig = {
       "mocks/dayjsConfig.ts",
     )
 
+    // Mock openai package (Node.js only)
+    viteConfig.resolve.alias["openai"] = resolve(__dirname, "mocks/empty.ts")
+
     // Mock contracts package to prevent loading all typechain factories
+    // Order matters: more specific paths first
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/GrantsManager__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/Treasury__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/VOT3__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/@openzeppelin/access/AccessControl__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
     viteConfig.resolve.alias["@vechain/vebetterdao-contracts/typechain-types"] = resolve(
       __dirname,
       "mocks/contracts.ts",
     )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts"] = resolve(__dirname, "mocks/contracts.ts")
 
     // Mock API hooks to prevent loading contract dependencies
     viteConfig.resolve.alias["@/api/indexer/sustainability/useUserScore"] = resolve(__dirname, "mocks/api-hooks.ts")

@@ -14,5 +14,11 @@ export const B3TR__factory = createMockFactory("B3TR")
 export const VoterRewards__factory = createMockFactory("VoterRewards")
 export const GalaxyMember__factory = createMockFactory("GalaxyMember")
 export const XAllocationPool__factory = createMockFactory("XAllocationPool")
+export const NodeManagement__factory = createMockFactory("NodeManagement")
+export const GrantsManager__factory = createMockFactory("GrantsManager")
+export const Emissions__factory = createMockFactory("Emissions")
+export const X2EarnCreator__factory = createMockFactory("X2EarnCreator")
+export const AccessControl__factory = createMockFactory("AccessControl")
+export const Treasury__factory = createMockFactory("Treasury")
 
 export * from "./empty"
