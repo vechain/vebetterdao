@@ -13,6 +13,7 @@
     "build:lambda": "turbo build --filter='@repo/lambda'",
     "build:lambda:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo build --filter='@repo/lambda'",
     "build:lambda:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo build --filter='@repo/lambda'",
+    "build-storybook": "yarn workspace frontend build-storybook",
     "start": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- turbo start --",
     "start:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env -- turbo start:staging --",
     "start:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo start:testnet --",
