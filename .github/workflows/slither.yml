@@ -9,7 +9,7 @@ on:
 
 jobs:
   slither:
-        uses: vechain/github-actions/.github/workflows/slither.yaml@57aaf426374fa4d13d91d6039c1cc063a59bbf3c
+        uses: vechain/github-actions/.github/workflows/slither.yaml@feature/waqar/add-falsepositive-slither  #v1.10.0
         with:
           solc-version: '0.8.20'
           target: 'packages/contracts/'
@@ -18,4 +18,5 @@ jobs:
           compile-command: 'yarn contracts:compile'
           ignore-compile: true
           slither-args: |
-            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --config-file slither.config.json --checklist --json slither.raw.json --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+#           --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
