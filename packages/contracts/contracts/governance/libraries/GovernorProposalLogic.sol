@@ -129,10 +129,11 @@ library GovernorProposalLogic {
   error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
 
   /**
-   * @dev Thrown when a proposal type is not allowed to perform a specific action.
+   * @dev Thrown when a proposal is not allowed to perform a specific action.
    * Some actions are restricted to Standard proposals only, others to Grant proposals only.
+   * eg. Executable proposals cannot be marked as in development if not executed yet but Succeeded.
    */
-  error GovernorRestrictedProposalType(GovernorTypes.ProposalType proposalType);
+  error GovernorRestrictedProposal();
 
   /** ------------------ GETTERS ------------------ **/
 
@@ -568,11 +569,12 @@ library GovernorProposalLogic {
     uint256 proposalId
   ) external returns (uint256) {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
+    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
 
     // Only Standard proposals are allowed here.
     // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
     if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposalType(proposalType);
+      revert GovernorRestrictedProposal();
     }
 
     //Can only mark as in development if proposal is executed or succeeded
@@ -582,6 +584,9 @@ library GovernorProposalLogic {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) |
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded)
     );
+    if (proposal.isExecutable && GovernorStateLogic._state(self, proposalId) == GovernorTypes.ProposalState.Succeeded) {
+      revert GovernorRestrictedProposal();
+    }
 
     self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
     //Emit event
@@ -597,9 +602,9 @@ library GovernorProposalLogic {
     // Only Standard proposals are allowed here.
     // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
     if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposalType(proposalType);
+      revert GovernorRestrictedProposal();
     }
-    
+
     //Can only mark as in development if proposal is executed or succeeded
     GovernorStateLogic.validateStateBitmap(
       self,
