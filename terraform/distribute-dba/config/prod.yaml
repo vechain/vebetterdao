@@ -1,0 +1,16 @@
+---
+# AWS Configuration
+aws_region: eu-west-1
+aws_account_id: "851725442887"
+environment: "mainnet"
+
+# Lambda Configuration
+lambda_function_name: "distribute-dba"
+lambda_handler: "index.handler"
+lambda_runtime: "nodejs20.x"
+lambda_memory_size: 512
+lambda_timeout: 900
+
+# Lambda Build Path
+lambda_source_dir: "packages/lambda/dist/mainnet/distributeDBA"
+
