@@ -1,78 +1,77 @@
-import { Avatar, Text, VStack, HStack, AvatarGroup } from "@chakra-ui/react"
-import { FaChevronRight } from "react-icons/fa"
+import { Avatar, Text, VStack, HStack, AvatarGroup, Card, LinkBox, LinkOverlay, Icon } from "@chakra-ui/react"
+import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
+import { FaChevronRight } from "react-icons/fa"
 
 export const GmCard = ({
   title,
   subtitle,
   footer,
   images,
-  onCardClick,
+  href,
 }: {
   title?: string
   subtitle?: string
   images?: string[]
   footer?: string
-  onCardClick?: () => void
+  href?: string
 }) => {
   const { t } = useTranslation()
-
   const plusCount = images?.length ? images?.length - 2 : 0
-
   return (
-    <VStack
-      position="relative"
-      alignItems="flex-start"
-      gap="8px"
-      border="none"
-      bg="#FFFFFF26"
-      borderColor={"#FFFFFF33"}
-      p="12px 16px"
-      rounded="8px"
-      flex={1}
-      cursor={onCardClick ? "pointer" : "default"}
-      onClick={onCardClick}>
-      <HStack w="full" justifyContent="space-between">
-        <Text display="block" fontSize="sm" color="#FFFFFFB2">
-          {subtitle}
-        </Text>
-        {images && images?.length > 1 && (
-          <HStack gap={1} fontSize="14px" fontWeight={500} lineHeight={1}>
-            <Text>{t("See all")}</Text>
-            <FaChevronRight size="14px" />
-          </HStack>
-        )}
-      </HStack>
-
-      <HStack alignItems="start">
-        <AvatarGroup rounded="8px" shape="square" size="xl" stacking="last-on-top" spaceX={"-1.5rem"}>
-          {images?.slice(0, 2)?.map(image => (
-            <Avatar.Root key={image} border="none" rounded="8px">
-              <Avatar.Image rounded="8px" src={image} />
-            </Avatar.Root>
-          ))}
-
-          {plusCount > 0 && (
-            <Avatar.Root rounded="8px" border="1px solid #E5EEFF" background="#6194F5">
-              <Avatar.Fallback fontSize="12px">{`+${plusCount}`}</Avatar.Fallback>
-            </Avatar.Root>
-          )}
-        </AvatarGroup>
-
-        <VStack flex="1" flexDirection={"column-reverse"} alignItems="start" alignSelf="end" gap={0}>
-          <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-            <Text fontSize="xs" fontWeight={600} lineClamp={1}>
-              {footer}
+    <LinkBox flex={1}>
+      <Card.Root bg="transparency.200" gap="2" p="4">
+        <Card.Title asChild>
+          <HStack w="full" justifyContent="space-between">
+            <Text display="block" textStyle="sm" color="white" fontWeight="semibold">
+              {subtitle}
             </Text>
+            {images && images?.length > 1 && (
+              <HStack gap={1} textStyle="md" fontWeight="semibold">
+                <Text color="white" fontWeight="semibold">
+                  {t("See all")}
+                </Text>
+                <Icon as={FaChevronRight} color="white" boxSize="4" />
+              </HStack>
+            )}
           </HStack>
+        </Card.Title>
+        <Card.Body>
+          <LinkOverlay asChild>
+            <NextLink href={href ?? ""}>
+              <HStack alignItems="start">
+                <AvatarGroup rounded="lg" shape="square" size="xl" stacking="last-on-top" spaceX={"-1.5rem"}>
+                  {images?.slice(0, 2)?.map(image => (
+                    <Avatar.Root key={image} border="0" rounded="lg">
+                      <Avatar.Image rounded="lg" src={image} />
+                    </Avatar.Root>
+                  ))}
 
-          {title && (
-            <Text fontWeight={700} lineClamp={1}>
-              {title}
-            </Text>
-          )}
-        </VStack>
-      </HStack>
-    </VStack>
+                  {plusCount > 0 && (
+                    <Avatar.Root rounded="lg" border="1px solid #E5EEFF" background="status.info.primary">
+                      <Avatar.Fallback color="white" textStyle="xxs">{`+${plusCount}`}</Avatar.Fallback>
+                    </Avatar.Root>
+                  )}
+                </AvatarGroup>
+
+                <VStack flex="1" flexDirection={"column-reverse"} alignItems="start" alignSelf="end" gap="0">
+                  <HStack bg="#FFFFFF4A" rounded="lg" px="2" py="1" gap="1">
+                    <Text textStyle="xs" color="white" fontWeight="semibold" lineClamp={1}>
+                      {footer}
+                    </Text>
+                  </HStack>
+
+                  {title && (
+                    <Text textStyle="md" color="white" fontWeight="bold" lineClamp={1}>
+                      {title}
+                    </Text>
+                  )}
+                </VStack>
+              </HStack>
+            </NextLink>
+          </LinkOverlay>
+        </Card.Body>
+      </Card.Root>
+    </LinkBox>
   )
 }

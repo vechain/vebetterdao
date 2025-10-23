@@ -1,25 +1,25 @@
-import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
-import { buildClause } from "@/utils/buildClause"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { getAppAvailableFundsQueryKey } from "@/api/contracts/x2EarnRewardsPool"
 import { ethers } from "ethers"
-import { removingExcessDecimals } from "@/utils/MathUtils"
-import { useXApp } from "@/api"
+import { useCallback, useMemo } from "react"
+
+import { buildClause } from "@/utils/buildClause"
+
+import { getAppAvailableFundsQueryKey } from "../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useXApp } from "../api/contracts/xApps/hooks/useXApp"
+import { removingExcessDecimals } from "../utils/MathUtils/MathUtils"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const config = getConfig()
-
 const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
 const X2EARN_REWARDS_POOL_CONTRACT = config.x2EarnRewardsPoolContractAddress
-
 type UseWithdrawAppBalanceProps = {
   appId: string
   amount: string
   reason: string
   onSuccess?: () => void
 }
-
 /**
  * Custom hook for withdrawing B3TR from the x2Earn rewards pool.
  *
@@ -33,7 +33,6 @@ type UseWithdrawAppBalanceProps = {
 export const useWithdrawAppBalance = ({ appId, amount, reason, onSuccess }: UseWithdrawAppBalanceProps) => {
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
   const { data: app } = useXApp(appId)
-
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({

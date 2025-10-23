@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVoting__factory.abi
 const method = "totalVoters" as const
-
 /**
  * Returns the query key for fetching the allocation voters.
  * @param roundId The round ID to get the voters for
@@ -13,7 +12,6 @@ const method = "totalVoters" as const
  */
 export const getAllocationVotersQueryKey = (roundId?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId || 0)] })
-
 /**
  * Hook to get the number of voters for a given roundId
  * @param roundId The roundId to get the votes for

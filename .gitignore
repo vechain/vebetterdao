@@ -2,6 +2,11 @@
 
 build/**
 
+# AI
+.claude
+#codex
+AGENTS.md
+
 # Logs
 logs
 *.log

@@ -1,16 +1,15 @@
 // import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { VStack, Heading, Text } from "@chakra-ui/react"
 import { useMemo } from "react"
+
 // import dayjs from "dayjs"
 import { ProposalState } from "@/hooks/proposals/grants/types"
-
 type TimeLineElementsProps = {
   state: ProposalState
   round?: string // Some state don't have a specific round ( e.g : In Development )
   startDate: number // Unix timestamp in seconds
   endDate: number // Unix timestamp in seconds
 }
-
 export const TimelineElements = ({ state, round, startDate, endDate }: TimeLineElementsProps) => {
   const currentState = useMemo(() => {
     switch (state) {
@@ -34,7 +33,6 @@ export const TimelineElements = ({ state, round, startDate, endDate }: TimeLineE
         return "Project Executed"
     }
   }, [state])
-
   // format the timeInformation to MM DD, YYYY(start round) - MM DD, YYYY(end round)
   {
     /* If it is the current state, show the round information */

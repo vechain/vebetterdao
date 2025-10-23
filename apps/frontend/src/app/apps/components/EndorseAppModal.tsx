@@ -1,29 +1,25 @@
-import {
-  UnendorsedApp,
-  useAllocationsRound,
-  useAppEndorsementScore,
-  useCurrentAllocationsRoundId,
-  XApp,
-  useGetUserNodes,
-} from "@/api"
-import { useEndorseApp } from "@/hooks"
 import { VStack, Heading, Box, Text, Button, Skeleton, Card, Image, RadioGroup } from "@chakra-ui/react"
-
 import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
 import { t } from "i18next"
 import { useCallback, useMemo, useState } from "react"
 
 import { BaseModal } from "@/components/BaseModal"
-import { GenericAlert } from "@/app/components/Alert"
-import dayjs from "dayjs"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
+import { useAppEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useEndorseApp } from "../../../hooks/useEndorseApp"
+import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   xApp: XApp | UnendorsedApp | undefined
 }
-
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
@@ -34,16 +30,12 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
       .filter(node => !node.endorsedAppId && node.xNodePoints > 0)
       .sort((a, b) => Number(b.xNodePoints) - Number(a.xNodePoints))
   }, [nodes])
-
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
-
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
-
   const handleSuccess = useCallback(() => {
     onClose()
   }, [onClose])
-
   const endorseAppMutation = useEndorseApp({
     appId: xApp?.id ?? "",
     nodeId: selectedNodeId ?? "",
@@ -73,7 +65,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         onClose()
       }}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading size="xl" fontWeight={700}>
+        <Heading size="xl" fontWeight="bold">
           {t("Endorse {{appName}} app", { appName: xApp?.name })}
         </Heading>
 
@@ -84,7 +76,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           whiteSpace="normal"
           wordBreak="break-word"
           flexWrap="wrap"
-          fontSize="sm">
+          textStyle="sm">
           {t("Select your node")}
         </Text>
 
@@ -111,14 +103,14 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                     alignItems="center"
                     flexDirection="row">
                     <Card.Body p="0" gap="0">
-                      <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                      <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
                         {t("Node")}
                       </Text>
-                      <Text fontWeight={700} lineHeight={1.6} lineClamp={1}>
+                      <Text lineHeight={1.6} lineClamp={1}>
                         {`${node.name} #${node.nodeId}`}
                       </Text>
                       <Box w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                        <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
+                        <Text textStyle="xs" _dark={{ color: "#FFFFFFB2" }}>
                           {t("{{value}} points", { value: node.xNodePoints })}
                         </Text>
                       </Box>
@@ -133,7 +125,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             </VStack>
           </RadioGroup.Root>
 
-          <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+          <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
             {t("Current app score: {{score}}", { score: appScore })}
             <br />
             {t("App score after endorsement: {{score}}", { score: newScore })}
@@ -154,7 +146,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         ) : null}
 
         <Skeleton w="full" loading={isUserNodesLoading}>
-          <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement} disabled={!selectedNodeId}>
+          <Button variant={"primary"} w={"full"} onClick={handleEndorsement} disabled={!selectedNodeId}>
             {t("Endorse now")}
           </Button>
         </Skeleton>

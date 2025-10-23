@@ -1,44 +1,45 @@
 "use client"
-import {
-  useAllocationsRound,
-  useAllocationsRoundState,
-  useHasVotedInRound,
-  useVotingThreshold,
-  useRoundXApps,
-  useTotalVotesOnBlock,
-} from "@/api"
-import { Button, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useLayoutEffect, useMemo } from "react"
+import { Button, Card, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
+import { useCallback, useLayoutEffect, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
-import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
-import { ResponsiveCard } from "@/components"
-import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
-import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
 import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
-import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useTotalVotesOnBlock } from "../../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useVotingThreshold } from "../../../../../../api/contracts/governance/hooks/useVotingThreshold"
+import { useAllocationsRound } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import { useCastAllocationVotes, CastAllocationVotesProps } from "../../../../../../hooks/useCastAllocationVotes"
+import {
+  CastAllocationVoteFormData,
+  useCastAllocationFormStore,
+} from "../../../../../../store/useCastAllocationFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
+import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
+
 type Props = {
   roundId: string
 }
 
 const compactFormatter = getCompactFormatter(2)
+
 export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { onClose: closeTxModal } = useTransactionModal()
   const router = useRouter()
-
   const xAppsQuery = useRoundXApps(roundId)
-
   const { data: votes } = useCastAllocationFormStore()
-
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return votes
@@ -133,21 +134,21 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     <>
       <SeeVoteDetailsModal roundId={roundId} votes={votes} isOpen={seeAllModal.open} onClose={seeAllModal.onClose} />
 
-      <ResponsiveCard>
+      <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
         <VStack w="full" gap={8} align={"flex-start"}>
-          <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700} data-testid={"voting-confirmation-page-title"}>
+          <Heading size={["xl", "xl", "2xl"]} data-testid={"voting-confirmation-page-title"}>
             {t("Review and confirm")}
           </Heading>
-          <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
+          <Text textStyle={"md"} color="text.subtle">
             {t(
               "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
             )}
           </Text>
-          <ResponsiveCard cardProps={{ variant: "filled" }}>
+          <Card.Root bg={{ base: "transparent", md: "card.subtle" }} px={{ base: "0", md: "6" }} w="full">
             <VStack flex={1} w="full" gap={8} align={"flex-start"}>
               <VStack gap={2} align="flex-start" w="full">
                 <HStack w="full" justify="space-between">
-                  <Heading fontSize={["20px", "20px", "24px"]} fontWeight={700}>
+                  <Heading size={["xl", "xl", "2xl"]} fontWeight="bold">
                     {t("Your vote")}
                   </Heading>
                   <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
@@ -156,7 +157,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                   </Button>
                 </HStack>
                 <Skeleton loading={votesAtSnapshotLoading}>
-                  <Text fontSize="16px" fontWeight="400">
+                  <Text textStyle="md">
                     <Trans
                       i18nKey={"{{amount}} distributed among {{apps}} apps"}
                       values={{ amount: compactFormatter.format(totalVotesToCast ?? 0), apps: votes.length }}
@@ -167,18 +168,18 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               </VStack>
               <AppVotesBreakdown votes={parsedVotes} />
             </VStack>
-          </ResponsiveCard>
+          </Card.Root>
 
           <CastAllocationControlsBottomBar
             onContinue={onContinue}
             helperText={
-              <Text fontSize={"16px"} fontWeight={400} color={"#F29B32"} textAlign={["center", "center", "left"]}>
+              <Text textStyle={"md"} color={"#F29B32"} textAlign={["center", "center", "left"]}>
                 <Trans i18nKey={"Once your vote has been cast, you will not be able to revert it."} t={t} />
               </Text>
             }
           />
         </VStack>
-      </ResponsiveCard>
+      </Card.Root>
     </>
   )
 }

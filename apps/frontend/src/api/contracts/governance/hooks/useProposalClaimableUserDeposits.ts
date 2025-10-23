@@ -1,14 +1,15 @@
-import { useQuery } from "@tanstack/react-query"
-import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { ProposalFilter, StateFilter } from "@/store"
+import { useQuery } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
-import { useProposalEnriched } from "@/hooks/proposals/common"
+import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
+
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+
+import { useProposalEnriched } from "../../../../hooks/proposals/common/useProposalEnriched"
+import { ProposalFilter, StateFilter } from "../../../../store/useProposalFilters"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
-
 // Filters for proposals that have claimable deposits
 const CLAIMABLE_STATES = [
   ProposalFilter.InThisRound, // Active
@@ -19,9 +20,7 @@ const CLAIMABLE_STATES = [
   StateFilter.Executed,
   StateFilter.DepositNotMet,
 ]
-
 export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) => ["allClaimableDeposits", userAddress]
-
 /**
  * Custom React hook that fetches and monitors claimable user deposits for each proposal.
  *
@@ -40,7 +39,6 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
     CLAIMABLE_STATES,
     enrichedProposals,
   )
-
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),
     enabled: !!thor && !!userAddress && !filteredProposalsLoading,

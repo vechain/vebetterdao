@@ -1,6 +1,7 @@
-import { useProposalEnriched } from "@/hooks/proposals/common"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useQuery } from "@tanstack/react-query"
+
+import { useProposalEnriched } from "./useProposalEnriched"
 
 export const getUserProposalsCreatedEventsQueryKey = (walletAddress: string) => [
   "PROPOSALS",
@@ -8,10 +9,8 @@ export const getUserProposalsCreatedEventsQueryKey = (walletAddress: string) => 
   "CREATED",
   walletAddress,
 ]
-
 export const useUserCreatedProposal = (walletAddress: string) => {
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
-
   return useQuery({
     queryKey: getUserProposalsCreatedEventsQueryKey(walletAddress),
     queryFn: () => {

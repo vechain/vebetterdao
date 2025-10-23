@@ -1,11 +1,10 @@
 import { getConfig } from "@repo/config"
-const config = getConfig()
 
+const config = getConfig()
 // function that returns the contract from the list by the address
 export const getContractByAddress = (address: string) => {
   return CONTRACT_LIST.find(contract => contract.contractAddress.toUpperCase() === address.toUpperCase())
 }
-
 export const CONTRACT_LIST = [
   {
     name: "B3TR",
@@ -132,5 +131,15 @@ export const CONTRACT_LIST = [
       "MANAGER_ROLE",
       "WHITELISTER_ROLE",
     ],
+  },
+  {
+    name: "RelayerRewardsPool",
+    contractAddress: config.relayerRewardsPoolContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "POOL_ADMIN_ROLE"],
+  },
+  {
+    name: "Dynamic Base Allocation Pool",
+    contractAddress: config.dbaPoolContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "DISTRIBUTOR_ROLE"],
   },
 ]

@@ -1,7 +1,10 @@
-import { Handshake, SignIcon, VoteCheckmarkIcon } from "@/components"
-import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types"
 import { Circle, Heading, HStack, Stack, Text, VStack } from "@chakra-ui/react"
 import { UilCheck } from "@iconscout/react-unicons"
+
+import { Handshake } from "../../../../../../components/Icons/Handshake"
+import { SignIcon } from "../../../../../../components/Icons/SignIcon"
+import { VoteCheckmarkIcon } from "../../../../../../components/Icons/VoteCheckmarkIcon"
+import { XAppsCreationSteps, XAppsCreationStepStatus } from "../../../../../../types/appDetails"
 
 type StepBoxesProps = {
   title: string
@@ -15,13 +18,11 @@ const statusIcon = {
   [XAppsCreationStepStatus.ACTIVE]: <Circle size="80%" bg="#004CFC" />,
   [XAppsCreationStepStatus.COMPLETED]: <UilCheck size={20} color="#004CFC" />,
 }
-
 const stepIcon = {
   [XAppsCreationSteps.SUBMISSION]: SignIcon,
   [XAppsCreationSteps.ENDORSEMENT]: Handshake,
   [XAppsCreationSteps.ALLOCATION]: VoteCheckmarkIcon,
 }
-
 export const StepBoxes = ({
   stepText,
   title,
@@ -31,8 +32,7 @@ export const StepBoxes = ({
 }: StepBoxesProps) => {
   const borderColor = status === XAppsCreationStepStatus.ACTIVE ? "#004CFC" : "transparent"
   const IconComponent = stepIcon[type]
-  const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "#000000"
-
+  const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "black"
   return (
     <Stack
       minW={["60vw", "45vw", "15vw", "5vw"]}
@@ -67,12 +67,12 @@ export const StepBoxes = ({
           <IconComponent size={124} color={iconColor} />
         </HStack>
         <VStack alignItems="start" w="full">
-          <Text fontSize="12px" color="#6A6A6A" lineHeight={"1px"}>
+          <Text textStyle="xs" color="text.subtle">
             {stepText}
           </Text>
           <Heading size={["md", "sm", "sm"]}>{title}</Heading>
         </VStack>
-        <Text fontSize="14px" color="#6A6A6A" w="full">
+        <Text textStyle="sm" color="text.subtle" w="full">
           {description}
         </Text>
       </Stack>

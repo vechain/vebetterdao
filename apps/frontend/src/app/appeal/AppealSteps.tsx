@@ -1,16 +1,14 @@
+import { VStack, Heading, Spinner, Steps, Box, Link, Text, Alert, List } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
+import NextLink from "next/link"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { AnalyticsUtils } from "@/utils"
-import { useWallet } from "@vechain/vechain-kit"
-import { queryClient, useUserBotSignals, useUserSignalEvents, useXApps } from "@/api"
-import { VStack, Heading, Spinner, Steps, Box, Link, Text, Alert, List } from "@chakra-ui/react"
-
-import { useRouter } from "next/navigation"
-import { getVerifiedVetDomainQueryKey, useVerifiedVetDomain } from "./hooks/useVerifiedVetDomain"
-import { ResetingResult } from "./components/ResetingResult"
-import { RESET_SIGNAL_KEY_LOCAL_STORAGE_PREFIX, VET_DOMAINS_VERIFY_URL, REDIRECT_URL, RESET_STATUS } from "./constants"
-import { ResetStatus } from "./types"
+import { useUserBotSignals } from "../../api/contracts/vePassport/hooks/useUserBotSignals"
+import { useUserSignalEvents } from "../../api/contracts/xApps/hooks/useUserSignalEvents"
+import { useXApps } from "../../api/contracts/xApps/hooks/useXApps"
+import { queryClient } from "../../api/QueryProvider"
 import {
   linkClickActions,
   LinkClickProperties,
@@ -19,8 +17,16 @@ import {
   SignalResetProperties,
   signalResetActions,
   signaledAfterKYC,
-} from "@/constants"
+} from "../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
 
+import { ResetingResult } from "./components/ResetingResult"
+import { VET_DOMAINS_VERIFY_URL, REDIRECT_URL } from "./constants/appeal"
+import { RESET_SIGNAL_KEY_LOCAL_STORAGE_PREFIX } from "./constants/localStorage"
+import { RESET_STATUS } from "./constants/resetStatus"
+import { getVerifiedVetDomainQueryKey, useVerifiedVetDomain } from "./hooks/useVerifiedVetDomain"
+
+type ResetStatus = (typeof RESET_STATUS)[keyof typeof RESET_STATUS]
 export const AppealSteps = () => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -33,12 +39,10 @@ export const AppealSteps = () => {
   const { data: userSignalEvents } = useUserSignalEvents(connectedAccount?.address as string)
   const { data: apps } = useXApps()
   const initialRenderRef = useRef(true) // Track initial render
-
   function getAppName(appId: string): string {
     const found = apps?.allApps.find(app => app.id === appId)
     return found ? found.name : "Unknown"
   }
-
   const STEPS = [
     { id: "step-1", title: t("Start"), description: t("Begin your DAO access appeal") },
     {
@@ -205,8 +209,8 @@ export const AppealSteps = () => {
       return (
         <Text>
           {step.description}{" "}
-          <Link color="blue.500" href={step.linkUrl} textDecoration="underline">
-            {step.linkText}
+          <Link color="blue.500" asChild textDecoration="underline">
+            <NextLink href={step.linkUrl}>{step.linkText}</NextLink>
           </Link>
         </Text>
       )
@@ -254,7 +258,7 @@ export const AppealSteps = () => {
       {userSignaledCount >= 1 && hasSuccessfulReset && (
         <VStack align="stretch" gap={2}>
           <Alert.Root status="warning" size="md" borderRadius="16px">
-            <Box lineHeight={"1.20rem"} fontSize="md" color="#F29B32">
+            <Box textStyle="md" color="status.positive.primary">
               <Alert.Title>
                 {
                   "You have been flagged again after your KYC. Please reach out to the app admin that flagged you to restore your access."

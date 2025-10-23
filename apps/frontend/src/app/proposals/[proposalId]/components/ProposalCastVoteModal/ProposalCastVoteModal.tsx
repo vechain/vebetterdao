@@ -1,12 +1,13 @@
+import { Button, Heading, HStack, Icon, RadioCard, Text, Textarea, VStack } from "@chakra-ui/react"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
 import { BaseModal } from "@/components/BaseModal"
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { Button, Card, Heading, HStack, Icon, RadioGroup, Text, Textarea, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 
 type Props = {
   isVoteModalOpen: boolean
@@ -18,14 +19,13 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
   const { isTxModalOpen } = useTransactionModal()
   const [selectedVote, setSelectedVote] = useState<string | null>(null)
   const [comment, setComment] = useState("")
-
   const voteOptions = useMemo(
     () => [
       {
         id: "1",
         title: "Approve",
         icon: ThumbsUpIcon,
-        iconColor: "status.success.primary",
+        iconColor: "status.positive.primary",
       },
       {
         id: "2",
@@ -37,21 +37,20 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
         id: "0",
         title: "Against",
         icon: ThumbsDownIcon,
-        iconColor: "status.error.primary",
+        iconColor: "status.negative.primary",
       },
     ],
     [],
   )
 
-  const onVoteSuccess = useCallback(() => {
-    onClose()
-    setSelectedVote(null)
-    setComment("")
-  }, [onClose])
-
   const castVoteMutation = useProposalCastVote({
     proposalId,
-    onSuccess: onVoteSuccess,
+    onSuccess: () => {
+      onClose()
+      castVoteMutation.resetStatus()
+      setSelectedVote(null)
+      setComment("")
+    },
   })
 
   const handleCastVote = useCallback(() => {
@@ -72,45 +71,35 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
       <VStack w="full" align="stretch" gap={6}>
         {/* Modal Header */}
         <Heading size="lg">{"Vote on this grant"}</Heading>
-        <Text fontSize="sm" color="gray.600">
+        <Text textStyle="sm" color="text.subtle">
           {" Select your vote"}
         </Text>
 
-        {/* Vote Options */}
-        <RadioGroup.Root onValueChange={e => setSelectedVote(e.value)} value={selectedVote}>
-          <VStack align="stretch" gap={3}>
-            {voteOptions.map(option => {
-              const isSelected = option.id === selectedVote
-              return (
-                <Card.Root
-                  key={option.id}
-                  cursor="pointer"
-                  p={4}
-                  border={isSelected ? "2px solid" : "1px solid"}
-                  borderColor={isSelected ? "blue.500" : "gray.200"}
-                  bg={isSelected ? "blue.50" : "white"}
-                  _hover={{ borderColor: "blue.300" }}
-                  onClick={() => setSelectedVote(option.id)}>
-                  <HStack justify="space-between">
-                    <HStack gap={3}>
-                      <Icon as={option.icon} color={option.iconColor} boxSize={5} />
-                      <Text fontWeight="medium">{option.title}</Text>
-                    </HStack>
-                    <RadioGroup.Item value={option.id}>
-                      <RadioGroup.ItemHiddenInput />
-                      <RadioGroup.ItemIndicator />
-                    </RadioGroup.Item>
-                  </HStack>
-                </Card.Root>
-              )
-            })}
+        <RadioCard.Root onValueChange={e => setSelectedVote(e.value)} value={selectedVote} colorPalette="blue">
+          <VStack gap="3" align="stretch">
+            {voteOptions.map(item => (
+              <RadioCard.Item
+                key={item.id}
+                value={item.id}
+                rounded="xl"
+                borderColor={item.id === selectedVote ? "none" : "border.emphasized"}>
+                <RadioCard.ItemHiddenInput />
+                <RadioCard.ItemControl>
+                  <RadioCard.ItemText as={HStack} gap="3" textStyle="md" color="text.default">
+                    <Icon as={item.icon} color={item.iconColor} boxSize={5} />
+                    {item.title}
+                  </RadioCard.ItemText>
+                  <RadioCard.ItemIndicator />
+                </RadioCard.ItemControl>
+              </RadioCard.Item>
+            ))}
           </VStack>
-        </RadioGroup.Root>
+        </RadioCard.Root>
 
         {/* Comment Section */}
         <VStack align="stretch" gap={2}>
-          <Text fontWeight="medium">{"Comment"}</Text>
-          <Text fontSize="sm" color="gray.500">
+          <Text>{"Comment"}</Text>
+          <Text textStyle="sm" color="gray.500">
             {"Optional"}
           </Text>
           <Textarea
@@ -119,12 +108,14 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
             onChange={e => setComment(e.target.value)}
             resize="none"
             rows={4}
+            // This prevents zooming on mobile
+            fontSize={"16px"}
           />
         </VStack>
 
         {/* Vote Button */}
         <Button
-          variant="primaryAction"
+          variant="primary"
           w="full"
           disabled={!selectedVote || castVoteMutation.isTransactionPending}
           onClick={handleCastVote}>

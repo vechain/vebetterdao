@@ -1,11 +1,15 @@
-import { useCurrentAllocationsRoundId, useGetUserGMs, useGMRequiredByProposalType } from "@/api"
-import { BaseModal } from "@/components/BaseModal"
-import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
-import { gmNfts } from "@/constants/gmNfts"
 import { Button, Heading, Icon, List, SimpleGrid, Text, UseDisclosureProps, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
+import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
+import { gmNfts } from "@/constants/gmNfts"
+
+import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMRequiredByProposalType } from "../../../../api/contracts/governance/hooks/useGMRequiredByProposalType"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 type Props = {
   isOpen: UseDisclosureProps["open"]
@@ -13,25 +17,20 @@ type Props = {
   hasNft: boolean
   isGrants?: boolean
 }
-
 export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, isGrants }: Props) => {
   const { t } = useTranslation()
-
   const { data: gmRequired } = useGMRequiredByProposalType()
   const { data: userGMs } = useGetUserGMs()
   const router = useRouter()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   const userHasAnyGm = useMemo(() => {
     return !!userGMs?.length
   }, [userGMs])
-
   const userHighestGm = useMemo(() => {
     if (!userHasAnyGm) return null
     if (userGMs?.length === 1) return userGMs[0]
     return userGMs?.sort((a, b) => Number(a.tokenLevel) - Number(b.tokenLevel))[0]
   }, [userGMs, userHasAnyGm])
-
   const getNftOrApplyButtonText = useMemo(() => {
     if (hasNft) {
       return t("Apply")
@@ -41,7 +40,6 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
     }
     return t("Upgrade NFT")
   }, [userHasAnyGm, hasNft, t])
-
   const handleGetNftOrApply = useCallback(() => {
     if (!userHasAnyGm) {
       router.push(`/rounds/${currentRoundId}`)
@@ -59,18 +57,18 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
           <NFTEarthIcon />
         </Icon>
         <VStack align="stretch" gap={6}>
-          <Heading alignSelf="center" fontSize="28px">
+          <Heading alignSelf="center" size="3xl">
             {isGrants ? t("To apply for a grant, you must") : t("To apply for a proposal, you must")}
           </Heading>
 
           {!hasNft ? (
             <List.Root as="ol" gap={2}>
               <List.Item>
-                <Text fontWeight={400}>
+                <Text>
                   <Trans
                     i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
                     values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
-                    components={{ b: <Text as="span" fontWeight="bold" /> }}
+                    components={{ b: <Text as="span" /> }}
                   />
                 </Text>
               </List.Item>
@@ -86,7 +84,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
               )}
             </List.Root>
           ) : (
-            <Text fontWeight={400}>
+            <Text>
               <Trans
                 i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetter."
                 components={{ b: <Text as="span" fontWeight="bold" /> }}
@@ -106,7 +104,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
             </Button>
           )}
 
-          <Button size="lg" variant="primaryAction" py={6} onClick={handleGetNftOrApply}>
+          <Button size="lg" variant="primary" py={6} onClick={handleGetNftOrApply}>
             {getNftOrApplyButtonText}
           </Button>
         </SimpleGrid>

@@ -1,10 +1,12 @@
 import { Heading, VStack, Text, Link, Button } from "@chakra-ui/react"
-import unknownAnimation from "./unknown.json"
-import { ReactNode } from "react"
 import { motion } from "framer-motion"
+import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import Lottie from "react-lottie"
+
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import unknownAnimation from "./unknown.json"
 
 export type UnknownModalContentProps = {
   title?: ReactNode
@@ -14,7 +16,6 @@ export type UnknownModalContentProps = {
   showExplorerButton?: boolean
   txId?: string
 }
-
 export const UnknownModalContent = ({
   title = "Unknown status",
   description = "It's not possible to verify the transaction status at the moment. Please check it on the explorer.",
@@ -50,7 +51,7 @@ export const UnknownModalContent = ({
       </motion.div>
       <VStack gap={4}>
         {description && (
-          <Text fontSize={"14px"} textAlign={"center"}>
+          <Text textStyle={"sm"} textAlign={"center"}>
             {description}
           </Text>
         )}
@@ -60,7 +61,7 @@ export const UnknownModalContent = ({
             target="_blank"
             rel="noopener noreferrer"
             color="gray.500"
-            fontSize={"14px"}
+            textStyle="sm"
             textDecoration={"underline"}>
             {t("View it on the explorer")}
           </Link>

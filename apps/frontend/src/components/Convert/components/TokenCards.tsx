@@ -1,11 +1,13 @@
 import { Button, HStack, Input, Stack, Text, VStack, Image } from "@chakra-ui/react"
-import { useCallback, useEffect, useMemo } from "react"
-import { Controller, UseFormReturn } from "react-hook-form"
 import { TokenBalance, useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
+import { useCallback, useEffect, useMemo } from "react"
+import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { B3TRIcon } from "@/components/Icons"
-import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
   amount: string
@@ -14,7 +16,6 @@ type Props = {
   swappableVot3Balance?: TokenBalance
   isVOT3BalanceMoreThanStakedB3TR?: boolean
 }
-
 export const TokenCards = ({
   isB3trToVot3,
   formData,
@@ -23,24 +24,19 @@ export const TokenCards = ({
   isVOT3BalanceMoreThanStakedB3TR,
 }: Props) => {
   const { account } = useWallet()
-
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
   }, [b3trBalance?.scaled])
-
   const vot3BalanceScaled = useMemo(() => {
     if (!vot3Balance || !swappableVot3Balance) return "0"
-
     return isVOT3BalanceMoreThanStakedB3TR ? swappableVot3Balance.scaled : vot3Balance.scaled
   }, [isVOT3BalanceMoreThanStakedB3TR, swappableVot3Balance, vot3Balance])
-
   const maxBalance = useMemo(
     () => (isB3trToVot3 ? b3trBalanceScaled : vot3BalanceScaled),
     [isB3trToVot3, b3trBalanceScaled, vot3BalanceScaled],
   )
-
   const containerVariants = {
     initial: {
       opacity: 0,
@@ -109,7 +105,7 @@ export const TokenCards = ({
   const renderMaxButton = useMemo(
     () => (
       <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"} data-testid={"convert-all-button"}>
-        <Text fontSize={14} fontWeight={500}>
+        <Text textStyle="sm" fontWeight="semibold">
           {t("Convert all")}
         </Text>
       </Button>
@@ -132,9 +128,7 @@ export const TokenCards = ({
             <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text fontSize={14} fontWeight={400}>
-                    {isB3trToVot3 ? t("You'll convert") : t("You'll receive")}
-                  </Text>
+                  <Text textStyle="sm">{isB3trToVot3 ? t("You'll convert") : t("You'll receive")}</Text>
                 </HStack>
                 <HStack w="full" data-testid={"B3TR"}>
                   <HStack flex={1}>
@@ -159,9 +153,7 @@ export const TokenCards = ({
             <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text fontSize={14} fontWeight={400}>
-                    {isB3trToVot3 ? t("You'll receive") : t("You'll convert")}
-                  </Text>
+                  <Text textStyle="sm">{isB3trToVot3 ? t("You'll receive") : t("You'll convert")}</Text>
                 </HStack>
                 <HStack w="full" data-testid={"VOT3"}>
                   <HStack flex={1}>

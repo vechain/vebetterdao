@@ -1,5 +1,3 @@
-import { WalletAddressInput } from "@/app/components/Input"
-import { useCreatorSubmissionFormStore } from "@/store"
 import { Button, Card, Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import { signIn, signOut, useSession } from "next-auth/react"
@@ -9,6 +7,7 @@ import {
   FieldErrors,
   UseFormClearErrors,
   UseFormRegister,
+  UseFormReset,
   UseFormSetError,
   UseFormSetValue,
   UseFormWatch,
@@ -16,9 +15,11 @@ import {
 import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
 
-import { FormCheckbox, FormItem } from "../CustomFormFields"
+import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
+import { useCreatorSubmissionFormStore } from "../../store/useCreatorSubmissionFormStore"
+import { FormCheckbox } from "../CustomFormFields/FormCheckbox"
+import { FormItem } from "../CustomFormFields/FormItem"
 import { genericValidation, patternUrlCheck, validateAppId, validateEmail } from "../CustomFormFields/validators"
-
 export type SubmitCreatorFormData = {
   appName: string
   appDescription: string
@@ -37,7 +38,6 @@ export type SubmitCreatorFormData = {
   securitySecureKeyManagement: boolean
   securityAntiFarming: boolean
 }
-
 type Props = {
   register: UseFormRegister<SubmitCreatorFormData>
   watch: UseFormWatch<SubmitCreatorFormData>
@@ -46,9 +46,11 @@ type Props = {
   clearErrors: UseFormClearErrors<SubmitCreatorFormData>
   errors: FieldErrors<SubmitCreatorFormData>
   setValue: UseFormSetValue<SubmitCreatorFormData>
+  resetForm: UseFormReset<SubmitCreatorFormData>
+  clearData: () => void
 }
 
-export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }: Props) => {
+export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, resetForm, clearData }: Props) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
 
@@ -184,16 +186,21 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
       setData({ [field]: value })
     }
   }
+  const handleResetForm = () => {
+    signOut({ redirect: false })
+    resetForm()
+    clearData()
+  }
 
   return (
-    <Card.Root w="full" borderRadius="xl">
+    <Card.Root w="full" borderRadius="xl" p={0}>
       <Card.Body w="full" p={{ base: 2, md: 6 }}>
         <VStack gap={4} w="full">
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={6}>
+            <Heading size="xl" pb={6}>
               {t("App Information")}
             </Heading>
-            <VStack w="full" gap={4} align="stretch">
+            <VStack w="full" gap={4} align="stretch" px={1}>
               <FormItem
                 label={t("App Name")}
                 placeholder={t("App Name")}
@@ -272,7 +279,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               />
               <Field.Root invalid={!!errors.adminWalletAddress}>
                 <Field.Label>{t("Creator NFT Wallet Address")}</Field.Label>
-                <Text fontSize="xs" color="gray.500" mb={2}>
+                <Text textStyle="xs" color="gray.500" mb={2}>
                   {t("The wallet address where you will receive your Creator NFT")}
                 </Text>
                 <WalletAddressInput
@@ -287,12 +294,12 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
             </VStack>
           </Card.Root>
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={6}>
+            <Heading size="xl" pb={6}>
               {t("Your Information")}
             </Heading>
-            <VStack w="full" gap={4} align="stretch">
+            <VStack w="full" gap={4} align="stretch" px={1}>
               <Field.Root invalid={!!errors.githubUsername}>
-                <Field.Label fontSize="md">{t("GitHub Username")}</Field.Label>
+                <Field.Label textStyle="md">{t("GitHub Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
@@ -307,7 +314,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               </Field.Root>
 
               <Field.Root invalid={!!errors.twitterUsername}>
-                <Field.Label fontSize="md">{t("X Username")}</Field.Label>
+                <Field.Label textStyle="md">{t("X Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
@@ -353,10 +360,10 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
           </Card.Root>
 
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={4}>
+            <Heading size="xl" pb={4}>
               {t("Testing Requirements")}
             </Heading>
-            <VStack w="full" gap={4} align="stretch">
+            <VStack w="full" gap={4} align="stretch" px={1}>
               <FormItem
                 label={t("Testnet Project URL")}
                 placeholder={"Eg. https://www.testnet.myapp.vet"}
@@ -395,10 +402,10 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
             </VStack>
           </Card.Root>
           <Card.Root w="full" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={4}>
+            <Heading size="xl" pb={4}>
               {t("Security Requirements")}
             </Heading>
-            <VStack align="start" gap={3}>
+            <VStack align="start" gap={3} px={1}>
               {checkboxList.map(checkbox => (
                 <FormCheckbox
                   key={checkbox.name}
@@ -414,18 +421,20 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
           </Card.Root>
         </VStack>
       </Card.Body>
-      <Card.Footer display={"flex"} flexDir={"column"} w="full" alignItems="center" justifyContent="center">
+      <Card.Footer display={"flex"} flexDir={"row"} w="full" alignItems="center" justifyContent="center" py={5}>
         <Button
-          variant="primaryAction"
+          type="button"
+          onClick={handleResetForm}
+          variant="ghost"
+          color="actions.tertiary.default"
+          focusRingColor="actions.tertiary.default"
+          size="lg">
+          {t("Reset Form")}
+        </Button>
+        <Button
+          variant="primary"
           disabled={Object.keys(errors).length > 0}
           type="submit"
-          w="full"
-          px={10}
-          maxW={{
-            base: "100%",
-            sm: "80%",
-            md: "30%",
-          }}
           size="lg"
           borderRadius={"full"}>
           {t("Send Application")}

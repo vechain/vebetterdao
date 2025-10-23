@@ -1,11 +1,11 @@
-import { JoinCommunity } from "@/components"
-import { StepCardProps, StepCard } from "@/components/StepCard"
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import SignIcon from "@/components/Icons/svg/sign.svg"
+
 import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
+import SignIcon from "@/components/Icons/svg/sign.svg"
 import VoteIcon from "@/components/Icons/svg/vote.svg"
+import { StepCardProps, StepCard } from "@/components/StepCard"
 
 const Steps: StepCardProps[] = [
   {
@@ -33,7 +33,6 @@ const Steps: StepCardProps[] = [
 export const NewAppPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
-
   const LINK_TO_DOCS = () => {
     window.open(
       "https://docs.vebetterdao.org/vebetterdao/x2earn-apps#voting-eligibility-and-endorsement-status",
@@ -41,7 +40,6 @@ export const NewAppPageContent = () => {
       "noopener",
     )
   }
-
   const onContinueClick = () => {
     router.push("/apps/new/form")
   }
@@ -70,16 +68,13 @@ export const NewAppPageContent = () => {
                 <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorPalette="primary" size="lg">
                   {t("More info")}
                 </Button>
-                <Button variant="primaryAction" rounded="full" size="lg" onClick={onContinueClick}>
+                <Button variant="primary" rounded="full" size="lg" onClick={onContinueClick}>
                   {t("Continue")}
                 </Button>
               </HStack>
             </VStack>
           </Card.Body>
         </Card.Root>
-      </GridItem>
-      <GridItem colSpan={1}>
-        <JoinCommunity />
       </GridItem>
     </Grid>
   )

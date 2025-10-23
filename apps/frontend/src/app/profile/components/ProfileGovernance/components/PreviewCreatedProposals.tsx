@@ -1,46 +1,55 @@
-import { HStack, VStack, Text } from "@chakra-ui/react"
+import { HStack, VStack, Text, Heading, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { ProposalBox } from "."
+
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+
+import { ProposalBox } from "./ProposalBox"
 
 type Props = {
   firstProposals?: ProposalEnriched[] | GrantProposalEnriched[]
-  isLoading: boolean
   isMoreProposals?: boolean
   isCreatedProposals?: boolean
   onSeeAllProposals?: () => void
 }
-
 export const PreviewCreatedProposals = ({
   firstProposals,
-  isLoading,
   isCreatedProposals,
   isMoreProposals,
   onSeeAllProposals,
 }: Props) => {
   const { t } = useTranslation()
-
   if (!firstProposals || firstProposals.length == 0) return null
-
   return (
-    <VStack w={"full"}>
-      <HStack w={"full"} justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
-        <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"}>
-          {isCreatedProposals ? t("Created Proposals") : t("Voted Proposals")}
-        </Text>
-        {isMoreProposals && (
-          <HStack color={"#004CFC"} cursor={"pointer"} onClick={onSeeAllProposals}>
-            <Text fontSize={{ base: 14, md: 16 }}>{t("See All")}</Text>
-            <FiArrowUpRight size={16} />
-          </HStack>
-        )}
-      </HStack>
-      <VStack w={"full"} gap={4}>
-        {firstProposals?.map(proposal => (
-          <ProposalBox key={proposal.id} proposal={proposal} isLoading={isLoading} />
-        ))}
-      </VStack>
-    </VStack>
+    <Card.Root w={"full"} variant="primary">
+      <Card.Body>
+        <HStack w={"full"} alignItems="center" justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
+          <Heading size={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
+            {isCreatedProposals ? t("Created Proposals") : t("Voted Proposals")}
+          </Heading>
+          {isMoreProposals && (
+            <Button variant="ghost" size="sm" color="actions.tertiary.default" onClick={onSeeAllProposals}>
+              <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
+                {t("See All")}
+              </Text>
+              <FiArrowUpRight size={16} />
+            </Button>
+          )}
+        </HStack>
+        <VStack w={"full"} gap={4}>
+          {firstProposals?.map(proposal => (
+            <ProposalBox
+              key={proposal.id}
+              proposalId={proposal.id}
+              metadata={{
+                title: proposal.title,
+                shortDescription: proposal.description,
+                markdownDescription: proposal.markdownDescription,
+              }}
+            />
+          ))}
+        </VStack>
+      </Card.Body>
+    </Card.Root>
   )
 }

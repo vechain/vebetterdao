@@ -1,47 +1,44 @@
-import {
-  useGetProposalDeposits,
-  useGetVotesOnBlock,
-  useHasVotedInProposals,
-  useIsDepositReached,
-  useProposalDepositEvent,
-  useProposalDepositThreshold,
-  useProposalQuorumByType,
-  useProposalSnapshot,
-  useProposalTotalVotes,
-  useProposalUserDeposit,
-  useProposalVotes,
-  useUserSingleProposalVoteEvent,
-  useVot3PastSupply,
-} from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
-import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
-import AbstainIcon from "@/components/Icons/svg/abstain.svg"
-import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
-import HeartIcon from "@/components/Icons/svg/heart.svg"
-import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
-import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
-import {
-  ProposalType as GrantsProposalType,
-  ProposalEnriched,
-  ProposalState,
-  useExecuteProposal,
-  useGetVot3Balance,
-  useQueueProposal,
-} from "@/hooks"
-import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
 import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/vechain-kit"
+import { useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ProposalCancelModal } from "../ProposalCancelModal"
-import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
-import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal"
-import { ProposalSupportModal } from "../ProposalSupportModal"
-import { UserInteractionBadges } from "../UserInteractionBadges"
+import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
+import { useGetProposalDeposits } from "@/api/contracts/governance/hooks/useGetProposalDeposits"
+import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
+import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
+import { useProposalDepositThreshold } from "@/api/contracts/governance/hooks/useProposalDepositThreshold"
+import { useProposalQuorumByType } from "@/api/contracts/governance/hooks/useProposalQuorumByType"
+import { useProposalQuorumNumeratorByType } from "@/api/contracts/governance/hooks/useProposalQuorumNumeratorByType"
+import { useProposalSnapshot } from "@/api/contracts/governance/hooks/useProposalSnapshot"
+import { useProposalTotalVotes } from "@/api/contracts/governance/hooks/useProposalTotalVotes"
+import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
+import { useVot3PastSupply } from "@/api/contracts/vot3/hooks/useVot3PastTotalSupply"
+import { useProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import { CountdownBoxes } from "@/components/CountdownBoxes/CountdownBoxes"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+import { MulticolorBar } from "@/components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "@/components/Proposal/ResultsDisplay"
+import { ProposalType as GrantsProposalType, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
+import { useExecuteProposal } from "@/hooks/useExecuteProposal"
+import { useQueueProposal } from "@/hooks/useQueueProposal"
+import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
+
+import { ProposalCancelModal } from "../ProposalCancelModal/ProposalCancelModal"
+import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
+import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
+import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
+import { UserInteractionBadges } from "../UserInteractionBadges/UserInteractionBadges"
 
 export const ProposalInteractionCard = ({
   proposal,
@@ -78,6 +75,9 @@ export const ProposalInteractionCard = ({
   const { data: userVot3OnSnapshot } = useGetVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
+  const { data: proposalQuorumNumerator } = useProposalQuorumNumeratorByType(
+    proposal?.type ?? GrantsProposalType.Standard,
+  )
   const { data: proposalQuorum } = useProposalQuorumByType(
     Number(roundSnapshot ?? 0),
     proposal?.type ?? GrantsProposalType.Standard,
@@ -98,6 +98,7 @@ export const ProposalInteractionCard = ({
   const handleExecuteProposal = useCallback(() => executeProposal(), [executeProposal])
 
   // ===== COMPUTED VALUES =====
+  const isProposer = compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? "0")
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
   const proposalQuorumBigInt = BigInt(proposalQuorum ?? "0")
@@ -105,7 +106,7 @@ export const ProposalInteractionCard = ({
   const hasUserAlreadyVoted = userHasAlreadyVotedInProposal?.[proposalId] ?? false
   const userVot3Balance = Number(userVot3BalanceQueryData?.original ?? 0)
   const proposalDepositReached = isDepositReached ?? false
-  const currentUserCanQueueOrExecute = permissions?.isProposalExecutor ?? false
+  const currentUserCanExecute = permissions?.isProposalExecutor ?? false
   const proposalHasTargets = proposal?.targets && proposal?.targets.length > 0
   const userVoteOption = userVoteEvent?.userVote
   const totalVotesAtSnapshot = votesAtSnapshotQueryData ?? ethers.formatEther("0")
@@ -126,17 +127,22 @@ export const ProposalInteractionCard = ({
     const current = Number(ethers.formatEther(currentDepositAmount))
     const threshold = Number(ethers.formatEther(proposalDepositThreshold))
 
-    return ((current / threshold) * 100).toFixed(0)
+    const result = (current / threshold) * 100
+
+    if (result < 1 && result > 0) {
+      return result.toFixed(2)
+    }
+
+    return result.toFixed(0)
   }, [currentDepositAmount, proposalDepositThreshold])
 
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
     if (proposal?.state !== ProposalState.Pending) return false
-    const isProposer = compareAddresses(proposal?.proposerAddress, account?.address)
     const isAdmin = permissions?.isAdminOfB3TRGovernor
     //Proposal is pending, and either the proposer or the account is the admin
     return proposal?.state === ProposalState.Pending && (isProposer || isAdmin)
-  }, [account?.address, permissions?.isAdminOfB3TRGovernor, proposal?.proposerAddress, proposal?.state])
+  }, [isProposer, permissions?.isAdminOfB3TRGovernor, proposal?.state])
 
   const shouldShowActionButton = useMemo(() => {
     if (!account?.address) {
@@ -148,30 +154,26 @@ export const ProposalInteractionCard = ({
     }
 
     if (proposal?.state === ProposalState.Pending) {
-      return (
-        !proposalDepositReached &&
-        userVot3Balance > 0 &&
-        !compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
-      )
+      return !proposalDepositReached && userVot3Balance > 0 && !isProposer
     }
 
     //User has permissions to execute or queue
-    if ((isQueuable || isExecutable) && currentUserCanQueueOrExecute) {
-      return isQueuable || isExecutable
+    if (isQueuable || isExecutable) {
+      return isQueuable || currentUserCanExecute
     }
 
     return false
   }, [
+    account?.address,
     proposal?.state,
     isQueuable,
     isExecutable,
+    currentUserCanExecute,
     hasUserAlreadyVoted,
     userVotingPower,
     proposalDepositReached,
     userVot3Balance,
-    currentUserCanQueueOrExecute,
-    account?.address,
-    proposal?.proposerAddress,
+    isProposer,
   ])
 
   const isActionButtonDisabled = useMemo(() => {
@@ -193,20 +195,19 @@ export const ProposalInteractionCard = ({
     }
 
     //User has permissions to execute or queue
-    if (isQueuable || isExecutable) {
-      return !currentUserCanQueueOrExecute
+    if (isExecutable) {
+      return !currentUserCanExecute
     }
 
     return false
   }, [
     proposal?.state,
-    isQueuable,
     isExecutable,
     hasUserAlreadyVoted,
     userVotingPower,
     userVot3Balance,
     proposalDepositReached,
-    currentUserCanQueueOrExecute,
+    currentUserCanExecute,
   ])
 
   // ===== VOTING DATA PROCESSING =====
@@ -221,7 +222,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.for?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
-        color: "success.primary",
+        color: "status.positive.primary",
         icon: ThumbsUpIcon,
       },
       {
@@ -231,7 +232,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.abstain?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
-        color: "warning.primary",
+        color: "status.warning.primary",
         icon: AbstainIcon,
       },
       {
@@ -241,7 +242,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.against?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
-        color: "error.primary",
+        color: "status.negative.primary",
         icon: ThumbsDownIcon,
       },
     ]
@@ -256,7 +257,7 @@ export const ProposalInteractionCard = ({
       return [
         {
           percentage: Number(percentageSupported ?? 0),
-          color: "success.primary",
+          color: "status.positive.primary",
           icon: userDeposits ? HeartSolidIcon : HeartIcon,
         },
       ]
@@ -338,12 +339,9 @@ export const ProposalInteractionCard = ({
 
   return (
     <>
-      {/* ===== MAIN CARD ===== */}
       <Skeleton loading={isLoading}>
-        <Card.Root gap={"0px"} variant="baseWithBorder">
-          {/* Card Header - Countdown Timer */}
-
-          <Card.Body gap={"32px"} p={"32px"}>
+        <Card.Root gap={"0"} variant="primary">
+          <Card.Body gap="8">
             {showCountdownBoxes && (
               <>
                 <HStack>
@@ -358,31 +356,34 @@ export const ProposalInteractionCard = ({
               </>
             )}
 
-            <VStack w="full" gap={"24px"} align={"stretch"}>
-              {/* Results Section Header */}
+            <VStack w="full" gap="6" align={"stretch"}>
               <HStack justify="space-between">
                 <HStack>
                   <Icon as={Reports} boxSize={5} />
                   <Heading>{t("Results")}</Heading>
                 </HStack>
-                <Button variant="primaryGhost" onClick={() => setIsResultsModalOpen(true)}>
+                <Button variant="plain" color="actions.tertiary.default" onClick={() => setIsResultsModalOpen(true)}>
                   {t("Details")}
                 </Button>
               </HStack>
               {/* Progress Bar and Results Display */}
-              <VStack gap={"16px"}>
+              <VStack gap="4">
                 <MulticolorBar segments={progressBarSegments} />
                 <ResultsDisplay proposalId={proposalId} segments={progressBarSegments} />
               </VStack>
               {/* User Interaction Badges */}
-              <UserInteractionBadges userDeposits={userDeposits} userVoteOption={userVoteOption} />
+              <UserInteractionBadges
+                proposalState={proposal?.state ?? ProposalState.Pending}
+                userDeposits={userDeposits}
+                userVoteOption={userVoteOption}
+              />
             </VStack>
 
             <HStack w="full" gap={4}>
               {/* Action Button */}
               {shouldShowActionButton && (
                 <Button
-                  variant="primaryAction"
+                  variant="primary"
                   w="full"
                   flex={1}
                   onClick={handleButtonClick}
@@ -413,6 +414,7 @@ export const ProposalInteractionCard = ({
         proposalState={proposal?.state ?? ProposalState.Pending}
         proposalId={proposalId}
         proposalQuorum={proposalQuorumBigInt}
+        proposalQuorumNumerator={proposalQuorumNumerator ?? BigInt(0)}
         proposalTotalVotes={proposalTotalVotes}
         proposalVotesData={proposalVotesQueryData}
         proposalSupportAmount={currentDepositAmount}

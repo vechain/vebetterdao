@@ -1,11 +1,11 @@
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useCallClause } from "@vechain/vechain-kit"
-import { useXAppsMetadataBaseUri } from ".."
+
+import { useXAppsMetadataBaseUri } from "@/api/contracts/xApps/hooks/useXAppsMetadataBaseUri"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
-
 export const useXApp = (appId?: string) => {
   const { data: baseUri } = useXAppsMetadataBaseUri()
   return useCallClause({
@@ -18,7 +18,6 @@ export const useXApp = (appId?: string) => {
       select: data => {
         const [id, teamWalletAddress, name, metadataURI, createdAtTimestamp, appAvailableForAllocationVoting] =
           data[0] as unknown as [`0x${string}`, `0x${string}`, string, string, string, boolean]
-
         return {
           id,
           teamWalletAddress,

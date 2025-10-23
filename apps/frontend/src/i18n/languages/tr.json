@@ -1991,5 +1991,21 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Şimdi iptal ederseniz, hibeniz kaldırılacak ve bir sonraki oylama turunda görünmeyecektir. Tur başladıktan sonra iptal artık mümkün olmayacaktır.",
   "Showing": "Gösteriliyor",
   "Search by proposal name": "Teklif adına göre ara",
-  "Created": "Oluşturuldu"
+  "Created": "Oluşturuldu",
+  "You have been signalled by": "Tarafından sinyal aldınız",
+  "You have reached the maximum GM NFT level.": "Maksimum GM NFT seviyesine ulaştınız.",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Bir uygulamadan onayınızı kaldırmak, artık tahsisatlar için seçilmemesiyle sonuçlanabilir.",
+  "Current Status": "Mevcut Durum",
+  "Status After Transaction": "İşlem Sonrası Durum",
+  "Reset Form": "Formu Sıfırla",
+  "Apps eligible in next round": "Bir sonraki turda uygun olan Uygulamalar",
+  "App not found": "Uygulama bulunamadı",
+  "Confirm Eligibility Change": "Uygunluk Değişikliğini Onayla",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Bir sonraki tur için <b>'{{appName}}'</b>'i <b>{{status}}</b> yapmak istediğinize emin misiniz?",
+  "eligible": "uygun",
+  "ineligible": "uygun olmayan",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bunu yaparak, kimliği {{appId}} olan {{appName}}, bir sonraki tur için {{status}} olacaktır.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı",
+  "Uploading...": "Yükleniyor...",
+  "Stored": "Saklandı"
 }

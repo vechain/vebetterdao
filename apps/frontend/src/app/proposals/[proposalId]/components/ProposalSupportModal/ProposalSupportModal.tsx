@@ -1,19 +1,23 @@
-import { useCurrentAllocationsRoundId } from "@/api"
-import { GenericAlert } from "@/app/components/Alert"
-import { MulticolorBar, ResultsDisplay } from "@/components"
-import { BaseModal } from "@/components/BaseModal"
-import HeartIcon from "@/components/Icons/svg/heart.svg"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
-import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { filterAmountInput } from "@/utils/filterAmountInput"
-import { Button, Heading, HStack, Icon, Image, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
 import { Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
+import CircleGreenVot3Icon from "@/components/Icons/svg/circle-green-vot3.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { filterAmountInput } from "@/utils/filterAmountInput"
+
+import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
+import { GenericAlert } from "../../../../components/Alert/GenericAlert"
 
 type Props = {
   isSupportModalOpen: boolean
@@ -36,14 +40,11 @@ export const ProposalSupportModal = ({
   const { isTxModalOpen } = useTransactionModal()
   const [amount, setAmount] = useState("")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   // Get user's VOT3 balance and current deposits using hooks
   const { data: vot3Balance } = useGetVot3Balance(account?.address)
-
   const canClaimNextRound = useMemo(() => {
     return votingRoundId === Number(currentRoundId ?? 0) + 1
   }, [votingRoundId, currentRoundId])
-
   // Helper function to calculate accurate percentage using wei precision
   const getPercentage = useCallback((deposits: bigint, threshold: bigint) => {
     if (threshold === 0n) return 0
@@ -132,7 +133,6 @@ export const ProposalSupportModal = ({
     const expectedPercentage = BigNumber(forecastedTotal).div(thresholdNumber)
     return expectedPercentage.times(100).toNumber()
   }, [proposalDeposits, proposalThreshold, inputAmount])
-
   // Display data for progress and results
   const displayPercent = Number(amount || "0") > 0 ? predictedPercent : currentPercent
   const progressData = useMemo(
@@ -167,29 +167,24 @@ export const ProposalSupportModal = ({
       showCloseButton
       isCloseable
       ariaTitle="Support this grant"
+      modalProps={{ size: "md" }}
       isOpen={isSupportModalOpen && !isTxModalOpen}
       onClose={onClose}>
       <VStack w="full" align="stretch" gap={6}>
         {/* Amount Input Section */}
         <VStack align="stretch" gap={2}>
-          <Text fontWeight="medium">{"Amount"}</Text>
+          <Text>{"Amount"}</Text>
           <InputGroup
             endElement={
               <HStack>
                 <Text>{"VOT3"}</Text>
-                <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"20px"} alt="VOT3 Icon" />
+                <Icon as={CircleGreenVot3Icon} />
               </HStack>
             }>
             <Input placeholder="0" size={"lg"} value={amount} onChange={handleChange} />
           </InputGroup>
           {/* Deposit Max Button */}
-          <Button
-            variant="plain"
-            color="blue.500"
-            fontSize="sm"
-            fontWeight="medium"
-            onClick={handleDepositMax}
-            alignSelf="flex-end">
+          <Button variant="plain" color="blue.500" textStyle="sm" onClick={handleDepositMax} alignSelf="flex-end">
             {"Deposit max"}
           </Button>
         </VStack>
@@ -215,7 +210,7 @@ export const ProposalSupportModal = ({
 
         {/* Support Button */}
         <Button
-          variant="primaryAction"
+          variant="primary"
           w="full"
           disabled={!Number(amount) || depositMutation.isTransactionPending}
           onClick={handleSupport}>

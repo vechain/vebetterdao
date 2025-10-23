@@ -1,20 +1,18 @@
 import { Box, VStack, Heading, Text, Grid, GridItem, Card, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
+import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
 import ProposalIcon from "@/components/Icons/svg/proposal.svg"
 import VoteIcon from "@/components/Icons/svg/vote.svg"
-import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
 
 interface StatsCardProps {
   icon: React.ElementType
   value: number | string
   label: string
 }
-
 const StatsCard = ({ icon, value, label }: StatsCardProps) => (
   <Card.Root
-    variant="baseWithBorder"
-    borderColor="border.secondary"
+    variant="primary"
     flex={{ base: "0 0 40%", lg: "1 0 calc(30% - 10px)" }}
     flexDirection="row"
     alignItems="center"
@@ -35,7 +33,7 @@ const StatsCard = ({ icon, value, label }: StatsCardProps) => (
     </Box>
     <VStack alignItems="flex-start" gap={0}>
       <Heading size={{ base: "md", lg: "2xl" }}>{value}</Heading>
-      <Text fontSize={{ base: "xs", lg: "sm" }} color="text.subtle">
+      <Text textStyle={{ base: "xs", lg: "sm" }} color="text.subtle">
         {label}
       </Text>
     </VStack>

@@ -1,31 +1,20 @@
-import { VStack } from "@chakra-ui/react"
-import { UserTransactions } from "./components/UserTransactions"
+import { Card, VStack } from "@chakra-ui/react"
+
 import { SwapB3trVot3 } from "@/components/GmNFTAndNodeCard/components/SwapB3trVot3"
+
+import { UserTransactions } from "./components/UserTransactions"
 
 type Props = {
   address: string
 }
 export const ProfileBalance = ({ address }: Props) => {
   return (
-    <VStack align={"stretch"} gap={4}>
-      <SwapB3trVot3
-        address={address}
-        containerProps={{
-          w: "full",
-          align: "stretch",
-          gap: "24px",
-          bg: "#004CFC",
-          rounded: "xl",
-          color: "white",
-          position: "relative",
-          p: 4,
-          overflow: "hidden",
-          bgImage: "url('/assets/backgrounds/cloud-background.webp')",
-          bgSize: "cover",
-          backgroundPosition: "center",
-          bgRepeat: "no-repeat",
-        }}
-      />
+    <VStack align="stretch" gap="4">
+      <Card.Root bg="banner.dashboard-tokens">
+        <Card.Body>
+          <SwapB3trVot3 address={address} />
+        </Card.Body>
+      </Card.Root>
       <UserTransactions address={address} />
     </VStack>
   )

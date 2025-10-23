@@ -1,11 +1,11 @@
-import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { FilterCriteria } from "@vechain/sdk-network"
-import { decodeEventLog } from "../governance"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
+
+import { decodeEventLog } from "@/api/contracts/governance/getEvents"
 
 const abi = X2EarnApps__factory.abi
-
 export type GracePeriodStartedEvent = {
   appId: string
   startBlock: string
@@ -13,7 +13,6 @@ export type GracePeriodStartedEvent = {
   blockNumber: number
   txOrigin: string
 }
-
 /**
  * Get the grace period events from the X2EarnApps contract
  * @param thor - The thor client
@@ -22,15 +21,11 @@ export type GracePeriodStartedEvent = {
  */
 export const getGracePeriodEvent = async (thor: ThorClient, appId?: string): Promise<GracePeriodStartedEvent[]> => {
   const x2EarnAppContractAddress = getConfig().x2EarnAppsContractAddress
-
   const eventAbi = thor.contracts.load(x2EarnAppContractAddress, abi).getEventAbi("AppUnendorsedGracePeriodStarted")
-
   const appIdBytes = appId ? `0x${BigInt(appId).toString(16).padStart(64, "0")}` : undefined
-
   const topics = eventAbi.encodeFilterTopicsNoNull({
     ...(appId ? { appId: appIdBytes } : {}),
   })
-
   /**
    * Filter criteria to get the events from the X2EarnApps contract that we are interested in
    * This way we can get all of them in one call
@@ -45,7 +40,6 @@ export const getGracePeriodEvent = async (thor: ThorClient, appId?: string): Pro
       eventAbi,
     },
   ]
-
   const events = (
     await getAllEventLogs({
       nodeUrl: getConfig().nodeUrl,

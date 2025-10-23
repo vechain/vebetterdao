@@ -1,11 +1,11 @@
-import { Card, Text, Image, Stack } from "@chakra-ui/react"
+import { Card, Text, Image, Stack, Heading } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const AppsBanner = () => {
   const { t } = useTranslation()
   return (
     <Card.Root
-      bg="#004CFC"
+      bg="banner.blue"
       h={{ base: "220px", md: "195px" }}
       p="24px"
       justifyContent="center"
@@ -20,10 +20,10 @@ export const AppsBanner = () => {
       bgRepeat="no-repeat"
       w="full">
       <Stack alignItems="stretch">
-        <Text fontSize={{ base: "28px", md: "36px" }} fontWeight={700}>
+        <Heading size="2xl" color="text.default">
           {t("Explore apps")}
-        </Text>
-        <Text fontSize="16px" fontWeight={400}>
+        </Heading>
+        <Text textStyle="md" color="info.secondary">
           {t("Browse and discover apps where you can earn tokens for sustainable actions.")}
         </Text>
       </Stack>

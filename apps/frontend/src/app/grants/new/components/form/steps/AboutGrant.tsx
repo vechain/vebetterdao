@@ -1,8 +1,3 @@
-import { FormSocialConnectButton, validateWalletAddress } from "@/components/CustomFormFields"
-import { FormItem } from "@/components/CustomFormFields/FormItem"
-import { patternUrlCheck } from "@/components/CustomFormFields/validators"
-import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
-import { uploadBlobToIPFS } from "@/utils/ipfs"
 import { Accordion, Box, Field, FileUpload, Grid, GridItem, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import { Linkedin, Mail, Telegram } from "iconoir-react"
@@ -21,6 +16,14 @@ import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
+
+import { FormItem } from "@/components/CustomFormFields/FormItem"
+import { patternUrlCheck } from "@/components/CustomFormFields/validators"
+import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
+import { uploadBlobToIPFS } from "@/utils/ipfs"
+
+import { FormSocialConnectButton } from "../../../../../../components/CustomFormFields/FormSocialConnectButton"
+import { validateWalletAddress } from "../../../../../../components/CustomFormFields/validators"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
@@ -124,9 +127,9 @@ export const AboutGrant = ({
   }
   //Handle file removal
   const onRemoveFile = useCallback(
-    (file: File) => {
+    (fileName: string) => {
       const currentAttachments = getValues("outcomesAttachment") || []
-      const updatedAttachments = currentAttachments.filter(attachment => attachment.name !== file.name)
+      const updatedAttachments = currentAttachments.filter(attachment => attachment.name !== fileName)
       setValue("outcomesAttachment", updatedAttachments)
       setData({ outcomesAttachment: updatedAttachments })
     },
@@ -145,7 +148,8 @@ export const AboutGrant = ({
         try {
           // Check for duplicates
           if (isFileDuplicate(file.name, currentAttachments)) {
-            return
+            //Skip duplicate
+            continue
           }
 
           // Validate file
@@ -199,7 +203,7 @@ export const AboutGrant = ({
       <Accordion.Root multiple w="full" defaultValue={["company-details", "project-details", "outcomes"]} spaceY={4}>
         <Accordion.Item value="company-details" pb={5}>
           <Accordion.ItemTrigger>
-            <Text fontSize="lg" fontWeight="semibold">
+            <Text textStyle="lg" fontWeight="semibold">
               {t("Company details")}
             </Text>
           </Accordion.ItemTrigger>
@@ -331,7 +335,7 @@ export const AboutGrant = ({
         </Accordion.Item>
         <Accordion.Item value="project-details" pb={5}>
           <Accordion.ItemTrigger>
-            <Text fontSize="lg" fontWeight="semibold">
+            <Text textStyle="lg" fontWeight="semibold">
               {t("Grant details")}
             </Text>
           </Accordion.ItemTrigger>
@@ -380,15 +384,15 @@ export const AboutGrant = ({
               <GridItem colSpan={{ base: 1, md: 2 }}>
                 <VStack gap={6} align="stretch" w="full">
                   <VStack align="flex-start" gap={1}>
-                    <Text fontSize="lg" fontWeight="semibold">
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Connect accounts")}
                     </Text>
-                    <Text fontSize="sm" color="gray.500">
+                    <Text textStyle="sm" color="gray.500">
                       {t("Please connect an account from your company, project, or your personal account")}
                     </Text>
                   </VStack>
 
-                  <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
+                  <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6} px="1">
                     <GridItem w="full">
                       <FormSocialConnectButton
                         label={twitterUsername ? twitterUsername : t("Connect X")}
@@ -499,7 +503,7 @@ export const AboutGrant = ({
         </Accordion.Item>
         <Accordion.Item value="outcomes" pb={5}>
           <Accordion.ItemTrigger>
-            <Text fontSize="lg" fontWeight="semibold">
+            <Text textStyle="lg" fontWeight="semibold">
               {t("Outcomes")}
             </Text>
           </Accordion.ItemTrigger>
@@ -633,10 +637,8 @@ export const AboutGrant = ({
                 <GridItem colSpan={{ base: 1, md: 2 }}>
                   <Field.Root invalid={!!errors.outcomesAttachment?.message}>
                     <HStack justify="space-between" w="full">
-                      <Field.Label fontSize="sm" fontWeight="medium">
-                        {t("Attachments")}
-                      </Field.Label>
-                      <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+                      <Field.Label textStyle="sm">{t("Attachments")}</Field.Label>
+                      <Text textStyle="sm" color="text.subtle">
                         {"Optional"}
                       </Text>
                     </HStack>
@@ -667,16 +669,43 @@ export const AboutGrant = ({
                       </FileUpload.Dropzone>
                       <FileUpload.ItemGroup>
                         <FileUpload.Context>
-                          {({ acceptedFiles }) =>
-                            acceptedFiles.map(file => (
+                          {({ acceptedFiles }) => {
+                            const storedFiles = getValues("outcomesAttachment") || []
+                            const currentFiles = acceptedFiles
+
+                            // Create a map of stored files by name
+                            const storedFileMap = new Map(storedFiles.map(file => [file.name, file]))
+
+                            // Filter out current files that are already stored
+                            const uniqueCurrentFiles = currentFiles.filter(file => !storedFileMap.has(file.name))
+
+                            const FileComponent = ({ file, isUploading }: { file: File; isUploading: boolean }) => (
                               <FileUpload.Item key={file.name} file={file}>
                                 <FileUpload.ItemPreview />
                                 <FileUpload.ItemName />
-                                <FileUpload.ItemSizeText />
-                                <FileUpload.ItemDeleteTrigger onClick={() => onRemoveFile(file)} />
+                                <Text textStyle="xs" color="text.subtle">
+                                  {isUploading ? t("Uploading...") : t("Stored")}
+                                </Text>
+                                <FileUpload.ItemDeleteTrigger onClick={() => onRemoveFile(file.name)} />
                               </FileUpload.Item>
-                            ))
-                          }
+                            )
+                            return (
+                              <>
+                                {/* Render stored files */}
+                                {storedFiles.map(file => {
+                                  const fileInstance = new File([""], file?.name ?? "", {
+                                    type: file?.type ?? "application/octet-stream",
+                                  })
+                                  return <FileComponent key={file.name} file={fileInstance} isUploading={false} />
+                                })}
+
+                                {/* Render current files that aren't stored yet */}
+                                {uniqueCurrentFiles.map(file => (
+                                  <FileComponent key={file.name} file={file} isUploading={true} />
+                                ))}
+                              </>
+                            )
+                          }}
                         </FileUpload.Context>
                       </FileUpload.ItemGroup>
                     </FileUpload.Root>

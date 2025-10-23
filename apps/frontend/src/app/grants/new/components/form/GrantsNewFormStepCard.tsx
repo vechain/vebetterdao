@@ -1,42 +1,43 @@
-import { useCurrentAllocationsRoundId } from "@/api"
+import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import { Treasury__factory } from "@vechain/vebetterdao-contracts/factories/Treasury__factory"
+import { ethers } from "ethers"
+import { useRouter } from "next/navigation"
+import { signOut, useSession } from "next-auth/react"
+import { useCallback, useMemo, useRef, useState } from "react"
+import { SubmitErrorHandler, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
 import { useHashProposal } from "@/api/contracts/governance/hooks/useHashProposal"
 import { toaster } from "@/components/ui/toaster"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
-import { useDraftGrantProposalStore, useGrantProposalFormStore } from "@/store"
 import { GRANT_PROPOSAL_FORM_STORE_NAME } from "@/store/useGrantProposalFormStore"
-import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
-import { Treasury__factory } from "@vechain/vebetterdao-contracts"
-import { ethers } from "ethers"
-import { signOut, useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useRef, useState } from "react"
-import { SubmitErrorHandler, useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
 
-import { GrantsNewFormStepIndicator } from "."
+import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useDraftGrantProposalStore, useGrantProposalFormStore } from "../../../../../store/useGrantProposalFormStore"
 import { GrantTypeSelection } from "../GrantTypeSelection"
-import { AboutGrant, Milestones, Schedule } from "./steps"
+
+import { GrantsNewFormStepIndicator } from "./GrantsNewFormStepIndicator"
+import { AboutGrant } from "./steps/AboutGrant"
+import { Milestones } from "./steps/Milestones"
+import { Schedule } from "./steps/Schedule"
 
 // ============================================================================
 // TYPES AND CONSTANTS
 // ============================================================================
-
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
   ABOUT_GRANT = "ABOUT_GRANT",
   MILESTONES = "MILESTONES",
   SCHEDULE = "SCHEDULE",
 }
-
 export type GrantStep = {
   key: GrantFormStep
   content: React.ReactNode
   title: string
 }
-
 const STEP_INDICES = {
   GRANT_TYPE: 0,
   ABOUT_GRANT: 1,
@@ -295,8 +296,8 @@ export const GrantsNewFormStepCard = () => {
   // ============================================================================
 
   return (
-    <Card.Root>
-      <Card.Body px={{ base: 3, md: 8 }}>
+    <Card.Root p={{ base: "6", md: "8" }}>
+      <Card.Body>
         <form ref={formRef} onSubmit={handleSubmit(onSubmit, onError)} style={{ width: "100%" }}>
           <VStack gap={4} w="full" align="flex-start">
             <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
@@ -309,7 +310,7 @@ export const GrantsNewFormStepCard = () => {
                     {t("Back")}
                   </Button>
                 )}
-                <Button w="40" type="submit" variant="primaryAction" px={8} size="lg">
+                <Button w="40" type="submit" variant="primary" px={8} size="lg">
                   {currentStepIndex === LAST_STEP ? t("Apply") : t("Continue")}
                 </Button>
               </HStack>

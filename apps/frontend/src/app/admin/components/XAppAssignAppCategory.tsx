@@ -16,18 +16,16 @@ import {
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
-import { useAppsWithoutCategories } from "@/hooks/useAppsWithoutCategories"
-import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/useAdminAssignCategories"
-import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
-import { useColorModeValue } from "@/components/ui/color-mode"
 
+import { useColorModeValue } from "@/components/ui/color-mode"
+import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/useAdminAssignCategories"
+import { useAppsWithoutCategories } from "@/hooks/useAppsWithoutCategories"
+import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 export const XAppAssignAppCategory = () => {
   const { t } = useTranslation()
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [appCategories, setAppCategories] = useState<Record<string, string[]>>({})
-
   const { data: appsWithoutCategories, isLoading: isLoadingApps } = useAppsWithoutCategories()
-
   const { assignCategories, isUploading, uploadError, isTransactionPending } = useAdminAssignCategories({
     onSuccess: () => {
       setAppCategories({})
@@ -35,12 +33,10 @@ export const XAppAssignAppCategory = () => {
     },
     onFailure: () => {},
   })
-
   const handleToggleCategory = useCallback((appId: string, categoryId: string) => {
     setAppCategories(prev => {
       const currentCategories = prev[appId] || []
       const isSelected = currentCategories.includes(categoryId)
-
       if (isSelected) {
         return {
           ...prev,
@@ -122,7 +118,7 @@ export const XAppAssignAppCategory = () => {
       <Card.Root w={"full"}>
         <Card.Header>
           <Heading size="lg">{t("Assign App Categories")}</Heading>
-          <Text fontSize="sm" color="#6A6A6A" mt={2}>
+          <Text textStyle="sm" color="text.subtle" mt={2}>
             {t("Maximum {{max}} categories per app.", {
               max: MAX_CATEGORIES,
             })}
@@ -150,7 +146,7 @@ export const XAppAssignAppCategory = () => {
                     {t("Apps without categories: {{count}}", { count: appsWithoutCategories.length })}
                   </Text>
                   <HStack gap={2}>
-                    <Text fontSize="sm" color="#6A6A6A">
+                    <Text textStyle="sm" color="text.subtle">
                       {carouselIndex + 1} {"/"} {appsWithoutCategories.length}
                     </Text>
                     <IconButton
@@ -189,13 +185,13 @@ export const XAppAssignAppCategory = () => {
                           mx={1}>
                           <VStack align="flex-start" gap={1}>
                             <Text fontWeight="semibold">{app.name}</Text>
-                            <Text fontSize="xs" color="black">
+                            <Text textStyle="xs" color="black">
                               {app.id}
                             </Text>
                           </VStack>
 
                           <VStack align="flex-start" gap={3}>
-                            <Text fontSize="sm" fontWeight="medium">
+                            <Text textStyle="sm">
                               {t("Selected Categories ({{count}}/{{max}})", {
                                 count: selectedCategories.length,
                                 max: MAX_CATEGORIES,

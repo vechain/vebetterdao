@@ -1,21 +1,22 @@
-import { useForm, Controller } from "react-hook-form"
 import { Badge, Button, Card, Field, Heading, HStack, Icon, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
-import { useMemo, useEffect } from "react"
-import { useTranslation } from "react-i18next"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useHasRole } from "@/api/contracts/account"
-import { useAccessControl } from "@/hooks"
-import { CONTRACT_LIST } from "@/constants"
-import { WalletAddressInput } from "@/app/components/Input"
 import { useWallet } from "@vechain/vechain-kit"
+import { useMemo, useEffect } from "react"
+import { useForm, Controller } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { useHasRole } from "../../../api/contracts/account/hooks/useHasRole"
+import { CONTRACT_LIST } from "../../../constants/contractList"
+import { useAccessControl } from "../../../hooks/useAccessControl"
+import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
+
 type UpdateRoleCardInput = {
   contract?: string
   role?: string
   walletAddress?: string
 }
-
 export const UpdateRoleCard = () => {
   const {
     control,
@@ -30,19 +31,15 @@ export const UpdateRoleCard = () => {
       walletAddress: "",
     },
   })
-
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const walletAddress = watch("walletAddress")
   const selectedContractAddress = watch("contract")
   const selectedRole = watch("role")
-
   const selectedContractObject = useMemo(
     () => CONTRACT_LIST.find(contract => compareAddresses(contract.contractAddress, selectedContractAddress)),
     [selectedContractAddress],
   )
-
   const { data: userAlreadyHasRole, error: hasRoleError } = useHasRole(
     selectedRole ?? "",
     selectedContractAddress ?? "",
@@ -96,7 +93,7 @@ export const UpdateRoleCard = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("Update Address Role")}</Heading>
-        <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
+        <Text textStyle="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
       </Card.Header>
 
       <Card.Body>
@@ -167,7 +164,7 @@ export const UpdateRoleCard = () => {
                 {userAlreadyHasRole ? (
                   <Badge
                     textTransform="none"
-                    fontSize="sm"
+                    textStyle="sm"
                     display="flex"
                     alignItems="center"
                     borderRadius="12px"
@@ -186,7 +183,7 @@ export const UpdateRoleCard = () => {
                 ) : (
                   <Badge
                     textTransform="none"
-                    fontSize="sm"
+                    textStyle="sm"
                     display="flex"
                     alignItems="center"
                     borderRadius="12px"

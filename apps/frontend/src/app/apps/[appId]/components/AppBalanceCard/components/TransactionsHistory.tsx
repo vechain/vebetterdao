@@ -1,11 +1,13 @@
 import { HStack, Text, VStack } from "@chakra-ui/react"
-import { AppFundActivityEvent } from "@/api/contracts/x2EarnRewardsPool"
-import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useBreakpoints } from "@/hooks"
+import dayjs from "dayjs"
+import { useTranslation } from "react-i18next"
+
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
-import dayjs from "dayjs"
+
+import { AppFundActivityEvent } from "../../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppFundActivityEvents"
+import { useBreakpoints } from "../../../../../../hooks/useBreakpoints"
 
 type Props = {
   transaction: AppFundActivityEvent
@@ -13,9 +15,7 @@ type Props = {
   start?: string
   end?: string
 }
-
 type TransactionType = "DEPOSIT" | "WITHDRAW" | "DISTRIBUTE_REWARDS" | "REWARDS_POOL_UPDATED" | string
-
 type TransactionProps = {
   // icon: JSX.Element
   title: string
@@ -23,26 +23,20 @@ type TransactionProps = {
   timestampTxs: number
   txId: string
 }
-
 const compactFormatter = getCompactFormatter(4)
-
 export const TransactionsHistory = ({ transaction, index, start, end }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-
   const txType = transaction.txType as TransactionType
   const timestamp = useEstimateBlockTimestamp({ blockNumber: transaction?.blockNumber })
-
   // Date filtering
   if (start && end) {
     const startTimestamp = dayjs(start).startOf("day").valueOf()
     const endTimestamp = dayjs(end).endOf("day").valueOf()
-
     if (timestamp < startTimestamp || timestamp > endTimestamp) {
       return null
     }
   }
-
   const seeTx = (txId: string) => {
     window.open(getExplorerTxLink(txId), "_blank")
   }
@@ -95,15 +89,15 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
             color: "blue.500",
             cursor: "pointer",
           }}
-          fontSize={isMobile ? 12 : 14}
-          fontWeight={"600"}
+          textStyle={isMobile ? "xs" : "sm"}
+          fontWeight="semibold"
           cursor={"pointer"}
           onClick={() => seeTx(txId)}>
           {title}
         </Text>
-        <Text fontSize={isMobile ? 12 : 14}>{dayjs(timestampTxs).format("DD/MM/YY")}</Text>
+        <Text textStyle={isMobile ? "xs" : "sm"}>{dayjs(timestampTxs).format("DD/MM/YY")}</Text>
       </VStack>
-      <Text fontSize={isMobile ? 12 : 14} fontWeight={"600"} onClick={() => seeTx(txId)}>
+      <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" onClick={() => seeTx(txId)}>
         {amount}
       </Text>
     </HStack>

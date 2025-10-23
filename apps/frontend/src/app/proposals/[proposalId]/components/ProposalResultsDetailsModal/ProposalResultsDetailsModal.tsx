@@ -1,9 +1,3 @@
-import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
-import { MulticolorBar, RegularModal, ResultsDisplay } from "@/components"
-import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
-import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
-import { ProposalState } from "@/hooks"
-import { VotingSegment } from "@/types/voting"
 import { Box, HStack, Icon, Link, Stack, Table, Text, VStack } from "@chakra-ui/react"
 import { UilCheckCircle } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
@@ -11,6 +5,16 @@ import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { formatEther, parseEther } from "viem"
+
+import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
+import { VotingSegment } from "@/types/voting"
+
+import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
+import { RegularModal } from "../../../../../components/RegularModal"
+import { ProposalState } from "../../../../../hooks/proposals/grants/types"
 
 // Types
 interface ProgressBarSegment {
@@ -21,27 +25,24 @@ interface ProgressBarSegment {
   color: string
   icon: React.ElementType
 }
-
 interface ProposalVotesData {
   totalVoters: number
   totalPower: bigint
   totalWeight: bigint
   votes: GroupedProposalVotes
 }
-
 // Base interfaces
 interface BaseModalProps {
   isResultsModalOpen: boolean
   onClose: () => void
 }
-
 interface BaseProposalProps {
   proposalId: string
   progressBarSegments: ProgressBarSegment[]
 }
-
 interface BaseVotingProps {
   proposalQuorum: bigint
+  proposalQuorumNumerator: bigint
   proposalTotalVotes: bigint
   totalVotesAtSnapshot: string
 }
@@ -78,6 +79,7 @@ const VotingResultContent = ({
   totalVotesAtSnapshot,
   votingSegments,
   proposalQuorum,
+  proposalQuorumNumerator,
   proposalTotalVotes,
   proposalVotesData,
 }: VotingResultContentProps) => {
@@ -85,7 +87,7 @@ const VotingResultContent = ({
   return (
     <Stack direction={{ base: "column", md: "row" }} w="full" align="stretch" gap={4}>
       <VStack bg="bg.subtle" p={5} borderRadius="16px" gap={4}>
-        <Text fontSize="md" fontWeight="semibold" alignSelf="flex-start">
+        <Text textStyle="md" fontWeight="semibold" alignSelf="flex-start">
           {"Votes"}
         </Text>
         <MulticolorBar segments={progressBarSegments} />
@@ -132,10 +134,11 @@ const VotingResultContent = ({
         </Table.Root>
       </VStack>
       <VStack bg="bg.subtle" p={5} borderRadius="16px">
-        <Text fontSize="md" fontWeight="semibold" alignSelf="flex-start">
+        <Text textStyle="md" fontWeight="semibold" alignSelf="flex-start">
           {"Quorum"}
         </Text>
         <ChartQuorum
+          proposalQuorumNumerator={proposalQuorumNumerator}
           proposalQuorum={proposalQuorum}
           proposalTotalVotes={proposalTotalVotes}
           totalVotesAtSnapshot={totalVotesAtSnapshot}
@@ -174,21 +177,21 @@ const SupportResultContent = ({
         {userSupportPercentage > 0 && (
           <HStack justify="space-between" w="full">
             <HStack>
-              <Icon as={HeartSolidIcon} color="success.primary" boxSize={5} />
-              <Text fontSize="md" color="text.subtle">
+              <Icon as={HeartSolidIcon} color="status.positive.primary" boxSize={5} />
+              <Text textStyle="md" color="text.subtle">
                 {t("{{percentage}}% (your support)", { percentage: userSupportPercentage.toFixed(2) })}
               </Text>
             </HStack>
-            <Text fontSize="md" color="text.subtle">
+            <Text textStyle="md" color="text.subtle">
               {humanNumber(formatEther(userDeposits), userDeposits, "VOT3")}
             </Text>
           </HStack>
         )}
         <HStack justify="space-between" w="full">
-          <Text fontSize="md" color="text.subtle">
+          <Text textStyle="md" color="text.subtle">
             {"Supporters"}
           </Text>
-          <Text fontSize="md" color="text.subtle">
+          <Text textStyle="md" color="text.subtle">
             {totalSupporters}
           </Text>
         </HStack>
@@ -197,7 +200,12 @@ const SupportResultContent = ({
   )
 }
 
-const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot }: ChartQuorumProps) => {
+const ChartQuorum = ({
+  proposalQuorum,
+  proposalTotalVotes,
+  totalVotesAtSnapshot,
+  proposalQuorumNumerator,
+}: ChartQuorumProps) => {
   const percentageFilled = useMemo(() => {
     if (!totalVotesAtSnapshot || !proposalTotalVotes) return BigInt(0)
     const totalVotesAtSnapshotBigInt = parseEther(totalVotesAtSnapshot.toString())
@@ -243,17 +251,20 @@ const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot 
           </PieChart>
         </ResponsiveContainer>
         <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color={isQuorumReached ? "success.primary" : "gray.700"}>
+          <Text textStyle="2xl" fontWeight="bold" color={isQuorumReached ? "status.positive.primary" : "gray.700"}>
             {`${percentageFilled}%`}
           </Text>
         </Box>
       </Box>
       {isQuorumReached && (
         <HStack justifyContent="center" w="full" textWrap={"nowrap"}>
-          <Icon as={UilCheckCircle} color="success.primary" boxSize={5} />
-          <Text fontSize="xs" fontWeight="semibold">
+          <Icon as={UilCheckCircle} color="status.positive.primary" boxSize={5} />
+          <Text textStyle="xs" fontWeight="semibold">
             <Trans
-              i18nKey="Minimum <Link>quorum</Link> (30%) reached"
+              i18nKey="Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached"
+              values={{
+                quorumNumerator: proposalQuorumNumerator,
+              }}
               components={{
                 Link: <Link target="_blank" href={PROPOSALS_QUORUM_DOCS_LINK} textDecoration="underline" />,
               }}
@@ -277,6 +288,7 @@ export const ProposalResultsDetailsModal = ({
   proposalState,
   proposalId,
   proposalQuorum,
+  proposalQuorumNumerator,
   proposalTotalVotes,
   proposalSupportAmount,
   totalSupporters,
@@ -312,6 +324,7 @@ export const ProposalResultsDetailsModal = ({
           totalVotesAtSnapshot={totalVotesAtSnapshot}
           votingSegments={votingSegments}
           proposalQuorum={proposalQuorum}
+          proposalQuorumNumerator={proposalQuorumNumerator}
           proposalTotalVotes={proposalTotalVotes}
           proposalVotesData={proposalVotesData}
         />

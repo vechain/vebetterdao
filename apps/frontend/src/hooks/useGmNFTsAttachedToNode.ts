@@ -1,29 +1,28 @@
-import { useQuery } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { getIpfsImage, getIpfsMetadata, IpfsImage } from "@/api/ipfs"
+import { useQuery } from "@tanstack/react-query"
+import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 import { notFoundImage } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
 
+import { getIpfsImage, IpfsImage } from "../api/ipfs/hooks/useIpfsImage"
+import { getIpfsMetadata } from "../api/ipfs/hooks/useIpfsMetadata"
+
 const galaxyMemberAbi = GalaxyMember__factory.abi
 const galaxyMemberAddress = getConfig().galaxyMemberContractAddress as `0x${string}`
 const galaxyMemberMethod = "getIdAttachedToNode" as const
-
 const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 const voterRewardsAbi = VoterRewards__factory.abi
 const voterRewardsMethod = "levelToMultiplier" as const
-
 export const getGmNFTsAttachedToNodeKeys = (nodeIds: string[]) => ["gmNFTsAttachedToNode", nodeIds]
-
 export interface GmNFTData {
   tokenId: string
   level: number
   multiplier: number
   metadata: NFTMetadata
 }
-
 export const useGmNFTsAttachedToNode = (
   nodeIds: string[],
   options?: {
@@ -32,9 +31,7 @@ export const useGmNFTsAttachedToNode = (
   },
 ) => {
   const { withMetadata = false, enabled = true } = options ?? {}
-
   const thor = useThor()
-
   return useQuery({
     queryKey: getGmNFTsAttachedToNodeKeys(nodeIds),
     queryFn: async () => {

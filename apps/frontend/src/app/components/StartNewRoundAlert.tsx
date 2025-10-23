@@ -1,21 +1,21 @@
-import { Alert, VStack, Text } from "@chakra-ui/react"
+import { Alert, VStack } from "@chakra-ui/react"
+
 import { StartRoundButton } from "@/app/admin/components/StartRoundCard/components/StartRoundButton"
-import { useCurrentRoundActiveState } from "@/api"
+
+import { useCurrentRoundActiveState } from "../../api/contracts/xAllocations/hooks/useCurrentRoundActiveState"
 
 export const StartNewRoundAlert = () => {
   const { isCurrentRoundActive } = useCurrentRoundActiveState()
-
   if (isCurrentRoundActive) return null
-
   return (
-    <Alert.Root status="error" borderRadius="16px" bg="#FFF3E5" border="1px solid #AF5F00">
+    <Alert.Root status="error">
       <VStack
         direction={["column-reverse", "column-reverse", "row"]}
         align={["stretch", "stretch", "flex-start"]}
         gap={4}>
-        <Text fontWeight="700" fontSize="16px" color="#AF5F00" as="span">
+        <Alert.Title textStyle="xl" fontWeight="bold">
           {"The previous round has ended. Start a new round to continue voting."}
-        </Text>
+        </Alert.Title>
         <Alert.Description>
           <StartRoundButton redirectTo="/" />
         </Alert.Description>

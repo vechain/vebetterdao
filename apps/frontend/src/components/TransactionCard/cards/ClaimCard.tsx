@@ -1,27 +1,25 @@
-import { Transaction } from "@/api"
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilGift } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { ActionModal } from "./BetterActionCard"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+
+import { Transaction } from "../../../api/indexer/transactions/useTransactions"
+import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
+
+import { ActionModal } from "./BetterActionCard/components/ActionModal"
 
 type Props = {
   transaction: Transaction
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 export const ClaimCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
-
   const actionModal = useDisclosure()
   const { isConnectedUser } = useRetrieveProfilIdentity()
-
   return (
-    <Card.Root variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
+    <Card.Root size="sm" variant="subtle" px={3} py={2} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>
         <HStack gap={3} w="full" justify="space-between">
           <HStack gap={4}>
@@ -37,27 +35,25 @@ export const ClaimCard = ({ transaction }: Props) => {
             </Flex>
             <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
-                <Text fontSize={"sm"} mr="1">
+                <Text textStyle={"sm"} mr="1">
                   {isConnectedUser ? t("You claimed") : t("Claimed")}
                 </Text>
-                <Text fontSize={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {t("voting rewards")}
                 </Text>
               </HStack>
-              <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+              <Text textStyle={"xs"} color={"#6A6A6A"}>
                 {dayjs.unix(transaction?.blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>
           </HStack>
           <VStack gap={0} align="stretch">
             <HStack gap={2}>
-              <Text fontWeight={600}>
+              <Text fontWeight="semibold">
                 {"+"}
                 {compactFormatter.format(Number(ethers.formatEther(transaction?.value ?? 0)))}
               </Text>
-              <Text fontWeight={400} fontSize={"sm"}>
-                {"B3TR"}
-              </Text>
+              <Text textStyle="sm">{"B3TR"}</Text>
             </HStack>
           </VStack>
         </HStack>

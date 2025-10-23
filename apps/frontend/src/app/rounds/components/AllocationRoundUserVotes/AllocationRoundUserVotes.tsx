@@ -1,24 +1,27 @@
-import { useAllocationsRound, useHasVotedInRound, useUserVotesInRound, useTotalVotesOnBlock } from "@/api"
 import { Button, Card, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { useMemo } from "react"
-import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
-import { useWallet } from "@vechain/vechain-kit"
-import { ethers } from "ethers"
-import BigNumber from "bignumber.js"
-import { scaledDivision } from "@/utils/MathUtils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
+import { ethers } from "ethers"
 import { t } from "i18next"
-import { FiArrowUpRight } from "react-icons/fi"
+import { useMemo } from "react"
 import { Trans } from "react-i18next"
+import { FiArrowUpRight } from "react-icons/fi"
+
+import { useTotalVotesOnBlock } from "../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useHasVotedInRound } from "../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
+import { scaledDivision } from "../../../../utils/MathUtils/MathUtils"
+import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
+
 import { SeeVoteDetailsModal } from "./SeeVoteDetailsModal"
 
 type Props = {
   roundId: string
   minPercentageToNotMerge?: number
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 /**
  * This component displays the user's votes in the current round.
  * It shows the total votes cast by the user and the breakdown of votes among the apps.
@@ -27,9 +30,7 @@ const compactFormatter = getCompactFormatter(2)
  */
 export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: Props) => {
   const { account } = useWallet()
-
   const seeAllModal = useDisclosure()
-
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
@@ -37,12 +38,10 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
   )
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
-
   const { data: castVotesEvent, isLoading: castVotesEventLoading } = useUserVotesInRound(
     roundId,
     account?.address ?? undefined,
   )
-
   const totalVotesCast = useMemo(
     () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
     [castVotesEvent],
@@ -100,22 +99,20 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
         id="user-votes"
         maxH={[!account?.address ? "600px" : "auto", "auto"]}
         overflowY={"hidden"}
-        variant="baseWithBorder"
+        variant="primary"
         data-testid={"user-votes-card"}>
         <Card.Body>
           <VStack flex={1} w="full" gap={8} align={"flex-start"}>
             <VStack gap={2} align="flex-start" w="full">
               <HStack w="full" justify="space-between">
-                <Heading fontSize="24px" fontWeight={700}>
-                  {t("Your vote")}
-                </Heading>
+                <Heading size="2xl">{t("Your vote")}</Heading>
                 <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
                   {t("See details")}
                   <FiArrowUpRight />
                 </Button>
               </HStack>
               <Skeleton loading={castVotesEventLoading}>
-                <Text fontSize="16px" fontWeight="400">
+                <Text textStyle="md">
                   <Trans
                     i18nKey={"{{amount}} distributed among {{apps}} apps"}
                     values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}

@@ -1,12 +1,12 @@
-import AbstainIcon from "@/components/Icons/svg/abstain.svg"
-import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
-import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { Card, CardBody, CardHeader, Heading, Icon, List, Separator, Text, VStack } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+
 export const HowGrantWorks = () => {
   const { t } = useTranslation()
-
   const infoList = [
     {
       heading: t("Submit Grant application"),
@@ -38,9 +38,8 @@ export const HowGrantWorks = () => {
       description: t("If approved, your grant is funded from the DAO Treasury."),
     },
   ]
-
   return (
-    <Card.Root variant="subtle" px={2}>
+    <Card.Root variant="primary">
       <CardHeader>
         <Heading size="lg">{t("How grant application works?")}</Heading>
       </CardHeader>
@@ -52,7 +51,7 @@ export const HowGrantWorks = () => {
                 <Heading size="md" color="text.default">
                   {`${index + 1}. ${item.heading}`}
                 </Heading>
-                <Text color="text.subtle" fontSize="sm">
+                <Text color="text.subtle" textStyle="sm">
                   {item.description}
                 </Text>
               </VStack>

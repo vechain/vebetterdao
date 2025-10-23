@@ -1,14 +1,18 @@
-import { UseFormReturn } from "react-hook-form"
-import { EditAppForm } from ".."
 import { Box, Circle, Flex, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { LOGO_UPLOAD_GUIDELINES, IMAGE_REQUIREMENTS, notFoundImage } from "@/constants"
-import { useCallback, useRef, useState } from "react"
 import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useRef, useState } from "react"
+import { UseFormReturn } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { toaster } from "@/components/ui/toaster"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
-import { useTranslation } from "react-i18next"
-import { validateImage } from "@/utils"
-import { toaster } from "@/components/ui/toaster"
+
+import { IMAGE_REQUIREMENTS, LOGO_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
+import { validateImage } from "../../../../../../../utils/ImageValidation"
+import { EditAppForm } from "../EditAppPageContent"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -56,7 +60,7 @@ export const EditAppLogo = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("Logo")}
       </Text>
       <Flex w="64px" h="64px" flexBasis={"64px"} position={"relative"} rounded="16px">
@@ -87,12 +91,12 @@ export const EditAppLogo = ({ form }: Props) => {
             _hover={{ bg: "#00000033" }}
             onClick={handleClickEdit}>
             <Circle bg={"#00000033"} size={"30px"}>
-              <UilPen color="#FFFFFF" size={"18px"} />
+              <UilPen color="white" size={"18px"} />
             </Circle>
           </Flex>
         </Box>
       </Flex>
-      <Text fontSize={14} color={invalidFormat ? "red" : "gray"} pt={0}>
+      <Text textStyle="sm" color={invalidFormat ? "red" : "gray"} pt={0}>
         {invalidFormat ? invalidMessage : t(LOGO_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>

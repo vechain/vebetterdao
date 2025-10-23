@@ -1,14 +1,16 @@
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
+import { TFunction } from "i18next"
 import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useState } from "react"
-import { CheckableCard, CheckableCardProps } from "@/components"
-import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
-import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
-import { TFunction } from "i18next"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
 import { v4 as uuid } from "uuid"
+
+import { CheckableCard, CheckableCardProps } from "../../../../../components/CheckableCard/CheckableCard"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "../../../../../constants/AnalyticsEvents"
+import { useProposalFormStore } from "../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
+
 export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
 })[] = t => [
@@ -33,7 +35,6 @@ export const NewProposalTypePageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const pageGuardResult = useNewProposalPageGuard()
-
   const { clearData } = useProposalFormStore()
   const [selectedRoute, setSelectedRoute] = useState<string>(Steps(t)[0]?.route as string)
   const onChange = useCallback(
@@ -42,7 +43,6 @@ export const NewProposalTypePageContent = () => {
     },
     [],
   )
-
   const onContinue = useCallback(() => {
     if (selectedRoute) {
       clearData()
@@ -50,10 +50,6 @@ export const NewProposalTypePageContent = () => {
       router.push(selectedRoute)
     }
   }, [router, selectedRoute, clearData])
-
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
 
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
@@ -72,12 +68,10 @@ export const NewProposalTypePageContent = () => {
       w="full"
       data-testid="new-proposal-type-page">
       <GridItem colSpan={2}>
-        <Card.Root variant="baseWithBorder">
+        <Card.Root variant="primary">
           <Card.Body py={8}>
             <VStack gap={8} align="flex-start">
-              <Heading size={["xl", "2xl"]} fontWeight="bold">
-                {t("Select proposal type")}
-              </Heading>
+              <Heading size={["xl", "2xl"]}>{t("Select proposal type")}</Heading>
               <Stack direction={["column", "column", "row"]} w="full" gap={4}>
                 {Steps(t).map(step => (
                   <CheckableCard
@@ -92,10 +86,10 @@ export const NewProposalTypePageContent = () => {
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-                <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+                <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
                   {t("Go back")}
                 </Button>
-                <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
+                <Button data-testid="continue" variant="primary" onClick={onContinue}>
                   {t("Continue")}
                 </Button>
               </HStack>

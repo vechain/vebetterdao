@@ -1,21 +1,30 @@
-import { Button, Icon, Image, Text, VStack } from "@chakra-ui/react"
+import { Button, Icon } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { PiSquaresFourFill } from "react-icons/pi"
+
+import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export const NoActionsCard = () => {
   const { t } = useTranslation()
   const router = useRouter()
   return (
-    <VStack gap={4} bg="light-contrast-on-card-bg" align="center" w="full" borderRadius="md" py="16px" px="28px">
-      <Image src="/assets/icons/hand-plant.svg" boxSize={"78px"} color="#757575" alt="No proposals" />
-      <Text fontSize={"16px"} fontWeight={500} color={"#757575"} textAlign="center">
-        {t("Use the Apps to do some Better Actions and earn tokens!")}
-      </Text>
-      <Button rounded={"full"} variant={"outline"} colorPalette="blue" onClick={() => router.push("/apps")}>
-        <Icon as={PiSquaresFourFill} />
+    <EmptyState
+      bg="transparent"
+      size="sm"
+      icon={
+        <Icon boxSize={20} color="actions.secondary.text-lighter">
+          <HandPlantIcon />
+        </Icon>
+      }
+      title={t("Use the Apps to do some Better Actions and earn tokens!")}>
+      <Button rounded={"full"} variant={"secondary"} onClick={() => router.push("/apps")}>
+        <Icon color="actions.secondary.text-lighter">
+          <PiSquaresFourFill />
+        </Icon>
         {t("Explore Apps")}
       </Button>
-    </VStack>
+    </EmptyState>
   )
 }

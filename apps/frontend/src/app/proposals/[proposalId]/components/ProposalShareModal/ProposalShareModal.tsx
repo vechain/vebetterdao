@@ -1,14 +1,16 @@
-import { CustomModalContent } from "@/components"
-import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import { ProposalType } from "@/hooks/proposals/grants/types"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { Box, CloseButton, Dialog, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { UilCheckCircle, UilLink } from "@iconscout/react-unicons"
 import { motion } from "framer-motion"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
+
+import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import { ProposalType } from "@/hooks/proposals/grants/types"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
 
 import shareIconAnimation from "./shareIconAnimation.json"
 
@@ -24,7 +26,6 @@ const containerVariants = {
     },
   },
 }
-
 export const ProposalShareModal = ({
   proposalId,
   proposalType,
@@ -88,10 +89,10 @@ export const ProposalShareModal = ({
                   />
                 </Box>
                 <VStack>
-                  <Heading fontSize="28px" fontWeight={700}>
+                  <Heading size="3xl" fontWeight="bold">
                     {t("Share this {{proposalType}}", { proposalType: proposalTypeText })}
                   </Heading>
-                  <Text fontSize="16px" fontWeight={400} color={"text.subtle"} textAlign={"center"}>
+                  <Text textStyle="lg" color={"text.subtle"} textAlign={"center"}>
                     {t("Share the {{proposalType}} on social media and invite people to vote", {
                       proposalType: proposalTypeText,
                     })}
@@ -101,7 +102,7 @@ export const ProposalShareModal = ({
                 {showCopiedLink ? (
                   <HStack color="#6DCB09">
                     <UilCheckCircle size="20px" />
-                    <Text fontSize="18px" fontWeight={500}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Copied!")}
                     </Text>
                   </HStack>
@@ -111,7 +112,7 @@ export const ProposalShareModal = ({
                     color="#004CFC"
                     onClick={handleCopyLink}>
                     <UilLink size="18px" />
-                    <Text fontSize="18px" fontWeight={500}>
+                    <Text textStyle="lg" fontWeight={500}>
                       {t("Copy link to {{proposalType}}", { proposalType: proposalTypeText })}
                     </Text>
                   </HStack>

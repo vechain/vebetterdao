@@ -1,7 +1,6 @@
 type Props = {
   color?: string
 }
-
 export const VoteBoxIcon: React.FC<Props> = ({ color = "#004CFC" }) => {
   return (
     <svg width="80" height="81" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">

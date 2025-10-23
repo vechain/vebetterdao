@@ -1,14 +1,3 @@
-import {
-  DISCORD_URL,
-  EMAIL_URL,
-  FACEBOOK_URL,
-  INSTAGRAM_URL,
-  LINKEDIN_URL,
-  TELEGRAM_URL,
-  TIKTOK_URL,
-  X_TWITTER_URL,
-  YOUTUBE_URL,
-} from "@/constants"
 import { HStack, Icon, Link } from "@chakra-ui/react"
 import React from "react"
 import {
@@ -23,6 +12,17 @@ import {
   FaYoutube,
 } from "react-icons/fa6"
 
+import {
+  DISCORD_URL,
+  EMAIL_URL,
+  FACEBOOK_URL,
+  INSTAGRAM_URL,
+  LINKEDIN_URL,
+  TELEGRAM_URL,
+  TIKTOK_URL,
+  X_TWITTER_URL,
+  YOUTUBE_URL,
+} from "../../../constants/links"
 const socialLinks = [
   { href: X_TWITTER_URL, icon: FaXTwitter },
   { href: INSTAGRAM_URL, icon: FaInstagram },
@@ -34,7 +34,6 @@ const socialLinks = [
   { href: FACEBOOK_URL, icon: FaFacebookF },
   { href: EMAIL_URL, icon: FaEnvelope },
 ]
-
 export const Socials: React.FC = () => {
   return (
     <HStack color={"white"} gap={4}>

@@ -1,16 +1,19 @@
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { StepCard, StepCardProps } from "@/components/StepCard"
-import { useTranslation } from "react-i18next"
-import { useCallback, useLayoutEffect } from "react"
 import { TFunction } from "i18next"
-import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
-import SignIcon from "@/components/Icons/svg/sign.svg"
-import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
-import VoteIcon from "@/components/Icons/svg/vote.svg"
+import { useRouter } from "next/navigation"
+import { useCallback, useLayoutEffect } from "react"
+import { useTranslation } from "react-i18next"
+
 import ArrowRightIcon from "@/components/Icons/svg/arrow-right.svg"
+import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
+import SignIcon from "@/components/Icons/svg/sign.svg"
+import VoteIcon from "@/components/Icons/svg/vote.svg"
+import { StepCard, StepCardProps } from "@/components/StepCard"
+
+import { ButtonClickProperties, buttonClicked, buttonClickActions } from "../../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
+
 const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => [
   {
     stepIcon: SignIcon,
@@ -24,7 +27,6 @@ const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => 
     stepTitle: t("Look for support"),
     stepDescription: t("In order for your proposal to be voted on, it will have to have the support of the community."),
   },
-
   {
     stepIcon: VoteIcon,
     stepNumber: 3,
@@ -50,10 +52,6 @@ export const NewProposalPageContent = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL))
   }, [router])
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
   useLayoutEffect(() => {
@@ -71,14 +69,12 @@ export const NewProposalPageContent = () => {
       w="full"
       data-testid="new-proposal-page">
       <GridItem colSpan={2}>
-        <Card.Root variant="baseWithBorder">
+        <Card.Root variant="primary">
           <Card.Body>
             <VStack gap={[6, 8]} align="flex-start">
               <VStack gap={[4, 6]} align="flex-start">
-                <Heading size={["xl", "2xl"]} fontWeight="bold">
-                  {t("Create a new proposal")}
-                </Heading>
-                <Text fontSize={["sm", "md"]}>
+                <Heading size={["xl", "2xl"]}>{t("Create a new proposal")}</Heading>
+                <Text textStyle={["sm", "md"]}>
                   {t(
                     "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",
                   )}
@@ -99,10 +95,10 @@ export const NewProposalPageContent = () => {
               </Stack>
               <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} gap={8}>
                 <HStack justify={"flex-end"} gap={4} flex={1}>
-                  <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+                  <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
                     {t("Go back")}
                   </Button>
-                  <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
+                  <Button data-testid="continue" variant="primary" onClick={onContinue}>
                     {t("Continue")}
                   </Button>
                 </HStack>

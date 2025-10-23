@@ -1,25 +1,24 @@
-import { useCallback, useMemo } from "react"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { buildClause } from "@/utils/buildClause"
-import {
-  getAppEndorsementScoreQueryKey,
-  getAppExistsQueryKey,
-  getIsBlacklistedQueryKey,
-  getEndorsersQueryKey,
-  getIsAppUnendorsedQueryKey,
-  getNodesEndorsedAppsQueryKey,
-  getXAppsQueryKey,
-  getUserNodesQueryKey,
-} from "@/api"
-import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { buildClause } from "@/utils/buildClause"
+
+import { getIsBlacklistedQueryKey } from "../api/contracts/vePassport/hooks/useIsBlacklisted"
+import { getAppEndorsementScoreQueryKey } from "../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
+import { getEndorsersQueryKey } from "../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { getIsAppUnendorsedQueryKey } from "../api/contracts/xApps/hooks/endorsement/useIsAppUnendorsed"
+import { getNodesEndorsedAppsQueryKey } from "../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { getAppExistsQueryKey } from "../api/contracts/xApps/hooks/useAppExists"
+import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+import { getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-
 type Props = { appId?: string; nodeId?: string; onSuccess?: () => void }
-
 /**
  * Hook for app owners to remove an endorsement
  * @param appId  the app id
@@ -40,7 +39,6 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
       }),
     ]
   }, [appId, nodeId])
-
   const refetchQueryKeys = useMemo(
     () => [
       getIsAppUnendorsedQueryKey(appId ?? ""),

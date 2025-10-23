@@ -1,15 +1,16 @@
-import { BetterActionCard } from "./cards/BetterActionCard"
+import { ethers } from "ethers"
+
+import { Transaction } from "../../api/indexer/transactions/useTransactions"
+
+import { BetterActionCard } from "./cards/BetterActionCard/BetterActionCard"
 import { ClaimCard } from "./cards/ClaimCard"
 import { SupportCard } from "./cards/SupportCard"
 import { SwapCard } from "./cards/SwapCard"
 import { UpgradeGMCard } from "./cards/UpgradeGMCard"
-import { Transaction } from "@/api"
-import { ethers } from "ethers"
 
 type Props = {
   transaction: Transaction
 }
-
 export const TransactionCard = ({ transaction }: Props) => {
   switch (transaction.eventName) {
     case "B3TR_ACTION": {

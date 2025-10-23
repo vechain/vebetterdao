@@ -1,11 +1,11 @@
-import { useProposalComments } from "@/api"
-import { SelectField } from "@/components"
 import { Center, createListCollection, Heading, HStack, Spinner, VStack } from "@chakra-ui/react"
 import { UilSortAmountDown } from "@iconscout/react-unicons"
 import { t } from "i18next"
 import { useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 
+import { useProposalComments } from "../../../../../api/indexer/proposals/useProposalComments"
+import { SelectField } from "../../../../../components/SelectField/SelectField"
 import { ProposalVoteComment } from "../ProposalVoteComment/ProposalVoteComment"
 
 enum VoteType {
@@ -14,11 +14,9 @@ enum VoteType {
   ABSTAIN = "ABSTAIN",
   ALL = "ALL",
 }
-
 type Props = {
   proposalId?: string
 }
-
 export const ProposalVoteCommentList = ({ proposalId }: Props) => {
   const sortOptions = createListCollection({
     items: [
@@ -41,16 +39,13 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
     support: activeFilter !== VoteType.ALL ? activeFilter : undefined,
     direction: direction as "ASC" | "DESC",
   })
-
   const visibleComments = data?.pages.flatMap(page => page.data)
   const commentsCount = visibleComments?.length ?? 0
-
   if (!commentsCount || !proposalId) return null
-
   return (
     <VStack alignItems="stretch" gap={4}>
       <HStack justifyContent="space-between" w="full">
-        <Heading fontWeight={700} fontSize="24px" w="full">
+        <Heading fontWeight="bold" size="2xl" w="full">
           {t("Comments ({{amount}})", { amount: commentsCount })}
         </Heading>
         <HStack w="full" justifyContent="flex-end">

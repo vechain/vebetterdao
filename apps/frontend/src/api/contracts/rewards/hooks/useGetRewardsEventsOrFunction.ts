@@ -4,7 +4,6 @@ export type ClaimedReward = {
   claimedReward: number
   claimedGMReward?: number
 }
-
 /**
  * useGetRewardsEventsOrFunction is a custom hook that fetches the rewards events or function for a given round and voter.
  * If the rewards are claimed 'useVotingRewards' will return 0, hence, it should return the claimed rewards.
@@ -16,9 +15,7 @@ export type ClaimedReward = {
  */
 export const useGetRewardsEventsOrFunction = (voter: string, cycle?: string) => {
   const { data: rewardClaimedEvents } = useRewardClaimedEvents(cycle ? Number(cycle) : 0, voter)
-
   if (!rewardClaimedEvents) return { claimedReward: 0, claimedGMReward: 0 }
-
   const claimedReward = rewardClaimedEvents[0]?.reward
   const gmReward = rewardClaimedEvents[0]?.gmReward
   return {

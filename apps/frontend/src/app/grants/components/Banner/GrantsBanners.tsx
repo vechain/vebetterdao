@@ -1,4 +1,3 @@
-import { useProposalClaimableUserDeposits } from "@/api/contracts/governance/hooks"
 import { IconButton } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -8,8 +7,9 @@ import { A11y } from "swiper/modules"
 // Import Swiper React components
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
 
-import { ClaimTokensBanner } from "./ClaimTokensBanner"
+import { useProposalClaimableUserDeposits } from "../../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 
+import { ClaimTokensBanner } from "./ClaimTokensBanner"
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
 import "swiper/css"
@@ -79,7 +79,7 @@ export const GrantsBanners = () => {
           hideBelow="md"
           pos={"absolute"}
           zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
+          variant={"subtle"}
           left={5}
           top={"50%"}
           transform={"translateY(-50%)"}
@@ -94,7 +94,7 @@ export const GrantsBanners = () => {
           hideBelow="md"
           pos={"absolute"}
           zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
+          variant={"subtle"}
           right={5}
           top={"50%"}
           transform={"translateY(-50%)"}

@@ -1,13 +1,17 @@
-import { RoundCreated, useAllocationsRoundsEvents, useVotingPeriod } from "@/api"
 import { Card, VStack, HStack, Heading, RadioGroup, Skeleton, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { useCurrentBlock } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useCurrentBlock } from "@vechain/vechain-kit"
+
+import { useVotingPeriod } from "../../../../../../api/contracts/governance/hooks/useVotingPeriod"
+import {
+  useAllocationsRoundsEvents,
+  RoundCreated,
+} from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 
 const blockTime = getConfig().network.blockTime
-
 type Props = {
   roundId: number | string
   selected: boolean
@@ -27,20 +31,15 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
   const { t } = useTranslation()
   const { data: allocationRoundEvents } = useAllocationsRoundsEvents()
   const { data: votingPeriod } = useVotingPeriod()
-
   const { data: currentBlock } = useCurrentBlock()
-
   const estimatedStartBlock = useMemo(() => {
     if (!allocationRoundEvents?.created.length) return null
-
     //round already exist
     const roundEvent = allocationRoundEvents.created.find(event => event.roundId === roundId)
     if (roundEvent) return Number(roundEvent.voteStart)
-
     //future round
     if (!votingPeriod) return null
     const latestRound = allocationRoundEvents.created[allocationRoundEvents.created.length - 1] as RoundCreated
-
     const roundsBetween = Math.abs(Number(roundId) - Number(latestRound.roundId))
     const blocksBetween = roundsBetween * Number(votingPeriod)
     const estimatedStartBlock = Number(latestRound.voteStart) + blocksBetween
@@ -88,9 +87,9 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
               </Heading>
             </Skeleton>
             <Skeleton loading={isEstimatedStartTimeLoading}>
-              <Text fontSize={["sm", "md"]} as="span" display={"inline-flex"} gap={1}>
+              <Text textStyle={["sm", "md"]} as="span" display={"inline-flex"} gap={1}>
                 {t("Starts on")}
-                <Text fontWeight="600">{estimatedStartTime?.format("MMM D")}</Text>
+                <Text fontWeight="semibold">{estimatedStartTime?.format("MMM D")}</Text>
               </Text>
             </Skeleton>
           </VStack>

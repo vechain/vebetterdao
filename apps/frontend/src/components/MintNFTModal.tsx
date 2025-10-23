@@ -1,22 +1,22 @@
-import { useNFTImage } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
-import { CustomModalContent } from "@/components/CustomModalContent"
-import { NFTWithRings } from "@/components/GmNFT/components"
-import { ShareButtons } from "@/components/ShareButtons"
-import { notFoundImage } from "@/constants"
 import { Card, Dialog, Text, VStack, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { useNFTImage } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
+import { CustomModalContent } from "@/components/CustomModalContent"
+import { ShareButtons } from "@/components/ShareButtons"
+import { notFoundImage } from "@/constants"
+
+import { NFTWithRings } from "./GmNFT/components/NFTwithRings"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   tokenID?: string
 }
-
 // TODO: check modal here
 export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
   const { imageData } = useNFTImage()
   const { t } = useTranslation()
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose} trapFocus={false} placement="center">
       <CustomModalContent w={"auto"} maxW="breakpoint-md">
@@ -38,36 +38,33 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                 <VStack alignItems={"center"}>
                   <Text
                     alignSelf={"center"}
-                    textStyle={"lg"}
                     mb={{ base: 4, md: 8 }}
                     textAlign={"center"}
                     data-testid={"gmnft-token-id"}
                     color={"white"}
-                    fontSize={28}
-                    fontWeight={700}>
+                    textStyle="3xl"
+                    fontWeight="bold">
                     {t("VeBetter")} <br /> {t("Governance")}
                   </Text>
 
                   <NFTWithRings image={imageData?.image ?? notFoundImage} tokenID={tokenID} />
                   <Text
                     alignSelf={"center"}
-                    textStyle="lg"
                     mt={{ base: 4, md: 8 }}
                     textAlign={"center"}
                     data-testid={"gmnft-token-id"}
                     color={"white"}
-                    fontSize={24}
-                    fontWeight={600}>
+                    textStyle="2xl"
+                    fontWeight="semibold">
                     {"Earth"}
                   </Text>
                   <Text
                     alignSelf={"center"}
-                    textStyle={"lg"}
                     textAlign={"center"}
                     data-testid={"gmnft-token-id"}
                     color={"white"}
-                    fontSize={16}
-                    fontWeight={500}>
+                    textStyle="md"
+                    fontWeight="semibold">
                     {t("#")}
                     {tokenID}
                   </Text>

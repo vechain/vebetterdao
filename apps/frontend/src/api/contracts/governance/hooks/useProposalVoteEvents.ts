@@ -1,11 +1,10 @@
 import { compareAddresses } from "@repo/utils/AddressUtils"
-
 import { useQuery } from "@tanstack/react-query"
-import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useWallet, useThor } from "@vechain/vechain-kit"
 
-export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS", proposalId, "VOTES"]
+import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 
+export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS", proposalId, "VOTES"]
 /**
  * Custom hook that retrieves the vote event for a specific proposal.
  * @param proposalId - The ID of the proposal.
@@ -14,7 +13,6 @@ export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS
 export const useProposalVoteEvents = (proposalId: string) => {
   const { account } = useWallet()
   const thor = useThor()
-
   return useQuery({
     queryKey: getProposalVoteEventsQueryKey(proposalId),
     queryFn: async () => {

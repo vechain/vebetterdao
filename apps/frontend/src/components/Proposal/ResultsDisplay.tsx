@@ -7,12 +7,10 @@ type ResultsDisplayProps = {
 }
 export const ResultsDisplay = ({ proposalId, segments, helperText }: ResultsDisplayProps) => {
   const isSingleSegment = segments.length === 1
-
   const containerProps = {
     justify: "space-between",
     w: "full",
   } as const
-
   const segmentProps = {
     gap: 2,
     flex: isSingleSegment ? "none" : "1",
@@ -21,18 +19,24 @@ export const ResultsDisplay = ({ proposalId, segments, helperText }: ResultsDisp
 
   return (
     <HStack p={0} {...containerProps}>
-      {segments.map(segment => (
-        <>
+      {segments.map(segment => {
+        //If less than 1, show 2 decimal places, otherwise show the whole number
+        const formattedPercentage =
+          segment.percentage > 0 && segment.percentage < 1
+            ? segment.percentage.toFixed(2)
+            : Math.floor(segment.percentage)
+
+        return (
           <HStack key={`${proposalId}-${segment.color}`} {...segmentProps}>
             <Icon as={segment.icon} boxSize={5} color={segment.color} />
-            <Text fontSize="md" color="text.subtle">
-              {`${Math.floor(segment.percentage)}%`}
+            <Text textStyle="md" color="text.subtle">
+              {`${formattedPercentage}%`}
             </Text>
           </HStack>
-        </>
-      ))}
+        )
+      })}
       {helperText && (
-        <Text fontSize="md" color="text.subtle">
+        <Text textStyle="md" color="text.subtle">
           {helperText}
         </Text>
       )}

@@ -1,7 +1,8 @@
-import { MAX_DAPP_GRANT_AMOUNT } from "@/constants"
 import { Box, Field, HStack, Input, InputGroup, Text } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { UseFormRegisterReturn } from "react-hook-form"
+
+import { MAX_DAPP_GRANT_AMOUNT } from "../../constants/proposals"
 
 type FormMoneyInputProps = {
   label?: string
@@ -17,7 +18,6 @@ type FormMoneyInputProps = {
   initialValue?: number
   max?: number
 }
-
 /**
  * FormMoneyInput component for USD input with automatic token conversion
  *
@@ -101,21 +101,21 @@ export const FormMoneyInput = ({
     <Field.Root invalid={!!error}>
       <HStack justify="space-between" w="full" minH="5" mb={description ? 0 : 2}>
         {label ? (
-          <Field.Label fontSize="sm" fontWeight="medium" htmlFor={registerPrimary.name}>
+          <Field.Label textStyle="sm" htmlFor={registerPrimary.name}>
             {label}
           </Field.Label>
         ) : (
           <Box />
         )}
         {isOptional && (
-          <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+          <Text textStyle="sm" color="text.subtle">
             {"Optional"}
           </Text>
         )}
       </HStack>
 
       {description && (
-        <Text fontSize="xs" color="gray.500" mb={2}>
+        <Text textStyle="xs" color="gray.500" mb={2}>
           {description}
         </Text>
       )}
@@ -147,7 +147,7 @@ export const FormMoneyInput = ({
       </InputGroup>
 
       {conversionRate && (
-        <Text fontSize="xs" color="text.subtle" mt={1}>
+        <Text textStyle="xs" color="text.subtle" mt={1}>
           {displayValue
             ? `$${formatCurrency(displayValue)} USD = ${Math.round(Number(displayValue.replace(/,/g, "")) * conversionRate).toLocaleString()} B3TR`
             : `1 USD = ${conversionRate} B3TR`}

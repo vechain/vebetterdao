@@ -20,16 +20,13 @@
  *   markerPosition={75}
  * />
  */
-
-import React from "react"
 import { Box } from "@chakra-ui/react"
-
+import React from "react"
 interface MulticolorBarSegment {
   percentage: number
   color: string
   label?: string
 }
-
 interface MulticolorBarProps {
   segments: MulticolorBarSegment[]
   height?: string | number
@@ -40,7 +37,6 @@ interface MulticolorBarProps {
   markerColor?: string
   className?: string
 }
-
 export const MulticolorBar: React.FC<MulticolorBarProps> = ({
   segments,
   height = 2,

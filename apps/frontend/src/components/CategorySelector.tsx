@@ -1,13 +1,3 @@
-import { useEffect, useState } from "react"
-import {
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
-  Path,
-  FieldValues,
-  RegisterOptions,
-  PathValue,
-} from "react-hook-form"
 import {
   Box,
   Text,
@@ -24,16 +14,25 @@ import {
   TagCloseTrigger,
   Portal,
 } from "@chakra-ui/react"
-import { FaSearch, FaPlus } from "react-icons/fa"
+import { useEffect, useState } from "react"
+import {
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+  Path,
+  FieldValues,
+  RegisterOptions,
+  PathValue,
+} from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
+import { FaSearch, FaPlus } from "react-icons/fa"
 
+import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 type CategoryType = {
   id: string
   name: string
   color: string
 }
-
 type CategorySelectorProps<T extends FieldValues> = {
   fieldName: Path<T>
   register: UseFormRegister<T>
@@ -44,7 +43,6 @@ type CategorySelectorProps<T extends FieldValues> = {
   categories?: CategoryType[]
   registerOptions?: RegisterOptions<T, Path<T>>
 }
-
 export const CategorySelector = <T extends FieldValues>({
   fieldName,
   register,
@@ -108,9 +106,9 @@ export const CategorySelector = <T extends FieldValues>({
 
   return (
     <Field.Root invalid={!!error}>
-      <Field.Label fontSize="md">{t("App Categories")}</Field.Label>
+      <Field.Label textStyle="md">{t("App Categories")}</Field.Label>
 
-      <Text fontSize="xs" color="gray.500" mb={2}>
+      <Text textStyle="xs" color="gray.500" mb={2}>
         {t("Select up to 2 categories that best describe your app.")}
       </Text>
 
@@ -161,7 +159,7 @@ export const CategorySelector = <T extends FieldValues>({
                   <Popover.Content width="300px" maxH="400px" overflowY="auto">
                     <Popover.Body p={3}>
                       <VStack gap={3} align="stretch">
-                        <InputGroup startElement={<FaSearch pointerEvents="none" color="#6A6A6A" />}>
+                        <InputGroup startElement={<FaSearch pointerEvents="none" color="text.subtle" />}>
                           <Input
                             size="md"
                             placeholder={t("Find a category")}
@@ -172,7 +170,7 @@ export const CategorySelector = <T extends FieldValues>({
                         </InputGroup>
 
                         {filteredCategories.length === 0 ? (
-                          <Text textAlign="center" py={2} color="#6A6A6A">
+                          <Text textAlign="center" py={2} color="text.subtle">
                             {t("No categories found")}
                           </Text>
                         ) : (

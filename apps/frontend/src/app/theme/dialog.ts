@@ -32,14 +32,15 @@ export const dialogSlotRecipe = defineSlotRecipe({
       },
     },
   },
-
+  defaultVariants: {
+    variant: "base",
+  },
   base: {
     content: {
       borderRadius: "16px",
     },
   },
 })
-
 // // define custom styles for modal variant
 // const variants = {
 //   base: (props: StyleFunctionProps) =>

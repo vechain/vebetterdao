@@ -1,8 +1,8 @@
-import { convertUriToUrl, resolveMediaTypeFromMimeType } from "@/utils"
 import { useQueries, useQuery } from "@tanstack/react-query"
 
-import axios from "axios"
-import { NFTMediaType } from "@/types"
+import { NFTMediaType } from "../../../types/media"
+import { resolveMediaTypeFromMimeType } from "../../../utils/media"
+import { convertUriToUrl } from "../../../utils/uri"
 
 export interface IpfsImage {
   image: string
@@ -10,7 +10,6 @@ export interface IpfsImage {
   mediaType: NFTMediaType
 }
 export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
-
 /**
  * Fetches NFT media from IPFS
  * @param uri - The IPFS URI of the NFT media
@@ -18,12 +17,14 @@ export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
  */
 export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
   if (!uri) throw new Error("IPFS URI is required")
-
-  const response = await axios.get(convertUriToUrl(uri), {
-    responseType: "blob",
-    maxContentLength: MAX_IMAGE_SIZE,
-  })
-
+  const response = await fetch(convertUriToUrl(uri))
+  if (!response.ok) {
+    throw new Error(`Failed to fetch IPFS image: ${response.status}`)
+  }
+  const blob = await response.blob()
+  if (blob.size > MAX_IMAGE_SIZE) {
+    throw new Error("IPFS image exceeds max supported size")
+  }
   // Check if the MIME type is allowed
   const allowedMimeTypes = [
     "image/jpeg",
@@ -36,18 +37,19 @@ export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
     "image/svg+xml",
     "application/json",
   ]
-  if (!allowedMimeTypes.includes(response.data.type)) {
-    throw new Error(`Unsupported MIME type: ${response.data.type}`)
+  const mimeType = blob.type || response.headers.get("content-type") || ""
+  if (!allowedMimeTypes.includes(mimeType)) {
+    throw new Error(`Unsupported MIME type: ${mimeType}`)
   }
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.readAsDataURL(response.data)
+    reader.readAsDataURL(blob)
     reader.onloadend = () => {
       resolve({
         image: reader.result as string,
-        mime: response.data.type,
-        mediaType: resolveMediaTypeFromMimeType(response.data.type),
+        mime: mimeType,
+        mediaType: resolveMediaTypeFromMimeType(mimeType),
       })
     }
     reader.onerror = () => {

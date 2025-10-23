@@ -1,12 +1,12 @@
-import { SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
+
+import { SubmitCreatorFormData } from "../components/SubmitCreatorForm/SubmitCreatorForm"
 
 export interface CreatorSubmissionFormStoreState extends SubmitCreatorFormData {
   setData: (data: Partial<CreatorSubmissionFormStoreState>) => void
   clearData: () => void
 }
-
 /**
  * Store for the multi-step proposal form data
  */

@@ -6,7 +6,6 @@
     "test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env.example turbo run test --",
     "test:watch": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env.example turbo run test:watch --",
     "test:coverage:solidity": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v IS_TEST_COVERAGE=true -e .env.example turbo run test:coverage:solidity",
-    "test:coverage:fe": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env.example turbo run test:coverage:fe",
     "build": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo build --filter='!@repo/lambda'",
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo build --filter='!@repo/lambda'",
     "build:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo build --filter='!@repo/lambda'",
@@ -47,6 +46,7 @@
     "contracts:select-and-deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/deploy/select-and-deploy.ts",
     "contracts:select-and-deploy:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/deploy/select-and-deploy.ts",
     "contracts:upgrade": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
+    "contracts:setup-environment": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @vechain/vebetterdao-contracts setup-environment:local",
     "contracts:upgrade:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/upgrade/select-and-upgrade.ts",
@@ -119,7 +119,13 @@
     "slice-ansi": "4.0.0",
     "color": "3.2.1",
     "color-string": "1.9.1",
-    "simple-swizzle": "0.2.2"
+    "simple-swizzle": "0.2.2",
+    "elliptic": "^6.6.1",
+    "parse-duration": "^2.1.3",
+    "axios": "^1.11.0",
+    "cookie": "^0.7.1",
+    "tmp": "^0.2.4",
+    "hono": "^4.10.2"
   },
   "packageManager": "yarn@1.22.22",
   "workspaces": [

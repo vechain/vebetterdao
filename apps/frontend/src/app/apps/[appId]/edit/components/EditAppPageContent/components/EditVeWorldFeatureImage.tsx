@@ -1,15 +1,19 @@
-import { UseFormReturn } from "react-hook-form"
-import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR, IMAGE_REQUIREMENTS } from "@/constants"
-import { useCallback, useEffect, useRef, useState } from "react"
 import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { UseFormReturn } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { toaster } from "@/components/ui/toaster"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
-import { useTranslation } from "react-i18next"
-import { validateImage } from "@/utils"
-import { toaster } from "@/components/ui/toaster"
-import { VeWorldFeaturedImageGuidelines } from "@/components/CreateEditAppForm"
+
+import { VeWorldFeaturedImageGuidelines } from "../../../../../../../components/CreateEditAppForm/VeWorldFeaturedImageGuidelines"
+import { IMAGE_REQUIREMENTS, VE_WOLRD_SCALING_FACTOR, AVG_PHONE_WIDTH } from "../../../../../../../constants/XAppsMedia"
+import { validateImage } from "../../../../../../../utils/ImageValidation"
+import { EditAppForm } from "../EditAppPageContent"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -69,9 +73,7 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Heading fontSize="24px" fontWeight="700">
-        {t("Featured Image")}
-      </Heading>
+      <Heading size="2xl">{t("Featured Image")}</Heading>
       <Flex w={computedWidth} h="76px" position={"relative"} rounded="12px" mt={4}>
         <Image
           src={featuredImage ?? notFoundImage}
@@ -98,11 +100,11 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
           <IconButton aria-label="Edit featured image" rounded={"full"} bg={"#00000033"} _hover={{ bg: "#00000033" }}>
-            <UilPen color="#FFFFFF" />
+            <UilPen color="white" />
           </IconButton>
         </Flex>
       </Flex>
-      <Text fontSize={14} color={invalidFormat ? "red" : "gray"} pt={0}>
+      <Text textStyle="sm" color={invalidFormat ? "red" : "gray"} pt={0}>
         {invalidFormat ? invalidMessage : <VeWorldFeaturedImageGuidelines />}
       </Text>
     </VStack>

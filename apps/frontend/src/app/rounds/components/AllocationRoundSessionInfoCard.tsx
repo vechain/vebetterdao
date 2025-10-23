@@ -1,21 +1,19 @@
-import {
-  useAllocationRoundQuorum,
-  useAllocationVotes,
-  useAllocationsRound,
-  useTotalVotesOnBlock,
-  useVot3PastSupply,
-} from "@/api"
-import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { Box, Circle, Steps } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useEffect, useMemo, useState } from "react"
 import { v4 as uuid } from "uuid"
 
+import { useTotalVotesOnBlock } from "../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useVot3PastSupply } from "../../../api/contracts/vot3/hooks/useVot3PastTotalSupply"
+import { useAllocationRoundQuorum } from "../../../api/contracts/xAllocations/hooks/useAllocationRoundQuorum"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationVotes } from "../../../api/contracts/xAllocations/hooks/useAllocationVotes"
+import { ProposalSessionSection } from "../../../components/ProposalSessionSection/ProposalSessionSection"
+
 type Props = {
   roundId: string
 }
-
 export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const { account } = useWallet()
   const { data: roundInfo } = useAllocationsRound(roundId)
@@ -26,15 +24,12 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? "",
   )
-
   const isRoundActive = useMemo(() => {
     return roundInfo?.state === 0
   }, [roundInfo?.state])
-
   const isUpcoming = useMemo(() => {
     return !isRoundActive && !quorumQuery.isLoading && !quorumQuery.data
   }, [quorumQuery, isRoundActive])
-
   return (
     <ProposalSessionSection
       quorumQuery={quorumQuery}
@@ -48,7 +43,6 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     />
   )
 }
-
 const AllocationRoundTimeline = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
 
@@ -90,19 +84,18 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
       step={step}
       count={steps.length}
       orientation="vertical"
-      colorPalette="primary"
       gap="0"
       height="200px"
       mt={4}
-      variant="primaryVertical">
+      variant="primary">
       <Steps.List>
         {steps.map((step, index) => (
           <Steps.Item key={`allocation-round-session-step-${uuid()}`} index={index}>
             <Steps.Indicator>
               <Steps.Status
-                incomplete={<Circle bg="#004CFC" size="0" />}
-                complete={<Circle bg="#004CFC" size="2" />}
-                current={<Circle bg="#004CFC" size="3" />}
+                incomplete={<Circle bg="actions.primary.default" size="0" />}
+                complete={<Circle bg="actions.primary.default" size="2" />}
+                current={<Circle bg="actions.primary.default" size="3" />}
               />
             </Steps.Indicator>
 

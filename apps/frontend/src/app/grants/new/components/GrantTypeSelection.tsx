@@ -1,21 +1,20 @@
-import { useColorModeValue } from "@/components/ui/color-mode"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { Card, CardBody, Grid, Icon, List, Text, VStack } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { Control, Controller, UseFormSetValue } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
+import { useColorModeValue } from "@/components/ui/color-mode"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
+
 interface GrantTypeSelectionProps {
   control: Control<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   setData: (data: Partial<GrantFormData>) => void
 }
-
 export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSelectionProps) => {
   const { t } = useTranslation()
   const notSelectedBorder = useColorModeValue("#D5D5D5", "#2D2D2F")
-
   const handleGrantTypeChange = useCallback(
     (type: string) => {
       setValue("grantType", type)
@@ -23,7 +22,6 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
     },
     [setValue, setData],
   )
-
   const grantTypes = {
     dapp: {
       title: t("App grant"),
@@ -69,34 +67,34 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
             {Object.entries(grantTypes).map(([type, info]) => (
               <Card.Root
                 key={type}
-                variant="filledWithBorder"
-                cursor="pointer"
-                borderColor={value === type ? "#004CFC" : notSelectedBorder}
-                boxShadow={value === type ? "0px 0px 16px 0px rgba(0, 76, 252, 0.35)" : undefined}
-                _hover={{ borderColor: "#004CFC" }}
+                variant="primary"
+                as="button"
+                borderColor={value === type ? "actions.tertiary.default" : notSelectedBorder}
+                boxShadow={value === type ? "0px 0px 16px 0px var(--vbd-colors-actions-tertiary-default)" : undefined}
+                _hover={{ borderColor: "actions.tertiary.default" }}
                 onClick={() => handleGrantTypeChange(type)}>
                 <CardBody>
                   <VStack align="flex-start" gap={4}>
-                    <Text fontSize="xl" fontWeight="bold">
+                    <Text textStyle="xl" fontWeight="bold">
                       {info.title}
                     </Text>
                     <VStack w="full" justify="space-between" align="flex-start">
-                      <Text fontSize="2xl" fontWeight="bold" color="#004CFC">
+                      <Text textStyle="2xl" fontWeight="bold" color="actions.tertiary.default">
                         {t("Up to {{amount}}", { amount: info.amount })}
                       </Text>
                       <Text color="gray.600">{info.duration}</Text>
                     </VStack>
-                    <Text fontSize="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
+                    <Text textStyle="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
                       {info.description}
                     </Text>
                     <Text color="gray.600">{info.target}</Text>
-                    <Text fontSize="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
+                    <Text textStyle="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
                       {t("Apply if you are building")}
                     </Text>
                     <List.Root gap={2} display={{ base: "none", md: "block" }}>
                       {info.requirements.map(req => (
                         <List.Item key={req} display="flex" alignItems="center">
-                          <List.Indicator asChild color="#004CFC">
+                          <List.Indicator asChild color="actions.tertiary.default">
                             <Icon as={BsCheck} />
                           </List.Indicator>
                           <Text color="gray.600">{req}</Text>

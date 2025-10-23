@@ -1,21 +1,23 @@
 import { ComponentType } from "react"
 
+export enum VoteType {
+  VOTE_AGAINST = "AGAINST",
+  VOTE_FOR = "FOR",
+  ABSTAIN = "ABSTAIN",
+}
 export interface VotingSegment {
   // Core data
   option: string
   voters: number
   votingPower: bigint
   totalWeight: bigint
-
   // Calculated percentages
   percentage: number // Based on total weight for progress bar
   percentagePower: number // Based on total voting power
-
   // UI props
   color: string
   icon: ComponentType
 }
-
 export interface VotingResults {
   segments: VotingSegment[]
   totals: {
@@ -24,14 +26,12 @@ export interface VotingResults {
     totalWeight: bigint
   }
 }
-
 export interface ProgressBarSegment {
   percentage: number
   color: string
   icon: ComponentType
   label?: string
 }
-
 export interface TableRowData {
   option: string
   voters: number
@@ -40,7 +40,6 @@ export interface TableRowData {
   color: string
   icon: ComponentType
 }
-
 // Utility functions to transform data
 export const votingSegmentToProgressBar = (segment: VotingSegment): ProgressBarSegment => ({
   percentage: segment.percentage,

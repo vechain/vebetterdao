@@ -1,16 +1,15 @@
 import { HStack, Text, VStack } from "@chakra-ui/react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
-import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { UilCheck, UilCopy } from "@iconscout/react-unicons"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 
 export const AppID = () => {
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
-
   const [showCopiedLink, setShowCopiedLink] = useState(false)
-
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(app?.id || "")
     setShowCopiedLink(true)
@@ -18,21 +17,18 @@ export const AppID = () => {
       setShowCopiedLink(false)
     }, 2000)
   }, [app?.id])
-
   return (
     <VStack align={"stretch"}>
-      <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+      <Text textStyle={"sm"} color="text.subtle">
         {t("App ID")}
       </Text>
       <HStack>
         {showCopiedLink ? (
           <UilCheck size={"18px"} color="#6DCB09" />
         ) : (
-          <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyLink} cursor="pointer" />
+          <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyLink} cursor="pointer" />
         )}
-        <Text fontSize={"14px"} fontWeight={400}>
-          {humanAddress(app?.id || "", 4, 2)}
-        </Text>
+        <Text textStyle={"sm"}>{humanAddress(app?.id || "", 4, 2)}</Text>
       </HStack>
     </VStack>
   )

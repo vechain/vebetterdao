@@ -5,19 +5,16 @@ export const stepsSlotRecipe = defineSlotRecipe({
   slots: stepsAnatomy.keys(),
   variants: {
     variant: {
-      primaryVertical: {
+      primary: {
         indicator: {
-          bg: "#E0E9FE",
-          "&[data-complete]": {
-            bg: "#E0E9FE",
-          },
-          "&[data-current]": {
-            borderColor: "#E0E9FE",
-          },
+          bg: "{colors.actions.secondary.default}",
         },
         separator: {
-          "&[data-complete]": {
-            bg: "#004CFC",
+          _complete: {
+            bg: "{colors.actions.primary.default}",
+          },
+          _horizontal: {
+            "--steps-gutter": "0",
           },
           "&[data-orientation=vertical]": {
             maxHeight: "calc(100% - var(--steps-size))",
@@ -27,25 +24,6 @@ export const stepsSlotRecipe = defineSlotRecipe({
               top: "calc(var(--steps-size)/2)",
               zIndex: 1,
             },
-          },
-        },
-      },
-      grants: {
-        indicator: {
-          w: "24px",
-          h: "24px",
-          borderRadius: "full",
-          bg: "#EFEFEF",
-          color: "#6A6A6A",
-
-          "&[data-complete]": {
-            bg: "#E0E9FE",
-            color: "#004CFC",
-            borderColor: "#004CFC",
-          },
-          "&[data-current]": {
-            bg: "#004CFC",
-            color: "#FFFFFF",
           },
         },
       },

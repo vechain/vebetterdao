@@ -5,10 +5,8 @@ import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-k
 const address = getConfig().galaxyMemberContractAddress
 const abi = GalaxyMember__factory.abi
 const method = "getIdAttachedToNode" as const
-
 export const getGetTokenIdAttachedToNodeQueryKey = (nodeId?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(nodeId || "0")] })
-
 /**
  * Custom hook that retrieves the GM Token ID attached to the given Vechain Node ID.
  *

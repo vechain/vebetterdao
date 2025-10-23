@@ -62,11 +62,13 @@ resource "aws_security_group" "ecs_service_sg" {
     to_port     = 0
   }
   ingress {
-    cidr_blocks = ["0.0.0.0/0"]
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
+    description     = "Allow traffic from ALB on container port 8669"
+    from_port       = 8669
+    to_port         = 8669
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb-sg.id]
   }
+  
   ingress {
     from_port = 0
     protocol  = "-1"

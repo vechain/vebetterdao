@@ -1,16 +1,23 @@
-import { useCallback, useMemo } from "react"
-import { Button, ButtonProps, useDisclosure, Text, HStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { useMintNFT, useUpgradeGM } from "@/hooks"
-import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
-import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useGMMaxLevel, useGetUserGMs } from "@/api"
-import { useTranslation } from "react-i18next"
+import { Button, ButtonProps, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { MintNFTModal } from "./MintNFTModal"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import NextLink from "next/link"
+import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+
+import { useGetUserGMs } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { useParticipatedInGovernance } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
+import { useCurrentAllocationsRoundId } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../constants/AnalyticsEvents"
+import { useMintNFT } from "../hooks/useMintNFT"
+import { useUpgradeGM } from "../hooks/useUpgradeGM"
+
 import { GetFreeNFTModal } from "./GmNFTAndNodeCard/GetFreeNFTModal"
+import { MintNFTModal } from "./MintNFTModal"
 import { Tooltip } from "./ui/tooltip"
 
 export const GmActionButton = ({
@@ -21,14 +28,11 @@ export const GmActionButton = ({
   buttonProps: ButtonProps
 }) => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { resetModal: resetTransactionModal, onClose: closeTransactionModal } = useTransactionModal()
-
   // Wallet and user data
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   // GM NFT data
   const { data: maxGMLevel } = useGMMaxLevel()
   const { data: userGms } = useGetUserGMs()
@@ -37,7 +41,6 @@ export const GmActionButton = ({
   const isMaxGmLevelReached = selectedGM && maxGMLevel === Number(selectedGM.tokenLevel)
   const isEnoughBalanceToUpgradeGM =
     b3trBalanceScaled && Number(b3trBalanceScaled || 0) >= Number(selectedGM?.b3trToUpgrade)
-
   // Modal controls
   const { open: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
   const { open: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()
@@ -85,11 +88,6 @@ export const GmActionButton = ({
     upgradeGM()
   }, [upgradeGM])
 
-  // Navigation handlers
-  const goToVote = useCallback(() => {
-    router.push(`/rounds/${currentRoundId}/vote`)
-  }, [currentRoundId, router])
-
   // Action click handlers
   const handleOnUpgrade = useCallback(() => {
     resetTransactionModal()
@@ -102,8 +100,8 @@ export const GmActionButton = ({
     // Case 1: User hasn't voted and doesn't own GM NFT
     if (!hasUserVoted && !isGMOwned) {
       return (
-        <Button {...buttonProps} onClick={goToVote}>
-          {t("Vote")}
+        <Button {...buttonProps} asChild>
+          <NextLink href={`/rounds/${currentRoundId}/vote`}>{t("Vote now")}</NextLink>
         </Button>
       )
     }
@@ -117,31 +115,16 @@ export const GmActionButton = ({
       )
     }
 
-    // Case 3: Max GM level reached
-    if (isMaxGmLevelReached) {
-      return (
-        <HStack bg={"#ffffff4a"} alignSelf="start" rounded="8px" px={5} py={1} gap={1} justify="center">
-          <Text
-            bg={"linear-gradient(135deg, #a8e5ff -2.65%, #8bff3b 98.11%)"}
-            style={{
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            fontSize={"lg"}
-            fontWeight={"bold"}
-            lineClamp={1}>
-            {t("Max Level Reached!")}
-          </Text>
-        </HStack>
-      )
-    }
-
     // Default case: Upgrade GM
     return (
       <Tooltip
-        positioning={{ placement: "top" }}
-        disabled={!!isEnoughBalanceToUpgradeGM}
-        content={t("Not enough balance to upgrade your GM NFT to the next level.")}>
+        positioning={{ placement: "bottom" }}
+        disabled={!isMaxGmLevelReached && !!isEnoughBalanceToUpgradeGM}
+        content={
+          isMaxGmLevelReached
+            ? t("You have reached the maximum GM NFT level.")
+            : t("Not enough balance to upgrade your GM NFT to the next level.")
+        }>
         <span>
           <Button
             {...buttonProps}
@@ -154,7 +137,7 @@ export const GmActionButton = ({
     )
   }, [
     buttonProps,
-    goToVote,
+    currentRoundId,
     handleOnUpgrade,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,

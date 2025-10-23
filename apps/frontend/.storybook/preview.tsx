@@ -1,0 +1,107 @@
+import { useEffect } from "react"
+import type { Preview } from "@storybook/nextjs-vite"
+import { withThemeByClassName } from "@storybook/addon-themes"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { Provider } from "../src/components/ui/provider"
+import { TransactionModalProvider } from "../src/providers/TransactionModalProvider.tsx"
+import { setMockAddress } from "./mocks/vechain-kit"
+import { VStack, Flex, Container } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+
+import { languages } from "../src/i18n"
+import "../src/i18n"
+
+export const globalTypes = {
+  locale: {
+    name: "Locale",
+    description: "Internationalization locale",
+    toolbar: {
+      icon: "globe",
+      items: languages.map(language => ({
+        value: language.code,
+        title: language.name,
+      })),
+
+      showName: true,
+    },
+  },
+}
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 60,
+    },
+  },
+})
+
+const preview: Preview = {
+  parameters: {
+    viewport: { defaultViewport: "mobile2" },
+    controls: {
+      matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/i,
+      },
+    },
+
+    a11y: {
+      // 'todo' - show a11y violations in the test UI only
+      // 'error' - fail CI on a11y violations
+      // 'off' - skip a11y checks entirely
+      test: "todo",
+    },
+  },
+  initialGlobals: { theme: "light", locale: "en" },
+  decorators: [
+    withThemeByClassName({
+      defaultTheme: "light",
+      themes: { light: "", dark: "dark" },
+    }),
+    (Story, context) => {
+      const mockAddress = context.parameters.mockWalletAddress
+      setMockAddress(mockAddress)
+
+      const { i18n } = useTranslation()
+      const { locale } = context.globals
+      useEffect(() => {
+        console.log(typeof locale)
+        if (locale) i18n.changeLanguage(locale)
+      }, [locale])
+
+      const isPageStory = context.title.startsWith("Pages/")
+      if (isPageStory) context.parameters.layout = "fullscreen"
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <Provider>
+            <TransactionModalProvider>
+              {isPageStory ? (
+                <VStack minH="100vh" gap={0} align="stretch">
+                  <Flex flex={1}>
+                    <Container
+                      flex={1}
+                      my={{ base: 4, md: 10 }}
+                      px={4}
+                      maxW={{ base: "sm", md: "xl" }}
+                      display={"flex"}
+                      alignItems={"center"}
+                      justifyContent={"flex-start"}
+                      flexDirection={"column"}>
+                      <Story />
+                    </Container>
+                  </Flex>
+                </VStack>
+              ) : (
+                <Story />
+              )}
+            </TransactionModalProvider>
+          </Provider>
+        </QueryClientProvider>
+      )
+    },
+  ],
+}
+
+export default preview
