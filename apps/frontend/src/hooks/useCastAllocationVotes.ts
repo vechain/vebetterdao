@@ -11,6 +11,9 @@ import { getXAppRoundEarningsQueryKey } from "../api/contracts/xAllocationPool/h
 import { getAllocationVotersQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationVoters"
 import { getAllocationVotesQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationVotes"
 import { getHasVotedInRoundQueryKey, useHasVotedInRound } from "../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { getIsAutoVotingEnabledQueryKey } from "../api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
+import { getIsAutoVotingEnabledInCurrentRoundQueryKey } from "../api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
+import { getUserVotingPreferencesQueryKey } from "../api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { getUserVotesInRoundQueryKey } from "../api/contracts/xApps/hooks/useUserVotesInRound"
 import { getXAppsSharesQueryKey } from "../api/contracts/xApps/hooks/useXAppShares"
 
@@ -121,6 +124,10 @@ export const useCastAllocationVotes = ({
       getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
       getXAppRoundEarningsQueryKey(roundId),
       getParticipatedInGovernanceQueryKey(account?.address ?? ""),
+      // Automation-related query keys - ensure toggle state and preferences are refreshed
+      getIsAutoVotingEnabledQueryKey(account?.address),
+      getIsAutoVotingEnabledInCurrentRoundQueryKey(account?.address),
+      getUserVotingPreferencesQueryKey(account?.address),
     ]
   }, [roundId, account?.address])
 
