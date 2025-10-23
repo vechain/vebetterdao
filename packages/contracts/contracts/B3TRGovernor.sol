@@ -1035,6 +1035,17 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Reset the development state of a proposal back to pending development
+   * @param proposalId The id of the proposal
+   * @dev This should reset the enum state back to the original one,
+   * since pending development is not tracked in {GovernorStateLogic._state} condition
+   */
+  function resetDevelopmentState(uint256 proposalId) public onlyRole(PROPOSAL_STATE_MANAGER_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorProposalLogic.resetDevelopmentState($, proposalId);
+  }
+
+  /**
    * @notice Mark a proposal as in development
    * @param proposalId The id of the proposal
    */

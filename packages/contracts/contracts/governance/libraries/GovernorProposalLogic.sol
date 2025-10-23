@@ -564,6 +564,18 @@ library GovernorProposalLogic {
     return _cancel(self, proposalId);
   }
 
+  /**
+   * @notice Mark a proposal as in development
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The id of the proposal.
+   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
+   * - Only Standard proposals are allowed here.
+   * - Can only mark as in development if proposal is executed or succeeded
+   * - If the proposal is executable and the state is succeeded, it cannot be marked as in development
+   * - Otherwise could skip the queue + execution steps
+   * - The proposal development state is set to InDevelopment
+   * - The event ProposalInDevelopment is emitted
+   */
   function markAsInDevelopment(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
     GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
@@ -590,6 +602,16 @@ library GovernorProposalLogic {
     emit ProposalInDevelopment(proposalId);
   }
 
+  /**
+   * @notice Mark a proposal as completed
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The id of the proposal.
+   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
+   * - Only Standard proposals are allowed here.
+   * - Can only mark as completed if proposal is in development
+   * - The proposal development state is set to Completed
+   * - The event ProposalCompleted is emitted
+   */
   function markAsCompleted(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
 
@@ -608,6 +630,24 @@ library GovernorProposalLogic {
     self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.Completed;
     //Emit event
     emit ProposalCompleted(proposalId);
+  }
+
+  /**
+   * @notice Reset the development state of a proposal back to pending development
+   * @param proposalId The id of the proposal
+   * @dev This should reset the enum state back to the original one,
+   * since pending development is not tracked in {GovernorStateLogic._state} condition
+   */
+  function resetDevelopmentState(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
+    GovernorStateLogic.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment) |
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
+    );
+    self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.PendingDevelopment;
+    //Emit event
+    emit ProposalDevelopmentStateReset(proposalId);
   }
 
   /** ------------------ INTERNAL FUNCTIONS ------------------ **/
