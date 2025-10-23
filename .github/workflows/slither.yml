@@ -47,5 +47,5 @@ jobs:
 #          compile-command: 'yarn contracts:compile'
           ignore-compile: true
           slither-args: |
-            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --config-file slither.config.json --checklist --json slither.raw.json --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
-#           --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+           # --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --config-file slither.config.json --checklist --json slither.raw.json --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
