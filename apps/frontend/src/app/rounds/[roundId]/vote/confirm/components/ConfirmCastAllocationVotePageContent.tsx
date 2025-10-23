@@ -199,15 +199,6 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                 </Text>
               )}
 
-              {!hasChanges && (
-                <Alert.Root status="warning" borderRadius="2xl" w="full">
-                  <Alert.Indicator />
-                  <Alert.Content>
-                    <Alert.Title>{t("No changes detected")}</Alert.Title>
-                  </Alert.Content>
-                </Alert.Root>
-              )}
-
               {!votingFlow.userStatus.hasVoted && (
                 <Card.Root bg={{ base: "transparent", md: "card.subtle" }} px={{ base: "0", md: "6" }} w="full">
                   <VStack flex={1} w="full" gap={8} align={"flex-start"}>

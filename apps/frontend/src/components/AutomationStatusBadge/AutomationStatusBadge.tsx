@@ -6,26 +6,37 @@ import { FaClock } from "react-icons/fa6"
 import { IoCheckmarkCircle } from "react-icons/io5"
 import { MdHowToVote } from "react-icons/md"
 
+import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useIsAutoVotingEnabled } from "../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
-import { useIsAutoVotingEnabledInCurrentRound } from "../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
+import { useIsAutoVotingEnabledForRound } from "../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabledForRound"
 
 type AutomationStatus = "active" | "pending" | "manual"
 
-export const AutomationStatusBadge = () => {
+type Props = {
+  roundId: string
+}
+
+export const AutomationStatusBadge = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: isAutoVotingEnabled, isLoading: isAutoVotingEnabledLoading } = useIsAutoVotingEnabled(account?.address)
-  const { data: isAutoVotingEnabledInCurrentRound, isLoading: isAutoVotingEnabledInCurrentRoundLoading } =
-    useIsAutoVotingEnabledInCurrentRound(account?.address)
+  const { data: isAutoVotingEnabledForRound, isLoading: isAutoVotingEnabledForRoundLoading } =
+    useIsAutoVotingEnabledForRound(account?.address, roundId)
+
+  const isCurrentRound = roundId === currentRoundId
 
   const status: AutomationStatus = useMemo(() => {
-    if (isAutoVotingEnabledInCurrentRound) return "active"
-    if (isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) return "pending"
+    // Active: Was enabled at this round's snapshot
+    if (isAutoVotingEnabledForRound) return "active"
+    // Pending: Only for current round - not enabled at snapshot but enabled now (will start next round)
+    if (isCurrentRound && !isAutoVotingEnabledForRound && isAutoVotingEnabled) return "pending"
+    // Manual: Not enabled at this round's snapshot
     return "manual"
-  }, [isAutoVotingEnabled, isAutoVotingEnabledInCurrentRound])
+  }, [isAutoVotingEnabled, isAutoVotingEnabledForRound, isCurrentRound])
 
-  const isLoading = isAutoVotingEnabledLoading || isAutoVotingEnabledInCurrentRoundLoading
+  const isLoading = isAutoVotingEnabledLoading || isAutoVotingEnabledForRoundLoading
 
   const config = useMemo(() => {
     switch (status) {

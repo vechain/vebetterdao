@@ -110,7 +110,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
             </Skeleton>
             <Separator color={"#D5D5D5"} />
 
-            {!!account?.address && <AutomationStatusBadge />}
+            {!!account?.address && <AutomationStatusBadge roundId={roundId} />}
 
             <Separator color={"#D5D5D5"} />
             <Stack
