@@ -75,14 +75,21 @@ library GovernorProposalLogic {
    * @dev Emitted when a proposal is queued.
    */
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
+
   /**
    * @dev Emitted when a proposal is marked as in development.
    */
   event ProposalInDevelopment(uint256 proposalId);
+
   /**
    * @dev Emitted when a proposal is marked as completed.
    */
   event ProposalCompleted(uint256 proposalId);
+
+  /**
+   * @dev Emitted when the development state of a proposal is reset back to pending development.
+   */
+  event ProposalDevelopmentStateReset(uint256 proposalId);
 
   /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.

@@ -292,6 +292,21 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event ProposalWithdraw(address indexed withdrawer, uint256 indexed proposalId, uint256 amount);
 
   /**
+   * @dev Emitted when a proposal is marked as in development.
+   */
+  event ProposalInDevelopment(uint256 proposalId);
+
+  /**
+   * @dev Emitted when a proposal is marked as completed.
+   */
+  event ProposalCompleted(uint256 proposalId);
+
+  /**
+   * @dev Emitted when the development state of a proposal is reset back to pending development.
+   */
+  event ProposalDevelopmentStateReset(uint256 proposalId);
+
+  /**
    * @notice module:core
    * @dev Name of the governor instance (used in building the ERC712 domain separator).
    */
