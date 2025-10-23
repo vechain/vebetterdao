@@ -6,10 +6,12 @@ on:
     branches:
       - main
       - testnet
+      - add-slither
   push:
     branches:
       - main
       - testnet
+      - add-slither
 
 jobs:
   check-changes:
