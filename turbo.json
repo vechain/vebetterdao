@@ -335,22 +335,6 @@
     "estimate-voting-gas:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "analyze-proposal-deposits:mainnet": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "analyze-proposal-deposits:testnet-staging": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "seed-voting-power:testnet-staging": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "seed-voting-power:mainnet": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     }
   }
 }
