@@ -20,7 +20,7 @@ export const CastVoteBanner = () => {
       illustration="/assets/icons/vote-icon.webp"
       description={t("It’s time to make your voice heard in this round and earn exciting rewards!")}
       cta={
-        <Button variant="primary" onClick={handleVote}>
+        <Button size={{ base: "sm", md: "md" }} variant="primary" onClick={handleVote}>
           {t("See round")}
         </Button>
       }

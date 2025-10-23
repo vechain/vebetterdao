@@ -16,7 +16,7 @@ export const CreatorApplicationRejectedBanner = () => {
       description={t("Your Creator's NFT application was rejected")}
       illustration="/assets/mascot/mascot-warning-head.webp"
       cta={
-        <Button onClick={navigateToCreatorForm} variant="primary">
+        <Button size={{ base: "sm", md: "md" }} onClick={navigateToCreatorForm} variant="primary">
           {t("Apply again")}
         </Button>
       }

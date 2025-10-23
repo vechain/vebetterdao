@@ -27,7 +27,7 @@ export const DelegatingBanner = () => {
         description={description}
         illustration="/assets/logos/veDelegate.svg"
         cta={
-          <Button variant="secondary" onClick={whatIsVeDelegate}>
+          <Button p="0" size={{ base: "sm", md: "md" }} variant="link" onClick={whatIsVeDelegate}>
             {t("Learn more")}
           </Button>
         }

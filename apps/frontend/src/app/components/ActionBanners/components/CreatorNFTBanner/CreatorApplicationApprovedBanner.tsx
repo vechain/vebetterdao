@@ -16,7 +16,7 @@ export const CreatorApplicationApprovedBanner = () => {
       description={t("Your Creator application was approved. Submit your app!")}
       illustration="/assets/images/creator-nft.webp"
       cta={
-        <Button onClick={navigateToSubmitAppForm} variant="primary">
+        <Button size={{ base: "sm", md: "md" }} onClick={navigateToSubmitAppForm} variant="primary">
           {t("Submit app")}
         </Button>
       }

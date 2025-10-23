@@ -11,6 +11,7 @@ interface NewApp {
   name: string
   id: string
 }
+
 export const NewAppBanner = () => {
   const router = useRouter()
   const { data: xApps } = useXApps()
@@ -45,7 +46,7 @@ export const NewAppBanner = () => {
       description={description}
       illustration="/assets/icons/new-app-gold.svg"
       cta={
-        <Button onClick={GOTOAPPS} variant="primary">
+        <Button size={{ base: "sm", md: "md" }} onClick={GOTOAPPS} variant="primary">
           {t("Explore")}
         </Button>
       }

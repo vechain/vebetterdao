@@ -27,7 +27,7 @@ export const CastProposalVoteBanners = ({ id, description }: Props) => {
       description={proposalMetadata?.data?.title ? `"${proposalMetadata.data.title}"` : `---`}
       illustration="/assets/icons/vote-icon.webp"
       cta={
-        <Button variant="primary" onClick={goToProposalPage}>
+        <Button size={{ base: "sm", md: "md" }} variant="primary" onClick={goToProposalPage}>
           {t("Vote now")}
         </Button>
       }

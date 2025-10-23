@@ -24,7 +24,7 @@ export const DoActionBanner = () => {
         description={description}
         illustration="/assets/icons/info-bell.webp"
         cta={
-          <Button variant="secondary" onClick={doActionModal.onOpen}>
+          <Button p="0" size={{ base: "sm", md: "md" }} variant="link" onClick={doActionModal.onOpen}>
             {t("Learn more")}
           </Button>
         }

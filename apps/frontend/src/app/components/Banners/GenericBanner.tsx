@@ -41,6 +41,7 @@ type GenericBannerProps = {
   description: ReactNode
   cta?: ReactNode
   onClose?: () => void
+  inSwiper?: boolean
   illustrationDimensions?: {
     width?: BoxProps["width"]
     height?: BoxProps["height"]
@@ -52,6 +53,7 @@ export const GenericBanner = ({
   title,
   description,
   cta,
+  inSwiper = true,
   onClose,
   illustration,
   illustrationDimensions,
@@ -74,7 +76,8 @@ export const GenericBanner = ({
       px={{ base: 4, lg: 10 }}
       py={{ base: 4, lg: 6 }}
       pt={{
-        base: 4 + 4,
+        // for swiper pagination bullets
+        base: 4 + (inSwiper ? 4 : 0),
         lg: 6,
       }}>
       <Float right={{ base: "20px", md: "175px" }} placement="middle-end" height="full" w="full">
@@ -94,16 +97,17 @@ export const GenericBanner = ({
 
       {onClose && (
         <CloseButton
+          variant="secondary"
           onClick={onClose}
           position="absolute"
           top="4"
           right="4"
           size="2xs"
-          bgColor="white"
-          color="black"
           zIndex={2}
-          _hover={{ opacity: 0.8 }}
-          transition="all 0.2s"
+          bgColor="actions.secondary.default"
+          css={{
+            "& svg": { color: "actions.secondary.text" },
+          }}
         />
       )}
 

@@ -24,17 +24,27 @@ export default meta
 export const LightMode = () => (
   <VStack gap="8" w="full">
     <GenericBanner
+      inSwiper={false}
       variant="default"
       title="Lorem ipsum"
       description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
-      cta={<Button variant="primary">Button</Button>}
+      cta={
+        <Button size={{ base: "sm", md: "md" }} variant="primary">
+          Button
+        </Button>
+      }
       onClose={() => alert("Closed")}
     />
     <GenericBanner
+      inSwiper={false}
       variant="b3mo"
       title="Lorem ipsum"
       description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
-      cta={<Button variant="primary">Button</Button>}
+      cta={
+        <Button size={{ base: "sm", md: "md" }} variant="primary">
+          Button
+        </Button>
+      }
       onClose={() => alert("Closed")}
     />
   </VStack>

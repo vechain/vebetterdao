@@ -19,7 +19,7 @@ export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
           : t("Start staking VET to explore the new stargate universe !")
       }
       cta={
-        <Button asChild variant="primary" maxWidth="max-content">
+        <Button size={{ base: "sm", md: "md" }} asChild variant="primary" maxWidth="max-content">
           <Link href="https://app.stargate.vechain.org/" target="_blank" rel="noopener noreferrer">
             {t("Explore")}
           </Link>

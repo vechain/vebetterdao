@@ -13,7 +13,7 @@ export const LowVthoBanner = () => {
       title={t("Not enough VTHO")}
       description={t("Get more VTHO to be able to vote and perform transactions!")}
       cta={
-        <Button variant="primary" onClick={initTransak}>
+        <Button size={{ base: "sm", md: "md" }} variant="primary" onClick={initTransak}>
           {t("Get more VTHO")}
         </Button>
       }
