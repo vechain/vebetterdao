@@ -169,7 +169,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * Some actions are restricted to Standard proposals only, others to Grant proposals only.
    * eg. Executable proposals cannot be marked as in development if not executed yet but Succeeded.
    */
-  error GovernorRestrictedProposal();
+  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
 
   /**
    * @dev Emitted when a proposal is created

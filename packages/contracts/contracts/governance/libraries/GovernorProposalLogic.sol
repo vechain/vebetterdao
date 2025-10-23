@@ -133,7 +133,7 @@ library GovernorProposalLogic {
    * Some actions are restricted to Standard proposals only, others to Grant proposals only.
    * eg. Executable proposals cannot be marked as in development if not executed yet but Succeeded.
    */
-  error GovernorRestrictedProposal();
+  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
 
   /** ------------------ GETTERS ------------------ **/
 
@@ -564,17 +564,14 @@ library GovernorProposalLogic {
     return _cancel(self, proposalId);
   }
 
-  function markAsInDevelopment(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) external {
+  function markAsInDevelopment(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
     GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
 
     // Only Standard proposals are allowed here.
     // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
     if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposal();
+      revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
     //Can only mark as in development if proposal is executed or succeeded
@@ -585,7 +582,7 @@ library GovernorProposalLogic {
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded)
     );
     if (proposal.isExecutable && GovernorStateLogic._state(self, proposalId) == GovernorTypes.ProposalState.Succeeded) {
-      revert GovernorRestrictedProposal();
+      revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
     self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
@@ -593,16 +590,13 @@ library GovernorProposalLogic {
     emit ProposalInDevelopment(proposalId);
   }
 
-  function markAsCompleted(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) external {
+  function markAsCompleted(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
 
     // Only Standard proposals are allowed here.
     // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
     if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposal();
+      revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
     //Can only mark as in development if proposal is executed or succeeded
