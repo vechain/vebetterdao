@@ -628,7 +628,7 @@ library GovernorProposalLogic {
       revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
-    // Can only mark as in development if proposal is executed or succeeded
+    // Can only mark as completed if proposal is in development
     GovernorStateLogic.validateStateBitmap(
       self,
       proposalId,
