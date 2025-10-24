@@ -45,9 +45,8 @@ export const DashboardAllocationRounds = () => {
             px="0"
             size="sm"
             textStyle="sm"
-            variant="plain"
+            variant="link"
             _hover={{ textDecoration: "underline" }}
-            color="actions.tertiary.default"
             disabled={allocationRound.isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
             fontWeight="semibold">
@@ -81,9 +80,8 @@ export const DashboardAllocationRounds = () => {
             px="0"
             fontWeight="semibold"
             _hover={{ textDecoration: "underline" }}
-            variant="plain"
+            variant="link"
             textStyle="sm"
-            color="actions.tertiary.default"
             disabled={allocationRound.isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
             {t("Next round")}

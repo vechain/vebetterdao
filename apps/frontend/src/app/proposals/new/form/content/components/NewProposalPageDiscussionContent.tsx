@@ -126,11 +126,7 @@ export const NewProposalPageDiscussionContent = () => {
                   {t("Make sure to replace all the placeholders with your own content.")}
                 </Field.HelperText>
               )}
-              <Button
-                data-testid="reset-markdown"
-                variant="plain"
-                color="actions.tertiary.default"
-                onClick={resetMarkdownToDefault}>
+              <Button data-testid="reset-markdown" variant="link" onClick={resetMarkdownToDefault}>
                 {t("Reset to default")}
               </Button>
             </Stack>
