@@ -244,9 +244,9 @@ export const ActionBanner = () => {
       position="relative"
       css={{
         base: {
-          "--swiper-pagination-top": "24px",
+          "--swiper-pagination-top": "16px",
           "--swiper-pagination-bottom": "auto",
-          "--swiper-pagination-left": "24px",
+          "--swiper-pagination-left": "16px",
           "--swiper-pagination-bullet-size": "6px",
           "--swiper-pagination-text-align": "left",
         },
