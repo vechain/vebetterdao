@@ -345,27 +345,41 @@ contract DBAPool is
   }
 
   /**
-   * @notice Seeds the reward amount for a specific app for a specific round
-   * @param _roundId The round ID to seed
-   * @param _appId The app ID to seed
-   * @param _amount The amount to seed
+   * @notice Seeds the reward amounts for multiple apps across multiple rounds (batch operation)
+   * @param _roundIds Array of round IDs to seed
+   * @param _appIds Array of app IDs to seed
+   * @param _amounts Array of amounts to seed
    */
-  function seedDBARewardsForApp(uint256 _roundId, bytes32 _appId, uint256 _amount) external onlyRole(UPGRADER_ROLE) {
-    require(_amount > 0, "DBAPool: amount is zero");
+  function seedDBARewardsForApps(
+    uint256[] calldata _roundIds,
+    bytes32[] calldata _appIds,
+    uint256[] calldata _amounts
+  ) external onlyRole(UPGRADER_ROLE) {
+    require(_roundIds.length == _appIds.length, "DBAPool: arrays length mismatch");
+    require(_roundIds.length == _amounts.length, "DBAPool: arrays length mismatch");
+    require(_roundIds.length > 0, "DBAPool: empty arrays");
+
     DBAPoolStorage storage $ = _getDBAPoolStorage();
 
-    // Validate that the round is valid: after distribution start
-    require(_roundId >= $.distributionStartRound, "DBAPool: round is invalid");
+    for (uint256 i = 0; i < _roundIds.length; i++) {
+      uint256 roundId = _roundIds[i];
+      bytes32 appId = _appIds[i];
+      uint256 amount = _amounts[i];
 
-    // Validate that the app exists
-    require($.x2EarnApps.appExists(_appId), "DBAPool: app does not exist");
+      // Validate amount
+      require(amount > 0, "DBAPool: amount is zero");
 
-    // If the app has already received rewards for the round, revert
-    if ($.dbaRoundRewardsForApp[_roundId][_appId] > 0) {
-      revert("DBAPool: app has already received rewards for the round");
+      // Validate that the round is valid: after distribution start
+      require(roundId >= $.distributionStartRound, "DBAPool: round is invalid");
+
+      // Validate that the app exists
+      require($.x2EarnApps.appExists(appId), "DBAPool: app does not exist");
+
+      // If the app has already received rewards for the round, revert
+      require($.dbaRoundRewardsForApp[roundId][appId] == 0, "DBAPool: app has already received rewards for the round");
+
+      // Seed the reward amount
+      $.dbaRoundRewardsForApp[roundId][appId] = amount;
     }
-
-    // Seed the reward amount
-    $.dbaRoundRewardsForApp[_roundId][_appId] = _amount;
   }
 }

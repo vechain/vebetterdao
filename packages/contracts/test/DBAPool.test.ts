@@ -1312,7 +1312,7 @@ describe("DBA Pool - @shard7b", async function () {
   })
 
   describe("Seed DBA Rewards Function", () => {
-    it("Should allow UPGRADER_ROLE to seed historical DBA rewards for an app", async function () {
+    it("Should allow UPGRADER_ROLE to seed historical DBA rewards for multiple apps", async function () {
       const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1321,19 +1321,24 @@ describe("DBA Pool - @shard7b", async function () {
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      // Create an app
-      const creator = otherAccounts[0]
-      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
-      const appId = await x2EarnApps.hashAppName("App1")
+      // Create apps
+      const creator1 = otherAccounts[0]
+      const creator2 = otherAccounts[1]
+      await x2EarnApps.connect(owner).addApp(creator1.address, creator1.address, "App1", "metadataURI")
+      await x2EarnApps.connect(owner).addApp(creator2.address, creator2.address, "App2", "metadataURI")
+      const app1Id = await x2EarnApps.hashAppName("App1")
+      const app2Id = await x2EarnApps.hashAppName("App2")
 
-      const roundId = 1n
-      const amount = ethers.parseEther("1000")
+      const roundIds = [1n, 1n]
+      const appIds = [app1Id, app2Id]
+      const amounts = [ethers.parseEther("1000"), ethers.parseEther("2000")]
 
       // Seed the rewards
-      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount)
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts)
 
       // Verify the rewards were seeded
-      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(roundId, appId)).to.equal(amount)
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(roundIds[0], appIds[0])).to.equal(amounts[0])
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(roundIds[1], appIds[1])).to.equal(amounts[1])
     })
 
     it("Should revert when non-UPGRADER tries to seed rewards", async function () {
@@ -1348,11 +1353,14 @@ describe("DBA Pool - @shard7b", async function () {
       await x2EarnApps.connect(otherAccount).addApp(creator.address, creator.address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
 
-      const roundId = 1n
-      const amount = ethers.parseEther("1000")
+      const roundIds = [1n]
+      const appIds = [appId]
+      const amounts = [ethers.parseEther("1000")]
 
       // Try to seed without UPGRADER_ROLE
-      await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).seedDBARewardsForApp(roundId, appId, amount))
+      await catchRevert(
+        dynamicBaseAllocationPool.connect(otherAccount).seedDBARewardsForApps(roundIds, appIds, amounts),
+      )
     })
 
     it("Should revert when seeding with zero amount", async function () {
@@ -1369,12 +1377,14 @@ describe("DBA Pool - @shard7b", async function () {
       await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
 
-      const roundId = 1n
+      const roundIds = [1n]
+      const appIds = [appId]
+      const amounts = [0n]
 
       // Try to seed with zero amount
-      await expect(dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, 0)).to.be.revertedWith(
-        "DBAPool: amount is zero",
-      )
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts),
+      ).to.be.revertedWith("DBAPool: amount is zero")
     })
 
     it("Should revert when seeding for invalid round", async function () {
@@ -1391,12 +1401,13 @@ describe("DBA Pool - @shard7b", async function () {
       await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
 
-      const roundId = 0n // Round before distributionStartRound (which is 1)
-      const amount = ethers.parseEther("1000")
+      const roundIds = [0n] // Round before distributionStartRound (which is 1)
+      const appIds = [appId]
+      const amounts = [ethers.parseEther("1000")]
 
       // Try to seed for invalid round
       await expect(
-        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount),
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts),
       ).to.be.revertedWith("DBAPool: round is invalid")
     })
 
@@ -1409,13 +1420,14 @@ describe("DBA Pool - @shard7b", async function () {
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      const roundId = 1n
-      const amount = ethers.parseEther("1000")
+      const roundIds = [1n]
       const nonExistentAppId = ethers.encodeBytes32String("NonExistentApp")
+      const appIds = [nonExistentAppId]
+      const amounts = [ethers.parseEther("1000")]
 
       // Try to seed for non-existent app
       await expect(
-        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, nonExistentAppId, amount),
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts),
       ).to.be.revertedWith("DBAPool: app does not exist")
     })
 
@@ -1433,19 +1445,20 @@ describe("DBA Pool - @shard7b", async function () {
       await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
 
-      const roundId = 1n
-      const amount = ethers.parseEther("1000")
+      const roundIds = [1n]
+      const appIds = [appId]
+      const amounts = [ethers.parseEther("1000")]
 
       // Seed the rewards first time
-      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount)
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts)
 
       // Try to seed again for same round and app
       await expect(
-        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount),
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts),
       ).to.be.revertedWith("DBAPool: app has already received rewards for the round")
     })
 
-    it("Should correctly track rewards per app per round", async function () {
+    it("Should correctly track rewards per app per round in batch", async function () {
       const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1462,25 +1475,63 @@ describe("DBA Pool - @shard7b", async function () {
       const app1Id = await x2EarnApps.hashAppName("App1")
       const app2Id = await x2EarnApps.hashAppName("App2")
 
-      const round1 = 1n
-      const round2 = 2n
       const amount1 = ethers.parseEther("1000")
       const amount2 = ethers.parseEther("2000")
 
-      // Seed rewards for app1 in round1
-      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(round1, app1Id, amount1)
+      // Seed rewards for multiple apps and rounds in one batch
+      const roundIds = [1n, 1n, 2n]
+      const appIds = [app1Id, app2Id, app1Id]
+      const amounts = [amount1, amount2, amount2]
 
-      // Seed rewards for app2 in round1
-      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(round1, app2Id, amount2)
-
-      // Seed rewards for app1 in round2
-      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(round2, app1Id, amount2)
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts)
 
       // Verify all rewards are tracked correctly
-      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app1Id)).to.equal(amount1)
-      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)).to.equal(amount2)
-      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app1Id)).to.equal(amount2)
-      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app2Id)).to.equal(0n) // Not seeded
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(1n, app1Id)).to.equal(amount1)
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(1n, app2Id)).to.equal(amount2)
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(2n, app1Id)).to.equal(amount2)
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(2n, app2Id)).to.equal(0n) // Not seeded
+    })
+
+    it("Should revert when arrays have mismatched lengths", async function () {
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      // Create an app
+      const creator = otherAccounts[0]
+      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("App1")
+
+      // Mismatched array lengths
+      const roundIds = [1n, 2n]
+      const appIds = [appId]
+      const amounts = [ethers.parseEther("1000")]
+
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts),
+      ).to.be.revertedWith("DBAPool: arrays length mismatch")
+    })
+
+    it("Should revert when arrays are empty", async function () {
+      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      const roundIds: bigint[] = []
+      const appIds: string[] = []
+      const amounts: bigint[] = []
+
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts),
+      ).to.be.revertedWith("DBAPool: empty arrays")
     })
   })
 
@@ -1623,19 +1674,24 @@ describe("DBA Pool - @shard7b", async function () {
       // Get V2 instance
       const dbaPoolV2 = await ethers.getContractAt("DBAPool", await dbaPoolV1.getAddress())
 
-      // Create an app
-      const creator = otherAccounts[0]
-      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
-      const appId = await x2EarnApps.hashAppName("App1")
+      // Create apps
+      const creator1 = otherAccounts[0]
+      const creator2 = otherAccounts[1]
+      await x2EarnApps.connect(owner).addApp(creator1.address, creator1.address, "App1", "metadataURI")
+      await x2EarnApps.connect(owner).addApp(creator2.address, creator2.address, "App2", "metadataURI")
+      const app1Id = await x2EarnApps.hashAppName("App1")
+      const app2Id = await x2EarnApps.hashAppName("App2")
 
-      const roundId = 1n
-      const amount = ethers.parseEther("1000")
+      const roundIds = [1n, 1n]
+      const appIds = [app1Id, app2Id]
+      const amounts = [ethers.parseEther("1000"), ethers.parseEther("2000")]
 
-      // Use new V2 function
-      await dbaPoolV2.connect(owner).seedDBARewardsForApp(roundId, appId, amount)
+      // Use new V2 batch function
+      await dbaPoolV2.connect(owner).seedDBARewardsForApps(roundIds, appIds, amounts)
 
       // Verify it works
-      expect(await dbaPoolV2.dbaRoundRewardsForApp(roundId, appId)).to.equal(amount)
+      expect(await dbaPoolV2.dbaRoundRewardsForApp(roundIds[0], appIds[0])).to.equal(amounts[0])
+      expect(await dbaPoolV2.dbaRoundRewardsForApp(roundIds[1], appIds[1])).to.equal(amounts[1])
     })
   })
 })
