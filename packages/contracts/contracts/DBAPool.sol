@@ -41,6 +41,7 @@ contract DBAPool is
     IB3TR b3tr;
     uint256 distributionStartRound; // The round from which DBA rewards distribution starts
     mapping(uint256 roundId => bool) dbaRewardsDistributed; // Tracks if DBA rewards have been distributed for a round
+    mapping(uint256 roundId => mapping(bytes32 appId => uint256 amount)) dbaRoundRewardsForApp; // Tracks the reward amount an app has received from the DBA
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.DBAPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -156,12 +157,26 @@ contract DBAPool is
         "DBAPool: Deposit of rewards allocation to x2EarnRewardsPool failed"
       );
 
+      // Track the reward amount for the app for later on-chain-retrieval
+      $.dbaRoundRewardsForApp[_roundId][appId] = amountPerApp;
+
       // Emit event for each app
       emit FundsDistributedToApp(appId, amountPerApp, _roundId);
     }
   }
 
   // ---------- Getters ---------- //
+
+  /**
+   * @notice Gets the reward amount distributed to a specific app for a specific round
+   * @param _roundId The round ID to check
+   * @param _appId The app ID to check
+   * @return The reward amount for the app for the round or 0 if no rewards have been distributed
+   */
+  function dbaRoundRewardsForApp(uint256 _roundId, bytes32 _appId) external view returns (uint256) {
+    DBAPoolStorage storage $ = _getDBAPoolStorage();
+    return $.dbaRoundRewardsForApp[_roundId][_appId];
+  }
 
   /**
    * @notice Gets the current B3TR balance of this contract
@@ -270,7 +285,7 @@ contract DBAPool is
    * @return The version string
    */
   function version() external pure returns (string memory) {
-    return "1";
+    return "2";
   }
 
   // ---------- Admin functions ---------- //
@@ -327,5 +342,30 @@ contract DBAPool is
     require(_distributionStartRound != 0, "DBAPool: distribution start round is zero");
     DBAPoolStorage storage $ = _getDBAPoolStorage();
     $.distributionStartRound = _distributionStartRound;
+  }
+
+  /**
+   * @notice Seeds the reward amount for a specific app for a specific round
+   * @param _roundId The round ID to seed
+   * @param _appId The app ID to seed
+   * @param _amount The amount to seed
+   */
+  function seedDBARewardsForApp(uint256 _roundId, bytes32 _appId, uint256 _amount) external onlyRole(UPGRADER_ROLE) {
+    require(_amount > 0, "DBAPool: amount is zero");
+    DBAPoolStorage storage $ = _getDBAPoolStorage();
+
+    // Validate that the round is valid: after distribution start
+    require(_roundId >= $.distributionStartRound, "DBAPool: round is invalid");
+
+    // Validate that the app exists
+    require($.x2EarnApps.appExists(_appId), "DBAPool: app does not exist");
+
+    // If the app has already received rewards for the round, revert
+    if ($.dbaRoundRewardsForApp[_roundId][_appId] > 0) {
+      revert("DBAPool: app has already received rewards for the round");
+    }
+
+    // Seed the reward amount
+    $.dbaRoundRewardsForApp[_roundId][_appId] = _amount;
   }
 }

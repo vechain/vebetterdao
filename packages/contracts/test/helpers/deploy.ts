@@ -121,6 +121,7 @@ import {
   RelayerRewardsPool,
   AutoVotingLogic,
   DBAPool,
+  DBAPoolV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -1153,16 +1154,26 @@ export const getOrDeployContractInstances = async ({
     },
   )) as RelayerRewardsPool
 
-  const dynamicBaseAllocationPool = (await deployProxy("DBAPool", [
+  const dynamicBaseAllocationPool = (await deployAndUpgrade(
+    ["DBAPoolV1", "DBAPool"],
+    [
+      [
+        {
+          admin: owner.address,
+          x2EarnApps: await x2EarnApps.getAddress(),
+          xAllocationPool: await xAllocationPool.getAddress(),
+          x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          distributionStartRound: 1,
+        },
+      ],
+      [], // No initialization args for V2
+    ],
     {
-      admin: owner.address,
-      x2EarnApps: await x2EarnApps.getAddress(),
-      xAllocationPool: await xAllocationPool.getAddress(),
-      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
-      b3tr: await b3tr.getAddress(),
-      distributionStartRound: 1,
+      versions: [undefined, 2],
+      logOutput: false,
     },
-  ])) as DBAPool
+  )) as DBAPool
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),

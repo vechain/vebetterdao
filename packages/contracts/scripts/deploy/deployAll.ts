@@ -18,6 +18,7 @@ import {
   GrantsManager,
   RelayerRewardsPool,
   DBAPool,
+  DBAPoolV1,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -927,16 +928,26 @@ export async function deployAll(config: ContractsConfig) {
   ])) as GrantsManager
 
   // DynamicBaseAllocationPool
-  const dynamicBaseAllocationPool = (await deployProxy("DBAPool", [
+  const dynamicBaseAllocationPool = (await deployAndUpgrade(
+    ["DBAPoolV1", "DBAPool"],
+    [
+      [
+        {
+          admin: TEMP_ADMIN, // admin
+          x2EarnApps: await x2EarnApps.getAddress(),
+          xAllocationPool: await xAllocationPool.getAddress(),
+          x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          distributionStartRound: 1, // startRound
+        },
+      ],
+      [], // No initialization args for V2
+    ],
     {
-      admin: TEMP_ADMIN, // admin
-      x2EarnApps: await x2EarnApps.getAddress(),
-      xAllocationPool: await xAllocationPool.getAddress(),
-      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
-      b3tr: await b3tr.getAddress(),
-      distributionStartRound: 1, // startRound
+      versions: [undefined, 2],
+      logOutput: true,
     },
-  ])) as DBAPool
+  )) as DBAPool
 
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)

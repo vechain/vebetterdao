@@ -7,12 +7,12 @@ import {
   getOrDeployContractInstances,
   getVot3Tokens,
   waitForRoundToEnd,
+  startNewAllocationRound,
 } from "./helpers"
 import { describe, it, before } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
-import { DBAPool } from "../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { endorseApp } from "./helpers/xnodes"
 
@@ -57,7 +57,7 @@ describe("DBA Pool - @shard7b", async function () {
         forceDeploy: true,
       })
 
-      expect(await dynamicBaseAllocationPool.version()).to.eql("1")
+      expect(await dynamicBaseAllocationPool.version()).to.eql("2")
     })
 
     it("Should revert if admin is set to zero address in initialization", async () => {
@@ -807,6 +807,106 @@ describe("DBA Pool - @shard7b", async function () {
       expect(await dynamicBaseAllocationPool.isDBARewardsDistributed(round1)).to.equal(true)
     })
 
+    it("Should successfully store distributed rewards for apps", async function () {
+      this.timeout(120000)
+
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 10
+      config.INITIAL_X_ALLOCATION = ethers.parseEther("10000")
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 50
+
+      const {
+        dynamicBaseAllocationPool,
+        owner,
+        x2EarnApps,
+        xAllocationPool,
+        xAllocationVoting,
+        emissions,
+        minterAccount,
+        otherAccounts,
+        veBetterPassport,
+        creators,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await bootstrapEmissions()
+
+      await veBetterPassport.whitelist(otherAccounts[0].address)
+      await veBetterPassport.whitelist(otherAccounts[1].address)
+      await veBetterPassport.toggleCheck(1)
+
+      await getVot3Tokens(otherAccounts[0], "10000")
+      await getVot3Tokens(otherAccounts[1], "10000")
+
+      // Create two apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("app1"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("app2"))
+
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[5].address, otherAccounts[5].address, "app1", "metadataURI")
+      await x2EarnApps
+        .connect(creators[1])
+        .submitApp(otherAccounts[6].address, otherAccounts[6].address, "app2", "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[0])
+      await endorseApp(app2Id, otherAccounts[1])
+
+      await emissions.connect(minterAccount).start()
+      const round1 = await xAllocationVoting.currentRoundId()
+
+      // Vote heavily on app1 to exceed cap, lightly on app2
+      await xAllocationVoting.connect(otherAccounts[0]).castVote(round1, [app1Id], [ethers.parseEther("9000")])
+      await xAllocationVoting.connect(otherAccounts[1]).castVote(round1, [app2Id], [ethers.parseEther("1000")])
+
+      await waitForRoundToEnd(round1)
+
+      await xAllocationPool
+        .connect(owner)
+        .setUnallocatedFundsReceiverAddress(await dynamicBaseAllocationPool.getAddress())
+
+      await xAllocationPool.claim(round1, app1Id)
+      await xAllocationPool.claim(round1, app2Id)
+
+      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
+
+      // Distribute to single app - should deposit all unallocated funds to X2EarnRewardsPool
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
+
+      // app 1 exceeded the cap, it received no rewards
+      const dbaRoundRewardsForApp1Round1 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app1Id)
+      expect(dbaRoundRewardsForApp1Round1).to.equal(0n)
+
+      // app 2 will receive the excess
+      const dbaRoundRewardsForApp2Round1 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)
+      expect(dbaRoundRewardsForApp2Round1).to.equal(ethers.parseEther("2800"))
+
+      const round2 = await startNewAllocationRound()
+
+      // Vote heavily on app1 to exceed cap, lightly on app2
+      await xAllocationVoting.connect(otherAccounts[0]).castVote(round2, [app1Id], [ethers.parseEther("9000")])
+      await xAllocationVoting.connect(otherAccounts[1]).castVote(round2, [app2Id], [ethers.parseEther("1000")])
+
+      await waitForRoundToEnd(round2)
+
+      await xAllocationPool.claim(round2, app1Id)
+      await xAllocationPool.claim(round2, app2Id)
+
+      // Distribute to single app - should deposit all unallocated funds to X2EarnRewardsPool
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round2, [app2Id])
+
+      // app 1 exceeded the cap, it received no rewards
+      const dbaRoundRewardsForApp1Round2 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app1Id)
+      expect(dbaRoundRewardsForApp1Round2).to.equal(0n)
+
+      // app 2 will receive the excess
+      const dbaRoundRewardsForApp2Round2 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app2Id)
+      expect(dbaRoundRewardsForApp2Round2).to.equal(ethers.parseEther("2800"))
+    })
+
     it("Should revert when trying to distribute to non-existent app", async function () {
       this.timeout(120000)
 
@@ -1208,6 +1308,334 @@ describe("DBA Pool - @shard7b", async function () {
       await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [])).to.be.revertedWith(
         "DBAPool: no apps to distribute to",
       )
+    })
+  })
+
+  describe("Seed DBA Rewards Function", () => {
+    it("Should allow UPGRADER_ROLE to seed historical DBA rewards for an app", async function () {
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      // Create an app
+      const creator = otherAccounts[0]
+      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("App1")
+
+      const roundId = 1n
+      const amount = ethers.parseEther("1000")
+
+      // Seed the rewards
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount)
+
+      // Verify the rewards were seeded
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(roundId, appId)).to.equal(amount)
+    })
+
+    it("Should revert when non-UPGRADER tries to seed rewards", async function () {
+      const { dynamicBaseAllocationPool, otherAccount, x2EarnApps, otherAccounts } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
+
+      // Create an app
+      const creator = otherAccounts[0]
+      await x2EarnApps.connect(otherAccount).addApp(creator.address, creator.address, "App1", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("App1")
+
+      const roundId = 1n
+      const amount = ethers.parseEther("1000")
+
+      // Try to seed without UPGRADER_ROLE
+      await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).seedDBARewardsForApp(roundId, appId, amount))
+    })
+
+    it("Should revert when seeding with zero amount", async function () {
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      // Create an app
+      const creator = otherAccounts[0]
+      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("App1")
+
+      const roundId = 1n
+
+      // Try to seed with zero amount
+      await expect(dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, 0)).to.be.revertedWith(
+        "DBAPool: amount is zero",
+      )
+    })
+
+    it("Should revert when seeding for invalid round", async function () {
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      // Create an app
+      const creator = otherAccounts[0]
+      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("App1")
+
+      const roundId = 0n // Round before distributionStartRound (which is 1)
+      const amount = ethers.parseEther("1000")
+
+      // Try to seed for invalid round
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount),
+      ).to.be.revertedWith("DBAPool: round is invalid")
+    })
+
+    it("Should revert when seeding for non-existent app", async function () {
+      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      const roundId = 1n
+      const amount = ethers.parseEther("1000")
+      const nonExistentAppId = ethers.encodeBytes32String("NonExistentApp")
+
+      // Try to seed for non-existent app
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, nonExistentAppId, amount),
+      ).to.be.revertedWith("DBAPool: app does not exist")
+    })
+
+    it("Should revert when seeding for app that already has rewards", async function () {
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      // Create an app
+      const creator = otherAccounts[0]
+      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("App1")
+
+      const roundId = 1n
+      const amount = ethers.parseEther("1000")
+
+      // Seed the rewards first time
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount)
+
+      // Try to seed again for same round and app
+      await expect(
+        dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(roundId, appId, amount),
+      ).to.be.revertedWith("DBAPool: app has already received rewards for the round")
+    })
+
+    it("Should correctly track rewards per app per round", async function () {
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
+      await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      // Create two apps
+      const creator1 = otherAccounts[0]
+      const creator2 = otherAccounts[1]
+      await x2EarnApps.connect(owner).addApp(creator1.address, creator1.address, "App1", "metadataURI1")
+      await x2EarnApps.connect(owner).addApp(creator2.address, creator2.address, "App2", "metadataURI2")
+      const app1Id = await x2EarnApps.hashAppName("App1")
+      const app2Id = await x2EarnApps.hashAppName("App2")
+
+      const round1 = 1n
+      const round2 = 2n
+      const amount1 = ethers.parseEther("1000")
+      const amount2 = ethers.parseEther("2000")
+
+      // Seed rewards for app1 in round1
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(round1, app1Id, amount1)
+
+      // Seed rewards for app2 in round1
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(round1, app2Id, amount2)
+
+      // Seed rewards for app1 in round2
+      await dynamicBaseAllocationPool.connect(owner).seedDBARewardsForApp(round2, app1Id, amount2)
+
+      // Verify all rewards are tracked correctly
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app1Id)).to.equal(amount1)
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)).to.equal(amount2)
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app1Id)).to.equal(amount2)
+      expect(await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app2Id)).to.equal(0n) // Not seeded
+    })
+  })
+
+  describe("Storage Integrity During Upgrade", () => {
+    it("Should preserve all storage when upgrading from V1 to V2", async function () {
+      const config = createLocalConfig()
+      const { owner, b3tr, x2EarnApps, xAllocationPool, x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      // Deploy V1
+      const dbaPoolV1 = await deployProxy("DBAPoolV1", [
+        {
+          admin: owner.address,
+          x2EarnApps: await x2EarnApps.getAddress(),
+          xAllocationPool: await xAllocationPool.getAddress(),
+          x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          distributionStartRound: 5,
+        },
+      ])
+
+      // Store V1 state
+      const v1X2EarnApps = await dbaPoolV1.x2EarnApps()
+      const v1XAllocationPool = await dbaPoolV1.xAllocationPool()
+      const v1X2EarnRewardsPool = await dbaPoolV1.x2EarnRewardsPool()
+      const v1B3tr = await dbaPoolV1.b3tr()
+      const v1DistributionStartRound = await dbaPoolV1.distributionStartRound()
+      const v1Version = await dbaPoolV1.version()
+
+      // Verify V1 state
+      expect(v1Version).to.equal("1")
+      expect(v1DistributionStartRound).to.equal(5n)
+
+      // Get contract factory for V2
+      const DBAPoolV2 = await ethers.getContractFactory("DBAPool")
+      const dbaPoolV2Implementation = await DBAPoolV2.deploy()
+      await dbaPoolV2Implementation.waitForDeployment()
+
+      // Upgrade to V2
+      const dbaPoolV1Contract = await ethers.getContractAt("DBAPoolV1", await dbaPoolV1.getAddress())
+      await dbaPoolV1Contract.upgradeToAndCall(await dbaPoolV2Implementation.getAddress(), "0x")
+
+      // Get V2 instance
+      const dbaPoolV2 = await ethers.getContractAt("DBAPool", await dbaPoolV1.getAddress())
+
+      // Verify all V1 storage is preserved
+      expect(await dbaPoolV2.x2EarnApps()).to.equal(v1X2EarnApps)
+      expect(await dbaPoolV2.xAllocationPool()).to.equal(v1XAllocationPool)
+      expect(await dbaPoolV2.x2EarnRewardsPool()).to.equal(v1X2EarnRewardsPool)
+      expect(await dbaPoolV2.b3tr()).to.equal(v1B3tr)
+      expect(await dbaPoolV2.distributionStartRound()).to.equal(v1DistributionStartRound)
+
+      // Verify new V2 functionality is available
+      expect(await dbaPoolV2.version()).to.equal("2")
+
+      // Verify new mapping returns 0 for all queries (not initialized yet)
+      const randomAppId = ethers.encodeBytes32String("randomApp")
+      expect(await dbaPoolV2.dbaRoundRewardsForApp(1n, randomAppId)).to.equal(0n)
+    })
+
+    it("Should maintain role assignments after upgrade", async function () {
+      const config = createLocalConfig()
+      const { owner, otherAccount, b3tr, x2EarnApps, xAllocationPool, x2EarnRewardsPool } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Deploy V1
+      const dbaPoolV1 = await deployProxy("DBAPoolV1", [
+        {
+          admin: owner.address,
+          x2EarnApps: await x2EarnApps.getAddress(),
+          xAllocationPool: await xAllocationPool.getAddress(),
+          x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          distributionStartRound: 1,
+        },
+      ])
+
+      // Grant roles in V1
+      const UPGRADER_ROLE = await dbaPoolV1.UPGRADER_ROLE()
+      const DISTRIBUTOR_ROLE = await dbaPoolV1.DISTRIBUTOR_ROLE()
+      await dbaPoolV1.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+      await dbaPoolV1.connect(owner).grantRole(DISTRIBUTOR_ROLE, otherAccount.address)
+
+      // Verify roles before upgrade
+      expect(await dbaPoolV1.hasRole(UPGRADER_ROLE, owner.address)).to.be.true
+      expect(await dbaPoolV1.hasRole(DISTRIBUTOR_ROLE, otherAccount.address)).to.be.true
+
+      // Upgrade to V2
+      const DBAPoolV2 = await ethers.getContractFactory("DBAPool")
+      const dbaPoolV2Implementation = await DBAPoolV2.deploy()
+      await dbaPoolV2Implementation.waitForDeployment()
+
+      const dbaPoolV1Contract = await ethers.getContractAt("DBAPoolV1", await dbaPoolV1.getAddress())
+      await dbaPoolV1Contract.connect(owner).upgradeToAndCall(await dbaPoolV2Implementation.getAddress(), "0x")
+
+      // Get V2 instance
+      const dbaPoolV2 = await ethers.getContractAt("DBAPool", await dbaPoolV1.getAddress())
+
+      // Verify roles are preserved after upgrade
+      expect(await dbaPoolV2.hasRole(UPGRADER_ROLE, owner.address)).to.be.true
+      expect(await dbaPoolV2.hasRole(DISTRIBUTOR_ROLE, otherAccount.address)).to.be.true
+    })
+
+    it("Should allow using new V2 functions after upgrade", async function () {
+      const config = createLocalConfig()
+      const { owner, b3tr, x2EarnApps, xAllocationPool, x2EarnRewardsPool, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Deploy V1
+      const dbaPoolV1 = await deployProxy("DBAPoolV1", [
+        {
+          admin: owner.address,
+          x2EarnApps: await x2EarnApps.getAddress(),
+          xAllocationPool: await xAllocationPool.getAddress(),
+          x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          distributionStartRound: 1,
+        },
+      ])
+
+      // Upgrade to V2
+      const DBAPoolV2 = await ethers.getContractFactory("DBAPool")
+      const dbaPoolV2Implementation = await DBAPoolV2.deploy()
+      await dbaPoolV2Implementation.waitForDeployment()
+
+      const UPGRADER_ROLE = await dbaPoolV1.UPGRADER_ROLE()
+      await dbaPoolV1.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
+      const dbaPoolV1Contract = await ethers.getContractAt("DBAPoolV1", await dbaPoolV1.getAddress())
+      await dbaPoolV1Contract.connect(owner).upgradeToAndCall(await dbaPoolV2Implementation.getAddress(), "0x")
+
+      // Get V2 instance
+      const dbaPoolV2 = await ethers.getContractAt("DBAPool", await dbaPoolV1.getAddress())
+
+      // Create an app
+      const creator = otherAccounts[0]
+      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("App1")
+
+      const roundId = 1n
+      const amount = ethers.parseEther("1000")
+
+      // Use new V2 function
+      await dbaPoolV2.connect(owner).seedDBARewardsForApp(roundId, appId, amount)
+
+      // Verify it works
+      expect(await dbaPoolV2.dbaRoundRewardsForApp(roundId, appId)).to.equal(amount)
     })
   })
 })
