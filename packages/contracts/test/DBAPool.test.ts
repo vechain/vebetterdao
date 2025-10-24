@@ -1313,21 +1313,28 @@ describe("DBA Pool - @shard7b", async function () {
 
   describe("Seed DBA Rewards Function", () => {
     it("Should allow UPGRADER_ROLE to seed historical DBA rewards for multiple apps", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, creators, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant UPGRADER_ROLE to owner
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      // Create apps
-      const creator1 = otherAccounts[0]
-      const creator2 = otherAccounts[1]
-      await x2EarnApps.connect(owner).addApp(creator1.address, creator1.address, "App1", "metadataURI")
-      await x2EarnApps.connect(owner).addApp(creator2.address, creator2.address, "App2", "metadataURI")
+      // Create apps using creators who have Creator NFTs
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI")
+      await x2EarnApps
+        .connect(creators[1])
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, "App2", "metadataURI")
       const app1Id = await x2EarnApps.hashAppName("App1")
       const app2Id = await x2EarnApps.hashAppName("App2")
+
+      // Endorse apps so they are fully created
+      await endorseApp(app1Id, otherAccounts[2])
+      await endorseApp(app2Id, otherAccounts[3])
 
       const roundIds = [1n, 1n]
       const appIds = [app1Id, app2Id]
@@ -1342,16 +1349,19 @@ describe("DBA Pool - @shard7b", async function () {
     })
 
     it("Should revert when non-UPGRADER tries to seed rewards", async function () {
-      const { dynamicBaseAllocationPool, otherAccount, x2EarnApps, otherAccounts } = await getOrDeployContractInstances(
-        {
+      const { dynamicBaseAllocationPool, otherAccount, x2EarnApps, creators, otherAccounts } =
+        await getOrDeployContractInstances({
           forceDeploy: true,
-        },
-      )
+        })
 
-      // Create an app
-      const creator = otherAccounts[0]
-      await x2EarnApps.connect(otherAccount).addApp(creator.address, creator.address, "App1", "metadataURI")
+      // Create an app using a creator who has a Creator NFT
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
+
+      // Endorse app so it's fully created
+      await endorseApp(appId, otherAccounts[2])
 
       const roundIds = [1n]
       const appIds = [appId]
@@ -1364,18 +1374,23 @@ describe("DBA Pool - @shard7b", async function () {
     })
 
     it("Should revert when seeding with zero amount", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, creators, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant UPGRADER_ROLE to owner
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      // Create an app
-      const creator = otherAccounts[0]
-      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      // Create an app using a creator who has a Creator NFT
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
+
+      // Endorse app so it's fully created
+      await endorseApp(appId, otherAccounts[2])
 
       const roundIds = [1n]
       const appIds = [appId]
@@ -1388,18 +1403,23 @@ describe("DBA Pool - @shard7b", async function () {
     })
 
     it("Should revert when seeding for invalid round", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, creators, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant UPGRADER_ROLE to owner
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      // Create an app
-      const creator = otherAccounts[0]
-      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      // Create an app using a creator who has a Creator NFT
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
+
+      // Endorse app so it's fully created
+      await endorseApp(appId, otherAccounts[2])
 
       const roundIds = [0n] // Round before distributionStartRound (which is 1)
       const appIds = [appId]
@@ -1432,18 +1452,23 @@ describe("DBA Pool - @shard7b", async function () {
     })
 
     it("Should revert when seeding for app that already has rewards", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, creators, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant UPGRADER_ROLE to owner
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      // Create an app
-      const creator = otherAccounts[0]
-      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      // Create an app using a creator who has a Creator NFT
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
+
+      // Endorse app so it's fully created
+      await endorseApp(appId, otherAccounts[2])
 
       const roundIds = [1n]
       const appIds = [appId]
@@ -1459,21 +1484,28 @@ describe("DBA Pool - @shard7b", async function () {
     })
 
     it("Should correctly track rewards per app per round in batch", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, creators, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant UPGRADER_ROLE to owner
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      // Create two apps
-      const creator1 = otherAccounts[0]
-      const creator2 = otherAccounts[1]
-      await x2EarnApps.connect(owner).addApp(creator1.address, creator1.address, "App1", "metadataURI1")
-      await x2EarnApps.connect(owner).addApp(creator2.address, creator2.address, "App2", "metadataURI2")
+      // Create two apps using creators who have Creator NFTs
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI1")
+      await x2EarnApps
+        .connect(creators[1])
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, "App2", "metadataURI2")
       const app1Id = await x2EarnApps.hashAppName("App1")
       const app2Id = await x2EarnApps.hashAppName("App2")
+
+      // Endorse apps so they are fully created
+      await endorseApp(app1Id, otherAccounts[2])
+      await endorseApp(app2Id, otherAccounts[3])
 
       const amount1 = ethers.parseEther("1000")
       const amount2 = ethers.parseEther("2000")
@@ -1493,18 +1525,23 @@ describe("DBA Pool - @shard7b", async function () {
     })
 
     it("Should revert when arrays have mismatched lengths", async function () {
-      const { dynamicBaseAllocationPool, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { dynamicBaseAllocationPool, owner, x2EarnApps, creators, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant UPGRADER_ROLE to owner
       const UPGRADER_ROLE = await dynamicBaseAllocationPool.UPGRADER_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
 
-      // Create an app
-      const creator = otherAccounts[0]
-      await x2EarnApps.connect(owner).addApp(creator.address, creator.address, "App1", "metadataURI")
+      // Create an app using a creator who has a Creator NFT
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI")
       const appId = await x2EarnApps.hashAppName("App1")
+
+      // Endorse app so it's fully created
+      await endorseApp(appId, otherAccounts[2])
 
       // Mismatched array lengths
       const roundIds = [1n, 2n]
@@ -1567,6 +1604,10 @@ describe("DBA Pool - @shard7b", async function () {
       expect(v1Version).to.equal("1")
       expect(v1DistributionStartRound).to.equal(5n)
 
+      // Grant UPGRADER_ROLE to owner
+      const UPGRADER_ROLE = await dbaPoolV1.UPGRADER_ROLE()
+      await dbaPoolV1.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+
       // Get contract factory for V2
       const DBAPoolV2 = await ethers.getContractFactory("DBAPool")
       const dbaPoolV2Implementation = await DBAPoolV2.deploy()
@@ -1574,7 +1615,7 @@ describe("DBA Pool - @shard7b", async function () {
 
       // Upgrade to V2
       const dbaPoolV1Contract = await ethers.getContractAt("DBAPoolV1", await dbaPoolV1.getAddress())
-      await dbaPoolV1Contract.upgradeToAndCall(await dbaPoolV2Implementation.getAddress(), "0x")
+      await dbaPoolV1Contract.connect(owner).upgradeToAndCall(await dbaPoolV2Implementation.getAddress(), "0x")
 
       // Get V2 instance
       const dbaPoolV2 = await ethers.getContractAt("DBAPool", await dbaPoolV1.getAddress())
@@ -1674,13 +1715,22 @@ describe("DBA Pool - @shard7b", async function () {
       // Get V2 instance
       const dbaPoolV2 = await ethers.getContractAt("DBAPool", await dbaPoolV1.getAddress())
 
-      // Create apps
-      const creator1 = otherAccounts[0]
-      const creator2 = otherAccounts[1]
-      await x2EarnApps.connect(owner).addApp(creator1.address, creator1.address, "App1", "metadataURI")
-      await x2EarnApps.connect(owner).addApp(creator2.address, creator2.address, "App2", "metadataURI")
+      // Get creators from deployment
+      const { creators } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      // Create apps using creators who have Creator NFTs
+      await x2EarnApps
+        .connect(creators[0])
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "App1", "metadataURI")
+      await x2EarnApps
+        .connect(creators[1])
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, "App2", "metadataURI")
       const app1Id = await x2EarnApps.hashAppName("App1")
       const app2Id = await x2EarnApps.hashAppName("App2")
+
+      // Endorse apps so they are fully created
+      await endorseApp(app1Id, otherAccounts[4])
+      await endorseApp(app2Id, otherAccounts[5])
 
       const roundIds = [1n, 1n]
       const appIds = [app1Id, app2Id]

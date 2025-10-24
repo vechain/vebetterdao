@@ -1154,23 +1154,31 @@ export const getOrDeployContractInstances = async ({
     },
   )) as RelayerRewardsPool
 
-  const dynamicBaseAllocationPool = (await deployAndUpgrade(
-    ["DBAPoolV1", "DBAPool"],
-    [
-      [
-        {
-          admin: owner.address,
-          x2EarnApps: await x2EarnApps.getAddress(),
-          xAllocationPool: await xAllocationPool.getAddress(),
-          x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
-          b3tr: await b3tr.getAddress(),
-          distributionStartRound: 1,
-        },
-      ],
-      [], // No initialization args for V2
-    ],
+  // Deploy DBAPool V1
+  const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
     {
-      versions: [undefined, 2],
+      admin: owner.address,
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationPool: await xAllocationPool.getAddress(),
+      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+      b3tr: await b3tr.getAddress(),
+      distributionStartRound: 1,
+    },
+  ])) as DBAPoolV1
+
+  // Grant UPGRADER_ROLE to owner so we can upgrade
+  const UPGRADER_ROLE = await dbaPoolV1.UPGRADER_ROLE()
+  const grantRoleTx = await dbaPoolV1.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+  await grantRoleTx.wait()
+
+  // Upgrade to V2
+  const dynamicBaseAllocationPool = (await upgradeProxy(
+    "DBAPoolV1",
+    "DBAPool",
+    await dbaPoolV1.getAddress(),
+    [], // No initialization args for V2
+    {
+      version: 2,
       logOutput: false,
     },
   )) as DBAPool

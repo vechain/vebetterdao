@@ -928,26 +928,38 @@ export async function deployAll(config: ContractsConfig) {
   ])) as GrantsManager
 
   // DynamicBaseAllocationPool
-  const dynamicBaseAllocationPool = (await deployAndUpgrade(
-    ["DBAPoolV1", "DBAPool"],
-    [
-      [
-        {
-          admin: TEMP_ADMIN, // admin
-          x2EarnApps: await x2EarnApps.getAddress(),
-          xAllocationPool: await xAllocationPool.getAddress(),
-          x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
-          b3tr: await b3tr.getAddress(),
-          distributionStartRound: 1, // startRound
-        },
-      ],
-      [], // No initialization args for V2
-    ],
+  console.log("Deploying DBAPool V1...")
+  const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
     {
-      versions: [undefined, 2],
+      admin: TEMP_ADMIN, // admin
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationPool: await xAllocationPool.getAddress(),
+      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+      b3tr: await b3tr.getAddress(),
+      distributionStartRound: 1, // startRound
+    },
+  ])) as DBAPoolV1
+
+  // Grant UPGRADER_ROLE to deployer so we can upgrade
+  const UPGRADER_ROLE_DBA = await dbaPoolV1.UPGRADER_ROLE()
+  const grantRoleTx = await dbaPoolV1.connect(deployer).grantRole(UPGRADER_ROLE_DBA, deployer.address)
+  await grantRoleTx.wait()
+  console.log("UPGRADER_ROLE granted to deployer for DBAPool")
+
+  // Upgrade to V2
+  console.log("Upgrading DBAPool to V2...")
+  const dynamicBaseAllocationPool = (await upgradeProxy(
+    "DBAPoolV1",
+    "DBAPool",
+    await dbaPoolV1.getAddress(),
+    [], // No initialization args for V2
+    {
+      version: 2,
       logOutput: true,
     },
   )) as DBAPool
+
+  console.log("DBAPool deployed and upgraded to V2")
 
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)

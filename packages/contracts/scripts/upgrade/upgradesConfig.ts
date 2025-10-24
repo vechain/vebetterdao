@@ -123,7 +123,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   "DBA Pool": {
     name: "dba-pool",
-    configAddressField: "dynamicBaseAllocationPoolContractAddress",
+    configAddressField: "dbaPoolContractAddress",
     versions: ["v2"],
     descriptions: {
       v2: "Add tracking of DBA rewards per app per round and seed function for historical data",
