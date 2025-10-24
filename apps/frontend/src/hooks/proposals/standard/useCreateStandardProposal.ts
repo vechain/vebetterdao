@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
-import { B3TRGovernor__factory, VOT3__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { VOT3__factory } from "@vechain/vebetterdao-contracts/factories/VOT3__factory"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"

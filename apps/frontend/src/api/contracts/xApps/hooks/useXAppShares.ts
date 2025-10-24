@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 
 const abi = XAllocationPool__factory.abi
@@ -32,7 +32,7 @@ export const useXAppsShares = (apps: string[], roundId?: string) => {
               functionName: method,
               address,
               args: [roundId, app],
-            }) as const,
+            } as const),
         ),
       })
       return shares.map((share, index) => {

@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 
 import { getXApps } from "../getXApps"

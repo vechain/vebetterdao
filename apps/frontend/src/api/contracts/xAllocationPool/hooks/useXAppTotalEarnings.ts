@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"
 import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
 
@@ -29,7 +29,7 @@ export const useXAppTotalEarnings = (roundIds: number[], appId: string) => {
               functionName: method,
               address,
               args: [BigInt(roundId), appId],
-            }) as const,
+            } as const),
         ),
       })
       roundEarnings.forEach((earning, index) => {

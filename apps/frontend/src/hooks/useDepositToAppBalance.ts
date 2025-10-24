@@ -1,5 +1,6 @@
 import { getConfig } from "@repo/config"
-import { X2EarnRewardsPool__factory, B3TR__factory } from "@vechain/vebetterdao-contracts"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
+import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnRewardsPool__factory"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 

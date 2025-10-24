@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/factories/GalaxyMember__factory"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { useWallet, executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
@@ -73,7 +74,7 @@ export const useGetUserGMs = (userAddress?: string) => {
                 address: voterRewardsContractAddress as `0x${string}`,
                 functionName: "levelToMultiplier",
                 args: [BigInt(gm.tokenLevel)],
-              }) as const,
+              } as const),
           ),
         }),
         executeMultipleClausesCall({
@@ -85,7 +86,7 @@ export const useGetUserGMs = (userAddress?: string) => {
                 address: galaxyMemberContractAddress as `0x${string}`,
                 functionName: "getNodeIdAttached",
                 args: [gm.tokenId],
-              }) as const,
+              } as const),
           ),
         }),
       ])
