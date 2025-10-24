@@ -9,8 +9,7 @@ const method = "distributionStartRound" as const
 /**
  * Returns the query key for fetching the DBA distribution start round
  */
-export const getDBADistributionStartRoundQueryKey = () =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getDBADistributionStartRoundQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get the round from which DBA distribution starts
