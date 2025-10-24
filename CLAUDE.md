@@ -20,7 +20,7 @@ Turborepo monorepo with:
 
 - `apps/frontend`: Next.js frontend app
 - `packages/contracts`: VeChain VeBetterDAO smart contracts
-- `packages/*`: Shared config, utils, constants, e2e tests, lambda functions
+- `packages/*`: Shared config, utils, constants, lambda functions
 
 # Environments
 
@@ -29,7 +29,6 @@ Turborepo monorepo with:
 - testnet: VeChain testnet
 - mainnet: VeChain mainnet
 - galactica-test: Galactica test network
-- e2e: E2E testing environment
 
 # Common commands
 
