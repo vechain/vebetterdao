@@ -1,16 +1,17 @@
 import { Button, Card, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
-import BigNumber from "bignumber.js"
-import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
-import { FiArrowUpRight } from "react-icons/fi"
-import { useTranslation } from "react-i18next"
-import { Transak, TransakConfig } from "@transak/transak-sdk"
 import { useQueryClient } from "@tanstack/react-query"
-import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+import { Transak, TransakConfig } from "@transak/transak-sdk"
+import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
+import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { FiArrowUpRight } from "react-icons/fi"
+
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 
 const isProduction = process.env.NODE_ENV === "production"
 export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
-
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
@@ -19,31 +20,26 @@ export const LowOnVthoCard: React.FC = () => {
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
-
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
-
     return b3trBalance.original !== "0" || vot3Balance.original !== "0"
   }, [b3trBalance, vot3Balance])
-
   const isLowOnVtho = useMemo(() => {
     return Number(balance?.energy ?? "0") < minVtho
   }, [balance])
-
   const labels = useMemo(() => {
     if (!balance) return
     const balanceNumber = new BigNumber(balance.energy ?? "0")
     if (balanceNumber.isZero())
       return {
         heading: "Not enough VTHO",
-        body: "VTHO is used as gas in every transaction you complete in VeBetterDAO, like voting, swapping tokens, etc.",
+        body: "VTHO is used as gas in every transaction you complete in VeBetter, like voting, swapping tokens, etc.",
       }
     return {
       heading: "You're low on VTHO ",
-      body: "You're running low on VTHO, used as gas in every transaction you complete in VeBetterDAO, like voting, swapping tokens, etc.",
+      body: "You're running low on VTHO, used as gas in every transaction you complete in VeBetter, like voting, swapping tokens, etc.",
     }
   }, [balance])
-
   const transakConfig: TransakConfig = useMemo(
     () => ({
       apiKey,
@@ -92,11 +88,7 @@ export const LowOnVthoCard: React.FC = () => {
   if (!account?.address || balanceLoading || !isLowOnVtho || !ownsTokens) return null
 
   return (
-    <Card.Root
-      borderColor={"#F29B32"}
-      backgroundColor={"#FFF3E5"}
-      variant={"baseWithBorder"}
-      boxShadow={"0px 0px 5px #F29B32"}>
+    <Card.Root borderColor={"#F29B32"} backgroundColor={"#FFF3E5"} variant="primary" boxShadow={"0px 0px 5px #F29B32"}>
       <Card.Body>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={1} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
@@ -104,11 +96,9 @@ export const LowOnVthoCard: React.FC = () => {
           </GridItem>
           <GridItem colSpan={3}>
             <VStack gap={4} w="full" justifyContent={"start"} alignItems={"start"}>
-              <Heading fontSize={"24px"} fontWeight={"700"}>
-                {labels?.heading}
-              </Heading>
+              <Heading size="2xl">{labels?.heading}</Heading>
 
-              <Text fontSize={"16px"} fontWeight={400}>
+              <Text textStyle={"md"}>
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 

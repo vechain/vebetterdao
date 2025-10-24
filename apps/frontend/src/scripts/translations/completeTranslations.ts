@@ -1,17 +1,48 @@
 import { writeFileSync } from "fs"
+
+import de from "../../i18n/languages/de.json"
 import en from "../../i18n/languages/en.json"
-import { forEach } from "lodash"
-import { translations } from "../../i18n"
+import es from "../../i18n/languages/es.json"
+import fr from "../../i18n/languages/fr.json"
+import hi from "../../i18n/languages/hi.json"
+import it from "../../i18n/languages/it.json"
+import ja from "../../i18n/languages/ja.json"
+import ko from "../../i18n/languages/ko.json"
+import nl from "../../i18n/languages/nl.json"
+import pt from "../../i18n/languages/pt.json"
+import sv from "../../i18n/languages/sv.json"
+import tr from "../../i18n/languages/tr.json"
+import tw from "../../i18n/languages/tw.json"
+import vi from "../../i18n/languages/vi.json"
+import zh from "../../i18n/languages/zh.json"
+
 import { KeyValueObject } from "./types"
 import { askChatGpt, getFixedWordPrompt, languagesToGenerate, splitObjectIntoBatches } from "./utils"
 
+export const enLang = "en"
+export const translations: { [key: string]: any } = {
+  en,
+  it,
+  fr,
+  es,
+  zh,
+  de,
+  ja,
+  vi,
+  nl,
+  ko,
+  sv,
+  tw,
+  tr,
+  hi,
+  pt,
+}
 const generatePrompt = (language: string, batch: KeyValueObject) => {
   return `
 I'm working on internationalizing my application. 
 I will send you a json object with the translations from English to ${language}.
 Keep the object keys identical, some object values are empty string, please fill just them.
 respond using an unique JSON object without any comments or any other descriptions.
-
 ${getFixedWordPrompt(language)}
 
 this is the JSON object with the translations:
@@ -44,7 +75,7 @@ const completeTranslations = async () => {
       return askChatGpt(generatePrompt(language.name, batch))
     })
     const results = await Promise.all(promises)
-    forEach(results, result => {
+    results.forEach(result => {
       Object.assign(translatedBatches, result)
     })
     writeFileSync(`./src/i18n/languages/${language.code}.json`, JSON.stringify(translatedBatches, null, 2))

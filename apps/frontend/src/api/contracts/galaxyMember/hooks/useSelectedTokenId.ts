@@ -5,10 +5,8 @@ import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechai
 const address = getConfig().galaxyMemberContractAddress
 const abi = GalaxyMember__factory.abi
 const method = "getSelectedTokenId" as const
-
 export const getSelectedTokenIdQueryKey = (account?: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(account ?? "0x") as `0x${string}`] })
-
 /**
  * Custom hook that retrieves the selected token ID for the selected galaxy member.
  *

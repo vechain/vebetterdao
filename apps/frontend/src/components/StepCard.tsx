@@ -1,15 +1,15 @@
-import { Box, Card, CardRootProps, Heading, Image, Stack, StackProps, Text } from "@chakra-ui/react"
+import { Box, Card, CardRootProps, Heading, Icon, Stack, StackProps, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export type StepCardProps = {
-  stepImageSrc: string
+  stepIcon: React.ElementType
   stepNumber: number
   stepTitle: string
   stepDescription: string
   stackProps?: StackProps
 } & CardRootProps
 export const StepCard: React.FC<StepCardProps> = ({
-  stepImageSrc,
+  stepIcon,
   stepNumber,
   stepTitle,
   stepDescription,
@@ -18,16 +18,16 @@ export const StepCard: React.FC<StepCardProps> = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Card.Root variant="filled" rounded={"3xl"} {...props}>
+    <Card.Root variant="primary" rounded={"3xl"} {...props}>
       <Card.Body>
         <Stack gap={4} align={"flex-start"} {...stackProps}>
-          <Image src={stepImageSrc} boxSize={32} alt={`step-${stepNumber}-image`} />
+          <Icon as={stepIcon} boxSize={32} color="brand.primary" />
           <Box>
-            <Text textTransform={"uppercase"} fontWeight={400} color="gray.500">
+            <Text textTransform={"uppercase"} color="gray.500">
               {t("Step {{number}}", { number: stepNumber })}
             </Text>
             <Heading size={["lg", "xl"]}>{t(stepTitle as any)}</Heading>
-            <Text mt={2} fontSize={["sm", "md"]}>
+            <Text mt={2} textStyle={["sm", "md"]}>
               {t(stepDescription as any)}
             </Text>
           </Box>

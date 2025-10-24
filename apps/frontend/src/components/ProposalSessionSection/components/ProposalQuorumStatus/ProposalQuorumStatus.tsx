@@ -1,4 +1,4 @@
-import { Box, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilTimes, UilCheck } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { UseQueryResult } from "@tanstack/react-query"
@@ -6,11 +6,9 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
-
 const getSafePercentage = (value: number) => {
   return isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100)
 }
-
 type Props = {
   quorumQuery: UseQueryResult<string, unknown>
   currentVotesQuery: UseQueryResult<string, unknown>
@@ -19,49 +17,43 @@ type Props = {
 }
 export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, showQuorumNeeded = true }: Props) => {
   const { t } = useTranslation()
-
   const isQuorumReached = useMemo(() => {
     if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
       return false
     }
     return Number(currentVotesQuery.data) >= Number(quorumQuery.data)
   }, [quorumQuery.data, currentVotesQuery.data])
-
   const votesToQuorumPercentage = useMemo(() => {
     if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
       return 0
     }
     return (Number(currentVotesQuery.data) / Number(quorumQuery.data)) * 100
   }, [quorumQuery.data, currentVotesQuery.data])
-
   const stateColor = useMemo(() => {
-    if (isQuorumReached) return "#38BF66"
-
-    if (isEnded) return "#D23F63"
-    return "#004CFC"
+    if (isQuorumReached) return "status.positive.primary"
+    if (isEnded) return "status.negative.primary"
+    return "status.info.primary"
   }, [isQuorumReached, isEnded])
-
   const isEndedAndQuorumNotReached = isEnded && !isQuorumReached
-
   return (
     <VStack align="stretch">
-      <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
+      <Text color="text.subtle" textStyle="sm">
         {t("VOT3 used to vote")}
       </Text>
       <HStack justify={"space-between"} align={"baseline"}>
         <HStack gap={2}>
           <Image h="20px" w="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
           <Skeleton loading={currentVotesQuery.isLoading || quorumQuery.isLoading}>
-            <Text fontSize="24px" fontWeight={700} data-testid={"total-votes"}>
+            <Text textStyle="2xl" fontWeight="bold" data-testid={"total-votes"}>
               {compactFormatter.format(Number(currentVotesQuery.data ?? 0))}
             </Text>
           </Skeleton>
         </HStack>
         <Skeleton loading={quorumQuery.isLoading || currentVotesQuery.isLoading}>
           <HStack gap={1} align="center">
-            {isEndedAndQuorumNotReached && <UilTimes size="16px" color={stateColor} />}
-            {isQuorumReached && <UilCheck size="16px" color={stateColor} />}
-            <Text fontWeight={600} fontSize={"14px"} color={stateColor}>
+            {isEndedAndQuorumNotReached && <Icon as={UilTimes} boxSize="4" color={stateColor} />}
+            {isQuorumReached && <Icon as={UilCheck} boxSize="4" color={stateColor} />}
+            <Text fontWeight="semibold" textStyle="sm" color={stateColor}>
               {compactFormatter.format(Number(votesToQuorumPercentage))}
               {t("%")}
             </Text>
@@ -85,11 +77,11 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
       {showQuorumNeeded ? (
         <HStack>
           <Skeleton loading={quorumQuery.isLoading}>
-            <Text fontWeight={600} fontSize={"14px"}>
+            <Text fontWeight="semibold" textStyle="sm">
               {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
             </Text>
           </Skeleton>
-          <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
+          <Text color="text.subtle" textStyle="sm">
             {t("needed for quorum")}
           </Text>
         </HStack>

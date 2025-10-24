@@ -1,138 +1,121 @@
-import { useAllocationAmount, useAllocationsRound, useMostVotedAppsInRound } from "@/api"
-import { Box, Card, HStack, Heading, Icon, Skeleton, Stack, Text } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { FaAngleRight } from "react-icons/fa6"
-import { DotSymbol } from "@/components/DotSymbol"
-import { useMemo } from "react"
+import { Box, Card, HStack, Heading, Icon, LinkBox, LinkOverlay, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { AllocationStateBadge } from "@/components/AllocationStateBadge"
+import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { B3TRIcon } from "@/components/Icons"
+import { FaAngleRight } from "react-icons/fa6"
+
+import { DotSymbol } from "@/components/DotSymbol"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
-import { useTheme } from "next-themes"
+
+import { useAllocationAmount } from "../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useMostVotedAppsInRound } from "../../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
+import { AllocationStateBadge } from "../../AllocationStateBadge/AllocationStateBadge"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
   roundId: string
 }
-
 const compactFormatter = getCompactFormatter()
-
 export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   const { t } = useTranslation()
-  const router = useRouter()
-  const { theme } = useTheme()
-
   const { data: allocationRound, isLoading } = useAllocationsRound(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
-
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
     return Object.values(roundAmount).reduce((acc, amount) => acc + Number(amount), 0)
   }, [roundAmount])
-
-  const onRoundClick = () => {
-    router.push(`/rounds/${roundId}`)
-  }
   const isActive = useMemo(() => {
     return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
   }, [allocationRound])
-
-  const cardActiveBackgroundColor = "#E9FDF1"
-  const cardActiveBorderColor = "#3DBA67"
-
-  const cardTextColor = isActive ? "black" : "inherit"
-
-  //TODO: dark mode support
-  const nonActiveBackgroundColor = theme === "light" ? "rgba(166, 217, 110, 0.12)" : "rgba(166, 217, 110, 0.12)"
-
   const mostVotedAppsQuery = useMostVotedAppsInRound(roundId)
-
   return (
-    <Card.Root
-      variant={"baseWithBorder"}
-      borderRadius={"24px"}
-      w="full"
-      {...(isActive && {
-        bg: cardActiveBackgroundColor,
-        borderColor: cardActiveBorderColor,
-        borderWidth: "1px",
-      })}
-      onClick={onRoundClick}
-      _hover={{
-        bg: isActive ? cardActiveBackgroundColor : nonActiveBackgroundColor,
-        cursor: "pointer",
-        transition: "all 0.2s ease-in-out",
-      }}
-      data-testid={`round-card-#${roundId}`}>
-      <Card.Body py="20px">
-        <HStack justify={"space-between"} w="full">
-          <Stack w="full" gap={1} flex={2}>
-            <HStack gap={2} w="fit-content" justify="space-between">
-              <AllocationStateBadge
-                roundId={roundId}
-                data-testid={`round-card-#${roundId}`}
-                renderBadge={false}
-                renderIcon={isActive}
-              />
+    <LinkBox asChild>
+      <Card.Root
+        w="full"
+        variant="subtle"
+        border="sm"
+        borderColor={isActive ? "border.active" : "border.secondary"}
+        fill="icon.default"
+        rounded="lg"
+        data-testid={`round-card-#${roundId}`}
+        p="4">
+        <LinkOverlay asChild w="full" flex={1}>
+          <NextLink href={`rounds/${roundId}`}>
+            <Card.Body p="0">
+              <HStack justify={"space-between"} w="full">
+                <Stack w="full" gap={1} flex={2}>
+                  <HStack gap={2} w="fit-content" justify="space-between">
+                    <AllocationStateBadge
+                      roundId={roundId}
+                      data-testid={`round-card-#${roundId}`}
+                      renderIcon={isActive}
+                    />
 
-              <DotSymbol boxProps={{ hideBelow: "md" }} color={"#6A6A6A"} size={"4px"} />
-              <Skeleton hideBelow="md" loading={isLoading}>
-                <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
-                  {isActive
-                    ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
-                    : allocationRound.voteEndTimestamp?.fromNow()}
-                </Text>
-              </Skeleton>
-            </HStack>
-
-            <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
-              <Heading as="h3" fontSize="20px" fontWeight={700}>
-                {t("Round #{{round}}", {
-                  round: roundId,
-                })}
-              </Heading>
-            </HStack>
-            <HStack w="fit-content" justify="space-between" fontSize={"12px"} fontWeight={400} color={cardTextColor}>
-              <Skeleton loading={isLoading}>
-                <Text>
-                  {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
-                  {allocationRound.voteEndTimestamp?.format("MMM D")}
-                </Text>
-              </Skeleton>
-            </HStack>
-          </Stack>
-          <HStack gap={4} justify="flex-end" flex={1}>
-            <Stack direction={["column", "column", "row"]} gap={4} align={["flex-end", "flex-end", "center"]}>
-              <Box width={"max-content"} justifyContent={"end"}>
-                <Skeleton loading={roundAmountLoading}>
-                  {roundAmountError ? (
-                    <Text color="red.500">{roundAmountError.message}</Text>
-                  ) : (
-                    <Box textAlign={"end"} color={cardTextColor}>
-                      <HStack gap={1}>
-                        <Heading fontSize="24px" fontWeight={700}>
-                          {compactFormatter.format(Number(totalAmount))}
-                        </Heading>
-                        <B3TRIcon boxSize={"20px"} colorVariant="dark" />
-                      </HStack>
-                      <Text fontSize={"14px"} fontWeight={400}>
-                        {t("total allocation")}
+                    <DotSymbol
+                      boxProps={{ hideBelow: "md" }}
+                      color={isActive ? "text.default" : "text.subtle"}
+                      size={"4px"}
+                    />
+                    <Skeleton hideBelow="md" loading={isLoading}>
+                      <Text color={isActive ? "text.default" : "text.subtle"} textStyle="xs">
+                        {isActive
+                          ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
+                          : allocationRound.voteEndTimestamp?.fromNow()}
                       </Text>
-                    </Box>
-                  )}
-                </Skeleton>
-              </Box>
+                    </Skeleton>
+                  </HStack>
 
-              <OverlappedAppsImages
-                appsIds={mostVotedAppsQuery.data.map(a => a.id)}
-                isLoading={mostVotedAppsQuery.isLoading}
-                otherAppsActiveColor={isActive}
-              />
-            </Stack>
-            <Icon as={FaAngleRight} boxSize={"24px"} color={cardTextColor} data-testid={`round-link-#${roundId}`} />
-          </HStack>
-        </HStack>
-      </Card.Body>
-    </Card.Root>
+                  <HStack mt={0.5} w="full" justify="space-between">
+                    <Heading as="h3" size="md" fontWeight="semibold">
+                      {t("Round #{{round}}", {
+                        round: roundId,
+                      })}
+                    </Heading>
+                  </HStack>
+                  <HStack w="fit-content" justify="space-between" textStyle="xs">
+                    <Skeleton loading={isLoading}>
+                      <Text>
+                        {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
+                        {allocationRound.voteEndTimestamp?.format("MMM D")}
+                      </Text>
+                    </Skeleton>
+                  </HStack>
+                </Stack>
+                <HStack gap={4} justify="flex-end" flex={1}>
+                  <Stack direction={["column", "column", "row"]} gap={4} align={["flex-end", "flex-end", "center"]}>
+                    <Box width={"max-content"} justifyContent={"end"}>
+                      <Skeleton loading={roundAmountLoading}>
+                        {roundAmountError ? (
+                          <Text color="red.500">{roundAmountError.message}</Text>
+                        ) : (
+                          <VStack gap={0} alignItems="flex-end">
+                            <HStack gap={1}>
+                              <Heading size="xl">{compactFormatter.format(Number(totalAmount))}</Heading>
+                              <B3TRIcon boxSize={"20px"} colorVariant="dark" />
+                            </HStack>
+                            <Text textStyle={"xs"} color="text.subtle">
+                              {t("total allocation")}
+                            </Text>
+                          </VStack>
+                        )}
+                      </Skeleton>
+                    </Box>
+
+                    <OverlappedAppsImages
+                      appsIds={mostVotedAppsQuery.data.map(a => a.id)}
+                      isLoading={mostVotedAppsQuery.isLoading}
+                      otherAppsActiveColor={isActive}
+                    />
+                  </Stack>
+                  <Icon as={FaAngleRight} boxSize={"24px"} fill="inherit" data-testid={`round-link-#${roundId}`} />
+                </HStack>
+              </HStack>
+            </Card.Body>
+          </NextLink>
+        </LinkOverlay>
+      </Card.Root>
+    </LinkBox>
   )
 }

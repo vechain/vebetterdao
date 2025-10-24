@@ -1,7 +1,6 @@
 type Props = {
   color?: string
 }
-
 export const ProposalIcon: React.FC<Props> = ({ color = "#004CFC" }) => {
   return (
     <svg width="79" height="78" viewBox="0 0 79 78" fill="none" xmlns="http://www.w3.org/2000/svg">

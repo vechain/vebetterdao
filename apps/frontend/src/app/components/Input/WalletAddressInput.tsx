@@ -1,8 +1,8 @@
-import { useId, useState, useEffect, useRef, useCallback } from "react"
 import { Input, InputGroup, InputProps, Field, InputGroupProps } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { useVechainDomain } from "@vechain/vechain-kit"
 import { isValid as isWalletAddressValid } from "@repo/utils/AddressUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
+import { useId, useState, useEffect, useRef, useCallback } from "react"
+import { useTranslation } from "react-i18next"
 
 type Props = InputProps & {
   onDomainResolved?: (domain?: string) => void
@@ -10,7 +10,6 @@ type Props = InputProps & {
   customValidation?: ({ address }: { address?: string }) => string
   inputGroupProps?: Omit<InputGroupProps, "children">
 }
-
 export const WalletAddressInput = ({
   onDomainResolved,
   onAddressResolved,
@@ -20,24 +19,19 @@ export const WalletAddressInput = ({
 }: Props) => {
   const id = useId()
   const { t } = useTranslation()
-
   const [inputValue, setInputValue] = useState((props?.defaultValue as string) ?? "")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
   // Tracks last resolved value (address or domain)
   const lastResolvedValue = useRef<string | undefined>()
   // Tracks if the parent was notified of invalid input
   const hasNotifiedInvalid = useRef(false)
-
   // Resolve the domain or address using the input value
   const { data: vnsData } = useVechainDomain(inputValue)
   const domain = vnsData?.domain
   const address = vnsData?.address
-
   const handleOnChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
   }, [])
-
   /**
    * Notify the parent if the input resolves to a wallet address or a domain with an associated address
    * - Notify the parent only once when the input transitions to a valid state
@@ -45,7 +39,6 @@ export const WalletAddressInput = ({
    */
   const notifyParentResolved = useCallback(() => {
     const resolvedValue = address ?? domain
-
     if ((isWalletAddressValid(inputValue) && inputValue === address) || (domain && address)) {
       //If already resolved, do not notify parent again
       if (resolvedValue === lastResolvedValue.current) return
@@ -135,6 +128,7 @@ export const WalletAddressInput = ({
           {...props}
           id={id}
           value={inputValue}
+          borderRadius="xl"
           onChange={handleOnChange}
           placeholder={props?.placeholder ?? t("Enter a wallet address or domain")}
           disabled={props?.disabled}

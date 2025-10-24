@@ -1,12 +1,12 @@
 import { Button, Dialog, VStack, useDisclosure, Text, Alert, Box, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-import { WithdrawModal } from "./WithdrawModal"
+import { XApp, UnendorsedApp } from "../../../../../api/contracts/xApps/getXApps"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+
 import { DepositModal } from "./DepositModal"
 import { FundsManagementModal } from "./FundsManagementModal"
-
-import { XApp, UnendorsedApp } from "@/api/contracts/xApps"
-import { useBreakpoints } from "@/hooks"
+import { WithdrawModal } from "./WithdrawModal"
 
 type Props = {
   app: XApp | UnendorsedApp
@@ -17,11 +17,9 @@ type Props = {
   isAppAdmin?: boolean
   isTreasuryAddress?: boolean
 }
-
 export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-
   const { open: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
   const { open: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
   const {
@@ -29,7 +27,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
     onOpen: onOpenFundsManagement,
     onClose: onCloseFundsManagement,
   } = useDisclosure()
-
   return (
     <>
       <Dialog.Root
@@ -45,7 +42,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 <CloseButton />
               </Dialog.CloseTrigger>
               <Dialog.Header>
-                <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+                <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
                   {t("Transfer App Balance")}
                 </Text>
               </Dialog.Header>
@@ -54,7 +51,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                   {isPaused && (
                     <Alert.Root status="error" borderRadius={["xl", "xl", "3xl"]}>
                       <Alert.Indicator w={5} h={5} />
-                      <Box lineHeight={"1.20rem"} fontSize="sm">
+                      <Box textStyle="sm">
                         <Alert.Description as="span">
                           {t(
                             "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",
@@ -70,10 +67,10 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     borderRadius="20px"
                     p="16px"
                     justifyContent="space-between">
-                    <Text fontSize={18} fontWeight={600}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Withdraw")}
                     </Text>
-                    <Text fontSize={14}>
+                    <Text textStyle="sm">
                       {t("Send your app’s funds received from allocations to your team wallet address.")}
                     </Text>
                     <Button
@@ -83,7 +80,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                         onOpenWithdraw()
                         onClose()
                       }}
-                      variant={"primaryAction"}
+                      variant={"primary"}
                       borderRadius={"full"}
                       w={"200px"}>
                       {t("Withdraw")}
@@ -96,10 +93,10 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     borderRadius="20px"
                     p="16px"
                     justifyContent="space-between">
-                    <Text fontSize={18} fontWeight={600}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Deposit")}
                     </Text>
-                    <Text fontSize={14}>
+                    <Text textStyle="sm">
                       {t(
                         "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.",
                       )}
@@ -110,7 +107,8 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                         onOpenDeposit()
                         onClose()
                       }}
-                      variant={"primarySubtle"}
+                      variant="ghost"
+                      color="actions.tertiary.default"
                       borderRadius={"full"}
                       w={"200px"}>
                       {t("Deposit")}
@@ -124,10 +122,10 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     border={"1px solid #D5D5D5"}
                     boxShadow={"none"}
                     justifyContent="space-between">
-                    <Text fontSize={18} fontWeight={600}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Refill Pools")}
                     </Text>
-                    <Text fontSize={14}>
+                    <Text textStyle="sm">
                       {t(
                         "Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
                       )}
@@ -139,7 +137,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                         onOpenFundsManagement()
                         onClose()
                       }}
-                      variant={"primaryAction"}
+                      variant={"primary"}
                       borderRadius={"full"}
                       w={"200px"}>
                       {t("Refill Pools")}

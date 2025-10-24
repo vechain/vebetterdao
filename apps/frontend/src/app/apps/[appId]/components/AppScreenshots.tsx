@@ -3,24 +3,21 @@ import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 
 import { useCurrentAppScreenshots } from "../hooks/useCurrentAppScreenshots"
+
 import { AppScreenshotModal } from "./AppScreenshotModal"
 
 export const AppScreenshots = () => {
   const { t } = useTranslation()
   const { screenshots } = useCurrentAppScreenshots()
-
   const { open: isOpen, onClose, onOpen } = useDisclosure()
-
   if (screenshots.length === 0) {
     return null
   }
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={4}>
-          <Heading fontSize="24px" fontWeight="700">
-            {t("Screenshots")}
-          </Heading>
+          <Heading size="2xl">{t("Screenshots")}</Heading>
           <Box overflowX="auto" gap={4} whiteSpace={"nowrap"} onClick={onOpen} cursor={"pointer"}>
             {screenshots.map((screenshot, index) => (
               <Box

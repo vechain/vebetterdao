@@ -1,60 +1,57 @@
 import { Button, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { AdminAppForm } from "../../AdminAppPageContent"
-import { useCurrentAppAdmin } from "@/app/apps/[appId]/hooks"
+
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
-import { useCallback, useState } from "react"
-import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
-import { UilPen } from "@iconscout/react-unicons"
+
+import { WalletAddressInput } from "../../../../../../../components/Input/WalletAddressInput"
+import { useCurrentAppAdmin } from "../../../../../hooks/useCurrentAppAdmin"
+import { AdminAppForm } from "../../AdminAppPageContent"
+
 import { ModalEditAdminAddress } from "./components/ModalEditAdminAddress"
-import { WalletAddressInput } from "@/app/components/Input"
+import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
 
 type Props = { form: UseFormReturn<AdminAppForm> }
-
 export const EditAppAddresses = ({ form }: Props) => {
   const { t } = useTranslation()
   const { admin } = useCurrentAppAdmin()
   const { app } = useCurrentAppInfo()
   const [editAdminAddress, setEditAdminAddress] = useState(false)
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
-
   const modalEditAdminAddress = useDisclosure()
   const handleEditAdminAddress = useCallback(() => {
     modalEditAdminAddress.onClose()
     setEditAdminAddress(true)
   }, [modalEditAdminAddress, setEditAdminAddress])
-
   const modalEditTeamWalletAddress = useDisclosure()
   const handleEditTeamWalletAddress = useCallback(() => {
     modalEditTeamWalletAddress.onClose()
     setEditTeamWalletAddress(true)
   }, [modalEditTeamWalletAddress, setEditTeamWalletAddress])
-
   const handleTeamWalletAddressResolved = useCallback(
     (address?: string) => {
       form.setValue("teamWalletAddress", address ?? "")
     },
     [form],
   )
-
   const handleAdminAddressResolved = useCallback(
     (address?: string) => {
       form.setValue("adminAddress", address ?? "")
     },
     [form],
   )
-
   return (
     <VStack align="stretch" gap="32px">
-      <Text color="#D23F63" fontSize={"24px"} fontWeight={700}>
+      <Text color="#D23F63" textStyle="2xl" fontWeight="bold">
         {t("Sensitive parameters")}
       </Text>
       <VStack align="stretch">
-        <Text fontSize="md" fontWeight={"800"}>
+        <Text textStyle="md" fontWeight={"800"}>
           {t("Treasury address")}
         </Text>
-        <Text fontSize="sm">{t("B3TR tokens will be sent to this address when withdrawing allocations.")}</Text>
+        <Text textStyle="sm">{t("B3TR tokens will be sent to this address when withdrawing allocations.")}</Text>
         <WalletAddressInput
           onAddressResolved={handleTeamWalletAddressResolved}
           disabled={!editTeamWalletAddress}
@@ -66,14 +63,15 @@ export const EditAppAddresses = ({ form }: Props) => {
             },
             endElement: editTeamWalletAddress ? null : (
               <Button
-                variant="primaryGhost"
+                variant="ghost"
+                color="actions.tertiary.default"
                 bg="#FFFFFF"
                 borderY="1px solid #f4f6f9"
                 borderRight="1px solid #f4f6f9"
                 onClick={modalEditTeamWalletAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
-                fontWeight={500}>
+                fontWeight="semibold">
                 <UilPen size="16px" />
                 {t("Edit")}
               </Button>
@@ -82,10 +80,10 @@ export const EditAppAddresses = ({ form }: Props) => {
         />
       </VStack>
       <VStack align="stretch">
-        <Text fontSize="md" fontWeight={"800"}>
+        <Text textStyle="md" fontWeight={"800"}>
           {t("Admin address")}
         </Text>
-        <Text fontSize="sm">
+        <Text textStyle="sm">
           {t(
             "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.",
           )}
@@ -101,14 +99,15 @@ export const EditAppAddresses = ({ form }: Props) => {
             },
             endElement: editAdminAddress ? null : (
               <Button
-                variant="primaryGhost"
+                variant="ghost"
+                color="actions.tertiary.default"
                 bg="#FFFFFF"
                 borderY="1px solid #f4f6f9"
                 borderRight="1px solid #f4f6f9"
                 onClick={modalEditAdminAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
-                fontWeight={500}>
+                fontWeight="semibold">
                 <UilPen size="16px" />
                 {t("Edit")}
               </Button>

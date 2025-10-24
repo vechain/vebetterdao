@@ -1,20 +1,22 @@
-import { BetterActionCard } from "./cards/BetterActionCard"
+import { ethers } from "ethers"
+
+import { Transaction } from "../../api/indexer/transactions/useTransactions"
+
+import { BetterActionCard } from "./cards/BetterActionCard/BetterActionCard"
 import { ClaimCard } from "./cards/ClaimCard"
 import { SupportCard } from "./cards/SupportCard"
 import { SwapCard } from "./cards/SwapCard"
 import { UpgradeGMCard } from "./cards/UpgradeGMCard"
-import { B3trTransaction } from "@/api"
 
 type Props = {
-  transaction: B3trTransaction
+  transaction: Transaction
 }
-
 export const TransactionCard = ({ transaction }: Props) => {
-  switch (transaction.txType) {
+  switch (transaction.eventName) {
     case "B3TR_ACTION": {
       return (
         <BetterActionCard
-          amountB3tr={transaction.amountB3TR}
+          amountB3tr={Number(ethers.formatEther(transaction.value ?? 0))}
           appId={transaction.appId}
           blockNumber={transaction.blockNumber}
           blockTimestamp={transaction.blockTimestamp}
@@ -22,13 +24,15 @@ export const TransactionCard = ({ transaction }: Props) => {
         />
       )
     }
-    case "SWAP":
-      return <SwapCard transaction={transaction} />
-    case "CLAIM_REWARD":
+    case "B3TR_SWAP_VOT3_TO_B3TR":
+      return <SwapCard transaction={transaction} vot3ToB3tr={true} />
+    case "B3TR_SWAP_B3TR_TO_VOT3":
+      return <SwapCard transaction={transaction} vot3ToB3tr={false} />
+    case "B3TR_CLAIM_REWARD":
       return <ClaimCard transaction={transaction} />
-    case "PROPOSAL_SUPPORT":
+    case "B3TR_PROPOSAL_SUPPORT":
       return <SupportCard transaction={transaction} />
-    case "UPGRADE_GM":
+    case "B3TR_UPGRADE_GM":
       return <UpgradeGMCard transaction={transaction} />
     default:
       return null

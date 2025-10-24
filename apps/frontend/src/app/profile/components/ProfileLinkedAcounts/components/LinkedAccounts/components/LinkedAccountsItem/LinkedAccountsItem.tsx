@@ -1,25 +1,28 @@
-import { useAccountLinking, useSustainabilityCurrentRoundOverview } from "@/api"
-import { AddressIcon } from "@/components/AddressIcon"
-import { LeafIcon } from "@/components/Icons/LeafIcon"
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack } from "@chakra-ui/react"
+import { UilLinkBroken } from "@iconscout/react-unicons"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
-import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
-import { UilLinkBroken } from "@iconscout/react-unicons"
-import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
+
+import { AddressIcon } from "@/components/AddressIcon"
+import { LeafIcon } from "@/components/Icons/LeafIcon"
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+
+import { useAccountLinking } from "../../../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useUserActionCurrentRoundOverview } from "../../../../../../../../api/indexer/actions/useUserActionOverview"
+
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
+import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
+import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 
 type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
-
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
   const { data: vnsData } = useVechainDomain(account)
   const domain = vnsData?.domain
   const isUserAccountCard = compareAddresses(account, userAccount?.address ?? "")
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(account)
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useUserActionCurrentRoundOverview(account)
   const {
     isPassport,
     isEntity,
@@ -29,11 +32,8 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
   const removeLinkModalPassportPOV = useDisclosure()
   const removeLinkModalEntityPOV = useDisclosure()
   const removePendingRequestModal = useDisclosure()
-
   const canUnlinkAccount = isConnectedUser && ((isPassport && !isUserAccountCard) || (isEntity && isUserAccountCard))
-
   if (isUserOverviewLoading || isAccountLinkingLoading) return null
-
   return (
     <Stack
       direction={["column", "column", "row"]}
@@ -52,8 +52,8 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
             <HStack>
               {domain && (
                 <Text
-                  fontWeight="600"
-                  fontSize={["sm", "sm", "lg"]}
+                  fontWeight="semibold"
+                  textStyle={["sm", "sm", "lg"]}
                   borderRight={"1px solid"}
                   paddingRight={2}
                   lineClamp={1}
@@ -61,7 +61,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
                   {humanDomain(domain, 8, 4)}
                 </Text>
               )}
-              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} lineClamp={1} title={account}>
+              <Text fontWeight="semibold" textStyle={["sm", "sm", "lg"]} lineClamp={1} title={account}>
                 {humanAddress(account, 4, 4)}
               </Text>
             </HStack>
@@ -78,31 +78,28 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
           </Stack>
           <HStack hideFrom="md" gap={1}>
             <LeafIcon color="#448300" size="24" />
-            <Heading fontWeight="700" fontSize={"xl"}>
-              {userOverview?.actionsRewarded ?? 0}
-            </Heading>
+            <Heading size="xl">{userOverview?.actionsRewarded ?? 0}</Heading>
           </HStack>
         </HStack>
       </HStack>
       <HStack gap={2} flex={[1, 1, 0]}>
         <HStack hideBelow="md" gap={1}>
           <LeafIcon color="#448300" size="24" />
-          <Heading fontWeight="700" fontSize={"xl"}>
-            {userOverview?.actionsRewarded ?? 0}
-          </Heading>
+          <Heading size="xl">{userOverview?.actionsRewarded ?? 0}</Heading>
         </HStack>
         {canUnlinkAccount && (
           <Button
             flex={1}
-            variant={"dangerGhost"}
+            variant={"ghost"}
+            colorPalette="red"
             onClick={isPassport ? removeLinkModalPassportPOV.onOpen : removeLinkModalEntityPOV.onOpen}>
-            <UilLinkBroken color="#C84968" />
+            <UilLinkBroken color="status.negative.primary" />
             {t("Unlink account")}
           </Button>
         )}
         {isConnectedUser && pending && (
-          <Button flex={1} variant={"dangerGhost"} onClick={removePendingRequestModal.onOpen}>
-            <UilLinkBroken color="#C84968" />
+          <Button flex={1} variant={"ghost"} colorPalette="red" onClick={removePendingRequestModal.onOpen}>
+            <UilLinkBroken color="status.negative.primary" />
             {t("Remove request")}
           </Button>
         )}

@@ -1,151 +1,73 @@
-import { Heading, Text, VStack, Card, HStack, Image, Button, useMediaQuery, Box } from "@chakra-ui/react"
-import React from "react"
+import { Card, Image, Heading, Text, TextProps } from "@chakra-ui/react"
+import { ReactNode } from "react"
 
-type GenericBannerProps = {
-  title: string
-  titleColor?: string
-  description: string | React.ReactElement
-  descriptionColor?: string
-  logoSrc?: string | React.ReactElement
-  backgroundColor?: string
-  backgroundImageSrc?: string
-  buttonLabel?: string
-  onButtonClick?: () => void
-  buttonVariant?: "outline" | "primaryAction" | "custom"
-  buttonIcon?: React.ReactElement
-  buttonIconPosition?: "left" | "right"
-  customButton?: React.ReactElement
-  imagePosition?: "top" | "center"
+type BannerType = "info" | "success" | "warning"
+
+const bannerColors: Record<
+  BannerType,
+  {
+    bg: Card.RootProps["bg"]
+    color: TextProps["color"]
+  }
+> = {
+  info: {
+    bg: "banner.blue",
+    color: "status.info.strong",
+  },
+  success: {
+    bg: "banner.green",
+    color: "status.positive.strong",
+  },
+  warning: {
+    bg: "banner.yellow",
+    color: "status.warning.strong",
+  },
 }
 
-export const GenericBanner: React.FC<GenericBannerProps> = ({
+export const GenericBanner = ({
+  variant,
   title,
-  titleColor = "#8D6602",
   description,
-  descriptionColor = "#5F4400",
   logoSrc,
-  backgroundColor = "#FFD979",
-  backgroundImageSrc,
-  buttonLabel,
-  onButtonClick,
-  buttonVariant = "outline",
-  buttonIcon,
-  buttonIconPosition = "right",
-  customButton,
-  imagePosition = "center",
+  cta,
+}: {
+  variant: BannerType
+  title: string
+  description: ReactNode
+  logoSrc?: string
+  cta?: ReactNode
 }) => {
-  const [isVerySmallMobile] = useMediaQuery(["(max-height: 667px)"])
-  const isOutlineBtn = buttonVariant === "outline"
-  const isIconLeft = buttonIconPosition === "left"
-  const hasButton = buttonLabel ?? buttonIcon ?? customButton
-
-  const descriptionElement =
-    typeof description === "string" ? (
-      <Heading fontSize="lg" fontWeight="700" color={descriptionColor}>
-        {description}
-      </Heading>
-    ) : (
-      description
-    )
-
-  const renderButton = () => {
-    if (customButton) return customButton
-
-    return (
-      <Button
-        onClick={onButtonClick}
-        borderRadius="full"
-        variant={buttonVariant === "outline" ? "outline" : "primaryAction"}
-        {...(isOutlineBtn && {
-          bg: "transparent",
-          border: "1px solid #5F4400",
-          _hover: { bg: "#5F440020" },
-        })}>
-        {isIconLeft && buttonIcon}
-        <Text fontWeight="500">{buttonLabel}</Text>
-        {!isIconLeft && buttonIcon}
-      </Button>
-    )
-  }
-
   return (
     <Card.Root
-      bg={backgroundColor}
-      borderRadius="xl"
+      flex={1}
       w="full"
       h="full"
-      minH={{
-        base: "30vh",
-        sm: "30vh",
-        md: "auto",
-      }}
-      position="relative"
-      overflow="hidden">
-      {/* Background Layer */}
-      {backgroundImageSrc && (
-        <Box
-          position="absolute"
-          inset={0}
-          zIndex={0}
-          bgImage={backgroundImageSrc ? `url(${backgroundImageSrc})` : undefined}
-          bgSize="cover"
-          backgroundPosition={imagePosition}
-          bgRepeat="no-repeat"
-          _before={{
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            bg: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)",
-            pointerEvents: "none",
-          }}
-        />
-      )}
-      <Card.Body
-        position="relative"
-        zIndex={1}
-        alignContent="center"
-        justifyContent="center"
-        borderRadius="xl"
-        padding={{ base: 4, md: 6 }}>
-        <HStack hideBelow="md" align="stretch" position="relative" w="full">
-          {logoSrc &&
-            (typeof logoSrc === "string" ? (
-              <Image src={logoSrc} alt="logo" objectFit="cover" w={24} h={24} />
-            ) : (
-              logoSrc
-            ))}
-          <HStack flex={1}>
-            <VStack gap={2} align="stretch" flex={1}>
-              <Text color={titleColor} fontWeight="600">
-                {title}
-              </Text>
-              {descriptionElement}
-            </VStack>
-            {hasButton && renderButton()}
-          </HStack>
-        </HStack>
-
-        <HStack hideFrom="md" align="center" position="relative" w="full" alignItems="center">
-          <VStack gap={2} align="stretch" justify="space-between">
-            <Text fontSize={12} color={titleColor} fontWeight="600">
-              {title}
-            </Text>
-            <Heading fontSize={18} fontWeight="700" color={descriptionColor}>
+      borderRadius="xl"
+      flexDirection={{ base: "column", md: "row" }}
+      alignItems={{ base: "flex-start", md: "center" }}
+      gap="4"
+      overflow="hidden"
+      bg={bannerColors[variant].bg}
+      px="6"
+      py="4">
+      <Image hideBelow="md" src={logoSrc} alt="logo" objectFit="cover" w="24" h="24" />
+      <Card.Body gap={{ base: "2", md: "0" }}>
+        <Card.Title>
+          <Text textStyle="sm" color={bannerColors[variant].color}>
+            {title}
+          </Text>
+        </Card.Title>
+        <Card.Description display="flex" alignItems="center" gap="1">
+          {typeof description === "string" ? (
+            <Heading size={{ base: "lg", md: "2xl" }} color="text.default" fontWeight="bold" lineClamp={3}>
               {description}
             </Heading>
-            {hasButton && renderButton()}
-          </VStack>
-          {logoSrc &&
-            (typeof logoSrc === "string" ? (
-              <Image src={logoSrc} alt="logo" w={isVerySmallMobile ? 16 : 24} h={isVerySmallMobile ? 16 : 24} />
-            ) : (
-              React.cloneElement(logoSrc, {
-                w: isVerySmallMobile ? 16 : 24,
-                h: isVerySmallMobile ? 16 : 24,
-              })
-            ))}
-        </HStack>
+          ) : (
+            description
+          )}
+        </Card.Description>
       </Card.Body>
+      {cta && <Card.Footer>{cta}</Card.Footer>}
     </Card.Root>
   )
 }

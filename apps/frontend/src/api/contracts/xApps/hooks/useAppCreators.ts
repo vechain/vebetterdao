@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress
 const method = "appCreators" as const
-
 export const getAppCreatorsQueryKey = (appId: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -13,7 +12,6 @@ export const getAppCreatorsQueryKey = (appId: string) =>
     method,
     args: [appId as `0x${string}`],
   })
-
 /**
  *  Get the creators of the app
  * @param appId  the id of the app to get the creators for

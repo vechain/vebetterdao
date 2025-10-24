@@ -5,14 +5,12 @@ import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-k
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVotingGovernor__factory.abi
 const method = "totalVotesQF" as const
-
 /**
  *  Returns the query key for fetching the number of quadratic funding votes for a given roundId.
  * @param roundId  the roundId the get the votes for
  */
 export const getAllocationVotesQfQueryKey = (roundId: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
-
 /**
  *  Hook to get the number of quadratic funding votes for a given roundId
  * @param roundId  the roundId the get the votes for

@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVoting__factory.abi
 const method = "hasVoted" as const
-
 /**
  * Returns the query key for fetching if a user has voted in a round.
  * @param roundId The round ID to check
@@ -19,7 +18,6 @@ export const getHasVotedInRoundQueryKey = (roundId: string, userAddress?: string
     method,
     args: [BigInt(roundId), userAddress as `0x${string}`],
   })
-
 /**
  * Hook to get if a user has voted in a given roundId
  * @param roundId The roundId to get the votes for

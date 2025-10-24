@@ -1,9 +1,10 @@
 import { Alert, Card, Separator, Heading, VStack } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { ProposalQuorumStatus } from "./components/ProposalQuorumStatus"
-import { ProposalSessionVot3 } from "./components/ProposalSessionVot3"
-import { UseQueryResult } from "@tanstack/react-query"
 import { UilClock } from "@iconscout/react-unicons"
+import { UseQueryResult } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
+
+import { ProposalQuorumStatus } from "./components/ProposalQuorumStatus/ProposalQuorumStatus"
+import { ProposalSessionVot3 } from "./components/ProposalSessionVot3/ProposalSessionVot3"
 
 type Props = {
   quorumQuery: UseQueryResult<string, unknown>
@@ -22,7 +23,6 @@ type Props = {
   renderTimeline?: React.ReactNode
   showQuorumNeeded?: boolean
 }
-
 export const ProposalSessionSection = ({
   quorumQuery,
   currentVotesQuery,
@@ -34,20 +34,17 @@ export const ProposalSessionSection = ({
   showQuorumNeeded = true,
 }: Props) => {
   const { t } = useTranslation()
-
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
-        <VStack align="stretch" gap={6}>
-          <Heading fontSize={"24px"} fontWeight={700}>
-            {t("Session information")}
-          </Heading>
+        <VStack align="stretch" gap={4}>
+          <Heading size="xl">{t("Session information")}</Heading>
           {renderQuroum === "upcoming" ? (
             <Alert.Root status="error" borderRadius="16px" bg="#FFF3E5">
               <Alert.Indicator>
-                <UilClock size={"36px"} color="#F29B32" />
+                <UilClock size={"36px"} color="status.positive.primary" />
               </Alert.Indicator>
-              <Alert.Title color="#F29B32" ml={2} fontSize="14px">
+              <Alert.Title color="status.positive.primary" ml={2} textStyle="sm">
                 {t("Quorum information will be available once the round starts.")}
               </Alert.Title>
             </Alert.Root>

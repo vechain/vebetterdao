@@ -1,13 +1,15 @@
-import { useQuery } from "@tanstack/react-query"
-import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { ProposalFilter, StateFilter } from "@/store"
+import { useQuery } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
+
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+
+import { useProposalEnriched } from "../../../../hooks/proposals/common/useProposalEnriched"
+import { ProposalFilter, StateFilter } from "../../../../store/useProposalFilters"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
-
 // Filters for proposals that have claimable deposits
 const CLAIMABLE_STATES = [
   ProposalFilter.InThisRound, // Active
@@ -18,9 +20,7 @@ const CLAIMABLE_STATES = [
   StateFilter.Executed,
   StateFilter.DepositNotMet,
 ]
-
 export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) => ["allClaimableDeposits", userAddress]
-
 /**
  * Custom React hook that fetches and monitors claimable user deposits for each proposal.
  *
@@ -34,8 +34,11 @@ export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) =>
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const thor = useThor()
-  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES)
-
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(
+    CLAIMABLE_STATES,
+    enrichedProposals,
+  )
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),
     enabled: !!thor && !!userAddress && !filteredProposalsLoading,
@@ -48,7 +51,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
               abi,
               address: GOVERNOR_CONTRACT,
               functionName: "getUserDeposit",
-              args: [BigInt(proposal.proposalId || 0), userAddress],
+              args: [BigInt(proposal.id || 0), userAddress],
             }) as const,
         ),
       })
@@ -56,7 +59,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
       const claimableDeposits = res
         .map((deposit, index) => {
           return {
-            proposalId: filteredProposals[index]?.proposalId as string,
+            proposalId: filteredProposals[index]?.id as string,
             deposit: deposit.toString(),
           }
         })

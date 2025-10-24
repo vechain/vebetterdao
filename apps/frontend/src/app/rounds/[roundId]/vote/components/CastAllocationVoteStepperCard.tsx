@@ -1,17 +1,15 @@
 "use client"
-import { ResponsiveCard } from "@/components"
-import { useBreakpoints } from "@/hooks"
-import { Box, Circle, Heading, Steps, VStack } from "@chakra-ui/react"
+import { Box, Card, Circle, Heading, Steps, VStack } from "@chakra-ui/react"
 import { useParams, usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
 export const CastAllocationVoteStepperCard = () => {
   const { isDesktop } = useBreakpoints()
   const { t } = useTranslation()
   const pathname = usePathname()
   const params = useParams()
-
   const steps = useMemo(
     () => [
       { key: "selectApps", title: t("Select Apps"), pathnames: ["/rounds/:roundId/vote"] },
@@ -20,9 +18,7 @@ export const CastAllocationVoteStepperCard = () => {
     ],
     [t],
   )
-
   const [step, setStep] = useState(1)
-
   //set active step based on the current pathname
   useEffect(() => {
     const pathPattern = Object.keys(params).reduce(
@@ -34,19 +30,13 @@ export const CastAllocationVoteStepperCard = () => {
       setStep(steps.indexOf(step))
     }
   }, [pathname, params, setStep, steps])
-
   const height = useMemo(() => {
     return steps.length * 60
   }, [steps])
-
   return (
-    <ResponsiveCard>
-      <VStack gap={8} w="full" align={"flex-start"}>
-        {isDesktop && (
-          <Heading fontSize="24px" fontWeight={700}>
-            {t("Progress")}
-          </Heading>
-        )}
+    <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
+      <VStack gap={4} w="full" align={"flex-start"}>
+        {isDesktop && <Heading size="xl">{t("Progress")}</Heading>}
         <Steps.Root
           w="full"
           size="sm"
@@ -54,7 +44,7 @@ export const CastAllocationVoteStepperCard = () => {
           onStepChange={e => setStep(e.step)}
           count={steps.length}
           orientation={isDesktop ? "vertical" : "horizontal"}
-          variant="primaryVertical"
+          variant="primary"
           gap={0}
           height={isDesktop ? height : "auto"}>
           <Steps.List>
@@ -69,9 +59,9 @@ export const CastAllocationVoteStepperCard = () => {
                 })}>
                 <Steps.Indicator>
                   <Steps.Status
-                    incomplete={<Circle bg="#004CFC" size="0" />}
-                    complete={<Circle bg="#004CFC" size="2" />}
-                    current={<Circle bg="#004CFC" size="3" />}
+                    incomplete={<Circle bg="actions.primary.default" size="0" />}
+                    complete={<Circle bg="actions.primary.default" size="2" />}
+                    current={<Circle bg="actions.primary.default" size="3" />}
                   />
                 </Steps.Indicator>
 
@@ -93,6 +83,6 @@ export const CastAllocationVoteStepperCard = () => {
           </Steps.List>
         </Steps.Root>
       </VStack>
-    </ResponsiveCard>
+    </Card.Root>
   )
 }

@@ -1,14 +1,14 @@
 import { HStack, Text, Button, VStack, Box } from "@chakra-ui/react"
-import { useTranslation, Trans } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
-import { ExclamationTriangle } from "@/components"
-import {
-  useIsRewardsPoolEnabled,
-  useDistributionManagement,
-  useIsDistributionPaused,
-} from "@/api/contracts/x2EarnRewardsPool"
-import { StepModal, type Step } from "@/components/StepModal"
+import { useTranslation, Trans } from "react-i18next"
+
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useIsDistributionPaused } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsDistributionPaused"
+import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
+import { useDistributionManagement } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/setter/useDistributionManagement"
+import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
+import { StepModal, type Step } from "../../../../../components/StepModal/StepModal"
 
 export type Props = {
   appId: string
@@ -16,23 +16,18 @@ export type Props = {
   onClose: () => void
   b3trAppBalance?: string
 }
-
 enum ManagementStep {
   MANAGEMENT_OPTIONS = "MANAGEMENT_OPTIONS",
   CONFIRMATION = "CONFIRMATION",
 }
-
 const STEP_COUNT = Object.keys(ManagementStep).length
-
 export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const [actionToConfirm, setActionToConfirm] = useState<"enable" | "disable" | "pause" | "resume">()
-
   // Get the initial state from the hook
   const { data: isEnabled } = useIsRewardsPoolEnabled(appId)
   const { data: isPaused } = useIsDistributionPaused(appId)
   const { isTxModalOpen } = useTransactionModal()
-
   const [step, setStep] = useState(0)
   const goToNext = useCallback(() => {
     const nextStep = step + 1
@@ -44,7 +39,6 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
     if (prevStep < 1) onClose()
     else setStep(prevStep)
   }, [step, onClose])
-
   const handleClose = useCallback(() => {
     setStep(0)
     onClose()
@@ -148,20 +142,20 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 bg={isEnabled ? "#3DBA67" : "#C84968"}
                 boxShadow={isEnabled ? "0 0 8px rgba(72, 187, 120, 0.5)" : "0 0 8px rgba(245, 101, 101, 0.5)"}
               />
-              <Text fontSize={18} fontWeight={600}>
+              <Text textStyle="lg" fontWeight="semibold">
                 {t("Rewards Pool")}
               </Text>
             </HStack>
             {!isEnabled ? (
               <>
-                <Text fontSize={14}>
+                <Text textStyle="sm">
                   <Trans
                     i18nKey="The rewards pool holds B3TR used to reward user actions. When you enable it, <bold>the pool starts empty</bold>, remember to <bold>fill it with funds</bold> to distribute rewards."
-                    components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                   />
                 </Text>
                 <Button
-                  variant="primaryAction"
+                  variant="primary"
                   borderRadius="full"
                   w="200px"
                   onClick={() => handleShowConfirmation("enable")}>
@@ -170,14 +164,14 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
               </>
             ) : (
               <>
-                <Text fontSize={14}>
+                <Text textStyle="sm">
                   <Trans
                     i18nKey="When you disabled rewards pool, <bold>the funds will move to app balance</bold>, you can enable it back at any time. The distributor will <bold>stop distributing rewards</bold> from the app balance pool."
-                    components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                   />
                 </Text>
                 <Button
-                  variant="primaryAction"
+                  variant="primary"
                   borderRadius="full"
                   w="200px"
                   onClick={() => handleShowConfirmation("disable")}>
@@ -200,43 +194,31 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
             {isPaused && (
               <Box w="8px" h="8px" borderRadius="full" bg={"#C84968"} boxShadow={"0 0 8px rgba(245, 101, 101, 0.5)"} />
             )}
-            <Text fontSize={18} fontWeight={600}>
+            <Text textStyle="lg" fontWeight="semibold">
               {isPaused ? t("Resume Distribution") : t("Pause Distribution")}
             </Text>
           </HStack>
           {isPaused ? (
             <>
-              <Text fontSize={14}>
+              <Text textStyle="sm">
                 <Trans
                   i18nKey="<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool."
-                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
-              <Button
-                variant="dangerFilledTonal"
-                borderRadius="full"
-                color="#C84968"
-                w="200px"
-                colorPalette="red"
-                onClick={() => handleShowConfirmation("resume")}>
+              <Button colorPalette="red" borderRadius="full" w="200px" onClick={() => handleShowConfirmation("resume")}>
                 {t("Resume Distribution")}
               </Button>
             </>
           ) : (
             <>
-              <Text fontSize={14}>
+              <Text textStyle="sm">
                 <Trans
                   i18nKey="You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools."
-                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
-              <Button
-                variant="dangerFilledTonal"
-                borderRadius="full"
-                w="200px"
-                color="#C84968"
-                colorPalette="red"
-                onClick={() => handleShowConfirmation("pause")}>
+              <Button w="200px" colorPalette="red" onClick={() => handleShowConfirmation("pause")}>
                 {t("Pause Distribution")}
               </Button>
             </>
@@ -253,18 +235,18 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
         <VStack border="1px solid #D5D5D5" borderRadius="20px" p="20px">
           <ExclamationTriangle size={"100px"} />
 
-          <Text fontSize={16} fontWeight={600}>
+          <Text textStyle="md" fontWeight="semibold">
             {confirmationText}
           </Text>
-          <Text fontSize={14} fontWeight={400} textAlign={"center"} px={8}>
+          <Text textStyle="sm" textAlign={"center"} px={8}>
             {informationOnConfirmationText}
           </Text>
         </VStack>
         <HStack mt={6} gap={4} width="full">
-          <Button variant="primarySubtle" flex={1} onClick={goToPrevious}>
+          <Button variant="ghost" color="actions.tertiary.default" flex={1} onClick={goToPrevious}>
             {t("Cancel")}
           </Button>
-          <Button variant="primaryAction" flex={1} onClick={handleManagementAction}>
+          <Button variant="primary" flex={1} onClick={handleManagementAction}>
             {t("Confirm")}
           </Button>
         </HStack>

@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs, useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKeyWithArgs, useWallet } from "@vechain/vechain-kit"
 
 const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "isPerson" as const
-
 /**
  * Returns the query key for fetching the isPerson status.
  * @param user - The user address.
@@ -14,7 +13,6 @@ const method = "isPerson" as const
 export const getIsPersonQueryKey = (user: string) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [user as `0x${string}`] })
 }
-
 /**
  * Hook to get the isPerson status from the VeBetterPassport contract.
  * @param user - The user address.
@@ -32,7 +30,6 @@ export const useIsPerson = (user?: string | null) => {
     },
   })
 }
-
 /**
  * Hook to get the isPerson status from the VeBetterPassport contract for the current user.
  * @returns The isPerson status.

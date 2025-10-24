@@ -1,49 +1,46 @@
-import {
-  useAllocationsRound,
-  useAllocationsRoundState,
-  useCanUserVote,
-  useTotalVotesOnBlock,
-  useHasVotedInRound,
-  useUserVotesInRound,
-  useVotingThreshold,
-  useRoundXApps,
-} from "@/api"
-import { AllocationStateBadge, VOT3Icon } from "@/components"
 import { Box, Button, Card, Separator, HStack, Heading, Icon, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
 import { MdHowToVote } from "react-icons/md"
 import { PiSquaresFourFill } from "react-icons/pi"
-import { ethers } from "ethers"
-import { useTranslation } from "react-i18next"
+
+import { useCanUserVote } from "../../../../api/contracts/governance/hooks/useCanUserVote"
+import { useTotalVotesOnBlock } from "../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useVotingThreshold } from "../../../../api/contracts/governance/hooks/useVotingThreshold"
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useHasVotedInRound } from "../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
+import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
+import { VOT3Icon } from "../../../../components/Icons/VOT3Icon"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
-import { useRouter } from "next/navigation"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
   roundId: string
 }
-
 export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
   const { data, isLoading } = useAllocationsRound(roundId)
-
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account?.address ?? undefined)
-
   const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     data?.voteStart ? Number(data.voteStart) : undefined,
     account?.address ?? "",
   )
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
-
   const { data: threshold } = useVotingThreshold()
 
   const totalVotesCast = useMemo(() => {
@@ -82,16 +79,16 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   }, [hasVoted, hasVotesAtSnapshot, totalVotesCast, isFinished, t])
 
   return (
-    <Card.Root w="full" borderRadius={"3xl"} variant={"baseWithBorder"} data-testid="allocation-round-header-card">
+    <Card.Root w="full" borderRadius={"3xl"} variant="primary" data-testid="allocation-round-header-card">
       <Card.Body>
         <Stack direction={["column", "row"]} justify="space-between" gap={12} w="full" alignItems={"stretch"}>
           <VStack gap={4} align="flex-start" flex={2}>
             <VStack gap={2} align="flex-start">
               <Text
-                color="#6A6A6A"
-                fontSize="lg"
+                color="text.subtle"
+                textStyle="lg"
                 textTransform={"uppercase"}
-                fontWeight={600}
+                fontWeight="semibold"
                 data-testid="round-title">
                 {t("Round #{{round}}", {
                   round: roundId,
@@ -102,7 +99,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
             </VStack>
 
             <Skeleton loading={isLoading}>
-              <Text color="gray.500" fontSize={["sm", "md"]}>
+              <Text color="gray.500" textStyle={["sm", "md"]}>
                 {t(
                   "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.",
                 )}
@@ -120,35 +117,31 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
                   <Skeleton loading={roundStateLoading}>
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                       {isFinished ? t("Finished") : t("Finishes in")}
                     </Text>
                   </Skeleton>
                   <Skeleton loading={isLoading || roundStateLoading}>
                     <HStack gap={2}>
                       <Icon as={FaClock} boxSize={4} color="contrast-fg-on-muted" />
-                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                        {remainingTime}
-                      </Text>
+                      <Text textStyle={["lg", "lg", "md"]}>{remainingTime}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 <Box>
-                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                  <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                     {t("Participating")}
                   </Text>
                   <Skeleton loading={roundAppsLoading}>
                     <HStack gap={2}>
                       <Icon as={PiSquaresFourFill} boxSize={4} />
-                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                        {t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}
-                      </Text>
+                      <Text textStyle={["lg", "lg", "md"]}>{t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 {!!account?.address && (
                   <Box data-testid="your-vote-box">
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                       {t("Your vote")}
                     </Text>
                     <Skeleton loading={hasVotedLoading || userVotesLoading || votesAtSnapshotLoading}>
@@ -158,9 +151,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                         ) : (
                           <Icon as={MdHowToVote} boxSize={4} />
                         )}
-                        <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                          {yourVoteText}
-                        </Text>
+                        <Text textStyle={["lg", "lg", "md"]}>{yourVoteText}</Text>
                       </HStack>
                     </Skeleton>
                   </Box>
@@ -169,7 +160,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
               {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && !isFinished && (
                 <Button
                   data-testid="cast-your-vote-button"
-                  variant={"primaryAction"}
+                  variant={"primary"}
                   onClick={navigateToVote}
                   size={"lg"}
                   colorPalette={"primary"}

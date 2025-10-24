@@ -1,21 +1,21 @@
-import { useCallback, useMemo } from "react"
-import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { useCallback, useMemo } from "react"
+
 import { buildClause } from "@/utils/buildClause"
+
+import { APP_SECURITY_LEVELS, getAppSecurityLevelQueryKey } from "../api/contracts/vePassport/hooks/useAppSecurityLevel"
+
 import { useBuildTransaction } from "./useBuildTransaction"
-import { APP_SECURITY_LEVELS, getAppSecurityLevelQueryKey } from "@/api"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
-
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress
-
 type Props = {
   appId: string
   securityLevel: number
   onSuccess?: () => void
   onSuccessMessageTitle?: string
 }
-
 /**
  * Update the security level for an app in the VeBetterPassport contract
  *
@@ -32,12 +32,9 @@ export const useUpdateAppSecurityLevel = ({ appId, securityLevel, onSuccess }: P
       args: [appId, securityLevel],
       comment: `Update security level for app ${appId} to ${APP_SECURITY_LEVELS[securityLevel]}`,
     })
-
     return [clauses]
   }, [appId, securityLevel])
-
   const refetchQueryKeys = useMemo(() => [getAppSecurityLevelQueryKey(appId)], [appId])
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

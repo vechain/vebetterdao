@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress
 const method = "claimed" as const
-
 export const getHasXAppClaimedQueryKey = (roundId: string, appId: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -13,7 +12,6 @@ export const getHasXAppClaimedQueryKey = (roundId: string, appId: string) =>
     method,
     args: [BigInt(roundId), appId as `0x${string}`],
   })
-
 /**
  *  Check if user has already claimed allocation rewards for a specific round and xApp
  *

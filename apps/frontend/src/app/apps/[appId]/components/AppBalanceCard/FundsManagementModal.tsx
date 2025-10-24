@@ -14,15 +14,17 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
-import { useAppAvailableFunds, useAppRewardsBalance, useRefillRewardsPool } from "@/api/contracts/x2EarnRewardsPool"
-import { useTranslation } from "react-i18next"
-import { useCallback, useState, useMemo, useEffect } from "react"
-import { useBreakpoints } from "@/hooks"
-import { HiMiniArrowsUpDown } from "react-icons/hi2"
-import { removingExcessDecimals } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
-import { filterAmountInput } from "@/utils"
+import { useCallback, useState, useMemo, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { HiMiniArrowsUpDown } from "react-icons/hi2"
 
+import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
+import { useRefillRewardsPool } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/setter/useRefillRewardsPool"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+import { filterAmountInput } from "../../../../../utils/filterAmountInput"
+import { removingExcessDecimals } from "../../../../../utils/MathUtils/MathUtils"
 type Props = {
   appId: string
   isOpen: boolean
@@ -30,19 +32,15 @@ type Props = {
   isEnablingRewardsPool?: boolean
   isRefillingPools?: boolean
 }
-
 type TabType = "balance-to-rewards" | "rewards-to-balance"
-
 interface TabConfig {
   id: TabType
   sourceLabel: string
   targetLabel: string
 }
-
 export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-
   const [activeTab, setActiveTab] = useState<TabType>("balance-to-rewards")
   const [amount, setAmount] = useState<string>("")
   //TODO: Add this to review modal before sending transaction
@@ -187,14 +185,14 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
               <CloseButton />
             </Dialog.CloseTrigger>
             <Dialog.Header>
-              <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+              <Text textStyle={{ base: "lg", md: "2xl" }} alignSelf={"center"}>
                 {t("Refill Pools")}
               </Text>
             </Dialog.Header>
 
             <Dialog.Body pb={6} gap={4}>
               <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
-                <Text fontSize={14} fontWeight={400} color="#6A6A6A">
+                <Text textStyle="sm" color="text.subtle">
                   {t(
                     "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
                   )}
@@ -219,14 +217,14 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                         p={"20px"}
                         pl={"20px"}
                         w={"full"}>
-                        <Text fontWeight="500">
+                        <Text fontWeight="semibold">
                           {t(activeTab === "balance-to-rewards" ? "From Balance" : "From Rewards Pool")}
                         </Text>
                         <HStack>
                           {isLoading ? (
                             <Skeleton height="20px" width="60px" />
                           ) : (
-                            <Heading fontSize={{ base: 30, md: 36 }} color="#6A6A6A">
+                            <Heading size={{ base: "3xl", md: "4xl" }} color="text.subtle">
                               {formatDisplayValue(
                                 activeTab === "balance-to-rewards" ? estimatedBalance : estimatedRewards,
                               )}
@@ -290,7 +288,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                           alignItems={"flex-start"}
                           borderBottomWidth={2}
                           borderColor={"rgba(213, 213, 213, 1)"}>
-                          <Text fontWeight="500">
+                          <Text fontWeight="semibold">
                             {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
                           </Text>
                           <Input
@@ -301,7 +299,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                             variant="amountInput"
                           />
                         </VStack>
-                        <Text fontSize={14} fontWeight={400}>
+                        <Text textStyle="sm">
                           {t("Current {{value}}: ", {
                             value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "Balance",
                           })}
@@ -316,7 +314,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                 mt={8}
                 disabled={isTransferDisabled || isLoading}
                 onClick={handleTransfer}
-                variant={"primaryAction"}
+                variant={"primary"}
                 borderRadius={"full"}
                 w={"full"}>
                 {t("Transfer token")}

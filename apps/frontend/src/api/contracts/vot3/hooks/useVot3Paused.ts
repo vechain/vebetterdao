@@ -1,14 +1,11 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
-
 import { getConfig } from "@repo/config"
 import { VOT3__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
 const abi = VOT3__factory.abi
 const address = getConfig().vot3ContractAddress
 const method = "paused" as const
-
 export const getIsVot3PausedQueryKey = () => getCallClauseQueryKey({ abi, address, method })
-
 /**
  * useVot3Paused is a custom hook that uses the useQuery hook from react-query to fetch the paused status of the Vot3 contract.
  *

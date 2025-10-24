@@ -6,7 +6,6 @@ import { formatEther } from "viem"
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
 const method = "proposalTotalVotes" as const
-
 /**
  * Get the operationId of the given proposal
  * @param proposalId  the id of the proposal
@@ -15,7 +14,6 @@ const method = "proposalTotalVotes" as const
 export const getProposalTotalVotesQueryKey = (proposalId: string) => {
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(proposalId ?? "0")] })
 }
-
 /**
  *  Hook to get the operationId of the given proposal
  * @param proposalId  the id of the proposal

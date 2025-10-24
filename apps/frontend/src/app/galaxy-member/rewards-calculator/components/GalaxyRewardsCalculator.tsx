@@ -1,49 +1,42 @@
-import React, { useState, useMemo, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useTranslation } from "react-i18next"
 import { Image, Card, HStack, Heading, Stack, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/vechain-kit"
-import {
-  useCurrentAllocationsRoundId,
-  useAllocationAmount,
-  useParticipatedInGovernance,
-  useGMLevelsOverview,
-  usePotentialRewardsFromIndexer,
-  useGetUserGMs,
-} from "@/api"
-import { GalaxyCarrousel } from "./GalaxyCarrousel"
-import { Tooltip } from "@/components/ui/tooltip"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
+import { useRouter } from "next/navigation"
+import React, { useState, useMemo, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+
+import { Tooltip } from "@/components/ui/tooltip"
+
+import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useParticipatedInGovernance } from "../../../../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
+import { usePotentialRewardsFromIndexer } from "../../../../api/contracts/rewards/hooks/usePotentialRewardsFromIndexer"
+import { useAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useGMLevelsOverview } from "../../../../api/indexer/gm/useGMLevelsOverview"
+
+import { GalaxyCarrousel } from "./GalaxyCarrousel"
 
 const DECIMAL_PLACES = 2
 const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
-
 export const GalaxyRewardsCalculator = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: userGms } = useGetUserGMs()
   const usersGM = userGms?.find(gm => gm.isSelected)
   const router = useRouter()
-
   const { data: gmLevelOverview } = useGMLevelsOverview()
-
   const [selectedGMLevel, setSelectedGMLevel] = useState<string>()
   const { data: currentRound } = useCurrentAllocationsRoundId()
   let round = currentRound
-
   const { data: emissionAmountCurrent } = useAllocationAmount(round ?? "")
   if (emissionAmountCurrent?.gm == "0.0") {
     round = (Number(currentRound) + 1).toString()
   }
-
   const { data: emissionAmountNext } = useAllocationAmount(round ?? "")
   const emissionAmount = emissionAmountCurrent?.gm == "0.0" ? emissionAmountNext : emissionAmountCurrent
-
   const { data: hasVoted } = useParticipatedInGovernance(account?.address ?? "")
-
   const emissionAmount_gmRewards = Number(emissionAmount?.gm) || 0
-
   const { potentialRewards, currentRewards } = usePotentialRewardsFromIndexer(
     gmLevelOverview || [],
     emissionAmount_gmRewards,
@@ -71,7 +64,7 @@ export const GalaxyRewardsCalculator = () => {
   return (
     <Card.Root
       p={7}
-      variant="baseWithBorder"
+      variant="primary"
       alignItems="center"
       style={{
         backgroundImage: `url('/assets/backgrounds/stardust.webp')`,
@@ -96,7 +89,7 @@ export const GalaxyRewardsCalculator = () => {
           {/* ESTIMATE CARD */}
           <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
-              <Heading fontSize="x-large">{t("Potential Rewards")}</Heading>
+              <Heading size="xl">{t("Potential Rewards")}</Heading>
               <Tooltip
                 content={
                   <Text>
@@ -114,7 +107,7 @@ export const GalaxyRewardsCalculator = () => {
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
               <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-              <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+              <Text bg="transparent" fontWeight="semibold" px={2} w="full" textStyle="4xl">
                 {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
               </Text>
             </HStack>
@@ -124,7 +117,7 @@ export const GalaxyRewardsCalculator = () => {
           {/* ACTUAL CARD */}
           <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
-              <Heading fontSize="x-large">{t("Estimated Expected Rewards")}</Heading>
+              <Heading size="xl">{t("Estimated Expected Rewards")}</Heading>
               <Tooltip
                 content={
                   <Text>
@@ -143,7 +136,7 @@ export const GalaxyRewardsCalculator = () => {
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
               <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
 
-              <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+              <Text bg="transparent" fontWeight="semibold" px={2} w="full" textStyle="4xl">
                 {compactFormatter.format(Number(estimatedRewards?.currentRewards ?? 0))}
               </Text>
             </HStack>
@@ -151,7 +144,7 @@ export const GalaxyRewardsCalculator = () => {
           {/* END ACTUAL CARD */}
         </Stack>
       </Stack>
-      <Text fontSize="xs" color="white" textAlign="center"></Text>
+      <Text textStyle="xs" color="white" textAlign="center"></Text>
     </Card.Root>
   )
 }

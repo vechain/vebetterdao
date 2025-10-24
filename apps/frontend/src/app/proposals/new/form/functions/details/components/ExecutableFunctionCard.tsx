@@ -1,10 +1,12 @@
 import { Box, Button, Card, HStack, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
 import { Control, FieldArrayWithId, FieldError, FieldErrors, UseFormRegister } from "react-hook-form"
-import { GenerateFunctionToCallParamsInput } from "@/components"
-import { FormData } from "./NewProposalForm"
 import { useTranslation } from "react-i18next"
 import { FaPlus } from "react-icons/fa6"
 import { FiTrash } from "react-icons/fi"
+
+import { GenerateFunctionToCallParamsInput } from "../../../../../../../components/GenerateFunctionToCallParamsInput/GenerateFunctionToCallParamsInput"
+
+import { FormData } from "./NewProposalForm"
 
 type Props = {
   field: FieldArrayWithId<FormData, "actions", "id">
@@ -16,7 +18,6 @@ type Props = {
   onAddAnotherTransactionClick?: () => void
   onRemoveTransactionClick?: () => void
 }
-
 export const ExecutableFunctionCard: React.FC<Props> = ({
   field,
   index,
@@ -31,7 +32,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
   return (
     <Card.Root
       w="full"
-      variant="filled"
+      variant="primary"
       data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}`}>
       <Card.Body py={4}>
         <VStack gap={4} align="flex-start">
@@ -43,15 +44,15 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
                   top="50%"
                   left="50%"
                   transform="translate(-50%, -50%)"
-                  fontSize="sm"
+                  textStyle="sm"
                   color="contrast-bg-on-muted"
-                  fontWeight={600}>
+                  fontWeight="semibold">
                   {index + 1}
                 </Text>
               </Box>
               <Box>
                 <Heading size="md">{field.name}</Heading>
-                <Text fontSize="sm" color="contrast-bg-strong">
+                <Text textStyle="sm" color="contrast-bg-strong">
                   {field.description}
                 </Text>
               </Box>
@@ -103,7 +104,8 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
               data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}__add-another-tx`}
               size="sm"
               onClick={onAddAnotherTransactionClick}
-              variant="primarySubtle"
+              variant="ghost"
+              color="actions.tertiary.default"
               alignSelf={"flex-start"}
               rounded="full">
               <FaPlus />

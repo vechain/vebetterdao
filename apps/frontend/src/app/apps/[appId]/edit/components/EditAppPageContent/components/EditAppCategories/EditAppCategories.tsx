@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import {
   Box,
   Text,
@@ -14,30 +13,28 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
-import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
-import { EditAppForm } from "../../EditAppPageContent"
+import { FaSearch, FaPlus } from "react-icons/fa"
+
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
+
+import { EditAppForm } from "../../EditAppPageContent"
 
 type EditAppCategoriesProps = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
-
 export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose, setOpen } = useDisclosure()
   const [searchQuery, setSearchQuery] = useState<string>("")
-
   const { setValue, watch, register } = form
   const selectedCategories = watch("categories") ?? []
-
   const filteredCategories = APP_CATEGORIES.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
-
   const maxAllowedCategories = MAX_CATEGORIES
-
   const handleSelectCategory = (categoryId: string) => {
     if (selectedCategories.includes(categoryId)) {
       setValue(
@@ -76,7 +73,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
 
   return (
     <VStack align="flex-start" gap={4} width="full">
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("App Categories")}
       </Text>
 
@@ -89,7 +86,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
             <Tag.Root
               key={categoryId}
               size="lg"
-              fontSize="14px"
+              textStyle="sm"
               borderRadius="full"
               variant="solid"
               backgroundColor={category.color}
@@ -113,7 +110,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
             positioning={{ placement: "bottom-start" }}
             closeOnInteractOutside={true}>
             <Popover.Trigger asChild>
-              <Button onClick={() => setOpen(true)} variant="outline" fontSize="14px" borderRadius="full" size="sm">
+              <Button onClick={() => setOpen(true)} variant="outline" textStyle="sm" borderRadius="full" size="sm">
                 <FaPlus />
                 {t("Add Category")}
               </Button>
@@ -123,7 +120,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
                 <Popover.Content width="300px" maxH="400px" overflowY="auto">
                   <Popover.Body p={3}>
                     <VStack gap={3} align="stretch">
-                      <InputGroup startElement={<FaSearch color="#6A6A6A" />}>
+                      <InputGroup startElement={<FaSearch color="text.subtle" />}>
                         <Input
                           size="md"
                           placeholder={t("Find a category")}
@@ -134,7 +131,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
                       </InputGroup>
 
                       {filteredCategories.length === 0 ? (
-                        <Text textAlign="center" py={2} color="#6A6A6A">
+                        <Text textAlign="center" py={2} color="text.subtle">
                           {t("No categories found")}
                         </Text>
                       ) : (
@@ -167,7 +164,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
       </HStack>
 
       {selectedCategories.length === 0 && (
-        <Text color="#6A6A6A" fontSize="sm">
+        <Text color="text.subtle" textStyle="sm">
           {t("No categories selected. Select up to 2 categories.")}
         </Text>
       )}

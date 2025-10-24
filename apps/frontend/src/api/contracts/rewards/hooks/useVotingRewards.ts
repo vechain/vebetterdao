@@ -1,16 +1,15 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { getRoundRewardQueryKey } from "./useVotingRoundReward"
-import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { ethers } from "ethers"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
+import { ethers } from "ethers"
+
+import { getRoundRewardQueryKey } from "./useVotingRoundReward"
 
 const abi = VoterRewards__factory.abi
 const address = getConfig().voterRewardsContractAddress as `0x${string}`
-
 export const getVotingRewardsQueryKey = (voter: string, lastRound: number) => [`ALL_TO_ROUND_${lastRound}`, voter]
-
 /**
  * useVotingRewards is a custom hook that fetches the voting rewards for a given round and voter.
  * It uses the mutli-clause reading to fetch the data in parallel for all rounds up to the current one.
@@ -21,17 +20,14 @@ export const getVotingRewardsQueryKey = (voter: string, lastRound: number) => [`
 export const useVotingRewards = (currentRoundId: number, voter?: string) => {
   const thor = useThor()
   const queryClient = useQueryClient()
-
   //Make sure we don't go below 0
   const lastRoundId = Math.max(0, currentRoundId - 1)
-
   return useQuery({
     queryKey: getVotingRewardsQueryKey(voter || "", lastRoundId),
     enabled: !!thor && !!voter,
     queryFn: async () => {
       // Get array from 1 to lastRoundId (if currentRoundId is still active)
       const rounds = Array.from({ length: lastRoundId }, (_, i) => (i + 1).toString())
-
       const res = await executeMultipleClausesCall({
         thor,
         calls: rounds.map(
@@ -44,7 +40,6 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
             }) as const,
         ),
       })
-
       const resGM = await executeMultipleClausesCall({
         thor,
         calls: rounds.map(

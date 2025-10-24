@@ -1,44 +1,24 @@
-import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { ExtractAbiEvent, ExtractAbiEventNames, AbiParametersToPrimitiveTypes, Abi } from "abitype"
+
 import { decodeEventLog } from "./getEvents"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`
-const eventNames = [
-  "ProposalCreated",
-  "ProposalCanceled",
-  "ProposalExecuted",
-  "ProposalQueued",
-  "ProposalDeposit",
-] as ProposalEvents[]
-
+const eventNames = ["ProposalCanceled", "ProposalExecuted", "ProposalQueued", "ProposalDeposit"] as ProposalEvents[]
 type ProposalEvents = ExtractAbiEventNames<typeof abi>
-
 // Utility type to extract event parameters from ABI
 export type ExtractEventParams<T extends Abi, K extends string> = AbiParametersToPrimitiveTypes<
   ExtractAbiEvent<T, K>["inputs"],
   "outputs"
 >
-
 export type ProposalMetadata = {
   title: string
   shortDescription: string
   markdownDescription: string
-}
-export type ProposalCreatedEvent = {
-  proposalId: string
-  proposer: string
-  targets: string[]
-  values: string[]
-  signatures: string[]
-  callDatas: string[]
-  description: string
-  roundIdVoteStart: string
-  depositThreshold: string
-  blockMeta: EventLogs["meta"]
 }
 export type ProposalCanceledEvent = {
   proposalId: string
@@ -59,7 +39,6 @@ export type ProposalDepositEvent = {
   amount: string
   blockMeta: EventLogs["meta"]
 }
-
 export const getProposalsEvents = async (thor: ThorClient, proposalId?: string) => {
   const contract = thor.contracts.load(address, abi)
   const eventAbis = eventNames.map(eventName => contract.getEventAbi(eventName))
@@ -88,7 +67,6 @@ export const getProposalsEvents = async (thor: ThorClient, proposalId?: string) 
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
    */
-  const decodedCreatedProposalEvents: ProposalCreatedEvent[] = []
   const decodedCanceledProposalEvents: ProposalCanceledEvent[] = []
   const decodedExecutedProposalEvents: ProposalExecutedEvent[] = []
   const decodedQueuedProposalEvents: ProposalQueuedEvent[] = []
@@ -96,32 +74,6 @@ export const getProposalsEvents = async (thor: ThorClient, proposalId?: string) 
 
   events.forEach(({ decodedData, meta: blockMeta }) => {
     switch (decodedData.eventName) {
-      case "ProposalCreated": {
-        const {
-          proposalId,
-          proposer,
-          targets,
-          values,
-          signatures,
-          calldatas,
-          description,
-          roundIdVoteStart,
-          depositThreshold,
-        } = decodedData.args
-        decodedCreatedProposalEvents.push({
-          proposalId: proposalId.toString(),
-          proposer,
-          targets: [...targets],
-          values: values.map(value => value.toString()),
-          signatures: [...signatures],
-          callDatas: [...calldatas],
-          description,
-          roundIdVoteStart: roundIdVoteStart.toString(),
-          depositThreshold: depositThreshold.toString(),
-          blockMeta,
-        })
-        break
-      }
       case "ProposalCanceled": {
         const { proposalId } = decodedData.args
         decodedCanceledProposalEvents.push({
@@ -165,7 +117,6 @@ export const getProposalsEvents = async (thor: ThorClient, proposalId?: string) 
   })
 
   return {
-    created: decodedCreatedProposalEvents,
     canceled: decodedCanceledProposalEvents,
     executed: decodedExecutedProposalEvents,
     queued: decodedQueuedProposalEvents,

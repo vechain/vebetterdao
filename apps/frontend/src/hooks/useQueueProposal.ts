@@ -1,15 +1,18 @@
-import { useCallback, useMemo } from "react"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalStateQueryKey, useProposalCreatedEvent } from "@/api"
-import { buildClause } from "@/utils/buildClause"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
+import { buildClause } from "@/utils/buildClause"
+
+import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
+import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useProposalState"
+
+import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
-
 type Props = { proposalId: string; onSuccess?: () => void }
-
 /**
  * Hook to queue a proposal
  * @param proposalId  the proposal id to queue
@@ -17,8 +20,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
  * @returns the queue transaction
  */
 export const useQueueProposal = ({ proposalId, onSuccess }: Props) => {
-  const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
-
+  const { data: proposal } = useProposalEnrichedById(proposalId)
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
@@ -26,23 +28,19 @@ export const useQueueProposal = ({ proposalId, onSuccess }: Props) => {
         contractInterface: GovernorInterface,
         method: "queue",
         args: [
-          proposalCreatedEvent.data?.targets,
-          proposalCreatedEvent.data?.values,
-          proposalCreatedEvent.data?.callDatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposalCreatedEvent.data?.description || "")),
+          proposal?.targets,
+          proposal?.values,
+          proposal?.calldatas,
+          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
         ],
         comment: "queue proposal",
       }),
     ]
-  }, [
-    proposalCreatedEvent.data?.callDatas,
-    proposalCreatedEvent.data?.description,
-    proposalCreatedEvent.data?.targets,
-    proposalCreatedEvent.data?.values,
-  ])
-
-  const refetchQueryKeys = useMemo(() => [getProposalStateQueryKey(proposalId)], [proposalId])
-
+  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, proposal?.values])
+  const refetchQueryKeys = useMemo(
+    () => [getProposalStateQueryKey(proposalId), getAllProposalsStateQueryKey()],
+    [proposalId],
+  )
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

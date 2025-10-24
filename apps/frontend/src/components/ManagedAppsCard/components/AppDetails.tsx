@@ -1,10 +1,13 @@
-import { useXAppMetadata } from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
 import { Separator, HStack, Heading, IconButton, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import NextLink from "next/link"
+import { useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
+
+import { notFoundImage } from "@/constants"
+
+import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
 
 type Props = {
@@ -13,9 +16,7 @@ type Props = {
   isModerator: boolean
   showSeparator?: boolean
 }
-
 export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false }: Props) => {
-  const router = useRouter()
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,
@@ -23,7 +24,6 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
     error: appMetadataError,
   } = useXAppMetadata(appId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-
   const role = useMemo(() => {
     if (isAdmin) {
       return "Admin"
@@ -33,22 +33,16 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
       return "Error"
     }
   }, [isAdmin, isModerator])
-
-  const navigateToAppDetail = useCallback(() => {
-    router.push(`/apps/${appId}`)
-  }, [router, appId])
-
   return (
-    <VStack alignItems={"start"} justify={"flex-start"} w={"full"} gap={4}>
-      <HStack gap={1} justifyContent={"space-between"} w={"full"}>
+    <VStack alignItems={"start"} justify={"flex-start"} w={"full"} gap="4">
+      <HStack gap="1" justifyContent={"space-between"} w={"full"}>
         <HStack>
           <Skeleton loading={isLogoLoading} alignContent={"start"}>
-            <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxW={"40px"} borderRadius="9px" />
+            <Image aspectRatio="square" src={logo?.image ?? notFoundImage} alt={"logo"} boxSize="40px" rounded="lg" />
           </Skeleton>
-
           <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
             <Heading size={"md"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
-            <Text fontSize={"sm"} fontWeight={"300"} color={"#6A6A6A"}>
+            <Text textStyle={"sm"} color="text.subtle">
               {role}
             </Text>
           </Skeleton>
@@ -57,13 +51,14 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
         <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
           <IconButton
             rounded={"full"}
-            variant="subtle"
+            variant="surface"
             aria-label="Go to App"
-            fontSize="22px"
+            width="6"
             disabled={isAppMetadataError}
-            onClick={navigateToAppDetail}
-            colorPalette={"blue"}>
-            <FiArrowUpRight />
+            asChild>
+            <NextLink href={`/apps/${appId}`}>
+              <FiArrowUpRight />
+            </NextLink>
           </IconButton>
         </Skeleton>
       </HStack>

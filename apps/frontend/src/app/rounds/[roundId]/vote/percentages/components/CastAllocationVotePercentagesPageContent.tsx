@@ -1,39 +1,38 @@
 "use client"
-import {
-  useAllocationsRound,
-  useAllocationsRoundState,
-  useTotalVotesOnBlock,
-  useHasVotedInRound,
-  useVotingThreshold,
-  useRoundXApps,
-} from "@/api"
-import { Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Card, Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useCallback, useLayoutEffect, useMemo } from "react"
-import { useRouter } from "next/navigation"
-import { Trans, useTranslation } from "react-i18next"
-import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
-import { SelectAppVotesInput } from "./SelectAppVotesInput"
-import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
-import { ResponsiveCard } from "@/components"
+import { useRouter } from "next/navigation"
+import { useCallback, useLayoutEffect, useMemo } from "react"
+import { Trans, useTranslation } from "react-i18next"
+
+import { useTotalVotesOnBlock } from "../../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useVotingThreshold } from "../../../../../../api/contracts/governance/hooks/useVotingThreshold"
+import { useAllocationsRound } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import {
+  useCastAllocationFormStore,
+  CastAllocationVoteFormData,
+} from "../../../../../../store/useCastAllocationFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+
+import { SelectAppVotesInput } from "./SelectAppVotesInput"
 
 type Props = {
   roundId: string
 }
+
 export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const router = useRouter()
-
   const xAppsQuery = useRoundXApps(roundId)
-
   const { data: votes, setData: onVotesChange } = useCastAllocationFormStore()
-
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return votes
@@ -141,21 +140,19 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   if (!shouldSeeThePage) return null
 
   return (
-    <ResponsiveCard>
-      <VStack w="full" gap={8} align={"flex-start"}>
-        <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
-          {t("Assign percentage of VOT3 to the apps")}
-        </Heading>
-        <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
+    <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
+      <VStack w="full" gap={4} align="flex-start">
+        <Heading size={["xl", "xl", "2xl"]}>{t("Assign percentage of VOT3 to the apps")}</Heading>
+        <Text textStyle={"md"} color="text.subtle">
           {t(
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
           )}
         </Text>
         <HStack w="full" gap={4} justify={"space-between"}>
-          <Heading fontSize={"20px"} fontWeight={700}>
+          <Heading size={"xl"}>
             <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: votes.length }} t={t} />
           </Heading>
-          <Button variant={"primaryLink"} onClick={splitEvenly}>
+          <Button variant="secondary" onClick={splitEvenly}>
             {t("Split evenly")}
           </Button>
         </HStack>
@@ -177,11 +174,11 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           onContinue={onContinue}
           helperText={
             error ? (
-              <Text fontSize={"16px"} fontWeight={600} color="#C84968">
+              <Text textStyle={"md"} fontWeight="semibold" color="status.negative.primary">
                 {error}
               </Text>
             ) : showWarning ? (
-              <Text fontSize={"16px"} fontWeight={400} color="#F29B32">
+              <Text textStyle={"md"} color="status.positive.primary">
                 <Trans
                   t={t}
                   i18nKey={
@@ -191,7 +188,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
                 />
               </Text>
             ) : (
-              <Text fontSize={"16px"} fontWeight={400} color={isFullyDistributed ? "#3DBA67" : "#252525"}>
+              <Text textStyle={"md"} color={isFullyDistributed ? "status.positive.primary" : "text.subtle"}>
                 <Trans
                   i18nKey={"{{amount}}% distributed"}
                   values={{ amount: percentageDistributed.toFixed(2) }}
@@ -202,6 +199,6 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           }
         />
       </VStack>
-    </ResponsiveCard>
+    </Card.Root>
   )
 }

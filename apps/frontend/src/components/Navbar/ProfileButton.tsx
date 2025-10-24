@@ -1,18 +1,18 @@
 import { Box, HStack, Text, VStack, Flex, Button, Image } from "@chakra-ui/react"
-import { AddressIcon } from "../AddressIcon"
-import { useWallet, useWalletModal, useVechainDomain } from "@vechain/vechain-kit"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { FaChevronRight } from "react-icons/fa6"
-import { useTranslation } from "react-i18next"
+import { useWallet, useWalletModal, useVechainDomain } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
-import { WalletIcon } from "../Icons/WalletIcon"
+import { useTranslation } from "react-i18next"
+import { FaChevronRight } from "react-icons/fa6"
+
+import { AddressIcon } from "../AddressIcon"
 import { VeBetterIcon } from "../Icons/VeBetterIcon"
+import { WalletIcon } from "../Icons/WalletIcon"
 
 type Props = {
   onMenuClose?: () => void
 }
-
 export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { account } = useWallet()
   const { data: vnsData } = useVechainDomain(account?.address)
@@ -20,22 +20,19 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { t } = useTranslation()
   const { open } = useWalletModal()
   const router = useRouter()
-
   const onClick = useCallback(() => {
     router.push("/profile")
     onMenuClose?.()
   }, [onMenuClose, router])
-
   const handleConnectWallet = useCallback(() => {
     open()
     onMenuClose?.()
   }, [open, onMenuClose])
-
   if (!account?.address)
     return (
       <Flex
         borderRadius={"lg"}
-        bg="#004CFC"
+        bg="actions.tertiary.default"
         w={"100%"}
         align="center"
         justify="center"
@@ -58,9 +55,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
               <WalletIcon size={"3.5rem"} />
             </Flex>
             <VStack align="stretch" color="white">
-              <Text fontSize="md" fontWeight={"400"}>
-                {t("Connect your wallet to see your profile")}
-              </Text>
+              <Text textStyle="md">{t("Connect your wallet to see your profile")}</Text>
             </VStack>
           </HStack>
           <Button
@@ -77,20 +72,20 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
     )
 
   return (
-    <Box borderWidth={1} borderColor={"#A8A8A8"} w={"full"} borderRadius={9} onClick={onClick}>
-      <HStack p={2} gap={2} w={"full"} justifyContent={"space-between"} px={3.5} py={4}>
-        <HStack w="full">
-          <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
-          <VStack gap={0} align={"flex-start"}>
-            <Text fontSize={18} fontWeight={600}>
+    <Box w={"full"} onClick={onClick}>
+      <HStack w={"full"} justifyContent={"flex-start"} py={4}>
+        <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
+        <VStack align={"flex-start"} gap={2}>
+          <HStack>
+            <Text textStyle="lg" fontWeight="semibold">
               {domain ?? humanAddress(account?.address ?? "", 4, 6)}
             </Text>
-            <Text fontSize={12} fontWeight={400}>
-              {t("View your Better Profile")}
-            </Text>
-          </VStack>
-        </HStack>
-        <FaChevronRight size={16} />
+            <FaChevronRight size={16} />
+          </HStack>
+          <Text textStyle="sm" color="text.subtle">
+            {t("View profile")}
+          </Text>
+        </VStack>
       </HStack>
     </Box>
   )

@@ -1,47 +1,54 @@
-import { useTranslation } from "react-i18next"
-import { useCallback, useMemo, useState } from "react"
-import { useTransactions } from "@/api"
 import { VStack, Heading, Card, Text, HStack, Menu, Spinner, Center, Portal } from "@chakra-ui/react"
-import { TransactionCard } from "@/components"
-import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
-import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
-import { TransactionType } from "@/constants"
+
+import { TransactionEvent } from "@/api/indexer/transactions/useTransactions"
+
+import { useTransactions } from "../../../api/indexer/transactions/useTransactions"
+import { TransactionCard } from "../../../components/TransactionCard/TransactionCard"
+import { TransactionType } from "../../../constants/transactions"
 
 type Props = {
   address: string
 }
-
 export const TransactionsContent = ({ address }: Props) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-
-  const filters: { id: TransactionType | "all"; label: string }[] = useMemo(
+  const filters: { id: TransactionType | "all"; label: string; filter: TransactionEvent[] | undefined }[] = useMemo(
     () => [
       {
         id: "all",
         label: t("All transactions"),
+        filter: undefined,
       },
       {
         id: TransactionType.B3TR_ACTION,
         label: t("Better Action"),
+        filter: ["B3TR_ACTION"],
       },
       {
         id: TransactionType.SWAP,
         label: t("Token conversion"),
+        filter: ["B3TR_SWAP_VOT3_TO_B3TR", "B3TR_SWAP_B3TR_TO_VOT3"],
       },
       {
         id: TransactionType.CLAIM_REWARD,
         label: t("Rewards"),
+        filter: ["B3TR_CLAIM_REWARD"],
       },
       {
         id: TransactionType.PROPOSAL_SUPPORT,
         label: t("Proposal support"),
+        filter: ["B3TR_PROPOSAL_SUPPORT"],
       },
       {
         id: TransactionType.UPGRADE_GM,
         label: t("Galaxy member"),
+        filter: ["B3TR_UPGRADE_GM"],
       },
     ],
     [t],
@@ -51,9 +58,8 @@ export const TransactionsContent = ({ address }: Props) => {
 
   const selectedFilter = useMemo(() => filters.find(filter => filter.id === filterId), [filterId, filters])
 
-  const { data, fetchNextPage, hasNextPage } = useTransactions({
-    user: address ?? "",
-    txType: selectedFilter?.id === "all" ? undefined : (selectedFilter?.id as TransactionType),
+  const { data, fetchNextPage, hasNextPage } = useTransactions(address ?? "", {
+    eventName: selectedFilter?.filter,
   })
   const transactions = useMemo(() => {
     return data?.pages.flatMap(page => page.data) ?? []
@@ -85,7 +91,7 @@ export const TransactionsContent = ({ address }: Props) => {
   }, [router])
 
   return (
-    <Card.Root w={"full"} variant={"baseWithBorder"}>
+    <Card.Root w={"full"} variant="primary">
       <Card.Body>
         <VStack gap={6} align="stretch">
           <HStack color="#004CFC" cursor="pointer" onClick={handleGoBack} mb="2">
@@ -129,7 +135,7 @@ export const TransactionsContent = ({ address }: Props) => {
               {transactions.length > 0 ? (
                 Object.entries(groupedTransactions).map(([day, transactions]) => (
                   <VStack key={day} gap={3} align="stretch">
-                    <Text fontWeight="600" color="#848484">
+                    <Text fontWeight="semibold" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {transactions.map((transaction: any) => (

@@ -1,53 +1,51 @@
-import { Card, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, Button, useDisclosure, HStack, Stack, Icon } from "@chakra-ui/react"
 import { UilArrowUpRight, UilCheck, UilCopy } from "@iconscout/react-unicons"
-import { useTranslation } from "react-i18next"
-import { DelegateXNodeModal } from "./DelegateXNodeModal"
-import { AddressIcon } from "@/components/AddressIcon"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
-import { DelegationAlert } from "./DelegationAlert"
 import { useState, useCallback } from "react"
-import { UserNode } from "@/api"
+import { useTranslation } from "react-i18next"
+
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+
+import { DelegateXNodeModal } from "./DelegateXNodeModal"
+import { DelegationAlert } from "./DelegationAlert"
+import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 
 export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const { delegatee, xNodeOwner, isXNodeDelegated, isXNodeDelegator } = xNode
-
   const delegateModal = useDisclosure()
   const revokeModal = useDisclosure()
-
   const { data: vnsDelegateeData } = useVechainDomain(delegatee)
   const delegateeDomain = vnsDelegateeData?.domain
   const { data: vnsOwnerData } = useVechainDomain(xNodeOwner)
   const ownerDomain = vnsOwnerData?.domain
-
   const isOwner = compareAddresses(account?.address ?? "", xNodeOwner ?? "")
   const displayAddress = isOwner ? (delegateeDomain ?? delegatee) : (ownerDomain ?? xNodeOwner)
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
-
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
-            <Heading fontSize="lg">{t("Node Management")}</Heading>
+            <Heading textStyle="xl">{t("Node Management")}</Heading>
             {isXNodeDelegated ? (
-              <Text fontSize="sm">
+              <Text textStyle="sm">
                 {isXNodeDelegator ? t("Node is currently managed by:") : t("Node managed for:")}
               </Text>
             ) : (
               <>
-                <Text fontSize="sm">{t("Assign a manager to help operate this node.")}</Text>
-                <Text fontSize="sm">
+                <Text textStyle="sm">{t("Assign a manager to help operate this node.")}</Text>
+                <Text textStyle="sm">
                   {t(
-                    "Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT.",
+                    "Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetter or VeVote), but cannot transfer, unstake, or burn the NFT.",
                   )}
                 </Text>
-                <Text fontSize="sm">{t("You can revoke access anytime.")}</Text>
+                <Text textStyle="sm">{t("You can revoke access anytime.")}</Text>
               </>
             )}
           </VStack>
@@ -60,8 +58,8 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
               onRevoke={revokeModal.onOpen}
             />
           ) : (
-            <Button variant="primarySubtle" onClick={delegateModal.onOpen}>
-              <UilArrowUpRight color="#004CFC" />
+            <Button ml="auto" maxW="fit-content" variant="secondary" onClick={delegateModal.onOpen}>
+              <Icon as={UilArrowUpRight} color="actions.secondary.text" />
               {t("Add node manager")}
             </Button>
           )}
@@ -117,12 +115,17 @@ const DelegatedNodeDisplay = ({
             {showCopiedLink ? (
               <UilCheck size={"18px"} color="#6DCB09" />
             ) : (
-              <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyAddress} cursor="pointer" />
+              <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyAddress} cursor="pointer" />
             )}
           </HStack>
         </HStack>
         {isXNodeDelegator && (
-          <Button variant="dangerGhost" colorPalette="red" onClick={onRevoke} w={"fit-content"}>
+          <Button
+            variant="ghost"
+            color="status.negative.primary"
+            colorPalette="red"
+            onClick={onRevoke}
+            w={"fit-content"}>
             {t("Cancel delegation")}
           </Button>
         )}

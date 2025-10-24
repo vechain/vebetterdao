@@ -1,29 +1,69 @@
-import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
-import { ProposalInfoCard, JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Spinner, Text, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
-import { useTranslation } from "react-i18next"
-import { RequirementModal, ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
+import {
+  Grid,
+  Card,
+  Box,
+  Button,
+  createListCollection,
+  HStack,
+  Spinner,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
+
+import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { useProposalClaimableUserDeposits } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/MobileFilterDrawer"
+import { SearchField } from "../../../components/SearchField/SearchField"
+import { SelectField } from "../../../components/SelectField/SelectField"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
+import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
+import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
+import { useBreakpoints } from "../../../hooks/useBreakpoints"
+import { useDebounce } from "../../../hooks/useDebounce"
+import { ProposalFilter, StateFilter, useProposalFilters } from "../../../store/useProposalFilters"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { GrantsProposalCard } from "../../grants/components/GrantsProposalCard"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
-import { useProposalFilters } from "@/store"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
-import { useMetProposalCriteria } from "@/api/contracts/governance"
+
+import { ClaimDeposits } from "./components/ClaimDeposits"
+import { CreateProposalCard } from "./components/CreateProposalCard"
+import { NoProposalsCard } from "./components/NoProposalsCard"
+import { RequirementModal } from "./components/RequirementModal"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const { t } = useTranslation()
   const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
-  const { selectedFilter } = useProposalFilters()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
-
+  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] }, isLoading } = useProposalEnriched()
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
+  const { hasMetProposalCriteria } = useMetProposalCriteria()
+  const { selectedFilter, setSelectedFilter } = useProposalFilters()
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalEnriched[])
 
-  const hasMetProposalCriteria = useMetProposalCriteria()
+  const filterOptions = useMemo(() => {
+    return createListCollection({
+      items: [
+        { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
+        { label: t("Support phase"), value: ProposalFilter.SupportPhase },
+        { label: t("Completed"), value: ProposalFilter.StandardProposalCompleted },
+        { label: t("Cancelled"), value: ProposalFilter.FailedStates },
+      ],
+    })
+  }, [t])
+
+  const { isMobile } = useBreakpoints()
 
   const onNewClick = useCallback(() => {
     if (!account?.address) {
@@ -35,20 +75,6 @@ export const ProposalsPageContent = () => {
     openRequirementModal()
   }, [account?.address, open, openRequirementModal])
 
-  //First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
-  const sortedProposals = useMemo(() => {
-    return filteredProposals.sort((a, b) => {
-      const getPriority = (proposal: (typeof filteredProposals)[0]) => {
-        if (proposal.state === ProposalState.Active) return 1
-        if (proposal.state === ProposalState.Pending && !proposal.isDepositReached) return 2 // lookingForSupport
-        if (proposal.state === ProposalState.Pending && proposal.isDepositReached) return 3 // upcoming
-        return 4 // Everything else
-      }
-
-      return getPriority(a) - getPriority(b)
-    })
-  }, [filteredProposals])
-
   if (isLoading)
     return (
       <VStack w="full" gap={12} h="80vh" justify="center">
@@ -57,77 +83,109 @@ export const ProposalsPageContent = () => {
     )
 
   return (
-    <VStack w={"full"} gap={4}>
-      <VStack w={"full"} alignContent={"flex-start"}>
-        <HStack gap={4} w="full" justify={"space-between"} alignItems={"center"} mb={2}>
-          <Box>
-            <HStack gap={3} alignItems={"center"}>
-              <Heading as="h1" size="4xl">
-                {t("Proposals")}
-              </Heading>
-            </HStack>
-          </Box>
-
-          {filteredProposals.length > 0 && (
-            <Button hideFrom="md" onClick={onNewClick} variant={"primaryAction"}>
-              {t("Create proposal")}
-            </Button>
-          )}
-        </HStack>
-      </VStack>
-      <ProposalsFilters alignSelf={"flex-start"} w="full" />
+    <>
       {totalClaimableDeposits > 0 && (
-        <Box hideFrom="md" mb={2} mt={3}>
+        <Box hideFrom="md">
           <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
         </Box>
       )}
-      <HStack w={"full"} gap={8} mt={3}>
-        <VStack
-          flex={{ base: undefined, md: 4.5 }}
-          data-testid="proposals"
-          alignSelf={"flex-start"}
-          gap={4}
-          w={{ base: "full", md: undefined }}>
-          {sortedProposals.map(proposal => (
-            <ProposalInfoCard
-              key={proposal.proposalId}
-              proposalId={proposal.proposalId}
-              description={proposal.description}
-              roundIdVoteStart={proposal.roundIdVoteStart}
-              proposalState={proposal.state}
-            />
-          ))}
-          {sortedProposals.length === 0 && !isLoading && (
-            <NoProposalsCard
-              onClick={onNewClick}
-              buttonText={t("Create proposal")}
-              description={
-                <Text fontSize={16} fontWeight={400} mt={2}>
-                  {t("Have an idea for something that could improve the experience in VeBetterDAO? ")}{" "}
-                  <b style={{ color: "contrast-fg-on-muted" }}>{t("Create a proposal")}</b>{" "}
-                  {t("and let the community vote to make it happen!")}
-                </Text>
-              }
-            />
-          )}
-        </VStack>
 
-        <VStack hideBelow="md" flex={2} alignSelf="flex-start" gap={6} position={"sticky"} top={24}>
+      <Grid alignItems="flex-start" w={"full"} gap={4} templateColumns={{ base: "1fr", md: "2fr 1fr" }}>
+        <Card.Root unstyled>
+          <Card.Header
+            w="full"
+            display="flex"
+            py="4"
+            flexDirection="row"
+            alignItems="flex-start"
+            justifyContent="space-between">
+            <Card.Title textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+              {t("Proposals")}
+            </Card.Title>
+
+            {filteredProposals.length > 0 && (
+              <Button hideFrom="md" onClick={onNewClick} variant={"primary"}>
+                {t("Create proposal")}
+              </Button>
+            )}
+          </Card.Header>
+          <Card.Body>
+            <VStack
+              flex={{ base: undefined, md: 4.5 }}
+              data-testid="proposals"
+              alignSelf={"flex-start"}
+              gap={4}
+              w={{ base: "full", md: undefined }}>
+              <HStack w="full" gap={4}>
+                <SearchField
+                  inputProps={{ minW: "200px", flex: 1 }}
+                  placeholder={t("Search by proposal name")}
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  disabled={!enrichedStandardProposals?.length}
+                />
+
+                {isMobile ? (
+                  <MobileFilterDrawer
+                    options={filterOptions}
+                    selectedValues={selectedFilter}
+                    onApply={setSelectedFilter}
+                    placeholder={t("Filter statuses")}
+                  />
+                ) : (
+                  <SelectField
+                    w="25%"
+                    placeholder={t("Status")}
+                    options={filterOptions}
+                    defaultValue={[]}
+                    showReset
+                    onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                    isMultiOption
+                  />
+                )}
+              </HStack>
+
+              {filteredProposals.map(proposal => (
+                <GrantsProposalCard
+                  key={proposal.id}
+                  variant="proposal"
+                  proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
+                />
+              ))}
+
+              {filteredProposals.length === 0 && !isLoading && (
+                <NoProposalsCard
+                  onClick={onNewClick}
+                  buttonText={t("Create proposal")}
+                  description={
+                    <Text textStyle="md" mt={2}>
+                      {t("Have an idea for something that could improve the experience in VeBetter? ")}{" "}
+                      <b style={{ color: "contrast-fg-on-muted" }}>{t("Create a proposal")}</b>{" "}
+                      {t("and let the community vote to make it happen!")}
+                    </Text>
+                  }
+                />
+              )}
+            </VStack>
+          </Card.Body>
+        </Card.Root>
+
+        <VStack hideBelow="md" alignSelf="flex-start" gap={6} position={"sticky"} top={24}>
           {totalClaimableDeposits > 0 && (
             <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
           )}
-          {sortedProposals.length > 0 && <CreateProposalCard />}
-          <JoinCommunity />
+          {filteredProposals.length > 0 && <CreateProposalCard />}
         </VStack>
-      </HStack>
-      <Box hideFrom="md" mt={2} w={"full"}>
-        <JoinCommunity />
-      </Box>
-      <RequirementModal
-        isOpen={isRequirementModalOpen}
-        onClose={closeRequirementModal}
-        hasNft={hasMetProposalCriteria}
-      />
-    </VStack>
+
+        <VStack hideFrom="md" mt={2} w={"full"}>
+          {filteredProposals.length > 0 && <CreateProposalCard />}
+        </VStack>
+        <RequirementModal
+          isOpen={isRequirementModalOpen}
+          onClose={closeRequirementModal}
+          hasNft={hasMetProposalCriteria}
+        />
+      </Grid>
+    </>
   )
 }

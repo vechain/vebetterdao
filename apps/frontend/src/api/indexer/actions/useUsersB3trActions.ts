@@ -1,0 +1,28 @@
+import { indexerQueryClient } from "../api"
+import { paths } from "../schema"
+
+type UserB3trActionsQuery = paths["/api/v1/b3tr/actions/users/{wallet}"]["get"]
+//TODO: UNCOMMENT THIS WHEN THE INDEXER IS FIXED
+// type UserB3trActionsQueryOptions = UserB3trActionsQuery["parameters"]["query"]
+type UserB3trActionsQueryResponse = UserB3trActionsQuery["responses"]["200"]["content"]["*/*"]
+export type UserB3trActions = UserB3trActionsQueryResponse["data"]
+export const useUsersB3trActions = (wallet: string, queryOptions: any) => {
+  return indexerQueryClient.useInfiniteQuery(
+    "get",
+    "/api/v1/b3tr/actions/users/{wallet}",
+    {
+      params: { path: { wallet }, query: queryOptions },
+    },
+    {
+      pageParamName: "page",
+      initialPageParam: 0,
+      getNextPageParam: (
+        lastPage: UserB3trActionsQueryResponse,
+        _allPages: UserB3trActionsQueryResponse[],
+        lastPageParam: number,
+      ) => {
+        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+      },
+    },
+  )
+}

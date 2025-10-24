@@ -1,63 +1,54 @@
-import {
-  useAccountLinking,
-  useCanUserVote,
-  useCurrentAllocationsRoundId,
-  useGetDelegatee,
-  useHasVotedInProposals,
-  useIsCreatorOfAnyApp,
-  useUserBotSignals,
-  useUserDelegation,
-  useVotingRewards,
-  useGMRewards,
-  useXApps,
-  useGetUserNodes,
-} from "@/api"
+import { IconButton, Box } from "@chakra-ui/react"
+import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+import { A11y, Navigation } from "swiper/modules"
+import { Swiper, SwiperSlide } from "swiper/react"
+
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
-import { IconButton } from "@chakra-ui/react"
-import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
-import { useCallback, useMemo, useRef, useState } from "react"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
-// import Swiper core and required modules
-import { A11y } from "swiper/modules"
-// Import Swiper React components
-import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
 
+import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
+import { useHasVotedInProposals } from "../../../api/contracts/governance/hooks/useHasVotedInProposals"
+import { useGMRewards } from "../../../api/contracts/rewards/hooks/useGMRewards"
+import { useVotingRewards } from "../../../api/contracts/rewards/hooks/useVotingRewards"
+import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetDelegatee"
+import { useUserBotSignals } from "../../../api/contracts/vePassport/hooks/useUserBotSignals"
+import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
+import { ProposalFilter } from "../../../store/useProposalFilters"
+
+import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
 import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
 import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
-import { DoActionBanner } from "./components/DoActionBanner"
-import { LowVthoBanner } from "./components/LowVthoBanner"
-import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
-import { StargateMigrationBanner } from "./components/StargateMigrationBanner"
+import { DoActionBanner } from "./components/DoActionBanner/DoActionBanner"
+import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
+import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
+import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
+import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 
-import "@/app/theme/swiper-custom.css"
-// Import Swiper styles
 import "swiper/css"
-import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
-import { ProposalFilter } from "@/store"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated } from "@/hooks"
+import "swiper/css/navigation"
+import "@/app/theme/swiper-custom.css"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
 
 export const ActionBanner = () => {
-  // store controlled swiper instance
-  const swiperRef = useRef<SwiperClass | null>(null) // Create a ref for the Swiper instance with type
-  const [isSliderEnd, setIsSliderEnd] = useState(false)
-  const [isSliderStart, setIsSliderStart] = useState(true)
-
-  const handleSliderChange = useCallback((_swiper: SwiperClass) => {
-    setIsSliderEnd(_swiper.isEnd)
-    setIsSliderStart(_swiper.isBeginning)
-  }, [])
-
   const { account, connection } = useWallet()
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
@@ -78,11 +69,13 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
-  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
-    ProposalFilter.InThisRound,
-  ])
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
+    [ProposalFilter.InThisRound],
+    enrichedProposals,
+  )
   const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
-    activeProposals?.map(proposal => proposal?.proposalId),
+    activeProposals?.map(proposal => proposal?.id),
     account?.address ?? undefined,
   )
 
@@ -196,12 +189,12 @@ export const ActionBanner = () => {
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
-    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
+    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.id])
     .map(proposal => (
       <CastProposalVoteBanners
-        key={`cast-vote-in-proposal-${proposal?.proposalId}`}
-        id={proposal?.proposalId}
-        description={proposal?.description}
+        key={`cast-vote-in-proposal-${proposal?.id}`}
+        id={proposal?.id}
+        description={proposal?.ipfsDescription ?? ""}
       />
     ))
 
@@ -246,64 +239,69 @@ export const ActionBanner = () => {
   if (slides.length === 0) return null
 
   return (
-    <Swiper
-      modules={[A11y]}
-      spaceBetween={20} // Space between slides
-      slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
-      navigation={false} // Disable Swiper's built-in navigation
-      pagination={{ clickable: true }}
-      scrollbar={{ draggable: true }}
-      onSwiper={swiper => (swiperRef.current = swiper)} // Store swiper instance
-      onSlideChange={handleSliderChange}
-      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }} // Ensure swiper itself takes full width
-    >
-      {slides.map(slide => (
-        <SwiperSlide
-          key={`slide-${slide?.key}`}
-          className="slide"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            height: "100%",
-            position: "relative",
-          }}>
-          {slide}
-        </SwiperSlide>
-      ))}
+    <Box position="relative">
+      <Swiper
+        modules={[A11y, Navigation]}
+        spaceBetween={20} // Space between slides
+        slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
+        navigation={{
+          nextEl: ".custom-swiper-button-next",
+          prevEl: ".custom-swiper-button-prev",
+        }}
+        pagination={{ clickable: true }}
+        scrollbar={{ draggable: true }}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+          display: "flex",
+        }}>
+        {slides.map(slide => (
+          <SwiperSlide
+            key={`slide-${slide?.key}`}
+            className="slide"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "auto",
+              position: "relative",
+              overflow: "hidden",
+            }}>
+            {slide}
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-      {/* Custom Navigation Buttons */}
+      <IconButton
+        className="custom-swiper-button-prev"
+        hideBelow="md"
+        pos={"absolute"}
+        zIndex={2} // Ensure it's above the slides
+        variant="subtle"
+        color="actions.tertiary.default"
+        left={0}
+        top={"50%"}
+        transform={"translate(-50%, -50%)"}
+        aria-label="Prev slide">
+        <FaChevronLeft />
+      </IconButton>
 
-      {!isSliderStart && (
-        <IconButton
-          hideBelow="md"
-          pos={"absolute"}
-          zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
-          left={5}
-          top={"50%"}
-          transform={"translateY(-50%)"}
-          onClick={() => swiperRef.current?.slidePrev()}
-          aria-label="Prev slide">
-          <FaChevronLeft />
-        </IconButton>
-      )}
-
-      {!isSliderEnd && slides.length > 1 && (
-        <IconButton
-          hideBelow="md"
-          pos={"absolute"}
-          zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
-          right={5}
-          top={"50%"}
-          transform={"translateY(-50%)"}
-          onClick={() => swiperRef.current?.slideNext()}
-          aria-label="Next slide">
-          <FaChevronRight />
-        </IconButton>
-      )}
-    </Swiper>
+      <IconButton
+        className="custom-swiper-button-next"
+        hideBelow="md"
+        pos={"absolute"}
+        zIndex={2} // Ensure it's above the slides
+        variant="subtle"
+        color="actions.tertiary.default"
+        right={0}
+        top={"50%"}
+        transform={"translate(50%,-50%)"}
+        aria-label="Next slide">
+        <FaChevronRight />
+      </IconButton>
+    </Box>
   )
 }

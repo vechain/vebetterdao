@@ -1,18 +1,4 @@
 import {
-  useAllocationsRound,
-  useAppEndorsementStatus,
-  useAppEndorsers,
-  useCurrentAllocationsRoundId,
-  UserNode,
-  useNodesEndorsedApps,
-} from "@/api"
-import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
-import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
-import { GenericAlert } from "@/app/components/Alert"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import {
   Button,
   Card,
   Separator,
@@ -22,26 +8,38 @@ import {
   Image,
   Stack,
   Text,
-  useBreakpointValue,
   useDisclosure,
   VStack,
+  Icon,
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
+import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { EmptyState } from "@/components/ui/empty-state"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useAppEndorsers } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { GenericAlert } from "../../../components/Alert/GenericAlert"
 
 export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const isEndorsingApp = !!xNode.endorsedAppId
-
   const { data: endorsedApps } = useNodesEndorsedApps([xNode.nodeId])
   const endorsedApp = endorsedApps?.[0]?.endorsedApp
-
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(xNode.endorsedAppId ?? "")
   // get app status and score
@@ -66,12 +64,6 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
-  const router = useRouter()
-  const goToApps = useCallback(() => {
-    router.push("/apps")
-  }, [router])
-
-  const searchIconSize = useBreakpointValue({ base: "4rem", md: "6rem" })
   const shouldDisableEndorsementButton = useMemo(() => {
     return xNode.isXNodeDelegated || xNode.isXNodeOnCooldown
   }, [xNode.isXNodeDelegated, xNode.isXNodeOnCooldown])
@@ -80,16 +72,16 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   }, [account?.address, xNode.isXNodeDelegated])
 
   return (
-    <Card.Root variant="baseWithBorder" w="full" h="min-content">
+    <Card.Root variant="primary" w="full" h="min-content">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Endorsed app")}</Heading>
-              {!isEndorsingApp && <UilInfoCircle color="#004CFC" />}
+              <Heading textStyle="xl">{t("Endorsed app")}</Heading>
+              {!isEndorsingApp && <Icon as={UilInfoCircle} color="icon.default" />}
             </HStack>
             {!isEndorsingApp && (
-              <Text fontSize="sm">
+              <Text textStyle="sm">
                 {t(
                   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.",
                 )}
@@ -115,12 +107,12 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
             />
           ) : null}
           {isEndorsingApp ? (
-            <Card.Root variant={"baseWithBorder"} p={4} rounded="lg">
+            <Card.Root variant="primary" p={4} rounded="lg">
               <VStack align="stretch" gap={6}>
                 <Stack direction={["column", "column", "row"]} justify="space-between">
                   <HStack>
                     <Image src={endorsedApp?.metadata.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
-                    <Heading fontSize="lg" fontWeight={"600"}>
+                    <Heading textStyle="lg" fontWeight="semibold">
                       {endorsedApp?.name}
                     </Heading>
                   </HStack>
@@ -137,15 +129,15 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                     justifyContent={["flex-start", "flex-start", "flex-end"]}
                     gap={0}>
                     <Text
-                      fontSize={["xs", "xs", "md"]}
+                      textStyle={["xs", "xs", "md"]}
                       color={["#6A6A6A", "#6A6A6A", "inherit"]}
                       order={[1, 1, 2]} // Change order for large viewports
                     >
                       {endorsingSince}
                     </Text>
                     <Text
-                      fontSize="xs"
-                      color="#6A6A6A"
+                      textStyle="xs"
+                      color="text.subtle"
                       order={[0, 0, 1]} // Change order for large viewports
                       pr={[1, 2, 0]} // Change padding for large viewports
                     >
@@ -173,7 +165,8 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                   </Flex>
 
                   <Button
-                    variant="dangerGhost"
+                    variant="ghost"
+                    color="status.negative.primary"
                     onClick={unendorseAppModal.onOpen}
                     w={["full", "full", "auto"]}
                     disabled={shouldDisableEndorsementButton}>
@@ -183,32 +176,25 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
               </VStack>
             </Card.Root>
           ) : (
-            <Flex align="center" justify={"center"} p={["8", "8", "12"]} bg="#F8F8F8" rounded="2xl" mt="2">
-              <VStack align="center" gap={2} maxW="27rem" textAlign={"center"}>
-                <UilSearch size={searchIconSize} color="#757575" />
-                <Heading fontSize="xl" color="#757575" fontWeight={"500"}>
-                  {t("You’re not endorsing any app")}
-                </Heading>
-                {xNode.isXNodeDelegator ? (
-                  <Text color="#757575">
-                    {t(
+            <EmptyState
+              bg="transparent"
+              icon={<Icon as={UilSearch} boxSize={{ base: "16", md: "24" }} />}
+              title={t("You’re not endorsing any app")}
+              description={
+                xNode.isXNodeDelegator
+                  ? t(
                       "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
-                    )}
-                  </Text>
-                ) : (
-                  <>
-                    <Text color="#757575">
-                      {t(
-                        "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
-                      )}
-                    </Text>
-                    <Button variant="primaryAction" onClick={goToApps} mt={4} w={["full", "full", "auto"]}>
-                      {t("Browse apps")}
-                    </Button>
-                  </>
-                )}
-              </VStack>
-            </Flex>
+                    )
+                  : t(
+                      "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
+                    )
+              }>
+              {!xNode.isXNodeDelegator && (
+                <Button variant="primary" asChild mt={4} w={["full", "full", "auto"]}>
+                  <NextLink href="/apps">{t("Browse apps")}</NextLink>
+                </Button>
+              )}
+            </EmptyState>
           )}
         </VStack>
       </Card.Body>

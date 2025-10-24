@@ -1,7 +1,8 @@
-import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
+
 import { decodeEventLog } from "./getEvents"
 
 export type ProposalVoteEvent = {
@@ -13,11 +14,9 @@ export type ProposalVoteEvent = {
   reason: string
   blockMeta: EventLogs["meta"]
 }
-
 const abi = B3TRGovernor__factory.abi
 const governanceContractAddress = getConfig().b3trGovernorAddress
 const event = "VoteCast" as const
-
 /**
  * Get the proposal vote events from the governor contract
  * @param thor - The thor client
@@ -27,12 +26,10 @@ const event = "VoteCast" as const
  */
 export const getProposalsVoteEvents = async (thor: ThorClient, proposalId?: string, voter?: string) => {
   const eventAbi = thor.contracts.load(governanceContractAddress, abi).getEventAbi(event)
-
   const topics = eventAbi.encodeFilterTopicsNoNull({
     ...(proposalId ? { proposalId: proposalId } : {}),
     ...(voter ? { voter: voter } : {}),
   })
-
   /**
    * Filter criteria to get the events from the governor contract that we are interested in
    * This way we can get all of them in one call

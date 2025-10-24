@@ -1,24 +1,21 @@
 "use client"
 import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
-import { MobileNavBar } from "./MobileNavbar"
-import { DesktopNavBar } from "./DesktopNavbar"
-import { useAllocationsRoundsEvents } from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
-import { Routes } from "./Routes"
-import { useHideOnScroll } from "@/hooks"
 
+import { useAccountPermissions } from "../../api/contracts/account/hooks/useAccountPermissions"
+import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { useHideOnScroll } from "../../hooks/useHideOnScroll"
+
+import { DesktopNavBar } from "./DesktopNavbar"
+import { MobileNavBar } from "./MobileNavbar"
+import { Routes } from "./Routes"
 export const Navbar: React.FC = () => {
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
-
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
-
   const isNavbarVisible = useHideOnScroll()
-
   // Filter routes based on user's role and if there are any allocation rounds
   const routesToRender = useMemo(
     () =>
@@ -33,29 +30,22 @@ export const Navbar: React.FC = () => {
       }),
     [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
   )
-
   const parsedRoutesToRender = useMemo(() => {
     if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []
     return routesToRender
   }, [routesToRender])
-
-  const bg = useColorModeValue("#F7F7F7", "#131313")
-  const borderColor = useColorModeValue("#EEEEEE", "#2D2D2F")
   return (
     <Box
-      bg={bg}
+      bg="bg.secondary"
       px={0}
       position={"sticky"}
       top={0}
-      zIndex={2}
+      zIndex={3}
       h={"auto"}
       w={"full"}
       transition="transform 0.3s ease-in-out"
-      transform={isNavbarVisible ? "translateY(0)" : "translateY(-100%)"}>
-      <HStack
-        justify={"space-between"}
-        p={isLargerThan1200 ? "16px 48px" : "8px 20px"}
-        borderBottom={`1px solid ${borderColor}`}>
+      transform={isNavbarVisible ? undefined : "translateY(-100%)"}>
+      <HStack justify={"space-between"} p={isLargerThan1200 ? "16px 48px" : "8px 20px"}>
         {isLargerThan1200 ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (

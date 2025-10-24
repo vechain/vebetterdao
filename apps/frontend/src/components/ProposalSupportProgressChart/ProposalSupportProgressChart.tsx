@@ -1,13 +1,11 @@
 import { Box, Circle, Flex, HStack, Text, VStack } from "@chakra-ui/react"
-import { t } from "i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { t } from "i18next"
 import { useMemo } from "react"
 import { FaRegHeart } from "react-icons/fa6"
 
 const getSafeScaledPercentage = (percentage: number) => Math.min(percentage, 1) * 100
-
 const compactFormatter = getCompactFormatter(1)
-
 type Props = {
   isDepositThresholdReached?: boolean
   isFailedDueToDeposit?: boolean
@@ -47,7 +45,6 @@ export const ProposalSupportProgressChart = ({
     }
     return "#004CFC"
   }, [isFailedDueToDeposit, isDepositThresholdReached])
-
   const othersDepositColor = useMemo(() => {
     if (isFailedDueToDeposit) {
       return "#EC9BAF"
@@ -82,17 +79,17 @@ export const ProposalSupportProgressChart = ({
           <Flex position="relative" top="7px" display={"inline-flex"}>
             <FaRegHeart color={yourDepositColor} size={"36"} />
           </Flex>
-          <Text fontSize={"28px"} fontWeight={700}>
+          <Text textStyle={"3xl"} fontWeight="bold">
             {compactFormatter.format(totalDeposits)}
           </Text>
-          <Text fontSize={"20px"} fontWeight={500}>
+          <Text textStyle={"xl"} fontWeight="semibold">
             {t("/")}
           </Text>
-          <Text fontSize={"20px"} fontWeight={500}>
+          <Text textStyle={"xl"} fontWeight="semibold">
             {compactFormatter.format(depositThreshold)}
           </Text>
         </HStack>
-        <Text fontSize={"18px"} fontWeight={400} color={"#6A6A6A"}>
+        <Text textStyle={"lg"} color={"#6A6A6A"}>
           {compactFormatter.format(totalDepositsPercentage)}
           {t("%")}
         </Text>
@@ -124,7 +121,7 @@ export const ProposalSupportProgressChart = ({
         <HStack gap={4}>
           <HStack>
             <Circle size="12px" bg={othersDepositColor} />
-            <Text fontSize="14px" fontWeight={400}>
+            <Text textStyle="sm">
               {t("From {{users}} users {{vot3}} VOT3.", {
                 vot3: compactFormatter.format(othersDeposits),
                 users: compactFormatter.format(otherDepositsUsersCount),
@@ -133,7 +130,7 @@ export const ProposalSupportProgressChart = ({
           </HStack>
           <HStack>
             <Circle size="12px" bg={yourDepositColor} />
-            <Text fontSize="14px" fontWeight={400}>
+            <Text textStyle="sm">
               {t("From you {{vot3}} VOT3.", { vot3: compactFormatter.format(Number(userDeposits)) })}
             </Text>
           </HStack>

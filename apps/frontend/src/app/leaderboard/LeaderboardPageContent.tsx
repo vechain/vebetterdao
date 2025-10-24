@@ -1,45 +1,36 @@
-import {
-  useCurrentAllocationsRoundId,
-  useSustainabilitySingleUserOverview,
-  useSustainabilityUserOverviewPerRound,
-} from "@/api"
-import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
 import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
-import { useRouter } from "next/navigation"
+import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
 
+import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
+import { useUserActionOverview } from "../../api/indexer/actions/useUserActionOverview"
+import { MockLeaderboard } from "../../components/Leaderboard/Leaderboard"
+import { LeaderboardRankingComponent } from "../../components/Leaderboard/LeaderboardRankingComponent"
+
 type Props = { roundId: string }
 export const LeaderboardPageContent = ({ roundId }: Props) => {
   const { account } = useWallet()
-  const router = useRouter()
-
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
-
   const isLastRound = selectedRoundId === currentRoundId
   const isFirstRound = selectedRoundId === "1"
-
   useEffect(() => {
     if (roundId && !selectedRoundId) {
       setSelectedRoundId(roundId)
     }
   }, [roundId, selectedRoundId])
-
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
-
-  const userRoundOverview = useSustainabilitySingleUserOverview({
-    wallet: account?.address ?? "",
-    roundId: selectedRoundId,
+  const userRoundOverview = useUserActionOverview(account?.address ?? "", {
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
   })
-
   const yourRaking = useMemo(() => {
     if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined
@@ -51,7 +42,10 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
     }
   }, [userRoundOverview, account?.address])
 
-  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
+  const leaderboardQuery = useUserActionLeaderboard({
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
+    direction: "DESC",
+  })
 
   const visibleRankings = useMemo(
     () => leaderboardQuery.data?.pages.map(page => page.data).flat() ?? [],
@@ -86,7 +80,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
             <Heading size="md">{t("Not enough data for the week")}</Heading>
-            <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
+            <Text textStyle="sm" color="text.subtle" textAlign={"center"}>
               {t("Come back later to see how you are ranking 🥇")}
             </Text>
           </VStack>
@@ -120,11 +114,11 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             <LeaderboardRankingComponent
               ranking={{
                 position: idx + 1,
-                address: ranking?.entity ?? "",
+                address: ranking?.wallet ?? "",
                 score: ranking?.actionsRewarded ?? 0,
               }}
-              key={`leaderboard-${ranking?.entity ?? idx}-${ranking?.roundId ?? idx}`}
-              isYourRanking={AddressUtils.compareAddresses(ranking?.entity ?? "", account?.address ?? "")}
+              key={`leaderboard-${ranking?.wallet ?? idx}-${ranking?.roundId ?? idx}`}
+              isYourRanking={AddressUtils.compareAddresses(ranking?.wallet ?? "", account?.address ?? "")}
             />
           ))}
         </VStack>
@@ -139,31 +133,24 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
           pos="fixed"
           bottom={0}
           w="full"
-          bg="white"
-          boxShadow="0px -1px 9px 0px rgba(0, 0, 0, 0.08);"
+          bg="bg.primary"
           p={4}
           zIndex={2}
           left={0}
           right={0}
           borderTopWidth={1}
-          borderColor="gray.200">
+          borderColor="border.secondary">
           <VStack w="full" maxW={"breakpoint-md"} mx="auto" align="stretch">
             <LeaderboardRankingComponent ranking={yourRaking} isYourRanking={true} />
           </VStack>
         </VStack>
       )}
       <VStack gap={8} align="flex-start" w="full">
-        <Button
-          px={0}
-          variant="plain"
-          color="primary"
-          _hover={{
-            textDecoration: "underline",
-          }}
-          size="sm"
-          onClick={() => router.push("/")}>
-          <FaAngleLeft />
-          {t("Go back")}
+        <Button px={0} variant="plain" color="actions.tertiary.default" size="sm" asChild>
+          <NextLink href="/">
+            <FaAngleLeft />
+            {t("Go back")}
+          </NextLink>
         </Button>
         <HStack justify={"space-between"} w="full">
           <IconButton
@@ -171,13 +158,13 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             size={"lg"}
             aria-label="Next round"
             variant="plain"
-            color="primary"
+            color="actions.tertiary.default"
             disabled={isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
             <Icon as={FaAngleLeft} boxSize={5} />
           </IconButton>
 
-          <Heading size={{ base: "md", lg: "xl" }} fontWeight="bold">
+          <Heading size={{ base: "md", lg: "xl" }}>
             {t("Round {{id}} leaderboard", {
               id: selectedRoundId ?? "",
             })}
@@ -188,7 +175,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             size={"lg"}
             aria-label="Next round"
             variant="plain"
-            color="primary"
+            color="actions.tertiary.default"
             disabled={isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
             <Icon as={FaAngleRight} boxSize={5} />

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
-import { getXApps } from "../getXApps"
 import { useThor } from "@vechain/vechain-kit"
+
+import { getXApps } from "../getXApps"
 
 /**
  * Query key for the xApps query
@@ -11,7 +12,6 @@ export const getXAppsQueryKey = (filterBlacklisted: boolean = false) => [
   "getXApps",
   filterBlacklisted ? "includes-blacklisted" : "excludes-blacklisted",
 ]
-
 /**
  * Hook to get all the available xApps in the B3TR ecosystem
  * @param filterBlacklisted - whether to filter blacklisted xApps
@@ -19,7 +19,6 @@ export const getXAppsQueryKey = (filterBlacklisted: boolean = false) => [
  */
 export const useXApps = ({ filterBlacklisted = false } = {}) => {
   const thor = useThor()
-
   return useQuery({
     queryKey: getXAppsQueryKey(filterBlacklisted),
     queryFn: async () => await getXApps(thor, filterBlacklisted),

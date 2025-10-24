@@ -1,5 +1,6 @@
-import { useXAppScreenshots } from "@/api/contracts/xApps/hooks/useXAppScreenshots"
 import { useParams } from "next/navigation"
+
+import { useXAppScreenshots } from "@/api/contracts/xApps/hooks/useXAppScreenshots"
 
 /**
  * Custom hook that retrieves the screenshots of the current app.
@@ -9,6 +10,5 @@ import { useParams } from "next/navigation"
  */
 export const useCurrentAppScreenshots = () => {
   const { appId } = useParams<{ appId: string }>()
-
   return useXAppScreenshots(appId)
 }

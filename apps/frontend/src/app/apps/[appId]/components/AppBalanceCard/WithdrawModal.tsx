@@ -11,25 +11,29 @@ import {
   NativeSelect,
   CloseButton,
 } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
-import { useWithdrawAppBalance } from "@/hooks"
-import { Controller, useForm } from "react-hook-form"
-import { CustomModalContent, B3TRIcon } from "@/components"
-import { useTranslation } from "react-i18next"
-import { motion } from "framer-motion"
-import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
-import { TeamWalletAddress } from "./components/TeamWalletAddress"
-import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
+import { motion } from "framer-motion"
+import { useCallback, useMemo } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { IoWalletOutline } from "react-icons/io5"
+
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
+import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
+import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
+
+import { TeamWalletAddress } from "./components/TeamWalletAddress"
+import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
+
 export type Props = {
   appId: string
   teamWalletAddress: string
   isOpen: boolean
   onClose: () => void
 }
-
 const containerVariants = {
   initial: {
     opacity: 0,
@@ -166,9 +170,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("Specify your reason")}
-                      </Text>
+                      <Text textStyle="sm">{t("Specify your reason")}</Text>
                     </HStack>
                     <HStack w="full">
                       <Input type="text" value={value} onChange={e => onChange(e.target.value)} variant="amountInput" />
@@ -191,24 +193,24 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
-            <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
               {t("Withdraw from your balance")}
             </Text>
           </HStack>
-          <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} opacity={0.7}>
+          <Text textStyle={{ base: "sm", md: "md" }} opacity={0.7}>
             {t("Send your app’s funds received from allocations to your team wallet address.")}
           </Text>
 
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
               <Skeleton loading={isBalanceLoading}>
-                <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
+                <Text textStyle={{ base: "2xl", md: "xl" }} fontWeight="semibold">
                   {FormattingUtils.humanNumber(Number(availableB3trToWithdrawScaled))}
                 </Text>
               </Skeleton>
             </HStack>
 
-            <Text fontSize="12px" fontWeight="400" opacity={0.7}>
+            <Text textStyle="xs" opacity={0.7}>
               {t("Current B3TR Balance")}
             </Text>
           </VStack>
@@ -219,9 +221,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={2}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("Withdraw reason")}
-                      </Text>
+                      <Text textStyle="sm">{t("Withdraw reason")}</Text>
                     </HStack>
                     <HStack w="full">{reasonInput}</HStack>
                   </VStack>
@@ -241,9 +241,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("You'll withdraw")}
-                      </Text>
+                      <Text textStyle="sm">{t("You'll withdraw")}</Text>
                     </HStack>
                     <HStack w="full">
                       <B3TRIcon boxSize={"30px"} />
@@ -262,13 +260,13 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           <Button
             mt={2}
             type="submit"
-            variant={"primaryAction"}
+            variant={"primary"}
             w={"full"}
             rounded={"full"}
             disabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
             size={"lg"}>
             <Icon as={IoWalletOutline} mr={2} />
-            <Text fontSize={{ base: 14, md: 18 }}>{t("Withdraw now")}</Text>
+            <Text textStyle={{ base: "sm", md: "lg" }}>{t("Withdraw now")}</Text>
           </Button>
         </VStack>
       </form>

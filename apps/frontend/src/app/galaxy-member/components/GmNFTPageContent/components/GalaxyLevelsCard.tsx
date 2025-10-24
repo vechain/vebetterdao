@@ -1,16 +1,18 @@
-import { useGetUserGMs, useGMMaxLevel, UserGM } from "@/api"
-import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { Tooltip } from "@/components/ui/tooltip"
-import { gmNfts } from "@/constants/gmNfts"
-import { Button, Card, Flex, Heading, HStack, Image, Table, VStack, Text } from "@chakra-ui/react"
+import { Button, Card, Flex, Heading, HStack, Image, SimpleGrid, VStack, Text, Icon } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { ToggleTip } from "@/components/ui/toggle-tip"
+import { gmNfts } from "@/constants/gmNfts"
+
+import { UserGM, useGetUserGMs } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
+
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(0)
-
 export const GalaxyLevelsCard = () => {
   const { data: userGms } = useGetUserGMs()
   const { data: maxGMLevel = 0 } = useGMMaxLevel()
@@ -30,7 +32,6 @@ export const GalaxyLevelsCard = () => {
     }
     return gmNfts.slice(maxGMLevel - 4, maxGMLevel)
   }, [tokenLevel, maxGMLevel])
-
   const getLevelText = (level: number, maxLevel: number, currentLevel: number) => {
     if (level === maxLevel) {
       return t("Max Level")
@@ -42,49 +43,53 @@ export const GalaxyLevelsCard = () => {
       b3trToUpgrade: compactFormatter.format(gmNfts[level - 1]?.b3trToUpgrade ?? 0),
     })
   }
-
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Reward Weight")}</Heading>
-              <Tooltip
+              <Heading textStyle="lg">{t("Reward Weight")}</Heading>
+              <ToggleTip
+                contentProps={{
+                  p: "0.25rem 0.5rem",
+                }}
                 content={
-                  <Table.ScrollArea maxW="280px" maxH="400px" overflowY="auto">
-                    <Table.Root variant="line" size="sm">
-                      <Table.Header position="sticky" top={0}>
-                        <Table.Row>
-                          <Table.ColumnHeader color="white" py={2}>
-                            {t("Name")}
-                          </Table.ColumnHeader>
-                          <Table.ColumnHeader color="white" py={2}>
-                            {t("Reward Weight")}
-                          </Table.ColumnHeader>
-                          <Table.ColumnHeader color="white" py={2}>
-                            {t("Cost")}
-                          </Table.ColumnHeader>
-                        </Table.Row>
-                      </Table.Header>
-                      <Table.Body>
-                        {gmNfts.map(nft => (
-                          <Table.Row key={nft.level} p={0}>
-                            <Table.Cell py={2}>{nft.name}</Table.Cell>
-                            <Table.Cell py={2}>{nft.multiplier}</Table.Cell>
-                            <Table.Cell py={2}>{compactFormatter.format(nft.b3trToUpgrade)}</Table.Cell>
-                          </Table.Row>
-                        ))}
-                      </Table.Body>
-                    </Table.Root>
-                  </Table.ScrollArea>
+                  <VStack maxW="280px" maxH="400px" overflowY="auto" align="stretch" gap={2}>
+                    <SimpleGrid
+                      alignItems="center"
+                      columns={3}
+                      gap={2}
+                      py={2}
+                      borderBottom="1px solid"
+                      borderColor="border.emphasized">
+                      <Text textStyle="sm" fontWeight="bold">
+                        {t("Name")}
+                      </Text>
+                      <Text textStyle="sm" fontWeight="bold">
+                        {t("Reward Weight")}
+                      </Text>
+                      <Text textStyle="sm" fontWeight="bold">
+                        {t("Cost")}
+                      </Text>
+                    </SimpleGrid>
+                    {gmNfts.map(nft => (
+                      <SimpleGrid key={nft.level} alignItems="center" columns={3} gap={2} py={2}>
+                        <Text textStyle="sm" fontWeight="bold">
+                          {nft.name}
+                        </Text>
+                        <Text textStyle="sm">{nft.multiplier}</Text>
+                        <Text textStyle="sm">{compactFormatter.format(nft.b3trToUpgrade)}</Text>
+                      </SimpleGrid>
+                    ))}
+                  </VStack>
                 }>
-                <span>
-                  <UilInfoCircle color="#004CFC" />
-                </span>
-              </Tooltip>
+                <Button size="xs" variant="ghost">
+                  <Icon as={UilInfoCircle} color="actions.tertiary.default" />
+                </Button>
+              </ToggleTip>
             </HStack>
-            <Text fontSize="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="text.subtle">
               {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}
             </Text>
           </VStack>
@@ -96,23 +101,23 @@ export const GalaxyLevelsCard = () => {
                   <Flex position="relative" w="10" h="10" rounded="full" overflow={"hidden"}>
                     <Image src={gmNft.image} alt={gmNft.name} w="10" h="10" position={"absolute"} />
                     <Flex w="full" h="full" align="center" justify="center" bg={"rgba(0, 0, 0, 0.2)"} zIndex={1}>
-                      <Text fontSize="md" color="#FFFFFF" fontWeight={700}>
+                      <Text textStyle="md" color="white">
                         {gmNft.level}
                       </Text>
                     </Flex>
                   </Flex>
                   <VStack align="stretch" gap={0}>
-                    <Text fontSize="lg" fontWeight={"600"}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {gmNft.name}
                     </Text>
-                    <Text fontSize="sm" color="#6A6A6A">
+                    <Text textStyle="sm" color="text.subtle">
                       {getLevelText(Number(gmNft.level), maxGMLevel, Number(tokenLevel))}
                     </Text>
                   </VStack>
                 </HStack>
                 {isCurrentLevel ? (
                   <Heading
-                    fontSize="2xl"
+                    textStyle="2xl"
                     bg={getLevelGradient(Number(tokenLevel))}
                     style={{
                       WebkitBackgroundClip: "text",
@@ -121,7 +126,7 @@ export const GalaxyLevelsCard = () => {
                     {gmNft.multiplier}
                   </Heading>
                 ) : (
-                  <Text fontSize="lg" color="#6A6A6A">
+                  <Text textStyle="lg" color="text.subtle">
                     {gmNft.multiplier}
                   </Text>
                 )}
@@ -129,7 +134,11 @@ export const GalaxyLevelsCard = () => {
             )
           })}
           {showShortened && gmNfts.slice(0, maxGMLevel).length > gmNftsShortened.length && (
-            <Button variant={"primaryLink"} onClick={() => setShowShortened(false)} fontSize="lg">
+            <Button
+              variant="plain"
+              color="actions.tertiary.default"
+              onClick={() => setShowShortened(false)}
+              textStyle="lg">
               {t("See all levels")}
             </Button>
           )}

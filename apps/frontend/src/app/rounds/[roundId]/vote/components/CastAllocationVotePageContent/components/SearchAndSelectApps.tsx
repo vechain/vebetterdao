@@ -1,12 +1,14 @@
-import { CastAllocationVoteFormData } from "@/store"
 import { VStack, InputGroup, Icon, Input, HStack, Skeleton, Heading, Checkbox } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
 import { useCallback, useMemo, useState } from "react"
-import { AppSelectableCard } from "./AppSelectableCard"
 import { useTranslation } from "react-i18next"
-import { NoAppsCard } from "./NoAppsCard"
+
+import { XApp } from "../../../../../../../api/contracts/xApps/getXApps"
+import { CastAllocationVoteFormData } from "../../../../../../../store/useCastAllocationFormStore"
 import { splitEvenly } from "../../../utils/splitEvenly"
-import { XApp } from "@/api"
+
+import { AppSelectableCard } from "./AppSelectableCard"
+import { NoAppsCard } from "./NoAppsCard"
 
 type Props = {
   selectedApps: CastAllocationVoteFormData[]
@@ -14,15 +16,12 @@ type Props = {
   xApps?: XApp[]
   isLoading?: boolean
 }
-
 const searchApp = (app: XApp, query: string) => {
   return app.name.toLowerCase().includes(query.toLowerCase())
 }
-
 export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps, isLoading }: Props) => {
   const { t } = useTranslation()
   const [appsToSearch, setAppsToSearch] = useState("")
-
   const onCheckboxChange = useCallback(
     (checked: boolean) => {
       if (!xApps) return
@@ -34,41 +33,37 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
     },
     [onSelectedAppsChange, xApps],
   )
-
   const isSelectAllChecked = useMemo(() => {
     if (!xApps) return false
     return selectedApps.length === xApps.length
   }, [selectedApps, xApps])
-
   const filteredApps = useMemo(() => {
     if (!xApps) return []
     return xApps.filter(xApp => searchApp(xApp, appsToSearch))
   }, [appsToSearch, xApps])
-
   return (
     <VStack w="full" gap={6}>
-      <InputGroup startElement={<Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />}>
+      <InputGroup startElement={<Icon as={UilSearch} boxSize={"24px"} color="text.subtle" />}>
         <Input
           size={"lg"}
           placeholder="Search for an app"
           value={appsToSearch}
           onChange={e => setAppsToSearch(e.target.value)}
-          fontSize={"16px"}
+          textStyle="md"
         />
       </InputGroup>
       <HStack w="full" gap={4} justify={"space-between"}>
         <Skeleton loading={isLoading}>
-          <Heading fontSize={"20px"} fontWeight={700}>
-            {t("{{amount}} participating apps", { amount: xApps?.length ?? "0" })}
-          </Heading>
+          <Heading size="xl">{t("{{amount}} participating apps", { amount: xApps?.length ?? "0" })}</Heading>
         </Skeleton>
         <Checkbox.Root
           colorPalette="primary"
           onCheckedChange={e => onCheckboxChange(!!e.checked)}
           checked={isSelectAllChecked}
           size="lg">
+          <Checkbox.HiddenInput />
           <Checkbox.Control />
-          {t("Select all")}
+          <Checkbox.Label>{t("Select all")}</Checkbox.Label>
         </Checkbox.Root>
       </HStack>
       <VStack w="full" gap={4}>

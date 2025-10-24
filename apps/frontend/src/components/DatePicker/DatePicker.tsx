@@ -1,4 +1,3 @@
-import { useCallback, useMemo, useState } from "react"
 import {
   Box,
   Button,
@@ -14,17 +13,16 @@ import {
   useMediaQuery,
   useBreakpointValue,
 } from "@chakra-ui/react"
-import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa"
-import { useTranslation } from "react-i18next"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
-
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa"
 // Starting the week on Monday
 dayjs.extend(updateLocale)
 dayjs.updateLocale("en", {
   weekStart: 1,
 })
-
 export type DatePickerProps = {
   // Start date in ISO format (YYYY-MM-DD)
   startDate?: string
@@ -37,8 +35,10 @@ export type DatePickerProps = {
   minDate?: string
   // Input size
   size?: "sm" | "md" | "lg"
+  placeholder?: string
+  variant?: "range" | "single"
+  value?: string
 }
-
 export const DatePicker = ({
   startDate = "",
   endDate = "",
@@ -46,6 +46,9 @@ export const DatePicker = ({
   maxDate,
   minDate,
   size = "md",
+  placeholder,
+  variant = "range",
+  value,
 }: DatePickerProps) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -58,7 +61,7 @@ export const DatePicker = ({
   })
 
   // Current view state
-  const today = useMemo(() => dayjs(), [])
+  const today = useMemo(() => (value ? dayjs(value) : dayjs()), [value])
   const [currentDate, setCurrentDate] = useState(today)
   const [selectionState, setSelectionState] = useState<"start" | "end">("start")
   const [tempStartDate, setTempStartDate] = useState(startDate)
@@ -99,6 +102,12 @@ export const DatePicker = ({
     (day: number) => {
       const selectedDate = currentDate.date(day).format("YYYY-MM-DD")
 
+      if (variant === "single") {
+        onChange(selectedDate, "")
+        setIsOpen(false)
+        return
+      }
+
       if (selectionState === "start") {
         setTempStartDate(selectedDate)
         setTempEndDate("")
@@ -125,7 +134,7 @@ export const DatePicker = ({
         )
       }
     },
-    [currentDate, selectionState, tempStartDate, onChange],
+    [currentDate, selectionState, tempStartDate, onChange, variant],
   )
 
   const resetSelection = useCallback(() => {
@@ -143,10 +152,13 @@ export const DatePicker = ({
   }, [startDate, endDate])
 
   const displayValue = useMemo(() => {
+    if (variant === "single") {
+      return startDate ? dayjs(startDate).format("D MMM, YYYY") : ""
+    }
     if (!startDate && !endDate) return ""
     if (startDate && !endDate) return dayjs(startDate).format("D MMM, YYYY")
     return `${dayjs(startDate).format("D MMM, YYYY")} - ${dayjs(endDate).format("D MMM, YYYY")}`
-  }, [startDate, endDate])
+  }, [startDate, endDate, variant])
 
   const isDayInRange = useCallback(
     (day: number) => {
@@ -183,27 +195,12 @@ export const DatePicker = ({
       open={isOpen}
       onOpenChange={details => setIsOpen(details.open)}
       positioning={{ strategy: "fixed", placement }}
-      closeOnInteractOutside={false}
-      // modifiers={[
-      //   {
-      //     name: "flip",
-      //     options: {
-      //       fallbackPlacements: ["top", "bottom", "right", "left"],
-      //     },
-      //   },
-      //   {
-      //     name: "preventOverflow",
-      //     options: {
-      //       padding: 8,
-      //     },
-      //   },
-      // ]}
-    >
+      closeOnInteractOutside={false}>
       <Popover.Trigger>
         <InputGroup w="full" startElement={<FaCalendarAlt color="contrast-fg-on-muted" pointerEvents="none" />}>
           <Input
             size={size}
-            placeholder={t("Select date range")}
+            placeholder={placeholder || t("Select date range")}
             value={displayValue}
             readOnly
             onClick={() => setIsOpen(!isOpen)}
@@ -233,7 +230,7 @@ export const DatePicker = ({
             <Grid templateColumns="repeat(7, 1fr)" gap={1}>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                 <Box key={day} textAlign="center">
-                  <Text fontSize="xs" fontWeight="medium" color="#D9D9D9">
+                  <Text textStyle="xs" color="#D9D9D9">
                     {day}
                   </Text>
                 </Box>
@@ -263,8 +260,7 @@ export const DatePicker = ({
                     p="0"
                     disabled={!isSelectable}
                     unstyled
-                    fontSize={isMobile ? "2xs" : "xs"}
-                    fontWeight="medium"
+                    textStyle={isMobile ? "2xs" : "xs"}
                     bg={isStartOrEnd ? "#004CFC" : isInRange ? "#E0E9FE" : "transparent"}
                     color={isStartOrEnd ? "white" : "inherit"}
                     borderRadius="md"
@@ -289,8 +285,8 @@ export const DatePicker = ({
             </HStack>
 
             {/* Reminder to select an end date */}
-            {tempStartDate && !tempEndDate && (
-              <Text fontSize="xs" color="#D9D9D9" textAlign="center">
+            {variant === "range" && tempStartDate && !tempEndDate && (
+              <Text textStyle="sm" color="#D9D9D9" textAlign="center">
                 {t("Select end date")}
               </Text>
             )}

@@ -1,6 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", ".env"],
   "globalEnv": [
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
@@ -28,19 +27,24 @@
     "NEXTAUTH_SECRET",
     "TWITTER_CLIENT_ID",
     "TWITTER_CLIENT_SECRET",
-    "RESET_USER_SIGNAL_COUNT_DOMAIN"
+    "RESET_USER_SIGNAL_COUNT_DOMAIN",
+    "DISCORD_CLIENT_ID",
+    "DISCORD_CLIENT_SECRET"
   ],
   "tasks": {
-    "install": {
-      "dependsOn": ["@vechain/vebetterdao-contracts#install", "^compile"]
+    "prepare-contracts": {
+      "cache": true,
+      "dependsOn": ["@vechain/vebetterdao-contracts#compile"],
+      "outputs": ["packages/contracts/artifacts/**", "packages/contracts/typechain-types/**"]
     },
-    "@vechain/vebetterdao-contracts#install": {
-      "cache": false
+    "build-storybook": {
+      "cache": true,
+      "outputs": ["storybook-static/**"]
     },
     "build": {
       "cache": true,
-      "dependsOn": ["@vechain/vebetterdao-contracts#compile", "@repo/config#check-or-generate-local-config"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "dependsOn": ["prepare-contracts"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "src/api/indexer/schema.d.ts"]
     },
     "lint": {
       "cache": false
@@ -50,6 +54,7 @@
     },
     "dev": {
       "cache": false,
+      "persistent": true,
       "dependsOn": ["^setup-contracts"]
     },
     "dev:staging": {
@@ -160,8 +165,9 @@
       "cache": false
     },
     "compile": {
-      "cache": false,
-      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+      "cache": true,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": ["dist/**", "artifacts/**", "typechain-types/**", "cache/**"]
     },
     "deploy": {
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
@@ -275,10 +281,6 @@
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "test:coverage:fe": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
     "test:coverage:solidity": {
       "cache": false,
       "dependsOn": ["^@repo/config#check-or-generate-local-config"]
@@ -331,22 +333,6 @@
       "cache": false
     },
     "estimate-voting-gas:mainnet": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "analyze-proposal-deposits:mainnet": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "analyze-proposal-deposits:testnet-staging": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "seed-voting-power:testnet-staging": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "seed-voting-power:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     }

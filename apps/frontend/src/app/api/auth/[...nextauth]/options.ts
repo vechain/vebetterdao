@@ -1,11 +1,13 @@
 import type { NextAuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github"
+// import DiscordProvider from "next-auth/providers/discord"
 import TwitterProvider from "next-auth/providers/twitter"
-
 const githubClientId = process.env.GITHUB_CLIENT_ID
 const githubClientSecret = process.env.GITHUB_CLIENT_SECRET
 const twitterClientId = process.env.TWITTER_CLIENT_ID
 const twitterClientSecret = process.env.TWITTER_CLIENT_SECRET
+// const discordClientId = process.env.DISCORD_CLIENT_ID
+// const discordClientSecret = process.env.DISCORD_CLIENT_SECRET
 const nextAuthSecret = process.env.NEXTAUTH_SECRET
 
 if (!githubClientId || !githubClientSecret || !nextAuthSecret || !twitterClientId || !twitterClientSecret) {
@@ -47,6 +49,10 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    // DiscordProvider({
+    //   clientId: discordClientId ?? "",
+    //   clientSecret: discordClientSecret ?? "",
+    // }),
   ],
   callbacks: {
     async session({ session, token }: any) {
@@ -56,6 +62,12 @@ export const authOptions: NextAuthOptions = {
       if (token?.twitterUsername) {
         session.user.twitterUsername = token.twitterUsername
       }
+      // if (token?.discordUsername) {
+      //   session.user.discordUsername = token.discordUsername
+      // }
+      // if (token?.discordUserId) {
+      //   session.user.discordUserId = token.discordUserId
+      // }
       return session
     },
     async jwt({ token, account, profile }: any) {
@@ -75,6 +87,16 @@ export const authOptions: NextAuthOptions = {
           token.twitterUsername = profile.username // Capture Twitter username
         }
       }
+
+      // // Assign Discord username if provider is Discord
+      // if (account?.provider === "discord") {
+      //   if (profile?.username) {
+      //     token.discordUsername = profile.username // Capture Discord username
+      //   }
+      //   if (profile?.id) {
+      //     token.discordUserId = profile.id // Capture Discord user id
+      //   }
+      // }
 
       return token
     },

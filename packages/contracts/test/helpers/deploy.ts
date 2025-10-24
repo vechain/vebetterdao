@@ -118,6 +118,9 @@ import {
   GovernorClockLogicV6,
   StargateNFT,
   GrantsManager,
+  RelayerRewardsPool,
+  AutoVotingLogic,
+  DBAPool,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -145,6 +148,7 @@ import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
 import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
 import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
+import { autoVotingLibraries } from "../../scripts/libraries"
 
 export interface DeployInstance {
   B3trContract: ContractFactory
@@ -166,6 +170,7 @@ export interface DeployInstance {
   veBetterPassportV1: VeBetterPassportV1
   veBetterPassportV2: VeBetterPassportV2
   veBetterPassportV3: VeBetterPassportV3
+  dynamicBaseAllocationPool: DBAPool
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -284,6 +289,12 @@ export interface DeployInstance {
   // StarGate
   stargateNftMock: StargateNFT
   vthoTokenMock: MyERC20
+
+  // Rewards Pool related to XAllocationVoting
+  relayerRewardsPool: RelayerRewardsPool
+
+  // AutoVoting Libraries
+  autoVotingLogic: AutoVotingLogic
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -309,6 +320,7 @@ export const getOrDeployContractInstances = async ({
   // Contracts are deployed using the first signer/account by default
   const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
   const creators = otherAccounts.slice(0, APPS.length) // otherAcounts[1]...otherAccounts[8] reserved for creators
+
   // ---------------------- Deploy Libraries ----------------------
   const {
     GovernorClockLogicLibV1,
@@ -425,6 +437,9 @@ export const getOrDeployContractInstances = async ({
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
   } = await x2EarnLibraries()
+
+  // Deploy AutoVoting Libraries
+  const { AutoVotingLogic } = await autoVotingLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
 
@@ -558,13 +573,8 @@ export const getOrDeployContractInstances = async ({
   const B3trContract = await ethers.getContractFactory("B3TR")
   const b3tr = await B3trContract.deploy(owner, minterAccount, owner)
 
-  // Deploy VOT3
-  const vot3 = (await deployProxy("VOT3", [
-    owner.address,
-    owner.address,
-    owner.address,
-    await b3tr.getAddress(),
-  ])) as VOT3
+  // Deploy VOT3 version 1
+  let vot3 = (await deployProxy("VOT3", [owner.address, owner.address, owner.address, await b3tr.getAddress()])) as VOT3
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
@@ -739,6 +749,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationPoolV3",
       "XAllocationPoolV4",
       "XAllocationPoolV5",
+      "XAllocationPoolV6",
       "XAllocationPool",
     ],
     [
@@ -756,9 +767,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [[], []],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
     },
   )) as XAllocationPool
 
@@ -805,7 +817,7 @@ export const getOrDeployContractInstances = async ({
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewardsV5", "VoterRewards"],
     [
       [
         owner.address, // admin
@@ -821,9 +833,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
     },
   )) as VoterRewards
 
@@ -839,6 +852,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV4",
       "XAllocationVotingV5",
       "XAllocationVotingV6",
+      "XAllocationVotingV7",
       "XAllocationVoting",
     ],
     [
@@ -859,15 +873,26 @@ export const getOrDeployContractInstances = async ({
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
         },
       ],
-      [veBetterPassportContractAddress],
       [],
       [],
       [],
       [],
-      [tempB3trGovernorAddress], // b3tr address
+      [],
+      [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      libraries: [
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        { AutoVotingLogic: await AutoVotingLogic.getAddress() },
+      ],
       logOutput: false,
     },
   )) as XAllocationVoting
@@ -1111,6 +1136,34 @@ export const getOrDeployContractInstances = async ({
     },
   )) as B3TRGovernor
 
+  const relayerRewardsPool = (await deployAndUpgrade(
+    ["RelayerRewardsPool"],
+    [
+      [
+        owner.address, // admin
+        owner.address, // upgrader
+        await b3tr.getAddress(), // b3trAddress
+        await emissions.getAddress(), // emissionsAddress
+        await xAllocationVoting.getAddress(), // xAllocationVotingAddress
+      ],
+    ],
+    {
+      versions: [undefined],
+      logOutput: false,
+    },
+  )) as RelayerRewardsPool
+
+  const dynamicBaseAllocationPool = (await deployProxy("DBAPool", [
+    {
+      admin: owner.address,
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationPool: await xAllocationPool.getAddress(),
+      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+      b3tr: await b3tr.getAddress(),
+      distributionStartRound: 1,
+    },
+  ])) as DBAPool
+
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
@@ -1125,6 +1178,7 @@ export const getOrDeployContractInstances = async ({
     X2EarnApps: await x2EarnApps.getAddress(),
     VeBetterPassport: veBetterPassportContractAddress,
     StargateNFT: await stargateNftMock.getAddress(),
+    DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
   }
 
   const libraries = {
@@ -1142,6 +1196,9 @@ export const getOrDeployContractInstances = async ({
       EndorsementUtils: await EndorsementUtils.getAddress(),
       AdministrationUtils: await AdministrationUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+    },
+    XAllocationVoting: {
+      AutoVotingLogic: await AutoVotingLogic.getAddress(),
     },
   }
 
@@ -1167,9 +1224,11 @@ export const getOrDeployContractInstances = async ({
   await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
+  // Set governor and veBetterPassport addresses in XAllocationVoting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)
   await xAllocationVoting.connect(owner).setB3TRGovernor(await governor.getAddress())
+  await xAllocationVoting.connect(owner).setVeBetterPassport(await veBetterPassport.getAddress())
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -1208,6 +1267,23 @@ export const getOrDeployContractInstances = async ({
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
 
+  // Setup the RelayerRewardsPool contract
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
+    .then(async tx => await tx.wait())
+  await xAllocationVoting
+    .connect(owner)
+    .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
+    .then(async tx => await tx.wait())
+  await xAllocationVoting.connect(owner).setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
+  await voterRewards.connect(owner).setRelayerRewardsPool(await relayerRewardsPool.getAddress())
+  await voterRewards.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
+
   // Since x2EarnApps v5, new apps => new creator != owner
   // Token id 2, 3, 4, 5 are reserved for the creator NFTs
   await Promise.all([
@@ -1240,6 +1316,7 @@ export const getOrDeployContractInstances = async ({
     xAllocationPool,
     emissions,
     voterRewards,
+    dynamicBaseAllocationPool,
     owner,
     otherAccount,
     minterAccount,
@@ -1353,6 +1430,8 @@ export const getOrDeployContractInstances = async ({
     vthoTokenMock,
     vechainNodesMock,
     stargateNftMock,
+    relayerRewardsPool,
+    autoVotingLogic: AutoVotingLogic,
   }
   return cachedDeployInstance
 }

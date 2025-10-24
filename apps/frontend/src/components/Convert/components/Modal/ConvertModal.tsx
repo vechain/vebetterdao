@@ -1,47 +1,45 @@
 "use-client"
-import { useCallback, useMemo, useState } from "react"
-import {
-  useConvertB3tr,
-  useConvertVot3,
-  useGetB3trBalance,
-  useGetVot3Balance,
-  useSmartAccountUpgradeRequired,
-} from "@/hooks"
-import { useForm } from "react-hook-form"
-import { TokenSelectionContent, SwapTokenContent, ReviewSwapContent } from "./contents"
-import { useB3trConverted } from "@/api"
 import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
-import { useTranslation } from "react-i18next"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { StepModal, type Step } from "../../../StepModal"
 import BigNumber from "bignumber.js"
+import { useCallback, useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useB3trConverted } from "../../../../api/contracts/b3tr/hooks/useB3trConverted"
+import { useConvertB3tr } from "../../../../hooks/useConvertB3tr"
+import { useConvertVot3 } from "../../../../hooks/useConvertVot3"
+import { useGetB3trBalance } from "../../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
+import { useSmartAccountUpgradeRequired } from "../../../../hooks/vechainKitHooks/useSmartAccountUpgradeRequired"
+import { Step, StepModal } from "../../../StepModal/StepModal"
+
+import { ReviewSwapContent } from "./contents/ReviewSwapContent"
+import { SwapTokenContent } from "./contents/SwapTokenContent"
+import { TokenSelectionContent } from "./contents/TokenSelectionContent"
 
 export type Props = {
   isOpen: boolean
   onClose: () => void
 }
-
 export enum ConvertStep {
   SELECT_TOKEN = "SELECT_TOKEN",
   CONFIRM_SWAP = "CONFIRM_SWAP",
   REVIEW_TX = "REVIEW_TX",
 }
-
 const STEP_COUNT = Object.keys(ConvertStep).length
-
 export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const { account } = useWallet()
   const [isB3trToVot3, setIsB3trToVot3] = useState<boolean>()
   const { isTxModalOpen } = useTransactionModal()
   const { t } = useTranslation()
   const [step, setStep] = useState(0)
-
   const goToNextStep = useCallback(() => {
     const nextStep = step + 1
     if (nextStep > STEP_COUNT) onClose()
     else setStep(nextStep)
   }, [step, onClose])
-
   const goToPrevStep = useCallback(() => {
     const prevStep = step - 1
     if (prevStep < 1) onClose()
@@ -158,7 +156,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       ? t(
           "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.",
         )
-      : t("B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.")
+      : t("B3TR are the tokens that you earn through the apps and by participating on the voting sessions.")
   }, [isB3trToVot3, t])
 
   const steps = useMemo<Step<ConvertStep>[]>(

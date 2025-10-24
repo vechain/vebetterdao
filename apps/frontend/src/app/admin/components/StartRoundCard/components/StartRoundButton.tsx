@@ -1,51 +1,68 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
-import { useDistributeEmission } from "@/hooks"
 import { VStack, Button, Text } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-export const StartRoundButton = () => {
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: currentRound } = useAllocationsRound(currentRoundId)
+import { useStartRoundAndClaimWorkflow } from "@/hooks/useStartRoundAndClaimWorkflow"
+
+import { useCurrentRoundActiveState } from "../../../../../api/contracts/xAllocations/hooks/useCurrentRoundActiveState"
+
+interface StartRoundButtonProps {
+  redirectTo?: string
+  onSuccess?: () => void
+}
+export const StartRoundButton = ({ redirectTo, onSuccess }: StartRoundButtonProps) => {
   const { t } = useTranslation()
-  const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === 0
-  }, [currentRound])
-  const { sendTransaction, isTransactionPending, status } = useDistributeEmission({})
-  const distributionLoading = isTransactionPending || status === "pending"
-
-  const handleSubmit = useCallback(() => {
-    sendTransaction()
-  }, [sendTransaction])
-
+  const router = useRouter()
+  const { isCurrentRoundActive, currentRound, currentRoundId } = useCurrentRoundActiveState()
+  const { sendTransaction, isTransactionPending, status, xAppsLeftCount } = useStartRoundAndClaimWorkflow({
+    roundId: currentRoundId ?? "",
+    onSuccess: () => {
+      onSuccess?.()
+      if (redirectTo) {
+        router.push(redirectTo)
+      }
+    },
+  })
   if (parseInt(currentRoundId ?? "0") < 1) return null
-
+  const getButtonText = () => {
+    if (isTransactionPending) {
+      return t("Processing transaction...")
+    }
+    if (status === "success") {
+      return t("Transaction completed!")
+    }
+    return t("Start new round & claim allocations")
+  }
   return (
-    <VStack w="full" gap={4}>
+    <VStack alignItems="start" w="full" gap={4}>
+      {xAppsLeftCount > 0 && (
+        <Text color="inherit">
+          {t("By clicking the button below, you will also claim allocations for {{count}} apps.", {
+            count: xAppsLeftCount,
+          })}
+        </Text>
+      )}
       <VStack w="full" gap={4} alignItems="start">
-        <VStack>
-          <Text>
-            {currentRound.voteEndTimestamp?.isBefore()
-              ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
-                  currentRoundId: currentRoundId,
-                  currentRoundEndedAt: currentRound.voteEndTimestamp?.fromNow(),
-                })
-              : t("Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}", {
-                  currentRoundId: currentRoundId,
-                  currentRoundEndsAt: currentRound.voteEndTimestamp?.fromNow(),
-                })}
-          </Text>
-        </VStack>
-        <VStack>
-          <Button
-            colorPalette="blue"
-            disabled={isCurrentRoundActive}
-            onClick={handleSubmit}
-            loading={distributionLoading}
-            data-testid={"start-voting-round-button"}>
-            {t("Start new round")}
-          </Button>
-        </VStack>
+        <Text color="inherit">
+          {currentRound.voteEndTimestamp?.isBefore()
+            ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
+                currentRoundId: currentRoundId,
+                currentRoundEndedAt: currentRound.voteEndTimestamp?.fromNow(),
+              })
+            : t("Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}", {
+                currentRoundId: currentRoundId,
+                currentRoundEndsAt: currentRound.voteEndTimestamp?.fromNow(),
+              })}
+        </Text>
+
+        <Button
+          variant="secondary"
+          disabled={isCurrentRoundActive || isTransactionPending || status === "success"}
+          onClick={() => sendTransaction()}
+          loading={isTransactionPending}
+          data-testid="start-voting-round-button">
+          {getButtonText()}
+        </Button>
       </VStack>
     </VStack>
   )

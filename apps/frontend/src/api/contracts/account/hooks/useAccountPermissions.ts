@@ -1,12 +1,12 @@
 import { getConfig } from "@repo/config"
-import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
+import { AccessControl__factory } from "@vechain/vebetterdao-contracts/@openzeppelin/access/AccessControl__factory"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+
 import { getBytes32Role } from "./useHasRole"
 
 const abi = AccessControl__factory.abi
 const method = "hasRole" as const
-
 const config = getConfig()
 type AccountPermissionResponse = {
   isAdminOfB3tr: boolean
@@ -42,8 +42,9 @@ type AccountPermissionResponse = {
   isMinterOfX2EarnCreator: boolean
   isBurnerOfX2EarnCreator: boolean
   isAdminOfX2EarnCreator: boolean
+  isGrantApprover: boolean
+  isGrantRejector: boolean
 }
-
 const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; contractAddress: string }> = {
   isAdminOfB3tr: {
     role: "DEFAULT_ADMIN_ROLE",
@@ -176,6 +177,14 @@ const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; cont
   isAdminOfX2EarnCreator: {
     role: "DEFAULT_ADMIN_ROLE",
     contractAddress: config.x2EarnCreatorContractAddress,
+  },
+  isGrantApprover: {
+    role: "GRANTS_APPROVER_ROLE",
+    contractAddress: config.grantsManagerContractAddress,
+  },
+  isGrantRejector: {
+    role: "GRANTS_REJECTOR_ROLE",
+    contractAddress: config.grantsManagerContractAddress,
   },
 }
 

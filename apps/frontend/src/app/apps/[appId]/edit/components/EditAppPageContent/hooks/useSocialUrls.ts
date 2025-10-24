@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { UseFormReturn } from "react-hook-form"
+
 import { EditAppForm } from "../EditAppPageContent"
 
 export const useSocialUrls = (form: UseFormReturn<EditAppForm, any, EditAppForm>) => {
@@ -8,7 +9,6 @@ export const useSocialUrls = (form: UseFormReturn<EditAppForm, any, EditAppForm>
   const telegramUrl = form.watch("telegramUrl")
   const youtubeUrl = form.watch("youtubeUrl")
   const mediumUrl = form.watch("mediumUrl")
-
   const socialUrls = useMemo(() => {
     const urls = []
     if (twitterUrl) {
@@ -43,6 +43,5 @@ export const useSocialUrls = (form: UseFormReturn<EditAppForm, any, EditAppForm>
     }
     return urls
   }, [discordUrl, mediumUrl, telegramUrl, twitterUrl, youtubeUrl])
-
   return socialUrls
 }

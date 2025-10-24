@@ -1,21 +1,20 @@
-import { Field, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { Field, Icon, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { useMemo } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { RiTwitterXFill } from "react-icons/ri"
 import { FaDiscord, FaMedium, FaTelegram, FaYoutube } from "react-icons/fa6"
-import { EditAppForm } from ".."
-import { useCurrentAppMetadata } from "@/app/apps/[appId]/hooks"
-import { useMemo } from "react"
-import { URL_REGEX } from "@/constants"
+import { RiTwitterXFill } from "react-icons/ri"
+
+import { URL_REGEX } from "../../../../../../../constants/url"
+import { useCurrentAppMetadata } from "../../../../hooks/useCurrentAppMetadata"
+import { EditAppForm } from "../EditAppPageContent"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
-
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
   return urls?.find(url => url.name === name)?.url || ""
 }
-
 export const EditAppSocialUrls = ({ form }: Props) => {
   const { t } = useTranslation()
   const {
@@ -28,7 +27,6 @@ export const EditAppSocialUrls = ({ form }: Props) => {
   const telegramUrl = findUrlByName(appMetadata?.social_urls, "Telegram")
   const youtubeUrl = findUrlByName(appMetadata?.social_urls, "Youtube")
   const mediumUrl = findUrlByName(appMetadata?.social_urls, "Medium")
-
   const inputData = useMemo(() => {
     return [
       {
@@ -36,35 +34,35 @@ export const EditAppSocialUrls = ({ form }: Props) => {
         url: twitterUrl,
         error: errors.twitterUrl,
         placeholder: t(`Add your x.com link`),
-        icon: <RiTwitterXFill />,
+        icon: <Icon as={RiTwitterXFill} color="social.twitter" />,
       },
       {
         inputKey: "discordUrl",
         url: discordUrl,
         error: errors.discordUrl,
         placeholder: t(`Add your discord link`),
-        icon: <FaDiscord color="#7289DA" />,
+        icon: <Icon as={FaDiscord} color="social.discord" />,
       },
       {
         inputKey: "telegramUrl",
         url: telegramUrl,
         error: errors.telegramUrl,
         placeholder: t(`Add your telegram link`),
-        icon: <FaTelegram color="#0088CC" />,
+        icon: <Icon as={FaTelegram} color="social.telegram" />,
       },
       {
         inputKey: "youtubeUrl",
         url: youtubeUrl,
         error: errors.youtubeUrl,
         placeholder: t(`Add your youtube link`),
-        icon: <FaYoutube color="#FF0000" />,
+        icon: <Icon as={FaYoutube} color="social.youtube" />,
       },
       {
         inputKey: "mediumUrl",
         url: mediumUrl,
         error: errors.mediumUrl,
         placeholder: t(`Add your medium link`),
-        icon: <FaMedium />,
+        icon: <Icon as={FaMedium} color="social.medium" />,
       },
     ]
   }, [
@@ -83,7 +81,7 @@ export const EditAppSocialUrls = ({ form }: Props) => {
 
   return (
     <VStack align={"stretch"} flex={1.5} gap={4} w="full">
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("Social media links")}
       </Text>
       {inputData.map(({ inputKey, url, error, placeholder, icon }) => (
@@ -91,7 +89,7 @@ export const EditAppSocialUrls = ({ form }: Props) => {
           <InputGroup startElement={icon}>
             <Input
               rounded="full"
-              fontSize={"14px"}
+              textStyle="sm"
               type="url"
               placeholder={placeholder}
               defaultValue={url}
@@ -103,7 +101,7 @@ export const EditAppSocialUrls = ({ form }: Props) => {
               })}
             />
           </InputGroup>
-          <Field.ErrorText fontSize={"12px"}>{error?.message || ""}</Field.ErrorText>
+          <Field.ErrorText textStyle="xs">{error?.message || ""}</Field.ErrorText>
         </Field.Root>
       ))}
     </VStack>

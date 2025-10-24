@@ -8,11 +8,11 @@ environment: "mainnet"
 lambda_function_name: "start-emissions-round"
 lambda_handler: "index.handler"
 lambda_runtime: "nodejs20.x"
-lambda_memory_size: 512
+lambda_memory_size: 1024
 lambda_timeout: 900
 
 # Lambda Build Path
 lambda_source_dir: "packages/lambda/dist/mainnet/startRound"
 
 # Schedule Configuration
-schedule_expression: "cron(00 5 ? * MON *)" # Runs every Monday at 5:00 AM UTC
+schedule_expression: "cron(40 6 ? * MON *)" # Runs every Monday at 6:40 AM UTC

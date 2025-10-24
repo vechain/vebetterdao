@@ -1,24 +1,24 @@
-import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { useIpfsImage } from "@/api/ipfs"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
-import { useXAppMetadata } from "@/api"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
+
+import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
 
 type Props = {
   event: AppEndorsedEvent
 }
-
 export const EndorsementHistoryItem = ({ event }: Props) => {
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(event.appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
   const eventTimestamp = useEstimateBlockTimestamp({ blockNumber: event.blockNumber })
-
   return (
-    <HStack>
+    <HStack gap="4">
       <Box position="relative">
         <Image src={logo?.image} alt="endorsed-app" w="12" h="12" rounded="xl" />
         <Box position="absolute" bottom="-6px" right="-6px" bg="white" rounded="full" zIndex={1}>
@@ -26,11 +26,11 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
         </Box>
       </Box>
       <VStack align="stretch" gap={0}>
-        <HStack gap={1} fontSize={["sm", "sm", "md"]}>
+        <HStack gap={1} textStyle={["sm", "sm", "md"]}>
           <Text>{t(event.endorsed ? "You endorsed" : "You unendorsed")} </Text>
-          <Text fontWeight="600">{appMetadata?.name}</Text>
+          <Text fontWeight="semibold">{appMetadata?.name}</Text>
         </HStack>
-        <Text fontSize={["2xs", "2xs", "sm"]} color="#6A6A6A">
+        <Text textStyle={["2xs", "2xs", "sm"]} color="text.subtle">
           {dayjs(eventTimestamp).fromNow()}
         </Text>
       </VStack>

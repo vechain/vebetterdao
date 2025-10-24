@@ -1,18 +1,21 @@
-import { useTweet } from "@/api/twitter/hooks/useTweets"
 import { Button, Field, Heading, Input, InputGroup, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiTwitterXFill } from "react-icons/ri"
+import Lottie from "react-lottie"
 import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
-import "./tweetStyle.css"
-import { useCurrentAppMetadata } from "../../../hooks"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+
+import { useTweet } from "@/api/twitter/hooks/useTweets"
 import { StepModal } from "@/components/StepModal/StepModal"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import { useUpdateAppMetadataReturnValue } from "@/hooks/useUpdateAppDetails"
 import { UseUploadAppMetadataReturnValue } from "@/hooks/useUploadAppMetadata"
-import Lottie from "react-lottie"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+
+import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
+
+import "./tweetStyle.css"
 
 type Props = {
   onClose: () => void
@@ -103,17 +106,15 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
       </Field.Root>
       {tweetId && !errors.tweetUrl && !tweetError && (
         <VStack align="stretch">
-          <Heading fontSize="20px" fontWeight={700}>
-            {t("Preview")}
-          </Heading>
+          <Heading size="xl">{t("Preview")}</Heading>
           {tweet && !isTweetLoading ? <EmbeddedTweet key={tweet.id_str} tweet={tweet} /> : <TweetSkeleton />}
         </VStack>
       )}
       <VStack align={"stretch"}>
-        <Button variant="primaryAction" type="submit">
+        <Button variant="primary" type="submit">
           {t("Save and show on feed")}
         </Button>
-        <Button variant="primaryGhost" onClick={onClose}>
+        <Button variant="ghost" color="actions.tertiary.default" onClick={onClose}>
           {t("Maybe later")}
         </Button>
       </VStack>

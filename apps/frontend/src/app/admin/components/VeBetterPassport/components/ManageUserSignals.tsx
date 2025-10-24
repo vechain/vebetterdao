@@ -1,17 +1,17 @@
-import { useUserBotSignals } from "@/api"
-import { WalletAddressInput } from "@/app/components/Input"
-import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
 import { Button, Card, Field, Heading, HStack, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useUserBotSignals } from "../../../../../api/contracts/vePassport/hooks/useUserBotSignals"
+import { useResetUserBotSignals } from "../../../../../hooks/useResetUserBotSignals"
+import { useSignalBotUser } from "../../../../../hooks/useSignalBotUser"
+import { WalletAddressInput } from "../../../../components/Input/WalletAddressInput"
+
 export const ManageUserSignals = () => {
   const [user, setUser] = useState<string>("")
   const [reason, setReason] = useState<string>("")
-
   const { data: signals, isLoading: signalsLoading } = useUserBotSignals(user)
-
   const {
     sendTransaction: resetSignalsTransaction,
     isTransactionPending: isResetTxLoading,
@@ -21,7 +21,6 @@ export const ManageUserSignals = () => {
     reason,
   })
   const isResetPending = resetStatus === "pending"
-
   const {
     sendTransaction: signalUserTransaction,
     isTransactionPending: isSignalTxLoading,
@@ -31,13 +30,10 @@ export const ManageUserSignals = () => {
     reason,
   })
   const isSignalPending = signalStatus === "pending"
-
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(user)
   }, [user])
-
   const { t } = useTranslation()
-
   const handleResetSignalsSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
@@ -45,7 +41,6 @@ export const ManageUserSignals = () => {
     },
     [resetSignalsTransaction],
   )
-
   const handleSignalUserSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
@@ -62,7 +57,7 @@ export const ManageUserSignals = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("Manage User Signals")}</Heading>
-        <Text fontSize="sm">
+        <Text textStyle="sm">
           {t(
             "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.",
           )}

@@ -1,24 +1,23 @@
-import { useCallback, useMemo } from "react"
-import { EnhancedClause } from "@vechain/vechain-kit"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getXAppsQueryKey } from "@/api"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-
 type useSubmitAppProps = {
   onSuccess?: () => Promise<void> | void
   onSuccessMessageTitle?: string
 }
-
 type BuildClausesProps = {
   teamWalletAddress: string
   adminAddress: string
   appName: string
   appMetadataUri: string
 }
-
 /**
  * Custom hook for submitting new applications to the X2EarnApps smart contract
  *

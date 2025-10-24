@@ -1,12 +1,15 @@
-import { Heading, Text, VStack, Link, Image, HStack, Flex, Button } from "@chakra-ui/react"
-import { ShareButtons } from "../../ShareButtons"
-import { ReactNode, useState } from "react"
+import { Heading, Text, VStack, Link, Icon, Image, HStack, Flex, Button } from "@chakra-ui/react"
 import { motion } from "framer-motion"
-import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+import { ReactNode, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 import { MdArrowOutward } from "react-icons/md"
+
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ShareButtons } from "../../ShareButtons"
+
 export type SuccessModalContentProps = {
   title?: ReactNode
   showSocialButtons?: boolean
@@ -15,7 +18,6 @@ export type SuccessModalContentProps = {
   isSuccessBeenTrack?: boolean
   onClose: () => void
 }
-
 const okHandVariants = {
   initial: { rotateY: 0 },
   animate: {
@@ -34,7 +36,6 @@ const okHandVariants = {
     },
   },
 }
-
 const MotionImage = motion(Image)
 /**
  * SuccessModalContent is a component that shows a success message with a lottie animation and share buttons
@@ -77,7 +78,7 @@ export const SuccessModalContent = ({
 
       {showSocialButtons && (
         <VStack>
-          <Text fontSize="sm">{t("Share your success on social media")}</Text>
+          <Text textStyle="sm">{t("Share your success on social media")}</Text>
           <ShareButtons descriptionEncoded={socialDescriptionEncoded} />
         </VStack>
       )}
@@ -87,21 +88,23 @@ export const SuccessModalContent = ({
           target="_blank"
           rel="noopener noreferrer"
           color="gray.500"
-          fontSize={"14px"}
+          textStyle="sm"
           style={{ textDecoration: "none" }}
           onClick={() =>
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
           }>
           <HStack alignSelf={"center"}>
-            <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
+            <Text textStyle="sm" fontWeight="semibold" color="brand.primary">
               {t("See transaction information")}
             </Text>
-            <MdArrowOutward size={20} color={"rgba(0, 76, 252, 1)"} />
+            <Icon boxSize={6} color="logo">
+              <MdArrowOutward />
+            </Icon>
           </HStack>
         </Link>
       </Flex>
       <HStack w={"full"} alignItems={"center"} justifyContent={"center"} gap={2} mt={4}>
-        <Button variant={"primaryAction"} w={"50%"} py={6} onClick={onClose}>
+        <Button variant={"primary"} w={"50%"} py={6} onClick={onClose}>
           {t("Done")}
         </Button>
       </HStack>

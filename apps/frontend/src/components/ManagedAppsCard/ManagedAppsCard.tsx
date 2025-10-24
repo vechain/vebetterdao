@@ -1,17 +1,18 @@
-import { useAccountAppPermissions } from "@/api"
 import { Button, Card, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
-import { AppDetails } from "./components/AppDetails"
-import { useTranslation } from "react-i18next"
-import { AllManagedAppsModal, AppAdministrationRole } from "./components/AllManagedAppsModal"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useAccountAppPermissions } from "../../api/contracts/xApps/hooks/useAccountAppPermissions"
+
+import { AllManagedAppsModal, AppAdministrationRole } from "./components/AllManagedAppsModal"
+import { AppDetails } from "./components/AppDetails"
 
 export const ManagedAppsCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { open: isOpen, onClose, onOpen } = useDisclosure()
   const { data: appsPermissions } = useAccountAppPermissions(account?.address ?? "")
-
   // filter only apps that are managed by the user and recreate the array by not using UseQueryResult but directly data
   const userAppRoles: AppAdministrationRole[] = useMemo(() => {
     if (!appsPermissions) return []
@@ -28,26 +29,23 @@ export const ManagedAppsCard = () => {
       return acc
     }, [] as AppAdministrationRole[])
   }, [appsPermissions])
-
   if (!userAppRoles || userAppRoles.length < 1) return null
-
   return (
-    <Card.Root w="full" variant="baseWithBorder">
+    <Card.Root w="full" variant="primary">
       <Card.Body>
-        <VStack gap={4} align="flex-start" w={"full"}>
+        <VStack gap="4" align="flex-start" w={"full"}>
           <HStack justifyContent={"space-between"} w="full">
-            <Heading fontSize="24px">{t("Managed apps")}</Heading>
-
+            <Heading size="xl">{t("Managed apps")}</Heading>
             {userAppRoles.length > 1 && (
               <HStack justifyContent={"flex-end"}>
-                <Button variant="ghost" colorPalette="primary" onClick={onOpen}>
+                <Button variant="ghost" onClick={onOpen}>
                   {t("See all") + ` (${userAppRoles.length})`}
                 </Button>
               </HStack>
             )}
           </HStack>
 
-          <VStack gap={8} w="full" align="flex-start" justify={"stretch"}>
+          <VStack gap="8" w="full" align="flex-start" justify={"stretch"}>
             {userAppRoles[0] && (
               <AppDetails
                 appId={userAppRoles[0].appId}

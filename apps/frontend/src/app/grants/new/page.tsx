@@ -1,0 +1,28 @@
+"use client"
+import { Spinner, VStack } from "@chakra-ui/react"
+import dynamic from "next/dynamic"
+import { useEffect } from "react"
+
+import { MotionVStack } from "../../../components/MotionVStack"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+const GrantsNewPageContent = dynamic(
+  () => import("./components/GrantsNewPageContent").then(mod => mod.GrantsNewPageContent),
+  {
+    ssr: false,
+    loading: () => (
+      <VStack w="full" gap={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    ),
+  },
+)
+export default function GrantsNew() {
+  useEffect(() => {
+    AnalyticsUtils.trackPage(`Grants New`)
+  }, [])
+  return (
+    <MotionVStack>
+      <GrantsNewPageContent />
+    </MotionVStack>
+  )
+}

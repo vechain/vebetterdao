@@ -14,13 +14,15 @@ import {
 } from "@chakra-ui/react"
 import { Icon as IconType, UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
-import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
-import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { WalletAddressInput } from "@/app/components/Input"
-import { useIsCreatorOfAnyApp, useAppsCountFromCreator } from "@/api"
+import { useTranslation } from "react-i18next"
 
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
+
+import { useAppsCountFromCreator } from "../../../api/contracts/xApps/hooks/useAppsCountFromCreator"
+import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
+import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
 type NFTFormInputs = {
   creatorWalletAddress: string
   tokenId: string
@@ -28,10 +30,8 @@ type NFTFormInputs = {
   actionType: string
   lookupCreatorAddress: string
 }
-
 export const ManageCreatorsNFT = () => {
   const { t } = useTranslation()
-
   const {
     register,
     handleSubmit,
@@ -82,7 +82,7 @@ export const ManageCreatorsNFT = () => {
   const renderBadge = (colorScheme: string, icon: IconType, text: string) => (
     <Badge
       textTransform="none"
-      fontSize="sm"
+      textStyle="sm"
       colorPalette={colorScheme}
       display="flex"
       alignItems="center"
@@ -213,7 +213,7 @@ export const ManageCreatorsNFT = () => {
                   colorPalette="blue"
                   type="submit"
                   disabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
-                  {t(actionType === "mint" ? "Mint" : "Burn")}
+                  {actionType === "mint" ? t("Mint") : t("Burn")}
                 </Button>
               )}
             </VStack>

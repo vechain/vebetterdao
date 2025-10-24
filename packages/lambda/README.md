@@ -7,33 +7,57 @@ This directory contains all AWS Lambda functions for the b3tr project. These lam
 Here's a list of the current lambda functions and their primary responsibilities:
 
 1.  **`checkEndorsements`**:
-
     - **Purpose**: Periodically checks and verifies the endorsements of X-Apps on the VeChain blockchain.
     - **Trigger**: Scheduled
     - **Key Operations**: Interacts with smart contracts to validate endorsement statuses and publishes notifications (e.g., to Slack) on success or failure.
 
 2.  **`getXAppSharesTop10`**:
-
     - **Purpose**: Retrieves and calculates the top 10 X-App shares for the previous round from the VeChain blockchain. This data is often used to feed frontend dashboards or leaderboards (e.g., VeBetter DAO website).
     - **Trigger**: API Gateway (HTTP GET request).
     - **Key Operations**: Fetches round data, X-App IDs, shares, filters blacklisted apps, sorts by percentage, and retrieves metadata (name, logo) from IPFS.
 
 3.  **`mintCreatorNFT`**:
-
     - **Purpose**: Mints a Creator NFT on the VeChain blockchain for a specified wallet address.
     - **Trigger**: API Gateway (HTTP POST request).
     - **Key Operations**: Takes a `creatorWalletAddress` in the request body, interacts with the X2EarnCreator smart contract to mint an NFT, and returns the transaction receipt.
 
 4.  **`startRound`**:
-
-    - **Purpose**: Initiates a new round in the VeBetterDAO ecosystem by distributing emissions and X-Allocations.
+    - **Purpose**: Initiates a new round in the VeBetterDAO ecosystem by distributing emissions, X-Allocations, and DBA rewards.
     - **Trigger**: Scheduled.
-    - **Key Operations**: Waits for the appropriate time to start a new round, calls the `distribute` function on the Emissions contract, and distributes X-Allocations to eligible X-Apps.
+    - **Key Operations**:
+      - Waits for the appropriate time to start a new round
+      - Calls the `distribute` function on the Emissions contract to start the new round
+      - Distributes X-Allocations to eligible X-Apps that haven't claimed their allocations
+      - Distributes DBA (Dynamic Base Allocation) rewards to eligible apps from the previous round:
+        - Checks if DBA Pool is deployed (gracefully skips if not)
+        - Filters eligible apps based on:
+          - App was eligible for voting in the round
+          - App rewarded at least 1 action with proofs during the round
+          - App received less than 7.5% of total votes
+          - App was fully endorsed during the round (not in grace period for entire round)
+        - Calls `distributeDBARewards` on the DBAPool contract with filtered app IDs
+      - Sends Slack notifications for each operation (success/failure)
+      - **Note**: If DBA distribution fails, the lambda still succeeds (since the primary goal of starting the round is complete)
 
 5.  **`veBetterPassport/resetSignalCounter`**:
     - **Purpose**: Resets the signal counter for a user in the VeBetter Passport system, typically after a KYC verification or a similar process.
     - **Trigger**: API Gateway (HTTP POST request).
     - **Key Operations**: Takes a `walletAddress` in the request body.
+
+6.  **`distributeDBA`** (Manual/Fallback - NO SCHEDULER):
+    - **Purpose**: Standalone DBA distribution lambda for manual/fallback use only.
+    - **Trigger**: Manual invocation only (NO automated scheduler configured).
+    - **When to Use**: This lambda should ONLY be triggered manually in the following scenarios:
+      - The `startRound` lambda fails after starting the round but before DBA distribution completes
+      - DBA rewards need to be distributed separately for any exceptional reason
+      - Testing DBA distribution in isolation
+    - **Note**: DBA distribution is now integrated into the `startRound` lambda and happens automatically as part of the round start process. This standalone version serves as a fallback mechanism and should not be part of normal operations.
+    - **Key Operations**:
+      - Determines the previous round that needs DBA distribution
+      - Checks if the round is ready and hasn't been distributed yet (via `canDistributeDBARewards`)
+      - Filters eligible apps using the same criteria as `startRound`
+      - Distributes DBA rewards to eligible apps
+      - Sends Slack notifications on success/failure
 
 ## Development
 
@@ -55,7 +79,6 @@ Follow these guidelines for developing and maintaining lambdas:
 2.  **Naming Conventions**: Use clear and consistent names for files and functions (e.g., `lambda.ts` for the main handler).
 
 3.  **Local Development & Testing**:
-
     - **Prerequisites**: Node.js, Yarn.
     - **Environment Variables**: Create a `.env` file in the `packages/lambda` directory or higher (e.g., project root `../../.env`) for local development. Example:
       ```env
@@ -72,7 +95,6 @@ Follow these guidelines for developing and maintaining lambdas:
       ```
 
 4.  **Environment Configuration (`LAMBDA_ENV`)**:
-
     - All lambdas are designed to be environment-aware using the `LAMBDA_ENV` environment variable.
     - Supported values:
       - `testnet-staging`: Uses testnet configurations, contract addresses, and secrets.

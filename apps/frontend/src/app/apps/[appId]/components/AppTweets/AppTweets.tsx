@@ -1,29 +1,31 @@
 import { Button, Card, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
+import { UilCheckCircle, UilPen, UilPlus, UilTimes } from "@iconscout/react-unicons"
+import { useParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { AddTweetModal } from "./components/AddTweetModal"
-import { TweetList } from "./components/TweetList"
-import { useCurrentAppMetadata } from "../../hooks"
-import { useCurrentAppRole } from "../../hooks/useCurrentAppRole"
-import { UilCheckCircle, UilPen, UilPlus, UilTimes } from "@iconscout/react-unicons"
-import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { useParams } from "next/navigation"
-import { OkHandIcon } from "@/components"
+import Lottie from "react-lottie"
+
+import { StepModal } from "@/components/StepModal/StepModal"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
-import { StepModal } from "@/components/StepModal/StepModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import Lottie from "react-lottie"
-import "./components/tweetStyle.css"
 
+import { OkHandIcon } from "../../../../../components/Icons/OkHandIcon"
+import { useUpdateAppDetails } from "../../../../../hooks/useUpdateAppDetails"
+import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
+import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
+import { useCurrentAppRole } from "../../hooks/useCurrentAppRole"
+
+import { AddTweetModal } from "./components/AddTweetModal"
+import { TweetList } from "./components/TweetList/TweetList"
+
+import "./components/tweetStyle.css"
 enum AppTweetsStep {
   UPLOADING = "UPLOADING",
 }
-
 export const AppTweets = () => {
   const [editMode, setEditMode] = useState(false)
   const { open: isNewTweetModalOpen, onOpen: onNewTweetModalOpen, onClose: onNewTweetModalClose } = useDisclosure()
-
   const { isAdminOrModerator } = useCurrentAppRole()
   const { t } = useTranslation()
   const { appId } = useParams<{ appId: string }>()
@@ -32,15 +34,12 @@ export const AppTweets = () => {
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
   const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
   const [tweets, setTweets] = useState<string[]>(metadataTweets)
-
   useEffect(() => {
     setTweets(metadataTweets)
   }, [metadataTweets])
-
   const handleEdit = useCallback(() => {
     setEditMode(true)
   }, [setEditMode])
-
   const handleCancelEdit = useCallback(() => {
     setEditMode(false)
     setTweets(metadataTweets)
@@ -127,35 +126,33 @@ export const AppTweets = () => {
       />
       <VStack align="stretch" gap={4}>
         <HStack justify={"space-between"} flexWrap={"wrap"}>
-          <Heading fontSize={"36px"} fontWeight={700}>
-            {t("App updates")}
-          </Heading>
+          <Heading size="2xl">{t("App updates")}</Heading>
           {isAdminOrModerator && (
             <>
               {editMode ? (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-                  <Button variant="primaryGhost" onClick={handleCancelEdit}>
+                  <Button variant="ghost" color="actions.tertiary.default" onClick={handleCancelEdit}>
                     <UilTimes color="#004CFC" fontSize="16px" />
                     {t("Cancel")}
                   </Button>
                   <Button
-                    variant="primaryAction"
+                    variant="primary"
                     disabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
                     onClick={onSubmit}>
-                    <UilCheckCircle color="#FFFFFF" fontSize="16px" />
+                    <UilCheckCircle color="white" fontSize="16px" />
                     {t("Save changes")}
                   </Button>
                 </HStack>
               ) : (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
                   {!isListEmpty && (
-                    <Button variant="primaryGhost" onClick={handleEdit}>
+                    <Button variant="ghost" color="actions.tertiary.default" onClick={handleEdit}>
                       <UilPen color="#004CFC" fontSize="16px" />
                       {t("Edit feed")}
                     </Button>
                   )}
-                  <Button variant="primaryAction" onClick={onNewTweetModalOpen}>
-                    <UilPlus color="#FFFFFF" fontSize="16px" />
+                  <Button variant="primary" onClick={onNewTweetModalOpen}>
+                    <UilPlus color="white" fontSize="16px" />
                     {t("Add X post")}
                   </Button>
                 </HStack>
@@ -174,7 +171,7 @@ export const AppTweets = () => {
             <Card.Body>
               <VStack align={"center"} justify={"center"} w="full" minH="200px">
                 <OkHandIcon color="#757575" />
-                <Heading fontSize={"20px"} fontWeight={500} textAlign={"center"}>
+                <Heading size="xl" fontWeight="semibold" textAlign={"center"}>
                   {t("App will add updates here.")}
                 </Heading>
               </VStack>

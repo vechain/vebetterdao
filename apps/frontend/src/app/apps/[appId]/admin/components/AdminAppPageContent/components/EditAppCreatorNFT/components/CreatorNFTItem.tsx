@@ -1,5 +1,3 @@
-import { CustomModalContent, ExclamationTriangle } from "@/components"
-import { AddressIcon } from "@/components/AddressIcon"
 import {
   Button,
   Heading,
@@ -16,11 +14,15 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+
 type Props = {
   creator: string
   handleDeleteCreator: () => void
 }
-
 export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
@@ -33,24 +35,24 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
           <Dialog.Body p={"40px"}>
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
-              <Heading fontSize={["xl", "2xl"]} fontWeight={700} textAlign={"center"}>
+              <Heading size={["xl", "2xl"]} fontWeight="bold" textAlign={"center"}>
                 {t("Delete {{address}} as creator?", { address: domain || humanAddress(creator, 4, 4) })}
               </Heading>
-              <Text color="#6A6A6A" textAlign={"center"}>
+              <Text color="text.subtle" textAlign={"center"}>
                 {t(
                   "The user will not be able to join the Discord channels, participate in the endorsement phases, and submit new apps.",
                 )}
               </Text>
               {domain && (
-                <Text color="#6A6A6A" textAlign={"center"}>
+                <Text color="text.subtle" textAlign={"center"}>
                   {`Address: ${humanAddress(creator, 8, 6)}`}
                 </Text>
               )}
               <VStack align="center" gap="20px" mt="20px">
-                <Button variant="primaryAction" onClick={onClose}>
+                <Button variant="primary" onClick={onClose}>
                   {t("Cancel")}
                 </Button>
-                <Button variant="dangerGhost" onClick={handleDeleteCreator}>
+                <Button variant="ghost" color="status.negative.primary" onClick={handleDeleteCreator}>
                   {t("Yes, remove")}
                 </Button>
               </VStack>
@@ -62,15 +64,15 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         <HStack hideBelow="md">
           <AddressIcon address={creator} h="48px" w="48px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="text.subtle" fontWeight="semibold">
               {domain}
             </Text>
-            <Text fontSize={"14px"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="text.subtle">
               {creator}
             </Text>
           </VStack>
         </HStack>
-        <Button hideBelow="md" variant="dangerGhost" onClick={onOpen}>
+        <Button hideBelow="md" variant="ghost" color="status.negative.primary" onClick={onOpen}>
           <UilTrash size={"14px"} color="#D23F63" />
           {t("Remove")}
         </Button>
@@ -78,15 +80,15 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         <HStack hideFrom="md">
           <AddressIcon address={creator} h="36px" w="36px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="text.subtle" fontWeight="semibold">
               {domain}
             </Text>
-            <Text fontSize={"14px"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="text.subtle">
               {humanAddress(creator, 8, 6)}
             </Text>
           </VStack>
         </HStack>
-        <IconButton hideFrom="md" variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+        <IconButton hideFrom="md" variant="ghost" color="status.negative.primary" aria-label="Remove" onClick={onOpen}>
           <UilTrash size={"14px"} color="#D23F63" />
         </IconButton>
       </HStack>

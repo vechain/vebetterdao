@@ -1,15 +1,12 @@
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { VeBetterDaoLogo } from "../VeBetterDaoLogo"
+import { Icon, Link } from "@chakra-ui/react"
+import NextLink from "next/link"
 
-export const NavbarLogo = () => {
-  const pathname = usePathname()
+import VBDLogo from "@/components/Icons/svg/vebetter-dao-logo.svg"
 
-  if (pathname !== "/")
-    return (
-      <Link href={"/"}>
-        <VeBetterDaoLogo />
-      </Link>
-    )
-  return <VeBetterDaoLogo />
-}
+export const NavbarLogo = () => (
+  <Link asChild>
+    <NextLink href={"/"}>
+      <Icon w="32" as={VBDLogo} color="icon.default" />
+    </NextLink>
+  </Link>
+)

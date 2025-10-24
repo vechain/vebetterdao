@@ -1,12 +1,15 @@
-import { AppDetailSocials } from "@/app/apps/[appId]/components/AppDetailOverview/components/AppDetailSocials"
-import { AppCardOptionsDesktopMenu } from "@/app/apps/components/AppCardOptionsDesktopMenu"
-import { AppCardOptionsMobileModal } from "@/app/apps/components/AppCardOptionsMobileModal"
-import { CreateEditAppFormData } from "@/components/CreateEditAppForm"
-import { notFoundImage } from "@/constants"
-import { useBreakpoints } from "@/hooks"
 import { useDisclosure, IconButton, Card, VStack, Skeleton, HStack, Heading, Text, Image } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { FaEllipsisVertical } from "react-icons/fa6"
+
+import { AppDetailSocials } from "@/app/apps/[appId]/components/AppDetailOverview/components/AppDetailSocials"
+import { AppCardOptionsDesktopMenu } from "@/app/apps/components/AppCardOptionsDesktopMenu"
+import { AppCardOptionsMobileModal } from "@/app/apps/components/AppCardOptionsMobileModal"
+import { notFoundImage } from "@/constants"
+
+import { useBreakpoints } from "../hooks/useBreakpoints"
+
+import { CreateEditAppFormData } from "./CreateEditAppForm/CreateEditAppForm"
 
 type Props = {
   app: CreateEditAppFormData
@@ -23,9 +26,7 @@ export const AppPreviewDetailCard = ({
   isBannerLoading,
 }: Props) => {
   const { isMobile } = useBreakpoints()
-
   const { open: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
-
   const renderAppOptions = useCallback(() => {
     if (isMobile) {
       return (
@@ -44,9 +45,8 @@ export const AppPreviewDetailCard = ({
     }
     return <AppCardOptionsDesktopMenu teamWalletAddress={app.treasuryWalletAddress} externalUrl={app.projectUrl} />
   }, [isMobile, openMobileOptions, isMobileOptionsOpen, closeMobileOptions, app])
-
   return (
-    <Card.Root variant={"baseWithBorder"} w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <VStack w="full" gap={4} align="flex-start">
           <Skeleton asChild w="full" h={200} loading={!!isBannerLoading} rounded={"3xl"}>
@@ -72,7 +72,7 @@ export const AppPreviewDetailCard = ({
           </HStack>
 
           <Skeleton loading={appMetadataLoading} w={["full", "70%"]}>
-            <Text fontSize={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
+            <Text textStyle={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
           </Skeleton>
           <AppDetailSocials socialUrls={[]} />
         </VStack>

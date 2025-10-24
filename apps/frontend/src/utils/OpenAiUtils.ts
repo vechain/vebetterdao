@@ -9,13 +9,11 @@ export type OpenAIHelperParams = {
   images?: string[]
   model?: string
 }
-
 /**
  * Helper class for interacting with the OpenAI API.
  */
 export class OpenAIHelper {
   private openai: OpenAI
-
   /**
    * Constructs a new instance of the OpenAIHelper class.
    * @param options The client options for the OpenAI API.
@@ -27,7 +25,6 @@ export class OpenAIHelper {
     }
     this.openai = new OpenAI(options)
   }
-
   /**
    * Sends a chat-based prompt to the OpenAI API and retrieves the response.
    * @param params The parameters for the chat prompt.

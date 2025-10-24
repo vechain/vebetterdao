@@ -7,7 +7,22 @@ if (typeof self === "undefined") {
 
 const nextConfig = {
   experimental: {
-    optimizePackageImports: ["@chakra-ui/react"],
+    optimizePackageImports: [
+      "@vechain/vebetterdao-contracts",
+      "@vechain/dapp-kit-react",
+      "@vechain/vechain-kit",
+      "@chakra-ui/react",
+      "@vechain/vebetterdao-contracts/*",
+      "react-icons",
+      "react-icons/bs",
+      "react-icons/fa",
+      "react-icons/fa6",
+      "react-icons/md",
+      "react-icons/io",
+      "react-icons/io5",
+      "iconoir-react",
+      "react-hook-form",
+    ],
     turbo: {
       rules: {
         "*.svg": {
@@ -17,6 +32,9 @@ const nextConfig = {
       },
     },
   },
+  swcMinify: true,
+  compress: true,
+  transpilePackages: ["express", "ts-node"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -24,6 +42,11 @@ const nextConfig = {
     })
     return config
   },
+  rewrites: () => [{ source: "/storybook", destination: "/storybook/index.html" }],
 }
 
-module.exports = nextConfig
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+})
+
+module.exports = withBundleAnalyzer(nextConfig)

@@ -1,9 +1,11 @@
 import { Heading, Text, VStack } from "@chakra-ui/react"
+import { useCallback } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../../AdminAppPageContent"
+
 import { AddCreatorNFTButton } from "./components/AddCreatorNFTButton"
-import { useCallback } from "react"
 import { CreatorNFTItem } from "./components/CreatorNFTItem"
 
 interface Props {
@@ -12,7 +14,6 @@ interface Props {
 export const EditAppCreatorNFT = ({ form }: Props) => {
   const { t } = useTranslation()
   const creators = form.watch("creators")
-
   const handleDeleteCreator = useCallback(
     (index: number) => () =>
       form.setValue(
@@ -21,13 +22,10 @@ export const EditAppCreatorNFT = ({ form }: Props) => {
       ),
     [form, creators],
   )
-
   return (
     <VStack align="stretch">
-      <Heading fontSize={"24px"} fontWeight={700}>
-        {t("Creator NFT")}
-      </Heading>
-      <Text color="#6A6A6A">
+      <Heading size="2xl">{t("Creator NFT")}</Heading>
+      <Text color="text.subtle">
         {t(
           "These users will be able to join the Discord channels, participate in the endorsement phases, and submit new apps.",
         )}

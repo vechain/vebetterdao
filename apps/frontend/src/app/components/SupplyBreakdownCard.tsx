@@ -1,41 +1,35 @@
-import { useB3trTokenDetails } from "@/api"
 import { Box, Card, HStack, Heading, Icon, Skeleton, SimpleGrid, Text, VStack } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
-import { useMemo } from "react"
-import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
-import { FiInfo } from "react-icons/fi"
+import { FormattingUtils } from "@repo/utils"
+import BigNumber from "bignumber.js"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useGetB3trBalance } from "@/hooks"
+import { FiInfo } from "react-icons/fi"
+
 import { Tooltip } from "@/components/ui/tooltip"
+
+import { useB3trTokenDetails } from "../../api/contracts/b3tr/hooks/useB3trTokenDetails"
+import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
 
 export const SupplyBreakdownCard = () => {
   const { t } = useTranslation()
-
   const { data: b3trTokenDetails } = useB3trTokenDetails()
   const { data: vot3ContractB3trBalance } = useGetB3trBalance(getConfig().vot3ContractAddress)
-
   const data = useMemo(() => {
     if (!b3trTokenDetails || !vot3ContractB3trBalance) return undefined
-
     const b3trCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply)
       .minus(vot3ContractB3trBalance?.scaled ?? 0)
       .toNumber()
-
     const vot3CirculatingSupply = new BigNumber(vot3ContractB3trBalance?.scaled ?? 0).toNumber()
-
     const totalCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
-
     const b3trCirculatingSupplyPercentage = new BigNumber(b3trCirculatingSupply)
       .dividedBy(totalCirculatingSupply)
       .multipliedBy(100)
       .toNumber()
-
     const vot3CirculatingSupplyPercentage = new BigNumber(vot3CirculatingSupply)
       .dividedBy(totalCirculatingSupply)
       .multipliedBy(100)
       .toNumber()
-
     return {
       b3trCirculatingSupply: {
         name: "B3TR in circulation",
@@ -59,23 +53,15 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Header>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="xl" fontWeight="bold">
-            {t("Supply breakdown")}
-          </Heading>
+          <Heading size="xl">{t("Supply breakdown")}</Heading>
           <Tooltip
-            content={
-              <Text>
-                {t(
-                  `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
-                )}
-              </Text>
-            }>
-            <span>
-              <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
-            </span>
+            content={t(
+              `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
+            )}>
+            <Icon as={FiInfo} color="actions.tertiary.default" position={"relative"} />
           </Tooltip>
         </HStack>
       </Card.Header>
@@ -83,21 +69,17 @@ export const SupplyBreakdownCard = () => {
         <VStack gap={4} align="flex-start">
           <SimpleGrid templateColumns={["repeat(1, 2fr)", "repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
             <VStack gap={1} align="flex-start">
-              <Text textStyle="md" fontWeight="400">
-                {t("B3TR in circulation")}
-              </Text>
+              <Text textStyle="md">{t("B3TR in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#004CFC"}>
+                <Heading size={["2xl", "2xl", "xl"]} color="brand.primary">
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
             <VStack gap={1} align="flex-start">
-              <Text textStyle="md" fontWeight="400">
-                {t("VOT3 in circulation")}
-              </Text>
+              <Text textStyle="md">{t("VOT3 in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#3DBA67"}>
+                <Heading size={["2xl", "2xl", "xl"]} color={"brand.secondary"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>

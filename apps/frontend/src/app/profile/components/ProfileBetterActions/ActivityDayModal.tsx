@@ -1,9 +1,11 @@
-import { useSustainabilityActions } from "@/api"
-import { BaseModal } from "@/components/BaseModal"
-import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
-import { Text, VStack } from "@chakra-ui/react"
+import { Center, Spinner, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import { useEffect } from "react"
+import InfiniteScroll from "react-infinite-scroll-component"
+
+import { BaseModal } from "@/components/BaseModal"
+
+import { useUsersB3trActions } from "../../../../api/indexer/actions/useUsersB3trActions"
+import { BetterActionCard } from "../../../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
 
 type Props = {
   isOpen: boolean
@@ -11,32 +13,15 @@ type Props = {
   date?: string
   address: string
 }
-
 export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
   //get unix timestamps for the start and end of the day
-  const startOfDay = dayjs(date).startOf("day").unix()
-  const endOfDay = dayjs(date).endOf("day").unix()
-
-  const actionsOfDayQuery = useSustainabilityActions({
-    wallet: date ? (address ?? "") : undefined,
-    after: startOfDay,
-    before: endOfDay,
+  const startOfDay = date ? dayjs(date).startOf("day").unix() : undefined
+  const endOfDay = date ? dayjs(date).endOf("day").unix() : undefined
+  const { data, fetchNextPage, hasNextPage } = useUsersB3trActions(address, {
+    ...(startOfDay && { after: startOfDay }),
+    ...(endOfDay && { before: endOfDay }),
   })
-
-  useEffect(() => {
-    // Fetch until there are no more pages left
-    const fetchAllPages = async () => {
-      while (actionsOfDayQuery.hasNextPage && !actionsOfDayQuery.isFetchingNextPage) {
-        await actionsOfDayQuery.fetchNextPage()
-      }
-    }
-
-    fetchAllPages()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startOfDay, endOfDay])
-
-  const flatActions = actionsOfDayQuery.data?.pages.map(page => page.data).flat() ?? []
-
+  const actions = data?.pages.map(page => page.data).flat() ?? []
   return (
     <BaseModal
       isOpen={isOpen}
@@ -45,19 +30,32 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
       ariaDescription={`ActivityDayModal for ${date}`}
       modalBodyProps={{ maxH: "80vh", overflowY: "auto" }}>
       <VStack gap={3} align="stretch">
-        <Text fontWeight="600" color="#848484">
+        <Text fontWeight="semibold" color="#848484">
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}
         </Text>
-        {flatActions.map(action => (
-          <BetterActionCard
-            key={`action-day-${action.appId}-${action.blockTimestamp}`}
-            amountB3tr={action.amount}
-            appId={action.appId}
-            blockNumber={action.blockNumber}
-            blockTimestamp={action.blockTimestamp}
-            proof={action.proof}
-          />
-        ))}
+        <InfiniteScroll
+          dataLength={actions.length}
+          next={fetchNextPage}
+          hasMore={!!hasNextPage}
+          style={{ overflow: "hidden" }}
+          loader={
+            <Center>
+              <Spinner size="md" mt={4} alignSelf="center" />
+            </Center>
+          }>
+          <VStack gap="4">
+            {actions.map(action => (
+              <BetterActionCard
+                key={`action-day-${action.appId}-${action.blockTimestamp}-${action.blockNumber}`}
+                amountB3tr={action.amount}
+                appId={action.appId}
+                blockNumber={action.blockNumber}
+                blockTimestamp={action.blockTimestamp}
+                proof={action.proof}
+              />
+            ))}
+          </VStack>
+        </InfiniteScroll>
       </VStack>
     </BaseModal>
   )
