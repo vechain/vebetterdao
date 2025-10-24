@@ -2007,5 +2007,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Ao fazer isso, {{appName}} com id {{appId}} será {{status}} para a próxima rodada.",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Quórum mínimo de <Link>quorum</Link> ({{quorumNumerator}}%) alcançado",
   "Uploading...": "Carregando...",
-  "Stored": "Armazenado"
+  "Stored": "Armazenado",
+  "Creator's nft received": "NFT do criador recebido",
+  "Creator application under review": "Aplicação do criador em revisão",
+  "Voting power delegated": "Poder de voto delegado",
+  "Cast your vote now!": "Vote agora!",
+  "Time to step up!": "Hora de agir!",
+  "Not enough VTHO": "VTHO insuficiente",
+  "New app available": "Novo aplicativo disponível",
+  "Active proposal": "Proposta ativa",
+  "You've been signalled by {{app}}": "Você foi sinalizado por {{app}}",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Seu poder de voto foi transferido para <platform>veDelegate.vet</platform> que vota em seu nome. <br/> Se você quiser votar aqui, deve remover a delegação no veDelegate antes do snapshot.",
+  "Stargate is live": "Stargate está ao vivo"
 }

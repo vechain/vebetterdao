@@ -2007,5 +2007,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "ऐसा करने से, आईडी {{appId}} के साथ {{appName}} अगले दौर के लिए {{status}} होगा।",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "न्यूनतम <Link>कोरम</Link> ({{quorumNumerator}}%) पूरा हुआ",
   "Uploading...": "अपलोड हो रहा है...",
-  "Stored": "संग्रहीत"
+  "Stored": "संग्रहीत",
+  "Creator's nft received": "निर्माता का एनएफटी प्राप्त हुआ",
+  "Creator application under review": "निर्माता का आवेदन समीक्षा के अधीन है",
+  "Voting power delegated": "मतदान शक्ति सौंपी गई",
+  "Cast your vote now!": "अभी अपना वोट डालें!",
+  "Time to step up!": "उठ खड़े होने का समय!",
+  "Not enough VTHO": "पर्याप्त VTHO नहीं",
+  "New app available": "नया ऐप उपलब्ध है",
+  "Active proposal": "सक्रिय प्रस्ताव",
+  "You've been signalled by {{app}}": "{{app}} द्वारा आपको संकेत मिला है",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "आपकी मतदान शक्ति <platform>veDelegate.vet</platform> को हस्तांतरित की गई है जो आपकी ओर से मतदान करता है। <br/> यदि आप यहां वोट करना चाहते हैं, तो आपको स्नैपशॉट से पहले veDelegate पर प्रतिनिधित्व निकालना होगा।",
+  "Stargate is live": "स्टारगेट लाइव है"
 }

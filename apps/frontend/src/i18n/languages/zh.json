@@ -2007,5 +2007,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "这样做的话，ID为{{appId}}的{{appName}}将在下轮中变为{{status}}。",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "达到最低<Link>法定人数</Link> ({{quorumNumerator}}%)",
   "Uploading...": "上传中...",
-  "Stored": "已存储"
+  "Stored": "已存储",
+  "Creator's nft received": "收到创作者的NFT",
+  "Creator application under review": "创作者申请正在审核中",
+  "Voting power delegated": "投票权已委托",
+  "Cast your vote now!": "现在投票！",
+  "Time to step up!": "是时候挺身而出了！",
+  "Not enough VTHO": "VTHO不足",
+  "New app available": "新应用可用",
+  "Active proposal": "活跃的提案",
+  "You've been signalled by {{app}}": "您已被{{app}}提醒",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票权已经转移到<platform>veDelegate.vet</platform>，该平台将代表您投票。<br/> 如果您想在此投票，必须在快照前在veDelegate上取消委托。",
+  "Stargate is live": "Stargate已上线"
 }
