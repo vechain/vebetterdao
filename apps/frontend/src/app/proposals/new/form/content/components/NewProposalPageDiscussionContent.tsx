@@ -137,12 +137,7 @@ export const NewProposalPageDiscussionContent = () => {
           </Field.Root>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button
-              data-testid="go-back"
-              variant="ghost"
-              color="actions.tertiary.default"
-              onClick={router.back}
-              disabled={isMetadataUploading}>
+            <Button data-testid="go-back" variant="link" onClick={router.back} disabled={isMetadataUploading}>
               {t("Go back")}
             </Button>
             <Button

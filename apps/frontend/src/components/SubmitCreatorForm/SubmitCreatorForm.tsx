@@ -425,8 +425,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
         <Button
           type="button"
           onClick={handleResetForm}
-          variant="ghost"
-          color="actions.tertiary.default"
+          variant="link"
           focusRingColor="actions.tertiary.default"
           size="lg">
           {t("Reset Form")}
