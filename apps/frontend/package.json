@@ -100,7 +100,6 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.25",
     "eslint-plugin-storybook": "^9.1.5",
-    "happy-dom": "20.0.2",
     "openapi-typescript": "^7.9.1",
     "resize-observer-polyfill": "^1.5.1",
     "rollup-plugin-node-builtins": "^2.1.2",
