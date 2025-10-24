@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().b3trGovernorAddress as `0x${string}`

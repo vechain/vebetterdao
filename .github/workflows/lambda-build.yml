@@ -43,6 +43,7 @@ jobs:
         env:
           TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+          NODE_OPTIONS: '--max-old-space-size=8192'
         run: |
           # Set environment variables based on workspace
           set +x  # Disable command echoing

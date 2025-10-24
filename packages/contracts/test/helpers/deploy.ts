@@ -2,11 +2,128 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-
-import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
-import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
-import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
-import { APPS } from "../../scripts/deploy/setup"
+import {
+  B3TR,
+  TimeLock,
+  VOT3,
+  GalaxyMember,
+  Emissions,
+  XAllocationVoting,
+  XAllocationPool,
+  VoterRewards,
+  Treasury,
+  X2EarnApps,
+  GovernorClockLogicV1,
+  GovernorConfiguratorV1,
+  GovernorDepositLogicV1,
+  GovernorFunctionRestrictionsLogicV1,
+  GovernorProposalLogicV1,
+  GovernorQuorumLogicV1,
+  GovernorStateLogicV1,
+  GovernorVotesLogicV1,
+  X2EarnRewardsPool,
+  MyERC20,
+  MyERC721,
+  MyERC1155,
+  TokenAuction,
+  B3TRGovernor,
+  NodeManagementV3,
+  B3TRGovernorV1,
+  B3TRGovernorV2,
+  VoterRewardsV1,
+  GovernorClockLogic,
+  GovernorConfigurator,
+  GovernorDepositLogic,
+  GovernorFunctionRestrictionsLogic,
+  GovernorProposalLogic,
+  GovernorQuorumLogic,
+  GovernorStateLogic,
+  GovernorVotesLogic,
+  EmissionsV1,
+  VeBetterPassport,
+  B3TRGovernorV3,
+  GovernorClockLogicV3,
+  GovernorConfiguratorV3,
+  GovernorFunctionRestrictionsLogicV3,
+  GovernorProposalLogicV3,
+  GovernorDepositLogicV3,
+  GovernorQuorumLogicV3,
+  GovernorVotesLogicV3,
+  GovernorStateLogicV3,
+  GovernorClockLogicV5,
+  GovernorConfiguratorV5,
+  GovernorDepositLogicV5,
+  GovernorFunctionRestrictionsLogicV5,
+  GovernorProposalLogicV5,
+  GovernorQuorumLogicV5,
+  GovernorStateLogicV5,
+  PassportChecksLogic,
+  PassportEntityLogic,
+  PassportPoPScoreLogic,
+  PassportSignalingLogic,
+  PassportWhitelistAndBlacklistLogic,
+  PassportPersonhoodLogic,
+  PassportDelegationLogic,
+  PassportChecksLogicV1,
+  PassportDelegationLogicV1,
+  PassportEntityLogicV1,
+  PassportPersonhoodLogicV1,
+  PassportPoPScoreLogicV1,
+  PassportSignalingLogicV1,
+  PassportWhitelistAndBlacklistLogicV1,
+  VeBetterPassportV1,
+  PassportConfiguratorV1,
+  AdministrationUtils,
+  VoteEligibilityUtils,
+  EndorsementUtils,
+  AdministrationUtilsV2,
+  VoteEligibilityUtilsV2,
+  EndorsementUtilsV2,
+  AdministrationUtilsV3,
+  VoteEligibilityUtilsV3,
+  EndorsementUtilsV3,
+  AdministrationUtilsV4,
+  VoteEligibilityUtilsV4,
+  EndorsementUtilsV4,
+  AdministrationUtilsV5,
+  VoteEligibilityUtilsV5,
+  EndorsementUtilsV5,
+  X2EarnCreator,
+  VeBetterPassportV2,
+  PassportConfiguratorV2,
+  PassportWhitelistAndBlacklistLogicV2,
+  PassportPoPScoreLogicV2,
+  PassportPersonhoodLogicV2,
+  PassportEntityLogicV2,
+  PassportDelegationLogicV2,
+  PassportChecksLogicV2,
+  PassportSignalingLogicV2,
+  B3TRMultiSig,
+  GovernorVotesLogicV5,
+  VeBetterPassportV3,
+  PassportPersonhoodLogicV3,
+  PassportEntityLogicV3,
+  PassportChecksLogicV3,
+  PassportConfiguratorV3,
+  PassportDelegationLogicV3,
+  PassportSignalingLogicV3,
+  PassportPoPScoreLogicV3,
+  PassportWhitelistAndBlacklistLogicV3,
+  GovernorQuorumLogicV6,
+  GovernorVotesLogicV6,
+  GovernorStateLogicV6,
+  GovernorFunctionRestrictionsLogicV6,
+  GovernorProposalLogicV6,
+  GovernorDepositLogicV6,
+  GovernorConfiguratorV6,
+  GovernorClockLogicV6,
+  StargateNFT,
+  GrantsManager,
+  RelayerRewardsPool,
+  AutoVotingLogic,
+  DBAPool,
+} from "../../typechain-types"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
   deployAndUpgrade,
   deployProxy,
@@ -145,7 +262,11 @@ import {
   GovernorStateLogicV4,
   GovernorVotesLogicV4,
 } from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
-import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
+import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
+import { APPS } from "../../scripts/deploy/setup"
+import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
+import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
+import { autoVotingLibraries } from "../../scripts/libraries"
 
 // Type helper to ensure all properties of an async function's return type are defined
 type EnsureDefined<T extends (...args: any[]) => any> = Required<Awaited<ReturnType<T>>>
@@ -169,6 +290,7 @@ export interface DeployInstance {
   veBetterPassportV1: VeBetterPassportV1
   veBetterPassportV2: VeBetterPassportV2
   veBetterPassportV3: VeBetterPassportV3
+  dynamicBaseAllocationPool: DBAPool
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -287,6 +409,12 @@ export interface DeployInstance {
   // StarGate
   stargateNftMock: StargateNFT
   vthoTokenMock: MyERC20
+
+  // Rewards Pool related to XAllocationVoting
+  relayerRewardsPool: RelayerRewardsPool
+
+  // AutoVoting Libraries
+  autoVotingLogic: AutoVotingLogic
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -312,6 +440,7 @@ export const getOrDeployContractInstances = async ({
   // Contracts are deployed using the first signer/account by default
   const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
   const creators = otherAccounts.slice(0, APPS.length) // otherAcounts[1]...otherAccounts[8] reserved for creators
+
   // ---------------------- Deploy Libraries ----------------------
   const {
     GovernorClockLogicLibV1,
@@ -429,6 +558,9 @@ export const getOrDeployContractInstances = async ({
     VoteEligibilityUtilsV5,
   } = (await x2EarnLibraries()) as EnsureDefined<typeof x2EarnLibraries>
 
+  // Deploy AutoVoting Libraries
+  const { AutoVotingLogic } = await autoVotingLibraries()
+
   // ---------------------- Deploy Mocks ----------------------
 
   // deploy Mocks
@@ -531,14 +663,14 @@ export const getOrDeployContractInstances = async ({
   // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
   await vechainNodesMock.addOperator(await stargateNftMock.getAddress())
 
-  const nodeManagementMock = await deployAndUpgrade(
+  const nodeManagementMock = (await deployAndUpgrade(
     ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
     [[await vechainNodesMock.getAddress(), owner.address, owner.address], [], [stargateNftAddress]],
     {
       versions: [undefined, 2, 3],
       logOutput: false,
     },
-  ) as NodeManagementV3
+  )) as NodeManagementV3
 
   let myErc1155, myErc721
   if (deployMocks) {
@@ -561,13 +693,8 @@ export const getOrDeployContractInstances = async ({
   const B3trContract = await ethers.getContractFactory("B3TR")
   const b3tr = await B3trContract.deploy(owner, minterAccount, owner)
 
-  // Deploy VOT3
-  const vot3 = (await deployProxy("VOT3", [
-    owner.address,
-    owner.address,
-    owner.address,
-    await b3tr.getAddress(),
-  ])) as VOT3
+  // Deploy VOT3 version 1
+  let vot3 = (await deployProxy("VOT3", [owner.address, owner.address, owner.address, await b3tr.getAddress()])) as VOT3
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
@@ -742,6 +869,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationPoolV3",
       "XAllocationPoolV4",
       "XAllocationPoolV5",
+      "XAllocationPoolV6",
       "XAllocationPool",
     ],
     [
@@ -759,9 +887,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [[], []],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
     },
   )) as XAllocationPool
 
@@ -808,7 +937,7 @@ export const getOrDeployContractInstances = async ({
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewardsV5", "VoterRewards"],
     [
       [
         owner.address, // admin
@@ -824,9 +953,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
     },
   )) as VoterRewards
 
@@ -842,6 +972,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV4",
       "XAllocationVotingV5",
       "XAllocationVotingV6",
+      "XAllocationVotingV7",
       "XAllocationVoting",
     ],
     [
@@ -862,15 +993,26 @@ export const getOrDeployContractInstances = async ({
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
         },
       ],
-      [veBetterPassportContractAddress],
       [],
       [],
       [],
       [],
-      [tempB3trGovernorAddress], // b3tr address
+      [],
+      [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      libraries: [
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        { AutoVotingLogic: await AutoVotingLogic.getAddress() },
+      ],
       logOutput: false,
     },
   )) as XAllocationVoting
@@ -1114,6 +1256,34 @@ export const getOrDeployContractInstances = async ({
     },
   )) as B3TRGovernor
 
+  const relayerRewardsPool = (await deployAndUpgrade(
+    ["RelayerRewardsPool"],
+    [
+      [
+        owner.address, // admin
+        owner.address, // upgrader
+        await b3tr.getAddress(), // b3trAddress
+        await emissions.getAddress(), // emissionsAddress
+        await xAllocationVoting.getAddress(), // xAllocationVotingAddress
+      ],
+    ],
+    {
+      versions: [undefined],
+      logOutput: false,
+    },
+  )) as RelayerRewardsPool
+
+  const dynamicBaseAllocationPool = (await deployProxy("DBAPool", [
+    {
+      admin: owner.address,
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationPool: await xAllocationPool.getAddress(),
+      x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
+      b3tr: await b3tr.getAddress(),
+      distributionStartRound: 1,
+    },
+  ])) as DBAPool
+
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
@@ -1128,6 +1298,7 @@ export const getOrDeployContractInstances = async ({
     X2EarnApps: await x2EarnApps.getAddress(),
     VeBetterPassport: veBetterPassportContractAddress,
     StargateNFT: await stargateNftMock.getAddress(),
+    DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
   }
 
   const libraries = {
@@ -1145,6 +1316,9 @@ export const getOrDeployContractInstances = async ({
       EndorsementUtils: await EndorsementUtils.getAddress(),
       AdministrationUtils: await AdministrationUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+    },
+    XAllocationVoting: {
+      AutoVotingLogic: await AutoVotingLogic.getAddress(),
     },
   }
 
@@ -1170,9 +1344,11 @@ export const getOrDeployContractInstances = async ({
   await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
+  // Set governor and veBetterPassport addresses in XAllocationVoting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)
   await xAllocationVoting.connect(owner).setB3TRGovernor(await governor.getAddress())
+  await xAllocationVoting.connect(owner).setVeBetterPassport(await veBetterPassport.getAddress())
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -1211,6 +1387,23 @@ export const getOrDeployContractInstances = async ({
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
 
+  // Setup the RelayerRewardsPool contract
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
+    .then(async tx => await tx.wait())
+  await xAllocationVoting
+    .connect(owner)
+    .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
+    .then(async tx => await tx.wait())
+  await xAllocationVoting.connect(owner).setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
+  await voterRewards.connect(owner).setRelayerRewardsPool(await relayerRewardsPool.getAddress())
+  await voterRewards.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
+
   // Since x2EarnApps v5, new apps => new creator != owner
   // Token id 2, 3, 4, 5 are reserved for the creator NFTs
   await Promise.all([
@@ -1243,6 +1436,7 @@ export const getOrDeployContractInstances = async ({
     xAllocationPool,
     emissions,
     voterRewards,
+    dynamicBaseAllocationPool,
     owner,
     otherAccount,
     minterAccount,
@@ -1356,6 +1550,8 @@ export const getOrDeployContractInstances = async ({
     vthoTokenMock,
     vechainNodesMock,
     stargateNftMock,
+    relayerRewardsPool,
+    autoVotingLogic: AutoVotingLogic,
   }
   return cachedDeployInstance
 }

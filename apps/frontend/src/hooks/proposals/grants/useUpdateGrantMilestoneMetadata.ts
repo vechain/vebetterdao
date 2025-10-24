@@ -1,6 +1,6 @@
 "use client"
 import { getConfig } from "@repo/config"
-import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
+import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
 
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"

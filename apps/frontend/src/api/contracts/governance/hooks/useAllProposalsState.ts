@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
-import { B3TRGovernor__factory, GrantsManager__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
 import { executeMultipleClausesCall, useThor, type MultipleClausesCallParameters } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 

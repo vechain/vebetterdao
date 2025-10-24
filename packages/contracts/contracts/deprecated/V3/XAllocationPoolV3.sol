@@ -23,7 +23,7 @@
 
 pragma solidity 0.8.20;
 
-import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
+import { IXAllocationPoolV3 as IXAllocationPool } from "./interfaces/IXAllocationPoolV3.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
@@ -49,7 +49,7 @@ import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
  * - Added the abilty to toggle quadratic funding on and off.
  * ---------------------- Version 3 ----------------------------------------
  * - Use new interface IX2EarnAppsV2 that supports endorsement.
-  * ---------------------- Version 4 ----------------------------------------
+ * ---------------------- Version 4 ----------------------------------------
  * - Use new interface IX2EarnAppsV2 that supports endorsement cooldown.
  */
 contract XAllocationPoolV3 is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {

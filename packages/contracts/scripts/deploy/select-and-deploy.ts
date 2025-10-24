@@ -27,13 +27,25 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "b3tr-multi-sig",
     description: "Deploy only this contract",
   },
+  XAllocationVoting: {
+    name: "x-allocation-voting",
+    description: "Deploy only this contract",
+  },
+  RelayerRewardsPool: {
+    name: "relayer-rewards-pool",
+    description: "Deploy only this contract",
+  },
   "Grants Manager": {
     name: "grants-manager",
     description: "Deploy only this contract",
   },
+  "Dynamic Base Allocation Pool": {
+    name: "dba-pool",
+    description: "Deploy only this contract",
+  },
 } as const
 
-async function upgradeContract() {
+async function deployContract() {
   try {
     const env = process.env.NEXT_PUBLIC_APP_ENV
     if (!env) throw new Error("Environment variable NEXT_PUBLIC_APP_ENV is not set.")
@@ -85,6 +97,20 @@ async function upgradeContract() {
         // Run the upgrade script
         execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
         break
+      case "x-allocation-voting":
+        console.log("Deploying XAllocationVoting")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
+      case "relayer-rewards-pool":
+        console.log("Deploying Relayer Rewards Pool")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
       case "grants-manager":
         console.log("Deploying Grants Manager")
         // Set environment variables
@@ -97,6 +123,13 @@ async function upgradeContract() {
         // Run the upgrade script
         execSync(`turbo run deploy:${env}`, { stdio: "inherit" })
         break
+      case "dba-pool":
+        console.log("Deploying Dynamic Base Allocation Pool")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
       default:
         throw new Error("Invalid choice")
     }
@@ -108,4 +141,4 @@ async function upgradeContract() {
   }
 }
 
-upgradeContract()
+deployContract()

@@ -58,6 +58,8 @@ export const useFilteredProposals = (
         proposal.state === ProposalState.Canceled ||
         proposal.state === ProposalState.Defeated ||
         proposal.state === ProposalState.DepositNotMet,
+      [ProposalFilter.InDevelopment]:
+        proposal.state === ProposalState.InDevelopment || proposal.state === ProposalState.Queued,
       // StateFilter values
       [StateFilter.Canceled]: proposal.state === ProposalState.Canceled,
       [StateFilter.Defeated]: proposal.state === ProposalState.Defeated,

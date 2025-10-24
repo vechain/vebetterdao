@@ -1,5 +1,6 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { Treasury__factory } from "@vechain/vebetterdao-contracts/factories/Treasury__factory"
 import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"

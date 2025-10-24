@@ -32,11 +32,13 @@ export const generateMockLocalConfig = () => {
     x2EarnAppsContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     tokenAuctionContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     x2EarnRewardsPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    dbaPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "nodeManagementContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "veBetterPassportContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "x2EarnCreatorContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "stargateNFTContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "grantsManagerContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    "relayerRewardsPoolContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "indexerUrl": "https://indexer.testnet.vechain.org/api/v1",
     "nodeUrl": "http://localhost:8669",
     "network": {
@@ -87,6 +89,9 @@ export const generateMockLocalConfig = () => {
       passportPoPScoreLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
       passportSignalingLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
       passportWhitelistAndBlacklistLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+    },
+    xAllocationVotingLibraries: {
+      autoVotingLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
     },
     }
     export default config;
