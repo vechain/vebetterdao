@@ -127,8 +127,8 @@ export const GrantsStepsCard = ({
               <List.Root variant="plain" pl={5} textStyle="sm" gap={2} textAlign="left">
                 {currentStep.listItems.map((item, index) => (
                   <List.Item key={`${item}-${index}`} color="text.subtle">
-                    <List.Indicator asChild color="actions.tertiary.default">
-                      <Icon boxSize="6" as={BsCheck} />
+                    <List.Indicator asChild>
+                      <Icon boxSize="6" as={BsCheck} color="icon.default" />
                     </List.Indicator>
                     {item}
                   </List.Item>

@@ -69,7 +69,7 @@ export const DashboardAllocationRounds = () => {
               </Skeleton>
               <DotSymbol color="text.subtle" size="2px" />
               <Skeleton loading={roundInfoLoading}>
-                <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
+                <Text textStyle="sm" color="actions.primary.default" fontWeight="semibold">
                   {roundInfo.voteEndTimestamp?.fromNow()}
                 </Text>
               </Skeleton>
