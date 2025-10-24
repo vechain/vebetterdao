@@ -85,7 +85,7 @@ export const GalaxyLevelsCard = () => {
                   </VStack>
                 }>
                 <Button size="xs" variant="ghost">
-                  <Icon as={UilInfoCircle} color="actions.tertiary.default" />
+                  <Icon as={UilInfoCircle} color="actions.primary.default" />
                 </Button>
               </ToggleTip>
             </HStack>
