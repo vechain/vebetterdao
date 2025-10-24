@@ -32,7 +32,6 @@
   },
   "dependencies": {
     "ts-loader": "^9.5.1",
-    "typescript": "^5.4.3",
-    "uninstall": "^0.0.0"
+    "typescript": "^5.4.3"
   }
 }
