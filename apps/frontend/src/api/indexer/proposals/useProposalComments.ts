@@ -19,9 +19,9 @@ export const useProposalComments = (proposalId: string, queryOptions?: ProposalC
       getNextPageParam: (
         lastPage: ProposalCommentsQueryResponse,
         _allPages: ProposalCommentsQueryResponse[],
-        lastPageParam: number,
+        lastPageParam: unknown,
       ) => {
-        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+        return lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined
       },
     },
   )

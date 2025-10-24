@@ -370,6 +370,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/explorer/block-usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get block usage statistics for a timestamp range
+         * @description
+         *                 Returns cumulative block usage statistics (gas usage, transaction counts, etc.) for a given timestamp range.
+         *
+         *                 The API automatically determines the appropriate data granularity based on the size of the time range:
+         *                 - Range ≤ 4,000 seconds: Returns all blocks (~360 data points)
+         *                 - Range ≤ 700,000 seconds: Returns hourly values (~168 data points)
+         *                 - Range ≤ 3,000,000 seconds: Returns daily values (~30 data points)
+         *                 - Range ≤ 35,000,000 seconds: Returns weekly values (~52 data points)
+         *                 - Range > 35,000,000 seconds: Returns monthly values
+         *
+         *                 Values are represented as a monotonic cumulative counter which means the values increase over time. This is
+         *                 a semantic used by Grafana for example. It requires some processing on the client side to convert to a value
+         *                 for a given block.
+         *
+         *                 For example to get the gasUsed at block n you would need to do:
+         *
+         *                     gasUsedAtBlockN = gasUsedAtBlockN - gasUsedAtBlock(n-1)
+         *
+         *                 In the case where we return hourly/daily/weekly/monthly values only you can calculate an average over the
+         *                 block range. If the first record in the returned data is at block n and the next record is at block n + k:
+         *
+         *                     averageGasUsedPerBlock = (gasUsedAtBlock(n+k) - gasUsedAtBlockN) / k
+         *
+         */
+        get: operations["getBlockUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/b3tr/xallocations/{roundId}/results": {
         parameters: {
             query?: never;
@@ -1003,6 +1045,18 @@ export interface components {
             description?: string;
             proof?: components["schemas"]["ProofV2"];
             impact?: components["schemas"]["Impact"];
+        };
+        BlockUsage: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            cumulativeGasLimit: number;
+            cumulativeGasUsed: number;
+            cumulativeBaseFeePerGas?: number;
+            cumulativeNumTransactions: number;
+            cumulativeNumClauses: number;
         };
         XAllocResult: {
             /** Format: int32 */
@@ -2266,6 +2320,55 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getBlockUsage: {
+        parameters: {
+            query: {
+                /**
+                 * @description The starting timestamp in seconds since Unix epoch (inclusive)
+                 * @example 1704067200
+                 */
+                startTimestamp: number;
+                /**
+                 * @description The ending timestamp in seconds since Unix epoch (inclusive). Must be greater than or equal to startTimestamp.
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BlockUsage"][];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */

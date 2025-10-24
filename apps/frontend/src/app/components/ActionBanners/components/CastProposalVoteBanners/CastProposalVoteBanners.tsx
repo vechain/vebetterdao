@@ -1,5 +1,4 @@
 import { Button } from "@chakra-ui/react"
-import { UilArrowRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,14 +23,12 @@ export const CastProposalVoteBanners = ({ id, description }: Props) => {
   }, [router, id])
   return (
     <GenericBanner
-      variant="warning"
-      title={t("ACTIVE PROPOSAL")}
+      title={t("Active proposal")}
       description={proposalMetadata?.data?.title ? `"${proposalMetadata.data.title}"` : `---`}
-      logoSrc="/assets/icons/vote-icon.webp"
+      illustration="/assets/icons/vote-icon.webp"
       cta={
-        <Button variant="primary" onClick={goToProposalPage}>
+        <Button size={{ base: "sm", md: "md" }} variant="primary" onClick={goToProposalPage}>
           {t("Vote now")}
-          <UilArrowRight color="white" />
         </Button>
       }
     />

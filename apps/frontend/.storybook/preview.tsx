@@ -45,7 +45,9 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-
+    nextjs: {
+      appDirectory: true,
+    },
     a11y: {
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
@@ -66,16 +68,16 @@ const preview: Preview = {
       const { i18n } = useTranslation()
       const { locale } = context.globals
       useEffect(() => {
-        console.log(typeof locale)
         if (locale) i18n.changeLanguage(locale)
       }, [locale])
 
+      const storybookTheme = context.globals.theme
       const isPageStory = context.title.startsWith("Pages/")
       if (isPageStory) context.parameters.layout = "fullscreen"
 
       return (
         <QueryClientProvider client={queryClient}>
-          <Provider>
+          <Provider forcedTheme={storybookTheme}>
             <TransactionModalProvider>
               {isPageStory ? (
                 <VStack minH="100vh" gap={0} align="stretch">
