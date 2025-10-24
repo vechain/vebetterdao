@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
-import { GalaxyMember__factory, NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/factories/GalaxyMember__factory"
+import { NodeManagementV3__factory as NodeManagement__factory } from "@vechain/vebetterdao-contracts/factories/mocks/Stargate/NodeManagement/NodeManagementV3__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 

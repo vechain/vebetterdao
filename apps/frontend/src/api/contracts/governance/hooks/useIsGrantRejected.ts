@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
+import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
 const abi = GrantsManager__factory.abi

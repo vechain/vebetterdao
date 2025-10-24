@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 
 const abi = B3TRGovernor__factory.abi

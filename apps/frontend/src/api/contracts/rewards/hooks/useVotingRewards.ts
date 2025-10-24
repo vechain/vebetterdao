@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
