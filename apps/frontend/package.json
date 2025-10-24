@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.28.14",
+  "version": "1.28.15",
   "private": true,
   "scripts": {
     "prebuild": "yarn chakra:typegen && yarn generate:schema",
