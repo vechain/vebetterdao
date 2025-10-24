@@ -26,8 +26,8 @@ export const ClaimTokensBanner = () => {
     return Number(ethers.formatEther(totalClaimableDeposits))
   }, [totalClaimableDeposits])
   return (
-    <Card.Root variant="primary" borderRadius="xl" w="full" h="full" position="relative" overflow="hidden">
-      <Card.Body position="relative" zIndex={1} justifyContent="center" borderRadius="xl">
+    <Card.Root variant="primary" borderRadius="xl" w="full" h="full" position="relative" overflow="hidden" p="0">
+      <Card.Body position="relative" zIndex={1} justifyContent="center" borderRadius="xl" p="4">
         <Box
           position="absolute"
           inset={0}

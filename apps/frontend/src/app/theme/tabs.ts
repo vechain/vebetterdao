@@ -9,7 +9,7 @@ export const tabsSlotRecipe = defineSlotRecipe({
     },
     list: { px: "1", borderColor: "border.secondary" },
     trigger: {
-      focusRing: "inside",
+      focusVisibleRing: "inside",
       focusRingWidth: "2px",
       focusRingColor: "border.active",
       fontWeight: "semibold",
@@ -28,7 +28,7 @@ export const tabsSlotRecipe = defineSlotRecipe({
             color: "text.default",
           },
           _selected: {
-            _focus: {
+            _focusVisible: {
               _horizontal: { "--indicator-thickness": "0" },
               _vertical: { "--indicator-thickness": "0" },
             },
