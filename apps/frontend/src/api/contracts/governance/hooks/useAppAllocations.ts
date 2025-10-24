@@ -1,62 +1,59 @@
 import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useQuery } from "@tanstack/react-query"
+import { ABIContract } from "@vechain/sdk-core"
 import { DBAPool__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { useThor, decodeEventLog } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 import { useAllocationPoolEvents } from "@/api/contracts/xAllocationPool/hooks/useAllocationPoolEvents"
+
+import { useDBADistributionStartRound } from "../../dbaPool/hooks/useDBADistributionStartRound"
 
 const dbaPoolAddress = getConfig().dbaPoolContractAddress as `0x${string}`
 const dbaPoolAbi = DBAPool__factory.abi
 
 /**
  * Fetches all DBA rewards for a specific app across all rounds
+ * Uses dbaRoundRewardsForApp(roundId, appId) contract function
  * @param appId The app ID
- * @returns Total DBA rewards received
+ * @param roundIds Array of round IDs to check
+ * @returns Total DBA and DBA by round
  */
-const useAppDBARewards = (appId: string) => {
+const useAppDBARewards = (appId: string, roundIds: number[]) => {
   const thor = useThor()
+  const { data: dbaStartRound } = useDBADistributionStartRound()
 
   return useQuery({
-    queryKey: ["appDBARewards", appId, dbaPoolAddress],
+    queryKey: ["appDBARewards", appId, roundIds, dbaPoolAddress],
     queryFn: async () => {
+      // Only check rounds >= dbaStartRound
+      const eligibleRounds = dbaStartRound !== undefined ? roundIds.filter(r => r >= dbaStartRound) : []
+
+      if (eligibleRounds.length === 0) {
+        return { totalDBA: 0, dbaByRound: {} }
+      }
+
       try {
-        const eventAbi = thor.contracts.load(dbaPoolAddress, dbaPoolAbi).getEventAbi("FundsDistributedToApp")
-        const topics = eventAbi.encodeFilterTopicsNoNull({ appId })
-
-        const logs = await thor.logs.filterEventLogs({
-          criteriaSet: [
-            {
-              criteria: {
-                address: dbaPoolAddress,
-                topic0: topics[0] ?? undefined,
-                topic1: topics[1] ?? undefined,
-              },
-              eventAbi,
-            },
-          ],
-          options: {
-            offset: 0,
-            limit: 256,
-          },
-          order: "asc",
-        })
-
         let totalDBA = 0
         const dbaByRound: Record<number, number> = {}
 
-        logs.forEach(eventLog => {
-          const event = decodeEventLog(eventLog, dbaPoolAbi)
-          if (event.decodedData.eventName === "FundsDistributedToApp") {
-            const amount = event.decodedData.args.amount
-            const roundId = Number(event.decodedData.args.roundId)
-            const dbaAmount = Number(ethers.formatEther(amount))
+        // Query DBA rewards for each eligible round
+        for (const roundId of eligibleRounds) {
+          const result = await thor.contracts.executeCall(
+            dbaPoolAddress,
+            ABIContract.ofAbi(dbaPoolAbi).getFunction("dbaRoundRewardsForApp"),
+            [BigInt(roundId), appId],
+          )
 
+          const amount = (result.result?.array?.[0] as bigint) ?? 0n
+          const dbaAmount = Number(ethers.formatEther(amount))
+
+          if (dbaAmount > 0) {
             totalDBA += dbaAmount
             dbaByRound[roundId] = dbaAmount
           }
-        })
+        }
 
         return { totalDBA, dbaByRound }
       } catch (error) {
@@ -64,7 +61,7 @@ const useAppDBARewards = (appId: string) => {
         return { totalDBA: 0, dbaByRound: {} }
       }
     },
-    enabled: !!appId && !!thor,
+    enabled: !!appId && !!thor && dbaStartRound !== undefined && roundIds.length > 0,
   })
 }
 
@@ -75,7 +72,14 @@ const useAppDBARewards = (appId: string) => {
  */
 export const useAppAllocations = (appId: string) => {
   const { data, error, isLoading } = useAllocationPoolEvents()
-  const { data: dbaData, isLoading: isDBALoading } = useAppDBARewards(appId)
+
+  // Extract round IDs from claimed rewards
+  const roundIds =
+    data?.claimedRewards
+      ?.filter(allocation => compareAddresses(allocation.appId, appId))
+      .map(allocation => Number(allocation.roundId)) || []
+
+  const { data: dbaData, isLoading: isDBALoading } = useAppDBARewards(appId, roundIds)
 
   const appAllocations =
     data?.claimedRewards

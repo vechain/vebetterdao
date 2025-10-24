@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"
 import { DBAPool__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { executeMultipleClausesCall, useThor, decodeEventLog } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 import { useDBADistributionStartRound } from "../../dbaPool/hooks/useDBADistributionStartRound"
@@ -95,43 +95,44 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
         const eligibleRounds = roundIds.filter(r => r >= dbaStartRound)
 
         if (eligibleRounds.length > 0) {
-          // Query DBA events for all apps
-          for (const appId of appIds) {
-            try {
-              const eventAbi = thor.contracts.load(dbaPoolAddress, dbaPoolAbi).getEventAbi("FundsDistributedToApp")
-              const topics = eventAbi.encodeFilterTopicsNoNull({ appId })
+          // Query DBA rewards for all apps using contract function
+          const dbaRewardsCalls = appIds
+            .map(appId =>
+              eligibleRounds.map(
+                roundId =>
+                  ({
+                    abi: dbaPoolAbi,
+                    address: dbaPoolAddress,
+                    functionName: "dbaRoundRewardsForApp",
+                    args: [roundId, appId],
+                  }) as const,
+              ),
+            )
+            .flat()
 
-              const logs = await thor.logs.filterEventLogs({
-                criteriaSet: [
-                  {
-                    criteria: {
-                      address: dbaPoolAddress,
-                      topic0: topics[0] ?? undefined,
-                      topic1: topics[1] ?? undefined,
-                    },
-                    eventAbi,
-                  },
-                ],
-                options: {
-                  offset: 0,
-                  limit: 256,
-                },
-                order: "asc",
-              })
+          try {
+            const dbaResults = await executeMultipleClausesCall({
+              thor,
+              calls: dbaRewardsCalls,
+            })
 
-              // Sum all DBA rewards for this app
-              logs.forEach(eventLog => {
-                const event = decodeEventLog(eventLog, dbaPoolAbi)
-                if (event.decodedData.eventName === "FundsDistributedToApp") {
-                  const amount = event.decodedData.args.amount
-                  const dbaAmount = Number(ethers.formatEther(amount))
+            const callsPerApp = eligibleRounds.length
+
+            dbaResults.forEach((result, index) => {
+              const appIndex = Math.floor(index / callsPerApp)
+              const appId = appIds[appIndex]
+
+              if (appId && result) {
+                const amount = (result as unknown as readonly [bigint])[0] ?? 0n
+                const dbaAmount = Number(ethers.formatEther(amount))
+                if (dbaAmount > 0) {
                   results[appId]!.amount += dbaAmount
                 }
-              })
-            } catch (error) {
-              console.error(`Error fetching DBA rewards for app ${appId}:`, error)
-              // Continue with other apps
-            }
+              }
+            })
+          } catch (error) {
+            console.error("Error fetching DBA rewards:", error)
+            // Continue without DBA data
           }
         }
       }
