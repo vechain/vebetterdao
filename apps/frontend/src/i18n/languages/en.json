@@ -1535,5 +1535,6 @@
   "Automation Pending": "Automation Pending",
   "Starting next round": "Starting next round",
   "No Automation": "No Automation",
-  "Manual voting": "Manual voting"
+  "Manual voting": "Manual voting",
+  "Automatically vote and claim rewards weekly. The service covers all transaction fees for a 10% fee of your weekly rewards (max 100 B3TR). ": "Automatically vote and claim rewards weekly. The service covers all transaction fees for a 10% fee of your weekly rewards (max 100 B3TR). "
 }
