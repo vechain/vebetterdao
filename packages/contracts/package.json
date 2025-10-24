@@ -130,7 +130,6 @@
     "eslint-plugin-prettier": "^5.1.3",
     "ethers": "^6.9.0",
     "hardhat": "2.19.1",
-    "nft.storage": "^7.1.1",
     "prettier": "^3.2.4"
   },
   "resolutions": {
