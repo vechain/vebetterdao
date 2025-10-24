@@ -34,8 +34,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-solc-
 
-      - name: Compile contracts
-        run: yarn contracts:compile
+#      - name: Compile contracts
+#        run: yarn contracts:compile
 
    run-slither:
         uses: vechain/github-actions/.github/workflows/slither.yaml@feature/waqar/add-falsepositive-slither  #v1.10.0
@@ -44,7 +44,7 @@ jobs:
           target: 'packages/contracts/'
           fail-on: 'none'
           cache: 'yarn'
-#          compile-command: 'yarn contracts:compile'
+          compile-command: 'yarn contracts:compile'
           ignore-compile: true
           slither-args: |
             --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
