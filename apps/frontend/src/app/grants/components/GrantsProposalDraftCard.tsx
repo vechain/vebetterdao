@@ -159,7 +159,7 @@ export const GrantsProposalDraftCard = ({ proposal }: GrantsProposalDraftCardPro
           </Button>
 
           <DeleteGrantProposalModal proposal={proposal}>
-            <Button w="40" variant="ghost" color="actions.tertiary.default" size="md">
+            <Button w="40" variant="ghost" color="status.negative.primary" size="md">
               {t("Delete")}
             </Button>
           </DeleteGrantProposalModal>

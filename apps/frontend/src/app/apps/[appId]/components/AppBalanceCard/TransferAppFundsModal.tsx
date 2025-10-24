@@ -102,14 +102,12 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                       )}
                     </Text>
                     <Button
+                      variant="primary"
                       mt={1}
                       onClick={() => {
                         onOpenDeposit()
                         onClose()
                       }}
-                      variant="ghost"
-                      color="actions.tertiary.default"
-                      borderRadius={"full"}
                       w={"200px"}>
                       {t("Deposit")}
                     </Button>

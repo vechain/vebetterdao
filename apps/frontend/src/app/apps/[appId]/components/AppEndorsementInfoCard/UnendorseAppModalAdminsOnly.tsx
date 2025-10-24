@@ -70,7 +70,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
           <Button colorPalette="red" w={"full"} onClick={handleUnendorsement}>
             {t("Remove now")}
           </Button>
-          <Button variant="ghost" color="actions.tertiary.default" w={"full"} onClick={onClose}>
+          <Button variant="ghost" color="status.negative.primary" w={"full"} onClick={onClose}>
             {t("Cancel")}
           </Button>
         </VStack>

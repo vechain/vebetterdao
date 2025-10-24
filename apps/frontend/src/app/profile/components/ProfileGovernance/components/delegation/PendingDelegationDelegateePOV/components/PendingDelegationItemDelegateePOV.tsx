@@ -44,7 +44,7 @@ export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, de
             <UilTimes color="status.negative.primary" />
             {t("Reject")}
           </Button>
-          <Button variant="ghost" color="actions.tertiary.default" p={3} onClick={acceptDelegationModal.onOpen}>
+          <Button variant="link" p={3} onClick={acceptDelegationModal.onOpen}>
             <UilCheck color="#004CFC" />
             {t("Accept")}
           </Button>

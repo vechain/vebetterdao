@@ -29,7 +29,7 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
               <Text textStyle={"sm"} color="text.subtle" w={"full"}>
                 {t("Treasury address")}
               </Text>
-              <Icon color="logo" boxSize={14}>
+              <Icon color="icon.default" boxSize={14}>
                 <FiInfo />
               </Icon>
             </HStack>
