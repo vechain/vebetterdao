@@ -18,6 +18,10 @@ import { IDynamicBaseAllocationPool } from "./interfaces/IDynamicBaseAllocationP
  * Initially acts as a wallet/treasury where the VeBetter team can manually distribute
  * surplus allocations to eligible apps. Future upgrades will add on-chain calculation
  * and permissionless distribution capabilities.
+ *
+ * --------- Version 2 ---------
+ * - Add storage to track the reward amount for each app for each round
+ * - Add seed function to seed historical rewards
  */
 contract DBAPool is
   AccessControlUpgradeable,
