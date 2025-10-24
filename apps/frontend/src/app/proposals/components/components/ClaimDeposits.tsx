@@ -1,6 +1,7 @@
-import { Box, Image, Text, Button } from "@chakra-ui/react"
+import { Box, Text, Button, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ethers } from "ethers"
+import { HeartSolid } from "iconoir-react"
 import { useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -25,15 +26,8 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
     sendTransaction()
   }, [sendTransaction])
   return (
-    <Box
-      bg={"contrast-on-dark-bg"}
-      borderRadius={12}
-      p={6}
-      alignContent={"flex-start"}
-      borderWidth={1}
-      borderColor={"#004CFC"}
-      boxShadow={"0px 0px 16px 0px rgba(0, 76, 252, 0.35)"}>
-      <Image src="/assets/icons/heart-deposits.svg" alt="Proposal icon" boxSize={14} />
+    <Box bg={"card.default"} borderRadius={12} p={6} alignContent={"flex-start"}>
+      <Icon boxSize={14} as={HeartSolid} color="actions.primary.default" />
       <Text textStyle="2xl" fontWeight="bold" mt={4}>
         {t("Claim back community support tokens")}
       </Text>

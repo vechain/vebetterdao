@@ -131,8 +131,8 @@ export const AppTweets = () => {
             <>
               {editMode ? (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-                  <Button variant="ghost" color="actions.tertiary.default" onClick={handleCancelEdit}>
-                    <UilTimes color="#004CFC" fontSize="16px" />
+                  <Button variant="ghost" color="status.negative.primary" onClick={handleCancelEdit}>
+                    <UilTimes fontSize="16px" />
                     {t("Cancel")}
                   </Button>
                   <Button
@@ -146,8 +146,8 @@ export const AppTweets = () => {
               ) : (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
                   {!isListEmpty && (
-                    <Button variant="ghost" color="actions.tertiary.default" onClick={handleEdit}>
-                      <UilPen color="#004CFC" fontSize="16px" />
+                    <Button variant="secondary" onClick={handleEdit}>
+                      <UilPen fontSize="16px" />
                       {t("Edit feed")}
                     </Button>
                   )}

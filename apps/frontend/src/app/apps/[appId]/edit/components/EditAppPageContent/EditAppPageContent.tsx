@@ -251,7 +251,7 @@ export const EditAppPageContent = () => {
             </Field.Root>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-            <Button variant="ghost" color="actions.tertiary.default" onClick={goToAppPage}>
+            <Button variant="ghost" color="status.negative.primary" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
             <Button variant="primary" type="submit" disabled={!isFormChanged}>

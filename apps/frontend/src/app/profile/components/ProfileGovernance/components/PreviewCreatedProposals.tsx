@@ -1,4 +1,4 @@
-import { HStack, VStack, Text, Heading, Card, Button } from "@chakra-ui/react"
+import { HStack, VStack, Heading, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
@@ -28,10 +28,8 @@ export const PreviewCreatedProposals = ({
             {isCreatedProposals ? t("Created Proposals") : t("Voted Proposals")}
           </Heading>
           {isMoreProposals && (
-            <Button variant="ghost" size="sm" color="actions.tertiary.default" onClick={onSeeAllProposals}>
-              <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
-                {t("See All")}
-              </Text>
+            <Button variant="ghost" size="sm" onClick={onSeeAllProposals} fontWeight="semibold">
+              {t("See All")}
               <FiArrowUpRight size={16} />
             </Button>
           )}

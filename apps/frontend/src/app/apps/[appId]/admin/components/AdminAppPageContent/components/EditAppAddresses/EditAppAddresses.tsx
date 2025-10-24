@@ -44,7 +44,7 @@ export const EditAppAddresses = ({ form }: Props) => {
   )
   return (
     <VStack align="stretch" gap="32px">
-      <Text color="#D23F63" textStyle="2xl" fontWeight="bold">
+      <Text color="status.negative.primary" textStyle="2xl" fontWeight="bold">
         {t("Sensitive parameters")}
       </Text>
       <VStack align="stretch">
@@ -58,16 +58,13 @@ export const EditAppAddresses = ({ form }: Props) => {
           required={true}
           defaultValue={app?.teamWalletAddress}
           inputGroupProps={{
-            endElementProps: {
-              pr: 0,
-            },
+            endElementProps: { pr: 0 },
             endElement: editTeamWalletAddress ? null : (
               <Button
-                variant="ghost"
-                color="actions.tertiary.default"
-                bg="#FFFFFF"
-                borderY="1px solid #f4f6f9"
-                borderRight="1px solid #f4f6f9"
+                variant="secondary"
+                borderColor="border.secondary"
+                borderY="1px"
+                borderRight="1px"
                 onClick={modalEditTeamWalletAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
@@ -99,11 +96,10 @@ export const EditAppAddresses = ({ form }: Props) => {
             },
             endElement: editAdminAddress ? null : (
               <Button
-                variant="ghost"
-                color="actions.tertiary.default"
-                bg="#FFFFFF"
-                borderY="1px solid #f4f6f9"
-                borderRight="1px solid #f4f6f9"
+                variant="secondary"
+                borderColor="border.secondary"
+                borderY="1px"
+                borderRight="1px"
                 onClick={modalEditAdminAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}

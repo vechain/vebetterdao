@@ -50,7 +50,7 @@ export const RejectLinkingModal = ({
           <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
+          <Button variant="link" onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

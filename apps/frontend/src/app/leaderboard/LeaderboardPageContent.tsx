@@ -146,7 +146,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
         </VStack>
       )}
       <VStack gap={8} align="flex-start" w="full">
-        <Button px={0} variant="plain" color="actions.tertiary.default" size="sm" asChild>
+        <Button px={0} variant="link" size="sm" asChild>
           <NextLink href="/">
             <FaAngleLeft />
             {t("Go back")}

@@ -189,9 +189,10 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
             w={"full"}
             rounded={"full"}
             disabled={invalidAmount}
-            size={"lg"}>
+            size={"lg"}
+            textStyle={{ base: "sm", md: "lg" }}>
             <Icon as={IoAddCircleOutline} mr={2} />
-            <Text textStyle={{ base: "sm", md: "lg" }}>{t("Deposit now")}</Text>
+            {t("Deposit now")}
           </Button>
         </VStack>
       </form>
