@@ -65,18 +65,30 @@ async function main() {
     `Upgrading DBAPool contract at address: ${config.dbaPoolContractAddress} on network: ${config.network.name}`,
   )
 
+  // Get the distributionStartRound from DBAPool
+  console.log("\n=== Getting Distribution Start Round ===")
+  let dbaPool = (await ethers.getContractAt("DBAPool", config.dbaPoolContractAddress)) as DBAPool
+  const distributionStartRound = await dbaPool.distributionStartRound()
+  console.log(`Distribution start round: ${distributionStartRound}`)
+
+  // Get the roundSnapshot block from XAllocationVoting for the distributionStartRound
+  console.log("\n=== Getting Round Snapshot Block ===")
+  const xAllocationVoting = await ethers.getContractAt("XAllocationVoting", config.xAllocationVotingContractAddress)
+  const roundSnapshotBlock = await xAllocationVoting.roundSnapshot(distributionStartRound)
+  console.log(`Round ${distributionStartRound} snapshot block: ${roundSnapshotBlock}`)
+
   // Fetch all historical events from the beginning
   console.log("\n=== Fetching Historical DBA Rewards Data ===")
   const { roundIds, appIds, amounts } = await fetchHistoricalDBAEvents(
     config.dbaPoolContractAddress,
-    0, // Fetch from the very beginning
+    Number(roundSnapshotBlock),
   )
 
   console.log(`Total events found: ${roundIds.length}`)
 
   // Perform the upgrade
   console.log("\n=== Upgrading Contract ===")
-  const dbaPool = (await upgradeProxy(
+  dbaPool = (await upgradeProxy(
     "DBAPoolV1",
     "DBAPool",
     config.dbaPoolContractAddress,
