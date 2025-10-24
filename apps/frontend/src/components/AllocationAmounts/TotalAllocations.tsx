@@ -61,13 +61,7 @@ export const TotalAllocations = () => {
               ))}
 
           {hasMoreApps && (
-            <Button
-              mx="auto"
-              maxW="fit"
-              size="md"
-              variant="ghost"
-              color="actions.tertiary.default"
-              onClick={handleLoadMore}>
+            <Button mx="auto" maxW="fit" size="md" variant="link" onClick={handleLoadMore}>
               {t("Load more")}
             </Button>
           )}

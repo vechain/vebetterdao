@@ -69,9 +69,9 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
                 key={type}
                 variant="primary"
                 as="button"
-                borderColor={value === type ? "actions.tertiary.default" : notSelectedBorder}
-                boxShadow={value === type ? "0px 0px 16px 0px var(--vbd-colors-actions-tertiary-default)" : undefined}
-                _hover={{ borderColor: "actions.tertiary.default" }}
+                borderColor={value === type ? "actions.primary.default" : notSelectedBorder}
+                boxShadow={value === type ? "0px 0px 16px 0px var(--vbd-colors-actions-primary-default)" : undefined}
+                _hover={{ borderColor: "actions.primary.default" }}
                 onClick={() => handleGrantTypeChange(type)}>
                 <CardBody>
                   <VStack align="flex-start" gap={4}>
@@ -79,7 +79,7 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
                       {info.title}
                     </Text>
                     <VStack w="full" justify="space-between" align="flex-start">
-                      <Text textStyle="2xl" fontWeight="bold" color="actions.tertiary.default">
+                      <Text textStyle="2xl" fontWeight="bold" color="actions.primary.default">
                         {t("Up to {{amount}}", { amount: info.amount })}
                       </Text>
                       <Text color="gray.600">{info.duration}</Text>
@@ -94,8 +94,8 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
                     <List.Root gap={2} display={{ base: "none", md: "block" }}>
                       {info.requirements.map(req => (
                         <List.Item key={req} display="flex" alignItems="center">
-                          <List.Indicator asChild color="actions.tertiary.default">
-                            <Icon as={BsCheck} />
+                          <List.Indicator asChild>
+                            <Icon as={BsCheck} color="icon.default" />
                           </List.Indicator>
                           <Text color="gray.600">{req}</Text>
                         </List.Item>

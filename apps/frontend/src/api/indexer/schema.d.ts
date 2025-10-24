@@ -379,8 +379,7 @@ export interface paths {
         };
         /**
          * Get block usage statistics for a timestamp range
-         * @description
-         *                 Returns cumulative block usage statistics (gas usage, transaction counts, etc.) for a given timestamp range.
+         * @description Returns cumulative block usage statistics (gas usage, transaction counts, etc.) for a given timestamp range.
          *
          *                 The API automatically determines the appropriate data granularity based on the size of the time range:
          *                 - Range ≤ 4,000 seconds: Returns all blocks (~360 data points)
@@ -401,7 +400,6 @@ export interface paths {
          *                 block range. If the first record in the returned data is at block n and the next record is at block n + k:
          *
          *                     averageGasUsedPerBlock = (gasUsedAtBlock(n+k) - gasUsedAtBlockN) / k
-         *
          */
         get: operations["getBlockUsage"];
         put?: never;
@@ -526,15 +524,13 @@ export interface paths {
         };
         /**
          * Get B3TR action overview for a specific wallet, optionally for a specific round or date.
-         * @description
-         *                 This endpoint retrieves the B3TR action overview for a wallet address.
+         * @description This endpoint retrieves the B3TR action overview for a wallet address.
          *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
          *
          *                 - If roundId is provided, the overview for the specific round is returned.
          *                 - If date is provided, the overview for the specific date is returned.
          *                 - If roundId/date are not provided, the all time sustainability overview for the user is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
          */
         get: operations["getUserOverview"];
         put?: never;
@@ -571,15 +567,12 @@ export interface paths {
         };
         /**
          * Get leaderboard of user's B3TR actions.
-         * @description
-         *                 This endpoint retrieves the user leaderboard based on their B3TR actions.
+         * @description This endpoint retrieves the user leaderboard based on their B3TR actions.
          *
          *                 - If roundId is provided, the leaderboard for the specific round is returned.
          *                 - If date is provided, the leaderboard for the specific date is returned.
          *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
-         *
          */
         get: operations["getUserLeaderboard"];
         put?: never;
@@ -599,15 +592,12 @@ export interface paths {
         };
         /**
          * Get the app B3TR action leaderboard
-         * @description
-         *                 This endpoint retrieves the app B3TR action leaderboard.
+         * @description This endpoint retrieves the app B3TR action leaderboard.
          *
          *                 - If roundId is provided, the leaderboard for the specific round is returned.
          *                 - If date is provided, the leaderboard for the specific date is returned.
          *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
-         *
          */
         get: operations["getAppLeaderboard"];
         put?: never;
@@ -627,15 +617,12 @@ export interface paths {
         };
         /**
          * Get the user B3TR action leaderboard for a given app
-         * @description
-         *                 This endpoint retrieves the user B3TR action leaderboard for a given app.
+         * @description This endpoint retrieves the user B3TR action leaderboard for a given app.
          *
          *                 - If roundId is provided, the leaderboard for the specific round is returned.
          *                 - If date is provided, the leaderboard for the specific date is returned.
          *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
-         *
          */
         get: operations["getUserAppLeaderboard"];
         put?: never;
@@ -655,14 +642,12 @@ export interface paths {
         };
         /**
          * Get global B3TR action overview, optionally for a specific round or date.
-         * @description
-         *                 This endpoint retrieves the global B3TR action overview.
+         * @description This endpoint retrieves the global B3TR action overview.
          *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
          *                 - If roundId is provided, the overview for the specific round is returned.
          *                 - If date is provided, the overview for the specific date is returned.
          *                 - If roundId/date are not provided, the all time global sustainability overview is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
          */
         get: operations["getGlobalOverview"];
         put?: never;
@@ -699,15 +684,13 @@ export interface paths {
         };
         /**
          * Get B3TR action overview for a specific app, optionally for a specific round or date.
-         * @description
-         *                 This endpoint retrieves the B3TR action overview for an app.
+         * @description This endpoint retrieves the B3TR action overview for an app.
          *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
          *
          *                 - If roundId is provided, the overview for the specific round is returned.
          *                 - If date is provided, the overview for the specific date is returned.
          *                 - If roundId/date are not provided, the all time sustainability overview for the app is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
          */
         get: operations["getAppOverview"];
         put?: never;

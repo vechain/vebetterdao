@@ -1,4 +1,10 @@
-export const WalletIcon = ({ color = "white", size = "116" }: { color?: string; size?: number | string }) => (
+export const WalletIcon = ({
+  color = "var(--vbd-colors-icon-default)",
+  size = "116",
+}: {
+  color?: string
+  size?: number | string
+}) => (
   <svg width={size} height={size} viewBox="0 0 116 116" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g id="Illustration/wallet">
       <path

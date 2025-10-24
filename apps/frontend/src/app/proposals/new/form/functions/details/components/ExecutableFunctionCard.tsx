@@ -104,8 +104,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
               data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}__add-another-tx`}
               size="sm"
               onClick={onAddAnotherTransactionClick}
-              variant="ghost"
-              color="actions.tertiary.default"
+              variant="link"
               alignSelf={"flex-start"}
               rounded="full">
               <FaPlus />
