@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
+import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnRewardsPool__factory"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 

@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { NodeManagementV3__factory as NodeManagement__factory } from "@vechain/vebetterdao-contracts/factories/mocks/Stargate/NodeManagement/NodeManagementV3__factory"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = NodeManagement__factory.abi

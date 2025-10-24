@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { Emissions__factory } from "@vechain/vebetterdao-contracts"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
@@ -31,7 +31,7 @@ export const getAllocationAmount = async (thor: ThorClient, roundId?: string): P
           address,
           functionName: method,
           args: [BigInt(roundId)],
-        }) as const,
+        } as const),
     ),
   })
   return {

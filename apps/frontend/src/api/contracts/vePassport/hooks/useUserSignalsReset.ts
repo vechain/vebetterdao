@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/factories/ve-better-passport/VeBetterPassport__factory"
 import { useMemo } from "react"
 
 import { useEvents } from "../../../../hooks/useEvents"

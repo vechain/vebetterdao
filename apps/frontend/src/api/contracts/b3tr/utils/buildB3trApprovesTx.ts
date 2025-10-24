@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { AddressUtils, FormattingUtils } from "@repo/utils"
-import { B3TR__factory } from "@vechain/vebetterdao-contracts"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
 import { EnhancedClause, ThorClient } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
