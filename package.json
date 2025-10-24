@@ -86,7 +86,6 @@
     "@datadog/browser-rum": "^5.23.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "dotenv-cli": "latest",
     "hardhat": "2.19.1",
