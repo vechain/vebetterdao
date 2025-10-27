@@ -40,7 +40,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
   const { data: dbaStartRound } = useDBADistributionStartRound()
 
   return useQuery({
-    queryKey: [...getXAppsTotalEarningsQueryKey(roundIds, appIds), dbaStartRound],
+    queryKey: [...getXAppsTotalEarningsQueryKey(roundIds, appIds), "withDBA", dbaStartRound],
     queryFn: async () => {
       const results: Record<string, { amount: number; appId: string }> = {}
       appIds.forEach(appId => {
@@ -139,6 +139,6 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
 
       return appIds.map(appId => results[appId] || { amount: 0, appId })
     },
-    enabled: !!thor && !!appIds.length && !!roundIds.length && dbaStartRound !== undefined,
+    enabled: !!thor && !!appIds.length && !!roundIds.length,
   })
 }

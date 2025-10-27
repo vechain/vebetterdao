@@ -36,65 +36,54 @@ export const useTotalXAppEarnings = (roundId: string, xAppId: string, votePercen
   // Determine if round is active (0 = Active)
   const isRoundActive = roundState === 0
 
-  // Check eligibility for DBA (inline)
+  // Check if round is eligible for DBA (basic check for active rounds)
   const roundIdNum = Number(roundId)
-  const isEligible =
-    dbaStartRound !== undefined && roundIdNum >= dbaStartRound && votePercentage < DBA_ELIGIBILITY_THRESHOLD
+  const shouldFetchDBAEstimate =
+    isRoundActive &&
+    dbaStartRound !== undefined &&
+    roundIdNum >= dbaStartRound &&
+    votePercentage < DBA_ELIGIBILITY_THRESHOLD
 
-  // For active rounds: estimate DBA rewards using actual unallocated amounts from contract
-  const { data: activeRoundEstimate } = useEstimateDBAForActiveRound(roundId, isEligible && isRoundActive)
+  // For active rounds: estimate DBA rewards (with full eligibility checks inside)
+  const { data: activeRoundEstimate } = useEstimateDBAForActiveRound(roundId, shouldFetchDBAEstimate)
 
-  // For concluded rounds: fetch actual DBA rewards from events
+  // For concluded rounds: fetch actual DBA rewards
   const { data: dbaRewards, isLoading: isDBARewardsLoading } = useDBARewards(roundId, xAppId)
 
   const result = useMemo(() => {
     const baseAmount = roundEarnings?.amount ?? "0"
+    let dbaAmount = "0"
+    let hasDBARewards = false
+    let isSimulation = false
 
-    // Check if DBA has already been distributed (actual rewards exist)
-    const hasActualDBARewards = dbaRewards?.hasRewards ?? false
-
-    if (hasActualDBARewards) {
-      // Concluded rounds with actual DBA distribution - show actual amounts
-      const dbaAmount = dbaRewards?.amount ?? "0"
-      const totalAmount = (parseFloat(baseAmount) + parseFloat(dbaAmount)).toString()
-
-      return {
-        baseEarnings: baseAmount,
-        dbaEarnings: dbaAmount,
-        totalEarnings: totalAmount,
-        appId: xAppId,
-        hasDBARewards: true,
-        isRoundActive: false,
-        isSimulation: false,
-      }
-    } else if (isRoundActive && isEligible) {
-      // Active rounds with eligibility - show estimated DBA
-      const dbaAmount = activeRoundEstimate?.estimatedAmount ?? "0"
-      const totalAmount = (parseFloat(baseAmount) + parseFloat(dbaAmount)).toString()
-
-      return {
-        baseEarnings: baseAmount,
-        dbaEarnings: dbaAmount,
-        totalEarnings: totalAmount,
-        appId: xAppId,
-        hasDBARewards: parseFloat(dbaAmount) > 0,
-        isRoundActive: true,
-        isSimulation: true,
-        estimationDetails: activeRoundEstimate,
-      }
-    } else {
-      // Concluded rounds without DBA or ineligible apps - show only base earnings
-      return {
-        baseEarnings: baseAmount,
-        dbaEarnings: "0",
-        totalEarnings: baseAmount,
-        appId: xAppId,
-        hasDBARewards: false,
-        isRoundActive: isRoundActive,
-        isSimulation: false,
+    // For concluded rounds: use actual DBA from contract
+    if (!isRoundActive && dbaRewards?.hasRewards) {
+      dbaAmount = dbaRewards.amount
+      hasDBARewards = true
+      isSimulation = false
+    }
+    // For active rounds: use estimated DBA if app is in eligible list
+    else if (isRoundActive && activeRoundEstimate) {
+      const eligibleAppIds = (activeRoundEstimate.eligibleAppIds as string[] | undefined) ?? []
+      if (eligibleAppIds.includes(xAppId)) {
+        dbaAmount = activeRoundEstimate.estimatedAmount ?? "0"
+        hasDBARewards = parseFloat(dbaAmount) > 0
+        isSimulation = true
       }
     }
-  }, [roundEarnings, dbaRewards, activeRoundEstimate, isRoundActive, isEligible, xAppId])
+
+    const totalAmount = (parseFloat(baseAmount) + parseFloat(dbaAmount)).toString()
+
+    return {
+      baseEarnings: baseAmount,
+      dbaEarnings: dbaAmount,
+      totalEarnings: totalAmount,
+      appId: xAppId,
+      hasDBARewards,
+      isRoundActive,
+      isSimulation,
+    }
+  }, [roundEarnings, dbaRewards, activeRoundEstimate, isRoundActive, xAppId])
 
   return {
     data: result,

@@ -48,6 +48,7 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
           totalAppsCount: 0,
           eligibleAppsCount: 0,
           totalUnallocated: "0",
+          eligibleAppIds: [],
         }
       }
 
@@ -72,6 +73,7 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
             totalAppsCount: 0,
             eligibleAppsCount: 0,
             totalUnallocated: "0",
+            eligibleAppIds: [],
           }
         }
 
@@ -165,6 +167,7 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
           eligibleAppsCount: eligibleAppsCount,
           totalUnallocated: formatEther(totalUnallocated),
           appsWithUnallocated: appsData.filter(app => app.unallocatedAmount > 0n).length,
+          eligibleAppIds: appsData.filter(app => app.isEligible).map(app => app.appId), // List of eligible app IDs
         }
       } catch (error) {
         console.error("Error estimating DBA for active round:", error)
@@ -174,6 +177,7 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
           totalAppsCount: 0,
           eligibleAppsCount: 0,
           totalUnallocated: "0",
+          eligibleAppIds: [],
           error: error instanceof Error ? error.message : "Unknown error",
         }
       }
