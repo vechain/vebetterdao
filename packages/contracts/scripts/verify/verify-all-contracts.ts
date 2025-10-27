@@ -46,7 +46,11 @@ async function getImplementationAddress(proxyAddress: string): Promise<string | 
     const events = await proxyContract.queryFilter(proxyContract.filters.Upgraded(), 0, "latest")
     if (events.length === 0) return null
     const latestEvent = events[events.length - 1]
-    return latestEvent.args?.implementation || latestEvent.args?.[0] || null
+    // Type guard to check if event is EventLog (has args property)
+    if ("args" in latestEvent) {
+      return latestEvent.args?.implementation || latestEvent.args?.[0] || null
+    }
+    return null
   } catch (error) {
     return null
   }
@@ -56,7 +60,7 @@ async function getVerificationMatch(address: string, chainId: string): Promise<s
   try {
     const response = await fetch(`https://sourcify.dev/server/v2/contract/${chainId}/${address}`)
     if (!response.ok) return null
-    const data = await response.json()
+    const data = (await response.json()) as { runtimeMatch?: string }
     return data.runtimeMatch || null
   } catch {
     return null
