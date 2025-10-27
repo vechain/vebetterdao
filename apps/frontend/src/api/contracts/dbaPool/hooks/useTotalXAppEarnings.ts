@@ -2,12 +2,11 @@ import { useMemo } from "react"
 
 import { useXAppRoundEarnings } from "../../xAllocationPool/hooks/useXAppRoundEarnings"
 import { useAllocationsRoundState } from "../../xAllocations/hooks/useAllocationsRoundState"
+import { DBA_ELIGIBILITY_THRESHOLD_PERCENTAGE } from "../constants"
 
 import { useDBADistributionStartRound } from "./useDBADistributionStartRound"
 import { useDBARewards } from "./useDBARewards"
 import { useEstimateDBAForActiveRound } from "./useEstimateDBAForActiveRound"
-
-const DBA_ELIGIBILITY_THRESHOLD = 7.5 // percentage
 
 /**
  * Hook that returns the total earnings for an app in a round
@@ -42,7 +41,7 @@ export const useTotalXAppEarnings = (roundId: string, xAppId: string, votePercen
     isRoundActive &&
     dbaStartRound !== undefined &&
     roundIdNum >= dbaStartRound &&
-    votePercentage < DBA_ELIGIBILITY_THRESHOLD
+    votePercentage < DBA_ELIGIBILITY_THRESHOLD_PERCENTAGE
 
   // For active rounds: estimate DBA rewards (with full eligibility checks inside)
   const { data: activeRoundEstimate } = useEstimateDBAForActiveRound(roundId, shouldFetchDBAEstimate)

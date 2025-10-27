@@ -10,13 +10,12 @@ import {
 import { useThor } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
+import { DBA_ELIGIBILITY_THRESHOLD_SCALED } from "../constants"
+
 const xAllocationPoolAddress = getConfig().xAllocationPoolContractAddress as `0x${string}`
 const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 const x2EarnAppsAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const x2EarnRewardsPoolAddress = getConfig().x2EarnRewardsPoolContractAddress as `0x${string}`
-
-// DBA eligibility threshold: apps with < 7.5% votes (750 in scaled format where 100 = 1%)
-const DBA_ELIGIBILITY_THRESHOLD = 750
 
 /**
  * Hook to estimate DBA rewards for an app in an active round
@@ -132,7 +131,7 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
 
             // Full eligibility check
             const isEligible =
-              appShare < DBA_ELIGIBILITY_THRESHOLD && // < 7.5% votes
+              appShare < DBA_ELIGIBILITY_THRESHOLD_SCALED && // < 7.5% votes (750 in scaled format)
               appShare > 0 && // Participated in voting
               !isUnendorsed && // Currently endorsed
               hasRewardedActions // Has rewarded at least 1 action
