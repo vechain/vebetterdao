@@ -48,7 +48,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
       })
 
       // Step 1: Get base roundEarnings for all apps and rounds
-      const BATCH_SIZE = 10
+      const BATCH_SIZE = 5
       const roundBatches = chunkArray(roundIds, BATCH_SIZE)
       for (const roundBatch of roundBatches) {
         const res = await executeMultipleClausesCall({
