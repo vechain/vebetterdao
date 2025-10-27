@@ -4,7 +4,7 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useXAppRoundEarnings } from "../../../../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
+import { useTotalXAppEarnings } from "../../../../api/contracts/dbaPool/hooks/useTotalXAppEarnings"
 import { useXAppMetadata } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { useRoundAppVotes } from "../../../../api/indexer/xallocations/useAppVotesRound"
 import { useIpfsImage } from "../../../../api/ipfs/hooks/useIpfsImage"
@@ -43,7 +43,14 @@ Props) => {
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-  const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
+
+  // Use combined earnings hook that includes DBA rewards
+  const { data: totalEarnings, isLoading: forecastedEarningsLoading } = useTotalXAppEarnings(
+    roundId,
+    data.app,
+    data.percentage,
+  )
+
   const roundIdNumber = useMemo(() => {
     try {
       return Number(roundId)
@@ -67,7 +74,7 @@ Props) => {
   const trackProgressColor = "rgba(154, 222, 78, 1)"
 
   const showMaxAllocation =
-    renderMaxAllocation && maxAllocation && Number(forecastedEarnings?.amount) >= Number(maxAllocation)
+    renderMaxAllocation && maxAllocation && Number(totalEarnings?.baseEarnings) >= Number(maxAllocation)
 
   return (
     <VStack gap={4} align={"flex-start"} w="full">
@@ -110,7 +117,7 @@ Props) => {
               <Skeleton loading={forecastedEarningsLoading}>
                 <HStack gap={1} align={"center"} justify={"flex-start"} w="full">
                   <Heading size={["sm", "md"]} fontWeight="semibold">
-                    {compactFormatter.format(Number(forecastedEarnings?.amount))}
+                    {compactFormatter.format(Number(totalEarnings?.totalEarnings))}
                   </Heading>
                   <B3TRIcon boxSize={["14px", "16px"]} colorVariant="dark" />
                 </HStack>

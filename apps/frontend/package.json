@@ -1,12 +1,12 @@
 {
   "name": "frontend",
-  "version": "1.28.13",
+  "version": "1.29.0",
   "private": true,
   "scripts": {
     "prebuild": "yarn chakra:typegen && yarn generate:schema",
     "typecheck": "tsc --noEmit",
-    "chakra:typegen": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
-    "chakra:typegen:watch": "npx @chakra-ui/cli typegen src/app/theme/theme.ts --watch",
+    "chakra:typegen": "chakra typegen src/app/theme/theme.ts",
+    "chakra:typegen:watch": "chakra typegen src/app/theme/theme.ts --watch",
     "dev": "next dev --turbo",
     "dev:staging": "next dev --turbo",
     "dev:testnet": "next dev --turbo",
@@ -21,11 +21,11 @@
     "start:galactica-test": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
-    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
+    "generate-translations": "ts-node ./src/scripts/translations/generateTranslations.ts",
+    "complete-translations": "ts-node ./src/scripts/translations/completeTranslations.ts",
     "storybook": "NEXT_PUBLIC_APP_ENV=local storybook dev -p 6006",
     "build-storybook": "NEXT_PUBLIC_APP_ENV=staging storybook build",
-    "generate:schema": "npx openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
+    "generate:schema": "openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.26.0",
@@ -82,6 +82,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@chakra-ui/cli": "^3.5.0",
     "@chromatic-com/storybook": "^4.1.1",
     "@next/eslint-plugin-next": "^14.2.25",
     "@repo/eslint-config": "*",
@@ -97,15 +98,14 @@
     "@types/react-dom": "^18",
     "@types/react-lottie": "^1.2.10",
     "@types/uuid": "^9.0.8",
-    "d3-array": "^3.2.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.25",
     "eslint-plugin-storybook": "^9.1.5",
-    "happy-dom": "14.12.3",
     "openapi-typescript": "^7.9.1",
     "resize-observer-polyfill": "^1.5.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "storybook": "^9.1.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
     "vite-plugin-svgr": "^4.5.0",

@@ -1,6 +1,8 @@
 import { Button, Dialog, VStack, useDisclosure, Text, Alert, Box, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { XApp, UnendorsedApp } from "../../../../../api/contracts/xApps/getXApps"
 import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
 
@@ -20,6 +22,7 @@ type Props = {
 export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
+  const { isTxModalOpen } = useTransactionModal()
   const { open: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
   const { open: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
   const {
@@ -102,14 +105,12 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                       )}
                     </Text>
                     <Button
+                      variant="primary"
                       mt={1}
                       onClick={() => {
                         onOpenDeposit()
                         onClose()
                       }}
-                      variant="ghost"
-                      color="actions.tertiary.default"
-                      borderRadius={"full"}
                       w={"200px"}>
                       {t("Deposit")}
                     </Button>
@@ -120,7 +121,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     borderRadius="20px"
                     p="16px"
                     border={"1px solid #D5D5D5"}
-                    boxShadow={"none"}
                     justifyContent="space-between">
                     <Text textStyle="lg" fontWeight="semibold">
                       {t("Refill Pools")}
@@ -159,7 +159,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
       />
       <FundsManagementModal
         appId={app.id}
-        isOpen={isOpenFundsManagement}
+        isOpen={isOpenFundsManagement && !isTxModalOpen}
         onClose={onCloseFundsManagement}
         isEnablingRewardsPool={isEnablingRewardsPool}
         isRefillingPools={true}

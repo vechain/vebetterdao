@@ -7,10 +7,10 @@ import {
   Text,
   VStack,
   Grid,
-  Link,
   LinkBox,
   LinkOverlay,
   Icon,
+  Button,
 } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useMemo } from "react"
@@ -50,12 +50,12 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
               {t("Explore Apps")}
             </Heading>
             {!!xApps && xApps.length > maxApps && (
-              <Link asChild textStyle="sm" fontWeight="semibold">
+              <Button asChild variant="link" textStyle="sm" fontWeight="semibold">
                 <NextLink href="/apps">
                   {t("See all")}
                   <Icon size="sm" as={MdKeyboardArrowRight} />
                 </NextLink>
-              </Link>
+              </Button>
             )}
           </HStack>
 

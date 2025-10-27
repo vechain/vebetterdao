@@ -1,4 +1,5 @@
 import { AppConfig } from "."
+
 const config: AppConfig = {
   environment: "testnet-staging",
   basePath: "https://b3tr-frontend.vercel.app",
@@ -59,14 +60,14 @@ const config: AppConfig = {
     },
   },
   b3trGovernorLibraries: {
-    governorClockLogicAddress: "0xb978b87556693eeea60da8d90bfb801d668263ec",
-    governorConfiguratorAddress: "0xbefcb743c4f409480d432ae3a486acf40a4dcc1c",
-    governorDepositLogicAddress: "0xc1408c89148bc110aa81d34d01149c28db2f7abc",
-    governorFunctionRestrictionsLogicAddress: "0x01f5dbdd3f61e7e103f9156ef01988ee91e9e425",
-    governorProposalLogicAddressAddress: "0xb3537e115a8b655afebfa85d19251188a2e0932e",
-    governorQuorumLogicAddress: "0x8181840d77eab52fbb31a0815fc027a351b425bc",
-    governorStateLogicAddress: "0xd784a819f163251785c3380ed35b49a884e86afa",
-    governorVotesLogicAddress: "0x7d77c504715cc18ee051d12918ddebad5dc84e5d",
+    governorClockLogicAddress: "0xf33d6fb7d7b26cfc68fc57a9a52b7358ba1b4705",
+    governorConfiguratorAddress: "0xc72b2e854d48ef6a47badb8c13548b15a34022c0",
+    governorDepositLogicAddress: "0x5bfda0abb9fdd8600f02c7defca34866b5560c6e",
+    governorFunctionRestrictionsLogicAddress: "0xc87376cbe6c02e96129f24a5b1167b1d1b74dcae",
+    governorProposalLogicAddressAddress: "0x85a89965a4791d13ccb2e4fa6a9f28a4ec5308bb",
+    governorQuorumLogicAddress: "0x8d54c011aff47941ec22f1ba9488f572a183d0d6",
+    governorStateLogicAddress: "0x6f727492eb384b93c7f81bb304917d8e8bc70c40",
+    governorVotesLogicAddress: "0xbff2d3f8e2422992cdf1347f8de93cbb02c0bb7e",
   },
   passportLibraries: {
     passportChecksLogicAddress: "0x252c2ea0e7cae88b8b7c73861b07c2b97b12aa76",

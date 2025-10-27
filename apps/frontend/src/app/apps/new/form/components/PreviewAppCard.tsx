@@ -41,7 +41,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
               as={UilArrowUpRight}
               bg={"rgba(224, 233, 254, 1)"}
               borderRadius={"full"}
-              color="logo"
+              color="icon.default"
               boxSize={[6, 8]}
               p={1}
             />

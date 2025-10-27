@@ -1,4 +1,4 @@
-import { Card, Heading, VStack, Link, Skeleton } from "@chakra-ui/react"
+import { Card, Heading, VStack, Skeleton, Button } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -38,9 +38,9 @@ export const UserTransactions = ({ address }: Props) => {
                   ))}
                 </VStack>
                 {hasNextPage && (
-                  <Link asChild mx="auto" color="actions.tertiary.default">
+                  <Button variant="link" asChild mx="auto">
                     <NextLink href={`/transactions/${address}`}>{t("See all")}</NextLink>
-                  </Link>
+                  </Button>
                 )}
               </>
             ) : (

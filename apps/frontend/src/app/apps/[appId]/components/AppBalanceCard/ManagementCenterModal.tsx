@@ -243,7 +243,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
           </Text>
         </VStack>
         <HStack mt={6} gap={4} width="full">
-          <Button variant="ghost" color="actions.tertiary.default" flex={1} onClick={goToPrevious}>
+          <Button variant="ghost" color="status.negative.primary" flex={1} onClick={goToPrevious}>
             {t("Cancel")}
           </Button>
           <Button variant="primary" flex={1} onClick={handleManagementAction}>

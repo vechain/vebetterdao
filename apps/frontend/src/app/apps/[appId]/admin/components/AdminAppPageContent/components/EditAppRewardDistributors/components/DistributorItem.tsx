@@ -76,7 +76,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
           </VStack>
         </HStack>
         {isDeleteable && (
-          <Button variant="ghost" color="status.negative.primary" onClick={onOpen}>
+          <Button hideBelow="md" variant="ghost" color="status.negative.primary" onClick={onOpen}>
             <UilTrash size={"14px"} color="#D23F63" />
             {t("Remove")}
           </Button>
@@ -90,7 +90,12 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
           </Text>
         </HStack>
         {isDeleteable && (
-          <IconButton variant="ghost" color="status.negative.primary" aria-label="Remove" onClick={onOpen}>
+          <IconButton
+            hideFrom="md"
+            variant="ghost"
+            color="status.negative.primary"
+            aria-label="Remove"
+            onClick={onOpen}>
             <UilTrash size={"14px"} color="#D23F63" />
           </IconButton>
         )}

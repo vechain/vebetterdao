@@ -53,13 +53,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         justify={["space-between", "space-between", "flex-end"]}
         gap={4}
         w={["full", "full", "auto"]}>
-        <Button
-          flex={1}
-          size="lg"
-          data-testid="go-back"
-          variant="ghost"
-          color="actions.tertiary.default"
-          onClick={router.back}>
+        <Button flex={1} size="lg" data-testid="go-back" variant="link" onClick={router.back}>
           <UilArrowLeft />
           {t("Go back")}
         </Button>

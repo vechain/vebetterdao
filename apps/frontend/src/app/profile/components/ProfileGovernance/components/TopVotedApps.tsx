@@ -21,10 +21,8 @@ export const TopVotedApps = ({ votedApps, isMoreTopVotedApps, onSeeAllAppsVoted 
             {t("Most Voted Apps")}
           </Text>
           {isMoreTopVotedApps && (
-            <Button variant="ghost" size="sm" color="actions.tertiary.default" onClick={onSeeAllAppsVoted}>
-              <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
-                {t("See All")}
-              </Text>
+            <Button variant="link" size="sm" onClick={onSeeAllAppsVoted} fontWeight="semibold">
+              {t("See All")}
               <FiArrowUpRight size={16} />
             </Button>
           )}

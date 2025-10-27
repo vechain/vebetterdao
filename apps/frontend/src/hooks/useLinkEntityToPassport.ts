@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
-import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/factories/ve-better-passport/VeBetterPassport__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 

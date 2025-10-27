@@ -32,7 +32,7 @@ export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
             <Text>{t("No endorsement events")}</Text>
           )}
           {appEndorsedEvents && displayCount < appEndorsedEvents.length && (
-            <Button onClick={handleLoadMore} variant="ghost" color="actions.tertiary.default">
+            <Button onClick={handleLoadMore} variant="link">
               {t("Load more")}
             </Button>
           )}
