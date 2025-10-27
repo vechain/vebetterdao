@@ -29,7 +29,7 @@ interface ContractInfo {
   Proxy: string
   Implementation: string
   Libraries: string
-  Verified: string
+  Status: string
 }
 
 async function getImplementationAddress(proxyAddress: string): Promise<string | null> {
@@ -44,13 +44,73 @@ async function getImplementationAddress(proxyAddress: string): Promise<string | 
   }
 }
 
-async function isContractVerified(address: string, chainId: string): Promise<boolean> {
+async function getVerificationMatch(address: string, chainId: string): Promise<string | null> {
   try {
     const response = await fetch(`https://sourcify.dev/server/v2/contract/${chainId}/${address}`)
-    return response.ok
+    if (!response.ok) return null
+    const data = await response.json()
+    return data.runtimeMatch || null
   } catch {
-    return false
+    return null
   }
+}
+
+function getLibraryAddresses(contractName: ContractName, config: any): string[] {
+  if (contractName === "B3TRGovernor") {
+    return [
+      config.b3trGovernorLibraries.governorClockLogicAddress,
+      config.b3trGovernorLibraries.governorConfiguratorAddress,
+      config.b3trGovernorLibraries.governorDepositLogicAddress,
+      config.b3trGovernorLibraries.governorFunctionRestrictionsLogicAddress,
+      config.b3trGovernorLibraries.governorProposalLogicAddressAddress,
+      config.b3trGovernorLibraries.governorQuorumLogicAddress,
+      config.b3trGovernorLibraries.governorStateLogicAddress,
+      config.b3trGovernorLibraries.governorVotesLogicAddress,
+    ]
+  }
+  if (contractName === "VeBetterPassport") {
+    return [
+      config.passportLibraries.passportChecksLogicAddress,
+      config.passportLibraries.passportConfiguratorAddress,
+      config.passportLibraries.passportEntityLogicAddress,
+      config.passportLibraries.passportDelegationLogicAddress,
+      config.passportLibraries.passportPersonhoodLogicAddress,
+      config.passportLibraries.passportPoPScoreLogicAddress,
+      config.passportLibraries.passportSignalingLogicAddress,
+      config.passportLibraries.passportWhitelistAndBlacklistLogicAddress,
+    ]
+  }
+  return []
+}
+
+async function getVerificationStatus(
+  proxyAddress: string,
+  implementationAddress: string | null,
+  libraryAddresses: string[],
+  chainId: bigint,
+): Promise<string> {
+  const chainIdStr = chainId.toString()
+  const checks: Array<{ type: string; match: string | null }> = []
+
+  const proxyMatch = await getVerificationMatch(proxyAddress, chainIdStr)
+  checks.push({ type: "Proxy", match: proxyMatch })
+
+  if (implementationAddress) {
+    const implMatch = await getVerificationMatch(implementationAddress, chainIdStr)
+    checks.push({ type: "Implementation", match: implMatch })
+  }
+
+  for (const libAddress of libraryAddresses) {
+    const libMatch = await getVerificationMatch(libAddress, chainIdStr)
+    checks.push({ type: "Library", match: libMatch })
+  }
+
+  const exactMatches = checks.filter(c => c.match === "exact_match").length
+  const total = checks.length
+
+  if (exactMatches === total) return "Fully Verified"
+  if (exactMatches > 0) return "Partially Verified"
+  return "Not Verified"
 }
 
 function hasLibraries(contractName: ContractName): string {
@@ -91,13 +151,15 @@ async function main() {
 
   for (const contract of contracts) {
     const implementation = await getImplementationAddress(contract.proxy)
-    const verified = await isContractVerified(contract.proxy, network.chainId)
+    const libraryAddresses = getLibraryAddresses(contract.name, config)
+    const status = await getVerificationStatus(contract.proxy, implementation, libraryAddresses, network.chainId)
+
     contractsInfo.push({
       Contract: contract.name,
       Proxy: contract.proxy,
       Implementation: implementation || "Not found",
       Libraries: hasLibraries(contract.name),
-      Verified: verified ? "✅" : "❌",
+      Status: status,
     })
   }
 
