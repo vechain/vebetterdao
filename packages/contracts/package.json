@@ -84,7 +84,7 @@
     "verify:mainnet": "npx hardhat verify --network vechain_mainnet",
     "estimate-voting-gas:mainnet": "npx hardhat run scripts/helpers/estimateVotingGas.ts --network vechain_mainnet",
     "setup-environment:local": "npx hardhat run scripts/standalone/setupLocalEnvironment.ts",
-    "verify:all:contracts:mainnet": "NEXT_PUBLIC_APP_ENV=mainnet npx hardhat run scripts/verify/verify-all-contracts.ts --network vechain_mainnet"
+    "verify:all:contracts:mainnet": "npx hardhat run scripts/verify/verify-all-contracts.ts --network vechain_mainnet"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",

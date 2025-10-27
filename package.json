@@ -81,20 +81,8 @@
     "prepare": "husky install",
     "contracts:verify:testnet": "dotenv -v VITE_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
     "contracts:verify:mainnet": "dotenv -v VITE_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
-    "contracts:estimate-voting-gas:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run estimate-voting-gas:mainnet --filter=@vechain/vebetterdao-contracts"
-  },
-  "devDependencies": {
-    "@datadog/browser-rum": "^5.23.0",
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
-    "dotenv": "^16.4.5",
-    "dotenv-cli": "latest",
-    "hardhat": "2.19.1",
-    "husky": "^8.0.0",
-    "lint-staged": "12.5.0",
-    "prettier": "^3.3.0",
-    "turbo": "^2.5.0",
-    "@vechain/picasso": "^2.1.1"
+    "contracts:estimate-voting-gas:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run estimate-voting-gas:mainnet --filter=@vechain/vebetterdao-contracts",
+    "contracts:verify:all:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet --  yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-all-contracts.ts"
   },
   "engines": {
     "node": "20.x.x"
