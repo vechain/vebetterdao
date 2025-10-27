@@ -13,11 +13,13 @@ const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
 const dbaPoolAddress = getConfig().dbaPoolContractAddress as `0x${string}`
 const dbaPoolAbi = DBAPool__factory.abi
-export const getXAppsTotalEarningsQueryKey = (roundIds: number[], appIds: string[]) => [
+export const getXAppsTotalEarningsQueryKey = (roundIds: number[], appIds: string[], dbaStartRound?: number) => [
   "xApps",
   appIds,
   "totalEarnings",
   roundIds,
+  "withDBA",
+  dbaStartRound,
 ]
 // Helper function to chunk an array into smaller arrays
 const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
@@ -40,7 +42,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
   const { data: dbaStartRound } = useDBADistributionStartRound()
 
   return useQuery({
-    queryKey: [...getXAppsTotalEarningsQueryKey(roundIds, appIds), "withDBA", dbaStartRound],
+    queryKey: getXAppsTotalEarningsQueryKey(roundIds, appIds, dbaStartRound),
     queryFn: async () => {
       const results: Record<string, { amount: number; appId: string }> = {}
       appIds.forEach(appId => {
