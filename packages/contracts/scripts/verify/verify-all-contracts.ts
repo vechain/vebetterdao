@@ -1,3 +1,4 @@
+// @ts-ignore
 import { ethers } from "hardhat"
 import { getConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
@@ -28,6 +29,7 @@ interface ContractInfo {
   Proxy: string
   Implementation: string
   Libraries: string
+  Verified: string
 }
 
 async function getImplementationAddress(proxyAddress: string): Promise<string | null> {
@@ -39,6 +41,15 @@ async function getImplementationAddress(proxyAddress: string): Promise<string | 
     return latestEvent.args?.implementation || latestEvent.args?.[0] || null
   } catch (error) {
     return null
+  }
+}
+
+async function isContractVerified(address: string, chainId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`https://sourcify.dev/server/v2/contract/${chainId}/${address}`)
+    return response.ok
+  } catch {
+    return false
   }
 }
 
@@ -80,11 +91,13 @@ async function main() {
 
   for (const contract of contracts) {
     const implementation = await getImplementationAddress(contract.proxy)
+    const verified = await isContractVerified(contract.proxy, network.chainId)
     contractsInfo.push({
       Contract: contract.name,
       Proxy: contract.proxy,
       Implementation: implementation || "Not found",
       Libraries: hasLibraries(contract.name),
+      Verified: verified ? "✅" : "❌",
     })
   }
 
