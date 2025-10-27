@@ -98,7 +98,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
             {t("Send request")}
           </Button>
 
-          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
+          <Button variant="ghost" color="status.negative.primary" onClick={handleClose}>
             {t("Cancel")}
           </Button>
         </VStack>
@@ -131,7 +131,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant="ghost" color="actions.tertiary.default" onClick={goToPrevious}>
+          <Button variant="link" onClick={goToPrevious}>
             {t("No, go back")}
           </Button>
         </VStack>

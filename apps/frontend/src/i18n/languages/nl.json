@@ -46,7 +46,7 @@
   "Your Creator's NFT application was approved!": "Uw aanvraag voor de NFT van de maker is goedgekeurd!",
   "Apply again": "Opnieuw aanvragen",
   "Your Creator's NFT application was rejected": "Uw aanvraag voor de NFT van de maker is afgewezen",
-  "CREATOR APPLICATION REJECTED": "AANVRAAG MAKER AFGEWEZEN",
+  "Creator application rejected": "AANVRAAG MAKER AFGEWEZEN",
   "Submit app": "App indienen",
   "Your Creator application was approved. Submit your app!": "Uw makerstoepassing is goedgekeurd. Dien uw app in!",
   "CREATOR'S NFT RECEIVED": "NFT VAN DE MAKER ONTVANGEN",
@@ -2008,5 +2008,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Hierdoor zal {{appName}} met id {{appId}} {{status}} zijn voor de volgende ronde.",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) bereikt",
   "Uploading...": "Uploaden...",
-  "Stored": "Opgeslagen"
+  "Stored": "Opgeslagen",
+  "Creator's nft received": "Creator's nft ontvangen",
+  "Creator application under review": "Applicatie van de maker in behandeling",
+  "Voting power delegated": "Stemkracht gedelegeerd",
+  "Cast your vote now!": "Breng nu je stem uit!",
+  "Time to step up!": "Tijd om op te staan!",
+  "Not enough VTHO": "Niet genoeg VTHO",
+  "New app available": "Nieuwe app beschikbaar",
+  "Active proposal": "Actief voorstel",
+  "You've been signalled by {{app}}": "Je bent gesignaleerd door {{app}}",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Uw stemkracht is overgedragen aan <platform>veDelegate.vet</platform> die namens u stemt. <br/> Als je hier wilt stemmen, moet je de delegatie bij veDelegate verwijderen voordat de snapshot plaatsvindt.",
+  "Stargate is live": "Stargate is live"
 }

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, HStack, Heading, Link, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, Card, HStack, Heading, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -45,7 +45,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
           )}
           {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
-            <Button size="md" variant="ghost" color="actions.tertiary.default" onClick={loadMore}>
+            <Button size="md" variant="link" onClick={loadMore}>
               {t("Load more")}
             </Button>
           )}
@@ -60,12 +60,12 @@ export const AllocationRoundsList: React.FC<Props> = ({
         <HStack w="full" justify="space-between" alignItems={"baseline"}>
           <Heading size={["xl", "2xl"]}>{t("Allocations")}</Heading>
           {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
-            <Link asChild variant="plain" textStyle="sm">
+            <Button asChild variant="link" textStyle="sm">
               <NextLink href="/rounds">
                 {t("See all rounds")}
                 <FiArrowUpRight />
               </NextLink>
-            </Link>
+            </Button>
           )}
         </HStack>
       </Card.Header>

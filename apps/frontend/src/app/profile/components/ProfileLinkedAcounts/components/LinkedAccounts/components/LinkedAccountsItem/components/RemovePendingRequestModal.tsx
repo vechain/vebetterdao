@@ -46,7 +46,7 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
           <Button variant="primary" onClick={handleRemoveLink}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
+          <Button variant="link" onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

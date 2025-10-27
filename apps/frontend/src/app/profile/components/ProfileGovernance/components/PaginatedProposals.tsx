@@ -25,13 +25,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
   return (
     <Card.Root w="full" variant="primary">
       <Card.Body gap={4}>
-        <Button
-          variant={"plain"}
-          color="actions.tertiary.default"
-          onClick={goBack}
-          size="sm"
-          alignItems="center"
-          alignSelf={"flex-start"}>
+        <Button variant="link" onClick={goBack} size="sm" alignItems="center" alignSelf={"flex-start"}>
           <FaAngleLeft />
           {t("Go back")}
         </Button>

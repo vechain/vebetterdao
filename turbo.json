@@ -320,9 +320,6 @@
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
-    "playwright:e2e": {
-      "cache": false
-    },
     "generate-docs": {
       "cache": false
     },

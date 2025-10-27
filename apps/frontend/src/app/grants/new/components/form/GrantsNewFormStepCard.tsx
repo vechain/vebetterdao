@@ -316,15 +316,7 @@ export const GrantsNewFormStepCard = () => {
               </HStack>
 
               {currentStepIndex !== FIRST_STEP && (
-                <Button
-                  w="40"
-                  type="button"
-                  onClick={saveDraft}
-                  variant="ghost"
-                  color="actions.tertiary.default"
-                  focusRingColor="actions.tertiary.default"
-                  px={8}
-                  size="lg">
+                <Button w="40" type="button" onClick={saveDraft} variant="link" px={8} size="lg">
                   {t("Save draft")}
                 </Button>
               )}

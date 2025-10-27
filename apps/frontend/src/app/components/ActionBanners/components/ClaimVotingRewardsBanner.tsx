@@ -30,16 +30,15 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Prop
   const hasGMRewards = gmRewards > 0
   return (
     <GenericBanner
-      variant="info"
-      title={t("CLAIM YOUR REWARDS")}
-      logoSrc="/assets/icons/claim-b3tr-icon.webp"
+      title={t("Claim your rewards")}
+      illustration="/assets/icons/claim-b3tr-icon.webp"
       description={
         hasGMRewards
           ? t("Congratulations! You have B3TR to claim for casting your vote in governance and holding GM.")
           : t("Congratulations! You have B3TR to claim for casting your vote in governance.")
       }
       cta={
-        <Button onClick={handleClaim} variant="primary">
+        <Button size={{ base: "sm", md: "md" }} onClick={handleClaim} variant="primary">
           <Icon as={UilGift} color="white" />
           {t("Claim your {{b3trToClaim}} B3TR", {
             b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),

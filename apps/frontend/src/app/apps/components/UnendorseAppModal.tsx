@@ -99,7 +99,7 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
           <Button colorPalette="red" w={"full"} onClick={handleUnendorsement}>
             {t("Unendorse now")}
           </Button>
-          <Button variant="ghost" color="actions.tertiary.default" w={"full"} onClick={onClose}>
+          <Button variant="ghost" color="status.negative.primary" w={"full"} onClick={onClose}>
             {t("Cancel")}
           </Button>
         </VStack>
