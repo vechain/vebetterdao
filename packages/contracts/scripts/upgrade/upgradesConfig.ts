@@ -129,7 +129,8 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     descriptions: {
       v2: "Add tracking of DBA rewards per app per round and seed function for historical data",
     },
-   "Grants Manager": {
+  },
+  "Grants Manager": {
     name: "grants-manager",
     configAddressField: "grantsManagerContractAddress",
     versions: ["v2"],
