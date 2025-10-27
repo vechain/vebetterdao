@@ -2,6 +2,9 @@
 import { ethers } from "hardhat"
 import { getConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
+import * as fs from "fs"
+import * as path from "path"
+import axios from "axios"
 
 //typed contract names
 type ContractName =
@@ -32,6 +35,11 @@ interface ContractInfo {
   Status: string
 }
 
+interface LibraryInfo {
+  name: string
+  address: string
+}
+
 async function getImplementationAddress(proxyAddress: string): Promise<string | null> {
   try {
     const proxyContract = await ethers.getContractAt(PROXY_ABI, proxyAddress)
@@ -55,32 +63,183 @@ async function getVerificationMatch(address: string, chainId: string): Promise<s
   }
 }
 
-function getLibraryAddresses(contractName: ContractName, config: any): string[] {
-  if (contractName === "B3TRGovernor") {
-    return [
-      config.b3trGovernorLibraries.governorClockLogicAddress,
-      config.b3trGovernorLibraries.governorConfiguratorAddress,
-      config.b3trGovernorLibraries.governorDepositLogicAddress,
-      config.b3trGovernorLibraries.governorFunctionRestrictionsLogicAddress,
-      config.b3trGovernorLibraries.governorProposalLogicAddressAddress,
-      config.b3trGovernorLibraries.governorQuorumLogicAddress,
-      config.b3trGovernorLibraries.governorStateLogicAddress,
-      config.b3trGovernorLibraries.governorVotesLogicAddress,
-    ]
+/**
+ * Recursively search for a contract artifact file
+ * @param dir - Directory to search in
+ * @param contractName - The name of the contract
+ * @returns The path to the artifact file or null if not found
+ */
+function findArtifactFile(dir: string, contractName: string): string | null {
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name)
+
+      if (entry.isDirectory()) {
+        // Recursively search subdirectories
+        const found = findArtifactFile(fullPath, contractName)
+        if (found) return found
+      } else if (entry.isFile() && entry.name === `${contractName}.json`) {
+        // Found the artifact file
+        return fullPath
+      }
+    }
+  } catch (error) {
+    // Ignore errors (e.g., permission denied)
   }
-  if (contractName === "VeBetterPassport") {
-    return [
-      config.passportLibraries.passportChecksLogicAddress,
-      config.passportLibraries.passportConfiguratorAddress,
-      config.passportLibraries.passportEntityLogicAddress,
-      config.passportLibraries.passportDelegationLogicAddress,
-      config.passportLibraries.passportPersonhoodLogicAddress,
-      config.passportLibraries.passportPoPScoreLogicAddress,
-      config.passportLibraries.passportSignalingLogicAddress,
-      config.passportLibraries.passportWhitelistAndBlacklistLogicAddress,
-    ]
+
+  return null
+}
+
+/**
+ * Get the artifact path for a contract dynamically
+ * @param contractName - The name of the contract
+ * @returns The path to the artifact file
+ */
+function getArtifactPath(contractName: ContractName | string): string {
+  const { artifactsDir } = getProjectPaths()
+  const contractsDir = path.join(artifactsDir, "contracts")
+
+  const artifactPath = findArtifactFile(contractsDir, contractName)
+
+  if (!artifactPath) {
+    throw new Error(`Artifact not found for contract: ${contractName}`)
   }
-  return []
+
+  return artifactPath
+}
+
+/**
+ * Extract library names from contract artifacts by reading linkReferences
+ * @param contractName - The name of the contract
+ * @returns Array of library names used by the contract
+ */
+function discoverLibrariesFromArtifact(contractName: ContractName): string[] {
+  try {
+    const artifactPath = getArtifactPath(contractName)
+
+    if (!fs.existsSync(artifactPath)) {
+      console.warn(`Artifact not found for ${contractName}: ${artifactPath}`)
+      return []
+    }
+
+    const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"))
+
+    if (!artifact.linkReferences) {
+      return []
+    }
+
+    const libraries: string[] = []
+
+    // linkReferences structure: { "path/to/Library.sol": { "LibraryName": [...] } }
+    for (const filePath of Object.keys(artifact.linkReferences)) {
+      const fileLibraries = artifact.linkReferences[filePath]
+      for (const libraryName of Object.keys(fileLibraries)) {
+        libraries.push(libraryName)
+      }
+    }
+
+    return libraries
+  } catch (error) {
+    console.warn(`Error reading artifact for ${contractName}:`, error)
+    return []
+  }
+}
+
+/**
+ * Extract library addresses from deployed bytecode using deployedLinkReferences
+ * @param implementationAddress - The deployed implementation contract address
+ * @param contractName - The contract name
+ * @returns Map of library names to their deployed addresses
+ */
+async function extractLibraryAddresses(
+  implementationAddress: string,
+  contractName: ContractName,
+): Promise<Map<string, string>> {
+  try {
+    const artifactPath = getArtifactPath(contractName)
+
+    if (!fs.existsSync(artifactPath)) {
+      return new Map()
+    }
+
+    const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"))
+
+    if (!artifact.deployedLinkReferences || Object.keys(artifact.deployedLinkReferences).length === 0) {
+      return new Map()
+    }
+
+    // Get the deployed bytecode from the blockchain
+    const deployedBytecode = await ethers.provider.getCode(implementationAddress)
+
+    if (deployedBytecode === "0x") {
+      console.warn(`No bytecode found at ${implementationAddress}`)
+      return new Map()
+    }
+
+    const libraryAddresses = new Map<string, string>()
+
+    // deployedLinkReferences structure: { "path/to/Library.sol": { "LibraryName": [{ start: X, length: 20 }] } }
+    for (const [filePath, libraries] of Object.entries(artifact.deployedLinkReferences)) {
+      for (const [libraryName, positions] of Object.entries(
+        libraries as Record<string, Array<{ start: number; length: number }>>,
+      )) {
+        // Get the first position where this library is linked
+        if (positions.length > 0) {
+          const position = positions[0]
+          // Bytecode is hex string: "0x" + bytes
+          // Each byte is 2 hex chars, so position in hex string is: 2 + (start * 2)
+          const startPos = 2 + position.start * 2
+          const endPos = startPos + position.length * 2
+
+          if (endPos <= deployedBytecode.length) {
+            // Extract the address (20 bytes = 40 hex chars)
+            const addressHex = deployedBytecode.slice(startPos, endPos)
+            const address = "0x" + addressHex
+            libraryAddresses.set(libraryName, address)
+          }
+        }
+      }
+    }
+
+    return libraryAddresses
+  } catch (error) {
+    console.warn(`Error extracting library addresses for ${contractName}:`, error)
+    return new Map()
+  }
+}
+
+/**
+ * Get detailed library information (name and address) for contracts that use libraries
+ * Dynamically discovers libraries from compiled artifacts and extracts addresses from deployed bytecode
+ * @param contractName - The name of the contract to check
+ * @param implementationAddress - The deployed implementation contract address
+ * @returns Array of LibraryInfo objects containing library names and addresses
+ */
+async function getContractLibraries(
+  contractName: ContractName,
+  implementationAddress: string | null,
+): Promise<LibraryInfo[]> {
+  const libraryNames = discoverLibrariesFromArtifact(contractName)
+
+  if (libraryNames.length === 0 || !implementationAddress) {
+    return []
+  }
+
+  const libraryAddresses = await extractLibraryAddresses(implementationAddress, contractName)
+  return libraryNames.map(name => ({
+    name,
+    address: libraryAddresses.get(name) || "Not found in bytecode",
+  }))
+}
+
+async function getLibraryAddresses(
+  contractName: ContractName,
+  implementationAddress: string | null,
+): Promise<string[]> {
+  const libraries = await getContractLibraries(contractName, implementationAddress)
+  return libraries.map(lib => lib.address)
 }
 
 async function getVerificationStatus(
@@ -114,8 +273,453 @@ async function getVerificationStatus(
 }
 
 function hasLibraries(contractName: ContractName): string {
-  const libraryContracts = ["B3TRGovernor", "VeBetterPassport"]
-  return libraryContracts.includes(contractName) ? "Yes" : "No"
+  const libraryNames = discoverLibrariesFromArtifact(contractName)
+  return libraryNames.length > 0 ? "Yes" : "No"
+}
+
+/**
+ * Display detailed library information for a specific contract
+ * @param contractName - The name of the contract
+ * @param implementationAddress - The deployed implementation contract address
+ */
+async function displayLibraryInfo(contractName: ContractName, implementationAddress: string | null): Promise<void> {
+  const libraries = await getContractLibraries(contractName, implementationAddress)
+
+  if (libraries.length === 0) {
+    console.log(`\n${contractName}: No libraries`)
+    return
+  }
+
+  console.log(`\n${contractName} Libraries (${libraries.length} found):`)
+  console.log("─".repeat(80))
+  libraries.forEach((lib, index) => {
+    const status = lib.address.startsWith("0x") && !lib.address.includes("Not found") ? "✓" : "✗"
+    console.log(`${status} ${index + 1}. ${lib.name}`)
+    console.log(`     Address: ${lib.address}`)
+  })
+  console.log("─".repeat(80))
+}
+
+// ============================================================================
+// VERIFICATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Get project paths dynamically
+ */
+function getProjectPaths() {
+  const cwd = process.cwd()
+  const isRunningFromRoot = fs.existsSync(path.join(cwd, "packages/contracts"))
+
+  if (isRunningFromRoot) {
+    return {
+      contractsDir: path.join(cwd, "packages/contracts/contracts"),
+      artifactsDir: path.join(cwd, "packages/contracts/artifacts"),
+      packageDir: path.join(cwd, "packages/contracts"),
+    }
+  } else {
+    const contractsExists = fs.existsSync(path.join(__dirname, "../../contracts"))
+    if (contractsExists) {
+      return {
+        contractsDir: path.join(__dirname, "../../contracts"),
+        artifactsDir: path.join(__dirname, "../../artifacts"),
+        packageDir: path.join(__dirname, "../.."),
+      }
+    } else {
+      throw new Error("Could not determine project structure")
+    }
+  }
+}
+
+/**
+ * Find contract metadata in build-info files
+ */
+function findContractMetadata(contractPath: string, contractName: string): any {
+  const { artifactsDir } = getProjectPaths()
+  const buildInfoDir = path.join(artifactsDir, "build-info")
+
+  if (!fs.existsSync(buildInfoDir)) {
+    return null
+  }
+
+  const buildInfoFiles = fs.readdirSync(buildInfoDir).filter(file => file.endsWith(".json"))
+
+  if (buildInfoFiles.length === 0) {
+    return null
+  }
+
+  const possiblePaths = [contractPath, `contracts/${contractPath}`, contractPath.replace(/\\/g, "/")]
+
+  for (const file of buildInfoFiles) {
+    const buildInfoPath = path.join(buildInfoDir, file)
+    const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, "utf8"))
+
+    if (buildInfo.output && buildInfo.output.contracts) {
+      for (const tryPath of possiblePaths) {
+        if (buildInfo.output.contracts[tryPath] && buildInfo.output.contracts[tryPath][contractName]) {
+          const contractOutput = buildInfo.output.contracts[tryPath][contractName]
+          if (contractOutput.metadata) {
+            return JSON.parse(contractOutput.metadata)
+          }
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Copy source files based on metadata
+ */
+function copySourceFiles(metadata: any, tempDir: string, contractsBaseDir: string): string[] {
+  const copiedFiles: string[] = []
+
+  if (!metadata.sources) {
+    return copiedFiles
+  }
+
+  for (const [sourcePath, sourceInfo] of Object.entries(metadata.sources)) {
+    if (sourcePath.includes("node_modules") || sourcePath.startsWith("@")) {
+      continue
+    }
+
+    let sourceFilePath: string
+
+    if (path.isAbsolute(sourcePath)) {
+      sourceFilePath = sourcePath
+    } else {
+      const { packageDir } = getProjectPaths()
+      const possiblePaths = [
+        path.join(packageDir, sourcePath),
+        path.join(contractsBaseDir, sourcePath),
+        sourcePath.startsWith("contracts/")
+          ? path.join(contractsBaseDir, sourcePath.replace(/^contracts\//, ""))
+          : null,
+      ].filter(Boolean) as string[]
+
+      sourceFilePath = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0]
+    }
+
+    if (fs.existsSync(sourceFilePath)) {
+      const destPath = path.join(tempDir, sourcePath)
+      const destDir = path.dirname(destPath)
+
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true })
+      }
+
+      fs.copyFileSync(sourceFilePath, destPath)
+      copiedFiles.push(sourcePath)
+    }
+  }
+
+  return copiedFiles
+}
+
+/**
+ * Submit verification to Sourcify
+ */
+async function submitVerification(
+  chainId: string,
+  contractAddress: string,
+  metadata: any,
+  copiedFiles: string[],
+  tempDir: string,
+): Promise<{ success: boolean; verificationId?: string; error?: string }> {
+  try {
+    const url = `https://sourcify.dev/server/v2/verify/metadata/${chainId}/${contractAddress}`
+
+    const sources: Record<string, string> = {}
+    for (const file of copiedFiles) {
+      const filePath = path.join(tempDir, file)
+      if (fs.existsSync(filePath)) {
+        sources[file] = fs.readFileSync(filePath, "utf8")
+      }
+    }
+
+    const requestBody = {
+      sources: sources,
+      metadata: metadata,
+    }
+
+    const response = await axios.post(url, requestBody, {
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Contract-Verification-Script/2.0",
+      },
+      timeout: 60000,
+    })
+
+    if (response.status === 202 && response.data.verificationId) {
+      return {
+        success: true,
+        verificationId: response.data.verificationId,
+      }
+    }
+
+    return { success: false, error: "Unexpected response" }
+  } catch (error: any) {
+    if (error.response?.status === 409) {
+      return { success: true, error: "ALREADY_VERIFIED" }
+    }
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Poll verification job status
+ */
+async function pollVerificationJob(
+  verificationId: string,
+  maxWaitTime: number = 120000,
+  pollInterval: number = 3000,
+): Promise<{ success: boolean; error?: string }> {
+  const startTime = Date.now()
+
+  while (Date.now() - startTime < maxWaitTime) {
+    try {
+      const response = await axios.get(`https://sourcify.dev/server/v2/verify/${verificationId}`, {
+        timeout: 15000,
+        headers: {
+          "User-Agent": "Contract-Verification-Script/2.0",
+        },
+      })
+
+      const data = response.data
+
+      if (data.isJobCompleted) {
+        if (data.contract && data.contract.match) {
+          return { success: true }
+        } else if (data.error) {
+          return { success: false, error: data.error.message || "Verification failed" }
+        } else {
+          return { success: false, error: "No match found" }
+        }
+      }
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return { success: false, error: "Job not found" }
+      }
+    }
+
+    await new Promise(resolve => setTimeout(resolve, pollInterval))
+  }
+
+  return { success: false, error: "Timeout" }
+}
+
+/**
+ * Verify a single contract
+ */
+async function verifySingleContract(
+  contractAddress: string,
+  contractFileName: string,
+  contractName: string,
+  chainId: string,
+): Promise<boolean> {
+  console.log(`   Verifying ${contractName} at ${contractAddress}...`)
+
+  try {
+    // Check if already verified
+    const checkMatch = await getVerificationMatch(contractAddress, chainId)
+    if (checkMatch === "exact_match") {
+      console.log(`   ✓ Already verified`)
+      return true
+    }
+
+    // Find contract metadata
+    const metadata = findContractMetadata(contractFileName, contractName)
+    if (!metadata) {
+      console.log(`   ✗ Metadata not found for ${contractName}`)
+      return false
+    }
+
+    // Setup temp directory
+    const { contractsDir, packageDir } = getProjectPaths()
+    const tempDir = path.join(packageDir, `temp-verify-${contractAddress}`)
+
+    if (fs.existsSync(tempDir)) {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+    }
+    fs.mkdirSync(tempDir, { recursive: true })
+
+    try {
+      // Copy source files
+      const copiedFiles = copySourceFiles(metadata, tempDir, contractsDir)
+      if (copiedFiles.length === 0) {
+        console.log(`   ✗ No source files copied`)
+        return false
+      }
+
+      // Submit verification
+      const submitResult = await submitVerification(chainId, contractAddress, metadata, copiedFiles, tempDir)
+
+      if (!submitResult.success) {
+        if (submitResult.error === "ALREADY_VERIFIED") {
+          console.log(`   ✓ Already verified`)
+          return true
+        }
+        console.log(`   ✗ Submission failed: ${submitResult.error}`)
+        return false
+      }
+
+      if (submitResult.verificationId) {
+        // Poll for completion
+        const pollResult = await pollVerificationJob(submitResult.verificationId)
+        if (pollResult.success) {
+          console.log(`   ✓ Verification successful`)
+          return true
+        } else {
+          console.log(`   ✗ Verification failed: ${pollResult.error}`)
+          return false
+        }
+      }
+
+      return false
+    } finally {
+      // Cleanup
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true })
+      }
+    }
+  } catch (error: any) {
+    console.log(`   ✗ Error: ${error.message}`)
+    return false
+  }
+}
+
+/**
+ * Dynamically find library contract file path by searching build-info files
+ */
+function getLibraryContractInfo(libraryName: string): { fileName: string; contractName: string } | null {
+  const { artifactsDir } = getProjectPaths()
+  const buildInfoDir = path.join(artifactsDir, "build-info")
+
+  if (!fs.existsSync(buildInfoDir)) {
+    return null
+  }
+
+  const buildInfoFiles = fs.readdirSync(buildInfoDir).filter(file => file.endsWith(".json"))
+
+  if (buildInfoFiles.length === 0) {
+    return null
+  }
+
+  // Search through all build-info files to find the library
+  for (const file of buildInfoFiles) {
+    const buildInfoPath = path.join(buildInfoDir, file)
+    const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, "utf8"))
+
+    if (buildInfo.output && buildInfo.output.contracts) {
+      // Iterate through all contract paths in the build info
+      for (const [contractPath, contracts] of Object.entries(buildInfo.output.contracts)) {
+        // Check if this path contains our library
+        if (contracts && typeof contracts === "object" && libraryName in contracts) {
+          // Found the library! Extract the file path
+          // contractPath might be like "contracts/governance/libraries/GovernorClockLogic.sol"
+          // We need to normalize it relative to the contracts directory
+          let normalizedPath = contractPath
+          if (normalizedPath.startsWith("contracts/")) {
+            normalizedPath = normalizedPath.replace(/^contracts\//, "")
+          }
+
+          return {
+            fileName: normalizedPath,
+            contractName: libraryName,
+          }
+        }
+      }
+    }
+  }
+
+  console.warn(`Could not find library ${libraryName} in build-info files`)
+  return null
+}
+
+/**
+ * Dynamically get contract file name from contract name by searching build-info files
+ */
+function getContractFileName(contractName: ContractName | string): string {
+  const { artifactsDir } = getProjectPaths()
+  const buildInfoDir = path.join(artifactsDir, "build-info")
+
+  if (!fs.existsSync(buildInfoDir)) {
+    throw new Error("build-info directory not found")
+  }
+
+  const buildInfoFiles = fs.readdirSync(buildInfoDir).filter(file => file.endsWith(".json"))
+
+  if (buildInfoFiles.length === 0) {
+    throw new Error("No build-info files found")
+  }
+
+  // Search through all build-info files to find the contract
+  for (const file of buildInfoFiles) {
+    const buildInfoPath = path.join(buildInfoDir, file)
+    const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, "utf8"))
+
+    if (buildInfo.output && buildInfo.output.contracts) {
+      // Iterate through all contract paths in the build info
+      for (const [contractPath, contracts] of Object.entries(buildInfo.output.contracts)) {
+        // Check if this path contains our contract
+        if (contracts && typeof contracts === "object" && contractName in contracts) {
+          // Found the contract! Extract the file path
+          // contractPath might be like "contracts/VOT3.sol" or "contracts/ve-better-passport/VeBetterPassport.sol"
+          // We need to normalize it relative to the contracts directory
+          let normalizedPath = contractPath
+          if (normalizedPath.startsWith("contracts/")) {
+            normalizedPath = normalizedPath.replace(/^contracts\//, "")
+          }
+
+          return normalizedPath
+        }
+      }
+    }
+  }
+
+  throw new Error(`Could not find contract ${contractName} in build-info files`)
+}
+
+/**
+ * Verify all components of a contract (proxy, implementation, libraries)
+ */
+async function verifyContractComponents(
+  contractName: ContractName,
+  proxyAddress: string,
+  implementationAddress: string | null,
+  chainId: string,
+): Promise<void> {
+  console.log(`\nVerifying ${contractName} components...`)
+
+  // 1. Verify Proxy as B3TRProxy
+  console.log(`\n1. Proxy (B3TRProxy):`)
+  await verifySingleContract(proxyAddress, "B3TRProxy.sol", "B3TRProxy", chainId)
+
+  // 2. Verify Implementation
+  if (implementationAddress) {
+    console.log(`\n2. Implementation (${contractName}):`)
+    const fileName = getContractFileName(contractName)
+    await verifySingleContract(implementationAddress, fileName, contractName, chainId)
+
+    // 3. Verify Libraries if any
+    const libraries = await getContractLibraries(contractName, implementationAddress)
+    if (libraries.length > 0) {
+      console.log(`\n3. Libraries (${libraries.length} found):`)
+      for (const lib of libraries) {
+        if (lib.address.startsWith("0x") && !lib.address.includes("Not found")) {
+          const libInfo = getLibraryContractInfo(lib.name)
+          if (libInfo) {
+            await verifySingleContract(lib.address, libInfo.fileName, libInfo.contractName, chainId)
+          } else {
+            console.log(`   ⚠ Library mapping not found for ${lib.name}`)
+          }
+        }
+      }
+    }
+  } else {
+    console.log(`\n✗ Cannot verify implementation - address not found`)
+  }
 }
 
 async function main() {
@@ -148,10 +752,11 @@ async function main() {
   ]
 
   const contractsInfo: ContractInfo[] = []
+  const contractsWithImpl: Array<{ name: ContractName; implementation: string | null }> = []
 
   for (const contract of contracts) {
     const implementation = await getImplementationAddress(contract.proxy)
-    const libraryAddresses = getLibraryAddresses(contract.name, config)
+    const libraryAddresses = await getLibraryAddresses(contract.name, implementation)
     const status = await getVerificationStatus(contract.proxy, implementation, libraryAddresses, network.chainId)
 
     contractsInfo.push({
@@ -161,12 +766,65 @@ async function main() {
       Libraries: hasLibraries(contract.name),
       Status: status,
     })
+
+    contractsWithImpl.push({
+      name: contract.name,
+      implementation: implementation,
+    })
   }
 
   console.table(contractsInfo)
 
   const failed = contractsInfo.filter(c => c.Implementation === "Not found").length
   console.log(`\n${contractsInfo.length - failed}/${contractsInfo.length} implementations found\n`)
+
+  console.log("\n" + "═".repeat(80))
+  console.log("AUTO-VERIFICATION FOR UNVERIFIED CONTRACTS")
+  console.log("═".repeat(80))
+
+  const unverifiedContracts = contractsInfo.filter(
+    c => c.Status === "Not Verified" || c.Status === "Partially Verified",
+  )
+
+  if (unverifiedContracts.length === 0) {
+    console.log("\n✓ All contracts are fully verified!")
+  } else {
+    console.log(`\nFound ${unverifiedContracts.length} contracts that need verification\n`)
+
+    for (const contractInfo of unverifiedContracts) {
+      const contractData = contracts.find(c => c.name === contractInfo.Contract)
+      const implData = contractsWithImpl.find(c => c.name === contractInfo.Contract)
+
+      if (contractData && implData) {
+        console.log("\n" + "─".repeat(80))
+        await verifyContractComponents(
+          contractData.name,
+          contractData.proxy,
+          implData.implementation,
+          network.chainId.toString(),
+        )
+      }
+    }
+
+    console.log("\n" + "═".repeat(80))
+    console.log("AUTO-VERIFICATION COMPLETED")
+    console.log("═".repeat(80) + "\n")
+  }
+  const contractsAfterVerification: ContractInfo[] = []
+  for (const contract of contracts) {
+    const implementation = await getImplementationAddress(contract.proxy)
+    const libraryAddresses = await getLibraryAddresses(contract.name, implementation)
+    const status = await getVerificationStatus(contract.proxy, implementation, libraryAddresses, network.chainId)
+
+    contractsAfterVerification.push({
+      Contract: contract.name,
+      Proxy: contract.proxy,
+      Implementation: implementation || "Not found",
+      Libraries: hasLibraries(contract.name),
+      Status: status,
+    })
+  }
+  console.table(contractsAfterVerification)
 
   if (failed > 0) {
     process.exit(1)
