@@ -24,13 +24,16 @@ export const getHasVoted = async (thor: ThorClient, proposalIds: string[], addre
           address: contractAddress,
           functionName,
           args: [id, address as `0x${string}`],
-        } as const),
+        }) as const,
     ),
   })
-  return proposalIds.reduce((acc, proposalId, index) => {
-    acc[proposalId] = hasVoted[index] || false
-    return acc
-  }, {} as Record<string, boolean>)
+  return proposalIds.reduce(
+    (acc, proposalId, index) => {
+      acc[proposalId] = hasVoted[index] || false
+      return acc
+    },
+    {} as Record<string, boolean>,
+  )
 }
 export const getHasVotedQueryKey = (proposalIds: string[], address?: string) => ["hasVoted", proposalIds, address]
 /**

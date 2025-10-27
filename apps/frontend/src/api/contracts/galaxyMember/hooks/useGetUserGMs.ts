@@ -74,7 +74,7 @@ export const useGetUserGMs = (userAddress?: string) => {
                 address: voterRewardsContractAddress as `0x${string}`,
                 functionName: "levelToMultiplier",
                 args: [BigInt(gm.tokenLevel)],
-              } as const),
+              }) as const,
           ),
         }),
         executeMultipleClausesCall({
@@ -86,7 +86,7 @@ export const useGetUserGMs = (userAddress?: string) => {
                 address: galaxyMemberContractAddress as `0x${string}`,
                 functionName: "getNodeIdAttached",
                 args: [gm.tokenId],
-              } as const),
+              }) as const,
           ),
         }),
       ])

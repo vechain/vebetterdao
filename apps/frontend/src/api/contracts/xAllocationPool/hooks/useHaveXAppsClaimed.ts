@@ -26,7 +26,7 @@ export const useHaveXAppsClaimed = (roundId: string, appIds: string[]) => {
               address,
               functionName: "claimed",
               args: [BigInt(roundId), id as `0x${string}`],
-            } as const),
+            }) as const,
         ),
       })
       return res.map((claimed, index) => ({

@@ -52,7 +52,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
               address: GOVERNOR_CONTRACT,
               functionName: "getUserDeposit",
               args: [BigInt(proposal.id || 0), userAddress],
-            } as const),
+            }) as const,
         ),
       })
 

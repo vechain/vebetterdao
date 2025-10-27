@@ -20,14 +20,17 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
           address,
           functionName: "nodeToEndorsedApp",
           args: [nodeId as `0x${string}`],
-        } as const),
+        }) as const,
     ),
   })
   if (apps.length !== nodeIds.length) throw new Error("Error fetching endorsed apps")
-  const appToNodeIndexMap = apps.reduce((acc, app, index) => {
-    if (app !== UNENDORSED_APP_ID) acc[app] = index
-    return acc
-  }, {} as Record<`0x${string}`, number>)
+  const appToNodeIndexMap = apps.reduce(
+    (acc, app, index) => {
+      if (app !== UNENDORSED_APP_ID) acc[app] = index
+      return acc
+    },
+    {} as Record<`0x${string}`, number>,
+  )
   const appDetails = (
     await executeMultipleClausesCall({
       thor,
@@ -38,7 +41,7 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
             address,
             functionName: "app",
             args: [appId as `0x${string}`],
-          } as const),
+          }) as const,
       ),
     })
   ).map(app => {

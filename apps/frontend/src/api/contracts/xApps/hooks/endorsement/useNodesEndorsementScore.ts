@@ -24,7 +24,7 @@ export const getNodesEndorsementScore = async (thor: ThorClient) => {
           address,
           functionName: method,
           args: [level],
-        } as const),
+        }) as const,
     ),
   })
   if (res.length !== nodeStrengthLevelArray.length) throw new Error("Error fetching nodes endorsement score")

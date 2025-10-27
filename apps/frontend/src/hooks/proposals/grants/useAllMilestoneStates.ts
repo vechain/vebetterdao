@@ -35,7 +35,7 @@ export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
               functionName: method,
               address: address as `0x${string}`,
               args: [BigInt(proposal.id), BigInt(index)],
-            } as const),
+            }) as const,
         )
         const results = await executeMultipleClausesCall({
           thor,

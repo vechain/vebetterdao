@@ -55,7 +55,7 @@ export const useGmNFTsAttachedToNode = (
               address: galaxyMemberAddress,
               functionName: "levelOf",
               args: [tokenId],
-            } as const),
+            }) as const,
         ),
       })
 
@@ -68,7 +68,7 @@ export const useGmNFTsAttachedToNode = (
               address: voterRewardsAddress,
               functionName: voterRewardsMethod,
               args: [level],
-            } as const),
+            }) as const,
         ),
       })
 
@@ -85,7 +85,7 @@ export const useGmNFTsAttachedToNode = (
                 address: galaxyMemberAddress,
                 functionName: "tokenURI",
                 args: [tokenId],
-              } as const),
+              }) as const,
           ),
         })
 
