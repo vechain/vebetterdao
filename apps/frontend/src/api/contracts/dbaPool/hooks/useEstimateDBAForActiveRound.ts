@@ -1,12 +1,19 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
 import { ABIContract } from "@vechain/sdk-core"
-import { XAllocationPool__factory, XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import {
+  X2EarnApps__factory,
+  X2EarnRewardsPool__factory,
+  XAllocationPool__factory,
+  XAllocationVoting__factory,
+} from "@vechain/vebetterdao-contracts/typechain-types"
 import { useThor } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
 const xAllocationPoolAddress = getConfig().xAllocationPoolContractAddress as `0x${string}`
 const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
+const x2EarnAppsAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
+const x2EarnRewardsPoolAddress = getConfig().x2EarnRewardsPoolContractAddress as `0x${string}`
 
 // DBA eligibility threshold: apps with < 7.5% votes (750 in scaled format where 100 = 1%)
 const DBA_ELIGIBILITY_THRESHOLD = 750
@@ -18,13 +25,11 @@ const DBA_ELIGIBILITY_THRESHOLD = 750
  * 1. Get all apps in the round
  * 2. For each app, call roundEarnings() to get unallocatedAmount
  * 3. Sum all unallocatedAmount values = total DBA pool for the round
- * 4. Count eligible apps based on:
+ * 4. Count eligible apps based on ALL criteria:
  *    - App has < 7.5% votes (< 750 in scaled format)
+ *    - App has rewarded at least 1 action in the round (RewardDistributed event)
+ *    - App is currently endorsed (not in grace period)
  * 5. DBA per eligible app = total DBA pool / eligible apps count
- *
- * Note: This is a simplified frontend calculation. The actual lambda also checks:
- * - App rewarded at least 1 action with proofs
- * - App was endorsed at round start and during the round
  *
  * @param roundId The round ID
  * @param isEligible Whether the app is potentially eligible for DBA (pre-filtered by vote %)
@@ -70,8 +75,7 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
           }
         }
 
-        // 2. For each app, get roundEarnings to extract unallocatedAmount
-        // Also get app shares to check vote percentage for eligibility
+        // 2. For each app, check full eligibility criteria
         const appsData = await Promise.all(
           appsInRound.map(async appId => {
             // Get earnings (includes unallocatedAmount)
@@ -88,14 +92,56 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
               [BigInt(roundId), appId],
             )
 
-            const unallocatedAmount = (earningsRes.result?.array?.[1] as bigint) ?? 0n // Index 1 is unallocatedAmount
-            const appShare = Number(sharesRes.result?.array?.[0] ?? 0) // App's vote share (scaled: 100 = 1%)
+            // Check if app is currently endorsed
+            const endorsedRes = await thor.contracts.executeCall(
+              x2EarnAppsAddress,
+              ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("isAppUnendorsed"),
+              [appId],
+            )
+
+            // Check if app has rewarded actions in this round (RewardDistributed event)
+            const rewardEventAbi = thor.contracts
+              .load(x2EarnRewardsPoolAddress, X2EarnRewardsPool__factory.abi)
+              .getEventAbi("RewardDistributed")
+            const topics = rewardEventAbi.encodeFilterTopicsNoNull({ appId })
+
+            const rewardEvents = await thor.logs.filterEventLogs({
+              criteriaSet: [
+                {
+                  criteria: {
+                    address: x2EarnRewardsPoolAddress,
+                    topic0: topics[0] ?? undefined,
+                    topic1: topics[1] ?? undefined,
+                  },
+                  eventAbi: rewardEventAbi,
+                },
+              ],
+              options: {
+                offset: 0,
+                limit: 1, // We only need to know if at least 1 exists
+              },
+              order: "desc",
+            })
+
+            const unallocatedAmount = (earningsRes.result?.array?.[1] as bigint) ?? 0n
+            const appShare = Number(sharesRes.result?.array?.[0] ?? 0)
+            const isUnendorsed = (endorsedRes.result?.array?.[0] as boolean) ?? false
+            const hasRewardedActions = rewardEvents.length > 0
+
+            // Full eligibility check
+            const isEligible =
+              appShare < DBA_ELIGIBILITY_THRESHOLD && // < 7.5% votes
+              appShare > 0 && // Participated in voting
+              !isUnendorsed && // Currently endorsed
+              hasRewardedActions // Has rewarded at least 1 action
 
             return {
               appId,
               unallocatedAmount,
               appShare,
-              isEligible: appShare < DBA_ELIGIBILITY_THRESHOLD && appShare > 0, // < 7.5% and participated
+              isUnendorsed,
+              hasRewardedActions,
+              isEligible,
             }
           }),
         )
@@ -103,7 +149,7 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
         // 3. Sum all unallocated amounts
         const totalUnallocated = appsData.reduce((sum: bigint, app) => sum + app.unallocatedAmount, 0n)
 
-        // 4. Count eligible apps (< 7.5% votes)
+        // 4. Count eligible apps (all criteria met)
         const eligibleAppsCount = appsData.filter(app => app.isEligible).length
 
         // 5. Calculate DBA per eligible app
