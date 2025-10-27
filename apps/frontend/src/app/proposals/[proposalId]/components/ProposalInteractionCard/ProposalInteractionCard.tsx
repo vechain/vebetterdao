@@ -393,7 +393,7 @@ export const ProposalInteractionCard = ({
                   <Icon as={Reports} boxSize={5} />
                   <Heading>{t("Results")}</Heading>
                 </HStack>
-                <Button variant="plain" color="actions.tertiary.default" onClick={() => setIsResultsModalOpen(true)}>
+                <Button variant="link" onClick={() => setIsResultsModalOpen(true)}>
                   {t("Details")}
                 </Button>
               </HStack>

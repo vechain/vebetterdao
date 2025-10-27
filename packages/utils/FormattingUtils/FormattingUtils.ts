@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js"
-import { isFinite } from "lodash"
+import isFinite from "lodash/isFinite"
 import dayjs from "dayjs"
 
 export const ROUND_DECIMAL_ZERO = 0

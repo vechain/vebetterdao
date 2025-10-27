@@ -1,8 +1,11 @@
-import { IconButton, Box } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
-import { A11y, Navigation } from "swiper/modules"
+import {
+  A11y,
+  //Autoplay,
+  Pagination,
+} from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
@@ -42,7 +45,7 @@ import { StargateMigrationBanner } from "./components/StargateMigrationBanner/St
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 
 import "swiper/css"
-import "swiper/css/navigation"
+import "swiper/css/pagination"
 import "@/app/theme/swiper-custom.css"
 
 // VTHO threshold for low VTHO that triggers the banner
@@ -234,74 +237,46 @@ export const ActionBanner = () => {
     showStargateBanner,
   ])
 
-  const slidesPerView = slides.length === 1 ? 1 : 1.1
-
   if (slides.length === 0) return null
 
   return (
-    <Box position="relative">
+    <Box
+      position="relative"
+      css={{
+        base: {
+          "--swiper-pagination-top": "16px",
+          "--swiper-pagination-bottom": "auto",
+          "--swiper-pagination-left": "16px",
+          "--swiper-pagination-bullet-size": "6px",
+          "--swiper-pagination-text-align": "left",
+        },
+        lg: {
+          "--swiper-pagination-top": "unset",
+          "--swiper-pagination-bottom": "16px",
+          "--swiper-pagination-left": "unset",
+          "--swiper-pagination-bullet-size": "8px",
+          "--swiper-pagination-text-align": "center",
+        },
+      }}>
       <Swiper
-        modules={[A11y, Navigation]}
-        spaceBetween={20} // Space between slides
-        slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
-        navigation={{
-          nextEl: ".custom-swiper-button-next",
-          prevEl: ".custom-swiper-button-prev",
-        }}
-        pagination={{ clickable: true }}
-        scrollbar={{ draggable: true }}
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100%",
-          overflow: "hidden",
-          display: "flex",
-        }}>
+        modules={[
+          A11y,
+          //Autoplay,
+          Pagination,
+        ]}
+        pagination={true}
+        wrapperClass="action-banner"
+        spaceBetween={20}
+        // TODO: this autoplay feature will be enabled later.
+        // speed={800}
+        // autoplay={{ delay: 3000, disableOnInteraction: false }}
+      >
         {slides.map(slide => (
-          <SwiperSlide
-            key={`slide-${slide?.key}`}
-            className="slide"
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "auto",
-              position: "relative",
-              overflow: "hidden",
-            }}>
+          <SwiperSlide key={`slide-${slide?.key}`} className="slide">
             {slide}
           </SwiperSlide>
         ))}
       </Swiper>
-
-      <IconButton
-        className="custom-swiper-button-prev"
-        hideBelow="md"
-        pos={"absolute"}
-        zIndex={2} // Ensure it's above the slides
-        variant="subtle"
-        color="actions.tertiary.default"
-        left={0}
-        top={"50%"}
-        transform={"translate(-50%, -50%)"}
-        aria-label="Prev slide">
-        <FaChevronLeft />
-      </IconButton>
-
-      <IconButton
-        className="custom-swiper-button-next"
-        hideBelow="md"
-        pos={"absolute"}
-        zIndex={2} // Ensure it's above the slides
-        variant="subtle"
-        color="actions.tertiary.default"
-        right={0}
-        top={"50%"}
-        transform={"translate(50%,-50%)"}
-        aria-label="Next slide">
-        <FaChevronRight />
-      </IconButton>
     </Box>
   )
 }

@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
+import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 

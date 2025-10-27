@@ -19,7 +19,7 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import { ContractFactory, Interface } from "ethers"
 import { createProposalWithMultipleFunctionsAndExecuteItGrant } from "../../helpers/common"
-describe.only("GrantsManager - V2 Compatibility - @shard4j", function () {
+describe("GrantsManager - V2 Compatibility - @shard4j", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -115,7 +115,7 @@ describe.only("GrantsManager - V2 Compatibility - @shard4j", function () {
 
     await expect(governor.connect(owner).markAsCompleted(proposalId)).to.be.revertedWithCustomError(
       governor,
-      "GovernorRestrictedProposalType",
+      "GovernorRestrictedProposal",
     )
     // State should remain the same
     expect(await grantsManager.grantState(proposalId)).to.equal(8) // InDevelopment state
@@ -133,7 +133,7 @@ describe.only("GrantsManager - V2 Compatibility - @shard4j", function () {
 
     await expect(governor.connect(owner).markAsCompleted(proposalId)).to.be.revertedWithCustomError(
       governor,
-      "GovernorRestrictedProposalType",
+      "GovernorRestrictedProposal",
     )
     // State should remain the same
     expect(await grantsManager.grantState(proposalId)).to.equal(9) // Completed state
@@ -168,7 +168,7 @@ describe.only("GrantsManager - V2 Compatibility - @shard4j", function () {
 
     await expect(governor.connect(owner).markAsCompleted(proposalId)).to.be.revertedWithCustomError(
       governor,
-      "GovernorRestrictedProposalType",
+      "GovernorRestrictedProposal",
     )
     // State should remain the same
     expect(await grantsManager.grantState(proposalId)).to.equal(8) // InDevelopment state
@@ -186,7 +186,7 @@ describe.only("GrantsManager - V2 Compatibility - @shard4j", function () {
 
     await expect(governor.connect(owner).markAsCompleted(proposalId)).to.be.revertedWithCustomError(
       governor,
-      "GovernorRestrictedProposalType",
+      "GovernorRestrictedProposal",
     )
     // State should remain the same
     expect(await grantsManager.grantState(proposalId)).to.equal(9) // Completed state

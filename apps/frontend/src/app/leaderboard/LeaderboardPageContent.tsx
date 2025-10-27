@@ -146,7 +146,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
         </VStack>
       )}
       <VStack gap={8} align="flex-start" w="full">
-        <Button px={0} variant="plain" color="actions.tertiary.default" size="sm" asChild>
+        <Button px={0} variant="link" size="sm" asChild>
           <NextLink href="/">
             <FaAngleLeft />
             {t("Go back")}
@@ -158,7 +158,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             size={"lg"}
             aria-label="Next round"
             variant="plain"
-            color="actions.tertiary.default"
+            color="actions.primary.default"
             disabled={isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
             <Icon as={FaAngleLeft} boxSize={5} />
@@ -175,7 +175,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             size={"lg"}
             aria-label="Next round"
             variant="plain"
-            color="actions.tertiary.default"
+            color="actions.primary.default"
             disabled={isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
             <Icon as={FaAngleRight} boxSize={5} />

@@ -38,13 +38,6 @@ const DBAPoolAbi = [
     stateMutability: "view",
     type: "function",
   },
-  {
-    inputs: [{ internalType: "uint256", name: "_roundId", type: "uint256" }],
-    name: "isDBARewardsDistributed",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "view",
-    type: "function",
-  },
 ] as const
 
 interface NetworkConfig {
@@ -172,6 +165,7 @@ async function getRoundToDistribute(thor: ThorClient): Promise<number | null> {
   console.log(`Current round: ${currentRound}, checking previous round: ${previousRound}`)
 
   // Check if the previous round can be distributed
+  // This function already checks if rewards were distributed, if round is ready, etc.
   const canDistributeRes = await thor.contracts.executeCall(
     CONFIG.dbaPoolContractAddress,
     ABIContract.ofAbi(DBAPoolAbi).getFunction("canDistributeDBARewards"),
@@ -185,25 +179,7 @@ async function getRoundToDistribute(thor: ThorClient): Promise<number | null> {
   const canDistribute = canDistributeRes.result?.array?.[0] ?? false
 
   if (!canDistribute) {
-    console.log(`Round ${previousRound} is not ready for DBA distribution`)
-    return null
-  }
-
-  // Check if already distributed
-  const isDistributedRes = await thor.contracts.executeCall(
-    CONFIG.dbaPoolContractAddress,
-    ABIContract.ofAbi(DBAPoolAbi).getFunction("isDBARewardsDistributed"),
-    [previousRound],
-  )
-
-  if (!isDistributedRes.success) {
-    throw new Error("Failed to check if DBA was already distributed")
-  }
-
-  const isDistributed = isDistributedRes.result?.array?.[0] ?? false
-
-  if (isDistributed) {
-    console.log(`Round ${previousRound} has already been distributed`)
+    console.log(`Round ${previousRound} is not ready for DBA distribution (already distributed or not ready yet)`)
     return null
   }
 
@@ -294,8 +270,13 @@ export async function distributeDBARewards(thor: ThorClient, roundId: number) {
 
 /**
  * AWS Lambda handler function that triggers DBA rewards distribution.
- * This lambda should be scheduled to run once per week, after the round has started
- * and allocations have been claimed.
+ *
+ * **IMPORTANT:** This lambda is for MANUAL/FALLBACK use only - NO SCHEDULER is configured.
+ *
+ * DBA distribution is now integrated into the `startRound` lambda and happens automatically.
+ * This standalone lambda should ONLY be triggered manually if:
+ * - The startRound lambda fails after starting the round but before DBA distribution
+ * - DBA rewards need to be distributed separately for any reason
  *
  * @param {APIGatewayEvent} event - The incoming event from API Gateway.
  * @param {Context} context - The execution context of the Lambda function.

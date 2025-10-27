@@ -5,15 +5,14 @@ import testnetStagingConfig from "@repo/config/testnet-staging"
 import { AppEnv } from "@repo/config/contracts"
 import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
-import { buildClaimClause, getAllApps } from "../helpers/xApps"
-import { getIdsOfUnclaimed } from "../helpers/xApps"
+import { buildClaimClause, getAllApps, getIdsOfUnclaimed } from "../helpers/xApps"
 import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts"
-import { buildTxBody, buildGasEstimate } from "../helpers"
+import { buildTxBody, buildGasEstimate, withRetry } from "../helpers"
 import { slackIds } from "../helpers/slack/slackIds"
-import { withRetry } from "../helpers"
+import { filterEligibleAppsForDBA } from "../helpers/dba"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -117,6 +116,34 @@ const { channelId: SLACK_CHANNEL_ID, messagePrefix: SLACK_MESSAGE_PREFIX } = get
 const client = new SecretsManagerClient({
   region: "eu-west-1",
 })
+
+// DBAPool ABI - extracted from contract interface
+const DBAPoolAbi = [
+  {
+    inputs: [{ internalType: "uint256", name: "_roundId", type: "uint256" }],
+    name: "canDistributeDBARewards",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "_roundId", type: "uint256" },
+      { internalType: "bytes32[]", name: "_appIds", type: "bytes32[]" },
+    ],
+    name: "distributeDBARewards",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "_roundId", type: "uint256" }],
+    name: "fundsForRound",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const
 
 /**
  * Distributes the VeBetterDAO emissions and starts the next round.
@@ -246,6 +273,122 @@ export async function distributeXAllocations(thor: ThorClient) {
 
   // Return the transaction receipt
   return { receipt, gasResult }
+}
+
+/**
+ * Distributes DBA rewards to eligible apps for the previous round.
+ * This should be called after emissions are distributed and x-allocations are claimed.
+ *
+ * @param thor - The ThorClient instance
+ * @returns the transaction receipt of the DBA distribution if successful
+ */
+async function distributeDBARewards(thor: ThorClient) {
+  // Check if DBA Pool is deployed (address is not zero)
+  if (CONFIG.dbaPoolContractAddress === "0x0000000000000000000000000000000000000000") {
+    console.log("DBA Pool is not deployed yet, skipping DBA distribution")
+    return { receipt: null, eligibleAppsCount: 0, skipped: true, notDeployed: true }
+  }
+
+  // Get the current round number from the Emissions contract
+  const currentRoundRes = await thor.contracts.executeCall(
+    CONFIG.emissionsContractAddress,
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("getCurrentCycle"),
+    [],
+  )
+  // Get the previous round number for which the DBA rewards are to be distributed
+  const currentRound = Number(currentRoundRes.result?.array?.[0] ?? 0)
+  const roundId = currentRound - 1
+
+  console.log(`Current round: ${currentRound}, distributing DBA for previous round: ${roundId}`)
+
+  const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
+  const signerAddress = Address.ofPrivateKey(privateKey).toString()
+
+  // Check if we can distribute for this round
+  // This function already checks if rewards were distributed, if round is ready, etc.
+  const canDistributeRes = await thor.contracts.executeCall(
+    CONFIG.dbaPoolContractAddress,
+    ABIContract.ofAbi(DBAPoolAbi).getFunction("canDistributeDBARewards"),
+    [roundId],
+  )
+
+  if (!canDistributeRes.success) {
+    throw new Error("Failed to check if DBA can be distributed")
+  }
+
+  const canDistribute = canDistributeRes.result?.array?.[0] ?? false
+
+  if (!canDistribute) {
+    console.log(`Round ${roundId} is not ready for DBA distribution (already distributed or not ready yet)`)
+    return { receipt: null, eligibleAppsCount: 0, skipped: true, notReady: true }
+  }
+
+  // Filter eligible apps
+  const eligibleApps = await filterEligibleAppsForDBA(thor, CONFIG, roundId)
+
+  if (eligibleApps.length === 0) {
+    console.log(`No eligible apps found for round ${roundId}`)
+    await publishMessage(
+      client,
+      SLACK_CHANNEL_ID,
+      `${SLACK_MESSAGE_PREFIX}:information_source: No eligible apps found for DBA distribution in round ${roundId}`,
+    )
+    return { receipt: null, eligibleAppsCount: 0, skipped: true }
+  }
+
+  console.log(`Found ${eligibleApps.length} eligible apps for DBA distribution`)
+
+  // Get the amount to be distributed
+  const fundsRes = await thor.contracts.executeCall(
+    CONFIG.dbaPoolContractAddress,
+    ABIContract.ofAbi(DBAPoolAbi).getFunction("fundsForRound"),
+    [roundId],
+  )
+
+  if (!fundsRes.success) {
+    throw new Error("Failed to get funds for round")
+  }
+
+  const totalFunds = fundsRes.result?.array?.[0] ?? 0n
+  console.log(`Total funds to distribute: ${totalFunds}`)
+
+  // Prepare the contract function call
+  const clause = Clause.callFunction(
+    Address.of(CONFIG.dbaPoolContractAddress),
+    ABIContract.ofAbi(DBAPoolAbi).getFunction("distributeDBARewards"),
+    [roundId, eligibleApps],
+  )
+
+  // Estimate the gas cost for the transaction
+  const gasResult = await buildGasEstimate(thor, [clause], signerAddress)
+
+  // Check if the transaction was estimated to revert and handle accordingly
+  if (gasResult.reverted) {
+    await publishMessage(
+      client,
+      SLACK_CHANNEL_ID,
+      `${SLACK_MESSAGE_PREFIX}:alert: DBA distribution failed for round ${roundId}: ${gasResult.revertReasons}, ${gasResult.vmErrors}`,
+    )
+
+    return { receipt: null, eligibleAppsCount: eligibleApps.length, gasResult }
+  }
+
+  // Build the transaction body with the estimated gas
+  // 2x the gas limit for safety
+  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas * 2)
+
+  // Sign the transaction
+  const signedTx = Transaction.of(txBody).sign(privateKey)
+
+  // Send the signed transaction to the blockchain
+  const tx = await thor.transactions.sendTransaction(signedTx)
+
+  // Wait for the transaction to be processed and get the receipt
+  const receipt = await thor.transactions.waitForTransaction(tx.id)
+
+  console.log(`DBA distribution successful for round ${roundId}`)
+
+  return { receipt, eligibleAppsCount: eligibleApps.length, gasResult }
 }
 
 /**
@@ -386,12 +529,71 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
     )
 
+    // Distribute DBA rewards for the previous round with retry
+    let dbaResult
+    try {
+      dbaResult = await withRetry(() => distributeDBARewards(thorClient), maxRetries, delayMs, "Distribute DBA Rewards")
+    } catch (error) {
+      console.log("Failed to distribute DBA rewards after all retries:", error)
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute DBA rewards after multiple attempts: ${error}`,
+      )
+      // Don't fail the entire lambda if DBA distribution fails
+      // The round has already started successfully
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          receiptEmissions,
+          receiptClaim,
+          dbaError: `Failed to distribute DBA rewards: ${error}`,
+        }),
+      }
+    }
+
+    const { receipt: receiptDBA, eligibleAppsCount, skipped, notDeployed, notReady } = dbaResult
+
+    if (notDeployed) {
+      console.log("DBA Pool not deployed yet, skipping")
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:information_source: DBA Pool not deployed yet, skipping DBA distribution`,
+      )
+    } else if (notReady) {
+      console.log("DBA distribution not ready yet (already distributed or round not ready)")
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:information_source: DBA distribution not ready (already distributed or round not ready yet)`,
+      )
+    } else if (skipped) {
+      console.log("DBA distribution skipped (no eligible apps)")
+    } else if (!receiptDBA) {
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: DBA distribution transaction reverted`,
+      )
+    } else {
+      console.log("DBA distribution successful")
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:white_check_mark: DBA rewards distributed successfully to ${eligibleAppsCount} apps`,
+      )
+    }
+
     // Return a successful response with the transaction receipt
     return {
       statusCode: 200,
       body: JSON.stringify({
         receiptEmissions,
         receiptClaim,
+        receiptDBA,
+        dbaEligibleAppsCount: eligibleAppsCount,
+        dbaSkipped: skipped,
       }),
     }
   } catch (error) {

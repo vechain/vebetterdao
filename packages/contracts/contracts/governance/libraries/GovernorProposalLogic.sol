@@ -75,14 +75,21 @@ library GovernorProposalLogic {
    * @dev Emitted when a proposal is queued.
    */
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
+
   /**
    * @dev Emitted when a proposal is marked as in development.
    */
   event ProposalInDevelopment(uint256 proposalId);
+
   /**
    * @dev Emitted when a proposal is marked as completed.
    */
   event ProposalCompleted(uint256 proposalId);
+
+  /**
+   * @dev Emitted when the development state of a proposal is reset back to pending development.
+   */
+  event ProposalDevelopmentStateReset(uint256 proposalId);
 
   /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
@@ -129,10 +136,11 @@ library GovernorProposalLogic {
   error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
 
   /**
-   * @dev Thrown when a proposal type is not allowed to perform a specific action.
+   * @dev Thrown when a proposal is not allowed to perform a specific action.
    * Some actions are restricted to Standard proposals only, others to Grant proposals only.
+   * eg. Executable proposals cannot be marked as in development if not executed yet but Succeeded.
    */
-  error GovernorRestrictedProposalType(GovernorTypes.ProposalType proposalType);
+  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
 
   /** ------------------ GETTERS ------------------ **/
 
@@ -563,44 +571,64 @@ library GovernorProposalLogic {
     return _cancel(self, proposalId);
   }
 
-  function markAsInDevelopment(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) external returns (uint256) {
+  /**
+   * @notice Mark a proposal as in development
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The id of the proposal.
+   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
+   * - Only Standard proposals are allowed here.
+   * - Can only mark as in development if proposal is executed or succeeded
+   * - If the proposal is executable and the state is succeeded, it cannot be marked as in development
+   * - Otherwise could skip the queue + execution steps
+   * - The proposal development state is set to InDevelopment
+   * - The event ProposalInDevelopment is emitted
+   */
+  function markAsInDevelopment(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
+    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
 
     // Only Standard proposals are allowed here.
     // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
     if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposalType(proposalType);
+      revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
-    //Can only mark as in development if proposal is executed or succeeded
+    // Can only mark as in development if proposal is executed or succeeded
     GovernorStateLogic.validateStateBitmap(
       self,
       proposalId,
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) |
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded)
     );
+    if (proposal.isExecutable && GovernorStateLogic._state(self, proposalId) == GovernorTypes.ProposalState.Succeeded) {
+      revert GovernorRestrictedProposal(proposalId, proposalType);
+    }
 
     self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
     //Emit event
     emit ProposalInDevelopment(proposalId);
   }
 
-  function markAsCompleted(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) external returns (uint256) {
+  /**
+   * @notice Mark a proposal as completed
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The id of the proposal.
+   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
+   * - Only Standard proposals are allowed here.
+   * - Can only mark as completed if proposal is in development
+   * - The proposal development state is set to Completed
+   * - The event ProposalCompleted is emitted
+   */
+  function markAsCompleted(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
 
     // Only Standard proposals are allowed here.
     // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
     if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposalType(proposalType);
+      revert GovernorRestrictedProposal(proposalId, proposalType);
     }
-    
-    //Can only mark as in development if proposal is executed or succeeded
+
+    // Can only mark as completed if proposal is in development
     GovernorStateLogic.validateStateBitmap(
       self,
       proposalId,
@@ -609,6 +637,24 @@ library GovernorProposalLogic {
     self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.Completed;
     //Emit event
     emit ProposalCompleted(proposalId);
+  }
+
+  /**
+   * @notice Reset the development state of a proposal back to pending development
+   * @param proposalId The id of the proposal
+   * @dev This should reset the enum state back to the original one,
+   * since pending development is not tracked in {GovernorStateLogic._state} condition
+   */
+  function resetDevelopmentState(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) external {
+    GovernorStateLogic.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment) |
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
+    );
+    self.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.PendingDevelopment;
+    //Emit event
+    emit ProposalDevelopmentStateReset(proposalId);
   }
 
   /** ------------------ INTERNAL FUNCTIONS ------------------ **/

@@ -46,7 +46,7 @@
   "Your Creator's NFT application was approved!": "Yaratıcı NFT başvurunuz onaylandı!",
   "Apply again": "Yeniden başvur",
   "Your Creator's NFT application was rejected": "Yaratıcı NFT başvurunuz reddedildi",
-  "CREATOR APPLICATION REJECTED": "YARATICI BAŞVURUSU REDDEDİLDİ",
+  "Creator application rejected": "YARATICI BAŞVURUSU REDDEDİLDİ",
   "Submit app": "Uygulama gönder",
   "Your Creator application was approved. Submit your app!": "Yaratıcı başvurunuz onaylandı. Uygulamanızı gönderin!",
   "CREATOR'S NFT RECEIVED": "YARATICININ NFT'Sİ ALINDI",
@@ -2007,5 +2007,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bunu yaparak, kimliği {{appId}} olan {{appName}}, bir sonraki tur için {{status}} olacaktır.",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı",
   "Uploading...": "Yükleniyor...",
-  "Stored": "Saklandı"
+  "Stored": "Saklandı",
+  "Creator's nft received": "Oluşturucu'nun NFT'si alındı",
+  "Creator application under review": "Oluşturucu başvurusu inceleme altında",
+  "Voting power delegated": "Oylama gücü devredildi",
+  "Cast your vote now!": "Şimdi oy verin!",
+  "Time to step up!": "Öne çıkma zamanı!",
+  "Not enough VTHO": "Yeterli VTHO yok",
+  "New app available": "Yeni uygulama mevcut",
+  "Active proposal": "Aktif öneri",
+  "You've been signalled by {{app}}": "{{app}} tarafından işaretlendiniz",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Oylama gücünüz sizin adınıza oy veren <platform>veDelegate.vet</platform>'e aktarılmıştır. <br/> Burada oy kullanmak istiyorsanız, anlık görüntüleme öncesinde veDelegate üzerindeki devri iptal etmelisiniz.",
+  "Stargate is live": "Stargate yayında"
 }

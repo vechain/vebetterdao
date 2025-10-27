@@ -97,7 +97,7 @@ export const SuccessModalContent = ({
             <Text textStyle="sm" fontWeight="semibold" color="brand.primary">
               {t("See transaction information")}
             </Text>
-            <Icon boxSize={6} color="logo">
+            <Icon boxSize={6} color="icon.default">
               <MdArrowOutward />
             </Icon>
           </HStack>

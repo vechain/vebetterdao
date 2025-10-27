@@ -46,7 +46,7 @@
   "Your Creator's NFT application was approved!": "Đơn đăng ký NFT của người tạo của bạn đã được chấp thuận!",
   "Apply again": "Nộp lại",
   "Your Creator's NFT application was rejected": "Đơn đăng ký NFT của người tạo của bạn đã bị từ chối",
-  "CREATOR APPLICATION REJECTED": "ĐƠN ĐĂNG KÝ NGƯỜI TẠO BỊ TỪ CHỐI",
+  "Creator application rejected": "ĐƠN ĐĂNG KÝ NGƯỜI TẠO BỊ TỪ CHỐI",
   "Submit app": "Nộp ứng dụng",
   "Your Creator application was approved. Submit your app!": "Đơn đăng ký của người tạo của bạn đã được chấp thuận. Nộp ứng dụng của bạn!",
   "CREATOR'S NFT RECEIVED": "NFT CỦA NGƯỜI TẠO ĐÃ NHẬN",
@@ -2007,5 +2007,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bằng cách làm điều này, {{appName}} với id {{appId}} sẽ bị {{status}} cho vòng tiếp theo.",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)",
   "Uploading...": "Đang tải lên...",
-  "Stored": "Đã lưu trữ"
+  "Stored": "Đã lưu trữ",
+  "Creator's nft received": "Đã nhận nft của nhà sáng tạo",
+  "Creator application under review": "Ứng dụng của nhà sáng tạo đang được xem xét",
+  "Voting power delegated": "Quyền biểu quyết đã được ủy quyền",
+  "Cast your vote now!": "Bỏ phiếu ngay!",
+  "Time to step up!": "Đã đến lúc hành động!",
+  "Not enough VTHO": "Không đủ VTHO",
+  "New app available": "Ứng dụng mới có sẵn",
+  "Active proposal": "Đề xuất đang hoạt động",
+  "You've been signalled by {{app}}": "Bạn đã được thông báo bởi {{app}}",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Quyền biểu quyết của bạn đã được chuyển đến <platform>veDelegate.vet</platform> nơi bỏ phiếu thay mặt bạn. <br/> Nếu bạn muốn bỏ phiếu tại đây, bạn phải gỡ bỏ ủy quyền trên veDelegate trước khi chụp nhanh.",
+  "Stargate is live": "Stargate đã hoạt động"
 }

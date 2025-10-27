@@ -46,7 +46,7 @@
   "Your Creator's NFT application was approved!": "您的創作者 NFT 申請已獲得批准！",
   "Apply again": "再次申請",
   "Your Creator's NFT application was rejected": "您的創作者 NFT 申請被拒絕",
-  "CREATOR APPLICATION REJECTED": "創作者申請被拒絕",
+  "Creator application rejected": "創作者申請被拒絕",
   "Submit app": "提交應用程式",
   "Your Creator application was approved. Submit your app!": "您的創作者申請已獲得批准。提交您的應用程式！",
   "CREATOR'S NFT RECEIVED": "創作者的 NFT 已接收",
@@ -2008,5 +2008,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "這樣做，ID為{{appId}}的{{appName}}將在下一輪被設定為{{status}}。",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)",
   "Uploading...": "上傳中...",
-  "Stored": "已存儲"
+  "Stored": "已存儲",
+  "Creator's nft received": "創作者的NFT已收到",
+  "Creator application under review": "創作者申請正在審核中",
+  "Voting power delegated": "投票權已委託",
+  "Cast your vote now!": "立即投票！",
+  "Time to step up!": "是時候站出來了！",
+  "Not enough VTHO": "VTHO不足",
+  "New app available": "有新應用可用",
+  "Active proposal": "活躍的提案",
+  "You've been signalled by {{app}}": "您已被{{app}}通知",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票權已轉移至<platform>veDelegate.vet</platform>，它將代表您投票。<br/>如果您想在此進行投票，必須在快照前於veDelegate上移除委託。",
+  "Stargate is live": "Stargate已上線"
 }

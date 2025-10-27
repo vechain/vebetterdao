@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/factories/GalaxyMember__factory"
 import { useCallback } from "react"
 
 import { getGMMaxLevelQueryKey } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"

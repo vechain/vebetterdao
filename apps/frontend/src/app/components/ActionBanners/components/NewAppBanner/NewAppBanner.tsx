@@ -1,5 +1,4 @@
-import { Button, Icon } from "@chakra-ui/react"
-import { UilArrowRight } from "@iconscout/react-unicons"
+import { Button } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
@@ -12,6 +11,7 @@ interface NewApp {
   name: string
   id: string
 }
+
 export const NewAppBanner = () => {
   const router = useRouter()
   const { data: xApps } = useXApps()
@@ -42,14 +42,12 @@ export const NewAppBanner = () => {
 
   return (
     <GenericBanner
-      variant="info"
-      title={t("NEW APP AVAILABLE")}
+      title={t("New app available")}
       description={description}
-      logoSrc="/assets/icons/new-app-gold.svg"
+      illustration="/assets/icons/new-app-gold.svg"
       cta={
-        <Button onClick={GOTOAPPS} variant="primary">
+        <Button size={{ base: "sm", md: "md" }} onClick={GOTOAPPS} variant="primary">
           {t("Explore")}
-          <Icon as={UilArrowRight} />
         </Button>
       }
     />

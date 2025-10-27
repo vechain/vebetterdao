@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
 const abi = X2EarnApps__factory.abi

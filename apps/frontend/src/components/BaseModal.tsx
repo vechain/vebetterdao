@@ -30,7 +30,6 @@ export const BaseModal = ({
   if (isDesktop)
     return (
       <Dialog.Root
-        variant="base"
         open={isOpen}
         onOpenChange={details => {
           if (!details.open) {
@@ -38,7 +37,6 @@ export const BaseModal = ({
           }
         }}
         size="lg"
-        placement="center"
         trapFocus={false}
         {...modalProps}>
         <Portal>

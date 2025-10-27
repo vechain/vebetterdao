@@ -19,9 +19,9 @@ export const useUsersB3trActions = (wallet: string, queryOptions: any) => {
       getNextPageParam: (
         lastPage: UserB3trActionsQueryResponse,
         _allPages: UserB3trActionsQueryResponse[],
-        lastPageParam: number,
+        lastPageParam: unknown,
       ) => {
-        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+        return lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined
       },
     },
   )

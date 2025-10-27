@@ -147,21 +147,19 @@ export const AppEndorsementInfoCard = ({
 
     if (nodeEndorsingApp) {
       buttonComponents.push(
-        <Link asChild>
-          <Button
-            key="removeEndorsementButton"
-            rounded="xl"
-            mt="4"
-            variant="outline"
-            colorPalette="red"
-            textStyle="md"
-            fontWeight="semibold"
-            onClick={onOpenUnendorsementModal}
-            w="full"
-            disabled={shouldDisableEndorsementButton}>
-            {t("Remove endorsement")}
-          </Button>
-        </Link>,
+        <Button
+          key="removeEndorsementButton"
+          variant="link"
+          rounded="xl"
+          mt="4"
+          colorPalette="red"
+          textStyle="md"
+          fontWeight="semibold"
+          onClick={onOpenUnendorsementModal}
+          w="full"
+          disabled={shouldDisableEndorsementButton}>
+          {t("Remove endorsement")}
+        </Button>,
       )
     }
 

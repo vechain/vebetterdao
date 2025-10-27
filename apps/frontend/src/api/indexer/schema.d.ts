@@ -370,6 +370,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/explorer/block-usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get block usage statistics for a timestamp range
+         * @description Returns cumulative block usage statistics (gas usage, transaction counts, etc.) for a given timestamp range.
+         *
+         *                 The API automatically determines the appropriate data granularity based on the size of the time range:
+         *                 - Range ≤ 4,000 seconds: Returns all blocks (~360 data points)
+         *                 - Range ≤ 700,000 seconds: Returns hourly values (~168 data points)
+         *                 - Range ≤ 3,000,000 seconds: Returns daily values (~30 data points)
+         *                 - Range ≤ 35,000,000 seconds: Returns weekly values (~52 data points)
+         *                 - Range > 35,000,000 seconds: Returns monthly values
+         *
+         *                 Values are represented as a monotonic cumulative counter which means the values increase over time. This is
+         *                 a semantic used by Grafana for example. It requires some processing on the client side to convert to a value
+         *                 for a given block.
+         *
+         *                 For example to get the gasUsed at block n you would need to do:
+         *
+         *                     gasUsedAtBlockN = gasUsedAtBlockN - gasUsedAtBlock(n-1)
+         *
+         *                 In the case where we return hourly/daily/weekly/monthly values only you can calculate an average over the
+         *                 block range. If the first record in the returned data is at block n and the next record is at block n + k:
+         *
+         *                     averageGasUsedPerBlock = (gasUsedAtBlock(n+k) - gasUsedAtBlockN) / k
+         */
+        get: operations["getBlockUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/b3tr/xallocations/{roundId}/results": {
         parameters: {
             query?: never;
@@ -484,15 +524,13 @@ export interface paths {
         };
         /**
          * Get B3TR action overview for a specific wallet, optionally for a specific round or date.
-         * @description
-         *                 This endpoint retrieves the B3TR action overview for a wallet address.
+         * @description This endpoint retrieves the B3TR action overview for a wallet address.
          *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
          *
          *                 - If roundId is provided, the overview for the specific round is returned.
          *                 - If date is provided, the overview for the specific date is returned.
          *                 - If roundId/date are not provided, the all time sustainability overview for the user is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
          */
         get: operations["getUserOverview"];
         put?: never;
@@ -529,15 +567,12 @@ export interface paths {
         };
         /**
          * Get leaderboard of user's B3TR actions.
-         * @description
-         *                 This endpoint retrieves the user leaderboard based on their B3TR actions.
+         * @description This endpoint retrieves the user leaderboard based on their B3TR actions.
          *
          *                 - If roundId is provided, the leaderboard for the specific round is returned.
          *                 - If date is provided, the leaderboard for the specific date is returned.
          *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
-         *
          */
         get: operations["getUserLeaderboard"];
         put?: never;
@@ -557,15 +592,12 @@ export interface paths {
         };
         /**
          * Get the app B3TR action leaderboard
-         * @description
-         *                 This endpoint retrieves the app B3TR action leaderboard.
+         * @description This endpoint retrieves the app B3TR action leaderboard.
          *
          *                 - If roundId is provided, the leaderboard for the specific round is returned.
          *                 - If date is provided, the leaderboard for the specific date is returned.
          *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
-         *
          */
         get: operations["getAppLeaderboard"];
         put?: never;
@@ -585,15 +617,12 @@ export interface paths {
         };
         /**
          * Get the user B3TR action leaderboard for a given app
-         * @description
-         *                 This endpoint retrieves the user B3TR action leaderboard for a given app.
+         * @description This endpoint retrieves the user B3TR action leaderboard for a given app.
          *
          *                 - If roundId is provided, the leaderboard for the specific round is returned.
          *                 - If date is provided, the leaderboard for the specific date is returned.
          *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
-         *
          */
         get: operations["getUserAppLeaderboard"];
         put?: never;
@@ -613,14 +642,12 @@ export interface paths {
         };
         /**
          * Get global B3TR action overview, optionally for a specific round or date.
-         * @description
-         *                 This endpoint retrieves the global B3TR action overview.
+         * @description This endpoint retrieves the global B3TR action overview.
          *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
          *                 - If roundId is provided, the overview for the specific round is returned.
          *                 - If date is provided, the overview for the specific date is returned.
          *                 - If roundId/date are not provided, the all time global sustainability overview is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
          */
         get: operations["getGlobalOverview"];
         put?: never;
@@ -657,15 +684,13 @@ export interface paths {
         };
         /**
          * Get B3TR action overview for a specific app, optionally for a specific round or date.
-         * @description
-         *                 This endpoint retrieves the B3TR action overview for an app.
+         * @description This endpoint retrieves the B3TR action overview for an app.
          *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
          *
          *                 - If roundId is provided, the overview for the specific round is returned.
          *                 - If date is provided, the overview for the specific date is returned.
          *                 - If roundId/date are not provided, the all time sustainability overview for the app is returned.
          *                 - If both roundId and date are provided, a BadRequest error is returned.
-         *
          */
         get: operations["getAppOverview"];
         put?: never;
@@ -1003,6 +1028,18 @@ export interface components {
             description?: string;
             proof?: components["schemas"]["ProofV2"];
             impact?: components["schemas"]["Impact"];
+        };
+        BlockUsage: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            cumulativeGasLimit: number;
+            cumulativeGasUsed: number;
+            cumulativeBaseFeePerGas?: number;
+            cumulativeNumTransactions: number;
+            cumulativeNumClauses: number;
         };
         XAllocResult: {
             /** Format: int32 */
@@ -2266,6 +2303,55 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getBlockUsage: {
+        parameters: {
+            query: {
+                /**
+                 * @description The starting timestamp in seconds since Unix epoch (inclusive)
+                 * @example 1704067200
+                 */
+                startTimestamp: number;
+                /**
+                 * @description The ending timestamp in seconds since Unix epoch (inclusive). Must be greater than or equal to startTimestamp.
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BlockUsage"][];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */

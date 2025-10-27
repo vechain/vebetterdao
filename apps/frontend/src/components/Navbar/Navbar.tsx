@@ -10,6 +10,7 @@ import { useHideOnScroll } from "../../hooks/useHideOnScroll"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { MobileNavBar } from "./MobileNavbar"
 import { Routes } from "./Routes"
+
 export const Navbar: React.FC = () => {
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
   const { account } = useWallet()

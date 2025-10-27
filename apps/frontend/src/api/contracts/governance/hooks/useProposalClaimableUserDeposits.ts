@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"

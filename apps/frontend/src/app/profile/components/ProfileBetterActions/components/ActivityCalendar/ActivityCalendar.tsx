@@ -108,7 +108,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
           <VStack align="stretch" gap={4}>
             <Flex justify="space-between" align="center">
               <Heading size="xl">{t("Actions History")}</Heading>
-              <Button variant="ghost" color="actions.tertiary.default" size="sm" onClick={handleSetListView}>
+              <Button variant="link" size="sm" onClick={handleSetListView}>
                 {t("List View")}
               </Button>
             </Flex>
