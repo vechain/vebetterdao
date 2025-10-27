@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { XAllocationVotingGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { XAllocationVotingGovernor__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVotingGovernor__factory"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress

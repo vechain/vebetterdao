@@ -20,7 +20,7 @@ Turborepo monorepo with:
 
 - `apps/frontend`: Next.js frontend app
 - `packages/contracts`: VeChain VeBetterDAO smart contracts
-- `packages/*`: Shared config, utils, constants, e2e tests, lambda functions
+- `packages/*`: Shared config, utils, constants, lambda functions
 
 # Environments
 
@@ -29,7 +29,6 @@ Turborepo monorepo with:
 - testnet: VeChain testnet
 - mainnet: VeChain mainnet
 - galactica-test: Galactica test network
-- e2e: E2E testing environment
 
 # Common commands
 
@@ -128,6 +127,8 @@ MCP servers configured in `.mcp.json`:
 
 # Component Development
 
+- DO NOT use comments during development
+
 ## Chakra UI v3
 
 - Project uses Chakra UI v3 design system
@@ -145,6 +146,28 @@ MCP servers configured in `.mcp.json`:
 4. Use Storybook MCP for automated component testing
 5. Use Figma MCP to sync designs with components
 6. Build static docs: `yarn build-storybook`
+
+### Story Variations Pattern
+
+For all component stories, create 4 variations:
+1. `{Name}LightMode` - main component (default)
+2. `{Name}DarkMode` - cloneElement with dark theme
+3. `{Name}MobileLightMode` - cloneElement with mobile viewport
+4. `{Name}MobileDarkMode` - cloneElement with dark theme + mobile viewport
+
+Example:
+```tsx
+export const LightMode = () => <YourComponent />
+
+export const DarkMode = () => cloneElement(<LightMode />)
+DarkMode.globals = { theme: "dark", viewport: { value: "responsive" } }
+
+export const MobileLightMode = () => cloneElement(<LightMode />)
+MobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }
+
+export const MobileDarkMode = () => cloneElement(<LightMode />)
+MobileDarkMode.globals = { theme: "dark", viewport: { value: "mobile2" } }
+```
 
 ## Figma to Code
 

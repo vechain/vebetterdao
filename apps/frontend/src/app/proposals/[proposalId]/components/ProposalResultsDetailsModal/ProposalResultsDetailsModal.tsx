@@ -183,7 +183,7 @@ const SupportResultContent = ({
               </Text>
             </HStack>
             <Text textStyle="md" color="text.subtle">
-              {humanNumber(formatEther(userDeposits), userDeposits, "VOT3")}
+              {humanNumber(formatEther(userDeposits), undefined, "VOT3")}
             </Text>
           </HStack>
         )}

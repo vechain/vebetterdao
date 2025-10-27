@@ -22,9 +22,9 @@ export const useUserActionSummaryForDateRange = (
       getNextPageParam: (
         lastPage: UserActionSummaryForDateRangeQueryResponse,
         _allPages: UserActionSummaryForDateRangeQueryResponse[],
-        lastPageParam: number,
+        lastPageParam: unknown,
       ) => {
-        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+        return lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined
       },
     },
   )

@@ -22,26 +22,42 @@ Here's a list of the current lambda functions and their primary responsibilities
     - **Key Operations**: Takes a `creatorWalletAddress` in the request body, interacts with the X2EarnCreator smart contract to mint an NFT, and returns the transaction receipt.
 
 4.  **`startRound`**:
-    - **Purpose**: Initiates a new round in the VeBetterDAO ecosystem by distributing emissions and X-Allocations.
+    - **Purpose**: Initiates a new round in the VeBetterDAO ecosystem by distributing emissions, X-Allocations, and DBA rewards.
     - **Trigger**: Scheduled.
-    - **Key Operations**: Waits for the appropriate time to start a new round, calls the `distribute` function on the Emissions contract, and distributes X-Allocations to eligible X-Apps.
+    - **Key Operations**:
+      - Waits for the appropriate time to start a new round
+      - Calls the `distribute` function on the Emissions contract to start the new round
+      - Distributes X-Allocations to eligible X-Apps that haven't claimed their allocations
+      - Distributes DBA (Dynamic Base Allocation) rewards to eligible apps from the previous round:
+        - Checks if DBA Pool is deployed (gracefully skips if not)
+        - Filters eligible apps based on:
+          - App was eligible for voting in the round
+          - App rewarded at least 1 action with proofs during the round
+          - App received less than 7.5% of total votes
+          - App was fully endorsed during the round (not in grace period for entire round)
+        - Calls `distributeDBARewards` on the DBAPool contract with filtered app IDs
+      - Sends Slack notifications for each operation (success/failure)
+      - **Note**: If DBA distribution fails, the lambda still succeeds (since the primary goal of starting the round is complete)
 
 5.  **`veBetterPassport/resetSignalCounter`**:
     - **Purpose**: Resets the signal counter for a user in the VeBetter Passport system, typically after a KYC verification or a similar process.
     - **Trigger**: API Gateway (HTTP POST request).
     - **Key Operations**: Takes a `walletAddress` in the request body.
 
-6.  **`distributeDBA`**:
-    - **Purpose**: Distributes Dynamic Base Allocation (DBA) rewards to eligible apps after a round completes. The lambda filters apps based on specific eligibility criteria and calls the DBAPool contract to distribute surplus allocations.
-    - **Trigger**: Scheduled (once per week, after round starts and allocations are claimed).
+6.  **`distributeDBA`** (Manual/Fallback - NO SCHEDULER):
+    - **Purpose**: Standalone DBA distribution lambda for manual/fallback use only.
+    - **Trigger**: Manual invocation only (NO automated scheduler configured).
+    - **When to Use**: This lambda should ONLY be triggered manually in the following scenarios:
+      - The `startRound` lambda fails after starting the round but before DBA distribution completes
+      - DBA rewards need to be distributed separately for any exceptional reason
+      - Testing DBA distribution in isolation
+    - **Note**: DBA distribution is now integrated into the `startRound` lambda and happens automatically as part of the round start process. This standalone version serves as a fallback mechanism and should not be part of normal operations.
     - **Key Operations**:
-      - Checks if the previous round is ready for DBA distribution (all funds claimed, unallocated funds exist)
-      - Filters eligible apps based on:
-        - App was eligible for voting in the round
-        - App rewarded at least 1 action with proofs during the round
-        - App received less than 7.5% of total votes
-        - App was fully endorsed during the round (not in grace period for entire round)
-      - Calls `distributeDBARewards` on the DBAPool contract with filtered app IDs
+      - Determines the previous round that needs DBA distribution
+      - Checks if the round is ready and hasn't been distributed yet (via `canDistributeDBARewards`)
+      - Filters eligible apps using the same criteria as `startRound`
+      - Distributes DBA rewards to eligible apps
+      - Sends Slack notifications on success/failure
 
 ## Development
 

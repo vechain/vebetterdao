@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { EnhancedClause } from "@vechain/vechain-kit"
 
 const voterRewardsInterface = VoterRewards__factory.createInterface()

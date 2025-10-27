@@ -110,11 +110,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                     {t("Detach")}
                   </Button>
                 ) : (
-                  <Button
-                    variant="ghost"
-                    color="actions.tertiary.default"
-                    onClick={() => handleAttachOnClick()}
-                    disabled={isXNodeDelegator}>
+                  <Button variant="link" onClick={() => handleAttachOnClick()} disabled={isXNodeDelegator}>
                     {t("Attach")}
                   </Button>
                 )}

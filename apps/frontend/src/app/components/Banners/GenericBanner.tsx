@@ -1,73 +1,137 @@
-import { Card, Image, Heading, Text, TextProps } from "@chakra-ui/react"
+import { Card, Image, Heading, Text, Box, CloseButton, Flex, BoxProps, Float } from "@chakra-ui/react"
 import { ReactNode } from "react"
 
-type BannerType = "info" | "success" | "warning"
+import { useColorModeValue } from "@/components/ui/color-mode"
 
-const bannerColors: Record<
-  BannerType,
-  {
-    bg: Card.RootProps["bg"]
-    color: TextProps["color"]
-  }
-> = {
-  info: {
+type BannerVariant = "default" | "b3mo"
+
+interface BannerConfig {
+  bg: string
+  illustration: string
+  bgImageLight: string
+  bgImageDark: string
+}
+
+const variantConfig: Record<BannerVariant, BannerConfig> = {
+  default: {
     bg: "banner.blue",
-    color: "status.info.strong",
+    illustration: "/assets/images/grants/step-1.webp",
+    bgImageLight: "/assets/backgrounds/banner-bg-blue-light.webp",
+    bgImageDark: "/assets/backgrounds/banner-bg-blue-dark.webp",
   },
-  success: {
+  b3mo: {
     bg: "banner.green",
-    color: "status.positive.strong",
-  },
-  warning: {
-    bg: "banner.yellow",
-    color: "status.warning.strong",
+    illustration: "/assets/mascot/mascot-welcoming.webp",
+    bgImageLight: "/assets/backgrounds/banner-bg-green-light.webp",
+    bgImageDark: "/assets/backgrounds/banner-bg-green-dark.webp",
   },
 }
 
-export const GenericBanner = ({
-  variant,
-  title,
-  description,
-  logoSrc,
-  cta,
-}: {
-  variant: BannerType
+type B3MOIllustration =
+  | "/assets/mascot/mascot-explore-dapps@1x.webp"
+  | "/assets/mascot/mascot-explore-dapps@2x.webp"
+  | "/assets/mascot/mascot-warning-head.webp"
+  | "/assets/mascot/mascot-holding-tokens.webp"
+  | "/assets/mascot/mascot-welcoming-left-head.webp"
+  | "/assets/mascot/mascot-welcoming.webp"
+  | "/assets/images/b3mo-stargate-greet.webp"
+
+type GenericBannerProps = {
   title: string
   description: ReactNode
-  logoSrc?: string
   cta?: ReactNode
-}) => {
+  onClose?: () => void
+  inSwiper?: boolean
+  illustrationDimensions?: {
+    width?: BoxProps["width"]
+    height?: BoxProps["height"]
+  }
+} & ({ variant?: "default"; illustration?: string } | { variant: "b3mo"; illustration?: B3MOIllustration })
+
+export const GenericBanner = ({
+  variant = "default",
+  title,
+  description,
+  cta,
+  inSwiper = true,
+  onClose,
+  illustration,
+  illustrationDimensions,
+}: GenericBannerProps) => {
+  const config = variantConfig[variant]
+  const bgImage = useColorModeValue(config.bgImageLight, config.bgImageDark)
+
   return (
     <Card.Root
       flex={1}
       w="full"
       h="full"
+      minH="40"
       borderRadius="xl"
-      flexDirection={{ base: "column", md: "row" }}
-      alignItems={{ base: "flex-start", md: "center" }}
-      gap="4"
       overflow="hidden"
-      bg={bannerColors[variant].bg}
-      px="6"
-      py="4">
-      <Image hideBelow="md" src={logoSrc} alt="logo" objectFit="cover" w="24" h="24" />
-      <Card.Body gap={{ base: "2", md: "0" }}>
-        <Card.Title>
-          <Text textStyle="sm" color={bannerColors[variant].color}>
+      bg={config.bg}
+      border="sm"
+      borderColor="border.secondary"
+      position="relative"
+      px={{ base: 4, lg: 10 }}
+      py={{ base: 4, lg: 6 }}
+      pt={{
+        // for swiper pagination bullets
+        base: 4 + (inSwiper ? 4 : 0),
+        lg: 6,
+      }}>
+      <Float right={{ base: "20px", md: "175px" }} placement="middle-end" height="full" w="full">
+        <Image src={bgImage} alt="bg-image-banner" h="full" w="auto" />
+      </Float>
+
+      <Flex
+        position="absolute"
+        right={{ base: "4", md: "16" }}
+        top="50%"
+        transform="translateY(-50%)"
+        w={illustrationDimensions?.width || (variant === "b3mo" ? "150px" : "128px")}
+        h={illustrationDimensions?.height || (variant === "b3mo" ? "150px" : "128px")}
+        zIndex={1}>
+        <Image src={illustration || config.illustration} alt="" w="full" h="full" objectFit="contain" />
+      </Flex>
+
+      {onClose && (
+        <CloseButton
+          variant="secondary"
+          onClick={onClose}
+          position="absolute"
+          top="4"
+          right="4"
+          size="2xs"
+          zIndex={2}
+          bgColor="actions.secondary.default"
+          css={{
+            "& svg": { color: "actions.secondary.text" },
+          }}
+        />
+      )}
+
+      <Flex
+        position="relative"
+        zIndex={1}
+        flex={1}
+        flexDirection="column"
+        gap={{ base: 2, md: 6 }}
+        justifyContent="space-between">
+        <Box display="flex" flexDirection="column" gap="2" maxW={{ base: "60%", lg: "80%" }}>
+          <Heading size={{ base: "md", md: "xl", lg: "2xl" }} fontWeight="bold" color="text.default">
             {title}
-          </Text>
-        </Card.Title>
-        <Card.Description display="flex" alignItems="center" gap="1">
+          </Heading>
           {typeof description === "string" ? (
-            <Heading size={{ base: "lg", md: "2xl" }} color="text.default" fontWeight="bold" lineClamp={3}>
+            <Text textStyle={{ base: "sm", lg: "md" }} color="text.subtle">
               {description}
-            </Heading>
+            </Text>
           ) : (
             description
           )}
-        </Card.Description>
-      </Card.Body>
-      {cta && <Card.Footer>{cta}</Card.Footer>}
+        </Box>
+        {cta && <Box>{cta}</Box>}
+      </Flex>
     </Card.Root>
   )
 }

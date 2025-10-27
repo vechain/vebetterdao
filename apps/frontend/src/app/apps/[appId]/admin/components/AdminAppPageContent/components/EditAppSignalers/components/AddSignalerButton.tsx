@@ -1,4 +1,15 @@
-import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, CloseButton } from "@chakra-ui/react"
+import {
+  Button,
+  Field,
+  HStack,
+  Heading,
+  Dialog,
+  Text,
+  VStack,
+  useDisclosure,
+  CloseButton,
+  Icon,
+} from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
@@ -42,7 +53,7 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
           </Dialog.CloseTrigger>
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
-              <UilUser size="54px" color="actions.tertiary.default" />
+              <Icon as={UilUser} boxSize="14" color="icon.default" />
               <Heading size="3xl">{t("Add a new signaler")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>
@@ -74,7 +85,7 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
                   onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add signaler")}
                 </Button>
-                <Button variant="ghost" color="actions.tertiary.default" onClick={onClose}>
+                <Button variant="negative" onClick={onClose}>
                   {t("Cancel")}
                 </Button>
               </VStack>
@@ -85,8 +96,7 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
       <Button
         mt={4}
         onClick={onOpen}
-        variant="ghost"
-        color="actions.tertiary.default"
+        variant="secondary"
         disabled={editAdminForm.getValues("signalers").length >= 3}
         alignSelf={"flex-start"}>
         <UilPlus size="14px" />

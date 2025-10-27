@@ -1,4 +1,4 @@
-import { Box, HStack, Text, VStack, Flex, Button, Image } from "@chakra-ui/react"
+import { Box, HStack, Text, VStack, Flex, Button } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useWallet, useWalletModal, useVechainDomain } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 
 import { AddressIcon } from "../AddressIcon"
-import { VeBetterIcon } from "../Icons/VeBetterIcon"
 import { WalletIcon } from "../Icons/WalletIcon"
 
 type Props = {
@@ -32,7 +31,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
     return (
       <Flex
         borderRadius={"lg"}
-        bg="actions.tertiary.default"
+        bg="banner.blue"
         w={"100%"}
         align="center"
         justify="center"
@@ -41,30 +40,18 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
         p={6}
         overflow={"hidden"}
         position={"relative"}>
-        <Image
-          src="/assets/backgrounds/cloud-background.webp"
-          alt="cloud-background"
-          position="absolute"
-          w={"150%"}
-          maxW={"150%"}
-          top={"-50%"}
-        />
         <VStack zIndex={2} align={"stretch"} w="full" gap={4}>
           <HStack gap={4} zIndex={2}>
             <Flex justify={"center"} align={"center"} h={14} w={14}>
               <WalletIcon size={"3.5rem"} />
             </Flex>
-            <VStack align="stretch" color="white">
-              <Text textStyle="md">{t("Connect your wallet to see your profile")}</Text>
+            <VStack align="stretch">
+              <Text textStyle="md" color="text.default" fontWeight="semibold">
+                {t("Connect your wallet to see your profile")}
+              </Text>
             </VStack>
           </HStack>
-          <Button
-            bg={"#E0E9FE"}
-            color="#004CFC"
-            rounded={"full"}
-            _hover={{ bg: "#E0E9FEDD" }}
-            onClick={handleConnectWallet}>
-            <VeBetterIcon size={20} />
+          <Button variant="primary" onClick={handleConnectWallet}>
             {t("Connect Wallet")}
           </Button>
         </VStack>

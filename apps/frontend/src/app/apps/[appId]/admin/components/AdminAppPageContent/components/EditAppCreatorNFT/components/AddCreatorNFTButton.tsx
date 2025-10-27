@@ -55,9 +55,7 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
 
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
-              <Icon color="logo" boxSize={14}>
-                <UilUser />
-              </Icon>
+              <Icon as={UilUser} color="icon.default" boxSize={14} />
               <Heading size="3xl">{t("Add a new Creator NFT")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>
@@ -89,7 +87,7 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
                   onClick={handleSubmit(onSubmit)}>
                   {t("Add creator")}
                 </Button>
-                <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
+                <Button variant="negative" onClick={handleClose}>
                   {t("Cancel")}
                 </Button>
               </VStack>
@@ -100,8 +98,7 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
       <Button
         mt={4}
         onClick={onOpen}
-        variant="ghost"
-        color="actions.tertiary.default"
+        variant="secondary"
         disabled={editAdminForm.getValues("creators").length >= 3}
         alignSelf={"flex-start"}>
         <UilPlus size="14px" />

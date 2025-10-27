@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
 import { useCallback, useMemo } from "react"
 
 import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"

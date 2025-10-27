@@ -247,14 +247,7 @@ export const GrantsPageContent = () => {
           </HStack>
           {showApplyForGrant && (
             <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }}>
-              <Button
-                asChild
-                variant={isMobile ? "secondary" : "ghost"}
-                color={isMobile ? "actions.secondary.text" : "actions.tertiary.default"}
-                focusRingColor="actions.tertiary.default"
-                size="md"
-                w={{ base: "48%", md: "auto" }}
-                rounded="full">
+              <Button asChild variant={isMobile ? "secondary" : "link"} size="md" w={{ base: "48%", md: "auto" }}>
                 <Link href="grants/manage" textStyle={"md"}>
                   {t("My grants")}
                 </Link>

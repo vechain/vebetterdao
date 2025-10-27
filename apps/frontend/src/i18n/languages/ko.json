@@ -46,7 +46,7 @@
   "Your Creator's NFT application was approved!": "창작자 NFT 신청이 승인되었습니다!",
   "Apply again": "다시 신청하기",
   "Your Creator's NFT application was rejected": "창작자 NFT 신청이 거부되었습니다",
-  "CREATOR APPLICATION REJECTED": "창작자 신청 거부됨",
+  "Creator application rejected": "창작자 신청 거부됨",
   "Submit app": "앱 제출",
   "Your Creator application was approved. Submit your app!": "창작자 신청이 승인되었습니다. 앱을 제출하세요!",
   "CREATOR'S NFT RECEIVED": "창작자 NFT 수신됨",
@@ -2007,5 +2007,16 @@
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "이렇게 하면 {{appId}}의 ID를 가진 {{appName}}이(가) 다음 라운드에서 {{status}} 상태가 됩니다.",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "최소 <Link>정족수</Link> ({{quorumNumerator}}%) 달성",
   "Uploading...": "업로드 중...",
-  "Stored": "저장됨"
+  "Stored": "저장됨",
+  "Creator's nft received": "크리에이터의 NFT 수신됨",
+  "Creator application under review": "크리에이터 신청서 검토 중",
+  "Voting power delegated": "투표 권한 위임됨",
+  "Cast your vote now!": "지금 투표하세요!",
+  "Time to step up!": "이제 나설 시간입니다!",
+  "Not enough VTHO": "VTHO 부족",
+  "New app available": "새로운 앱 사용 가능",
+  "Active proposal": "활성 제안",
+  "You've been signalled by {{app}}": "{{app}}로부터 신호받았습니다",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "귀하의 투표 권한은 <platform>veDelegate.vet</platform>으로 이전되어 대리 투표됩니다. <br/> 여기에서 투표하려면, 스냅샷 전에 veDelegate에서 위임을 제거해야 합니다.",
+  "Stargate is live": "스타게이트가 활성화되었습니다"
 }

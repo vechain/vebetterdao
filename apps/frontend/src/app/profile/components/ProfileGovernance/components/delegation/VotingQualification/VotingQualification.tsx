@@ -43,7 +43,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                 {t(isConnectedUser ? "Your Voting Qualification" : "Voting qualification")}
               </Heading>
               {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
-                <Button variant={"ghost"} color="actions.tertiary.default" onClick={delegationModal.onOpen} size="sm">
+                <Button variant={"link"} onClick={delegationModal.onOpen} size="sm">
                   <UilArrowUpRight />
                   {t("Delegate")}
                 </Button>

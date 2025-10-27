@@ -61,7 +61,7 @@ export const SupplyBreakdownCard = () => {
             content={t(
               `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
             )}>
-            <Icon as={FiInfo} color="actions.tertiary.default" position={"relative"} />
+            <Icon as={FiInfo} color="actions.primary.default" position={"relative"} />
           </Tooltip>
         </HStack>
       </Card.Header>

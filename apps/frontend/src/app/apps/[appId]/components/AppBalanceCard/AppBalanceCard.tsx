@@ -71,10 +71,7 @@ export const AppBalanceCard = () => {
 
   return (
     <>
-      <Card.Root
-        w={"full"}
-        border={isPaused ? "1px solid #C84968" : "1px solid #D5D5D5"}
-        boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}>
+      <Card.Root w={"full"} colorPalette="Red" border="sm" borderColor={isPaused ? "#C84968" : "border.primary"}>
         <Card.Body pt={3} pb={2}>
           <HStack justify={"space-between"} w={"full"}>
             <VStack alignItems={"start"} gap={0}>
@@ -88,9 +85,7 @@ export const AppBalanceCard = () => {
                       )}
                     </Text>
                   }>
-                  <span>
-                    <Icon as={FiInfo} color="logo" position={"relative"} />
-                  </span>
+                  <Icon as={FiInfo} color="icon.default" position={"relative"} />
                 </Tooltip>
               </HStack>
               <Skeleton loading={isBalanceLoading}>
@@ -112,17 +107,15 @@ export const AppBalanceCard = () => {
           </HStack>
           {/* Manage App Funds Section*/}
           <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
-            <Separator borderColor="#E2E8F0" />
+            <Separator borderColor="border.primary" />
           </Box>
 
           <Stack direction="row" w="full" justifyContent={"space-between"} alignItems="center" pt={2}>
             <VStack alignItems={"start"} gap={0}>
-              <HStack>
+              <HStack alignItems="center">
                 <Text textStyle="md">{t("Rewards Pool")}</Text>
                 <Tooltip content={<Text>{t("Amount of B3TR available for rewards distribution")}</Text>}>
-                  <span>
-                    <Icon as={FiInfo} color="logo" position={"relative"} />
-                  </span>
+                  <Icon as={FiInfo} color="icon.default" position={"relative"} />
                 </Tooltip>
               </HStack>
               <Skeleton loading={isRewardsBalanceLoading}>
@@ -144,13 +137,13 @@ export const AppBalanceCard = () => {
             </VStack>
           </Stack>
           <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
-            <Separator borderColor="#E2E8F0" />
+            <Separator borderColor="border.primary" />
           </Box>
           <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
             <Text textStyle="md" fontWeight="semibold" color="brand.primary">
               {t("View history")}
             </Text>
-            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="actions.tertiary.default" cursor="pointer" />
+            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="icon.default" cursor="pointer" />
           </HStack>
           {!isAppAdmin && (
             <GenericAlert

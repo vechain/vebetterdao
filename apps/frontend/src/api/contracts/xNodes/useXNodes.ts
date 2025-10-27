@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/dapp-kit-react"
 import { ThorClient } from "@vechain/sdk-network"
-import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { NodeManagementV3__factory as NodeManagement__factory } from "@vechain/vebetterdao-contracts/factories/mocks/Stargate/NodeManagement/NodeManagementV3__factory"
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"

@@ -422,13 +422,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
         </VStack>
       </Card.Body>
       <Card.Footer display={"flex"} flexDir={"row"} w="full" alignItems="center" justifyContent="center" py={5}>
-        <Button
-          type="button"
-          onClick={handleResetForm}
-          variant="ghost"
-          color="actions.tertiary.default"
-          focusRingColor="actions.tertiary.default"
-          size="lg">
+        <Button type="button" onClick={handleResetForm} variant="link" size="lg">
           {t("Reset Form")}
         </Button>
         <Button

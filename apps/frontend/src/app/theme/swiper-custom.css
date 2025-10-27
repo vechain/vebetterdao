@@ -12,3 +12,13 @@
 .swiper-slide-next {
   opacity: 0.5; /* Faded for the next/prev slides */
 }
+
+.action-banner ~ .swiper-pagination {
+  line-height: 0;
+  text-align: var(--swiper-pagination-text-align, "center") !important;
+  left: var(--swiper-pagination-left, 0) !important;
+}
+
+.action-banner > .swiper-slide {
+  height: auto;
+}

@@ -54,6 +54,57 @@ const config: StorybookConfig = {
     // Mock thor-devkit for Storybook (uses Node crypto)
     viteConfig.resolve.alias["thor-devkit"] = resolve(__dirname, "mocks/thor-devkit.ts")
 
+    // Mock dayjs config to only load English locale
+    viteConfig.resolve.alias["@/utils/dayjsConfig"] = resolve(__dirname, "mocks/dayjsConfig.ts")
+    viteConfig.resolve.alias[resolve(__dirname, "../src/utils/dayjsConfig.ts")] = resolve(
+      __dirname,
+      "mocks/dayjsConfig.ts",
+    )
+
+    // Mock openai package (Node.js only)
+    viteConfig.resolve.alias["openai"] = resolve(__dirname, "mocks/empty.ts")
+
+    // Mock contracts package to prevent loading all typechain factories
+    // Order matters: more specific paths first
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/GrantsManager__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/Treasury__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/VOT3__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/@openzeppelin/access/AccessControl__factory"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/typechain-types"] = resolve(
+      __dirname,
+      "mocks/contracts.ts",
+    )
+    viteConfig.resolve.alias["@vechain/vebetterdao-contracts"] = resolve(__dirname, "mocks/contracts.ts")
+
+    // Mock API hooks to prevent loading contract dependencies
+    viteConfig.resolve.alias["@/api/indexer/sustainability/useUserScore"] = resolve(__dirname, "mocks/api-hooks.ts")
+    viteConfig.resolve.alias["@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"] = resolve(
+      __dirname,
+      "mocks/api-hooks.ts",
+    )
+    viteConfig.resolve.alias["@/api/contracts/xApps/hooks/useXApps"] = resolve(__dirname, "mocks/api-hooks.ts")
+    viteConfig.resolve.alias["@/api/contracts/xApps/hooks/useUserSignalEvents"] = resolve(
+      __dirname,
+      "mocks/api-hooks.ts",
+    )
+    viteConfig.resolve.alias["@/hooks/useTransak"] = resolve(__dirname, "mocks/api-hooks.ts")
+
     // 3) Guardrails: if anything still tries to pull Node built-ins, stub them
     // (better to fail silently than crash)
     for (const builtin of ["fs", "stream", "path", "zlib"]) {

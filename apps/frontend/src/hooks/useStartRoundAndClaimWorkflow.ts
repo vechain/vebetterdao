@@ -1,5 +1,6 @@
 import { getConfig } from "@repo/config"
-import { Emissions__factory, XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"
 import { useWallet, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 

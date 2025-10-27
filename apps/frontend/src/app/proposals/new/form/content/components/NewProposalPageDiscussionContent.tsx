@@ -126,23 +126,14 @@ export const NewProposalPageDiscussionContent = () => {
                   {t("Make sure to replace all the placeholders with your own content.")}
                 </Field.HelperText>
               )}
-              <Button
-                data-testid="reset-markdown"
-                variant="plain"
-                color="actions.tertiary.default"
-                onClick={resetMarkdownToDefault}>
+              <Button data-testid="reset-markdown" variant="link" onClick={resetMarkdownToDefault}>
                 {t("Reset to default")}
               </Button>
             </Stack>
           </Field.Root>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button
-              data-testid="go-back"
-              variant="ghost"
-              color="actions.tertiary.default"
-              onClick={router.back}
-              disabled={isMetadataUploading}>
+            <Button data-testid="go-back" variant="link" onClick={router.back} disabled={isMetadataUploading}>
               {t("Go back")}
             </Button>
             <Button

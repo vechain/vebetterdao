@@ -122,7 +122,14 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Vechain Nodes x GM upgrades feature",
     },
   },
-  "Grants Manager": {
+  "DBA Pool": {
+    name: "dba-pool",
+    configAddressField: "dbaPoolContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Add tracking of DBA rewards per app per round and seed function for historical data",
+    },
+   "Grants Manager": {
     name: "grants-manager",
     configAddressField: "grantsManagerContractAddress",
     versions: ["v2"],
