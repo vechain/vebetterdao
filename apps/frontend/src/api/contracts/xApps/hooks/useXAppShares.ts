@@ -32,7 +32,7 @@ export const useXAppsShares = (apps: string[], roundId?: string) => {
               functionName: method,
               address,
               args: [roundId, app],
-            } as const),
+            }) as const,
         ),
       })
       return shares.map((share, index) => {

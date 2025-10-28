@@ -31,7 +31,7 @@ export const getAllocationAmount = async (thor: ThorClient, roundId?: string): P
           address,
           functionName: method,
           args: [BigInt(roundId)],
-        } as const),
+        }) as const,
     ),
   })
   return {

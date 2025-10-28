@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
 
-import { BannerStorageKey, setBannerClosed } from "../../Banners/GenericBanner"
+import { setBannerEnabled, BannerStorageKey } from "../../Banners/GenericBanner"
 
 type Props = {
   isOpen: boolean
@@ -38,7 +38,7 @@ export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
             flex={1}
             variant="secondary"
             onClick={() => {
-              setBannerClosed(BannerStorageKey.STARGATE_MIGRATION)
+              setBannerEnabled(BannerStorageKey.STARGATE_MIGRATION)
               onClose()
             }}>
             {t("Later")}

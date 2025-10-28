@@ -28,7 +28,7 @@ export const useB3trTokenDetails = () => {
           decimals: data[2],
           circulatingSupply: ethers.formatEther(data[3]),
           totalSupply: ethers.formatEther(data[4]),
-        } as TokenDetails),
+        }) as TokenDetails,
     },
   })
 }

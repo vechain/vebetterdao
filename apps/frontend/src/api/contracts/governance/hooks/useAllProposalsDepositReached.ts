@@ -24,7 +24,7 @@ export const useAllProposalsDepositReached = (proposalsIds: string[]) => {
               functionName,
               address,
               args: [BigInt(proposalId)],
-            } as const),
+            }) as const,
         ),
       })
       const depositsReached = depositsReachedResult.map((depositReached, index) => {

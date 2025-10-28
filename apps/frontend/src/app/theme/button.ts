@@ -9,7 +9,7 @@ export const buttonRecipe = defineRecipe({
     fontWeight: "semibold",
     px: "6",
     py: "3",
-    focusRing: "outside",
+    focusVisibleRing: "outside",
     focusRingColor: "borders.active",
     focusRingWidth: "2px",
     focusRingOffset: "2px",

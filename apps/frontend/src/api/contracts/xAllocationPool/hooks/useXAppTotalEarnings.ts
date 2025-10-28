@@ -29,7 +29,7 @@ export const useXAppTotalEarnings = (roundIds: number[], appId: string) => {
               functionName: method,
               address,
               args: [BigInt(roundId), appId],
-            } as const),
+            }) as const,
         ),
       })
       roundEarnings.forEach((earning, index) => {

@@ -37,7 +37,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
               address,
               functionName: "getReward",
               args: [roundId, voter],
-            } as const),
+            }) as const,
         ),
       })
       const resGM = await executeMultipleClausesCall({
@@ -49,7 +49,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
               address,
               functionName: "getGMReward",
               args: [roundId, voter],
-            } as const),
+            }) as const,
         ),
       })
 
