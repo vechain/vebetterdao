@@ -180,7 +180,7 @@ const config = defineConfig({
         },
 
         brand: {
-          primary: { value: { base: "{colors.blue.600}", _dark: "white" } },
+          primary: { value: { base: "magenta", _dark: "cyan" } },
           secondary: { value: { base: "#B1F16C", _dark: "#B4EA82" } },
           tertiary: { value: { base: "white", _dark: "black" } },
           "secondary-strong": { value: { base: "#6DCB09", _dark: "#4F5945" } },
