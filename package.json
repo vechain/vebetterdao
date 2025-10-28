@@ -82,7 +82,8 @@
     "contracts:verify:testnet": "dotenv -v VITE_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
     "contracts:verify:mainnet": "dotenv -v VITE_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
     "contracts:estimate-voting-gas:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run estimate-voting-gas:mainnet --filter=@vechain/vebetterdao-contracts",
-    "contracts:verify:all:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-all-contracts.ts"
+    "contracts:verify:all:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-all-contracts.ts",
+    "contracts:check-verification-status:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/check-verification-status.ts"
   },
   "devDependencies": {
     "@datadog/browser-rum": "^5.23.0",
