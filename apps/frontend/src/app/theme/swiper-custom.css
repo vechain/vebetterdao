@@ -22,3 +22,14 @@
 .action-banner > .swiper-slide {
   height: auto;
 }
+
+@media (max-width: 500px) {
+  .action-banner:has(+ .swiper-pagination),
+  .action-banner:has(~ .swiper-pagination) {
+    .swiper-slide {
+      .chakra-heading {
+        padding-top: 16px;
+      }
+    }
+  }
+}

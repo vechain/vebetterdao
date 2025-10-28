@@ -3,6 +3,35 @@ import { ReactNode } from "react"
 
 import { useColorModeValue } from "@/components/ui/color-mode"
 
+// TODO: will be used when closing banners enabled
+export enum BannerStorageKey {
+  STARGATE_MIGRATION = "show_stargate_banner",
+  CAST_VOTE = "show_banner_cast_vote",
+  CLAIM_REWARDS = "show_banner_claim_rewards",
+  NEW_APP = "show_banner_new_app",
+  CREATOR_NFT = "show_banner_creator_nft",
+  LOW_VTHO = "show_banner_low_vtho",
+  USER_SIGNALED = "show_banner_user_signaled",
+  DELEGATING = "show_banner_delegating",
+  DO_ACTION = "show_banner_do_action",
+}
+
+export const isBannerEnabled = (storageKey: string): boolean => {
+  return localStorage.getItem(storageKey) === "true"
+}
+
+export const isBannerClosed = (storageKey: string): boolean => {
+  return localStorage.getItem(storageKey) !== "true"
+}
+
+export const setBannerEnabled = (storageKey: string): void => {
+  localStorage.setItem(storageKey, "true")
+}
+
+export const setBannerClosed = (storageKey: string): void => {
+  localStorage.setItem(storageKey, "false")
+}
+
 type BannerVariant = "default" | "b3mo"
 
 interface BannerConfig {
@@ -40,8 +69,9 @@ type GenericBannerProps = {
   title: string
   description: ReactNode
   cta?: ReactNode
+  closable?: boolean
+  storageKey?: string
   onClose?: () => void
-  inSwiper?: boolean
   illustrationDimensions?: {
     width?: BoxProps["width"]
     height?: BoxProps["height"]
@@ -53,13 +83,20 @@ export const GenericBanner = ({
   title,
   description,
   cta,
-  inSwiper = true,
+  closable = false,
+  storageKey,
   onClose,
   illustration,
   illustrationDimensions,
 }: GenericBannerProps) => {
   const config = variantConfig[variant]
   const bgImage = useColorModeValue(config.bgImageLight, config.bgImageDark)
+
+  const handleClose = () => {
+    if (storageKey) setBannerClosed(storageKey)
+
+    onClose?.()
+  }
 
   return (
     <Card.Root
@@ -74,12 +111,7 @@ export const GenericBanner = ({
       borderColor="border.secondary"
       position="relative"
       px={{ base: 4, lg: 10 }}
-      py={{ base: 4, lg: 6 }}
-      pt={{
-        // for swiper pagination bullets
-        base: 4 + (inSwiper ? 4 : 0),
-        lg: 6,
-      }}>
+      py={{ base: 4, lg: 6 }}>
       <Float right={{ base: "20px", md: "175px" }} placement="middle-end" height="full" w="full">
         <Image src={bgImage} alt="bg-image-banner" h="full" w="auto" />
       </Float>
@@ -95,10 +127,10 @@ export const GenericBanner = ({
         <Image src={illustration || config.illustration} alt="" w="full" h="full" objectFit="contain" />
       </Flex>
 
-      {onClose && (
+      {closable && (
         <CloseButton
           variant="secondary"
-          onClick={onClose}
+          onClick={handleClose}
           position="absolute"
           top="4"
           right="4"
