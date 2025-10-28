@@ -1,0 +1,51 @@
+name: Slither
+
+on:
+   push:
+     branches:
+       - main
+       - feat/add-false-positive-slither
+   pull_request:
+
+jobs:
+   compile-slither:
+    name: Slither Analysis
+    runs-on: ubuntu-latest
+    #needs: check-changes
+    if: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Cache Solidity compilers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/hardhat-nodejs
+          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-solc-
+
+#      - name: Compile contracts
+#        run: yarn contracts:compile
+
+   run-slither:
+        uses: vechain/github-actions/.github/workflows/slither.yaml@72c47d9d8d3f9ed4404f9056f48967e524b43ae9 # v.1.13.0
+        with:
+          solc-version: '0.8.20'
+          target: 'packages/contracts/'
+          fail-on: 'none'
+          cache: 'yarn'
+          compile-command: 'yarn contracts:compile'
+          ignore-compile: true
+          slither-args: |
+            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+# --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --config-file slither.config.json --checklist --json slither.raw.json --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
