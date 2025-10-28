@@ -29,6 +29,7 @@ function mockContractsPlugin() {
     },
   }
 }
+
 const config: StorybookConfig = {
   stories: [
     "../src/**/*.mdx",
@@ -84,6 +85,9 @@ const config: StorybookConfig = {
     viteConfig.resolve.alias[resolve(__dirname, "../src/api/contracts/xApps/hooks/useUserSignalEvents.ts")] =
       apiHooksMock
     viteConfig.resolve.alias[resolve(__dirname, "../src/hooks/useTransak.ts")] = apiHooksMock
+    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/actions/useUserActionLeaderboard.ts")] =
+      apiHooksMock
+    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/actions/useUserActionOverview.ts")] = apiHooksMock
 
     // Add custom plugin to handle all contract imports
     viteConfig.plugins.push(mockContractsPlugin())

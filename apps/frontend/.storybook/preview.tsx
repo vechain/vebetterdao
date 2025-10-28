@@ -7,9 +7,15 @@ import { TransactionModalProvider } from "../src/providers/TransactionModalProvi
 import { VStack, Flex, Container } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { setMockAddress } from "./mockAddressState"
+import { http } from "msw"
+import { setupWorker } from "msw/browser"
+import { handlers } from "./mocks/handlers"
 
 import { languages } from "../src/i18n"
 import "../src/i18n"
+
+const worker = setupWorker(...handlers)
+worker.start({ onUnhandledRequest: "bypass" })
 
 export const globalTypes = {
   locale: {
