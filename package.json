@@ -32,6 +32,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "contracts:compile": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run compile --filter=@vechain/vebetterdao-contracts",
+    "contracts:compile:slither": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run compile:slither --filter=@vechain/vebetterdao-contracts",
     "contracts:publish": "yarn workspace @vechain/vebetterdao-contracts publish",
     "contracts:deploy": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy --filter=@vechain/vebetterdao-contracts",
     "contracts:deploy:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy --filter=@vechain/vebetterdao-contracts",

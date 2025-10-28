@@ -40,6 +40,7 @@
     "test:coverage:solidity": "hardhat coverage",
     "coverage:report": "nyc report --reporter=lcov --reporter=text --reporter=html --temp-dir=./coverage",
     "compile": "npx hardhat compile && tsc -b ./tsconfig.esm.json ./tsconfig.cjs.json",
+    "compile:slither": "npx --node-options=\"--max-old-space-size=8192\" hardhat compile && npx --node-options=\"--max-old-space-size=8192\" tsc -b ./tsconfig.esm.json ./tsconfig.cjs.json",
     "deploy": "npx hardhat run scripts/deploy",
     "deploy:local": "npx hardhat run scripts/deploy --network vechain_solo",
     "deploy:testnet-staging": "npx hardhat run scripts/deploy --network vechain_testnet",
