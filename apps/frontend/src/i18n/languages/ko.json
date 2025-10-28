@@ -2018,5 +2018,9 @@
   "Active proposal": "활성 제안",
   "You've been signalled by {{app}}": "{{app}}로부터 신호받았습니다",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "귀하의 투표 권한은 <platform>veDelegate.vet</platform>으로 이전되어 대리 투표됩니다. <br/> 여기에서 투표하려면, 스냅샷 전에 veDelegate에서 위임을 제거해야 합니다.",
-  "Stargate is live": "스타게이트가 활성화되었습니다"
+  "Stargate is live": "스타게이트가 활성화되었습니다",
+  "Migrate your Node NFT before December 2": "12월 2일 전에 노드 NFT를 마이그레이션하세요.",
+  "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "당신은 아직 구식 NFT를 보유하고 있습니다. 지지 권한 손실을 피하려면 12월 2일 전에 마이그레이션하세요.",
+  "Migrate now": "지금 마이그레이션",
+  "Later": "나중에"
 }

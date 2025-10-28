@@ -2018,5 +2018,9 @@
   "Active proposal": "Đề xuất đang hoạt động",
   "You've been signalled by {{app}}": "Bạn đã được thông báo bởi {{app}}",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Quyền biểu quyết của bạn đã được chuyển đến <platform>veDelegate.vet</platform> nơi bỏ phiếu thay mặt bạn. <br/> Nếu bạn muốn bỏ phiếu tại đây, bạn phải gỡ bỏ ủy quyền trên veDelegate trước khi chụp nhanh.",
-  "Stargate is live": "Stargate đã hoạt động"
+  "Stargate is live": "Stargate đã hoạt động",
+  "Migrate your Node NFT before December 2": "Di chuyển Node NFT của bạn trước ngày 2 tháng 12",
+  "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "Bạn vẫn đang giữ một NFT lỗi thời. Di chuyển trước ngày 2 tháng 12 để tránh mất khả năng chứng thực của bạn.",
+  "Migrate now": "Di chuyển ngay bây giờ",
+  "Later": "Để sau"
 }

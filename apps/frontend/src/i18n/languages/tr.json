@@ -2018,5 +2018,9 @@
   "Active proposal": "Aktif öneri",
   "You've been signalled by {{app}}": "{{app}} tarafından işaretlendiniz",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Oylama gücünüz sizin adınıza oy veren <platform>veDelegate.vet</platform>'e aktarılmıştır. <br/> Burada oy kullanmak istiyorsanız, anlık görüntüleme öncesinde veDelegate üzerindeki devri iptal etmelisiniz.",
-  "Stargate is live": "Stargate yayında"
+  "Stargate is live": "Stargate yayında",
+  "Migrate your Node NFT before December 2": "Node NFT'nizi 2 Aralık'tan önce taşıyın",
+  "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "Hâlâ eski bir NFT'ye sahipsiniz. Onaylama yeteneğinizi kaybetmemek için 2 Aralık'tan önce taşıyın.",
+  "Migrate now": "Şimdi taşı",
+  "Later": "Sonra"
 }

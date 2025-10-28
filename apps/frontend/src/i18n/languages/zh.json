@@ -2018,5 +2018,9 @@
   "Active proposal": "活跃的提案",
   "You've been signalled by {{app}}": "您已被{{app}}提醒",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票权已经转移到<platform>veDelegate.vet</platform>，该平台将代表您投票。<br/> 如果您想在此投票，必须在快照前在veDelegate上取消委托。",
-  "Stargate is live": "Stargate已上线"
+  "Stargate is live": "Stargate已上线",
+  "Migrate your Node NFT before December 2": "在12月2日之前迁移您的节点NFT",
+  "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "您仍然持有过时的NFT。在12月2日前进行迁移，以免失去背书功能。",
+  "Migrate now": "立即迁移",
+  "Later": "稍后"
 }
