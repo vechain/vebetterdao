@@ -1,0 +1,9 @@
+// Export functions
+export { getRoundSnapshot } from "./getRoundSnapshot"
+export { isUserAutoVotingEnabledForRound } from "./isUserAutoVotingEnabledForRound"
+export { getAutoVotingEnabledUsers, getAllAutoVotingEnabledUsers } from "./getAutoVotingEnabledUsers"
+export { verifyAutoVotingUsersIsActive } from "./verifyAutoVotingEnabledUsers"
+export { castVotesOnBehalfOf } from "./castVotesOnBehalfOf"
+
+// Export types
+export type { AutoVotingEnabledUsersResult } from "./getAutoVotingEnabledUsers"
