@@ -5,7 +5,7 @@ import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
 import { useProposalCompletedEvent } from "@/hooks/proposals/common/useProposalCompletedEvent.ts"
-import { useProposalInDevelomentEvent } from "@/hooks/proposals/common/useProposalInDevelomentEvent"
+import { useProposalInDevelopmentEvent } from "@/hooks/proposals/common/useProposalInDevelopmentEvent"
 
 import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
 import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
@@ -28,7 +28,7 @@ type Props = {
 
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
-  const { data: proposalInDevelopmentEvent } = useProposalInDevelomentEvent(proposal?.id ?? "")
+  const { data: proposalInDevelopmentEvent } = useProposalInDevelopmentEvent(proposal?.id ?? "")
   const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposal?.id ?? "")
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
   const proposalCreatedAt = proposal?.createdAt ?? 0
