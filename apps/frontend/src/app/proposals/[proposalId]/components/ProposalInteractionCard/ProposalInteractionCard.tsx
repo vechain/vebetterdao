@@ -1,6 +1,6 @@
 import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
@@ -29,8 +29,16 @@ import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { MulticolorBar } from "@/components/MulticolorBar/MulticolorBar"
 import { ResultsDisplay } from "@/components/Proposal/ResultsDisplay"
-import { ProposalType as GrantsProposalType, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
+import {
+  ProposalType as GrantsProposalType,
+  ProposalEnriched,
+  ProposalState,
+  ProposalType,
+} from "@/hooks/proposals/grants/types"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useMarkProposalCompleted } from "@/hooks/useMarkProposalCompleted"
+import { useMarkProposalInDevelopment } from "@/hooks/useMarkProposalInDevelopment"
 import { useQueueProposal } from "@/hooks/useQueueProposal"
 import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
 
@@ -92,10 +100,16 @@ export const ProposalInteractionCard = ({
   // ===== CONTRACT TRANSACTION HOOKS =====
   const { sendTransaction: queueProposal } = useQueueProposal({ proposalId })
   const { sendTransaction: executeProposal } = useExecuteProposal({ proposalId })
+  const { sendTransaction: markProposalInDevelopment } = useMarkProposalInDevelopment({ proposalId })
+  const { sendTransaction: markProposalCompleted } = useMarkProposalCompleted({ proposalId })
 
   const handleQueueProposal = useCallback(() => queueProposal(), [queueProposal])
 
   const handleExecuteProposal = useCallback(() => executeProposal(), [executeProposal])
+
+  const handleMarkProposalInDevelopment = useCallback(() => markProposalInDevelopment(), [markProposalInDevelopment])
+
+  const handleMarkProposalCompleted = useCallback(() => markProposalCompleted(), [markProposalCompleted])
 
   // ===== COMPUTED VALUES =====
   const isProposer = compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
@@ -110,6 +124,7 @@ export const ProposalInteractionCard = ({
   const proposalHasTargets = proposal?.targets && proposal?.targets.length > 0
   const userVoteOption = userVoteEvent?.userVote
   const totalVotesAtSnapshot = votesAtSnapshotQueryData ?? ethers.formatEther("0")
+  const hasProposalStateRole = permissions?.isProposalStateManager ?? false
   // Check if the proposal is queuable and executable
   const isQueuable = useMemo(() => {
     return proposal?.state === ProposalState.Succeeded && proposalHasTargets
@@ -135,6 +150,22 @@ export const ProposalInteractionCard = ({
 
     return result.toFixed(0)
   }, [currentDepositAmount, proposalDepositThreshold])
+
+  const canMarkInDevelopment = useMemo(() => {
+    if (proposal?.type === ProposalType.Grant || !hasProposalStateRole) {
+      return false
+    }
+
+    return proposal?.state === ProposalState.Executed || proposal?.state === ProposalState.Succeeded
+  }, [hasProposalStateRole, proposal?.state, proposal?.type])
+
+  const canMarkCompleted = useMemo(() => {
+    if (proposal?.type === ProposalType.Grant || !hasProposalStateRole) {
+      return false
+    }
+
+    return proposal?.state === ProposalState.InDevelopment
+  }, [hasProposalStateRole, proposal?.state, proposal?.type])
 
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
@@ -396,6 +427,16 @@ export const ProposalInteractionCard = ({
                   {t("Cancel {{proposalType}}", {
                     proposalType: proposalTypeText,
                   })}
+                </Button>
+              )}
+              {canMarkInDevelopment && (
+                <Button variant="secondary" w="full" flex={1} onClick={handleMarkProposalInDevelopment}>
+                  {t("Mark as in development")}
+                </Button>
+              )}
+              {canMarkCompleted && (
+                <Button variant="secondary" w="full" flex={1} onClick={handleMarkProposalCompleted}>
+                  {t("Mark as completed")}
                 </Button>
               )}
             </HStack>

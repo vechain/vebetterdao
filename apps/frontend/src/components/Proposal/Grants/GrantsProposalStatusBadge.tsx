@@ -63,9 +63,9 @@ const BADGE_CONFIG: Record<ProposalState, BadgeConfig> = {
   },
 
   [ProposalState.Executed]: {
-    text: "Completed",
-    icon: FaRegCircleCheck,
-    variant: "neutral",
+    text: "Executed",
+    icon: IoIosCode,
+    variant: "info",
   },
 
   [ProposalState.DepositNotMet]: {

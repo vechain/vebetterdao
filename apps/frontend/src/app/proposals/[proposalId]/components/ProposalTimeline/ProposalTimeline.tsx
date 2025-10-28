@@ -4,6 +4,9 @@ import { t } from "i18next"
 import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
+import { useProposalCompletedEvent } from "@/hooks/proposals/common/useProposalCompletedEvent.ts"
+import { useProposalInDevelopmentEvent } from "@/hooks/proposals/common/useProposalInDevelopmentEvent"
+
 import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
 import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
 import {
@@ -22,14 +25,16 @@ type TimelineStep = {
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
 }
-//TODO: This should be fixed by the smart contract logic
-//This is a temporary fix to show the correct timeline for the proposals
-const maxVotingRoundCompleted = 48
+
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
+  const { data: proposalInDevelopmentEvent } = useProposalInDevelopmentEvent(proposal?.id ?? "")
+  const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposal?.id ?? "")
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
+  const standardProposalInDevelopmentStartDate = proposalInDevelopmentEvent?.[0]?.timestamp
+  const standardProposalCompletedTimestamp = proposalCompletedEvent?.[0]?.timestamp
   const isGrant = proposal?.type === ProposalType.Grant
   ///Scenario 1: Grant completed
   // support -> approval -> in development -> completed
@@ -50,10 +55,21 @@ export const ProposalTimeline = ({ proposal }: Props) => {
       supportStartDate: proposalCreatedAt * 1000,
       supportEndDate: supportEndDate,
       votingEndDate: votingEndDate,
+      // Standard proposal only
+      inDevelopmentStartDate: standardProposalInDevelopmentStartDate,
+      completedTimestamp: standardProposalCompletedTimestamp,
       hasValidDates: hasValidDates,
       isLoading: isLoading,
     }
-  }, [proposalCreatedAt, supportEndDate, votingEndDate, hasValidDates, isLoading])
+  }, [
+    proposalCreatedAt,
+    supportEndDate,
+    votingEndDate,
+    standardProposalInDevelopmentStartDate,
+    standardProposalCompletedTimestamp,
+    hasValidDates,
+    isLoading,
+  ])
 
   const grantTimelineSteps = useMemo(() => {
     //If the grant is cancelled but not rejected, means that it should jump straight from base step (Support phase) to the cancelled step
@@ -172,22 +188,27 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     return [
       {
         label: t("Approval phase"),
-        state: [ProposalState.Active, ProposalState.Defeated],
+        state: [ProposalState.Active, ProposalState.Succeeded, ProposalState.Queued, ProposalState.Executed],
         description: timelineDates.hasValidDates
           ? t("Round #{{roundId}}: {{dateString}}", {
               roundId: Number(proposalVotingRoundId),
               dateString: `${dayjs(timelineDates.supportEndDate).format("MMM D, YYYY")} - ${dayjs(timelineDates.votingEndDate).format("MMM D, YYYY")}`,
             })
-          : "---",
+          : "",
       },
       {
         label: t("In development"),
-        state: [ProposalState.Succeeded, ProposalState.Queued],
-        description: timelineDates.hasValidDates ? dayjs(timelineDates.votingEndDate).format("MMM D, YYYY") : "---",
+        state: [ProposalState.InDevelopment],
+        description: timelineDates.inDevelopmentStartDate
+          ? dayjs(timelineDates.inDevelopmentStartDate).format("MMM D, YYYY")
+          : "",
       },
       {
         label: t("Completed"),
-        state: [ProposalState.Executed],
+        state: [ProposalState.Completed],
+        description: timelineDates.completedTimestamp
+          ? dayjs(timelineDates.completedTimestamp).format("MMM D, YYYY")
+          : "",
       },
     ]
   }, [
@@ -195,6 +216,8 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     timelineDates.hasValidDates,
     timelineDates.supportEndDate,
     timelineDates.votingEndDate,
+    timelineDates.inDevelopmentStartDate,
+    timelineDates.completedTimestamp,
     proposalVotingRoundId,
   ])
 
@@ -232,18 +255,10 @@ export const ProposalTimeline = ({ proposal }: Props) => {
 
   const currentStep = useMemo(() => {
     if (!proposal) return 0
-    if (
-      maxVotingRoundCompleted >= Number(proposalVotingRoundId) &&
-      proposal.state === ProposalState.Succeeded &&
-      !isGrant
-    ) {
-      //TODO: This should be fixed by the smart contract logic
-      //This is a temporary fix to show the correct timeline for the proposals
-      return 4
-    }
+
     const stepIndex = timelineSteps.findIndex(step => step.state.includes(proposal.state as ProposalState | "Created"))
     return stepIndex >= 0 ? stepIndex : 0
-  }, [isGrant, proposal, proposalVotingRoundId, timelineSteps])
+  }, [proposal, timelineSteps])
 
   return (
     <Card.Root variant="primary" w="full" p="6" gap={0}>

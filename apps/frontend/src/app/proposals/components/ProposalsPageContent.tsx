@@ -1,9 +1,9 @@
 import {
-  Grid,
-  Card,
   Box,
   Button,
+  Card,
   createListCollection,
+  Grid,
   HStack,
   Spinner,
   Text,
@@ -57,7 +57,8 @@ export const ProposalsPageContent = () => {
       items: [
         { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
         { label: t("Support phase"), value: ProposalFilter.SupportPhase },
-        { label: t("Completed"), value: ProposalFilter.StandardProposalCompleted },
+        { label: t("In development"), value: ProposalFilter.StandardInDevelopment },
+        { label: t("Completed"), value: StateFilter.Completed },
         { label: t("Cancelled"), value: ProposalFilter.FailedStates },
       ],
     })
