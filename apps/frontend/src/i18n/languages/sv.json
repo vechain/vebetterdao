@@ -2022,5 +2022,7 @@
   "Migrate your Node NFT before December 2": "Migrera din Node NFT före den 2 december",
   "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "Du har fortfarande en föråldrad NFT. Migrera före den 2 december för att undvika att förlora din rekommendationsmöjlighet.",
   "Migrate now": "Migrera nu",
-  "Later": "Senare"
+  "Later": "Senare",
+  "Mark as in development": "Markera som under utveckling",
+  "Mark as completed": "Markera som slutförd"
 }

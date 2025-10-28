@@ -2022,5 +2022,7 @@
   "Migrate your Node NFT before December 2": "12月2日までにあなたのノードNFTを移行してください",
   "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "古いNFTをまだ保有しています。推薦機能を失うことを避けるためには12月2日までに移行してください。",
   "Migrate now": "今すぐ移行",
-  "Later": "後で"
+  "Later": "後で",
+  "Mark as in development": "開発中としてマーク",
+  "Mark as completed": "完了としてマーク"
 }

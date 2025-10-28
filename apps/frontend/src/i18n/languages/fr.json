@@ -2022,5 +2022,7 @@
   "Migrate your Node NFT before December 2": "Migrez votre NFT Node avant le 2 décembre",
   "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "Vous détenez toujours un NFT obsolète. Migrez avant le 2 décembre pour éviter de perdre votre capacité d'endossement.",
   "Migrate now": "Migrer maintenant",
-  "Later": "Plus tard"
+  "Later": "Plus tard",
+  "Mark as in development": "Marquer comme en développement",
+  "Mark as completed": "Marquer comme terminé"
 }
