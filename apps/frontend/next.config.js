@@ -8,18 +8,17 @@ if (typeof self === "undefined") {
 const nextConfig = {
   experimental: {
     optimizePackageImports: [
-      "@vechain/vebetterdao-contracts",
       "@vechain/dapp-kit-react",
       "@vechain/vechain-kit",
       "@chakra-ui/react",
-      "@vechain/vebetterdao-contracts/*",
-      "react-icons",
       "react-icons/bs",
       "react-icons/fa",
       "react-icons/fa6",
       "react-icons/md",
       "react-icons/io",
       "react-icons/io5",
+      "react-icons/fi",
+      "react-icons/tb",
       "iconoir-react",
       "react-hook-form",
     ],
@@ -34,7 +33,13 @@ const nextConfig = {
   },
   swcMinify: true,
   compress: true,
+  serverExternalPackages: ["@vechain/vebetterdao-contracts"],
   transpilePackages: ["express", "ts-node"],
+  turbopack: {
+    resolveAlias: {
+      canvas: "./empty-module.ts",
+    },
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

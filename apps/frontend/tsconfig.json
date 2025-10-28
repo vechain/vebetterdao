@@ -16,7 +16,7 @@
     }
   },
   "include": ["next-env.d.ts", "next.config.js", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": [".next", "node_modules"],
+  "exclude": [".next", "node_modules", "**/*.test.*", "**/*.spec.*"],
   "ts-node": {
     // these options are overrides used only by ts-node
     "compilerOptions": {
