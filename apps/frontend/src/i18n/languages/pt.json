@@ -2018,5 +2018,11 @@
   "Active proposal": "Proposta ativa",
   "You've been signalled by {{app}}": "Você foi sinalizado por {{app}}",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Seu poder de voto foi transferido para <platform>veDelegate.vet</platform> que vota em seu nome. <br/> Se você quiser votar aqui, deve remover a delegação no veDelegate antes do snapshot.",
-  "Stargate is live": "Stargate está ao vivo"
+  "Stargate is live": "Stargate está ao vivo",
+  "Migrate your Node NFT before December 2": "Migre seu NFT de Nó antes de 2 de dezembro",
+  "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "Você ainda possui um NFT desatualizado. Migre antes de 2 de dezembro para evitar perder sua capacidade de endosso.",
+  "Migrate now": "Migrar agora",
+  "Later": "Depois",
+  "Mark as in development": "Marcar como em desenvolvimento",
+  "Mark as completed": "Marcar como concluído"
 }
