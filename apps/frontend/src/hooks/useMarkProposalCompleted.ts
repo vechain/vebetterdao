@@ -13,7 +13,7 @@ const GovernorInterface = B3TRGovernor__factory.createInterface()
 type Props = { proposalId: string; onSuccess?: () => void }
 /**
  * Hook to mark a proposal as completed
- * @param proposalId  the proposal id to mark as in development
+ * @param proposalId  the proposal id to mark as completed
  * @param onSuccess  the callback to call after the proposal is marked as completed
  * @returns the mark completed transaction
  */
