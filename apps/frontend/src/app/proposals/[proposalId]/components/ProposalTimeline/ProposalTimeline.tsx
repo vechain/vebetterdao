@@ -33,8 +33,8 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
-  const standardProposalInDevelopmentStartDate = proposalInDevelopmentEvent?.[0]?.timestamp ?? 0
-  const standardProposalCompletedTimestamp = proposalCompletedEvent?.[0]?.timestamp ?? 0
+  const standardProposalInDevelopmentStartDate = proposalInDevelopmentEvent?.[0]?.timestamp
+  const standardProposalCompletedTimestamp = proposalCompletedEvent?.[0]?.timestamp
   const isGrant = proposal?.type === ProposalType.Grant
   ///Scenario 1: Grant completed
   // support -> approval -> in development -> completed
@@ -56,10 +56,8 @@ export const ProposalTimeline = ({ proposal }: Props) => {
       supportEndDate: supportEndDate,
       votingEndDate: votingEndDate,
       // Standard proposal only
-      inDevelopmentStartDate: standardProposalInDevelopmentStartDate
-        ? standardProposalInDevelopmentStartDate * 1000
-        : undefined,
-      completedTimestamp: standardProposalCompletedTimestamp ? standardProposalCompletedTimestamp * 1000 : undefined,
+      inDevelopmentStartDate: standardProposalInDevelopmentStartDate,
+      completedTimestamp: standardProposalCompletedTimestamp,
       hasValidDates: hasValidDates,
       isLoading: isLoading,
     }

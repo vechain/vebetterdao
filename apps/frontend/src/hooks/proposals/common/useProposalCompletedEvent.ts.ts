@@ -15,7 +15,7 @@ export const useProposalCompletedEvent = (proposalId: string) => {
       id: response.decodedData.args.proposalId.toString(),
       blockNumber: response.meta.blockNumber,
       txOrigin: response.meta.txOrigin,
-      timestamp: response.meta.blockTimestamp,
+      timestamp: response?.meta?.blockTimestamp ? response.meta.blockTimestamp * 1000 : 0,
     }),
   })
 
