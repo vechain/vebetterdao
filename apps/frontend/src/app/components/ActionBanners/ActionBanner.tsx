@@ -30,7 +30,7 @@ import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 import { ProposalFilter } from "../../../store/useProposalFilters"
-import { BannerStorageKey, isBannerClosed, isBannerEnabled } from "../Banners/GenericBanner"
+import { BannerStorageKey, isBannerEnabled } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
@@ -55,7 +55,7 @@ const VTHO_THRESHOLD = 5
 
 export const ActionBanner = () => {
   const { account, connection } = useWallet()
-  const [showModal, setShowModal] = useState(!isBannerClosed(BannerStorageKey.STARGATE_MIGRATION))
+  const [showModal, setShowModal] = useState(!isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 

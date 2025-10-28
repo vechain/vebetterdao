@@ -24,6 +24,10 @@ export const isBannerClosed = (storageKey: string): boolean => {
   return localStorage.getItem(storageKey) !== "true"
 }
 
+export const setBannerEnabled = (storageKey: string): void => {
+  localStorage.setItem(storageKey, "true")
+}
+
 export const setBannerClosed = (storageKey: string): void => {
   localStorage.setItem(storageKey, "false")
 }
