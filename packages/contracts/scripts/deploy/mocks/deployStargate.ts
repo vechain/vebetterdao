@@ -26,7 +26,7 @@ enum TokenLevelId {
   Flash,
 }
 
-export const deployStargateMock = async () => {
+export const deployStargateMock = async ({ logOutput = false }) => {
   const deployer = (await ethers.getSigners())[0]
 
   // Deploys the latest implementation of the contracts
@@ -37,7 +37,7 @@ export const deployStargateMock = async () => {
     StargateNFTSettingsLib,
     StargateNFTTokenLib,
     StargateNFTTokenManagerLib,
-  } = await deployStargateNFTLibraries({ latestVersionOnly: true })
+  } = await deployStargateNFTLibraries({ logOutput })
 
   const stargateNFTProxyAddress = await deployUpgradeableWithoutInitialization(
     "StargateNFT",
@@ -51,6 +51,7 @@ export const deployStargateMock = async () => {
     },
     false,
   )
+  logOutput && console.log("StargateNFT proxy deployed at: ", stargateNFTProxyAddress)
 
   const stargateProxyAddress = await deployUpgradeableWithoutInitialization(
     "Stargate",
@@ -59,6 +60,7 @@ export const deployStargateMock = async () => {
     },
     false,
   )
+  logOutput && console.log("Stargate proxy deployed at: ", stargateProxyAddress)
 
   const stargateNFT = (await initializeProxyAllVersions(
     "StargateNFT",
@@ -76,6 +78,7 @@ export const deployStargateMock = async () => {
             levelOperator: deployer.address,
             legacyNodes: deployer.address, // We set a random address since we do not care about the legacy ndodes on B3TR
             stargateDelegation: deployer.address, // We set a random address here as well since we do not care
+            vthoToken: "0x0000000000000000000000000000456E65726779", // address of solo, testnet and mainnet
             legacyLastTokenId: 10,
             levelsAndSupplies: [
               // Legacy normal levels
@@ -203,12 +206,11 @@ export const deployStargateMock = async () => {
                 circulatingSupply: 0,
               },
             ],
-            vthoToken: "0x0000000000000000000000000000456E65726779", // address of solo, testnet and mainnet
           },
         ],
       }, // V1
       {
-        args: [],
+        args: [[]],
         version: 2,
       },
       {
@@ -236,6 +238,7 @@ export const deployStargateMock = async () => {
     ],
     false,
   )) as StargateNFT
+  logOutput && console.log("StargateNFT initialized")
 
   const stargate = (await initializeProxyAllVersions(
     "Stargate",
@@ -255,6 +258,7 @@ export const deployStargateMock = async () => {
     ],
     false,
   )) as Stargate
+  logOutput && console.log("Stargate initialized")
 
   return {
     stargateNFT,
@@ -262,7 +266,7 @@ export const deployStargateMock = async () => {
   }
 }
 
-async function deployStargateNFTLibraries({ logOutput = false, latestVersionOnly = false }): Promise<{
+async function deployStargateNFTLibraries({ logOutput = false }): Promise<{
   StargateNFTClockLib: Clock
   StargateNFTLevelsLib: Levels
   StargateNFTSettingsLib: Settings

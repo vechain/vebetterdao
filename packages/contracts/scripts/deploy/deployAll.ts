@@ -47,7 +47,8 @@ import {
 } from "../helpers/roles"
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 import { ZERO_ADDRESS } from "@vechain/sdk-core"
-import { deployStargateMock } from "./mock/deployStargate"
+import { deployStargateMock } from "./mocks/deployStargate"
+import { deployNodeManagementMock } from "./mocks/deployNodeManagement"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -291,9 +292,15 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   // Deploy Stargate Mock
-  const { stargateNFT: stargateNftMock, stargate: stargateMock } = await deployStargateMock()
-  console.log("Using Stargate NFT Mock deployed at: ", stargateNftMock.getAddress())
-  console.log("Using Stargate Mock deployed at: ", stargateMock.getAddress())
+  console.log("Deploying Stargate Mock")
+  const { stargateNFT: stargateNftMock, stargate: stargateMock } = await deployStargateMock({ logOutput: true })
+
+  // Deploy NodeManagement Mock
+  console.log("Deploying NodeManagement Mock")
+  const nodeManagementMock = await deployNodeManagementMock({
+    stargateNFTProxyAddress: await stargateNftMock.getAddress(),
+    logOutput: true,
+  })
 
   // ---------------------- Deploy Contracts ----------------------
   console.log("Deploying VeBetter DAO contracts")
@@ -351,16 +358,6 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as Treasury
 
-  // Deploy NodeManagement - deprecating...
-  // const nodeManagement = (await deployAndUpgrade(
-  //   ["NodeManagementV1", "NodeManagement"],
-  //   [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []],
-  //   {
-  //     versions: [undefined, 2],
-  //     logOutput: true,
-  //   },
-  // )) as NodeManagement
-
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
     PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
@@ -387,7 +384,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [
         config.XAPP_GRACE_PERIOD,
-        nodeManagementAddress,
+        await nodeManagementMock.getAddress(),
         veBetterPassportContractAddress,
         await x2EarnCreator.getAddress(),
       ],
@@ -514,7 +511,12 @@ export async function deployAll(config: ContractsConfig) {
           treasury: await treasury.getAddress(),
         },
       ],
-      [vechainNodesAddress, nodeManagementAddress, TEMP_ADMIN, config.GM_NFT_NODE_TO_FREE_LEVEL],
+      [
+        deployer.address, // deprecated, we do not care about the legacy vechain nodes contract anymore
+        await nodeManagementMock.getAddress(),
+        TEMP_ADMIN,
+        config.GM_NFT_NODE_TO_FREE_LEVEL,
+      ],
       [],
       [],
       [],
@@ -991,7 +993,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
-    vechainNodesManagement: nodeManagementAddress,
+    vechainNodesManagement: await nodeManagementMock.getAddress(),
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
     GrantsManager: await grantsManager.getAddress(),
@@ -1079,7 +1081,9 @@ export async function deployAll(config: ContractsConfig) {
   console.log("Governance role granted to treasury contract admin")
 
   // Grant GrantsManager admin role to GrantsManager contract
+  await governor.connect(deployer).grantRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), deployer.address)
   await governor.connect(deployer).setGrantsManager(await grantsManager.getAddress())
+  await governor.connect(deployer).revokeRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), deployer.address)
   console.log("GrantsManager address set in B3TRGovernor contract")
 
   // Grant PROPOSAL_STATE_MANAGER_ROLE to deployer in B3TRGovernor contract
@@ -1246,7 +1250,7 @@ export async function deployAll(config: ContractsConfig) {
     xAllocationVoting,
     b3tr,
     vot3,
-    vechainNodesMock,
+    stargateMock,
   )
 
   // ---------- Role updates ---------- //
