@@ -6,7 +6,7 @@ import { useEvents } from "../../useEvents"
 
 const b3trGovernorAddress = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi
-export const useProposalInDevelomentEvent = (proposalId: string) => {
+export const useProposalInDevelopmentEvent = (proposalId: string) => {
   const result = useEvents({
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalInDevelopment",
