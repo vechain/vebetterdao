@@ -47,6 +47,7 @@ import {
 } from "../helpers/roles"
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 import { ZERO_ADDRESS } from "@vechain/sdk-core"
+import { deployStargateMock } from "./mock/deployStargate"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -289,35 +290,10 @@ export async function deployAll(config: ContractsConfig) {
     throw new Error("Failed to deploy X2Earn latest libraries")
   }
 
-  // Stargate and NFTs related contracts: They needed to deploy in Stargate repo first
-  // See from more details: { https://github.com/vechain/stargate-contracts/blob/main/README.md }
-  if (config.VECHAIN_NODES_CONTRACT_ADDRESS === ZERO_ADDRESS) {
-    throw new Error("VECHAIN_NODES_CONTRACT_ADDRESS is not set")
-  }
-  if (config.STARGATE_NFT_CONTRACT_ADDRESS === ZERO_ADDRESS) {
-    throw new Error("STARGATE_NFT_CONTRACT_ADDRESS is not set")
-  }
-  if (config.STARGATE_DELEGATE_CONTRACT_ADDRESS === ZERO_ADDRESS) {
-    throw new Error("STARGATE_DELEGATE_CONTRACT_ADDRESS is not set")
-  }
-  if (config.NODE_MANAGEMENT_CONTRACT_ADDRESS === ZERO_ADDRESS) {
-    throw new Error("NODE_MANAGEMENT_CONTRACT_ADDRESS is not set")
-  }
-  let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
-  const vechainNodesAddress = await vechainNodesMock.getAddress()
-  console.log("Using Vechain Nodes Mock deployed at: ", vechainNodesAddress)
-
-  let stargateNftMock = await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)
-  const stargateNftAddress = await stargateNftMock.getAddress()
-  console.log("Using Stargate NFT Mock deployed at: ", stargateNftAddress)
-
-  let stargateDelegateMock = await ethers.getContractAt("StargateDelegation", config.STARGATE_DELEGATE_CONTRACT_ADDRESS)
-  const stargateDelegateAddress = await stargateDelegateMock.getAddress()
-  console.log("Using Stargate Delegate Mock deployed at: ", stargateDelegateAddress)
-
-  let nodeManagementMock = await ethers.getContractAt("NodeManagementV3", config.NODE_MANAGEMENT_CONTRACT_ADDRESS)
-  const nodeManagementAddress = await nodeManagementMock.getAddress()
-  console.log("Using Node Management Mock deployed at: ", nodeManagementAddress)
+  // Deploy Stargate Mock
+  const { stargateNFT: stargateNftMock, stargate: stargateMock } = await deployStargateMock()
+  console.log("Using Stargate NFT Mock deployed at: ", stargateNftMock.getAddress())
+  console.log("Using Stargate Mock deployed at: ", stargateMock.getAddress())
 
   // ---------------------- Deploy Contracts ----------------------
   console.log("Deploying VeBetter DAO contracts")
