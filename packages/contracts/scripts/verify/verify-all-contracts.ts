@@ -1,4 +1,3 @@
-// @ts-ignore
 import { ethers } from "hardhat"
 import { getConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
