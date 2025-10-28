@@ -4,6 +4,9 @@ import { t } from "i18next"
 import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
+import { useProposalCompletedEvent } from "@/hooks/proposals/common/useProposalCompletedEvent.ts"
+import { useProposalInDevelomentEvent } from "@/hooks/proposals/common/useProposalInDevelomentEvent"
+
 import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
 import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
 import {
@@ -25,9 +28,13 @@ type Props = {
 
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
+  const { data: proposalInDevelopmentEvent } = useProposalInDevelomentEvent(proposal?.id ?? "")
+  const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposal?.id ?? "")
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
+  const standardProposalInDevelopmentStartDate = proposalInDevelopmentEvent?.[0]?.timestamp ?? 0
+  const standardProposalCompletedTimestamp = proposalCompletedEvent?.[0]?.timestamp ?? 0
   const isGrant = proposal?.type === ProposalType.Grant
   ///Scenario 1: Grant completed
   // support -> approval -> in development -> completed
@@ -48,10 +55,23 @@ export const ProposalTimeline = ({ proposal }: Props) => {
       supportStartDate: proposalCreatedAt * 1000,
       supportEndDate: supportEndDate,
       votingEndDate: votingEndDate,
+      // Standard proposal only
+      inDevelopmentStartDate: standardProposalInDevelopmentStartDate
+        ? standardProposalInDevelopmentStartDate * 1000
+        : undefined,
+      completedTimestamp: standardProposalCompletedTimestamp ? standardProposalCompletedTimestamp * 1000 : undefined,
       hasValidDates: hasValidDates,
       isLoading: isLoading,
     }
-  }, [proposalCreatedAt, supportEndDate, votingEndDate, hasValidDates, isLoading])
+  }, [
+    proposalCreatedAt,
+    supportEndDate,
+    votingEndDate,
+    standardProposalInDevelopmentStartDate,
+    standardProposalCompletedTimestamp,
+    hasValidDates,
+    isLoading,
+  ])
 
   const grantTimelineSteps = useMemo(() => {
     //If the grant is cancelled but not rejected, means that it should jump straight from base step (Support phase) to the cancelled step
@@ -176,16 +196,21 @@ export const ProposalTimeline = ({ proposal }: Props) => {
               roundId: Number(proposalVotingRoundId),
               dateString: `${dayjs(timelineDates.supportEndDate).format("MMM D, YYYY")} - ${dayjs(timelineDates.votingEndDate).format("MMM D, YYYY")}`,
             })
-          : "---",
+          : "",
       },
       {
         label: t("In development"),
         state: [ProposalState.InDevelopment],
-        description: timelineDates.hasValidDates ? dayjs(timelineDates.votingEndDate).format("MMM D, YYYY") : "---",
+        description: timelineDates.inDevelopmentStartDate
+          ? dayjs(timelineDates.inDevelopmentStartDate).format("MMM D, YYYY")
+          : "",
       },
       {
         label: t("Completed"),
         state: [ProposalState.Completed],
+        description: timelineDates.completedTimestamp
+          ? dayjs(timelineDates.completedTimestamp).format("MMM D, YYYY")
+          : "",
       },
     ]
   }, [
@@ -193,6 +218,8 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     timelineDates.hasValidDates,
     timelineDates.supportEndDate,
     timelineDates.votingEndDate,
+    timelineDates.inDevelopmentStartDate,
+    timelineDates.completedTimestamp,
     proposalVotingRoundId,
   ])
 
