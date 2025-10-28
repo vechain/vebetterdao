@@ -12,7 +12,6 @@ jobs:
     name: Compile Contracts for Slither Analysis
     runs-on: ubuntu-latest
 
-    if: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
