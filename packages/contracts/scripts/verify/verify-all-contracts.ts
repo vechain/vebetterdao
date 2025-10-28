@@ -8,6 +8,7 @@ import {
   ContractName,
   copySourceFiles,
   findContractMetadata,
+  getAllContracts,
   getContractFileName,
   getContractLibraries,
   getImplementationAddress,
@@ -152,24 +153,7 @@ async function main() {
 
   console.log(`\n${config.network.name} (Chain ID: ${network.chainId})\n`)
 
-  const contracts: Array<{ proxy: string; name: ContractName }> = [
-    { proxy: config.vot3ContractAddress, name: "VOT3" },
-    { proxy: config.b3trGovernorAddress, name: "B3TRGovernor" },
-    { proxy: config.galaxyMemberContractAddress, name: "GalaxyMember" },
-    { proxy: config.x2EarnAppsContractAddress, name: "X2EarnApps" },
-    { proxy: config.veBetterPassportContractAddress, name: "VeBetterPassport" },
-    { proxy: config.emissionsContractAddress, name: "Emissions" },
-    { proxy: config.timelockContractAddress, name: "TimeLock" },
-    { proxy: config.xAllocationPoolContractAddress, name: "XAllocationPool" },
-    { proxy: config.xAllocationVotingContractAddress, name: "XAllocationVoting" },
-    { proxy: config.voterRewardsContractAddress, name: "VoterRewards" },
-    { proxy: config.treasuryContractAddress, name: "Treasury" },
-    { proxy: config.x2EarnRewardsPoolContractAddress, name: "X2EarnRewardsPool" },
-    { proxy: config.x2EarnCreatorContractAddress, name: "X2EarnCreator" },
-    { proxy: config.grantsManagerContractAddress, name: "GrantsManager" },
-    { proxy: config.dbaPoolContractAddress, name: "DBAPool" },
-    { proxy: config.relayerRewardsPoolContractAddress, name: "RelayerRewardsPool" },
-  ]
+  const contracts = getAllContracts(config)
 
   const contractsInfo: ContractInfo[] = []
   const contractsWithImpl: Array<{ name: ContractName; implementation: string | null }> = []

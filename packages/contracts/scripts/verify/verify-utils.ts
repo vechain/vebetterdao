@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import * as fs from "fs"
 import * as path from "path"
 import axios from "axios"
+import { AppConfig } from "@repo/config"
 
 //typed contract names
 export type ContractName =
@@ -23,6 +24,32 @@ export type ContractName =
   | "RelayerRewardsPool"
 
 export const PROXY_ABI = ["event Upgraded(address indexed implementation)"]
+
+/**
+ * Get the standardized list of all contracts with their proxy addresses
+ * @param config - The environment configuration containing contract addresses
+ * @returns Array of contract proxy addresses and names
+ */
+export function getAllContracts(config: AppConfig): Array<{ proxy: string; name: ContractName }> {
+  return [
+    { proxy: config.vot3ContractAddress, name: "VOT3" },
+    { proxy: config.b3trGovernorAddress, name: "B3TRGovernor" },
+    { proxy: config.galaxyMemberContractAddress, name: "GalaxyMember" },
+    { proxy: config.x2EarnAppsContractAddress, name: "X2EarnApps" },
+    { proxy: config.veBetterPassportContractAddress, name: "VeBetterPassport" },
+    { proxy: config.emissionsContractAddress, name: "Emissions" },
+    { proxy: config.timelockContractAddress, name: "TimeLock" },
+    { proxy: config.xAllocationPoolContractAddress, name: "XAllocationPool" },
+    { proxy: config.xAllocationVotingContractAddress, name: "XAllocationVoting" },
+    { proxy: config.voterRewardsContractAddress, name: "VoterRewards" },
+    { proxy: config.treasuryContractAddress, name: "Treasury" },
+    { proxy: config.x2EarnRewardsPoolContractAddress, name: "X2EarnRewardsPool" },
+    { proxy: config.x2EarnCreatorContractAddress, name: "X2EarnCreator" },
+    { proxy: config.grantsManagerContractAddress, name: "GrantsManager" },
+    { proxy: config.dbaPoolContractAddress, name: "DBAPool" },
+    { proxy: config.relayerRewardsPoolContractAddress, name: "RelayerRewardsPool" },
+  ]
+}
 
 export interface ContractInfo {
   Contract: ContractName
