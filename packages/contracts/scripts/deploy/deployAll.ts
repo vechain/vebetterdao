@@ -20,6 +20,10 @@ import {
   GrantsManagerV1,
   DBAPool,
   DBAPoolV1,
+  StargateNFT,
+  Stargate,
+  NodeManagementV3,
+  TokenAuction,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -49,6 +53,9 @@ import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 import { ZERO_ADDRESS } from "@vechain/sdk-core"
 import { deployStargateMock } from "./mocks/deployStargate"
 import { deployNodeManagementMock } from "./mocks/deployNodeManagement"
+import { getConfig } from "@repo/config"
+import { EnvConfig } from "@repo/config/contracts"
+import { deployLegacyNodesMock } from "./mocks/deployLegacyNodes"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -57,6 +64,7 @@ const symbol = "GM"
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
+  const envConfig = getConfig(config.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
   console.log(
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
@@ -291,16 +299,40 @@ export async function deployAll(config: ContractsConfig) {
     throw new Error("Failed to deploy X2Earn latest libraries")
   }
 
-  // Deploy Stargate Mock
-  console.log("Deploying Stargate Mock")
-  const { stargateNFT: stargateNftMock, stargate: stargateMock } = await deployStargateMock({ logOutput: true })
+  // In testnet and mainnet we want to point at the real external contracts,
+  // to do so we need to first add the address in the appropriate config file
+  // for local deployments instead we deploy the mocks
+  let stargateNftMock: StargateNFT
+  let stargateMock: Stargate
+  let nodeManagementMock: NodeManagementV3
+  let vechainNodesMock: TokenAuction
+  if (network.name !== "vechain_mainnet" && network.name !== "vechain_testnet") {
+    // Deploy Stargate Mock
+    console.log("Deploying Stargate Mock")
+    const { stargateNFT, stargate } = await deployStargateMock({ logOutput: true })
+    stargateMock = stargate
+    stargateNftMock = stargateNFT
 
-  // Deploy NodeManagement Mock
-  console.log("Deploying NodeManagement Mock")
-  const nodeManagementMock = await deployNodeManagementMock({
-    stargateNFTProxyAddress: await stargateNftMock.getAddress(),
-    logOutput: true,
-  })
+    // Deploy NodeManagement Mock
+    console.log("Deploying NodeManagement Mock")
+    nodeManagementMock = await deployNodeManagementMock({
+      stargateNFTProxyAddress: await stargateNftMock.getAddress(),
+      logOutput: true,
+    })
+    const { vechainNodesMock: vechainNodesMockDeployed } = await deployLegacyNodesMock({ logOutput: true })
+    vechainNodesMock = vechainNodesMockDeployed
+  } else {
+    stargateMock = (await ethers.getContractAt("Stargate", envConfig.stargateContractAddress)) as Stargate
+    stargateNftMock = (await ethers.getContractAt("StargateNFT", envConfig.stargateNFTContractAddress)) as StargateNFT
+    nodeManagementMock = (await ethers.getContractAt(
+      "NodeManagementV3",
+      envConfig.nodeManagementContractAddress,
+    )) as NodeManagementV3
+    vechainNodesMock = (await ethers.getContractAt(
+      "TokenAuction",
+      envConfig.tokenAuctionContractAddress,
+    )) as TokenAuction
+  }
 
   // ---------------------- Deploy Contracts ----------------------
   console.log("Deploying VeBetter DAO contracts")
@@ -1640,6 +1672,8 @@ export async function deployAll(config: ContractsConfig) {
     x2EarnCreator: x2EarnCreator,
     grantsManager: grantsManager,
     relayerRewardsPool: relayerRewardsPool,
+    stargate: stargateMock,
+    stargateNFT: stargateNftMock,
     dynamicBaseAllocationPool: dynamicBaseAllocationPool,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,

@@ -22,6 +22,7 @@ const config: AppConfig = {
   x2EarnCreatorContractAddress: "0xb89f0ecdaf9987f87912d6c77756435fe4085b05",
   tokenAuctionContractAddress: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c",
   stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
+  stargateContractAddress: "0x0000000000000000000000000000000000000000",
   grantsManagerContractAddress: "0x005af71e9b2d629c0c6e2f9d39fdfd1bb967c0ea",
   relayerRewardsPoolContractAddress: "0x92b5a7484970d9b2ad981e8135ff14e6f996dc04",
   dbaPoolContractAddress: "0x328710f4925c3e4c04961882b96c50cc7cd9d958",
