@@ -17,4 +17,8 @@ export const logger = {
       JSON.stringify({ level: "ERROR", message, ...errorData, ...data, timestamp: new Date().toISOString() }),
     )
   },
+
+  success: (message: string, data?: Record<string, unknown>) => {
+    console.log(JSON.stringify({ level: "SUCCESS", message, ...data, timestamp: new Date().toISOString() }))
+  },
 }
