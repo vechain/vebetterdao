@@ -311,6 +311,34 @@ yarn contracts:deploy:testnet
 
 Addresses will be outputted in the console. If you want the frontend to use those addresses then copy them in the `testnet.ts` file inside `./packages/config/`.
 
+### Slither
+
+Slither is running in a gha workflow every time there is any changes in the contracts folder.
+It will report any issues found in the contracts.
+
+It is possible to mark false positives by updating the `slither.config.json` file. Eg:
+
+````json
+
+```json
+{
+  "suppressions": [
+    {
+      "check": "reentrancy-eth",
+      "file": "contracts/B3TR.sol",
+      "function": "executeTransaction(uint256)",
+      "reason": "CEI done; false positive"
+    }
+  ]
+}
+````
+
+It is possible to:
+
+- Mark an entire function as False Positive
+- Mark a specific line of code as False Positive
+- Mark a number of lines as False Positive
+
 ## Verify contracts (Optional)
 
 Optionally verify your smart contracts on Sourcify. This allows 3rd to view and independently verify all of the following:
