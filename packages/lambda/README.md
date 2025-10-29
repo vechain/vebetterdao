@@ -59,6 +59,29 @@ Here's a list of the current lambda functions and their primary responsibilities
       - Distributes DBA rewards to eligible apps
       - Sends Slack notifications on success/failure
 
+7.  **`relayerCastVote`**:
+    - **Purpose**: Automatically casts votes on behalf of users who have enabled auto-voting in the
+      XAllocationVoting contract.
+    - **Trigger**: Scheduled (runs 30 minutes after `startRound` to ensure the new round has started).
+    - **Scheduling**:
+      - **Testnet/Dev**: `cron(0 2 ? * TUE,THU,SAT *)` - 2:00 AM UTC on Tue/Thu/Sat (30 min after
+        round start at 1:30 AM)
+      - **Mainnet/Prod**: `cron(10 7 ? * MON *)` - 7:10 AM UTC on Monday (30 min after round start
+        at 6:40 AM)
+    - **Key Operations**:
+      - Retrieves the current round ID from the XAllocationVoting contract
+      - Fetches the round snapshot block number
+      - Queries all `AutoVotingToggled` events from block 0 to snapshot block to reconstruct user
+        auto-voting state
+      - Filters users who had auto-voting enabled at the round snapshot
+      - Verifies that users are still 'active' at the round snapshot (not deactivated)
+      - Casts votes on behalf of all valid users in a single batch transaction using
+        `castVoteOnBehalfOf`
+      - Sends Slack notifications for any invalid users detected
+      - Returns transaction receipt with the number of users voted for
+    - **Note**: The lambda uses a relayer wallet (stored in AWS Secrets Manager) to pay gas fees
+      for voting on behalf of users
+
 ## Development
 
 Follow these guidelines for developing and maintaining lambdas:
