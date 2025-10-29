@@ -130,7 +130,13 @@ export const getAllAutoVotingEnabledUsers = async (
 
   // Loop through all pages of events
   while (true) {
+    logger.info("Fetching events page", { offset, limit: MAX_EVENTS_PER_REQUEST })
     const result = await getAutoVotingEnabledUsers(thor, contractAddress, fromBlock, toBlock, offset)
+    logger.info("Events page received", {
+      eventCount: result.eventCount,
+      hasMore: result.hasMore,
+      offset,
+    })
 
     // Merge paginated results - each page may contain updates to the same users
     for (const [user, enabled] of result.userAutoVotingState.entries()) {
@@ -141,6 +147,7 @@ export const getAllAutoVotingEnabledUsers = async (
 
     // Break if there are no more events
     if (!result.hasMore) {
+      logger.info("Pagination complete", { totalEvents })
       break
     }
 

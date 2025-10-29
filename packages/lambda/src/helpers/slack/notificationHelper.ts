@@ -1,6 +1,6 @@
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
-import { logger } from "./logger"
-import { publishMessage } from "./slack"
+import { logger } from "../logger"
+import { publishMessage } from "."
 
 export interface NotificationOptions {
   level: "success" | "info" | "warn" | "error"
