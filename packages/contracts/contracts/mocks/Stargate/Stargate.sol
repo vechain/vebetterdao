@@ -384,6 +384,25 @@ contract Stargate is
     _delegate($, tokenId, _validator);
   }
 
+  // Mock function to allow us testing the migration without the need to delegate to the protocol staker contract
+  /// @param _tokenId The ID of the token to migrate
+  /// @dev Emits a {IStargateNFT.TokenMigrated} event
+  function migrate(uint256 _tokenId) external payable whenNotPaused nonReentrant {
+    StargateStorage storage $ = _getStargateStorage();
+
+    // get the level of the node from the legacy nodes contract
+    (, uint8 level, , , , , ) = $.stargateNFTContract.legacyNodes().getMetadata(_tokenId);
+    // get the vet amount required to stake for the level
+    uint256 vetAmountRequiredToStake = $.stargateNFTContract.getLevel(level).vetAmountRequiredToStake;
+    // validate the msg.value
+    if (msg.value != vetAmountRequiredToStake) {
+      revert VetAmountMismatch(level, vetAmountRequiredToStake, msg.value);
+    }
+
+    // migrate the token to the StargateNFT contract
+    $.stargateNFTContract.migrate(_tokenId);
+  }
+
   /// @inheritdoc IStargate
   function migrateAndDelegate(uint256 _tokenId, address _validator) external payable whenNotPaused nonReentrant {
     StargateStorage storage $ = _getStargateStorage();

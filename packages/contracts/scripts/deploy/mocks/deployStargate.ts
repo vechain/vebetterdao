@@ -26,8 +26,23 @@ enum TokenLevelId {
   Flash,
 }
 
-export const deployStargateMock = async ({ logOutput = false }) => {
+export const deployStargateMock = async ({
+  logOutput = false,
+  legacyNodesContractAddress,
+  vthoTokenAddress,
+}: {
+  logOutput?: boolean
+  legacyNodesContractAddress?: string
+  vthoTokenAddress?: string
+}) => {
   const deployer = (await ethers.getSigners())[0]
+
+  // const deploy a mocked protocol staker contract
+  const ProtocolStakerMock = await ethers.getContractFactory("ProtocolStakerMock")
+  const protocolStakerMock = await ProtocolStakerMock.deploy()
+  await protocolStakerMock.waitForDeployment()
+  const protocolStakerMockAddress = await protocolStakerMock.getAddress()
+  logOutput && console.log("ProtocolStakerMock deployed at: ", protocolStakerMockAddress)
 
   // Deploys the latest implementation of the contracts
   const {
@@ -76,10 +91,10 @@ export const deployStargateMock = async ({ logOutput = false }) => {
             upgrader: deployer.address,
             pauser: deployer.address,
             levelOperator: deployer.address,
-            legacyNodes: deployer.address, // We set a random address since we do not care about the legacy ndodes on B3TR
+            legacyNodes: legacyNodesContractAddress ?? deployer.address, // We set a random address since we do not care about the legacy ndodes on B3TR
             stargateDelegation: deployer.address, // We set a random address here as well since we do not care
-            vthoToken: "0x0000000000000000000000000000456E65726779", // address of solo, testnet and mainnet
-            legacyLastTokenId: 10,
+            vthoToken: vthoTokenAddress ?? "0x0000000000000000000000000000456E65726779", // address of solo, testnet and mainnet
+            legacyLastTokenId: 1000,
             levelsAndSupplies: [
               // Legacy normal levels
               {
@@ -248,9 +263,9 @@ export const deployStargateMock = async ({ logOutput = false }) => {
         args: [
           {
             admin: deployer.address,
-            protocolStakerContract: deployer.address, // we do not care about delegations
+            protocolStakerContract: protocolStakerMockAddress,
             stargateNFTContract: stargateNFTProxyAddress,
-            legacyNodesContract: deployer.address, // We do not care about the legacy nodes on B3TR
+            legacyNodesContract: legacyNodesContractAddress ?? deployer.address, // We do not care about the legacy nodes on B3TR
             maxClaimablePeriods: 832,
           },
         ],
