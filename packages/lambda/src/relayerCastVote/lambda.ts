@@ -2,6 +2,7 @@ import { APIGatewayProxyResult, Context } from "aws-lambda"
 
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
+import { Address } from "@vechain/sdk-core"
 
 import stagingConfig from "@repo/config/testnet-staging"
 import mainnetConfig from "@repo/config/mainnet"
@@ -29,8 +30,7 @@ interface NetworkConfig {
 
 interface SecretsConfig {
   secretId: string
-  walletKey: string
-  privateKeyKey: string
+  privateKeyId: string
 }
 
 interface SlackConfig {
@@ -72,23 +72,20 @@ const getSecretsConfig = (): SecretsConfig => {
     case AppEnv.MAINNET:
       return {
         secretId: "relayer_cast_vote_mainnet",
-        walletKey: "WALLET",
-        privateKeyKey: "RELAYER_PK",
+        privateKeyId: "relayer-cast-vote-pk",
       }
 
     case AppEnv.TESTNET_STAGING:
       return {
         secretId: "relayer_cast_vote_testnet",
-        walletKey: "WALLET",
-        privateKeyKey: "RELAYER_PK",
+        privateKeyId: "relayer-cast-vote-pk",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
         secretId: "relayer_cast_vote_testnet",
-        walletKey: "WALLET",
-        privateKeyKey: "RELAYER_PK",
+        privateKeyId: "relayer-cast-vote-pk",
       }
   }
 }
@@ -97,13 +94,12 @@ const getSlackConfig = (): SlackConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
 
-  // C06BLEJE5SA - b3tr-dev (slack channel)
-  // We are pointing this channel for both testnet and mainnet
+  // Point them all to b3tr-lambda channel
   switch (environment) {
     case AppEnv.MAINNET:
       return {
-        channelId: slackIds.b3trDev,
-        messagePrefix: "",
+        channelId: slackIds.b3trLambda,
+        messagePrefix: "[MAINNET] ",
       }
 
     case AppEnv.TESTNET_STAGING:
@@ -122,7 +118,7 @@ const getSlackConfig = (): SlackConfig => {
 }
 
 const { nodeUrl: NODE_URL, config: CONFIG } = getNetworkConfig()
-const { secretId: SECRET_ID, walletKey: WALLET_KEY, privateKeyKey: PRIVATE_KEY_KEY } = getSecretsConfig()
+const { secretId: SECRET_ID, privateKeyId: PRIVATE_KEY_ID } = getSecretsConfig()
 const { channelId: SLACK_CHANNEL_ID, messagePrefix: SLACK_MESSAGE_PREFIX } = getSlackConfig()
 /**
  * Retrieves the caller wallet information.
@@ -132,12 +128,14 @@ const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKe
   try {
     const client = new SecretsManagerClient({ region: "eu-west-1" })
 
-    const walletAddress = await getSecret(client, SECRET_ID, WALLET_KEY)
-    const privateKey = await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY)
+    const privateKey = await getSecret(client, SECRET_ID, PRIVATE_KEY_ID)
 
-    if (!walletAddress || !privateKey) {
-      throw new Error("Empty wallet credentials retrieved from secrets manager")
+    if (!privateKey) {
+      throw new Error("Empty private key retrieved from secrets manager")
     }
+
+    // Derive wallet address from private key
+    const walletAddress = Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString()
 
     return { walletAddress, privateKey }
   } catch (error) {
@@ -150,7 +148,6 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
   console.log(`Caller wallet address: ${(await getCallerWalletInfo()).walletAddress}`)
-  // eslint-disable-next-line turbo/no-undeclared-env-vars
   console.log(`Environment: ${process.env.LAMBDA_ENV}`)
   console.log(`Network: ${NODE_URL}`)
   console.log(`XAllocationVoting contract: ${CONFIG.xAllocationVotingContractAddress}`)
@@ -201,7 +198,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       await publishMessage(
         secretsClient,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: Invalid users found: ${invalidUsers}`,
+        `${SLACK_MESSAGE_PREFIX}:warning: Invalid users found: ${invalidUsers}`,
       )
     }
 
