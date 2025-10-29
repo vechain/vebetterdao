@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import {
   A11y,
   //Autoplay,
@@ -30,6 +30,7 @@ import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 import { ProposalFilter } from "../../../store/useProposalFilters"
+import { BannerStorageKey, isBannerEnabled } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
@@ -43,6 +44,7 @@ import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
+import { NodeUpgradeModal } from "./modals/NodeUpgradeModal"
 
 import "swiper/css"
 import "swiper/css/pagination"
@@ -53,6 +55,7 @@ const VTHO_THRESHOLD = 5
 
 export const ActionBanner = () => {
   const { account, connection } = useWallet()
+  const [showModal, setShowModal] = useState(!isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
@@ -188,7 +191,8 @@ export const ActionBanner = () => {
   // Legacy Node banners logic
   const isLegacyNode = useMemo(() => (userNodes?.legacyNodes?.length ?? 0) > 0, [userNodes])
   // Remove the banner for every user at the end of this round
-  const showStargateBanner = currentRoundId < 55 || isLegacyNode
+  const showStargateBanner =
+    currentRoundId < 55 || (isLegacyNode && isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
@@ -240,43 +244,47 @@ export const ActionBanner = () => {
   if (slides.length === 0) return null
 
   return (
-    <Box
-      position="relative"
-      css={{
-        base: {
-          "--swiper-pagination-top": "16px",
-          "--swiper-pagination-bottom": "auto",
-          "--swiper-pagination-left": "16px",
-          "--swiper-pagination-bullet-size": "6px",
-          "--swiper-pagination-text-align": "left",
-        },
-        lg: {
-          "--swiper-pagination-top": "unset",
-          "--swiper-pagination-bottom": "16px",
-          "--swiper-pagination-left": "unset",
-          "--swiper-pagination-bullet-size": "8px",
-          "--swiper-pagination-text-align": "center",
-        },
-      }}>
-      <Swiper
-        modules={[
-          A11y,
-          //Autoplay,
-          Pagination,
-        ]}
-        pagination={true}
-        wrapperClass="action-banner"
-        spaceBetween={20}
-        // TODO: this autoplay feature will be enabled later.
-        // speed={800}
-        // autoplay={{ delay: 3000, disableOnInteraction: false }}
-      >
-        {slides.map(slide => (
-          <SwiperSlide key={`slide-${slide?.key}`} className="slide">
-            {slide}
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </Box>
+    <>
+      <Box
+        position="relative"
+        css={{
+          base: {
+            "--swiper-pagination-top": "16px",
+            "--swiper-pagination-bottom": "auto",
+            "--swiper-pagination-left": "16px",
+            "--swiper-pagination-bullet-size": "6px",
+            "--swiper-pagination-text-align": "left",
+          },
+          lg: {
+            "--swiper-pagination-top": "unset",
+            "--swiper-pagination-bottom": "16px",
+            "--swiper-pagination-left": "unset",
+            "--swiper-pagination-bullet-size": "8px",
+            "--swiper-pagination-text-align": "center",
+          },
+        }}>
+        <Swiper
+          modules={[
+            A11y,
+            //Autoplay,
+            Pagination,
+          ]}
+          rewind={true}
+          pagination={slides.length > 1}
+          wrapperClass="action-banner"
+          spaceBetween={20}
+          // TODO: this autoplay feature will be enabled later.
+          // speed={800}
+          // autoplay={{ delay: 3000, disableOnInteraction: false }}
+        >
+          {slides.map(slide => (
+            <SwiperSlide key={`slide-${slide?.key}`} className="slide">
+              {slide}
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </Box>
+      <NodeUpgradeModal isOpen={isLegacyNode && showModal} onClose={() => setShowModal(false)} />
+    </>
   )
 }

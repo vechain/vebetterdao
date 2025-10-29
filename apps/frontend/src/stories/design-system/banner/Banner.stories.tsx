@@ -24,7 +24,6 @@ export default meta
 export const LightMode = () => (
   <VStack gap="8" w="full">
     <GenericBanner
-      inSwiper={false}
       variant="default"
       title="Lorem ipsum"
       description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
@@ -36,7 +35,6 @@ export const LightMode = () => (
       onClose={() => alert("Closed")}
     />
     <GenericBanner
-      inSwiper={false}
       variant="b3mo"
       title="Lorem ipsum"
       description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
