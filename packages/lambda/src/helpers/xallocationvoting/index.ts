@@ -4,8 +4,8 @@ export { isUserAutoVotingEnabledForRound } from "./isUserAutoVotingEnabledForRou
 export { getAutoVotingEnabledUsers, getAllAutoVotingEnabledUsers } from "./getAutoVotingEnabledUsers"
 export { verifyAutoVotingUsersIsActive } from "./verifyAutoVotingEnabledUsers"
 export { castVotesOnBehalfOf } from "./castVotesOnBehalfOf"
-export { processBatchedVotes } from "./batchVoteProcessor"
+export { processBatchedVotes, isolateFailedVotes } from "./batchVoteProcessor"
 
 // Export types
 export type { AutoVotingEnabledUsersResult } from "./getAutoVotingEnabledUsers"
-export type { BatchResult, FailedVote } from "./batchVoteProcessor"
+export type { VoteBatchResult, FailedVote } from "./batchVoteProcessor"
