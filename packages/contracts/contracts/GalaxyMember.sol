@@ -71,6 +71,9 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
  *   removed `setVechainNodes`
  *   updated `getNodeLevelOf` to use nodeManagement contract
  *   updated ownership conditions on `detachNode` to use nodeManagement contract
+ *
+ * --------------------------------- VERSION 6 ---------------------------------
+ * - Removes Nodemanagement and TokenAuction in favor of Stargate Contract
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -722,7 +725,7 @@ contract GalaxyMember is
   /// @dev This function is used to identify the version of the contract and should be updated in each new version
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "5";
+    return "6";
   }
 
   struct TokenInfo {
