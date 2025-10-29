@@ -131,6 +131,7 @@ import {
   AutoVotingLogic,
   DBAPool,
   DBAPoolV1,
+  Stargate,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -159,6 +160,7 @@ import { APPS } from "../../scripts/deploy/setup"
 import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
 import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
 import { autoVotingLibraries } from "../../scripts/libraries"
+import { deployStargateMock } from "../../scripts/deploy/mocks/deployStargate"
 
 export interface DeployInstance {
   B3trContract: ContractFactory
@@ -306,6 +308,7 @@ export interface DeployInstance {
 
   // StarGate
   stargateNftMock: StargateNFT
+  stargateMock: Stargate
   vthoTokenMock: MyERC20
 
   // Rewards Pool related to XAllocationVoting
@@ -491,92 +494,23 @@ export const getOrDeployContractInstances = async ({
   await vthoTokenMock.waitForDeployment()
   const vthoAddress = await vthoTokenMock.getAddress()
 
-  // Deploy StargateNFT libraries
-  const {
-    StargateNFTClockLib,
-    StargateNFTSettingsLib,
-    StargateNFTTokenLib,
-    StargateNFTMintingLib,
-    StargateNFTVetGeneratedVthoLib,
-    StargateNFTLevelsLib,
-  } = await deployStargateNFTLibraries({ logOutput: false })
-
-  // Deploy StargateNFT proxy
-  const stargateNftAddress = await deployStargateProxyWithoutInitialization(
-    "StargateNFT",
-    {
-      Clock: await StargateNFTClockLib.getAddress(),
-      MintingLogic: await StargateNFTMintingLib.getAddress(),
-      Settings: await StargateNFTSettingsLib.getAddress(),
-      Token: await StargateNFTTokenLib.getAddress(),
-      VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
-      Levels: await StargateNFTLevelsLib.getAddress(),
-    },
-    false,
-  )
-
-  // Deploy StargateDelegation proxy
-  const stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, false)
-
-  // Initialize StargateNFT proxy
-  const stargateNftMock = (await initializeProxy(
-    stargateNftAddress,
-    "StargateNFT",
-    [
-      {
-        tokenCollectionName: "VeChain Node Token",
-        tokenCollectionSymbol: "VNT",
-        baseTokenURI: "ipfs://mock/",
-        admin: owner.address,
-        upgrader: owner.address,
-        pauser: owner.address,
-        levelOperator: owner.address,
-        legacyNodes: await vechainNodesMock.getAddress(), // from TokenAuction mock
-        stargateDelegation: stargateDelegateAddress,
-        legacyLastTokenId: 13, // see setup.ts, seeding for 5 + APPS.length accounts
-        levelsAndSupplies: initialTokenLevels, // TODO: review implementation
-        vthoToken: vthoAddress,
-      },
-    ],
-    {
-      Clock: await StargateNFTClockLib.getAddress(),
-      MintingLogic: await StargateNFTMintingLib.getAddress(),
-      Settings: await StargateNFTSettingsLib.getAddress(),
-      Token: await StargateNFTTokenLib.getAddress(),
-      VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
-      Levels: await StargateNFTLevelsLib.getAddress(),
-    },
-  )) as StargateNFT
-
-  // Initialize StargateDelegation proxy
-  const stargateDelegateMock = await initializeProxy(
-    stargateDelegateAddress,
-    "StargateDelegation",
-    [
-      {
-        upgrader: owner.address,
-        admin: owner.address,
-        stargateNFT: stargateNftAddress,
-        vthoToken: vthoAddress,
-        vthoRewardPerBlock, // CHECK - as per stargate local config
-        delegationPeriod: 10, // CHECK - as per stargate local config
-        operator: owner.address,
-      },
-    ],
-    {},
-  )
+  const { stargateNFT: stargateNftMock, stargate: stargateMock } = await deployStargateMock({
+    logOutput: false,
+    legacyNodesContractAddress: await vechainNodesMock.getAddress(),
+    vthoTokenAddress: await vthoTokenMock.getAddress(),
+  })
 
   // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
   await vechainNodesMock.addOperator(await stargateNftMock.getAddress())
 
-  const nodeManagementMock = await deployAndUpgrade(
+  const nodeManagementMock = (await deployAndUpgrade(
     ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
-    [[await vechainNodesMock.getAddress(), owner.address, owner.address], [], [stargateNftAddress]],
+    [[await vechainNodesMock.getAddress(), owner.address, owner.address], [], [await stargateNftMock.getAddress()]],
     {
       versions: [undefined, 2, 3],
       logOutput: false,
     },
-  )
+  )) as NodeManagementV3
 
   let myErc1155, myErc721
   if (deployMocks) {
@@ -1515,6 +1449,7 @@ export const getOrDeployContractInstances = async ({
     vthoTokenMock,
     vechainNodesMock,
     stargateNftMock,
+    stargateMock,
     relayerRewardsPool,
     autoVotingLogic: AutoVotingLogic,
   }

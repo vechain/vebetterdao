@@ -1,19 +1,19 @@
 import {
   B3TR,
   Emissions,
-  TokenAuction,
   Treasury,
   VOT3,
   VoterRewards,
   X2EarnApps,
   B3TRGovernor,
   XAllocationVoting,
+  Stargate,
 } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
 import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
-import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
+import { mintStargateNFTs, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
 import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
 
@@ -90,7 +90,7 @@ export const setupEnvironment = async (
   xAllocationVoting: XAllocationVoting,
   b3tr: B3TR,
   vot3: VOT3,
-  vechainNodesMock: TokenAuction,
+  stargateMock: Stargate,
 ) => {
   switch (config) {
     case "local":
@@ -104,12 +104,12 @@ export const setupEnvironment = async (
         xAllocationVoting,
         b3tr,
         vot3,
-        vechainNodesMock,
+        stargateMock,
         shouldEndorseXApps(),
       )
       break
     case "testnet":
-      await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
+      await setupTestEnvironment(emissions, x2EarnApps, stargateMock)
       break
     case "mainnet":
       await setupMainnetEnvironment(emissions, x2EarnApps)
@@ -137,7 +137,7 @@ export const setupLocalEnvironment = async (
   xAllocationVoting: XAllocationVoting,
   b3tr: B3TR,
   vot3: VOT3,
-  vechainNodesMock: TokenAuction,
+  stargateMock: Stargate,
   endorseApps: boolean,
 ) => {
   const start = performance.now()
@@ -190,13 +190,13 @@ export const setupLocalEnvironment = async (
    */
 
   // If the first 8 accounts does not have the correct nodes, run the following line
-  await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
+  await mintStargateNFTs(stargateMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
   await startEmissions(emissionsContract, admin)
 
   if (endorseApps) {
     // Get unendorsed XAPPs
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
-    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, vechainNodesMock)
+    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, stargateMock)
     // If this fails, check if the first 8 accounts have the correct nodes [7, 6, 5, 3, 1, 7, 7, 7]
   }
   await proposeUpgradeGovernance(governor, xAllocationVoting)
@@ -206,11 +206,7 @@ export const setupLocalEnvironment = async (
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-export const setupTestEnvironment = async (
-  emissions: Emissions,
-  x2EarnApps: X2EarnApps,
-  vechainNodesMock: TokenAuction,
-) => {
+export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps, stargateMock: Stargate) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
@@ -228,10 +224,10 @@ export const setupTestEnvironment = async (
   await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
   console.log("x-apps added")
 
-  // Creating NODE holders
+  // Creating Stargate NFT holders
   const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
-  await mintVechainNodes(vechainNodesMock, allAccounts, padNodeTypes([7, 6, 5, 3, 2], allAccounts.length))
-  console.log("NODE holders created")
+  await mintStargateNFTs(stargateMock, allAccounts, padNodeTypes([7, 6, 5, 3, 2], allAccounts.length))
+  console.log("Stargate NFT holders created")
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)

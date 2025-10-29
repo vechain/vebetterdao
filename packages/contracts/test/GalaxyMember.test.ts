@@ -38,7 +38,7 @@ import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("Galaxy Member - @shard3b", () => {
+describe.only("Galaxy Member - @shard3b", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -4464,7 +4464,7 @@ describe("Galaxy Member - @shard3b", () => {
 
   describe("StarGate", () => {
     it("Should preserve GM selection and attachment after migrating node from TokenAuction to StarGate", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, nodeManagement, galaxyMember, otherAccount } =
+      const { owner, vechainNodesMock, stargateNftMock, stargateMock, nodeManagement, galaxyMember, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -4517,7 +4517,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // Migrate the node to from TokenAuction to StarGate
       const vetRequired = (await stargateNftMock.getLevel(1))[5]
-      await stargateNftMock.connect(owner).migrateAndDelegate(nodeId, true, { value: vetRequired })
+      await stargateMock.connect(owner).migrate(nodeId, { value: vetRequired })
 
       // Check contracts totalSupply again
       expect(await vechainNodesMock.totalSupply()).to.equal(1)
@@ -4541,12 +4541,11 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMember.levelOf(gmId)).to.equal(1) // downgraded to Earth
     })
 
-    it("Should preserve delegation after migrating node from TokenAuction to StarGate", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, nodeManagement, galaxyMember, otherAccount } =
+    it("Should preserve token manager after migrating node from TokenAuction to StarGate", async () => {
+      const { owner, vechainNodesMock, stargateNftMock, stargateMock, nodeManagement, galaxyMember, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
-      const stargateNftErrors = await getStargateNFTErrorsInterface(stargateNftMock)
 
       // Setup GM MAX LEVEL
       await galaxyMember.connect(owner).setMaxLevel(10)
@@ -4596,14 +4595,9 @@ describe("Galaxy Member - @shard3b", () => {
       // Fast forward 4 hours so that StarGate NFT contract can destroy the legacy node
       await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
 
-      // Should revert if delegatee tries to migrate the node
-      const vetRequired = (await stargateNftMock.getLevel(7))[5]
-      await expect(
-        stargateNftMock.connect(owner).migrateAndDelegate(nodeId, true, { value: vetRequired }),
-      ).to.be.revertedWithCustomError(stargateNftErrors, "NotOwner")
-
+      const vetRequired = (await stargateNftMock.getLevel(7)).vetAmountRequiredToStake
       // Only otherAccount can migrate the node
-      await stargateNftMock.connect(otherAccount).migrateAndDelegate(nodeId, true, { value: vetRequired })
+      await stargateMock.connect(otherAccount).migrate(nodeId, { value: vetRequired })
 
       // Check contracts totalSupply again
       expect(await vechainNodesMock.totalSupply()).to.equal(0)
@@ -4632,10 +4626,18 @@ describe("Galaxy Member - @shard3b", () => {
     })
 
     it("Should attach/detach GM correclty for nodes freshly minted on StarGate", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, nodeManagement, galaxyMember, vthoTokenMock, otherAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const {
+        owner,
+        vechainNodesMock,
+        stargateNftMock,
+        stargateMock,
+        nodeManagement,
+        galaxyMember,
+        vthoTokenMock,
+        otherAccount,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       // Setup GM MAX LEVEL
       await galaxyMember.connect(owner).setMaxLevel(10)
 
@@ -4649,7 +4651,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // Mint a Strength node directly on StarGate
       const vetRequired = (await stargateNftMock.getLevel(1))[5]
-      await stargateNftMock.connect(owner).stake(1, { value: vetRequired })
+      await stargateMock.connect(owner).stake(1, { value: vetRequired })
       expect(await stargateNftMock.balanceOf(owner.address)).to.equal(1)
 
       // Check contracts totalSupply again
@@ -4679,7 +4681,7 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMember.levelOf(gmId)).to.equal(2) // from Earth to Moon
 
       // Owner unstakes and the node is burned
-      await stargateNftMock.connect(owner).unstake(nodeId)
+      await stargateMock.connect(owner).unstake(nodeId)
       expect(await stargateNftMock.balanceOf(owner.address)).to.equal(0)
       expect(await stargateNftMock.totalSupply()).to.equal(0)
 
@@ -4695,10 +4697,18 @@ describe("Galaxy Member - @shard3b", () => {
     })
 
     it("Should attach GM correctly for StarGate new economic nodes - no free upgrade", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, nodeManagement, galaxyMember, vthoTokenMock, otherAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const {
+        owner,
+        vechainNodesMock,
+        stargateNftMock,
+        stargateMock,
+        nodeManagement,
+        galaxyMember,
+        vthoTokenMock,
+        otherAccount,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Setup GM MAX LEVEL
       await galaxyMember.connect(owner).setMaxLevel(10)
@@ -4713,7 +4723,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // Mint a Dawm node directly on StarGate
       const vetRequired = (await stargateNftMock.getLevel(8))[5]
-      await stargateNftMock.connect(owner).stake(8, { value: vetRequired })
+      await stargateMock.connect(owner).stake(8, { value: vetRequired })
       expect(await stargateNftMock.balanceOf(owner.address)).to.equal(1)
 
       // Check contracts totalSupply again
@@ -4748,7 +4758,7 @@ describe("Galaxy Member - @shard3b", () => {
 describe("Galaxy Member - @shard3b", () => {
   describe("StarGate", () => {
     it("Should preserve GM selection and attachment after migrating node from TokenAuction to StarGate", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, nodeManagement, galaxyMember, otherAccount } =
+      const { owner, vechainNodesMock, stargateNftMock, stargateMock, nodeManagement, galaxyMember, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -4801,7 +4811,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // Migrate the node to from TokenAuction to StarGate
       const vetRequired = (await stargateNftMock.getLevel(1))[5]
-      await stargateNftMock.connect(owner).migrateAndDelegate(nodeId, true, { value: vetRequired })
+      await stargateMock.connect(owner).migrate(nodeId, { value: vetRequired })
 
       // Check contracts totalSupply again
       expect(await vechainNodesMock.totalSupply()).to.equal(1)
@@ -4826,7 +4836,7 @@ describe("Galaxy Member - @shard3b", () => {
     })
 
     it("Should preserve delegation after migrating node from TokenAuction to StarGate", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, nodeManagement, galaxyMember, otherAccount } =
+      const { owner, vechainNodesMock, stargateNftMock, stargateMock, nodeManagement, galaxyMember, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -4880,14 +4890,9 @@ describe("Galaxy Member - @shard3b", () => {
       // Fast forward 4 hours so that StarGate NFT contract can destroy the legacy node
       await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
 
-      // Should revert if delegatee tries to migrate the node
-      const vetRequired = (await stargateNftMock.getLevel(7))[5]
-      await expect(
-        stargateNftMock.connect(owner).migrateAndDelegate(nodeId, true, { value: vetRequired }),
-      ).to.be.revertedWithCustomError(stargateNftErrors, "NotOwner")
-
       // Only otherAccount can migrate the node
-      await stargateNftMock.connect(otherAccount).migrateAndDelegate(nodeId, true, { value: vetRequired })
+      const vetRequired = (await stargateNftMock.getLevel(7)).vetAmountRequiredToStake
+      await stargateMock.connect(otherAccount).migrate(nodeId, { value: vetRequired })
 
       // Check contracts totalSupply again
       expect(await vechainNodesMock.totalSupply()).to.equal(0)
@@ -4916,7 +4921,7 @@ describe("Galaxy Member - @shard3b", () => {
     })
 
     it("Should attach/detach GM correclty for nodes freshly minted on StarGate", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, galaxyMember, vthoTokenMock, otherAccount } =
+      const { owner, vechainNodesMock, stargateNftMock, stargateMock, galaxyMember, vthoTokenMock, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -4932,8 +4937,8 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await stargateNftMock.totalSupply()).to.equal(0)
 
       // Mint a Strength node directly on StarGate
-      const vetRequired = (await stargateNftMock.getLevel(1))[5]
-      await stargateNftMock.connect(owner).stake(1, { value: vetRequired })
+      const vetRequired = (await stargateNftMock.getLevel(1)).vetAmountRequiredToStake
+      await stargateMock.connect(owner).stake(1, { value: vetRequired })
       expect(await stargateNftMock.balanceOf(owner.address)).to.equal(1)
 
       // Check contracts totalSupply again
@@ -4963,7 +4968,7 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMember.levelOf(gmId)).to.equal(2) // from Earth to Moon
 
       // Owner unstakes and the node is burned
-      await stargateNftMock.connect(owner).unstake(nodeId)
+      await stargateMock.connect(owner).unstake(nodeId)
       expect(await stargateNftMock.balanceOf(owner.address)).to.equal(0)
       expect(await stargateNftMock.totalSupply()).to.equal(0)
 
@@ -4979,7 +4984,7 @@ describe("Galaxy Member - @shard3b", () => {
     })
 
     it("Should attach GM correctly for StarGate new economic nodes - no free upgrade", async () => {
-      const { owner, vechainNodesMock, stargateNftMock, galaxyMember, vthoTokenMock, otherAccount } =
+      const { owner, vechainNodesMock, stargateNftMock, stargateMock, galaxyMember, vthoTokenMock, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -4997,7 +5002,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // Mint a Dawm node directly on StarGate
       const vetRequired = (await stargateNftMock.getLevel(8))[5]
-      await stargateNftMock.connect(owner).stake(8, { value: vetRequired })
+      await stargateMock.connect(owner).stake(8, { value: vetRequired })
       expect(await stargateNftMock.balanceOf(owner.address)).to.equal(1)
 
       // Check contracts totalSupply again
