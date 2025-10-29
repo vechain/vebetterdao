@@ -132,6 +132,7 @@ const processSingleBatch = async (
   walletAddress: string,
   privateKey: string | Uint8Array,
   batchNumber: number,
+  dryRun: boolean = false,
 ): Promise<{ success: boolean; txId?: string; needsIsolation?: boolean }> => {
   try {
     const clauses = buildBatchClauses(contractAddress, users, roundId)
@@ -143,8 +144,19 @@ const processSingleBatch = async (
         usersCount: users.length,
         revertReasons: gasResult.revertReasons,
         vmErrors: gasResult.vmErrors,
+        dryRun,
       })
       return { success: false, needsIsolation: true }
+    }
+
+    // If dry run, stop here after successful gas estimation
+    if (dryRun) {
+      logger.info("Batch simulation successful (DRY RUN)", {
+        batchNumber,
+        votesCount: users.length,
+        estimatedGas: gasResult.totalGas,
+      })
+      return { success: true, txId: `DRY_RUN_BATCH_${batchNumber}` }
     }
 
     const txBody = await buildTxBody(thor, clauses, gasResult.totalGas)
@@ -173,7 +185,7 @@ const processSingleBatch = async (
       return { success: false, needsIsolation: true }
     }
   } catch (error) {
-    logger.error("Batch processing error", error, { batchNumber, usersCount: users.length })
+    logger.error("Batch processing error", error, { batchNumber, usersCount: users.length, dryRun })
     return { success: false, needsIsolation: true }
   }
 }
@@ -187,6 +199,7 @@ const processSingleBatch = async (
  * @param walletAddress - The wallet address to use for signing
  * @param privateKey - The private key for signing (as hex string or Uint8Array)
  * @param batchSize - Size of each batch (default: 10)
+ * @param dryRun - If true, only simulate votes without sending transactions (default: false)
  * @returns BatchResult with counts and failure details
  */
 export const processBatchedVotes = async (
@@ -197,11 +210,13 @@ export const processBatchedVotes = async (
   walletAddress: string,
   privateKey: string | Uint8Array,
   batchSize: number = 10,
+  dryRun: boolean = false,
 ): Promise<BatchResult> => {
   logger.info("Starting batched vote processing", {
     totalUsers: users.length,
     batchSize,
     roundId,
+    dryRun,
   })
 
   const queue = [...users] // Create a copy to work with
@@ -222,6 +237,7 @@ export const processBatchedVotes = async (
       walletAddress,
       privateKey,
       batchNumber,
+      dryRun,
     )
 
     if (result.success && result.txId) {
@@ -252,6 +268,7 @@ export const processBatchedVotes = async (
     successfulVotes,
     failedVotesCount: failedVotes.length,
     totalTransactions: transactionIds.length,
+    dryRun,
     failedVotes: failedVotes.length > 0 ? failedVotes : undefined,
   })
 

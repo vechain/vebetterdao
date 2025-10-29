@@ -93,25 +93,25 @@ const getSlackConfig = (): SlackConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
 
-  // Point them all to b3tr-lambda channel
+  // Point them all to b3tr-lambda channel with Auto-Voting prefix
   switch (environment) {
     case AppEnv.MAINNET:
       return {
         channelId: slackIds.b3trLambda,
-        messagePrefix: "[MAINNET] ",
+        messagePrefix: "[MAINNET][Auto-Voting] ",
       }
 
     case AppEnv.TESTNET_STAGING:
       return {
         channelId: slackIds.b3trLambda,
-        messagePrefix: "[STAGING] ",
+        messagePrefix: "[STAGING][Auto-Voting] ",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
         channelId: slackIds.b3trLambda,
-        messagePrefix: "[STAGING] ",
+        messagePrefix: "[STAGING][Auto-Voting] ",
       }
   }
 }
@@ -144,24 +144,37 @@ const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKe
 }
 
 export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
+  // Parse debug flag from event payload
+  let dryRun = false
+  try {
+    const body = event.body ? JSON.parse(event.body) : {}
+    dryRun = body.debug === true
+  } catch {
+    // If body parsing fails, default to false
+    dryRun = false
+  }
+
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
   console.log(`Caller wallet address: ${(await getCallerWalletInfo()).walletAddress}`)
   console.log(`Environment: ${process.env.LAMBDA_ENV}`)
   console.log(`Network: ${NODE_URL}`)
   console.log(`XAllocationVoting contract: ${CONFIG.xAllocationVotingContractAddress}`)
+  console.log(`Dry Run Mode: ${dryRun}`)
 
   try {
     const thorClient = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const secretsClient = new SecretsManagerClient({ region: "eu-west-1" })
     const BATCH_SIZE = 10
 
-    // Slack notification options
-    const slackOptions = {
-      client: secretsClient,
-      channelId: SLACK_CHANNEL_ID,
-      messagePrefix: SLACK_MESSAGE_PREFIX,
-    }
+    // Slack notification options - disabled during dry-run
+    const slackOptions = dryRun
+      ? undefined
+      : {
+          client: secretsClient,
+          channelId: SLACK_CHANNEL_ID,
+          messagePrefix: SLACK_MESSAGE_PREFIX,
+        }
 
     // Get the current round information
     const currentRoundId = Number(await getCurrentRoundId(thorClient, CONFIG.xAllocationVotingContractAddress))
@@ -196,7 +209,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     if (!allValid) {
       await notify({
         level: "warn",
-        message: `Found ${invalidUsers.length} invalid auto-voting users`,
+        message: `Found ${invalidUsers.length} invalid auto-voting users in round ${currentRoundId}. Check logs for more details.`,
         data: {
           roundId: currentRoundId,
           invalidUsersCount: invalidUsers.length,
@@ -230,6 +243,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       walletAddress,
       privateKey,
       BATCH_SIZE,
+      dryRun,
     )
 
     // Check if we managed to cast any votes at all
@@ -254,7 +268,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     if (batchResult.failedVotes.length > 0) {
       await notify({
         level: "warn",
-        message: `Some votes failed to be cast`,
+        message: `Some votes failed to be cast in round ${currentRoundId}. Check logs for more details.`,
         data: {
           successfulVotes: batchResult.successfulVotes,
           failedVotes: batchResult.failedVotes.length,
@@ -266,13 +280,18 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
 
     await notify({
       level: "success",
-      message: `Auto-voting completed for round ${currentRoundId}`,
+      message: dryRun
+        ? `Auto-voting simulation completed for round ${currentRoundId} (DRY RUN)`
+        : `Auto-voting completed for round ${currentRoundId}`,
       data: {
         totalUsers: usersToVoteFor.length,
         successfulVotes: batchResult.successfulVotes,
         failedVotes: batchResult.failedVotes.length,
         roundId: currentRoundId,
         transactions: batchResult.transactionIds.length,
+        dryRun,
+        // Include detailed failed votes in dry-run mode for easier debugging
+        ...(dryRun && batchResult.failedVotes.length > 0 ? { failedVoteDetails: batchResult.failedVotes } : {}),
       },
       slack: slackOptions,
     })
@@ -282,6 +301,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       failedVotes: batchResult.failedVotes,
       transactionIds: batchResult.transactionIds,
       roundId: currentRoundId,
+      dryRun,
     })
   } catch (error) {
     logger.error("Lambda execution failed", error)
