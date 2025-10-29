@@ -1,5 +1,6 @@
 import { ThorClient } from "@vechain/sdk-network"
 import { isUserAutoVotingEnabledForRound } from "./isUserAutoVotingEnabledForRound"
+import { logger } from "../logger"
 
 /**
  * Verifies that all users in the list have auto-voting enabled (and 'active' at the round start block) for the specified round
@@ -19,7 +20,10 @@ export const verifyAutoVotingUsersIsActive = async (
   validUsers: string[]
   invalidUsers: string[]
 }> => {
-  console.log(`Verifying auto-voting status for ${users.length} users in round ${roundId}`)
+  logger.info("Verifying auto-voting eligibility", {
+    userCount: users.length,
+    roundId,
+  })
 
   const results = await Promise.all(
     users.map(async user => {
@@ -27,7 +31,7 @@ export const verifyAutoVotingUsersIsActive = async (
         const isEnabled = await isUserAutoVotingEnabledForRound(thor, contractAddress, user, roundId)
         return { user, isEnabled }
       } catch (error) {
-        console.error(`Error checking auto-voting status for ${user}:`, error)
+        logger.error("Error verifying user", error, { user, roundId })
         return { user, isEnabled: false }
       }
     }),
@@ -36,11 +40,19 @@ export const verifyAutoVotingUsersIsActive = async (
   const validUsers = results.filter(r => r.isEnabled).map(r => r.user)
   const invalidUsers = results.filter(r => !r.isEnabled).map(r => r.user)
 
-  console.log(`Verification complete: ${validUsers.length} valid, ${invalidUsers.length} invalid`)
-
   if (invalidUsers.length > 0) {
-    console.warn(`Invalid users found:`, invalidUsers)
+    logger.warn("Invalid users found", {
+      invalidCount: invalidUsers.length,
+      invalidUsers,
+      roundId,
+    })
   }
+
+  logger.info("Verification complete", {
+    validCount: validUsers.length,
+    invalidCount: invalidUsers.length,
+    allValid: invalidUsers.length === 0,
+  })
 
   return {
     allValid: invalidUsers.length === 0,

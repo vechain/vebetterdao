@@ -1,6 +1,7 @@
 import { ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Hex } from "@vechain/sdk-core"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { logger } from "../logger"
 
 // The max limit is 1000 events per request
 // https://github.com/vechain/thor/blob/master/docs/command_line_arguments.md
@@ -17,12 +18,19 @@ export interface AutoVotingEnabledUsersResult {
 
 /**
  * Gets users who have auto-voting enabled by fetching AutoVotingToggled events
+ *
+ * SNAPSHOT BEHAVIOR:
+ * - This function reconstructs the auto-voting state at a specific timepoint (toBlock)
+ * - It processes all toggle events chronologically up to toBlock
+ * - For users who toggled multiple times, only their final state at toBlock matters
+ * - This mirrors the contract's checkpoint-based storage (upperLookupRecent)
+ *
  * @param thor - The ThorClient instance
  * @param contractAddress - The XAllocationVoting contract address
  * @param fromBlock - The starting block number
- * @param toBlock - The ending block number (optional, defaults to latest)
+ * @param toBlock - The snapshot block (typically round start block)
  * @param offset - The offset for pagination (default: 0)
- * @returns Object containing user states, pagination info
+ * @returns Object containing user states at the snapshot, pagination info
  */
 export const getAutoVotingEnabledUsers = async (
   thor: ThorClient,
@@ -31,8 +39,6 @@ export const getAutoVotingEnabledUsers = async (
   toBlock?: number,
   offset: number = 0,
 ): Promise<AutoVotingEnabledUsersResult> => {
-  console.log(`Fetching AutoVotingToggled events from block ${fromBlock} to ${toBlock || "latest"} (offset: ${offset})`)
-
   const xAllocationVotingContract = ABIContract.ofAbi(XAllocationVoting__factory.abi)
   const autoVotingToggledEvent = xAllocationVotingContract.getEvent("AutoVotingToggled") as any
   const topics = autoVotingToggledEvent.encodeFilterTopicsNoNull({})
@@ -59,10 +65,9 @@ export const getAutoVotingEnabledUsers = async (
     ],
   })
 
-  console.log(`Found ${logs.length} AutoVotingToggled events at offset ${offset}`)
-
-  // Map to store the latest state for each user
-  const userAutoVotingState = new Map<string, boolean>()
+  // Map to store each user's final state at the snapshot block
+  // If a user toggles multiple times, later events overwrite earlier ones
+  const userStateAtSnapshot = new Map<string, boolean>()
 
   for (const log of logs) {
     const accountTopic = log.topics?.[1] as string
@@ -75,8 +80,8 @@ export const getAutoVotingEnabledUsers = async (
     if (accountTopic) {
       const walletAddress = decodedData.args.account as string
       const enabled = decodedData.args.enabled as boolean
-      // Overwrite the previous state if the same user is toggled multiple times
-      userAutoVotingState.set(walletAddress, enabled)
+      // Overwrite previous state - only the final state at snapshot matters
+      userStateAtSnapshot.set(walletAddress, enabled)
     }
   }
 
@@ -84,7 +89,7 @@ export const getAutoVotingEnabledUsers = async (
   const hasMore = logs.length === MAX_EVENTS_PER_REQUEST
 
   return {
-    userAutoVotingState,
+    userAutoVotingState: userStateAtSnapshot,
     hasMore,
     eventCount: logs.length,
   }
@@ -92,11 +97,20 @@ export const getAutoVotingEnabledUsers = async (
 
 /**
  * Gets all users who have auto-voting enabled by fetching all AutoVotingToggled events with pagination
+ *
+ * IMPORTANT: This function queries from block 0 to reconstruct the complete history.
+ * This ensures we capture the correct state at the snapshot regardless of when users toggled.
+ *
+ * Examples:
+ * - User ON at block 50, snapshot at 100 → INCLUDED (was ON at snapshot)
+ * - User ON at 50, OFF at 80, snapshot at 100 → EXCLUDED (was OFF at snapshot)
+ * - User ON at 50, OFF at 150, snapshot at 100 → INCLUDED (OFF happened after snapshot)
+ *
  * @param thor - The ThorClient instance
  * @param contractAddress - The XAllocationVoting contract address
- * @param fromBlock - The starting block number
- * @param toBlock - The ending block number (optional, defaults to latest)
- * @returns Array of user addresses with auto-voting enabled
+ * @param fromBlock - The starting block number (typically 0 to get full history)
+ * @param toBlock - The snapshot block (typically round start block)
+ * @returns Array of user addresses with auto-voting enabled at the snapshot
  */
 export const getAllAutoVotingEnabledUsers = async (
   thor: ThorClient,
@@ -104,20 +118,23 @@ export const getAllAutoVotingEnabledUsers = async (
   fromBlock: number,
   toBlock?: number,
 ): Promise<string[]> => {
-  console.log(`Fetching all AutoVotingToggled events from block ${fromBlock} to ${toBlock || "latest"}`)
+  logger.info("Fetching AutoVotingToggled events", {
+    fromBlock,
+    toBlock: toBlock || "latest",
+  })
 
-  // Aggregate map to store the latest state for each user across all pages
-  const aggregatedUserState = new Map<string, boolean>()
+  // Aggregate map to store each user's final state at snapshot across all paginated results
+  const userStateAtSnapshot = new Map<string, boolean>()
   let offset = 0
   let totalEvents = 0
 
-  // Loop through all pages
+  // Loop through all pages of events
   while (true) {
     const result = await getAutoVotingEnabledUsers(thor, contractAddress, fromBlock, toBlock, offset)
 
-    // Merge the results into the aggregated map
+    // Merge paginated results - each page may contain updates to the same users
     for (const [user, enabled] of result.userAutoVotingState.entries()) {
-      aggregatedUserState.set(user, enabled)
+      userStateAtSnapshot.set(user, enabled)
     }
 
     totalEvents += result.eventCount
@@ -131,14 +148,15 @@ export const getAllAutoVotingEnabledUsers = async (
     offset += MAX_EVENTS_PER_REQUEST
   }
 
-  console.log(`Fetched ${totalEvents} total AutoVotingToggled events`)
+  // Grab only wallets that have enabled status
+  const enabledUsersAtSnapshot = Array.from(userStateAtSnapshot.entries())
+    .filter(([_user, isEnabled]) => isEnabled === true)
+    .map(([user, _isEnabled]) => user)
 
-  // Filter to only enabled users
-  const enabledUsers = Array.from(aggregatedUserState.entries())
-    .filter(([_, enabled]) => enabled)
-    .map(([account]) => account)
+  logger.info("AutoVotingToggled events processed", {
+    totalEvents,
+    activeUsersAtSnapshot: enabledUsersAtSnapshot.length,
+  })
 
-  console.log(`Found ${enabledUsers.length} users with auto-voting active`)
-
-  return enabledUsers
+  return enabledUsersAtSnapshot
 }

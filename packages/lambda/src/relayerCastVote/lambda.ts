@@ -9,6 +9,7 @@ import mainnetConfig from "@repo/config/mainnet"
 import { getSecret } from "../helpers/secret"
 import { CustomApiError, StandardApiError, SuccessResponseType } from "../helpers/api.types"
 import { buildResponse } from "../helpers/api/response"
+import { logger } from "../helpers/logger"
 import { AppEnv } from "@repo/config/contracts"
 import { AppConfig } from "@repo/config"
 import { getCurrentRoundId } from "../helpers/xApps"
@@ -160,9 +161,9 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
 
     // Get the current round ID
     const currentRoundId = Number(await getCurrentRoundId(thorClient, CONFIG.xAllocationVotingContractAddress))
-    console.log(`Current round ID: ${currentRoundId}`)
 
     if (currentRoundId === 0) {
+      logger.warn("No active round found")
       return buildResponse(StandardApiError.BAD_REQUEST, {
         message: "No active round found",
       })
@@ -170,7 +171,11 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
 
     // Get the round start block number
     const roundStartBlock = await getRoundSnapshot(thorClient, CONFIG.xAllocationVotingContractAddress, currentRoundId)
-    console.log(`Round start block: ${roundStartBlock}`)
+
+    logger.info("Round information retrieved", {
+      roundId: currentRoundId,
+      snapshotBlock: roundStartBlock,
+    })
 
     // Fetch all users with auto-voting enabled and 'active' at the round start block
     const usersToVoteFor = await getAllAutoVotingEnabledUsers(
@@ -189,6 +194,10 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     )
 
     if (!allValid) {
+      logger.warn("Invalid users detected, notifying Slack", {
+        invalidUsers,
+        roundId: currentRoundId,
+      })
       await publishMessage(
         secretsClient,
         SLACK_CHANNEL_ID,
@@ -196,7 +205,8 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       )
     }
 
-    if (usersToVoteFor.length === 0) {
+    if (validUsers.length === 0) {
+      logger.info("No users with auto-voting enabled")
       return buildResponse(SuccessResponseType.SUCCESS, {
         message: "No users with auto-voting active found",
       })
@@ -209,26 +219,36 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     const { receipt, gasResult } = await castVotesOnBehalfOf(
       thorClient,
       CONFIG.xAllocationVotingContractAddress,
-      usersToVoteFor,
+      validUsers,
       currentRoundId,
       walletAddress,
       privateKey,
     )
 
     if (!receipt) {
+      logger.error("Transaction reverted", undefined, {
+        revertReasons: gasResult?.revertReasons,
+        vmErrors: gasResult?.vmErrors,
+      })
       return buildResponse(CustomApiError.TRANSACTION_REVERTED, {
         revertReasons: gasResult?.revertReasons,
         vmErrors: gasResult?.vmErrors,
       })
     }
 
+    logger.info("Votes cast successfully", {
+      usersVoted: validUsers.length,
+      roundId: currentRoundId,
+      txId: receipt.meta.txID,
+    })
+
     return buildResponse(SuccessResponseType.SUCCESS, {
       receipt,
-      usersVoted: usersToVoteFor.length,
+      usersVoted: validUsers.length,
       roundId: currentRoundId,
     })
   } catch (error) {
-    console.error("Error casting votes on behalf of users:", error)
+    logger.error("Lambda execution failed", error)
 
     return buildResponse(StandardApiError.INTERNAL_SERVER_ERROR, {
       error: error instanceof Error ? error.message : String(error),
