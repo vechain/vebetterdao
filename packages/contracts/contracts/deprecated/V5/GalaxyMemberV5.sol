@@ -33,11 +33,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { ITokenAuction } from "./mocks/Stargate/interfaces/ITokenAuction.sol";
-import { INodeManagementV3 } from "./mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { ITokenAuction } from "../../mocks/Stargate/interfaces/ITokenAuction.sol";
+import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 
