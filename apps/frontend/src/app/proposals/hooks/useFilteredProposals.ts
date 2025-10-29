@@ -52,12 +52,14 @@ export const useFilteredProposals = (
       [ProposalFilter.ApprovalPhase]:
         proposal.state === ProposalState.Active || proposal.state === ProposalState.Succeeded,
       [ProposalFilter.SupportPhase]: proposal.state === ProposalState.Pending,
-      [ProposalFilter.StandardProposalCompleted]:
-        proposal.state === ProposalState.Completed || proposal.state === ProposalState.Executed,
       [ProposalFilter.FailedStates]:
         proposal.state === ProposalState.Canceled ||
         proposal.state === ProposalState.Defeated ||
         proposal.state === ProposalState.DepositNotMet,
+      [ProposalFilter.StandardInDevelopment]:
+        proposal.state === ProposalState.InDevelopment ||
+        proposal.state === ProposalState.Queued ||
+        proposal.state === ProposalState.Executed,
       [ProposalFilter.InDevelopment]:
         proposal.state === ProposalState.InDevelopment || proposal.state === ProposalState.Queued,
       // StateFilter values

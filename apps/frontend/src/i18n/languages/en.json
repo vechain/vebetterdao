@@ -1513,5 +1513,11 @@
   "ineligible": "ineligible",
   "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.",
   "Uploading...": "Uploading...",
-  "Stored": "Stored"
+  "Stored": "Stored",
+  "Mark as in development": "Mark as in development",
+  "Mark as completed": "Mark as completed",
+  "Migrate your Node NFT before December 2": "Migrate your Node NFT before December 2",
+  "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.",
+  "Migrate now": "Migrate now",
+  "Later": "Later"
 }

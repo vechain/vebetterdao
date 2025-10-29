@@ -1,7 +1,6 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite"
 
 import { join, dirname, resolve } from "path"
-// import svgr from "vite-plugin-svgr"
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -9,6 +8,26 @@ import { join, dirname, resolve } from "path"
  */
 function getAbsolutePath(value: string): any {
   return dirname(require.resolve(join(value, "package.json")))
+}
+
+/**
+ * Vite plugin to redirect contract imports to mocks
+ */
+function mockContractsPlugin() {
+  const contractsMockPath = resolve(__dirname, "../__mocks__/@vechain/vebetterdao-contracts.ts")
+
+  return {
+    name: "mock-contracts",
+    resolveId(id: string) {
+      if (id.startsWith("@vechain/vebetterdao-contracts/")) {
+        return contractsMockPath
+      }
+      if (id === "@vechain/vebetterdao-contracts") {
+        return contractsMockPath
+      }
+      return null
+    },
+  }
 }
 const config: StorybookConfig = {
   stories: [
@@ -37,84 +56,38 @@ const config: StorybookConfig = {
     viteConfig.optimizeDeps ??= {}
     viteConfig.optimizeDeps.exclude ??= []
     viteConfig.ssr ??= {}
+    viteConfig.plugins ??= []
     viteConfig.logLevel = "silent"
 
-    // 1) Keep Node-only packages out of the browser pre-bundle
     viteConfig.optimizeDeps.exclude.push("next/dist/compiled/gzip-size")
 
-    // 2) Replace the Node-only module with an empty shim for preview
     viteConfig.resolve.alias["next/dist/compiled/gzip-size"] = resolve(__dirname, "mocks/empty.ts")
 
-    // Mock @repo/config for Storybook
-    viteConfig.resolve.alias["@repo/config"] = resolve(__dirname, "mocks/config.ts")
+    // Force Vite to use mocks for packages with Node.js dependencies
+    viteConfig.resolve.alias["@repo/config"] = resolve(__dirname, "../__mocks__/@repo/config.ts")
+    viteConfig.resolve.alias["@vechain/vechain-kit"] = resolve(__dirname, "../__mocks__/@vechain/vechain-kit.tsx")
+    viteConfig.resolve.alias["thor-devkit"] = resolve(__dirname, "../__mocks__/thor-devkit.ts")
+    viteConfig.resolve.alias["openai"] = resolve(__dirname, "../__mocks__/openai.ts")
+    viteConfig.resolve.alias["crypto"] = resolve(__dirname, "../__mocks__/crypto.ts")
+    viteConfig.resolve.alias["fs"] = resolve(__dirname, "../__mocks__/fs.ts")
+    viteConfig.resolve.alias["stream"] = resolve(__dirname, "../__mocks__/stream.ts")
+    viteConfig.resolve.alias["path"] = resolve(__dirname, "../__mocks__/path.ts")
+    viteConfig.resolve.alias["zlib"] = resolve(__dirname, "../__mocks__/zlib.ts")
 
-    // Mock @vechain/vechain-kit for Storybook
-    viteConfig.resolve.alias["@vechain/vechain-kit"] = resolve(__dirname, "mocks/vechain-kit.tsx")
+    // Mock local modules that have complex dependencies
+    const apiHooksMock = resolve(__dirname, "../src/api/__mocks__/hooks.ts")
+    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/sustainability/useUserScore.ts")] = apiHooksMock
+    viteConfig.resolve.alias[
+      resolve(__dirname, "../src/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId.ts")
+    ] = apiHooksMock
+    viteConfig.resolve.alias[resolve(__dirname, "../src/api/contracts/xApps/hooks/useXApps.ts")] = apiHooksMock
+    viteConfig.resolve.alias[resolve(__dirname, "../src/api/contracts/xApps/hooks/useUserSignalEvents.ts")] =
+      apiHooksMock
+    viteConfig.resolve.alias[resolve(__dirname, "../src/hooks/useTransak.ts")] = apiHooksMock
 
-    // Mock thor-devkit for Storybook (uses Node crypto)
-    viteConfig.resolve.alias["thor-devkit"] = resolve(__dirname, "mocks/thor-devkit.ts")
+    // Add custom plugin to handle all contract imports
+    viteConfig.plugins.push(mockContractsPlugin())
 
-    // Mock dayjs config to only load English locale
-    viteConfig.resolve.alias["@/utils/dayjsConfig"] = resolve(__dirname, "mocks/dayjsConfig.ts")
-    viteConfig.resolve.alias[resolve(__dirname, "../src/utils/dayjsConfig.ts")] = resolve(
-      __dirname,
-      "mocks/dayjsConfig.ts",
-    )
-
-    // Mock openai package (Node.js only)
-    viteConfig.resolve.alias["openai"] = resolve(__dirname, "mocks/empty.ts")
-
-    // Mock contracts package to prevent loading all typechain factories
-    // Order matters: more specific paths first
-    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"] = resolve(
-      __dirname,
-      "mocks/contracts.ts",
-    )
-    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/GrantsManager__factory"] = resolve(
-      __dirname,
-      "mocks/contracts.ts",
-    )
-    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/Treasury__factory"] = resolve(
-      __dirname,
-      "mocks/contracts.ts",
-    )
-    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/factories/VOT3__factory"] = resolve(
-      __dirname,
-      "mocks/contracts.ts",
-    )
-    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/@openzeppelin/access/AccessControl__factory"] = resolve(
-      __dirname,
-      "mocks/contracts.ts",
-    )
-    viteConfig.resolve.alias["@vechain/vebetterdao-contracts/typechain-types"] = resolve(
-      __dirname,
-      "mocks/contracts.ts",
-    )
-    viteConfig.resolve.alias["@vechain/vebetterdao-contracts"] = resolve(__dirname, "mocks/contracts.ts")
-
-    // Mock API hooks to prevent loading contract dependencies
-    viteConfig.resolve.alias["@/api/indexer/sustainability/useUserScore"] = resolve(__dirname, "mocks/api-hooks.ts")
-    viteConfig.resolve.alias["@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"] = resolve(
-      __dirname,
-      "mocks/api-hooks.ts",
-    )
-    viteConfig.resolve.alias["@/api/contracts/xApps/hooks/useXApps"] = resolve(__dirname, "mocks/api-hooks.ts")
-    viteConfig.resolve.alias["@/api/contracts/xApps/hooks/useUserSignalEvents"] = resolve(
-      __dirname,
-      "mocks/api-hooks.ts",
-    )
-    viteConfig.resolve.alias["@/hooks/useTransak"] = resolve(__dirname, "mocks/api-hooks.ts")
-
-    // 3) Guardrails: if anything still tries to pull Node built-ins, stub them
-    // (better to fail silently than crash)
-    for (const builtin of ["fs", "stream", "path", "zlib"]) {
-      viteConfig.resolve.alias[builtin] = resolve(__dirname, "mocks/empty.ts")
-    }
-
-    // Mock crypto with browser-compatible implementation
-    viteConfig.resolve.alias["crypto"] = resolve(__dirname, "mocks/crypto.ts")
-
-    // 4) Ensure SSR pipeline doesn’t try to externalize the module either
     const noExt = viteConfig.ssr.noExternal
     viteConfig.ssr.noExternal = Array.isArray(noExt)
       ? [...noExt, /next\/dist\/compiled\/gzip-size/]
