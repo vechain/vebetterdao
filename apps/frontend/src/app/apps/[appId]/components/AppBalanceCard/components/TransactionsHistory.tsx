@@ -1,7 +1,8 @@
-import { HStack, Text, VStack } from "@chakra-ui/react"
+import { HStack, Text, VStack, Icon, Link } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
+import { FiExternalLink } from "react-icons/fi"
 
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
@@ -46,9 +47,6 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
     if (timestamp < startTimestamp || timestamp > endTimestamp) {
       return null
     }
-  }
-  const seeTx = (txId: string) => {
-    window.open(getExplorerTxLink(txId), "_blank")
   }
 
   const getTransactionProps = (): TransactionProps => {
@@ -123,17 +121,17 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
   const bgColor = index % 2 === 0 ? "profile-bg" : "info-bg"
 
   return (
-    <HStack p={4} justify="space-between" borderRadius="md" bg={bgColor}>
+    <HStack
+      p={4}
+      justify="space-between"
+      borderRadius="md"
+      bg={bgColor}
+      _hover={{
+        bg: { base: "gray.50", _dark: "gray.800" },
+        transition: "background 0.2s",
+      }}>
       <VStack gap={0} alignItems={"flex-start"} flex={1}>
-        <Text
-          _hover={{
-            color: "blue.500",
-            cursor: "pointer",
-          }}
-          textStyle={isMobile ? "xs" : "sm"}
-          fontWeight="semibold"
-          cursor={"pointer"}
-          onClick={() => seeTx(txId)}>
+        <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold">
           {title}
         </Text>
         {subtitle && (
@@ -141,11 +139,24 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
             {subtitle}
           </Text>
         )}
-        <Text textStyle={isMobile ? "xs" : "sm"} color="gray.500">
+        <Link
+          href={getExplorerTxLink(txId)}
+          target="_blank"
+          rel="noopener noreferrer"
+          textStyle={isMobile ? "xs" : "sm"}
+          color="gray.500"
+          _hover={{
+            color: "blue.600",
+            textDecoration: "underline",
+          }}
+          display="inline-flex"
+          alignItems="center"
+          gap={1}>
           {t("on")} {dayjs(timestampTxs).format("DD/MM/YY")} {t("at")} {dayjs(timestampTxs).format("HH:mm")}
-        </Text>
+          <Icon as={FiExternalLink} boxSize={isMobile ? 2.5 : 3} />
+        </Link>
       </VStack>
-      <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" onClick={() => seeTx(txId)} flexShrink={0}>
+      <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" flexShrink={0}>
         {amount}
       </Text>
     </HStack>

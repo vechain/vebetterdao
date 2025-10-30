@@ -1,7 +1,6 @@
 import {
   Card,
   Dialog,
-  HStack,
   Text,
   VStack,
   NativeSelect,
@@ -11,10 +10,14 @@ import {
   Icon,
   Portal,
   CloseButton,
+  IconButton,
+  Flex,
 } from "@chakra-ui/react"
 import { useCallback, useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaSync } from "react-icons/fa"
+
+import { Tooltip } from "@/components/ui/tooltip"
 
 import { useAppFundActivityEvents } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppFundActivityEvents"
 import { DatePicker } from "../../../../../components/DatePicker/DatePicker"
@@ -69,10 +72,14 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
     }
 
     if (filteredTransactions.length === 0) {
+      const message =
+        transactionTypeFilter === "ALL" && transactions && transactions.length === 0
+          ? t("No transactions found")
+          : t("No transactions found for the selected type")
       return (
         <VStack py={100} textAlign="center" w="full">
           <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No transaction" />
-          <Text color="#757575">{t("No transactions found for the selected type")}</Text>
+          <Text color="gray.600">{message}</Text>
         </VStack>
       )
     }
@@ -129,21 +136,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
             <Dialog.Body pb={6}>
               <Card.Root w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={2} h={"full"} pb={4}>
                 <Card.Body overflowY="hidden">
-                  <HStack justifyContent="flex-end" alignItems="baseline">
-                    <Icon
-                      as={FaSync}
-                      onClick={() => {
-                        refetch()
-                        setTransactionTypeFilter("ALL")
-                        setIsRotating(!isRotating)
-                      }}
-                      cursor="pointer"
-                      transform={isRotating ? "rotate(360deg)" : "rotate(0deg)"}
-                      transition="transform 0.4s ease-in-out"
-                    />
-                  </HStack>
-
-                  <HStack gap={4} mb={4} justifyContent="space-between" w="full">
+                  <Flex gap={4} mb={4} justifyContent="space-between" w="full" alignItems="end">
                     <VStack alignItems="start" gap={0} flex="0.75">
                       <Text textStyle="sm" mb={1}>
                         {t("Type")}
@@ -169,7 +162,27 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                       </Text>
                       <DatePicker startDate={startDate} endDate={endDate} onChange={handleDateRangeChange} size="sm" />
                     </VStack>
-                  </HStack>
+
+                    <Tooltip content={t("Refresh transactions")}>
+                      <IconButton
+                        aria-label={t("Refresh transactions")}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          refetch()
+                          setTransactionTypeFilter("ALL")
+                          setStartDate("")
+                          setEndDate("")
+                          setIsRotating(!isRotating)
+                        }}>
+                        <Icon
+                          as={FaSync}
+                          transform={isRotating ? "rotate(360deg)" : "rotate(0deg)"}
+                          transition="transform 0.4s ease-in-out"
+                        />
+                      </IconButton>
+                    </Tooltip>
+                  </Flex>
 
                   {renderTx()}
                 </Card.Body>
