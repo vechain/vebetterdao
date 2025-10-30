@@ -1083,6 +1083,8 @@
   "The wallet address where you will receive your app's B3TR": "The wallet address where you will receive your app's B3TR",
   "The wallet address which will be used to manage your app": "The wallet address which will be used to manage your app",
   "Date Range": "Date Range",
+  "on": "on",
+  "at": "at",
   "Enabling allowance...": "Enabling allowance...",
   "Disabling allowance...": "Disabling allowance...",
   "Loading transactions...": "Loading transactions...",

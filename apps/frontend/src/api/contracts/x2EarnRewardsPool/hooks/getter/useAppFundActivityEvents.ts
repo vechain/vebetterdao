@@ -20,6 +20,7 @@ export type AppFundActivityEvent = {
   availableFunds?: string
   rewardsPoolBalance?: string
   txType: string
+  reason?: string
 }
 /**
  * Hook to get all the apps tx events such as:
@@ -67,6 +68,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       blockNumber: meta.blockNumber,
       txId: meta.txID,
       txType: "WITHDRAW",
+      reason: decodedData.args.reason as string,
     }),
   })
 

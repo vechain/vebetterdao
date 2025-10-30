@@ -28,6 +28,7 @@ type TransactionType =
 type TransactionProps = {
   // icon: JSX.Element
   title: string
+  subtitle?: string
   amount: string
   timestampTxs: number
   txId: string
@@ -54,24 +55,28 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
     const transactionTypes: Record<TransactionType, TransactionProps> = {
       DEPOSIT: {
         title: t("Deposit"),
+        subtitle: t("Deposit"),
         amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
       VOTES_ALLOCATION: {
-        title: t("Votes Allocation"),
+        title: t("Deposit"),
+        subtitle: t("Votes Allocation"),
         amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
       DYNAMIC_BASE_ALLOCATION: {
-        title: t("Dynamic Base Allocation"),
+        title: t("Deposit"),
+        subtitle: t("Dynamic Base Allocation"),
         amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
       WITHDRAW: {
         title: t("Withdraw"),
+        subtitle: transaction.reason,
         amount: `-${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
@@ -83,19 +88,22 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
         txId: transaction.txId,
       },
       REWARDS_POOL_UPDATED: {
-        title: t("Rewards Pool Updated"),
+        title: t("Rewards Pool"),
+        subtitle: t("Rewards Pool Updated"),
         amount: `${compactFormatter.format(parseFloat(transaction.rewardsPoolBalance || "0"))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
       INCREASE_REWARDS_POOL: {
-        title: t("Increased Rewards Pool"),
+        title: t("Rewards Pool"),
+        subtitle: t("Increased Rewards Pool"),
         amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
       DECREASE_REWARDS_POOL: {
-        title: t("Decreased Rewards Pool"),
+        title: t("Rewards Pool"),
+        subtitle: t("Decreased Rewards Pool"),
         amount: `-${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
@@ -111,12 +119,12 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
       }
     )
   }
-  const { title, amount, timestampTxs, txId } = getTransactionProps()
+  const { title, subtitle, amount, timestampTxs, txId } = getTransactionProps()
   const bgColor = index % 2 === 0 ? "profile-bg" : "info-bg"
 
   return (
     <HStack p={4} justify="space-between" borderRadius="md" bg={bgColor}>
-      <VStack gap={0} alignItems={"flex-start"}>
+      <VStack gap={0} alignItems={"flex-start"} flex={1}>
         <Text
           _hover={{
             color: "blue.500",
@@ -128,9 +136,16 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
           onClick={() => seeTx(txId)}>
           {title}
         </Text>
-        <Text textStyle={isMobile ? "xs" : "sm"}>{dayjs(timestampTxs).format("DD/MM/YY")}</Text>
+        {subtitle && (
+          <Text textStyle={isMobile ? "xs" : "sm"} color="gray.600" noOfLines={2}>
+            {subtitle}
+          </Text>
+        )}
+        <Text textStyle={isMobile ? "xs" : "sm"} color="gray.500">
+          {t("on")} {dayjs(timestampTxs).format("DD/MM/YY")} {t("at")} {dayjs(timestampTxs).format("HH:mm")}
+        </Text>
       </VStack>
-      <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" onClick={() => seeTx(txId)}>
+      <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" onClick={() => seeTx(txId)} flexShrink={0}>
         {amount}
       </Text>
     </HStack>
