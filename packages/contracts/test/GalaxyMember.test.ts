@@ -32,6 +32,7 @@ import {
   GalaxyMemberV2,
   GalaxyMemberV3,
   GalaxyMemberV4,
+  GalaxyMemberV5,
   MockERC721Receiver,
 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
@@ -1018,11 +1019,11 @@ describe("Galaxy Member - @shard3b", () => {
 
       const galaxyMemberV5 = (await upgradeProxy(
         "GalaxyMemberV4",
-        "GalaxyMember",
+        "GalaxyMemberV5",
         await galaxyMember.getAddress(),
         [],
         { version: 5 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV5
 
       storageSlotsAfter = []
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
