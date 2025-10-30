@@ -33,7 +33,7 @@ type TransactionProps = {
   timestampTxs: number
   txId: string
 }
-const compactFormatter = getCompactFormatter(4)
+const compactFormatter = getCompactFormatter(2)
 export const TransactionsHistory = ({ transaction, index, start, end }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
@@ -137,7 +137,7 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
           {title}
         </Text>
         {subtitle && (
-          <Text textStyle={isMobile ? "xs" : "sm"} color="gray.600" noOfLines={2}>
+          <Text textStyle={isMobile ? "xs" : "sm"} color="gray.600" lineClamp={2}>
             {subtitle}
           </Text>
         )}
