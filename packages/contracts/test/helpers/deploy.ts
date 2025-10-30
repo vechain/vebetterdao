@@ -606,7 +606,7 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
-      [],
+      [await stargateNftMock.getAddress()],
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6],
