@@ -146,8 +146,8 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                     </VStack>
 
                     <Tooltip
-                      content={t("Refresh transactions")}
-                      contentProps={{ p: 2, borderRadius: "md", color: { base: "black", _dark: "white" } }}>
+                      content={<Text color="fg">{t("Refresh transactions")}</Text>}
+                      contentProps={{ p: 2, borderRadius: "md" }}>
                       <IconButton
                         aria-label={t("Refresh transactions")}
                         size="sm"
