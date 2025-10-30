@@ -18,7 +18,7 @@ import {
   ZERO_ADDRESS,
   participateInAllocationVoting,
   startNewAllocationRound,
-  addNodeToken,
+  mintLegacyNode,
   bootstrapAndStartEmissions,
   payDeposit,
   updateGMMultipliers,
@@ -3219,8 +3219,8 @@ describe("VoterRewards - @shard10", () => {
 
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      await addNodeToken(1, voter1)
-      await addNodeToken(3, voter3)
+      await mintLegacyNode(1, voter1)
+      await mintLegacyNode(3, voter3)
 
       await participateInAllocationVoting(voter1)
 
@@ -3427,7 +3427,7 @@ describe("VoterRewards - @shard10", () => {
 
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      await addNodeToken(3, voter1)
+      await mintLegacyNode(3, voter1)
 
       const roundId = await startNewAllocationRound()
 
@@ -3621,7 +3621,7 @@ describe("VoterRewards - @shard10", () => {
 
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      await addNodeToken(3, voter1)
+      await mintLegacyNode(3, voter1)
 
       const roundId = await startNewAllocationRound()
 
@@ -3876,7 +3876,7 @@ describe("VoterRewards - @shard10", () => {
 
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      await addNodeToken(3, voter1)
+      await mintLegacyNode(3, voter1)
 
       const roundId = await startNewAllocationRound()
 
