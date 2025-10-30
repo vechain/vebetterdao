@@ -314,9 +314,9 @@ contract GalaxyMember is
 
     require(
       ownerOf(tokenId) == msg.sender ||
-        $.stargateNFT.isTokenManager(msg.sender, tokenId) ||
+        $.stargateNFT.isTokenManager(msg.sender, nodeTokenId) ||
         $.stargateNFT.ownerOf(nodeTokenId) == msg.sender,
-      "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller"
+      "GalaxyMember: node not owned or managed by caller or token not owned by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == tokenId, "GalaxyMember: node not attached to the token");
     require(getNodeIdAttached(tokenId) == nodeTokenId, "GalaxyMember: token not attached to the node");
