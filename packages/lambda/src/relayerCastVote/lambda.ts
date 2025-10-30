@@ -273,7 +273,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     if (batchResult.failedVotes.length > 0) {
       await notify({
         level: "warn",
-        message: `Some votes failed to be cast in round ${currentRoundId}. Check logs for more details.`,
+        message: `${batchResult.failedVotes.length} votes failed to be cast in round ${currentRoundId}. Check logs for more details.`,
         data: {
           successfulVotes: batchResult.successfulVotes,
           failedVotes: batchResult.failedVotes.length,
