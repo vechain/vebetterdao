@@ -1,17 +1,12 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import {
-  ZERO_ADDRESS,
-  catchRevert,
-  filterEventsByName,
-  getOrDeployContractInstances,
-  createNodeHolder,
-} from "./helpers"
+import { ZERO_ADDRESS, catchRevert, filterEventsByName, getOrDeployContractInstances } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { NodeManagement, NodeManagementV1 } from "../typechain-types"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { createNodeHolder } from "./helpers/xnodes"
 
 describe.skip("Node Management -@shard5", function () {
   describe("Contract upgradeablity", () => {
