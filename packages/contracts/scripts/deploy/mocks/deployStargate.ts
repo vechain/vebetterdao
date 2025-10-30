@@ -144,7 +144,7 @@ export const deployStargateMock = async ({
                   scaledRewardFactor: 200,
                   maturityBlocks: 0,
                 },
-                cap: 0, // 1
+                cap: 100, // 1
                 circulatingSupply: 0,
               },
               {
@@ -156,7 +156,7 @@ export const deployStargateMock = async ({
                   scaledRewardFactor: 300,
                   maturityBlocks: 0,
                 },
-                cap: 0, // 1
+                cap: 100, // 1
                 circulatingSupply: 0,
               },
               {
@@ -168,7 +168,7 @@ export const deployStargateMock = async ({
                   scaledRewardFactor: 400,
                   maturityBlocks: 0,
                 },
-                cap: 0, // No ThunderX
+                cap: 100, // No ThunderX
                 circulatingSupply: 0,
               },
               {
@@ -180,7 +180,7 @@ export const deployStargateMock = async ({
                   scaledRewardFactor: 500,
                   maturityBlocks: 0,
                 },
-                cap: 0, // 1
+                cap: 100, // 1
                 circulatingSupply: 0,
               },
               // New levels
