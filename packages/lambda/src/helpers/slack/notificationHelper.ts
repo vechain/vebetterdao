@@ -44,7 +44,7 @@ export const notify = async (options: NotificationOptions): Promise<void> => {
   // Optionally send to Slack
   if (slack) {
     const emoji = SLACK_EMOJIS[level]
-    const slackMessage = `${slack.messagePrefix}${emoji} ${message}.`
+    const slackMessage = `${slack.messagePrefix}${emoji} ${message}`
     await publishMessage(slack.client, slack.channelId, slackMessage)
   }
 }
