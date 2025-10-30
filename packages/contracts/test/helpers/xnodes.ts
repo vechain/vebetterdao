@@ -1,5 +1,29 @@
-import { getOrDeployContractInstances } from "./deploy"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { ContractTransactionResponse } from "ethers"
+
+import { getOrDeployContractInstances } from "./deploy"
+
+export const getNodeIdFromStakeTx = async (tx: ContractTransactionResponse) => {
+  const { stargateNftMock } = await getOrDeployContractInstances({})
+
+  const nodeStakeTxReceipt = await tx.wait()
+
+  // Find the Transfer event and decode it to get the tokenId
+  const transferEvent = nodeStakeTxReceipt?.logs
+    .map(log => {
+      try {
+        return stargateNftMock.interface.parseLog({ topics: log.topics as string[], data: log.data })
+      } catch {
+        return null
+      }
+    })
+    .find(event => event?.name === "Transfer")
+
+  if (!transferEvent) throw new Error("No Transfer event found")
+  const nodeId = transferEvent.args.tokenId
+
+  return nodeId
+}
 
 export const endorseApp = async (appId: string, endorser: HardhatEthersSigner) => {
   const { x2EarnApps } = await getOrDeployContractInstances({})
@@ -16,9 +40,13 @@ export const endorseApp = async (appId: string, endorser: HardhatEthersSigner) =
 }
 
 export const createNodeHolder = async (level: number, endorser: HardhatEthersSigner) => {
-  const { vechainNodesMock } = await getOrDeployContractInstances({})
+  const { stargateMock, stargateNftMock } = await getOrDeployContractInstances({})
 
-  await vechainNodesMock.addToken(endorser.address, level, false, 0, 0)
+  const nodeStakeTx = await stargateMock
+    .connect(endorser)
+    .stake(level, { value: (await stargateNftMock.getLevel(level)).vetAmountRequiredToStake })
 
-  return await vechainNodesMock.ownerToId(endorser.address)
+  const nodeId = await getNodeIdFromStakeTx(nodeStakeTx)
+
+  return nodeId
 }
