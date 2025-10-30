@@ -50,20 +50,6 @@ export const useAppFundActivityEvents = (appId: string) => {
     }),
   })
 
-  const rawRewardDistributedEvents = useEvents({
-    contractAddress,
-    abi,
-    eventName: "RewardDistributed",
-    filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      appId: decodedData.args.appId,
-      amount: ethers.formatEther(decodedData.args.amount),
-      blockNumber: meta.blockNumber,
-      txId: meta.txID,
-      txType: "DISTRIBUTE_REWARDS",
-    }),
-  })
-
   const rawRewardsPoolBalanceUpdatedEvents = useEvents({
     contractAddress,
     abi,
@@ -82,14 +68,10 @@ export const useAppFundActivityEvents = (appId: string) => {
 
   const depositEvents = rawDepositEvents.data
   const teamWithdrawalEvents = rawTeamWithdrawalEvents.data
-  const rewardDistributedEvents = rawRewardDistributedEvents.data
   const rewardsPoolBalanceUpdatedEvents = rawRewardsPoolBalanceUpdatedEvents.data
 
   const isLoading =
-    rawDepositEvents.isLoading ||
-    rawTeamWithdrawalEvents.isLoading ||
-    rawRewardDistributedEvents.isLoading ||
-    rawRewardsPoolBalanceUpdatedEvents.isLoading
+    rawDepositEvents.isLoading || rawTeamWithdrawalEvents.isLoading || rawRewardsPoolBalanceUpdatedEvents.isLoading
 
   // Normalize and combine all events into a single array
   const allEvents = useMemo(() => {
@@ -100,9 +82,6 @@ export const useAppFundActivityEvents = (appId: string) => {
       ...(teamWithdrawalEvents?.map(event => ({
         ...event,
       })) || []),
-      ...(rewardDistributedEvents?.map(event => ({
-        ...event,
-      })) || []),
       ...(rewardsPoolBalanceUpdatedEvents?.map(event => ({
         ...event,
       })) || []),
@@ -110,14 +89,13 @@ export const useAppFundActivityEvents = (appId: string) => {
 
     // Sort by block number (descending - newest first)
     return normalized.sort((a, b) => b.blockNumber - a.blockNumber)
-  }, [depositEvents, teamWithdrawalEvents, rewardDistributedEvents, rewardsPoolBalanceUpdatedEvents])
+  }, [depositEvents, teamWithdrawalEvents, rewardsPoolBalanceUpdatedEvents])
 
   const refetch = useCallback(() => {
     rawDepositEvents.refetch()
     rawTeamWithdrawalEvents.refetch()
-    rawRewardDistributedEvents.refetch()
     rawRewardsPoolBalanceUpdatedEvents.refetch()
-  }, [rawDepositEvents, rawTeamWithdrawalEvents, rawRewardDistributedEvents, rawRewardsPoolBalanceUpdatedEvents])
+  }, [rawDepositEvents, rawTeamWithdrawalEvents, rawRewardsPoolBalanceUpdatedEvents])
 
   return {
     isLoading,
@@ -126,7 +104,6 @@ export const useAppFundActivityEvents = (appId: string) => {
     rawData: {
       depositEvents,
       teamWithdrawalEvents,
-      rewardDistributedEvents,
       rewardsPoolBalanceUpdatedEvents,
     },
     refetch,

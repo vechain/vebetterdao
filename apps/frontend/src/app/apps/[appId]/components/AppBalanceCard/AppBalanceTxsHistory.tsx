@@ -148,7 +148,6 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                           <option value="ALL">{t("All")}</option>
                           <option value="DEPOSIT">{t("Deposits")}</option>
                           <option value="WITHDRAW">{t("Withdrawals")}</option>
-                          <option value="DISTRIBUTE_REWARDS">{t("Rewards Distribution")}</option>
                           <option value="REWARDS_POOL_UPDATED">{t("Reward Pool Update")}</option>
                         </NativeSelect.Field>
                       </NativeSelect.Root>
