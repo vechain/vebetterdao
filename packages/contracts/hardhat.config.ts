@@ -52,6 +52,10 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       chainId: 1337,
+      accounts: {
+        count: 20,
+        accountsBalance: "1000000000000000000000000", // 1,000,000 ETH per account (100x default)
+      },
     },
     vechain_solo: {
       url: getSoloUrl(),
