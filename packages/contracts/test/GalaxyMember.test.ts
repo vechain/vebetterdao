@@ -1,30 +1,11 @@
-import { describe, it, beforeEach } from "mocha"
-import {
-  NFT_NAME,
-  NFT_SYMBOL,
-  ZERO_ADDRESS,
-  addNodeToken,
-  bootstrapAndStartEmissions,
-  bootstrapEmissions,
-  catchRevert,
-  createProposal,
-  getEventName,
-  getOrDeployContractInstances,
-  getProposalIdFromTx,
-  getVot3Tokens,
-  participateInAllocationVoting,
-  payDeposit,
-  startNewAllocationRound,
-  upgradeNFTtoLevel,
-  waitForCurrentRoundToEnd,
-  waitForProposalToBeActive,
-  getStargateNFTErrorsInterface,
-} from "./helpers"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { createTestConfig } from "./helpers/config"
-import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { beforeEach, describe, it } from "mocha"
+
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import {
   GalaxyMember,
@@ -35,8 +16,28 @@ import {
   GalaxyMemberV5,
   MockERC721Receiver,
 } from "../typechain-types"
-import { time } from "@nomicfoundation/hardhat-network-helpers"
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import {
+  bootstrapAndStartEmissions,
+  bootstrapEmissions,
+  catchRevert,
+  createProposal,
+  getEventName,
+  getOrDeployContractInstances,
+  getProposalIdFromTx,
+  getStargateNFTErrorsInterface,
+  getVot3Tokens,
+  mintLegacyNode,
+  NFT_NAME,
+  NFT_SYMBOL,
+  participateInAllocationVoting,
+  payDeposit,
+  startNewAllocationRound,
+  upgradeNFTtoLevel,
+  waitForCurrentRoundToEnd,
+  waitForProposalToBeActive,
+  ZERO_ADDRESS,
+} from "./helpers"
+import { createTestConfig } from "./helpers/config"
 import { endorseApp } from "./helpers/xnodes"
 
 describe("Galaxy Member - @shard3b", () => {
@@ -825,7 +826,7 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMemberV2.levelOf(1)).to.equal(2) // Moon
 
       // Mint Mjolnir X Node to otherAccount
-      await addNodeToken(7, otherAccount)
+      await mintLegacyNode(7, otherAccount)
       expect(await vechainNodesMock.idToOwner(2)).to.equal(await otherAccount.getAddress())
 
       // Expect a free upgrade to level 7 when attaching a Mjolnir X Node to a GM NFT of a lower level
@@ -2665,7 +2666,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      const nodeMetadata = await addNodeToken(1, otherAccount) // Mint new Strength Economy Node (Level 1) to other account
+      const nodeMetadata = await mintLegacyNode(1, otherAccount) // Mint new Strength Economy Node (Level 1) to other account
 
       const tokenId = await vechainNodesMock.ownerToId(otherAccount.address)
       expect(await vechainNodesMock.getMetadata(tokenId)).to.deep.equal(nodeMetadata)
@@ -2708,7 +2709,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      await addNodeToken(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
+      await mintLegacyNode(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
 
       await participateInAllocationVoting(otherAccount, false, owner)
 
@@ -2798,7 +2799,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      const nodeMetadata1 = await addNodeToken(1, otherAccount)
+      const nodeMetadata1 = await mintLegacyNode(1, otherAccount)
 
       expect(await vechainNodesMock.idToOwner(1)).to.equal(await otherAccount.getAddress())
 
@@ -2827,7 +2828,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      const nodeMetadata = await addNodeToken(1, owner)
+      const nodeMetadata = await mintLegacyNode(1, owner)
 
       expect(await vechainNodesMock.idToOwner(1)).to.equal(await owner.getAddress())
 
@@ -2858,7 +2859,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      const nodeMetadata = await addNodeToken(1, owner)
+      const nodeMetadata = await mintLegacyNode(1, owner)
 
       expect(await vechainNodesMock.idToOwner(1)).to.equal(await owner.getAddress())
 
@@ -2913,7 +2914,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccounts[3])
 
@@ -2987,7 +2988,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      await addNodeToken(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
+      await mintLegacyNode(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
 
       await participateInAllocationVoting(otherAccount)
 
@@ -3055,7 +3056,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccounts[3])
 
@@ -3086,7 +3087,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccount)
 
@@ -3119,7 +3120,7 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
 
       // I can attach another node
-      await addNodeToken(2, owner)
+      await mintLegacyNode(2, owner)
 
       await expect(galaxyMember.connect(owner).attachNode(3, 1)).to.be.revertedWith(
         "GalaxyMember: token already attached to a node",
@@ -3145,7 +3146,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccounts[3])
 
@@ -3183,7 +3184,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccounts[3])
 
@@ -3223,7 +3224,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccount)
 
@@ -3284,7 +3285,7 @@ describe("Galaxy Member - @shard3b", () => {
 
       expect(await galaxyMember.levelOf(1)).to.equal(3) // Level 3
 
-      await addNodeToken(2, owner)
+      await mintLegacyNode(2, owner)
 
       await galaxyMember.connect(owner).attachNode(2, 1)
 
@@ -3312,7 +3313,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccounts[2])
 
@@ -3366,7 +3367,7 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMember.ownerOf(1)).to.equal(owner.address)
 
       // Attach node to GM NFT
-      await addNodeToken(2, owner) // Mint Level 2 Node with Token ID 1
+      await mintLegacyNode(2, owner) // Mint Level 2 Node with Token ID 1
 
       const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
@@ -3400,7 +3401,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccount)
 
@@ -3429,7 +3430,7 @@ describe("Galaxy Member - @shard3b", () => {
       // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
-      await addNodeToken(1, owner)
+      await mintLegacyNode(1, owner)
 
       await participateInAllocationVoting(owner, false, otherAccount)
 
@@ -3694,7 +3695,7 @@ describe("Galaxy Member - @shard3b", () => {
         await participateInAllocationVoting(owner, true)
 
         // Mint Strength Economic Node (Level 1) to nodeHolder
-        await addNodeToken(1, nodeHolder)
+        await mintLegacyNode(1, nodeHolder)
 
         // owner owns a Mjolnir X Node, nodeHolder owns a Strength Economic Node
         const nodeId = 1
@@ -3751,7 +3752,7 @@ describe("Galaxy Member - @shard3b", () => {
         await participateInAllocationVoting(owner, true)
 
         // Mint Thunder Economy Node (Level 2) to nodeHolder
-        await addNodeToken(2, nodeHolder)
+        await mintLegacyNode(2, nodeHolder)
 
         // owner owns a Mjolnir X Node, nodeHolder owns a Thunder Economic Node
         const nodeId = 1
@@ -3813,7 +3814,7 @@ describe("Galaxy Member - @shard3b", () => {
         await participateInAllocationVoting(owner, true)
 
         // Mint Strength Economy Node (Level 1) to nodeHolder
-        await addNodeToken(1, nodeHolder)
+        await mintLegacyNode(1, nodeHolder)
 
         // owner owns a Mjolnir X Node, nodeHolder owns a Strength Economic Node
         const nodeId = 1
@@ -3889,7 +3890,7 @@ describe("Galaxy Member - @shard3b", () => {
         await participateInAllocationVoting(owner, true)
 
         // Mint Strength Economy Node (Level 1) to nodeHolder
-        await addNodeToken(1, nodeHolder)
+        await mintLegacyNode(1, nodeHolder)
 
         // owner owns a Mjolnir X Node, nodeHolder owns a Strength Economic Node
         const nodeId = 1
@@ -3967,7 +3968,7 @@ describe("Galaxy Member - @shard3b", () => {
         await participateInAllocationVoting(owner, true)
 
         // Mint Strength Economy Node (Level 1) to nodeHolder
-        await addNodeToken(1, nodeHolder)
+        await mintLegacyNode(1, nodeHolder)
 
         // owner owns a Mjolnir X Node, nodeHolder owns a Strength Economic Node
         const nodeId = 1
@@ -4027,7 +4028,7 @@ describe("Galaxy Member - @shard3b", () => {
         await participateInAllocationVoting(owner, true)
 
         // Mint Strength Economy Node (Level 1) to nodeHolder
-        await addNodeToken(1, nodeHolder)
+        await mintLegacyNode(1, nodeHolder)
 
         // owner owns a Mjolnir X Node, nodeHolder owns a Strength Economic Node
         const nodeId = 1
@@ -4279,6 +4280,8 @@ describe("Galaxy Member - @shard3b", () => {
         minterAccount,
         otherAccounts,
         b3tr,
+        stargateMock,
+        stargateNftMock,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -4296,9 +4299,20 @@ describe("Galaxy Member - @shard3b", () => {
       const endorser1 = otherAccounts[5]
       const endorser2 = otherAccounts[6]
 
-      await addNodeToken(5, account4)
-      await addNodeToken(7, account5)
-      await addNodeToken(5, account6)
+      //Stake nodes to stargate
+      await stargateMock
+        .connect(account4)
+        .stake(5, { value: (await stargateNftMock.getLevel(5)).vetAmountRequiredToStake })
+      await stargateMock
+        .connect(account5)
+        .stake(7, { value: (await stargateNftMock.getLevel(7)).vetAmountRequiredToStake })
+      await stargateMock
+        .connect(account6)
+        .stake(5, { value: (await stargateNftMock.getLevel(5)).vetAmountRequiredToStake })
+
+      const stargateNodeId1 = await stargateNftMock.tokenOfOwnerByIndex(account4.address, 0)
+      const stargateNodeId2 = await stargateNftMock.tokenOfOwnerByIndex(account5.address, 0)
+      const stargateNodeId3 = await stargateNftMock.tokenOfOwnerByIndex(account6.address, 0)
 
       // participation in governance is a requirement for minting
       await getVot3Tokens(account1, "5000000")
@@ -4382,9 +4396,9 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMember.levelOf(tokenId6)).to.equal(4) // Level 4
 
       // Attach nodes to GM NFTs
-      await galaxyMember.connect(account4).attachNode(1, tokenId4)
-      await galaxyMember.connect(account5).attachNode(2, tokenId5)
-      await galaxyMember.connect(account6).attachNode(3, tokenId6)
+      await galaxyMember.connect(account4).attachNode(stargateNodeId1, tokenId4)
+      await galaxyMember.connect(account5).attachNode(stargateNodeId2, tokenId5)
+      await galaxyMember.connect(account6).attachNode(stargateNodeId3, tokenId6)
 
       // Check GM NFT levels after attaching nodes
       expect(await galaxyMember.levelOf(tokenId4)).to.equal(4) // Free upgrade to level 4 => Has GM of level 2 which means B3TR donated of 10000, needs 90000 more to reach level 5
@@ -4503,7 +4517,7 @@ describe("Galaxy Member - @shard3b", () => {
       await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
 
       // Migrate the node to from TokenAuction to StarGate
-      const vetRequired = (await stargateNftMock.getLevel(1))[5]
+      const vetRequired = (await stargateNftMock.getLevel(1)).vetAmountRequiredToStake
       await stargateMock.connect(owner).migrate(nodeId, { value: vetRequired })
 
       // Check contracts totalSupply again
