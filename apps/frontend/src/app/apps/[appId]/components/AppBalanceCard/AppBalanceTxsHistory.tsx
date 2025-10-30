@@ -85,30 +85,12 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
     }
 
     return (
-      <Box
-        h={"350px"}
-        overflowY="auto"
-        pr={2}
-        css={{
-          "&::-webkit-scrollbar": {
-            width: "8px",
-          },
-          "&::-webkit-scrollbar-track": {
-            background: "#f1f1f1",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: "#c1c1c1",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            background: "#a1a1a1",
-          },
-        }}>
-        <VStack alignItems="stretch" gap={0}>
-          {filteredTransactions.map((transaction, index) => (
+      <Box h={"350px"} overflowY="auto" pr={2}>
+        <VStack alignItems="stretch" gap={2}>
+          {filteredTransactions.map(transaction => (
             <TransactionsHistory
               key={`${transaction.txType}-${transaction.blockNumber}-${transaction.txId}`}
               transaction={transaction}
-              index={index}
               start={startDate}
               end={endDate}
             />
@@ -134,8 +116,8 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
             </Dialog.Header>
 
             <Dialog.Body pb={6}>
-              <Card.Root w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={2} h={"full"} pb={4}>
-                <Card.Body overflowY="hidden">
+              <Card.Root variant="primary" w={"full"} rounded={"16px"} mt={2} h={"full"} p={4} gap={4}>
+                <Card.Body p={0} overflowY="hidden">
                   <Flex gap={4} mb={4} justifyContent="space-between" w="full" alignItems="end">
                     <VStack alignItems="start" gap={0} flex="0.75">
                       <Text textStyle="sm" mb={1}>

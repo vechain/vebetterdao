@@ -12,7 +12,6 @@ import { useBreakpoints } from "../../../../../../hooks/useBreakpoints"
 
 type Props = {
   transaction: AppFundActivityEvent
-  index: number
   start?: string
   end?: string
 }
@@ -35,7 +34,7 @@ type TransactionProps = {
   txId: string
 }
 const compactFormatter = getCompactFormatter(2)
-export const TransactionsHistory = ({ transaction, index, start, end }: Props) => {
+export const TransactionsHistory = ({ transaction, start, end }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const txType = transaction.txType as TransactionType
@@ -118,24 +117,32 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
     )
   }
   const { title, subtitle, amount, timestampTxs, txId } = getTransactionProps()
-  const bgColor = index % 2 === 0 ? "profile-bg" : "info-bg"
+
+  // Determine amount color based on transaction type (matching endorsement colors)
+  const isPositive =
+    txType === "DEPOSIT" ||
+    txType === "VOTES_ALLOCATION" ||
+    txType === "DYNAMIC_BASE_ALLOCATION" ||
+    txType === "INCREASE_REWARDS_POOL"
+  const isNegative = txType === "WITHDRAW" || txType === "DECREASE_REWARDS_POOL"
+  const amountColor = isPositive ? "status.positive.primary" : isNegative ? "status.negative.primary" : "inherit"
 
   return (
     <HStack
-      p={4}
-      justify="space-between"
-      borderRadius="md"
-      bg={bgColor}
-      _hover={{
-        bg: { base: "gray.50", _dark: "gray.800" },
-        transition: "background 0.2s",
-      }}>
-      <VStack gap={0} alignItems={"flex-start"} flex={1}>
+      p={2}
+      borderRadius={"16px"}
+      border="sm"
+      bg="bg.primary"
+      borderColor="border.secondary"
+      w={"full"}
+      alignItems={"center"}
+      justify={"space-between"}>
+      <VStack align="start" justifyContent={"flex-start"} gap={0} flex={1}>
         <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold">
           {title}
         </Text>
         {subtitle && (
-          <Text textStyle={isMobile ? "xs" : "sm"} color="gray.600" lineClamp={2}>
+          <Text textStyle={isMobile ? "xs" : "sm"} color="text.subtle" lineClamp={2}>
             {subtitle}
           </Text>
         )}
@@ -143,8 +150,8 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
           href={getExplorerTxLink(txId)}
           target="_blank"
           rel="noopener noreferrer"
-          textStyle={isMobile ? "xs" : "sm"}
-          color="gray.500"
+          textStyle="xs"
+          color="text.subtle"
           _hover={{
             color: "blue.600",
             textDecoration: "underline",
@@ -153,12 +160,14 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
           alignItems="center"
           gap={1}>
           {t("on")} {dayjs(timestampTxs).format("DD/MM/YY")} {t("at")} {dayjs(timestampTxs).format("HH:mm")}
-          <Icon as={FiExternalLink} boxSize={isMobile ? 2.5 : 3} />
+          <Icon as={FiExternalLink} boxSize={2.5} />
         </Link>
       </VStack>
-      <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" flexShrink={0}>
-        {amount}
-      </Text>
+      <VStack align="end" gap={0}>
+        <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" color={amountColor}>
+          {amount}
+        </Text>
+      </VStack>
     </HStack>
   )
 }
