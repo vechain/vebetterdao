@@ -1359,8 +1359,8 @@ describe("X-Apps - @shard15", function () {
         },
       )) as XAllocationPoolV3
 
-      const galaxyMember = (await deployAndUpgrade(
-        ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
+      const galaxyMemberV3 = (await deployAndUpgrade(
+        ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3"],
         [
           [
             {
@@ -1389,7 +1389,7 @@ describe("X-Apps - @shard15", function () {
         {
           versions: [undefined, 2, 3],
         },
-      )) as GalaxyMember
+      )) as GalaxyMemberV3
 
       const emissions = (await deployAndUpgrade(
         ["EmissionsV1", "Emissions"],
@@ -1436,7 +1436,7 @@ describe("X-Apps - @shard15", function () {
             owner.address, // upgrader // TODO: transferRole
             owner.address, // contractsAddressManager
             await emissions.getAddress(),
-            await galaxyMember.getAddress(),
+            await galaxyMemberV3.getAddress(),
             await b3tr.getAddress(),
             config.VOTER_REWARDS_LEVELS,
             config.VOTER_REWARDS_MULTIPLIER,
@@ -1484,7 +1484,7 @@ describe("X-Apps - @shard15", function () {
           {
             x2EarnApps: await x2EarnAppsV1.getAddress(),
             xAllocationVoting: await xAllocationVoting.getAddress(),
-            galaxyMember: await galaxyMember.getAddress(),
+            galaxyMember: await galaxyMemberV3.getAddress(),
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
             roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
             minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
@@ -7056,7 +7056,7 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("Node owner with 0 endorsement points cannot endorse an app", async function () {
-      const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, stargateMock, stargateNftMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -7070,7 +7070,7 @@ describe("X-Apps - @shard17b", function () {
       // Create node holder with level 0 (0 endorsement score)
       await createNodeHolder(0, otherAccounts[1]) // Node strength level 0 corresponds to an endorsement score of 0
       const level = await stargateNftMock.getLevel(1)
-      await stargateNftMock.stake(level.id, { value: level.vetAmountRequiredToStake })
+      await stargateMock.stake(level.id, { value: level.vetAmountRequiredToStake })
       // Get the token ID owned by the account
       const ownedIds = await stargateNftMock.idsOwnedBy(owner.address)
       const nodeId = ownedIds[0]
