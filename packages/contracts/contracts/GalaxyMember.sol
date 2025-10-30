@@ -195,8 +195,8 @@ contract GalaxyMember is
   /// @dev Only callable by the UPGRADER_ROLE
   /// @param _stargateNFT StargateNFT contract address
   function initializeV6(address _stargateNFT) public virtual reinitializer(6) {
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    $.stargateNFT = IStargateNFT(_stargateNFT);
+    require(_stargateNFT != address(0), "Galaxy Member: _stargateNFT cannot be the zero address");
+    _getGalaxyMemberStorage().stargateNFT = IStargateNFT(_stargateNFT);
   }
 
   /// @notice Internal function to authorize contract upgrades
@@ -622,9 +622,8 @@ contract GalaxyMember is
   }
 
   /// @notice Gets the StargateNFT contract address
-  function stargateNFT() external view returns (address) {
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    return address($.stargateNFT);
+  function stargateNFT() external view returns (IStargateNFT) {
+    return _getGalaxyMemberStorage().stargateNFT;
   }
 
   /// @notice Gets the maximum level that tokens can be minted or upgraded to

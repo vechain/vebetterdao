@@ -362,5 +362,5 @@ interface IGalaxyMember {
   function xAllocationsGovernor() external view returns (address);
 
   /// @notice Returns the StargateNFT contract address
-  function stargateNFT() external view returns (address);
+  function stargateNFT() external view returns (IStargateNFT);
 }
