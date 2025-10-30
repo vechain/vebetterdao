@@ -41,7 +41,7 @@ import {
 import { createTestConfig } from "./helpers/config"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
 
-describe("Galaxy Member - @shard3b", () => {
+describe.only("Galaxy Member - @shard3b", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -283,6 +283,15 @@ describe("Galaxy Member - @shard3b", () => {
       await participateInAllocationVoting(owner)
       await galaxyMember.connect(owner).freeMint()
       tokenId = 1
+    })
+
+    //After each unstake, so the VET is recovered, otherwise some tests will fail because of insufficient VET
+    afterEach(async () => {
+      const { stargateMock, stargateNftMock } = await getOrDeployContractInstances({})
+      const nodeId = (await stargateNftMock.connect(owner).idsOwnedBy(owner.address))?.[0]
+      if (nodeId) {
+        await stargateMock.connect(owner).unstake(nodeId)
+      }
     })
 
     describe("ERC721 Metadata", () => {
