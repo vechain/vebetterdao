@@ -29,7 +29,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployAndUpgrade, deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember } from "../typechain-types"
+import { GalaxyMember, GalaxyMemberV2 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { endorseApp } from "./helpers/xnodes"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
@@ -1112,11 +1112,11 @@ describe("VoterRewards - @shard10", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [
           await vechainNodesMock.getAddress(),
@@ -1125,7 +1125,7 @@ describe("VoterRewards - @shard10", () => {
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -1279,11 +1279,11 @@ describe("VoterRewards - @shard10", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [
           await vechainNodesMock.getAddress(),
@@ -1292,7 +1292,7 @@ describe("VoterRewards - @shard10", () => {
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -1450,11 +1450,11 @@ describe("VoterRewards - @shard10", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [
           await vechainNodesMock.getAddress(),
@@ -1463,7 +1463,7 @@ describe("VoterRewards - @shard10", () => {
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -1664,11 +1664,11 @@ describe("VoterRewards - @shard10", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [
           await vechainNodesMock.getAddress(),
@@ -1677,7 +1677,7 @@ describe("VoterRewards - @shard10", () => {
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -1841,11 +1841,11 @@ describe("VoterRewards - @shard10", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
-      const galaxyMember = (await upgradeProxy(
+      const galaxyMemberV2 = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [
           await vechainNodesMock.getAddress(),
@@ -1854,13 +1854,13 @@ describe("VoterRewards - @shard10", () => {
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
-      await galaxyMember.waitForDeployment()
+      await galaxyMemberV2.waitForDeployment()
 
-      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
+      await galaxyMemberV2.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMemberV2.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMemberV2.getAddress())
 
       await x2EarnApps
         .connect(owner)
@@ -1919,16 +1919,16 @@ describe("VoterRewards - @shard10", () => {
 
       // GM NFT token mint and upgrade
 
-      await galaxyMember.connect(voter1).freeMint()
+      await galaxyMemberV2.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMemberV2, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5)
+      expect(await galaxyMemberV2.levelOf(await galaxyMemberV2.getSelectedTokenId(voter1.address))).to.equal(5)
 
       // Send GM NFT to another account
-      await galaxyMember.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
+      await galaxyMemberV2.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
 
-      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter2.address))).to.equal(5)
+      expect(await galaxyMemberV2.levelOf(await galaxyMemberV2.getSelectedTokenId(voter2.address))).to.equal(5)
 
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -2244,9 +2244,9 @@ describe("VoterRewards - @shard10", () => {
         },
       ])) as GalaxyMember
 
-      const galaxyMember = (await upgradeProxy(
+      const galaxyMemberV2 = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [
           await vechainNodesMock.getAddress(),
@@ -2255,13 +2255,13 @@ describe("VoterRewards - @shard10", () => {
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
-      await galaxyMember.waitForDeployment()
+      await galaxyMemberV2.waitForDeployment()
 
-      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
+      await galaxyMemberV2.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMemberV2.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMemberV2.getAddress())
 
       const voter1 = otherAccounts[0]
       const voter2 = otherAccounts[1]
@@ -2304,9 +2304,9 @@ describe("VoterRewards - @shard10", () => {
 
       // GM NFT token mint and upgrade
 
-      await galaxyMember.connect(voter1).freeMint()
+      await galaxyMemberV2.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMemberV2, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
@@ -2396,11 +2396,11 @@ describe("VoterRewards - @shard10", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
-      const galaxyMember = (await upgradeProxy(
+      const galaxyMemberV2 = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [
           await vechainNodesMock.getAddress(),
@@ -2409,13 +2409,13 @@ describe("VoterRewards - @shard10", () => {
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
-      await galaxyMember.waitForDeployment()
+      await galaxyMemberV2.waitForDeployment()
 
-      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
+      await galaxyMemberV2.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMemberV2.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMemberV2.getAddress())
 
       await x2EarnApps
         .connect(owner)
@@ -2470,11 +2470,11 @@ describe("VoterRewards - @shard10", () => {
       expect(await xAllocationVoting.roundDeadline(xAllocationsRoundID)).to.lt(await emissions.getNextCycleBlock())
 
       // Upgrading GM NFT
-      await galaxyMember.connect(voter1).freeMint()
+      await galaxyMemberV2.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMemberV2, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5)
+      expect(await galaxyMemberV2.levelOf(await galaxyMemberV2.getSelectedTokenId(voter1.address))).to.equal(5)
 
       // Vote on apps for the second round
       await voteOnApps(
@@ -2592,8 +2592,8 @@ describe("VoterRewards - @shard10", () => {
         true,
       )
 
-      const galaxyMember = (await deployAndUpgrade(
-        ["GalaxyMemberV1", "GalaxyMember"],
+      const galaxyMemberV2 = (await deployAndUpgrade(
+        ["GalaxyMemberV1", "GalaxyMemberV2"],
         [
           [
             {
@@ -2621,13 +2621,13 @@ describe("VoterRewards - @shard10", () => {
         {
           versions: [undefined, 2],
         },
-      )) as GalaxyMember
+      )) as GalaxyMemberV2
 
-      await galaxyMember.waitForDeployment()
+      await galaxyMemberV2.waitForDeployment()
 
-      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
+      await galaxyMemberV2.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMemberV2.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMemberV2.getAddress())
 
       await x2EarnApps
         .connect(owner)
@@ -2760,7 +2760,7 @@ describe("VoterRewards - @shard10", () => {
       })
 
       const galaxyMember = (await deployAndUpgrade(
-        ["GalaxyMemberV1", "GalaxyMember"],
+        ["GalaxyMemberV1", "GalaxyMemberV2"],
         [
           [
             {
@@ -2918,7 +2918,7 @@ describe("VoterRewards - @shard10", () => {
 
         Total reward weighted votes = 5000 (2000 + 2000 + 1000) = 5000
         Voter 1 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)
-        Voter 2 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)  
+        Voter 2 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)
         Voter 3 allocation = 1000 / 5000 * 100 = 20% (400000 B3TR)
       */
       expect(await voterRewards.getReward(xAllocationsRoundID, voter1.address)).to.equal(800000000000000000000000n)
@@ -2976,8 +2976,8 @@ describe("VoterRewards - @shard10", () => {
 
       expect(await voterRewards.isQuadraticRewardingDisabledAtBlock(await ethers.provider.getBlockNumber())).to.be.false
 
-      const galaxyMember = (await deployAndUpgrade(
-        ["GalaxyMemberV1", "GalaxyMember"],
+      const galaxyMemberV2 = (await deployAndUpgrade(
+        ["GalaxyMemberV1", "GalaxyMemberV2"],
         [
           [
             {
@@ -3005,13 +3005,13 @@ describe("VoterRewards - @shard10", () => {
         {
           versions: [undefined, 2],
         },
-      )) as GalaxyMember
+      )) as GalaxyMemberV2
 
-      await galaxyMember.waitForDeployment()
+      await galaxyMemberV2.waitForDeployment()
 
-      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
+      await galaxyMemberV2.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMemberV2.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMemberV2.getAddress())
 
       await x2EarnApps
         .connect(owner)
@@ -3062,7 +3062,7 @@ describe("VoterRewards - @shard10", () => {
       expect(await xAllocationVoting.roundDeadline(xAllocationsRoundID)).to.lt(await emissions.getNextCycleBlock())
 
       // Upgrading GM NFT
-      await galaxyMember.connect(voter1).freeMint()
+      await galaxyMemberV2.connect(voter1).freeMint()
 
       // Disable quadratic rewarding mid round
       await voterRewards.toggleQuadraticRewarding()
@@ -3106,8 +3106,8 @@ describe("VoterRewards - @shard10", () => {
       tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [], nextCycle)
       proposalId = await getProposalIdFromTx(tx)
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
-      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5) // Level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMemberV2, b3tr, voter1, minterAccount) // Upgrading to level 5
+      expect(await galaxyMemberV2.levelOf(await galaxyMemberV2.getSelectedTokenId(voter1.address))).to.equal(5) // Level 5
 
       await waitForProposalToBeActive(proposalId) // we are in round 3 now
 
@@ -3315,7 +3315,7 @@ describe("VoterRewards - @shard10", () => {
       /*
        voter3 cast vote but the GM NFT was already used to vote for the proposal, thus NO multiplier should be applied
 
-       Only voter 1 gets GM rewards 
+       Only voter 1 gets GM rewards
       */
       expect(await voterRewards.getGMReward(await xAllocationVoting.currentRoundId(), voter1.address)).to.equal(
         250000000000000000000000n,
@@ -3350,7 +3350,7 @@ describe("VoterRewards - @shard10", () => {
       )
 
       /*
-        Now with gm reward pool, things change a bit 
+        Now with gm reward pool, things change a bit
 
         voter 3: 600 because of Level 5 GM NFT due to Mjolnir attached)
         voter 1: 110 because Mjolnir
@@ -3667,7 +3667,7 @@ describe("VoterRewards - @shard10", () => {
       /*
         voter 1: 1.20x (Level 3)
         voter 2: 0
-        voter 3: 
+        voter 3:
 
         Total GM weight = 1.20
       */

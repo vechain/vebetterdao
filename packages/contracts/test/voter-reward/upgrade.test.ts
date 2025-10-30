@@ -672,7 +672,7 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     } = contractConfig
 
     const galaxyMember = (await deployAndUpgrade(
-      ["GalaxyMemberV1", "GalaxyMember"],
+      ["GalaxyMemberV1", "GalaxyMemberV2"],
       [
         [
           {
@@ -693,7 +693,7 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
       ],
       { versions: [undefined, 2] },
-    )) as unknown as GalaxyMember
+    )) as GalaxyMemberV2
 
     // Deploy Emissions contract
     const emissions = (await deployAndUpgrade(
