@@ -1,11 +1,8 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { ABIContract, Hex } from "@vechain/sdk-core"
+import { ABIContract } from "@vechain/sdk-core"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { logger } from "../logger"
-
-// The max limit is 1000 events per request
-// https://github.com/vechain/thor/blob/master/docs/command_line_arguments.md
-const MAX_EVENTS_PER_REQUEST = 1000
+import { aggregateEvents, aggregateAllEvents } from "../events"
 
 export interface AutoVotingEnabledUsersResult {
   /** Map of user addresses to their auto-voting enabled state */
@@ -43,55 +40,35 @@ export const getAutoVotingEnabledUsers = async (
   const autoVotingToggledEvent = xAllocationVotingContract.getEvent("AutoVotingToggled") as any
   const topics = autoVotingToggledEvent.encodeFilterTopicsNoNull({})
 
-  const logs = await thor.logs.filterEventLogs({
-    range: {
-      unit: "block" as const,
-      from: fromBlock,
-      to: toBlock,
-    },
-    options: {
-      offset,
-      limit: MAX_EVENTS_PER_REQUEST,
-    },
-    order: "asc",
-    criteriaSet: [
-      {
-        criteria: {
-          address: contractAddress,
-          topic0: topics[0],
-        },
-        eventAbi: autoVotingToggledEvent,
-      },
-    ],
-  })
-
-  // Map to store each user's final state at the snapshot block
+  // Aggregation function: Map to store each user's final state at the snapshot block
   // If a user toggles multiple times, later events overwrite earlier ones
-  const userStateAtSnapshot = new Map<string, boolean>()
-
-  for (const log of logs) {
+  const aggregateFn = (userStateAtSnapshot: Map<string, boolean>, log: any, decodedData: any): Map<string, boolean> => {
     const accountTopic = log.topics?.[1] as string
-
-    const decodedData = autoVotingToggledEvent.decodeEventLog({
-      topics: log.topics.map((topic: string) => Hex.of(topic)),
-      data: Hex.of(log.data),
-    })
-
     if (accountTopic) {
       const walletAddress = decodedData.args.account as string
       const enabled = decodedData.args.enabled as boolean
       // Overwrite previous state - only the final state at snapshot matters
       userStateAtSnapshot.set(walletAddress, enabled)
     }
+    return userStateAtSnapshot
   }
 
-  // If we got exactly MAX_EVENTS_PER_REQUEST, there might be more
-  const hasMore = logs.length === MAX_EVENTS_PER_REQUEST
+  const { result, hasMore, eventCount } = await aggregateEvents(
+    thor,
+    contractAddress,
+    autoVotingToggledEvent,
+    topics,
+    fromBlock,
+    toBlock,
+    aggregateFn,
+    new Map<string, boolean>(),
+    offset,
+  )
 
   return {
-    userAutoVotingState: userStateAtSnapshot,
+    userAutoVotingState: result,
     hasMore,
-    eventCount: logs.length,
+    eventCount,
   }
 }
 
@@ -123,37 +100,33 @@ export const getAllAutoVotingEnabledUsers = async (
     toBlock: toBlock || "latest",
   })
 
-  // Aggregate map to store each user's final state at snapshot across all paginated results
-  const userStateAtSnapshot = new Map<string, boolean>()
-  let offset = 0
-  let totalEvents = 0
+  const xAllocationVotingContract = ABIContract.ofAbi(XAllocationVoting__factory.abi)
+  const autoVotingToggledEvent = xAllocationVotingContract.getEvent("AutoVotingToggled") as any
+  const topics = autoVotingToggledEvent.encodeFilterTopicsNoNull({})
 
-  // Loop through all pages of events
-  while (true) {
-    logger.info("Fetching events page", { offset, limit: MAX_EVENTS_PER_REQUEST })
-    const result = await getAutoVotingEnabledUsers(thor, contractAddress, fromBlock, toBlock, offset)
-    logger.info("Events page received", {
-      eventCount: result.eventCount,
-      hasMore: result.hasMore,
-      offset,
-    })
-
-    // Merge paginated results - each page may contain updates to the same users
-    for (const [user, enabled] of result.userAutoVotingState.entries()) {
-      userStateAtSnapshot.set(user, enabled)
+  // Aggregation function: Map to store each user's final state at the snapshot block
+  // If a user toggles multiple times, later events overwrite earlier ones
+  const aggregateFn = (userStateAtSnapshot: Map<string, boolean>, log: any, decodedData: any): Map<string, boolean> => {
+    const accountTopic = log.topics?.[1] as string
+    if (accountTopic) {
+      const walletAddress = decodedData.args.account as string
+      const enabled = decodedData.args.enabled as boolean
+      // Overwrite previous state - only the final state at snapshot matters
+      userStateAtSnapshot.set(walletAddress, enabled)
     }
-
-    totalEvents += result.eventCount
-
-    // Break if there are no more events
-    if (!result.hasMore) {
-      logger.info("Pagination complete", { totalEvents })
-      break
-    }
-
-    // Move to the next page
-    offset += MAX_EVENTS_PER_REQUEST
+    return userStateAtSnapshot
   }
+
+  const { result: userStateAtSnapshot, totalEvents } = await aggregateAllEvents(
+    thor,
+    contractAddress,
+    autoVotingToggledEvent,
+    topics,
+    fromBlock,
+    toBlock,
+    aggregateFn,
+    new Map<string, boolean>(),
+  )
 
   // Grab only wallets that have enabled status
   const enabledUsersAtSnapshot = Array.from(userStateAtSnapshot.entries())
