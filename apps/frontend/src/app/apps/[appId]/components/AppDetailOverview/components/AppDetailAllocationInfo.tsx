@@ -1,15 +1,42 @@
 import { Card, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useParams } from "next/navigation"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useAppAllocations } from "@/api/contracts/governance/hooks/useAppAllocations"
+import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 
 const compactFormatter = getCompactFormatter(2)
 export const AppDetailAllocationInfo = () => {
   const { appId } = useParams<{ appId: string }>()
-  const { totalAllocationReceived, lastRoundAllocationReceived, averageAllocationReceived } = useAppAllocations(appId)
+  const { data: earningsData } = useAppEarnings(appId)
   const { t } = useTranslation()
+
+  const { totalAllocationReceived, lastRoundAllocationReceived, averageAllocationReceived } = useMemo(() => {
+    if (!earningsData || !Array.isArray(earningsData)) {
+      return {
+        totalAllocationReceived: 0,
+        lastRoundAllocationReceived: 0,
+        averageAllocationReceived: 0,
+      }
+    }
+
+    // Calculate total allocation across all rounds
+    const total = earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
+
+    // Get last round allocation (earnings are sorted by roundId)
+    const lastRound = earningsData[earningsData.length - 1]
+    const lastRoundAmount = lastRound?.totalAmount || 0
+
+    // Calculate average
+    const average = earningsData.length > 0 ? total / earningsData.length : 0
+
+    return {
+      totalAllocationReceived: total,
+      lastRoundAllocationReceived: lastRoundAmount,
+      averageAllocationReceived: average,
+    }
+  }, [earningsData])
   return (
     <Card.Root bg="card.subtle" h={"full"} rounded="8px" flex={1.5}>
       <Card.Body gap={6}>
