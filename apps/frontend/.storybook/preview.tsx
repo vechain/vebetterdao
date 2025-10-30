@@ -7,15 +7,14 @@ import { TransactionModalProvider } from "../src/providers/TransactionModalProvi
 import { VStack, Flex, Container } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { setMockAddress } from "./mockAddressState"
-import { http } from "msw"
-import { setupWorker } from "msw/browser"
-import { handlers } from "./mocks/handlers"
+
+import { initialize, mswLoader } from "msw-storybook-addon"
 
 import { languages } from "../src/i18n"
 import "../src/i18n"
+import { handlers } from "./mocks/handlers.ts"
 
-const worker = setupWorker(...handlers)
-worker.start({ onUnhandledRequest: "bypass" })
+initialize()
 
 export const globalTypes = {
   locale: {
@@ -60,8 +59,10 @@ const preview: Preview = {
       // 'off' - skip a11y checks entirely
       test: "todo",
     },
+    msw: { handlers },
   },
   initialGlobals: { theme: "light", locale: "en" },
+  loaders: [mswLoader],
   decorators: [
     withThemeByClassName({
       defaultTheme: "light",
