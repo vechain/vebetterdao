@@ -76,6 +76,9 @@ import { IStargateNFT } from "./mocks/Stargate/interfaces/IStargateNFT.sol";
  *
  * --------------------------------- VERSION 6 ---------------------------------
  * - Removes Nodemanagement and TokenAuction in favor of Stargate Contract
+ * - Replaced `nodeManagement.getNodeManager` with `stargateNFT.getTokenManager`
+ * - Replaced `nodeManagement.getNodeOwner` with `stargateNFT.ownerOf`
+ * - Replaced `nodeManagement.getNodeLevel` with `stargateNFT.getTokenLevel`
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -290,8 +293,8 @@ contract GalaxyMember is
 
     require(ownerOf(tokenId) == msg.sender, "GalaxyMember: token not owned by caller");
     require(
-      $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender,
-      "GalaxyMember: vechain node not owned or managed by caller"
+      $.stargateNFT.getTokenManager(nodeTokenId) == msg.sender,
+      "GalaxyMember: node not owned or managed by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == 0, "GalaxyMember: node already attached to a token");
     require(getNodeIdAttached(tokenId) == 0, "GalaxyMember: token already attached to a node");
@@ -311,8 +314,8 @@ contract GalaxyMember is
 
     require(
       ownerOf(tokenId) == msg.sender ||
-        $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender ||
-        $.nodeManagement.getNodeOwner(nodeTokenId) == msg.sender,
+        $.stargateNFT.isTokenManager(msg.sender, tokenId) ||
+        $.stargateNFT.ownerOf(nodeTokenId) == msg.sender,
       "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == tokenId, "GalaxyMember: node not attached to the token");
@@ -483,7 +486,7 @@ contract GalaxyMember is
     uint256 level = 1;
 
     // if the token is attached to a node and the node is managed by the caller
-    if (nodeId != 0 && $.nodeManagement.getNodeManager(nodeId) == ownerOf(tokenId)) {
+    if (nodeId != 0 && $.stargateNFT.getTokenManager(nodeId) == ownerOf(tokenId)) {
       // Get the level of the node (i.e., Strength, Thunder, Mjolnir, VeThorX, StrengthX, ThunderX, MjolnirX)
       uint8 nodeLevel = getNodeLevelOf(nodeId);
 
@@ -520,7 +523,7 @@ contract GalaxyMember is
   function getNodeLevelOf(uint256 nodeId) public view virtual returns (uint8) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    return $.nodeManagement.getNodeLevel(nodeId);
+    return $.stargateNFT.getTokenLevel(nodeId);
   }
 
   /// @notice Gets the selected token ID for the user
