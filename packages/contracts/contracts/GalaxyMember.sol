@@ -84,8 +84,7 @@ contract GalaxyMember is
   ERC721BurnableUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable,
-  UUPSUpgradeable,
-  IGalaxyMember
+  UUPSUpgradeable
 {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected token ID of the user
 
@@ -121,6 +120,8 @@ contract GalaxyMember is
     mapping(address => uint256) _selectedTokenID_DEPRECATED; // Mapping from user address to selected GM token ID - DEPRECATED IN FAVOUR OF CHECKPOINTS
     // --------------------------- V3 Additions --------------------------- //
     mapping(address => Checkpoints.Trace208) _selectedTokenIDCheckpoints; // Checkpoints for selected GM token ID of the user
+    // --------------------------- V6 Additions --------------------------- //
+    IStargateNFT stargateNFT; // StargateNFT contract
   }
 
   /// @notice Storage slot for GalaxyMemberStorage
@@ -134,6 +135,45 @@ contract GalaxyMember is
       $.slot := GalaxyMemberStorageLocation
     }
   }
+
+  /// @dev Emitted when an account changes the selected token for voting rewards.
+  event Selected(address indexed owner, uint256 tokenId);
+
+  /// @dev Emitted when a token is upgraded.
+  event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
+
+  /// @dev Emitted when the max level is updated.
+  event MaxLevelUpdated(uint256 oldLevel, uint256 newLevel);
+
+  /// @dev Emitted when XAllocationVotingGovernor contract address is updated
+  event XAllocationsGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @dev Emitted when B3TRGovernor contract address is updated
+  event B3trGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @dev Emitted when base URI is updated
+  event BaseURIUpdated(string indexed newBaseURI, string indexed oldBaseURI);
+
+  /// @dev Emitted when B3TR required to upgrade to each level is updated
+  event B3TRtoUpgradeToLevelUpdated(uint256[] b3trToUpgradeToLevel);
+
+  /// @dev Emitted when public minting is paused
+  event PublicMintingPaused(bool isPaused);
+
+  /// @dev Emitted when a node is attached to a token
+  event NodeAttached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
+
+  /// @dev Emitted when a node is detached from a token
+  event NodeDetached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
+
+  /// @dev Emitted when node is attached to a token
+  event LevelWhenAttached(uint256 indexed tokenId, uint256 indexed nodeTokenId, uint256 level);
+
+  /// @dev Emitted when node is detached from a token
+  event LevelWhenDetached(uint256 indexed tokenId, uint256 indexed nodeTokenId, uint256 level);
+
+  /// @dev Emitted when the StargateNFT contract address is updated
+  event StargateNFTAddressUpdated(address indexed newAddress, address indexed oldAddress);
 
   /// @notice Modifier to check if public minting is not paused
   modifier whenPublicMintingNotPaused() {
@@ -397,7 +437,7 @@ contract GalaxyMember is
     require(_stargateNFT != address(0), "Galaxy Member: _stargateNFT cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    emit StargateNFTAddressUpdated(_stargateNFT, $.stargateNFT);
+    emit StargateNFTAddressUpdated(_stargateNFT, address($.stargateNFT));
     $.stargateNFT = IStargateNFT(_stargateNFT);
   }
 
@@ -581,7 +621,7 @@ contract GalaxyMember is
   /// @notice Gets the StargateNFT contract address
   function stargateNFT() external view returns (address) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    return $.stargateNFT;
+    return address($.stargateNFT);
   }
 
   /// @notice Gets the maximum level that tokens can be minted or upgraded to
