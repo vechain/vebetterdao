@@ -15,6 +15,7 @@ import { AppDetailOverview } from "./AppDetailOverview/AppDetailOverview"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets/AppTweets"
+import { ProofValidationAlert } from "./ProofValidationAlert/ProofValidationAlert"
 
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()
@@ -51,6 +52,7 @@ export const AppDetailPageContent = () => {
       <GridItem w="full" colSpan={[1, 1, 2]} order={[2, 2, 1]}>
         <Stack direction="column" gap={8}>
           {shouldRenderCreationSteps ? <AppCreationSteps /> : null}
+          {(isAppModerator || isAppAdmin) && app?.id && <ProofValidationAlert appId={app.id} />}
           <AppScreenshots />
           <AppTweets />
         </Stack>
