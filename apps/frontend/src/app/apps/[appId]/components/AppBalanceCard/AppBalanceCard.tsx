@@ -11,12 +11,12 @@ import {
   VStack,
   useDisclosure,
   Box,
+  Link,
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { FaArrowUpRightFromSquare } from "react-icons/fa6"
 import { FiInfo } from "react-icons/fi"
 
 import { Tooltip } from "@/components/ui/tooltip"
@@ -139,12 +139,14 @@ export const AppBalanceCard = () => {
           <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
             <Separator borderColor="border.primary" />
           </Box>
-          <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
-            <Text textStyle="md" fontWeight="semibold" color="brand.primary">
-              {t("View history")}
-            </Text>
-            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="icon.default" cursor="pointer" />
-          </HStack>
+          <Link
+            textStyle="md"
+            fontWeight="semibold"
+            color="actions.secondary.text-lighter"
+            onClick={onOpenRewardsPoolAccess}
+            alignSelf={"start"}>
+            {t("History")}
+          </Link>
           {!isAppAdmin && (
             <GenericAlert
               title={t("Access restricted")}
