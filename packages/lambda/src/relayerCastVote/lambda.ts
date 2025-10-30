@@ -286,8 +286,8 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     await notify({
       level: "success",
       message: dryRun
-        ? `Auto-voting simulation completed for round ${currentRoundId} (DRY RUN)`
-        : `Auto-voting completed for round ${currentRoundId}`,
+        ? `Auto-voting simulation completed for round ${currentRoundId} (DRY RUN). Successfully simulated ${batchResult.successfulVotes} votes.`
+        : `Auto-voting completed for round ${currentRoundId}. Successfully cast ${batchResult.successfulVotes} votes.`,
       data: {
         totalUsers: usersToVoteFor.length,
         successfulVotes: batchResult.successfulVotes,
