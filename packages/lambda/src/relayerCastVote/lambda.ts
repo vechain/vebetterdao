@@ -144,13 +144,18 @@ const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKe
 }
 
 export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
-  // Parse debug flag from event payload
+  // Parse dryRun flag from event payload
+  // Check direct event property (for EventBridge/direct invocation) or body (for API Gateway)
   let dryRun = false
   try {
-    const body = event.body ? JSON.parse(event.body) : {}
-    dryRun = body.debug === true
+    if (event.dryRun !== undefined) {
+      dryRun = event.dryRun === true
+    } else if (event.body) {
+      const body = JSON.parse(event.body)
+      dryRun = body.dryRun === true
+    }
   } catch {
-    // If body parsing fails, default to false
+    // If parsing fails, default to false
     dryRun = false
   }
 
