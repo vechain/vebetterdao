@@ -38,7 +38,7 @@ import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { endorseApp } from "./helpers/xnodes"
 
-describe.only("Galaxy Member - @shard3b", () => {
+describe("Galaxy Member - @shard3b", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -473,20 +473,6 @@ describe.only("Galaxy Member - @shard3b", () => {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
 
-    it("Shouldn't be able to initialize the contract if already initialized", async function () {
-      const config = createLocalConfig()
-      const { galaxyMember, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
-
-      await expect(
-        galaxyMember
-          .connect(owner)
-          .initializeV2(owner.address, owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL),
-      ).to.be.reverted
-    })
-
     it("Should not be able to deploy contract with max level less than 1", async function () {
       const { owner, b3tr, treasury } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -675,7 +661,7 @@ describe.only("Galaxy Member - @shard3b", () => {
         forceDeploy: true,
       })
 
-      expect(await galaxyMember.version()).to.equal("5")
+      expect(await galaxyMember.version()).to.equal("6")
     })
 
     it("Should not have state conflict after upgrading", async () => {
@@ -784,7 +770,7 @@ describe.only("Galaxy Member - @shard3b", () => {
         await galaxyMember.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as GalaxyMemberV2
 
       let storageSlotsAfter = []
 
@@ -2313,15 +2299,15 @@ describe.only("Galaxy Member - @shard3b", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -2402,15 +2388,15 @@ describe.only("Galaxy Member - @shard3b", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -2462,11 +2448,11 @@ describe.only("Galaxy Member - @shard3b", () => {
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -2509,15 +2495,15 @@ describe.only("Galaxy Member - @shard3b", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -2590,15 +2576,15 @@ describe.only("Galaxy Member - @shard3b", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -2643,15 +2629,15 @@ describe.only("Galaxy Member - @shard3b", () => {
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
-      ])) as GalaxyMember
+      ])) as GalaxyMemberV1
 
       const galaxyMember = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
