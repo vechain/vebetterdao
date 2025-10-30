@@ -41,6 +41,7 @@ import { INodeManagementV3 } from "./mocks/Stargate/interfaces/INodeManagement/I
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { IGalaxyMember } from "./interfaces/IGalaxyMember.sol";
+import { IStargateNFT } from "./mocks/Stargate/interfaces/IStargateNFT.sol";
 
 /**
  * @title GalaxyMember
@@ -145,6 +146,14 @@ contract GalaxyMember is
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
+  }
+
+  /// @notice Initializes the contract V6
+  /// @dev Only callable by the UPGRADER_ROLE
+  /// @param _stargateNFT StargateNFT contract address
+  function initializeV6(address _stargateNFT) public virtual reinitializer(6) {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    $.stargateNFT = IStargateNFT(_stargateNFT);
   }
 
   /// @notice Internal function to authorize contract upgrades
@@ -381,6 +390,17 @@ contract GalaxyMember is
     $._nodeToFreeUpgradeLevel[nodeLevel] = level;
   }
 
+  /// @notice Sets the StargateNFT contract address
+  /// @dev Only callable by the contractsAddressManager role
+  /// @param _stargateNFT StargateNFT contract address
+  function setStargateNFTAddress(address _stargateNFT) public virtual onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(_stargateNFT != address(0), "Galaxy Member: _stargateNFT cannot be the zero address");
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    emit StargateNFTAddressUpdated(_stargateNFT, $.stargateNFT);
+    $.stargateNFT = IStargateNFT(_stargateNFT);
+  }
+
   // ---------- Getters ---------- //
 
   /// @notice Gets the level of the GM token
@@ -556,6 +576,12 @@ contract GalaxyMember is
   function treasury() external view returns (address) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.treasury;
+  }
+
+  /// @notice Gets the StargateNFT contract address
+  function stargateNFT() external view returns (address) {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    return $.stargateNFT;
   }
 
   /// @notice Gets the maximum level that tokens can be minted or upgraded to
