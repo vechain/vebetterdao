@@ -40,6 +40,7 @@ import { ITokenAuction } from "./mocks/Stargate/interfaces/ITokenAuction.sol";
 import { INodeManagementV3 } from "./mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
+import { IGalaxyMember } from "./interfaces/IGalaxyMember.sol";
 
 /**
  * @title GalaxyMember
@@ -82,7 +83,8 @@ contract GalaxyMember is
   ERC721BurnableUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable,
-  UUPSUpgradeable
+  UUPSUpgradeable,
+  IGalaxyMember
 {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected token ID of the user
 
@@ -132,42 +134,6 @@ contract GalaxyMember is
     }
   }
 
-  /// @dev Emitted when an account changes the selected token for voting rewards.
-  event Selected(address indexed owner, uint256 tokenId);
-
-  /// @dev Emitted when a token is upgraded.
-  event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
-
-  /// @dev Emitted when the max level is updated.
-  event MaxLevelUpdated(uint256 oldLevel, uint256 newLevel);
-
-  /// @dev Emitted when XAllocationVotingGovernor contract address is updated
-  event XAllocationsGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
-
-  /// @dev Emitted when B3TRGovernor contract address is updated
-  event B3trGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
-
-  /// @dev Emitted when base URI is updated
-  event BaseURIUpdated(string indexed newBaseURI, string indexed oldBaseURI);
-
-  /// @dev Emitted when B3TR required to upgrade to each level is updated
-  event B3TRtoUpgradeToLevelUpdated(uint256[] b3trToUpgradeToLevel);
-
-  /// @dev Emitted when public minting is paused
-  event PublicMintingPaused(bool isPaused);
-
-  /// @dev Emitted when a node is attached to a token
-  event NodeAttached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
-
-  /// @dev Emitted when a node is detached from a token
-  event NodeDetached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
-
-  /// @dev Emitted when node is attached to a token
-  event LevelWhenAttached(uint256 indexed tokenId, uint256 indexed nodeTokenId, uint256 level);
-
-  /// @dev Emitted when node is detached from a token
-  event LevelWhenDetached(uint256 indexed tokenId, uint256 indexed nodeTokenId, uint256 level);
-
   /// @notice Modifier to check if public minting is not paused
   modifier whenPublicMintingNotPaused() {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
@@ -179,34 +145,6 @@ contract GalaxyMember is
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
-  }
-
-  /// @notice Data for initializing the contract
-  /// @param name Name of the ERC721 token
-  /// @param symbol Symbol of the ERC721 token
-  /// @param admin Address to grant the admin role
-  /// @param upgrader Address to grant the upgrader role
-  /// @param pauser Address to grant the pauser role
-  /// @param minter Address to grant the minter role
-  /// @param contractsAddressManager Address that can update external contracts address
-  /// @param maxLevel Maximum level tokens can achieve
-  /// @param baseTokenURI Base URI for computing {tokenURI}
-  /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
-  /// @param _b3tr B3TR token contract address
-  /// @param _treasury Address of the treasury
-  struct InitializationData {
-    string name;
-    string symbol;
-    address admin;
-    address upgrader;
-    address pauser;
-    address minter;
-    address contractsAddressManager;
-    uint256 maxLevel;
-    string baseTokenURI;
-    uint256[] b3trToUpgradeToLevel;
-    address b3tr;
-    address treasury;
   }
 
   /// @notice Internal function to authorize contract upgrades
