@@ -43,7 +43,17 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
     if (!transactions) return []
     let filtered = transactions
     if (transactionTypeFilter !== "ALL") {
-      filtered = filtered.filter(tx => tx.txType === transactionTypeFilter)
+      if (transactionTypeFilter === "REWARDS_POOL_UPDATES") {
+        // Group both increase and decrease rewards pool transactions
+        filtered = filtered.filter(tx => tx.txType === "INCREASE_REWARDS_POOL" || tx.txType === "DECREASE_REWARDS_POOL")
+      } else if (transactionTypeFilter === "DEPOSIT") {
+        // Group all deposit types: regular deposits, votes allocation, and dynamic base allocation
+        filtered = filtered.filter(
+          tx => tx.txType === "DEPOSIT" || tx.txType === "VOTES_ALLOCATION" || tx.txType === "DYNAMIC_BASE_ALLOCATION",
+        )
+      } else {
+        filtered = filtered.filter(tx => tx.txType === transactionTypeFilter)
+      }
     }
 
     return filtered
@@ -148,7 +158,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                           <option value="ALL">{t("All")}</option>
                           <option value="DEPOSIT">{t("Deposits")}</option>
                           <option value="WITHDRAW">{t("Withdrawals")}</option>
-                          <option value="REWARDS_POOL_UPDATED">{t("Reward Pool Update")}</option>
+                          <option value="REWARDS_POOL_UPDATES">{t("Rewards Pool Updates")}</option>
                         </NativeSelect.Field>
                       </NativeSelect.Root>
                     </VStack>

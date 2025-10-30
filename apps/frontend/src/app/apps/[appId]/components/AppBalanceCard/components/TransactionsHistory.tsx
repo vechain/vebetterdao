@@ -15,7 +15,16 @@ type Props = {
   start?: string
   end?: string
 }
-type TransactionType = "DEPOSIT" | "WITHDRAW" | "DISTRIBUTE_REWARDS" | "REWARDS_POOL_UPDATED" | string
+type TransactionType =
+  | "DEPOSIT"
+  | "VOTES_ALLOCATION"
+  | "DYNAMIC_BASE_ALLOCATION"
+  | "WITHDRAW"
+  | "DISTRIBUTE_REWARDS"
+  | "REWARDS_POOL_UPDATED"
+  | "INCREASE_REWARDS_POOL"
+  | "DECREASE_REWARDS_POOL"
+  | string
 type TransactionProps = {
   // icon: JSX.Element
   title: string
@@ -45,13 +54,25 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
     const transactionTypes: Record<TransactionType, TransactionProps> = {
       DEPOSIT: {
         title: t("Deposit"),
-        amount: `${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
+        amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
+        timestampTxs: timestamp,
+        txId: transaction.txId,
+      },
+      VOTES_ALLOCATION: {
+        title: t("Votes Allocation"),
+        amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
+        timestampTxs: timestamp,
+        txId: transaction.txId,
+      },
+      DYNAMIC_BASE_ALLOCATION: {
+        title: t("Dynamic Base Allocation"),
+        amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
       WITHDRAW: {
         title: t("Withdraw"),
-        amount: `${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
+        amount: `-${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
@@ -64,6 +85,18 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
       REWARDS_POOL_UPDATED: {
         title: t("Rewards Pool Updated"),
         amount: `${compactFormatter.format(parseFloat(transaction.rewardsPoolBalance || "0"))} B3TR`,
+        timestampTxs: timestamp,
+        txId: transaction.txId,
+      },
+      INCREASE_REWARDS_POOL: {
+        title: t("Increased Rewards Pool"),
+        amount: `+${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
+        timestampTxs: timestamp,
+        txId: transaction.txId,
+      },
+      DECREASE_REWARDS_POOL: {
+        title: t("Decreased Rewards Pool"),
+        amount: `-${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
         txId: transaction.txId,
       },
