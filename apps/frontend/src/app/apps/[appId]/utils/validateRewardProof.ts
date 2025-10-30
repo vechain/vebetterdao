@@ -49,7 +49,7 @@ export const validateRewardProof = (proof: string, allowedImpactKeys?: string[])
   let parsedProof: any
   try {
     parsedProof = JSON.parse(proof)
-  } catch (error) {
+  } catch {
     issues.push({
       type: "invalid_json",
       message: "Proof is not valid JSON format.",
