@@ -34,7 +34,7 @@ import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
 import { ManagementCenterModal } from "./ManagementCenterModal"
 import { TransferAppFundsModal } from "./TransferAppFundsModal"
 
-const compactFormatter = getCompactFormatter(4)
+const compactFormatter = getCompactFormatter(2)
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
