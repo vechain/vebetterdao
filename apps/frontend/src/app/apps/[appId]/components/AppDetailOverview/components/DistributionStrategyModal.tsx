@@ -11,6 +11,7 @@ import {
   Popover,
   Portal,
   SimpleGrid,
+  useClipboard,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -33,13 +34,14 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
   const { data: vnsData } = useVechainDomain(distributor)
   const domain = vnsData?.domain
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
+  const { copy, copied: isCopied } = useClipboard({
+    value: distributor,
+    timeout: 1000,
+  })
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(distributor)
-    setIsCopied(true)
+    copy()
     setTimeout(() => {
-      setIsCopied(false)
       setIsPopoverOpen(false)
     }, 1000)
   }
