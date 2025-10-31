@@ -1,12 +1,6 @@
 import { getOrDeployContractInstances, NFT_NAME, NFT_SYMBOL } from "../helpers"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import {
-  bootstrapEmissions,
-  mintLegacyNode,
-  moveBlocks,
-  participateInAllocationVoting,
-  upgradeNFTtoLevel,
-} from "../helpers/common"
+import { bootstrapEmissions, mintLegacyNode, participateInAllocationVoting, upgradeNFTtoLevel } from "../helpers/common"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import {
   B3TR,
@@ -769,5 +763,108 @@ describe.only("Galaxy Member - V6 Upgrade - @shard3b", function () {
     await galaxyMemberV6.connect(otherAccount).attachNode(nodeId, 1)
     expect(await galaxyMemberV6.levelOf(1)).to.equal(7) // Saturn
     expect(await galaxyMemberV6.getIdAttachedToNode(nodeId)).to.equal(1)
+  })
+
+  it("Should reset attachment if node NOT migrated before upgrading to V6", async () => {
+    // Bootstrap emissions
+    await bootstrapEmissions()
+
+    const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
+      {
+        name: NFT_NAME,
+        symbol: NFT_SYMBOL,
+        admin: owner.address,
+        upgrader: owner.address,
+        pauser: owner.address,
+        minter: owner.address,
+        contractsAddressManager: owner.address,
+        maxLevel: 5,
+        baseTokenURI: config.GM_NFT_BASE_URI,
+        b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        b3tr: await b3tr.getAddress(),
+        treasury: await treasury.getAddress(),
+      },
+    ])) as GalaxyMemberV1
+
+    await galaxyMemberV1.waitForDeployment()
+    expect(await galaxyMemberV1.MAX_LEVEL()).to.equal(5)
+
+    await galaxyMemberV1.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+    await galaxyMemberV1.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+
+    //Participate in governance - owner needs to participate to be able to free mint
+    await participateInAllocationVoting(owner, true, otherAccounts[10])
+
+    //Mint 4 tokens to owner
+    await galaxyMemberV1.connect(owner).freeMint() // gmId 0
+    await galaxyMemberV1.connect(owner).burn(0) // gmId 0
+    await galaxyMemberV1.connect(owner).freeMint() // gmId 1
+    await galaxyMemberV1.connect(owner).burn(1) // gmId 1
+    await galaxyMemberV1.connect(owner).freeMint() // gmId 2
+    await galaxyMemberV1.connect(owner).burn(2) // gmId 2
+    await galaxyMemberV1.connect(owner).freeMint() // gmId 3
+    await galaxyMemberV1.connect(owner).burn(3) // gmId 3
+
+    //Upgrade to v2
+    const galaxyMemberV2 = (await upgradeProxy(
+      "GalaxyMemberV1",
+      "GalaxyMemberV2",
+      await galaxyMemberV1.getAddress(),
+      [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+      { version: 2 },
+    )) as GalaxyMemberV2
+    expect(await galaxyMemberV2.version()).to.equal("2")
+
+    //Upgrade to v3
+    const galaxyMemberV3 = (await upgradeProxy(
+      "GalaxyMemberV2",
+      "GalaxyMemberV3",
+      await galaxyMemberV2.getAddress(),
+      [],
+      { version: 3 },
+    )) as GalaxyMemberV3
+    expect(await galaxyMemberV3.version()).to.equal("3")
+
+    //Upgrade to v4
+    const galaxyMemberV4 = (await upgradeProxy(
+      "GalaxyMemberV3",
+      "GalaxyMemberV4",
+      await galaxyMemberV3.getAddress(),
+      [],
+      { version: 4 },
+    )) as GalaxyMemberV4
+    expect(await galaxyMemberV4.version()).to.equal("4")
+
+    //Upgrade to v5
+    const galaxyMemberV5 = (await upgradeProxy(
+      "GalaxyMemberV4",
+      "GalaxyMemberV5",
+      await galaxyMemberV4.getAddress(),
+      [],
+      { version: 5 },
+    )) as GalaxyMemberV5
+
+    expect(await galaxyMemberV5.version()).to.equal("5")
+
+    const gmId = 4
+    await galaxyMemberV5.connect(owner).freeMint() //gmid 4
+    await mintLegacyNode(7, owner)
+    const ownerNodes = await nodeManagement.getUserNodes(owner.address)
+    const nodeId = ownerNodes[0].nodeId
+    await galaxyMemberV5.connect(owner).attachNode(nodeId, gmId)
+
+    //Upgrade to v6
+    const galaxyMemberV6 = (await upgradeProxy(
+      "GalaxyMemberV5",
+      "GalaxyMember",
+      await galaxyMemberV5.getAddress(),
+      [await stargateNftMock.getAddress()],
+      { version: 6 },
+    )) as GalaxyMember
+
+    expect(await galaxyMemberV6.version()).to.equal("6")
+
+    expect(await galaxyMemberV6.levelOf(gmId)).to.equal(1)
+    expect(await galaxyMemberV6.getIdAttachedToNode(nodeId)).to.equal(0)
   })
 })
