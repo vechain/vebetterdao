@@ -191,7 +191,6 @@ export const AppDetailOverview = ({
         onClose={onDistributionStrategyModalClose}
         // TODO: migration add distribution_strategy to XAppMetadata in vechain-kit
         distributionStrategy={appMetadata?.distribution_strategy ?? ""}
-        logo={logo ?? notFoundImage}
       />
     </>
   )
