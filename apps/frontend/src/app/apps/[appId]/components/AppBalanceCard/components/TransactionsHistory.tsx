@@ -1,6 +1,7 @@
 import { HStack, Text, VStack, Icon, Link } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiExternalLink } from "react-icons/fi"
 
@@ -33,12 +34,14 @@ type TransactionProps = {
   timestampTxs: number
   txId: string
 }
-const compactFormatter = getCompactFormatter(2)
+
 export const TransactionsHistory = ({ transaction, start, end }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const txType = transaction.txType as TransactionType
   const timestamp = useEstimateBlockTimestamp({ blockNumber: transaction?.blockNumber })
+
+  const compactFormatter = useMemo(() => getCompactFormatter(2), [])
   // Date filtering
   if (start && end) {
     const startTimestamp = dayjs(start).startOf("day").valueOf()
