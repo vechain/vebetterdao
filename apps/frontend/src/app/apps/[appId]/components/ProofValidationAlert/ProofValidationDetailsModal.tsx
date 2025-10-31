@@ -5,6 +5,11 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
+import {
+  SUSTAINABILITY_PROOF_DOCS_LINK,
+  REWARD_METADATA_DOCS_LINK,
+  REWARD_DISTRIBUTION_DOCS_LINK,
+} from "@/constants/links"
 
 import { ProofIssue } from "../../utils/validateRewardProof"
 
@@ -222,7 +227,7 @@ export const ProofValidationDetailsModal = ({ isOpen, onClose, issues }: Props) 
               <Card.Body p={0} pt={3}>
                 <VStack align="flex-start" gap={2} w="full">
                   <Link
-                    href="https://docs.vebetterdao.org/developer-guides/sustainability-proof-and-impacts"
+                    href={SUSTAINABILITY_PROOF_DOCS_LINK}
                     target="_blank"
                     rel="noopener noreferrer"
                     color="blue.600"
@@ -236,7 +241,7 @@ export const ProofValidationDetailsModal = ({ isOpen, onClose, issues }: Props) 
                     </HStack>
                   </Link>
                   <Link
-                    href="https://docs.vebetterdao.org/developer-guides/reward-metadata"
+                    href={REWARD_METADATA_DOCS_LINK}
                     target="_blank"
                     rel="noopener noreferrer"
                     color="blue.600"
@@ -250,7 +255,7 @@ export const ProofValidationDetailsModal = ({ isOpen, onClose, issues }: Props) 
                     </HStack>
                   </Link>
                   <Link
-                    href="https://docs.vebetterdao.org/developer-guides/reward-distribution"
+                    href={REWARD_DISTRIBUTION_DOCS_LINK}
                     target="_blank"
                     rel="noopener noreferrer"
                     color="blue.600"
