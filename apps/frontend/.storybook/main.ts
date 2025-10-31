@@ -29,6 +29,7 @@ function mockContractsPlugin() {
     },
   }
 }
+
 const config: StorybookConfig = {
   stories: [
     "../src/**/*.mdx",
@@ -66,6 +67,7 @@ const config: StorybookConfig = {
     // Force Vite to use mocks for packages with Node.js dependencies
     viteConfig.resolve.alias["@repo/config"] = resolve(__dirname, "../__mocks__/@repo/config.ts")
     viteConfig.resolve.alias["@vechain/vechain-kit"] = resolve(__dirname, "../__mocks__/@vechain/vechain-kit.tsx")
+    viteConfig.resolve.alias["@vechain/picasso"] = resolve(__dirname, "../__mocks__/@vechain/picasso.ts")
     viteConfig.resolve.alias["thor-devkit"] = resolve(__dirname, "../__mocks__/thor-devkit.ts")
     viteConfig.resolve.alias["openai"] = resolve(__dirname, "../__mocks__/openai.ts")
     viteConfig.resolve.alias["crypto"] = resolve(__dirname, "../__mocks__/crypto.ts")
@@ -84,6 +86,9 @@ const config: StorybookConfig = {
     viteConfig.resolve.alias[resolve(__dirname, "../src/api/contracts/xApps/hooks/useUserSignalEvents.ts")] =
       apiHooksMock
     viteConfig.resolve.alias[resolve(__dirname, "../src/hooks/useTransak.ts")] = apiHooksMock
+    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/actions/useUserActionLeaderboard.ts")] =
+      apiHooksMock
+    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/actions/useUserActionOverview.ts")] = apiHooksMock
 
     // Add custom plugin to handle all contract imports
     viteConfig.plugins.push(mockContractsPlugin())
