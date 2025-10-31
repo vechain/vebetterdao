@@ -130,7 +130,7 @@ export const DistributionStrategyModal = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
-  const { data: appOverview, isLoading: appOverviewLoading } = useAppActionOverview(app?.id ?? "", undefined, !!app?.id)
+  const { data: appOverview, isLoading: appOverviewLoading } = useAppActionOverview(app?.id ?? "")
 
   const formattedStats = useMemo(() => {
     if (!appOverview) return null
