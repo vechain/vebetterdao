@@ -263,12 +263,12 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
       .connect(owner)
       .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
     const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-    await endorseApp(app1, otherAccounts[0])
+    await endorseApp(app1, otherAccounts[0], true)
     await x2EarnApps
       .connect(creator1)
       .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
     const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-    await endorseApp(app2, otherAccounts[1])
+    await endorseApp(app2, otherAccounts[1], true)
     const voter2 = otherAccounts[3]
     const voter3 = otherAccounts[4]
 
@@ -548,8 +548,8 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
       expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
     }
 
-    // Upgrade to V4
-    await upgradeProxy("GalaxyMemberV2", "GalaxyMember", await galaxyMemberV1.getAddress(), [], {
+    // Upgrade to V3
+    await upgradeProxy("GalaxyMemberV2", "GalaxyMemberV3", await galaxyMemberV1.getAddress(), [], {
       version: 3,
     })
 
@@ -934,12 +934,12 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
       .connect(owner)
       .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
     const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-    await endorseApp(app1, otherAccounts[0])
+    await endorseApp(app1, otherAccounts[0], true)
     await x2EarnApps
       .connect(creator1)
       .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
     const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-    await endorseApp(app2, otherAccounts[1])
+    await endorseApp(app2, otherAccounts[1], true)
     const voter2 = otherAccounts[3]
     const voter3 = otherAccounts[4]
 
