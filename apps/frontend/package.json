@@ -35,7 +35,7 @@
     "@repo/config": "*",
     "@repo/constants": "*",
     "@repo/utils": "*",
-    "@storybook/addon-themes": "^9.1.5",
+    "@storybook/addon-themes": "^10.0.1",
     "@svgr/webpack": "^8.1.0",
     "@tanstack/query-sync-storage-persister": "^5.28.12",
     "@tanstack/react-query": "^5.64.2",
@@ -83,15 +83,15 @@
   },
   "devDependencies": {
     "@chakra-ui/cli": "^3.5.0",
-    "@chromatic-com/storybook": "^4.1.1",
+    "@chromatic-com/storybook": "^4.1.2",
     "@next/eslint-plugin-next": "^14.2.25",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "@storybook/addon-a11y": "^9.1.5",
-    "@storybook/addon-docs": "^9.1.5",
-    "@storybook/addon-mcp": "^0.0.5",
-    "@storybook/addon-vitest": "^9.1.5",
-    "@storybook/nextjs-vite": "^9.1.5",
+    "@storybook/addon-a11y": "^10.0.1",
+    "@storybook/addon-docs": "^10.0.1",
+    "@storybook/addon-mcp": "^0.1.3",
+    "@storybook/addon-vitest": "^10.0.1",
+    "@storybook/nextjs-vite": "^10.0.1",
     "@types/mixpanel-browser": "^2.49.0",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -100,15 +100,22 @@
     "@types/uuid": "^9.0.8",
     "eslint": "^8",
     "eslint-config-next": "14.2.25",
-    "eslint-plugin-storybook": "^9.1.5",
+    "eslint-plugin-storybook": "^10.0.1",
+    "msw": "^2.11.6",
+    "msw-storybook-addon": "^2.0.6",
     "openapi-typescript": "^7.9.1",
     "resize-observer-polyfill": "^1.5.1",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "storybook": "^9.1.5",
+    "storybook": "^10.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
     "vite-plugin-svgr": "^4.5.0",
     "vite-tsconfig-paths": "^4.3.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

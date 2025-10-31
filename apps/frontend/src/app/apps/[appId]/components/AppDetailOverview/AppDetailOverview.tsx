@@ -7,6 +7,7 @@ import {
   HStack,
   Heading,
   Image,
+  Link,
   Skeleton,
   Stack,
   Text,
@@ -141,19 +142,13 @@ export const AppDetailOverview = ({
                           <Text textStyle={"sm"} color="text.subtle">
                             {t("Distribution Strategy")}
                           </Text>
-                          <Button
-                            w="auto"
-                            h="auto"
-                            p={0}
-                            m={0}
-                            variant={"ghost"}
-                            color="text.subtle"
-                            onClick={() => {
-                              onDistributionStrategyModalOpen()
-                            }}>
+                          <Link
+                            textStyle="md"
+                            fontWeight="semibold"
+                            color="actions.secondary.text-lighter"
+                            onClick={onDistributionStrategyModalOpen}>
                             {t("View Details")}
-                            <UilArrowUpRight />
-                          </Button>
+                          </Link>
                         </VStack>
                       ) : null}
                     </Stack>
@@ -191,7 +186,6 @@ export const AppDetailOverview = ({
         onClose={onDistributionStrategyModalClose}
         // TODO: migration add distribution_strategy to XAppMetadata in vechain-kit
         distributionStrategy={appMetadata?.distribution_strategy ?? ""}
-        logo={logo ?? notFoundImage}
       />
     </>
   )
