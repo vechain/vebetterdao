@@ -152,7 +152,7 @@ export const DistributionStrategyModal = ({
           </Card.Header>
 
           <Card.Body p={0}>
-            <Text textStyle="md" color="text.subtle" lineHeight="tall">
+            <Text textStyle="md" color="text.subtle" whiteSpace="pre-wrap">
               {distributionStrategy}
             </Text>
           </Card.Body>
