@@ -6,7 +6,7 @@ import {
   VStack,
   Center,
   HStack,
-  Box,
+  IconButton,
   Popover,
   Portal,
   SimpleGrid,
@@ -69,10 +69,14 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
         }}
         open={isPopoverOpen}
         onOpenChange={details => setIsPopoverOpen(details.open)}>
-        <Popover.Trigger>
-          <Box as="button" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <Popover.Trigger asChild>
+          <IconButton
+            variant="ghost"
+            size="sm"
+            aria-label={t("Options")}
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
             <HiDotsVertical />
-          </Box>
+          </IconButton>
         </Popover.Trigger>
         <Portal>
           <Popover.Positioner>
