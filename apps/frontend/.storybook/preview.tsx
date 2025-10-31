@@ -43,7 +43,7 @@ const queryClient = new QueryClient({
 
 const preview: Preview = {
   parameters: {
-    viewport: { defaultViewport: "mobile2" },
+    viewport: {},
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -61,7 +61,15 @@ const preview: Preview = {
     },
     msw: { handlers },
   },
-  initialGlobals: { theme: "light", locale: "en" },
+  initialGlobals: {
+    theme: "light",
+    locale: "en",
+
+    viewport: {
+      value: "mobile2",
+      isRotated: false,
+    },
+  },
   loaders: [mswLoader],
   decorators: [
     withThemeByClassName({
