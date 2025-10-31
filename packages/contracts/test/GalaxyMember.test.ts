@@ -837,13 +837,14 @@ describe("Galaxy Member - @shard3b", () => {
 
       // Mint Mjolnir X Node to otherAccount
       await mintLegacyNode(7, otherAccount)
-      expect(await vechainNodesMock.idToOwner(2)).to.equal(await otherAccount.getAddress())
+      const nodeId = 1 //Should be the first minted
+      expect(await vechainNodesMock.idToOwner(nodeId)).to.equal(await otherAccount.getAddress())
 
       // Expect a free upgrade to level 7 when attaching a Mjolnir X Node to a GM NFT of a lower level
-      expect(await galaxyMemberV2.getLevelAfterAttachingNode(1, 2)).to.equal(7)
+      expect(await galaxyMemberV2.getLevelAfterAttachingNode(1, nodeId)).to.equal(7)
 
       // Attach nodeId 2 to gmId 1
-      await galaxyMemberV2.connect(otherAccount).attachNode(2, 1)
+      await galaxyMemberV2.connect(otherAccount).attachNode(nodeId, 1)
       expect(await galaxyMemberV2.levelOf(1)).to.equal(7) // Saturn
       expect(await galaxyMemberV2.tokenURI(1)).to.equal(config.GM_NFT_BASE_URI + "7.json")
 
@@ -1005,10 +1006,10 @@ describe("Galaxy Member - @shard3b", () => {
 
       // V5 is about pointing nodeManagement to version 3, and deprecate the usage of tokenAuction contract
       // Before the upgrade, I can correctly check the level of the vechain node
-      expect(await galaxyMemberV4.getNodeLevelOf(2)).to.equal(7)
+      expect(await galaxyMemberV4.getNodeLevelOf(nodeId)).to.equal(7)
 
       // The node is still attached to the GM NFT, resulting on the GM NFT having level 7
-      expect(await galaxyMemberV4.getIdAttachedToNode(2)).to.equal(1)
+      expect(await galaxyMemberV4.getIdAttachedToNode(nodeId)).to.equal(1)
       expect(await galaxyMemberV4.levelOf(1)).to.equal(7)
 
       storageSlots = []
@@ -1085,28 +1086,28 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMemberV5.getSelectedTokenId(otherAccounts[6].getAddress())).to.equal(4n)
 
       // Can still check the level of the vechain node
-      expect(await galaxyMemberV5.getNodeLevelOf(2)).to.equal(7)
+      expect(await galaxyMemberV5.getNodeLevelOf(nodeId)).to.equal(7)
 
       // The node is still attached to the GM NFT gmId1, resulting on the GM NFT having level 7
-      expect(await galaxyMemberV5.getIdAttachedToNode(2)).to.equal(1)
+      expect(await galaxyMemberV5.getIdAttachedToNode(nodeId)).to.equal(1)
       expect(await galaxyMemberV5.levelOf(1)).to.equal(7)
 
       // Node can be delegated, and the GM will be downgraded
-      await nodeManagement.connect(otherAccount).delegateNode(otherAccounts[1].address, 2)
+      await nodeManagement.connect(otherAccount).delegateNode(otherAccounts[1].address, nodeId)
       expect(await galaxyMemberV5.levelOf(1)).to.equal(2) // Moon
 
       // For the record, otherAccounts[1] is the new delegatee/node manager, they also own GM NFT gmId3
-      expect(await nodeManagement.getNodeManager(2)).to.equal(await otherAccounts[1].getAddress())
+      expect(await nodeManagement.getNodeManager(nodeId)).to.equal(await otherAccounts[1].getAddress())
       expect(await galaxyMemberV5.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
       expect(await galaxyMemberV5.levelOf(3)).to.equal(1) // Earth
 
       // Delegatee decides to attach the delegated node to their own GM NFT (need to detach first)
-      await galaxyMemberV5.connect(otherAccounts[1]).detachNode(2, 1)
-      await galaxyMemberV5.connect(otherAccounts[1]).attachNode(2, 3)
+      await galaxyMemberV5.connect(otherAccounts[1]).detachNode(nodeId, 1)
+      await galaxyMemberV5.connect(otherAccounts[1]).attachNode(nodeId, 3)
       expect(await galaxyMemberV5.levelOf(3)).to.equal(7) // Saturn - the node gets a free upgrade
 
       // Node owner - otherAccount - who's nor the GM NFT owner neither the node manager - can still detach the node
-      await galaxyMemberV5.connect(otherAccount).detachNode(2, 3)
+      await galaxyMemberV5.connect(otherAccount).detachNode(nodeId, 3)
       expect(await galaxyMemberV5.levelOf(3)).to.equal(1) // Back to Earth
 
       // after the upgrade, we check that the mapping _nodeToFreeUpgradeLevel has no corrupted values
