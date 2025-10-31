@@ -1,0 +1,20 @@
+---
+# AWS Configuration
+aws_region: eu-west-1
+aws_account_id: "211125319139"
+environment: "testnet"
+
+# Lambda Configuration
+lambda_function_name: "relayer-cast-vote"
+lambda_handler: "index.handler"
+lambda_runtime: "nodejs20.x"
+lambda_memory_size: 512
+lambda_timeout: 900
+
+# Lambda Build Path
+lambda_source_dir: "packages/lambda/dist/testnet-staging/relayerCastVote"
+
+# Schedule Configuration
+# Runs 5 minutes after start-emissions-round (which runs at 1:30 AM on Tue/Thu/Sat)
+# This ensures the round has started and is ready for auto-voting
+schedule_expression: "cron(35 1 ? * TUE,THU,SAT *)"
