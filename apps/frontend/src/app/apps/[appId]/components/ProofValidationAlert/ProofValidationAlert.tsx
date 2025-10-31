@@ -1,4 +1,4 @@
-import { VStack, Button, useDisclosure, Card, Text, HStack, Skeleton, Stack } from "@chakra-ui/react"
+import { VStack, Button, useDisclosure, Card, Text, HStack, Skeleton, Stack, Icon } from "@chakra-ui/react"
 import { UilExclamationTriangle } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -67,13 +67,13 @@ export const ProofValidationAlert = ({ appId }: Props) => {
   return (
     <>
       <Skeleton loading={isLoadingData}>
-        <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" p="4">
+        <Card.Root bg="status.warning.subtle" borderColor="status.warning.primary" rounded="xl" w="full" p="4">
           <Card.Body position="relative" overflow="hidden" borderRadius="xl" p="0">
             <VStack gap={0} w="full" align="flex-start">
               <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
-                <UilExclamationTriangle size={36} color="#AF5F00" />
+                <Icon as={UilExclamationTriangle} boxSize={9} color="status.warning.strong" />
                 <VStack gap={0} w="full" align="flex-start">
-                  <Text fontWeight="bold" color="#AF5F00" as="span">
+                  <Text fontWeight="bold" color="status.warning.strong" as="span">
                     {validationResults.hasErrors
                       ? t("Reward proofs have validation errors")
                       : t("Reward proofs have validation warnings")}
@@ -85,7 +85,7 @@ export const ProofValidationAlert = ({ appId }: Props) => {
                     justify="space-between"
                     alignItems={{ base: "flex-end", md: "flex-start" }}
                     w="full">
-                    <Text color="#AF5F00">
+                    <Text color="status.warning.strong">
                       {validationResults.hasErrors
                         ? t(
                             "Your app is not properly emitting sustainability proofs. This affects transparency and impact tracking.",
@@ -97,7 +97,7 @@ export const ProofValidationAlert = ({ appId }: Props) => {
                       alignItems="flex-end"
                       variant="plain"
                       _hover={{ textDecoration: "underline" }}
-                      color="#AF5F00"
+                      color="status.warning.strong"
                       onClick={onOpen}>
                       {t("View details")}
                     </Button>
