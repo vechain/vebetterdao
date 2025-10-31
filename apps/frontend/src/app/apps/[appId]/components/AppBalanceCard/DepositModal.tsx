@@ -164,7 +164,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
                 align="flex-start"
                 gap={12}
                 borderBottomWidth={2}
-                borderColor={"rgba(213, 213, 213, 1)"}>
+                borderColor="border.secondary">
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">

@@ -135,8 +135,12 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                     w="8px"
                     h="8px"
                     borderRadius="full"
-                    bg={isEnabled ? "#3DBA67" : "#C84968"}
-                    boxShadow={isEnabled ? "0 0 8px rgba(72, 187, 120, 0.5)" : "0 0 8px rgba(245, 101, 101, 0.5)"}
+                    bg={isEnabled ? "status.positive.primary" : "status.negative.primary"}
+                    boxShadow={
+                      isEnabled
+                        ? "0 0 8px token(colors.status.positive.primary/50)"
+                        : "0 0 8px token(colors.status.negative.primary/50)"
+                    }
                   />
                   <Text textStyle="lg" fontWeight="semibold">
                     {t("Rewards Pool")}
@@ -153,7 +157,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                     <Button
                       variant="primary"
                       borderRadius="full"
-                      w="200px"
+                      w="full"
                       onClick={() => handleShowConfirmation("enable")}>
                       {t("Enable")}
                     </Button>
@@ -169,7 +173,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                     <Button
                       variant="primary"
                       borderRadius="full"
-                      w="200px"
+                      w="full"
                       onClick={() => handleShowConfirmation("disable")}>
                       {t("Disable")}
                     </Button>
@@ -184,8 +188,8 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
           w="full"
           rounded="16px"
           p={4}
-          border={isPaused ? "1px solid #C84968" : undefined}
-          boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}>
+          border={isPaused ? "1px solid token(colors.status.negative.primary)" : undefined}
+          boxShadow={isPaused ? "0 0 8px token(colors.status.negative.primary/50)" : "none"}>
           <Card.Body p={0}>
             <VStack align="start" gap={4}>
               <HStack gap={2}>
@@ -194,8 +198,8 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                     w="8px"
                     h="8px"
                     borderRadius="full"
-                    bg={"#C84968"}
-                    boxShadow={"0 0 8px rgba(245, 101, 101, 0.5)"}
+                    bg="status.negative.primary"
+                    boxShadow="0 0 8px token(colors.status.negative.primary/50)"
                   />
                 )}
                 <Text textStyle="lg" fontWeight="semibold">
@@ -213,7 +217,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                   <Button
                     colorPalette="red"
                     borderRadius="full"
-                    w="200px"
+                    w="full"
                     onClick={() => handleShowConfirmation("resume")}>
                     {t("Resume Distribution")}
                   </Button>
@@ -226,7 +230,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                       components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                     />
                   </Text>
-                  <Button w="200px" colorPalette="red" onClick={() => handleShowConfirmation("pause")}>
+                  <Button w="full" colorPalette="red" onClick={() => handleShowConfirmation("pause")}>
                     {t("Pause Distribution")}
                   </Button>
                 </>

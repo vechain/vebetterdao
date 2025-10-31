@@ -36,7 +36,7 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
         </Tooltip>
         <HStack>
           {showCopiedLink ? (
-            <UilCheck size={"18px"} color="#6DCB09" />
+            <UilCheck size={"18px"} color="status.positive.primary" />
           ) : (
             <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyLink} cursor="pointer" />
           )}

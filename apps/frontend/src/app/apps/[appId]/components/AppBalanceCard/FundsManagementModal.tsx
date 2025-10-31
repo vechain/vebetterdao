@@ -245,7 +245,8 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                         <Circle
                           size="60px"
                           bg="contrast-fg-on-strong"
-                          border="1px solid #D5D5D5"
+                          borderWidth="1px"
+                          borderColor="border.secondary"
                           position="absolute"
                           right="30px"
                           justifyContent="center"
@@ -258,10 +259,10 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                           }}
                           boxShadow="sm"
                           _hover={{
-                            border: "1px solid #004CFC",
-                            boxShadow: "0px 0px 16px rgba(0, 76, 252, 0.29)",
+                            borderColor: "actions.primary.default",
+                            boxShadow: "0px 0px 16px token(colors.actions.primary.default/30)",
                             "& > svg": {
-                              color: "#004CFC",
+                              color: "actions.primary.default",
                             },
                           }}>
                           <Icon
@@ -270,7 +271,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                             transform={activeTab === "balance-to-rewards" ? "rotate(0deg)" : "rotate(180deg)"}
                             transition="transform 0.3s ease"
                             _hover={{
-                              color: "#004CFC",
+                              color: "actions.primary.default",
                             }}
                           />
                         </Circle>
@@ -287,7 +288,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                           w={"full"}
                           alignItems={"flex-start"}
                           borderBottomWidth={2}
-                          borderColor={"rgba(213, 213, 213, 1)"}>
+                          borderColor="border.secondary">
                           <Text fontWeight="semibold">
                             {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
                           </Text>

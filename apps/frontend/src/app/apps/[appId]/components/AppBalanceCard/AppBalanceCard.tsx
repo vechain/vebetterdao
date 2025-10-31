@@ -64,14 +64,18 @@ export const AppBalanceCard = () => {
   const isAppAdminOrTreasuryAddress = isAppAdmin || app?.teamWalletAddress === account?.address
 
   const rewardsPoolColor = useMemo(() => {
-    if (isPaused) return "#FCEEF1"
-    if (isRewardsPoolEnabled) return "#3DBA67"
-    else return "#D9D9D9"
+    if (isPaused) return "status.negative.subtle"
+    if (isRewardsPoolEnabled) return "status.positive.primary"
+    else return "bg.muted"
   }, [isPaused, isRewardsPoolEnabled])
 
   return (
     <>
-      <Card.Root w={"full"} colorPalette="Red" border="sm" borderColor={isPaused ? "#C84968" : "border.primary"}>
+      <Card.Root
+        w={"full"}
+        colorPalette="Red"
+        border="sm"
+        borderColor={isPaused ? "status.negative.primary" : "border.primary"}>
         <Card.Body pt={3} pb={2}>
           <HStack justify={"space-between"} w={"full"}>
             <VStack alignItems={"start"} gap={0}>

@@ -81,7 +81,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                           }}
                           variant={"primary"}
                           borderRadius={"full"}
-                          w={"200px"}>
+                          w={"full"}>
                           {t("Withdraw")}
                         </Button>
                       </VStack>
@@ -105,7 +105,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                             onOpenDeposit()
                             onClose()
                           }}
-                          w={"200px"}>
+                          w={"full"}>
                           {t("Deposit")}
                         </Button>
                       </VStack>
@@ -131,7 +131,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                           }}
                           variant={"primary"}
                           borderRadius={"full"}
-                          w={"200px"}>
+                          w={"full"}>
                           {t("Refill Pools")}
                         </Button>
                       </VStack>
