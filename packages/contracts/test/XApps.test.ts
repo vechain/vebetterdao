@@ -11,6 +11,7 @@ import {
   getStorageSlots,
   getTwoUniqueRandomIndices,
   getVot3Tokens,
+  mintLegacyNode,
   parseAppAddedEvent,
   startNewAllocationRound,
   waitForBlock,
@@ -353,9 +354,9 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holder with an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       // Add apps -> should be eligble for next round
       await x2EarnAppsV1
         .connect(owner)
@@ -529,8 +530,9 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holder with an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Add apps -> should be eligble for next round
       await x2EarnAppsV1
@@ -897,8 +899,9 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holders with an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Add apps -> should be eligible for the next round
       await x2EarnAppsV2
@@ -919,7 +922,8 @@ describe("X-Apps - @shard15", function () {
         .connect(owner)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
 
-      await createNodeHolder(7, otherAccounts[4]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[4]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       await x2EarnAppsV2.connect(otherAccounts[4]).endorseApp(app3Id, 3)
 
       // Check eligibility
