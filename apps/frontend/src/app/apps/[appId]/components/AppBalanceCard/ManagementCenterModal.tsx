@@ -299,7 +299,6 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
       steps={steps}
       activeStep={step}
       closeOnInteractOutside={true}
-      useStandardCloseButton={true}
       modalContentProps={{
         borderRadius: "2xl",
         maxW: "600px",

@@ -23,7 +23,6 @@ export type StepModalProps<T extends string> = {
   disableCloseButton?: boolean
   closeOnInteractOutside?: boolean
   modalContentProps?: Partial<Dialog.ContentProps>
-  useStandardCloseButton?: boolean
 }
 export const StepModal = <T extends string>({
   isOpen,
@@ -36,7 +35,6 @@ export const StepModal = <T extends string>({
   disableCloseButton,
   closeOnInteractOutside = false,
   modalContentProps,
-  useStandardCloseButton = false,
 }: StepModalProps<T>) => {
   const handleClose = () => {
     setActiveStep(0)
@@ -64,7 +62,7 @@ export const StepModal = <T extends string>({
       modalBodyProps={{
         p: 0,
       }}
-      showCloseButton={useStandardCloseButton}
+      showCloseButton={false}
       isCloseable={true}
       modalProps={{ closeOnInteractOutside }}>
       <Flex position="relative" h="60px" alignItems="center">
@@ -83,7 +81,7 @@ export const StepModal = <T extends string>({
           </Text>
         </Flex>
 
-        {isDesktop && !disableCloseButton && !useStandardCloseButton ? (
+        {isDesktop && !disableCloseButton ? (
           <Button position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
             <Icon as={IoClose} boxSize="30px" />
           </Button>
