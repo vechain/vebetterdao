@@ -1,15 +1,30 @@
-import { Card, Heading, Skeleton, Text, VStack, Center, HStack, Box, Popover, Portal } from "@chakra-ui/react"
+import {
+  Card,
+  Heading,
+  Skeleton,
+  Text,
+  VStack,
+  Center,
+  HStack,
+  Box,
+  Popover,
+  Portal,
+  SimpleGrid,
+} from "@chakra-ui/react"
+import { FormattingUtils } from "@repo/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaCopy, FaExternalLinkAlt, FaCheck } from "react-icons/fa"
 import { HiDotsVertical } from "react-icons/hi"
 
+import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { getExplorerAddressLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
+import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
 
 const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
@@ -96,9 +111,21 @@ export const DistributionStrategyModal = ({
   distributionStrategy: string
 }) => {
   const { t } = useTranslation()
+  const { app } = useCurrentAppInfo()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
+  const { data: appOverview, isLoading: appOverviewLoading } = useAppActionOverview(app?.id ?? "", undefined, !!app?.id)
+
+  const formattedStats = useMemo(() => {
+    if (!appOverview) return null
+    return {
+      totalRewards: FormattingUtils.humanNumber(appOverview.totalRewardAmount ?? 0),
+      actionsRewarded: FormattingUtils.humanNumber(appOverview.actionsRewarded ?? 0),
+      uniqueUsers: FormattingUtils.humanNumber(appOverview.totalUniqueUserInteractions ?? 0),
+    }
+  }, [appOverview])
+
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} modalProps={{ size: "3xl" }}>
+    <BaseModal isOpen={isOpen} onClose={onClose} modalProps={{ size: "4xl" }}>
       <VStack gap={6} align="flex-start" w="full">
         <Heading size="2xl">{t("Distribution Strategy")}</Heading>
 
@@ -113,6 +140,66 @@ export const DistributionStrategyModal = ({
             <Text textStyle="md" color="text.subtle" lineHeight="tall">
               {distributionStrategy}
             </Text>
+          </Card.Body>
+        </Card.Root>
+
+        <Card.Root variant="primary" p={4} gap={4} w="full">
+          <Card.Header p={0}>
+            <Heading size="xl" alignSelf="flex-start">
+              {t("Reward Statistics")}
+            </Heading>
+          </Card.Header>
+
+          <Card.Body p={0}>
+            {appOverviewLoading ? (
+              <SimpleGrid columns={[1, 2, 3]} gap={4} w="full">
+                <VStack align="flex-start" gap={1}>
+                  <Skeleton w="40%" h="16px" />
+                  <Skeleton w="60%" h="32px" />
+                </VStack>
+                <VStack align="flex-start" gap={1}>
+                  <Skeleton w="40%" h="16px" />
+                  <Skeleton w="60%" h="32px" />
+                </VStack>
+                <VStack align="flex-start" gap={1}>
+                  <Skeleton w="40%" h="16px" />
+                  <Skeleton w="60%" h="32px" />
+                </VStack>
+              </SimpleGrid>
+            ) : formattedStats ? (
+              <SimpleGrid columns={[1, 2, 3]} gap={4} w="full">
+                <VStack align="flex-start" gap={1}>
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("Total B3TR Distributed")}
+                  </Text>
+                  <Heading size="xl" color="brand.primary">
+                    {formattedStats.totalRewards}
+                  </Heading>
+                </VStack>
+                <VStack align="flex-start" gap={1}>
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("Actions Rewarded")}
+                  </Text>
+                  <Heading size="xl" color="brand.primary">
+                    {formattedStats.actionsRewarded}
+                  </Heading>
+                </VStack>
+                <VStack align="flex-start" gap={1}>
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("Unique Users")}
+                  </Text>
+                  <Heading size="xl" color="brand.primary">
+                    {formattedStats.uniqueUsers}
+                  </Heading>
+                </VStack>
+              </SimpleGrid>
+            ) : (
+              <Center w="full" py={8}>
+                <Text textStyle="sm" color="text.subtle">
+                  {t("No statistics available")}
+                </Text>
+              </Center>
+            )}
           </Card.Body>
         </Card.Root>
 
