@@ -9,3 +9,8 @@ export const getExplorerTxLink = (txId?: string): string => {
     return `${explorerUrl}/transaction/${txId}`
   }
 }
+
+export const getExplorerAddressLink = (address?: string): string => {
+  const explorerUrl = getConfig().network.explorerUrl
+  return `${explorerUrl}/accounts/${address}`
+}
