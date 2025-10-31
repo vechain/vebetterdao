@@ -298,7 +298,7 @@ contract GalaxyMember is
       $.stargateNFT.getTokenManager(nodeTokenId) == msg.sender,
       "GalaxyMember: node not owned or managed by caller"
     );
-    require(getIdAttachedToNode(nodeTokenId) == 0, "GalaxyMember: node already attached to a token");
+    require(_getIdAttachedToNode(nodeTokenId, $) == 0, "GalaxyMember: node already attached to a token");
     require(_getNodeIdAttached(tokenId, $) == 0, "GalaxyMember: token already attached to a node");
 
     $._nodeToTokenId[nodeTokenId] = tokenId;
@@ -320,7 +320,7 @@ contract GalaxyMember is
         $.stargateNFT.ownerOf(nodeTokenId) == msg.sender,
       "GalaxyMember: node not owned or managed by caller or token not owned by caller"
     );
-    require(getIdAttachedToNode(nodeTokenId) == tokenId, "GalaxyMember: node not attached to the token");
+    require(_getIdAttachedToNode(nodeTokenId, $) == tokenId, "GalaxyMember: node not attached to the token");
     require(_getNodeIdAttached(tokenId, $) == nodeTokenId, "GalaxyMember: token not attached to the node");
 
     delete $._nodeToTokenId[nodeTokenId];
@@ -637,7 +637,7 @@ contract GalaxyMember is
   /// @notice Get the GM Token ID attached to the Vechain Node Token ID
   /// @param nodeId Vechain node Token ID
   function getIdAttachedToNode(uint256 nodeId) public view virtual returns (uint256) {
-    return _getGalaxyMemberStorage()._nodeToTokenId[nodeId];
+    return _getIdAttachedToNode(nodeId, _getGalaxyMemberStorage());
   }
 
   /// @notice Get the Vechain Node Token ID attached to the GM Token ID
@@ -775,6 +775,15 @@ contract GalaxyMember is
     }
 
     return nodeId;
+  }
+
+  function _getIdAttachedToNode(uint256 nodeId, GalaxyMemberStorage storage $) internal view virtual returns (uint256) {
+    uint256 tokenId = $._nodeToTokenId[nodeId];
+    if (!$.stargateNFT.tokenExists(nodeId)) {
+      return 0;
+    }
+
+    return tokenId;
   }
 
   // ---------- Overrides ---------- //
