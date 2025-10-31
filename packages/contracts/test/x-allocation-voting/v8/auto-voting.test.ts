@@ -487,7 +487,7 @@ describe("AutoVoting - @shard14b", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
+      await endorseApp(app1Id, appOwner, true)
 
       // Register relayer
       await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
