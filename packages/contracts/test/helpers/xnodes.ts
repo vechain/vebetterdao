@@ -2,6 +2,8 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractTransactionResponse } from "ethers"
 
 import { getOrDeployContractInstances } from "./deploy"
+import { mintLegacyNode } from "./common"
+import { nodeManagement } from "../../typechain-types/contracts/mocks/Stargate"
 
 export const getNodeIdFromStakeTx = async (tx: ContractTransactionResponse) => {
   const { stargateNftMock } = await getOrDeployContractInstances({})
@@ -25,11 +27,18 @@ export const getNodeIdFromStakeTx = async (tx: ContractTransactionResponse) => {
   return nodeId
 }
 
-export const endorseApp = async (appId: string, endorser: HardhatEthersSigner) => {
-  const { x2EarnApps } = await getOrDeployContractInstances({})
+export const endorseApp = async (appId: string, endorser: HardhatEthersSigner, useLegacyNode: boolean = false) => {
+  const { x2EarnApps, nodeManagement } = await getOrDeployContractInstances({})
 
+  let nodeId: bigint
   // Create a MjolnirX node holder => score = 100
-  const nodeId = await createNodeHolder(7, endorser)
+  if (useLegacyNode) {
+    await mintLegacyNode(7, endorser)
+    const ownerNodes = await nodeManagement.getUserNodes(endorser.address)
+    nodeId = ownerNodes[0].nodeId
+  } else {
+    nodeId = await createNodeHolder(7, endorser)
+  }
 
   const tx = await x2EarnApps.connect(endorser).endorseApp(appId, nodeId)
   const txReceipt = await tx.wait()
