@@ -16,7 +16,7 @@ type Props = {
   showCloseButton?: boolean
   isCloseable?: boolean
   title?: string
-  illustration?: React.ReactNode
+  illustration?: string
   footer?: React.ReactNode
   description?: string | React.ReactNode
   showLogo?: boolean
@@ -72,7 +72,7 @@ export const Modal = ({
                     <GridItem rowSpan={2}>
                       {illustration && (
                         <Box position="relative" boxSize={{ base: "16", md: "48" }}>
-                          <Image alt="mascot-welcoming" src="/assets/mascot/mascot-welcoming.webp" fill />
+                          <Image alt="mascot-welcoming" src={illustration} fill />
                         </Box>
                       )}
                     </GridItem>
@@ -107,7 +107,6 @@ export const Modal = ({
 
   return (
     <BaseBottomSheet
-      {...(modalContentProps?.bgColor ? { customBgColor: modalContentProps.bgColor as string } : {})}
       isOpen={isOpen}
       onClose={onClose}
       ariaTitle={ariaTitle ?? ""}

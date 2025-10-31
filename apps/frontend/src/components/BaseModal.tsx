@@ -59,7 +59,6 @@ export const BaseModal = ({
 
   return (
     <BaseBottomSheet
-      {...(modalContentProps?.bgColor ? { customBgColor: modalContentProps.bgColor as string } : {})}
       isOpen={isOpen}
       onClose={onClose}
       ariaTitle={ariaTitle ?? ""}

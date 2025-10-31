@@ -54,9 +54,7 @@ export const StepModal = <T extends string>({
         p: 6,
         pt: 2,
       }}
-      modalBodyProps={{
-        p: 0,
-      }}
+      modalBodyProps={{ p: 0 }}
       showCloseButton={false}
       isCloseable={true}
       modalProps={{ closeOnInteractOutside: false }}>

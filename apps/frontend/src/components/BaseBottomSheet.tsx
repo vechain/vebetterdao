@@ -10,7 +10,6 @@ type Props = {
   ariaTitle: string
   ariaDescription: string
   isDismissable?: boolean
-  customBgColor?: string
 }
 
 const DRAG_THRESHOLD = 150
@@ -23,7 +22,6 @@ export const BaseBottomSheet = ({
   ariaTitle = "BottomSheet",
   ariaDescription,
   isDismissable = true,
-  customBgColor,
 }: Props) => {
   const [dragY, setDragY] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -65,7 +63,7 @@ export const BaseBottomSheet = ({
           <Drawer.Content
             ref={contentRef}
             aria-description={ariaDescription}
-            bg={customBgColor ?? "bg.primary"}
+            bg="bg.primary"
             borderTopRadius="10px"
             h="auto"
             maxH="90vh"

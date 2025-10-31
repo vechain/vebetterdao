@@ -1,4 +1,4 @@
-import { Button, Text, VStack, Box, SimpleGrid } from "@chakra-ui/react"
+import { Button, Text, VStack, SimpleGrid } from "@chakra-ui/react"
 import { Meta } from "@storybook/nextjs-vite"
 import { cloneElement, useState } from "react"
 
@@ -51,7 +51,7 @@ export const CenterAlignedWithImage = () => {
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        illustration={<Box w="180px" h="180px" bg="purple.500" rounded="full" />}
+        illustration="/assets/mascot/mascot-welcoming.webp"
         title="Support this proposal with VOT3"
         description="Show your support to this proposal by contributing with your VOT3 tokens, allowing it to be up for voting on Round 12."
         footer={
