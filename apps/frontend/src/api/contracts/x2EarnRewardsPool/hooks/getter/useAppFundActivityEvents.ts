@@ -120,12 +120,12 @@ export const useAppFundActivityEvents = (appId: string) => {
                       }
                     }
                   } catch (e) {
-                    console.error("Error decoding transaction data:", e)
+                    console.error(`Error decoding transaction data for tx ${event.txId}:`, e)
                   }
                 }
               }
             } catch (e) {
-              console.error("Error fetching transaction:", e)
+              console.error(`Error fetching transaction ${event.txId}:`, e)
             }
             return event
           }),
