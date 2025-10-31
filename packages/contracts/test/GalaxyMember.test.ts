@@ -24,10 +24,8 @@ import {
   getEventName,
   getOrDeployContractInstances,
   getProposalIdFromTx,
-  getStargateNFTErrorsInterface,
   getVot3Tokens,
   mintLegacyNode,
-  moveBlocks,
   NFT_NAME,
   NFT_SYMBOL,
   participateInAllocationVoting,
@@ -41,7 +39,7 @@ import {
 import { createTestConfig } from "./helpers/config"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
 
-describe("Galaxy Member - @shard3b", () => {
+describe("Galaxy Member - @shard3a", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })

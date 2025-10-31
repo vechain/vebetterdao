@@ -114,9 +114,9 @@ jobs:
           - shard: shard2
             label: Emissions
           - shard: shard3a
-            label: Available for Assignment
-          - shard: shard3b
             label: Galaxy Member
+          - shard: shard3b
+            label: Galaxy Member - V6 Upgrade
           - shard: shard4a
             label: Governor & TimeLock
           - shard: shard4b

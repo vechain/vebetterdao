@@ -10,8 +10,8 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 
 - **shard0**: B3TR Token, B3TR Multi Sig
 - **shard2**: Emissions
-- **shard3a**: (available for assignment)
-- **shard3b**: Galaxy Member
+- **shard3a**: Galaxy Member
+- **shard3b**: Galaxy Member - V6 Upgrade
 - **shard4a**: Governance - Governor and TimeLock
 - **shard4b**: Governance - Voting power with proposal deposit
 - **shard4c**: Governance - Milestone Creation
