@@ -3371,7 +3371,7 @@ describe("VoterRewards - @shard10", () => {
       expect(await voterRewards.cycleToVoterToGMWeight(xAllocationsRoundID, voter1.address)).to.equal(110n)
     })
 
-    it.only("Should not multiply voting power if Vechain node already voted for proposal", async () => {
+    it("Should not multiply voting power if Vechain node already voted for proposal", async () => {
       const description = "Test Proposal: testing propsal with random description!"
       const functionToCall = "tokenDetails"
 
