@@ -117,6 +117,8 @@ contract GalaxyMember is
     ITokenAuction vechainNodes; // Vechain Nodes contract
     INodeManagementV3 nodeManagement; // Node Management contract
     mapping(uint256 => uint256) _nodeToTokenId; // Mapping from Vechain node ID to GalaxyMember Token ID. Used to track the XNode tied to the GM token ID
+    /// @dev If the node is burnt we override the return of "getNodeIdAttached" to 0, so users can attach it to a new node
+    /// after the new attachment storage will reflect and standard logic will apply
     mapping(uint256 => uint256) _tokenIdToNode; // Mapping from GalaxyMember Token ID to Vechain node ID. Used to track the GM token ID tied to the XNode token ID
     mapping(uint8 => uint256) _nodeToFreeUpgradeLevel; // Mapping from Vechain node level to GalaxyMember level. Used to track the GM level that can be upgraded for free for a given Vechain node level
     mapping(uint256 => uint256) _tokenIdToB3TRdonated; // Mapping from GM Token ID to B3TR donated for upgrading
@@ -297,7 +299,7 @@ contract GalaxyMember is
       "GalaxyMember: node not owned or managed by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == 0, "GalaxyMember: node already attached to a token");
-    require(getNodeIdAttached(tokenId) == 0, "GalaxyMember: token already attached to a node");
+    require(_getNodeIdAttached(tokenId, $) == 0, "GalaxyMember: token already attached to a node");
 
     $._nodeToTokenId[nodeTokenId] = tokenId;
     $._tokenIdToNode[tokenId] = nodeTokenId;
@@ -319,7 +321,7 @@ contract GalaxyMember is
       "GalaxyMember: node not owned or managed by caller or token not owned by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == tokenId, "GalaxyMember: node not attached to the token");
-    require(getNodeIdAttached(tokenId) == nodeTokenId, "GalaxyMember: token not attached to the node");
+    require(_getNodeIdAttached(tokenId, $) == nodeTokenId, "GalaxyMember: token not attached to the node");
 
     delete $._nodeToTokenId[nodeTokenId];
     delete $._tokenIdToNode[tokenId];
@@ -641,7 +643,7 @@ contract GalaxyMember is
   /// @notice Get the Vechain Node Token ID attached to the GM Token ID
   /// @param tokenId GM Token ID
   function getNodeIdAttached(uint256 tokenId) public view virtual returns (uint256) {
-    return _getGalaxyMemberStorage()._tokenIdToNode[tokenId];
+    return _getNodeIdAttached(tokenId, _getGalaxyMemberStorage());
   }
 
   /// @notice Get the GM level that can be upgraded for free for a given Vechain node level
@@ -758,6 +760,22 @@ contract GalaxyMember is
     return "mode=blocknumber&from=default";
   }
 
+  // ---------- Internal Functions ---------- //
+
+  /// @notice Internal function to get the level of the token
+  /// @param tokenId Token ID to get the node ID for
+  /// @param $ GalaxyMemberStorage storage pointer
+  /// @return nodeId The node ID attached to the token
+  function _getNodeIdAttached(uint256 tokenId, GalaxyMemberStorage storage $) internal view virtual returns (uint256) {
+    uint256 nodeId = $._tokenIdToNode[tokenId];
+    // If the node does is burnt we return 0, so users can attach it to a new node
+    if (!$.stargateNFT.tokenExists(nodeId)) {
+      return 0;
+    }
+
+    return nodeId;
+  }
+
   // ---------- Overrides ---------- //
 
   /// @notice Performs automatic level updating upon token updates
@@ -775,13 +793,14 @@ contract GalaxyMember is
     whenNotPaused
     returns (address)
   {
-    require(getNodeIdAttached(tokenId) == 0, "GalaxyMember: token attached to a node, detach before transfer");
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    require(_getNodeIdAttached(tokenId, $) == 0, "GalaxyMember: token attached to a node, detach before transfer");
 
     address _previousOwner = super._update(to, tokenId, auth);
 
     // If the owner has no tokens, don't select any token
     if (_previousOwner != address(0) && balanceOf(_previousOwner) == 0) {
-      _getGalaxyMemberStorage()._selectedTokenIDCheckpoints[_previousOwner].push(clock(), 0);
+      $._selectedTokenIDCheckpoints[_previousOwner].push(clock(), 0);
     }
 
     // If the owner transfers out the selected token, select the first token he owns
