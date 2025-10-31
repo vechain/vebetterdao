@@ -38,7 +38,7 @@ let otherAccounts: SignerWithAddress[]
 let nodeManagement: NodeManagementV3
 let vechainNodes: TokenAuction
 let stargateMock: Stargate
-describe.only("Galaxy Member - V6 Upgrade - @shard3b", function () {
+describe("Galaxy Member - V6 Upgrade - @shard3b", function () {
   beforeEach(async function () {
     config = createLocalConfig()
     const contracts = await getOrDeployContractInstances({
