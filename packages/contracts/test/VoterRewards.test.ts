@@ -3371,7 +3371,7 @@ describe("VoterRewards - @shard10", () => {
       expect(await voterRewards.cycleToVoterToGMWeight(xAllocationsRoundID, voter1.address)).to.equal(110n)
     })
 
-    it("Should not multiply voting power if Vechain node already voted for proposal", async () => {
+    it.only("Should not multiply voting power if Vechain node already voted for proposal", async () => {
       const description = "Test Proposal: testing propsal with random description!"
       const functionToCall = "tokenDetails"
 
@@ -3389,6 +3389,8 @@ describe("VoterRewards - @shard10", () => {
         governor,
         x2EarnApps,
         owner,
+        stargateMock,
+        stargateNftMock,
       } = await getOrDeployContractInstances({
         config: {
           ...config,
@@ -3452,8 +3454,17 @@ describe("VoterRewards - @shard10", () => {
       // Start next cycle
       await emissions.distribute()
 
-      // Attach node to GM NFT
-      await galaxyMember.connect(voter1).attachNode(3, 1)
+      // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
+      await vechainNodesMock.addAuctionWhiteList(1, await stargateNftMock.getAddress())
+      //Remove lead time from legacy nodes contract
+      await vechainNodesMock.setLeadTime(0)
+
+      // Migrate legacy node to Stargate NFT
+      await stargateMock
+        .connect(voter1)
+        .migrate(1, { value: (await stargateNftMock.getLevel(3)).vetAmountRequiredToStake })
+      console.log("voter1 nodes, ", await stargateNftMock.tokensOwnedBy(voter1.address))
+      await galaxyMember.connect(voter1).attachNode(1, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(6) // Level 6 because of the Mjolnir node attached
 
@@ -3582,7 +3593,10 @@ describe("VoterRewards - @shard10", () => {
         otherAccounts,
         voterRewards,
         x2EarnApps,
+        stargateMock,
         owner,
+        nodeManagement,
+        stargateNftMock,
       } = await getOrDeployContractInstances({
         config: {
           ...config,
@@ -3600,14 +3614,14 @@ describe("VoterRewards - @shard10", () => {
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await endorseApp(app1, otherAccounts[6])
+      await endorseApp(app1, otherAccounts[6], true)
 
       await x2EarnApps
         .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-      await endorseApp(app2, otherAccounts[7])
+      await endorseApp(app2, otherAccounts[7], true)
 
       const voter1 = otherAccounts[1]
       const voter2 = otherAccounts[2]
@@ -3636,6 +3650,15 @@ describe("VoterRewards - @shard10", () => {
         ],
         BigInt(roundId),
       )
+
+      //Remove lead time from legacy nodes contract
+      await vechainNodesMock.connect(owner).addOperator(await stargateNftMock.getAddress())
+      await vechainNodesMock.connect(owner).setLeadTime(0)
+      await moveBlocks(12)
+      // Migrate legacy node to Stargate NFT
+      await stargateMock
+        .connect(voter1)
+        .migrate(3, { value: (await stargateNftMock.getLevel(3)).vetAmountRequiredToStake })
 
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 
