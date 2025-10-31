@@ -82,6 +82,27 @@ Here's a list of the current lambda functions and their primary responsibilities
     - **Note**: The lambda uses a relayer wallet (stored in AWS Secrets Manager) to pay gas fees
       for voting on behalf of users
 
+8.  **`relayerClaimReward`**:
+    - **Purpose**: Automatically claims voting rewards on behalf of users who have enabled auto-voting
+      in the XAllocationVoting contract.
+    - **Trigger**: Scheduled (runs 5 minutes after `startRound` to claim rewards from the previous
+      round).
+    - **Scheduling**:
+      - **Testnet/Dev**: `cron(35 1 ? * TUE,THU,SAT *)` - 1:35 AM UTC on Tue/Thu/Sat (5 mins after
+        round start at 1:30 AM)
+      - **Mainnet/Prod**: `cron(45 6 ? * MON *)` - 6:45 AM UTC on Monday (5 min after round start
+        at 6:40 AM)
+    - **Key Operations**:
+      - Retrieves the current round ID from the XAllocationVoting contract
+      - Fetches the previous round snapshot block number
+      - Queries all `AutoVotingToggled` events up to the previous round snapshot to identify users with auto-voting enabled (active)
+      - Claims rewards from the previous round for all eligible users in batches using the
+        `claimReward` function on the VoterRewards contract
+      - Handles batch processing with automatic failure isolation and retry logic
+      - Sends Slack notifications on success or failure
+      - Returns transaction receipts with the number of successful and failed claims
+    - **Note**: The lambda uses the same relayer wallet as `relayerCastVote` (stored in AWS Secrets Manager) to pay gas fees for claiming rewards on behalf of users. Relayer fees are deducted from user rewards as configured in the VoterRewards V6 contract
+
 ## Development
 
 Follow these guidelines for developing and maintaining lambdas:
