@@ -44,15 +44,18 @@ export const AppDetailPageContent = () => {
       alignItems={"flex-start"}
       data-testid="app-detail-grid">
       <GridItem w="full" colSpan={[1, 1, 3]}>
-        <AppDetailOverview
-          endorsementStatus={endorsementStatus}
-          isEndorsementStatusLoading={isEndorsementStatusLoading}
-        />
+        <Stack direction="column" gap={4}>
+          {(isAppModerator || isAppAdmin) && app?.id && <ProofValidationAlert appId={app.id} />}
+
+          <AppDetailOverview
+            endorsementStatus={endorsementStatus}
+            isEndorsementStatusLoading={isEndorsementStatusLoading}
+          />
+        </Stack>
       </GridItem>
       <GridItem w="full" colSpan={[1, 1, 2]} order={[2, 2, 1]}>
         <Stack direction="column" gap={8}>
           {shouldRenderCreationSteps ? <AppCreationSteps /> : null}
-          {(isAppModerator || isAppAdmin) && app?.id && <ProofValidationAlert appId={app.id} />}
           <AppScreenshots />
           <AppTweets />
         </Stack>
