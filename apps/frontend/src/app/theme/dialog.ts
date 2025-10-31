@@ -37,12 +37,10 @@ export const dialogSlotRecipe = defineSlotRecipe({
       color: "text.default",
       textStyle: "3xl",
       fontWeight: "bold",
-      textAlign: "center",
     },
     description: {
       color: "text.default",
       textStyle: "md",
-      textAlign: "center",
     },
     closeTrigger: {
       position: "absolute",
@@ -72,7 +70,5 @@ export const dialogSlotRecipe = defineSlotRecipe({
       "8xl": { content: { width: "90rem" } },
     },
   },
-  defaultVariants: {
-    placement: "center",
-  },
+  defaultVariants: { placement: "center" },
 })
