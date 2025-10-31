@@ -128,7 +128,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
-        <Dialog.CloseTrigger asChild top={{ base: 5, md: 6 }} right={4}>
+        <Dialog.CloseTrigger asChild>
           <CloseButton />
         </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>

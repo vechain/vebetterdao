@@ -181,7 +181,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content borderRadius="20px">
-            <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} asChild>
+            <Dialog.CloseTrigger asChild>
               <CloseButton />
             </Dialog.CloseTrigger>
             <Dialog.Header>

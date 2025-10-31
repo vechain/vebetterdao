@@ -1,4 +1,4 @@
-import { HStack, Text, Button, VStack, Box } from "@chakra-ui/react"
+import { HStack, Text, Button, VStack, Box, Card } from "@chakra-ui/react"
 import { useCallback, useState, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 
@@ -125,124 +125,138 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
 
   const ManagementOptionsContent = useMemo(
     () => (
-      <>
+      <VStack gap={4}>
         {!isPaused && (
-          <VStack
-            align="start"
-            gap={4}
-            border="1px solid #D5D5D5"
-            borderRadius="20px"
-            p="16px"
-            justifyContent="space-between">
-            <HStack gap={2}>
-              <Box
-                w="8px"
-                h="8px"
-                borderRadius="full"
-                bg={isEnabled ? "#3DBA67" : "#C84968"}
-                boxShadow={isEnabled ? "0 0 8px rgba(72, 187, 120, 0.5)" : "0 0 8px rgba(245, 101, 101, 0.5)"}
-              />
-              <Text textStyle="lg" fontWeight="semibold">
-                {t("Rewards Pool")}
-              </Text>
-            </HStack>
-            {!isEnabled ? (
-              <>
-                <Text textStyle="sm">
-                  <Trans
-                    i18nKey="The rewards pool holds B3TR used to reward user actions. When you enable it, <bold>the pool starts empty</bold>, remember to <bold>fill it with funds</bold> to distribute rewards."
-                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
+          <Card.Root variant="primary" w="full" rounded="16px" p={4}>
+            <Card.Body p={0}>
+              <VStack align="start" gap={4}>
+                <HStack gap={2}>
+                  <Box
+                    w="8px"
+                    h="8px"
+                    borderRadius="full"
+                    bg={isEnabled ? "#3DBA67" : "#C84968"}
+                    boxShadow={isEnabled ? "0 0 8px rgba(72, 187, 120, 0.5)" : "0 0 8px rgba(245, 101, 101, 0.5)"}
                   />
-                </Text>
-                <Button
-                  variant="primary"
-                  borderRadius="full"
-                  w="200px"
-                  onClick={() => handleShowConfirmation("enable")}>
-                  {t("Enable")}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Text textStyle="sm">
-                  <Trans
-                    i18nKey="When you disabled rewards pool, <bold>the funds will move to app balance</bold>, you can enable it back at any time. The distributor will <bold>stop distributing rewards</bold> from the app balance pool."
-                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
-                  />
-                </Text>
-                <Button
-                  variant="primary"
-                  borderRadius="full"
-                  w="200px"
-                  onClick={() => handleShowConfirmation("disable")}>
-                  {t("Disable")}
-                </Button>
-              </>
-            )}
-          </VStack>
+                  <Text textStyle="lg" fontWeight="semibold">
+                    {t("Rewards Pool")}
+                  </Text>
+                </HStack>
+                {!isEnabled ? (
+                  <>
+                    <Text textStyle="sm">
+                      <Trans
+                        i18nKey="The rewards pool holds B3TR used to reward user actions. When you enable it, <bold>the pool starts empty</bold>, remember to <bold>fill it with funds</bold> to distribute rewards."
+                        components={{ bold: <Text as="span" fontWeight="semibold" /> }}
+                      />
+                    </Text>
+                    <Button
+                      variant="primary"
+                      borderRadius="full"
+                      w="200px"
+                      onClick={() => handleShowConfirmation("enable")}>
+                      {t("Enable")}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Text textStyle="sm">
+                      <Trans
+                        i18nKey="When you disabled rewards pool, <bold>the funds will move to app balance</bold>, you can enable it back at any time. The distributor will <bold>stop distributing rewards</bold> from the app balance pool."
+                        components={{ bold: <Text as="span" fontWeight="semibold" /> }}
+                      />
+                    </Text>
+                    <Button
+                      variant="primary"
+                      borderRadius="full"
+                      w="200px"
+                      onClick={() => handleShowConfirmation("disable")}>
+                      {t("Disable")}
+                    </Button>
+                  </>
+                )}
+              </VStack>
+            </Card.Body>
+          </Card.Root>
         )}
-        <VStack
-          align="start"
-          gap={4}
-          border={isPaused ? "1px solid #C84968" : "1px solid #D5D5D5"}
-          boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}
-          borderRadius="20px"
-          p="16px"
-          mt={isPaused ? "0" : "24px"}
-          justifyContent="space-between">
-          <HStack gap={2}>
-            {isPaused && (
-              <Box w="8px" h="8px" borderRadius="full" bg={"#C84968"} boxShadow={"0 0 8px rgba(245, 101, 101, 0.5)"} />
-            )}
-            <Text textStyle="lg" fontWeight="semibold">
-              {isPaused ? t("Resume Distribution") : t("Pause Distribution")}
-            </Text>
-          </HStack>
-          {isPaused ? (
-            <>
-              <Text textStyle="sm">
-                <Trans
-                  i18nKey="<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool."
-                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
-                />
-              </Text>
-              <Button colorPalette="red" borderRadius="full" w="200px" onClick={() => handleShowConfirmation("resume")}>
-                {t("Resume Distribution")}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Text textStyle="sm">
-                <Trans
-                  i18nKey="You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools."
-                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
-                />
-              </Text>
-              <Button w="200px" colorPalette="red" onClick={() => handleShowConfirmation("pause")}>
-                {t("Pause Distribution")}
-              </Button>
-            </>
-          )}
-        </VStack>
-      </>
+        <Card.Root
+          variant="primary"
+          w="full"
+          rounded="16px"
+          p={4}
+          border={isPaused ? "1px solid #C84968" : undefined}
+          boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}>
+          <Card.Body p={0}>
+            <VStack align="start" gap={4}>
+              <HStack gap={2}>
+                {isPaused && (
+                  <Box
+                    w="8px"
+                    h="8px"
+                    borderRadius="full"
+                    bg={"#C84968"}
+                    boxShadow={"0 0 8px rgba(245, 101, 101, 0.5)"}
+                  />
+                )}
+                <Text textStyle="lg" fontWeight="semibold">
+                  {isPaused ? t("Resume Distribution") : t("Pause Distribution")}
+                </Text>
+              </HStack>
+              {isPaused ? (
+                <>
+                  <Text textStyle="sm">
+                    <Trans
+                      i18nKey="<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool."
+                      components={{ bold: <Text as="span" fontWeight="semibold" /> }}
+                    />
+                  </Text>
+                  <Button
+                    colorPalette="red"
+                    borderRadius="full"
+                    w="200px"
+                    onClick={() => handleShowConfirmation("resume")}>
+                    {t("Resume Distribution")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Text textStyle="sm">
+                    <Trans
+                      i18nKey="You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools."
+                      components={{ bold: <Text as="span" fontWeight="semibold" /> }}
+                    />
+                  </Text>
+                  <Button w="200px" colorPalette="red" onClick={() => handleShowConfirmation("pause")}>
+                    {t("Pause Distribution")}
+                  </Button>
+                </>
+              )}
+            </VStack>
+          </Card.Body>
+        </Card.Root>
+      </VStack>
     ),
     [t, isPaused, isEnabled, handleShowConfirmation],
   )
 
   const ConfirmationContent = useMemo(
     () => (
-      <VStack justifyContent="space-between">
-        <VStack border="1px solid #D5D5D5" borderRadius="20px" p="20px">
-          <ExclamationTriangle size={"100px"} />
+      <VStack gap={4}>
+        <Card.Root variant="primary" w="full" rounded="16px" p={4}>
+          <Card.Body p={0}>
+            <VStack gap={4}>
+              <ExclamationTriangle size={"100px"} />
 
-          <Text textStyle="md" fontWeight="semibold">
-            {confirmationText}
-          </Text>
-          <Text textStyle="sm" textAlign={"center"} px={8}>
-            {informationOnConfirmationText}
-          </Text>
-        </VStack>
-        <HStack mt={6} gap={4} width="full">
+              <Text textStyle="md" fontWeight="semibold">
+                {confirmationText}
+              </Text>
+              <Text textStyle="sm" textAlign={"center"} px={8}>
+                {informationOnConfirmationText}
+              </Text>
+            </VStack>
+          </Card.Body>
+        </Card.Root>
+        <HStack gap={4} width="full">
           <Button variant="ghost" color="status.negative.primary" flex={1} onClick={goToPrevious}>
             {t("Cancel")}
           </Button>
@@ -280,6 +294,13 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
       setActiveStep={setStep}
       steps={steps}
       activeStep={step}
+      closeOnInteractOutside={true}
+      useStandardCloseButton={true}
+      modalContentProps={{
+        borderRadius: "2xl",
+        maxW: "600px",
+        w: "lg",
+      }}
     />
   )
 }
