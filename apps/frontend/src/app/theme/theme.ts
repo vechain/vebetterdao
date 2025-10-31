@@ -90,6 +90,14 @@ const config = defineConfig({
       spacing: {
         "0": { value: "0" },
       },
+      zIndex: {
+        onboarding: {
+          // https://chakra-ui.com/docs/theming/z-index
+          overlay: { value: 1801 },
+          highlight: { value: 1802 },
+          tooltip: { value: 1803 },
+        },
+      },
       colors: {
         transparency: {
           DEFAULT: { value: "rgba(255, 255, 255, 0.15)" },

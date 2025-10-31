@@ -1,0 +1,7 @@
+export { OnboardingHighlight } from "./OnboardingHighlight"
+export { OnboardingOverlay } from "./OnboardingOverlay"
+export { OnboardingTooltip } from "./OnboardingTooltip"
+export { OnboardingProvider, OnboardingContext } from "./OnboardingProvider"
+export { useOnboarding } from "./useOnboarding"
+export type { OnboardingStep } from "./OnboardingProvider"
+export type { OnboardingTooltipProps } from "./OnboardingTooltip"
