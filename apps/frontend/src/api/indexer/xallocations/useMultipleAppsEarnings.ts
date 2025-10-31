@@ -1,5 +1,4 @@
 import { useQueries } from "@tanstack/react-query"
-import { useMemo } from "react"
 
 import { fetchClient } from "../api"
 
@@ -10,7 +9,7 @@ import { fetchClient } from "../api"
  * @returns Object with earnings data per app and loading state
  */
 export const useMultipleAppsEarnings = (appIds: string[]) => {
-  const earningsQueries = useQueries({
+  return useQueries({
     queries: appIds.map(appId => ({
       queryKey: ["xallocations", "earnings", appId],
       queryFn: async () => {
@@ -24,17 +23,9 @@ export const useMultipleAppsEarnings = (appIds: string[]) => {
       },
       enabled: !!appId,
     })),
+    combine: results => ({
+      data: results.every(r => r.data) ? results.map(r => r.data!).filter(Boolean) : undefined,
+      isLoading: results.some(r => r.isLoading),
+    }),
   })
-
-  const isLoading = earningsQueries.some(query => query.isLoading)
-
-  const data = useMemo(() => {
-    if (earningsQueries.some(query => !query.data)) {
-      return undefined
-    }
-
-    return earningsQueries.map(query => query.data!).filter(Boolean)
-  }, [earningsQueries])
-
-  return { data, isLoading }
 }
