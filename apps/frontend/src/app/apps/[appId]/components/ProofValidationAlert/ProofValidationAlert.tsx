@@ -1,4 +1,4 @@
-import { VStack, Button, useDisclosure, Card, Text, HStack, Skeleton, Stack, Icon } from "@chakra-ui/react"
+import { Alert, Button, useDisclosure, Icon, Skeleton, Stack } from "@chakra-ui/react"
 import { UilExclamationTriangle } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -67,46 +67,38 @@ export const ProofValidationAlert = ({ appId }: Props) => {
   return (
     <>
       <Skeleton loading={isLoadingData}>
-        <Card.Root bg="status.warning.subtle" borderColor="status.warning.primary" rounded="xl" w="full" p="4">
-          <Card.Body position="relative" overflow="hidden" borderRadius="xl" p="0">
-            <VStack gap={0} w="full" align="flex-start">
-              <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
-                <Icon as={UilExclamationTriangle} boxSize={9} color="status.warning.strong" />
-                <VStack gap={0} w="full" align="flex-start">
-                  <Text fontWeight="bold" color="status.warning.strong" as="span">
-                    {validationResults.hasErrors
-                      ? t("Reward proofs have validation errors")
-                      : t("Reward proofs have validation warnings")}
-                  </Text>
-                  <Stack
-                    flexDir={{ base: "column", md: "row" }}
-                    gap="0"
-                    alignSelf="flex-end"
-                    justify="space-between"
-                    alignItems={{ base: "flex-end", md: "flex-start" }}
-                    w="full">
-                    <Text color="status.warning.strong">
-                      {validationResults.hasErrors
-                        ? t(
-                            "Your app is not properly emitting sustainability proofs. This affects transparency and impact tracking.",
-                          )
-                        : t("Your app's sustainability proofs could be improved for better compatibility.")}
-                    </Text>
-                    <Button
-                      size="sm"
-                      alignItems="flex-end"
-                      variant="plain"
-                      _hover={{ textDecoration: "underline" }}
-                      color="status.warning.strong"
-                      onClick={onOpen}>
-                      {t("View details")}
-                    </Button>
-                  </Stack>
-                </VStack>
-              </HStack>
-            </VStack>
-          </Card.Body>
-        </Card.Root>
+        <Alert.Root status="warning">
+          <Stack flexDir="column" w="full" gap={2}>
+            <Stack flexDir={["column", "column", "row"]} w="full" gap={2}>
+              <Alert.Indicator>
+                <Icon as={UilExclamationTriangle} boxSize={7} />
+              </Alert.Indicator>
+              <Alert.Title>
+                {validationResults.hasErrors
+                  ? t("Reward proofs have validation errors")
+                  : t("Reward proofs have validation warnings")}
+              </Alert.Title>
+            </Stack>
+            <Stack flexDir={["column", "column", "row"]} justify="space-between" align="flex-start" w="full" gap={2}>
+              <Alert.Description flex={1}>
+                {validationResults.hasErrors
+                  ? t(
+                      "Your app is not properly emitting sustainability proofs. This affects transparency and impact tracking.",
+                    )
+                  : t("Your app's sustainability proofs could be improved for better compatibility.")}
+              </Alert.Description>
+              <Button
+                size="sm"
+                variant="plain"
+                _hover={{ textDecoration: "underline" }}
+                colorPalette="orange"
+                onClick={onOpen}
+                flexShrink={0}>
+                {t("View details")}
+              </Button>
+            </Stack>
+          </Stack>
+        </Alert.Root>
       </Skeleton>
 
       <ProofValidationDetailsModal isOpen={open} onClose={onClose} issues={validationResults.issues} />
