@@ -21,7 +21,7 @@ import {
 import { describe, it, before } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { createNodeHolder, endorseApp } from "./helpers/xnodes"
+import { createLegacyNodeHolder, createNodeHolder, endorseApp } from "./helpers/xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../scripts/helpers"
 import {
@@ -6861,7 +6861,7 @@ describe("X-Apps - @shard17b", function () {
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      const node = await createNodeHolder(7, otherAccounts[1])
+      const node = await createLegacyNodeHolder(7, otherAccounts[1])
 
       await startNewAllocationRound()
 
@@ -6921,7 +6921,7 @@ describe("X-Apps - @shard17b", function () {
         .connect(owner)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
-      const node = await createNodeHolder(7, otherAccounts[1])
+      const node = await createLegacyNodeHolder(7, otherAccounts[1])
 
       await startNewAllocationRound()
 
@@ -6971,7 +6971,7 @@ describe("X-Apps - @shard17b", function () {
         config,
       })
 
-      const node = await createNodeHolder(7, owner)
+      const node = await createLegacyNodeHolder(7, owner)
 
       // Round 1
       await startNewAllocationRound()
@@ -7011,7 +7011,7 @@ describe("X-Apps - @shard17b", function () {
         config,
       })
 
-      const node = await createNodeHolder(7, owner)
+      const node = await createLegacyNodeHolder(7, owner)
 
       // Round 1
       await startNewAllocationRound()
