@@ -59,3 +59,11 @@ export const createNodeHolder = async (level: number, endorser: HardhatEthersSig
 
   return nodeId
 }
+
+export const createLegacyNodeHolder = async (level: number, endorser: HardhatEthersSigner) => {
+  const { nodeManagement } = await getOrDeployContractInstances({})
+
+  await mintLegacyNode(level, endorser)
+  const ownerNodes = await nodeManagement.getUserNodes(endorser.address)
+  return ownerNodes[0].nodeId
+}
