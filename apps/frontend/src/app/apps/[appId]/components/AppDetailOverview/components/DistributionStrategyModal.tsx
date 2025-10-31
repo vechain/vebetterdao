@@ -7,6 +7,7 @@ import {
   Center,
   HStack,
   IconButton,
+  Link,
   Popover,
   Portal,
   SimpleGrid,
@@ -45,7 +46,6 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
 
   const handleViewOnExplorer = () => {
     setIsPopoverOpen(false)
-    window.open(getExplorerAddressLink(distributor), "_blank", "noopener,noreferrer")
   }
 
   return (
@@ -89,12 +89,23 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
                       {isCopied ? t("Address copied") : t("Copy address")}
                     </Text>
                   </HStack>
-                  <HStack onClick={handleViewOnExplorer} cursor="pointer">
+                  <Link
+                    href={getExplorerAddressLink(distributor)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleViewOnExplorer}
+                    display="flex"
+                    alignItems="center"
+                    gap={2}
+                    textStyle={["sm", "md"]}
+                    fontWeight="normal"
+                    color="inherit"
+                    _hover={{ textDecoration: "none" }}
+                    _focus={{ boxShadow: "none", outline: "none" }}
+                    _active={{ boxShadow: "none" }}>
                     <FaExternalLinkAlt />
-                    <Text whiteSpace="nowrap" textStyle={["sm", "md"]}>
-                      {t("View on explorer")}
-                    </Text>
-                  </HStack>
+                    {t("View on explorer")}
+                  </Link>
                 </VStack>
               </Popover.Body>
             </Popover.Content>
