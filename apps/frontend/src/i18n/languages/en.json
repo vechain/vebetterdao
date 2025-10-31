@@ -872,7 +872,7 @@
   "Get more VTHO to be able to vote and perform transactions!": "Get more VTHO to be able to vote and perform transactions!",
   "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.": "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.",
   "Deposit": "Deposit",
-  "Reward distributors": "Reward distributors",
+  "Reward Distributors": "Reward Distributors",
   "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.": "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.",
   "This address won't be able to distribute rewards anymore.": "This address won't be able to distribute rewards anymore.",
   "Add a new reward distributor": "Add a new reward distributor",
@@ -1519,5 +1519,6 @@
   "Migrate your Node NFT before December 2": "Migrate your Node NFT before December 2",
   "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.": "You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.",
   "Migrate now": "Migrate now",
-  "Later": "Later"
+  "Later": "Later",
+  "No reward distributors configured": "No reward distributors configured"
 }
