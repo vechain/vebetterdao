@@ -1,4 +1,4 @@
-import { Button, VStack, useDisclosure, Text, Alert, Box, Card } from "@chakra-ui/react"
+import { Button, VStack, useDisclosure, Text, Alert, Box, Card, Heading } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -44,13 +44,9 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
         modalBodyProps={{
           p: 0,
         }}
-        modalProps={{
-          closeOnInteractOutside: true,
-        }}>
-        <VStack gap={6} w="full">
-          <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"flex-start"}>
-            {t("Transfer App Balance")}
-          </Text>
+        modalProps={{ size: "6xl" }}>
+        <VStack gap={6} w="full" alignItems="flex-start">
+          <Heading size={"2xl"}>{t("Transfer App Balance")}</Heading>
           <VStack gap={4} w="full">
             {isPaused && (
               <Alert.Root status="error" borderRadius={["xl", "xl", "3xl"]}>
