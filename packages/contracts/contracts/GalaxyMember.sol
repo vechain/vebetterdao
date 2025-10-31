@@ -117,8 +117,8 @@ contract GalaxyMember is
     ITokenAuction vechainNodes; // Vechain Nodes contract
     INodeManagementV3 nodeManagement; // Node Management contract
     mapping(uint256 => uint256) _nodeToTokenId; // Mapping from Vechain node ID to GalaxyMember Token ID. Used to track the XNode tied to the GM token ID
-    /// @dev If the node is burnt we override the return of "getNodeIdAttached" to 0, so users can attach it to a new node
-    /// after the new attachment storage will reflect and standard logic will apply
+    /// @dev If the node is burnt we override the return of "getNodeIdAttached" to 0, so users can attach it to a new node after the new attachment storage will reflect and standard logic will apply
+    /// @dev If the node is not managed by the owner of the token, we return 0, so users can attach it to a new node, this happens if the node is transferred to another address and the new owner is not owner of the GM
     mapping(uint256 => uint256) _tokenIdToNode; // Mapping from GalaxyMember Token ID to Vechain node ID. Used to track the GM token ID tied to the XNode token ID
     mapping(uint8 => uint256) _nodeToFreeUpgradeLevel; // Mapping from Vechain node level to GalaxyMember level. Used to track the GM level that can be upgraded for free for a given Vechain node level
     mapping(uint256 => uint256) _tokenIdToB3TRdonated; // Mapping from GM Token ID to B3TR donated for upgrading
@@ -768,8 +768,9 @@ contract GalaxyMember is
   /// @return nodeId The node ID attached to the token
   function _getNodeIdAttached(uint256 tokenId, GalaxyMemberStorage storage $) internal view virtual returns (uint256) {
     uint256 nodeId = $._tokenIdToNode[tokenId];
-    // If the node does is burnt we return 0, so users can attach it to a new node
-    if (!$.stargateNFT.tokenExists(nodeId)) {
+    // 1 - If the node does is burnt we return 0, so users can attach it to a new node
+    // 2 - If the node is not managed by the owner of the token, we return 0, so users can attach it to a new node
+    if (!$.stargateNFT.tokenExists(nodeId) || ownerOf(tokenId) != $.stargateNFT.getTokenManager(nodeId)) {
       return 0;
     }
 
