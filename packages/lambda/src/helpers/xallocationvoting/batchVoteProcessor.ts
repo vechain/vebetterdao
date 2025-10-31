@@ -89,6 +89,7 @@ export const isolateFailedVotes = async (
  * @param privateKey - The private key for signing (as hex string or Uint8Array)
  * @param batchSize - Size of each batch (default: 10)
  * @param dryRun - If true, only simulate votes without sending transactions (default: false)
+ * @param maxRetries - Maximum number of retries per vote (default: 3)
  * @returns VoteBatchResult with counts and failure details
  */
 export const processBatchedVotes = async (
@@ -100,10 +101,20 @@ export const processBatchedVotes = async (
   privateKey: string | Uint8Array,
   batchSize: number = 10,
   dryRun: boolean = false,
+  maxRetries: number = 3,
 ): Promise<VoteBatchResult> => {
   const clauseBuilder = buildCastVoteClause(contractAddress, roundId)
 
-  const result = await processBatchedClauses(thor, users, clauseBuilder, walletAddress, privateKey, batchSize, dryRun)
+  const result = await processBatchedClauses(
+    thor,
+    users,
+    clauseBuilder,
+    walletAddress,
+    privateKey,
+    batchSize,
+    dryRun,
+    maxRetries,
+  )
 
   return convertBatchResult(result)
 }

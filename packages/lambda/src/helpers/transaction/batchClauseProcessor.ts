@@ -104,7 +104,7 @@ export const isolateFailedExecutions = async <T>(
 
 /**
  * Processes a single batch of clauses
- * @returns Success status and transaction ID if successful
+ * @returns Success status and transaction ID if successful, or error details if failed
  */
 const processSingleBatch = async (
   thor: ThorClient,
@@ -113,7 +113,7 @@ const processSingleBatch = async (
   privateKey: string | Uint8Array,
   batchNumber: number,
   dryRun: boolean = false,
-): Promise<{ success: boolean; txId?: string; needsIsolation?: boolean }> => {
+): Promise<{ success: boolean; txId?: string; needsIsolation?: boolean; error?: string }> => {
   try {
     const gasResult = await buildGasEstimate(thor, clauses, walletAddress)
 
@@ -125,7 +125,7 @@ const processSingleBatch = async (
         vmErrors: gasResult.vmErrors,
         dryRun,
       })
-      return { success: false, needsIsolation: true }
+      return { success: false, needsIsolation: true, error: "Gas estimation failed" }
     }
 
     // If dry run, stop here after successful gas estimation
@@ -149,7 +149,7 @@ const processSingleBatch = async (
 
     if (!receipt) {
       logger.warn("Batch receipt not found", { batchNumber, txId: tx.id })
-      return { success: false, needsIsolation: true }
+      return { success: false, needsIsolation: true, error: "Receipt not found" }
     }
 
     if (!receipt.reverted) {
@@ -161,11 +161,12 @@ const processSingleBatch = async (
       return { success: true, txId: tx.id }
     } else {
       logger.warn("Batch transaction reverted", { batchNumber, txId: tx.id })
-      return { success: false, needsIsolation: true }
+      return { success: false, needsIsolation: true, error: "Transaction reverted" }
     }
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
     logger.error("Batch processing error", error, { batchNumber, clausesCount: clauses.length, dryRun })
-    return { success: false, needsIsolation: true }
+    return { success: false, needsIsolation: true, error: errorMessage }
   }
 }
 
@@ -178,6 +179,7 @@ const processSingleBatch = async (
  * @param privateKey - The private key for signing (as hex string or Uint8Array)
  * @param batchSize - Size of each batch (default: 10)
  * @param dryRun - If true, only simulate without sending transactions (default: false)
+ * @param maxRetries - Maximum number of retries per item (default: 3)
  * @returns BatchResult with counts and failure details
  */
 export const processBatchedClauses = async <T>(
@@ -188,16 +190,30 @@ export const processBatchedClauses = async <T>(
   privateKey: string | Uint8Array,
   batchSize: number = 10,
   dryRun: boolean = false,
+  maxRetries: number = 3,
 ): Promise<BatchResult<T>> => {
+  // Validate batch size
+  if (batchSize <= 0) {
+    throw new Error(`Invalid batchSize: ${batchSize}. Must be greater than 0.`)
+  }
+
+  // Validate max retries
+  if (maxRetries < 0) {
+    throw new Error(`Invalid maxRetries: ${maxRetries}. Must be 0 or greater.`)
+  }
+
   logger.info("Starting batched clause processing", {
     totalItems: items.length,
     batchSize,
     dryRun,
+    maxRetries,
   })
 
   const queue = [...items] // Create a copy to work with
   const failedExecutions: FailedExecution<T>[] = []
   const transactionIds: string[] = []
+  const retryCount = new Map<T, number>() // Track retry attempts per item
+  const lastError = new Map<T, string>() // Track last error for each item
   let successfulExecutions = 0
   let batchNumber = 0
 
@@ -211,18 +227,87 @@ export const processBatchedClauses = async <T>(
     if (result.success && result.txId) {
       transactionIds.push(result.txId)
       successfulExecutions += batch.length
+      // Clear retry counts and errors for successful items
+      batch.forEach(item => {
+        retryCount.delete(item)
+        lastError.delete(item)
+      })
     } else if (result.needsIsolation) {
       // Batch failed, need to isolate which items are bad
-      const { toRetry, definitelyFailed } = await isolateFailedExecutions(thor, batch, clauseBuilder, walletAddress)
+      let toRetry: T[] = []
+      let definitelyFailed: FailedExecution<T>[] = []
+
+      try {
+        const isolationResult = await isolateFailedExecutions(thor, batch, clauseBuilder, walletAddress)
+        toRetry = isolationResult.toRetry
+        definitelyFailed = isolationResult.definitelyFailed
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        logger.error("Isolation process failed", error, { batchNumber, batchSize: batch.length })
+
+        // If isolation fails completely, mark all items as failed
+        definitelyFailed = batch.map(item => ({
+          item,
+          reason: `Isolation failed: ${errorMessage}`,
+        }))
+      }
 
       // Add failed executions to our tracking list
       failedExecutions.push(...definitelyFailed)
 
-      // Add items that passed simulation back to the front of the queue
-      if (toRetry.length > 0) {
-        logger.info("Adding items back to queue for retry", { count: toRetry.length })
-        queue.unshift(...toRetry)
+      // Store the error for all items in this batch
+      if (result.error) {
+        batch.forEach(item => lastError.set(item, result.error!))
       }
+
+      // Filter items based on retry count to prevent infinite loops
+      const itemsToRetry: T[] = []
+      for (const item of toRetry) {
+        const currentRetries = retryCount.get(item) || 0
+
+        if (currentRetries >= maxRetries) {
+          // Max retries exceeded, mark as failed with the actual error
+          const error = lastError.get(item) || "Unknown error"
+          logger.warn("Item exceeded max retries", {
+            item,
+            retries: currentRetries,
+            maxRetries,
+            lastError: error,
+          })
+          failedExecutions.push({
+            item,
+            reason: `Max retries (${maxRetries}) exceeded. Last error: ${error}`,
+          })
+          lastError.delete(item)
+          retryCount.delete(item)
+        } else {
+          // Increment retry count and add back to queue
+          retryCount.set(item, currentRetries + 1)
+          itemsToRetry.push(item)
+        }
+      }
+
+      // Add items that can be retried back to the front of the queue
+      if (itemsToRetry.length > 0) {
+        logger.info("Adding items back to queue for retry", {
+          count: itemsToRetry.length,
+          itemsExceededRetries: toRetry.length - itemsToRetry.length,
+        })
+        queue.unshift(...itemsToRetry)
+      }
+    } else {
+      // Handle unexpected state
+      logger.error("Unexpected batch result state", undefined, {
+        result,
+        batchNumber,
+        itemCount: batch.length,
+      })
+      batch.forEach(item => {
+        failedExecutions.push({
+          item,
+          reason: result.error || "Unexpected failure without isolation",
+        })
+      })
     }
   }
 

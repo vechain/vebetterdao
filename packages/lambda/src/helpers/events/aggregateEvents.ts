@@ -144,6 +144,7 @@ export const aggregateAllEvents = async <T>(
   toBlock: number | undefined,
   aggregateFn: (accumulator: T, log: any, decodedData: any) => T,
   initialValue: T,
+  showLogs: boolean = false,
 ): Promise<{ result: T; totalEvents: number }> => {
   let accumulator = initialValue
   let offset = 0
@@ -165,11 +166,13 @@ export const aggregateAllEvents = async <T>(
       offset,
     )
 
-    logger.info("Events page received", {
-      eventCount,
-      hasMore,
-      offset,
-    })
+    if (showLogs) {
+      logger.info("Events page received", {
+        eventCount,
+        hasMore,
+        offset,
+      })
+    }
 
     // Update accumulator with results from this page
     accumulator = result

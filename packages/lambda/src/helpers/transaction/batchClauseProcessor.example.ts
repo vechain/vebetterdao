@@ -25,6 +25,7 @@ export const exampleProcessBatchedVotes = async (
   privateKey: string,
   batchSize: number = 10,
   dryRun: boolean = false,
+  maxRetries: number = 3,
 ) => {
   // Step 1: Define how to build a clause for each user
   const buildCastVoteClause = (user: string): Clause => {
@@ -44,6 +45,7 @@ export const exampleProcessBatchedVotes = async (
     privateKey,
     batchSize,
     dryRun,
+    maxRetries, // Prevents infinite loops on transient errors
   )
 
   // Step 3: Handle results
@@ -84,6 +86,7 @@ export const exampleProcessBatchedVotes = async (
  *    - Batching (groups items into batches of specified size)
  *    - Gas estimation (validates each batch before sending)
  *    - Failure isolation (identifies which specific items fail)
- *    - Automatic retry (retries valid items from failed batches)
+ *    - Automatic retry with limit (retries valid items up to maxRetries times)
+ *    - Infinite loop protection (prevents endless retries on transient errors like 403)
  *    - Dry-run mode (simulates without sending transactions)
  */
