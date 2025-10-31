@@ -133,7 +133,7 @@ export const TransactionsHistory = ({ transaction, start, end }: Props) => {
   return (
     <HStack
       p={2}
-      borderRadius={"16px"}
+      borderRadius="2xl"
       border="sm"
       bg="bg.primary"
       borderColor="border.secondary"
@@ -156,7 +156,7 @@ export const TransactionsHistory = ({ transaction, start, end }: Props) => {
           textStyle="xs"
           color="text.subtle"
           _hover={{
-            color: "blue.600",
+            color: "actions.primary.default",
             textDecoration: "underline",
           }}
           display="inline-flex"
