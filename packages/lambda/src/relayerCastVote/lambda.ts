@@ -10,6 +10,7 @@ import mainnetConfig from "@repo/config/mainnet"
 import { getSecret } from "../helpers/secret"
 import { CustomApiError, StandardApiError, SuccessResponseType } from "../helpers/api.types"
 import { buildResponse } from "../helpers/api/response"
+import { parseDryRunFlag } from "../helpers/api"
 import { logger } from "../helpers/logger"
 import { AppEnv } from "@repo/config/contracts"
 import { AppConfig } from "@repo/config"
@@ -144,20 +145,7 @@ const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKe
 }
 
 export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
-  // Parse dryRun flag from event payload
-  // Check direct event property (for EventBridge/direct invocation) or body (for API Gateway)
-  let dryRun = false
-  try {
-    if (event.dryRun !== undefined) {
-      dryRun = event.dryRun === true
-    } else if (event.body) {
-      const body = JSON.parse(event.body)
-      dryRun = body.dryRun === true
-    }
-  } catch {
-    // If parsing fails, default to false
-    dryRun = false
-  }
+  const dryRun = parseDryRunFlag(event)
 
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
