@@ -39,17 +39,6 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
     timeout: 1000,
   })
 
-  const handleCopyAddress = () => {
-    copy()
-    setTimeout(() => {
-      setIsPopoverOpen(false)
-    }, 1000)
-  }
-
-  const handleViewOnExplorer = () => {
-    setIsPopoverOpen(false)
-  }
-
   return (
     <HStack w="full" justify="space-between">
       <HStack gap={3}>
@@ -85,7 +74,7 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
             <Popover.Content width="auto" boxShadow="md" border="1px solid #EFEFEF">
               <Popover.Body p={2}>
                 <VStack alignItems="stretch" gap={3}>
-                  <HStack onClick={handleCopyAddress} cursor="pointer">
+                  <HStack onClick={() => copy()} cursor="pointer">
                     {isCopied ? <FaCheck /> : <FaCopy />}
                     <Text whiteSpace="nowrap" textStyle={["sm", "md"]}>
                       {isCopied ? t("Address copied") : t("Copy address")}
@@ -95,7 +84,6 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
                     href={getExplorerAddressLink(distributor)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={handleViewOnExplorer}
                     display="flex"
                     alignItems="center"
                     gap={2}
