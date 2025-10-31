@@ -35,13 +35,17 @@ export const ProofValidationAlert = ({ appId }: Props) => {
       const result = validateRewardProof(event.proof, allowedImpactKeys)
       if (!result.isValid || result.issues.length > 0) {
         hasInvalidProofs = true
-        // Add issues but avoid duplicates
+        // Add issues with example proof and transaction ID
         result.issues.forEach(issue => {
           const isDuplicate = allIssues.some(
             existing => existing.type === issue.type && existing.message === issue.message,
           )
           if (!isDuplicate) {
-            allIssues.push(issue)
+            allIssues.push({
+              ...issue,
+              exampleProof: event.proof,
+              txId: event.txId,
+            })
           }
         })
       }

@@ -1,5 +1,7 @@
-import { VStack, HStack, Text, Heading, Link, Card, Icon, Stack, Separator } from "@chakra-ui/react"
-import { UilExternalLinkAlt, UilTimesCircle, UilExclamationTriangle } from "@iconscout/react-unicons"
+import { VStack, HStack, Text, Heading, Link, Card, Icon, Stack, Separator, Collapsible } from "@chakra-ui/react"
+import { UilExternalLinkAlt, UilTimesCircle, UilExclamationTriangle, UilAngleDown } from "@iconscout/react-unicons"
+import { getConfig } from "@repo/config"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
@@ -10,6 +12,91 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   issues: ProofIssue[]
+}
+
+const IssueCard = ({ issue, colorScheme }: { issue: ProofIssue; colorScheme: "red" | "orange" }) => {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const config = getConfig()
+  const explorerUrl = config.network.explorerUrl || "https://explore-testnet.vechain.org"
+
+  const hasExample = issue.exampleProof && issue.exampleProof.trim() !== ""
+
+  return (
+    <VStack align="flex-start" w="full" p={3} bg={`${colorScheme}.50`} rounded="md" gap={2}>
+      <HStack align="flex-start" w="full">
+        <Icon
+          as={colorScheme === "red" ? UilTimesCircle : UilExclamationTriangle}
+          color={`${colorScheme}.500`}
+          boxSize={5}
+          mt={0.5}
+          flexShrink={0}
+        />
+        <VStack align="flex-start" flex={1} gap={1}>
+          <Text fontWeight="semibold" fontSize="sm" color={`${colorScheme}.700`}>
+            {issue.type.replace(/_/g, " ").toUpperCase()}
+          </Text>
+          <Text fontSize="sm" color={`${colorScheme}.900`}>
+            {issue.message}
+          </Text>
+
+          {hasExample && (
+            <>
+              <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
+                <Collapsible.Trigger asChild w="full">
+                  <HStack
+                    cursor="pointer"
+                    color={`${colorScheme}.700`}
+                    fontSize="xs"
+                    fontWeight="semibold"
+                    _hover={{ textDecoration: "underline" }}
+                    mt={1}>
+                    <Icon
+                      as={UilAngleDown}
+                      boxSize={4}
+                      transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+                      transition="transform 0.2s"
+                    />
+                    <Text color={`${colorScheme}.900`}>{isOpen ? t("Hide proof") : t("View your proof")}</Text>
+                  </HStack>
+                </Collapsible.Trigger>
+                <Collapsible.Content>
+                  <VStack align="flex-start" w="full" mt={2} gap={2}>
+                    <Card.Root w="full" bg="white" border="1px solid" borderColor={`${colorScheme}.200`}>
+                      <Card.Body p={2}>
+                        <Text
+                          fontFamily="monospace"
+                          fontSize="2xs"
+                          whiteSpace="pre-wrap"
+                          wordBreak="break-all"
+                          color="gray.800">
+                          {issue.exampleProof}
+                        </Text>
+                      </Card.Body>
+                    </Card.Root>
+                    {issue.txId && (
+                      <Link
+                        href={`${explorerUrl}/transactions/${issue.txId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color={`${colorScheme}.600`}
+                        fontSize="xs"
+                        fontWeight="semibold">
+                        <HStack>
+                          <Text color={`${colorScheme}.900`}>{t("View on explorer")}</Text>
+                          <Icon as={UilExternalLinkAlt} boxSize={3} />
+                        </HStack>
+                      </Link>
+                    )}
+                  </VStack>
+                </Collapsible.Content>
+              </Collapsible.Root>
+            </>
+          )}
+        </VStack>
+      </HStack>
+    </VStack>
+  )
 }
 
 export const ProofValidationDetailsModal = ({ isOpen, onClose, issues }: Props) => {
@@ -38,23 +125,7 @@ export const ProofValidationDetailsModal = ({ isOpen, onClose, issues }: Props) 
                         {t("Errors")} {`(${errors.length})`}
                       </Text>
                       {errors.map(issue => (
-                        <HStack
-                          key={`error-${issue.type}-${issue.message}`}
-                          align="flex-start"
-                          w="full"
-                          p={3}
-                          bg="red.50"
-                          rounded="md">
-                          <Icon as={UilTimesCircle} color="red.500" boxSize={5} mt={0.5} flexShrink={0} />
-                          <VStack align="flex-start" flex={1} gap={1}>
-                            <Text fontWeight="semibold" fontSize="sm" color="red.700">
-                              {issue.type.replace(/_/g, " ").toUpperCase()}
-                            </Text>
-                            <Text fontSize="sm" color="red.900">
-                              {issue.message}
-                            </Text>
-                          </VStack>
-                        </HStack>
+                        <IssueCard key={`error-${issue.type}-${issue.message}`} issue={issue} colorScheme="red" />
                       ))}
                     </VStack>
                   )}
@@ -64,23 +135,7 @@ export const ProofValidationDetailsModal = ({ isOpen, onClose, issues }: Props) 
                         {t("Warnings")} {`(${warnings.length})`}
                       </Text>
                       {warnings.map(issue => (
-                        <HStack
-                          key={`warning-${issue.type}-${issue.message}`}
-                          align="flex-start"
-                          w="full"
-                          p={3}
-                          bg="orange.50"
-                          rounded="md">
-                          <Icon as={UilExclamationTriangle} color="orange.500" boxSize={5} mt={0.5} flexShrink={0} />
-                          <VStack align="flex-start" flex={1} gap={1}>
-                            <Text fontWeight="semibold" fontSize="sm" color="orange.700">
-                              {issue.type.replace(/_/g, " ").toUpperCase()}
-                            </Text>
-                            <Text fontSize="sm" color="orange.900">
-                              {issue.message}
-                            </Text>
-                          </VStack>
-                        </HStack>
+                        <IssueCard key={`warning-${issue.type}-${issue.message}`} issue={issue} colorScheme="orange" />
                       ))}
                     </VStack>
                   )}

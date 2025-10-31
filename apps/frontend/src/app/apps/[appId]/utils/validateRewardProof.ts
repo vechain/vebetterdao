@@ -18,6 +18,8 @@ export type ProofIssue = {
     | "invalid_impact_code"
   message: string
   severity: "error" | "warning"
+  exampleProof?: string // Example proof that has this issue
+  txId?: string // Transaction ID where this proof was emitted
 }
 
 // Valid proof types according to documentation
@@ -67,81 +69,80 @@ export const validateRewardProof = (proof: string, allowedImpactKeys?: string[])
     })
   }
 
-  // Check 4: If version 2, validate structure
-  if (parsedProof.version === 2) {
-    // Must have at least proof or impact
-    const hasProof = parsedProof.proof && typeof parsedProof.proof === "object"
-    const hasImpact = parsedProof.impact && typeof parsedProof.impact === "object"
-
-    if (!hasProof && !hasImpact) {
-      issues.push({
-        type: "invalid_structure",
-        message: "Version 2 proof must contain at least 'proof' or 'impact' field.",
-        severity: "error",
-      })
-    }
-
-    // Validate proof types
-    if (hasProof) {
-      const proofKeys = Object.keys(parsedProof.proof)
-      const invalidProofTypes = proofKeys.filter(key => !VALID_PROOF_TYPES.includes(key))
-
-      if (invalidProofTypes.length > 0) {
-        issues.push({
-          type: "invalid_proof_type",
-          message: `Invalid proof type(s): ${invalidProofTypes.join(", ")}. Valid types are: ${VALID_PROOF_TYPES.join(", ")}.`,
-          severity: "error",
-        })
-      }
-    }
-
-    // Validate impact codes
-    if (hasImpact) {
-      const impactKeys = Object.keys(parsedProof.impact)
-
-      // Only validate against allowed keys if they are provided
-      if (allowedImpactKeys && allowedImpactKeys.length > 0) {
-        const invalidImpactCodes = impactKeys.filter(
-          key => !allowedImpactKeys.includes(key) && !DEPRECATED_IMPACT_CODES.includes(key),
-        )
-
-        if (invalidImpactCodes.length > 0) {
-          issues.push({
-            type: "invalid_impact_code",
-            message: `Invalid impact code(s): ${invalidImpactCodes.join(", ")}. Valid codes are: ${allowedImpactKeys.join(", ")}.`,
-            severity: "error",
-          })
-        }
-      }
-
-      // Check for deprecated impact codes
-      const deprecatedCodesUsed = impactKeys.filter(key => DEPRECATED_IMPACT_CODES.includes(key))
-      if (deprecatedCodesUsed.length > 0) {
-        issues.push({
-          type: "invalid_impact_code",
-          message: `Deprecated impact code(s): ${deprecatedCodesUsed.join(", ")}. These codes are from version 1 and should not be used.`,
-          severity: "warning",
-        })
-      }
-
-      // Validate that impact values are numbers
-      for (const [key, value] of Object.entries(parsedProof.impact)) {
-        if (typeof value !== "number" && typeof value !== "string") {
-          issues.push({
-            type: "invalid_structure",
-            message: `Impact value for '${key}' must be a number or numeric string.`,
-            severity: "error",
-          })
-        }
-      }
-    }
-  } else if (parsedProof.version === 1 || !parsedProof.version) {
-    // Version 1 validation (deprecated format)
+  // Check 4: Version-specific warnings
+  if (parsedProof.version === 1 || !parsedProof.version) {
     issues.push({
       type: "invalid_structure",
       message: "Using deprecated version 1 format. Please migrate to version 2 format as documented.",
       severity: "warning",
     })
+  }
+
+  // Check 5: Validate structure (applies to all versions)
+  const hasProof = parsedProof.proof && typeof parsedProof.proof === "object"
+  const hasImpact = parsedProof.impact && typeof parsedProof.impact === "object"
+
+  if (!hasProof && !hasImpact) {
+    issues.push({
+      type: "invalid_structure",
+      message: "Proof must contain at least 'proof' or 'impact' field.",
+      severity: "error",
+    })
+  }
+
+  // Validate proof types
+  if (hasProof) {
+    const proofKeys = Object.keys(parsedProof.proof)
+    const invalidProofTypes = proofKeys.filter(key => !VALID_PROOF_TYPES.includes(key))
+
+    if (invalidProofTypes.length > 0) {
+      issues.push({
+        type: "invalid_proof_type",
+        message: `Invalid proof type(s): ${invalidProofTypes.join(", ")}. Valid types are: ${VALID_PROOF_TYPES.join(", ")}.`,
+        severity: "error",
+      })
+    }
+  }
+
+  // Validate impact codes
+  if (hasImpact) {
+    const impactKeys = Object.keys(parsedProof.impact)
+
+    // Only validate against allowed keys if they are provided
+    if (allowedImpactKeys && allowedImpactKeys.length > 0) {
+      const invalidImpactCodes = impactKeys.filter(
+        key => !allowedImpactKeys.includes(key) && !DEPRECATED_IMPACT_CODES.includes(key),
+      )
+
+      if (invalidImpactCodes.length > 0) {
+        issues.push({
+          type: "invalid_impact_code",
+          message: `Invalid impact code(s): ${invalidImpactCodes.join(", ")}. Valid codes are: ${allowedImpactKeys.join(", ")}.`,
+          severity: "error",
+        })
+      }
+    }
+
+    // Check for deprecated impact codes
+    const deprecatedCodesUsed = impactKeys.filter(key => DEPRECATED_IMPACT_CODES.includes(key))
+    if (deprecatedCodesUsed.length > 0) {
+      issues.push({
+        type: "invalid_impact_code",
+        message: `Deprecated impact code(s): ${deprecatedCodesUsed.join(", ")}. These codes are from version 1 and should not be used.`,
+        severity: "warning",
+      })
+    }
+
+    // Validate that impact values are numbers
+    for (const [key, value] of Object.entries(parsedProof.impact)) {
+      if (typeof value !== "number" && typeof value !== "string") {
+        issues.push({
+          type: "invalid_structure",
+          message: `Impact value for '${key}' must be a number or numeric string.`,
+          severity: "error",
+        })
+      }
+    }
   }
 
   const hasErrors = issues.some(issue => issue.severity === "error")

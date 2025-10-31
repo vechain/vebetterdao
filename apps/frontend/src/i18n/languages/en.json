@@ -1539,5 +1539,8 @@
   "Reward proofs have validation errors": "Reward proofs have validation errors",
   "Reward proofs have validation warnings": "Reward proofs have validation warnings",
   "Your app is not properly emitting sustainability proofs. This affects transparency and impact tracking.": "Your app is not properly emitting sustainability proofs. This affects transparency and impact tracking.",
-  "Your app's sustainability proofs could be improved for better compatibility.": "Your app's sustainability proofs could be improved for better compatibility."
+  "Your app's sustainability proofs could be improved for better compatibility.": "Your app's sustainability proofs could be improved for better compatibility.",
+  "View your proof": "View your proof",
+  "Hide proof": "Hide proof",
+  "View on explorer": "View on explorer"
 }
