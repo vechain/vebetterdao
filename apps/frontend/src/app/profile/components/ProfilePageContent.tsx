@@ -8,18 +8,16 @@ import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 import { ProfileBetterActions } from "./ProfileBetterActions/ProfileBetterActions"
-import { ProfileGMLevel } from "./ProfileGMLevel/ProfileGMLevel"
 import { ProfileGovernance } from "./ProfileGovernance/ProfileGovernance"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts/ProfileLinkedAcounts"
-import { ProfileNodes } from "./ProfileNodes/ProfileNodes"
+import { ProfileNFTs } from "./ProfileNFTs/ProfileNFTs"
 
 enum Tab {
   BetterActions = "better-actions",
+  NFTs = "nfts",
   Governance = "governance",
   LinkedAccounts = "linked-accounts",
-  GM = "gm",
-  Nodes = "nodes",
 }
 interface ProfilePageContentProps {
   address?: string
@@ -48,8 +46,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const tabs = useMemo(
     () => [
       { tab: Tab.BetterActions, label: t("Better Actions") },
-      { tab: Tab.GM, label: t("GM Level") },
-      { tab: Tab.Nodes, label: t("Nodes") },
+      { tab: Tab.NFTs, label: t("NFTs") },
       { tab: Tab.Governance, label: t("Governance") },
       { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
     ],
@@ -121,17 +118,14 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         <Tabs.Content value={Tab.BetterActions}>
           <ProfileBetterActions address={parsedAddress} />
         </Tabs.Content>
+        <Tabs.Content value={Tab.NFTs}>
+          <ProfileNFTs address={parsedAddress} />
+        </Tabs.Content>
         <Tabs.Content value={Tab.Governance}>
           <ProfileGovernance address={parsedAddress} />
         </Tabs.Content>
         <Tabs.Content value={Tab.LinkedAccounts}>
           <ProfileLinkedAcounts address={parsedAddress} />
-        </Tabs.Content>
-        <Tabs.Content value={Tab.GM}>
-          <ProfileGMLevel address={parsedAddress} />
-        </Tabs.Content>
-        <Tabs.Content value={Tab.Nodes}>
-          <ProfileNodes address={parsedAddress} />
         </Tabs.Content>
       </Tabs.Root>
     </VStack>
