@@ -18,6 +18,10 @@ import "@/i18n"
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
 const Navbar = dynamic(() => import("@/components/Navbar/Navbar").then(mod => mod.Navbar), { ssr: false })
+const MobileBottomNav = dynamic(
+  () => import("@/components/Navbar/MobileBottomNav").then(mod => mod.MobileBottomNav),
+  { ssr: false },
+)
 const FreshDeskWidget = dynamic(
   () => import("@/components/FreshDeskWidget/FreshDeskWidget").then(mod => mod.FreshDeskWidget),
   {
@@ -85,7 +89,7 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
       {isProduction && <FreshDeskWidget widgetId={103000007852} />}
-      <VStack minH="100vh" gap={0} align="stretch" bg="layout-bg">
+      <VStack minH="100vh" gap={0} align="stretch" bg="layout-bg" pb={{ base: "70px", lg: 0 }}>
         <Navbar />
         <Flex flex={1}>
           <Container
@@ -103,6 +107,7 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
           <Toaster />
         </Flex>
         <Footer />
+        <MobileBottomNav />
       </VStack>
     </Providers>
   )

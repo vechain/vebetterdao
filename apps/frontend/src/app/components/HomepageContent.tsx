@@ -8,13 +8,11 @@ import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
-import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
   return (
     <>
-      {!isAboveMd && <RoundInfoBottomSheet />}
       <Grid
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap="32px"

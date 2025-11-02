@@ -2,11 +2,12 @@ import { VStack, Icon, Text, Tabs, Button } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useMemo, useCallback, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
+import { useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
 
+import { NotConnectedWallet } from "../../../components/GmNFTAndNodeCard/components/NotConnectedWallet"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
@@ -32,15 +33,9 @@ interface ProfilePageContentProps {
 export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const { account } = useWallet()
   const { t } = useTranslation()
-  const router = useRouter()
   const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
   const parsedAddress = address ?? account?.address ?? ""
   const searchParams = useSearchParams()
-  useEffect(() => {
-    if (!parsedAddress) {
-      router.push("/error")
-    }
-  }, [parsedAddress, router])
 
   const getInitialTab = useCallback(() => {
     const tabFromURL = searchParams.get("tab")
@@ -111,6 +106,15 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     },
     [updateURLWithTab],
   )
+
+  // If no wallet is connected, show the connect wallet component
+  if (!parsedAddress) {
+    return (
+      <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
+        <NotConnectedWallet />
+      </VStack>
+    )
+  }
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
