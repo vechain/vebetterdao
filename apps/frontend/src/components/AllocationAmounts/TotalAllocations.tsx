@@ -9,7 +9,7 @@ import { useXApps } from "../../api/contracts/xApps/hooks/useXApps"
 
 import { AppAmount } from "./components/AppAmount"
 
-const APPS_DISPLAY_LIMIT = 10
+const APPS_DISPLAY_LIMIT = 5
 export const TotalAllocations = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps({ filterBlacklisted: true })

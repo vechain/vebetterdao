@@ -23,10 +23,8 @@ export const DashboardSideBar = () => {
     <VStack gap={4}>
       {isMobile && <CantVoteCard />}
       <ManagedAppsCard />
-      {/* <YourBetterActionsCard address={account?.address ?? ""} /> */}
       <UserTransactions address={account?.address ?? ""} />
       <Leaderboard />
-      {/* <SupplyBreakdownCard /> */}
     </VStack>
   )
 }

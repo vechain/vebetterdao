@@ -1,8 +1,11 @@
 import { Grid, GridItem, useMediaQuery, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 
 import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
 
 import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
+import { TopVotedAppsSection } from "../profile/components/ProfileGovernance/components/TopVotedAppsSection"
+import { VotedProposalsSection } from "../profile/components/ProfileGovernance/components/VotedProposalsSection"
 
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
@@ -11,6 +14,7 @@ import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
+  const { account } = useWallet()
   return (
     <>
       {!isAboveMd && <RoundInfoBottomSheet />}
@@ -35,7 +39,12 @@ export const HomePageContent = () => {
                 <DashboardAllocationRounds />
               </>
             )}
-            {/* <DashboardXApps /> */}
+            <VotedProposalsSection
+              address={account?.address ?? ""}
+              onSeeAll={() => {}}
+              onExploreGovernance={() => {}}
+            />
+            <TopVotedAppsSection address={account?.address ?? ""} onSeeAll={() => {}} onExploreGovernance={() => {}} />
           </VStack>
         </GridItem>
         <GridItem colSpan={1} order={[1, 1, 2]}>

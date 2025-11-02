@@ -2,6 +2,7 @@ import { VStack, HStack, Stack } from "@chakra-ui/react"
 
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
+import { SupplyBreakdownCard } from "@/app/components/SupplyBreakdownCard"
 
 import { TotalAllocations } from "../../../components/AllocationAmounts/TotalAllocations"
 import { AllocationRoundsList } from "../../../components/AllocationRoundsList/AllocationRoundsList"
@@ -22,6 +23,7 @@ export const AllocationRoundsContent = () => {
         </HStack>
         <VStack gap={4} flex={1} position={["static", "static", "sticky"]} top={100} right={0}>
           <TotalAllocations />
+          <SupplyBreakdownCard />
         </VStack>
       </Stack>
     </VStack>
