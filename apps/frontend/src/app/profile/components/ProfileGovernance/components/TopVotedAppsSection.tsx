@@ -36,6 +36,9 @@ export const TopVotedAppsSection = ({ address, onSeeAll, onExploreGovernance, pr
 
   const hasApps = firstTopVotedApps && firstTopVotedApps.length > 0
 
+  // if user is not connected, don't show the top voted apps
+  if (!address) return null
+
   if (!hasApps) {
     return (
       <EmptyStateGovernance

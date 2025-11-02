@@ -37,6 +37,9 @@ export const VotedProposalsSection = ({ address, onSeeAll, onExploreGovernance, 
 
   const hasProposals = firstProposals && firstProposals.length > 0
 
+  // if user is not connected, don't show the voted proposals
+  if (!address) return null
+
   if (!hasProposals) {
     return (
       <EmptyVotedProposals address={address} isConnectedUser={isConnectedUser} onExploreClick={onExploreGovernance} />

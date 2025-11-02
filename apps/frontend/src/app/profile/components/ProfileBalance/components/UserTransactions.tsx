@@ -23,6 +23,9 @@ export const UserTransactions = ({ address }: Props) => {
     return data?.pages[0]?.pagination?.hasNext ?? false
   }, [data])
 
+  // if user is not connected, don't show the transactions
+  if (!address) return null
+
   return (
     <Skeleton w={"full"} rounded="xl" loading={isLoading}>
       <Card.Root w={"full"} variant="outline" borderColor="border.primary">
