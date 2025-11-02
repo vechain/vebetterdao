@@ -33,4 +33,3 @@ export const CreatedProposalsSection = ({ address, onSeeAll, previewSize = 3 }: 
     />
   )
 }
-

@@ -18,4 +18,3 @@ export const ProfileSettings = ({ address }: Props) => {
     </VStack>
   )
 }
-

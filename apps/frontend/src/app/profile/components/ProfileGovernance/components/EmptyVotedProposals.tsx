@@ -40,4 +40,3 @@ export const EmptyVotedProposals = ({ address, isConnectedUser, onExploreClick }
     </Card.Root>
   )
 }
-

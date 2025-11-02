@@ -18,4 +18,3 @@ export const DelegationSection = ({ address, isConnectedUser }: Props) => {
     </VStack>
   )
 }
-
