@@ -7,7 +7,6 @@ import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNode
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
-import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 
 export const HomePageContent = () => {
@@ -36,7 +35,7 @@ export const HomePageContent = () => {
                 <DashboardAllocationRounds />
               </>
             )}
-            <DashboardXApps />
+            {/* <DashboardXApps /> */}
           </VStack>
         </GridItem>
         <GridItem colSpan={1} order={[1, 1, 2]}>

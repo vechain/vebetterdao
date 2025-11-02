@@ -4,10 +4,9 @@ import dynamic from "next/dynamic"
 
 import { ManagedAppsCard } from "../../components/ManagedAppsCard/ManagedAppsCard"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
+import { UserTransactions } from "../profile/components/ProfileBalance/components/UserTransactions"
 
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
-import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
-import { YourBetterActionsCard } from "./YourBetterActionsCard"
 
 const Leaderboard = dynamic(() => import("../../components/Leaderboard/Leaderboard").then(mod => mod.Leaderboard), {
   ssr: false,
@@ -24,9 +23,10 @@ export const DashboardSideBar = () => {
     <VStack gap={4}>
       {isMobile && <CantVoteCard />}
       <ManagedAppsCard />
-      <YourBetterActionsCard address={account?.address ?? ""} />
+      {/* <YourBetterActionsCard address={account?.address ?? ""} /> */}
+      <UserTransactions address={account?.address ?? ""} />
       <Leaderboard />
-      <SupplyBreakdownCard />
+      {/* <SupplyBreakdownCard /> */}
     </VStack>
   )
 }

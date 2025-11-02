@@ -22,8 +22,9 @@ export const UserTransactions = ({ address }: Props) => {
   const hasNextPage = useMemo(() => {
     return data?.pages[0]?.pagination?.hasNext ?? false
   }, [data])
+
   return (
-    <Skeleton rounded="xl" loading={isLoading}>
+    <Skeleton w={"full"} rounded="xl" loading={isLoading}>
       <Card.Root w={"full"} variant="outline" borderColor="border.primary">
         <Card.Body>
           <VStack gap="4" align="stretch">
