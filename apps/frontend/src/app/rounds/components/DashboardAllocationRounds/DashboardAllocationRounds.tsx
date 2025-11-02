@@ -1,4 +1,4 @@
-import { Button, Heading, HStack, Icon, Skeleton, Text, VStack, Card } from "@chakra-ui/react"
+import { Box, Button, Heading, HStack, Icon, Skeleton, Stack, Text, VStack, Card } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
@@ -40,7 +40,12 @@ export const DashboardAllocationRounds = () => {
   return (
     <Card.Root variant="primary">
       <Card.Body gap="8">
-        <HStack gap="4" justifyContent="space-between" w="full">
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          gap={{ base: "4", md: "4" }}
+          justifyContent={{ base: "center", md: "space-between" }}
+          w="full"
+          align="center">
           <Button
             px="0"
             size="sm"
@@ -49,31 +54,35 @@ export const DashboardAllocationRounds = () => {
             _hover={{ textDecoration: "underline" }}
             disabled={allocationRound.isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-            fontWeight="semibold">
+            fontWeight="semibold"
+            order={{ base: 2, md: 1 }}
+            display={{ base: "none", md: "flex" }}>
             <Icon as={FaAngleLeft} boxSize={4} />
             {t("Previous round")}
           </Button>
 
-          <VStack gap="2">
-            <Heading size="2xl" fontWeight="normal">
+          <VStack gap="2" order={{ base: 1, md: 2 }} w={{ base: "full", md: "auto" }}>
+            <Heading size={{ base: "xl", md: "2xl" }} fontWeight="normal" textAlign="center">
               <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: selectedRoundId }} t={t} />
             </Heading>
-            <HStack gap="2">
+            <Stack direction={{ base: "column", sm: "row" }} gap="2" align="center" justify="center" flexWrap="wrap">
               <Skeleton loading={roundInfoLoading}>
-                <Text textStyle="sm" color="text.subtle">
+                <Text textStyle="sm" color="text.subtle" textAlign="center">
                   {t("{{from}} to {{to}}", {
                     from: roundInfo.voteStartTimestamp?.format("MMM D"),
                     to: roundInfo.voteEndTimestamp?.format("MMM D"),
                   })}
                 </Text>
               </Skeleton>
-              <DotSymbol color="text.subtle" size="2px" />
+              <Box display={{ base: "none", sm: "block" }}>
+                <DotSymbol color="text.subtle" size="2px" />
+              </Box>
               <Skeleton loading={roundInfoLoading}>
-                <Text textStyle="sm" color="actions.primary.default" fontWeight="semibold">
+                <Text textStyle="sm" color="actions.primary.default" fontWeight="semibold" textAlign="center">
                   {roundInfo.voteEndTimestamp?.fromNow()}
                 </Text>
               </Skeleton>
-            </HStack>
+            </Stack>
           </VStack>
 
           <Button
@@ -83,14 +92,45 @@ export const DashboardAllocationRounds = () => {
             variant="link"
             textStyle="sm"
             disabled={allocationRound.isLastRound}
-            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
+            order={{ base: 2, md: 3 }}
+            display={{ base: "none", md: "flex" }}>
             {t("Next round")}
             <Icon as={FaAngleRight} fill="currentColor" boxSize={4} />
           </Button>
-        </HStack>
+
+          <HStack gap="4" w="full" justifyContent="space-between" order={3} display={{ base: "flex", md: "none" }}>
+            <Button
+              px="0"
+              size="sm"
+              textStyle="sm"
+              variant="link"
+              _hover={{ textDecoration: "underline" }}
+              disabled={allocationRound.isFirstRound}
+              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
+              fontWeight="semibold">
+              <Icon as={FaAngleLeft} boxSize={4} />
+              {t("Previous round")}
+            </Button>
+
+            <Button
+              px="0"
+              fontWeight="semibold"
+              _hover={{ textDecoration: "underline" }}
+              variant="link"
+              textStyle="sm"
+              disabled={allocationRound.isLastRound}
+              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+              {t("Next round")}
+              <Icon as={FaAngleRight} fill="currentColor" boxSize={4} />
+            </Button>
+          </HStack>
+        </Stack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
         <VStack gap={4} w="full">
-          <Heading size="2xl">{t("Proposals and Grants looking for support and approval")}</Heading>
+          <Heading size={{ base: "xl", md: "xl" }} textAlign="center">
+            {t("Proposals and Grants looking for support and approval")}
+          </Heading>
 
           {!!sortedProposals.length ? (
             <VStack gap={4} w="full">

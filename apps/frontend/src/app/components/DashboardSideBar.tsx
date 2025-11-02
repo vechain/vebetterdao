@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import { ManagedAppsCard } from "../../components/ManagedAppsCard/ManagedAppsCard"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
 import { UserTransactions } from "../profile/components/ProfileBalance/components/UserTransactions"
+import { DashboardAllocationRounds } from "../rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
 
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 
@@ -21,7 +22,12 @@ export const DashboardSideBar = () => {
   const { isMobile } = useBreakpoints()
   return (
     <VStack gap={4}>
-      {isMobile && <CantVoteCard />}
+      {isMobile && (
+        <>
+          <CantVoteCard />
+          <DashboardAllocationRounds />
+        </>
+      )}
       <ManagedAppsCard />
       <UserTransactions address={account?.address ?? ""} />
       <Leaderboard />
