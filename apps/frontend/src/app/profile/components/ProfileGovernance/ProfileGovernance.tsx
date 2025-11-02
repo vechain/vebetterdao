@@ -74,7 +74,6 @@ export const ProfileGovernance = ({ address }: Props) => {
           <CreatedProposalsSection address={profileWalletAddress} onSeeAll={onSeeAllCreatedProposals} />
           <VotedProposalsSection
             address={profileWalletAddress}
-            isConnectedUser={isConnectedUser}
             onSeeAll={onSeeAllVotedProposals}
             onExploreGovernance={() => router.push("/apps")}
           />

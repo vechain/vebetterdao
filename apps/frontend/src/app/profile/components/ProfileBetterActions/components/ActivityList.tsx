@@ -39,7 +39,7 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between" align="baseline" mb={4}>
-            <Heading size="md">{t("Actions history")}</Heading>
+            <Heading size="md">{t("History")}</Heading>
             <Button variant="link" size="sm" h={"16px"} onClick={handleSetCalendarView}>
               {t("Change to calendar view")}
             </Button>

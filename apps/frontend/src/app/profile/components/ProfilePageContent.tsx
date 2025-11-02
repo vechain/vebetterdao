@@ -1,16 +1,12 @@
-import { VStack, Icon, Text, Tabs, Button } from "@chakra-ui/react"
-import { compareAddresses } from "@repo/utils/AddressUtils"
+import { VStack, Tabs } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import NextLink from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useCallback, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { FaAngleLeft } from "react-icons/fa6"
 
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
-import { ProfileBalance } from "./ProfileBalance/ProfileBalance"
 import { ProfileBetterActions } from "./ProfileBetterActions/ProfileBetterActions"
 import { ProfileGMLevel } from "./ProfileGMLevel/ProfileGMLevel"
 import { ProfileGovernance } from "./ProfileGovernance/ProfileGovernance"
@@ -19,7 +15,6 @@ import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts/ProfileLinkedAcount
 import { ProfileNodes } from "./ProfileNodes/ProfileNodes"
 
 enum Tab {
-  Balance = "balance",
   BetterActions = "better-actions",
   Governance = "governance",
   LinkedAccounts = "linked-accounts",
@@ -33,7 +28,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
-  const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
   const parsedAddress = address ?? account?.address ?? ""
   const searchParams = useSearchParams()
   useEffect(() => {
@@ -48,12 +42,11 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     if (tabFromURL && isValidTab) {
       return tabFromURL as Tab
     }
-    return Tab.Balance
+    return Tab.BetterActions
   }, [searchParams])
 
   const tabs = useMemo(
     () => [
-      { tab: Tab.Balance, label: t("Balance") },
       { tab: Tab.BetterActions, label: t("Better Actions") },
       { tab: Tab.GM, label: t("GM Level") },
       { tab: Tab.Nodes, label: t("Nodes") },
@@ -65,9 +58,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
 
   const trackTabChange = (tab: Tab) => {
     switch (tab) {
-      case Tab.Balance:
-        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.EXPLORE_BALANCE_FROM_PROFILE))
-        break
       case Tab.BetterActions:
         AnalyticsUtils.trackEvent(
           buttonClicked,
@@ -114,16 +104,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
-      {!isConnectedUser && (
-        <Button asChild w="max-content" variant="link">
-          <NextLink href="/">
-            <Icon as={FaAngleLeft} boxSize={3} />
-            <Text color="inherit" textStyle="sm" fontWeight="semibold">
-              {t("Go back")}
-            </Text>
-          </NextLink>
-        </Button>
-      )}
       <ProfileHeader address={parsedAddress} />
       <Tabs.Root
         variant="line"
@@ -138,9 +118,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
             </Tabs.Trigger>
           ))}
         </Tabs.List>
-        <Tabs.Content value={Tab.Balance}>
-          <ProfileBalance address={parsedAddress} />
-        </Tabs.Content>
         <Tabs.Content value={Tab.BetterActions}>
           <ProfileBetterActions address={parsedAddress} />
         </Tabs.Content>

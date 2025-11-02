@@ -13,7 +13,7 @@ type Props = {
   address: string
 }
 export const ProfileBetterActions = ({ address }: Props) => {
-  const [isCalendarView, setIsCalendarView] = useState(true)
+  const [isCalendarView, setIsCalendarView] = useState(false)
   const { isPerson, isLoading } = useCanUserVote(address)
   return (
     <VStack gap={4} w="full">
