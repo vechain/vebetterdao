@@ -8,16 +8,14 @@ import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 import { ProfileBetterActions } from "./ProfileBetterActions/ProfileBetterActions"
-import { ProfileGovernance } from "./ProfileGovernance/ProfileGovernance"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts/ProfileLinkedAcounts"
 import { ProfileNFTs } from "./ProfileNFTs/ProfileNFTs"
+import { ProfileSettings } from "./ProfileSettings/ProfileSettings"
 
 enum Tab {
   BetterActions = "better-actions",
   NFTs = "nfts",
-  Governance = "governance",
-  LinkedAccounts = "linked-accounts",
+  Settings = "settings",
 }
 interface ProfilePageContentProps {
   address?: string
@@ -47,8 +45,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     () => [
       { tab: Tab.BetterActions, label: t("Better Actions") },
       { tab: Tab.NFTs, label: t("NFTs") },
-      { tab: Tab.Governance, label: t("Governance") },
-      { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
+      { tab: Tab.Settings, label: t("Settings") },
     ],
     [t],
   )
@@ -59,12 +56,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         AnalyticsUtils.trackEvent(
           buttonClicked,
           buttonClickActions(ButtonClickProperties.EXPLORE_BETTER_ACTIONS_FROM_PROFILE),
-        )
-        break
-      case Tab.Governance:
-        AnalyticsUtils.trackEvent(
-          buttonClicked,
-          buttonClickActions(ButtonClickProperties.EXPLORE_GOVERNANCE_FROM_PROFILE),
         )
         break
     }
@@ -121,11 +112,8 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         <Tabs.Content value={Tab.NFTs}>
           <ProfileNFTs address={parsedAddress} />
         </Tabs.Content>
-        <Tabs.Content value={Tab.Governance}>
-          <ProfileGovernance address={parsedAddress} />
-        </Tabs.Content>
-        <Tabs.Content value={Tab.LinkedAccounts}>
-          <ProfileLinkedAcounts address={parsedAddress} />
+        <Tabs.Content value={Tab.Settings}>
+          <ProfileSettings address={parsedAddress} />
         </Tabs.Content>
       </Tabs.Root>
     </VStack>

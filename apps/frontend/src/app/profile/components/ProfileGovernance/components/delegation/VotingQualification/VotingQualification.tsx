@@ -26,9 +26,9 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   const { isPerson } = useCanUserVote(address, delegateeAddress)
   const descriptionLabel = useMemo(() => {
     return isConnectedUser
-      ? t("Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens")
+      ? t("You are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens.")
       : t(
-          "The user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens",
+          "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens.",
         )
   }, [t, isConnectedUser])
   const delegationModal = useDisclosure()
@@ -51,6 +51,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
             </HStack>
             <Text textStyle="md">
               {isConnectedUser &&
+                !isPerson &&
                 t(
                   "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",
                 )}

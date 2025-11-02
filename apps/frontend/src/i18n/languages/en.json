@@ -689,7 +689,8 @@
   "This account is not currently qualified to vote.": "This account is not currently qualified to vote.",
   "While this account keeps their qualification, you’ll be able to use it to vote.": "While this account keeps their qualification, you’ll be able to use it to vote.",
   "You are using {{delegatorAddress}} voting qualification": "You are using {{delegatorAddress}} voting qualification",
-  "Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens": "Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens",
+  "You are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens.": "You are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens.",
+  "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens.": "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens.",
   "Your Voting Qualification": "Your Voting Qualification",
   "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.": "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",
   "Connect your wallet to see your profile": "Connect your wallet to see your profile",
@@ -757,6 +758,7 @@
   "Get more VTHO": "Get more VTHO",
   "App ID": "App ID",
   "Governance": "Governance",
+  "Settings": "Settings",
   "Team allocation share": "Team allocation share",
   "Marketing": "Marketing",
   "Development": "Development",
@@ -1097,7 +1099,6 @@
   "Enabling allowance...": "Enabling allowance...",
   "Disabling allowance...": "Disabling allowance...",
   "Loading transactions...": "Loading transactions...",
-  "No transactions found": "No transactions found",
   "No transactions found for the selected type": "No transactions found for the selected type",
   "Reward Pool Update": "Reward Pool Update",
   "Rewards Pool Updates": "Rewards Pool Updates",
@@ -1561,5 +1562,6 @@
   "Your app's sustainability proofs could be improved for better compatibility.": "Your app's sustainability proofs could be improved for better compatibility.",
   "View your proof": "View your proof",
   "Hide proof": "Hide proof",
-  "Your Most Voted Apps": "Your Most Voted Apps"
+  "Your Most Voted Apps": "Your Most Voted Apps",
+  "NFTs": "NFTs"
 }

@@ -9,10 +9,8 @@ import { useUserTopVotedApps } from "../../../../api/contracts/xApps/hooks/useUs
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../constants/AnalyticsEvents"
 import { useUserCreatedProposal } from "../../../../hooks/proposals/common/useUserCreatedProposal"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { useRetrieveProfilIdentity } from "../utils/useRetrieveProfilIdentity"
 
 import { CreatedProposalsSection } from "./components/CreatedProposalsSection"
-import { DelegationSection } from "./components/DelegationSection"
 import { PaginatedProposals } from "./components/PaginatedProposals"
 import { PaginatedTopVotedApps } from "./components/PaginatedTopVotedApps"
 import { TopVotedAppsSection } from "./components/TopVotedAppsSection"
@@ -31,8 +29,6 @@ type Props = {
 export const ProfileGovernance = ({ address }: Props) => {
   const { account } = useWallet()
   const profileWalletAddress = address ?? account?.address ?? ""
-
-  const { isConnectedUser } = useRetrieveProfilIdentity()
 
   const router = useRouter()
 
@@ -70,7 +66,6 @@ export const ProfileGovernance = ({ address }: Props) => {
     case ListView.ALL:
       return (
         <VStack gap="8" w="full">
-          <DelegationSection address={address} isConnectedUser={isConnectedUser} />
           <CreatedProposalsSection address={profileWalletAddress} onSeeAll={onSeeAllCreatedProposals} />
           <VotedProposalsSection
             address={profileWalletAddress}
