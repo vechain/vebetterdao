@@ -8,6 +8,7 @@ import {
   Input,
   InputGroup,
   Popover,
+  Portal,
   Text,
   VStack,
   useMediaQuery,
@@ -55,9 +56,9 @@ export const DatePicker = ({
   const [isMobile] = useMediaQuery(["(max-width: 768px)"])
 
   // Responsive placement based on screen size
-  const placement = useBreakpointValue<"right-end" | undefined>({
+  const placement = useBreakpointValue<"bottom-start" | undefined>({
     base: undefined,
-    md: "right-end",
+    md: "bottom-start",
   })
 
   // Current view state
@@ -209,90 +210,99 @@ export const DatePicker = ({
           />
         </InputGroup>
       </Popover.Trigger>
-      <Popover.Content width={isMobile ? "280px" : "320px"} boxShadow="lg">
-        <Popover.Arrow />
-        <Popover.Body p={isMobile ? 2 : 4}>
-          <VStack gap={isMobile ? 2 : 4} align="stretch">
-            {/* Calendar Header */}
-            <Flex justify="space-between" align="center">
-              <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)} disabled={isPrevMonthDisabled}>
-                <FaChevronLeft />
-              </Button>
-              <Heading size="md" textAlign="center">
-                {monthName.toUpperCase()}
-              </Heading>
-              <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>
-                <FaChevronRight />
-              </Button>
-            </Flex>
-
-            {/* Day Headers */}
-            <Grid templateColumns="repeat(7, 1fr)" gap={1}>
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                <Box key={day} textAlign="center">
-                  <Text textStyle="xs" color="#D9D9D9">
-                    {day}
-                  </Text>
-                </Box>
-              ))}
-
-              {/* Empty cells for days before the first day of month with a random key */}
-              {[...Array((firstDayOfMonth + 6) % 7)].map((_, i) => {
-                const date = currentDate.startOf("month").subtract(((firstDayOfMonth + 6) % 7) - i, "day")
-                return <Box key={`empty-${date.format("YYYY-MM-DD")}`} h="8" />
-              })}
-
-              {/* Calendar Days */}
-              {Array.from({ length: daysInMonth }).map((_, index) => {
-                const day = index + 1
-                const isSelectable = isDaySelectable(day)
-                const isInRange = isDayInRange(day)
-                const isStartOrEnd = isDayStartOrEnd(day)
-                const isToday = today.isSame(currentDate.date(day), "day")
-
-                return (
-                  <Button
-                    key={`day-${day}`}
-                    onClick={() => isSelectable && handleDaySelect(day)}
-                    w="full"
-                    h={isMobile ? "7" : "8"}
-                    minW="0"
-                    p="0"
-                    disabled={!isSelectable}
-                    unstyled
-                    textStyle={isMobile ? "2xs" : "xs"}
-                    bg={isStartOrEnd ? "#004CFC" : isInRange ? "#E0E9FE" : "transparent"}
-                    color={isStartOrEnd ? "white" : "inherit"}
-                    borderRadius="md"
-                    border={isToday ? "2px solid #000" : "1px solid #dfdfdf"}
-                    _hover={{ opacity: isSelectable ? 0.8 : 1 }}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center">
-                    {day}
+      <Portal>
+        <Popover.Positioner>
+          <Popover.Content width={isMobile ? "280px" : "320px"} boxShadow="lg">
+            <Popover.Arrow />
+            <Popover.Body p={isMobile ? 2 : 4}>
+              <VStack gap={isMobile ? 2 : 4} align="stretch">
+                {/* Calendar Header */}
+                <Flex justify="space-between" align="center">
+                  <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)} disabled={isPrevMonthDisabled}>
+                    <FaChevronLeft />
                   </Button>
-                )
-              })}
-            </Grid>
+                  <Heading size="md" textAlign="center">
+                    {monthName.toUpperCase()}
+                  </Heading>
+                  <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>
+                    <FaChevronRight />
+                  </Button>
+                </Flex>
 
-            <HStack justify="space-between">
-              <Button size="sm" variant="ghost" onClick={resetSelection}>
-                {t("Clear")}
-              </Button>
-              <Button size="sm" variant="outline" onClick={cancelSelection}>
-                {t("Cancel")}
-              </Button>
-            </HStack>
+                {/* Day Headers */}
+                <Grid templateColumns="repeat(7, 1fr)" gap={1}>
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
+                    <Box key={day} textAlign="center">
+                      <Text textStyle="xs" color="gray.500">
+                        {day}
+                      </Text>
+                    </Box>
+                  ))}
 
-            {/* Reminder to select an end date */}
-            {variant === "range" && tempStartDate && !tempEndDate && (
-              <Text textStyle="sm" color="#D9D9D9" textAlign="center">
-                {t("Select end date")}
-              </Text>
-            )}
-          </VStack>
-        </Popover.Body>
-      </Popover.Content>
+                  {/* Empty cells for days before the first day of month with a random key */}
+                  {[...Array((firstDayOfMonth + 6) % 7)].map((_, i) => {
+                    const date = currentDate.startOf("month").subtract(((firstDayOfMonth + 6) % 7) - i, "day")
+                    return <Box key={`empty-${date.format("YYYY-MM-DD")}`} h="8" />
+                  })}
+
+                  {/* Calendar Days */}
+                  {Array.from({ length: daysInMonth }).map((_, index) => {
+                    const day = index + 1
+                    const isSelectable = isDaySelectable(day)
+                    const isInRange = isDayInRange(day)
+                    const isStartOrEnd = isDayStartOrEnd(day)
+                    const isToday = today.isSame(currentDate.date(day), "day")
+
+                    return (
+                      <Button
+                        key={`day-${day}`}
+                        onClick={() => isSelectable && handleDaySelect(day)}
+                        w="full"
+                        h={isMobile ? "7" : "8"}
+                        minW="0"
+                        p="0"
+                        disabled={!isSelectable}
+                        unstyled
+                        textStyle={isMobile ? "2xs" : "xs"}
+                        bg={
+                          isStartOrEnd ? "blue.600" : isInRange ? { base: "blue.50", _dark: "blue.900" } : "transparent"
+                        }
+                        color={isStartOrEnd ? "white" : "inherit"}
+                        borderRadius="md"
+                        border={isToday ? "2px solid" : "1px solid"}
+                        borderColor={
+                          isToday ? { base: "gray.900", _dark: "gray.100" } : { base: "gray.300", _dark: "gray.600" }
+                        }
+                        _hover={{ opacity: isSelectable ? 0.8 : 1 }}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center">
+                        {day}
+                      </Button>
+                    )
+                  })}
+                </Grid>
+
+                <HStack justify="space-between">
+                  <Button size="sm" variant="ghost" onClick={resetSelection}>
+                    {t("Clear")}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={cancelSelection}>
+                    {t("Cancel")}
+                  </Button>
+                </HStack>
+
+                {/* Reminder to select an end date */}
+                {variant === "range" && tempStartDate && !tempEndDate && (
+                  <Text textStyle="sm" color="gray.500" textAlign="center">
+                    {t("Select end date")}
+                  </Text>
+                )}
+              </VStack>
+            </Popover.Body>
+          </Popover.Content>
+        </Popover.Positioner>
+      </Portal>
     </Popover.Root>
   )
 }

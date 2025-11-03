@@ -131,7 +131,7 @@ export const useGetTokenUsdPrice = (_tokenAddress?: string) => {
 
 export const useGetAvatarOfAddress = (_address?: string) => {
   return {
-    data: null,
+    data: "/assets/backgrounds/your-ranking-bg.svg",
     isLoading: false,
     error: null,
   }
