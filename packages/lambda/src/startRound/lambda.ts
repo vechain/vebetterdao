@@ -255,14 +255,9 @@ export async function distributeXAllocations(thor: ThorClient) {
 
   logger.info("Claim clauses", { claimClauses, ineligibleApps: failedXAppIds, xAppIdsCount: xAppIds.length })
 
-  // If all unclaimed apps failed gas estimation, that's a critical error
-  if (xAppIds.length === failedXAppIds.length && failedXAppIds.length > 0) {
-    const errorMsg = `All ${xAppIds.length} X-Apps failed gas estimation for round ${previousRound}`
-    console.error(errorMsg)
-    throw new Error(errorMsg)
-  }
-
-  // If no claims to process (but some succeeded gas estimation earlier), skip distribution
+  // If no claims to process, skip distribution
+  // ClaimClauses is used to determine if the app is eligible to claim allocations
+  // If it's empty, it means no apps are eligible to claim allocations
   if (claimClauses.length === 0) {
     logger.info(`No claim clauses to distribute X-Allocations for round ${previousRound}`)
     return { receipt: null, gasResult: null, allClaimed: true }
