@@ -4,12 +4,17 @@ import { withThemeByClassName } from "@storybook/addon-themes"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Provider } from "../src/components/ui/provider"
 import { TransactionModalProvider } from "../src/providers/TransactionModalProvider.tsx"
-import { setMockAddress } from "./mocks/vechain-kit"
 import { VStack, Flex, Container } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+import { setMockAddress } from "./mockAddressState"
+
+import { initialize, mswLoader } from "msw-storybook-addon"
 
 import { languages } from "../src/i18n"
 import "../src/i18n"
+import { handlers } from "./mocks/handlers.ts"
+
+initialize()
 
 export const globalTypes = {
   locale: {
@@ -38,7 +43,7 @@ const queryClient = new QueryClient({
 
 const preview: Preview = {
   parameters: {
-    viewport: { defaultViewport: "mobile2" },
+    viewport: {},
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -54,8 +59,18 @@ const preview: Preview = {
       // 'off' - skip a11y checks entirely
       test: "todo",
     },
+    msw: { handlers },
   },
-  initialGlobals: { theme: "light", locale: "en" },
+  initialGlobals: {
+    theme: "light",
+    locale: "en",
+
+    viewport: {
+      value: "mobile2",
+      isRotated: false,
+    },
+  },
+  loaders: [mswLoader],
   decorators: [
     withThemeByClassName({
       defaultTheme: "light",

@@ -1,0 +1,20 @@
+---
+# AWS Configuration
+aws_region: eu-west-1
+aws_account_id: "851725442887"
+environment: "mainnet"
+
+# Lambda Configuration
+lambda_function_name: "relayer-claim-reward"
+lambda_handler: "index.handler"
+lambda_runtime: "nodejs20.x"
+lambda_memory_size: 512
+lambda_timeout: 900
+
+# Lambda Build Path
+lambda_source_dir: "packages/lambda/dist/mainnet/relayerClaimReward"
+
+# Schedule Configuration
+# Runs 5 minutes after start-emissions-round (which runs at 6:40 AM on Monday)
+schedule_expression: "cron(45 6 ? * MON *)" # Runs every Monday at 6:45 AM UTC
+
