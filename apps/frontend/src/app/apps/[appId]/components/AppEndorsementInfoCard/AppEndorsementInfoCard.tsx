@@ -1,4 +1,5 @@
 import { Button, Card, Heading, HStack, Link, Skeleton, Stack, VStack, useDisclosure } from "@chakra-ui/react"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -190,6 +191,7 @@ export const AppEndorsementInfoCard = ({
               color="actions.secondary.text-lighter"
               onClick={onOpenEndorsementInfoModal}>
               {t("History")}
+              <UilArrowUpRight />
             </Link>
           </HStack>
         </Card.Header>

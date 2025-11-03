@@ -13,6 +13,7 @@ import {
   Box,
   Link,
 } from "@chakra-ui/react"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -145,11 +146,13 @@ export const AppBalanceCard = () => {
           </Box>
           <Link
             textStyle="md"
+            mt={2}
             fontWeight="semibold"
             color="actions.secondary.text-lighter"
             onClick={onOpenRewardsPoolAccess}
             alignSelf={"start"}>
             {t("History")}
+            <UilArrowUpRight />
           </Link>
           {!isAppAdmin && (
             <GenericAlert

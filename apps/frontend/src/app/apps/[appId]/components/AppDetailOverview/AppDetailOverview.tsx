@@ -148,6 +148,7 @@ export const AppDetailOverview = ({
                             color="actions.secondary.text-lighter"
                             onClick={onDistributionStrategyModalOpen}>
                             {t("View Details")}
+                            <UilArrowUpRight />
                           </Link>
                         </VStack>
                       ) : null}
