@@ -1,6 +1,8 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
+
 import { useMetProposalCriteria } from "../../../../api/contracts/governance/hooks/useMetProposalCriteria"
 
 /**
@@ -11,14 +13,24 @@ import { useMetProposalCriteria } from "../../../../api/contracts/governance/hoo
 export const useNewGrantPageGuard = () => {
   const { account } = useWallet()
   const { hasMetProposalCriteria, isLoading } = useMetProposalCriteria()
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
+  const isProduction = process.env.NODE_ENV === "production"
+
+  const hasAllowedWallet = useMemo(
+    () => (isProduction && permissions?.isGrantApprover) || !isProduction,
+    [isProduction, permissions?.isGrantApprover],
+  )
+
   const isVisitAuthorized = useMemo(() => {
     if (isLoading) return true // Allow visit while loading
-    if (!account?.address || !hasMetProposalCriteria) return false
+    if (!account?.address || !hasMetProposalCriteria || !hasAllowedWallet) return false
     return true
-  }, [account?.address, hasMetProposalCriteria, isLoading])
+  }, [account?.address, hasMetProposalCriteria, isLoading, hasAllowedWallet])
+
   const redirectPath = useMemo(() => {
-    if (!account?.address || !hasMetProposalCriteria) return "/grants"
+    if (!account?.address || !hasMetProposalCriteria || !hasAllowedWallet) return "/grants"
     return "/grants/new"
-  }, [account?.address, hasMetProposalCriteria])
+  }, [account?.address, hasAllowedWallet, hasMetProposalCriteria])
+
   return { isVisitAuthorized, redirectPath, isLoading }
 }
