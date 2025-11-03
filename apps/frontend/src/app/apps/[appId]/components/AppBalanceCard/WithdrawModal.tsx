@@ -1,15 +1,12 @@
 import {
   Button,
-  Card,
   HStack,
   Text,
   VStack,
-  Dialog,
   Input,
   Skeleton,
   Icon,
   NativeSelect,
-  CloseButton,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { motion } from "framer-motion"
@@ -21,7 +18,7 @@ import { IoWalletOutline } from "react-icons/io5"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
-import { CustomModalContent } from "../../../../../components/CustomModalContent"
+import { BaseModal } from "../../../../../components/BaseModal"
 import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
 import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
 
@@ -188,10 +185,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
-        <Dialog.CloseTrigger asChild>
-          <CloseButton />
-        </Dialog.CloseTrigger>
-        <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
+        <VStack align={"flex-start"} w="full">
           <HStack>
             <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
               {t("Withdraw from your balance")}
@@ -287,12 +281,23 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   ])
 
   return (
-    <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={handleClose} trapFocus={true} placement="center">
-      <CustomModalContent w={"auto"} maxW="breakpoint-md">
-        <Card.Root rounded={20}>
-          <Card.Body>{renderCardContent()}</Card.Body>
-        </Card.Root>
-      </CustomModalContent>
-    </Dialog.Root>
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={handleClose}
+      showCloseButton={true}
+      modalContentProps={{
+        borderRadius: "2xl",
+        maxW: "600px",
+        w: "lg",
+        p: 6,
+      }}
+      modalBodyProps={{
+        p: 0,
+      }}
+      modalProps={{
+        closeOnInteractOutside: true,
+      }}>
+      {renderCardContent()}
+    </BaseModal>
   )
 }

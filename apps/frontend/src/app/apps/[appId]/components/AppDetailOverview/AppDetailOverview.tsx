@@ -14,7 +14,7 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { UilExternalLink, UilArrowUpRight } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -165,7 +165,7 @@ export const AppDetailOverview = ({
                       )}
                       <Button flex={1} variant={"primary"} onClick={goToWebsite}>
                         {t("Go to Website")}
-                        <UilArrowUpRight color="white" size={"16px"} />
+                        <UilExternalLink color="white" size={"16px"} />
                       </Button>
                       {isMobile && (
                         <>

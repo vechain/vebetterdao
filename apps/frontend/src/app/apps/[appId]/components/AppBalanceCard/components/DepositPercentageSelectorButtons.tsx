@@ -17,7 +17,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   return (
-    <SimpleGrid columns={5} gap="4" my="4">
+    <SimpleGrid columns={5} gap="4" my="4" w="full">
       {DEPOSIT_PERCENTAGES.map(percentage => (
         <Button
           key={percentage.toString()}
@@ -28,7 +28,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
           w={"full"}
           h={"30px"}
           textStyle="md">
-          {percentage === 1 ? (isMobile ? `${percentage * 100}%` : t("Deposit all")) : `${percentage * 100}%`}
+          {percentage === 1 ? (isMobile ? `${percentage * 100}%` : t("All")) : `${percentage * 100}%`}
         </Button>
       ))}
     </SimpleGrid>
