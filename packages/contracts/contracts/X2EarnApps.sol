@@ -335,12 +335,6 @@ contract X2EarnApps is
     _removeXAppSubmission(_appId);
   }
 
-  /**
-   * @dev See {IX2EarnApps-setNodeManagementContract}.
-   */
-  function setNodeManagementContract(address _nodeManagementContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setNodeManagementContract(_nodeManagementContract);
-  }
 
   /**
    * @dev See {IX2EarnApps-setVeBetterPassportContract}.
