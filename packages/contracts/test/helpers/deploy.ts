@@ -342,6 +342,7 @@ export const getOrDeployContractInstances = async ({
 
   // ---------------------- Deploy Libraries ----------------------
   const {
+    // V1
     GovernorClockLogicLibV1,
     GovernorConfiguratorLibV1,
     GovernorDepositLogicLibV1,
@@ -350,14 +351,7 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV1,
     GovernorVotesLogicLibV1,
     GovernorStateLogicLibV1,
-    GovernorClockLogicLib,
-    GovernorConfiguratorLib,
-    GovernorDepositLogicLib,
-    GovernorFunctionRestrictionsLogicLib,
-    GovernorProposalLogicLib,
-    GovernorQuorumLogicLib,
-    GovernorVotesLogicLib,
-    GovernorStateLogicLib,
+    // V3
     GovernorClockLogicLibV3,
     GovernorConfiguratorLibV3,
     GovernorFunctionRestrictionsLogicLibV3,
@@ -366,6 +360,7 @@ export const getOrDeployContractInstances = async ({
     GovernorVotesLogicLibV3,
     GovernorDepositLogicLibV3,
     GovernorStateLogicLibV3,
+    // V4
     GovernorClockLogicLibV4,
     GovernorConfiguratorLibV4,
     GovernorFunctionRestrictionsLogicLibV4,
@@ -374,6 +369,7 @@ export const getOrDeployContractInstances = async ({
     GovernorVotesLogicLibV4,
     GovernorDepositLogicLibV4,
     GovernorStateLogicLibV4,
+    // V5
     GovernorClockLogicLibV5,
     GovernorConfiguratorLibV5,
     GovernorFunctionRestrictionsLogicLibV5,
@@ -383,6 +379,7 @@ export const getOrDeployContractInstances = async ({
     GovernorVotesLogicLibV5,
     GovernorDepositLogicLibV5,
     GovernorStateLogicLibV5,
+    // V6
     GovernorClockLogicLibV6,
     GovernorConfiguratorLibV6,
     GovernorDepositLogicLibV6,
@@ -391,6 +388,7 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV6,
     GovernorStateLogicLibV6,
     GovernorVotesLogicLibV6,
+    // V7
     GovernorClockLogicLibV7,
     GovernorConfiguratorLibV7,
     GovernorDepositLogicLibV7,
@@ -399,7 +397,16 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV7,
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
-  } = await governanceLibraries()
+    // V8 (latest)
+    GovernorClockLogicLib,
+    GovernorConfiguratorLib,
+    GovernorDepositLogicLib,
+    GovernorFunctionRestrictionsLogicLib,
+    GovernorProposalLogicLib,
+    GovernorQuorumLogicLib,
+    GovernorVotesLogicLib,
+    GovernorStateLogicLib,
+  } = await governanceLibraries({ logOutput: false, latestVersionOnly: false })
 
   // Deploy Passport Libraries
   const {
