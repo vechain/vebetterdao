@@ -20,6 +20,7 @@ import {
   VOT3,
   RelayerRewardsPool,
   X2EarnCreator,
+  StargateNFT,
 } from "../../../typechain-types"
 
 describe("AutoVoting - @shard14b", function () {
@@ -43,7 +44,7 @@ describe("AutoVoting - @shard14b", function () {
   let appOwner2: HardhatEthersSigner
   let appOwner3: HardhatEthersSigner
   let x2EarnCreatorContract: X2EarnCreator
-
+  let stargateNftMock: StargateNFT
   // Main setup - used by most tests
   const setupContracts = async () => {
     const config = await getOrDeployContractInstances({
@@ -71,7 +72,7 @@ describe("AutoVoting - @shard14b", function () {
     appOwner2 = otherAccounts[13]
     appOwner3 = otherAccounts[14]
     x2EarnCreatorContract = config.x2EarnCreator
-
+    stargateNftMock = config.stargateNftMock
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
     await emissions.connect(minterAccount).bootstrap()
@@ -487,7 +488,7 @@ describe("AutoVoting - @shard14b", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner, true)
+      await endorseApp(app1Id, appOwner)
 
       // Register relayer
       await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
@@ -504,7 +505,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId)).to.be.true
 
       // App gets unendorsed - will become ineligible after grace period
-      const nodeId = 1
+      const nodeId = await stargateNftMock.tokenOfOwnerByIndex(appOwner.address, 0)
       await x2EarnApps.connect(appOwner).unendorseApp(app1Id, nodeId)
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.be.true
 
@@ -546,8 +547,7 @@ describe("AutoVoting - @shard14b", function () {
       await x2EarnApps
         .connect(appOwner2)
         .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
-      //TODO:Using legacy node for now, but should be replaced by stargate
-      await endorseApp(app2Id, appOwner2, true)
+      await endorseApp(app2Id, appOwner2)
 
       // User sets preferences for new app2
       await xAllocationVoting.connect(user).setUserVotingPreferences([app2Id])
@@ -1014,8 +1014,7 @@ describe("AutoVoting - @shard14b", function () {
       await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      //TODO:Using legacy node for now, but should be replaced by stargate
-      await endorseApp(app1Id, appOwner, true)
+      await endorseApp(app1Id, appOwner)
 
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
@@ -1027,7 +1026,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId)).to.be.true
 
       // App gets unendorsed during round 1, but autovoting should still work
-      const nodeId = 1
+      const nodeId = await stargateNftMock.tokenOfOwnerByIndex(appOwner.address, 0)
       await x2EarnApps.connect(appOwner).unendorseApp(app1Id, nodeId)
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
@@ -1094,15 +1093,13 @@ describe("AutoVoting - @shard14b", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      //TODO:Using legacy node for now, but should be replaced by stargate
-      await endorseApp(app1Id, appOwner, true)
+      await endorseApp(app1Id, appOwner)
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner2.address))
       await x2EarnApps
         .connect(appOwner2)
         .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
-      //TODO:Using legacy node for now, but should be replaced by stargate
-      await endorseApp(app2Id, appOwner2, true)
+      await endorseApp(app2Id, appOwner2)
 
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id, app2Id])
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
@@ -1115,7 +1112,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId2)).to.be.true
 
       // App gets unendorsed during round 2, but autovoting should still work
-      const nodeId = 1
+      const nodeId = await stargateNftMock.tokenOfOwnerByIndex(appOwner.address, 0)
       await x2EarnApps.connect(appOwner).unendorseApp(app1Id, nodeId)
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
