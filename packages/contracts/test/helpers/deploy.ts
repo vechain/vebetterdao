@@ -142,6 +142,7 @@ import {
   upgradeProxy,
 } from "../../scripts/helpers"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
+import { setWhitelistedFunctions } from "../../scripts/deploy/deployLatest"
 
 import {
   GovernorClockLogicV4,
@@ -158,9 +159,8 @@ import { APPS } from "../../scripts/deploy/setup"
 import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
 import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
 import { autoVotingLibraries } from "../../scripts/libraries"
+import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
-// Type helper to ensure all properties of an async function's return type are defined
-type EnsureDefined<T extends (...args: any[]) => any> = Required<Awaited<ReturnType<T>>>
 export interface DeployInstance {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
@@ -1383,7 +1383,7 @@ export const getOrDeployContractInstances = async ({
 
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
-    await callBootstrapAndStartEmissions()
+    await callBootstrapAndStartEmissions({ b3tr, emissions, minterAccount, owner })
   }
 
   cachedDeployInstance = {
