@@ -27,7 +27,6 @@ import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgrad
 import {
   B3TRGovernor,
   Emissions,
-  GalaxyMember,
   VeBetterPassport,
   VeBetterPassportV1,
   VoterRewards,
@@ -37,6 +36,7 @@ import {
   X2EarnAppsV3,
   X2EarnAppsV4,
   X2EarnAppsV5,
+  X2EarnAppsV6,
   X2EarnApps__factory,
   X2EarnRewardsPool,
   X2EarnRewardsPoolV4,
@@ -90,13 +90,6 @@ describe("X-Apps - @shard15", function () {
   })
 
   describe("Contract upgradeablity", () => {
-    it("v5 initializer is empty", async function () {
-      const { x2EarnApps } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-      await x2EarnApps.initializeV5()
-    })
-
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
       const { x2EarnApps, owner, administrationUtils, endorsementUtils, voteEligibilityUtils } =
         await getOrDeployContractInstances({
@@ -354,7 +347,6 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holder with an endorsement score of 100
-      //TODO: Using legacy node for now, but should be replaced by stargate
       await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       // Add apps -> should be eligble for next round
@@ -530,9 +522,8 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holder with an endorsement score of 100
-      //TODO: Using legacy node for now, but should be replaced by stargate
-      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      const nodeId1 = await createLegacyNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      const nodeId2 = await createLegacyNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Add apps -> should be eligble for next round
       await x2EarnAppsV1
@@ -611,8 +602,8 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV2.isAppUnendorsed(app3Id)).to.eql(true)
 
       // 2 out of the three apps get endorsed
-      await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
-      await x2EarnAppsV2.connect(otherAccounts[2]).endorseApp(app2Id, 2) // Node holder endorsement score is 100
+      await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
+      await x2EarnAppsV2.connect(otherAccounts[2]).endorseApp(app2Id, nodeId2) // Node holder endorsement score is 100
 
       // wait for round to end
       await waitForCurrentRoundToEnd()
@@ -657,21 +648,21 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV2.isAppUnendorsed(app3Id)).to.eql(true)
 
       // Prior to upgrade node holder can endorse apps without being subject to cooldown period
-      await x2EarnAppsV2.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder endorsement score is 100
+      await x2EarnAppsV2.connect(otherAccounts[1]).unendorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
       expect(await x2EarnAppsV2.isAppUnendorsed(app1Id)).to.eql(true)
-      await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
+      await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
       expect(await x2EarnAppsV2.isAppUnendorsed(app1Id)).to.eql(false)
-      await x2EarnAppsV2.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder endorsement score is 100
+      await x2EarnAppsV2.connect(otherAccounts[1]).unendorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
       expect(await x2EarnAppsV2.isAppUnendorsed(app1Id)).to.eql(true)
-      await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
+      await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
       expect(await x2EarnAppsV2.isAppUnendorsed(app1Id)).to.eql(false)
 
       // Create new node holders with an endorsement score of 100
-      const nodeId1 = await createNodeHolder(7, otherAccounts[5]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      const nodeId2 = await createNodeHolder(7, otherAccounts[6]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      const nodeId3 = await createLegacyNodeHolder(7, otherAccounts[5]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      const nodeId4 = await createLegacyNodeHolder(7, otherAccounts[6]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // app3Id just gets endorsed
-      await x2EarnAppsV2.connect(otherAccounts[6]).endorseApp(app3Id, nodeId2)
+      await x2EarnAppsV2.connect(otherAccounts[6]).endorseApp(app3Id, nodeId4)
 
       // Upgrade X2EarnAppsV3 to X2EarnAppsV2
       const x2EarnAppsV3 = (await upgradeProxy(
@@ -690,20 +681,20 @@ describe("X-Apps - @shard15", function () {
       )) as X2EarnAppsV3
 
       // New node holders should not be subject to cooldown period even if they endorse an app prior to upgrade
-      expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(false)
-      expect(await x2EarnAppsV3.checkCooldown(nodeId2)).to.eql(false)
+      expect(await x2EarnAppsV3.checkCooldown(nodeId3)).to.eql(false)
+      expect(await x2EarnAppsV3.checkCooldown(nodeId4)).to.eql(false)
 
       // Node holders that endorsed an app prior to upgrade should not be subject to cooldown period
-      expect(await x2EarnAppsV3.checkCooldown(1)).to.eql(false)
+      expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(false)
 
       // If a node holder that endorsed an app prior to upgrade performs an action they should be subject to cooldown period
-      await x2EarnAppsV3.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder endorsement score is 100
-      await x2EarnAppsV3.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
+      await x2EarnAppsV3.connect(otherAccounts[1]).unendorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
+      await x2EarnAppsV3.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
 
-      expect(await x2EarnAppsV3.checkCooldown(1)).to.eql(true)
+      expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(true)
 
       // Should revert if user in cooldown period tries to endorse an app
-      await catchRevert(x2EarnAppsV3.connect(otherAccounts[1]).endorseApp(app1Id, 1))
+      await catchRevert(x2EarnAppsV3.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1))
 
       await x2EarnAppsV3
         .connect(creator1)
@@ -711,7 +702,7 @@ describe("X-Apps - @shard15", function () {
       const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app 4"))
 
       // New node holders should be subject to cooldown period
-      await catchRevert(x2EarnAppsV3.connect(otherAccounts[5]).endorseApp(app4Id, 5))
+      await catchRevert(x2EarnAppsV3.connect(otherAccounts[6]).endorseApp(app4Id, nodeId4))
 
       // Fast forward time to next round
       // wait for round to end
@@ -722,7 +713,7 @@ describe("X-Apps - @shard15", function () {
       // New node holders should not be subject to cooldown period
       expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(false)
       expect(await x2EarnAppsV3.checkCooldown(nodeId2)).to.eql(false)
-      expect(await x2EarnAppsV3.checkCooldown(1)).to.eql(false)
+      expect(await x2EarnAppsV3.checkCooldown(nodeId3)).to.eql(false)
 
       // Upgrade X2EarnAppsV3 to X2EarnApps
       const x2EarnAppsV4 = (await upgradeProxy(
@@ -744,16 +735,15 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV4.checkCooldown(nodeId2)).to.eql(false)
 
       // Node holders that endorsed an app prior to upgrade should not be subject to cooldown period
-      expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
+      expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(false)
 
       // If a node holder that endorsed an app prior to upgrade performs an action they should be subject to cooldown period
-      await x2EarnAppsV4.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder endorsement score is 100
-      await x2EarnAppsV4.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
-
-      expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(true)
+      await x2EarnAppsV4.connect(otherAccounts[1]).unendorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
+      await x2EarnAppsV4.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
+      expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(true)
 
       // Should revert if user in cooldown period tries to endorse an app
-      await catchRevert(x2EarnAppsV4.connect(otherAccounts[1]).endorseApp(app1Id, 1))
+      await catchRevert(x2EarnAppsV4.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1))
 
       await x2EarnAppsV4
         .connect(creator2)
@@ -761,7 +751,7 @@ describe("X-Apps - @shard15", function () {
       const app5Id = ethers.keccak256(ethers.toUtf8Bytes("My app 5"))
 
       // New node holders should be subject to cooldown period
-      await catchRevert(x2EarnAppsV4.connect(otherAccounts[5]).endorseApp(app5Id, 5))
+      await catchRevert(x2EarnAppsV4.connect(otherAccounts[6]).endorseApp(app5Id, nodeId4))
 
       // Fast forward time to next round
       // wait for round to end
@@ -771,47 +761,45 @@ describe("X-Apps - @shard15", function () {
       // New node holders should not be subject to cooldown period
       expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(false)
       expect(await x2EarnAppsV4.checkCooldown(nodeId2)).to.eql(false)
-      expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
+      expect(await x2EarnAppsV4.checkCooldown(nodeId3)).to.eql(false)
 
       // Upgrade X2EarnAppsV4 to X2EarnAppsV5
-      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", await x2EarnAppsV4.getAddress(), [], {
+      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnAppsV5", await x2EarnAppsV4.getAddress(), [], {
         version: 5,
         libraries: {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          AdministrationUtilsV5: await administrationUtilsV5.getAddress(),
+          EndorsementUtilsV5: await endorsementUtilsV5.getAddress(),
+          VoteEligibilityUtilsV5: await voteEligibilityUtilsV5.getAddress(),
         },
-      })) as X2EarnApps
+      })) as X2EarnAppsV5
 
       // New node holders should not be subject to cooldown period
       expect(await x2EarnAppsV5.checkCooldown(nodeId1)).to.eql(false)
       expect(await x2EarnAppsV5.checkCooldown(nodeId2)).to.eql(false)
-      expect(await x2EarnAppsV5.checkCooldown(1)).to.eql(false)
+      expect(await x2EarnAppsV5.checkCooldown(nodeId3)).to.eql(false)
 
       // If a node holder that endorsed an app prior to upgrade performs an action they should be subject to cooldown period
-      await x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder endorsement score is 100
-      await x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
-
-      expect(await x2EarnAppsV5.checkCooldown(1)).to.eql(true)
-
-      // Should revert if user in cooldown period tries to endorse an app
-      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, 1))
-
-      // Should revert if user in cooldown period tries to unendorse an app
-      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, 1))
+      await x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
+      await x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1) // Node holder endorsement score is 100
+      expect(await x2EarnAppsV5.checkCooldown(nodeId1)).to.eql(true)
 
       // Should revert if user in cooldown period tries to endorse an app
-      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, 1))
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1))
 
       // Should revert if user in cooldown period tries to unendorse an app
-      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, 1))
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, nodeId1))
+
+      // Should revert if user in cooldown period tries to endorse an app
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1))
+
+      // Should revert if user in cooldown period tries to unendorse an app
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, nodeId1))
       await x2EarnAppsV5
         .connect(creator3)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app 6", "metadataURI")
       const app6Id = ethers.keccak256(ethers.toUtf8Bytes("My app 6"))
-
       // New node holders should be subject to cooldown period
-      await catchRevert(x2EarnAppsV5.connect(otherAccounts[5]).endorseApp(app6Id, 5))
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[6]).endorseApp(app6Id, nodeId4))
 
       // Fast forward time to next round
       // wait for round to end
@@ -821,7 +809,7 @@ describe("X-Apps - @shard15", function () {
       // New node holders should not be subject to cooldown period
       expect(await x2EarnAppsV5.checkCooldown(nodeId1)).to.eql(false)
       expect(await x2EarnAppsV5.checkCooldown(nodeId2)).to.eql(false)
-      expect(await x2EarnAppsV5.checkCooldown(1)).to.eql(false)
+      expect(await x2EarnAppsV5.checkCooldown(nodeId3)).to.eql(false)
     })
 
     it("Should not have state conflict after upgrading to V6", async () => {
@@ -853,6 +841,9 @@ describe("X-Apps - @shard15", function () {
         administrationUtilsV5,
         endorsementUtilsV5,
         voteEligibilityUtilsV5,
+        administrationUtilsV6,
+        endorsementUtilsV6,
+        voteEligibilityUtilsV6,
       } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const x2EarnAppsV2 = (await deployAndUpgrade(
@@ -899,7 +890,6 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holders with an endorsement score of 100
-      //TODO: Using legacy node for now, but should be replaced by stargate
       await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
@@ -922,7 +912,6 @@ describe("X-Apps - @shard15", function () {
         .connect(owner)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
 
-      //TODO: Using legacy node for now, but should be replaced by stargate
       await mintLegacyNode(7, otherAccounts[4]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       await x2EarnAppsV2.connect(otherAccounts[4]).endorseApp(app3Id, 3)
 
@@ -1156,14 +1145,14 @@ describe("X-Apps - @shard15", function () {
       expect(addressFromSlot2UpgradeV5).to.equal(expectedAddress2UpgradeV5)
 
       // Upgrade to V6
-      const x2EarnAppsV6 = (await upgradeProxy("X2EarnAppsV5", "X2EarnApps", await x2EarnAppsV5.getAddress(), [], {
+      const x2EarnAppsV6 = (await upgradeProxy("X2EarnAppsV5", "X2EarnAppsV6", await x2EarnAppsV5.getAddress(), [], {
         version: 6,
         libraries: {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          AdministrationUtilsV6: await administrationUtilsV6.getAddress(),
+          EndorsementUtilsV6: await endorsementUtilsV6.getAddress(),
+          VoteEligibilityUtilsV6: await voteEligibilityUtilsV6.getAddress(),
         },
-      })) as X2EarnApps
+      })) as X2EarnAppsV6
 
       expect(await x2EarnAppsV6.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
 
@@ -2004,17 +1993,17 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnApps.MAX_REWARD_DISTRIBUTORS()).to.eql(100n)
     })
 
-    it("Only admin can update node management contract address", async function () {
-      const { x2EarnApps, otherAccount, nodeManagement, owner } = await getOrDeployContractInstances({
+    it("Only admin can update stargate NFT contract address", async function () {
+      const { x2EarnApps, otherAccount, stargateNftMock, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      expect(await x2EarnApps.getNodeManagementContract()).to.eql(await nodeManagement.getAddress())
-      await catchRevert(x2EarnApps.connect(otherAccount).setNodeManagementContract(otherAccount.address))
+      expect(await x2EarnApps.getStargateNFT()).to.eql(await stargateNftMock.getAddress())
+      await catchRevert(x2EarnApps.connect(otherAccount).setStargateNFT(otherAccount.address))
 
-      await x2EarnApps.connect(owner).setNodeManagementContract(await otherAccount.getAddress())
+      await x2EarnApps.connect(owner).setStargateNFT(await otherAccount.getAddress())
 
-      expect(await x2EarnApps.getNodeManagementContract()).to.eql(await otherAccount.getAddress())
+      expect(await x2EarnApps.getStargateNFT()).to.eql(await otherAccount.getAddress())
     })
 
     it("Only admin can update veBetter passport contract address", async function () {
