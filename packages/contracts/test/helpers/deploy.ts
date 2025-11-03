@@ -132,6 +132,9 @@ import {
   DBAPool,
   DBAPoolV1,
   Stargate,
+  AdministrationUtilsV6,
+  EndorsementUtilsV6,
+  VoteEligibilityUtilsV6,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -288,22 +291,35 @@ export interface DeployInstance {
   administrationUtils: AdministrationUtils
   endorsementUtils: EndorsementUtils
   voteEligibilityUtils: VoteEligibilityUtils
+  // V2
   administrationUtilsV2: AdministrationUtilsV2
   endorsementUtilsV2: EndorsementUtilsV2
   voteEligibilityUtilsV2: VoteEligibilityUtilsV2
+  // V3
   administrationUtilsV3: AdministrationUtilsV3
   endorsementUtilsV3: EndorsementUtilsV3
   voteEligibilityUtilsV3: VoteEligibilityUtilsV3
+  // V4
   administrationUtilsV4: AdministrationUtilsV4
   endorsementUtilsV4: EndorsementUtilsV4
   voteEligibilityUtilsV4: VoteEligibilityUtilsV4
+  // V5
   administrationUtilsV5: AdministrationUtilsV5
   endorsementUtilsV5: EndorsementUtilsV5
   voteEligibilityUtilsV5: VoteEligibilityUtilsV5
+  // V6
+  administrationUtilsV6: AdministrationUtilsV6
+  endorsementUtilsV6: EndorsementUtilsV6
+  voteEligibilityUtilsV6: VoteEligibilityUtilsV6
 
+  //ERC 1155 and 721
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
+
+  // Legacy Nodes
   vechainNodesMock: TokenAuction
+
+  // B3TR MultiSig
   b3trMultiSig: B3TRMultiSig
 
   // StarGate
@@ -465,6 +481,10 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV5,
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
+    // V6
+    AdministrationUtilsV6,
+    EndorsementUtilsV6,
+    VoteEligibilityUtilsV6,
   } = await x2EarnLibraries()
 
   // Deploy AutoVoting Libraries
@@ -632,7 +652,7 @@ export const getOrDeployContractInstances = async ({
   const x2EarnRewardsPoolAddress = otherAccounts[11].address
 
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
     [
       ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
       [
@@ -645,9 +665,10 @@ export const getOrDeployContractInstances = async ({
       [x2EarnRewardsPoolAddress], // Setting temporary address for the x2EarnRewardsPool
       [],
       [],
+      [await stargateNftMock.getAddress()],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       libraries: [
         undefined,
         {
@@ -669,6 +690,11 @@ export const getOrDeployContractInstances = async ({
           AdministrationUtilsV5: await AdministrationUtilsV5.getAddress(),
           EndorsementUtilsV5: await EndorsementUtilsV5.getAddress(),
           VoteEligibilityUtilsV5: await VoteEligibilityUtilsV5.getAddress(),
+        },
+        {
+          AdministrationUtilsV6: await AdministrationUtilsV6.getAddress(),
+          EndorsementUtilsV6: await EndorsementUtilsV6.getAddress(),
+          VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),

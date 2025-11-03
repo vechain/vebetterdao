@@ -17,6 +17,7 @@ import {
   X2EarnCreator,
   GrantsManager,
   GrantsManagerV1,
+  StargateNFT,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -92,15 +93,26 @@ export async function deployLatest(config: ContractsConfig) {
     AdministrationUtils,
     EndorsementUtils,
     VoteEligibilityUtils,
+    // V2
     AdministrationUtilsV2,
     EndorsementUtilsV2,
     VoteEligibilityUtilsV2,
+    // V3
     AdministrationUtilsV3,
     EndorsementUtilsV3,
     VoteEligibilityUtilsV3,
+    // V4
     AdministrationUtilsV4,
     EndorsementUtilsV4,
     VoteEligibilityUtilsV4,
+    // V5
+    AdministrationUtilsV5,
+    EndorsementUtilsV5,
+    VoteEligibilityUtilsV5,
+    // V6
+    AdministrationUtilsV6,
+    EndorsementUtilsV6,
+    VoteEligibilityUtilsV6,
   } = await x2EarnLibraries()
 
   // ----------------------  Stargate Contracts and NodeManagement ----------------------
@@ -186,7 +198,7 @@ export async function deployLatest(config: ContractsConfig) {
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
     [
       [
         config.XAPP_BASE_URI,
@@ -203,9 +215,11 @@ export async function deployLatest(config: ContractsConfig) {
       [config.X2EARN_NODE_COOLDOWN_PERIOD, X_ALLOCATION_ADRESS_TEMP],
       [X2EARNREWARDSPOOL_ADDRESS_TEMP],
       [],
+      [],
+      [await stargateNftMock.getAddress()],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       libraries: [
         undefined,
         {
@@ -222,6 +236,16 @@ export async function deployLatest(config: ContractsConfig) {
           AdministrationUtilsV4: await AdministrationUtilsV4!!.getAddress(),
           EndorsementUtilsV4: await EndorsementUtilsV4!!.getAddress(),
           VoteEligibilityUtilsV4: await VoteEligibilityUtilsV4!!.getAddress(),
+        },
+        {
+          AdministrationUtilsV5: await AdministrationUtilsV5!!.getAddress(),
+          EndorsementUtilsV5: await EndorsementUtilsV5!!.getAddress(),
+          VoteEligibilityUtilsV5: await VoteEligibilityUtilsV5!!.getAddress(),
+        },
+        {
+          AdministrationUtilsV6: await AdministrationUtilsV6!!.getAddress(),
+          EndorsementUtilsV6: await EndorsementUtilsV6!!.getAddress(),
+          VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6!!.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
