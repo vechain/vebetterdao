@@ -233,6 +233,7 @@ export async function distributeXAllocations(thor: ThorClient) {
   }
 
   const claimClauses = []
+  const failedXAppIds: string[] = []
 
   // Build the claim clauses for the X-Apps that have not yet claimed their allocations and the gas estimation does not revert
   for (const xAppId of xAppIds) {
@@ -247,16 +248,16 @@ export async function distributeXAllocations(thor: ThorClient) {
     // Check if the transaction was estimated to revert and handle accordingly
     if (!gasResult.reverted) {
       claimClauses.push(claimClause)
+    } else {
+      failedXAppIds.push(xAppId)
     }
   }
 
   // If all claims failed gas estimation, treat as already claimed
   // This can happen due to race conditions where apps are claimed between the check and gas estimation
-  logger.info("Claim clauses", { claimClauses, xAppIdsCount: xAppIds.length })
+  logger.info("Claim clauses", { claimClauses, ineligibleApps: failedXAppIds, xAppIdsCount: xAppIds.length })
   if (claimClauses.length === 0) {
-    console.log(
-      `All ${xAppIds.length} X-App claims failed gas estimation for round ${previousRound}. Likely already claimed - treating as complete.`,
-    )
+    console.log(`There is no claim clause to distribute X-Allocations for round ${previousRound}`)
     return { receipt: null, gasResult: null, allClaimed: true }
   }
 
@@ -451,7 +452,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       await publishMessage(
         client,
         slackIds.b3trLambda,
-        `${SLACK_MESSAGE_PREFIX}:information_source: Skipping distribute() - detected round was already started (current block: ${roundState.currentBlock}, next cycle: ${roundState.nextCycleBlock})`,
+        `${SLACK_MESSAGE_PREFIX}:information_source: ${roundState.currentCycle} Round was already started`,
       )
     } else {
       // Wait for the next round to start before proceeding
@@ -481,7 +482,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         await publishMessage(
           client,
           slackIds.b3trLambda,
-          `${SLACK_MESSAGE_PREFIX}:information_source: Round was started by another process while waiting - skipping distribute()`,
+          `${SLACK_MESSAGE_PREFIX}:information_source: ${recheckState.currentCycle} Round was already started`,
         )
         // Continue to X-Allocations and DBA distribution
       } else {
@@ -574,7 +575,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: No X-Apps need to claim allocations`,
+        `${SLACK_MESSAGE_PREFIX}:information_source: No eligible X-Apps found to claim allocations`,
       )
     } else if (!receiptClaim && gasResultXallocations?.reverted) {
       await publishMessage(
