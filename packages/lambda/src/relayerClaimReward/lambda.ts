@@ -15,12 +15,8 @@ import { logger } from "../helpers/logger"
 import { AppEnv } from "@repo/config/contracts"
 import { AppConfig } from "@repo/config"
 import { getCurrentRoundId } from "../helpers/xApps"
-import {
-  getAllAutoVotingEnabledUsers,
-  getRoundSnapshot,
-  verifyAutoVotingUsersIsActive,
-} from "../helpers/xallocationvoting"
-import { processBatchedVotes } from "../helpers/xallocationvoting/batchVoteProcessor"
+import { getAllAutoVotingEnabledUsers, getRoundSnapshot } from "../helpers/xallocationvoting"
+import { processBatchedClaims } from "../helpers/voterRewards/batchClaimProcessor"
 import { slackIds } from "../helpers/slack/slackIds"
 import { notify } from "../helpers/slack/notificationHelper"
 
@@ -99,20 +95,20 @@ const getSlackConfig = (): SlackConfig => {
     case AppEnv.MAINNET:
       return {
         channelId: slackIds.b3trLambda,
-        messagePrefix: "[MAINNET][Auto-Voting] ",
+        messagePrefix: "[MAINNET][Auto-Claim] ",
       }
 
     case AppEnv.TESTNET_STAGING:
       return {
         channelId: slackIds.b3trLambda,
-        messagePrefix: "[STAGING][Auto-Voting] ",
+        messagePrefix: "[STAGING][Auto-Claim] ",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
         channelId: slackIds.b3trLambda,
-        messagePrefix: "[STAGING][Auto-Voting] ",
+        messagePrefix: "[STAGING][Auto-Claim] ",
       }
   }
 }
@@ -152,6 +148,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
   console.log(`Caller wallet address: ${(await getCallerWalletInfo()).walletAddress}`)
   console.log(`Environment: ${process.env.LAMBDA_ENV}`)
   console.log(`Network: ${NODE_URL}`)
+  console.log(`VoterRewards contract: ${CONFIG.voterRewardsContractAddress}`)
   console.log(`XAllocationVoting contract: ${CONFIG.xAllocationVotingContractAddress}`)
   console.log(`Dry Run Mode: ${dryRun}`)
 
@@ -171,101 +168,76 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
 
     // Get the current round information
     const currentRoundId = Number(await getCurrentRoundId(thorClient, CONFIG.xAllocationVotingContractAddress))
-    const roundStartBlock = await getRoundSnapshot(thorClient, CONFIG.xAllocationVotingContractAddress, currentRoundId)
-
-    logger.info("Round information retrieved", {
-      roundId: currentRoundId,
-      snapshotBlock: roundStartBlock,
-    })
+    const previousRoundId = currentRoundId - 1
+    const previousRoundStartBlock = await getRoundSnapshot(
+      thorClient,
+      CONFIG.xAllocationVotingContractAddress,
+      previousRoundId,
+    )
 
     // Fetch all users with auto-voting enabled
     // Starting from block 0 to the round start block
-    const allUsersWithEnabledStatus = await getAllAutoVotingEnabledUsers(
+    const usersToClaimFor = await getAllAutoVotingEnabledUsers(
       thorClient,
       CONFIG.xAllocationVotingContractAddress,
       0,
-      roundStartBlock,
+      previousRoundStartBlock,
     )
 
-    // Verify that all users are 'active' at the round start block
-    const {
-      allValid,
-      validUsers: usersToVoteFor,
-      invalidUsers,
-    } = await verifyAutoVotingUsersIsActive(
-      thorClient,
-      CONFIG.xAllocationVotingContractAddress,
-      allUsersWithEnabledStatus,
-      currentRoundId,
-    )
-
-    if (!allValid) {
+    if (usersToClaimFor.length === 0) {
       await notify({
         level: "warn",
-        message: `Found ${invalidUsers.length} invalid auto-voting users in round ${currentRoundId}. Check logs for more details.`,
-        data: {
-          roundId: currentRoundId,
-          invalidUsersCount: invalidUsers.length,
-          invalidUsers,
-        },
-        slack: slackOptions,
-      })
-    }
-
-    if (usersToVoteFor.length === 0) {
-      await notify({
-        level: "warn",
-        message: `No users with auto-voting active found in round ${currentRoundId}`,
-        data: { roundId: currentRoundId },
+        message: `No active auto-voting users found for round ${previousRoundId}`,
+        data: { previousRoundId: previousRoundId },
         slack: slackOptions,
       })
       return buildResponse(SuccessResponseType.SUCCESS, {
-        message: `No users with auto-voting active found in round ${currentRoundId}`,
+        message: `No active auto-voting users found for round ${previousRoundId}`,
       })
     }
 
     // Get the caller wallet information (relayer wallet)
     const { privateKey, walletAddress } = await getCallerWalletInfo()
 
-    // Cast votes on behalf of users using batch processor
-    const batchResult = await processBatchedVotes(
+    // Claim rewards on behalf of users using batch processor
+    const batchResult = await processBatchedClaims(
       thorClient,
-      CONFIG.xAllocationVotingContractAddress,
-      usersToVoteFor,
-      currentRoundId,
+      CONFIG.voterRewardsContractAddress,
+      usersToClaimFor,
+      previousRoundId,
       walletAddress,
       privateKey,
       BATCH_SIZE,
       dryRun,
     )
 
-    // Check if we managed to cast any votes at all
-    if (batchResult.successfulVotes === 0) {
+    // Check if we are unable to claim any rewards for the previous round
+    if (batchResult.successfulClaims === 0) {
       await notify({
         level: "error",
-        message: `Failed to cast any votes in round ${currentRoundId}`,
+        message: `Failed to claim any rewards for round ${previousRoundId}`,
         data: {
-          roundId: currentRoundId,
-          totalAttempted: usersToVoteFor.length,
-          failedVotes: batchResult.failedVotes,
+          previousRoundId: previousRoundId,
+          totalAttempted: usersToClaimFor.length,
+          failedClaims: batchResult.failedClaims,
         },
         slack: slackOptions,
       })
       return buildResponse(CustomApiError.TRANSACTION_REVERTED, {
-        message: `Failed to cast any votes in round ${currentRoundId}`,
-        failedVotes: batchResult.failedVotes,
+        message: `Failed to claim any rewards for round ${previousRoundId}`,
+        failedClaims: batchResult.failedClaims,
       })
     }
 
-    // Log failed votes if any
-    if (batchResult.failedVotes.length > 0) {
+    // Log failed claims if any
+    if (batchResult.failedClaims.length > 0) {
       await notify({
         level: "warn",
-        message: `${batchResult.failedVotes.length} votes failed to be cast in round ${currentRoundId}. Check logs for more details.`,
+        message: `${batchResult.failedClaims.length} claims failed to be processed for round ${previousRoundId}. Check logs for more details.`,
         data: {
-          successfulVotes: batchResult.successfulVotes,
-          failedVotes: batchResult.failedVotes.length,
-          failedVoteDetails: batchResult.failedVotes,
+          successfulClaims: batchResult.successfulClaims,
+          failedClaims: batchResult.failedClaims.length,
+          failedClaimDetails: batchResult.failedClaims,
         },
         slack: slackOptions,
       })
@@ -274,26 +246,26 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     await notify({
       level: "success",
       message: dryRun
-        ? `Auto-voting simulation completed for round ${currentRoundId} (DRY RUN). Successfully simulated ${batchResult.successfulVotes} votes.`
-        : `Auto-voting completed for round ${currentRoundId}. Successfully cast ${batchResult.successfulVotes} votes.`,
+        ? `Auto-claim simulation completed for round ${previousRoundId} (DRY RUN). Successfully simulated ${batchResult.successfulClaims} claims.`
+        : `Auto-claim completed for round ${previousRoundId}. Successfully claimed ${batchResult.successfulClaims} rewards.`,
       data: {
-        totalUsers: usersToVoteFor.length,
-        successfulVotes: batchResult.successfulVotes,
-        failedVotes: batchResult.failedVotes.length,
-        roundId: currentRoundId,
+        totalUsers: usersToClaimFor.length,
+        successfulClaims: batchResult.successfulClaims,
+        failedClaims: batchResult.failedClaims.length,
+        previousRoundId: previousRoundId,
         transactions: batchResult.transactionIds.length,
         dryRun,
-        // Include detailed failed votes in dry-run mode for easier debugging
-        ...(dryRun && batchResult.failedVotes.length > 0 ? { failedVoteDetails: batchResult.failedVotes } : {}),
+        // Include detailed failed claims in dry-run mode for easier debugging
+        ...(dryRun && batchResult.failedClaims.length > 0 ? { failedClaimDetails: batchResult.failedClaims } : {}),
       },
       slack: slackOptions,
     })
 
     return buildResponse(SuccessResponseType.SUCCESS, {
-      successfulVotes: batchResult.successfulVotes,
-      failedVotes: batchResult.failedVotes,
+      successfulClaims: batchResult.successfulClaims,
+      failedClaims: batchResult.failedClaims,
       transactionIds: batchResult.transactionIds,
-      roundId: currentRoundId,
+      previousRoundId: previousRoundId,
       dryRun,
     })
   } catch (error) {
