@@ -158,7 +158,7 @@ describe("X-Apps - @shard15", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnApps.version()).to.equal("6")
+      expect(await x2EarnApps.version()).to.equal("7")
     })
 
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
