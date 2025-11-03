@@ -1,13 +1,4 @@
-import {
-  Button,
-  HStack,
-  Text,
-  VStack,
-  Input,
-  Skeleton,
-  Icon,
-  NativeSelect,
-} from "@chakra-ui/react"
+import { Button, HStack, Text, VStack, Input, Skeleton, Icon, NativeSelect } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { motion } from "framer-motion"
 import { useCallback, useMemo } from "react"
@@ -252,15 +243,12 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
 
           <Button
-            mt={2}
             type="submit"
-            variant={"primary"}
-            w={"full"}
-            rounded={"full"}
             disabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
-            size={"lg"}>
-            <Icon as={IoWalletOutline} mr={2} />
-            <Text textStyle={{ base: "sm", md: "lg" }}>{t("Withdraw now")}</Text>
+            variant={"primary"}
+            borderRadius={"full"}
+            w={"full"}>
+            {t("Withdraw now")}
           </Button>
         </VStack>
       </form>

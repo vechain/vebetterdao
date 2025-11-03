@@ -179,16 +179,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
           <PercentageSelectorButtons availableAmount={availableB3trToDepositScaled} setValue={setValue} />
 
-          <Button
-            mt={2}
-            type="submit"
-            variant={"primary"}
-            w={"full"}
-            rounded={"full"}
-            disabled={invalidAmount}
-            size={"lg"}
-            textStyle={{ base: "sm", md: "lg" }}>
-            <Icon as={IoAddCircleOutline} mr={2} />
+          <Button type="submit" disabled={invalidAmount} variant={"primary"} borderRadius={"full"} w={"full"}>
             {t("Deposit now")}
           </Button>
         </VStack>
