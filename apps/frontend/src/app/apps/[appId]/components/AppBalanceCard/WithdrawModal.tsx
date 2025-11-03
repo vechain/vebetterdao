@@ -1,10 +1,9 @@
-import { Button, HStack, Text, VStack, Input, Skeleton, Icon, NativeSelect } from "@chakra-ui/react"
+import { Button, HStack, Text, VStack, Input, Skeleton, NativeSelect } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { motion } from "framer-motion"
 import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { IoWalletOutline } from "react-icons/io5"
 
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -86,7 +85,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     [availableB3trToWithdrawScaled],
   )
 
-  const { sendTransaction } = useWithdrawAppBalance({
+  const { sendTransaction, resetStatus } = useWithdrawAppBalance({
     appId,
     amount,
     reason: reason === "Other" ? customReason : reason,
@@ -97,11 +96,12 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   }, [sendTransaction])
 
   const handleClose = useCallback(() => {
+    resetStatus()
     onClose()
     setValue("amount", "")
     setValue("reason", "")
     setValue("customReason", "")
-  }, [onClose, setValue])
+  }, [resetStatus, onClose, setValue])
 
   const amountInput = useMemo(() => {
     return (

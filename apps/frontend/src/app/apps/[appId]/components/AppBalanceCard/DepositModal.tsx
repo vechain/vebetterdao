@@ -96,10 +96,9 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     amount,
   })
 
-  const handleWithdraw = useCallback(() => {
-    resetStatus()
+  const handleDeposit = useCallback(() => {
     sendTransaction()
-  }, [sendTransaction, resetStatus])
+  }, [sendTransaction])
 
   const handleClose = useCallback(() => {
     resetStatus()
@@ -127,7 +126,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const renderCardContent = useCallback(() => {
     return (
-      <form onSubmit={formData.handleSubmit(handleWithdraw)}>
+      <form onSubmit={formData.handleSubmit(handleDeposit)}>
         <VStack align={"flex-start"} w="full">
           <HStack>
             <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
@@ -187,7 +186,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     )
   }, [
     formData,
-    handleWithdraw,
+    handleDeposit,
     invalidAmount,
     availableB3trToDepositScaled,
     t,
