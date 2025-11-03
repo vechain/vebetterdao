@@ -981,7 +981,7 @@ export const getStorageSlots = async (contractAddress: AddressLike, ...initialSl
   return slots.filter(slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000") // Removing empty slots
 }
 
-export const addNodeToken = async (
+export const mintLegacyNode = async (
   level: number,
   owner: HardhatEthersSigner,
 ): Promise<[string, bigint, boolean, boolean, bigint, bigint, bigint]> => {

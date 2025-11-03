@@ -11,6 +11,7 @@ import {
   getStorageSlots,
   getTwoUniqueRandomIndices,
   getVot3Tokens,
+  mintLegacyNode,
   parseAppAddedEvent,
   startNewAllocationRound,
   waitForBlock,
@@ -20,7 +21,7 @@ import {
 import { describe, it, before } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { createNodeHolder, endorseApp } from "./helpers/xnodes"
+import { createLegacyNodeHolder, createNodeHolder, endorseApp } from "./helpers/xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../scripts/helpers"
 import {
@@ -353,9 +354,9 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holder with an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       // Add apps -> should be eligble for next round
       await x2EarnAppsV1
         .connect(owner)
@@ -529,8 +530,9 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holder with an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Add apps -> should be eligble for next round
       await x2EarnAppsV1
@@ -897,8 +899,9 @@ describe("X-Apps - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holders with an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Add apps -> should be eligible for the next round
       await x2EarnAppsV2
@@ -919,7 +922,8 @@ describe("X-Apps - @shard15", function () {
         .connect(owner)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
 
-      await createNodeHolder(7, otherAccounts[4]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      //TODO: Using legacy node for now, but should be replaced by stargate
+      await mintLegacyNode(7, otherAccounts[4]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       await x2EarnAppsV2.connect(otherAccounts[4]).endorseApp(app3Id, 3)
 
       // Check eligibility
@@ -1359,8 +1363,8 @@ describe("X-Apps - @shard15", function () {
         },
       )) as XAllocationPoolV3
 
-      const galaxyMember = (await deployAndUpgrade(
-        ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
+      const galaxyMemberV3 = (await deployAndUpgrade(
+        ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3"],
         [
           [
             {
@@ -1389,7 +1393,7 @@ describe("X-Apps - @shard15", function () {
         {
           versions: [undefined, 2, 3],
         },
-      )) as GalaxyMember
+      )) as GalaxyMemberV3
 
       const emissions = (await deployAndUpgrade(
         ["EmissionsV1", "Emissions"],
@@ -1436,7 +1440,7 @@ describe("X-Apps - @shard15", function () {
             owner.address, // upgrader // TODO: transferRole
             owner.address, // contractsAddressManager
             await emissions.getAddress(),
-            await galaxyMember.getAddress(),
+            await galaxyMemberV3.getAddress(),
             await b3tr.getAddress(),
             config.VOTER_REWARDS_LEVELS,
             config.VOTER_REWARDS_MULTIPLIER,
@@ -1484,7 +1488,7 @@ describe("X-Apps - @shard15", function () {
           {
             x2EarnApps: await x2EarnAppsV1.getAddress(),
             xAllocationVoting: await xAllocationVoting.getAddress(),
-            galaxyMember: await galaxyMember.getAddress(),
+            galaxyMember: await galaxyMemberV3.getAddress(),
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
             roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
             minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
@@ -6857,7 +6861,7 @@ describe("X-Apps - @shard17b", function () {
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      const node = await createNodeHolder(7, otherAccounts[1])
+      const node = await createLegacyNodeHolder(7, otherAccounts[1])
 
       await startNewAllocationRound()
 
@@ -6917,7 +6921,7 @@ describe("X-Apps - @shard17b", function () {
         .connect(owner)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
-      const node = await createNodeHolder(7, otherAccounts[1])
+      const node = await createLegacyNodeHolder(7, otherAccounts[1])
 
       await startNewAllocationRound()
 
@@ -6967,7 +6971,7 @@ describe("X-Apps - @shard17b", function () {
         config,
       })
 
-      const node = await createNodeHolder(7, owner)
+      const node = await createLegacyNodeHolder(7, owner)
 
       // Round 1
       await startNewAllocationRound()
@@ -7007,7 +7011,7 @@ describe("X-Apps - @shard17b", function () {
         config,
       })
 
-      const node = await createNodeHolder(7, owner)
+      const node = await createLegacyNodeHolder(7, owner)
 
       // Round 1
       await startNewAllocationRound()
@@ -7056,7 +7060,7 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("Node owner with 0 endorsement points cannot endorse an app", async function () {
-      const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, stargateMock, stargateNftMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -7070,7 +7074,7 @@ describe("X-Apps - @shard17b", function () {
       // Create node holder with level 0 (0 endorsement score)
       await createNodeHolder(0, otherAccounts[1]) // Node strength level 0 corresponds to an endorsement score of 0
       const level = await stargateNftMock.getLevel(1)
-      await stargateNftMock.stake(level.id, { value: level.vetAmountRequiredToStake })
+      await stargateMock.stake(level.id, { value: level.vetAmountRequiredToStake })
       // Get the token ID owned by the account
       const ownedIds = await stargateNftMock.idsOwnedBy(owner.address)
       const nodeId = ownedIds[0]

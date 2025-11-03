@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - testnet
+      - feat/stargate
   push:
     branches:
       - main
@@ -113,9 +114,11 @@ jobs:
           - shard: shard2
             label: Emissions
           - shard: shard3a
-            label: Available for Assignment
-          - shard: shard3b
             label: Galaxy Member
+          - shard: shard3b
+            label: Galaxy Member - V6 Upgrade
+          - shard: shard3c
+            label: Galaxy Member - V6 Compatibility
           - shard: shard4a
             label: Governor & TimeLock
           - shard: shard4b

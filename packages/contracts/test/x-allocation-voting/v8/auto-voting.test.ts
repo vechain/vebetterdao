@@ -487,7 +487,7 @@ describe("AutoVoting - @shard14b", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
+      await endorseApp(app1Id, appOwner, true)
 
       // Register relayer
       await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
@@ -546,7 +546,8 @@ describe("AutoVoting - @shard14b", function () {
       await x2EarnApps
         .connect(appOwner2)
         .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
-      await endorseApp(app2Id, appOwner2)
+      //TODO:Using legacy node for now, but should be replaced by stargate
+      await endorseApp(app2Id, appOwner2, true)
 
       // User sets preferences for new app2
       await xAllocationVoting.connect(user).setUserVotingPreferences([app2Id])
@@ -1013,7 +1014,8 @@ describe("AutoVoting - @shard14b", function () {
       await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
+      //TODO:Using legacy node for now, but should be replaced by stargate
+      await endorseApp(app1Id, appOwner, true)
 
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
@@ -1092,13 +1094,15 @@ describe("AutoVoting - @shard14b", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
+      //TODO:Using legacy node for now, but should be replaced by stargate
+      await endorseApp(app1Id, appOwner, true)
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner2.address))
       await x2EarnApps
         .connect(appOwner2)
         .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
-      await endorseApp(app2Id, appOwner2)
+      //TODO:Using legacy node for now, but should be replaced by stargate
+      await endorseApp(app2Id, appOwner2, true)
 
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id, app2Id])
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
