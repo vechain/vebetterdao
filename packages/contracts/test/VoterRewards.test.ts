@@ -22,6 +22,7 @@ import {
   bootstrapAndStartEmissions,
   payDeposit,
   updateGMMultipliers,
+  moveBlocks,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
@@ -31,7 +32,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployAndUpgrade, deployProxy, upgradeProxy } from "../scripts/helpers"
 import { GalaxyMember, GalaxyMemberV2 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
-import { endorseApp } from "./helpers/xnodes"
+import { createNodeHolder, endorseApp } from "./helpers/xnodes"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 describe("VoterRewards - @shard10", () => {
@@ -3174,7 +3175,6 @@ describe("VoterRewards - @shard10", () => {
       const config = createLocalConfig()
 
       const {
-        vechainNodesMock,
         galaxyMember,
         emissions,
         b3tr,
@@ -3215,12 +3215,8 @@ describe("VoterRewards - @shard10", () => {
       const voter2 = otherAccounts[2]
       const voter3 = otherAccounts[3]
 
-      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
-
-      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
-
-      await mintLegacyNode(1, voter1)
-      await mintLegacyNode(3, voter3)
+      const nodeIdVoter1 = await createNodeHolder(1, voter1)
+      const nodeIdVoter3 = await createNodeHolder(3, voter3)
 
       await participateInAllocationVoting(voter1)
 
@@ -3231,7 +3227,7 @@ describe("VoterRewards - @shard10", () => {
       await galaxyMember.setMaxLevel(10)
 
       // Attach node to GM NFT
-      await galaxyMember.connect(voter1).attachNode(3, 1)
+      await galaxyMember.connect(voter1).attachNode(nodeIdVoter1, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 1
 
@@ -3284,11 +3280,11 @@ describe("VoterRewards - @shard10", () => {
         "GalaxyMember: token attached to a node, detach before transfer",
       ) // Can't transfer GM NFT attached to a node
 
-      await galaxyMember.connect(voter1).detachNode(3, 1) // Detach node
+      await galaxyMember.connect(voter1).detachNode(nodeIdVoter1, 1) // Detach node
 
       await galaxyMember.connect(voter1).transferFrom(voter1.address, voter3.address, 1) // Now we can transfer the NFT
 
-      await galaxyMember.connect(voter3).attachNode(4, 1) // Attach Mjolnir to GM NFT of voter3 that he just received
+      await galaxyMember.connect(voter3).attachNode(nodeIdVoter3, 1) // Attach Mjolnir to GM NFT of voter3 that he just received
 
       expect(await galaxyMember.levelOf(1)).to.equal(6) // Level 6 because of the Mjolnir node
 
@@ -3378,7 +3374,6 @@ describe("VoterRewards - @shard10", () => {
       const config = createLocalConfig()
 
       const {
-        vechainNodesMock,
         galaxyMember,
         emissions,
         b3tr,
@@ -3425,11 +3420,7 @@ describe("VoterRewards - @shard10", () => {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
-      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
-
-      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
-
-      await mintLegacyNode(3, voter1)
+      const nodeIdVoter1 = await createNodeHolder(3, voter1)
 
       const roundId = await startNewAllocationRound()
 
@@ -3454,17 +3445,7 @@ describe("VoterRewards - @shard10", () => {
       // Start next cycle
       await emissions.distribute()
 
-      // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
-      await vechainNodesMock.addAuctionWhiteList(1, await stargateNftMock.getAddress())
-      //Remove lead time from legacy nodes contract
-      await vechainNodesMock.setLeadTime(0)
-
-      // Migrate legacy node to Stargate NFT
-      await stargateMock
-        .connect(voter1)
-        .migrate(1, { value: (await stargateNftMock.getLevel(3)).vetAmountRequiredToStake })
-      console.log("voter1 nodes, ", await stargateNftMock.tokensOwnedBy(voter1.address))
-      await galaxyMember.connect(voter1).attachNode(1, 1)
+      await galaxyMember.connect(voter1).attachNode(nodeIdVoter1, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(6) // Level 6 because of the Mjolnir node attached
 
@@ -3500,15 +3481,12 @@ describe("VoterRewards - @shard10", () => {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       // Transfer Mjolnir to voter2
-      await vechainNodesMock.connect(voter1).transferFrom(voter1.address, voter2.address, 3)
+      await stargateNftMock.connect(voter1).transferFrom(voter1.address, voter2.address, nodeIdVoter1)
 
       await galaxyMember.connect(voter2).freeMint() // Token Id 2
+      const gmId2 = await galaxyMember.tokenOfOwnerByIndex(await voter2.getAddress(), 0)
 
-      await expect(galaxyMember.connect(voter2).attachNode(3, 2)).to.be.reverted // Mjolnir (token Id 1) is still attached to voter1
-
-      await galaxyMember.connect(voter2).detachNode(3, await galaxyMember.getIdAttachedToNode(3)) // Detach Mjolnir from voter1's GM NFT
-
-      await galaxyMember.connect(voter2).attachNode(3, 2) // Attach Mjolnir to voter2's GM NFT
+      await galaxyMember.connect(voter2).attachNode(nodeIdVoter1, gmId2) // Attach Mjolnir to voter2's GM NFT
 
       expect(await galaxyMember.levelOf(2)).to.equal(6) // Level 6 because of the Mjolnir node attached
       expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1 because Mjolnir was detached
