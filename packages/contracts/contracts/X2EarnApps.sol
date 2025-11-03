@@ -367,4 +367,11 @@ contract X2EarnApps is
   function setX2EarnRewardsPoolContract(address _x2EarnRewardsPoolContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setX2EarnRewardsPoolContract(_x2EarnRewardsPoolContract);
   }
+
+  /**
+   * @dev See {IX2EarnApps-setStargateNFT}.
+   */
+  function setStargateNFT(address _stargateNft) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setStargateNFT(_stargateNft);
+  }
 }

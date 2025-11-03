@@ -414,8 +414,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @notice This function can be called to update the Stargate NFT contract
    */
-  function _setStargateNFT(address stargateNFTContract) internal virtual {
-    _getEndorsementStorage()._stargateNFT = IStargateNFT(stargateNFTContract);
+  function _setStargateNFT(address stargateNft) internal virtual {
+    _getEndorsementStorage()._stargateNFT = IStargateNFT(stargateNft);
   }
 
   // ---------- Private ---------- //
@@ -585,15 +585,20 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev See {IX2EarnApps-getXAllocationVotingGovernor}.
    */
   function getXAllocationVotingGovernor() external view returns (IXAllocationVotingGovernor) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-    return $._xAllocationVotingGovernor;
+    return _getEndorsementStorage()._xAllocationVotingGovernor;
   }
 
   /**
    * @dev See {IX2EarnApps-getVeBetterPassportContract}.
    */
   function getVeBetterPassportContract() external view returns (IVeBetterPassport) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-    return $._veBetterPassport;
+    return _getEndorsementStorage()._veBetterPassport;
+  }
+
+  /**
+   * @dev See {IX2EarnApps-getStargateNFT}.
+   */
+  function getStargateNFT() external view returns (IStargateNFT) {
+    return _getEndorsementStorage()._stargateNFT;
   }
 }

@@ -6,6 +6,7 @@ import { EndorsementUtils } from "../x-2-earn-apps/libraries/EndorsementUtils.so
 import { IX2EarnCreator } from "./IX2EarnCreator.sol";
 import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
 import { IX2EarnRewardsPool } from "./IX2EarnRewardsPool.sol";
+import { IStargateNFT } from "../mocks/Stargate/interfaces/IStargateNFT.sol";
 
 /**
  * @title IX2EarnApps
@@ -695,4 +696,15 @@ interface IX2EarnApps {
    * Emits a {CooldownPeriodUpdated} event.
    */
   function updateCooldownPeriod(uint256 _newCooldownPeriod) external;
+
+  /**
+   * @dev Set the Stargate NFT contract address.
+   * @param _stargateNft The address of the Stargate NFT contract.
+   */
+  function setStargateNFT(address _stargateNft) external;
+
+  /**
+   * @dev Get the Stargate NFT contract address.
+   */
+  function getStargateNFT() external view returns (IStargateNFT);
 }
