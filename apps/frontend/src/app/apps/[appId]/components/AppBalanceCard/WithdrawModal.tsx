@@ -22,8 +22,8 @@ import { BaseModal } from "../../../../../components/BaseModal"
 import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
 import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
 
+import { PercentageSelectorButtons } from "./components/PercentageSelectorButtons"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
-import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
 
 export type Props = {
   appId: string
@@ -247,7 +247,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             </motion.div>
           </motion.div>
 
-          <WithdrawPercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
+          <PercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
 
           <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
 

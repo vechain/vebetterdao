@@ -16,7 +16,7 @@ import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
 import { useDepositToAppBalance } from "../../../../../hooks/useDepositToAppBalance"
 import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
 
-import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
+import { PercentageSelectorButtons } from "./components/PercentageSelectorButtons"
 
 export type Props = {
   appId: string
@@ -177,7 +177,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
             </motion.div>
           </motion.div>
 
-          <DepositPercentageSelectorButtons availableAmount={availableB3trToDepositScaled} setValue={setValue} />
+          <PercentageSelectorButtons availableAmount={availableB3trToDepositScaled} setValue={setValue} />
 
           <Button
             mt={2}
