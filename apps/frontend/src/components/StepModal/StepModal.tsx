@@ -67,7 +67,7 @@ export const StepModal = <T extends string>({
       modalProps={{ closeOnInteractOutside }}>
       <Flex position="relative" h="60px" alignItems="center">
         {!isFirstStep && !disableBackButton ? (
-          <Button variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
+          <Button type="button" variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
             <Icon as={IoArrowBackOutline} boxSize="30px" />
           </Button>
         ) : null}
@@ -82,7 +82,7 @@ export const StepModal = <T extends string>({
         </Flex>
 
         {isDesktop && !disableCloseButton ? (
-          <Button position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
+          <Button type="button" position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
             <Icon as={IoClose} boxSize="30px" />
           </Button>
         ) : null}

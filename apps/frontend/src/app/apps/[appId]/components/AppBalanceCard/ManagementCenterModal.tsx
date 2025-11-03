@@ -29,20 +29,22 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
   const { data: isPaused } = useIsDistributionPaused(appId)
   const { isTxModalOpen } = useTransactionModal()
   const [step, setStep] = useState(0)
-  const goToNext = useCallback(() => {
-    const nextStep = step + 1
-    if (nextStep > STEP_COUNT) onClose()
-    else setStep(nextStep)
-  }, [step, onClose])
-  const goToPrevious = useCallback(() => {
-    const prevStep = step - 1
-    if (prevStep < 1) onClose()
-    else setStep(prevStep)
-  }, [step, onClose])
   const handleClose = useCallback(() => {
     setStep(0)
     onClose()
-  }, [onClose, setStep])
+  }, [onClose])
+
+  const goToNext = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep >= STEP_COUNT) handleClose()
+    else setStep(nextStep)
+  }, [step, handleClose])
+
+  const goToPrevious = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 0) handleClose()
+    else setStep(prevStep)
+  }, [step, handleClose])
 
   // Pause, resume and toggle hooks
   const { pauseDistribution, unpauseDistribution, toggleRewardsPool } = useDistributionManagement({
