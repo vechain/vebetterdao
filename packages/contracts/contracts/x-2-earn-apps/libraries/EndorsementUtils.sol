@@ -71,13 +71,13 @@ library EndorsementUtils {
   /**
    * @notice Retrieves the endorsers of a given app.
    * @param _appEndorsers Mapping of app IDs to arrays of endorsing node IDs.
-   * @param _stargateNFTContract The Stargate NFT contract to retrieve node information.
+   * @param _stargateNFT The Stargate NFT contract to retrieve node information.
    * @param appId The unique identifier of the app.
    * @return address[] Array of addresses of the endorsers.
    */
   function getEndorsers(
     mapping(bytes32 => uint256[]) storage _appEndorsers,
-    IStargateNFT _stargateNFTContract,
+    IStargateNFT _stargateNFT,
     bytes32 appId
   ) external view returns (address[] memory) {
     uint256 length = _appEndorsers[appId].length;
@@ -85,7 +85,7 @@ library EndorsementUtils {
     uint256 count = 0;
 
     for (uint256 i = 0; i < length; i++) {
-      address endorser = _stargateNFTContract.getNodeManager(_appEndorsers[appId][i]);
+      address endorser = _stargateNFT.getTokenManager(_appEndorsers[appId][i]);
       if (endorser != address(0)) {
         endorsers[count] = endorser;
         count++;
@@ -102,16 +102,16 @@ library EndorsementUtils {
   /**
    * @notice Calculates the total endorsement score for a user's nodes.
    * @param _nodeEnodorsmentScore Mapping of endorsement scores for each node level.
-   * @param _stargateNFTContract Stargate NFT contract to retrieve node information.
+   * @param _stargateNFT Stargate NFT contract to retrieve node information.
    * @param user The address of the user whose endorsement score to calculate.
    * @return uint256 The total endorsement score for the user's nodes.
    */
   function getUsersEndorsementScore(
     mapping(uint8 => uint256) storage _nodeEnodorsmentScore,
-    IStargateNFT _stargateNFTContract,
+    IStargateNFT _stargateNFT,
     address user
   ) external view returns (uint256) {
-    DataTypes.Token[] memory nodeLevels = _stargateNFTContract.tokensManagedBy(user);
+    DataTypes.Token[] memory nodeLevels = _stargateNFT.tokensManagedBy(user);
     uint256 totalScore;
 
     for (uint256 i; i < nodeLevels.length; i++) {
@@ -128,9 +128,9 @@ library EndorsementUtils {
    * @param _nodeToEndorsedApp Mapping of node IDs to the app ID they are currently endorsing.
    * @param _appEndorsers Mapping of app IDs to arrays of node IDs that have endorsed them.
    * @param _appScores Mapping of app IDs to their calculated endorsement scores.
-   * @param _stargateNFTContract The Stargate NFT contract to retrieve node levels.
+   * @param _stargateNFT The Stargate NFT contract to retrieve node levels.
    * @param appId The unique identifier of the app.
-   * @param endorserToRemove The node ID of the endorser to remove.
+   * @param endorserNodeIdToRemove The node ID of the endorser to remove.
    * @return uint256 The updated score of the app.
    */
   function getScoreAndRemoveEndorsement(
@@ -138,7 +138,7 @@ library EndorsementUtils {
     mapping(uint256 => bytes32) storage _nodeToEndorsedApp,
     mapping(bytes32 => uint256[]) storage _appEndorsers,
     mapping(bytes32 => uint256) storage _appScores,
-    IStargateNFT _stargateNFTContract,
+    IStargateNFT _stargateNFT,
     bytes32 appId,
     uint256 endorserNodeIdToRemove
   ) external returns (uint256) {
@@ -149,7 +149,7 @@ library EndorsementUtils {
       // Get the current endorser's node id
       uint256 endorserNodeId = _appEndorsers[appId][i];
       // Get the node level of the endorser
-      uint8 nodeLevel = _stargateNFTContract.getNodeLevel(endorserNodeId);
+      uint8 nodeLevel = _stargateNFT.getNodeLevel(endorserNodeId);
 
       // Check if the endorser's node level is 0 or if the endorser is the one to be removed
       if (nodeLevel == 0 || endorserNodeId == endorserNodeIdToRemove) {
