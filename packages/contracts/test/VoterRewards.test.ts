@@ -3606,7 +3606,7 @@ describe("VoterRewards - @shard10", () => {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
-      await mintLegacyNode(3, voter1)
+      const voter1NodeId = await createNodeHolder(3, voter1)
 
       const roundId = await startNewAllocationRound()
 
@@ -3632,8 +3632,7 @@ describe("VoterRewards - @shard10", () => {
       await emissions.distribute()
 
       // Attach node to GM NFT
-      const nodeId = await stargateNftMock.tokenOfOwnerByIndex(voter1.address, 0)
-      await galaxyMember.connect(voter1).attachNode(nodeId, 1)
+      await galaxyMember.connect(voter1).attachNode(voter1NodeId, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(3) // Level 3 because of the Mjolnir node attached but max level is 3.
 
@@ -3778,7 +3777,7 @@ describe("VoterRewards - @shard10", () => {
 
         Starting from Level 1 (when Mjolnir is detached), the GM NFT Level would be = Level 9 with 435,000 B3TR required to upgrade to Level 10
       */
-      await galaxyMember.connect(voter1).detachNode(3, 1) // Detach Mjolnir from GM NFT
+      await galaxyMember.connect(voter1).detachNode(voter1NodeId, 1) // Detach Mjolnir from GM NFT
 
       expect(await galaxyMember.levelOf(1)).to.equal(9)
       expect(await galaxyMember.getB3TRtoUpgrade(1)).to.equal(ethers.parseEther("435000"))
