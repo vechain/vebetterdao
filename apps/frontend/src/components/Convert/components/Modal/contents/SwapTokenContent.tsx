@@ -71,8 +71,9 @@ export const SwapTokenContent = ({
         disabled={disableSubmitButton}
         onClick={goToNextStep}
         size={"lg"}
-        data-testid={"confirm-swap-button"}>
-        <Text textStyle={{ base: "sm", md: "lg" }}>{t("Review operation")}</Text>
+        data-testid={"confirm-swap-button"}
+        textStyle={{ base: "sm", md: "lg" }}>
+        {t("Review operation")}
       </Button>
     </>
   )

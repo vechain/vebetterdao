@@ -85,7 +85,7 @@ export const GalaxyLevelsCard = () => {
                   </VStack>
                 }>
                 <Button size="xs" variant="ghost">
-                  <Icon as={UilInfoCircle} color="actions.tertiary.default" />
+                  <Icon as={UilInfoCircle} color="actions.primary.default" />
                 </Button>
               </ToggleTip>
             </HStack>
@@ -134,11 +134,7 @@ export const GalaxyLevelsCard = () => {
             )
           })}
           {showShortened && gmNfts.slice(0, maxGMLevel).length > gmNftsShortened.length && (
-            <Button
-              variant="plain"
-              color="actions.tertiary.default"
-              onClick={() => setShowShortened(false)}
-              textStyle="lg">
+            <Button variant="link" onClick={() => setShowShortened(false)} textStyle="lg">
               {t("See all levels")}
             </Button>
           )}

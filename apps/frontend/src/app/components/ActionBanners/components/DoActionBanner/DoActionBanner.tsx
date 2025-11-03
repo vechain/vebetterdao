@@ -1,5 +1,4 @@
 import { Button, useDisclosure } from "@chakra-ui/react"
-import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -21,14 +20,12 @@ export const DoActionBanner = () => {
   return (
     <>
       <GenericBanner
-        variant="warning"
-        title={t("TIME TO STEP UP! 🏃🏼‍♂️")}
+        title={t("Time to step up!")}
         description={description}
-        logoSrc="/assets/icons/info-bell.webp"
+        illustration="/assets/icons/info-bell.webp"
         cta={
-          <Button variant="primary" onClick={doActionModal.onOpen}>
-            <UilInfoCircle />
-            {t("Know more")}
+          <Button p="0" size={{ base: "sm", md: "md" }} variant="link" onClick={doActionModal.onOpen}>
+            {t("Learn more")}
           </Button>
         }
       />

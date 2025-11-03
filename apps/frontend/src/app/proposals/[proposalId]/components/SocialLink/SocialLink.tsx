@@ -11,7 +11,7 @@ export const SocialLink: React.FC<SocialLinkProps> = ({ icon, href, label, value
   return (
     <HStack>
       <Icon as={icon} size="lg" color="icon.subtle" />
-      <Link cursor="pointer" color="actions.tertiary.default" href={href} target="_blank" rel="noopener noreferrer">
+      <Link cursor="pointer" color="actions.primary.default" href={href} target="_blank" rel="noopener noreferrer">
         {value || label}
       </Link>
     </HStack>

@@ -76,6 +76,7 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
                     p={3}
                     color={"text.subtle"}
                     _hover={{
+                      bg: "card.hover",
                       color: "text.default",
                     }}
                     onClick={() => {

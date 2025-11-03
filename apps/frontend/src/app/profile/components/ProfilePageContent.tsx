@@ -1,4 +1,4 @@
-import { VStack, Icon, Text, Link, Tabs } from "@chakra-ui/react"
+import { VStack, Icon, Text, Tabs, Button } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
@@ -115,14 +115,14 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
-        <Link asChild w="max-content" color="actions.secondary.text-lighter">
+        <Button asChild w="max-content" variant="link">
           <NextLink href="/">
             <Icon as={FaAngleLeft} boxSize={3} />
-            <Text textStyle="sm" fontWeight="semibold">
+            <Text color="inherit" textStyle="sm" fontWeight="semibold">
               {t("Go back")}
             </Text>
           </NextLink>
-        </Link>
+        </Button>
       )}
       <ProfileHeader address={parsedAddress} />
       <Tabs.Root
@@ -131,9 +131,9 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         defaultValue={getInitialTab()}
         lazyMount
         onValueChange={tab => handleTabChange(tab.value as Tab)}>
-        <Tabs.List justifyContent="space-around" scrollbar="hidden" overflow="scroll">
+        <Tabs.List justifyContent="space-around" zIndex="0" scrollbar="hidden" overflowX="scroll">
           {tabs.map(({ tab, label }) => (
-            <Tabs.Trigger key={tab} value={tab} flexShrink={0}>
+            <Tabs.Trigger key={tab} value={tab} flexShrink={0} zIndex="1">
               {label}
             </Tabs.Trigger>
           ))}

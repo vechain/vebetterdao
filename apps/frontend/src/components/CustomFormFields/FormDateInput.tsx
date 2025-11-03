@@ -124,7 +124,7 @@ const CalendarBody = ({
 
         // A day is unavailable if it's not selectable
         const isUnavailable = !isSelectable
-        const bgColor = isUnavailable ? "bg.subtle" : isSelected ? "actions.tertiary.default" : "transparent"
+        const bgColor = isUnavailable ? "bg.subtle" : isSelected ? "actions.primary.default" : "transparent"
         const textColor = isUnavailable ? "text.subtle" : isSelected ? "white" : "inherit"
         const borderColor = isUnavailable ? "none" : isSelected ? "border.secondary" : "border.primary"
         return (

@@ -28,7 +28,7 @@ export const CreateProposalCard = () => {
   return (
     <>
       <Card.Root variant="primary">
-        <Icon as={ProposalIcon} boxSize={24} color="actions.tertiary.default" />
+        <Icon as={ProposalIcon} boxSize={24} color="actions.primary.default" />
         <Text textStyle="2xl" fontWeight="bold" mt={4}>
           {t("Create a proposal")}
         </Text>

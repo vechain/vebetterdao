@@ -46,22 +46,13 @@ export const AdminPageContent = () => {
   return (
     <Tabs.Root
       variant="subtle"
-      colorPalette="blue"
+      colorPalette="actions.primary"
       w={"full"}
       data-testid="admin-page"
       lazyMount
-      defaultValue="emissions"
-      fitted>
+      defaultValue="emissions">
       <Tabs.Indicator rounded="full" />
-      <Tabs.List
-        sm={{ gapX: "1" }}
-        overflowY="hidden"
-        css={{
-          scrollbarWidth: "none",
-          "::-webkit-scrollbar": {
-            display: "none",
-          },
-        }}>
+      <Tabs.List w="full" sm={{ gapX: "1" }} overflowY="hidden" scrollbar="hidden" justifyContent="space-evenly">
         <Tabs.Trigger value="emissions">{"Emissions"}</Tabs.Trigger>
         {Number(currentRoundId) > 0 && <Tabs.Trigger value="allocation-rewards">{"Allocation Rewards"}</Tabs.Trigger>}
         {permissions?.isAdminOfX2EarnApps && <Tabs.Trigger value="x2earn-apps">{"X2Earn Apps"}</Tabs.Trigger>}

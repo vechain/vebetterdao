@@ -32,9 +32,9 @@ export const useTransactions = (account: string, queryOptions?: TransactionsQuer
       getNextPageParam: (
         lastPage: TransactionsQueryResponse,
         _allPages: TransactionsQueryResponse[],
-        lastPageParam: number,
+        lastPageParam: unknown,
       ) => {
-        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+        return lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined
       },
     },
   )

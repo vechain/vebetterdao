@@ -1,6 +1,6 @@
 {
   "name": "@vechain/vebetterdao-contracts",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
@@ -83,7 +83,11 @@
     "verify:testnet": "npx hardhat verify --network vechain_testnet",
     "verify:mainnet": "npx hardhat verify --network vechain_mainnet",
     "estimate-voting-gas:mainnet": "npx hardhat run scripts/helpers/estimateVotingGas.ts --network vechain_mainnet",
-    "setup-environment:local": "npx hardhat run scripts/standalone/setupLocalEnvironment.ts"
+    "setup-environment:local": "npx hardhat run scripts/standalone/setupLocalEnvironment.ts",
+    "verify:all:contracts:mainnet": "npx hardhat run scripts/verify/verify-all-contracts.ts --network vechain_mainnet",
+    "verify:all:contracts:testnet-staging": "npx hardhat run scripts/verify/verify-all-contracts.ts --network vechain_testnet",
+    "check-verification-status:mainnet": "npx hardhat run scripts/verify/check-verification-status.ts --network vechain_mainnet",
+    "check-verification-status:testnet-staging": "npx hardhat run scripts/verify/check-verification-status.ts --network vechain_testnet"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
@@ -103,7 +107,6 @@
     "chai": "^4.2.0",
     "dotenv": "^16.3.1",
     "form-data": "^4.0.0",
-    "fs": "^0.0.1-security",
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-ignore-warnings": "^0.2.11",
@@ -131,7 +134,6 @@
     "eslint-plugin-prettier": "^5.1.3",
     "ethers": "^6.9.0",
     "hardhat": "2.19.1",
-    "nft.storage": "^7.1.1",
     "prettier": "^3.2.4"
   },
   "resolutions": {

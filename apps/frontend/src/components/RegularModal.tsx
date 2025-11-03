@@ -28,7 +28,6 @@ export const RegularModal = ({
 }: Props) => {
   return (
     <Dialog.Root
-      variant="base"
       open={isOpen}
       onOpenChange={details => {
         if (!details.open) {
@@ -36,7 +35,6 @@ export const RegularModal = ({
         }
       }}
       size={size}
-      placement="center"
       trapFocus={false}
       {...modalProps}>
       <Portal>

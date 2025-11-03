@@ -1,12 +1,12 @@
 {
   "name": "frontend",
-  "version": "1.28.13",
+  "version": "1.29.1",
   "private": true,
   "scripts": {
     "prebuild": "yarn chakra:typegen && yarn generate:schema",
     "typecheck": "tsc --noEmit",
-    "chakra:typegen": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
-    "chakra:typegen:watch": "npx @chakra-ui/cli typegen src/app/theme/theme.ts --watch",
+    "chakra:typegen": "chakra typegen src/app/theme/theme.ts",
+    "chakra:typegen:watch": "chakra typegen src/app/theme/theme.ts --watch",
     "dev": "next dev --turbo",
     "dev:staging": "next dev --turbo",
     "dev:testnet": "next dev --turbo",
@@ -21,11 +21,11 @@
     "start:galactica-test": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
-    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
+    "generate-translations": "ts-node ./src/scripts/translations/generateTranslations.ts",
+    "complete-translations": "ts-node ./src/scripts/translations/completeTranslations.ts",
     "storybook": "NEXT_PUBLIC_APP_ENV=local storybook dev -p 6006",
     "build-storybook": "NEXT_PUBLIC_APP_ENV=staging storybook build",
-    "generate:schema": "npx openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
+    "generate:schema": "openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.26.0",
@@ -35,7 +35,7 @@
     "@repo/config": "*",
     "@repo/constants": "*",
     "@repo/utils": "*",
-    "@storybook/addon-themes": "^9.1.5",
+    "@storybook/addon-themes": "^10.0.1",
     "@svgr/webpack": "^8.1.0",
     "@tanstack/query-sync-storage-persister": "^5.28.12",
     "@tanstack/react-query": "^5.64.2",
@@ -82,33 +82,40 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^4.1.1",
+    "@chakra-ui/cli": "^3.5.0",
+    "@chromatic-com/storybook": "^4.1.2",
     "@next/eslint-plugin-next": "^14.2.25",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "@storybook/addon-a11y": "^9.1.5",
-    "@storybook/addon-docs": "^9.1.5",
-    "@storybook/addon-mcp": "^0.0.5",
-    "@storybook/addon-vitest": "^9.1.5",
-    "@storybook/nextjs-vite": "^9.1.5",
+    "@storybook/addon-a11y": "^10.0.1",
+    "@storybook/addon-docs": "^10.0.1",
+    "@storybook/addon-mcp": "^0.1.3",
+    "@storybook/addon-vitest": "^10.0.1",
+    "@storybook/nextjs-vite": "^10.0.1",
     "@types/mixpanel-browser": "^2.49.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-lottie": "^1.2.10",
     "@types/uuid": "^9.0.8",
-    "d3-array": "^3.2.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.25",
-    "eslint-plugin-storybook": "^9.1.5",
-    "happy-dom": "20.0.2",
+    "eslint-plugin-storybook": "^10.0.1",
+    "msw": "^2.11.6",
+    "msw-storybook-addon": "^2.0.6",
     "openapi-typescript": "^7.9.1",
     "resize-observer-polyfill": "^1.5.1",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "storybook": "^9.1.5",
+    "storybook": "^10.0.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
     "vite-plugin-svgr": "^4.5.0",
     "vite-tsconfig-paths": "^4.3.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

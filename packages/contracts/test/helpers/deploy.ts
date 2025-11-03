@@ -119,11 +119,20 @@ import {
   GovernorClockLogicV6,
   StargateNFT,
   GrantsManager,
+  GovernorVotesLogicV7,
+  GovernorStateLogicV7,
+  GovernorQuorumLogicV7,
+  GovernorFunctionRestrictionsLogicV7,
+  GovernorProposalLogicV7,
+  GovernorDepositLogicV7,
+  GovernorConfiguratorV7,
+  GovernorClockLogicV7,
+  GrantsManagerV1,
   RelayerRewardsPool,
   AutoVotingLogic,
   DBAPool,
+  DBAPoolV1,
 } from "../../typechain-types"
-import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
   deployAndUpgrade,
   deployProxy,
@@ -133,125 +142,7 @@ import {
   upgradeProxy,
 } from "../../scripts/helpers"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
-import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
-import {
-  AdministrationUtils,
-  AdministrationUtilsV2,
-  AdministrationUtilsV3,
-  AdministrationUtilsV4,
-  AdministrationUtilsV5,
-  B3TR,
-  B3TRGovernor,
-  B3TRGovernorV1,
-  B3TRGovernorV2,
-  B3TRGovernorV3,
-  B3TRMultiSig,
-  Emissions,
-  EmissionsV1,
-  EndorsementUtils,
-  EndorsementUtilsV2,
-  EndorsementUtilsV3,
-  EndorsementUtilsV4,
-  EndorsementUtilsV5,
-  GalaxyMember,
-  GovernorClockLogic,
-  GovernorClockLogicV1,
-  GovernorClockLogicV3,
-  GovernorClockLogicV5,
-  GovernorClockLogicV6,
-  GovernorConfigurator,
-  GovernorConfiguratorV1,
-  GovernorConfiguratorV3,
-  GovernorConfiguratorV5,
-  GovernorConfiguratorV6,
-  GovernorDepositLogic,
-  GovernorDepositLogicV1,
-  GovernorDepositLogicV3,
-  GovernorDepositLogicV5,
-  GovernorDepositLogicV6,
-  GovernorFunctionRestrictionsLogic,
-  GovernorFunctionRestrictionsLogicV1,
-  GovernorFunctionRestrictionsLogicV3,
-  GovernorFunctionRestrictionsLogicV5,
-  GovernorFunctionRestrictionsLogicV6,
-  GovernorProposalLogic,
-  GovernorProposalLogicV1,
-  GovernorProposalLogicV3,
-  GovernorProposalLogicV5,
-  GovernorProposalLogicV6,
-  GovernorQuorumLogic,
-  GovernorQuorumLogicV1,
-  GovernorQuorumLogicV3,
-  GovernorQuorumLogicV5,
-  GovernorQuorumLogicV6,
-  GovernorStateLogic,
-  GovernorStateLogicV1,
-  GovernorStateLogicV3,
-  GovernorStateLogicV5,
-  GovernorStateLogicV6,
-  GovernorVotesLogic,
-  GovernorVotesLogicV1,
-  GovernorVotesLogicV3,
-  GovernorVotesLogicV5,
-  GovernorVotesLogicV6,
-  GrantsManager,
-  MyERC1155,
-  MyERC20,
-  MyERC721,
-  NodeManagementV3,
-  PassportChecksLogic,
-  PassportChecksLogicV1,
-  PassportChecksLogicV2,
-  PassportChecksLogicV3,
-  PassportConfiguratorV1,
-  PassportConfiguratorV2,
-  PassportConfiguratorV3,
-  PassportDelegationLogic,
-  PassportDelegationLogicV1,
-  PassportDelegationLogicV2,
-  PassportDelegationLogicV3,
-  PassportEntityLogic,
-  PassportEntityLogicV1,
-  PassportEntityLogicV2,
-  PassportEntityLogicV3,
-  PassportPersonhoodLogic,
-  PassportPersonhoodLogicV1,
-  PassportPersonhoodLogicV2,
-  PassportPersonhoodLogicV3,
-  PassportPoPScoreLogic,
-  PassportPoPScoreLogicV1,
-  PassportPoPScoreLogicV2,
-  PassportPoPScoreLogicV3,
-  PassportSignalingLogic,
-  PassportSignalingLogicV1,
-  PassportSignalingLogicV2,
-  PassportSignalingLogicV3,
-  PassportWhitelistAndBlacklistLogic,
-  PassportWhitelistAndBlacklistLogicV1,
-  PassportWhitelistAndBlacklistLogicV2,
-  PassportWhitelistAndBlacklistLogicV3,
-  StargateNFT,
-  TimeLock,
-  TokenAuction,
-  Treasury,
-  VeBetterPassport,
-  VeBetterPassportV1,
-  VeBetterPassportV2,
-  VeBetterPassportV3,
-  VOT3,
-  VoteEligibilityUtils,
-  VoteEligibilityUtilsV2,
-  VoteEligibilityUtilsV3,
-  VoteEligibilityUtilsV4,
-  VoteEligibilityUtilsV5,
-  VoterRewards,
-  VoterRewardsV1,
-  X2EarnApps,
-  X2EarnCreator,
-  X2EarnRewardsPool,
-  XAllocationPool,
-  XAllocationVoting,
-} from "../../typechain-types"
+
 import {
   GovernorClockLogicV4,
   GovernorConfiguratorV4,
@@ -347,6 +238,14 @@ export interface DeployInstance {
   governorQuorumLogicLibV6: GovernorQuorumLogicV6
   governorStateLogicLibV6: GovernorStateLogicV6
   governorVotesLogicLibV6: GovernorVotesLogicV6
+  governorClockLogicLibV7: GovernorClockLogicV7
+  governorConfiguratorLibV7: GovernorConfiguratorV7
+  governorDepositLogicLibV7: GovernorDepositLogicV7
+  governorFunctionRestrictionsLogicLibV7: GovernorFunctionRestrictionsLogicV7
+  governorProposalLogicLibV7: GovernorProposalLogicV7
+  governorQuorumLogicLibV7: GovernorQuorumLogicV7
+  governorStateLogicLibV7: GovernorStateLogicV7
+  governorVotesLogicLibV7: GovernorVotesLogicV7
 
   // GrantsManager
   grantsManager: GrantsManager
@@ -492,7 +391,15 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV6,
     GovernorStateLogicLibV6,
     GovernorVotesLogicLibV6,
-  } = (await governanceLibraries()) as EnsureDefined<typeof governanceLibraries>
+    GovernorClockLogicLibV7,
+    GovernorConfiguratorLibV7,
+    GovernorDepositLogicLibV7,
+    GovernorFunctionRestrictionsLogicLibV7,
+    GovernorProposalLogicLibV7,
+    GovernorQuorumLogicLibV7,
+    GovernorStateLogicLibV7,
+    GovernorVotesLogicLibV7,
+  } = await governanceLibraries()
 
   // Deploy Passport Libraries
   const {
@@ -1120,13 +1027,31 @@ export const getOrDeployContractInstances = async ({
 
   // Set the TEMP governor address before deploying the governor
   const TEMP_GOVERNOR_ADDRESS = owner.address
-  const grantsManager = (await deployProxy("GrantsManager", [
+
+  // Deploy GrantsManager V1 first
+  const grantsManagerV1 = (await deployProxy("GrantsManagerV1", [
+    // ← Change to GrantsManagerV1
     TEMP_GOVERNOR_ADDRESS, // governor address
     await treasury.getAddress(), // treasury address
     owner.address, // admin
     await b3tr.getAddress(), // b3tr address
     config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
-  ])) as GrantsManager
+  ])) as GrantsManagerV1
+
+  // Grant UPGRADER_ROLE to deployer
+  await grantsManagerV1.connect(owner).grantRole(await grantsManagerV1.UPGRADER_ROLE(), owner.address)
+
+  // Then upgrade from V1 to V2
+  const grantsManager = (await upgradeProxy(
+    "GrantsManagerV1",
+    "GrantsManager",
+    await grantsManagerV1.getAddress(),
+    [],
+    {
+      version: 2,
+      libraries: {},
+    },
+  )) as GrantsManager
 
   const governor = (await deployAndUpgrade(
     [
@@ -1136,6 +1061,7 @@ export const getOrDeployContractInstances = async ({
       "B3TRGovernorV4",
       "B3TRGovernorV5",
       "B3TRGovernorV6",
+      "B3TRGovernorV7",
       "B3TRGovernor",
     ],
     [
@@ -1178,9 +1104,10 @@ export const getOrDeployContractInstances = async ({
           grantsManager: await grantsManager.getAddress(), //GrantsManager contract
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
+      [], // Reserved for future configuration parameters; currently no values required
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -1243,6 +1170,16 @@ export const getOrDeployContractInstances = async ({
           GovernorVotesLogicV6: await GovernorVotesLogicLibV6.getAddress(),
         },
         {
+          GovernorClockLogicV7: await GovernorClockLogicLibV7.getAddress(),
+          GovernorConfiguratorV7: await GovernorConfiguratorLibV7.getAddress(),
+          GovernorDepositLogicV7: await GovernorDepositLogicLibV7.getAddress(),
+          GovernorFunctionRestrictionsLogicV7: await GovernorFunctionRestrictionsLogicLibV7.getAddress(),
+          GovernorProposalLogicV7: await GovernorProposalLogicLibV7.getAddress(),
+          GovernorQuorumLogicV7: await GovernorQuorumLogicLibV7.getAddress(),
+          GovernorStateLogicV7: await GovernorStateLogicLibV7.getAddress(),
+          GovernorVotesLogicV7: await GovernorVotesLogicLibV7.getAddress(),
+        },
+        {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
           GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
           GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
@@ -1273,7 +1210,8 @@ export const getOrDeployContractInstances = async ({
     },
   )) as RelayerRewardsPool
 
-  const dynamicBaseAllocationPool = (await deployProxy("DBAPool", [
+  // Deploy DBAPool V1
+  const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
     {
       admin: owner.address,
       x2EarnApps: await x2EarnApps.getAddress(),
@@ -1282,7 +1220,24 @@ export const getOrDeployContractInstances = async ({
       b3tr: await b3tr.getAddress(),
       distributionStartRound: 1,
     },
-  ])) as DBAPool
+  ])) as DBAPoolV1
+
+  // Grant UPGRADER_ROLE to owner so we can upgrade
+  const UPGRADER_ROLE = await dbaPoolV1.UPGRADER_ROLE()
+  const grantRoleTx = await dbaPoolV1.connect(owner).grantRole(UPGRADER_ROLE, owner.address)
+  await grantRoleTx.wait()
+
+  // Upgrade to V2
+  const dynamicBaseAllocationPool = (await upgradeProxy(
+    "DBAPoolV1",
+    "DBAPool",
+    await dbaPoolV1.getAddress(),
+    [], // No initialization args for V2
+    {
+      version: 2,
+      logOutput: false,
+    },
+  )) as DBAPool
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -1416,6 +1371,9 @@ export const getOrDeployContractInstances = async ({
   await grantsManager.connect(owner).grantRole(await grantsManager.GOVERNANCE_ROLE(), await governor.getAddress()) // prev initialized with (TEMP_GOVERNOR_ADDRESS= owner.address)
   await grantsManager.connect(owner).grantRole(await grantsManager.DEFAULT_ADMIN_ROLE(), owner.address)
 
+  // Grant PROPOSAL_STATE_MANAGER_ROLE to owner in B3TRGovernor contract
+  await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions()
@@ -1498,6 +1456,14 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV6: GovernorQuorumLogicLibV6,
     governorStateLogicLibV6: GovernorStateLogicLibV6,
     governorVotesLogicLibV6: GovernorVotesLogicLibV6,
+    governorClockLogicLibV7: GovernorClockLogicLibV7,
+    governorConfiguratorLibV7: GovernorConfiguratorLibV7,
+    governorDepositLogicLibV7: GovernorDepositLogicLibV7,
+    governorFunctionRestrictionsLogicLibV7: GovernorFunctionRestrictionsLogicLibV7,
+    governorProposalLogicLibV7: GovernorProposalLogicLibV7,
+    governorQuorumLogicLibV7: GovernorQuorumLogicLibV7,
+    governorStateLogicLibV7: GovernorStateLogicLibV7,
+    governorVotesLogicLibV7: GovernorVotesLogicLibV7,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,

@@ -36,7 +36,7 @@ export const AppCreationSteps = () => {
                 <Heading size="3xl">{t("Your App is almost ready!")}</Heading>
               </HStack>
               <HStack w="full" justify="end" alignItems="center" display={{ base: "none", md: "flex" }}>
-                <Icon color="logo">
+                <Icon color="icon.default">
                   <UilInfoCircle />
                 </Icon>
                 <Link

@@ -1,9 +1,7 @@
 import { HTMLChakraProps, Image } from "@chakra-ui/react"
-import { PicassoUtils } from "@repo/utils"
+import { getPicassoImgSrc } from "@repo/utils/PicassoUtils"
 import { useGetAvatarOfAddress } from "@vechain/vechain-kit"
 import React from "react"
-
-const { getPicassoImgSrc } = PicassoUtils
 
 export interface IAddressIcon extends HTMLChakraProps<"img"> {
   address: string

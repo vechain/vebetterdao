@@ -1,5 +1,4 @@
-import { Text, useDisclosure, Button, Icon } from "@chakra-ui/react"
-import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useDisclosure, Button } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
@@ -52,22 +51,14 @@ export const UserSignaledBanner = () => {
   return (
     <>
       <GenericBanner
-        variant="warning"
-        title={t("You have been signalled").toUpperCase()}
-        description={
-          <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold">
-            {t("You have been signalled by")} <b>{appSignals}</b>
-            {<br />}
-            {t(
-              "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
-            )}
-          </Text>
-        }
-        logoSrc="/assets/icons/info-bell.webp"
+        title={t("You've been signalled by {{app}}", appSignals)}
+        description={t(
+          "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
+        )}
+        illustration="/assets/icons/info-bell.webp"
         cta={
-          <Button variant="secondary" onClick={onOpen}>
+          <Button padding="0" variant="link" onClick={onOpen}>
             {t("Appeal here")}
-            <Icon as={UilInfoCircle} color="white" />
           </Button>
         }
       />

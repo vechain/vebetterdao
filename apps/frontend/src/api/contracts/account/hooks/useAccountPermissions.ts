@@ -44,6 +44,7 @@ type AccountPermissionResponse = {
   isAdminOfX2EarnCreator: boolean
   isGrantApprover: boolean
   isGrantRejector: boolean
+  isProposalStateManager: boolean
 }
 const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; contractAddress: string }> = {
   isAdminOfB3tr: {
@@ -185,6 +186,10 @@ const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; cont
   isGrantRejector: {
     role: "GRANTS_REJECTOR_ROLE",
     contractAddress: config.grantsManagerContractAddress,
+  },
+  isProposalStateManager: {
+    role: "PROPOSAL_STATE_MANAGER_ROLE",
+    contractAddress: config.b3trGovernorAddress,
   },
 }
 
