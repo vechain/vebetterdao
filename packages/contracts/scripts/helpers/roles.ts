@@ -14,7 +14,7 @@ import {
   X2EarnRewardsPool,
   XAllocationPool,
   XAllocationVoting,
-  NodeManagement,
+  NodeManagementV3,
 } from "../../typechain-types"
 
 export const transferAdminRole = async (
@@ -40,11 +40,11 @@ export const transferAdminRole = async (
   await contract
     .connect(oldAdmin)
     .grantRole(adminRole, newAdminAddress)
-    .then(async tx => await tx.wait())
+    .then(async (tx: any) => await tx.wait())
   await contract
     .connect(oldAdmin)
     .renounceRole(adminRole, oldAdmin.address)
-    .then(async tx => await tx.wait())
+    .then(async (tx: any) => await tx.wait())
 
   const newAdminSet = await contract.hasRole(adminRole, newAdminAddress)
   const oldAdminRemoved = !(await contract.hasRole(adminRole, oldAdmin.address))
@@ -233,7 +233,7 @@ export const validateContractRole = async (
     | X2EarnApps
     | VeBetterPassport
     | X2EarnCreator
-    | NodeManagement,
+    | NodeManagementV3,
   expectedAddress: string,
   tempAdmin: string,
   role: string,
@@ -275,7 +275,7 @@ export const transferSettingsManagerRole = async (
 }
 
 export const transferUpgraderRole = async (
-  contract: Emissions | XAllocationPool | NodeManagement | X2EarnApps | GalaxyMember,
+  contract: Emissions | XAllocationPool | NodeManagementV3 | X2EarnApps | GalaxyMember,
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
