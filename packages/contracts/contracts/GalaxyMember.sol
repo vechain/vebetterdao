@@ -293,6 +293,7 @@ contract GalaxyMember is
   function attachNode(uint256 nodeTokenId, uint256 tokenId) public virtual whenNotPaused {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
+    require(tokenId == 0 || _ownerOf(tokenId) != address(0), "GalaxyMember: token does not exist");
     require(ownerOf(tokenId) == msg.sender, "GalaxyMember: token not owned by caller");
     require(
       $.stargateNFT.getTokenManager(nodeTokenId) == msg.sender,
@@ -314,6 +315,7 @@ contract GalaxyMember is
   function detachNode(uint256 nodeTokenId, uint256 tokenId) public virtual whenNotPaused {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
+    require(tokenId == 0 || _ownerOf(tokenId) != address(0), "GalaxyMember: token does not exist");
     require(
       ownerOf(tokenId) == msg.sender ||
         $.stargateNFT.isTokenManager(msg.sender, nodeTokenId) ||
@@ -779,7 +781,7 @@ contract GalaxyMember is
 
   function _getIdAttachedToNode(uint256 nodeId, GalaxyMemberStorage storage $) internal view virtual returns (uint256) {
     uint256 tokenId = $._nodeToTokenId[nodeId];
-    if (!$.stargateNFT.tokenExists(nodeId)) {
+    if (tokenId == 0 || !$.stargateNFT.tokenExists(nodeId) || ownerOf(tokenId) != $.stargateNFT.getTokenManager(nodeId)) {
       return 0;
     }
 
