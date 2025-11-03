@@ -17,6 +17,7 @@ import {
   X2EarnCreator,
   GrantsManager,
   GrantsManagerV1,
+  StargateNFT,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
