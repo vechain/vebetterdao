@@ -3562,7 +3562,6 @@ describe("VoterRewards - @shard10", () => {
       const config = createLocalConfig()
 
       const {
-        vechainNodesMock,
         galaxyMember,
         emissions,
         b3tr,
@@ -3571,9 +3570,7 @@ describe("VoterRewards - @shard10", () => {
         otherAccounts,
         voterRewards,
         x2EarnApps,
-        stargateMock,
         owner,
-        nodeManagement,
         stargateNftMock,
       } = await getOrDeployContractInstances({
         config: {
@@ -3592,14 +3589,14 @@ describe("VoterRewards - @shard10", () => {
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await endorseApp(app1, otherAccounts[6], true)
+      await endorseApp(app1, otherAccounts[6])
 
       await x2EarnApps
         .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-      await endorseApp(app2, otherAccounts[7], true)
+      await endorseApp(app2, otherAccounts[7])
 
       const voter1 = otherAccounts[1]
       const voter2 = otherAccounts[2]
@@ -3608,10 +3605,6 @@ describe("VoterRewards - @shard10", () => {
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
-
-      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
-
-      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       await mintLegacyNode(3, voter1)
 
@@ -3629,15 +3622,6 @@ describe("VoterRewards - @shard10", () => {
         BigInt(roundId),
       )
 
-      //Remove lead time from legacy nodes contract
-      await vechainNodesMock.connect(owner).addOperator(await stargateNftMock.getAddress())
-      await vechainNodesMock.connect(owner).setLeadTime(0)
-      await moveBlocks(12)
-      // Migrate legacy node to Stargate NFT
-      await stargateMock
-        .connect(voter1)
-        .migrate(3, { value: (await stargateNftMock.getLevel(3)).vetAmountRequiredToStake })
-
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 
       await galaxyMember.setMaxLevel(3) // Set max level of GM NFT to 3
@@ -3648,7 +3632,8 @@ describe("VoterRewards - @shard10", () => {
       await emissions.distribute()
 
       // Attach node to GM NFT
-      await galaxyMember.connect(voter1).attachNode(3, 1)
+      const nodeId = await stargateNftMock.tokenOfOwnerByIndex(voter1.address, 0)
+      await galaxyMember.connect(voter1).attachNode(nodeId, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(3) // Level 3 because of the Mjolnir node attached but max level is 3.
 
