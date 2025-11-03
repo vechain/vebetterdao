@@ -177,7 +177,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
         closeOnInteractOutside: true,
       }}>
       <VStack gap={6} w="full">
-        <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
+        <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"flex-start"}>
           {t("Refill Pools")}
         </Text>
         <VStack gap={4} w="full">
