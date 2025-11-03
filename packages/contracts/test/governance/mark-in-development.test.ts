@@ -168,9 +168,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
   describe("Permissions - Mark as IN-DEVELOPMENT", function () {
     it("(TEXT-ONLY PROPOSAL) Should NOT be able to mark as IN-DEVELOPMENT if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
-      const targets = []
-      const values = []
-      const calldatas = []
+      const targets: string[] = []
+      const values: bigint[] = []
+      const calldatas: string[] = []
       const description = `description-${this.test?.title}`
       const startRoundId = (await getRoundId()) + 1
 
@@ -268,9 +268,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId)).to.reverted
     })
     it("(TEXT-ONLY PROPOSAL) Should be able to mark as IN-DEVELOPMENT if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
-      const targets = []
-      const values = []
-      const calldatas = []
+      const targets: string[] = []
+      const values: bigint[] = []
+      const calldatas: string[] = []
       const description = `description-${this.test?.title}`
       const startRoundId = (await getRoundId()) + 1
 
@@ -378,9 +378,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
   })
   describe("Permissions - Mark as COMPLETED", function () {
     it("(TEXT-ONLY PROPOSAL) Should NOT be able to mark as COMPLETED if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
-      const targets = []
-      const values = []
-      const calldatas = []
+      const targets: string[] = []
+      const values: bigint[] = []
+      const calldatas: string[] = []
       const description = `description-${this.test?.title}`
       const startRoundId = (await getRoundId()) + 1
 
@@ -478,9 +478,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       await expect(governor.connect(otherAccounts[3]).markAsCompleted(proposalId)).to.reverted
     })
     it("(TEXT-ONLY PROPOSAL) Should be able to mark as COMPLETED if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
-      const targets = []
-      const values = []
-      const calldatas = []
+      const targets: string[] = []
+      const values: bigint[] = []
+      const calldatas: string[] = []
       const description = `description-${this.test?.title}`
       const startRoundId = (await getRoundId()) + 1
 
@@ -600,9 +600,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
   })
   describe("Permissions - Reset Development State", function () {
     it("(TEXT-ONLY PROPOSAL) Should NOT be able to reset development state if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
-      const targets = []
-      const values = []
-      const calldatas = []
+      const targets: string[] = []
+      const values: bigint[] = []
+      const calldatas: string[] = []
       const description = `description-${this.test?.title}`
       const startRoundId = (await getRoundId()) + 1
 
@@ -710,9 +710,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       await expect(governor.connect(otherAccounts[3]).resetDevelopmentState(proposalId)).to.reverted
     })
     it("(TEXT-ONLY PROPOSAL) Should be able to reset development state if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
-      const targets = []
-      const values = []
-      const calldatas = []
+      const targets: string[] = []
+      const values: bigint[] = []
+      const calldatas: string[] = []
       const description = `description-${this.test?.title}`
       const startRoundId = (await getRoundId()) + 1
 
