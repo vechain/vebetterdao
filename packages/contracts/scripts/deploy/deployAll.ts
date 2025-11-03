@@ -242,7 +242,7 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtilsV5,
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
-  } = await x2EarnLibraries()
+  } = await x2EarnLibraries({ logOutput: true, latestVersionOnly: false })
 
   console.log("Deploying AutoVoting Libraries")
   const { AutoVotingLogic } = await autoVotingLibraries()
