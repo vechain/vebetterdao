@@ -149,7 +149,7 @@ library EndorsementUtils {
       // Get the current endorser's node id
       uint256 endorserNodeId = _appEndorsers[appId][i];
       // Get the node level of the endorser
-      uint8 nodeLevel = _stargateNFT.getNodeLevel(endorserNodeId);
+      uint8 nodeLevel = _stargateNFT.getTokenLevel(endorserNodeId);
 
       // Check if the endorser's node level is 0 or if the endorser is the one to be removed
       if (nodeLevel == 0 || endorserNodeId == endorserNodeIdToRemove) {
