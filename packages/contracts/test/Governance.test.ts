@@ -6035,7 +6035,7 @@ describe("Governor and TimeLock - @shard4a", function () {
   })
 
   describe("Libraries", function () {
-    let governor: B3TRGovernor
+    let governor: B3TRGovernor | B3TRGovernorV1
 
     describe("GovernorClockLogic", function () {
       this.beforeAll(async function () {
