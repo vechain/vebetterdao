@@ -49,7 +49,7 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  *
  * -------------------- Version 3 --------------------
  * - The contract has been upgraded to version 3 to add node cooldown period.
- * 
+ *
  * -------------------- Version 4 --------------------
  * - Enabling by default the rewards pool for new apps submitted.
  *
@@ -62,6 +62,10 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * - Upon StarGate launch, we updated the NodeManagement contract to V3. This impacted mostly
  *   EndorsementUtils library.
  *   EndorsementUpgradeable module.
+ *
+ * -------------------- Version 7 --------------------
+ * - The contract has been upgraded to version 7 to include the V6 version of the contract.
+ * - todo: add description of the changes
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
@@ -130,7 +134,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "6";
+    return "7";
   }
 
   // ---------- Overrides ------------ //
@@ -348,7 +352,9 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setXAllocationVotingGovernor}.
    */
-  function setXAllocationVotingGovernor(address _xAllocationVotingGovernor) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationVotingGovernor(
+    address _xAllocationVotingGovernor
+  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
   }
 
@@ -362,7 +368,7 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setX2EarnRewardsPool}.
    */
-  function setX2EarnRewardsPoolContract(address  _x2EarnRewardsPoolContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setX2EarnRewardsPoolContract( _x2EarnRewardsPoolContract);
+  function setX2EarnRewardsPoolContract(address _x2EarnRewardsPoolContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setX2EarnRewardsPoolContract(_x2EarnRewardsPoolContract);
   }
 }
