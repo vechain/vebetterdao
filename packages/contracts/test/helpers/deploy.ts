@@ -446,7 +446,7 @@ export const getOrDeployContractInstances = async ({
     PassportPoPScoreLogic,
     PassportSignalingLogic,
     PassportWhitelistAndBlacklistLogic,
-  } = (await passportLibraries()) as EnsureDefined<typeof passportLibraries>
+  } = await passportLibraries({ logOutput: false, latestVersionOnly: false })
 
   // Deploy X2Earn AppLibraries
   const {
@@ -470,7 +470,7 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV5,
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
-  } = (await x2EarnLibraries()) as EnsureDefined<typeof x2EarnLibraries>
+  } = await x2EarnLibraries({ logOutput: false, latestVersionOnly: false })
 
   // Deploy AutoVoting Libraries
   const { AutoVotingLogic } = await autoVotingLibraries()
