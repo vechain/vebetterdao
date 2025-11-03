@@ -1,11 +1,10 @@
-import { Button, HStack, Text, VStack, Input, Skeleton, Icon } from "@chakra-ui/react"
+import { Button, HStack, Text, VStack, Input, Skeleton } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
 import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
-import { IoAddCircleOutline } from "react-icons/io5"
 
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
