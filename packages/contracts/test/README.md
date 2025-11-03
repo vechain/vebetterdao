@@ -12,6 +12,7 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard2**: Emissions
 - **shard3a**: Galaxy Member
 - **shard3b**: Galaxy Member - V6 Upgrade
+- **shard3c**: Galaxy Member - V6 Compatibility
 - **shard4a**: Governance - Governor and TimeLock
 - **shard4b**: Governance - Voting power with proposal deposit
 - **shard4c**: Governance - Milestone Creation
