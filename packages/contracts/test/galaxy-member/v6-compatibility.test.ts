@@ -32,7 +32,7 @@ let nodeManagement: NodeManagementV3
 let vechainNodes: TokenAuction
 let stargateMock: Stargate
 let galaxyMember: GalaxyMember
-describe.only("Galaxy Member - V6 Compatibility - @shard3c", function () {
+describe("Galaxy Member - V6 Compatibility - @shard3c", function () {
   beforeEach(async function () {
     config = createLocalConfig()
     const contracts = await getOrDeployContractInstances({
