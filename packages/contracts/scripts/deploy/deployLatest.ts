@@ -72,7 +72,7 @@ export async function deployLatest(config: ContractsConfig) {
     GovernorVotesLogicLib,
     GovernorDepositLogicLib,
     GovernorStateLogicLib,
-  } = await governanceLibraries(true)
+  } = await governanceLibraries({ logOutput: true, latestVersionOnly: true })
 
   console.log("Deploying VeBetter Passport Libraries")
   // Deploy Passport Libraries

@@ -133,7 +133,7 @@ export async function deployAll(config: ContractsConfig) {
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
     GovernorGovernanceLogicLibV7,
-  } = await governanceLibraries()
+  } = await governanceLibraries({ logOutput: true, latestVersionOnly: false })
 
   if (
     !GovernorClockLogicLibV1 ||
