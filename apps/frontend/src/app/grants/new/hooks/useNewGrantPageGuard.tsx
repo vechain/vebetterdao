@@ -13,7 +13,7 @@ import { useMetProposalCriteria } from "../../../../api/contracts/governance/hoo
 export const useNewGrantPageGuard = () => {
   const { account } = useWallet()
   const { hasMetProposalCriteria, isLoading } = useMetProposalCriteria()
-  const { data: permissions } = useAccountPermissions(account?.address ?? "")
+  const { data: permissions } = useAccountPermissions(account?.address)
   const isProduction = process.env.NODE_ENV === "production"
 
   const hasAllowedWallet = useMemo(
