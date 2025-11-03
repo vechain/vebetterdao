@@ -253,11 +253,18 @@ export async function distributeXAllocations(thor: ThorClient) {
     }
   }
 
-  // If all claims failed gas estimation, treat as already claimed
-  // This can happen due to race conditions where apps are claimed between the check and gas estimation
   logger.info("Claim clauses", { claimClauses, ineligibleApps: failedXAppIds, xAppIdsCount: xAppIds.length })
+
+  // If all unclaimed apps failed gas estimation, that's a critical error
+  if (xAppIds.length === failedXAppIds.length && failedXAppIds.length > 0) {
+    const errorMsg = `All ${xAppIds.length} X-Apps failed gas estimation for round ${previousRound}`
+    console.error(errorMsg)
+    throw new Error(errorMsg)
+  }
+
+  // If no claims to process (but some succeeded gas estimation earlier), skip distribution
   if (claimClauses.length === 0) {
-    console.log(`There is no claim clause to distribute X-Allocations for round ${previousRound}`)
+    logger.info(`No claim clauses to distribute X-Allocations for round ${previousRound}`)
     return { receipt: null, gasResult: null, allClaimed: true }
   }
 
@@ -556,16 +563,10 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute X-Allocations after multiple attempts: ${errorMsg}`,
       )
 
-      // If all claims failed, this is a critical error
-      if (errorMsg.includes("failed gas estimation")) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ error: `Critical X-Allocations failure: ${errorMsg}` }),
-        }
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: `Failed to distribute X-Allocations: ${errorMsg}` }),
       }
-
-      // For other errors, continue to DBA distribution
-      xAllocationsResult = { receipt: null, gasResult: null, error: errorMsg }
     }
 
     const { receipt: receiptClaim, gasResult: gasResultXallocations, allClaimed } = xAllocationsResult
