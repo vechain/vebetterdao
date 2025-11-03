@@ -24,8 +24,8 @@
     "index.ts",
     "artifacts/contracts/**/*.json",
     "typechain-types/**/*.ts",
-    "test/**/*.ts"
-    // "scripts/**/*.ts" //TODO: Add this back after all the issues are fixed
+    "test/**/*.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"],
   "files": ["./hardhat.config.ts"]
