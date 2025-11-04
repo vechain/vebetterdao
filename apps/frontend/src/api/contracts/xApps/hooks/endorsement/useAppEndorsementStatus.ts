@@ -64,36 +64,13 @@ const determineAppStatus = (
  * - `isLoading`: A boolean indicating if any of the data fetching operations are still in progress
  */
 export const useAppEndorsementStatus = (appId: string) => {
-  const {
-    data: threshold,
-    isLoading: isEndorsementThresholdLoading,
-    isFetching: isFetchingThreshold,
-  } = useEndorsementScoreThreshold()
-  const {
-    data: score,
-    isLoading: isEndorsementScoreLoading,
-    isFetching: isFetchingScore,
-  } = useAppEndorsementScore(appId)
-  const {
-    data: appEligibleAtRoundStart,
-    isLoading: isAppEligibleAtRoundStartLoading,
-    isFetching: isFetchingAppEligible,
-  } = useAppEligibleAtRoundStart(appId)
-  const {
-    data: isUnendorsed,
-    isLoading: isUnendorsedLoading,
-    isFetching: isFetchingUnendorsed,
-  } = useIsAppUnendorsed(appId)
-  const {
-    data: isBlacklisted = false,
-    isLoading: isBlacklistedLoading,
-    isFetching: isFetchingBlacklisted,
-  } = useAppIsBlackListed(appId)
-  const {
-    data: appHasBeenIntoAllocationRounds,
-    isLoading: isAppExistsLoading,
-    isFetching: isFetchingAppExists,
-  } = useAppExists(appId)
+  const { data: threshold, isLoading: isEndorsementThresholdLoading } = useEndorsementScoreThreshold()
+  const { data: score, isLoading: isEndorsementScoreLoading } = useAppEndorsementScore(appId)
+  const { data: appEligibleAtRoundStart, isLoading: isAppEligibleAtRoundStartLoading } =
+    useAppEligibleAtRoundStart(appId)
+  const { data: isUnendorsed, isLoading: isUnendorsedLoading } = useIsAppUnendorsed(appId)
+  const { data: isBlacklisted = false, isLoading: isBlacklistedLoading } = useAppIsBlackListed(appId)
+  const { data: appHasBeenIntoAllocationRounds, isLoading: isAppExistsLoading } = useAppExists(appId)
 
   const numericScore = Number(score)
   const numericThreshold = Number(threshold)
@@ -109,17 +86,11 @@ export const useAppEndorsementStatus = (appId: string) => {
 
   const isLoading =
     isEndorsementThresholdLoading ||
-    isFetchingThreshold ||
     isEndorsementScoreLoading ||
-    isFetchingScore ||
     isAppEligibleAtRoundStartLoading ||
-    isFetchingAppEligible ||
     isUnendorsedLoading ||
-    isFetchingUnendorsed ||
     isBlacklistedLoading ||
-    isFetchingBlacklisted ||
     isAppExistsLoading ||
-    isFetchingAppExists ||
     !hasValidData
 
   const status = determineAppStatus(
