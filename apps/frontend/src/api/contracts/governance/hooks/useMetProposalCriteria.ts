@@ -5,6 +5,7 @@ import { useGetUserGMs } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGMRequiredByProposalType } from "@/api/contracts/governance/hooks/useGMRequiredByProposalType"
 
 import { ProposalType } from "../../../../types/proposals"
+import { useAccountPermissions } from "../../account/hooks/useAccountPermissions"
 
 /**
  * Hook to get the GM level required by proposal type
@@ -15,8 +16,23 @@ export const useMetProposalCriteria = (proposalType: ProposalType = ProposalType
   const { account } = useWallet()
   const { data: gmRequired, isLoading: isLoadingGMRequired } = useGMRequiredByProposalType(proposalType)
   const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs(account?.address)
+  const { data: permissions } = useAccountPermissions(account?.address)
+
+  const isProduction = process.env.NODE_ENV === "production"
+
+  const hasAllowedGrantApproverPermission = useMemo(() => {
+    const isGrant = proposalType === ProposalType.GRANT
+    if (!isGrant || !isProduction) return true // Standard proposals and non-production are always authorized
+
+    return permissions?.isGrantApprover ?? false
+  }, [proposalType, isProduction, permissions?.isGrantApprover])
+
   const hasRequiredGM = useMemo(() => {
     return userGMs?.some(gm => Number(gm.tokenLevel) >= (gmRequired ?? 1))
   }, [userGMs, gmRequired])
-  return { hasMetProposalCriteria: !!hasRequiredGM, isLoading: isLoadingGMRequired || isLoadingUserGMs }
+
+  return {
+    hasMetProposalCriteria: !!hasRequiredGM && hasAllowedGrantApproverPermission,
+    isLoading: isLoadingGMRequired || isLoadingUserGMs,
+  }
 }
