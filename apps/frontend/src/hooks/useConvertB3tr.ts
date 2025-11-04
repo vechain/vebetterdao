@@ -18,7 +18,7 @@ import { useVot3RequireSelfDelegation } from "./vechainKitHooks/useVot3RequireSe
 const config = getConfig()
 // Extra 5% to mitigate sporadic wrong estimation of gas
 // Check https://vechain-foundation.slack.com/archives/C060FHDHG2J/p1753095056679039?thread_ts=1753093780.802499&cid=C060FHDHG2J
-const GAS_PADDING = 0.05
+const GAS_PADDING = 0.2
 type useMintB3trProps = {
   amount?: string | number
   onSuccess?: () => void
