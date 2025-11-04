@@ -65,7 +65,9 @@ export const AppDetailOverview = ({
   return (
     <>
       <VStack gap={4} align="stretch">
-        {showEndorsementStatusCallout && <EndorsementStatusCallout endorsementStatus={endorsementStatus} />}
+        {showEndorsementStatusCallout && !isEndorsementStatusLoading && (
+          <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
+        )}
         <Card.Root variant="primary">
           <Card.Body>
             <VStack align="stretch" gap={4}>
