@@ -110,7 +110,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
-    "vite-plugin-svgr": "^4.5.0",
     "vite-tsconfig-paths": "^4.3.2"
   },
   "msw": {
