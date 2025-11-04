@@ -14,7 +14,7 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { UilArrowUpRight, UilExternalLinkAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -65,7 +65,9 @@ export const AppDetailOverview = ({
   return (
     <>
       <VStack gap={4} align="stretch">
-        {showEndorsementStatusCallout && <EndorsementStatusCallout endorsementStatus={endorsementStatus} />}
+        {showEndorsementStatusCallout && !isEndorsementStatusLoading && (
+          <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
+        )}
         <Card.Root variant="primary">
           <Card.Body>
             <VStack align="stretch" gap={4}>
@@ -148,6 +150,7 @@ export const AppDetailOverview = ({
                             color="actions.secondary.text-lighter"
                             onClick={onDistributionStrategyModalOpen}>
                             {t("View Details")}
+                            <UilArrowUpRight />
                           </Link>
                         </VStack>
                       ) : null}
@@ -164,7 +167,7 @@ export const AppDetailOverview = ({
                       )}
                       <Button flex={1} variant={"primary"} onClick={goToWebsite}>
                         {t("Go to Website")}
-                        <UilArrowUpRight color="white" size={"16px"} />
+                        <UilExternalLinkAlt color="white" size={"16px"} />
                       </Button>
                       {isMobile && (
                         <>

@@ -13,6 +13,7 @@ import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { ProposalType } from "../../../types/proposals"
 import { RequirementModal } from "../../proposals/components/components/RequirementModal"
 
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
@@ -65,7 +66,7 @@ export const GrantsStepsCard = ({
   const openRequirementModal = useCallback(() => setIsRequirementModalOpen(true), [])
   const closeRequirementModal = useCallback(() => setIsRequirementModalOpen(false), [])
 
-  const { hasMetProposalCriteria } = useMetProposalCriteria()
+  const { hasMetProposalCriteria } = useMetProposalCriteria(ProposalType.GRANT)
 
   const handleApply = useCallback(() => {
     if (!isLastStep) {
