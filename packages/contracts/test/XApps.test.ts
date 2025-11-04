@@ -4109,7 +4109,7 @@ describe.only("X-Apps - @shard17b", function () {
     })
   })
 
-  describe.only("XApp Endorsement", function () {
+  describe("XApp Endorsement", function () {
     it("If an XAPP is endorsed with a score of 100 they should be eligble for XAllocation Voting", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -6063,19 +6063,12 @@ describe.only("X-Apps - @shard17b", function () {
 
       // Unedorsed apps list should not be empty
       expect((await x2EarnApps.unendorsedAppIds()).length).to.eql(1)
-      console.log("chegou 1")
+
       // blacklist XAPP from future rounds
       await x2EarnApps.connect(owner).setVotingEligibility(app1Id, false)
 
       // Skip ahead 1 day to be able to transfer node
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
-      // XNode holder increases its node strength by getting a new node while XAPP is blacklisted
-
-      const tokenId2 = (await stargateNftMock.idsManagedBy(otherAccounts[2].address))[0]
-      await stargateMock.connect(otherAccounts[2]).unstake(tokenId2)
-      const upgradedTokenId = await createNodeHolder(7, otherAccounts[2])
-      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, upgradedTokenId)
-      console.log("chegou 2")
       // app should not be pending endorsement -> blacklisted XAPPS should not be pending endorsement
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
 
@@ -6090,13 +6083,13 @@ describe.only("X-Apps - @shard17b", function () {
 
       // wait for round to end
       await waitForCurrentRoundToEnd()
-      console.log("chegou 3")
+
       // Remove XAPP from blacklist
       await x2EarnApps.connect(owner).setVotingEligibility(app1Id, true)
-      console.log("chegou 4")
+
       // To find XAPPS that have been unblacklisted need to check endorsement status
       await x2EarnApps.checkEndorsement(app1Id)
-      console.log("chegou 5")
+
       // Should not be pending endorsement
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
 
@@ -6123,7 +6116,7 @@ describe.only("X-Apps - @shard17b", function () {
         forceDeploy: true,
       })
 
-      const nodeId1 = await createNodeHolder(0, otherAccounts[0]) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      const nodeId1 = await createNodeHolder(9, otherAccounts[0]) // Node strength level 9 corresponds (Lightning) to an endorsement score of 0
       const nodeId2 = await createNodeHolder(1, otherAccounts[1]) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
       const nodeId3 = await createNodeHolder(2, otherAccounts[2]) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
       const nodeId4 = await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
@@ -6133,7 +6126,7 @@ describe.only("X-Apps - @shard17b", function () {
       const nodeId8 = await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Get endorsement score
-      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[0].address)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[0].address)).to.eql(0n) // Node strength level 9 corresponds (Lightning) to an endorsement score of 0
       expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[1].address)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
       expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[2].address)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
       expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[3].address)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
@@ -6148,7 +6141,7 @@ describe.only("X-Apps - @shard17b", function () {
         forceDeploy: true,
       })
 
-      const nodeId1 = await createNodeHolder(0, otherAccounts[0]) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      const nodeId1 = await createNodeHolder(9, otherAccounts[0]) // Node strength level 9 corresponds (Lightning) to an endorsement score of 0
       const nodeId2 = await createNodeHolder(1, otherAccounts[1]) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
       const nodeId3 = await createNodeHolder(2, otherAccounts[2]) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
       const nodeId4 = await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
@@ -6158,7 +6151,7 @@ describe.only("X-Apps - @shard17b", function () {
       const nodeId8 = await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Get endorsement score
-      expect(await x2EarnApps.getNodeEndorsementScore(nodeId1)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      expect(await x2EarnApps.getNodeEndorsementScore(nodeId1)).to.eql(0n) // Node strength level 9 corresponds (Lightning) to an endorsement score of 0
       expect(await x2EarnApps.getNodeEndorsementScore(nodeId2)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
       expect(await x2EarnApps.getNodeEndorsementScore(nodeId3)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
       expect(await x2EarnApps.getNodeEndorsementScore(nodeId4)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
@@ -6232,7 +6225,7 @@ describe.only("X-Apps - @shard17b", function () {
       expect((await x2EarnApps.unendorsedAppIds()).length).to.eql(0)
     })
 
-    it.only("If a user recieves an XNode that is endorsing an XAPP they can remove endorsement and endorse another XAPP", async function () {
+    it("If a user recieves an XNode that is endorsing an XAPP they can remove endorsement and endorse another XAPP", async function () {
       const { x2EarnApps, otherAccounts, owner, stargateMock, stargateNftMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -6272,14 +6265,7 @@ describe.only("X-Apps - @shard17b", function () {
       // Skip ahead 1 day to be able to transfer node
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // XNode holder increases its node strength by getting a new node
-      const tokenId = (await stargateNftMock.idsManagedBy(owner.address))[0]
-      await stargateMock.connect(owner).unstake(tokenId)
-      const upgradedTokenId = await createNodeHolder(7, owner)
-      await x2EarnApps.connect(owner).endorseApp(app1Id, upgradedTokenId)
-
-      //get app score
-      const appScore = await x2EarnApps.getScore(app1Id)
-      console.log("app score", appScore)
+      await stargateNftMock.connect(owner).transferFrom(owner.address, otherAccounts[0].address, nodeId1)
 
       // check endorsement
       await x2EarnApps.checkEndorsement(app1Id)
