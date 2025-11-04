@@ -1,18 +1,4 @@
-import {
-  Card,
-  Dialog,
-  Text,
-  VStack,
-  NativeSelect,
-  Box,
-  Center,
-  Image,
-  Icon,
-  Portal,
-  CloseButton,
-  IconButton,
-  Flex,
-} from "@chakra-ui/react"
+import { Card, Text, VStack, NativeSelect, Box, Center, Image, Icon, IconButton, Flex, Heading } from "@chakra-ui/react"
 import { useCallback, useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaSync } from "react-icons/fa"
@@ -20,6 +6,7 @@ import { FaSync } from "react-icons/fa"
 import { Tooltip } from "@/components/ui/tooltip"
 
 import { useAppFundActivityEvents } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppFundActivityEvents"
+import { BaseModal } from "../../../../../components/BaseModal"
 import { DatePicker } from "../../../../../components/DatePicker/DatePicker"
 
 import { TransactionsHistory } from "./components/TransactionsHistory"
@@ -101,80 +88,78 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content borderRadius="20px">
-            <Dialog.CloseTrigger asChild>
-              <CloseButton />
-            </Dialog.CloseTrigger>
-            <Dialog.Header>
-              <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
-                {t("Transaction history")}
-              </Text>
-            </Dialog.Header>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      showCloseButton={true}
+      modalContentProps={{
+        borderRadius: "2xl",
+        maxW: "600px",
+        w: "lg",
+        p: 6,
+      }}
+      modalBodyProps={{
+        p: 0,
+      }}
+      modalProps={{ size: "6xl" }}>
+      <VStack gap={6} w="full" alignItems="flex-start">
+        <Heading size={"2xl"}>{t("Transaction history")}</Heading>
+        <Card.Root variant="primary" w={"full"} rounded={"16px"} h={"full"} p={4} gap={4}>
+          <Card.Body p={0} overflowY="hidden">
+            <Flex gap={4} mb={4} justifyContent="space-between" w="full" alignItems="end">
+              <VStack alignItems="start" gap={0} flex="0.75">
+                <Text textStyle="sm" mb={1}>
+                  {t("Type")}
+                </Text>
+                <NativeSelect.Root size="sm">
+                  <NativeSelect.Indicator />
+                  <NativeSelect.Field
+                    rounded={"md"}
+                    value={transactionTypeFilter}
+                    onChange={e => setTransactionTypeFilter(e.target.value)}
+                    w="full">
+                    <option value="ALL">{t("All")}</option>
+                    <option value="DEPOSIT">{t("Deposits")}</option>
+                    <option value="WITHDRAW">{t("Withdrawals")}</option>
+                    <option value="REWARDS_POOL_UPDATES">{t("Rewards Pool Updates")}</option>
+                  </NativeSelect.Field>
+                </NativeSelect.Root>
+              </VStack>
 
-            <Dialog.Body pb={6}>
-              <Card.Root variant="primary" w={"full"} rounded={"16px"} mt={2} h={"full"} p={4} gap={4}>
-                <Card.Body p={0} overflowY="hidden">
-                  <Flex gap={4} mb={4} justifyContent="space-between" w="full" alignItems="end">
-                    <VStack alignItems="start" gap={0} flex="0.75">
-                      <Text textStyle="sm" mb={1}>
-                        {t("Type")}
-                      </Text>
-                      <NativeSelect.Root size="sm">
-                        <NativeSelect.Indicator />
-                        <NativeSelect.Field
-                          rounded={"md"}
-                          value={transactionTypeFilter}
-                          onChange={e => setTransactionTypeFilter(e.target.value)}
-                          w="full">
-                          <option value="ALL">{t("All")}</option>
-                          <option value="DEPOSIT">{t("Deposits")}</option>
-                          <option value="WITHDRAW">{t("Withdrawals")}</option>
-                          <option value="REWARDS_POOL_UPDATES">{t("Rewards Pool Updates")}</option>
-                        </NativeSelect.Field>
-                      </NativeSelect.Root>
-                    </VStack>
+              <VStack alignItems="start" gap={0} flex="1">
+                <Text textStyle="sm" mb={1}>
+                  {t("Date Range")}
+                </Text>
+                <DatePicker startDate={startDate} endDate={endDate} onChange={handleDateRangeChange} size="sm" />
+              </VStack>
 
-                    <VStack alignItems="start" gap={0} flex="1">
-                      <Text textStyle="sm" mb={1}>
-                        {t("Date Range")}
-                      </Text>
-                      <DatePicker startDate={startDate} endDate={endDate} onChange={handleDateRangeChange} size="sm" />
-                    </VStack>
+              <Tooltip
+                content={<Text color="fg">{t("Refresh transactions")}</Text>}
+                contentProps={{ p: 2, borderRadius: "md" }}>
+                <IconButton
+                  aria-label={t("Refresh transactions")}
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    refetch()
+                    setTransactionTypeFilter("ALL")
+                    setStartDate("")
+                    setEndDate("")
+                    setIsRotating(!isRotating)
+                  }}>
+                  <Icon
+                    as={FaSync}
+                    transform={isRotating ? "rotate(360deg)" : "rotate(0deg)"}
+                    transition="transform 0.4s ease-in-out"
+                  />
+                </IconButton>
+              </Tooltip>
+            </Flex>
 
-                    <Tooltip
-                      content={<Text color="fg">{t("Refresh transactions")}</Text>}
-                      contentProps={{ p: 2, borderRadius: "md" }}>
-                      <IconButton
-                        aria-label={t("Refresh transactions")}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          refetch()
-                          setTransactionTypeFilter("ALL")
-                          setStartDate("")
-                          setEndDate("")
-                          setIsRotating(!isRotating)
-                        }}>
-                        <Icon
-                          as={FaSync}
-                          transform={isRotating ? "rotate(360deg)" : "rotate(0deg)"}
-                          transition="transform 0.4s ease-in-out"
-                        />
-                      </IconButton>
-                    </Tooltip>
-                  </Flex>
-
-                  {renderTx()}
-                </Card.Body>
-              </Card.Root>
-            </Dialog.Body>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+            {renderTx()}
+          </Card.Body>
+        </Card.Root>
+      </VStack>
+    </BaseModal>
   )
 }
