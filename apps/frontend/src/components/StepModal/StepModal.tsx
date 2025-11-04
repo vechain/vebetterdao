@@ -1,4 +1,4 @@
-import { Text, useMediaQuery, Flex, Button, Icon, Dialog } from "@chakra-ui/react"
+import { Text, useMediaQuery, Flex, Button, Icon } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { ReactNode } from "react"
 import { IoArrowBackOutline, IoClose } from "react-icons/io5"
@@ -21,8 +21,6 @@ export type StepModalProps<T extends string> = {
   activeStep: number
   disableBackButton?: boolean
   disableCloseButton?: boolean
-  closeOnInteractOutside?: boolean
-  modalContentProps?: Partial<Dialog.ContentProps>
 }
 export const StepModal = <T extends string>({
   isOpen,
@@ -33,8 +31,6 @@ export const StepModal = <T extends string>({
   setActiveStep,
   disableBackButton,
   disableCloseButton,
-  closeOnInteractOutside = false,
-  modalContentProps,
 }: StepModalProps<T>) => {
   const handleClose = () => {
     setActiveStep(0)
@@ -57,17 +53,16 @@ export const StepModal = <T extends string>({
         w: "auto",
         p: 6,
         pt: 2,
-        ...modalContentProps,
       }}
       modalBodyProps={{
         p: 0,
       }}
       showCloseButton={false}
       isCloseable={true}
-      modalProps={{ closeOnInteractOutside }}>
+      modalProps={{ closeOnInteractOutside: false }}>
       <Flex position="relative" h="60px" alignItems="center">
         {!isFirstStep && !disableBackButton ? (
-          <Button type="button" variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
+          <Button variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
             <Icon as={IoArrowBackOutline} boxSize="30px" />
           </Button>
         ) : null}
@@ -82,7 +77,7 @@ export const StepModal = <T extends string>({
         </Flex>
 
         {isDesktop && !disableCloseButton ? (
-          <Button type="button" position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
+          <Button position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
             <Icon as={IoClose} boxSize="30px" />
           </Button>
         ) : null}

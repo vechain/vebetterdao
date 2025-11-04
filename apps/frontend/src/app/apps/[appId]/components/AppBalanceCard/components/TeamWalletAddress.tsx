@@ -1,13 +1,22 @@
 import { Flex, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { InfoCircle } from "iconoir-react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Clipboard } from "@/components/ui/clipboard"
 import { Tooltip } from "@/components/ui/tooltip"
 
 export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: string }) => {
   const { t } = useTranslation()
+  const [showCopiedLink, setShowCopiedLink] = useState(false)
+  const handleCopyLink = useCallback(async () => {
+    await navigator.clipboard.writeText(teamWalletAddress)
+    setShowCopiedLink(true)
+    setTimeout(() => {
+      setShowCopiedLink(false)
+    }, 2000)
+  }, [teamWalletAddress])
   return (
     <VStack w={"full"} gap={4} align={"flex-start"}>
       <VStack align={"stretch"} w={"full"} justify={"start"} css={{ "--tooltip-bg": "lightgray" }}>
@@ -26,7 +35,11 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
           </Flex>
         </Tooltip>
         <HStack>
-          <Clipboard value={teamWalletAddress} />
+          {showCopiedLink ? (
+            <UilCheck size={"18px"} color="#6DCB09" />
+          ) : (
+            <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyLink} cursor="pointer" />
+          )}
           <Text textStyle={"xl"}>{humanAddress(teamWalletAddress, 6, 6)}</Text>
         </HStack>
       </VStack>

@@ -1,10 +1,10 @@
-import { Button, VStack, useDisclosure, Text, Alert, Box, Card, Heading } from "@chakra-ui/react"
+import { Button, Dialog, VStack, useDisclosure, Text, Alert, Box, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { XApp, UnendorsedApp } from "../../../../../api/contracts/xApps/getXApps"
-import { BaseModal } from "../../../../../components/BaseModal"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
 
 import { DepositModal } from "./DepositModal"
 import { FundsManagementModal } from "./FundsManagementModal"
@@ -21,6 +21,7 @@ type Props = {
 }
 export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoints()
   const { isTxModalOpen } = useTransactionModal()
   const { open: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
   const { open: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
@@ -31,112 +32,123 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
   } = useDisclosure()
   return (
     <>
-      <BaseModal
-        isOpen={isOpen}
-        onClose={onClose}
-        showCloseButton={true}
-        modalContentProps={{
-          borderRadius: "2xl",
-          maxW: "600px",
-          w: "lg",
-          p: 6,
-        }}
-        modalBodyProps={{
-          p: 0,
-        }}
-        modalProps={{ size: "6xl" }}>
-        <VStack gap={6} w="full" alignItems="flex-start">
-          <Heading size={"2xl"}>{t("Transfer App Balance")}</Heading>
-          <VStack gap={4} w="full">
-            {isPaused && (
-              <Alert.Root status="error" borderRadius={["xl", "xl", "3xl"]}>
-                <Alert.Indicator w={5} h={5} />
-                <Box textStyle="sm">
-                  <Alert.Description as="span">
-                    {t(
-                      "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",
-                    )}
-                  </Alert.Description>
-                </Box>
-              </Alert.Root>
-            )}
-            <Card.Root variant="primary" w="full" rounded="16px" p={4}>
-              <Card.Body p={0}>
-                <VStack align="start" gap={4}>
-                  <Text textStyle="lg" fontWeight="semibold">
-                    {t("Withdraw")}
-                  </Text>
-                  <Text textStyle="sm">
-                    {t("Send your app's funds received from allocations to your team wallet address.")}
-                  </Text>
-                  <Button
-                    mt={1}
-                    disabled={!isAppAdmin}
-                    onClick={() => {
-                      onOpenWithdraw()
-                      onClose()
-                    }}
-                    variant={"primary"}
-                    borderRadius={"full"}
-                    w={"full"}>
-                    {t("Withdraw")}
-                  </Button>
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={onClose}
+        placement={isMobile ? "bottom" : "center"}
+        motionPreset="slide-in-bottom">
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content borderRadius="20px">
+              <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} asChild>
+                <CloseButton />
+              </Dialog.CloseTrigger>
+              <Dialog.Header>
+                <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
+                  {t("Transfer App Balance")}
+                </Text>
+              </Dialog.Header>
+              <Dialog.Body pb={6}>
+                <VStack justifyContent={"space-between"}>
+                  {isPaused && (
+                    <Alert.Root status="error" borderRadius={["xl", "xl", "3xl"]}>
+                      <Alert.Indicator w={5} h={5} />
+                      <Box textStyle="sm">
+                        <Alert.Description as="span">
+                          {t(
+                            "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",
+                          )}
+                        </Alert.Description>
+                      </Box>
+                    </Alert.Root>
+                  )}
+                  <VStack
+                    align="start"
+                    gap={4}
+                    border="1px solid #D5D5D5"
+                    borderRadius="20px"
+                    p="16px"
+                    justifyContent="space-between">
+                    <Text textStyle="lg" fontWeight="semibold">
+                      {t("Withdraw")}
+                    </Text>
+                    <Text textStyle="sm">
+                      {t("Send your app’s funds received from allocations to your team wallet address.")}
+                    </Text>
+                    <Button
+                      mt={1}
+                      disabled={!isAppAdmin}
+                      onClick={() => {
+                        onOpenWithdraw()
+                        onClose()
+                      }}
+                      variant={"primary"}
+                      borderRadius={"full"}
+                      w={"200px"}>
+                      {t("Withdraw")}
+                    </Button>
+                  </VStack>
+                  <VStack
+                    align="start"
+                    gap={4}
+                    border="1px solid #D5D5D5"
+                    borderRadius="20px"
+                    p="16px"
+                    justifyContent="space-between">
+                    <Text textStyle="lg" fontWeight="semibold">
+                      {t("Deposit")}
+                    </Text>
+                    <Text textStyle="sm">
+                      {t(
+                        "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.",
+                      )}
+                    </Text>
+                    <Button
+                      variant="primary"
+                      mt={1}
+                      onClick={() => {
+                        onOpenDeposit()
+                        onClose()
+                      }}
+                      w={"200px"}>
+                      {t("Deposit")}
+                    </Button>
+                  </VStack>
+                  <VStack
+                    align="start"
+                    gap={4}
+                    borderRadius="20px"
+                    p="16px"
+                    border={"1px solid #D5D5D5"}
+                    justifyContent="space-between">
+                    <Text textStyle="lg" fontWeight="semibold">
+                      {t("Refill Pools")}
+                    </Text>
+                    <Text textStyle="sm">
+                      {t(
+                        "Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
+                      )}
+                    </Text>
+                    <Button
+                      mt={1}
+                      disabled={!isAppAdmin}
+                      onClick={() => {
+                        onOpenFundsManagement()
+                        onClose()
+                      }}
+                      variant={"primary"}
+                      borderRadius={"full"}
+                      w={"200px"}>
+                      {t("Refill Pools")}
+                    </Button>
+                  </VStack>
                 </VStack>
-              </Card.Body>
-            </Card.Root>
-            <Card.Root variant="primary" w="full" rounded="16px" p={4}>
-              <Card.Body p={0}>
-                <VStack align="start" gap={4}>
-                  <Text textStyle="lg" fontWeight="semibold">
-                    {t("Deposit")}
-                  </Text>
-                  <Text textStyle="sm">
-                    {t(
-                      "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.",
-                    )}
-                  </Text>
-                  <Button
-                    variant="primary"
-                    mt={1}
-                    onClick={() => {
-                      onOpenDeposit()
-                      onClose()
-                    }}
-                    w={"full"}>
-                    {t("Deposit")}
-                  </Button>
-                </VStack>
-              </Card.Body>
-            </Card.Root>
-            <Card.Root variant="primary" w="full" rounded="16px" p={4}>
-              <Card.Body p={0}>
-                <VStack align="start" gap={4}>
-                  <Text textStyle="lg" fontWeight="semibold">
-                    {t("Refill Pools")}
-                  </Text>
-                  <Text textStyle="sm">
-                    {t(
-                      "Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
-                    )}
-                  </Text>
-                  <Button
-                    mt={1}
-                    disabled={!isAppAdmin}
-                    onClick={() => {
-                      onOpenFundsManagement()
-                      onClose()
-                    }}
-                    variant={"primary"}
-                    borderRadius={"full"}
-                    w={"full"}>
-                    {t("Refill Pools")}
-                  </Button>
-                </VStack>
-              </Card.Body>
-            </Card.Root>
-          </VStack>
-        </VStack>
-      </BaseModal>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
 
       <DepositModal appId={app?.id} isOpen={isOpenDeposit} onClose={onCloseDeposit} />
       <WithdrawModal

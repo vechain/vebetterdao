@@ -13,7 +13,6 @@ import {
   Box,
   Link,
 } from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -65,18 +64,14 @@ export const AppBalanceCard = () => {
   const isAppAdminOrTreasuryAddress = isAppAdmin || app?.teamWalletAddress === account?.address
 
   const rewardsPoolColor = useMemo(() => {
-    if (isPaused) return "status.negative.subtle"
-    if (isRewardsPoolEnabled) return "status.positive.primary"
-    else return "bg.muted"
+    if (isPaused) return "#FCEEF1"
+    if (isRewardsPoolEnabled) return "#3DBA67"
+    else return "#D9D9D9"
   }, [isPaused, isRewardsPoolEnabled])
 
   return (
     <>
-      <Card.Root
-        w={"full"}
-        colorPalette="Red"
-        border="sm"
-        borderColor={isPaused ? "status.negative.primary" : "border.primary"}>
+      <Card.Root w={"full"} colorPalette="Red" border="sm" borderColor={isPaused ? "#C84968" : "border.primary"}>
         <Card.Body pt={3} pb={2}>
           <HStack justify={"space-between"} w={"full"}>
             <VStack alignItems={"start"} gap={0}>
@@ -146,13 +141,11 @@ export const AppBalanceCard = () => {
           </Box>
           <Link
             textStyle="md"
-            mt={2}
             fontWeight="semibold"
             color="actions.secondary.text-lighter"
             onClick={onOpenRewardsPoolAccess}
             alignSelf={"start"}>
             {t("History")}
-            <UilArrowUpRight />
           </Link>
           {!isAppAdmin && (
             <GenericAlert

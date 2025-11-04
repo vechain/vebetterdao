@@ -37,23 +37,20 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { open: isOpen = false, onClose } = modal
   const [step, setStep] = useState(0)
   const delegatee = watch("walletAddress")
-  
-  const handleClose = useCallback(() => {
-    onClose?.()
-    setStep(0)
-  }, [onClose])
-  
   const goToNext = useCallback(() => {
     const nextStep = step + 1
-    if (nextStep >= STEP_COUNT) handleClose()
+    if (nextStep > STEP_COUNT) onClose?.()
     else setStep(nextStep)
-  }, [step, handleClose])
+  }, [step, onClose])
 
   const goToPrevious = useCallback(() => {
     const prevStep = step - 1
-    if (prevStep < 0) handleClose()
+    if (prevStep < 1) onClose?.()
     else setStep(prevStep)
-  }, [step, handleClose])
+  }, [step, onClose])
+  const handleClose = useCallback(() => {
+    onClose?.()
+  }, [onClose])
 
   const delegatePassport = useDelegatePassport({
     onSuccess: handleClose,

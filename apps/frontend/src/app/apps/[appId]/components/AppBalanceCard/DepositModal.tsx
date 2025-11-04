@@ -1,21 +1,22 @@
-import { Button, HStack, Text, VStack, Input, Skeleton } from "@chakra-ui/react"
+import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon, CloseButton } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
 import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
+import { IoAddCircleOutline } from "react-icons/io5"
 
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { useXApp } from "../../../../../api/contracts/xApps/hooks/useXApp"
-import { BaseModal } from "../../../../../components/BaseModal"
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
 import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
 import { useDepositToAppBalance } from "../../../../../hooks/useDepositToAppBalance"
 import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
 
-import { PercentageSelectorButtons } from "./components/PercentageSelectorButtons"
+import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 
 export type Props = {
   appId: string
@@ -95,9 +96,10 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     amount,
   })
 
-  const handleDeposit = useCallback(() => {
+  const handleWithdraw = useCallback(() => {
+    resetStatus()
     sendTransaction()
-  }, [sendTransaction])
+  }, [sendTransaction, resetStatus])
 
   const handleClose = useCallback(() => {
     resetStatus()
@@ -125,8 +127,11 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const renderCardContent = useCallback(() => {
     return (
-      <form onSubmit={formData.handleSubmit(handleDeposit)}>
-        <VStack align={"flex-start"} w="full">
+      <form onSubmit={formData.handleSubmit(handleWithdraw)}>
+        <Dialog.CloseTrigger asChild top={{ base: 5, md: 6 }} right={4}>
+          <CloseButton />
+        </Dialog.CloseTrigger>
+        <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
               <Trans i18nKey={"Deposit B3TR to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
@@ -159,7 +164,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
                 align="flex-start"
                 gap={12}
                 borderBottomWidth={2}
-                borderColor="border.secondary">
+                borderColor={"rgba(213, 213, 213, 1)"}>
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
@@ -175,9 +180,18 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
             </motion.div>
           </motion.div>
 
-          <PercentageSelectorButtons availableAmount={availableB3trToDepositScaled} setValue={setValue} />
+          <DepositPercentageSelectorButtons availableAmount={availableB3trToDepositScaled} setValue={setValue} />
 
-          <Button type="submit" disabled={invalidAmount} variant={"primary"} borderRadius={"full"} w={"full"}>
+          <Button
+            mt={2}
+            type="submit"
+            variant={"primary"}
+            w={"full"}
+            rounded={"full"}
+            disabled={invalidAmount}
+            size={"lg"}
+            textStyle={{ base: "sm", md: "lg" }}>
+            <Icon as={IoAddCircleOutline} mr={2} />
             {t("Deposit now")}
           </Button>
         </VStack>
@@ -185,7 +199,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     )
   }, [
     formData,
-    handleDeposit,
+    handleWithdraw,
     invalidAmount,
     availableB3trToDepositScaled,
     t,
@@ -197,23 +211,12 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   ])
 
   return (
-    <BaseModal
-      isOpen={isOpen && !isTxModalOpen}
-      onClose={handleClose}
-      showCloseButton={true}
-      modalContentProps={{
-        borderRadius: "2xl",
-        maxW: "600px",
-        w: "lg",
-        p: 6,
-      }}
-      modalBodyProps={{
-        p: 0,
-      }}
-      modalProps={{
-        closeOnInteractOutside: true,
-      }}>
-      {renderCardContent()}
-    </BaseModal>
+    <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={details => !details.open && handleClose()}>
+      <CustomModalContent w={"auto"} maxW="breakpoint-md">
+        <Card.Root rounded={20}>
+          <Card.Body>{renderCardContent()}</Card.Body>
+        </Card.Root>
+      </CustomModalContent>
+    </Dialog.Root>
   )
 }
