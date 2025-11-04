@@ -415,6 +415,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @notice This function can be called to update the Stargate NFT contract
    */
   function _setStargateNFT(address stargateNft) internal virtual {
+    require(stargateNft != address(0), "Stargate NFT address cannot be 0");
     _getEndorsementStorage()._stargateNFT = IStargateNFT(stargateNft);
   }
 
