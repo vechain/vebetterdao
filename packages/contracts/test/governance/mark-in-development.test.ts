@@ -207,7 +207,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       await waitForVotingPeriodToEnd(proposalId)
 
       // Random account should NOT be able to mark as IN-DEVELOPMENT
-      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId)).to.be.reverted
     })
     it("(EXECUTABLE PROPOSAL) Should NOT be able to mark as IN-DEVELOPMENT if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       //Create and execute a proposal doing a tokenDetails call
@@ -239,7 +239,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       })?.args[0]
 
       // Random account should NOT be able to mark as IN-DEVELOPMENT
-      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId)).to.be.reverted
     })
     it("(GRANT PROPOSAL) Should NOT be able to mark as IN-DEVELOPMENT if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
@@ -417,7 +417,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       await waitForVotingPeriodToEnd(proposalId)
 
       // Random account should NOT be able to mark as COMPLETED
-      await expect(governor.connect(otherAccounts[3]).markAsCompleted(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsCompleted(proposalId)).to.be.reverted
     })
     it("(EXECUTABLE PROPOSAL) Should NOT be able to mark as COMPLETED if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       //Create and execute a proposal doing a tokenDetails call
@@ -449,7 +449,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       })?.args[0]
 
       // Random account should NOT be able to mark as COMPLETED
-      await expect(governor.connect(otherAccounts[3]).markAsCompleted(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsCompleted(proposalId)).to.be.reverted
     })
     it("(GRANT PROPOSAL) Should NOT be able to mark as COMPLETED if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
@@ -475,7 +475,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       )
 
       // Random account should NOT be able to mark as COMPLETED
-      await expect(governor.connect(otherAccounts[3]).markAsCompleted(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsCompleted(proposalId)).to.be.reverted
     })
     it("(TEXT-ONLY PROPOSAL) Should be able to mark as COMPLETED if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const targets: string[] = []
@@ -644,7 +644,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Random account should NOT be able to reset development state
-      await expect(governor.connect(otherAccounts[3]).resetDevelopmentState(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).resetDevelopmentState(proposalId)).to.be.reverted
     })
     it("(EXECUTABLE PROPOSAL) Should NOT be able to reset development state if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       //Create and execute a proposal doing a tokenDetails call
@@ -681,7 +681,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Random account should NOT be able to reset development state
-      await expect(governor.connect(otherAccounts[3]).resetDevelopmentState(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).resetDevelopmentState(proposalId)).to.be.reverted
     })
     it("(GRANT PROPOSAL) Should NOT be able to reset development state if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
@@ -707,7 +707,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       )
 
       // Random account should NOT be able to reset development state
-      await expect(governor.connect(otherAccounts[3]).resetDevelopmentState(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).resetDevelopmentState(proposalId)).to.be.reverted
     })
     it("(TEXT-ONLY PROPOSAL) Should be able to reset development state if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const targets: string[] = []
