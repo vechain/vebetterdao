@@ -124,6 +124,10 @@ library EndorsementUtils {
     uint256 count = 0;
 
     for (uint256 i = 0; i < length; i++) {
+      //if token does not exist, skip
+      if (!_stargateNFT.tokenExists(_appEndorsers[appId][i])) {
+        continue;
+      }
       address endorser = _stargateNFT.getTokenManager(_appEndorsers[appId][i]);
       if (endorser != address(0)) {
         endorsers[count] = endorser;

@@ -151,7 +151,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Check if the user is managing the specified nodeId either through delegation or ownership
-    if (!$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+    if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
 
@@ -195,7 +195,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Check if the user is managing the specified nodeId either through delegation or ownership
-    if (!$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+    if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
 
@@ -214,8 +214,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @return bytes32 The unique identifier of the app that the node ID is endorsing.
    */
   function nodeToEndorsedApp(uint256 nodeId) external view returns (bytes32) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-    return $._nodeToEndorsedApp[nodeId];
+    return _getEndorsementStorage()._nodeToEndorsedApp[nodeId];
   }
 
   /**
@@ -224,8 +223,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @return uint256 The endorsement score of the node ID.
    */
   function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-    return $._nodeEnodorsmentScore[nodeLevel];
+    return _getEndorsementStorage()._nodeEnodorsmentScore[nodeLevel];
   }
 
   // ---------- Internal ---------- //
