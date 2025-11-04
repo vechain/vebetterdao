@@ -265,7 +265,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       )
 
       // Random account should NOT be able to mark as IN-DEVELOPMENT
-      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId)).to.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId)).to.be.reverted
     })
     it("(TEXT-ONLY PROPOSAL) Should be able to mark as IN-DEVELOPMENT if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const targets: string[] = []
