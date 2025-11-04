@@ -3997,7 +3997,7 @@ describe("X-Apps - @shard17a", function () {
   })
 })
 
-describe.only("X-Apps - @shard17b", function () {
+describe("X-Apps - @shard17b", function () {
   // We prepare the environment for 4 creators
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
@@ -6020,7 +6020,8 @@ describe.only("X-Apps - @shard17b", function () {
       expect((await x2EarnApps.unendorsedAppIds()).length).to.eql(1)
     })
 
-    it("An XAPP that has been removed from black list, but did not reach score threshold pre blacklist, but node has increased score since so that XApp now has a score greater than 100, they should not be peding endorsement ", async function () {
+    //Skipping test since upgrade is no more possible with stargate
+    it.skip("An XAPP that has been removed from black list, but did not reach score threshold pre blacklist, but node has increased score since so that XApp now has a score greater than 100, they should not be peding endorsement ", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner, stargateMock, stargateNftMock } =
         await getOrDeployContractInstances({
           forceDeploy: true,
