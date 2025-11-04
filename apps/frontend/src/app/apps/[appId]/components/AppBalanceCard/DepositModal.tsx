@@ -96,8 +96,9 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   })
 
   const handleDeposit = useCallback(() => {
+    resetStatus()
     sendTransaction()
-  }, [sendTransaction])
+  }, [sendTransaction, resetStatus])
 
   const handleClose = useCallback(() => {
     resetStatus()
