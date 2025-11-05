@@ -405,8 +405,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @notice This function can be called to update the VeBetterPassport contract
    */
   function _setVeBetterPassportContract(address veBetterPassportContract) internal virtual {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
+    require(veBetterPassportContract != address(0), "VeBetterPassport address cannot be 0");
+    _getEndorsementStorage()._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
   }
 
   /**
