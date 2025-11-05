@@ -1,91 +1,92 @@
 import { useMemo } from "react"
 
-import { useXAppRoundEarnings } from "../../xAllocationPool/hooks/useXAppRoundEarnings"
+import { useAppEarnings } from "../../../indexer/xallocations/useAppEarnings"
 import { useAllocationsRoundState } from "../../xAllocations/hooks/useAllocationsRoundState"
-import { DBA_ELIGIBILITY_THRESHOLD_PERCENTAGE } from "../constants"
 
-import { useDBADistributionStartRound } from "./useDBADistributionStartRound"
-import { useDBARewards } from "./useDBARewards"
-import { useEstimateDBAForActiveRound } from "./useEstimateDBAForActiveRound"
+import { useXAppRoundEarningsWithDBA } from "./useXAppRoundEarningsWithDBA"
 
 /**
  * Hook that returns the total earnings for an app in a round
- * This includes:
- * - roundEarnings (from XAllocationPool)
- * - DBA rewards (actual or estimated based on round state)
  *
- * For active rounds: estimates DBA rewards using actual unallocated amounts
- * For concluded rounds: shows actual distributed DBA rewards from events
+ * Routes to the appropriate data source based on round state:
+ * - Active rounds: Uses contract-based estimation with full DBA eligibility validation
+ * - Concluded rounds: Uses indexer which already includes DBA in totalAmount
  *
  * @param roundId The round ID
  * @param xAppId The app ID
  * @param votePercentage The app's vote percentage (0-100)
- * @returns Combined earnings data
+ * @returns Combined earnings data with consistent interface
  */
 export const useTotalXAppEarnings = (roundId: string, xAppId: string, votePercentage: number) => {
-  // Get base round earnings
-  const { data: roundEarnings, isLoading: isRoundEarningsLoading } = useXAppRoundEarnings(roundId, xAppId)
-
-  // Get round state to determine if it's concluded or live
+  // Get round state to determine routing
   const { data: roundState, isLoading: isRoundStateLoading } = useAllocationsRoundState(roundId)
-
-  // Get DBA distribution start round from contract (cached forever)
-  const { data: dbaStartRound } = useDBADistributionStartRound()
 
   // Determine if round is active (0 = Active)
   const isRoundActive = roundState === 0
+  const isRoundConcluded = roundState !== undefined && roundState !== 0
 
-  // Check if round is eligible for DBA (basic check for active rounds)
-  const roundIdNum = Number(roundId)
-  const shouldFetchDBAEstimate =
-    isRoundActive &&
-    dbaStartRound !== undefined &&
-    roundIdNum >= dbaStartRound &&
-    votePercentage < DBA_ELIGIBILITY_THRESHOLD_PERCENTAGE
+  // For concluded rounds: use indexer (already includes DBA)
+  // Only fetch when round is concluded
+  const { data: indexerData, isLoading: isIndexerLoading } = useAppEarnings(
+    xAppId,
+    {
+      roundId: Number(roundId),
+    },
+    {
+      enabled: isRoundConcluded,
+    },
+  )
 
-  // For active rounds: estimate DBA rewards (with full eligibility checks inside)
-  const { data: activeRoundEstimate } = useEstimateDBAForActiveRound(roundId, shouldFetchDBAEstimate)
-
-  // For concluded rounds: fetch actual DBA rewards
-  const { data: dbaRewards, isLoading: isDBARewardsLoading } = useDBARewards(roundId, xAppId)
+  // For active rounds: use contract-based estimation
+  const { data: contractData, isLoading: isContractLoading } = useXAppRoundEarningsWithDBA(
+    roundId,
+    xAppId,
+    votePercentage,
+    isRoundActive,
+    isRoundActive, // Only enabled when round is active
+  )
 
   const result = useMemo(() => {
-    const baseAmount = roundEarnings?.amount ?? "0"
-    let dbaAmount = "0"
-    let hasDBARewards = false
-    let isSimulation = false
+    // Use indexer for concluded rounds
+    if (!isRoundActive && indexerData && indexerData.length > 0) {
+      const earnings = indexerData[0]
+      const totalAmount = earnings?.totalAmount?.toString() ?? "0"
 
-    // For concluded rounds: use actual DBA from contract
-    if (!isRoundActive && dbaRewards?.hasRewards) {
-      dbaAmount = dbaRewards.amount
-      hasDBARewards = true
-      isSimulation = false
-    }
-    // For active rounds: use estimated DBA if app is in eligible list
-    else if (isRoundActive && activeRoundEstimate) {
-      const eligibleAppIds = (activeRoundEstimate.eligibleAppIds as string[] | undefined) ?? []
-      if (eligibleAppIds.includes(xAppId)) {
-        dbaAmount = activeRoundEstimate.estimatedAmount ?? "0"
-        hasDBARewards = parseFloat(dbaAmount) > 0
-        isSimulation = true
+      return {
+        baseEarnings: totalAmount, // Indexer doesn't split out DBA
+        dbaEarnings: "0", // Already included in totalAmount
+        totalEarnings: totalAmount,
+        appId: xAppId,
+        hasDBARewards: false, // Can't determine from indexer
+        isRoundActive: false,
+        isSimulation: false,
+        source: "indexer" as const,
       }
     }
 
-    const totalAmount = (parseFloat(baseAmount) + parseFloat(dbaAmount)).toString()
-
-    return {
-      baseEarnings: baseAmount,
-      dbaEarnings: dbaAmount,
-      totalEarnings: totalAmount,
-      appId: xAppId,
-      hasDBARewards,
-      isRoundActive,
-      isSimulation,
+    // Use contract data for active rounds or if indexer has no data
+    if (contractData) {
+      return {
+        ...contractData,
+        source: "contract" as const,
+      }
     }
-  }, [roundEarnings, dbaRewards, activeRoundEstimate, isRoundActive, xAppId])
+
+    // Fallback
+    return {
+      baseEarnings: "0",
+      dbaEarnings: "0",
+      totalEarnings: "0",
+      appId: xAppId,
+      hasDBARewards: false,
+      isRoundActive,
+      isSimulation: false,
+      source: "none" as const,
+    }
+  }, [isRoundActive, indexerData, contractData, xAppId])
 
   return {
     data: result,
-    isLoading: isRoundEarningsLoading || isRoundStateLoading || (!isRoundActive && isDBARewardsLoading),
+    isLoading: isRoundStateLoading || (isRoundActive ? isContractLoading : isIndexerLoading),
   }
 }
