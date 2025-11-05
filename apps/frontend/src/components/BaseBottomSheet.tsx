@@ -12,6 +12,7 @@ type Props = {
   ariaDescription: string
   isDismissable?: boolean
   customBgColor?: string
+  minHeight?: string
 }
 export const BaseBottomSheet = ({
   isOpen,
@@ -21,6 +22,7 @@ export const BaseBottomSheet = ({
   ariaDescription,
   isDismissable = true,
   customBgColor,
+  minHeight,
 }: Props) => {
   const bgColor = useColorModeValue("#F9FAFB", "#1A1A1A")
   return (
@@ -59,6 +61,7 @@ export const BaseBottomSheet = ({
             right: 0,
             height: "auto", // Let the content define the height initially
             maxHeight: "90vh", // Limit to a maximum of 90% of the viewport height
+            minHeight,
             overflow: "hidden", // Prevent content from overflowing out of the drawer
             display: "flex",
             flexDirection: "column",

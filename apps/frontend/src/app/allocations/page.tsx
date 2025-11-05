@@ -1,17 +1,64 @@
-import { Box, Button, Card, Dialog, Grid, GridItem, Heading, Icon, Square, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Dialog, Grid, GridItem, Heading, Icon, Square, Text, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { executeCallClause } from "@vechain/vechain-kit"
 import { Clock, Flash } from "iconoir-react"
+import { redirect } from "next/navigation"
 
+import { fetchClient } from "@/api/indexer/api"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
 import { AllocationTabs } from "./components/tabs/AllocationTabs"
 
-// const getAllocation = async () =>
-//   Promise.resolve({
-//     name: "Mock Allocation",
-//   })
-//   const allocation = await getAllocation()
+const abi = XAllocationVoting__factory.abi
+const address = getConfig().xAllocationVotingContractAddress as `0x${string}`
+
+const getApps = async () => {
+  const thor = await getNodeJsThorClient()
+  const [currentRoundId] = await executeCallClause({
+    thor,
+    abi,
+    contractAddress: address,
+    method: "currentRoundId",
+    args: [],
+  })
+
+  const [apps] = await executeCallClause({
+    thor,
+    abi,
+    contractAddress: address,
+    method: "getAppsOfRound",
+    args: [currentRoundId],
+  })
+
+  const res = await fetchClient.GET("/api/v1/b3tr/xallocations/{roundId}/results", {
+    params: { path: { roundId: Number(currentRoundId) } },
+  })
+
+  if (!res.data) return []
+
+  const resultsMap = new Map(res.data.map(result => [result.appId, result]))
+
+  return apps.map(app => {
+    const result = resultsMap.get(app.id)
+    return {
+      ...app,
+      voters: result?.voters ?? 0,
+      votesReceived: result?.votesReceived ?? 0,
+    }
+  })
+}
+
+const releaseNewDesign = false
 
 export default async function Page() {
+  const apps = await getApps()
+
+  if (!releaseNewDesign) {
+    return redirect("/rounds")
+  }
+
   return (
     <>
       <VStack alignItems="stretch" gap="2" w="full" mb="6">
@@ -94,26 +141,7 @@ export default async function Page() {
         </Grid>
       </VStack>
 
-      <AllocationTabs />
-
-      <Box
-        p="4"
-        pos="fixed"
-        bottom={0}
-        left={0}
-        right={0}
-        bg="bg.primary"
-        border="sm"
-        borderColor="border.secondary"
-        zIndex={50}>
-        <Dialog.Root>
-          <Dialog.Trigger asChild>
-            <Button w="full" variant="primary">
-              {"Vote for 10 apps"}
-            </Button>
-          </Dialog.Trigger>
-        </Dialog.Root>
-      </Box>
+      <AllocationTabs apps={apps} />
     </>
   )
 }
