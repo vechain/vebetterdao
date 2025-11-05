@@ -1,11 +1,8 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { getConfig } from "@repo/config"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { TransactionUtils } from "@repo/utils"
-import { ABIContract, Address, Clause, VET } from "@vechain/sdk-core"
-import { ThorClient } from "@vechain/sdk-network"
+import { VET } from "@vechain/sdk-core"
 import { expect } from "chai"
 import { ethers, network } from "hardhat"
 import { before, describe, it } from "mocha"
@@ -21,7 +18,6 @@ import {
   VeBetterPassportV1,
   VoterRewards,
   X2EarnApps,
-  X2EarnApps__factory,
   X2EarnAppsV1,
   X2EarnAppsV2,
   X2EarnAppsV3,
@@ -44,7 +40,6 @@ import {
   getStorageSlots,
   getTwoUniqueRandomIndices,
   getVot3Tokens,
-  mintLegacyNode,
   parseAppAddedEvent,
   startNewAllocationRound,
   waitForBlock,
@@ -53,8 +48,6 @@ import {
   ZERO_ADDRESS,
 } from "./helpers"
 import { createLegacyNodeHolder, createNodeHolder, endorseApp } from "./helpers/xnodes"
-
-const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 describe("X-Apps - Core Features - @shard15", function () {
   // We prepare the environment for 4 creators
@@ -348,8 +341,8 @@ describe("X-Apps - Core Features - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holder with an endorsement score of 100
-      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await createLegacyNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await createLegacyNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       // Add apps -> should be eligble for next round
       await x2EarnAppsV1
         .connect(owner)
@@ -891,8 +884,8 @@ describe("X-Apps - Core Features - @shard15", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       // Create two MjolnirX node holders with an endorsement score of 100
-      await mintLegacyNode(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await mintLegacyNode(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await createLegacyNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await createLegacyNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Add apps -> should be eligible for the next round
       await x2EarnAppsV2
@@ -913,7 +906,7 @@ describe("X-Apps - Core Features - @shard15", function () {
         .connect(owner)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
 
-      await mintLegacyNode(7, otherAccounts[4]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await createLegacyNodeHolder(7, otherAccounts[4]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       await x2EarnAppsV2.connect(otherAccounts[4]).endorseApp(app3Id, 3)
 
       // Check eligibility
@@ -6343,17 +6336,9 @@ describe("X-Apps - Metadata and Endorsement - @shard15b", function () {
       for (let i = 0; i < 50; i++) {
         // Create node holder with an endorsement score
         const nodeHolder = accounts[i].address as unknown as HardhatEthersSigner
-        await createNodeHolder(level, nodeHolder)
+        const nodeId = await createNodeHolder(level, nodeHolder)
 
-        const clauses = [
-          Clause.callFunction(
-            Address.of(await x2EarnApps.getAddress()),
-            ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
-            [app1Id],
-          ),
-        ]
-
-        await TransactionUtils.sendTx(thorClient, clauses, accounts[i].pk)
+        await x2EarnApps.connect(nodeHolder).endorseApp(app1Id, nodeId)
       }
 
       const endorsers = await x2EarnApps.getEndorsers(app1Id)
