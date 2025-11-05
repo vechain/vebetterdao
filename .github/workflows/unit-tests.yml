@@ -176,7 +176,13 @@ jobs:
           - shard: shard14b
             label: X-Allocation Voting - Auto Voting
           - shard: shard15
-            label: X-Apps
+            label: X-Apps - Core Features
+          - shard: shard15a
+            label: X-Apps - Team Management
+          - shard: shard15b
+            label: X-Apps - Metadata and Endorsement
+          - shard: shard15c
+            label: X-Apps - V7 Upgrade
           - shard: shard16
             label: VeBetterPassport Additional Tests
           - shard: shard17a

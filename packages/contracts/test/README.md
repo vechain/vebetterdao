@@ -34,7 +34,10 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard12**: X2EarnRewardsPool
 - **shard13**: X-Allocation Pool
 - **shard14**: X-Allocation Voting
-- **shard15**: X-Apps
+- **shard15**: X-Apps - Core Features
+- **shard15a**: X-Apps - Team Management
+- **shard15b**: X-Apps - Metadata and Endorsement
+- **shard15c**: X-Apps - V7 Upgrade
 - **shard16**: VeBetterPassport (additional tests)
 - **shard17a**: X-Apps (additional tests)
 - **shard17b**: X-Apps (additional tests)

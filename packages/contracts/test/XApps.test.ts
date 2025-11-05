@@ -1,7 +1,40 @@
-import { ethers, network } from "hardhat"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { getConfig } from "@repo/config"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { TransactionUtils } from "@repo/utils"
+import { ABIContract, Address, Clause, VET } from "@vechain/sdk-core"
+import { ThorClient } from "@vechain/sdk-network"
 import { expect } from "chai"
+import { ethers, network } from "hardhat"
+import { before, describe, it } from "mocha"
+
+import { APPS } from "../scripts/deploy/setup"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../scripts/helpers"
+import { airdropVTHO } from "../scripts/helpers/airdrop"
+import { getTestKeys, SeedAccount } from "../scripts/helpers/seedAccounts"
 import {
-  ZERO_ADDRESS,
+  B3TRGovernor,
+  Emissions,
+  VeBetterPassport,
+  VeBetterPassportV1,
+  VoterRewards,
+  X2EarnApps,
+  X2EarnApps__factory,
+  X2EarnAppsV1,
+  X2EarnAppsV2,
+  X2EarnAppsV3,
+  X2EarnAppsV4,
+  X2EarnAppsV5,
+  X2EarnAppsV6,
+  X2EarnRewardsPool,
+  X2EarnRewardsPoolV4,
+  XAllocationPool,
+  XAllocationPoolV3,
+  XAllocationVotingV3,
+} from "../typechain-types"
+import {
   bootstrapAndStartEmissions,
   bootstrapEmissions,
   catchRevert,
@@ -17,45 +50,13 @@ import {
   waitForBlock,
   waitForCurrentRoundToEnd,
   waitForRoundToEnd,
+  ZERO_ADDRESS,
 } from "./helpers"
-import { describe, it, before } from "mocha"
-import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createLegacyNodeHolder, createNodeHolder, endorseApp } from "./helpers/xnodes"
-import { time } from "@nomicfoundation/hardhat-network-helpers"
-import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../scripts/helpers"
-import {
-  B3TRGovernor,
-  Emissions,
-  VeBetterPassport,
-  VeBetterPassportV1,
-  VoterRewards,
-  X2EarnApps,
-  X2EarnAppsV1,
-  X2EarnAppsV2,
-  X2EarnAppsV3,
-  X2EarnAppsV4,
-  X2EarnAppsV5,
-  X2EarnAppsV6,
-  X2EarnApps__factory,
-  X2EarnRewardsPool,
-  X2EarnRewardsPoolV4,
-  XAllocationPool,
-  XAllocationPoolV3,
-  XAllocationVotingV3,
-} from "../typechain-types"
-import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
-import { TransactionUtils } from "@repo/utils"
-import { APPS } from "../scripts/deploy/setup"
-import { ABIContract, Address, Clause, VET, type TransactionBody } from "@vechain/sdk-core"
-import { airdropVTHO } from "../scripts/helpers/airdrop"
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { ThorClient } from "@vechain/sdk-network"
-import { getConfig } from "@repo/config"
 
 const thorClient = ThorClient.at(getConfig().nodeUrl)
 
-describe("X-Apps - @shard15", function () {
+describe("X-Apps - Core Features - @shard15", function () {
   // We prepare the environment for 4 creators
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
@@ -3169,7 +3170,7 @@ describe("X-Apps - @shard15", function () {
   })
 })
 
-describe("X-Apps - @shard17a", function () {
+describe("X-Apps - Team Management - @shard15a", function () {
   describe("Admin address", function () {
     it("Admin can update the admin address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -3997,7 +3998,7 @@ describe("X-Apps - @shard17a", function () {
   })
 })
 
-describe("X-Apps - @shard17b", function () {
+describe("X-Apps - Metadata and Endorsement - @shard15b", function () {
   // We prepare the environment for 4 creators
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
