@@ -48,7 +48,7 @@ export function SearchAppsBottomSheet({
       isDismissable={true}
       minHeight="100vh">
       <Flex gap="4" mb="4" alignItems="center" justifyContent="space-between">
-        <IconButton minWidth="unset" variant="ghost" boxSize="6" p="0" rounded="full">
+        <IconButton minWidth="unset" variant="ghost" boxSize="6" p="0" rounded="full" onClick={handleClose}>
           <NavArrowLeft />
         </IconButton>
         <InputGroup

@@ -2,10 +2,11 @@
 
 import { CheckboxCard, Circle, Flex, Heading, Icon, Progress, Tabs, Text } from "@chakra-ui/react"
 import { Group, Search as SearchIcon } from "iconoir-react"
-import { useMemo, useState } from "react" // useState for selectedCategory
+import { useMemo, useState } from "react"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { EmptyState } from "@/components/ui/empty-state"
+import { useDebounce } from "@/hooks/useDebounce"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 export interface AppWithVotes {
@@ -39,6 +40,7 @@ export function AppCategoryTabs({
   showEmptyState = false,
 }: AppCategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
   const totalVotes = useMemo(
     () =>
@@ -51,13 +53,13 @@ export function AppCategoryTabs({
   const filteredApps = useMemo(() => {
     return apps
       .filter(app => {
-        const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesSearch = app.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
         const matchesCategory =
           selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
         return matchesSearch && matchesCategory
       })
       .sort((a, b) => (b.votesReceived ?? 0) - (a.votesReceived ?? 0))
-  }, [apps, searchQuery, selectedCategory])
+  }, [apps, debouncedSearchQuery, selectedCategory])
 
   return (
     <Tabs.Root
@@ -119,7 +121,7 @@ export function AppCategoryTabs({
               </CheckboxCard.Control>
             </CheckboxCard.Root>
           ))
-        ) : searchQuery.length > 0 && showEmptyState ? (
+        ) : debouncedSearchQuery.length > 0 && showEmptyState ? (
           <EmptyState
             bgColor="transparent"
             icon={
