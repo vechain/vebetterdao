@@ -1,3 +1,4 @@
+"use client"
 import { Avatar, Image, Skeleton, SkeletonProps } from "@chakra-ui/react"
 
 import { notFoundImage } from "@/constants"
