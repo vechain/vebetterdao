@@ -716,6 +716,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/b3tr/actions/users/{wallet}/app/{appId}/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get B3TR action overview for a user on a specific app, optionally for a specific round or date.
+         * @description This endpoint retrieves the B3TR action overview for a user on a specific app.
+         *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
+         *
+         *                 - If roundId is provided, the overview for the specific round is returned.
+         *                 - If date is provided, the overview for the specific date is returned.
+         *                 - If roundId/date are not provided, the all time sustainability overview for the user on the app is returned.
+         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         */
+        get: operations["getUserAppOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/b3tr/actions/leaderboards/users": {
         parameters: {
             query?: never;
@@ -1394,6 +1420,21 @@ export interface components {
             totalRewardAmount: number;
             totalImpact?: components["schemas"]["Impact"];
         };
+        UserAppOverview: {
+            wallet: string;
+            appId: string;
+            /** Format: int32 */
+            roundId?: number;
+            /** Format: double */
+            totalRewardAmount: number;
+            /** Format: int64 */
+            actionsRewarded: number;
+            totalImpact?: components["schemas"]["Impact"];
+            /** Format: int64 */
+            rankByReward?: number;
+            /** Format: int64 */
+            rankByActionsRewarded?: number;
+        };
         PaginatedResponseUserLeaderboardItem: {
             data: components["schemas"]["UserLeaderboardItem"][];
             pagination: components["schemas"]["PaginationDetail"];
@@ -1486,25 +1527,25 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
+                eventName?: string[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
                 /** @description The contract address */
                 contractAddress?: string;
                 /** @description Return transactions after and including this timestamp (Unix time in seconds). */
-                after?: Record<string, never>;
+                after?: number;
                 /** @description Return transactions before and including this timestamp (Unix time in seconds). */
-                before?: Record<string, never>;
+                before?: number;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1536,6 +1577,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -1557,19 +1608,19 @@ export interface operations {
                 /** @description The contract address */
                 contractAddress?: string;
                 /** @description Return transactions after and including this timestamp (Unix time in seconds). */
-                after?: Record<string, never>;
+                after?: number;
                 /** @description Return transactions before and including this timestamp (Unix time in seconds). */
-                before?: Record<string, never>;
+                before?: number;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1598,6 +1649,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -1619,15 +1680,15 @@ export interface operations {
                 /** @description Filter by support: AGAINST, FOR, or ABSTAIN. */
                 support?: "AGAINST" | "FOR" | "ABSTAIN";
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1648,6 +1709,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1698,6 +1769,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -1722,15 +1803,15 @@ export interface operations {
                 /** @description The token contract address */
                 tokenAddress?: string;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1751,6 +1832,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1780,15 +1871,15 @@ export interface operations {
                 /** @description The token contract address */
                 tokenAddress?: string;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1809,6 +1900,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1841,15 +1942,15 @@ export interface operations {
                  */
                 officialTokensOnly?: boolean;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1870,6 +1971,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1899,15 +2010,15 @@ export interface operations {
                 /** @description The token contract address */
                 tokenAddress?: string;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1928,6 +2039,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1955,22 +2076,22 @@ export interface operations {
                  *       "0x995711ADca070C8f6cC9ca98A5B9C5A99b8350b1"
                  *     ]
                  */
-                addresses: unknown[];
+                addresses: string[];
                 /**
                  * @description Block number to query
                  * @example 1000000
                  */
                 blockNumber: number;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -1991,6 +2112,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2028,15 +2159,15 @@ export interface operations {
                  */
                 expanded?: boolean;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -2057,6 +2188,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2112,6 +2253,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2139,15 +2290,15 @@ export interface operations {
                  */
                 expanded?: boolean;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -2168,6 +2319,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2200,15 +2361,15 @@ export interface operations {
                  */
                 expanded?: boolean;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -2234,6 +2395,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2254,7 +2425,7 @@ export interface operations {
                  * @description Optional query parameter to get the total VTHO generated at a specific block number. If not provided, the latest value will be returned.
                  * @example 12345678
                  */
-                blockNumber?: Record<string, never>;
+                blockNumber?: number;
             };
             header?: never;
             path?: never;
@@ -2273,6 +2444,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2322,6 +2503,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2342,7 +2533,7 @@ export interface operations {
                  * @description Optional query parameter to get the total VTHO claimed at a specific block number. If not provided, the latest value will be returned.
                  * @example 12345678
                  */
-                blockNumber?: Record<string, never>;
+                blockNumber?: number;
             };
             header?: never;
             path?: never;
@@ -2361,6 +2552,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2410,6 +2611,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2454,6 +2665,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2474,7 +2695,7 @@ export interface operations {
                  * @description Optional query parameter to get the total VET staked at a specific block number. If not provided, the latest value will be returned.
                  * @example 12345678
                  */
-                blockNumber?: Record<string, never>;
+                blockNumber?: number;
             };
             header?: never;
             path?: never;
@@ -2493,6 +2714,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2545,6 +2776,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2565,7 +2806,7 @@ export interface operations {
                  * @description Optional query parameter to get the total VET delegated at a specific block number. If not provided, the latest value will be returned.
                  * @example 12345678
                  */
-                blockNumber?: Record<string, never>;
+                blockNumber?: number;
             };
             header?: never;
             path?: never;
@@ -2584,6 +2825,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2646,6 +2897,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2701,6 +2962,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2721,7 +2992,7 @@ export interface operations {
                  * @description Optional query parameter to get the total number of NFT holders at a specific block number. If not provided, the latest value will be returned.
                  * @example 12345678
                  */
-                blockNumber?: Record<string, never>;
+                blockNumber?: number;
             };
             header?: never;
             path?: never;
@@ -2740,6 +3011,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2792,6 +3073,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2818,15 +3109,22 @@ export interface operations {
                 /** @description The NFT tokenId */
                 tokenId?: string;
                 /**
-                 * @description The results page number
+                 * @description The addresses of the collections to exclude. Max 20 collections.
+                 * @example [
+                 *       "0x1234567890123456789012345678901234567890"
+                 *     ]
+                 */
+                excludeCollections?: string[];
+                /**
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -2847,6 +3145,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse_Public"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse_Public"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2874,15 +3182,22 @@ export interface operations {
                  */
                 owner: string;
                 /**
-                 * @description The results page number
+                 * @description The addresses of the collections to exclude. Max 20 collections.
+                 * @example [
+                 *       "0x1234567890123456789012345678901234567890"
+                 *     ]
+                 */
+                excludeCollections?: string[];
+                /**
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -2892,13 +3207,41 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseString"];
+                };
+            };
             /** @description Invalid address supplied */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PaginatedResponseString"];
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2907,25 +3250,25 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE" | "STARGATE_CLAIM_REWARDS_BASE" | "STARGATE_CLAIM_REWARDS_DELEGATE" | "STARGATE_UNDELEGATE" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
+                eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE" | "STARGATE_CLAIM_REWARDS_BASE" | "STARGATE_CLAIM_REWARDS_DELEGATE" | "STARGATE_UNDELEGATE" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ONLY" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
                 /** @description The contract address */
                 contractAddress?: string;
                 /** @description Return transactions after and including this timestamp (Unix time in seconds). */
-                after?: Record<string, never>;
+                after?: number;
                 /** @description Return transactions before and including this timestamp (Unix time in seconds). */
-                before?: Record<string, never>;
+                before?: number;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -2952,6 +3295,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3001,6 +3354,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3056,6 +3419,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3105,6 +3478,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3126,15 +3509,15 @@ export interface operations {
                 /** @description Filter by support. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -3158,6 +3541,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3204,6 +3597,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3223,15 +3626,15 @@ export interface operations {
                 /** @description Filter by support. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -3255,6 +3658,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3301,6 +3714,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3320,19 +3743,19 @@ export interface operations {
                 /** @description App ID to query by. */
                 appId?: string;
                 /** @description Return transactions after this timestamp (Unix time in milliseconds). */
-                after?: Record<string, never>;
+                after?: number;
                 /** @description Return transactions before this timestamp (Unix time in milliseconds). */
-                before?: Record<string, never>;
+                before?: number;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -3345,7 +3768,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Success */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3354,11 +3777,40 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseAction"];
                 };
             };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
         };
     };
     getUserOverview: {
         parameters: {
             query?: {
+                /** @description Round ID to filter by. */
                 roundId?: number;
                 date?: string;
             };
@@ -3387,6 +3839,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3408,15 +3870,15 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 endDate: string;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -3445,6 +3907,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getUserAppOverview: {
+        parameters: {
+            query?: {
+                /** @description Round ID to filter by. */
+                roundId?: number;
+                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Wallet address. */
+                wallet: string;
+                /** @description App ID to query by. */
+                appId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserAppOverview"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3465,15 +3995,15 @@ export interface operations {
                 roundId?: number;
                 date?: string;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
                 /** @description The sort by field */
@@ -3501,6 +4031,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3522,15 +4062,15 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
                 /** @description The sort by field */
@@ -3558,6 +4098,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3579,15 +4129,15 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
                 /** @description The sort by field */
@@ -3613,6 +4163,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3661,6 +4221,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3678,19 +4248,19 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Return transactions after this timestamp (Unix time in milliseconds). */
-                after?: Record<string, never>;
+                after?: number;
                 /** @description Return transactions before this timestamp (Unix time in milliseconds). */
-                before?: Record<string, never>;
+                before?: number;
                 /**
-                 * @description The results page number
+                 * @description The zero-based results page number
                  * @example 0
                  */
-                page?: Record<string, never>;
+                page?: number;
                 /**
                  * @description The results page size
                  * @example 20
                  */
-                size?: Record<string, never>;
+                size?: number;
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
@@ -3703,13 +4273,41 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Success */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseAction"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3741,6 +4339,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3782,6 +4390,16 @@ export interface operations {
             };
             /** @description Validation errors occurred, eg: invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
