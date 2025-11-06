@@ -162,7 +162,7 @@ export function AppCategoryTabs({
             justifyContent="space-between"
             gap="4">
             <HStack gap="1">
-              <Text textStyle="sm">{t("Showing")}</Text>
+              <Text textStyle="sm">{"Showing"}</Text>
 
               <Pagination.PageText format="long" textStyle="sm" />
             </HStack>
