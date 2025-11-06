@@ -987,6 +987,10 @@ export interface components {
             totalElements?: number;
             hasNext: boolean;
         };
+        CursorPaginationDetail: {
+            cursor?: string;
+            hasNext: boolean;
+        };
         ProofV2: {
             image?: string;
             link?: string;
@@ -1396,7 +1400,7 @@ export interface components {
         };
         PaginatedResponseUserLeaderboardItem: {
             data: components["schemas"]["UserLeaderboardItem"][];
-            pagination: components["schemas"]["PaginationDetail"];
+            pagination: components["schemas"]["CursorPaginationDetail"];
         };
         UserLeaderboardItem: {
             wallet: string;
@@ -1422,11 +1426,11 @@ export interface components {
         };
         PaginatedResponseAppLeaderboardItem: {
             data: components["schemas"]["AppLeaderboardItem"][];
-            pagination: components["schemas"]["PaginationDetail"];
+            pagination: components["schemas"]["CursorPaginationDetail"];
         };
         PaginatedResponseUserAppLeaderboardItem: {
             data: components["schemas"]["UserAppLeaderboardItem"][];
-            pagination: components["schemas"]["PaginationDetail"];
+            pagination: components["schemas"]["CursorPaginationDetail"];
         };
         UserAppLeaderboardItem: {
             appId: string;
@@ -3464,11 +3468,8 @@ export interface operations {
                 /** @description Round ID to filter by. */
                 roundId?: number;
                 date?: string;
-                /**
-                 * @description The results page number
-                 * @example 0
-                 */
-                page?: Record<string, never>;
+                /** @description Cursor for pagination */
+                cursor?: string;
                 /**
                  * @description The results page size
                  * @example 20
@@ -3521,11 +3522,8 @@ export interface operations {
                 roundId?: number;
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
-                /**
-                 * @description The results page number
-                 * @example 0
-                 */
-                page?: Record<string, never>;
+                /** @description Cursor for pagination */
+                cursor?: string;
                 /**
                  * @description The results page size
                  * @example 20
@@ -3578,11 +3576,8 @@ export interface operations {
                 roundId?: number;
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
-                /**
-                 * @description The results page number
-                 * @example 0
-                 */
-                page?: Record<string, never>;
+                /** @description Cursor for pagination */
+                cursor?: string;
                 /**
                  * @description The results page size
                  * @example 20
