@@ -57,6 +57,7 @@ export function AllocationTabs({ apps, onSelectedAppsChange }: AllocationTabsPro
               apps={apps}
               selectedAppIds={selectedAppIds}
               onToggleApp={toggleApp}
+              onViewAll={() => setIsSearchOpen(true)}
               showAdditionalTabs
               tabsListProps={{
                 position: "sticky",
@@ -66,6 +67,7 @@ export function AllocationTabs({ apps, onSelectedAppsChange }: AllocationTabsPro
                 bg: isStuck ? "bg.primary" : undefined,
                 zIndex: 2,
               }}
+              showPagination
             />
           </Bleed>
         </Tabs.Content>

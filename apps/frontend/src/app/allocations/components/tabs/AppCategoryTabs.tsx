@@ -1,6 +1,18 @@
 "use client"
 
-import { CheckboxCard, Circle, Flex, Heading, Icon, Progress, Tabs, Text } from "@chakra-ui/react"
+import {
+  Button,
+  CheckboxCard,
+  Circle,
+  Flex,
+  Heading,
+  HStack,
+  Icon,
+  Pagination,
+  Progress,
+  Tabs,
+  Text,
+} from "@chakra-ui/react"
 import { Group, Search as SearchIcon } from "iconoir-react"
 import { useMemo, useState } from "react"
 
@@ -28,6 +40,8 @@ interface AppCategoryTabsProps {
   tabsListProps?: Record<string, any>
   showAdditionalTabs?: boolean
   showEmptyState?: boolean
+  showPagination?: boolean
+  onViewAll?: VoidFunction
 }
 
 export function AppCategoryTabs({
@@ -38,6 +52,8 @@ export function AppCategoryTabs({
   tabsListProps,
   showAdditionalTabs = false,
   showEmptyState = false,
+  showPagination = false,
+  onViewAll,
 }: AppCategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
@@ -87,7 +103,7 @@ export function AppCategoryTabs({
         gap={tabsListProps?.mb ? "3" : "4"}
         p={tabsListProps?.mb ? undefined : "4"}>
         {filteredApps.length > 0 ? (
-          filteredApps.map(app => (
+          (showPagination ? filteredApps.slice(0, 10) : filteredApps).map(app => (
             <CheckboxCard.Root
               key={app.id}
               rounded="lg"
@@ -133,6 +149,29 @@ export function AppCategoryTabs({
             description="Hmm, we couldn't find that app. Please check the spelling."
           />
         ) : null}
+
+        {showPagination && (
+          <Pagination.Root
+            defaultPage={1}
+            count={apps.length}
+            pageSize={10}
+            page={1}
+            onPageChange={() => {}}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            gap="4">
+            <HStack gap="1">
+              <Text textStyle="sm">{t("Showing")}</Text>
+
+              <Pagination.PageText format="long" textStyle="sm" />
+            </HStack>
+
+            <Button variant="link" p="0" size="sm" onClick={onViewAll}>
+              {"View all"}
+            </Button>
+          </Pagination.Root>
+        )}
       </Tabs.Content>
 
       {showAdditionalTabs && (
