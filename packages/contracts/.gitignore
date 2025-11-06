@@ -14,5 +14,8 @@ artifacts
 
 docs
 
+# Output data files
+output
+
 # GalaxyMember metadata
 metadata/galaxyMember/metadata.zip
