@@ -28,8 +28,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
   const handleSearchChange = useCallback(
     (query: string) => {
       const params = new URLSearchParams(searchParams)
-      if (query) params.set("search", query)
-
+      params.set("search", query)
       router.replace(`${pathname}?${params.toString()}`)
     },
     [pathname, router, searchParams],
