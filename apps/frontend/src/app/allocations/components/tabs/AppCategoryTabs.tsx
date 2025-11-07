@@ -21,16 +21,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { useDebounce } from "@/hooks/useDebounce"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
-export interface AppWithVotes {
-  id: string
-  name: string
-  voters?: number
-  votesReceived?: number
-  // TODO: this is temporary
-  metadata?: {
-    categories?: string[]
-  }
-}
+import type { AppWithVotes } from "../../page"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
@@ -58,13 +49,13 @@ export function AppCategoryTabs({
   const [selectedCategory, setSelectedCategory] = useState("all")
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
-  const totalVotes = useMemo(
-    () =>
-      apps.reduce((acc, cum) => {
-        return acc + (cum?.votesReceived ? Number(cum.votesReceived) : 0)
-      }, 0),
-    [apps],
-  )
+  // const totalVotes = useMemo(
+  //   () =>
+  //     apps.reduce((acc, cum) => {
+  //       return acc + (cum?.votesReceived ? Number(cum.votesReceived) : 0)
+  //     }, 0),
+  //   [apps],
+  // )
 
   const filteredApps = useMemo(() => {
     return apps
@@ -74,7 +65,7 @@ export function AppCategoryTabs({
           selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
         return matchesSearch && matchesCategory
       })
-      .sort((a, b) => (b.votesReceived ?? 0) - (a.votesReceived ?? 0))
+      .sort((a, b) => (b.votesReceived > a.votesReceived ? 1 : 0))
   }, [apps, debouncedSearchQuery, selectedCategory])
 
   return (
@@ -123,9 +114,7 @@ export function AppCategoryTabs({
                       {app.voters ?? 0}
                     </Text>
                     <Text textStyle="xs" fontWeight="bold">
-                      {(app.votesReceived ?? 0) > 0
-                        ? `${(((app?.votesReceived || 0) / totalVotes) * 100).toFixed(2)}%`
-                        : "0%"}
+                      {"0%"}
                     </Text>
                   </Flex>
                   <Progress.Root w="full" size="xs" colorPalette="green" mt="1" value={50}>

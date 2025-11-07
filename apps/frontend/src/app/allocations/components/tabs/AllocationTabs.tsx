@@ -1,88 +1,92 @@
 "use client"
 
-import { Bleed, Box, Button, Dialog, Icon, Input, InputGroup, Presence, Tabs } from "@chakra-ui/react"
-import { Search } from "iconoir-react"
-import { useRef, useState } from "react"
+import { Box, Bleed, Button, Dialog, Presence, Tabs } from "@chakra-ui/react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { createContext, useRef, useState, useCallback } from "react"
 
 import { useStickyState } from "@/hooks/useStickyState"
 
-import { AppCategoryTabs, AppWithVotes } from "./AppCategoryTabs"
-import { SearchAppsBottomSheet } from "./components/SearchAppsBottomSheet"
+import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../page"
+
+import { RoundInfoTab } from "./RoundInfoTab"
+import { VoteTab } from "./VoteTab"
+
+interface AllocationTabsContextType {
+  roundId: number
+  apps: AppWithVotes[]
+  selectedAppIds: Set<string>
+  onToggleApp: (appId: string) => void
+  isStuck: boolean
+}
+
+export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
 
 interface AllocationTabsProps {
-  apps: AppWithVotes[]
+  currentRoundDetails: AllocationCurrentRoundDetails
   onSelectedAppsChange?: (selectedIds: Set<string>) => void
 }
 
-export function AllocationTabs({ apps, onSelectedAppsChange }: AllocationTabsProps) {
+export function AllocationTabs({ currentRoundDetails, onSelectedAppsChange }: AllocationTabsProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
 
-  const toggleApp = (appId: string) => {
-    setSelectedAppIds(prev => {
-      const next = new Set(prev)
-      next.has(appId) ? next.delete(appId) : next.add(appId)
-      onSelectedAppsChange?.(next)
-      return next
-    })
+  const currentTab = searchParams.get("tab") || "vote"
+
+  const toggleApp = useCallback(
+    (appId: string) => {
+      setSelectedAppIds(prev => {
+        const next = new Set(prev)
+        next.has(appId) ? next.delete(appId) : next.add(appId)
+        onSelectedAppsChange?.(next)
+        return next
+      })
+    },
+    [onSelectedAppsChange],
+  )
+
+  const handleTabChange = (details: { value: string }) => {
+    const params = new URLSearchParams(searchParams)
+    params.set("tab", details.value)
+    router.push(`?${params.toString()}`)
   }
 
   return (
-    <>
+    <AllocationTabsContext.Provider
+      value={{
+        roundId: currentRoundDetails.id,
+        apps: currentRoundDetails.apps,
+        selectedAppIds,
+        onToggleApp: toggleApp,
+        isStuck,
+      }}>
       <Box ref={sentinelRef} height="1px" />
 
-      <Tabs.Root defaultValue="tab1" variant="line" size="md" w="full" lazyMount>
+      <Tabs.Root value={currentTab} variant="line" size="md" w="full" lazyMount onValueChange={handleTabChange}>
         <Bleed position="sticky" top="0" zIndex={2} inlineStart="4" inlineEnd="4">
           <Tabs.List pt={isStuck ? "3" : undefined} px="4" bg={isStuck ? "bg.primary" : undefined}>
-            <Tabs.Trigger flex={1} justifyContent="center" value="tab1">
+            <Tabs.Trigger flex={1} justifyContent="center" value="vote">
               {"Vote for apps"}
             </Tabs.Trigger>
-            <Tabs.Trigger flex={1} justifyContent="center" value="tab2">
+            <Tabs.Trigger flex={1} justifyContent="center" value="round">
               {"Round info"}
             </Tabs.Trigger>
           </Tabs.List>
         </Bleed>
-        <Tabs.Content value="tab1" display="flex" flexDirection="column" gap="4">
-          <InputGroup
-            startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
-            rounded="xl"
-            borderColor="border.primary">
-            <Input id="allocation-app-filter" placeholder="Search app" onFocus={() => setIsSearchOpen(true)} />
-          </InputGroup>
-          <Bleed inlineStart="4" inlineEnd="4">
-            <AppCategoryTabs
-              apps={apps}
-              selectedAppIds={selectedAppIds}
-              onToggleApp={toggleApp}
-              onViewAll={() => setIsSearchOpen(true)}
-              showAdditionalTabs
-              tabsListProps={{
-                position: "sticky",
-                top: "52px",
-                py: isStuck ? "3" : undefined,
-                px: "4",
-                bg: isStuck ? "bg.primary" : undefined,
-                zIndex: 2,
-              }}
-              showPagination
-            />
-          </Bleed>
+        <Tabs.Content value="vote" display="flex" flexDirection="column" gap="4">
+          <VoteTab
+            apps={currentRoundDetails.apps}
+            selectedAppIds={selectedAppIds}
+            onToggleApp={toggleApp}
+            isStuck={isStuck}
+          />
         </Tabs.Content>
-        <Tabs.Content value="tab2">{"Second tab content"}</Tabs.Content>
+        <Tabs.Content value="round">
+          <RoundInfoTab currentRoundDetails={currentRoundDetails} />
+        </Tabs.Content>
       </Tabs.Root>
-
-      <SearchAppsBottomSheet
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        apps={apps}
-        selectedAppIds={selectedAppIds}
-        onToggleApp={toggleApp}
-      />
 
       <Presence
         present={selectedAppIds.size > 0}
@@ -106,6 +110,6 @@ export function AllocationTabs({ apps, onSelectedAppsChange }: AllocationTabsPro
           </Dialog.Root>
         </Box>
       </Presence>
-    </>
+    </AllocationTabsContext.Provider>
   )
 }

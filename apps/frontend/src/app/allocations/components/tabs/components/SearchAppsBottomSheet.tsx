@@ -4,9 +4,10 @@ import { CloseButton, Flex, IconButton, Input, InputGroup } from "@chakra-ui/rea
 import { NavArrowLeft } from "iconoir-react"
 import { useRef } from "react"
 
+import type { AppWithVotes } from "@/app/allocations/page"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 
-import { AppCategoryTabs, type AppWithVotes } from "../AppCategoryTabs"
+import { AppCategoryTabs } from "../AppCategoryTabs"
 
 interface SearchAppsBottomSheetProps {
   isOpen: boolean

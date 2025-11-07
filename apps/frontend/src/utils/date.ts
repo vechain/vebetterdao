@@ -1,3 +1,5 @@
+import { ThorClient } from "@vechain/vechain-kit"
+
 import dayjs from "@/utils/dayjsConfig"
 
 /**
@@ -76,3 +78,25 @@ export const timestampToTimeLeftDecomposed = (endDate: number, startDate: number
  * @returns {string} - The formatted date string in "D MMM" format.
  */
 export const parseDate = (date: number): string => dayjs(date).format("D MMM")
+
+const VECHAIN_BLOCK_TIME_SECONDS = 10
+export const blockNumberToDate = async (
+  thor: ThorClient,
+  blockNumber: bigint,
+  currentBlockTimestamp?: number | null,
+  currentBlockNumber?: bigint,
+): Promise<Date> => {
+  let blockTs = currentBlockTimestamp
+  let currentBlock = currentBlockNumber
+
+  if (!blockTs || !currentBlock) {
+    const bestBlock = await thor.blocks.getBestBlockCompressed()
+    blockTs ??= bestBlock?.timestamp ?? Math.floor(Date.now() / 1000)
+    currentBlock ??= bestBlock ? BigInt(bestBlock.number) : BigInt(0)
+  }
+
+  const blockDifference = blockNumber - currentBlock
+  const timeOffsetSeconds = blockDifference * BigInt(VECHAIN_BLOCK_TIME_SECONDS)
+
+  return new Date((Number(blockTs) + Number(timeOffsetSeconds)) * 1000)
+}
