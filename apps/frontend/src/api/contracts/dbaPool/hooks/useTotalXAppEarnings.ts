@@ -48,7 +48,7 @@ export const useTotalXAppEarnings = (roundId: string, xAppId: string, votePercen
 
   const result = useMemo(() => {
     // Use indexer for concluded rounds
-    if (!isRoundActive && indexerData && indexerData.length > 0) {
+    if (isRoundConcluded && indexerData && indexerData.length > 0) {
       const earnings = indexerData[0]
       const totalAmount = earnings?.totalAmount?.toString() ?? "0"
 
@@ -83,7 +83,7 @@ export const useTotalXAppEarnings = (roundId: string, xAppId: string, votePercen
       isSimulation: false,
       source: "none" as const,
     }
-  }, [isRoundActive, indexerData, contractData, xAppId])
+  }, [isRoundActive, isRoundConcluded, indexerData, contractData, xAppId])
 
   return {
     data: result,

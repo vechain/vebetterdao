@@ -30,7 +30,7 @@ export const useXAppRoundEarningsWithDBA = (
   enabled: boolean = true,
 ) => {
   // Get base round earnings
-  const { data: roundEarnings, isLoading: isRoundEarningsLoading } = useXAppRoundEarnings(roundId, xAppId)
+  const { data: roundEarnings, isLoading: isRoundEarningsLoading } = useXAppRoundEarnings(roundId, xAppId, enabled)
 
   // Get DBA distribution start round from contract (cached forever)
   const { data: dbaStartRound } = useDBADistributionStartRound()
