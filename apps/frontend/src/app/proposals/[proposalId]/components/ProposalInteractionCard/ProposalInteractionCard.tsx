@@ -148,7 +148,7 @@ export const ProposalInteractionCard = ({
       return result.toFixed(2)
     }
 
-    return result.toFixed(0)
+    return Math.floor(result)
   }, [currentDepositAmount, proposalDepositThreshold])
 
   const canMarkInDevelopment = useMemo(() => {

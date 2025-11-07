@@ -305,7 +305,7 @@ export interface paths {
         };
         /**
          * Get historic data for total VTHO claimed
-         * @description This endpoint returns a time series of total VTHO claimed by all Stargate users.
+         * @description This endpoint returns a time series of total VTHO claimed by all Stargate users (Delegation only).
          */
         get: operations["getTotalVthoClaimed_2"];
         put?: never;
@@ -906,13 +906,38 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description Error response returned by the API */
         ExceptionResponse: {
+            /**
+             * @description Unique identifier for this error
+             * @example 7cecb690-631f-416f-930d-bb5828d02e67
+             */
             id: string;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description HTTP status code
+             * @example 400
+             */
             status: number;
+            /**
+             * @description Error message describing what went wrong
+             * @example The provided address is invalid
+             */
             message?: string;
+            /**
+             * @description Error type/category
+             * @example Bad Request
+             */
             error: string;
+            /**
+             * @description The API path that was requested
+             * @example /api/v1/transfers
+             */
             path: string;
+            /**
+             * @description Unix timestamp when the error occurred
+             * @example 1762352201
+             */
             timestamp: number;
         };
         AppVote: {
@@ -1004,14 +1029,8 @@ export interface components {
             pagination: components["schemas"]["PaginationDetail"];
         };
         PaginationDetail: {
-            hasCount: boolean;
-            /** Format: int64 */
-            countLimit: number;
-            /** Format: int32 */
-            totalPages?: number;
-            /** Format: int64 */
-            totalElements?: number;
             hasNext: boolean;
+            cursor?: string;
         };
         ProofV2: {
             image?: string;
@@ -1229,13 +1248,38 @@ export interface components {
             /** Format: int64 */
             value: number;
         };
+        /** @description Error response returned by the API */
         ExceptionResponse_Public: {
+            /**
+             * @description Unique identifier for this error
+             * @example 7cecb690-631f-416f-930d-bb5828d02e67
+             */
             id: string;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description HTTP status code
+             * @example 400
+             */
             status: number;
+            /**
+             * @description Error message describing what went wrong
+             * @example The provided address is invalid
+             */
             message?: string;
+            /**
+             * @description Error type/category
+             * @example Bad Request
+             */
             error: string;
+            /**
+             * @description The API path that was requested
+             * @example /api/v1/transfers
+             */
             path: string;
+            /**
+             * @description Unix timestamp when the error occurred
+             * @example 1762352201
+             */
             timestamp: number;
         };
         IndexedNft_Public: {
@@ -1255,14 +1299,8 @@ export interface components {
             pagination: components["schemas"]["PaginationDetail_Public"];
         };
         PaginationDetail_Public: {
-            hasCount: boolean;
-            /** Format: int64 */
-            countLimit: number;
-            /** Format: int32 */
-            totalPages?: number;
-            /** Format: int64 */
-            totalElements?: number;
             hasNext: boolean;
+            cursor?: string;
         };
         HistoryEventDto: {
             id: string;
@@ -2534,6 +2572,8 @@ export interface operations {
                  * @example 12345678
                  */
                 blockNumber?: number;
+                /** @description Optional query parameter to filter rewards by type. If not all rewards will be returned. */
+                rewardsType?: "LEGACY" | "DELEGATION";
             };
             header?: never;
             path?: never;
@@ -2582,7 +2622,10 @@ export interface operations {
     };
     getTotalVthoClaimed_1: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Optional query parameter to filter rewards by type. If not provided, all types will be included. */
+                rewardsType?: "LEGACY" | "DELEGATION";
+            };
             header?: never;
             path: {
                 /**
@@ -3995,11 +4038,6 @@ export interface operations {
                 roundId?: number;
                 date?: string;
                 /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
                  * @description The results page size
                  * @example 20
                  */
@@ -4008,6 +4046,8 @@ export interface operations {
                 direction?: "ASC" | "DESC";
                 /** @description The sort by field */
                 sortBy?: "totalRewardAmount" | "actionsRewarded";
+                /** @description The pagination cursor returned by a previous request. */
+                cursor?: string;
             };
             header?: never;
             path?: never;
@@ -4062,11 +4102,6 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
                 /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
                  * @description The results page size
                  * @example 20
                  */
@@ -4075,6 +4110,8 @@ export interface operations {
                 direction?: "ASC" | "DESC";
                 /** @description The sort by field */
                 sortBy?: "totalRewardAmount" | "actionsRewarded";
+                /** @description The pagination cursor returned by a previous request. */
+                cursor?: string;
             };
             header?: never;
             path?: never;
@@ -4129,11 +4166,6 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
                 /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
                  * @description The results page size
                  * @example 20
                  */
@@ -4142,6 +4174,8 @@ export interface operations {
                 direction?: "ASC" | "DESC";
                 /** @description The sort by field */
                 sortBy?: "totalRewardAmount" | "actionsRewarded";
+                /** @description The pagination cursor returned by a previous request. */
+                cursor?: string;
             };
             header?: never;
             path: {
