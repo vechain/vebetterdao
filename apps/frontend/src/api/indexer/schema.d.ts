@@ -3221,7 +3221,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseString"];
                 };
             };
-            /** @description Invalid address supplied */
+            /** @description Validation errors occurred, eg: invalid input */
             400: {
                 headers: {
                     [name: string]: unknown;

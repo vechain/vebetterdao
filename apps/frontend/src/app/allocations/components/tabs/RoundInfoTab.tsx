@@ -13,24 +13,35 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Gift, Group, NavArrowRight, SmartphoneDevice, Flash } from "iconoir-react"
 import NextLink from "next/link"
+import { useMemo } from "react"
+import { formatEther } from "viem"
 
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 
 import { AllocationCurrentRoundDetails } from "../../page"
 
-const formatLargeNumber = (num: number) => {
-  if (num >= 1_000_000) {
-    return `${(num / 1_000_000).toFixed(2)}M`
-  }
-  if (num >= 1_000) {
-    return `${(num / 1_000).toFixed(1)}K`
-  }
-  return num.toLocaleString()
-}
-
 export function RoundInfoTab({ currentRoundDetails }: { currentRoundDetails: AllocationCurrentRoundDetails }) {
+  const distribution = useMemo(() => {
+    const toApps = Number(currentRoundDetails.xAllocationsAmount)
+    const toVoters = Number(currentRoundDetails.vote2EarnAmount)
+    const toTreasury = Number(currentRoundDetails.treasuryAmount)
+    const total = toApps + toVoters + toTreasury
+
+    const appsPercent = (toApps / total) * 100
+    const votersPercent = (toVoters / total) * 100
+    const treasuryPercent = (toTreasury / total) * 100
+
+    return {
+      total,
+      appsPercent,
+      votersPercent,
+      treasuryPercent,
+    }
+  }, [currentRoundDetails.xAllocationsAmount, currentRoundDetails.vote2EarnAmount, currentRoundDetails.treasuryAmount])
+
   return (
     <VStack alignItems="stretch" gap="5" w="full" mt="2">
       <VStack alignItems="stretch" gap="2">
@@ -71,10 +82,10 @@ export function RoundInfoTab({ currentRoundDetails }: { currentRoundDetails: All
                 {currentRoundDetails.apps.length}
               </Text>
               <Text textStyle="md" fontWeight="semibold">
-                {formatLargeNumber(currentRoundDetails.totalVoters)}
+                {getCompactFormatter(3).format(currentRoundDetails.totalVoters)}
               </Text>
               <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
-                {formatLargeNumber(Number(currentRoundDetails.totalVP))}
+                {getCompactFormatter(2).format(Number(formatEther(currentRoundDetails.totalVP)))}
               </Text>
             </SimpleGrid>
 
@@ -97,15 +108,15 @@ export function RoundInfoTab({ currentRoundDetails }: { currentRoundDetails: All
                     <B3TRIcon />
                   </Icon>
                   <Text textStyle="md" fontWeight="semibold">
-                    {"3.5M B3TR"}
+                    {getCompactFormatter(2).format(Number(formatEther(BigInt(distribution.total)))) + " B3TR"}
                   </Text>
                 </HStack>
 
                 <VStack alignItems="stretch" gap="1">
                   <Box h="1" bg="bg.subtle" rounded="full" overflow="hidden" display="flex">
-                    <Box flex="1" bg="status.positive.primary" />
-                    <Box w="27px" bg="status.info.strong" />
-                    <Box w="35px" bg="status.warning.primary" />
+                    <Box w={`${distribution.appsPercent}%`} bg="status.positive.primary" />
+                    <Box w={`${distribution.votersPercent}%`} bg="status.info.strong" />
+                    <Box w={`${distribution.treasuryPercent}%`} bg="status.warning.primary" />
                   </Box>
 
                   <HStack gap="8" pt="1">

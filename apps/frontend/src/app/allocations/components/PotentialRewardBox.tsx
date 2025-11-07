@@ -2,7 +2,6 @@
 
 import { Card, VStack, Square, Icon, Text, Skeleton, Mark } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { useCallClause, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -25,9 +24,7 @@ export const PotentialRewardBox = ({ currentRoundDetails }: { currentRoundDetail
     address: voterRewardsAddress,
     method: "cycleToVoterToTotal",
     args: [BigInt(id), account?.address as `0x{string}`],
-    queryOptions: {
-      select: data => data[0],
-    },
+    queryOptions: { select: data => data[0] },
   })
 
   const { data: userGMWeight, isLoading: isUserGMWeightLoading } = useCallClause({
@@ -35,9 +32,7 @@ export const PotentialRewardBox = ({ currentRoundDetails }: { currentRoundDetail
     address: voterRewardsAddress,
     method: "getGMReward",
     args: [BigInt(id), account?.address as `0x{string}`],
-    queryOptions: {
-      select: data => data[0],
-    },
+    queryOptions: { select: data => data[0] },
   })
 
   const isLoading = isUserVoterTotalLoading || isUserGMWeightLoading
@@ -77,16 +72,14 @@ export const PotentialRewardBox = ({ currentRoundDetails }: { currentRoundDetail
         <Text textStyle="xs" lineClamp={1}>
           {"Potential rewards"}
         </Text>
-        {isLoading || !potentialReward ? (
-          <Skeleton />
-        ) : (
+        <Skeleton asChild loading={isLoading || !potentialReward}>
           <Text textStyle="sm" lineClamp={1}>
             <Mark variant="text" fontWeight="semibold">
-              {getCompactFormatter().format(humanNumber(formatEther(potentialReward.netTotal)))}
+              {potentialReward ? Number(formatEther(potentialReward.netTotal)).toFixed(2) : "-"}
             </Mark>
             {" B3TR"}
           </Text>
-        )}
+        </Skeleton>
       </VStack>
     </Card.Root>
   )

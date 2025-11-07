@@ -18,7 +18,6 @@ import { useMemo, useState } from "react"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { EmptyState } from "@/components/ui/empty-state"
-import { useDebounce } from "@/hooks/useDebounce"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 import type { AppWithVotes } from "../../page"
@@ -33,6 +32,8 @@ interface AppCategoryTabsProps {
   showEmptyState?: boolean
   showPagination?: boolean
   onViewAll?: VoidFunction
+  initialCategory?: string
+  onCategoryChange?: (category: string) => void
 }
 
 export function AppCategoryTabs({
@@ -45,33 +46,37 @@ export function AppCategoryTabs({
   showEmptyState = false,
   showPagination = false,
   onViewAll,
+  initialCategory = "all",
+  onCategoryChange,
 }: AppCategoryTabsProps) {
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const debouncedSearchQuery = useDebounce(searchQuery, 300)
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
 
-  // const totalVotes = useMemo(
-  //   () =>
-  //     apps.reduce((acc, cum) => {
-  //       return acc + (cum?.votesReceived ? Number(cum.votesReceived) : 0)
-  //     }, 0),
-  //   [apps],
-  // )
+  const totalVotes = useMemo(
+    () =>
+      apps.reduce((acc, cum) => {
+        return acc + (cum?.votesReceived ? cum.votesReceived : 0n)
+      }, 0n),
+    [apps],
+  )
 
   const filteredApps = useMemo(() => {
     return apps
       .filter(app => {
-        const matchesSearch = app.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+        const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
         const matchesCategory =
           selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
         return matchesSearch && matchesCategory
       })
-      .sort((a, b) => (b.votesReceived > a.votesReceived ? 1 : 0))
-  }, [apps, debouncedSearchQuery, selectedCategory])
+      .sort((a, b) => (b.votesReceived > a.votesReceived ? 1 : -1))
+  }, [apps, searchQuery, selectedCategory])
 
   return (
     <Tabs.Root
       value={selectedCategory}
-      onValueChange={e => setSelectedCategory(e.value)}
+      onValueChange={e => {
+        setSelectedCategory(e.value)
+        onCategoryChange?.(e.value)
+      }}
       variant="subtle"
       colorPalette="actions.secondary"
       size="md"
@@ -114,7 +119,7 @@ export function AppCategoryTabs({
                       {app.voters ?? 0}
                     </Text>
                     <Text textStyle="xs" fontWeight="bold">
-                      {"0%"}
+                      {((app.votesReceived * 100n) / totalVotes).toString() + "%"}
                     </Text>
                   </Flex>
                   <Progress.Root w="full" size="xs" colorPalette="green" mt="1" value={50}>
@@ -126,7 +131,7 @@ export function AppCategoryTabs({
               </CheckboxCard.Control>
             </CheckboxCard.Root>
           ))
-        ) : debouncedSearchQuery.length > 0 && showEmptyState ? (
+        ) : searchQuery.length > 0 && showEmptyState ? (
           <EmptyState
             bgColor="transparent"
             icon={

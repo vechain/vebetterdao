@@ -7,6 +7,7 @@ import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
 import { redirect } from "next/navigation"
 
+import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 import { fetchClient } from "@/api/indexer/api"
 import { FeatureFlag, featureFlags } from "@/constants/featureFlag"
 import { blockNumberToDate } from "@/utils/date"
@@ -25,6 +26,7 @@ export interface AppWithVotes {
   appAvailableForAllocationVoting: boolean
   voters: number
   votesReceived: bigint
+  metadata?: Awaited<ReturnType<typeof getXAppMetadata>>
 }
 
 export interface AllocationCurrentRoundDetails {
@@ -37,6 +39,8 @@ export interface AllocationCurrentRoundDetails {
   vote2EarnAmount: bigint
   gmAmount: bigint
   cycleTotalGMWeight: bigint
+  xAllocationsAmount: bigint
+  treasuryAmount: bigint
 }
 
 const xAllocationVotingAbi = XAllocationVoting__factory.abi
@@ -48,28 +52,35 @@ const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${stri
 const emissionsAbi = Emissions__factory.abi
 const emissionsAddress = getConfig().emissionsContractAddress as `0x${string}`
 
+export type AllocationAmount = {
+  treasury: string
+  voteX2Earn: string
+  voteXAllocations: string
+  gm: string
+}
+
 const getCurrentRoundDetails = async (cycle: bigint) => {
   const thor = await getNodeJsThorClient()
-  // Data neeed to calculate potential user reward
+
   const [apps, cycleTotal, cycleTotalGMWeight, emissions] = await executeMultipleClausesCall({
     thor,
     calls: [
       {
         abi: xAllocationVotingAbi,
         address: xAllocationVotingAddress,
-        functionName: "getAppsOfRound",
+        functionName: "getAppsOfRound" as const,
         args: [cycle],
       },
       {
         abi: voterRewardsAbi,
         address: voterRewardsAddress,
-        functionName: "cycleToTotal",
+        functionName: "cycleToTotal" as const,
         args: [cycle],
       },
       {
         abi: voterRewardsAbi,
         address: voterRewardsAddress,
-        functionName: "cycleToTotalGMWeight",
+        functionName: "cycleToTotalGMWeight" as const,
         args: [cycle],
       },
       {
@@ -81,12 +92,14 @@ const getCurrentRoundDetails = async (cycle: bigint) => {
     ],
   })
 
-  const [_xAllocationsAmount, vote2EarnAmount, _treasuryAmount, gmAmount] = emissions
+  const [xAllocationsAmount, vote2EarnAmount, treasuryAmount, gmAmount] = emissions
 
   return {
     apps,
     cycleTotal,
+    xAllocationsAmount,
     vote2EarnAmount,
+    treasuryAmount,
     gmAmount,
     cycleTotalGMWeight: cycleTotalGMWeight as bigint,
   }
@@ -125,13 +138,14 @@ const getData = async (): Promise<AllocationCurrentRoundDetails> => {
   const resultsMap = new Map(res.data.map(result => [result.appId, result]))
 
   const apps = currentRoundDetails!.apps
-  const appsWithVotes = apps.map(app => {
+  const appsMetadata = await Promise.all(apps.map(app => getXAppMetadata(`ipfs://${app.metadataURI}`)))
+  const appsWithVotes = apps.map((app, index) => {
     const result = resultsMap.get(app.id)
     return {
       ...app,
       voters: result?.voters ?? 0,
-      // this actually returns string, BE typing needed change
       votesReceived: BigInt(result!.votesReceived.toString()) ?? 0,
+      metadata: appsMetadata[index],
     }
   })
 
