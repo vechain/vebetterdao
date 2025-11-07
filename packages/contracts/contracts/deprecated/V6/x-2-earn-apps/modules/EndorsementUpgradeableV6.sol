@@ -24,16 +24,16 @@
 pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
-import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
-import { EndorsementUtils } from "../libraries/EndorsementUtils.sol";
-import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
-import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
-import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
-import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { IStargateNFT } from "../../mocks/Stargate/interfaces/IStargateNFT.sol";
+import { VechainNodesDataTypes } from "../../../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
+import { X2EarnAppsUpgradeableV6 } from "../X2EarnAppsUpgradeableV6.sol";
+import { X2EarnAppsDataTypes } from "../../../../libraries/X2EarnAppsDataTypes.sol";
+import { EndorsementUtilsV6 } from "../libraries/EndorsementUtilsV6.sol";
+import { INodeManagementV3 } from "../../../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
+import { IVeBetterPassport } from "../../../../interfaces/IVeBetterPassport.sol";
+import { PassportTypes } from "../../../../ve-better-passport/libraries/PassportTypes.sol";
+import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
 
-abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable {
+abstract contract EndorsementUpgradeableV6 is Initializable, X2EarnAppsUpgradeableV6 {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
   struct EndorsementStorage {
     bytes32[] _unendorsedApps; // List of apps pending endorsement
@@ -51,8 +51,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(uint256 => uint256) _endorsementRound; // The latest round in which a node endorsed an app
     uint256 _cooldownPeriod; // Cooldown duration in rounds for a node to endorse an app
     IXAllocationVotingGovernor _xAllocationVotingGovernor; // The XAllocationVotingGovernor contract
-    //------- Version 7 -------//
-    IStargateNFT _stargateNFT; // The Stargate NFT contract
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -78,17 +76,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   ) internal onlyInitializing {
     _setCooldownPeriod(_cooldownPeriod);
     _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
-  }
-
-  /**
-   * @dev Sets the value for the cooldown period.
-   */
-  function __Endorsement_init_v7(address _stargateNFT) internal onlyInitializing {
-    __Endorsement_init_unchained_v7(_stargateNFT);
-  }
-
-  function __Endorsement_init_unchained_v7(address _stargateNFT) internal onlyInitializing {
-    _setStargateNFT(_stargateNFT);
   }
 
   // ---------- Public ---------- //
@@ -151,7 +138,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Check if the user is managing the specified nodeId either through delegation or ownership
-    if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+    if (!$._nodeManagementContract.isNodeManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
 
@@ -195,7 +182,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Check if the user is managing the specified nodeId either through delegation or ownership
-    if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+    if (!$._nodeManagementContract.isNodeManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
 
@@ -214,7 +201,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @return bytes32 The unique identifier of the app that the node ID is endorsing.
    */
   function nodeToEndorsedApp(uint256 nodeId) external view returns (bytes32) {
-    return _getEndorsementStorage()._nodeToEndorsedApp[nodeId];
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._nodeToEndorsedApp[nodeId];
   }
 
   /**
@@ -223,7 +211,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @return uint256 The endorsement score of the node ID.
    */
   function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256) {
-    return _getEndorsementStorage()._nodeEnodorsmentScore[nodeLevel];
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._nodeEnodorsmentScore[nodeLevel];
   }
 
   // ---------- Internal ---------- //
@@ -237,12 +226,12 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Retrieve the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
     return
-      EndorsementUtils.getScoreAndRemoveEndorsement(
+      EndorsementUtilsV6.getScoreAndRemoveEndorsement(
         $._nodeEnodorsmentScore,
         $._nodeToEndorsedApp,
         $._appEndorsers,
         $._appScores,
-        $._stargateNFT,
+        $._nodeManagementContract,
         appId,
         endorserToRemove
       );
@@ -252,9 +241,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev Internal function to update the endorsement scores of each node level.
    * @param nodeStrengthScores The node level scores to update.
    */
-  function _updateNodeEndorsementScores(EndorsementUtils.NodeStrengthScores calldata nodeStrengthScores) internal {
+  function _updateNodeEndorsementScores(VechainNodesDataTypes.NodeStrengthScores calldata nodeStrengthScores) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    EndorsementUtils.updateNodeEndorsementScores($._nodeEnodorsmentScore, nodeStrengthScores);
+    EndorsementUtilsV6.updateNodeEndorsementScores($._nodeEnodorsmentScore, nodeStrengthScores);
   }
 
   /**
@@ -276,7 +265,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function _updateAppsPendingEndorsement(bytes32 appId, bool remove) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    EndorsementUtils.updateAppsPendingEndorsement($._unendorsedApps, $._unendorsedAppsIndex, appId, remove);
+    EndorsementUtilsV6.updateAppsPendingEndorsement($._unendorsedApps, $._unendorsedAppsIndex, appId, remove);
   }
 
   /**
@@ -402,19 +391,19 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @notice This function can be called to update the VeBetterPassport contract
+   * @notice This function can be called to update the node management contract
    */
-  function _setVeBetterPassportContract(address veBetterPassportContract) internal virtual {
-    require(veBetterPassportContract != address(0), "VeBetterPassport address cannot be 0");
-    _getEndorsementStorage()._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
+  function _setNodeManagementContract(address nodeManagementContract) internal virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    $._nodeManagementContract = INodeManagementV3(nodeManagementContract);
   }
 
   /**
-   * @notice This function can be called to update the Stargate NFT contract
+   * @notice This function can be called to update the VeBetterPassport contract
    */
-  function _setStargateNFT(address stargateNft) internal virtual {
-    require(stargateNft != address(0), "Stargate NFT address cannot be 0");
-    _getEndorsementStorage()._stargateNFT = IStargateNFT(stargateNft);
+  function _setVeBetterPassportContract(address veBetterPassportContract) internal virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
   }
 
   // ---------- Private ---------- //
@@ -459,7 +448,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Use the EndorsementUtils library to update the status of the app
-    bool stillEligible = EndorsementUtils.updateStatusIfThresholdNotMet(
+    bool stillEligible = EndorsementUtilsV6.updateStatusIfThresholdNotMet(
       $._appGracePeriodStart,
       $._appSecurity,
       $._unendorsedApps,
@@ -526,7 +515,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function checkCooldown(uint256 nodeId) public view returns (bool) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    return EndorsementUtils.checkCooldown($._endorsementRound, $._cooldownPeriod, $._xAllocationVotingGovernor, nodeId);
+    return EndorsementUtilsV6.checkCooldown($._endorsementRound, $._cooldownPeriod, $._xAllocationVotingGovernor, nodeId);
   }
 
   /**
@@ -559,7 +548,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function getEndorsers(bytes32 appId) external view returns (address[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    return EndorsementUtils.getEndorsers($._appEndorsers, $._stargateNFT, appId);
+    return EndorsementUtilsV6.getEndorsers($._appEndorsers, $._nodeManagementContract, appId);
   }
 
   /**
@@ -567,7 +556,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function getUsersEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    return EndorsementUtils.getUsersEndorsementScore($._nodeEnodorsmentScore, $._stargateNFT, user);
+    return EndorsementUtilsV6.getUsersEndorsementScore($._nodeEnodorsmentScore, $._nodeManagementContract, user);
   }
 
   /**
@@ -576,28 +565,31 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getNodeEndorsementScore(uint256 nodeId) public view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    uint8 nodeLevel = $._stargateNFT.getTokenLevel(nodeId);
+    uint8 nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);
     return $._nodeEnodorsmentScore[nodeLevel];
+  }
+
+  /**
+   * @dev See {IX2EarnApps-getNodeEndorsementScore}.
+   */
+  function getNodeManagementContract() external view returns (INodeManagementV3) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._nodeManagementContract;
   }
 
   /**
    * @dev See {IX2EarnApps-getXAllocationVotingGovernor}.
    */
   function getXAllocationVotingGovernor() external view returns (IXAllocationVotingGovernor) {
-    return _getEndorsementStorage()._xAllocationVotingGovernor;
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._xAllocationVotingGovernor;
   }
 
   /**
    * @dev See {IX2EarnApps-getVeBetterPassportContract}.
    */
   function getVeBetterPassportContract() external view returns (IVeBetterPassport) {
-    return _getEndorsementStorage()._veBetterPassport;
-  }
-
-  /**
-   * @dev See {IX2EarnApps-getStargateNFT}.
-   */
-  function getStargateNFT() external view returns (IStargateNFT) {
-    return _getEndorsementStorage()._stargateNFT;
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._veBetterPassport;
   }
 }

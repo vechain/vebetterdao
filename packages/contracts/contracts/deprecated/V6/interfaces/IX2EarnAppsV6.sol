@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
-import { EndorsementUtils } from "../x-2-earn-apps/libraries/EndorsementUtils.sol";
-import { IX2EarnCreator } from "./IX2EarnCreator.sol";
-import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
-import { IX2EarnRewardsPool } from "./IX2EarnRewardsPool.sol";
-import { IStargateNFT } from "../mocks/Stargate/interfaces/IStargateNFT.sol";
+import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
+import { VechainNodesDataTypes } from "../../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
+import { IX2EarnCreator } from "../../../interfaces/IX2EarnCreator.sol";
+import { IXAllocationVotingGovernor } from "../../../interfaces/IXAllocationVotingGovernor.sol";
+import { IX2EarnRewardsPool } from "../../../interfaces/IX2EarnRewardsPool.sol";
 
 /**
- * @title IX2EarnApps
+ * @title IX2EarnAppsV6
  * @notice Interface for the X2EarnApps contract.
  * @dev The contract inheriting this interface should be able to manage the x2earn apps and their Eligibility for allocation voting.
  */
-interface IX2EarnApps {
+interface IX2EarnAppsV6 {
   /**
    * @dev The clock was incorrectly modified.
    */
@@ -247,7 +246,7 @@ interface IX2EarnApps {
   /**
    * @dev Event fired when the node strength scores are updated.
    */
-  event NodeStrengthScoresUpdated(EndorsementUtils.NodeStrengthScores indexed nodeStrengthScores);
+  event NodeStrengthScoresUpdated(VechainNodesDataTypes.NodeStrengthScores indexed nodeStrengthScores);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
@@ -602,7 +601,7 @@ interface IX2EarnApps {
    *
    * Emits a {NodeStrengthScoreUpdated} event.
    */
-  function updateNodeEndorsementScores(EndorsementUtils.NodeStrengthScores calldata _nodeStrengthScores) external;
+  function updateNodeEndorsementScores(VechainNodesDataTypes.NodeStrengthScores calldata _nodeStrengthScores) external;
 
   /**
    * @notice Update the endorsement score threshold
@@ -696,15 +695,4 @@ interface IX2EarnApps {
    * Emits a {CooldownPeriodUpdated} event.
    */
   function updateCooldownPeriod(uint256 _newCooldownPeriod) external;
-
-  /**
-   * @dev Set the Stargate NFT contract address.
-   * @param _stargateNft The address of the Stargate NFT contract.
-   */
-  function setStargateNFT(address _stargateNft) external;
-
-  /**
-   * @dev Get the Stargate NFT contract address.
-   */
-  function getStargateNFT() external view returns (IStargateNFT);
 }

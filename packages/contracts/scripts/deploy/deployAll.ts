@@ -265,18 +265,26 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtils,
     EndorsementUtils,
     VoteEligibilityUtils,
+    // V2
     AdministrationUtilsV2,
     EndorsementUtilsV2,
     VoteEligibilityUtilsV2,
+    // V3
     AdministrationUtilsV3,
     EndorsementUtilsV3,
     VoteEligibilityUtilsV3,
+    // V4
     AdministrationUtilsV4,
     EndorsementUtilsV4,
     VoteEligibilityUtilsV4,
+    // V5
     AdministrationUtilsV5,
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
+    // V6
+    AdministrationUtilsV6,
+    EndorsementUtilsV6,
+    VoteEligibilityUtilsV6,
   } = await x2EarnLibraries()
 
   console.log("Deploying AutoVoting Libraries")
@@ -294,6 +302,9 @@ export async function deployAll(config: ContractsConfig) {
   }
   if (!AdministrationUtilsV5 || !EndorsementUtilsV5 || !VoteEligibilityUtilsV5) {
     throw new Error("Failed to deploy X2Earn V5 libraries")
+  }
+  if (!AdministrationUtilsV6 || !EndorsementUtilsV6 || !VoteEligibilityUtilsV6) {
+    throw new Error("Failed to deploy X2Earn V6 libraries")
   }
   if (!AdministrationUtils || !EndorsementUtils || !VoteEligibilityUtils) {
     throw new Error("Failed to deploy X2Earn latest libraries")
@@ -406,7 +417,7 @@ export async function deployAll(config: ContractsConfig) {
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
     [
       [
         config.XAPP_BASE_URI,
@@ -424,9 +435,10 @@ export async function deployAll(config: ContractsConfig) {
       [X2EARNREWARDSPOOL_ADDRESS_TEMP],
       [],
       [],
+      [await stargateNftMock.getAddress()],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       libraries: [
         undefined,
         {
@@ -448,6 +460,11 @@ export async function deployAll(config: ContractsConfig) {
           AdministrationUtilsV5: await AdministrationUtilsV5.getAddress(),
           EndorsementUtilsV5: await EndorsementUtilsV5.getAddress(),
           VoteEligibilityUtilsV5: await VoteEligibilityUtilsV5.getAddress(),
+        },
+        {
+          AdministrationUtilsV6: await AdministrationUtilsV6.getAddress(),
+          EndorsementUtilsV6: await EndorsementUtilsV6.getAddress(),
+          VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),

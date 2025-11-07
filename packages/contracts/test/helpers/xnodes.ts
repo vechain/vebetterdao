@@ -46,6 +46,8 @@ export const endorseApp = async (appId: string, endorser: HardhatEthersSigner, u
   const event = txReceipt?.logs[0]
 
   if (!event) throw new Error("No endorsement event found")
+
+  return { nodeId, txReceipt }
 }
 
 export const createNodeHolder = async (level: number, endorser: HardhatEthersSigner) => {

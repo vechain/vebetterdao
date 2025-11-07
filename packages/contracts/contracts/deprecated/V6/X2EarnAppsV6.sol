@@ -23,19 +23,19 @@
 
 pragma solidity 0.8.20;
 
-import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
-import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
-import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
-import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
-import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeable.sol";
-import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgradeable.sol";
-import { EndorsementUtils } from "./x-2-earn-apps/libraries/EndorsementUtils.sol";
+import { X2EarnAppsUpgradeableV6 } from "./x-2-earn-apps/X2EarnAppsUpgradeableV6.sol";
+import { AdministrationUpgradeableV6 } from "./x-2-earn-apps/modules/AdministrationUpgradeableV6.sol";
+import { AppsStorageUpgradeableV6 } from "./x-2-earn-apps/modules/AppsStorageUpgradeableV6.sol";
+import { ContractSettingsUpgradeableV6 } from "./x-2-earn-apps/modules/ContractSettingsUpgradeableV6.sol";
+import { VoteEligibilityUpgradeableV6 } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeableV6.sol";
+import { EndorsementUpgradeableV6 } from "./x-2-earn-apps/modules/EndorsementUpgradeableV6.sol";
+import { VechainNodesDataTypes } from "../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
- * @title X2EarnApps
+ * @title X2EarnAppsV6
  * @notice This contract handles the x-2-earn applications of the VeBetterDAO ecosystem. The contract allows the insert, management and
  * eligibility of apps for the B3TR allocation rounds.
  * @dev The contract is using AccessControl to handle the admin and upgrader roles.
@@ -49,7 +49,7 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  *
  * -------------------- Version 3 --------------------
  * - The contract has been upgraded to version 3 to add node cooldown period.
- *
+ * 
  * -------------------- Version 4 --------------------
  * - Enabling by default the rewards pool for new apps submitted.
  *
@@ -62,18 +62,14 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * - Upon StarGate launch, we updated the NodeManagement contract to V3. This impacted mostly
  *   EndorsementUtils library.
  *   EndorsementUpgradeable module.
- *
- * -------------------- Version 7 --------------------
- * - The contract has been upgraded to version 7 to include the V6 version of the contract.
- * - todo: add description of the changes
  */
-contract X2EarnApps is
-  X2EarnAppsUpgradeable,
-  AdministrationUpgradeable,
-  ContractSettingsUpgradeable,
-  VoteEligibilityUpgradeable,
-  AppsStorageUpgradeable,
-  EndorsementUpgradeable,
+contract X2EarnAppsV6 is
+  X2EarnAppsUpgradeableV6,
+  AdministrationUpgradeableV6,
+  ContractSettingsUpgradeableV6,
+  VoteEligibilityUpgradeableV6,
+  AppsStorageUpgradeableV6,
+  EndorsementUpgradeableV6,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -88,15 +84,12 @@ contract X2EarnApps is
   }
 
   /**
-   * @notice Initialize the version 7 contract
-   * @param _stargateNft the address of the Stargate NFT contract
+   * @notice Initialize the version 5 contract
    *
-   * @dev This function is called only once during the contract deployment
+   * @dev This function is called only once during the contract upgrade from V4 to V5.
+   * This upgrade adds a restriction on creator NFTs holder: they can only be attached to one app.
    */
-  function initializeV7(address _stargateNft) external onlyRole(UPGRADER_ROLE) reinitializer(7) {
-    require(_stargateNft != address(0), "X2EarnApps: Invalid Stargate NFT contract address");
-    __Endorsement_init_v7(_stargateNft);
-  }
+  function initializeV5() public reinitializer(5) {}
 
   // ---------- Modifiers ------------ //
 
@@ -137,7 +130,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "7";
+    return "6";
   }
 
   // ---------- Overrides ------------ //
@@ -302,7 +295,7 @@ contract X2EarnApps is
    * @dev See {IX2EarnApps-updateNodeEndorsementScores}.
    */
   function updateNodeEndorsementScores(
-    EndorsementUtils.NodeStrengthScores calldata _nodeStrengthScores
+    VechainNodesDataTypes.NodeStrengthScores calldata _nodeStrengthScores
   ) external onlyRole(GOVERNANCE_ROLE) {
     _updateNodeEndorsementScores(_nodeStrengthScores);
   }
@@ -338,6 +331,7 @@ contract X2EarnApps is
     _removeXAppSubmission(_appId);
   }
 
+
   /**
    * @dev See {IX2EarnApps-setVeBetterPassportContract}.
    */
@@ -348,9 +342,7 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setXAllocationVotingGovernor}.
    */
-  function setXAllocationVotingGovernor(
-    address _xAllocationVotingGovernor
-  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationVotingGovernor(address _xAllocationVotingGovernor) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
   }
 
@@ -364,14 +356,7 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setX2EarnRewardsPool}.
    */
-  function setX2EarnRewardsPoolContract(address _x2EarnRewardsPoolContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setX2EarnRewardsPoolContract(_x2EarnRewardsPoolContract);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setStargateNFT}.
-   */
-  function setStargateNFT(address _stargateNft) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setStargateNFT(_stargateNft);
+  function setX2EarnRewardsPoolContract(address  _x2EarnRewardsPoolContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setX2EarnRewardsPoolContract( _x2EarnRewardsPoolContract);
   }
 }

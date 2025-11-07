@@ -23,60 +23,19 @@
 
 pragma solidity 0.8.20;
 
-import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
-import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
-import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
-import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { IStargateNFT } from "../../mocks/Stargate/interfaces/IStargateNFT.sol";
-import { DataTypes } from "../../mocks/Stargate/StargateNFT/libraries/DataTypes.sol";
+import { VechainNodesDataTypes } from "../../../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
+import { PassportTypes } from "../../../../ve-better-passport/libraries/PassportTypes.sol";
+import { INodeManagementV3 } from "../../../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
+import { IVeBetterPassport } from "../../../../interfaces/IVeBetterPassport.sol";
+import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
- * @title EndorsementUtils
+ * @title EndorsementUtilsV6
  * @dev Utility library for handling endorsements of applications in a voting context.
  * It manages endorsements, endorsement scores, endorsement status, and app eligibility
  * for voting by interacting with node levels and managing endorsement checkpoints.
  */
-library EndorsementUtils {
-  // ------------------------------- Node Data Types -------------------------------
-  /**
-   * @dev The strength level of each node.
-   */
-  enum NodeStrengthLevel {
-    None,
-    // Normal Token
-    Strength,
-    Thunder,
-    Mjolnir,
-    // X Token
-    VeThorX,
-    StrengthX,
-    ThunderX,
-    MjolnirX
-  }
-
-  /**
-   * @dev The score of a node.
-   */
-  struct NodeStrengthScores {
-    uint256 strength;
-    uint256 thunder;
-    uint256 mjolnir;
-    uint256 veThorX;
-    uint256 strengthX;
-    uint256 thunderX;
-    uint256 mjolnirX;
-  }
-
-  /**
-   * @dev The source of a node: VeChainNodes legacy contract or Stargate.
-   */
-  enum NodeSource {
-    None,
-    VeChainNodes,
-    StargateNFT
-  }
-
-  // ------------------------------- Events -------------------------------
+library EndorsementUtilsV6 {
   /**
    * @dev Emitted when an app is endorsed or unendorsed.
    * @param appId The unique identifier of the app.
@@ -89,7 +48,7 @@ library EndorsementUtils {
    * @dev Emitted when node strength scores are updated.
    * @param nodeStrengthScores Updated scores for different node levels.
    */
-  event NodeStrengthScoresUpdated(NodeStrengthScores nodeStrengthScores);
+  event NodeStrengthScoresUpdated(VechainNodesDataTypes.NodeStrengthScores nodeStrengthScores);
 
   /**
    * @dev Emitted when the endorsement status of an app changes.
@@ -110,13 +69,13 @@ library EndorsementUtils {
   /**
    * @notice Retrieves the endorsers of a given app.
    * @param _appEndorsers Mapping of app IDs to arrays of endorsing node IDs.
-   * @param _stargateNFT The Stargate NFT contract to retrieve node information.
+   * @param _nodeManagementContract The node management contract to retrieve node information.
    * @param appId The unique identifier of the app.
    * @return address[] Array of addresses of the endorsers.
    */
   function getEndorsers(
     mapping(bytes32 => uint256[]) storage _appEndorsers,
-    IStargateNFT _stargateNFT,
+    INodeManagementV3 _nodeManagementContract,
     bytes32 appId
   ) external view returns (address[] memory) {
     uint256 length = _appEndorsers[appId].length;
@@ -124,11 +83,7 @@ library EndorsementUtils {
     uint256 count = 0;
 
     for (uint256 i = 0; i < length; i++) {
-      //if token does not exist, skip
-      if (!_stargateNFT.tokenExists(_appEndorsers[appId][i])) {
-        continue;
-      }
-      address endorser = _stargateNFT.getTokenManager(_appEndorsers[appId][i]);
+      address endorser = _nodeManagementContract.getNodeManager(_appEndorsers[appId][i]);
       if (endorser != address(0)) {
         endorsers[count] = endorser;
         count++;
@@ -145,20 +100,20 @@ library EndorsementUtils {
   /**
    * @notice Calculates the total endorsement score for a user's nodes.
    * @param _nodeEnodorsmentScore Mapping of endorsement scores for each node level.
-   * @param _stargateNFT Stargate NFT contract to retrieve node information.
+   * @param _nodeManagementContract The node management contract to retrieve node information.
    * @param user The address of the user whose endorsement score to calculate.
    * @return uint256 The total endorsement score for the user's nodes.
    */
   function getUsersEndorsementScore(
     mapping(uint8 => uint256) storage _nodeEnodorsmentScore,
-    IStargateNFT _stargateNFT,
+    INodeManagementV3 _nodeManagementContract,
     address user
   ) external view returns (uint256) {
-    DataTypes.Token[] memory nodeLevels = _stargateNFT.tokensManagedBy(user);
+    uint8[] memory nodeLevels = _nodeManagementContract.getUsersNodeLevels(user);
     uint256 totalScore;
 
     for (uint256 i; i < nodeLevels.length; i++) {
-      totalScore += _nodeEnodorsmentScore[nodeLevels[i].levelId];
+      totalScore += _nodeEnodorsmentScore[nodeLevels[i]];
     }
 
     return totalScore;
@@ -171,9 +126,9 @@ library EndorsementUtils {
    * @param _nodeToEndorsedApp Mapping of node IDs to the app ID they are currently endorsing.
    * @param _appEndorsers Mapping of app IDs to arrays of node IDs that have endorsed them.
    * @param _appScores Mapping of app IDs to their calculated endorsement scores.
-   * @param _stargateNFT The Stargate NFT contract to retrieve node levels.
+   * @param _nodeManagementContract The node management contract to retrieve node levels.
    * @param appId The unique identifier of the app.
-   * @param endorserNodeIdToRemove The node ID of the endorser to remove.
+   * @param endorserToRemove The node ID of the endorser to remove.
    * @return uint256 The updated score of the app.
    */
   function getScoreAndRemoveEndorsement(
@@ -181,30 +136,30 @@ library EndorsementUtils {
     mapping(uint256 => bytes32) storage _nodeToEndorsedApp,
     mapping(bytes32 => uint256[]) storage _appEndorsers,
     mapping(bytes32 => uint256) storage _appScores,
-    IStargateNFT _stargateNFT,
+    INodeManagementV3 _nodeManagementContract,
     bytes32 appId,
-    uint256 endorserNodeIdToRemove
+    uint256 endorserToRemove
   ) external returns (uint256) {
     uint256 score;
 
     // Iterate over the list of endorsers for the given app
     for (uint256 i; i < _appEndorsers[appId].length; ) {
       // Get the current endorser's node id
-      uint256 endorserNodeId = _appEndorsers[appId][i];
+      uint256 endorser = _appEndorsers[appId][i];
       // Get the node level of the endorser
-      uint8 nodeLevel = _stargateNFT.getTokenLevel(endorserNodeId);
+      uint8 nodeLevel = _nodeManagementContract.getNodeLevel(endorser);
 
       // Check if the endorser's node level is 0 or if the endorser is the one to be removed
-      if (nodeLevel == 0 || endorserNodeId == endorserNodeIdToRemove) {
+      if (nodeLevel == 0 || endorser == endorserToRemove) {
         // Remove endorser by swapping with the last element and then reducing the length
         _appEndorsers[appId][i] = _appEndorsers[appId][_appEndorsers[appId].length - 1];
         _appEndorsers[appId].pop();
 
         // Emit an event indicating the app has been unendorsed by the node ID
-        emit AppEndorsed(appId, endorserNodeId, false);
+        emit AppEndorsed(appId, endorser, false);
 
         // Delete the endorser from the endorsers mapping
-        delete _nodeToEndorsedApp[endorserNodeId];
+        delete _nodeToEndorsedApp[endorser];
       } else {
         // Add the endorser's score to the total score
         score += _nodeEnodorsmentScore[nodeLevel];
@@ -285,7 +240,7 @@ library EndorsementUtils {
    */
   function updateNodeEndorsementScores(
     mapping(uint8 => uint256) storage nodeEnodorsmentScores,
-    NodeStrengthScores calldata nodeStrengthScores
+    VechainNodesDataTypes.NodeStrengthScores calldata nodeStrengthScores
   ) external {
     // Set the endorsement score for each node level
     nodeEnodorsmentScores[1] = nodeStrengthScores.strength; // Strength Node score
