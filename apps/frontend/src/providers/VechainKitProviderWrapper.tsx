@@ -32,8 +32,10 @@ export function VechainKitProviderWrapper({ children }: Props) {
           "google",
           "apple",
           "twitter",
+          "sms",
           "farcaster",
           // "email",
+          "github",
           "discord",
           "tiktok",
           // "rabby_wallet",
@@ -49,6 +51,10 @@ export function VechainKitProviderWrapper({ children }: Props) {
         embeddedWallets: {
           createOnLogin: "all-users",
         },
+      }}
+      feeDelegation={{
+        delegatorUrl: process.env.NEXT_PUBLIC_DELEGATOR_URL!,
+        delegateAllTransactions: false,
       }}
       dappKit={{
         allowedWallets: ["veworld", "wallet-connect"],
