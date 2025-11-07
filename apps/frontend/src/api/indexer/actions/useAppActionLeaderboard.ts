@@ -2,7 +2,7 @@ import { indexerQueryClient } from "../api"
 import { paths } from "../schema"
 
 type AppActionLeaderboardQuery = paths["/api/v1/b3tr/actions/leaderboards/apps"]["get"]
-type AppActionLeaderboardQueryOptions = AppActionLeaderboardQuery["parameters"]["query"]
+type AppActionLeaderboardQueryOptions = Omit<AppActionLeaderboardQuery["parameters"]["query"], "cursor">
 type AppActionLeaderboardQueryResponse = AppActionLeaderboardQuery["responses"]["200"]["content"]["*/*"]
 export const useAppActionLeaderboard = (queryOptions: AppActionLeaderboardQueryOptions) => {
   return indexerQueryClient.useInfiniteQuery(
@@ -12,14 +12,14 @@ export const useAppActionLeaderboard = (queryOptions: AppActionLeaderboardQueryO
       params: { query: queryOptions },
     },
     {
-      pageParamName: "page",
-      initialPageParam: 0,
+      pageParamName: "cursor",
+      initialPageParam: "",
       getNextPageParam: (
         lastPage: AppActionLeaderboardQueryResponse,
         _allPages: AppActionLeaderboardQueryResponse[],
-        lastPageParam: unknown,
+        _lastPageParam: unknown,
       ) => {
-        return lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined
+        return lastPage.pagination.hasNext && lastPage.pagination.cursor ? lastPage.pagination.cursor : undefined
       },
     },
   )
