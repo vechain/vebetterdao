@@ -8,6 +8,7 @@ import { Flash } from "iconoir-react"
 import { redirect } from "next/navigation"
 
 import { fetchClient } from "@/api/indexer/api"
+import { FeatureFlag, featureFlags } from "@/constants/featureFlag"
 import { blockNumberToDate } from "@/utils/date"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
@@ -151,10 +152,8 @@ const getData = async (): Promise<AllocationCurrentRoundDetails> => {
   }
 }
 
-const releaseNewDesign = false
-
 export default async function Page() {
-  if (!releaseNewDesign) return redirect("/rounds")
+  if (!featureFlags[FeatureFlag.ALLOCATION_REDESIGN].enabled) return redirect("/rounds")
 
   const currentRoundDetails = await getData()
 

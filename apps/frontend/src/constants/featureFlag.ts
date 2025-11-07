@@ -1,6 +1,7 @@
 export enum FeatureFlag {
   GALAXY_MEMBER_UPGRADES = "galaxyMemberUpgrades",
   VECHAIN_KIT = "vechainKit",
+  ALLOCATION_REDESIGN = "allocation-redesign",
 }
 type FeatureFlagConfig = Record<
   FeatureFlag,
@@ -15,4 +16,5 @@ export const featureFlags: FeatureFlagConfig = {
     comingSoonText: "GM upgrades coming soon!",
   },
   [FeatureFlag.VECHAIN_KIT]: { enabled: false },
+  [FeatureFlag.ALLOCATION_REDESIGN]: { enabled: true },
 }
