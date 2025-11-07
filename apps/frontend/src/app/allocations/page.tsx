@@ -144,7 +144,7 @@ const getData = async (): Promise<AllocationCurrentRoundDetails> => {
     return {
       ...app,
       voters: result?.voters ?? 0,
-      votesReceived: BigInt(result!.votesReceived.toString()) ?? 0,
+      votesReceived: result?.votesReceived ? BigInt(result.votesReceived.toString()) : 0n,
       metadata: appsMetadata[index],
     }
   })
