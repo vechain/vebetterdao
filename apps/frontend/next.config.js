@@ -12,7 +12,6 @@ const nextConfig = {
       "@vechain/dapp-kit-react",
       "@vechain/vechain-kit",
       "@chakra-ui/react",
-      "@vechain/vebetterdao-contracts/*",
       "react-icons",
       "react-icons/bs",
       "react-icons/fa",
