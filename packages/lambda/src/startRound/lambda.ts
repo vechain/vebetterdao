@@ -447,14 +447,14 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     let gasResultEmissions = null
 
     // Check if we should skip the distribute step (it was already called in a previous run)
-    if (roundState.shouldSkipDistribute) {
+    if (!roundState.shouldSkipDistribute) {
       logger.info(
-        `Skipping distribute() - round already started. Current block: ${roundState.currentBlock}, Next cycle block: ${roundState.nextCycleBlock}`,
+        `Skipping start round. Current block: ${roundState.currentBlock}, Next cycle block: ${roundState.nextCycleBlock}, Blocks until next cycle: ${roundState.blocksUntilNextCycle}`,
       )
       await publishMessage(
         client,
-        slackIds.b3trLambda,
-        `${SLACK_MESSAGE_PREFIX}:information_source: ${roundState.currentCycle} Round was already started`,
+        slackIds.b3trDev,
+        `${SLACK_MESSAGE_PREFIX}:information_source: Round ${roundState.currentCycle}. Skipping start round because we are (${roundState.blocksUntilNextCycle} blocks away, exceeds waiting period).`,
       )
     } else {
       // Wait for the next round to start before proceeding
