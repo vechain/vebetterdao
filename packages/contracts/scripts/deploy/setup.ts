@@ -1,21 +1,22 @@
+import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
+
 import {
   B3TR,
+  B3TRGovernor,
   Emissions,
+  Stargate,
   Treasury,
   VOT3,
   VoterRewards,
   X2EarnApps,
-  B3TRGovernor,
   XAllocationVoting,
-  Stargate,
 } from "../../typechain-types"
-import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
-import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
-import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintStargateNFTs, proposeUpgradeGovernance } from "../helpers"
+import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
+import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
+import { getSeedAccounts, getTestKeys, SeedStrategy } from "../helpers/seedAccounts"
 import { convertB3trForVot3 } from "../helpers/swap"
-import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
+import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
 
 const accounts = getTestKeys(17)
 const xDappCreatorAccounts = accounts.slice(0, 8)
@@ -178,19 +179,19 @@ export const setupLocalEnvironment = async (
 
   await convertB3trForVot3(b3tr, vot3, seedAccounts)
 
-  // Deprecated with stargateNFTAddress
-  /**
-   * First seed account will have a Mjolnir X Node
-   * Second seed account will have a Thunder X Node
-   * Third seed account will have a Strength X Node
-   * Forth seed account will have a Mjölnir Economic Node
-   * Fifth seed account will have a Strength Economic Node
-   * Remaining accounts with have a Mjolnir X Node -> These will have an endorsement score of 100
-   * BEWARE : The first 8 accounts have to hold those nodes : Check if it is the case before running the script
-   */
+  // // Deprecated with stargateNFTAddress
+  // /**
+  //  * First seed account will have a Mjolnir X Node
+  //  * Second seed account will have a Thunder X Node
+  //  * Third seed account will have a Strength X Node
+  //  * Forth seed account will have a Mjölnir Economic Node
+  //  * Fifth seed account will have a Strength Economic Node
+  //  * Remaining accounts with have a Mjolnir X Node -> These will have an endorsement score of 100
+  //  * BEWARE : The first 8 accounts have to hold those nodes : Check if it is the case before running the script
+  //  */
 
-  // If the first 8 accounts does not have the correct nodes, run the following line
-  await mintStargateNFTs(stargateMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
+  // // If the first 8 accounts does not have the correct nodes, run the following line
+  // await mintStargateNFTs(stargateMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
   await startEmissions(emissionsContract, admin)
 
   if (endorseApps) {
