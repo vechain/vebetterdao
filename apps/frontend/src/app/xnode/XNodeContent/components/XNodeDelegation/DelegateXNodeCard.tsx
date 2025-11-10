@@ -12,7 +12,6 @@ import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
 
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
 import { DelegationAlert } from "./DelegationAlert"
-import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 
 export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
@@ -69,7 +68,6 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
       </Card.Body>
 
       <DelegateXNodeModal xNode={xNode} modal={delegateModal} />
-      <RevokeXNodeDelegationModal xNode={xNode} modal={revokeModal} />
     </Card.Root>
   )
 }
