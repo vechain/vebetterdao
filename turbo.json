@@ -47,8 +47,13 @@
     },
     "build": {
       "cache": true,
-      "dependsOn": ["^build"],
+      "dependsOn": ["prepare-contracts"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "src/api/indexer/schema.d.ts"]
+    },
+    "@vechain/vebetterdao-contracts#build": {
+      "cache": true,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": ["dist/**", "artifacts/**", "typechain-types/**", "cache/**"]
     },
     "lint": {
       "cache": false
