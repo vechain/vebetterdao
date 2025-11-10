@@ -190,6 +190,3 @@ export const useGetUserNodes = (user?: string) => {
     enabled: !!userAddress && !!nodeLevelToEndorsementScore,
   })
 }
-
-// For backward compatibility (if needed)
-export const useGetUserNode = useGetUserNodes
