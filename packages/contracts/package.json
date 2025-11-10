@@ -28,19 +28,19 @@
       "import": "./dist/esm/contracts/typechain-types/factories/contracts/*.js",
       "require": "./dist/cjs/contracts/typechain-types/factories/contracts/*.js",
       "types": "./dist/esm/contracts/typechain-types/factories/contracts/*.d.ts",
-      "default": "./typechain-types/factories/contracts/*"
+      "default": "./typechain-types/factories/*"
     },
-    "./@openzeppelin/access/*": {
-      "import": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/access/*.js",
-      "require": "./dist/cjs/contracts/typechain-types/factories/@openzeppelin/contracts/access/*.js",
-      "types": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/access/*.d.ts",
-      "default": "./typechain-types/factories/@openzeppelin/contracts/access/*"
+    "./@openzeppelin/*": {
+      "import": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/*.js",
+      "require": "./dist/cjs/contracts/typechain-types/factories/@openzeppelin/contracts/*.js",
+      "types": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/*.d.ts",
+      "default": "./typechain-types/factories/@openzeppelin/*"
     },
-    "./typechain-types/*": {
-      "import": "./dist/esm/contracts/typechain-types/*",
-      "require": "./dist/cjs/contracts/typechain-types/*",
-      "types": "./dist/esm/contracts/typechain-types/*",
-      "default": "./typechain-types/*"
+    "./contracts/*": {
+      "import": "./dist/esm/contracts/typechain-types/contracts/*.js",
+      "require": "./dist/cjs/contracts/typechain-types/contracts/*.js",
+      "types": "./dist/esm/contracts/typechain-types/contracts/*.d.ts",
+      "default": "./typechain-types/contracts/*"
     }
   },
   "prepublishOnly": "yarn compile",
