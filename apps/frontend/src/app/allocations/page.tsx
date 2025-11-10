@@ -1,10 +1,11 @@
-import { Button, Card, Dialog, Grid, GridItem, Heading, Icon, Text, VStack } from "@chakra-ui/react"
+export const dynamic = "force-dynamic"
+
+import { Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
-import { Flash } from "iconoir-react"
 import { redirect } from "next/navigation"
 
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
@@ -16,6 +17,7 @@ import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 import { CountdownBox } from "./components/CountdownBox"
 import { PotentialRewardBox } from "./components/PotentialRewardBox"
 import { AllocationTabs } from "./components/tabs/AllocationTabs"
+import { VotingPowerBox } from "./components/VotingPowerBox"
 
 export interface AppWithVotes {
   id: string
@@ -175,30 +177,12 @@ export default async function Page() {
     <>
       <VStack alignItems="stretch" gap="2" w="full" mb="6">
         <Heading>{"Allocation"}</Heading>
-        <Grid templateRows="repeat(2,1fr)" templateColumns="repeat(2,1fr)" gap="2">
-          <GridItem asChild colSpan={2} w="full">
-            <Card.Root
-              p="4"
-              variant="subtle"
-              bgColor="status.positive.subtle"
-              flexDirection="row"
-              alignItems="center"
-              justifyContent="space-between">
-              <VStack flex={1} lineClamp={2}>
-                <Text textStyle="xs">{"Voting Power"}</Text>
-                <Text textStyle="lg" fontWeight="semibold">
-                  {"XX.XXK"}
-                </Text>
-              </VStack>
-              <Dialog.Root>
-                <Dialog.Trigger asChild>
-                  <Button variant="primary">
-                    <Icon as={Flash} boxSize="4" />
-                    {"Power up"}
-                  </Button>
-                </Dialog.Trigger>
-              </Dialog.Root>
-            </Card.Root>
+        <Grid
+          templateRows={{ base: "repeat(2,1fr)", md: "1fr" }}
+          templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }}
+          gap="2">
+          <GridItem colSpan={2} w="full">
+            <VotingPowerBox />
           </GridItem>
           <GridItem asChild>
             <PotentialRewardBox currentRoundDetails={currentRoundDetails} />
