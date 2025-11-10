@@ -34,6 +34,7 @@
   "prepublishOnly": "yarn compile",
   "scripts": {
     "clean": "rm -rf dist artifacts typechain-types cache node_modules",
+    "build": "npx hardhat compile && tsc -b ./tsconfig.esm.json ./tsconfig.cjs.json",
     "test:thor-solo": "npx hardhat test",
     "test:hardhat": "npx hardhat test --network hardhat",
     "test:hardhat:shard": "npx hardhat test --network hardhat --grep \"$SHARD\"",

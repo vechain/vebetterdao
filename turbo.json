@@ -34,8 +34,12 @@
   "tasks": {
     "prepare-contracts": {
       "cache": true,
-      "dependsOn": ["@vechain/vebetterdao-contracts#compile"],
-      "outputs": ["packages/contracts/artifacts/**", "packages/contracts/typechain-types/**"]
+      "dependsOn": ["@vechain/vebetterdao-contracts#build"],
+      "outputs": [
+        "packages/contracts/artifacts/**",
+        "packages/contracts/typechain-types/**",
+        "packages/contracts/dist/**"
+      ]
     },
     "build-storybook": {
       "cache": true,
@@ -43,7 +47,7 @@
     },
     "build": {
       "cache": true,
-      "dependsOn": ["prepare-contracts"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "src/api/indexer/schema.d.ts"]
     },
     "lint": {
