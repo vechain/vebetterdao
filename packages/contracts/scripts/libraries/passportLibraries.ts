@@ -300,14 +300,14 @@ export async function passportLibraries<T extends DeployPassportLibrariesArgs>({
   logOutput && console.log("PassportWhitelistAndBlacklistLogicV3 Library deployed")
 
   // Deploy Clock Logic V3 (note: no typechain export for this library)
-  const PassportClockLogicV3Factory = await ethers.getContractFactory("PassportClockLogicV3")
-  const PassportClockLogicV3Lib = await PassportClockLogicV3Factory.deploy()
+  const PassportClockLogicV3 = await ethers.getContractFactory("PassportClockLogicV3")
+  const PassportClockLogicV3Lib = await PassportClockLogicV3.deploy()
   await PassportClockLogicV3Lib.waitForDeployment()
   logOutput && console.log("PassportClockLogicV3 Library deployed")
 
   // Deploy EIP712Signing Logic V3 (note: no typechain export for this library)
-  const PassportEIP712SigningLogicV3Factory = await ethers.getContractFactory("PassportEIP712SigningLogicV3")
-  const PassportEIP712SigningLogicV3Lib = await PassportEIP712SigningLogicV3Factory.deploy()
+  const PassportEIP712SigningLogicV3 = await ethers.getContractFactory("PassportEIP712SigningLogicV3")
+  const PassportEIP712SigningLogicV3Lib = await PassportEIP712SigningLogicV3.deploy()
   await PassportEIP712SigningLogicV3Lib.waitForDeployment()
   logOutput && console.log("PassportEIP712SigningLogicV3 Library deployed")
 
