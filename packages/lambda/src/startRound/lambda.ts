@@ -453,7 +453,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       )
       await publishMessage(
         client,
-        slackIds.b3trDev,
+        SLACK_CHANNEL_ID,
         `${SLACK_MESSAGE_PREFIX}:information_source: Round ${roundState.currentCycle}. Skipping start round because we are (${roundState.blocksUntilNextCycle} blocks away, exceeds waiting period).`,
       )
     } else {
@@ -483,8 +483,8 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         )
         await publishMessage(
           client,
-          slackIds.b3trLambda,
-          `${SLACK_MESSAGE_PREFIX}:information_source: ${recheckState.currentCycle} Round was already started`,
+          SLACK_CHANNEL_ID,
+          `${SLACK_MESSAGE_PREFIX}:information_source: Round ${recheckState.currentCycle} started by another process while waiting. Proceeding to X-Allocations.`,
         )
         // Continue to X-Allocations and DBA distribution
       } else {
