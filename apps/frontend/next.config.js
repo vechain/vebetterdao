@@ -34,7 +34,7 @@ const nextConfig = {
   },
   swcMinify: true,
   compress: true,
-  transpilePackages: ["express", "ts-node"],
+  transpilePackages: ["express", "ts-node", "@vechain/vebetterdao-contracts"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
