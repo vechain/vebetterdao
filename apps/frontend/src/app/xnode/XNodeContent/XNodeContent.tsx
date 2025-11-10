@@ -7,7 +7,6 @@ import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { AttachGMNFTCard } from "./components/AttachGMNFTCard"
 import { EndorsementHistoryList } from "./components/EndorsementHistoryList/EndorsementHistoryList"
 import { EndorsingAppCard } from "./components/EndorsingAppCard"
-import { DelegateXNodeCard } from "./components/XNodeDelegation/DelegateXNodeCard"
 import { XNodePageHeader } from "./components/XNodePageHeader"
 
 type Props = {
@@ -30,7 +29,6 @@ export const XNodeContent = ({ xNodeId }: Props) => {
       <XNodePageHeader xNode={xNode} />
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
         <VStack flex={3}>
-          <DelegateXNodeCard xNode={xNode} />
           <AttachGMNFTCard xNode={xNode} />
           <EndorsingAppCard xNode={xNode} />
         </VStack>
