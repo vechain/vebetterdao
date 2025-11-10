@@ -2,10 +2,8 @@ import { Card, Heading, Stack, Button, Text } from "@chakra-ui/react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useMultipleXAppsTotalEarnings } from "../../api/contracts/xAllocationPool/hooks/useMultipleXAppsTotalEarnings"
-import { useAllocationsRound } from "../../api/contracts/xAllocations/hooks/useAllocationsRound"
-import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "../../api/contracts/xApps/hooks/useXApps"
+import { useMultipleAppsEarnings } from "../../api/indexer/xallocations/useMultipleAppsEarnings"
 
 import { AppAmount } from "./components/AppAmount"
 
@@ -14,20 +12,30 @@ export const TotalAllocations = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps({ filterBlacklisted: true })
   const activeApps = xApps?.active
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
   const [displayLimit, setDisplayLimit] = useState(APPS_DISPLAY_LIMIT)
-  // Generate roundIds from 1 to currentRoundId or previous round if current round is not active
-  const roundIds = useMemo(() => {
-    return Array.from({ length: Number(currentRoundId) - (currentRound.state === 0 ? 1 : 0) }, (_, i) => i + 1)
-  }, [currentRoundId, currentRound])
-  const { data: totalEarningsPerApp, isLoading: isTotalEarningsPerAppLoading } = useMultipleXAppsTotalEarnings(
-    roundIds,
+
+  const { data: earningsData, isLoading: isTotalEarningsPerAppLoading } = useMultipleAppsEarnings(
     activeApps?.map(app => app.id) ?? [],
   )
+
+  // Aggregate and sort earnings by total amount
   const sortedTotalEarnings = useMemo(() => {
-    return totalEarningsPerApp?.sort((a, b) => Number(b?.amount) - Number(a?.amount))
-  }, [totalEarningsPerApp])
+    if (!earningsData) return undefined
+
+    return earningsData
+      .map(item => {
+        // Sum up totalAmount across all rounds for this app
+        const totalAmount = Array.isArray(item.earnings)
+          ? item.earnings.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
+          : 0
+
+        return {
+          appId: item.appId,
+          amount: totalAmount,
+        }
+      })
+      .sort((a, b) => Number(b.amount) - Number(a.amount))
+  }, [earningsData])
   const handleLoadMore = () => {
     setDisplayLimit(prev => prev + APPS_DISPLAY_LIMIT)
   }
