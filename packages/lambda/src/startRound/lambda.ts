@@ -447,7 +447,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     let gasResultEmissions = null
 
     // Check if we should skip the distribute step (it was already called in a previous run)
-    if (!roundState.shouldSkipDistribute) {
+    if (roundState.shouldSkipDistribute) {
       logger.info(
         `Skipping start round. Current block: ${roundState.currentBlock}, Next cycle block: ${roundState.nextCycleBlock}, Blocks until next cycle: ${roundState.blocksUntilNextCycle}`,
       )
