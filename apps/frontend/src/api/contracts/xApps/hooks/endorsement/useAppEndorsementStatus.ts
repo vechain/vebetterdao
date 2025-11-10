@@ -72,21 +72,34 @@ export const useAppEndorsementStatus = (appId: string) => {
   const { data: isBlacklisted = false, isLoading: isBlacklistedLoading } = useAppIsBlackListed(appId)
   const { data: appHasBeenIntoAllocationRounds, isLoading: isAppExistsLoading } = useAppExists(appId)
 
+  const numericScore = Number(score)
+  const numericThreshold = Number(threshold)
+
+  // Check if we're still loading OR if we don't have valid data yet
+  const hasValidData =
+    typeof isUnendorsed !== "undefined" &&
+    typeof appEligibleAtRoundStart !== "undefined" &&
+    typeof isBlacklisted !== "undefined" &&
+    typeof appHasBeenIntoAllocationRounds !== "undefined" &&
+    !isNaN(numericScore) &&
+    !isNaN(numericThreshold)
+
   const isLoading =
     isEndorsementThresholdLoading ||
     isEndorsementScoreLoading ||
     isAppEligibleAtRoundStartLoading ||
     isUnendorsedLoading ||
     isBlacklistedLoading ||
-    isAppExistsLoading
+    isAppExistsLoading ||
+    !hasValidData
 
   const status = determineAppStatus(
     isUnendorsed,
     appEligibleAtRoundStart,
     isBlacklisted,
     appHasBeenIntoAllocationRounds,
-    Number(score),
-    Number(threshold),
+    numericScore,
+    numericThreshold,
   )
 
   return {

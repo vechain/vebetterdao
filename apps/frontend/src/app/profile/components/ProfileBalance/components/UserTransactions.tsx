@@ -14,7 +14,6 @@ type Props = {
 }
 export const UserTransactions = ({ address }: Props) => {
   const { t } = useTranslation()
-  // @ts-expect-error TODO: this should be fixed in indexer side
   const { data, isLoading } = useTransactions(address ?? "", { size: 5 })
   const transactions = useMemo(() => {
     return data?.pages.flatMap(page => page.data) ?? []

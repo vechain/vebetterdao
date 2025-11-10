@@ -231,7 +231,7 @@ export const GrantsPageContent = () => {
         <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
           <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
             <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Grants")}</Heading>
-            {!open && (
+            {!open && showApplyForGrant && (
               <Link
                 display="inline-flex"
                 alignItems="center"
@@ -260,7 +260,7 @@ export const GrantsPageContent = () => {
           )}
         </Stack>
 
-        <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
+        {showApplyForGrant && <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />}
         {!isMobile && (
           <GrantsStatsCards
             totalApplications={enrichedGrantProposals?.length || 0}

@@ -1,32 +1,19 @@
-import {
-  Button,
-  Card,
-  HStack,
-  Text,
-  VStack,
-  Dialog,
-  Input,
-  Skeleton,
-  Icon,
-  NativeSelect,
-  CloseButton,
-} from "@chakra-ui/react"
+import { Button, HStack, Text, VStack, Input, Skeleton, NativeSelect } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { motion } from "framer-motion"
 import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { IoWalletOutline } from "react-icons/io5"
 
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
-import { CustomModalContent } from "../../../../../components/CustomModalContent"
+import { BaseModal } from "../../../../../components/BaseModal"
 import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
 import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
 
+import { PercentageSelectorButtons } from "./components/PercentageSelectorButtons"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
-import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
 
 export type Props = {
   appId: string
@@ -98,7 +85,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     [availableB3trToWithdrawScaled],
   )
 
-  const { sendTransaction } = useWithdrawAppBalance({
+  const { sendTransaction, resetStatus } = useWithdrawAppBalance({
     appId,
     amount,
     reason: reason === "Other" ? customReason : reason,
@@ -109,11 +96,12 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   }, [sendTransaction])
 
   const handleClose = useCallback(() => {
+    resetStatus()
     onClose()
     setValue("amount", "")
     setValue("reason", "")
     setValue("customReason", "")
-  }, [onClose, setValue])
+  }, [resetStatus, onClose, setValue])
 
   const amountInput = useMemo(() => {
     return (
@@ -166,7 +154,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 align="flex-start"
                 gap={12}
                 borderBottomWidth={2}
-                borderColor={"rgba(213, 213, 213, 1)"}>
+                borderColor="border.secondary">
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
@@ -188,10 +176,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
-        <Dialog.CloseTrigger asChild>
-          <CloseButton />
-        </Dialog.CloseTrigger>
-        <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
+        <VStack align={"flex-start"} w="full">
           <HStack>
             <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
               {t("Withdraw from your balance")}
@@ -237,7 +222,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 align="flex-start"
                 gap={12}
                 borderBottomWidth={2}
-                borderColor={"rgba(213, 213, 213, 1)"}>
+                borderColor="border.secondary">
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
@@ -253,20 +238,17 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             </motion.div>
           </motion.div>
 
-          <WithdrawPercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
+          <PercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
 
           <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
 
           <Button
-            mt={2}
             type="submit"
-            variant={"primary"}
-            w={"full"}
-            rounded={"full"}
             disabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
-            size={"lg"}>
-            <Icon as={IoWalletOutline} mr={2} />
-            <Text textStyle={{ base: "sm", md: "lg" }}>{t("Withdraw now")}</Text>
+            variant={"primary"}
+            borderRadius={"full"}
+            w={"full"}>
+            {t("Withdraw now")}
           </Button>
         </VStack>
       </form>
@@ -287,12 +269,23 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   ])
 
   return (
-    <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={handleClose} trapFocus={true} placement="center">
-      <CustomModalContent w={"auto"} maxW="breakpoint-md">
-        <Card.Root rounded={20}>
-          <Card.Body>{renderCardContent()}</Card.Body>
-        </Card.Root>
-      </CustomModalContent>
-    </Dialog.Root>
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={handleClose}
+      showCloseButton={true}
+      modalContentProps={{
+        borderRadius: "2xl",
+        maxW: "600px",
+        w: "lg",
+        p: 6,
+      }}
+      modalBodyProps={{
+        p: 0,
+      }}
+      modalProps={{
+        closeOnInteractOutside: true,
+      }}>
+      {renderCardContent()}
+    </BaseModal>
   )
 }
