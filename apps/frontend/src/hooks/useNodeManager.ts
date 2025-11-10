@@ -1,10 +1,10 @@
 import { getConfig } from "@repo/config"
-import { NodeManagementV3__factory as NodeManagement__factory } from "@vechain/vebetterdao-contracts/factories/mocks/Stargate/NodeManagement/NodeManagementV3__factory"
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { StargateNFT__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
-const abi = NodeManagement__factory.abi
-const address = getConfig().nodeManagementContractAddress
-const method = "getNodeManager" as const
+const abi = StargateNFT__factory.abi
+const address = getConfig().stargateNFTContractAddress
+const method = "getTokenManager" as const
 /**
  * Get the query key for the address of the user managing the node ID (endorsement)
  * @param nodeId The ID of the node for which the manager address is being retrieved
