@@ -1,49 +1,46 @@
 {
   "name": "@vechain/vebetterdao-contracts",
   "version": "8.1.0",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "main": "dist/cjs/contracts/index.js",
+  "module": "dist/esm/contracts/index.js",
+  "types": "dist/esm/contracts/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "typechain-types",
+    "artifacts"
   ],
   "license": "MIT",
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/esm/index.d.ts"
+      "import": "./dist/esm/contracts/index.js",
+      "require": "./dist/cjs/contracts/index.js",
+      "types": "./dist/esm/contracts/index.d.ts",
+      "default": "./index.ts"
     },
     "./typechain-types": {
-      "import": "./dist/esm/typechain-types/index.js",
-      "require": "./dist/cjs/typechain-types/index.js",
-      "types": "./dist/esm/typechain-types/index.d.ts"
-    },
-    "./typechain-types/*": {
-      "import": "./dist/esm/typechain-types/*.js",
-      "require": "./dist/cjs/typechain-types/*.js",
-      "types": "./dist/esm/typechain-types/*.d.ts"
+      "import": "./dist/esm/contracts/typechain-types/index.js",
+      "require": "./dist/cjs/contracts/typechain-types/index.js",
+      "types": "./dist/esm/contracts/typechain-types/index.d.ts",
+      "default": "./typechain-types/index.ts"
     },
     "./factories/*": {
-      "import": "./dist/esm/typechain-types/factories/contracts/*.js",
-      "require": "./dist/cjs/typechain-types/factories/contracts/*.js",
-      "types": "./dist/esm/typechain-types/factories/contracts/*.d.ts"
+      "import": "./dist/esm/contracts/typechain-types/factories/contracts/*.js",
+      "require": "./dist/cjs/contracts/typechain-types/factories/contracts/*.js",
+      "types": "./dist/esm/contracts/typechain-types/factories/contracts/*.d.ts",
+      "default": "./typechain-types/factories/contracts/*"
     },
-    "./factories/contracts/*": {
-      "import": "./dist/esm/typechain-types/factories/contracts/*.js",
-      "require": "./dist/cjs/typechain-types/factories/contracts/*.js",
-      "types": "./dist/esm/typechain-types/factories/contracts/*.d.ts"
+    "./@openzeppelin/access/*": {
+      "import": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/access/*.js",
+      "require": "./dist/cjs/contracts/typechain-types/factories/@openzeppelin/contracts/access/*.js",
+      "types": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/access/*.d.ts",
+      "default": "./typechain-types/factories/@openzeppelin/contracts/access/*"
     },
-    "./@openzeppelin/*": {
-      "import": "./dist/esm/typechain-types/factories/@openzeppelin/contracts/*.js",
-      "require": "./dist/cjs/typechain-types/factories/@openzeppelin/contracts/*.js",
-      "types": "./dist/esm/typechain-types/factories/@openzeppelin/contracts/*.d.ts"
-    },
-    "./@openzeppelin/contracts/*": {
-      "import": "./dist/esm/typechain-types/factories/@openzeppelin/contracts/*.js",
-      "require": "./dist/cjs/typechain-types/factories/@openzeppelin/contracts/*.js",
-      "types": "./dist/esm/typechain-types/factories/@openzeppelin/contracts/*.d.ts"
+    "./typechain-types/*": {
+      "import": "./dist/esm/contracts/typechain-types/*",
+      "require": "./dist/cjs/contracts/typechain-types/*",
+      "types": "./dist/esm/contracts/typechain-types/*",
+      "default": "./typechain-types/*"
     }
   },
   "prepublishOnly": "yarn compile",
