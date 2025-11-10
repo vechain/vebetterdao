@@ -26,7 +26,7 @@ import { useState } from "react"
 import { Modal } from "@/components/Modal"
 
 const meta: Meta<typeof Modal> = {
-  title: "design-system/components/Modal/Allocation-Modals",
+  title: "design-system/components/Modal/Allocation Modals",
   component: Modal,
 }
 
