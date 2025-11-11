@@ -6,7 +6,6 @@ import {
   MintingLogic,
   Settings,
   Token,
-  VetGeneratedVtho,
 } from "../../../typechain-types"
 
 interface DeployStargateNFTLibrariesArgs {
@@ -19,7 +18,6 @@ export type StargateLibraries = {
   StargateNFTSettingsLib: Settings
   StargateNFTMintingLib: MintingLogic
   StargateNFTTokenLib: Token
-  StargateNFTVetGeneratedVthoLib: VetGeneratedVtho
 }
 
 export async function deployStargateNFTLibraries({
@@ -57,18 +55,11 @@ export async function deployStargateNFTLibraries({
   await StargateNFTTokenLib.waitForDeployment()
   logOutput && console.log("Token Library deployed")
 
-  // Deploy VetGeneratedVtho Library
-  const VetGeneratedVtho = await ethers.getContractFactory("VetGeneratedVtho")
-  const StargateNFTVetGeneratedVthoLib = (await VetGeneratedVtho.deploy()) as VetGeneratedVtho
-  await StargateNFTVetGeneratedVthoLib.waitForDeployment()
-  logOutput && console.log("VetGeneratedVtho Library deployed")
-
   return {
     StargateNFTClockLib,
     StargateNFTLevelsLib,
     StargateNFTMintingLib,
     StargateNFTSettingsLib,
     StargateNFTTokenLib,
-    StargateNFTVetGeneratedVthoLib,
   }
 }
