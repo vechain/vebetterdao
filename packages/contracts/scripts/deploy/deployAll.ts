@@ -133,32 +133,7 @@ export async function deployAll(config: ContractsConfig) {
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
     GovernorGovernanceLogicLibV7,
-  } = await governanceLibraries()
-
-  if (
-    !GovernorClockLogicLibV1 ||
-    !GovernorConfiguratorLibV1 ||
-    !GovernorDepositLogicLibV1 ||
-    !GovernorFunctionRestrictionsLogicLibV1 ||
-    !GovernorProposalLogicLibV1 ||
-    !GovernorQuorumLogicLibV1 ||
-    !GovernorVotesLogicLibV1 ||
-    !GovernorStateLogicLibV1
-  ) {
-    throw new Error("Failed to deploy Governance V1 libraries")
-  }
-  if (
-    !GovernorClockLogicLib ||
-    !GovernorConfiguratorLib ||
-    !GovernorDepositLogicLib ||
-    !GovernorFunctionRestrictionsLogicLib ||
-    !GovernorProposalLogicLib ||
-    !GovernorQuorumLogicLib ||
-    !GovernorVotesLogicLib ||
-    !GovernorStateLogicLib
-  ) {
-    throw new Error("Failed to deploy Governance latest libraries")
-  }
+  } = await governanceLibraries({ logOutput: true, latestVersionOnly: false })
 
   console.log("Deploying VeBetter Passport Libraries")
   // Deploy Passport Libraries
@@ -199,7 +174,7 @@ export async function deployAll(config: ContractsConfig) {
     PassportPoPScoreLogic,
     PassportSignalingLogic,
     PassportWhitelistAndBlacklistLogic,
-  } = await passportLibraries()
+  } = await passportLibraries({ logOutput: true, latestVersionOnly: false })
 
   if (
     !PassportChecksLogicV1 ||
@@ -267,7 +242,7 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtilsV5,
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
-  } = await x2EarnLibraries()
+  } = await x2EarnLibraries({ logOutput: true, latestVersionOnly: false })
 
   console.log("Deploying AutoVoting Libraries")
   const { AutoVotingLogic } = await autoVotingLibraries()

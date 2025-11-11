@@ -12,7 +12,6 @@ const nextConfig = {
       "@vechain/dapp-kit-react",
       "@vechain/vechain-kit",
       "@chakra-ui/react",
-      "@vechain/vebetterdao-contracts/*",
       "react-icons",
       "react-icons/bs",
       "react-icons/fa",
@@ -34,7 +33,7 @@ const nextConfig = {
   },
   swcMinify: true,
   compress: true,
-  transpilePackages: ["express", "ts-node"],
+  transpilePackages: ["express", "ts-node", "@vechain/vebetterdao-contracts"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

@@ -161,11 +161,11 @@ export const decodeEventLog = (_params: any) => {
 // QUERY KEY HELPERS
 // ============================================================================
 
-export const getAccountBalanceQueryKey = (address: string) => ["accountBalance", address]
+export const getAccountBalanceQueryKey = (_address: string) => ["accountBalance", _address]
 
-export const getCallClauseQueryKey = (params: any) => ["callClause", params]
+export const getCallClauseQueryKey = (_params: any) => ["callClause", _params]
 
-export const getCallClauseQueryKeyWithArgs = (params: any) => ["callClause", params]
+export const getCallClauseQueryKeyWithArgs = (_params: any) => ["callClause", _params]
 
 export const currentBlockQueryKey = ["currentBlock"]
 
