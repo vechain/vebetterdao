@@ -12,6 +12,7 @@ import {
   TimeLock,
   Treasury,
   VOT3,
+  EmissionsV2,
 } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse, AddressLike } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
@@ -680,7 +681,7 @@ export const waitForBlock = async (blockNumber: number) => {
   }
 }
 
-export const waitForNextCycle = async (emission?: Emissions) => {
+export const waitForNextCycle = async (emission?: Emissions | EmissionsV2) => {
   if (!emission) {
     const { emissions } = await getContractInstances()
     emission = emissions as Emissions

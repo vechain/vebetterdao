@@ -13,14 +13,14 @@ export const getXAppRoundEarningsQueryKey = (roundId: string | number, xAppId?: 
     method,
     args: [BigInt(roundId), xAppId as `0x${string}`],
   })
-export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
+export const useXAppRoundEarnings = (roundId: string, xAppId: string, enabled: boolean = true) => {
   return useCallClause({
     abi,
     address,
     method,
     args: [BigInt(roundId), xAppId as `0x${string}`],
     queryOptions: {
-      enabled: !!roundId && !!xAppId,
+      enabled: enabled && !!roundId && !!xAppId,
       select: data => ({
         amount: formatEther(data[0]),
         appId: xAppId,

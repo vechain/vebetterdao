@@ -73,7 +73,7 @@ export async function deployLatest(config: ContractsConfig) {
     GovernorVotesLogicLib,
     GovernorDepositLogicLib,
     GovernorStateLogicLib,
-  } = await governanceLibraries(true)
+  } = await governanceLibraries({ logOutput: true, latestVersionOnly: true })
 
   console.log("Deploying VeBetter Passport Libraries")
   // Deploy Passport Libraries
@@ -86,7 +86,7 @@ export async function deployLatest(config: ContractsConfig) {
     PassportPoPScoreLogic,
     PassportSignalingLogic,
     PassportWhitelistAndBlacklistLogic,
-  } = await passportLibraries(true)
+  } = await passportLibraries({ logOutput: true, latestVersionOnly: true })
 
   console.log("Deploying X2Earn App Libraries")
   const {
@@ -113,7 +113,7 @@ export async function deployLatest(config: ContractsConfig) {
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
-  } = await x2EarnLibraries()
+  } = await x2EarnLibraries({ logOutput: true, latestVersionOnly: false })
 
   // ----------------------  Stargate Contracts and NodeManagement ----------------------
   let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
