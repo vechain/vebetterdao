@@ -12,7 +12,7 @@ import {
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
 import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury, airdropVTHO, airdropVET } from "../helpers/airdrop"
+import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintStargateNFTs, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
 import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
