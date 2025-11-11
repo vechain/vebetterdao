@@ -10,7 +10,21 @@ const meta = {
 
 export default meta
 
-const statuses = ["info", "warning", "error", "success"] as const
+const statuses = ["info", "warning", "error", "success", "neutral"] as const
+
+export const AllVariants = () => (
+  <VStack gap="4" alignItems="stretch">
+    <For each={statuses}>
+      {status => (
+        <AlertCard
+          status={status}
+          title={`${status.charAt(0).toUpperCase() + status.slice(1)} Title`}
+          message="This is a toast message."
+        />
+      )}
+    </For>
+  </VStack>
+)
 
 export const WithTitle = () => (
   <VStack gap="4" alignItems="stretch">
@@ -83,8 +97,13 @@ export const RealWorldExamples = () => (
       title="Transaction failed"
       message="Unable to submit your vote. Please check your wallet connection and try again."
     />
+    <AlertCard
+      status="neutral"
+      title="System notification"
+      message="This is a general notification message for informational purposes."
+    />
   </VStack>
 )
 
-export const DarkMode = () => cloneElement(<WithTitle />)
+export const DarkMode = () => cloneElement(<AllVariants />)
 DarkMode.globals = { theme: "dark" }

@@ -1,9 +1,9 @@
-import { Card, Icon, Text, HStack, VStack, type CardRootProps } from "@chakra-ui/react"
+import { Alert, HStack, VStack, Text } from "@chakra-ui/react"
 import { InfoCircle, WarningCircle, CheckCircle, XmarkCircle } from "iconoir-react"
 import { ReactNode } from "react"
 
-export interface AlertCardProps extends Omit<CardRootProps, "variant"> {
-  status: "info" | "warning" | "error" | "success"
+export interface AlertCardProps {
+  status: "info" | "warning" | "error" | "success" | "neutral"
   title?: string
   message: string | ReactNode
   icon?: ReactNode
@@ -14,37 +14,34 @@ const statusIcons = {
   warning: WarningCircle,
   error: XmarkCircle,
   success: CheckCircle,
+  neutral: InfoCircle,
 }
 
 const statusColors = {
-  info: "alert.info",
-  warning: "alert.warning",
-  error: "alert.error",
-  success: "alert.success",
+  info: "status.info",
+  warning: "status.warning",
+  error: "status.negative",
+  success: "status.positive",
+  neutral: "status.neutral",
 }
 
-export const AlertCard = ({ status, title, message, icon, ...props }: AlertCardProps) => {
+export const AlertCard = ({ status, title, message, icon }: AlertCardProps) => {
   const StatusIcon = statusIcons[status]
 
   return (
-    <Card.Root
-      py="3"
-      px="4"
-      variant="subtle"
+    <Alert.Root
+      status={status}
+      py={{ base: "2", md: "2.5" }}
+      px={{ base: "3", md: "4" }}
       bgColor={`${statusColors[status]}.subtle`}
       borderWidth="1px"
       borderStyle="solid"
-      borderColor={`${statusColors[status]}.secondary`}
-      borderRadius="lg"
-      {...props}>
-      <HStack alignItems="flex-start" gap="2">
-        <Icon
-          boxSize={{ base: "5", md: "6" }}
-          color={`${statusColors[status]}.strong`}
-          flexShrink={0}
-          mt={{ base: "0.5", md: "1" }}>
+      borderColor={`${statusColors[status]}.primary`}
+      borderRadius="lg">
+      <HStack alignItems="flex-start" gap="2" w="full">
+        <Alert.Indicator boxSize={{ base: "4", md: "5" }} flexShrink={0} mt="0.5">
           {icon || <StatusIcon />}
-        </Icon>
+        </Alert.Indicator>
         <VStack alignItems="flex-start" gap="1" flex={1}>
           {title && (
             <Text textStyle="sm" fontWeight="semibold" color={`${statusColors[status]}.strong`}>
@@ -60,6 +57,6 @@ export const AlertCard = ({ status, title, message, icon, ...props }: AlertCardP
           )}
         </VStack>
       </HStack>
-    </Card.Root>
+    </Alert.Root>
   )
 }

@@ -268,56 +268,34 @@ const config = defineConfig({
         },
         status: {
           positive: {
-            strong: { value: { base: "#047229", _dark: "#A3E706" } },
+            strong: { value: { base: "#047229", _dark: "#A3E7D6" } },
             primary: { value: { base: "#3DBA67", _dark: "#26C9A1" } },
             secondary: { value: { base: "#99E0B1", _dark: "#1EA181" } },
             subtle: { value: { base: "#E9FDF1", _dark: "#212A23" } },
           },
           negative: {
-            strong: { value: { base: "#B6244C", _dark: "#EC4D9C" } },
-            primary: { value: { base: "#C84868", _dark: "#D23F63" } },
+            strong: { value: { base: "#C53030", _dark: "#E99A9E" } },
+            primary: { value: { base: "#DF6A6E", _dark: "#D44145" } },
             secondary: { value: { base: "#EC98AF", _dark: "#9C354E" } },
-            subtle: { value: { base: "#FCEEF1", _dark: "#2C1D21" } },
+            subtle: { value: { base: "#FCEEF1", _dark: "#400E0E" } },
           },
           info: {
-            strong: { value: { base: "#2D65D1", _dark: "#CBD0FF" } },
-            primary: { value: { base: "#6194F5", _dark: "#A2C2FF" } },
-            secondary: { value: { base: "#CBD0FF", _dark: "#8930CE" } },
-            subtle: { value: { base: "#E5E5FF", _dark: "#2A303A" } },
+            strong: { value: { base: "#004CFC", _dark: "#B3CCFF" } },
+            primary: { value: { base: "#80AAFF", _dark: "#4D88FF" } },
+            secondary: { value: { base: "#B3CCFF", _dark: "#003ECC" } },
+            subtle: { value: { base: "#E6EEFF", _dark: "#001633" } },
           },
           warning: {
-            strong: { value: { base: "#AF5F00", _dark: "#FFC985" } },
-            primary: { value: { base: "#F29832", _dark: "#F29832" } },
+            strong: { value: { base: "#AF5F00", _dark: "#FFCC99" } },
+            primary: { value: { base: "#FFB566", _dark: "#F2A54E" } },
             secondary: { value: { base: "#FFE4C3", _dark: "#B2752C" } },
-            subtle: { value: { base: "#FFF3E5", _dark: "#36322D" } },
+            subtle: { value: { base: "#FFF3E5", _dark: "#402404" } },
           },
           neutral: {
             strong: { value: { base: "{colors.gray.600}", _dark: "{colors.gray.300}" } },
             primary: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.400}" } },
             secondary: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.500}" } },
             subtle: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
-          },
-        },
-        alert: {
-          info: {
-            strong: { value: { base: "#2C5282", _dark: "#90CDF4" } },
-            secondary: { value: { base: "#90CDF4", _dark: "#2C5282" } },
-            subtle: { value: { base: "#EBF8FF", _dark: "#1A365D" } },
-          },
-          warning: {
-            strong: { value: { base: "#AF5F00", _dark: "#FFC985" } },
-            secondary: { value: { base: "#FFE4C3", _dark: "#B2752C" } },
-            subtle: { value: { base: "#FFF3E5", _dark: "#36322D" } },
-          },
-          error: {
-            strong: { value: { base: "#B6244C", _dark: "#EC4D9C" } },
-            secondary: { value: { base: "#EC98AF", _dark: "#9C354E" } },
-            subtle: { value: { base: "#FCEEF1", _dark: "#2C1D21" } },
-          },
-          success: {
-            strong: { value: { base: "#047229", _dark: "#A3E706" } },
-            secondary: { value: { base: "#99E0B1", _dark: "#1EA181" } },
-            subtle: { value: { base: "#E9FDF1", _dark: "#212A23" } },
           },
         },
         // graph colors will change after allocations redesign
