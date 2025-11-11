@@ -18,6 +18,7 @@ import {
   GrantsManager,
   GrantsManagerV1,
   StargateNFT,
+  Stargate,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -127,6 +128,10 @@ export async function deployLatest(config: ContractsConfig) {
   let stargateDelegateMock = await ethers.getContractAt("StargateDelegation", config.STARGATE_DELEGATE_CONTRACT_ADDRESS)
   const stargateDelegateAddress = await stargateDelegateMock.getAddress()
   console.log("Using Stargate Delegate Mock deployed at: ", stargateDelegateAddress)
+
+  let stargateMock = (await ethers.getContractAt("Stargate", config.STARGATE_CONTRACT_ADDRESS)) as Stargate
+  const stargateMockAddress = await stargateMock.getAddress()
+  console.log("Using Stargate Mock deployed at: ", stargateMockAddress)
 
   let nodeManagement = (await ethers.getContractAt(
     "NodeManagementV3",
@@ -828,10 +833,10 @@ export async function deployLatest(config: ContractsConfig) {
           xAllocationVoting,
           b3tr,
           vot3,
-          vechainNodesMock,
+          stargateMock,
           shouldEndorseXApps(),
         )
-      } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
+      } else await setupTestEnvironment(emissions, x2EarnApps, stargateMock)
       break
     case "vechain_solo":
       await setupLocalEnvironment(
@@ -842,7 +847,7 @@ export async function deployLatest(config: ContractsConfig) {
         xAllocationVoting,
         b3tr,
         vot3,
-        vechainNodesMock,
+        stargateMock,
         shouldEndorseXApps(),
       )
       break
