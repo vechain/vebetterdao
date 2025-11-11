@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query"
+import { QueryKey, useQueryClient } from "@tanstack/react-query"
 import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 
@@ -6,7 +6,7 @@ import { useTransactionModal, TransactionCustomUI } from "@/providers/Transactio
 
 export type BuildTransactionProps<ClausesParams = void> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
-  refetchQueryKeys?: Array<(string | undefined | unknown[])[]>
+  refetchQueryKeys?: QueryKey[]
   onSuccess?: () => void
   invalidateCache?: boolean
   suggestedMaxGas?: number

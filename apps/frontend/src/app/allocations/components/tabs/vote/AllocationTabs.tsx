@@ -4,11 +4,12 @@ import { Box, Bleed, Button, Dialog, Presence, Tabs } from "@chakra-ui/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createContext, useRef, useState, useCallback } from "react"
 
+import { RoundEarnings } from "@/app/allocations/history/page"
 import { useStickyState } from "@/hooks/useStickyState"
 
-import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../page"
+import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../../page"
+import { RoundInfoTab } from "../round-info/RoundInfoTab"
 
-import { RoundInfoTab } from "./RoundInfoTab"
 import { VoteTab } from "./VoteTab"
 
 interface AllocationTabsContextType {
@@ -24,9 +25,14 @@ export const AllocationTabsContext = createContext<AllocationTabsContextType | n
 interface AllocationTabsProps {
   currentRoundDetails: AllocationCurrentRoundDetails
   onSelectedAppsChange?: (selectedIds: Set<string>) => void
+  previous3RoundsEarnings: RoundEarnings[]
 }
 
-export function AllocationTabs({ currentRoundDetails, onSelectedAppsChange }: AllocationTabsProps) {
+export function AllocationTabs({
+  currentRoundDetails,
+  onSelectedAppsChange,
+  previous3RoundsEarnings,
+}: AllocationTabsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -84,7 +90,7 @@ export function AllocationTabs({ currentRoundDetails, onSelectedAppsChange }: Al
           />
         </Tabs.Content>
         <Tabs.Content value="round">
-          <RoundInfoTab currentRoundDetails={currentRoundDetails} />
+          <RoundInfoTab currentRoundDetails={currentRoundDetails} previous3RoundsEarnings={previous3RoundsEarnings} />
         </Tabs.Content>
       </Tabs.Root>
 

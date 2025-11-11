@@ -5,10 +5,10 @@ import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../../page"
+import { SearchAppsBottomSheet } from "../components/SearchAppsBottomSheet"
 
 import { AppCategoryTabs } from "./AppCategoryTabs"
-import { SearchAppsBottomSheet } from "./components/SearchAppsBottomSheet"
 
 interface VoteTabProps {
   apps: AppWithVotes[]

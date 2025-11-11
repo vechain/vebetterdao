@@ -1,18 +1,19 @@
-import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
-import { getAllEventLogs, useThor } from "@vechain/vechain-kit"
+import { EventLogs } from "@vechain/sdk-network"
+import { useThor } from "@vechain/vechain-kit"
 import { Abi } from "abitype"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
 
-import { decodeEventLog } from "../api/contracts/governance/getEvents"
+import { fetchContractEvents } from "../api/contracts/governance/fetchContractEvents"
+
+type FilterParams = Record<string, unknown> | unknown[] | undefined
 
 export type UseEventsParams<T extends Abi, K extends ContractEventName<T>, R> = {
   abi: T
   contractAddress: string
   eventName: K
-  filterParams?: Record<string, unknown> | unknown[] | undefined
+  filterParams?: FilterParams
   mapResponse: ({
     meta,
     decodedData,
@@ -21,8 +22,10 @@ export type UseEventsParams<T extends Abi, K extends ContractEventName<T>, R> = 
     decodedData: ReturnType<typeof viemDecodeEventLog<T, K>>
   }) => R
 }
+
 /**
- * Custom hook for fetching contract events.
+ * Custom hook for fetching contract events (client-side).
+ * For server-side usage, use fetchContractEvents directly.
  */
 export const useEvents = <T extends Abi, K extends ContractEventName<T>, R>({
   abi,
@@ -32,53 +35,33 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, R>({
   mapResponse,
 }: UseEventsParams<T, K, R>) => {
   const thor = useThor()
+
   const queryFn = useCallback(async () => {
     if (!thor) return []
-    const eventAbi = thor.contracts.load(contractAddress, abi).getEventAbi(eventName)
-    const topics = eventAbi.encodeFilterTopicsNoNull(filterParams ?? {})
-    // Construct filter criteria
-    const filterCriteria: FilterCriteria[] = [
-      {
-        criteria: {
-          address: contractAddress,
-          topic0: topics[0] ?? undefined,
-          topic1: topics[1] ?? undefined,
-          topic2: topics[2] ?? undefined,
-          topic3: topics[3] ?? undefined,
-          topic4: topics[4] ?? undefined,
-        },
-        eventAbi,
-      },
-    ]
 
-    const events = (await getAllEventLogs({ thor, nodeUrl: getConfig().nodeUrl, filterCriteria })).map(event =>
-      decodeEventLog(event, abi),
-    )
-
-    if (events.some(({ decodedData }) => decodedData.eventName !== eventName)) throw new Error(`Unknown event`)
-
-    return events.map(event =>
-      mapResponse({
-        meta: event.meta,
-        decodedData: event.decodedData as ReturnType<typeof viemDecodeEventLog<T, K>>,
-      }),
-    )
+    return await fetchContractEvents({
+      thor,
+      abi,
+      contractAddress,
+      eventName,
+      filterParams,
+      mapResponse,
+    })
   }, [thor, contractAddress, abi, eventName, filterParams, mapResponse])
-
-  const queryKey = useMemo(() => getEventsKey({ eventName, filterParams }), [eventName, filterParams])
 
   return useQuery({
     queryFn,
-    queryKey,
+    queryKey: getEventsKey({ eventName, filterParams }),
     enabled: !!thor,
   })
 }
 
 export type GetEventsKeyParams = {
   eventName: string
-  filterParams?: Object
+  filterParams?: FilterParams
 }
 
 export const getEventsKey = ({ eventName, filterParams }: GetEventsKeyParams) => {
-  return [eventName, filterParams ? JSON.stringify(filterParams) : "all"]
+  // no need for JSON.stringify wagmi hashFn is used in react-query client
+  return [eventName, filterParams ? filterParams : "all"]
 }

@@ -20,7 +20,7 @@ import { AppImage } from "@/components/AppImage/AppImage"
 import { EmptyState } from "@/components/ui/empty-state"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../../page"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]

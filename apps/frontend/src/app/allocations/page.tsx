@@ -16,8 +16,9 @@ import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
 import { CountdownBox } from "./components/CountdownBox"
 import { PotentialRewardBox } from "./components/PotentialRewardBox"
-import { AllocationTabs } from "./components/tabs/AllocationTabs"
+import { AllocationTabs } from "./components/tabs/vote/AllocationTabs"
 import { VotingPowerBox } from "./components/VotingPowerBox"
+import { getRounds, RoundEarnings } from "./history/page"
 
 export interface AppWithVotes {
   id: string
@@ -43,6 +44,7 @@ export interface AllocationCurrentRoundDetails {
   cycleTotalGMWeight: bigint
   xAllocationsAmount: bigint
   treasuryAmount: bigint
+  previous3RoundsEarnings: RoundEarnings[]
 }
 
 const xAllocationVotingAbi = XAllocationVoting__factory.abi
@@ -61,7 +63,12 @@ export type AllocationAmount = {
   gm: string
 }
 
-const getCurrentRoundDetails = async (cycle: bigint) => {
+export const getRoundResults = async (roundId: number) =>
+  fetchClient.GET("/api/v1/b3tr/xallocations/{roundId}/results", {
+    params: { path: { roundId } },
+  })
+
+export const getRoundDetails = async (cycle: bigint) => {
   const thor = await getNodeJsThorClient()
 
   const [apps, cycleTotal, cycleTotalGMWeight, emissions] = await executeMultipleClausesCall({
@@ -129,11 +136,10 @@ const getData = async (): Promise<AllocationCurrentRoundDetails> => {
     ],
   })
 
-  const currentRoundDetails = await getCurrentRoundDetails(currentRoundId)
+  const currentRoundDetails = await getRoundDetails(currentRoundId)
+  const rounds = await getRounds()
 
-  const res = await fetchClient.GET("/api/v1/b3tr/xallocations/{roundId}/results", {
-    params: { path: { roundId: Number(currentRoundId) } },
-  })
+  const res = await getRoundResults(Number(currentRoundId))
 
   if (!res.data) throw Error("There is an error getting the data. Please try again.")
 
@@ -165,6 +171,7 @@ const getData = async (): Promise<AllocationCurrentRoundDetails> => {
     deadlineDate,
     ...currentRoundDetails,
     apps: appsWithVotes,
+    previous3RoundsEarnings: rounds.data.slice(1, 4),
   }
 }
 
@@ -193,7 +200,10 @@ export default async function Page() {
         </Grid>
       </VStack>
 
-      <AllocationTabs currentRoundDetails={currentRoundDetails} />
+      <AllocationTabs
+        currentRoundDetails={currentRoundDetails}
+        previous3RoundsEarnings={currentRoundDetails.previous3RoundsEarnings}
+      />
     </>
   )
 }

@@ -2,6 +2,7 @@ import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 
 import { alertSlotRecipe } from "./alert"
 import { badgeRecipe } from "./badge"
+import { breadrumbSlotRecipe } from "./breadcrumb"
 import { buttonRecipe } from "./button"
 import { cardSlotRecipe } from "./card"
 import { checkboxSlotRecipe } from "./checkbox"
@@ -57,6 +58,7 @@ const config = defineConfig({
 
     slotRecipes: {
       alert: alertSlotRecipe,
+      breadcrumb: breadrumbSlotRecipe,
       card: cardSlotRecipe,
       dialog: dialogSlotRecipe,
       steps: stepsSlotRecipe,
