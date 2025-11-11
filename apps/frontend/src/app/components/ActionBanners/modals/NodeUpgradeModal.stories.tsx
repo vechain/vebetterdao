@@ -14,7 +14,7 @@ export default meta
 export const LightMode = () => <NodeUpgradeModal isOpen onClose={() => {}} />
 
 export const DarkMode = () => cloneElement(<LightMode />)
-DarkMode.globals = { theme: "dark", viewport: { value: "responsive" } }
+DarkMode.globals = { theme: "dark", viewport: { value: "desktop" } }
 
 export const MobileLightMode = () => cloneElement(<LightMode />)
 MobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }

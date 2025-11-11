@@ -1857,7 +1857,7 @@
 
 "@chromatic-com/storybook@^4.1.2":
   version "4.1.2"
-  resolved "https://registry.npmjs.org/@chromatic-com/storybook/-/storybook-4.1.2.tgz#d9e6d5a552e125f40c78ac494706f0bd5c2147a2"
+  resolved "https://registry.yarnpkg.com/@chromatic-com/storybook/-/storybook-4.1.2.tgz#d9e6d5a552e125f40c78ac494706f0bd5c2147a2"
   integrity sha512-QAWGtHwib0qsP5CcO64aJCF75zpFgpKK3jNpxILzQiPK3sVo4EmnVGJVdwcZWpWrGdH8E4YkncGoitw4EXzKMg==
   dependencies:
     "@neoconfetti/react" "^1.0.0"
@@ -4474,135 +4474,6 @@
     viem "^2.32.0"
     zustand "^5.0.0"
 
-"@radix-ui/primitive@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.1.3.tgz#e2dbc13bdc5e4168f4334f75832d7bdd3e2de5ba"
-  integrity sha512-JTF99U/6XIjCBo0wqkU5sK10glYe27MRRsfwoiq5zzOEZLHU3A3KCMa5X/azekYRCJ0HlwI0crAXS/5dEHTzDg==
-
-"@radix-ui/react-compose-refs@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-1.1.2.tgz#a2c4c47af6337048ee78ff6dc0d090b390d2bb30"
-  integrity sha512-z4eqJvfiNnFMHIIvXP3CY57y2WJs5g2v3X0zm9mEJkrkNv4rDxu+sg9Jh8EkXyeqBkB7SOcboo9dMVqhyrACIg==
-
-"@radix-ui/react-context@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/@radix-ui/react-context/-/react-context-1.1.2.tgz#61628ef269a433382c364f6f1e3788a6dc213a36"
-  integrity sha512-jCi/QKUM2r1Ju5a3J64TH2A5SpKAgh0LpknyqdQ4m6DCV0xJ2HG1xARRwNGPQfi1SLdLWZ1OJz6F4OMBBNiGJA==
-
-"@radix-ui/react-dialog@^1.1.1":
-  version "1.1.15"
-  resolved "https://registry.npmjs.org/@radix-ui/react-dialog/-/react-dialog-1.1.15.tgz#1de3d7a7e9a17a9874d29c07f5940a18a119b632"
-  integrity sha512-TCglVRtzlffRNxRMEyR36DGBLJpeusFcgMVD9PZEzAKnUs1lKCgX5u9BmC2Yg+LL9MgZDugFFs1Vl+Jp4t/PGw==
-  dependencies:
-    "@radix-ui/primitive" "1.1.3"
-    "@radix-ui/react-compose-refs" "1.1.2"
-    "@radix-ui/react-context" "1.1.2"
-    "@radix-ui/react-dismissable-layer" "1.1.11"
-    "@radix-ui/react-focus-guards" "1.1.3"
-    "@radix-ui/react-focus-scope" "1.1.7"
-    "@radix-ui/react-id" "1.1.1"
-    "@radix-ui/react-portal" "1.1.9"
-    "@radix-ui/react-presence" "1.1.5"
-    "@radix-ui/react-primitive" "2.1.3"
-    "@radix-ui/react-slot" "1.2.3"
-    "@radix-ui/react-use-controllable-state" "1.2.2"
-    aria-hidden "^1.2.4"
-    react-remove-scroll "^2.6.3"
-
-"@radix-ui/react-dismissable-layer@1.1.11":
-  version "1.1.11"
-  resolved "https://registry.npmjs.org/@radix-ui/react-dismissable-layer/-/react-dismissable-layer-1.1.11.tgz#e33ab6f6bdaa00f8f7327c408d9f631376b88b37"
-  integrity sha512-Nqcp+t5cTB8BinFkZgXiMJniQH0PsUt2k51FUhbdfeKvc4ACcG2uQniY/8+h1Yv6Kza4Q7lD7PQV0z0oicE0Mg==
-  dependencies:
-    "@radix-ui/primitive" "1.1.3"
-    "@radix-ui/react-compose-refs" "1.1.2"
-    "@radix-ui/react-primitive" "2.1.3"
-    "@radix-ui/react-use-callback-ref" "1.1.1"
-    "@radix-ui/react-use-escape-keydown" "1.1.1"
-
-"@radix-ui/react-focus-guards@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.npmjs.org/@radix-ui/react-focus-guards/-/react-focus-guards-1.1.3.tgz#2a5669e464ad5fde9f86d22f7fdc17781a4dfa7f"
-  integrity sha512-0rFg/Rj2Q62NCm62jZw0QX7a3sz6QCQU0LpZdNrJX8byRGaGVTqbrW9jAoIAHyMQqsNpeZ81YgSizOt5WXq0Pw==
-
-"@radix-ui/react-focus-scope@1.1.7":
-  version "1.1.7"
-  resolved "https://registry.npmjs.org/@radix-ui/react-focus-scope/-/react-focus-scope-1.1.7.tgz#dfe76fc103537d80bf42723a183773fd07bfb58d"
-  integrity sha512-t2ODlkXBQyn7jkl6TNaw/MtVEVvIGelJDCG41Okq/KwUsJBwQ4XVZsHAVUkK4mBv3ewiAS3PGuUWuY2BoK4ZUw==
-  dependencies:
-    "@radix-ui/react-compose-refs" "1.1.2"
-    "@radix-ui/react-primitive" "2.1.3"
-    "@radix-ui/react-use-callback-ref" "1.1.1"
-
-"@radix-ui/react-id@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/@radix-ui/react-id/-/react-id-1.1.1.tgz#1404002e79a03fe062b7e3864aa01e24bd1471f7"
-  integrity sha512-kGkGegYIdQsOb4XjsfM97rXsiHaBwco+hFI66oO4s9LU+PLAC5oJ7khdOVFxkhsmlbpUqDAvXw11CluXP+jkHg==
-  dependencies:
-    "@radix-ui/react-use-layout-effect" "1.1.1"
-
-"@radix-ui/react-portal@1.1.9":
-  version "1.1.9"
-  resolved "https://registry.npmjs.org/@radix-ui/react-portal/-/react-portal-1.1.9.tgz#14c3649fe48ec474ac51ed9f2b9f5da4d91c4472"
-  integrity sha512-bpIxvq03if6UNwXZ+HTK71JLh4APvnXntDc6XOX8UVq4XQOVl7lwok0AvIl+b8zgCw3fSaVTZMpAPPagXbKmHQ==
-  dependencies:
-    "@radix-ui/react-primitive" "2.1.3"
-    "@radix-ui/react-use-layout-effect" "1.1.1"
-
-"@radix-ui/react-presence@1.1.5":
-  version "1.1.5"
-  resolved "https://registry.npmjs.org/@radix-ui/react-presence/-/react-presence-1.1.5.tgz#5d8f28ac316c32f078afce2996839250c10693db"
-  integrity sha512-/jfEwNDdQVBCNvjkGit4h6pMOzq8bHkopq458dPt2lMjx+eBQUohZNG9A7DtO/O5ukSbxuaNGXMjHicgwy6rQQ==
-  dependencies:
-    "@radix-ui/react-compose-refs" "1.1.2"
-    "@radix-ui/react-use-layout-effect" "1.1.1"
-
-"@radix-ui/react-primitive@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmjs.org/@radix-ui/react-primitive/-/react-primitive-2.1.3.tgz#db9b8bcff49e01be510ad79893fb0e4cda50f1bc"
-  integrity sha512-m9gTwRkhy2lvCPe6QJp4d3G1TYEUHn/FzJUtq9MjH46an1wJU+GdoGC5VLof8RX8Ft/DlpshApkhswDLZzHIcQ==
-  dependencies:
-    "@radix-ui/react-slot" "1.2.3"
-
-"@radix-ui/react-slot@1.2.3":
-  version "1.2.3"
-  resolved "https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-1.2.3.tgz#502d6e354fc847d4169c3bc5f189de777f68cfe1"
-  integrity sha512-aeNmHnBxbi2St0au6VBVC7JXFlhLlOnvIIlePNniyUNAClzmtAUEY8/pBiK3iHjufOlwA+c20/8jngo7xcrg8A==
-  dependencies:
-    "@radix-ui/react-compose-refs" "1.1.2"
-
-"@radix-ui/react-use-callback-ref@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-1.1.1.tgz#62a4dba8b3255fdc5cc7787faeac1c6e4cc58d40"
-  integrity sha512-FkBMwD+qbGQeMu1cOHnuGB6x4yzPjho8ap5WtbEJ26umhgqVXbhekKUQO+hZEL1vU92a3wHwdp0HAcqAUF5iDg==
-
-"@radix-ui/react-use-controllable-state@1.2.2":
-  version "1.2.2"
-  resolved "https://registry.npmjs.org/@radix-ui/react-use-controllable-state/-/react-use-controllable-state-1.2.2.tgz#905793405de57d61a439f4afebbb17d0645f3190"
-  integrity sha512-BjasUjixPFdS+NKkypcyyN5Pmg83Olst0+c6vGov0diwTEo6mgdqVR6hxcEgFuh4QrAs7Rc+9KuGJ9TVCj0Zzg==
-  dependencies:
-    "@radix-ui/react-use-effect-event" "0.0.2"
-    "@radix-ui/react-use-layout-effect" "1.1.1"
-
-"@radix-ui/react-use-effect-event@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.npmjs.org/@radix-ui/react-use-effect-event/-/react-use-effect-event-0.0.2.tgz#090cf30d00a4c7632a15548512e9152217593907"
-  integrity sha512-Qp8WbZOBe+blgpuUT+lw2xheLP8q0oatc9UpmiemEICxGvFLYmHm9QowVZGHtJlGbS6A6yJ3iViad/2cVjnOiA==
-  dependencies:
-    "@radix-ui/react-use-layout-effect" "1.1.1"
-
-"@radix-ui/react-use-escape-keydown@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/@radix-ui/react-use-escape-keydown/-/react-use-escape-keydown-1.1.1.tgz#b3fed9bbea366a118f40427ac40500aa1423cc29"
-  integrity sha512-Il0+boE7w/XebUHyBjroE+DbByORGR9KKmITzbR7MyQ4akpORYP/ZmbhAr0DG7RmmBqoOnZdy2QlvajJ2QA59g==
-  dependencies:
-    "@radix-ui/react-use-callback-ref" "1.1.1"
-
-"@radix-ui/react-use-layout-effect@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/@radix-ui/react-use-layout-effect/-/react-use-layout-effect-1.1.1.tgz#0c4230a9eed49d4589c967e2d9c0d9d60a23971e"
-  integrity sha512-RbJRS4UWQFkzHTTwVymMTUv8EqYhOp8dOOviLj2ugtTiXRaRQS7GLGxZTLL1jWhMeoSCf5zmcZkqTl9IiYfXcQ==
-
 "@rainbow-me/rainbowkit@^2.1.5":
   version "2.2.9"
   resolved "https://registry.npmjs.org/@rainbow-me/rainbowkit/-/rainbowkit-2.2.9.tgz#4b4336f45442fea89f843d1bc050bd480ea18599"
@@ -5851,29 +5722,29 @@
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
 "@storybook/addon-a11y@^10.0.1":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/addon-a11y/-/addon-a11y-10.0.4.tgz#c9609076c44ae42e6235dfe6c0c3bdc2c4099d59"
-  integrity sha512-wCat2y4SHBl1nzHCuT7P6uaOIiAvIuUojUza0c04H/JMYfe+PFGYEmbeQB/hfocY2sJ1LFmSlwdbnaA2xWO48w==
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-a11y/-/addon-a11y-10.0.2.tgz#b15edac2e3c4d8bdd21c59ca284779557ffc399f"
+  integrity sha512-iJJ+AXsi1oHOJ88lm/9Y2xoFJqkMOduORGk8VMPTE8fKO0THkBOSZboVHrPRiCADBLbkK9CIIzCoMzZd1XnakQ==
   dependencies:
     "@storybook/global" "^5.0.0"
     axe-core "^4.2.0"
 
 "@storybook/addon-docs@^10.0.1":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/addon-docs/-/addon-docs-10.0.4.tgz#036adb2232672287581efb8df6517fcefb665db5"
-  integrity sha512-RbrvAy0PNDLgTSVWofNd1Fa/3RvU9PRHvjhOVN9hgW/ToEKJaeQ0hxbnluwSp48VLAQNp16oDq8dphX/ASmQTg==
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-10.0.2.tgz#260b5f5c4ba7fa1114321160a45d4711561bde65"
+  integrity sha512-0lU0kDKSLcKjTd+cQ2jwZr+vOIH/p0M6Vy6w/uoc6qsKEb/Plc+IHu+o2SU6ZO9hkVlDyXzk6xI+64N22O7CHg==
   dependencies:
     "@mdx-js/react" "^3.0.0"
-    "@storybook/csf-plugin" "10.0.4"
+    "@storybook/csf-plugin" "10.0.2"
     "@storybook/icons" "^1.6.0"
-    "@storybook/react-dom-shim" "10.0.4"
+    "@storybook/react-dom-shim" "10.0.2"
     react "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
     react-dom "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
     ts-dedent "^2.0.0"
 
 "@storybook/addon-mcp@^0.1.3":
   version "0.1.3"
-  resolved "https://registry.npmjs.org/@storybook/addon-mcp/-/addon-mcp-0.1.3.tgz#8d6f99ac4e4b7f6d40e1c0cd150bdbe466e3c284"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-mcp/-/addon-mcp-0.1.3.tgz#8d6f99ac4e4b7f6d40e1c0cd150bdbe466e3c284"
   integrity sha512-7lPSFkK0RmVIVlq+yNBg65m8GAih8IsOx61DeUQaKUSSSQlLFOFmtLHms/A1Noz2oMZ0wm/d3p5z2U/gYi+9dg==
   dependencies:
     "@storybook/mcp" "0.0.6"
@@ -5883,34 +5754,34 @@
     valibot "^1.1.0"
 
 "@storybook/addon-themes@^10.0.1":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/addon-themes/-/addon-themes-10.0.4.tgz#637a80ad23da589c10b6d0644d5c9b7a0f0d4c31"
-  integrity sha512-4XDEOoCoy2AuccDURmU4Qh/3dhuGfukvef9FtLgJDHNcY3Z+KRFishbgYu1jlcDDTrT7sl27aAfIu0tEXCbHKQ==
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-themes/-/addon-themes-10.0.2.tgz#309a20bb116aa9ac0516b018f9457f6a68d0b9b2"
+  integrity sha512-l2bR7v8Mj1YPsbcKqZmMeRDsyJvJ+b5XEyz/vyIK0rC6Y6qiExPq3RrE7wiGaPIA3Yk/k81AzdsYer1Gv7ERKQ==
   dependencies:
     ts-dedent "^2.0.0"
 
 "@storybook/addon-vitest@^10.0.1":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/addon-vitest/-/addon-vitest-10.0.4.tgz#267bf2f4c1af9120ca8ef186ea4eb94a17c5a677"
-  integrity sha512-URmwUV9pjo0Ig3rONaQwcOa0HEYz2PzuH+tvp/JujnBXBSawFs3XVdpnfK48DRvyWk7mPWNlJa+eFU6VRmrDtg==
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-vitest/-/addon-vitest-10.0.2.tgz#196128ca05132043cbe79a05bdae3ba35686793d"
+  integrity sha512-ilpjflHJPa0au4YX48QsOmrkWFFqBjzfOGwKEDY2jBYJRyCqsdYju2Jl9Uku2CIXnJJJHI+iGLngPL225yV4Lg==
   dependencies:
     "@storybook/global" "^5.0.0"
     "@storybook/icons" "^1.6.0"
     prompts "^2.4.0"
     ts-dedent "^2.2.0"
 
-"@storybook/builder-vite@10.0.4":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/builder-vite/-/builder-vite-10.0.4.tgz#bacdac3fc50375bece5b000668a2be093dc0a2dc"
-  integrity sha512-+nJ1lmtieXZPQ7HdCwJZdV5PI6Xg+XdSjDrb6vrZZEF33M7qrBBn92RHaCCROHCjnkp4RN5OnaMBv6q9BuRh0g==
+"@storybook/builder-vite@10.0.2":
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/builder-vite/-/builder-vite-10.0.2.tgz#857e9c71020ac7507b0d0b053b870e6856f330aa"
+  integrity sha512-VPCsSdY7AYFnB2GRfRkcBmRA8RQo7I15PTEoIuQg5pF9qDQpz6ykMR8mK5j0TtRXshQjen4HyKv6lYTfmEMdUA==
   dependencies:
-    "@storybook/csf-plugin" "10.0.4"
+    "@storybook/csf-plugin" "10.0.2"
     ts-dedent "^2.0.0"
 
-"@storybook/csf-plugin@10.0.4":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/csf-plugin/-/csf-plugin-10.0.4.tgz#c555e36208ef44a0cf41d7ebcf32ed2b198f3216"
-  integrity sha512-38ggKUYWWD+rtQRD1K1+y+qpBeeOxg6DM46l7S9bCm+CTQAMIipkmpPW2o1n2S6vO2D0/9SotQA7wilK4Dok+Q==
+"@storybook/csf-plugin@10.0.2":
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/csf-plugin/-/csf-plugin-10.0.2.tgz#15e796e048bd3e6e4592407ed99cde4b62285776"
+  integrity sha512-fiDTgZQa6/vCIMDWm5b/Dy+8/YGHX7bHqdINTtdKRJlrZgxFOainYczR6kyf5nyu9RQouEX0NgSXvKLS0HyCyw==
   dependencies:
     unplugin "^2.3.5"
 
@@ -5921,12 +5792,12 @@
 
 "@storybook/icons@^1.6.0":
   version "1.6.0"
-  resolved "https://registry.npmjs.org/@storybook/icons/-/icons-1.6.0.tgz#9fa6eb9c82922b79f75a2cf83c38af30ba7fd696"
+  resolved "https://registry.yarnpkg.com/@storybook/icons/-/icons-1.6.0.tgz#9fa6eb9c82922b79f75a2cf83c38af30ba7fd696"
   integrity sha512-hcFZIjW8yQz8O8//2WTIXylm5Xsgc+lW9ISLgUk1xGmptIJQRdlhVIXCpSyLrQaaRiyhQRaVg7l3BD9S216BHw==
 
 "@storybook/mcp@0.0.6":
   version "0.0.6"
-  resolved "https://registry.npmjs.org/@storybook/mcp/-/mcp-0.0.6.tgz#7e8568f965c707fddd9e0f14df3e55d387a3154d"
+  resolved "https://registry.yarnpkg.com/@storybook/mcp/-/mcp-0.0.6.tgz#7e8568f965c707fddd9e0f14df3e55d387a3154d"
   integrity sha512-sCLU9jvCjCDFHOTSOa/3jUZ/HKTQQ5UrBC52mpBFEfgs6jUcspUC5DZSwsFqrcNi6jB4pi6MARLNlsimeGPsJg==
   dependencies:
     "@tmcp/adapter-valibot" "^0.1.4"
@@ -5935,43 +5806,43 @@
     valibot "^1.1.0"
 
 "@storybook/nextjs-vite@^10.0.1":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/nextjs-vite/-/nextjs-vite-10.0.4.tgz#8e28746cd104296ca2e39ac90d29daad124ac53c"
-  integrity sha512-xCbaTsWzCR4XNwviMmeDaEoo6HepFQ9Axo2rYBFKFwl93dhAxAu5Ku4KtMb3rRLvrfU4fTJwppzgtJpzpk6OVQ==
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/nextjs-vite/-/nextjs-vite-10.0.2.tgz#0332217ba21fa0ef779ba65dcf096658372ff95d"
+  integrity sha512-ogkFuREQstj8c7aqwrLBuIVf5r+LMWgmvK6LTFJIPK4CniSxt1DvtAljy/8J3I43nzwvD+V5Fyenquv+1Pg5WA==
   dependencies:
-    "@storybook/builder-vite" "10.0.4"
-    "@storybook/react" "10.0.4"
-    "@storybook/react-vite" "10.0.4"
+    "@storybook/builder-vite" "10.0.2"
+    "@storybook/react" "10.0.2"
+    "@storybook/react-vite" "10.0.2"
     styled-jsx "5.1.6"
     vite-plugin-storybook-nextjs "^3.0.0"
 
-"@storybook/react-dom-shim@10.0.4":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/react-dom-shim/-/react-dom-shim-10.0.4.tgz#ec43f1bd10a9303e18e11a2d75c24d0f8228d501"
-  integrity sha512-vw36aBr5csaCVEN0sXzcUUt3UBeJTX2qFpSHL4K8Z7BT2XVv8f6Am+qqrWmwhHvZUED/DXo/Z2pKXMMPLfmnDw==
+"@storybook/react-dom-shim@10.0.2":
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/react-dom-shim/-/react-dom-shim-10.0.2.tgz#69a719757d659de3ed6e6180dea287e3106edfb0"
+  integrity sha512-rVEwxwd9g6TDIIXzX73NPV+FF/WokNKMm1H6ATYBQ51wrxiEalHg/lPFdosoWAQ4dsLKkeSxxOpZy9375IXhGQ==
 
-"@storybook/react-vite@10.0.4":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/react-vite/-/react-vite-10.0.4.tgz#fde926242e11108f56fb4460933e202f746f1bd8"
-  integrity sha512-40Sa/2FQEkCDZAs88O9qlDHjivZqmPGeEkoTE8OV++X+jY9iKcgF5jQHtfkNErpzqLanq0+SeYxp08elhbAQRg==
+"@storybook/react-vite@10.0.2":
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/react-vite/-/react-vite-10.0.2.tgz#b9ccabbcd6601b97ffee97d8eae4f6e339e4fd2e"
+  integrity sha512-V3QoEmqJS8a4j4kHBULjtOygqhfB+x532GsfTSBIOorkrlwTE6a8iZOp2wGRNGkpYIf6jI7MyRz6FklelflMRQ==
   dependencies:
     "@joshwooding/vite-plugin-react-docgen-typescript" "0.6.1"
     "@rollup/pluginutils" "^5.0.2"
-    "@storybook/builder-vite" "10.0.4"
-    "@storybook/react" "10.0.4"
+    "@storybook/builder-vite" "10.0.2"
+    "@storybook/react" "10.0.2"
     empathic "^2.0.0"
     magic-string "^0.30.0"
     react-docgen "^8.0.0"
     resolve "^1.22.8"
     tsconfig-paths "^4.2.0"
 
-"@storybook/react@10.0.4":
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/@storybook/react/-/react-10.0.4.tgz#0756898c4634b7a2b59ea0044d9eeedaa0e0bd49"
-  integrity sha512-h8XpI3sb2ieqfbywRBF7/YkG1NDxYuGWTwlNdPtsrn+WypkKG9je192GkIwpgP2lSkRBNqmrZ2AVWyOmnARrqA==
+"@storybook/react@10.0.2":
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@storybook/react/-/react-10.0.2.tgz#6227b55784eb157c0cc3f9acc7c7a637aaaf1e3c"
+  integrity sha512-qxBlOE7cjRPFNoFCY2GNG5t/+6O0AXQav8pZ6q4La2foXdlInfNJPfcPUp4qI9R1+maSwDYbovixA3uFM/UC8Q==
   dependencies:
     "@storybook/global" "^5.0.0"
-    "@storybook/react-dom-shim" "10.0.4"
+    "@storybook/react-dom-shim" "10.0.2"
 
 "@svgr/babel-plugin-add-jsx-attribute@8.0.0":
   version "8.0.0"
@@ -6176,7 +6047,7 @@
 
 "@tmcp/adapter-valibot@^0.1.4":
   version "0.1.4"
-  resolved "https://registry.npmjs.org/@tmcp/adapter-valibot/-/adapter-valibot-0.1.4.tgz#5168f56ec381566dd9993dd5f6a085e88c243742"
+  resolved "https://registry.yarnpkg.com/@tmcp/adapter-valibot/-/adapter-valibot-0.1.4.tgz#5168f56ec381566dd9993dd5f6a085e88c243742"
   integrity sha512-/fGCUz/L5RLCYC4L0Mo6s9Z9cSIIPztuHfIkhyo3WjMPTjQWUkFulA47sZSWRTaz5eKQxm5fV1qcfT7zHSuY3Q==
   dependencies:
     "@standard-schema/spec" "^1.0.0"
@@ -6185,12 +6056,12 @@
 
 "@tmcp/session-manager@^0.2.0":
   version "0.2.0"
-  resolved "https://registry.npmjs.org/@tmcp/session-manager/-/session-manager-0.2.0.tgz#e6c463c89514f5759f4da93e0946ab9fed715ea4"
+  resolved "https://registry.yarnpkg.com/@tmcp/session-manager/-/session-manager-0.2.0.tgz#e6c463c89514f5759f4da93e0946ab9fed715ea4"
   integrity sha512-/MjEFFvnvrV3DbnwEAXMBKhIFmm7z81EgazBtPhKP9i5pe37/iDkYHOa+SD6aaqT3V7gACQ1nmqoJH3MdrC7gQ==
 
 "@tmcp/transport-http@^0.8.0":
   version "0.8.0"
-  resolved "https://registry.npmjs.org/@tmcp/transport-http/-/transport-http-0.8.0.tgz#2d43ed1f6bdefecd819b7c763c89d18f75e1af54"
+  resolved "https://registry.yarnpkg.com/@tmcp/transport-http/-/transport-http-0.8.0.tgz#2d43ed1f6bdefecd819b7c763c89d18f75e1af54"
   integrity sha512-XkIFDIDr8zzQhJiwI+6He0pIGmEg0SAwHdsv914UtL0zqKuUfFvFLLARkryB95Rhp1ib4nVWAgLcV1FtdWGzIw==
   dependencies:
     "@tmcp/session-manager" "^0.2.0"
@@ -7250,9 +7121,21 @@
   resolved "https://registry.npmjs.org/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.11.1.tgz#538b1e103bf8d9864e7b85cc96fa8d6fb6c40777"
   integrity sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==
 
+"@use-gesture/core@10.3.1":
+  version "10.3.1"
+  resolved "https://registry.npmjs.org/@use-gesture/core/-/core-10.3.1.tgz#976c9421e905f0079d49822cfd5c2e56b808fc56"
+  integrity sha512-WcINiDt8WjqBdUXye25anHiNxPc0VOrlT8F6LLkU6cycrOGUDyY/yyFmsg3k8i5OLvv25llc0QC45GhR/C8llw==
+
+"@use-gesture/react@^10.3.1":
+  version "10.3.1"
+  resolved "https://registry.npmjs.org/@use-gesture/react/-/react-10.3.1.tgz#17a743a894d9bd9a0d1980c618f37f0164469867"
+  integrity sha512-Yy19y6O2GJq8f7CHf7L0nxL8bf4PZCPaVOCgJrusOeFHY1LvHgYXnmnXg6N5iwAnbgbZCDjo60SiM6IPJi9C5g==
+  dependencies:
+    "@use-gesture/core" "10.3.1"
+
 "@valibot/to-json-schema@^1.3.0":
   version "1.3.0"
-  resolved "https://registry.npmjs.org/@valibot/to-json-schema/-/to-json-schema-1.3.0.tgz#75444030928e5a40cbe5603e3bd5d4bdd4e6fd57"
+  resolved "https://registry.yarnpkg.com/@valibot/to-json-schema/-/to-json-schema-1.3.0.tgz#75444030928e5a40cbe5603e3bd5d4bdd4e6fd57"
   integrity sha512-82Vv6x7sOYhv5YmTRgSppSqj1nn2pMCk5BqCMGWYp0V/fq+qirrbGncqZAtZ09/lrO40ne/7z8ejwE728aVreg==
 
 "@vanilla-extract/css@1.17.3":
@@ -9402,7 +9285,7 @@ argparse@^2.0.1:
   resolved "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
   integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
 
-aria-hidden@^1.2.3, aria-hidden@^1.2.4:
+aria-hidden@^1.2.3:
   version "1.2.6"
   resolved "https://registry.npmjs.org/aria-hidden/-/aria-hidden-1.2.6.tgz#73051c9b088114c795b1ea414e9c0fff874ffc1a"
   integrity sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA==
@@ -11526,7 +11409,7 @@ emoji-regex@^9.2.2:
 
 empathic@^2.0.0:
   version "2.0.0"
-  resolved "https://registry.npmjs.org/empathic/-/empathic-2.0.0.tgz#71d3c2b94fad49532ef98a6c34be0386659f6131"
+  resolved "https://registry.yarnpkg.com/empathic/-/empathic-2.0.0.tgz#71d3c2b94fad49532ef98a6c34be0386659f6131"
   integrity sha512-i6UzDscO/XfAcNYD75CfICkmfLedpyPDdozrLMmQc5ORaQcdMoc21OnlEylMIqI7U8eniKrPMxxtj8k0vhmJhA==
 
 enabled@2.0.x:
@@ -12042,9 +11925,9 @@ eslint-plugin-react@^7.33.2:
     string.prototype.repeat "^1.0.0"
 
 eslint-plugin-storybook@^10.0.1:
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/eslint-plugin-storybook/-/eslint-plugin-storybook-10.0.4.tgz#6931098453f11aaf90d61468765e6513d3bef9c6"
-  integrity sha512-etAC9C/x6SQZksQQkCZpSms7O9CLTzwPtion2e8hQSnzT3BIyhSP4JHGJyNwEQ2Mt71XROWuOwqnH776cZiXqw==
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-storybook/-/eslint-plugin-storybook-10.0.2.tgz#70b4a562324e90c4adccad2c2578355d2ad498e0"
+  integrity sha512-Xy4ezGvPDB/auQikmS60o0e4LTs6fvrBzXNPAJAyZeqNjAzXehHTISJABlThCAzr96+j+SASL0msNvsQWgF1Lg==
   dependencies:
     "@typescript-eslint/utils" "^8.8.1"
 
@@ -12168,7 +12051,7 @@ eslint@^8, eslint@^8.56.0:
 
 esm-env@^1.2.2:
   version "1.2.2"
-  resolved "https://registry.npmjs.org/esm-env/-/esm-env-1.2.2.tgz#263c9455c55861f41618df31b20cb571fc20b75e"
+  resolved "https://registry.yarnpkg.com/esm-env/-/esm-env-1.2.2.tgz#263c9455c55861f41618df31b20cb571fc20b75e"
   integrity sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==
 
 espree@^9.6.0, espree@^9.6.1:
@@ -15032,7 +14915,7 @@ json-parse-even-better-errors@^2.3.0:
 
 json-rpc-2.0@^1.7.1:
   version "1.7.1"
-  resolved "https://registry.npmjs.org/json-rpc-2.0/-/json-rpc-2.0-1.7.1.tgz#f4a5095d0a7e51701bffe153ce19087a8b13418e"
+  resolved "https://registry.yarnpkg.com/json-rpc-2.0/-/json-rpc-2.0-1.7.1.tgz#f4a5095d0a7e51701bffe153ce19087a8b13418e"
   integrity sha512-JqZjhjAanbpkXIzFE7u8mE/iFblawwlXtONaCvRqI+pyABVz7B4M1EUNpyVW+dZjqgQ2L5HFmZCmOCgUKm00hg==
 
 json-rpc-engine@^6.1.0:
@@ -18114,7 +17997,7 @@ react-remove-scroll@2.6.2:
     use-callback-ref "^1.3.3"
     use-sidecar "^1.1.2"
 
-react-remove-scroll@^2.5.7, react-remove-scroll@^2.6.3:
+react-remove-scroll@^2.5.7:
   version "2.7.1"
   resolved "https://registry.npmjs.org/react-remove-scroll/-/react-remove-scroll-2.7.1.tgz#d2101d414f6d81d7d3bf033f3c1cb4785789f753"
   integrity sha512-HpMh8+oahmIdOuS5aFKKY6Pyog+FNaZV/XyJOq7b4YFwsFHe5yYfdbIalI4k3vU2nSDql7YskmUseHsRrJqIPA==
@@ -19515,7 +19398,7 @@ sprintf-js@~1.0.2:
 
 sqids@^0.3.0:
   version "0.3.0"
-  resolved "https://registry.npmjs.org/sqids/-/sqids-0.3.0.tgz#969eabe54a362682e44cb73fce2bfea84e504dec"
+  resolved "https://registry.yarnpkg.com/sqids/-/sqids-0.3.0.tgz#969eabe54a362682e44cb73fce2bfea84e504dec"
   integrity sha512-lOQK1ucVg+W6n3FhRwwSeUijxe93b51Bfz5PMRMihVf1iVkl82ePQG7V5vwrhzB11v0NtsR25PSZRGiSomJaJw==
 
 stable-hash@^0.0.5:
@@ -19571,9 +19454,9 @@ stop-iteration-iterator@^1.1.0:
     internal-slot "^1.1.0"
 
 storybook@^10.0.1:
-  version "10.0.4"
-  resolved "https://registry.npmjs.org/storybook/-/storybook-10.0.4.tgz#a71df5259c9b676619eeb32f2c4ad9c10d52a2f3"
-  integrity sha512-BRPz+TgWet6aV9xjQ2z3HeEELJX5BRxMUWqSPgyfemzrXa3slVL+4pLncTjlK1Qz1sEJORjy42qxdIKLXl4PwA==
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/storybook/-/storybook-10.0.2.tgz#998c96ad1c7e6c27205474675a5667a2bcbda7fb"
+  integrity sha512-Kjhw0J+N3CzHO6NIc0trzTtG5ov0wkMsnKjyVqBL9Zq+WORCrhAESFTnk4Wt2JEIu+FVgb7pae8csWUoHk2reA==
   dependencies:
     "@storybook/global" "^5.0.0"
     "@storybook/icons" "^1.6.0"
@@ -20206,9 +20089,9 @@ tldts@^7.0.5:
     tldts-core "^7.0.17"
 
 tmcp@^1.16.0:
-  version "1.16.2"
-  resolved "https://registry.npmjs.org/tmcp/-/tmcp-1.16.2.tgz#82c6533f79bb5d7b51d75b512720d47ce9e07ce5"
-  integrity sha512-4Q/aenWdWR0CWnmKjAR4Q5H+8+i/UvU5Q4wHRJQ6AfE6Ta0pBTpRn722hAfHYYLKmTV12sGgXfLju8FEjJzagQ==
+  version "1.16.1"
+  resolved "https://registry.yarnpkg.com/tmcp/-/tmcp-1.16.1.tgz#9d4f1bf6be1407db10dff6333e0756421add6c23"
+  integrity sha512-pmqdFMfYi8e57p8bzpIkEtTt6GfAXGpub8rwySgo1yEEQogTpGdXFjGbISeS0SKrYN/MnIsHN6nj8gPjmAc+EQ==
   dependencies:
     "@standard-schema/spec" "^1.0.0"
     json-rpc-2.0 "^1.7.1"
@@ -20806,7 +20689,7 @@ unpipe@1.0.0:
 
 unplugin@^2.3.5:
   version "2.3.10"
-  resolved "https://registry.npmjs.org/unplugin/-/unplugin-2.3.10.tgz#15e75fec9384743335be7e54e5c88b5c187a3e94"
+  resolved "https://registry.yarnpkg.com/unplugin/-/unplugin-2.3.10.tgz#15e75fec9384743335be7e54e5c88b5c187a3e94"
   integrity sha512-6NCPkv1ClwH+/BGE9QeoTIl09nuiAt0gS28nn1PvYXsGKRwM2TCbFA2QiilmehPDTXIe684k4rZI1yl3A1PCUw==
   dependencies:
     "@jridgewell/remapping" "^2.3.5"
@@ -20887,7 +20770,7 @@ uri-js@^4.2.2:
 
 uri-template-matcher@^1.1.1:
   version "1.1.2"
-  resolved "https://registry.npmjs.org/uri-template-matcher/-/uri-template-matcher-1.1.2.tgz#fccf60653828f2c3d21a0ebdbf9aa2b7daaf16bd"
+  resolved "https://registry.yarnpkg.com/uri-template-matcher/-/uri-template-matcher-1.1.2.tgz#fccf60653828f2c3d21a0ebdbf9aa2b7daaf16bd"
   integrity sha512-uZc1h12jdO3m/R77SfTEOuo6VbMhgWznaawKpBjRGSJb7i91x5PgI37NQJtG+Cerxkk0yr1pylBY2qG1kQ+aEQ==
 
 url@0.10.3:
@@ -20997,7 +20880,7 @@ v8-to-istanbul@^9.0.1:
 
 valibot@^1.1.0:
   version "1.1.0"
-  resolved "https://registry.npmjs.org/valibot/-/valibot-1.1.0.tgz#873bb1af9e1577391690307bfe0520bd1360ec2d"
+  resolved "https://registry.yarnpkg.com/valibot/-/valibot-1.1.0.tgz#873bb1af9e1577391690307bfe0520bd1360ec2d"
   integrity sha512-Nk8lX30Qhu+9txPYTwM0cFlWLdPFsFr6LblzqIySfbZph9+BFsAHsNvHOymEviUepeIW6KFHzpX8TKhbptBXXw==
 
 validate-npm-package-license@^3.0.1:
@@ -21044,13 +20927,6 @@ valtio@2.1.7:
   integrity sha512-DwJhCDpujuQuKdJ2H84VbTjEJJteaSmqsuUltsfbfdbotVfNeTE4K/qc/Wi57I9x8/2ed4JNdjEna7O6PfavRg==
   dependencies:
     proxy-compare "^3.0.1"
-
-vaul@^0.9.6:
-  version "0.9.9"
-  resolved "https://registry.npmjs.org/vaul/-/vaul-0.9.9.tgz#ff075c3cba6193d4859bb6f1b09efcce049cf812"
-  integrity sha512-7afKg48srluhZwIkaU+lgGtFCUsYBSGOl8vcc8N/M3YQlZFlynHD15AE+pwrYdc826o7nrIND4lL9Y6b9WWZZQ==
-  dependencies:
-    "@radix-ui/react-dialog" "^1.1.1"
 
 vfile-location@^5.0.0:
   version "5.0.3"
