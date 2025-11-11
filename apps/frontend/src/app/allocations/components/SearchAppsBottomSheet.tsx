@@ -7,7 +7,7 @@ import { useRef } from "react"
 import type { AppWithVotes } from "@/app/allocations/page"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 
-import { AppCategoryTabs } from "../vote/AppCategoryTabs"
+import { AppCategoryTabs } from "./tabs/vote/AppCategoryTabs"
 
 interface SearchAppsBottomSheetProps {
   isOpen: boolean

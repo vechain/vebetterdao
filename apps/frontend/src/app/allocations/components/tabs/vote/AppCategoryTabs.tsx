@@ -2,7 +2,7 @@
 
 import {
   Button,
-  CheckboxCard,
+  Card,
   Circle,
   CloseButton,
   createListCollection,
@@ -14,21 +14,20 @@ import {
   InputGroup,
   Pagination,
   Portal,
-  Progress,
   Select,
   Tabs,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Group, Search, Search as SearchIcon } from "iconoir-react"
+import { Search, Search as SearchIcon } from "iconoir-react"
 import { useMemo, useState } from "react"
 
-import { AppImage } from "@/components/AppImage/AppImage"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 import type { AppWithVotes } from "../../../page"
+import { AppRadioCard } from "../../AppRadioCard"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
@@ -117,8 +116,8 @@ export function AppCategoryTabs({
   }
 
   return (
-    <>
-      <VStack gap="4" align="stretch">
+    <HStack asChild={isMobile} gap="6" alignItems="flex-start">
+      <VStack flex={1} gap="4" align="stretch">
         <VStack hideBelow="md" gap="4" align="stretch" px="4">
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
@@ -232,36 +231,16 @@ export function AppCategoryTabs({
             p={tabsListProps?.mb ? undefined : "4"}>
             {filteredApps.length > 0 ? (
               (showPagination ? sortedAppsWithSelected.slice(0, 10) : sortedAppsWithSelected).map(app => (
-                <CheckboxCard.Root
+                <AppRadioCard
                   key={app.id}
-                  rounded="lg"
-                  p="3"
-                  colorPalette="blue"
-                  checked={selectedAppIds?.has(app.id) ?? false}
-                  onCheckedChange={() => onToggleApp?.(app.id)}>
-                  <CheckboxCard.HiddenInput />
-                  <CheckboxCard.Control alignItems="center" p="0" gap="3">
-                    <CheckboxCard.Indicator rounded="sm" />
-                    <AppImage appId={app.id} gridRow="1 / 3" />
-                    <CheckboxCard.Content gap="0.5">
-                      <Heading fontSize="md">{app.name}</Heading>
-                      <Flex w="full" justifyContent="space-between">
-                        <Text display="flex" gap="2" textStyle="xs">
-                          <Icon as={Group} boxSize="4" />
-                          {app.voters ?? 0}
-                        </Text>
-                        <Text textStyle="xs" fontWeight="bold">
-                          {((app.votesReceived * 100n) / totalVotes).toString() + "%"}
-                        </Text>
-                      </Flex>
-                      <Progress.Root w="full" size="xs" colorPalette="green" mt="1" value={50}>
-                        <Progress.Track rounded="lg">
-                          <Progress.Range />
-                        </Progress.Track>
-                      </Progress.Root>
-                    </CheckboxCard.Content>
-                  </CheckboxCard.Control>
-                </CheckboxCard.Root>
+                  appId={app.id}
+                  appName={app.name}
+                  appVoters={app.voters}
+                  appVotesReceived={app.votesReceived}
+                  totalVotes={totalVotes}
+                  checked={selectedAppIds?.has(app.id)}
+                  onCheckedChange={() => onToggleApp?.(app.id)}
+                />
               ))
             ) : searchQuery.length > 0 && showEmptyState ? (
               <EmptyState
@@ -301,6 +280,23 @@ export function AppCategoryTabs({
           </Tabs.Content>
         </Tabs.Root>
       </VStack>
-    </>
+      {!isMobile && (
+        <VStack width="1/3" align="stretch" justifySelf="flex-start">
+          <Heading size="lg">{"Your top 5 Apps"}</Heading>
+          <Card.Root variant="primary" p="8">
+            <Card.Body gap="8">
+              <Text textStyle="sm" color="text.subtle">
+                {"Most voted app of all time"}
+              </Text>
+              {Array(5)
+                .fill(null)
+                .map((_, idx) => (
+                  <div key={idx}>{"A"}</div>
+                ))}
+            </Card.Body>
+          </Card.Root>
+        </VStack>
+      )}
+    </HStack>
   )
 }
