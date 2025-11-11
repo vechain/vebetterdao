@@ -13,3 +13,7 @@ export const GRANT_TERMS_AND_CONDITIONS_LINK =
   "https://files.vebetterdao.org/vebetterdaocontainer/VeBetterDAO_Grant_Terms_And_Conditions.pdf"
 export const VOTING_POWER_DOCS_LINK = "https://docs.vebetterdao.org/vebetterdao/governance#quadratic-voting"
 export const PROPOSALS_QUORUM_DOCS_LINK = "https://docs.vebetterdao.org/vebetterdao/governance?q=quorum"
+export const SUSTAINABILITY_PROOF_DOCS_LINK =
+  "https://docs.vebetterdao.org/developer-guides/sustainability-proof-and-impacts"
+export const REWARD_METADATA_DOCS_LINK = "https://docs.vebetterdao.org/developer-guides/reward-metadata"
+export const REWARD_DISTRIBUTION_DOCS_LINK = "https://docs.vebetterdao.org/developer-guides/reward-distribution"

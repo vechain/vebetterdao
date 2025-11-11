@@ -2,6 +2,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
 import { useMetProposalCriteria } from "../../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { ProposalType } from "../../../../types/proposals"
 
 /**
  * This hook is used to guard the grants page.
@@ -10,15 +11,18 @@ import { useMetProposalCriteria } from "../../../../api/contracts/governance/hoo
  */
 export const useNewGrantPageGuard = () => {
   const { account } = useWallet()
-  const { hasMetProposalCriteria, isLoading } = useMetProposalCriteria()
+  const { hasMetProposalCriteria, isLoading } = useMetProposalCriteria(ProposalType.GRANT)
+
   const isVisitAuthorized = useMemo(() => {
     if (isLoading) return true // Allow visit while loading
     if (!account?.address || !hasMetProposalCriteria) return false
     return true
   }, [account?.address, hasMetProposalCriteria, isLoading])
+
   const redirectPath = useMemo(() => {
     if (!account?.address || !hasMetProposalCriteria) return "/grants"
     return "/grants/new"
   }, [account?.address, hasMetProposalCriteria])
+
   return { isVisitAuthorized, redirectPath, isLoading }
 }

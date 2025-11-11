@@ -35,16 +35,6 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const { isTxModalOpen } = useTransactionModal()
   const { t } = useTranslation()
   const [step, setStep] = useState(0)
-  const goToNextStep = useCallback(() => {
-    const nextStep = step + 1
-    if (nextStep > STEP_COUNT) onClose()
-    else setStep(nextStep)
-  }, [step, onClose])
-  const goToPrevStep = useCallback(() => {
-    const prevStep = step - 1
-    if (prevStep < 1) onClose()
-    else setStep(prevStep)
-  }, [step, onClose])
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
 
@@ -82,7 +72,19 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     setIsB3trToVot3(undefined)
     setValue("amount", "")
     setStep(0)
-  }, [onClose, setStep, setValue])
+  }, [onClose, setValue])
+
+  const goToNextStep = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep >= STEP_COUNT) handleClose()
+    else setStep(nextStep)
+  }, [step, handleClose])
+
+  const goToPrevStep = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 0) handleClose()
+    else setStep(prevStep)
+  }, [step, handleClose])
 
   const convertB3trMutation = useConvertB3tr({
     amount,
