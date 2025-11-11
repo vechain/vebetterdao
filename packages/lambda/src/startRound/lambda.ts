@@ -7,12 +7,13 @@ import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { buildClaimClause, getAllApps, getIdsOfUnclaimed } from "../helpers/xApps"
 import { getSecret } from "../helpers/secret"
-import { waitForRoundStart } from "../helpers/emissions"
+import { waitForRoundStart, detectRoundState } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { buildTxBody, buildGasEstimate, withRetry } from "../helpers"
 import { slackIds } from "../helpers/slack/slackIds"
 import { filterEligibleAppsForDBA } from "../helpers/dba"
+import { logger } from "../helpers/logger"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -221,8 +222,18 @@ export async function distributeXAllocations(thor: ThorClient) {
 
   // Get the IDs of the X-Apps that have not yet claimed their allocations
   const xAppIds = await getIdsOfUnclaimed(thor, CONFIG, xApps, previousRound.toString())
+  logger.info("X-App IDs", { xAppIds })
+
+  // If no X-Apps need to claim, skip distribution
+  if (xAppIds.length === 0) {
+    console.log(
+      `No X-Apps need to claim allocations for round ${previousRound} (${xApps.length} total apps, 0 unclaimed)`,
+    )
+    return { receipt: null, gasResult: null, allClaimed: true }
+  }
 
   const claimClauses = []
+  const failedXAppIds: string[] = []
 
   // Build the claim clauses for the X-Apps that have not yet claimed their allocations and the gas estimation does not revert
   for (const xAppId of xAppIds) {
@@ -237,7 +248,19 @@ export async function distributeXAllocations(thor: ThorClient) {
     // Check if the transaction was estimated to revert and handle accordingly
     if (!gasResult.reverted) {
       claimClauses.push(claimClause)
+    } else {
+      failedXAppIds.push(xAppId)
     }
+  }
+
+  logger.info("Claim clauses", { claimClauses, ineligibleApps: failedXAppIds, xAppIdsCount: xAppIds.length })
+
+  // If no claims to process, skip distribution
+  // ClaimClauses is used to determine if the app is eligible to claim allocations
+  // If it's empty, it means no apps are eligible to claim allocations
+  if (claimClauses.length === 0) {
+    logger.info(`No claim clauses to distribute X-Allocations for round ${previousRound}`)
+    return { receipt: null, gasResult: null, allClaimed: true }
   }
 
   // Estimate the gas cost for the transaction
@@ -416,70 +439,106 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       isPollingEnabled: false,
     })
 
-    // Wait for the next round to start before proceeding
-    // If the round does not start within 5 minutes, we will retry 3 times with a 1 second delay
-    try {
-      await withRetry(() => waitForRoundStart(thorClient, CONFIG), 3, 1000, "Wait for Round Start")
-    } catch (error) {
-      console.log("Failed to wait for round start after all retries:", error)
+    // Detect the current round state to determine if we should skip distribution
+    const roundState = await detectRoundState(thorClient, CONFIG)
+    console.log("Round state:", roundState)
+
+    let receiptEmissions = null
+    let gasResultEmissions = null
+
+    // Check if we should skip the distribute step (it was already called in a previous run)
+    if (roundState.shouldSkipDistribute) {
+      logger.info(
+        `Skipping start round. Current block: ${roundState.currentBlock}, Next cycle block: ${roundState.nextCycleBlock}, Blocks until next cycle: ${roundState.blocksUntilNextCycle}`,
+      )
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: Failed to wait for round start after multiple attempts: ${error}`,
+        `${SLACK_MESSAGE_PREFIX}:information_source: Round ${roundState.currentCycle}. Skipping start round because we are (${roundState.blocksUntilNextCycle} blocks away, exceeds waiting period).`,
       )
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: `Failed to wait for round start: ${error}` }),
+    } else {
+      // Wait for the next round to start before proceeding
+      // If the round does not start within 5 minutes, we will retry 3 times with a 1 second delay
+      try {
+        await withRetry(() => waitForRoundStart(thorClient, CONFIG), 3, 1000, "Wait for Round Start")
+      } catch (error) {
+        console.log("Failed to wait for round start after all retries:", error)
+        await publishMessage(
+          client,
+          SLACK_CHANNEL_ID,
+          `${SLACK_MESSAGE_PREFIX}:alert: Failed to wait for round start after multiple attempts: ${error}`,
+        )
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ error: `Failed to wait for round start: ${error}` }),
+        }
+      }
+
+      // Re-check if the round was already started while we were waiting
+      // This handles the race condition where someone else calls distribute() concurrently
+      const recheckState = await detectRoundState(thorClient, CONFIG)
+      if (recheckState.shouldSkipDistribute) {
+        logger.info(
+          `Detected round was started by another process while waiting. Current block: ${recheckState.currentBlock}, Next cycle block: ${recheckState.nextCycleBlock}`,
+        )
+        await publishMessage(
+          client,
+          SLACK_CHANNEL_ID,
+          `${SLACK_MESSAGE_PREFIX}:information_source: Round ${recheckState.currentCycle} started by another process while waiting. Proceeding to X-Allocations.`,
+        )
+        // Continue to X-Allocations and DBA distribution
+      } else {
+        // Distribute the emissions to the VeBetterDAO and start the next round with retry
+        let emissionsResult
+        try {
+          emissionsResult = await withRetry(
+            () => distributeEmissions(thorClient),
+            maxRetries,
+            delayMs,
+            "Distribute Emissions",
+          )
+        } catch (error) {
+          console.log("Failed to distribute emissions after all retries:", error)
+          await publishMessage(
+            client,
+            SLACK_CHANNEL_ID,
+            `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute emissions after multiple attempts: ${error}`,
+          )
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: `Failed to distribute emissions: ${error}` }),
+          }
+        }
+
+        const { receipt, gasResult } = emissionsResult
+        receiptEmissions = receipt
+        gasResultEmissions = gasResult
+
+        if (!receiptEmissions) {
+          await publishMessage(
+            client,
+            SLACK_CHANNEL_ID,
+            `${SLACK_MESSAGE_PREFIX}:alert: Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
+          )
+          return {
+            statusCode: 500,
+            body: JSON.stringify({
+              error: `Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
+            }),
+          }
+        }
+
+        // Log the transaction receipt for debugging and verification
+        console.log("Receipt:", receiptEmissions)
+
+        // Publish a success message to the Slack channel
+        await publishMessage(
+          client,
+          SLACK_CHANNEL_ID,
+          `${SLACK_MESSAGE_PREFIX}:white_check_mark: Round started successfully`,
+        )
       }
     }
-
-    // Distribute the emissions to the VeBetterDAO and start the next round with retry
-    let emissionsResult
-    try {
-      emissionsResult = await withRetry(
-        () => distributeEmissions(thorClient),
-        maxRetries,
-        delayMs,
-        "Distribute Emissions",
-      )
-    } catch (error) {
-      console.log("Failed to distribute emissions after all retries:", error)
-      await publishMessage(
-        client,
-        SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute emissions after multiple attempts: ${error}`,
-      )
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: `Failed to distribute emissions: ${error}` }),
-      }
-    }
-
-    const { receipt: receiptEmissions, gasResult: gasResultEmissions } = emissionsResult
-
-    if (!receiptEmissions) {
-      await publishMessage(
-        client,
-        SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
-      )
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error: `Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
-        }),
-      }
-    }
-
-    // Log the transaction receipt for debugging and verification
-    console.log("Receipt:", receiptEmissions)
-
-    // Publish a success message to the Slack channel
-    await publishMessage(
-      client,
-      SLACK_CHANNEL_ID,
-      `${SLACK_MESSAGE_PREFIX}:white_check_mark: Round started successfully`,
-    )
 
     // Distribute the X-Allocations to the X-App addresses that have not yet claimed them with retry
     let xAllocationsResult
@@ -491,43 +550,47 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         "Distribute X-Allocations",
       )
     } catch (error) {
-      console.log("Failed to distribute X-Allocations after all retries:", error)
+      const errorMsg = String(error)
+      console.log("Failed to distribute X-Allocations after all retries:", errorMsg)
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute X-Allocations after multiple attempts: ${error}`,
+        `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute X-Allocations after multiple attempts: ${errorMsg}`,
       )
+
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: `Failed to distribute X-Allocations: ${error}` }),
+        body: JSON.stringify({ error: `Failed to distribute X-Allocations: ${errorMsg}` }),
       }
     }
 
-    const { receipt: receiptClaim, gasResult: gasResultXallocations } = xAllocationsResult
+    const { receipt: receiptClaim, gasResult: gasResultXallocations, allClaimed } = xAllocationsResult
 
-    if (!receiptClaim) {
+    if (allClaimed) {
+      console.log("No X-Apps need to claim allocations - skipping")
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:information_source: No eligible X-Apps found to claim allocations`,
+      )
+    } else if (!receiptClaim && gasResultXallocations?.reverted) {
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
         `${SLACK_MESSAGE_PREFIX}:alert: X-Allocations transaction reverted: ${gasResultXallocations.revertReasons}, ${gasResultXallocations.vmErrors}`,
       )
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error: `Transaction reverted: ${gasResultXallocations.revertReasons}, ${gasResultXallocations.vmErrors}`,
-        }),
-      }
+      // Continue to DBA distribution instead of returning
+    } else if (receiptClaim) {
+      // Log the transaction receipt for debugging and verification
+      console.log("Receipt:", receiptClaim)
+
+      // Publish a success message to the Slack channel
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
+      )
     }
-
-    // Log the transaction receipt for debugging and verification
-    console.log("Receipt:", receiptClaim)
-
-    // Publish a success message to the Slack channel
-    await publishMessage(
-      client,
-      SLACK_CHANNEL_ID,
-      `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
-    )
 
     // Distribute DBA rewards for the previous round with retry
     let dbaResult

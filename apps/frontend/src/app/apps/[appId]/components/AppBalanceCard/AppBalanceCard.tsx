@@ -11,12 +11,13 @@ import {
   VStack,
   useDisclosure,
   Box,
+  Link,
 } from "@chakra-ui/react"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { FaArrowUpRightFromSquare } from "react-icons/fa6"
 import { FiInfo } from "react-icons/fi"
 
 import { Tooltip } from "@/components/ui/tooltip"
@@ -34,7 +35,7 @@ import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
 import { ManagementCenterModal } from "./ManagementCenterModal"
 import { TransferAppFundsModal } from "./TransferAppFundsModal"
 
-const compactFormatter = getCompactFormatter(4)
+const compactFormatter = getCompactFormatter(2)
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -64,14 +65,18 @@ export const AppBalanceCard = () => {
   const isAppAdminOrTreasuryAddress = isAppAdmin || app?.teamWalletAddress === account?.address
 
   const rewardsPoolColor = useMemo(() => {
-    if (isPaused) return "#FCEEF1"
-    if (isRewardsPoolEnabled) return "#3DBA67"
-    else return "#D9D9D9"
+    if (isPaused) return "status.negative.subtle"
+    if (isRewardsPoolEnabled) return "status.positive.primary"
+    else return "bg.muted"
   }, [isPaused, isRewardsPoolEnabled])
 
   return (
     <>
-      <Card.Root w={"full"} colorPalette="Red" border="sm" borderColor={isPaused ? "#C84968" : "border.primary"}>
+      <Card.Root
+        w={"full"}
+        colorPalette="Red"
+        border="sm"
+        borderColor={isPaused ? "status.negative.primary" : "border.primary"}>
         <Card.Body pt={3} pb={2}>
           <HStack justify={"space-between"} w={"full"}>
             <VStack alignItems={"start"} gap={0}>
@@ -139,12 +144,16 @@ export const AppBalanceCard = () => {
           <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
             <Separator borderColor="border.primary" />
           </Box>
-          <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
-            <Text textStyle="md" fontWeight="semibold" color="brand.primary">
-              {t("View history")}
-            </Text>
-            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="icon.default" cursor="pointer" />
-          </HStack>
+          <Link
+            textStyle="md"
+            mt={2}
+            fontWeight="semibold"
+            color="actions.secondary.text-lighter"
+            onClick={onOpenRewardsPoolAccess}
+            alignSelf={"start"}>
+            {t("History")}
+            <UilArrowUpRight />
+          </Link>
           {!isAppAdmin && (
             <GenericAlert
               title={t("Access restricted")}

@@ -7,13 +7,14 @@ import {
   HStack,
   Heading,
   Image,
+  Link,
   Skeleton,
   Stack,
   Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { UilArrowUpRight, UilExternalLinkAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -64,7 +65,9 @@ export const AppDetailOverview = ({
   return (
     <>
       <VStack gap={4} align="stretch">
-        {showEndorsementStatusCallout && <EndorsementStatusCallout endorsementStatus={endorsementStatus} />}
+        {showEndorsementStatusCallout && !isEndorsementStatusLoading && (
+          <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
+        )}
         <Card.Root variant="primary">
           <Card.Body>
             <VStack align="stretch" gap={4}>
@@ -141,19 +144,14 @@ export const AppDetailOverview = ({
                           <Text textStyle={"sm"} color="text.subtle">
                             {t("Distribution Strategy")}
                           </Text>
-                          <Button
-                            w="auto"
-                            h="auto"
-                            p={0}
-                            m={0}
-                            variant={"ghost"}
-                            color="text.subtle"
-                            onClick={() => {
-                              onDistributionStrategyModalOpen()
-                            }}>
+                          <Link
+                            textStyle="md"
+                            fontWeight="semibold"
+                            color="actions.secondary.text-lighter"
+                            onClick={onDistributionStrategyModalOpen}>
                             {t("View Details")}
                             <UilArrowUpRight />
-                          </Button>
+                          </Link>
                         </VStack>
                       ) : null}
                     </Stack>
@@ -169,7 +167,7 @@ export const AppDetailOverview = ({
                       )}
                       <Button flex={1} variant={"primary"} onClick={goToWebsite}>
                         {t("Go to Website")}
-                        <UilArrowUpRight color="white" size={"16px"} />
+                        <UilExternalLinkAlt color="white" size={"16px"} />
                       </Button>
                       {isMobile && (
                         <>
@@ -191,7 +189,6 @@ export const AppDetailOverview = ({
         onClose={onDistributionStrategyModalClose}
         // TODO: migration add distribution_strategy to XAppMetadata in vechain-kit
         distributionStrategy={appMetadata?.distribution_strategy ?? ""}
-        logo={logo ?? notFoundImage}
       />
     </>
   )

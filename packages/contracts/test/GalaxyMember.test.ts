@@ -784,7 +784,7 @@ describe("Galaxy Member - @shard3b", () => {
         await galaxyMember.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as GalaxyMemberV2
 
       let storageSlotsAfter = []
 
@@ -834,7 +834,7 @@ describe("Galaxy Member - @shard3b", () => {
       expect(await galaxyMemberV2.levelOf(5)).to.equal(1) // Earth
 
       // Let's upgrade gmId 1, owned by otherAccount, to level 2
-      await upgradeNFTtoLevel(1, 2, galaxyMemberV2, b3tr, otherAccount, minterAccount)
+      await upgradeNFTtoLevel(1, 2, galaxyMemberV2 as any, b3tr, otherAccount, minterAccount)
       expect(await galaxyMemberV2.levelOf(1)).to.equal(2) // Moon
 
       // Mint Mjolnir X Node to otherAccount

@@ -7,8 +7,6 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
-  ariaTitle?: string
-  ariaDescription?: string
   modalProps?: Partial<Dialog.RootProps>
   modalContentProps?: Partial<Dialog.ContentProps>
   showCloseButton?: boolean
@@ -51,22 +49,21 @@ export const Modal = ({
     <Portal>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content
-          rounded={"2xl"}
-          maxH="80vh"
-          overflowY="auto"
-          mx={{ base: 4, md: "none" }}
-          {...modalContentProps}>
+        <Dialog.Content rounded={"2xl"} maxH="80vh" overflowY="auto" {...modalContentProps}>
           {showHeader && (
             <Dialog.Header asChild>
-              <Grid templateRows="1fr" templateColumns={"36px 1fr 36px"} placeItems="start" justifyItems="center">
+              <Grid
+                templateRows={illustration ? "1fr 1fr" : "1fr"}
+                templateColumns={"36px 1fr 36px"}
+                placeItems="start"
+                justifyItems="center">
                 <GridItem>
                   {showLogo ? <Image alt="b3tr-logo" src={B3TRLogo} width="36" height="36" /> : <Box w="9" h="9" />}
                 </GridItem>
                 <GridItem rowSpan={2}>
                   {illustration && (
                     <Box position="relative" boxSize={{ base: "16", md: "48" }}>
-                      <Image alt="modal-image" src={illustration} fill />
+                      <Image alt="mascot-welcoming" src={illustration} fill />
                     </Box>
                   )}
                 </GridItem>
@@ -83,7 +80,7 @@ export const Modal = ({
               </Grid>
             </Dialog.Header>
           )}
-          <Dialog.Body textAlign={illustration ? "center" : "left"} pb={footer ? 0 : 4}>
+          <Dialog.Body textAlign={illustration ? "center" : "left"} py={4}>
             {title && (
               <Dialog.Title fontWeight="bold" textStyle={{ base: "xl", md: illustration ? "3xl" : "xl" }}>
                 {title}

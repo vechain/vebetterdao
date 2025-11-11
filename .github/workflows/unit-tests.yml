@@ -136,8 +136,6 @@ jobs:
             label: Governance - Grants Manager V2 Upgrade
           - shard: shard4j
             label: Governance - Grants Manager V2 Compatibility
-          - shard: shard5
-            label: Node Management
           - shard: shard6
             label: TimeLock
           - shard: shard7

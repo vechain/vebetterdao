@@ -1,19 +1,4 @@
-import {
-  Dialog,
-  Text,
-  HStack,
-  Button,
-  Heading,
-  VStack,
-  Icon,
-  Box,
-  Flex,
-  Input,
-  Circle,
-  Skeleton,
-  Portal,
-  CloseButton,
-} from "@chakra-ui/react"
+import { Text, HStack, Button, Heading, VStack, Icon, Box, Flex, Input, Circle, Skeleton } from "@chakra-ui/react"
 import BigNumber from "bignumber.js"
 import { useCallback, useState, useMemo, useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -22,7 +7,7 @@ import { HiMiniArrowsUpDown } from "react-icons/hi2"
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
 import { useRefillRewardsPool } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/setter/useRefillRewardsPool"
-import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+import { BaseModal } from "../../../../../components/BaseModal"
 import { filterAmountInput } from "../../../../../utils/filterAmountInput"
 import { removingExcessDecimals } from "../../../../../utils/MathUtils/MathUtils"
 type Props = {
@@ -40,7 +25,6 @@ interface TabConfig {
 }
 export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoints()
   const [activeTab, setActiveTab] = useState<TabType>("balance-to-rewards")
   const [amount, setAmount] = useState<string>("")
   //TODO: Add this to review modal before sending transaction
@@ -176,153 +160,151 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
   }, [availableBalanceFormatted, rewardsBalanceFormatted])
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content borderRadius="20px">
-            <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} asChild>
-              <CloseButton />
-            </Dialog.CloseTrigger>
-            <Dialog.Header>
-              <Text textStyle={{ base: "lg", md: "2xl" }} alignSelf={"center"}>
-                {t("Refill Pools")}
-              </Text>
-            </Dialog.Header>
-
-            <Dialog.Body pb={6} gap={4}>
-              <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
-                <Text textStyle="sm" color="text.subtle">
-                  {t(
-                    "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
-                  )}
-                </Text>
-              </Box>
-
-              {tabs.map(
-                tab =>
-                  activeTab === tab.id && (
-                    <VStack
-                      key={`content-${tab.id}`}
-                      w={"full"}
-                      mt={4}
-                      justifyContent={"space-between"}
-                      position="relative"
-                      alignItems={"flex-start"}
-                      gap={1}>
-                      <VStack
-                        bg="info-bg"
-                        alignItems={"flex-start"}
-                        borderRadius={"12px"}
-                        p={"20px"}
-                        pl={"20px"}
-                        w={"full"}>
-                        <Text fontWeight="semibold">
-                          {t(activeTab === "balance-to-rewards" ? "From Balance" : "From Rewards Pool")}
-                        </Text>
-                        <HStack>
-                          {isLoading ? (
-                            <Skeleton height="20px" width="60px" />
-                          ) : (
-                            <Heading size={{ base: "3xl", md: "4xl" }} color="text.subtle">
-                              {formatDisplayValue(
-                                activeTab === "balance-to-rewards" ? estimatedBalance : estimatedRewards,
-                              )}
-                            </Heading>
-                          )}
-                        </HStack>
-                      </VStack>
-                      {/* The line between the two sections */}
-                      <Flex
-                        position="absolute"
-                        top="40%"
-                        left="0"
-                        transform="translateY(-50%)"
-                        width={"full"}
-                        alignItems="center"
-                        justifyContent="center"
-                        zIndex={1}>
-                        <Circle
-                          size="60px"
-                          bg="contrast-fg-on-strong"
-                          border="1px solid #D5D5D5"
-                          position="absolute"
-                          right="30px"
-                          justifyContent="center"
-                          alignItems="center"
-                          cursor="pointer"
-                          onClick={() => {
-                            const newTab =
-                              activeTab === "balance-to-rewards" ? "rewards-to-balance" : "balance-to-rewards"
-                            handleTabChange(newTab)
-                          }}
-                          boxShadow="sm"
-                          _hover={{
-                            border: "1px solid #004CFC",
-                            boxShadow: "0px 0px 16px rgba(0, 76, 252, 0.29)",
-                            "& > svg": {
-                              color: "#004CFC",
-                            },
-                          }}>
-                          <Icon
-                            as={HiMiniArrowsUpDown}
-                            boxSize="35px"
-                            transform={activeTab === "balance-to-rewards" ? "rotate(0deg)" : "rotate(180deg)"}
-                            transition="transform 0.3s ease"
-                            _hover={{
-                              color: "#004CFC",
-                            }}
-                          />
-                        </Circle>
-                      </Flex>
-
-                      <VStack
-                        bg="info-bg"
-                        alignItems={"flex-start"}
-                        borderRadius={"12px"}
-                        p={"20px"}
-                        pl={"20px"}
-                        w={"full"}>
-                        <VStack
-                          w={"full"}
-                          alignItems={"flex-start"}
-                          borderBottomWidth={2}
-                          borderColor={"rgba(213, 213, 213, 1)"}>
-                          <Text fontWeight="semibold">
-                            {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
-                          </Text>
-                          <Input
-                            placeholder="0"
-                            type="text"
-                            value={amount}
-                            onChange={e => handleAmountChange(e.target.value)}
-                            variant="amountInput"
-                          />
-                        </VStack>
-                        <Text textStyle="sm">
-                          {t("Current {{value}}: ", {
-                            value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "Balance",
-                          })}
-                          {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}
-                        </Text>
-                      </VStack>
-                    </VStack>
-                  ),
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      showCloseButton={true}
+      modalContentProps={{
+        borderRadius: "2xl",
+        maxW: "600px",
+        w: "lg",
+        p: 6,
+      }}
+      modalBodyProps={{
+        p: 0,
+      }}
+      modalProps={{
+        closeOnInteractOutside: true,
+      }}>
+      <VStack gap={6} w="full">
+        <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"flex-start"}>
+          {t("Refill Pools")}
+        </Text>
+        <VStack gap={4} w="full">
+          <Box borderRadius="16px" p={"6px"} mb={"25px"}>
+            <Text textStyle="sm" color="text.subtle">
+              {t(
+                "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
               )}
+            </Text>
+          </Box>
 
-              <Button
-                mt={8}
-                disabled={isTransferDisabled || isLoading}
-                onClick={handleTransfer}
-                variant={"primary"}
-                borderRadius={"full"}
-                w={"full"}>
-                {t("Transfer token")}
-              </Button>
-            </Dialog.Body>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+          {tabs.map(
+            tab =>
+              activeTab === tab.id && (
+                <VStack
+                  key={`content-${tab.id}`}
+                  w={"full"}
+                  mt={4}
+                  justifyContent={"space-between"}
+                  position="relative"
+                  alignItems={"flex-start"}
+                  gap={1}>
+                  <VStack
+                    bg="info-bg"
+                    alignItems={"flex-start"}
+                    borderRadius={"12px"}
+                    p={"20px"}
+                    pl={"20px"}
+                    w={"full"}>
+                    <Text fontWeight="semibold">
+                      {t(activeTab === "balance-to-rewards" ? "From Balance" : "From Rewards Pool")}
+                    </Text>
+                    <HStack>
+                      {isLoading ? (
+                        <Skeleton height="20px" width="60px" />
+                      ) : (
+                        <Heading size={{ base: "3xl", md: "4xl" }} color="text.subtle">
+                          {formatDisplayValue(activeTab === "balance-to-rewards" ? estimatedBalance : estimatedRewards)}
+                        </Heading>
+                      )}
+                    </HStack>
+                  </VStack>
+                  {/* The line between the two sections */}
+                  <Flex
+                    position="absolute"
+                    top="40%"
+                    left="0"
+                    transform="translateY(-50%)"
+                    width={"full"}
+                    alignItems="center"
+                    justifyContent="center"
+                    zIndex={1}>
+                    <Circle
+                      size="60px"
+                      bg="contrast-fg-on-strong"
+                      borderWidth="1px"
+                      borderColor="border.secondary"
+                      position="absolute"
+                      right="30px"
+                      justifyContent="center"
+                      alignItems="center"
+                      cursor="pointer"
+                      onClick={() => {
+                        const newTab = activeTab === "balance-to-rewards" ? "rewards-to-balance" : "balance-to-rewards"
+                        handleTabChange(newTab)
+                      }}
+                      boxShadow="sm"
+                      _hover={{
+                        borderColor: "actions.primary.default",
+                        boxShadow: "0px 0px 16px token(colors.actions.primary.default/30)",
+                        "& > svg": {
+                          color: "actions.primary.default",
+                        },
+                      }}>
+                      <Icon
+                        as={HiMiniArrowsUpDown}
+                        boxSize="35px"
+                        transform={activeTab === "balance-to-rewards" ? "rotate(0deg)" : "rotate(180deg)"}
+                        transition="transform 0.3s ease"
+                        _hover={{
+                          color: "actions.primary.default",
+                        }}
+                      />
+                    </Circle>
+                  </Flex>
+
+                  <VStack
+                    bg="info-bg"
+                    alignItems={"flex-start"}
+                    borderRadius={"12px"}
+                    p={"20px"}
+                    pl={"20px"}
+                    w={"full"}>
+                    <VStack w={"full"} alignItems={"flex-start"} borderBottomWidth={2} borderColor="border.secondary">
+                      <Text fontWeight="semibold">
+                        {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
+                      </Text>
+                      <Input
+                        placeholder="0"
+                        type="text"
+                        value={amount}
+                        onChange={e => handleAmountChange(e.target.value)}
+                        variant="amountInput"
+                      />
+                    </VStack>
+                    <Text textStyle="sm">
+                      {t("Current {{value}}: ", {
+                        value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "Balance",
+                      })}
+                      {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}
+                    </Text>
+                  </VStack>
+                </VStack>
+              ),
+          )}
+
+          <Button
+            mt={8}
+            disabled={isTransferDisabled || isLoading}
+            onClick={handleTransfer}
+            variant={"primary"}
+            borderRadius={"full"}
+            w={"full"}>
+            {t("Transfer token")}
+          </Button>
+        </VStack>
+      </VStack>
+    </BaseModal>
   )
 }
