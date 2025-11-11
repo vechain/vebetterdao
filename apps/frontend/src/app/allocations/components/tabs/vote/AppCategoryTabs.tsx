@@ -2,7 +2,6 @@
 
 import {
   Button,
-  Card,
   Circle,
   CloseButton,
   createListCollection,
@@ -28,6 +27,7 @@ import { APP_CATEGORIES } from "@/types/appDetails"
 
 import type { AppWithVotes } from "../../../page"
 import { AppRadioCard } from "../../AppRadioCard"
+import { UserTopVotesAppsCard } from "../../UserTopVotesAppsCard"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
@@ -283,18 +283,7 @@ export function AppCategoryTabs({
       {!isMobile && (
         <VStack width="1/3" align="stretch" justifySelf="flex-start">
           <Heading size="lg">{"Your top 5 Apps"}</Heading>
-          <Card.Root variant="primary" p="8">
-            <Card.Body gap="8">
-              <Text textStyle="sm" color="text.subtle">
-                {"Most voted app of all time"}
-              </Text>
-              {Array(5)
-                .fill(null)
-                .map((_, idx) => (
-                  <div key={idx}>{"A"}</div>
-                ))}
-            </Card.Body>
-          </Card.Root>
+          <UserTopVotesAppsCard apps={apps} />
         </VStack>
       )}
     </HStack>
