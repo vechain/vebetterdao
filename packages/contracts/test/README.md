@@ -20,7 +20,6 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard4f**: Governance - V7 Upgrade
 - **shard4g**: Governance - V8 Upgrade
 - **shard4h**: Governance - V8 Compatibility
-- **shard5**: Node Management (skipped)
 - **shard6**: TimeLock
 - **shard7**: Treasury
 - **shard8**: VeBetterPassport
