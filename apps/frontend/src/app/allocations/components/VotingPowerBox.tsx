@@ -1,15 +1,19 @@
 "use client"
 
-import { Card, VStack, Icon, Text, Button, Dialog, Skeleton } from "@chakra-ui/react"
+import { Icon, Text, Button, Dialog, Skeleton } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
 import { formatEther } from "viem"
 
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+
+import { StatCard } from "./StatCard"
 
 export const VotingPowerBox = () => {
   const { account } = useWallet()
+  const { isMobile } = useBreakpoints()
   const { data: vot3Balance, isLoading } = useGetVot3Balance(account?.address)
 
   const original = vot3Balance ? Number(vot3Balance.original) : 0
@@ -17,29 +21,28 @@ export const VotingPowerBox = () => {
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return (
-    <Card.Root
-      p="4"
-      variant="subtle"
-      bgColor="status.positive.subtle"
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="space-between">
-      <VStack flex={1} lineClamp={2}>
-        <Text textStyle="xs">{"Voting Power"}</Text>
+    <StatCard
+      showIcon={!isMobile}
+      variant="positive"
+      title="Voting power"
+      icon={<Flash />}
+      subtitle={
         <Skeleton loading={isLoading}>
-          <Text textStyle="lg" fontWeight="semibold">
+          <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="semibold">
             {formatted}
           </Text>
         </Skeleton>
-      </VStack>
-      <Dialog.Root>
-        <Dialog.Trigger asChild>
-          <Button variant="primary">
-            <Icon as={Flash} boxSize="4" />
-            {"Power up"}
-          </Button>
-        </Dialog.Trigger>
-      </Dialog.Root>
-    </Card.Root>
+      }
+      cta={
+        <Dialog.Root>
+          <Dialog.Trigger asChild>
+            <Button variant="primary">
+              <Icon as={Flash} boxSize="4" />
+              {"Power up"}
+            </Button>
+          </Dialog.Trigger>
+        </Dialog.Root>
+      }
+    />
   )
 }

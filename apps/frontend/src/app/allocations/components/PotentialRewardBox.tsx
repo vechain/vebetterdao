@@ -1,16 +1,18 @@
 "use client"
 
-import { Card, VStack, Square, Icon, Text, Skeleton, Mark } from "@chakra-ui/react"
+import { Text, Skeleton, Mark } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { useCallClause, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { formatEther } from "viem"
 
-import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
 
 import type { AllocationCurrentRoundDetails } from "../page"
+
+import { StatCard } from "./StatCard"
 
 const voterRewardsAbi = VoterRewards__factory.abi
 const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
@@ -55,32 +57,20 @@ export const PotentialRewardBox = ({ currentRoundDetails }: { currentRoundDetail
   )
 
   return (
-    <Card.Root
-      p="4"
-      variant="subtle"
-      bgColor="status.info.subtle"
-      display="grid"
-      gridTemplateColumns="2rem 1fr"
-      columnGap="2"
-      alignItems="center">
-      <Square rounded="md" bgColor="status.info.subtle" aspectRatio={1} height="32px">
-        <Icon boxSize="5" color="status.info.strong">
-          <B3TRIcon />
-        </Icon>
-      </Square>
-      <VStack flex={1} lineClamp={2} gap="1">
-        <Text textStyle="xs" lineClamp={1}>
-          {"Potential rewards"}
-        </Text>
+    <StatCard
+      variant="info"
+      title="Potential rewards"
+      icon={<B3TRIcon />}
+      subtitle={
         <Skeleton asChild loading={isLoading || !potentialReward}>
-          <Text textStyle="sm" lineClamp={1}>
+          <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>
             <Mark variant="text" fontWeight="semibold">
               {potentialReward ? Number(formatEther(potentialReward.netTotal)).toFixed(2) : "-"}
             </Mark>
             {" B3TR"}
           </Text>
         </Skeleton>
-      </VStack>
-    </Card.Root>
+      }
+    />
   )
 }
