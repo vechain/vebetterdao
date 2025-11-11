@@ -52,13 +52,13 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
     onClose?.()
     setStep(0)
   }, [onClose])
-  
+
   const goToNext = useCallback(() => {
     const nextStep = step + 1
     if (nextStep >= STEP_COUNT) handleClose()
     else setStep(nextStep)
   }, [step, handleClose])
-  
+
   const goToPrevious = useCallback(() => {
     const prevStep = step - 1
     if (prevStep < 0) handleClose()

@@ -12,7 +12,7 @@ export const checkboxSlotRecipe = defineSlotRecipe({
           alignItems: "center",
           gap: "2",
           borderRadius: "4px",
-          focusRing: "outside",
+          focusVisibleRing: "outside",
           focusRingColor: "borders.active",
           focusRingWidth: "2px",
           focusRingOffset: "2px",
