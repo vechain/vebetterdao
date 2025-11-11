@@ -4,20 +4,28 @@ import {
   Button,
   CheckboxCard,
   Circle,
+  CloseButton,
+  createListCollection,
   Flex,
   Heading,
   HStack,
   Icon,
+  Input,
+  InputGroup,
   Pagination,
+  Portal,
   Progress,
+  Select,
   Tabs,
   Text,
+  VStack,
 } from "@chakra-ui/react"
-import { Group, Search as SearchIcon } from "iconoir-react"
+import { Group, Search, Search as SearchIcon } from "iconoir-react"
 import { useMemo, useState } from "react"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { EmptyState } from "@/components/ui/empty-state"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 import type { AppWithVotes } from "../../../page"
@@ -28,7 +36,6 @@ interface AppCategoryTabsProps {
   selectedAppIds?: Set<string>
   onToggleApp?: (appId: string) => void
   tabsListProps?: Record<string, any>
-  showAdditionalTabs?: boolean
   showEmptyState?: boolean
   showPagination?: boolean
   onViewAll?: VoidFunction
@@ -42,14 +49,19 @@ export function AppCategoryTabs({
   selectedAppIds,
   onToggleApp,
   tabsListProps,
-  showAdditionalTabs = false,
   showEmptyState = false,
   showPagination = false,
   onViewAll,
   initialCategory = "all",
   onCategoryChange,
 }: AppCategoryTabsProps) {
+  const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
+  const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
+
+  const categoryCollection = createListCollection({
+    items: APP_CATEGORIES.map(category => ({ label: category.name, value: category.id })),
+  })
 
   const totalVotes = useMemo(
     () =>
@@ -63,119 +75,232 @@ export function AppCategoryTabs({
     return apps
       .filter(app => {
         const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesSearchDesktop = app.name.toLowerCase().includes(searchQueryDesktop.toLowerCase())
+
         const matchesCategory =
           selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
-        return matchesSearch && matchesCategory
+        return (isMobile ? matchesSearch : matchesSearchDesktop) && matchesCategory
       })
       .sort((a, b) => (b.votesReceived > a.votesReceived ? 1 : -1))
-  }, [apps, searchQuery, selectedCategory])
+  }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
+
+  const areAllFilteredAppsSelected = useMemo(() => {
+    if (!selectedAppIds || filteredApps.length === 0) return false
+    return filteredApps.every(app => selectedAppIds.has(app.id))
+  }, [filteredApps, selectedAppIds])
+
+  const sortedAppsWithSelected = useMemo(() => {
+    return filteredApps.slice().sort((a, b) => {
+      const aSelected = selectedAppIds?.has(a.id) ?? false
+      const bSelected = selectedAppIds?.has(b.id) ?? false
+      if (aSelected === bSelected) return 0
+      return aSelected ? -1 : 1
+    })
+  }, [filteredApps, selectedAppIds])
+
+  const handleSelectAll = () => {
+    if (!onToggleApp) return
+
+    if (areAllFilteredAppsSelected) {
+      filteredApps.forEach(app => {
+        if (selectedAppIds?.has(app.id)) {
+          onToggleApp(app.id)
+        }
+      })
+    } else {
+      filteredApps.forEach(app => {
+        if (!selectedAppIds?.has(app.id)) {
+          onToggleApp(app.id)
+        }
+      })
+    }
+  }
 
   return (
-    <Tabs.Root
-      value={selectedCategory}
-      onValueChange={e => {
-        setSelectedCategory(e.value)
-        onCategoryChange?.(e.value)
-      }}
-      variant="subtle"
-      colorPalette="actions.secondary"
-      size="md"
-      w="full">
-      <Tabs.List w="full" overflowY="hidden" overflowX="scroll" gap="2" scrollbar="hidden" {...tabsListProps}>
-        <Tabs.Trigger key="all" flex={1} justifyContent="center" value="all" minWidth="4rem">
-          {"All"}
-        </Tabs.Trigger>
-        {APP_CATEGORIES.map(({ id, name }) => (
-          <Tabs.Trigger key={id} flex={1} justifyContent="center" value={id} minWidth="max-content">
-            {name}
-          </Tabs.Trigger>
-        ))}
-      </Tabs.List>
+    <>
+      <VStack gap="4" align="stretch">
+        <VStack hideBelow="md" gap="4" align="stretch" px="4">
+          <Flex alignItems="center" justifyContent="space-between">
+            <Heading size="lg">{"Active apps in current round"}</Heading>
+            <Flex gap="4">
+              <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
+                {areAllFilteredAppsSelected ? "Deselect all" : "Select all"}
+              </Button>
+              <Button variant="primary" minWidth="36">
+                {selectedAppIds && selectedAppIds.size > 0
+                  ? selectedAppIds.size > 1
+                    ? `Vote for ${selectedAppIds?.size} Apps`
+                    : `Vote for 1 App`
+                  : "Vote"}
+              </Button>
+            </Flex>
+          </Flex>
+          <Flex gap="4" alignItems="center" justifyContent="space-between">
+            <InputGroup
+              flex={1}
+              startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
+              endElement={
+                searchQueryDesktop ? (
+                  <CloseButton size="xs" onClick={() => setSearchQueryDesktop("")} me="-2" />
+                ) : undefined
+              }
+              borderColor="border.primary">
+              <Input
+                id="allocation-app-filter-desktop"
+                variant="outline"
+                placeholder="Search app"
+                value={searchQueryDesktop}
+                onChange={e => setSearchQueryDesktop(e.target.value)}
+                rounded="xl"
+              />
+            </InputGroup>
+            <Select.Root
+              collection={categoryCollection}
+              width="40"
+              value={[selectedCategory]}
+              onValueChange={e => {
+                if (!e.value[0]) return
+                setSelectedCategory(e.value[0])
+                onCategoryChange?.(e.value[0])
+              }}>
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger>
+                  <Select.ValueText placeholder="Category" />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  {selectedCategory !== "all" ? (
+                    <Select.ClearTrigger
+                      onClick={() => {
+                        setSelectedCategory("all")
+                        onCategoryChange?.("")
+                      }}
+                    />
+                  ) : (
+                    <Select.Indicator />
+                  )}
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    {categoryCollection.items.map(category => (
+                      <Select.Item item={category} key={category.value}>
+                        {category.label}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>{" "}
+          </Flex>
+        </VStack>
+        <Tabs.Root
+          value={selectedCategory}
+          onValueChange={e => {
+            setSelectedCategory(e.value)
+            onCategoryChange?.(e.value)
+          }}
+          variant="subtle"
+          colorPalette="actions.secondary"
+          size="md"
+          w="full">
+          <Tabs.List
+            hideFrom="md"
+            w="full"
+            overflowY="hidden"
+            overflowX="scroll"
+            gap="2"
+            scrollbar="hidden"
+            {...tabsListProps}>
+            <Tabs.Trigger key="all" flex={1} justifyContent="center" value="all" minWidth="4rem">
+              {"All"}
+            </Tabs.Trigger>
+            {APP_CATEGORIES.map(({ id, name }) => (
+              <Tabs.Trigger key={id} flex={1} justifyContent="center" value={id} minWidth="max-content">
+                {name}
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
 
-      <Tabs.Content
-        value={selectedCategory}
-        display="flex"
-        flexDirection="column"
-        gap={tabsListProps?.mb ? "3" : "4"}
-        p={tabsListProps?.mb ? undefined : "4"}>
-        {filteredApps.length > 0 ? (
-          (showPagination ? filteredApps.slice(0, 10) : filteredApps).map(app => (
-            <CheckboxCard.Root
-              key={app.id}
-              rounded="lg"
-              p="3"
-              colorPalette="blue"
-              checked={selectedAppIds?.has(app.id) ?? false}
-              onCheckedChange={() => onToggleApp?.(app.id)}>
-              <CheckboxCard.HiddenInput />
-              <CheckboxCard.Control alignItems="center" p="0" gap="3">
-                <CheckboxCard.Indicator rounded="sm" />
-                <AppImage appId={app.id} gridRow="1 / 3" />
-                <CheckboxCard.Content gap="0.5">
-                  <Heading fontSize="md">{app.name}</Heading>
-                  <Flex w="full" justifyContent="space-between">
-                    <Text display="flex" gap="2" textStyle="xs">
-                      <Icon as={Group} boxSize="4" />
-                      {app.voters ?? 0}
-                    </Text>
-                    <Text textStyle="xs" fontWeight="bold">
-                      {((app.votesReceived * 100n) / totalVotes).toString() + "%"}
-                    </Text>
-                  </Flex>
-                  <Progress.Root w="full" size="xs" colorPalette="green" mt="1" value={50}>
-                    <Progress.Track rounded="lg">
-                      <Progress.Range />
-                    </Progress.Track>
-                  </Progress.Root>
-                </CheckboxCard.Content>
-              </CheckboxCard.Control>
-            </CheckboxCard.Root>
-          ))
-        ) : searchQuery.length > 0 && showEmptyState ? (
-          <EmptyState
-            bgColor="transparent"
-            icon={
-              <Circle width="100px" height="100px" bgColor="status.neutral.subtle">
-                <Icon as={SearchIcon} boxSize={16} color="actions.disabled.text" />
-              </Circle>
-            }
-            title={""}
-            description="Hmm, we couldn't find that app. Please check the spelling."
-          />
-        ) : null}
-
-        {showPagination && (
-          <Pagination.Root
-            defaultPage={1}
-            count={apps.length}
-            pageSize={10}
-            page={1}
-            onPageChange={() => {}}
+          <Tabs.Content
+            value={selectedCategory}
             display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            gap="4">
-            <HStack gap="1">
-              <Text textStyle="sm">{"Showing"}</Text>
+            flexDirection="column"
+            gap={tabsListProps?.mb ? "3" : "4"}
+            p={tabsListProps?.mb ? undefined : "4"}>
+            {filteredApps.length > 0 ? (
+              (showPagination ? sortedAppsWithSelected.slice(0, 10) : sortedAppsWithSelected).map(app => (
+                <CheckboxCard.Root
+                  key={app.id}
+                  rounded="lg"
+                  p="3"
+                  colorPalette="blue"
+                  checked={selectedAppIds?.has(app.id) ?? false}
+                  onCheckedChange={() => onToggleApp?.(app.id)}>
+                  <CheckboxCard.HiddenInput />
+                  <CheckboxCard.Control alignItems="center" p="0" gap="3">
+                    <CheckboxCard.Indicator rounded="sm" />
+                    <AppImage appId={app.id} gridRow="1 / 3" />
+                    <CheckboxCard.Content gap="0.5">
+                      <Heading fontSize="md">{app.name}</Heading>
+                      <Flex w="full" justifyContent="space-between">
+                        <Text display="flex" gap="2" textStyle="xs">
+                          <Icon as={Group} boxSize="4" />
+                          {app.voters ?? 0}
+                        </Text>
+                        <Text textStyle="xs" fontWeight="bold">
+                          {((app.votesReceived * 100n) / totalVotes).toString() + "%"}
+                        </Text>
+                      </Flex>
+                      <Progress.Root w="full" size="xs" colorPalette="green" mt="1" value={50}>
+                        <Progress.Track rounded="lg">
+                          <Progress.Range />
+                        </Progress.Track>
+                      </Progress.Root>
+                    </CheckboxCard.Content>
+                  </CheckboxCard.Control>
+                </CheckboxCard.Root>
+              ))
+            ) : searchQuery.length > 0 && showEmptyState ? (
+              <EmptyState
+                bgColor="transparent"
+                icon={
+                  <Circle width="100px" height="100px" bgColor="status.neutral.subtle">
+                    <Icon as={SearchIcon} boxSize={16} color="actions.disabled.text" />
+                  </Circle>
+                }
+                title={""}
+                description="Hmm, we couldn't find that app. Please check the spelling."
+              />
+            ) : null}
 
-              <Pagination.PageText format="long" textStyle="sm" />
-            </HStack>
+            {showPagination && (
+              <Pagination.Root
+                defaultPage={1}
+                count={filteredApps.length}
+                pageSize={10}
+                page={1}
+                onPageChange={() => {}}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                gap="4">
+                <HStack gap="1">
+                  <Text textStyle="sm">{"Showing"}</Text>
 
-            <Button variant="link" p="0" size="sm" onClick={onViewAll}>
-              {"View all"}
-            </Button>
-          </Pagination.Root>
-        )}
-      </Tabs.Content>
+                  <Pagination.PageText format="long" textStyle="sm" />
+                </HStack>
 
-      {showAdditionalTabs && (
-        <>
-          <Tabs.Content value="tab1" display="flex" flexDirection="column" gap="4">
-            {"First tab content"}
+                <Button hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
+                  {"View all"}
+                </Button>
+              </Pagination.Root>
+            )}
           </Tabs.Content>
-          <Tabs.Content value="tab2">{"Second tab content"}</Tabs.Content>
-        </>
-      )}
-    </Tabs.Root>
+        </Tabs.Root>
+      </VStack>
+    </>
   )
 }

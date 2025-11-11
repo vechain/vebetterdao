@@ -62,6 +62,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
   return (
     <>
       <InputGroup
+        hideFrom="md"
         startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
         rounded="xl"
         borderColor="border.primary">
@@ -78,7 +79,6 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
           selectedAppIds={selectedAppIds}
           onToggleApp={onToggleApp}
           onViewAll={handleViewAll}
-          showAdditionalTabs
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={urlSearchQuery}

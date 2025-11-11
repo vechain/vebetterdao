@@ -70,13 +70,24 @@ export function AllocationTabs({
       }}>
       <Box ref={sentinelRef} height="1px" />
 
-      <Tabs.Root value={currentTab} variant="line" size="md" w="full" lazyMount onValueChange={handleTabChange}>
-        <Bleed position="sticky" top="0" zIndex={2} inlineStart="4" inlineEnd="4">
-          <Tabs.List pt={isStuck ? "3" : undefined} px="4" bg={isStuck ? "bg.primary" : undefined}>
-            <Tabs.Trigger flex={1} justifyContent="center" value="vote">
+      <Tabs.Root
+        value={currentTab}
+        variant="line"
+        size={{ base: "md", md: "lg" }}
+        w="full"
+        lazyMount
+        onValueChange={handleTabChange}>
+        <Bleed
+          position={{ base: "sticky", md: "static" }}
+          top="0"
+          zIndex={2}
+          inlineStart={{ base: "4", md: "0" }}
+          inlineEnd={{ base: "4", md: "0" }}>
+          <Tabs.List pt={isStuck ? "3" : undefined} px={{ base: "4", md: "0" }} bg={isStuck ? "bg.primary" : undefined}>
+            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote">
               {"Vote for apps"}
             </Tabs.Trigger>
-            <Tabs.Trigger flex={1} justifyContent="center" value="round">
+            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round">
               {"Round info"}
             </Tabs.Trigger>
           </Tabs.List>
@@ -95,6 +106,7 @@ export function AllocationTabs({
       </Tabs.Root>
 
       <Presence
+        hideFrom="md"
         present={selectedAppIds.size > 0}
         animationName={{
           _open: "slide-from-bottom",
