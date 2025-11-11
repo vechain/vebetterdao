@@ -1,14 +1,10 @@
 "use client"
 
 import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
 import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-
-import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
-import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 
 import type { AppWithVotes } from "../../../page"
 import { AlertCard } from "../../AlertCard"
@@ -21,9 +17,10 @@ interface VoteTabProps {
   selectedAppIds: Set<string>
   onToggleApp: (appId: string) => void
   isStuck: boolean
+  hasEnoughVotesAtSnapshot: boolean
 }
 
-export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabProps) {
+export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot }: VoteTabProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -31,10 +28,6 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
   const selectedCategory = searchParams.get("category") || "all"
   const isSearchOpen = searchParams.has("search")
   const { t } = useTranslation()
-
-  const { account } = useWallet()
-  const { data: delegateeAddress } = useGetDelegatee(account?.address)
-  const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
 
   const handleSearchChange = useCallback(
     (query: string) => {
@@ -72,7 +65,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
 
   return (
     <>
-      {selectedAppIds && selectedAppIds.size > 0 && !hasVotesAtSnapshot && (
+      {selectedAppIds && selectedAppIds.size > 0 && !hasEnoughVotesAtSnapshot && (
         <AlertCard
           status="error"
           title={t("Not enough voting power to vote")}
@@ -100,7 +93,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={urlSearchQuery}
-          hasEnoughVotesAtSnapshot={hasVotesAtSnapshot}
+          hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
           tabsListProps={{
             position: "sticky",
             top: "52px",

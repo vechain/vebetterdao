@@ -106,6 +106,7 @@ export function AllocationTabs({
             selectedAppIds={selectedAppIds}
             onToggleApp={toggleApp}
             isStuck={isStuck}
+            hasEnoughVotesAtSnapshot={hasVotesAtSnapshot}
           />
         </Tabs.Content>
         <Tabs.Content value="round">
