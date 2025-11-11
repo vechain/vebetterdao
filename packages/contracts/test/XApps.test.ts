@@ -3884,7 +3884,13 @@ describe("X-Apps - @shard17a", function () {
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, -1)).to.be.reverted
+      // uint256 cannot be negative, so ethers will throw an encoding error
+      try {
+        await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, -1)
+        expect.fail("Should have thrown an error")
+      } catch (error: any) {
+        expect(error.code).to.equal("INVALID_ARGUMENT")
+      }
     })
 
     it("Non-admin cannot update the team allocation percentage of an app", async function () {
