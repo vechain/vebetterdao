@@ -1,11 +1,17 @@
 "use client"
 
 import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
+import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 
 import type { AppWithVotes } from "../../../page"
+import { AlertCard } from "../../AlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
 
 import { AppCategoryTabs } from "./AppCategoryTabs"
@@ -24,6 +30,11 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
   const urlSearchQuery = searchParams.get("search") || ""
   const selectedCategory = searchParams.get("category") || "all"
   const isSearchOpen = searchParams.has("search")
+  const { t } = useTranslation()
+
+  const { account } = useWallet()
+  const { data: delegateeAddress } = useGetDelegatee(account?.address)
+  const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
 
   const handleSearchChange = useCallback(
     (query: string) => {
@@ -61,6 +72,13 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
 
   return (
     <>
+      {selectedAppIds && selectedAppIds.size > 0 && !hasVotesAtSnapshot && (
+        <AlertCard
+          status="error"
+          title={t("Not enough voting power to vote")}
+          message={t("You need at least 1 voting power to participate. Power up your balance to gain voting power.")}
+        />
+      )}
       <InputGroup
         hideFrom="md"
         startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
@@ -82,6 +100,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={urlSearchQuery}
+          hasEnoughVotesAtSnapshot={hasVotesAtSnapshot}
           tabsListProps={{
             position: "sticky",
             top: "52px",

@@ -1,9 +1,12 @@
 "use client"
 
 import { Box, Bleed, Button, Dialog, Presence, Tabs } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createContext, useRef, useState, useCallback } from "react"
 
+import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
+import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { RoundEarnings } from "@/app/allocations/history/page"
 import { useStickyState } from "@/hooks/useStickyState"
 
@@ -18,6 +21,7 @@ interface AllocationTabsContextType {
   selectedAppIds: Set<string>
   onToggleApp: (appId: string) => void
   isStuck: boolean
+  hasEnoughVotesAtSnapshot: boolean
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
@@ -38,6 +42,9 @@ export function AllocationTabs({
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
+  const { account } = useWallet()
+  const { data: delegateeAddress } = useGetDelegatee(account?.address)
+  const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
 
   const currentTab = searchParams.get("tab") || "vote"
 
@@ -67,6 +74,7 @@ export function AllocationTabs({
         selectedAppIds,
         onToggleApp: toggleApp,
         isStuck,
+        hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
@@ -121,7 +129,7 @@ export function AllocationTabs({
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <Dialog.Root>
             <Dialog.Trigger asChild>
-              <Button w="full" variant="primary">
+              <Button w="full" variant="primary" disabled={!hasVotesAtSnapshot}>
                 {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
               </Button>
             </Dialog.Trigger>
