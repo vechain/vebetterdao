@@ -298,6 +298,28 @@ const config = defineConfig({
             subtle: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
           },
         },
+        alert: {
+          info: {
+            strong: { value: { base: "#2C5282", _dark: "#90CDF4" } },
+            secondary: { value: { base: "#90CDF4", _dark: "#2C5282" } },
+            subtle: { value: { base: "#EBF8FF", _dark: "#1A365D" } },
+          },
+          warning: {
+            strong: { value: { base: "#AF5F00", _dark: "#FFC985" } },
+            secondary: { value: { base: "#FFE4C3", _dark: "#B2752C" } },
+            subtle: { value: { base: "#FFF3E5", _dark: "#36322D" } },
+          },
+          error: {
+            strong: { value: { base: "#B6244C", _dark: "#EC4D9C" } },
+            secondary: { value: { base: "#EC98AF", _dark: "#9C354E" } },
+            subtle: { value: { base: "#FCEEF1", _dark: "#2C1D21" } },
+          },
+          success: {
+            strong: { value: { base: "#047229", _dark: "#A3E706" } },
+            secondary: { value: { base: "#99E0B1", _dark: "#1EA181" } },
+            subtle: { value: { base: "#E9FDF1", _dark: "#212A23" } },
+          },
+        },
         // graph colors will change after allocations redesign
         graph: {
           1: { value: { base: "#203A87", _dark: "#F0F4F7" } },
