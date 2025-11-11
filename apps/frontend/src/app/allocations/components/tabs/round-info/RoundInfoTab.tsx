@@ -42,7 +42,7 @@ export function RoundInfoTab({
         }}
       />
 
-      <VStack gap="3" alignItems="stretch">
+      <VStack hideFrom="md" gap="3" alignItems="stretch">
         <HStack justifyContent="space-between" w="full">
           <Heading size="lg" fontWeight="semibold">
             {"Explore rounds history"}

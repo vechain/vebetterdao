@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, Icon, Flex, Heading, Text, Circle, Skeleton, Box, Float } from "@chakra-ui/react"
+import { Card, Icon, Flex, Heading, Text, Circle, Skeleton, Box, Float, Badge } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
@@ -12,6 +12,7 @@ import { AppImage } from "@/components/AppImage/AppImage"
 import Vote from "@/components/Icons/svg/vote.svg"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useEvents } from "@/hooks/useEvents"
+import { APP_CATEGORIES } from "@/types/appDetails"
 
 import { AppWithVotes } from "../page"
 
@@ -20,7 +21,7 @@ const isEmpty = false
 const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress
 
-export const UserTopVotesAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
+export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
   const { account } = useWallet()
   const { data: appsVotedInRounds, isLoading } = useEvents({
     abi,
@@ -82,7 +83,7 @@ export const UserTopVotesAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
             {"Most voted app of all time"}
           </Text>
           {top5VotedApps.map((app, idx) => (
-            <Flex key={app!.id} gap="4" alignItems="flex-start">
+            <Flex key={app!.id} gap="4" alignItems="center">
               <Box position="relative">
                 <AppImage appId={app!.id} flexShrink={0} shape="square" borderRadius="lg" />
                 <Float placement="top-start">
@@ -98,11 +99,16 @@ export const UserTopVotesAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
                 </Float>
               </Box>
 
-              <Heading flex="1" size="md" lineClamp={1}>
-                {app?.name}
-              </Heading>
+              <Flex flex="1" flexDir="column" alignItems="flex-start" gap="1">
+                <Heading size="md" lineClamp={1}>
+                  {app?.name}
+                </Heading>
+                <Badge variant="neutral" size="sm" rounded="sm">
+                  {APP_CATEGORIES.find(category => category.id === app?.metadata?.categories[0])?.name || "-"}
+                </Badge>
+              </Flex>
 
-              <Flex flexDir="column" alignItems="flex-end">
+              <Flex flexDir="column" alignSelf="center" alignItems="flex-end" gap="0.5">
                 <Text textStyle="sm" fontWeight="semibold" color="text.muted" flexShrink={0}>
                   {FormattingUtils.humanNumber(formatEther(appVoteMetrics.totalWeight.get(app!.id) ?? 0n))}
                 </Text>

@@ -27,7 +27,7 @@ import { APP_CATEGORIES } from "@/types/appDetails"
 
 import type { AppWithVotes } from "../../../page"
 import { AppRadioCard } from "../../AppRadioCard"
-import { UserTopVotesAppsCard } from "../../UserTopVotesAppsCard"
+import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
@@ -283,7 +283,7 @@ export function AppCategoryTabs({
       {!isMobile && (
         <VStack width="1/3" align="stretch" justifySelf="flex-start">
           <Heading size="lg">{"Your top 5 Apps"}</Heading>
-          <UserTopVotesAppsCard apps={apps} />
+          <UserTopVotedAppsCard apps={apps} />
         </VStack>
       )}
     </HStack>
