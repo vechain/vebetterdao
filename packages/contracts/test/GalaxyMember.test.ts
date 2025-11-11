@@ -3072,7 +3072,7 @@ describe("Galaxy Member - @shard3a", () => {
         expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(0)
 
         // Trying to detach should revert
-        await expect(galaxyMember.connect(owner).detachNode(ownerNodeId, gmId)).to.be.rejected
+        await expect(galaxyMember.connect(owner).detachNode(ownerNodeId, gmId)).to.be.reverted
 
         // Expect GM NFT to be detached from the node
         expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(0)

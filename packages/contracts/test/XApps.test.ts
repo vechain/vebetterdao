@@ -14,6 +14,7 @@ import { getTestKeys, SeedAccount } from "../scripts/helpers/seedAccounts"
 import {
   B3TRGovernor,
   Emissions,
+  GalaxyMemberV3,
   VeBetterPassport,
   VeBetterPassportV1,
   VoterRewards,
