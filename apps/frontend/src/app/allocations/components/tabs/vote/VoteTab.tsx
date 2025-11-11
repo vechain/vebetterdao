@@ -20,9 +20,17 @@ interface VoteTabProps {
   onToggleApp: (appId: string) => void
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
+  onVoteClick: () => void
 }
 
-export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot }: VoteTabProps) {
+export function VoteTab({
+  apps,
+  selectedAppIds,
+  onToggleApp,
+  isStuck,
+  hasEnoughVotesAtSnapshot,
+  onVoteClick,
+}: VoteTabProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -108,6 +116,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughV
             zIndex: 2,
           }}
           showPagination
+          onVoteClick={onVoteClick}
         />
       </Bleed>
 
