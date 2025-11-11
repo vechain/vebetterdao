@@ -66,7 +66,7 @@ export const endorseXApps = async (
   // 8 apps
   for (let i = 0; i < apps.length; i++) {
     const owner = endorsers[i].key.address
-    const nodeId = await stargateNFT.idsOwnedBy(owner.toString())[0]
+    const nodeId = (await stargateNFT.idsOwnedBy(owner.toString()))[0]
     const clause = Clause.callFunction(
       Address.of(await x2EarnApps.getAddress()),
       ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
