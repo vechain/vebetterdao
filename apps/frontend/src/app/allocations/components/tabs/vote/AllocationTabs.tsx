@@ -9,11 +9,13 @@ import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { RoundEarnings } from "@/app/allocations/history/page"
 import { useStickyState } from "@/hooks/useStickyState"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../../page"
 import { ConfirmVoteModal } from "../../confirm-vote-modal/ConfirmVoteModal"
 import { RoundInfoTab } from "../round-info/RoundInfoTab"
 
+import { useAllocationVoting } from "./hooks"
 import { VoteTab } from "./VoteTab"
 
 interface AllocationTabsContextType {
@@ -47,6 +49,7 @@ export function AllocationTabs({
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
+  const { onClose: closeTxModal } = useTransactionModal()
 
   const currentTab = searchParams.get("tab") || "vote"
 
@@ -66,13 +69,16 @@ export function AllocationTabs({
     [onSelectedAppsChange],
   )
 
-  const handleConfirmVote = useCallback((allocations: Map<string, number>) => {
-    // @TODO: Implement the actual voting logic here
-    // eslint-disable-next-line no-console
-    console.log("Voting with allocations:", allocations)
-    // Clear selected apps after successful vote
+  const onVoteSuccess = useCallback(() => {
+    closeTxModal()
     setSelectedAppIds(new Set())
-  }, [])
+    closeModal()
+  }, [closeTxModal, closeModal])
+
+  const { handleConfirmVote } = useAllocationVoting({
+    roundId: currentRoundDetails.id.toString(),
+    onSuccess: onVoteSuccess,
+  })
 
   const handleTabChange = (details: { value: string }) => {
     const params = new URLSearchParams(searchParams)

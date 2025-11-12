@@ -12,11 +12,13 @@ import { ShareButtons } from "../../ShareButtons"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
+  description?: ReactNode
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
   txId?: string
   isSuccessBeenTrack?: boolean
   onClose: () => void
+  buttonText?: string
 }
 const okHandVariants = {
   initial: { rotateY: 0 },
@@ -48,11 +50,13 @@ const MotionImage = motion(Image)
  */
 export const SuccessModalContent = ({
   title = "Transaction completed!",
+  description,
   showSocialButtons = false,
   socialDescriptionEncoded = "%F0%9F%8C%B1%20Excited%20to%20contribute%20to%20a%20%23Better%20future%20with%20my%20latest%20activity%20on%20%23VeBetterDAO%21%0A%0AVisit%20https%3A%2F%2Fvebetterdao.org%20and%20start%20making%20a%20difference%20today%21%20%F0%9F%92%AB%0A%0A%23VeBetterDAO%20%23Vechain",
   txId,
   isSuccessBeenTrack,
   onClose,
+  buttonText,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
 
@@ -75,6 +79,12 @@ export const SuccessModalContent = ({
       <Heading size="3xl" data-testid={"tx-modal-title"}>
         {title}
       </Heading>
+
+      {description && (
+        <VStack gap={2} mt={4}>
+          {description}
+        </VStack>
+      )}
 
       {showSocialButtons && (
         <VStack>
@@ -105,7 +115,7 @@ export const SuccessModalContent = ({
       </Flex>
       <HStack w={"full"} alignItems={"center"} justifyContent={"center"} gap={2} mt={4}>
         <Button variant={"primary"} w={"50%"} py={6} onClick={onClose}>
-          {t("Done")}
+          {buttonText || t("Done")}
         </Button>
       </HStack>
     </VStack>

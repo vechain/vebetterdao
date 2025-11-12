@@ -18,11 +18,16 @@ import { SelectedAppsSection } from "./SelectedAppsSection"
 import { useConfirmVoteModal } from "./useConfirmVoteModal"
 import { VotingPowerSection } from "./VotingPowerSection"
 
+export interface AllocationWithWeight {
+  percentage: number
+  weight: bigint
+}
+
 interface ConfirmVoteModalProps {
   isOpen: boolean
   onClose: () => void
   selectedApps: AppWithVotes[]
-  onConfirm: (allocations: Map<string, number>) => void
+  onConfirm: (allocations: Map<string, AllocationWithWeight>) => void
 }
 
 export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: ConfirmVoteModalProps) => {
@@ -62,10 +67,23 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
-    onConfirm(allocations)
+    const allocationsWithWeight = new Map<string, AllocationWithWeight>()
+    const votesAtSnapshotInEther = vot3Balance?.original ? Number(ethers.formatEther(vot3Balance.original)) : 0
+
+    allocations.forEach((percentage, appId) => {
+      const rawValue = scaledDivision(percentage * votesAtSnapshotInEther, 100)
+      const weight = ethers.parseEther(rawValue.toString())
+
+      allocationsWithWeight.set(appId, {
+        percentage,
+        weight,
+      })
+    })
+
+    onConfirm(allocationsWithWeight)
     setIsCustomising(false)
     onClose()
-  }, [onConfirm, allocations, onClose])
+  }, [onConfirm, allocations, onClose, vot3Balance])
 
   const handleCloseModal = useCallback(() => {
     setIsCustomising(false)

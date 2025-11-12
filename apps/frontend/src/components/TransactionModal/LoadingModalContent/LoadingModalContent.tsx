@@ -9,7 +9,7 @@ import loadingAnimation from "./loading.json"
 
 export type LoadingModalContentProps = {
   title?: ReactNode
-  description?: string
+  description?: ReactNode
   txId?: string
 }
 export const LoadingModalContent = ({
@@ -36,7 +36,12 @@ export const LoadingModalContent = ({
       <Heading data-testid={"tx-modal-title"} size="md">
         {title}
       </Heading>
-      {description && <Text textStyle="sm">{description}</Text>}
+
+      {description && (
+        <VStack gap={2} mt={4}>
+          {typeof description === "string" ? <Text textStyle="sm">{description}</Text> : description}
+        </VStack>
+      )}
       {txId && (
         <Link
           href={getExplorerTxLink(txId)}
