@@ -7,7 +7,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { AppWithVotes } from "../../../page"
-import { AlertCard } from "../../AlertCard"
+import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
 
 import { AppCategoryTabs } from "./AppCategoryTabs"
@@ -66,7 +66,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughV
   return (
     <>
       {selectedAppIds && selectedAppIds.size > 0 && !hasEnoughVotesAtSnapshot && (
-        <AlertCard
+        <AllocationAlertCard
           status="error"
           title={t("Not enough voting power to vote")}
           message={t("You need at least 1 voting power to participate. Power up your balance to gain voting power.")}

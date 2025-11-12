@@ -2,7 +2,7 @@ import { Alert, HStack, VStack, Text } from "@chakra-ui/react"
 import { InfoCircle, WarningCircle, CheckCircle, XmarkCircle } from "iconoir-react"
 import { ReactNode } from "react"
 
-export interface AlertCardProps {
+export interface AllocationAlertCardProps {
   status: "info" | "warning" | "error" | "success" | "neutral"
   title?: string
   message: string | ReactNode
@@ -25,7 +25,7 @@ const statusColors = {
   neutral: "status.neutral",
 }
 
-export const AlertCard = ({ status, title, message, icon }: AlertCardProps) => {
+export const AllocationAlertCard = ({ status, title, message, icon }: AllocationAlertCardProps) => {
   const StatusIcon = statusIcons[status]
 
   return (

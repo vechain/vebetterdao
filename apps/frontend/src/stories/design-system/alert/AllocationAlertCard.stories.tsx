@@ -2,11 +2,12 @@ import { VStack, For, Text } from "@chakra-ui/react"
 import { Meta } from "@storybook/nextjs-vite"
 import { cloneElement } from "react"
 
-import { AlertCard } from "@/app/allocations/components/AlertCard"
+import { AllocationAlertCard } from "@/app/allocations/components/AllocationAlertCard"
 
 const meta = {
-  component: AlertCard,
-} satisfies Meta<typeof AlertCard>
+  title: "design-system/components/AllocationAlertCard",
+  component: AllocationAlertCard,
+} satisfies Meta<typeof AllocationAlertCard>
 
 export default meta
 
@@ -16,7 +17,7 @@ export const AllVariants = () => (
   <VStack gap="4" alignItems="stretch">
     <For each={statuses}>
       {status => (
-        <AlertCard
+        <AllocationAlertCard
           status={status}
           title={`${status.charAt(0).toUpperCase() + status.slice(1)} Title`}
           message="This is a toast message."
@@ -30,7 +31,7 @@ export const WithTitle = () => (
   <VStack gap="4" alignItems="stretch">
     <For each={statuses}>
       {status => (
-        <AlertCard
+        <AllocationAlertCard
           status={status}
           title={`${status.charAt(0).toUpperCase() + status.slice(1)} Title`}
           message="This is a message describing the alert content."
@@ -43,14 +44,14 @@ export const WithTitle = () => (
 export const WithoutTitle = () => (
   <VStack gap="4" alignItems="stretch">
     <For each={statuses}>
-      {status => <AlertCard status={status} message={`This is a ${status} message without a title.`} />}
+      {status => <AllocationAlertCard status={status} message={`This is a ${status} message without a title.`} />}
     </For>
   </VStack>
 )
 
 export const MultilineContent = () => (
   <VStack gap="4" alignItems="stretch">
-    <AlertCard
+    <AllocationAlertCard
       status="info"
       message={
         <VStack alignItems="flex-start" gap="1">
@@ -63,7 +64,7 @@ export const MultilineContent = () => (
         </VStack>
       }
     />
-    <AlertCard
+    <AllocationAlertCard
       status="warning"
       message={
         <VStack alignItems="flex-start" gap="1">
@@ -81,23 +82,27 @@ export const MultilineContent = () => (
 
 export const RealWorldExamples = () => (
   <VStack gap="4" alignItems="stretch">
-    <AlertCard
+    <AllocationAlertCard
       status="info"
       title="Round in progress"
       message="You can change your vote allocation until the round ends."
     />
-    <AlertCard status="warning" title="Time running out" message="Only 2 hours left to cast your vote in this round." />
-    <AlertCard
+    <AllocationAlertCard
+      status="warning"
+      title="Time running out"
+      message="Only 2 hours left to cast your vote in this round."
+    />
+    <AllocationAlertCard
       status="success"
       title="Vote submitted successfully"
       message="Your allocation has been recorded and will be counted at the end of this round."
     />
-    <AlertCard
+    <AllocationAlertCard
       status="error"
       title="Transaction failed"
       message="Unable to submit your vote. Please check your wallet connection and try again."
     />
-    <AlertCard
+    <AllocationAlertCard
       status="neutral"
       title="System notification"
       message="This is a general notification message for informational purposes."
