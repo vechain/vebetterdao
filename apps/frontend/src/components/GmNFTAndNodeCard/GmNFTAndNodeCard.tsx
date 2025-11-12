@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, Heading, Stack, Flex, Image, Skeleton, useDisclosure, Box, Icon } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -36,9 +38,11 @@ export const GmNFTAndNodeCard = () => {
   const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodes?.length === 0
 
   const totalPoints = userNodesInfo?.totalEndorsementScore?.toString() ?? "0"
+
   if (!account?.address && !viewMode) {
     return <NotConnectedWallet />
   }
+
   if (isLoading) {
     return <Skeleton height={isMobile ? "96" : "64"} width="full" rounded="xl" />
   }
@@ -96,10 +100,12 @@ export const GmNFTAndNodeCard = () => {
 
               {userNodesInfo?.nodes && userNodesInfo?.nodes?.length > 0 ? (
                 <GmCard
-                  title={`${userNodesInfo?.nodes?.[0]?.metadata?.name || ""} #${userNodesInfo?.nodes?.[0]?.id?.toString() || ""}`}
+                  title={`${typeof userNodesInfo?.nodes?.[0]?.metadata === "object" ? userNodesInfo?.nodes?.[0]?.metadata?.name : ""} #${userNodesInfo?.nodes?.[0]?.id?.toString() || ""}`}
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
-                  imagesIpfsUri={userNodesInfo?.nodes?.map(node => node?.metadata?.image ?? "")}
+                  imagesIpfsUri={userNodesInfo?.nodes?.map(node =>
+                    typeof node?.metadata === "object" ? (node?.metadata?.image ?? "") : "",
+                  )}
                   href={`/profile?tab=nodes`}
                 />
               ) : (

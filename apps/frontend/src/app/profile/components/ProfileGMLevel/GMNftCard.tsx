@@ -1,3 +1,5 @@
+"use client"
+
 import { Box, Button, Card, Image, LinkBox, LinkOverlay, Text, HStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useCallback } from "react"
