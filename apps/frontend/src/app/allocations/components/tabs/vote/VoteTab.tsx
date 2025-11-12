@@ -6,6 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
+
 import type { AppWithVotes } from "../../../page"
 import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
@@ -28,6 +30,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughV
   const selectedCategory = searchParams.get("category") || "all"
   const isSearchOpen = searchParams.has("search")
   const { t } = useTranslation()
+  const { data: threshold } = useVotingThreshold()
 
   const handleSearchChange = useCallback(
     (query: string) => {
@@ -69,7 +72,9 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughV
         <AllocationAlertCard
           status="error"
           title={t("Not enough voting power to vote")}
-          message={t("You need at least 1 voting power to participate. Power up your balance to gain voting power.")}
+          message={t("You need at least {{threshold}} voting power to participate. Power up your balance!", {
+            threshold: threshold ?? "1",
+          })}
         />
       )}
       <InputGroup
