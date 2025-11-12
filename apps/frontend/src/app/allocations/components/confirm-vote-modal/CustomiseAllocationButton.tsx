@@ -18,7 +18,7 @@ export const CustomiseAllocationButton = ({ onClick }: CustomiseAllocationButton
       justifyContent="center"
       textStyle="md"
       fontWeight="semibold">
-      {t("Customise allocation")}
+      {t("Customise votes")}
     </Button>
   )
 }
