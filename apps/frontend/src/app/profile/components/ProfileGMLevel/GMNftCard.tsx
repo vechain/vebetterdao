@@ -6,7 +6,7 @@ import { FaChevronRight } from "react-icons/fa"
 
 import { UserGM } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
-import { useSelectGM } from "@/hooks/useSelectGM"
+import { useSelectGM } from "@/hooks/galaxyMember/useSelectGM"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 

@@ -11,6 +11,17 @@ const stargateNFTContractAddress = getConfig().stargateNFTContractAddress as `0x
 const x2EarnAppsAbi = X2EarnApps__factory.abi
 const stargateNFTAbi = StargateNFT__factory.abi
 
+//TODO: Replace by dynamic type inference
+type StargateNFTMetadata = {
+  name: string
+  description: string
+  image: string
+  attributes: {
+    trait_type: string
+    value: string
+  }[]
+}
+
 /**
  * Get the query key for fetching user nodes
  * @param user - The address of the user to check
@@ -51,7 +62,7 @@ export const useGetUserNodes = (user?: string) => {
 
       const nodeIds = tokensOverview?.map(token => token.id.toString())
       let nodePoints: bigint[] = []
-      let nodeMetadata: string[] = []
+      let nodeMetadata: StargateNFTMetadata[] = []
       if (nodeIds?.length > 0) {
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
         nodePoints = await executeMultipleClausesCall({
@@ -75,7 +86,7 @@ export const useGetUserNodes = (user?: string) => {
         })
         await Promise.all(
           (rawNodeMetadata as string[])?.map(async metadataUri => {
-            const metadata = await getIpfsMetadata<any>(metadataUri)
+            const metadata = await getIpfsMetadata<StargateNFTMetadata>(metadataUri)
             nodeMetadata.push(metadata)
           }),
         )

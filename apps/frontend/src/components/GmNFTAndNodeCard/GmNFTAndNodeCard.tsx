@@ -21,22 +21,21 @@ import { GmEmptyStateCard } from "./GmEmptyStateCard"
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
+  const { data: b3trBalance } = useGetB3trBalance(account?.address)
   const { isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
-  const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
-  const { data: nodes, isLoading: isNodesLoading } = useGetUserNodes()
-  const { data: b3trBalance } = useGetB3trBalance(account?.address)
+  const { data: userNodesInfo, isLoading: isNodesLoading } = useGetUserNodes()
   const { isMobile } = useBreakpoints()
   const {
     open: isGetGMAndNodeModalOpen,
     onOpen: onOpenGetGMAndNodeModal,
     onClose: onCloseGetGMAndNodeModal,
   } = useDisclosure()
+  const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
   const isLoading = isUserGMsLoading || isNodesLoading
-  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && nodes?.allNodes?.length === 0
-  const totalPoints = useMemo(() => {
-    return nodes?.allNodes?.reduce((acc, node) => acc + node.xNodePoints, 0) || 0
-  }, [nodes])
+  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodes?.length === 0
+
+  const totalPoints = userNodesInfo?.totalEndorsementScore?.toString() ?? "0"
   if (!account?.address && !viewMode) {
     return <NotConnectedWallet />
   }
@@ -81,7 +80,7 @@ export const GmNFTAndNodeCard = () => {
                   subtitle={t("Galaxy Member")}
                   title={selectedGM?.metadata?.name || "name"}
                   footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
-                  images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
+                  imagesIpfsUri={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
                   href={`/galaxy-member/${selectedGM?.tokenId}`}
                 />
               ) : (
@@ -95,12 +94,12 @@ export const GmNFTAndNodeCard = () => {
                 />
               )}
 
-              {nodes?.allNodes && nodes?.allNodes?.length > 0 ? (
+              {userNodesInfo?.nodes && userNodesInfo?.nodes?.length > 0 ? (
                 <GmCard
-                  title={`${nodes?.allNodes?.[0]?.name || ""} #${nodes?.allNodes?.[0]?.nodeId || ""}`}
+                  title={`${userNodesInfo?.nodes?.[0]?.metadata?.name || ""} #${userNodesInfo?.nodes?.[0]?.id?.toString() || ""}`}
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
-                  images={nodes?.allNodes?.map(node => node.image)}
+                  imagesIpfsUri={userNodesInfo?.nodes?.map(node => node?.metadata?.image ?? "")}
                   href={`/profile?tab=nodes`}
                 />
               ) : (
