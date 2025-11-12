@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, Text, VStack } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 
 import type { AppWithVotes } from "../../page"
 
@@ -13,12 +14,13 @@ interface SelectedAppsSectionProps {
 }
 
 export const SelectedAppsSection = ({ apps, allocations, onAllocationChange }: SelectedAppsSectionProps) => {
+  const { t } = useTranslation()
   return (
     <Box>
       <Text textStyle="md" fontWeight="semibold" mb={2} display="flex" justifyContent="space-between">
-        <span>{"Selected apps"}</span>
+        <span>{t("Selected apps")}</span>
         <Text as="span" color="text.subtle" textStyle="sm" fontWeight="normal">
-          {apps.length} {apps.length === 1 ? "app" : "apps"}
+          {apps.length} {apps.length === 1 ? t("app") : t("apps")}
         </Text>
       </Text>
 

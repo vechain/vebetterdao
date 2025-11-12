@@ -4,11 +4,13 @@ import { Box, HStack, Icon, Skeleton, Text } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 export const VotingPowerSection = () => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { data: vot3Balance, isLoading } = useGetVot3Balance(account?.address)
 
@@ -22,7 +24,7 @@ export const VotingPowerSection = () => {
         <HStack gap={2}>
           <Icon as={Flash} boxSize={4} color="text.subtle" />
           <Text textStyle="sm" color="text.subtle" fontWeight="medium">
-            {"Voting Power"}
+            {t("Voting Power")}
           </Text>
         </HStack>
         <Skeleton loading={isLoading}>

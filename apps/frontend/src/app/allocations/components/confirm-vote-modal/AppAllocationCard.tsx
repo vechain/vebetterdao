@@ -5,6 +5,7 @@ import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Minus, Plus } from "iconoir-react"
 import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
@@ -19,6 +20,7 @@ interface AppAllocationCardProps {
 }
 
 export const AppAllocationCard = ({ app, percentage, onPercentageChange }: AppAllocationCardProps) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { data: vot3Balance, isLoading: isLoadingBalance } = useGetVot3Balance(account?.address)
 
@@ -90,7 +92,7 @@ export const AppAllocationCard = ({ app, percentage, onPercentageChange }: AppAl
         <VStack gap={2} alignItems="stretch">
           <HStack justify="space-between">
             <Text textStyle="sm" color="text.subtle">
-              {"Allocate voting power"}
+              {t("Allocate voting power")}
             </Text>
             <VStack gap={0} alignItems="flex-end">
               <Text textStyle="md" fontWeight="semibold">
@@ -108,7 +110,7 @@ export const AppAllocationCard = ({ app, percentage, onPercentageChange }: AppAl
           {/* Input with +/- buttons */}
           <HStack gap={2}>
             <IconButton
-              aria-label="Decrease percentage"
+              aria-label={t("Decrease percentage")}
               size="sm"
               variant="surface"
               rounded="full"
@@ -129,7 +131,7 @@ export const AppAllocationCard = ({ app, percentage, onPercentageChange }: AppAl
             </InputGroup>
 
             <IconButton
-              aria-label="Increase percentage"
+              aria-label={t("Increase percentage")}
               size="sm"
               variant="surface"
               rounded="full"

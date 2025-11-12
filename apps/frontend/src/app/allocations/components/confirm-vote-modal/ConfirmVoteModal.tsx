@@ -2,6 +2,7 @@
 
 import { Button, Dialog, Portal, CloseButton, VStack } from "@chakra-ui/react"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { AppWithVotes } from "../../page"
 
@@ -20,6 +21,7 @@ interface ConfirmVoteModalProps {
 }
 
 export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: ConfirmVoteModalProps) => {
+  const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
 
   // Memoize appIds to prevent unnecessary recreations
@@ -82,7 +84,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
               position="relative"
               flexShrink={0}>
               <Dialog.Title textStyle="xl" fontWeight="bold">
-                {"Confirm your vote"}
+                {t("Confirm your vote")}
               </Dialog.Title>
               <Dialog.CloseTrigger asChild position="absolute" right={6} top="50%" transform="translateY(-50%)">
                 <CloseButton size="md" />
@@ -122,10 +124,10 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
               borderColor="border.secondary"
               flexShrink={0}>
               <Button variant={"secondary"} onClick={handleCloseModal} flex={1}>
-                {"Cancel"}
+                {t("Cancel")}
               </Button>
               <Button variant={"primary"} onClick={handleConfirm} disabled={!canSubmit} flex={1}>
-                {"Vote"}
+                {t("Vote")}
               </Button>
             </Dialog.Footer>
           </Dialog.Content>

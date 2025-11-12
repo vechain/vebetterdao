@@ -2,6 +2,7 @@
 
 import { Box, Circle, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { Check } from "iconoir-react"
+import { useTranslation } from "react-i18next"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 
@@ -12,12 +13,13 @@ interface SelectedAppsPreviewProps {
 }
 
 export const SelectedAppsPreview = ({ apps }: SelectedAppsPreviewProps) => {
+  const { t } = useTranslation()
   return (
     <VStack gap={3} alignItems="stretch">
       <Text textStyle="md" fontWeight="semibold" display="flex" justifyContent="space-between">
-        <span>{"Selected apps"}</span>
+        <span>{t("Selected apps")}</span>
         <Text as="span" color="text.subtle" textStyle="sm" fontWeight="normal">
-          {apps.length} {apps.length === 1 ? "app" : "apps"}
+          {apps.length} {apps.length === 1 ? t("app") : t("apps")}
         </Text>
       </Text>
 
