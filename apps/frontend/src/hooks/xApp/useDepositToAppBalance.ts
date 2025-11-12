@@ -5,11 +5,11 @@ import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"
+import { removingExcessDecimals } from "@/utils/MathUtils/MathUtils"
 
 import { getAppAvailableFundsQueryKey } from "../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { useXApp } from "../../api/contracts/xApps/hooks/useXApp"
 import { useBuildTransaction } from "../useBuildTransaction"
-import { removingExcessDecimals } from "../utils/MathUtils/MathUtils"
 
 const config = getConfig()
 const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()

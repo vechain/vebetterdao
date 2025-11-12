@@ -6,7 +6,7 @@ import { useCallback, useMemo } from "react"
 import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { buildClause } from "@/utils/buildClause"
 
-import { useBuildTransaction } from "./useBuildTransaction"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnCreatorNftInterface = X2EarnCreator__factory.createInterface()
 type Props = { walletAddress: string; tokenId: string; onSuccess?: () => void; invalidateCache?: boolean }

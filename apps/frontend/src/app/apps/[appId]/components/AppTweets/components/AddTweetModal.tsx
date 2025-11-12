@@ -9,8 +9,8 @@ import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
 import { useTweet } from "@/api/twitter/hooks/useTweets"
 import { StepModal } from "@/components/StepModal/StepModal"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import { useUpdateAppMetadataReturnValue } from "@/hooks/useUpdateAppDetails"
-import { UseUploadAppMetadataReturnValue } from "@/hooks/useUploadAppMetadata"
+import { useUpdateAppMetadataReturnValue } from "@/hooks/xApp/useUpdateAppDetails"
+import { UseUploadAppMetadataReturnValue } from "@/hooks/xApp/useUploadAppMetadata"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 
 import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
@@ -40,18 +40,18 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
   const { appMetadata } = useCurrentAppMetadata()
 
   const [step, setStep] = useState(0)
-  
+
   const handleClose = useCallback(() => {
     setStep(0)
     onClose()
   }, [onClose])
-  
+
   const goToNext = useCallback(() => {
     const nextStep = step + 1
     if (nextStep >= STEP_COUNT) handleClose()
     else setStep(nextStep)
   }, [step, handleClose])
-  
+
   const goToPrevious = useCallback(() => {
     const prevStep = step - 1
     if (prevStep < 0) handleClose()
