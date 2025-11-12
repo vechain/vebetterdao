@@ -32,7 +32,7 @@ export const AppsPageContent = () => {
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
   const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: endorsedApps, isLoading: isEndorsedAppsLoading } = useNodesEndorsedApps(
-    nodes?.allNodes?.map(node => node.nodeId) ?? [],
+    nodes?.nodes?.map((node: any) => node.id.toString()) ?? [],
   )
   const isXNodeLoading = isUserNodesLoading || isEndorsedAppsLoading
   const isEndorsingApp = !!endorsedApps?.length && endorsedApps?.length > 0

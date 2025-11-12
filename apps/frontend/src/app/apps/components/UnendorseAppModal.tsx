@@ -27,8 +27,8 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
-  const { data: nodes } = useGetUserNodes()
-  const node = nodes?.allNodes?.find(node => node.nodeId === xNodeId)
+  const { data: userNodesInfo } = useGetUserNodes()
+  const node = userNodesInfo?.nodes?.find(node => node.id.toString() === xNodeId)
   const { data: endorsedApps = [] } = useNodesEndorsedApps([xNodeId])
   const endorsedApp = endorsedApps[0]?.endorsedApp
   const handleSuccess = useCallback(() => {
@@ -81,7 +81,7 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
             textStyle="2xl"
             color="status.negative.primary">
             {"-"}
-            {node?.xNodePoints}
+            {node?.endorsementScore?.toString() ?? "0"}
           </Text>
         </Flex>
 

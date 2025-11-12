@@ -58,7 +58,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
 
   const isUserAppEndorser = useMemo(() => {
     if (!appId) return false
-    return userNode?.isXNodeHolder && compareAddresses(appId, userNode?.endorsedAppId)
+    // TODO: Fetch endorsedAppId and isXNodeHolder status
+    return false // TODO: Placeholder until proper data is fetched
   }, [appId, userNode])
 
   // Confirm unendorsement, unendorsement modal controls

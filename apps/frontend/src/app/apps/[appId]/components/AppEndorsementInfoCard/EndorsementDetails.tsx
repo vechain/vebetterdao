@@ -29,7 +29,8 @@ export const EndorsementDetails = ({
 }: Props) => {
   const { t } = useTranslation()
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
-  const yourScore = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)?.xNodePoints
+  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
+  const yourScore = userNodes?.nodes?.find((node: any) => false)?.endorsementScore // TODO: Placeholder
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus] ?? { color: "#6A6A6A" }
   return (

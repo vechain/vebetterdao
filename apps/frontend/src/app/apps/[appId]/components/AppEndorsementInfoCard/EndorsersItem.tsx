@@ -12,7 +12,7 @@ import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useApp
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
+import { useNodeEndorsementScore } from "@/hooks/node/useNodeEndorsementScore"
 
 type Props = {
   appId: string
@@ -37,7 +37,8 @@ export const EndorsersItem = ({
   const { t } = useTranslation()
   const router = useRouter()
   const { data: userNodes, isLoading: endorserNodesLoading } = useGetUserNodes(endorserAddress)
-  const endorserNodeId = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)?.nodeId
+  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
+  const endorserNodeId = userNodes?.nodes?.find(node => node.id)?.id.toString()
   const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId ?? "")
   // Find the first element in events (ie most recent) where the endorser endorsed the app
   const lastEndorsementEvent = endorsementEvents.find(event => event.nodeId === endorserNodeId && event.endorsed)

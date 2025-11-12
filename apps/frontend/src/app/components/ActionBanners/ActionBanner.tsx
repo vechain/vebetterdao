@@ -24,7 +24,6 @@ import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUs
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
@@ -98,8 +97,6 @@ export const ActionBanner = () => {
     isPerson,
     isLoading,
   } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
-
-  const { data: userNodes } = useGetUserNodes(account?.address ?? "")
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
@@ -189,7 +186,7 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   // Legacy Node banners logic
-  const isLegacyNode = useMemo(() => (userNodes?.legacyNodes?.length ?? 0) > 0, [userNodes])
+  const isLegacyNode = true //TODO: Get if user has any legacy node to display banner
   // Remove the banner for every user at the end of this round
   const showStargateBanner =
     currentRoundId < 55 || (isLegacyNode && isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))

@@ -37,7 +37,8 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(appId)
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
-  const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)
+  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
+  const nodeEndorsingApp = userNodes?.nodes?.find((node: any) => false) // TODO: Placeholder until endorsedAppId is fetched
   const {
     score: endorsementScore,
     threshold: endorsementThreshold,
@@ -49,7 +50,8 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   const isUserAppEndorser = useMemo(() => {
     if (!appId) return false
-    return nodeEndorsingApp?.isXNodeHolder
+    // TODO: Determine isXNodeHolder status
+    return false // TODO: Placeholder
   }, [appId, nodeEndorsingApp])
 
   return (
@@ -133,7 +135,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                       <VStack gap={0} alignItems="flex-start">
                         <Skeleton loading={isUserNodesLoading}>
                           <Text textStyle="2xl" color="#004CFC">
-                            {nodeEndorsingApp?.xNodePoints}
+                            {nodeEndorsingApp?.endorsementScore?.toString()}
                           </Text>
                         </Skeleton>
                         <Text textStyle="xs" color="text.subtle">

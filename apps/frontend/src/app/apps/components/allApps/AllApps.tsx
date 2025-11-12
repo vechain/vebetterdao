@@ -52,7 +52,7 @@ export const AllApps = ({
 }: Props) => {
   const { t } = useTranslation()
   const { data: nodes } = useGetUserNodes()
-  const { data: endorsedApps } = useNodesEndorsedApps(nodes?.allNodes?.map(node => node.nodeId) ?? [])
+  const { data: endorsedApps } = useNodesEndorsedApps(nodes?.nodes?.map((node: any) => node.id.toString()) ?? [])
   const isEndorsingApp = endorsedApps?.length && endorsedApps?.length > 0
 
   const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange } = useAppsSorting(

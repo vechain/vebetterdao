@@ -26,9 +26,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { data: endorsementScore } = useAppEndorsementScore(xApp?.id ?? "")
   const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const nodesNotEndorsingApp = useMemo(() => {
-    return nodes?.allNodes
-      .filter(node => !node.endorsedAppId && node.xNodePoints > 0)
-      .sort((a, b) => Number(b.xNodePoints) - Number(a.xNodePoints))
+    // TODO: Filter by endorsedAppId from nodeToEndorsedApp contract call
+    return nodes?.nodes
+      .filter(node => node.endorsementScore > 0)
+      .sort((a, b) => Number(b.endorsementScore) - Number(a.endorsementScore))
   }, [nodes])
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -46,15 +47,15 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const appScore = useMemo(() => Number(endorsementScore ?? 0), [endorsementScore])
   const newScore =
     appScore +
-    Number(selectedNodeId ? nodesNotEndorsingApp?.find(node => node.nodeId === selectedNodeId)?.xNodePoints : 0)
+    Number(selectedNodeId ? nodesNotEndorsingApp?.find(node => node.id.toString() === selectedNodeId)?.endorsementScore : 0)
 
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.sendTransaction()
   }, [endorseAppMutation])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    const selectedNode = nodesNotEndorsingApp?.find(node => node.nodeId === selectedNodeId)
-    return account?.address && selectedNode && !selectedNode?.isXNodeOnCooldown
+    // TODO: Fetch isXNodeOnCooldown from contract
+    return false // TODO: Placeholder
   }, [account, selectedNodeId, nodesNotEndorsingApp])
 
   return (
@@ -83,7 +84,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         <VStack w="full" alignItems="stretch" gap={4}>
           <RadioGroup.Root onValueChange={details => setSelectedNodeId(details.value)} value={selectedNodeId}>
             <VStack w="full" gap={4} alignItems="stretch">
-              {nodesNotEndorsingApp?.map(node => (
+              {nodesNotEndorsingApp?.map((node: any) => (
                 <Card.Root
                   key={node.nodeId}
                   variant="outline"

@@ -10,7 +10,7 @@ import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 
 export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
-  const { data: appEndorsedEvents } = useAppEndorsedEvents({ nodeId: xNode.nodeId ?? undefined })
+  const { data: appEndorsedEvents } = useAppEndorsedEvents({ nodeId: xNode.id.toString() })
   const [displayCount, setDisplayCount] = useState(5)
   const handleLoadMore = useCallback(() => {
     setDisplayCount(prevCount => Math.min(prevCount + 5, appEndorsedEvents?.length || 0))

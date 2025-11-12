@@ -53,10 +53,11 @@ export const AppEndorsementInfoCard = ({
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
-  const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === app?.id)
-  const isXNodeHolder = userNodes?.allNodes?.some(node => node.isXNodeHolder && !node.endorsedAppId)
+  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
+  const nodeEndorsingApp = userNodes?.nodes?.find((node: any) => false) // TODO: Placeholder until endorsedAppId is fetched
+  const isXNodeHolder = userNodes?.nodes?.some((node: any) => node.endorsementScore > 0)
   const totalXNodePoints = Math.max(
-    ...(userNodes?.allNodes?.filter(node => !node.endorsedAppId).map(node => node.xNodePoints) ?? []),
+    ...(userNodes?.nodes?.map((node: any) => Number(node.endorsementScore)) ?? []),
   )
 
   // Call to actions
@@ -74,14 +75,14 @@ export const AppEndorsementInfoCard = ({
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    return (
-      nodeEndorsingApp?.isXNodeDelegator || nodeEndorsingApp?.isXNodeOnCooldown || nodeEndorsingApp?.xNodePoints === 0
-    )
+    // TODO: Fetch isXNodeDelegator and isXNodeOnCooldown from contract
+    return false // TODO: Placeholder
   }, [nodeEndorsingApp])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account && nodeEndorsingApp?.isXNodeOnCooldown && nodeEndorsingApp?.nodeId === app?.id
-  }, [account, app?.id, nodeEndorsingApp?.isXNodeOnCooldown, nodeEndorsingApp?.nodeId])
+    // TODO: Fetch isXNodeOnCooldown from contract
+    return false // TODO: Placeholder
+  }, [account, app?.id, nodeEndorsingApp])
 
   // // Modals
   const {
@@ -228,7 +229,7 @@ export const AppEndorsementInfoCard = ({
 
       <EndorseAppModal xApp={app} isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} />
       <UnendorseAppModal
-        xNodeId={nodeEndorsingApp?.nodeId ?? ""}
+        xNodeId={nodeEndorsingApp?.id?.toString() ?? ""}
         isOpen={isUnendorsementModalOpen}
         onClose={onCloseUnendorsementModal}
       />

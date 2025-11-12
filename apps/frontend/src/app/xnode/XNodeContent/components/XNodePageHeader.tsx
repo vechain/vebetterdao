@@ -6,7 +6,9 @@ import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-  const { image: xNodeImage, name: xNodeName, nodeType, xNodePoints, isXNodeDelegator, isXNodeDelegatee } = xNode
+  const isXNodeDelegator = false //TODO: Get if xNode is delegator
+  const isXNodeDelegatee = false //TODO: Get if xNode is delegatee
+  const xNodePoints = xNode?.endorsementScore?.toString() ?? "0"
   return (
     <Card.Root variant="primary" p="0">
       <Image
@@ -33,18 +35,18 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
           color="white"
           flexGrow={4}>
           <Image
-            src={xNodeImage}
-            alt="gm"
+            src={xNode?.metadata?.image ?? ""}
+            alt={xNode?.metadata?.name ?? ""}
             w={isAbove800 ? "132px" : "68px"}
             h={isAbove800 ? "132px" : "68px"}
             rounded="8px"
           />
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
             <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="#FFFFFF80">
-              {nodeType}
+              {"nodeType"} {/** TODO: Get node type */}
             </Text>
             <Text color="white" fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
-              {xNodeName}
+              {xNode?.metadata?.name ?? ""}
             </Text>
 
             <HStack>

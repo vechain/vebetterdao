@@ -41,7 +41,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
   const { isTxModalOpen } = useTransactionModal()
   const { data: levelAfterAttaching } = useGetLevelAfterAttachingNode({
     tokenId: gmId,
-    nodeTokenId: node?.nodeId ?? "",
+    nodeTokenId: node?.id?.toString() ?? "",
   })
   const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
@@ -53,7 +53,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
     gmId,
-    xNodeId: node?.nodeId ?? "",
+    xNodeId: node?.id?.toString() ?? "",
     onSuccess: handleClose,
   })
 
