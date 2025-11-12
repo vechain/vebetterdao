@@ -25,9 +25,8 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
   // Memoize appIds to prevent unnecessary recreations
   const appIds = useMemo(() => selectedApps.map(app => app.id), [selectedApps])
 
-  const { allocations, setAllocation, setEqualAllocations, getTotalPercentage, isValid } = useConfirmVoteModal(appIds)
+  const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
 
-  const totalPercentage = getTotalPercentage()
   const canSubmit = isValid()
 
   // Reset allocations to equal distribution when modal opens
@@ -107,7 +106,6 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
                       apps={selectedApps}
                       allocations={allocations}
                       onAllocationChange={setAllocation}
-                      totalPercentage={totalPercentage}
                     />
                   </>
                 )}
@@ -123,11 +121,9 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
               borderTopWidth="1px"
               borderColor="border.secondary"
               flexShrink={0}>
-              {/* @ts-expect-error - custom variant defined in theme */}
               <Button variant={"secondary"} onClick={handleCloseModal} flex={1}>
                 {"Cancel"}
               </Button>
-              {/* @ts-expect-error - custom variant defined in theme */}
               <Button variant={"primary"} onClick={handleConfirm} disabled={!canSubmit} flex={1}>
                 {"Vote"}
               </Button>

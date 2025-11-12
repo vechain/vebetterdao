@@ -145,14 +145,11 @@ export function AllocationTabs({
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <Dialog.Root>
             <Dialog.Trigger asChild>
-              <Button w="full" variant="primary" disabled={!hasVotesAtSnapshot}>
+              <Button w="full" variant="primary" disabled={!hasVotesAtSnapshot} onClick={openModal}>
                 {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
               </Button>
             </Dialog.Trigger>
           </Dialog.Root>
-          <Button w="full" variant="primary" onClick={openModal}>
-            {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
-          </Button>
         </Box>
       </Presence>
 
