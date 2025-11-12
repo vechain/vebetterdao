@@ -29,15 +29,7 @@ export const AlertCard = ({ status, title, message, icon }: AlertCardProps) => {
   const StatusIcon = statusIcons[status]
 
   return (
-    <Alert.Root
-      status={status}
-      py={{ base: "2", md: "2.5" }}
-      px={{ base: "3", md: "4" }}
-      bgColor={`${statusColors[status]}.subtle`}
-      borderWidth="1px"
-      borderStyle="solid"
-      borderColor={`${statusColors[status]}.primary`}
-      borderRadius="lg">
+    <Alert.Root status={status} py={{ base: "2", md: "2.5" }} px={{ base: "3", md: "4" }}>
       <HStack alignItems="flex-start" gap="2" w="full">
         <Alert.Indicator boxSize={{ base: "4", md: "5" }} flexShrink={0} mt="0.5">
           {icon || <StatusIcon />}
