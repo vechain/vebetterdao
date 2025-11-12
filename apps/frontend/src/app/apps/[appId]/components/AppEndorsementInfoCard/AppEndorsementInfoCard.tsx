@@ -5,7 +5,7 @@ import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 
@@ -49,15 +49,14 @@ export const AppEndorsementInfoCard = ({
     app?.id ?? "",
     account?.address ?? "",
   )
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
-  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
-  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
-  const nodeEndorsingApp = userNodes?.nodes?.find((node: any) => false) // TODO: Placeholder until endorsedAppId is fetched
-  const isXNodeHolder = userNodes?.nodes?.some((node: any) => node.endorsementScore > 0)
+  const nodeEndorsingApp = userNodesInfo?.nodesManagedByUser?.find((node: UserNode) => node.endorsedAppId === app?.id)
+  const userNodesHasPoints = userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsementScore > 0)
   const totalXNodePoints = Math.max(
-    ...(userNodes?.nodes?.map((node: any) => Number(node.endorsementScore)) ?? []),
+    ...(userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => Number(node.endorsementScore)) ?? []),
   )
 
   // Call to actions
@@ -67,22 +66,20 @@ export const AppEndorsementInfoCard = ({
     endorsementStatus === XAppStatus.UNENDORSED_NOT_ELIGIBLE
 
   const shouldRenderEndorseButton = useMemo(() => {
-    return isXNodeHolder && !nodeEndorsingApp && appUnendorsedStatus
-  }, [isXNodeHolder, nodeEndorsingApp, appUnendorsedStatus])
+    return userNodesHasPoints && !nodeEndorsingApp && appUnendorsedStatus
+  }, [userNodesHasPoints, nodeEndorsingApp, appUnendorsedStatus])
 
   const shouldRenderLookForEndorsersButton = useMemo(() => {
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    // TODO: Fetch isXNodeDelegator and isXNodeOnCooldown from contract
-    return false // TODO: Placeholder
+    return nodeEndorsingApp?.isOnCooldown
   }, [nodeEndorsingApp])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    // TODO: Fetch isXNodeOnCooldown from contract
-    return false // TODO: Placeholder
-  }, [account, app?.id, nodeEndorsingApp])
+    return nodeEndorsingApp?.isOnCooldown
+  }, [nodeEndorsingApp])
 
   // // Modals
   const {
