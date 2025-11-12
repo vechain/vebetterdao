@@ -8,6 +8,7 @@ import {
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 
+import { compareAddresses } from "../../../utils/AddressUtils/AddressUtils"
 import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
 
 const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
@@ -45,9 +46,15 @@ export type UserNode = TokenOverview & {
   endorsementScore: bigint
   metadata: StargateNFTMetadata | undefined
   type: NodeType
+  endorsedAppId: string | undefined
+  isOnCooldown: boolean
+  currentUserIsManager: boolean
+  currentUserIsOwner: boolean
 }
 export type UserNodesInfo = {
-  nodes: UserNode[]
+  allNodes: UserNode[]
+  nodesManagedByUser: UserNode[]
+  nodesOwnedByUser: UserNode[]
   totalEndorsementScore: Awaited<ReturnType<X2EarnApps["getUsersEndorsementScore"]>>
 }
 
@@ -93,6 +100,8 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
       let nodePointsArray: bigint[] = []
       let nodeMetadataArray: StargateNFTMetadata[] = []
       let nodeIsXArray: boolean[] = []
+      let nodeToEndorsedAppArray: string[] = []
+      let nodeCooldownArray: boolean[] = []
       if (nodeIds?.length > 0) {
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
         nodePointsArray = await executeMultipleClausesCall({
@@ -133,6 +142,26 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
             args: [BigInt(nodeId)],
           })),
         })
+        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
+        nodeToEndorsedAppArray = await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: x2EarnAppsAbi,
+            address: x2EarnAppsContractAddress,
+            functionName: "nodeToEndorsedApp",
+            args: [BigInt(nodeId)],
+          })),
+        })
+        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
+        nodeCooldownArray = await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: x2EarnAppsAbi,
+            address: x2EarnAppsContractAddress,
+            functionName: "checkCooldown",
+            args: [BigInt(nodeId)],
+          })),
+        })
       }
 
       const nodesWithPoints = tokensOverview?.map((node, index) => ({
@@ -140,11 +169,17 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
         type: nodeIsXArray[index] ? NodeType.X : NodeType.ECONOMIC,
         endorsementScore: nodePointsArray[index] ?? BigInt(0),
         metadata: nodeMetadataArray[index],
+        endorsedAppId: nodeToEndorsedAppArray[index],
+        isOnCooldown: nodeCooldownArray?.[index] ?? false,
+        currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
+        currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
       }))
       const totalEndorsementScore = usersEndorsementScore ?? BigInt(0)
 
       const plannedReturn = {
-        nodes: nodesWithPoints,
+        allNodes: nodesWithPoints,
+        nodesManagedByUser: nodesWithPoints.filter(node => node.currentUserIsManager),
+        nodesOwnedByUser: nodesWithPoints.filter(node => node.currentUserIsOwner),
         totalEndorsementScore,
       }
       return plannedReturn
