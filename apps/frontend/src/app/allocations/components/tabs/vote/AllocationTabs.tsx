@@ -150,9 +150,6 @@ export function AllocationTabs({
               </Button>
             </Dialog.Trigger>
           </Dialog.Root>
-          <Button w="full" variant="primary" onClick={openModal}>
-            {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
-          </Button>
         </Box>
       </Presence>
 
