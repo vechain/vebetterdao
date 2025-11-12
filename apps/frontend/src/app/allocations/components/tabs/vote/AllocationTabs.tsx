@@ -7,7 +7,7 @@ import { createContext, useRef, useState, useCallback } from "react"
 import { RoundEarnings } from "@/app/allocations/history/page"
 import { useStickyState } from "@/hooks/useStickyState"
 
-import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../../page"
+import type { AllocationRoundDetails, AppWithVotes } from "../../../page"
 import { RoundInfoTab } from "../round-info/RoundInfoTab"
 
 import { VoteTab } from "./VoteTab"
@@ -23,16 +23,12 @@ interface AllocationTabsContextType {
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
 
 interface AllocationTabsProps {
-  currentRoundDetails: AllocationCurrentRoundDetails
+  roundDetails: AllocationRoundDetails
   onSelectedAppsChange?: (selectedIds: Set<string>) => void
   previous3RoundsEarnings: RoundEarnings[]
 }
 
-export function AllocationTabs({
-  currentRoundDetails,
-  onSelectedAppsChange,
-  previous3RoundsEarnings,
-}: AllocationTabsProps) {
+export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3RoundsEarnings }: AllocationTabsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -62,8 +58,8 @@ export function AllocationTabs({
   return (
     <AllocationTabsContext.Provider
       value={{
-        roundId: currentRoundDetails.id,
-        apps: currentRoundDetails.apps,
+        roundId: roundDetails.id,
+        apps: roundDetails.apps,
         selectedAppIds,
         onToggleApp: toggleApp,
         isStuck,
@@ -93,15 +89,10 @@ export function AllocationTabs({
           </Tabs.List>
         </Bleed>
         <Tabs.Content value="vote" display="flex" flexDirection="column" gap="4">
-          <VoteTab
-            apps={currentRoundDetails.apps}
-            selectedAppIds={selectedAppIds}
-            onToggleApp={toggleApp}
-            isStuck={isStuck}
-          />
+          <VoteTab apps={roundDetails.apps} selectedAppIds={selectedAppIds} onToggleApp={toggleApp} isStuck={isStuck} />
         </Tabs.Content>
         <Tabs.Content value="round">
-          <RoundInfoTab currentRoundDetails={currentRoundDetails} previous3RoundsEarnings={previous3RoundsEarnings} />
+          <RoundInfoTab roundDetails={roundDetails} previous3RoundsEarnings={previous3RoundsEarnings} />
         </Tabs.Content>
       </Tabs.Root>
 

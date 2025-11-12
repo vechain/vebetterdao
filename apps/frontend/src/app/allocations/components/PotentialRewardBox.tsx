@@ -10,15 +10,15 @@ import { formatEther } from "viem"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
 
-import type { AllocationCurrentRoundDetails } from "../page"
+import type { AllocationRoundDetails } from "../page"
 
 import { StatCard } from "./StatCard"
 
 const voterRewardsAbi = VoterRewards__factory.abi
 const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 
-export const PotentialRewardBox = ({ currentRoundDetails }: { currentRoundDetails: AllocationCurrentRoundDetails }) => {
-  const { id, cycleTotal, vote2EarnAmount, gmAmount, cycleTotalGMWeight } = currentRoundDetails
+export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationRoundDetails }) => {
+  const { id, cycleTotal, vote2EarnAmount, gmAmount, cycleTotalGMWeight } = roundDetails
   const { account } = useWallet()
 
   const { data: userVoterTotal, isLoading: isUserVoterTotalLoading } = useCallClause({

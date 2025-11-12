@@ -1,30 +1,43 @@
-import { Badge, Button, Card, Flex, Grid, Heading, HStack, Icon, IconButton, Text, VStack } from "@chakra-ui/react"
-import { Activity, NavArrowLeft, NavArrowRight, SmartphoneDevice } from "iconoir-react"
+import { Badge, Button, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { RoundEarnings } from "@/app/allocations/history/page"
 
-import { AllocationCurrentRoundDetails } from "../../../page"
+import { AllocationRoundDetails } from "../../../page"
+import { RoundActiveAppsListCard } from "../../RoundActiveAppsListCard"
+import { UserVotingActivityCard } from "../../UserVotingActivityCard"
 
 import { RoundDistributionCard } from "./RoundDistributionCard"
 import { RoundHistoryCard } from "./RoundHistoryCard"
 
 export function RoundInfoTab({
-  currentRoundDetails,
+  roundDetails,
   previous3RoundsEarnings,
 }: {
-  currentRoundDetails: AllocationCurrentRoundDetails
+  roundDetails: AllocationRoundDetails
   previous3RoundsEarnings: RoundEarnings[]
 }) {
-  const { cycleTotal, totalVoters, apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount } = currentRoundDetails
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { cycleTotal, totalVoters, apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount } = roundDetails
+
+  const handleRoundNavigation = (newRoundId: number) => {
+    const params = new URLSearchParams(searchParams)
+    params.set("tab", "round")
+    params.set("roundId", newRoundId.toString())
+    router.push(`?${params.toString()}`)
+  }
+
   return (
     <VStack alignItems="stretch" gap="5" w="full" mt="2">
       <VStack hideFrom="md" alignItems="stretch" gap="2">
         <HStack gap="2">
           <Text textStyle="md" fontWeight="semibold">
-            {"Round"} {currentRoundDetails.id}
+            {"Round"} {roundDetails.id}
           </Text>
-          <Badge variant="positive">{"Active"}</Badge>
+          {roundDetails.currentRoundId === roundDetails.id && <Badge variant="positive">{"Active"}</Badge>}
         </HStack>
         <Text textStyle="sm" color="text.subtle">
           {"Aug 11 - Aug 18"}
@@ -36,7 +49,7 @@ export function RoundInfoTab({
             <Text textStyle="md" color="text.subtle">
               {"Round"}
             </Text>
-            <Heading size="4xl">{currentRoundDetails.id}</Heading>
+            <Heading size="4xl">{roundDetails.id}</Heading>
           </VStack>
           <VStack gap="1" pl="6" align="start">
             <Text textStyle="md" color="text.subtle">
@@ -44,15 +57,26 @@ export function RoundInfoTab({
             </Text>
             <Heading size="lg">{"Aug 3 - Aug 10"}</Heading>
           </VStack>
-          <Flex h="full" pl="6" alignItems="flex-start">
-            <Badge variant="positive">{"Active"}</Badge>
-          </Flex>
+          {roundDetails.currentRoundId === roundDetails.id && (
+            <Flex h="full" pl="6" alignItems="flex-start">
+              <Badge variant="positive">{"Active"}</Badge>
+            </Flex>
+          )}
         </Grid>
         <Flex columnGap="4">
-          <IconButton variant="outline" boxSize={"44px"}>
+          <IconButton
+            variant="outline"
+            boxSize={"44px"}
+            onClick={() => handleRoundNavigation(roundDetails.id - 1)}
+            disabled={roundDetails.id <= 1}
+            aria-label="Previous round">
             <NavArrowLeft />
           </IconButton>
-          <IconButton variant="outline" boxSize={"44px"}>
+          <IconButton
+            variant="outline"
+            boxSize={"44px"}
+            onClick={() => handleRoundNavigation(roundDetails.id + 1)}
+            aria-label="Next round">
             <NavArrowRight />
           </IconButton>
           <Button variant="link" p="0" size="md">
@@ -89,25 +113,8 @@ export function RoundInfoTab({
         ))}
       </VStack>
       <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap="6">
-        <Card.Root p="6">
-          <Card.Header as={HStack} gap="2">
-            <Icon as={Activity} boxSize="5" color="icon.default" />
-            <Heading size="lg" fontWeight="semibold">
-              {"Your voting activity"}
-            </Heading>
-          </Card.Header>
-        </Card.Root>
-        <Card.Root p="6">
-          <Card.Header as={HStack} justifyContent="space-between">
-            <Heading as={HStack} size="lg" fontWeight="semibold">
-              <Icon as={SmartphoneDevice} boxSize="5" color="icon.default" />
-              {"Active apps"}
-            </Heading>
-            <Badge variant="neutral" size="sm" rounded="sm">
-              {"12 apps"}
-            </Badge>
-          </Card.Header>
-        </Card.Root>
+        <UserVotingActivityCard roundId={BigInt(roundDetails.id)} apps={apps} />
+        <RoundActiveAppsListCard apps={apps} />
       </Grid>
     </VStack>
   )

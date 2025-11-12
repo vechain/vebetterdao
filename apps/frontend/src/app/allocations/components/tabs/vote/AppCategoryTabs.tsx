@@ -71,16 +71,14 @@ export function AppCategoryTabs({
   )
 
   const filteredApps = useMemo(() => {
-    return apps
-      .filter(app => {
-        const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchesSearchDesktop = app.name.toLowerCase().includes(searchQueryDesktop.toLowerCase())
+    return apps.filter(app => {
+      const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearchDesktop = app.name.toLowerCase().includes(searchQueryDesktop.toLowerCase())
 
-        const matchesCategory =
-          selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
-        return (isMobile ? matchesSearch : matchesSearchDesktop) && matchesCategory
-      })
-      .sort((a, b) => (b.votesReceived > a.votesReceived ? 1 : -1))
+      const matchesCategory =
+        selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
+      return (isMobile ? matchesSearch : matchesSearchDesktop) && matchesCategory
+    })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
   const areAllFilteredAppsSelected = useMemo(() => {

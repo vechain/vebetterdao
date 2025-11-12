@@ -32,8 +32,9 @@ export interface AppWithVotes {
   metadata?: Awaited<ReturnType<typeof getXAppMetadata>>
 }
 
-export interface AllocationCurrentRoundDetails {
+export interface AllocationRoundDetails {
   id: number
+  currentRoundId: number
   totalVoters: number
   totalVP: bigint
   deadlineDate?: Date
@@ -114,11 +115,11 @@ export const getRoundDetails = async (cycle: bigint) => {
   }
 }
 
-const getData = async (): Promise<AllocationCurrentRoundDetails> => {
+const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDetails> => {
   const thor = await getNodeJsThorClient()
   const bestBlock = await thor.blocks.getBestBlockCompressed()
 
-  const [currentRoundId, currentRoundDeadline] = await executeMultipleClausesCall({
+  const [currentRoundId] = await executeMultipleClausesCall({
     thor,
     calls: [
       {
@@ -127,58 +128,82 @@ const getData = async (): Promise<AllocationCurrentRoundDetails> => {
         functionName: "currentRoundId",
         args: [],
       },
-      {
-        abi: xAllocationVotingAbi,
-        address: xAllocationVotingAddress,
-        functionName: "currentRoundDeadline",
-        args: [],
-      },
     ],
   })
 
-  const currentRoundDetails = await getRoundDetails(currentRoundId)
+  let deadlineDate: Date | undefined
+  const roundId = round ?? Number(currentRoundId)
+
+  if (!round) {
+    const [roundDeadline] = await executeMultipleClausesCall({
+      thor,
+      calls: [
+        {
+          abi: xAllocationVotingAbi,
+          address: xAllocationVotingAddress,
+          functionName: "roundDeadline" as const,
+          args: [BigInt(roundId)],
+        },
+      ],
+    })
+
+    deadlineDate = await blockNumberToDate(
+      thor,
+      BigInt(roundDeadline),
+      bestBlock?.timestamp,
+      bestBlock ? BigInt(bestBlock.number) : undefined,
+    )
+  }
+
+  const roundDetails = await getRoundDetails(BigInt(roundId))
   const rounds = await getRounds()
 
-  const res = await getRoundResults(Number(currentRoundId))
+  const res = await getRoundResults(roundId)
 
   if (!res.data) throw Error("There is an error getting the data. Please try again.")
 
   const resultsMap = new Map(res.data.map(result => [result.appId, result]))
 
-  const apps = currentRoundDetails!.apps
+  const apps = roundDetails!.apps
   const appsMetadata = await Promise.all(apps.map(app => getXAppMetadata(`ipfs://${app.metadataURI}`)))
-  const appsWithVotes = apps.map((app, index) => {
-    const result = resultsMap.get(app.id)
-    return {
-      ...app,
-      voters: result?.voters ?? 0,
-      votesReceived: result?.votesReceived ? BigInt(result.votesReceived.toString()) : 0n,
-      metadata: appsMetadata[index],
-    }
-  })
-
-  const deadlineDate = await blockNumberToDate(
-    thor,
-    BigInt(currentRoundDeadline),
-    bestBlock?.timestamp,
-    bestBlock ? BigInt(bestBlock.number) : undefined,
-  )
+  const appsWithVotes = apps
+    .map((app, index) => {
+      const result = resultsMap.get(app.id)
+      return {
+        ...app,
+        voters: result?.voters ?? 0,
+        votesReceived: result?.votesReceived ? BigInt(result.votesReceived.toString()) : 0n,
+        metadata: appsMetadata[index],
+      }
+    })
+    .sort((appA, appB) => (appA.votesReceived > appB.votesReceived ? -1 : 1))
 
   return {
-    id: Number(currentRoundId),
+    id: roundId,
+    currentRoundId: Number(currentRoundId),
     totalVoters: appsWithVotes.reduce((sum, app) => sum + (app.voters ?? 0), 0),
-    totalVP: currentRoundDetails.cycleTotal,
+    totalVP: roundDetails.cycleTotal,
     deadlineDate,
-    ...currentRoundDetails,
+    ...roundDetails,
     apps: appsWithVotes,
     previous3RoundsEarnings: rounds.data.slice(1, 4),
   }
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }: { searchParams: Promise<{ roundId?: string }> }) {
   if (!featureFlags[FeatureFlag.ALLOCATION_REDESIGN].enabled) return redirect("/rounds")
 
-  const currentRoundDetails = await getData()
+  const params = await searchParams
+  const roundIdParam = params.roundId
+
+  let roundDetails: AllocationRoundDetails
+
+  if (roundIdParam) {
+    const roundId = parseInt(roundIdParam, 10)
+    if (isNaN(roundId)) {
+      return redirect("/allocations")
+    } else roundDetails = await getHistoricalRoundData(roundId)
+  } else roundDetails = await getHistoricalRoundData()
 
   return (
     <>
@@ -192,18 +217,15 @@ export default async function Page() {
             <VotingPowerBox />
           </GridItem>
           <GridItem asChild>
-            <PotentialRewardBox currentRoundDetails={currentRoundDetails} />
+            <PotentialRewardBox roundDetails={roundDetails} />
           </GridItem>
           <GridItem asChild>
-            <CountdownBox deadline={currentRoundDetails?.deadlineDate} />
+            <CountdownBox deadline={roundDetails?.deadlineDate} />
           </GridItem>
         </Grid>
       </VStack>
 
-      <AllocationTabs
-        currentRoundDetails={currentRoundDetails}
-        previous3RoundsEarnings={currentRoundDetails.previous3RoundsEarnings}
-      />
+      <AllocationTabs roundDetails={roundDetails} previous3RoundsEarnings={roundDetails.previous3RoundsEarnings} />
     </>
   )
 }

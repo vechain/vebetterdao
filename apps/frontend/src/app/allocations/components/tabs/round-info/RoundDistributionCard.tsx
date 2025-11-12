@@ -6,13 +6,13 @@ import { formatEther } from "viem"
 
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 
-import { AllocationCurrentRoundDetails } from "../../../page"
+import { AllocationRoundDetails } from "../../../page"
 
 export function RoundDistributionCard({
   roundDetails,
 }: {
   roundDetails: Pick<
-    AllocationCurrentRoundDetails,
+    AllocationRoundDetails,
     "xAllocationsAmount" | "vote2EarnAmount" | "treasuryAmount" | "totalVoters" | "totalVP"
   > & {
     totalApp: number
