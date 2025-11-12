@@ -88,7 +88,7 @@ export function RoundInfoTab({
           <RoundHistoryCard key={round.roundId} round={round} />
         ))}
       </VStack>
-      <Grid gridTemplateColumns="repeat(2,1fr)" gap="6">
+      <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap="6">
         <Card.Root p="6">
           <Card.Header as={HStack} gap="2">
             <Icon as={Activity} boxSize="5" color="icon.default" />
