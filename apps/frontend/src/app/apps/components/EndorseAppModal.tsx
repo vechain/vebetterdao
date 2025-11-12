@@ -1,6 +1,7 @@
 import { VStack, Heading, Box, Text, Button, Skeleton, Card, Image, RadioGroup } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
+import { ethers } from "ethers"
 import { t } from "i18next"
 import { useCallback, useMemo, useState } from "react"
 
@@ -13,6 +14,7 @@ import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
 import { useAppEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useEndorseApp } from "../../../hooks/xApp/useEndorseApp"
+import { convertUriToUrl } from "../../../utils/uri"
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type Props = {
@@ -24,13 +26,12 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
   const { data: endorsementScore } = useAppEndorsementScore(xApp?.id ?? "")
-  const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const nodesNotEndorsingApp = useMemo(() => {
-    // TODO: Filter by endorsedAppId from nodeToEndorsedApp contract call
-    return nodes?.nodes
-      .filter(node => node.endorsementScore > 0)
+    return userNodesInfo?.nodesManagedByUser
+      .filter(node => node.endorsementScore > 0 && node.endorsedAppId === ethers.ZeroHash)
       .sort((a, b) => Number(b.endorsementScore) - Number(a.endorsementScore))
-  }, [nodes])
+  }, [userNodesInfo])
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
@@ -45,9 +46,17 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   })
 
   const appScore = useMemo(() => Number(endorsementScore ?? 0), [endorsementScore])
-  const newScore =
-    appScore +
-    Number(selectedNodeId ? nodesNotEndorsingApp?.find(node => node.id.toString() === selectedNodeId)?.endorsementScore : 0)
+
+  const selectedNode = useMemo(() => {
+    if (!selectedNodeId || !nodesNotEndorsingApp) return null
+    return nodesNotEndorsingApp.find(node => node.id.toString() === selectedNodeId)
+  }, [selectedNodeId, nodesNotEndorsingApp])
+
+  const selectedNodeScore = useMemo(() => {
+    return Number(selectedNode?.endorsementScore ?? 0)
+  }, [selectedNode])
+
+  const newScore = appScore + selectedNodeScore
 
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.sendTransaction()
@@ -56,7 +65,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const shouldDisplayCooldownAlert = useMemo(() => {
     // TODO: Fetch isXNodeOnCooldown from contract
     return false // TODO: Placeholder
-  }, [account, selectedNodeId, nodesNotEndorsingApp])
+  }, [])
 
   return (
     <BaseModal
@@ -94,11 +103,16 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   p="16px"
                   rounded="8px">
                   <Card.Header p="0">
-                    <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
+                    <Image
+                      src={convertUriToUrl(node?.metadata?.image)}
+                      alt={node?.metadata?.name}
+                      boxSize="62px"
+                      rounded="8px"
+                    />
                   </Card.Header>
 
                   <RadioGroup.Item
-                    value={node.nodeId}
+                    value={node.id.toString()}
                     flex={1}
                     justifyContent="space-between"
                     alignItems="center"
@@ -108,11 +122,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                         {t("Node")}
                       </Text>
                       <Text lineHeight={1.6} lineClamp={1}>
-                        {`${node.name} #${node.nodeId}`}
+                        {`${node.metadata?.name} #${node.id}`}
                       </Text>
                       <Box w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
                         <Text textStyle="xs" _dark={{ color: "#FFFFFFB2" }}>
-                          {t("{{value}} points", { value: node.xNodePoints })}
+                          {t("{{value}} points", { value: node.endorsementScore.toString() })}
                         </Text>
                       </Box>
                     </Card.Body>
