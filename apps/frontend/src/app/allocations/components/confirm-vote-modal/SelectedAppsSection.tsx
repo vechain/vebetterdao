@@ -11,9 +11,17 @@ interface SelectedAppsSectionProps {
   apps: AppWithVotes[]
   allocations: Map<string, number>
   onAllocationChange: (appId: string, percentage: number) => void
+  vot3Balance: { original: string; scaled: string; formatted: string } | undefined
+  isLoadingBalance: boolean
 }
 
-export const SelectedAppsSection = ({ apps, allocations, onAllocationChange }: SelectedAppsSectionProps) => {
+export const SelectedAppsSection = ({
+  apps,
+  allocations,
+  onAllocationChange,
+  vot3Balance,
+  isLoadingBalance,
+}: SelectedAppsSectionProps) => {
   const { t } = useTranslation()
   return (
     <Box>
@@ -31,6 +39,8 @@ export const SelectedAppsSection = ({ apps, allocations, onAllocationChange }: S
             app={app}
             percentage={allocations.get(app.id) ?? 0}
             onPercentageChange={percentage => onAllocationChange(app.id, percentage)}
+            vot3Balance={vot3Balance}
+            isLoadingBalance={isLoadingBalance}
           />
         ))}
       </VStack>

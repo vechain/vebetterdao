@@ -2,14 +2,12 @@
 
 import { Box, HStack, IconButton, Input, InputGroup, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet } from "@vechain/vechain-kit"
 import { Minus, Plus } from "iconoir-react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import type { AppWithVotes } from "../../page"
 
@@ -17,12 +15,18 @@ interface AppAllocationCardProps {
   app: AppWithVotes
   percentage: number
   onPercentageChange: (percentage: number) => void
+  vot3Balance: { original: string; scaled: string; formatted: string } | undefined
+  isLoadingBalance: boolean
 }
 
-export const AppAllocationCard = ({ app, percentage, onPercentageChange }: AppAllocationCardProps) => {
+export const AppAllocationCard = ({
+  app,
+  percentage,
+  onPercentageChange,
+  vot3Balance,
+  isLoadingBalance,
+}: AppAllocationCardProps) => {
   const { t } = useTranslation()
-  const { account } = useWallet()
-  const { data: vot3Balance, isLoading: isLoadingBalance } = useGetVot3Balance(account?.address)
 
   const displayValue = useMemo(() => {
     if (percentage === 0) return ""

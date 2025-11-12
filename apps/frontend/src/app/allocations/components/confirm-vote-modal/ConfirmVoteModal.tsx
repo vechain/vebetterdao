@@ -1,8 +1,11 @@
 "use client"
 
 import { Button, Dialog, Portal, CloseButton, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import type { AppWithVotes } from "../../page"
 
@@ -23,6 +26,9 @@ interface ConfirmVoteModalProps {
 export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
+
+  const { account } = useWallet()
+  const { data: vot3Balance, isLoading: isLoadingBalance } = useGetVot3Balance(account?.address)
 
   // Memoize appIds to prevent unnecessary recreations
   const appIds = useMemo(() => selectedApps.map(app => app.id), [selectedApps])
@@ -94,7 +100,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             {/* Body */}
             <Dialog.Body px={8} pb={4} flex="1" overflowY="auto">
               <VStack gap={4} alignItems="stretch">
-                <VotingPowerSection />
+                <VotingPowerSection vot3Balance={vot3Balance} isLoading={isLoadingBalance} />
 
                 {!isCustomising ? (
                   <>
@@ -108,6 +114,8 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
                       apps={selectedApps}
                       allocations={allocations}
                       onAllocationChange={setAllocation}
+                      vot3Balance={vot3Balance}
+                      isLoadingBalance={isLoadingBalance}
                     />
                   </>
                 )}
