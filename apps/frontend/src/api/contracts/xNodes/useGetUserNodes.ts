@@ -1,6 +1,11 @@
 import { getConfig } from "@repo/config"
-import { useQuery } from "@tanstack/react-query"
-import { StargateNFT__factory, X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
+import {
+  type StargateNFT,
+  StargateNFT__factory,
+  type X2EarnApps,
+  X2EarnApps__factory,
+} from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 
 import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
@@ -22,6 +27,21 @@ type StargateNFTMetadata = {
   }[]
 }
 
+type TokenOverviewTuple = Awaited<ReturnType<StargateNFT["tokensOverview"]>>[number]
+// executeMultipleClausesCall transforms tuples into objects with named properties
+type TokenOverview = {
+  id: TokenOverviewTuple[0]
+  owner: TokenOverviewTuple[1]
+  manager: TokenOverviewTuple[2]
+  levelId: number // Converted from bigint to number at runtime
+}
+
+export type UserNode = TokenOverview & { endorsementScore: bigint; metadata: StargateNFTMetadata | undefined }
+export type UserNodesInfo = {
+  nodes: UserNode[]
+  totalEndorsementScore: Awaited<ReturnType<X2EarnApps["getUsersEndorsementScore"]>>
+}
+
 /**
  * Get the query key for fetching user nodes
  * @param user - The address of the user to check
@@ -35,7 +55,7 @@ export const getUserNodesQueryKey = (user?: string) => ["userNodes", user]
  * @dev Legacy nodes are not supported anymore , the only information we get is if the user still have legacy nodes,
  * if so, we display a banner, but not UI anymore
  */
-export const useGetUserNodes = (user?: string) => {
+export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> => {
   const thor = useThor()
   const { account } = useWallet()
   const userAddress = user ?? account?.address
@@ -95,7 +115,7 @@ export const useGetUserNodes = (user?: string) => {
       const nodesWithPoints = tokensOverview?.map((node, index) => ({
         ...node,
         endorsementScore: nodePoints[index] ?? BigInt(0),
-        metadata: nodeMetadata[index] ?? "",
+        metadata: nodeMetadata[index],
       }))
       const totalEndorsementScore = usersEndorsementScore ?? BigInt(0)
 
