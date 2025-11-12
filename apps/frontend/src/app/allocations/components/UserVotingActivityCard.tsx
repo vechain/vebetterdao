@@ -143,7 +143,7 @@ export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; app
             description="You haven't voted in this round"
           />
         ) : (
-          <Grid gridTemplateColumns="repeat(2,1fr)" rowGap="3" columnGap="8">
+          <Grid gridTemplateColumns="repeat(2,1fr)" rowGap="8" columnGap="3">
             <Card.Root p="4" bg="card.subtle" gap="1">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {"Voting power used"}
