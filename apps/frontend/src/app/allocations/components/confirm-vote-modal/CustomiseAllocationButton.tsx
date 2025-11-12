@@ -1,12 +1,14 @@
 "use client"
 
 import { Button } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 
 interface CustomiseAllocationButtonProps {
   onClick: () => void
 }
 
 export const CustomiseAllocationButton = ({ onClick }: CustomiseAllocationButtonProps) => {
+  const { t } = useTranslation()
   return (
     <Button
       variant="ghost"
@@ -16,7 +18,7 @@ export const CustomiseAllocationButton = ({ onClick }: CustomiseAllocationButton
       justifyContent="center"
       textStyle="md"
       fontWeight="semibold">
-      {"Customise allocation"}
+      {t("Customise allocation")}
     </Button>
   )
 }
