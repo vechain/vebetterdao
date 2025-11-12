@@ -16,6 +16,11 @@ const stargateNFTContractAddress = getConfig().stargateNFTContractAddress as `0x
 const x2EarnAppsAbi = X2EarnApps__factory.abi
 const stargateNFTAbi = StargateNFT__factory.abi
 
+enum NodeType {
+  X = "XNode",
+  ECONOMIC = "Economic Node",
+}
+
 //TODO: Replace by dynamic type inference
 type StargateNFTMetadata = {
   name: string
@@ -36,7 +41,11 @@ type TokenOverview = {
   levelId: number // Converted from bigint to number at runtime
 }
 
-export type UserNode = TokenOverview & { endorsementScore: bigint; metadata: StargateNFTMetadata | undefined }
+export type UserNode = TokenOverview & {
+  endorsementScore: bigint
+  metadata: StargateNFTMetadata | undefined
+  type: NodeType
+}
 export type UserNodesInfo = {
   nodes: UserNode[]
   totalEndorsementScore: Awaited<ReturnType<X2EarnApps["getUsersEndorsementScore"]>>
@@ -81,11 +90,12 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
       })
 
       const nodeIds = tokensOverview?.map(token => token.id.toString())
-      let nodePoints: bigint[] = []
-      let nodeMetadata: StargateNFTMetadata[] = []
+      let nodePointsArray: bigint[] = []
+      let nodeMetadataArray: StargateNFTMetadata[] = []
+      let nodeIsXArray: boolean[] = []
       if (nodeIds?.length > 0) {
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodePoints = await executeMultipleClausesCall({
+        nodePointsArray = await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
@@ -94,6 +104,7 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
             args: [BigInt(nodeId)],
           })),
         })
+
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
         const rawNodeMetadata = await executeMultipleClausesCall({
           thor,
@@ -107,15 +118,28 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
         await Promise.all(
           (rawNodeMetadata as string[])?.map(async metadataUri => {
             const metadata = await getIpfsMetadata<StargateNFTMetadata>(metadataUri)
-            nodeMetadata.push(metadata)
+            nodeMetadataArray.push(metadata)
           }),
         )
+
+        //Get node level info
+        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
+        nodeIsXArray = await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: stargateNFTAbi,
+            address: stargateNFTContractAddress,
+            functionName: "isXToken",
+            args: [BigInt(nodeId)],
+          })),
+        })
       }
 
       const nodesWithPoints = tokensOverview?.map((node, index) => ({
         ...node,
-        endorsementScore: nodePoints[index] ?? BigInt(0),
-        metadata: nodeMetadata[index],
+        type: nodeIsXArray[index] ? NodeType.X : NodeType.ECONOMIC,
+        endorsementScore: nodePointsArray[index] ?? BigInt(0),
+        metadata: nodeMetadataArray[index],
       }))
       const totalEndorsementScore = usersEndorsementScore ?? BigInt(0)
 

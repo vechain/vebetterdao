@@ -2,8 +2,6 @@ import { Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { MinXNodeLevel } from "@/constants/XNode"
-
 import { useNodesEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useNodesEndorsementScore"
 import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
 import { useEndorsementScoreThreshold } from "../../../api/contracts/xApps/hooks/useEndorsementScoreThreshold"
@@ -23,7 +21,6 @@ export const EndorsementPointsBanner = () => {
   }, [nodesEndorsementScore.data, endorsedApps.data, userNodesInfo?.nodes])
   //TODO: Support multiple nodes
   const nodeToDisplay = userNodesInfo?.nodes?.[0]
-  const nodeType = (nodeToDisplay?.id ?? 0) >= MinXNodeLevel ? "XNode" : "Node"
   if (!availablePoints) return null
   return (
     <Stack
@@ -44,7 +41,7 @@ export const EndorsementPointsBanner = () => {
         <Skeleton loading={isLoading}>
           <Heading size="md" color="white">
             {t("As {{nodeType}} holder, you have {{value}} available points to endorse Apps", {
-              nodeType,
+              nodeType: nodeToDisplay?.type,
               value: availablePoints,
             })}
           </Heading>

@@ -2,6 +2,7 @@ import { Card, HStack, Image, Stack, Text, useMediaQuery, VStack } from "@chakra
 import { useTranslation } from "react-i18next"
 
 import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { convertUriToUrl } from "../../../../utils/uri"
 
 export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
@@ -35,7 +36,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
           color="white"
           flexGrow={4}>
           <Image
-            src={xNode?.metadata?.image ?? ""}
+            src={convertUriToUrl(xNode?.metadata?.image ?? "")}
             alt={xNode?.metadata?.name ?? ""}
             w={isAbove800 ? "132px" : "68px"}
             h={isAbove800 ? "132px" : "68px"}
@@ -43,7 +44,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
           />
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
             <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="#FFFFFF80">
-              {"nodeType"} {/** TODO: Get node type */}
+              {xNode?.type}
             </Text>
             <Text color="white" fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
               {xNode?.metadata?.name ?? ""}
