@@ -18,12 +18,12 @@ export const ProfileNodes = ({ address }: { address: string }) => {
         </Card.Header>
         <Card.Body>
           <Skeleton loading={isUserNodesLoading}>
-            {userNodes?.allNodes?.length === 0 ? (
+            {userNodes?.nodes?.length === 0 ? (
               <Text>{t("No nodes found.")}</Text>
             ) : (
               <VStack gap="4" align="stretch">
-                {userNodes?.allNodes?.map(node => (
-                  <NodeCard key={node.nodeId} node={node} isClickable={account?.address === address} />
+                {userNodes?.nodes?.map(node => (
+                  <NodeCard key={node.id.toString()} node={node} isClickable={account?.address === address} />
                 ))}
               </VStack>
             )}

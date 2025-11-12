@@ -19,7 +19,7 @@ import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal
 import { Tooltip } from "@/components/ui/tooltip"
 
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { UserNode, useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
@@ -32,7 +32,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
-  const [selectedNode, setSelectedNode] = useState<UserNode | undefined>(undefined)
+  const [selectedNode, setSelectedNode] = useState(undefined)
 
   const nodesAttachedToGMs = userGMs?.reduce(
     (acc, gm) => {
@@ -44,7 +44,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
     {} as Record<string, string>,
   )
 
-  const attachedNode = userNodes?.allNodes?.find(node => node.nodeId === gm?.nodeIdAttached)
+  const attachedNode = userNodes?.nodes?.find(node => node.id.toString() === gm?.nodeIdAttached?.toString())
 
   const {
     open: isAttachGMToXNodeModalOpen,
@@ -66,25 +66,25 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
-        {!!userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
+        {!!userNodes?.nodes?.length && userNodes?.nodes?.length > 0 && (
           <Card.Root flex={3} variant="primary" maxH={"fit-content"}>
             <Card.Header>
               <Heading textStyle="lg">
-                {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
+                {t("Nodes")} {`(${userNodes?.nodes?.length})`}
               </Heading>
             </Card.Header>
             <Card.Body>
               <VStack align={"stretch"} gap="4">
-                {userNodes?.allNodes
+                {userNodes?.nodes
                   ?.sort((a, b) => {
                     // Sort so that attached node appears first
-                    if (a.nodeId === gm.nodeIdAttached) return -1
-                    if (b.nodeId === gm.nodeIdAttached) return 1
+                    if (a.id.toString() === gm.nodeIdAttached?.toString()) return -1
+                    if (b.id.toString() === gm.nodeIdAttached?.toString()) return 1
                     return 0
                   })
                   ?.map(node => (
                     <Card.Root
-                      key={node.nodeId}
+                      key={node.id}
                       variant="subtle"
                       _hover={{ bg: "card.subtle" }}
                       alignItems="center"
@@ -96,12 +96,12 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                         <Avatar.Root shape="rounded" boxSize="16" borderRadius="0.75rem">
                           <Avatar.Image
                             boxSize="16"
-                            src={node?.image}
-                            alt={node?.name}
+                            src={node?.metadata?.image ?? ""}
+                            alt={node?.metadata?.name}
                             borderRadius="0.75rem"
                             objectFit="contain"
                           />
-                          <Avatar.Fallback name={node?.name} />
+                          <Avatar.Fallback name={node?.metadata?.name ?? ""} />
                         </Avatar.Root>
                       </Card.Header>
 
@@ -113,32 +113,32 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                           textStyle={isAbove800 ? "sm" : "xs"}
                           lineHeight={isAbove800 ? 1.6 : 1.2}
                           lineClamp={isAbove800 ? 1 : undefined}>
-                          {`${node.name} #${node.nodeId}`}
+                          {`${node?.metadata?.name} #${node.id}`}
                         </Text>
                         <Badge w="fit-content" mt="1">
                           <Text textStyle="xs" fontWeight="semibold" _dark={{ color: "#FFFFFFB2" }}>
-                            {t("{{value}} points", { value: node.xNodePoints })}
+                            {t("{{value}} points", { value: node.endorsementScore.toString() })}
                           </Text>
                         </Badge>
                       </Card.Body>
 
                       <Card.Footer p="0">
-                        {attachedNode?.nodeId === node.nodeId ? (
+                        {attachedNode?.id === node.id ? (
                           <Button
                             colorPalette="red"
                             size={isAbove800 ? "sm" : "xs"}
                             onClick={onDetachGMToXNodeModalOpen}>
                             {t("Detach")}
                           </Button>
-                        ) : nodesAttachedToGMs?.[node.nodeId] ? (
+                        ) : nodesAttachedToGMs?.[node.id.toString()] ? (
                           <Tooltip content={t("This node is already attached to another GM")}>
                             <span>
                               <Button
-                                disabled={!!nodesAttachedToGMs?.[node.nodeId]}
+                                disabled={!!nodesAttachedToGMs?.[node.id.toString()]}
                                 variant="secondary"
                                 size={isAbove800 ? "sm" : "xs"}
                                 onClick={() => {
-                                  setSelectedNode(node)
+                                  // setSelectedNode(node)
                                   onAttachGMToXNodeModalOpen()
                                 }}>
                                 {t("Attached")}
@@ -153,7 +153,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                                 variant="secondary"
                                 size={isAbove800 ? "sm" : "xs"}
                                 onClick={() => {
-                                  setSelectedNode(node)
+                                  // setSelectedNode(node)
                                   onAttachGMToXNodeModalOpen()
                                 }}>
                                 {t("Attach")}

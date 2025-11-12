@@ -5,6 +5,7 @@ import { FaChevronRight } from "react-icons/fa"
 
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
+import { convertUriToUrl } from "@/utils/uri"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
@@ -25,7 +26,12 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
         p="16px"
         rounded="8px">
         <Card.Header p="0">
-          <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
+          <Image
+            src={convertUriToUrl(node?.metadata?.image ?? "")}
+            alt={node?.metadata?.name ?? ""}
+            boxSize="62px"
+            rounded="8px"
+          />
         </Card.Header>
         <Card.Body p="0" gap="0">
           {node ? (
@@ -34,7 +40,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                 condition={isClickable}
                 wrapper={({ children }) => (
                   <LinkOverlay asChild>
-                    <NextLink href={`/xnode/${node.nodeId}`}>{children}</NextLink>
+                    <NextLink href={`/xnode/${node.id}`}>{children}</NextLink>
                   </LinkOverlay>
                 )}>
                 <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
@@ -42,7 +48,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                 </Text>
               </ConditionalWrapper>
               <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
-                {`${node.name} #${node.nodeId}`}
+                {`${node.metadata?.name} #${node.id}`}
               </Text>
               <Box
                 w="fit-content"
@@ -52,7 +58,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                 rounded="8px"
                 padding="4px 8px">
                 <Text textStyle={"xs"} lineClamp={1}>
-                  {t("{{value}} points", { value: node.xNodePoints })}
+                  {t("{{value}} points", { value: node.endorsementScore.toString() })}
                 </Text>
               </Box>
             </>
