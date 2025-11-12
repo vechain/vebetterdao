@@ -4,8 +4,12 @@ import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
 import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
 
 import type { AppWithVotes } from "../../../page"
+import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
 
 import { AppCategoryTabs } from "./AppCategoryTabs"
@@ -15,15 +19,18 @@ interface VoteTabProps {
   selectedAppIds: Set<string>
   onToggleApp: (appId: string) => void
   isStuck: boolean
+  hasEnoughVotesAtSnapshot: boolean
 }
 
-export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabProps) {
+export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot }: VoteTabProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const urlSearchQuery = searchParams.get("search") || ""
   const selectedCategory = searchParams.get("category") || "all"
   const isSearchOpen = searchParams.has("search")
+  const { t } = useTranslation()
+  const { data: threshold } = useVotingThreshold()
 
   const handleSearchChange = useCallback(
     (query: string) => {
@@ -61,6 +68,15 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
 
   return (
     <>
+      {selectedAppIds && selectedAppIds.size > 0 && !hasEnoughVotesAtSnapshot && (
+        <AllocationAlertCard
+          status="error"
+          title={t("Not enough voting power to vote")}
+          message={t("You need at least {{threshold}} voting power to participate. Power up your balance!", {
+            threshold: threshold ?? "1",
+          })}
+        />
+      )}
       <InputGroup
         hideFrom="md"
         startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
@@ -82,6 +98,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck }: VoteTabP
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={urlSearchQuery}
+          hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
           tabsListProps={{
             position: "sticky",
             top: "52px",

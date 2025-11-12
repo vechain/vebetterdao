@@ -40,6 +40,7 @@ interface AppCategoryTabsProps {
   onViewAll?: VoidFunction
   initialCategory?: string
   onCategoryChange?: (category: string) => void
+  hasEnoughVotesAtSnapshot?: boolean
 }
 
 export function AppCategoryTabs({
@@ -53,6 +54,7 @@ export function AppCategoryTabs({
   onViewAll,
   initialCategory = "all",
   onCategoryChange,
+  hasEnoughVotesAtSnapshot,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
@@ -125,7 +127,10 @@ export function AppCategoryTabs({
               <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
                 {areAllFilteredAppsSelected ? "Deselect all" : "Select all"}
               </Button>
-              <Button variant="primary" minWidth="36">
+              <Button
+                variant="primary"
+                minWidth="36"
+                disabled={!hasEnoughVotesAtSnapshot && selectedAppIds && selectedAppIds.size > 0}>
                 {selectedAppIds && selectedAppIds.size > 0
                   ? selectedAppIds.size > 1
                     ? `Vote for ${selectedAppIds?.size} Apps`
