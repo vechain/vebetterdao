@@ -63,6 +63,7 @@ const config: HardhatUserConfig = {
         mnemonic: getMnemonic(),
         count: 20,
         path: HDKey.VET_DERIVATION_PATH,
+        accountsBalance: "1000000000000000000000000",
       },
       gas: 10000000,
     },

@@ -116,7 +116,7 @@ export function createGalacticaTestConfig() {
 
     /*
       Level => Percentage Multiplier
-  
+
       2 (Moon) => 10% (1.1x)
       3 (Mercury) => 20% (1.2x)
       4 (Venus) => 50% (1.5x)
@@ -210,6 +210,7 @@ export function createGalacticaTestConfig() {
     ],
 
     // Stargate contracts - contracts will be deployed as mocks on galactica test network
+    STARGATE_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     STARGATE_NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     STARGATE_DELEGATE_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     NODE_MANAGEMENT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",

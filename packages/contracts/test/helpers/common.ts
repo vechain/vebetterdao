@@ -12,6 +12,12 @@ import {
   TimeLock,
   Treasury,
   VOT3,
+  EmissionsV2,
+  GalaxyMemberV5,
+  GalaxyMemberV4,
+  GalaxyMemberV3,
+  GalaxyMemberV1,
+  GalaxyMemberV2,
 } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse, AddressLike } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
@@ -680,7 +686,7 @@ export const waitForBlock = async (blockNumber: number) => {
   }
 }
 
-export const waitForNextCycle = async (emission?: Emissions) => {
+export const waitForNextCycle = async (emission?: Emissions | EmissionsV2) => {
   if (!emission) {
     const { emissions } = await getContractInstances()
     emission = emissions as Emissions
@@ -935,7 +941,7 @@ export const bootstrapAndStartEmissions = async (contractToPassToMethods?: any) 
 export const upgradeNFTtoLevel = async (
   tokenId: number,
   level: number,
-  nft: GalaxyMember,
+  nft: GalaxyMember | GalaxyMemberV1 | GalaxyMemberV2 | GalaxyMemberV3 | GalaxyMemberV4 | GalaxyMemberV5,
   b3tr: B3TR,
   owner: HardhatEthersSigner,
   minter: HardhatEthersSigner,
@@ -949,7 +955,7 @@ export const upgradeNFTtoLevel = async (
 
 export const upgradeNFTtoNextLevel = async (
   tokenId: number,
-  nft: GalaxyMember,
+  nft: GalaxyMember | GalaxyMemberV1 | GalaxyMemberV2 | GalaxyMemberV3 | GalaxyMemberV4 | GalaxyMemberV5,
   b3tr: B3TR,
   owner: HardhatEthersSigner,
   minter: HardhatEthersSigner,

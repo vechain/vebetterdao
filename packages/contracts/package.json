@@ -1,39 +1,52 @@
 {
   "name": "@vechain/vebetterdao-contracts",
   "version": "8.1.0",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "main": "dist/cjs/contracts/index.js",
+  "module": "dist/esm/contracts/index.js",
+  "types": "dist/esm/contracts/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "typechain-types",
+    "artifacts"
   ],
   "license": "MIT",
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/esm/index.d.ts"
+      "import": "./dist/esm/contracts/index.js",
+      "require": "./dist/cjs/contracts/index.js",
+      "types": "./dist/esm/contracts/index.d.ts",
+      "default": "./index.ts"
     },
     "./typechain-types": {
-      "import": "./dist/esm/typechain-types/index.js",
-      "require": "./dist/cjs/typechain-types/index.js",
-      "types": "./dist/esm/typechain-types/index.d.ts"
+      "import": "./dist/esm/contracts/typechain-types/index.js",
+      "require": "./dist/cjs/contracts/typechain-types/index.js",
+      "types": "./dist/esm/contracts/typechain-types/index.d.ts",
+      "default": "./typechain-types/index.ts"
     },
     "./factories/*": {
-      "import": "./dist/esm/typechain-types/factories/contracts/*.js",
-      "require": "./dist/cjs/typechain-types/factories/contracts/*.js",
-      "types": "./dist/esm/typechain-types/factories/contracts/*.d.ts"
+      "import": "./dist/esm/contracts/typechain-types/factories/contracts/*.js",
+      "require": "./dist/cjs/contracts/typechain-types/factories/contracts/*.js",
+      "types": "./dist/esm/contracts/typechain-types/factories/contracts/*.d.ts",
+      "default": "./typechain-types/factories/*"
     },
     "./@openzeppelin/*": {
-      "import": "./dist/esm/typechain-types/factories/@openzeppelin/contracts/*.js",
-      "require": "./dist/cjs/typechain-types/factories/@openzeppelin/contracts/*.js",
-      "types": "./dist/esm/typechain-types/factories/@openzeppelin/contracts/*.d.ts"
+      "import": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/*.js",
+      "require": "./dist/cjs/contracts/typechain-types/factories/@openzeppelin/contracts/*.js",
+      "types": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/*.d.ts",
+      "default": "./typechain-types/factories/@openzeppelin/*"
+    },
+    "./contracts/*": {
+      "import": "./dist/esm/contracts/typechain-types/contracts/*.js",
+      "require": "./dist/cjs/contracts/typechain-types/contracts/*.js",
+      "types": "./dist/esm/contracts/typechain-types/contracts/*.d.ts",
+      "default": "./typechain-types/contracts/*"
     }
   },
   "prepublishOnly": "yarn compile",
   "scripts": {
     "clean": "rm -rf dist artifacts typechain-types cache node_modules",
+    "build": "npx hardhat compile && tsc -b ./tsconfig.esm.json ./tsconfig.cjs.json",
     "test:thor-solo": "npx hardhat test",
     "test:hardhat": "npx hardhat test --network hardhat",
     "test:hardhat:shard": "npx hardhat test --network hardhat --grep \"$SHARD\"",

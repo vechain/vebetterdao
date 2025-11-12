@@ -830,7 +830,7 @@ describe("Galaxy Member - @shard3a", () => {
       expect(await galaxyMemberV2.levelOf(5)).to.equal(1) // Earth
 
       // Let's upgrade gmId 1, owned by otherAccount, to level 2
-      await upgradeNFTtoLevel(1, 2, galaxyMemberV2, b3tr, otherAccount, minterAccount)
+      await upgradeNFTtoLevel(1, 2, galaxyMemberV2 as any, b3tr, otherAccount, minterAccount)
       expect(await galaxyMemberV2.levelOf(1)).to.equal(2) // Moon
 
       // Mint Mjolnir X Node to otherAccount
@@ -3072,7 +3072,7 @@ describe("Galaxy Member - @shard3a", () => {
         expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(0)
 
         // Trying to detach should revert
-        await expect(galaxyMember.connect(owner).detachNode(ownerNodeId, gmId)).to.be.rejected
+        await expect(galaxyMember.connect(owner).detachNode(ownerNodeId, gmId)).to.be.reverted
 
         // Expect GM NFT to be detached from the node
         expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(0)
