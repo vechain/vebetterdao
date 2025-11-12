@@ -23,12 +23,10 @@ export const useConfirmVoteModal = (appIds: string[]) => {
 
     // Add the remainder to the last app to ensure total is exactly 100%
     const remainder = parseFloat((100 - total).toFixed(2))
-    if (remainder > 0 && appIds.length > 0) {
-      const lastAppId = appIds[appIds.length - 1]
-      if (lastAppId) {
-        const finalPercentage = parseFloat((basePercentage + remainder).toFixed(2))
-        map.set(lastAppId, finalPercentage)
-      }
+    if (remainder > 0) {
+      const lastAppId = appIds[appIds.length - 1]!
+      const finalPercentage = parseFloat((basePercentage + remainder).toFixed(2))
+      map.set(lastAppId, finalPercentage)
     }
 
     return map
@@ -54,7 +52,8 @@ export const useConfirmVoteModal = (appIds: string[]) => {
     allocations.forEach(value => {
       total += value
     })
-    return Math.round(total * 100) / 100
+    // Round to 2 decimal places consistently with stored values
+    return parseFloat(total.toFixed(2))
   }, [allocations])
 
   const isValid = useCallback(() => {
