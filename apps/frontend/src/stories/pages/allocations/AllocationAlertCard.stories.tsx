@@ -5,7 +5,7 @@ import { cloneElement } from "react"
 import { AllocationAlertCard } from "@/app/allocations/components/AllocationAlertCard"
 
 const meta = {
-  title: "design-system/components/AllocationAlertCard",
+  title: "pages/allocations/AllocationAlertCard",
   component: AllocationAlertCard,
 } satisfies Meta<typeof AllocationAlertCard>
 
