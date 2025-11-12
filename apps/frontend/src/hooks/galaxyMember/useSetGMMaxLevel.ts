@@ -5,7 +5,7 @@ import { useCallback } from "react"
 import { getGMMaxLevelQueryKey } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { buildClause } from "@/utils/buildClause"
 
-import { useBuildTransaction } from "./useBuildTransaction"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type Props = { maxLevel: number; onSuccess?: () => void }

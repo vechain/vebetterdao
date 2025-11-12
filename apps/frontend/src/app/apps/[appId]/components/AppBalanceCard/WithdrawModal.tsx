@@ -10,7 +10,7 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { BaseModal } from "../../../../../components/BaseModal"
 import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
-import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
+import { useWithdrawAppBalance } from "../../../../../hooks/xApp/useWithdrawAppBalance"
 
 import { PercentageSelectorButtons } from "./components/PercentageSelectorButtons"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"

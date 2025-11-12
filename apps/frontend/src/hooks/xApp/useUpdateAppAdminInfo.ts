@@ -5,13 +5,12 @@ import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
-import { getAppAdminQueryKey } from "../api/contracts/xApps/hooks/useAppAdmin"
-import { getAppCreatorsQueryKey } from "../api/contracts/xApps/hooks/useAppCreators"
-import { getAppModeratorsQueryKey } from "../api/contracts/xApps/hooks/useAppModerators"
-import { getAppRewardDistributorsQueryKey } from "../api/contracts/xApps/hooks/useAppRewardDistributors"
-import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
-
-import { useBuildTransaction } from "./useBuildTransaction"
+import { getAppAdminQueryKey } from "../../api/contracts/xApps/hooks/useAppAdmin"
+import { getAppCreatorsQueryKey } from "../../api/contracts/xApps/hooks/useAppCreators"
+import { getAppModeratorsQueryKey } from "../../api/contracts/xApps/hooks/useAppModerators"
+import { getAppRewardDistributorsQueryKey } from "../../api/contracts/xApps/hooks/useAppRewardDistributors"
+import { getXAppsQueryKey } from "../../api/contracts/xApps/hooks/useXApps"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()

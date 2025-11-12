@@ -5,9 +5,8 @@ import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
-import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
-
-import { useBuildTransaction } from "./useBuildTransaction"
+import { getXAppsQueryKey } from "../../api/contracts/xApps/hooks/useXApps"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 type Props = {

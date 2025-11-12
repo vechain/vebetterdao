@@ -3,9 +3,8 @@ import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2
 import { EnhancedClause } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
-
-import { useBuildTransaction } from "./useBuildTransaction"
+import { getXAppsQueryKey } from "../../api/contracts/xApps/hooks/useXApps"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 type useSubmitAppProps = {

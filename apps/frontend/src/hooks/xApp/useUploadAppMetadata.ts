@@ -6,7 +6,7 @@ import { IMAGE_REQUIREMENTS } from "@/constants/XAppsMedia"
 import { base64ToBlob } from "@/utils/BlobUtils"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 
-import { XAppMetadata } from "../api/contracts/xApps/getXAppMetadata"
+import { XAppMetadata } from "../../api/contracts/xApps/getXAppMetadata"
 
 export type UseUploadAppMetadataReturnValue = {
   metadataUploading: boolean

@@ -12,7 +12,7 @@ import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocation
 import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
 import { useAppEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { useEndorseApp } from "../../../hooks/useEndorseApp"
+import { useEndorseApp } from "../../../hooks/xApp/useEndorseApp"
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type Props = {

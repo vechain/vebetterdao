@@ -5,10 +5,9 @@ import { useCallback, useMemo } from "react"
 
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 
-import { getXAppMetadataQueryKey } from "../api/contracts/xApps/hooks/useXAppMetadata"
-import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
-
-import { useBuildTransaction } from "./useBuildTransaction"
+import { getXAppMetadataQueryKey } from "../../api/contracts/xApps/hooks/useXAppMetadata"
+import { getXAppsQueryKey } from "../../api/contracts/xApps/hooks/useXApps"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 type useUpdateAppDetailsProps = {

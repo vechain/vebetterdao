@@ -6,7 +6,7 @@ import { useCallback, useMemo } from "react"
 import { getUserGMsQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { buildClause } from "@/utils/buildClause"
 
-import { useBuildTransaction } from "./useBuildTransaction"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type Props = { tokenId?: string; onSuccess?: () => void }

@@ -4,11 +4,10 @@ import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
-import { getAppEndorsementScoreQueryKey } from "../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
-import { getEndorsersQueryKey } from "../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
-import { getIsAppUnendorsedQueryKey } from "../api/contracts/xApps/hooks/endorsement/useIsAppUnendorsed"
-
-import { useBuildTransaction } from "./useBuildTransaction"
+import { getAppEndorsementScoreQueryKey } from "../../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
+import { getEndorsersQueryKey } from "../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { getIsAppUnendorsedQueryKey } from "../../api/contracts/xApps/hooks/endorsement/useIsAppUnendorsed"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 type Props = { appId: string; onSuccess?: () => void }

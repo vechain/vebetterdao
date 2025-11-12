@@ -6,10 +6,10 @@ import { Trans, useTranslation } from "react-i18next"
 
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { Clipboard } from "@/components/ui/clipboard"
+import { useNodeEndorsementScore } from "@/hooks/node/useNodeEndorsementScore"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 
-import { useGetNodeManager } from "../../../../../hooks/useNodeManager"
+import { useGetNodeManager } from "../../../../../hooks/node/useNodeManager"
 
 type Props = {
   event: AppEndorsedEvent

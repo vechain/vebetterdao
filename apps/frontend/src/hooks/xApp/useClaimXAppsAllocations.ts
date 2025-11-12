@@ -2,10 +2,10 @@ import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { getHasXAppClaimedQueryKey } from "../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
-import { buildClaimXAppAllocationTx } from "../api/contracts/xAllocationPool/utils/buildClaimXAppAllocationTx"
+import { getHasXAppClaimedQueryKey } from "../../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
+import { buildClaimXAppAllocationTx } from "../../api/contracts/xAllocationPool/utils/buildClaimXAppAllocationTx"
+import { useBuildTransaction } from "../useBuildTransaction"
 
-import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 
 type useClaimAllocationsProps = {

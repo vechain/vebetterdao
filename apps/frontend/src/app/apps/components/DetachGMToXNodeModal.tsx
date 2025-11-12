@@ -8,7 +8,7 @@ import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 import { CustomModalContent } from "../../../components/CustomModalContent"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
-import { useDetachGMFromXNode } from "../../../hooks/useDetachGMFromXNode"
+import { useDetachGMFromXNode } from "../../../hooks/galaxyMember/useDetachGMFromXNode"
 import { useGetLevelAfterDetachingNode } from "../hooks/useGetLevelAfterDetachingNode"
 
 type Props = {

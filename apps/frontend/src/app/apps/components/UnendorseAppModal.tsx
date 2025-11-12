@@ -9,7 +9,7 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { useUnendorseApp } from "../../../hooks/useUnendorseApp"
+import { useUnendorseApp } from "../../../hooks/xApp/useUnendorseApp"
 
 type Props = {
   xNodeId: string

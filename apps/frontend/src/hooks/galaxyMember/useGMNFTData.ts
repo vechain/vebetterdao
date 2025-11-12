@@ -1,12 +1,11 @@
+import { useLevelMultiplier } from "@/api/contracts/galaxyMember/hooks/useLevelMultiplier"
+import { useLevelOfToken } from "@/api/contracts/galaxyMember/hooks/useLevelOfToken"
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 import { useNFTMetadataUri } from "@/api/contracts/galaxyMember/hooks/useNFTMetadataUri"
+import { useIpfsImage } from "@/api/ipfs/hooks/useIpfsImage"
+import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { notFoundImage } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
-
-import { useLevelMultiplier } from "../api/contracts/galaxyMember/hooks/useLevelMultiplier"
-import { useLevelOfToken } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
-import { useIpfsImage } from "../api/ipfs/hooks/useIpfsImage"
-import { useIpfsMetadata } from "../api/ipfs/hooks/useIpfsMetadata"
 
 /**
  * Custom hook to fetch and process GM NFT data

@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query"
 
 import { DEPRECATED_IDS } from "@/types/appDetails"
 
-import { getXAppMetadata } from "../api/contracts/xApps/getXAppMetadata"
-import { XApp } from "../api/contracts/xApps/getXApps"
-import { useXApps } from "../api/contracts/xApps/hooks/useXApps"
-import { useXAppsMetadataBaseUri } from "../api/contracts/xApps/hooks/useXAppsMetadataBaseUri"
+import { getXAppMetadata } from "../../api/contracts/xApps/getXAppMetadata"
+import { XApp } from "../../api/contracts/xApps/getXApps"
+import { useXApps } from "../../api/contracts/xApps/hooks/useXApps"
+import { useXAppsMetadataBaseUri } from "../../api/contracts/xApps/hooks/useXAppsMetadataBaseUri"
 
 export type AppWithoutCategories = XApp & {
   metadata?: {

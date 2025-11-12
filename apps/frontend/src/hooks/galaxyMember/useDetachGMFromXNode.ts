@@ -8,12 +8,11 @@ import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMembe
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { buildClause } from "@/utils/buildClause"
 
-import { getUserGMsQueryKey, useGetUserGMs } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
-import { getNFTMetadataUriQueryKey } from "../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
-import { getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
-
-import { useBuildTransaction } from "./useBuildTransaction"
+import { getUserGMsQueryKey, useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getLevelOfTokenQueryKey } from "../../api/contracts/galaxyMember/hooks/useLevelOfToken"
+import { getNFTMetadataUriQueryKey } from "../../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
+import { getUserNodesQueryKey } from "../../api/contracts/xNodes/useGetUserNodes"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type Props = {

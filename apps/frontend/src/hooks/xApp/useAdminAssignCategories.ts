@@ -6,10 +6,10 @@ import { useCallback, useMemo } from "react"
 
 import { XAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 
-import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+import { getXAppsQueryKey } from "../../api/contracts/xApps/hooks/useXApps"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 import { AppWithoutCategories } from "./useAppsWithoutCategories"
-import { useBuildTransaction } from "./useBuildTransaction"
 import { useUploadAppMetadata } from "./useUploadAppMetadata"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()

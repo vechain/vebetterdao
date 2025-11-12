@@ -27,7 +27,7 @@ import { useGetUserGMs } from "../../../api/contracts/galaxyMember/hooks/useGetU
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { CustomModalContent } from "../../../components/CustomModalContent"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
-import { useAttachGMToXNode } from "../../../hooks/useAttachGMToXNode"
+import { useAttachGMToXNode } from "../../../hooks/galaxyMember/useAttachGMToXNode"
 import { useGetLevelAfterAttachingNode } from "../hooks/useGetLevelAfterAttachingNode"
 
 type Props = {

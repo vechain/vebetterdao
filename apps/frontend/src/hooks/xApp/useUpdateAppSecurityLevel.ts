@@ -4,9 +4,11 @@ import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
-import { APP_SECURITY_LEVELS, getAppSecurityLevelQueryKey } from "../api/contracts/vePassport/hooks/useAppSecurityLevel"
-
-import { useBuildTransaction } from "./useBuildTransaction"
+import {
+  APP_SECURITY_LEVELS,
+  getAppSecurityLevelQueryKey,
+} from "../../api/contracts/vePassport/hooks/useAppSecurityLevel"
+import { useBuildTransaction } from "../useBuildTransaction"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress
