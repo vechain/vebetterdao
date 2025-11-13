@@ -10,8 +10,6 @@ import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import type { AppWithVotes } from "../../page"
 
-import { CustomiseAllocationButton } from "./CustomiseAllocationButton"
-import { EqualVotesButton } from "./EqualVotesButton"
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"
 import { useConfirmVoteModal } from "./useConfirmVoteModal"
@@ -78,7 +76,18 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             <VotingPowerSection
               vot3Balance={vot3Balance}
               isLoading={isLoadingBalance}
-              button={<CustomiseAllocationButton onClick={() => setIsCustomising(true)} />}
+              button={
+                <Button
+                  variant="ghost"
+                  colorPalette="blue"
+                  onClick={() => setIsCustomising(true)}
+                  w="full"
+                  justifyContent="center"
+                  textStyle="md"
+                  fontWeight="semibold">
+                  {t("Customise votes")}
+                </Button>
+              }
             />
             <SelectedAppsPreview apps={selectedApps} />
           </>
@@ -87,7 +96,18 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             <VotingPowerSection
               vot3Balance={vot3Balance}
               isLoading={isLoadingBalance}
-              button={<EqualVotesButton onClick={setEqualAllocations} />}
+              button={
+                <Button
+                  variant="ghost"
+                  colorPalette="blue"
+                  onClick={setEqualAllocations}
+                  w="full"
+                  justifyContent="center"
+                  textStyle="md"
+                  fontWeight="semibold">
+                  {t("Equal votes")}
+                </Button>
+              }
             />
             <SelectedAppsSection
               apps={selectedApps}
