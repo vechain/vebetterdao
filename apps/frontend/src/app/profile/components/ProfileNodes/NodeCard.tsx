@@ -1,4 +1,5 @@
 import { Box, Card, Image, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa"
@@ -17,7 +18,11 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
       <ConditionalWrapper
         condition={!node?.currentUserIsManager}
         wrapper={({ children }) => (
-          <BlurredWrapper title={t("Node not available")} description={t("It's currently managed by someone else")}>
+          <BlurredWrapper
+            title={t("Node managed externally")}
+            description={t("This node is managed by {{address}}. To manage it, open Stargate", {
+              address: humanAddress(node?.manager ?? ""),
+            })}>
             {children}
           </BlurredWrapper>
         )}>

@@ -1563,6 +1563,6 @@
   "Hide proof": "Hide proof",
   "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens": "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens",
   "Send your app's funds received from allocations to your team wallet address.": "Send your app's funds received from allocations to your team wallet address.",
-  "Node not available": "Node not available",
-  "It's currently managed by someone else": "It's currently managed by someone else"
+  "Node managed externally": "Node managed externally",
+  "This node is managed by {{address}}. To manage it, open Stargate": "This node is managed by {{address}}. To manage it, open Stargate"
 }
