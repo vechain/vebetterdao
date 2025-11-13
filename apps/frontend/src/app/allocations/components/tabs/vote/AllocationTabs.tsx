@@ -15,7 +15,7 @@ import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../../page"
 import { ConfirmVoteModal } from "../../confirm-vote-modal/ConfirmVoteModal"
 import { RoundInfoTab } from "../round-info/RoundInfoTab"
 
-import { useAllocationVoting } from "./hooks"
+import { useAllocationVoting } from "./hooks/useAllocationVoting"
 import { VoteTab } from "./VoteTab"
 
 interface AllocationTabsContextType {
