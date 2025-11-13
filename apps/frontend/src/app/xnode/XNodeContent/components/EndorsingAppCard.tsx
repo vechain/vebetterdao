@@ -20,56 +20,56 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
 import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
 import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { convertUriToUrl } from "@/utils/uri"
 
 import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useAppEndorsers } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
-import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
 import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { GenericAlert } from "../../../components/Alert/GenericAlert"
 
 export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const isEndorsingApp = false //TODO: Get if node is endorsing an app
-  const { data: endorsedApps } = useNodesEndorsedApps([node.id.toString()])
-  const endorsedApp = endorsedApps?.[0]?.endorsedApp
+  const isEndorsingApp = node?.isEndorsingApp
+  const endorsedAppId = node?.endorsedAppId
   // get the number of endorsers for the endorsed app
-  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers("") //TODO: Get endorsed app ID
+  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedAppId ?? "")
   // get app status and score
   const {
     score: endorsementScore,
     status: endorsementStatus,
     threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
-  } = useAppEndorsementStatus("") //TODO: Get endorsed app ID
+  } = useAppEndorsementStatus(endorsedAppId ?? "")
 
   // get the last endorsement event for the endorsed app
   const { data: appEndorsedEvents } = useAppEndorsedEvents({
     nodeId: node.id.toString(),
-    appId: "", //TODO: Get endorsed app ID
+    appId: endorsedAppId,
     endorsed: true,
   })
-
+  const { data: appMetadata } = useXAppMetadata(endorsedAppId ?? "")
   const unendorseAppModal = useDisclosure()
-
   const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
   const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    return false //TODO: Get if node is delegated or on cooldown
-  }, [])
+    return node?.isOnCooldown || !node?.currentUserIsManager
+  }, [node?.currentUserIsManager, node?.isOnCooldown])
+
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account?.address && !false //TODO: Get if node is delegated
-  }, [account?.address])
+    return account?.address && !node?.currentUserIsManager
+  }, [account?.address, node?.currentUserIsManager])
 
   return (
     <Card.Root variant="primary" w="full" h="min-content">
@@ -90,10 +90,10 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
           </VStack>
           {shouldDisplayCooldownAlert ? (
             <GenericAlert
-              type={!false ? "warning" : "error"} //TODO: Get if node is on cooldown
+              type={node?.isOnCooldown ? "warning" : "error"}
               isLoading={roundInfoLoading}
               message={
-                false
+                node?.isOnCooldown
                   ? t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
                       roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
                     })
@@ -111,9 +111,15 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
               <VStack align="stretch" gap={6}>
                 <Stack direction={["column", "column", "row"]} justify="space-between">
                   <HStack>
-                    <Image src={endorsedApp?.metadata.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
+                    <Image
+                      src={convertUriToUrl(appMetadata?.logo ?? "")}
+                      alt="endorsed-app"
+                      w="12"
+                      h="12"
+                      rounded="xl"
+                    />
                     <Heading textStyle="lg" fontWeight="semibold">
-                      {endorsedApp?.name}
+                      {appMetadata?.name}
                     </Heading>
                   </HStack>
                   <Flex alignSelf={["flex-start", "flex-start", "center"]}>
@@ -154,7 +160,7 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
                   w="full">
                   <Flex>
                     <EndorsementDetails
-                      appId={""} //TODO: Get endorsed app ID
+                      appId={endorsedAppId}
                       endorsementScore={endorsementScore}
                       endorsementStatus={endorsementStatus}
                       endorsementThreshold={endorsementThreshold}
@@ -180,17 +186,16 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
               bg="transparent"
               icon={<Icon as={UilSearch} boxSize={{ base: "16", md: "24" }} />}
               title={t("You’re not endorsing any app")}
-              //TODO: Get if node is delegator
               description={
-                false //TODO: Get if node is delegator
+                node?.currentUserIsManager
                   ? t(
-                      "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
-                    )
-                  : t(
                       "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
                     )
+                  : t(
+                      "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
+                    )
               }>
-              {!false && ( //TODO: Get if node is delegator
+              {!node?.currentUserIsManager && (
                 <Button variant="primary" asChild mt={4} w={["full", "full", "auto"]}>
                   <NextLink href="/apps">{t("Browse apps")}</NextLink>
                 </Button>
