@@ -11,7 +11,7 @@ import { RoundEarnings } from "@/app/allocations/history/page"
 import { useStickyState } from "@/hooks/useStickyState"
 
 import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../../page"
-import { ConfirmVoteModal } from "../../confirm-vote-modal"
+import { ConfirmVoteModal } from "../../confirm-vote-modal/ConfirmVoteModal"
 import { RoundInfoTab } from "../round-info/RoundInfoTab"
 
 import { VoteTab } from "./VoteTab"
