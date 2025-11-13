@@ -23,7 +23,7 @@ export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
       modalContentProps={{ rounded: "xl", maxW: "lg" }}>
       <VStack gap={6} w="full">
         <VStack gap={2} textAlign="center">
-          <Image src="/assets/3d-illustrations/3d-fist.webp" alt="Illustration 3d Fist" width="80" height="80" />
+          <Image src="/assets/3d-illustrations/node.webp" alt="Illustration 3d Fist" width="80" height="80" />
           <Text textStyle="xl" fontWeight="bold">
             {t("Migrate your Node NFT before December 2")}
           </Text>

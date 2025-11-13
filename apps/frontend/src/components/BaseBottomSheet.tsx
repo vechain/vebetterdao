@@ -1,7 +1,6 @@
-import { Box, VisuallyHidden } from "@chakra-ui/react"
-import { Drawer } from "vaul"
-
-import { useColorModeValue } from "@/components/ui/color-mode"
+import { Box, Drawer, Portal, VisuallyHidden } from "@chakra-ui/react"
+import { useDrag } from "@use-gesture/react"
+import { useRef, useState } from "react"
 
 type Props = {
   isOpen: boolean
@@ -11,8 +10,11 @@ type Props = {
   ariaTitle: string
   ariaDescription: string
   isDismissable?: boolean
-  customBgColor?: string
 }
+
+const DRAG_THRESHOLD = 150
+const VELOCITY_THRESHOLD = 0.5
+
 export const BaseBottomSheet = ({
   isOpen,
   onClose,
@@ -20,67 +22,79 @@ export const BaseBottomSheet = ({
   ariaTitle = "BottomSheet",
   ariaDescription,
   isDismissable = true,
-  customBgColor,
 }: Props) => {
-  const bgColor = useColorModeValue("#F9FAFB", "#1A1A1A")
+  const [dragY, setDragY] = useState(0)
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  const bind = useDrag(
+    ({ down, movement: [, my], velocity: [, vy], direction: [, dy] }) => {
+      if (!isDismissable) return
+
+      if (down && my > 0) {
+        setDragY(my)
+      } else {
+        if (my > DRAG_THRESHOLD || (vy > VELOCITY_THRESHOLD && dy > 0)) {
+          onClose()
+        }
+        setDragY(0)
+      }
+    },
+    {
+      from: () => [0, dragY],
+      filterTaps: true,
+      axis: "y",
+      bounds: { top: 0 },
+    },
+  )
+
   return (
     <Drawer.Root
-      dismissible={isDismissable}
-      shouldScaleBackground
-      repositionInputs={false}
+      placement="bottom"
+      closeOnInteractOutside={isDismissable}
       open={isOpen}
-      onOpenChange={open => {
-        if (!open) {
+      onOpenChange={e => {
+        if (!e.open) {
           onClose()
         }
       }}>
-      <Drawer.Portal>
-        <Drawer.Overlay
-          style={{
-            zIndex: 3,
-            position: "fixed",
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.50)",
-          }}
-        />
-        <Drawer.Content
-          aria-description={ariaDescription}
-          aria-describedby={ariaTitle}
-          style={{
-            zIndex: 3,
-            backgroundColor: customBgColor ?? bgColor,
-            borderRadius: "10px 10px 0 0",
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "auto", // Let the content define the height initially
-            maxHeight: "90vh", // Limit to a maximum of 90% of the viewport height
-            overflow: "hidden", // Prevent content from overflowing out of the drawer
-            display: "flex",
-            flexDirection: "column",
-          }}>
-          <VisuallyHidden>
-            <Drawer.Title>{ariaTitle}</Drawer.Title>
-          </VisuallyHidden>
-
-          {/* Scrollable content area */}
-          <div
+      <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content
+            ref={contentRef}
+            aria-description={ariaDescription}
+            bg="bg.primary"
+            borderTopRadius="10px"
+            h="auto"
+            maxH="90vh"
+            overflow="hidden"
+            display="flex"
+            flexDirection="column"
             style={{
-              backgroundColor: customBgColor ?? bgColor,
-              borderRadius: "10px 10px 0 0",
-              flex: 1,
-              overflowY: "auto", // Only scroll if content overflows
-              padding: "1rem",
-            }}>
-            <Box mx={"auto"} w={"34px"} h={"5px"} bg={"#D7D6D4"} mb={4} rounded={"full"} />
-            {children}
-          </div>
-        </Drawer.Content>
-      </Drawer.Portal>
+              transform: `translateY(${dragY}px)`,
+              transition: dragY === 0 ? "transform 0.2s ease-out" : "none",
+            }}
+            {...(isDismissable ? bind() : {})}>
+            <VisuallyHidden>
+              <Drawer.Title>{ariaTitle}</Drawer.Title>
+            </VisuallyHidden>
+
+            <Drawer.Body flex={1} overflowY="auto" p={4} display="flex" flexDirection="column">
+              <Box
+                mx="auto"
+                w="34px"
+                h="5px"
+                bg="#D7D6D4"
+                mb={4}
+                rounded="full"
+                cursor={isDismissable ? "grab" : "default"}
+                _active={isDismissable ? { cursor: "grabbing" } : {}}
+              />
+              {children}
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
     </Drawer.Root>
   )
 }

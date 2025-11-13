@@ -49,7 +49,7 @@ export const LightMode = () => (
 )
 
 export const DarkMode = () => cloneElement(<LightMode />)
-DarkMode.globals = { theme: "dark", viewport: { value: "responsive" } }
+DarkMode.globals = { theme: "dark", viewport: { value: "desktop" } }
 
 export const MobileLightMode = () => cloneElement(<LightMode />)
 MobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }
@@ -67,7 +67,7 @@ export const ActionBannersLightMode = () => (
 )
 
 export const ActionBannersDarkMode = () => cloneElement(<ActionBannersLightMode />)
-ActionBannersDarkMode.globals = { theme: "dark", viewport: { value: "responsive" } }
+ActionBannersDarkMode.globals = { theme: "dark", viewport: { value: "desktop" } }
 
 export const ActionBannersMobileLightMode = () => cloneElement(<ActionBannersLightMode />)
 ActionBannersMobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }
@@ -84,7 +84,7 @@ export const CreatorBannersLightMode = () => (
 )
 
 export const CreatorBannersDarkMode = () => cloneElement(<CreatorBannersLightMode />)
-CreatorBannersDarkMode.globals = { theme: "dark", viewport: { value: "responsive" } }
+CreatorBannersDarkMode.globals = { theme: "dark", viewport: { value: "desktop" } }
 
 export const CreatorBannersMobileLightMode = () => cloneElement(<CreatorBannersLightMode />)
 CreatorBannersMobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }
@@ -100,7 +100,7 @@ export const AnnouncementBannersLightMode = () => (
 )
 
 export const AnnouncementBannersDarkMode = () => cloneElement(<AnnouncementBannersLightMode />)
-AnnouncementBannersDarkMode.globals = { theme: "dark", viewport: { value: "responsive" } }
+AnnouncementBannersDarkMode.globals = { theme: "dark", viewport: { value: "desktop" } }
 
 export const AnnouncementBannersMobileLightMode = () => cloneElement(<AnnouncementBannersLightMode />)
 AnnouncementBannersMobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }
@@ -116,7 +116,7 @@ export const StargateAnnouncementsLightMode = () => (
 )
 
 export const StargateAnnouncementsDarkMode = () => cloneElement(<StargateAnnouncementsLightMode />)
-StargateAnnouncementsDarkMode.globals = { theme: "dark", viewport: { value: "responsive" } }
+StargateAnnouncementsDarkMode.globals = { theme: "dark", viewport: { value: "desktop" } }
 
 export const StargateAnnouncementsMobileLightMode = () => cloneElement(<StargateAnnouncementsLightMode />)
 StargateAnnouncementsMobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }

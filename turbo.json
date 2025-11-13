@@ -178,6 +178,11 @@
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "outputs": ["dist/**", "artifacts/**", "typechain-types/**", "cache/**"]
     },
+    "compile:slither": {
+      "cache": true,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": ["dist/**", "artifacts/**", "typechain-types/**", "cache/**"]
+    },
     "deploy": {
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
     },
