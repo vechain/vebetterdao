@@ -131,10 +131,10 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
               borderTopWidth="1px"
               borderColor="border.secondary"
               flexShrink={0}>
-              <Button variant={"secondary"} onClick={handleCloseModal} flex={1}>
+              <Button variant="secondary" onClick={handleCloseModal} flex={1}>
                 {t("Cancel")}
               </Button>
-              <Button variant={"primary"} onClick={handleConfirm} disabled={!canSubmit} flex={1}>
+              <Button variant="primary" onClick={handleConfirm} disabled={!canSubmit} flex={1}>
                 {t("Vote")}
               </Button>
             </Dialog.Footer>
