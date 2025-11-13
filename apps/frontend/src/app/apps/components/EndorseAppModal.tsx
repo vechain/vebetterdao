@@ -63,9 +63,9 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   }, [endorseAppMutation])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    // TODO: Fetch isXNodeOnCooldown from contract
-    return false // TODO: Placeholder
-  }, [])
+    const selectedNode = nodesNotEndorsingApp?.find(node => node.id.toString() === selectedNodeId)
+    return account?.address && selectedNode && !selectedNode?.isOnCooldown
+  }, [account, selectedNodeId, nodesNotEndorsingApp])
 
   return (
     <BaseModal
