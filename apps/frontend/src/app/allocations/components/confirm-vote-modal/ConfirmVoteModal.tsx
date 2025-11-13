@@ -1,10 +1,11 @@
 "use client"
 
-import { Button, Dialog, Portal, CloseButton, VStack } from "@chakra-ui/react"
+import { Button, VStack, HStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { Modal } from "@/components/Modal"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import type { AppWithVotes } from "../../page"
@@ -67,80 +68,54 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
   }, [onClose])
 
   return (
-    <Dialog.Root
-      open={isOpen}
-      onOpenChange={details => {
-        if (!details.open) {
-          handleCloseModal()
-        }
+    <Modal
+      isOpen={isOpen}
+      onClose={handleCloseModal}
+      title={t("Confirm your vote")}
+      showCloseButton={true}
+      showLogo={false}
+      modalContentProps={{
+        maxH: "90vh",
+        display: "flex",
+        flexDirection: "column",
       }}
-      size="lg"
-      trapFocus={false}>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content rounded="2xl" maxH="90vh" display="flex" flexDirection="column">
-            {/* Header */}
-            <Dialog.Header
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              px={8}
-              py={6}
-              position="relative"
-              flexShrink={0}>
-              <Dialog.Title textStyle="xl" fontWeight="bold">
-                {t("Confirm your vote")}
-              </Dialog.Title>
-              <Dialog.CloseTrigger asChild position="absolute" right={6} top="50%" transform="translateY(-50%)">
-                <CloseButton size="md" />
-              </Dialog.CloseTrigger>
-            </Dialog.Header>
-
-            {/* Body */}
-            <Dialog.Body px={8} pb={4} flex="1" overflowY="auto">
-              <VStack gap={4} alignItems="stretch">
-                <VotingPowerSection vot3Balance={vot3Balance} isLoading={isLoadingBalance} />
-
-                {!isCustomising ? (
-                  <>
-                    <CustomiseAllocationButton onClick={handleCustomise} />
-                    <SelectedAppsPreview apps={selectedApps} />
-                  </>
-                ) : (
-                  <>
-                    <EqualVotesButton onClick={handleEqualVotes} />
-                    <SelectedAppsSection
-                      apps={selectedApps}
-                      allocations={allocations}
-                      onAllocationChange={setAllocation}
-                      vot3Balance={vot3Balance}
-                      isLoadingBalance={isLoadingBalance}
-                    />
-                  </>
-                )}
-              </VStack>
-            </Dialog.Body>
-
-            {/* Footer */}
-            <Dialog.Footer
-              display="flex"
-              gap={4}
-              px={8}
-              py={6}
-              borderTopWidth="1px"
-              borderColor="border.secondary"
-              flexShrink={0}>
-              <Button variant="secondary" onClick={handleCloseModal} flex={1}>
-                {t("Cancel")}
-              </Button>
-              <Button variant="primary" onClick={handleConfirm} disabled={!canSubmit} flex={1}>
-                {t("Vote")}
-              </Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+      footer={
+        <HStack gap={4} w="full">
+          <Button variant="secondary" onClick={handleCloseModal} flex={1}>
+            {t("Cancel")}
+          </Button>
+          <Button variant="primary" onClick={handleConfirm} disabled={!canSubmit} flex={1}>
+            {t("Vote")}
+          </Button>
+        </HStack>
+      }>
+      <VStack gap={4} alignItems="stretch">
+        {!isCustomising ? (
+          <>
+            <VotingPowerSection
+              vot3Balance={vot3Balance}
+              isLoading={isLoadingBalance}
+              button={<CustomiseAllocationButton onClick={handleCustomise} />}
+            />
+            <SelectedAppsPreview apps={selectedApps} />
+          </>
+        ) : (
+          <>
+            <VotingPowerSection
+              vot3Balance={vot3Balance}
+              isLoading={isLoadingBalance}
+              button={<EqualVotesButton onClick={handleEqualVotes} />}
+            />
+            <SelectedAppsSection
+              apps={selectedApps}
+              allocations={allocations}
+              onAllocationChange={setAllocation}
+              vot3Balance={vot3Balance}
+              isLoadingBalance={isLoadingBalance}
+            />
+          </>
+        )}
+      </VStack>
+    </Modal>
   )
 }

@@ -43,9 +43,9 @@ export const useConfirmVoteModal = (appIds: string[]) => {
     })
   }, [])
 
-  const setEqualAllocations = useCallback(() => {
+  const setEqualAllocations = () => {
     setAllocations(getEqualDistribution())
-  }, [getEqualDistribution])
+  }
 
   const getTotalPercentage = useCallback(() => {
     let total = 0

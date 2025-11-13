@@ -1,35 +1,44 @@
 "use client"
 
-import { Box, HStack, Icon, Skeleton, Text } from "@chakra-ui/react"
+import { Card, Center, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { Flash } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 
 interface VotingPowerSectionProps {
   vot3Balance: { original: string; scaled: string; formatted: string } | undefined
   isLoading: boolean
+  button?: React.ReactNode
 }
 
-export const VotingPowerSection = ({ vot3Balance, isLoading }: VotingPowerSectionProps) => {
+export const VotingPowerSection = ({ vot3Balance, isLoading, button }: VotingPowerSectionProps) => {
   const { t } = useTranslation()
 
   // Use the pre-formatted value from the hook
   const formatted = vot3Balance?.formatted ?? "0"
 
   return (
-    <Box bg="bg.subtle" borderRadius="xl" p={4} borderWidth="1px" borderColor="border.primary">
-      <HStack justify="space-between" align="center">
-        <HStack gap={2}>
-          <Icon as={Flash} boxSize={4} color="text.subtle" />
-          <Text textStyle="sm" color="text.subtle" fontWeight="medium">
-            {t("Voting Power")}
-          </Text>
+    <Card.Root variant="subtle" p={4}>
+      <VStack gap={3.5} alignItems="stretch">
+        <HStack
+          justify="space-between"
+          align="center"
+          pb={button ? 4 : 0}
+          borderBottomWidth={button ? "1px" : "0"}
+          borderColor="border.secondary">
+          <HStack gap={1}>
+            <Icon as={Flash} boxSize={4} color="text.subtle" />
+            <Text textStyle="s" color="text.subtle" fontWeight="semibold" lineHeight="16px">
+              {t("Voting Power")}
+            </Text>
+          </HStack>
+          <Skeleton loading={isLoading}>
+            <Text textStyle="md" fontWeight="semibold" lineHeight="24px" textAlign="center">
+              {formatted}
+            </Text>
+          </Skeleton>
         </HStack>
-        <Skeleton loading={isLoading}>
-          <Text textStyle="lg" fontWeight="semibold">
-            {formatted}
-          </Text>
-        </Skeleton>
-      </HStack>
-    </Box>
+        {button && <Center>{button}</Center>}
+      </VStack>
+    </Card.Root>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Circle, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Circle, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { Check } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 
@@ -16,22 +16,16 @@ export const SelectedAppsPreview = ({ apps }: SelectedAppsPreviewProps) => {
   const { t } = useTranslation()
   return (
     <VStack gap={3} alignItems="stretch">
-      <Text textStyle="md" fontWeight="semibold" display="flex" justifyContent="space-between">
-        <span>{t("Selected apps")}</span>
-        <Text as="span" color="text.subtle" textStyle="sm" fontWeight="normal">
+      <HStack justifyContent="space-between">
+        <Text textStyle="md" fontWeight="semibold">
+          {t("Selected apps")}
+        </Text>
+        <Text color="text.subtle" textStyle="sm" fontWeight="normal">
           {apps.length} {apps.length === 1 ? t("app") : t("apps")}
         </Text>
-      </Text>
+      </HStack>
 
-      <Box
-        bg="bg.subtle"
-        borderRadius="xl"
-        p={6}
-        borderWidth="1px"
-        borderColor="border.primary"
-        display="flex"
-        justifyContent="center"
-        alignItems="center">
+      <Card.Root variant="subtle" p={6} display="flex" justifyContent="center" alignItems="center">
         <HStack gap={3} justifyContent="center" flexWrap="wrap">
           {apps.map(app => (
             <Box key={app.id} position="relative">
@@ -49,7 +43,7 @@ export const SelectedAppsPreview = ({ apps }: SelectedAppsPreviewProps) => {
             </Box>
           ))}
         </HStack>
-      </Box>
+      </Card.Root>
     </VStack>
   )
 }
