@@ -33,8 +33,9 @@ export const EndorsementDetails = ({
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const yourScore = useMemo(() => {
     return (
-      userNodes?.nodesManagedByUser?.find((node: UserNode) => compareAddresses(node.endorsedAppId ?? "", appId ?? ""))
-        ?.endorsementScore ?? BigInt(0)
+      userNodes?.nodesManagedByUser
+        ?.find((node: UserNode) => compareAddresses(node.endorsedAppId ?? "", appId ?? ""))
+        ?.endorsementScore?.toString() ?? BigInt(0)?.toString()
     )
   }, [userNodes, appId])
   const STATUS_CONFIG = useXAppStatusConfig()
