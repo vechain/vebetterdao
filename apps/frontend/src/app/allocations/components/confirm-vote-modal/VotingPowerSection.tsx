@@ -24,8 +24,7 @@ export const VotingPowerSection = ({ vot3Balance, isLoading, button }: VotingPow
           align="center"
           pb={button ? 4 : 0}
           borderBottomWidth={button ? "1px" : "0"}
-          borderColor="border.secondary"
-          _hover={{ borderColor: "border.primary" }}>
+          borderColor="borders.primary">
           <HStack gap={1}>
             <Icon as={Flash} boxSize={4} color="text.subtle" />
             <Text textStyle="sm" color="text.subtle" fontWeight="semibold">
