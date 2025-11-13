@@ -1,18 +1,19 @@
 import { Text, HStack, VStack, Box, Popover, Skeleton, Portal } from "@chakra-ui/react"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { HiDotsVertical } from "react-icons/hi"
 
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { AddressIcon } from "@/components/AddressIcon"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/node/useNodeEndorsementScore"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 
 type Props = {
   appId: string
@@ -37,8 +38,11 @@ export const EndorsersItem = ({
   const { t } = useTranslation()
   const router = useRouter()
   const { data: userNodes, isLoading: endorserNodesLoading } = useGetUserNodes(endorserAddress)
-  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
-  const endorserNodeId = userNodes?.nodes?.find(node => node.id)?.id.toString()
+  const endorserNodeId = useMemo(() => {
+    return userNodes?.nodesManagedByUser
+      ?.find((node: UserNode) => compareAddresses(node.endorsedAppId ?? "", appId ?? ""))
+      ?.id.toString()
+  }, [userNodes, appId])
   const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId ?? "")
   // Find the first element in events (ie most recent) where the endorser endorsed the app
   const lastEndorsementEvent = endorsementEvents.find(event => event.nodeId === endorserNodeId && event.endorsed)

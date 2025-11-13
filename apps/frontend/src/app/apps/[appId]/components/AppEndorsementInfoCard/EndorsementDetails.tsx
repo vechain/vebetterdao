@@ -1,7 +1,9 @@
 import { HStack, Text, VStack, Skeleton } from "@chakra-ui/react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useGetUserNodes } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
 import { XAppStatus } from "../../../../../types/appDetails"
 import { useXAppStatusConfig } from "../../hooks/useXAppStatusConfig"
 
@@ -29,8 +31,12 @@ export const EndorsementDetails = ({
 }: Props) => {
   const { t } = useTranslation()
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
-  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
-  const yourScore = userNodes?.nodes?.find((node: any) => false)?.endorsementScore // TODO: Placeholder
+  const yourScore = useMemo(() => {
+    return (
+      userNodes?.nodesManagedByUser?.find((node: UserNode) => compareAddresses(node.endorsedAppId ?? "", appId ?? ""))
+        ?.endorsementScore ?? BigInt(0)
+    )
+  }, [userNodes, appId])
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus] ?? { color: "#6A6A6A" }
   return (

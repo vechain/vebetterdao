@@ -19,7 +19,7 @@ import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal
 import { Tooltip } from "@/components/ui/tooltip"
 
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
@@ -29,7 +29,7 @@ import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
 export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
   const [selectedNode, setSelectedNode] = useState(undefined)
@@ -44,7 +44,9 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
     {} as Record<string, string>,
   )
 
-  const attachedNode = userNodes?.nodes?.find(node => node.id.toString() === gm?.nodeIdAttached?.toString())
+  const attachedNode = userNodesInfo?.nodesManagedByUser?.find(
+    node => node.id.toString() === gm?.nodeIdAttached?.toString(),
+  )
 
   const {
     open: isAttachGMToXNodeModalOpen,
@@ -66,23 +68,23 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
-        {!!userNodes?.nodes?.length && userNodes?.nodes?.length > 0 && (
+        {!!userNodesInfo?.nodesManagedByUser?.length && userNodesInfo?.nodesManagedByUser?.length > 0 && (
           <Card.Root flex={3} variant="primary" maxH={"fit-content"}>
             <Card.Header>
               <Heading textStyle="lg">
-                {t("Nodes")} {`(${userNodes?.nodes?.length})`}
+                {t("Nodes")} {`(${userNodesInfo?.nodesManagedByUser?.length})`}
               </Heading>
             </Card.Header>
             <Card.Body>
               <VStack align={"stretch"} gap="4">
-                {userNodes?.nodes
+                {userNodesInfo?.nodesManagedByUser
                   ?.sort((a, b) => {
                     // Sort so that attached node appears first
                     if (a.id.toString() === gm.nodeIdAttached?.toString()) return -1
                     if (b.id.toString() === gm.nodeIdAttached?.toString()) return 1
                     return 0
                   })
-                  ?.map(node => (
+                  ?.map((node: UserNode) => (
                     <Card.Root
                       key={node.id}
                       variant="subtle"

@@ -14,9 +14,9 @@ type Props = {
 }
 export const XNodeContent = ({ xNodeId }: Props) => {
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
-  const isXNodeHolder = userNodesInfo?.nodes?.length && userNodesInfo?.nodes?.length > 0
+  const isXNodeHolder = userNodesInfo?.nodesManagedByUser?.length && userNodesInfo?.nodesManagedByUser?.length > 0
   const router = useRouter()
-  const xNode = userNodesInfo?.nodes?.find(node => node.id.toString() === xNodeId)
+  const xNode = userNodesInfo?.nodesManagedByUser?.find(node => node.id.toString() === xNodeId)
   // Redirect to the dashboard if the user is not an X-Node holder
   useEffect(() => {
     if (!isXNodeHolder && !isUserNodesLoading) {

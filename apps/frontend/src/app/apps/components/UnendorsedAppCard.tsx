@@ -14,6 +14,7 @@ import {
   LinkOverlay,
 } from "@chakra-ui/react"
 import { UilAngleRight } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -22,7 +23,7 @@ import NewAppIcon from "@/components/Icons/svg/new-app.svg"
 
 import { useAppEndorsementStatus } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
 const notFoundImage = "/assets/images/image-not-found.webp"
 import { useXAppStatusConfig } from "../[appId]/hooks/useXAppStatusConfig"
@@ -34,11 +35,10 @@ type Props = {
 }
 export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props) => {
   const { t } = useTranslation()
-  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(appId)
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
-  // TODO: Fetch endorsedAppId from nodeToEndorsedApp contract call
-  const nodeEndorsingApp = userNodes?.nodes?.find((node: any) => false) // TODO: Placeholder until endorsedAppId is fetched
+
   const {
     score: endorsementScore,
     threshold: endorsementThreshold,
@@ -46,12 +46,15 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(appId)
   const STATUS_CONFIG = useXAppStatusConfig()
-  const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
 
+  const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
+  const nodeEndorsingApp = userNodes?.nodesManagedByUser?.find((node: UserNode) =>
+    compareAddresses(node.endorsedAppId ?? "", appId ?? ""),
+  )
   const isUserAppEndorser = useMemo(() => {
-    if (!appId) return false
-    // TODO: Determine isXNodeHolder status
-    return false // TODO: Placeholder
+    if (!appId || !nodeEndorsingApp) return false
+    //If there's a node endorsing the app, then the user is endorsing the app
+    return !!nodeEndorsingApp
   }, [appId, nodeEndorsingApp])
 
   return (

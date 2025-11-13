@@ -2,7 +2,7 @@ import { Card, VStack, Heading, Text, Skeleton } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
 import { NodeCard } from "./NodeCard"
 
@@ -18,11 +18,11 @@ export const ProfileNodes = ({ address }: { address: string }) => {
         </Card.Header>
         <Card.Body>
           <Skeleton loading={isUserNodesLoading}>
-            {userNodes?.nodes?.length === 0 ? (
+            {userNodes?.nodesManagedByUser?.length === 0 ? (
               <Text>{t("No nodes found.")}</Text>
             ) : (
               <VStack gap="4" align="stretch">
-                {userNodes?.nodes?.map(node => (
+                {userNodes?.nodesManagedByUser?.map((node: UserNode) => (
                   <NodeCard key={node.id.toString()} node={node} isClickable={account?.address === address} />
                 ))}
               </VStack>

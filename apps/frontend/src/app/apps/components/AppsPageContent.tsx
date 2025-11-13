@@ -8,7 +8,7 @@ import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorse
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
 import { useSortXappAlphabetically } from "../../../api/contracts/xApps/hooks/useSortXappAlphabetically"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { AppsBanner } from "../../../components/Banners/AppsBanner"
 import { JoinB3TRAppsBanner } from "../../../components/Banners/JoinB3TRAppsBanner"
 
@@ -30,9 +30,9 @@ export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-  const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: endorsedApps, isLoading: isEndorsedAppsLoading } = useNodesEndorsedApps(
-    nodes?.nodes?.map((node: any) => node.id.toString()) ?? [],
+    userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => node.id.toString()) ?? [],
   )
   const isXNodeLoading = isUserNodesLoading || isEndorsedAppsLoading
   const isEndorsingApp = !!endorsedApps?.length && endorsedApps?.length > 0

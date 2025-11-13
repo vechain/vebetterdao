@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 import { useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { useGetUserNodes } from "../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useRetrieveProfilIdentity } from "../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
 import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
@@ -35,7 +35,7 @@ export const GmNFTAndNodeCard = () => {
   } = useDisclosure()
   const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
   const isLoading = isUserGMsLoading || isNodesLoading
-  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodes?.length === 0
+  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodesManagedByUser?.length === 0
 
   const totalPoints = userNodesInfo?.totalEndorsementScore?.toString() ?? "0"
 
@@ -98,13 +98,13 @@ export const GmNFTAndNodeCard = () => {
                 />
               )}
 
-              {userNodesInfo?.nodes && userNodesInfo?.nodes?.length > 0 ? (
+              {userNodesInfo?.nodesManagedByUser && userNodesInfo?.nodesManagedByUser?.length > 0 ? (
                 <GmCard
-                  title={`${typeof userNodesInfo?.nodes?.[0]?.metadata === "object" ? userNodesInfo?.nodes?.[0]?.metadata?.name : ""} #${userNodesInfo?.nodes?.[0]?.id?.toString() || ""}`}
+                  title={`${userNodesInfo?.nodesManagedByUser?.[0]?.metadata?.name ?? ""} #${userNodesInfo?.nodesManagedByUser?.[0]?.id?.toString() || ""}`}
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
-                  imagesIpfsUri={userNodesInfo?.nodes?.map(node =>
-                    typeof node?.metadata === "object" ? (node?.metadata?.image ?? "") : "",
+                  imagesIpfsUri={userNodesInfo?.nodesManagedByUser?.map(
+                    (node: UserNode) => node?.metadata?.image ?? "",
                   )}
                   href={`/profile?tab=nodes`}
                 />

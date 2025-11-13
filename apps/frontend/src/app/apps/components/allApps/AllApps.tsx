@@ -12,14 +12,14 @@ import {
   CloseButton,
 } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
+import { ethers } from "ethers"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { FILTER_ACTIVE_APPS } from "@/types/appDetails"
 
 import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
-import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
-import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { usePagination } from "../../../../hooks/usePagination"
 import { useAppsFiltering } from "../../hooks/useAppsFiltering"
 import { useAppsSearch } from "../../hooks/useAppsSearch"
@@ -51,9 +51,11 @@ export const AllApps = ({
   headingComponent,
 }: Props) => {
   const { t } = useTranslation()
-  const { data: nodes } = useGetUserNodes()
-  const { data: endorsedApps } = useNodesEndorsedApps(nodes?.nodes?.map((node: any) => node.id.toString()) ?? [])
-  const isEndorsingApp = endorsedApps?.length && endorsedApps?.length > 0
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
+
+  const isUserEndorsingAnyApp = useMemo(() => {
+    return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsedAppId !== ethers.ZeroHash)
+  }, [userNodesInfo])
 
   const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange } = useAppsSorting(
     currentActiveApps,
@@ -71,7 +73,7 @@ export const AllApps = ({
   const itemsPerPage = 25
   const { currentItems: displayAppsRestricted, hasMore, loadMore } = usePagination(filteredApps, itemsPerPage)
 
-  const layout: LayoutKey = isEndorsingApp ? "endorser" : "default"
+  const layout: LayoutKey = isUserEndorsingAnyApp ? "endorser" : "default"
   const showCreatorBanner = useMemo(() => statusFilter === FILTER_ACTIVE_APPS, [statusFilter])
 
   // State for selected categories
@@ -91,7 +93,7 @@ export const AllApps = ({
 
   const appsSection = useMemo(() => {
     const isEmpty = !displayAppsRestricted?.length // if no apps, show empty state
-    return isXAppsLoading || isSorting ? (
+    return isXAppsLoading || isSorting || isUserNodesLoading ? (
       <VStack w="full" gap={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size="lg" />
       </VStack>
@@ -121,7 +123,17 @@ export const AllApps = ({
         )}
       </VStack>
     )
-  }, [t, displayAppsRestricted, isXAppsLoading, isSorting, showCreatorBanner, layout, hasMore, loadMore])
+  }, [
+    displayAppsRestricted,
+    isXAppsLoading,
+    isSorting,
+    isUserNodesLoading,
+    showCreatorBanner,
+    hasMore,
+    loadMore,
+    t,
+    layout,
+  ])
 
   return (
     <VStack gap={8} w="full" data-testid="apps-page">
