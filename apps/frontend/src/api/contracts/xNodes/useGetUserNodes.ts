@@ -9,6 +9,9 @@ import {
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 
+import { notFoundImage } from "@/constants"
+import { convertUriToUrl } from "@/utils/uri"
+
 import { compareAddresses } from "../../../utils/AddressUtils/AddressUtils"
 import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
 
@@ -24,7 +27,6 @@ enum NodeType {
   ECONOMIC = "Economic Node",
 }
 
-//TODO: Replace by dynamic type inference
 type StargateNFTMetadata = {
   name: string
   description: string
@@ -178,7 +180,12 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
         ...node,
         type: nodeIsXArray[index] ? NodeType.X : NodeType.ECONOMIC,
         endorsementScore: nodePointsArray[index] ?? BigInt(0),
-        metadata: nodeMetadataArray[index],
+        metadata: {
+          name: nodeMetadataArray[index]?.name ?? "",
+          description: nodeMetadataArray[index]?.description ?? "",
+          attributes: nodeMetadataArray[index]?.attributes ?? [],
+          image: nodeMetadataArray[index]?.image ? convertUriToUrl(nodeMetadataArray[index].image) : notFoundImage,
+        },
         endorsedAppId: nodeToEndorsedAppArray[index],
         isOnCooldown: nodeCooldownArray?.[index] ?? false,
         currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
