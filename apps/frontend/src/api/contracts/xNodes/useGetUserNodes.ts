@@ -3,6 +3,7 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import {
   type StargateNFT,
   StargateNFT__factory,
+  TokenAuction__factory,
   type X2EarnApps,
   X2EarnApps__factory,
 } from "@vechain/vebetterdao-contracts/typechain-types"
@@ -13,10 +14,11 @@ import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
 
 const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const stargateNFTContractAddress = getConfig().stargateNFTContractAddress as `0x${string}`
+const legacyNodesContractAddress = getConfig().tokenAuctionContractAddress as `0x${string}`
 
 const x2EarnAppsAbi = X2EarnApps__factory.abi
 const stargateNFTAbi = StargateNFT__factory.abi
-
+const legacyNodesAbi = TokenAuction__factory.abi
 enum NodeType {
   X = "XNode",
   ECONOMIC = "Economic Node",
@@ -56,6 +58,8 @@ export type UserNodesInfo = {
   nodesManagedByUser: UserNode[]
   nodesOwnedByUser: UserNode[]
   totalEndorsementScore: Awaited<ReturnType<X2EarnApps["getUsersEndorsementScore"]>>
+  hasLegacyNode: boolean
+  legacyNodesCount: bigint
 }
 
 /**
@@ -78,7 +82,7 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
   return useQuery({
     queryKey: getUserNodesQueryKey(userAddress),
     queryFn: async () => {
-      const [tokensOverview, usersEndorsementScore] = await executeMultipleClausesCall({
+      const [tokensOverview, usersEndorsementScore, legacyNodesCount] = await executeMultipleClausesCall({
         thor,
         calls: [
           {
@@ -91,6 +95,12 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
             functionName: "getUsersEndorsementScore",
+            args: [userAddress as `0x${string}`],
+          },
+          {
+            abi: legacyNodesAbi,
+            address: legacyNodesContractAddress,
+            functionName: "balanceOf",
             args: [userAddress as `0x${string}`],
           },
         ],
@@ -175,12 +185,15 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
         currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
       }))
       const totalEndorsementScore = usersEndorsementScore ?? BigInt(0)
+      const hasLegacyNode = legacyNodesCount ? legacyNodesCount > BigInt(0) : false
 
       const plannedReturn = {
         allNodes: nodesWithPoints,
         nodesManagedByUser: nodesWithPoints.filter(node => node.currentUserIsManager),
         nodesOwnedByUser: nodesWithPoints.filter(node => node.currentUserIsOwner),
         totalEndorsementScore,
+        hasLegacyNode,
+        legacyNodesCount: legacyNodesCount ?? BigInt(0),
       }
       return plannedReturn
     },
