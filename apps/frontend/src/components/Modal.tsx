@@ -68,30 +68,43 @@ export const Modal = ({
                   )}
                 </GridItem>
 
-                <GridItem>
-                  {isCloseable && showCloseButton ? (
-                    <Dialog.CloseTrigger asChild position="static">
-                      <CloseButton size="md" />
-                    </Dialog.CloseTrigger>
-                  ) : (
-                    <Box w="9" h="9" />
-                  )}
-                </GridItem>
-              </Grid>
-            </Dialog.Header>
-          )}
-          <Dialog.Body textAlign={illustration ? "center" : "left"} py={4}>
-            {title && (
-              <Dialog.Title fontWeight="bold" textStyle={{ base: "xl", md: illustration ? "3xl" : "xl" }}>
-                {title}
-              </Dialog.Title>
-            )}
-            {description && <Dialog.Description my="9"> {description}</Dialog.Description>}
-            {children}
-          </Dialog.Body>
-          {footer && <Dialog.Footer>{footer}</Dialog.Footer>}
-        </Dialog.Content>
-      </Dialog.Positioner>
-    </Portal>
-  </Dialog.Root>
-)
+                    <GridItem>
+                      {isCloseable && showCloseButton ? (
+                        <Dialog.CloseTrigger asChild position="static">
+                          <CloseButton size="md" />
+                        </Dialog.CloseTrigger>
+                      ) : (
+                        <Box w="9" h="9" />
+                      )}
+                    </GridItem>
+                  </Grid>
+                </Dialog.Header>
+              )}
+              <Dialog.Body textAlign={illustration ? "center" : "left"} py={4}>
+                {title && (
+                  <Dialog.Title fontWeight="bold" textStyle={{ base: "xl", md: illustration ? "3xl" : "xl" }}>
+                    {title}
+                  </Dialog.Title>
+                )}
+                {description && <Dialog.Description my="9"> {description}</Dialog.Description>}
+                {children}
+              </Dialog.Body>
+              {footer && <Dialog.Footer>{footer}</Dialog.Footer>}
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+    )
+
+  return (
+    <BaseBottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaTitle={ariaTitle ?? ""}
+      isDismissable={isCloseable}
+      ariaDescription={ariaDescription ?? ""}
+      footer={footer}>
+      {children}
+    </BaseBottomSheet>
+  )
+}

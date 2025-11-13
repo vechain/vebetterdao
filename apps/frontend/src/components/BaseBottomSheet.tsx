@@ -12,6 +12,7 @@ type Props = {
   isDismissable?: boolean
   customBgColor?: string
   minHeight?: string
+  footer?: React.ReactNode
 }
 
 const DRAG_THRESHOLD = 150
@@ -25,6 +26,7 @@ export const BaseBottomSheet = ({
   ariaDescription,
   isDismissable = true,
   minHeight,
+  footer,
 }: Props) => {
   const [dragY, setDragY] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -96,6 +98,12 @@ export const BaseBottomSheet = ({
               />
               {children}
             </Drawer.Body>
+
+            {footer && (
+              <Box p={4} borderColor="border.default">
+                {footer}
+              </Box>
+            )}
           </Drawer.Content>
         </Drawer.Positioner>
       </Portal>
