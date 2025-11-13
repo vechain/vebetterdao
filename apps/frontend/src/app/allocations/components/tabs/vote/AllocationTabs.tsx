@@ -50,7 +50,7 @@ export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3Ro
   )
 
   const handleTabChange = (details: { value: string }) => {
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams()
     params.set("tab", details.value)
     router.push(`?${params.toString()}`)
   }

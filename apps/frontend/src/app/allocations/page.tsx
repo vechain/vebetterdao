@@ -37,7 +37,10 @@ export interface AllocationRoundDetails {
   currentRoundId: number
   totalVoters: number
   totalVP: bigint
-  deadlineDate?: Date
+  roundStartBlock: bigint
+  roundStart?: Date
+  roundEnd?: Date
+  currentRoundDeadline?: Date
   apps: AppWithVotes[]
   cycleTotal: bigint
   vote2EarnAmount: bigint
@@ -72,9 +75,35 @@ export const getRoundResults = async (roundId: number) =>
 export const getRoundDetails = async (cycle: bigint) => {
   const thor = await getNodeJsThorClient()
 
-  const [apps, cycleTotal, cycleTotalGMWeight, emissions] = await executeMultipleClausesCall({
+  const [
+    roundStartBlock,
+    roundDeadlineBlock,
+    currentRoundDeadlineBlock,
+    apps,
+    cycleTotal,
+    cycleTotalGMWeight,
+    emissions,
+  ] = await executeMultipleClausesCall({
     thor,
     calls: [
+      {
+        abi: xAllocationVotingAbi,
+        address: xAllocationVotingAddress,
+        functionName: "roundSnapshot" as const,
+        args: [cycle],
+      },
+      {
+        abi: xAllocationVotingAbi,
+        address: xAllocationVotingAddress,
+        functionName: "roundDeadline" as const,
+        args: [cycle],
+      },
+      {
+        abi: xAllocationVotingAbi,
+        address: xAllocationVotingAddress,
+        functionName: "currentRoundDeadline" as const,
+        args: [],
+      },
       {
         abi: xAllocationVotingAbi,
         address: xAllocationVotingAddress,
@@ -103,8 +132,15 @@ export const getRoundDetails = async (cycle: bigint) => {
   })
 
   const [xAllocationsAmount, vote2EarnAmount, treasuryAmount, gmAmount] = emissions
+  const [roundStart, roundEnd, currentRoundDeadline] = await Promise.all(
+    [roundStartBlock, roundDeadlineBlock, currentRoundDeadlineBlock].map(block => blockNumberToDate(thor, block)),
+  )
 
   return {
+    roundStartBlock,
+    roundStart,
+    currentRoundDeadline,
+    roundEnd,
     apps,
     cycleTotal,
     xAllocationsAmount,
@@ -117,8 +153,6 @@ export const getRoundDetails = async (cycle: bigint) => {
 
 const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDetails> => {
   const thor = await getNodeJsThorClient()
-  const bestBlock = await thor.blocks.getBestBlockCompressed()
-
   const [currentRoundId] = await executeMultipleClausesCall({
     thor,
     calls: [
@@ -131,29 +165,7 @@ const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDe
     ],
   })
 
-  let deadlineDate: Date | undefined
   const roundId = round ?? Number(currentRoundId)
-
-  if (!round) {
-    const [roundDeadline] = await executeMultipleClausesCall({
-      thor,
-      calls: [
-        {
-          abi: xAllocationVotingAbi,
-          address: xAllocationVotingAddress,
-          functionName: "roundDeadline" as const,
-          args: [BigInt(roundId)],
-        },
-      ],
-    })
-
-    deadlineDate = await blockNumberToDate(
-      thor,
-      BigInt(roundDeadline),
-      bestBlock?.timestamp,
-      bestBlock ? BigInt(bestBlock.number) : undefined,
-    )
-  }
 
   const roundDetails = await getRoundDetails(BigInt(roundId))
   const rounds = await getRounds()
@@ -183,7 +195,6 @@ const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDe
     currentRoundId: Number(currentRoundId),
     totalVoters: appsWithVotes.reduce((sum, app) => sum + (app.voters ?? 0), 0),
     totalVP: roundDetails.cycleTotal,
-    deadlineDate,
     ...roundDetails,
     apps: appsWithVotes,
     previous3RoundsEarnings: rounds.data.slice(1, 4),
@@ -220,7 +231,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
             <PotentialRewardBox roundDetails={roundDetails} />
           </GridItem>
           <GridItem asChild>
-            <CountdownBox deadline={roundDetails?.deadlineDate} />
+            <CountdownBox deadline={roundDetails?.currentRoundDeadline} />
           </GridItem>
         </Grid>
       </VStack>

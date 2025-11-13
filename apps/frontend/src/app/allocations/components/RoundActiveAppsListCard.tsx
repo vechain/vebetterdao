@@ -23,18 +23,15 @@ const RoundActiveAppCard = ({ id, name, votesReceived }: Pick<AppWithVotes, "id"
       alignItems="center"
       p="3"
       columnGap="4">
-      <AppImage appId={id || ""} flexShrink={0} shape="square" borderRadius="lg" />
-
+      <AppImage boxSize="11" appId={id || ""} flexShrink={0} shape="square" borderRadius="lg" />
       <VStack gap="1" alignItems="start">
         <Text textStyle="lg" color="text.default" fontWeight="semibold">
           {name || "-"}
         </Text>
-
         <Text textStyle="md" fontWeight="semibold">
           {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))}
         </Text>
       </VStack>
-
       <IconButton variant="ghost">
         <Icon as={NavArrowRight} boxSize={5} color="icon.default" />
       </IconButton>

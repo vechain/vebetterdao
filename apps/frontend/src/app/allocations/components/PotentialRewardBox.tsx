@@ -18,14 +18,14 @@ const voterRewardsAbi = VoterRewards__factory.abi
 const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 
 export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationRoundDetails }) => {
-  const { id, cycleTotal, vote2EarnAmount, gmAmount, cycleTotalGMWeight } = roundDetails
+  const { currentRoundId, cycleTotal, vote2EarnAmount, gmAmount, cycleTotalGMWeight } = roundDetails
   const { account } = useWallet()
 
   const { data: userVoterTotal, isLoading: isUserVoterTotalLoading } = useCallClause({
     abi: voterRewardsAbi,
     address: voterRewardsAddress,
     method: "cycleToVoterToTotal",
-    args: [BigInt(id), account?.address as `0x{string}`],
+    args: [BigInt(currentRoundId), account?.address as `0x{string}`],
     queryOptions: { select: data => data[0] },
   })
 
@@ -33,7 +33,7 @@ export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationR
     abi: voterRewardsAbi,
     address: voterRewardsAddress,
     method: "getGMReward",
-    args: [BigInt(id), account?.address as `0x{string}`],
+    args: [BigInt(currentRoundId), account?.address as `0x{string}`],
     queryOptions: { select: data => data[0] },
   })
 

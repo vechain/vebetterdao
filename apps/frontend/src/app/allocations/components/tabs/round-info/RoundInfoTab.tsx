@@ -1,4 +1,5 @@
 import { Badge, Button, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import dayjs from "dayjs"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -12,6 +13,8 @@ import { UserVotingActivityCard } from "../../UserVotingActivityCard"
 import { RoundDistributionCard } from "./RoundDistributionCard"
 import { RoundHistoryCard } from "./RoundHistoryCard"
 
+const DATE_FORMAT = "MMM D"
+
 export function RoundInfoTab({
   roundDetails,
   previous3RoundsEarnings,
@@ -22,6 +25,7 @@ export function RoundInfoTab({
   const router = useRouter()
   const searchParams = useSearchParams()
   const { cycleTotal, totalVoters, apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount } = roundDetails
+  const isCurrentRound = roundDetails.currentRoundId === roundDetails.id
 
   const handleRoundNavigation = (newRoundId: number) => {
     const params = new URLSearchParams(searchParams)
@@ -40,7 +44,7 @@ export function RoundInfoTab({
           {roundDetails.currentRoundId === roundDetails.id && <Badge variant="positive">{"Active"}</Badge>}
         </HStack>
         <Text textStyle="sm" color="text.subtle">
-          {"Aug 11 - Aug 18"}
+          {dayjs(roundDetails.roundStart).format(DATE_FORMAT) + "-" + dayjs(roundDetails.roundEnd).format(DATE_FORMAT)}
         </Text>
       </VStack>
       <Card.Root hideBelow="md" p="6" alignItems="center" justifyContent="space-between" flexDirection="row">
@@ -55,9 +59,13 @@ export function RoundInfoTab({
             <Text textStyle="md" color="text.subtle">
               {"Round dates"}
             </Text>
-            <Heading size="lg">{"Aug 3 - Aug 10"}</Heading>
+            <Heading size="lg">
+              {dayjs(roundDetails.roundStart).format(DATE_FORMAT) +
+                "-" +
+                dayjs(roundDetails.roundEnd).format(DATE_FORMAT)}
+            </Heading>
           </VStack>
-          {roundDetails.currentRoundId === roundDetails.id && (
+          {isCurrentRound && (
             <Flex h="full" pl="6" alignItems="flex-start">
               <Badge variant="positive">{"Active"}</Badge>
             </Flex>
@@ -73,6 +81,7 @@ export function RoundInfoTab({
             <NavArrowLeft />
           </IconButton>
           <IconButton
+            disabled={isCurrentRound}
             variant="outline"
             boxSize={"44px"}
             onClick={() => handleRoundNavigation(roundDetails.id + 1)}
@@ -101,8 +110,14 @@ export function RoundInfoTab({
           <Heading size="lg" fontWeight="semibold">
             {"Explore rounds history"}
           </Heading>
-
-          <IconButton variant="link" p="0" minWidth="unset" boxSize="4" color="text.subtle" asChild>
+          <IconButton
+            disabled={isCurrentRound}
+            variant="link"
+            p="0"
+            minWidth="unset"
+            boxSize="4"
+            color="text.subtle"
+            asChild>
             <NextLink href="/allocations/history">
               <NavArrowRight />
             </NextLink>
@@ -113,7 +128,7 @@ export function RoundInfoTab({
         ))}
       </VStack>
       <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap="6">
-        <UserVotingActivityCard roundId={BigInt(roundDetails.id)} apps={apps} />
+        <UserVotingActivityCard roundDetails={roundDetails} />
         <RoundActiveAppsListCard apps={apps} />
       </Grid>
     </VStack>

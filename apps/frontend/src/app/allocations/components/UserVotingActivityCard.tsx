@@ -14,9 +14,11 @@ import {
   Text,
   Button,
   Collapsible,
+  Skeleton,
 } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { Activity, Check } from "iconoir-react"
@@ -27,22 +29,65 @@ import { AppImage } from "@/components/AppImage/AppImage"
 import Vote from "@/components/Icons/svg/vote.svg"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useEvents } from "@/hooks/useEvents"
+import { APP_CATEGORIES } from "@/types/appDetails"
 
-import { AppWithVotes } from "../page"
+import { AllocationRoundDetails, AppWithVotes } from "../page"
 
 const INITIAL_DISPLAY_COUNT = 3
 
 const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress
 
-export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; apps: AppWithVotes[] }) => {
+const voterRewardsAbi = VoterRewards__factory.abi
+const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
+
+interface AppVoteItemProps {
+  app: AppWithVotes | undefined
+  voteWeight: bigint
+}
+
+const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
+  <Card.Root key={app?.id} p="4" bg="card.subtle" asChild>
+    <Grid gridTemplateColumns="50px 1fr auto" alignItems="center">
+      <Box position="relative">
+        <AppImage boxSize="11" appId={app?.id || ""} flexShrink={0} shape="square" borderRadius="lg" />
+        <Float placement="top-end" offsetX="3" offsetY="1">
+          <Circle
+            size="4"
+            bg="status.positive.primary"
+            border="sm"
+            borderColor="status.positive.subtle"
+            color="text.alt">
+            <Icon as={Check} boxSize="3" color="text.alt" />
+          </Circle>
+        </Float>
+      </Box>
+
+      <VStack gap="1" align="start">
+        <Heading size={{ base: "sm", md: "md" }} color="text.subtle" fontWeight="semibold">
+          {app?.name || "-"}
+        </Heading>
+        <Badge variant="neutral" size="sm" rounded="sm">
+          {APP_CATEGORIES.find(category => category.id === app?.metadata?.categories[0])?.name || "-"}
+        </Badge>
+      </VStack>
+
+      <Text textStyle="md" fontWeight="semibold">
+        {getCompactFormatter(2).format(Number(formatEther(voteWeight)))}
+      </Text>
+    </Grid>
+  </Card.Root>
+)
+
+export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: AllocationRoundDetails }) => {
+  const { id: roundId, apps } = roundDetails
   const [isOpen, setIsOpen] = useState(false)
   const { account } = useWallet()
-  const { data: appsVotedInRounds, isLoading } = useEvents({
+  const { data: voteCastEvents, isLoading } = useEvents({
     abi,
     contractAddress,
     eventName: "AllocationVoteCast",
-    filterParams: { voter: account?.address },
+    filterParams: { voter: account?.address, roundId: BigInt(roundId) },
     mapResponse: ({ decodedData }) =>
       decodedData.args.appsIds.map((id, idx) => [
         decodedData.args.roundId,
@@ -51,29 +96,39 @@ export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; app
       ]) as Array<[bigint, string, bigint]>,
   })
 
-  // TODO: update this logic to make it leaner
-  const appVoteMetrics = useMemo(() => {
-    const totalWeight = new Map<string, bigint>()
-    const timesVoted = new Map<string, number>()
+  const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
+    abi: voterRewardsAbi,
+    contractAddress: voterRewardsAddress,
+    eventName: "RewardClaimedV2",
+    filterParams: {
+      cycle: BigInt(roundId),
+      voter: account?.address,
+    },
+    mapResponse: ({ decodedData }) =>
+      getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
+  })
 
-    if (appsVotedInRounds?.length) {
-      appsVotedInRounds.forEach(roundAppIds => {
-        roundAppIds.forEach(([id, appId, voteWeight]) => {
-          if (id === roundId) {
-            totalWeight.set(appId, (totalWeight.get(appId) ?? 0n) + (voteWeight || 0n))
-            timesVoted.set(appId, (timesVoted.get(appId) ?? 0) + 1)
-          }
-        })
+  const [appsVotedInRound] = voteCastEvents || []
+
+  const appVoteMetrics = useMemo(() => {
+    const votes = new Map<string, bigint>()
+
+    if (appsVotedInRound?.length) {
+      appsVotedInRound.forEach(([_id, appId, vote]) => {
+        votes.set(appId, vote)
       })
     }
 
-    return { totalWeight, timesVoted }
-  }, [appsVotedInRounds, roundId])
+    return votes
+  }, [appsVotedInRound])
+  const votingPowerUsed = getCompactFormatter(2).format(
+    Number(formatEther([...appVoteMetrics.entries()].reduce((vp, app) => vp + app[1], 0n))),
+  )
 
   const appVoteMetricsSortedByWeight = useMemo(() => {
-    if (appVoteMetrics.totalWeight.size === 0) return []
+    if (appVoteMetrics.size === 0) return []
 
-    return Array.from(appVoteMetrics.totalWeight.entries())
+    return Array.from(appVoteMetrics.entries())
       .sort(([, weightA], [, weightB]) => (weightB > weightA ? 1 : weightB < weightA ? -1 : 0))
       .map(([appId]) => appId)
   }, [appVoteMetrics])
@@ -82,48 +137,11 @@ export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; app
     return appVoteMetricsSortedByWeight.map(id => apps.find(app => app.id === id)).filter(Boolean)
   }, [apps, appVoteMetricsSortedByWeight])
 
-  const votingPowerUsed = useMemo(() => {
-    const vp = Array.from(appVoteMetrics.totalWeight.entries()).reduce((vp, [, weight]) => vp + weight, 0n)
-
-    return getCompactFormatter(2).format(Number(formatEther(vp)))
-  }, [appVoteMetrics.totalWeight])
-
   const visibleApps = isOpen ? topVotedApps : topVotedApps.slice(0, INITIAL_DISPLAY_COUNT)
   const hasMoreApps = topVotedApps.length > INITIAL_DISPLAY_COUNT
 
-  const AppVoteItem = ({ app }: { app: AppWithVotes | undefined }) => (
-    <Card.Root key={app?.id} p="4" bg="card.subtle" asChild>
-      <Grid gridTemplateColumns="50px 1fr auto" placeContent="center">
-        <Box position="relative">
-          <AppImage appId={app?.id || ""} flexShrink={0} shape="square" borderRadius="lg" />
-          <Float placement="top-end">
-            <Circle
-              size="5"
-              bg="status.positive.primary"
-              border="sm"
-              borderColor="status.positive.subtle"
-              color="text.alt"
-              textStyle="xs">
-              <Icon as={Check} boxSize="18px" color="text.alt" />
-            </Circle>
-          </Float>
-        </Box>
-
-        <HStack gap="2">
-          <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
-            {app?.name || "-"}
-          </Text>
-        </HStack>
-
-        <Text textStyle="md" fontWeight="semibold">
-          {"+XXX.XXM"}
-        </Text>
-      </Grid>
-    </Card.Root>
-  )
-
   return (
-    <Card.Root p="6" height="max-content">
+    <Card.Root p="6" height="max-content" minHeight="500px">
       <Card.Header as={HStack} gap="2">
         <Icon as={Activity} boxSize="5" color="icon.default" />
         <Heading size="lg" fontWeight="semibold">
@@ -131,9 +149,11 @@ export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; app
         </Heading>
       </Card.Header>
       <Card.Body asChild>
-        {!isLoading && appVoteMetrics.timesVoted.size === 0 ? (
+        {!isLoading && appVoteMetrics.size === 0 ? (
           <EmptyState
-            my="auto"
+            flex={1}
+            display="flex"
+            justifyContent="center"
             icon={
               <Circle aspectRatio={1} width="120px" bg="bg.subtle">
                 <Icon as={Vote} boxSize="100px" />
@@ -157,9 +177,13 @@ export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; app
                 {"Rewards earned"}
               </Text>
 
-              <Text textStyle="md" fontWeight="semibold" color="status.positive.primary">
-                {"+XXX.XXM B3TR"}
-              </Text>
+              <Skeleton loading={isRewardClaimedLoading}>
+                <Text textStyle="md" fontWeight="semibold" color="status.positive.primary">
+                  {"+"}
+                  {getCompactFormatter(2).format(Number(rewardClaimed))}
+                  {" B3TR"}
+                </Text>
+              </Skeleton>
             </Card.Root>
             <VStack gridColumn="1 / 3" align="stretch" gap="3">
               <HStack justifyContent="space-between">
@@ -171,7 +195,7 @@ export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; app
               <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
                 <VStack gap="2" align="stretch">
                   {visibleApps.map(app => (
-                    <AppVoteItem key={app?.id} app={app} />
+                    <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
                   ))}
 
                   {hasMoreApps && (
@@ -179,11 +203,10 @@ export const UserVotingActivityCard = ({ roundId, apps }: { roundId: bigint; app
                       <Collapsible.Content>
                         <VStack gap="2" align="stretch">
                           {topVotedApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
-                            <AppVoteItem key={app?.id} app={app} />
+                            <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
                           ))}
                         </VStack>
                       </Collapsible.Content>
-
                       <Collapsible.Trigger asChild mt="2">
                         <Button variant="plain" colorPalette="blue" fontWeight="semibold" textStyle="md">
                           <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
