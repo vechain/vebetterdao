@@ -103,7 +103,7 @@ export const GmNFTAndNodeCard = () => {
                   title={`${userNodesInfo?.nodesManagedByUser?.[0]?.metadata?.name ?? ""} #${userNodesInfo?.nodesManagedByUser?.[0]?.id?.toString() || ""}`}
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
-                  imges={userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => node?.metadata?.image)}
+                  images={userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => node?.metadata?.image)}
                   href={`/profile?tab=nodes`}
                 />
               ) : (

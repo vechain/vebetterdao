@@ -8,6 +8,7 @@ import {
   X2EarnApps__factory,
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 
 import { notFoundImage } from "@/constants"
 import { convertUriToUrl } from "@/utils/uri"
@@ -48,9 +49,9 @@ type TokenOverview = {
 
 export type UserNode = TokenOverview & {
   endorsementScore: bigint
-  metadata: StargateNFTMetadata | undefined
+  metadata: StargateNFTMetadata
   type: NodeType
-  endorsedAppId: string | undefined
+  endorsedAppId: string
   isOnCooldown: boolean
   currentUserIsManager: boolean
   currentUserIsOwner: boolean
@@ -186,7 +187,7 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
           attributes: nodeMetadataArray[index]?.attributes ?? [],
           image: nodeMetadataArray[index]?.image ? convertUriToUrl(nodeMetadataArray[index].image) : notFoundImage,
         },
-        endorsedAppId: nodeToEndorsedAppArray[index],
+        endorsedAppId: nodeToEndorsedAppArray[index] ?? ethers.ZeroHash,
         isOnCooldown: nodeCooldownArray?.[index] ?? false,
         currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
         currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
