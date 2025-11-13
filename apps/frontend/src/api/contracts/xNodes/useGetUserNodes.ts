@@ -56,6 +56,7 @@ export type UserNode = TokenOverview & {
   metadata: StargateNFTMetadata
   type: NodeType
   endorsedAppId: string
+  isEndorsingApp: boolean
   isOnCooldown: boolean
   currentUserIsManager: boolean
   currentUserIsOwner: boolean
@@ -194,23 +195,41 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
         })
       }
 
-      const nodesWithPoints = tokensOverview?.map((node, index) => ({
-        ...node,
-        type: nodeIsXArray[index] ? NodeType.X : NodeType.ECONOMIC,
-        endorsementScore: nodePointsArray[index] ?? BigInt(0),
-        metadata: {
-          name: nodeMetadataArray[index]?.name ?? "",
-          description: nodeMetadataArray[index]?.description ?? "",
-          attributes: nodeMetadataArray[index]?.attributes ?? [],
-          image: nodeMetadataArray[index]?.image ? convertUriToUrl(nodeMetadataArray[index].image) : notFoundImage,
-        },
-        endorsedAppId: nodeToEndorsedAppArray[index] ?? ethers.ZeroHash,
-        isOnCooldown: nodeCooldownArray?.[index] ?? false,
-        currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
-        currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
-        gmAttachedTokenId: nodeGmAttachedTokenIdArray[index] ?? BigInt(0),
-        isGmAttached: !!nodeGmAttachedTokenIdArray[index],
-      }))
+      const nodesWithPoints = tokensOverview?.map((node, index) => {
+        const rawMetadata = nodeMetadataArray[index]
+        const endorsedAppId = nodeToEndorsedAppArray[index] ?? ethers.ZeroHash
+        const gmTokenId = nodeGmAttachedTokenIdArray[index] ?? BigInt(0)
+
+        return {
+          // Base node properties (id, owner, manager, levelId)
+          ...node,
+
+          // Node classification
+          type: nodeIsXArray[index] ? NodeType.X : NodeType.ECONOMIC,
+
+          // Endorsement properties
+          endorsementScore: nodePointsArray[index] ?? BigInt(0),
+          endorsedAppId,
+          isEndorsingApp: !endorsedAppId || endorsedAppId !== ethers.ZeroHash,
+          isOnCooldown: nodeCooldownArray?.[index] ?? false,
+
+          // Metadata
+          metadata: {
+            name: rawMetadata?.name ?? "",
+            description: rawMetadata?.description ?? "",
+            attributes: rawMetadata?.attributes ?? [],
+            image: rawMetadata?.image ? convertUriToUrl(rawMetadata.image) : notFoundImage,
+          },
+
+          // User permissions
+          currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
+          currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
+
+          // Galaxy Member attachment
+          gmAttachedTokenId: gmTokenId,
+          isGmAttached: gmTokenId > BigInt(0),
+        }
+      })
       const totalEndorsementScore = usersEndorsementScore ?? BigInt(0)
       const hasLegacyNode = legacyNodesCount ? legacyNodesCount > BigInt(0) : false
 
