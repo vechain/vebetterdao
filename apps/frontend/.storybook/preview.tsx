@@ -8,6 +8,8 @@ import { VStack, Flex, Container } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { setMockAddress } from "./mockAddressState"
 
+import { MINIMAL_VIEWPORTS } from "storybook/viewport"
+
 import { initialize, mswLoader } from "msw-storybook-addon"
 
 import { languages } from "../src/i18n"
@@ -43,7 +45,19 @@ const queryClient = new QueryClient({
 
 const preview: Preview = {
   parameters: {
-    viewport: {},
+    viewport: {
+      options: {
+        ...MINIMAL_VIEWPORTS,
+        iphone12: {
+          name: "iPhone 12",
+          styles: {
+            height: "844px",
+            width: "390px",
+          },
+          type: "mobile",
+        },
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -66,7 +80,7 @@ const preview: Preview = {
     locale: "en",
 
     viewport: {
-      value: "mobile2",
+      value: "iphone12",
       isRotated: false,
     },
   },

@@ -37,12 +37,12 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { open: isOpen = false, onClose } = modal
   const [step, setStep] = useState(0)
   const delegatee = watch("walletAddress")
-  
+
   const handleClose = useCallback(() => {
     onClose?.()
     setStep(0)
   }, [onClose])
-  
+
   const goToNext = useCallback(() => {
     const nextStep = step + 1
     if (nextStep >= STEP_COUNT) handleClose()

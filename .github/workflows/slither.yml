@@ -1,0 +1,22 @@
+name: Slither
+
+on:
+   push:
+     branches:
+       - main
+       - feat/add-false-positive-slither
+   pull_request:
+
+jobs:
+  run-slither:
+        name: Slither Analysis
+        uses: vechain/github-actions/.github/workflows/slither.yaml@72c47d9d8d3f9ed4404f9056f48967e524b43ae9 # v.1.13.0
+        with:
+          solc-version: '0.8.20'
+          target: 'packages/contracts/'
+          fail-on: 'none'
+          cache: 'yarn'
+          compile-command: 'yarn contracts:compile:slither'
+          ignore-compile: true
+          slither-args: |
+            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/

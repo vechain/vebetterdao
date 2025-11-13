@@ -9,7 +9,7 @@ export type Props = { isLegacyNode?: boolean }
 export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
   return (
     <GenericBanner
-      illustration="/assets/3d-illustrations/3d-fist.webp"
+      illustration="/assets/3d-illustrations/node.webp"
       title={t("Migrate your Node NFT before December 2")}
       description={
         isLegacyNode

@@ -66,20 +66,20 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const { watch, setValue } = formData
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
-  
+
   const handleClose = useCallback(() => {
     onClose()
     setIsB3trToVot3(undefined)
     setValue("amount", "")
     setStep(0)
   }, [onClose, setValue])
-  
+
   const goToNextStep = useCallback(() => {
     const nextStep = step + 1
     if (nextStep >= STEP_COUNT) handleClose()
     else setStep(nextStep)
   }, [step, handleClose])
-  
+
   const goToPrevStep = useCallback(() => {
     const prevStep = step - 1
     if (prevStep < 0) handleClose()
