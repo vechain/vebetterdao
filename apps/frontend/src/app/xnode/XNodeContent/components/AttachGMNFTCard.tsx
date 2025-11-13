@@ -31,7 +31,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
   const isXNodeDelegator = false //TODO: Get if xNode is delegator
   const isXNodeAttachedToGM = false //TODO: Get if xNode is attached to a GM
   // TODO: Fetch attached GM from contract - use getAttachedGM(xNode.id)
-  const attachedGMNFT = userGms?.find((gm: UserGM) => false) // TODO: Placeholder - needs proper implementation
+  const attachedGMNFT = userGms?.find((_gm: UserGM) => false) // TODO: Placeholder - needs proper implementation
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
   const handleDetachOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
