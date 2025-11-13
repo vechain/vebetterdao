@@ -38,7 +38,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
 
   const canSubmit = isValid()
 
-  // Reset allocations to equal distribution when modal opens
+  // Set equal allocations when modal opens
   useEffect(() => {
     if (isOpen) {
       setEqualAllocations()
@@ -53,14 +53,6 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
     setIsCustomising(false)
     onClose()
   }, [onConfirm, allocations, onClose])
-
-  const handleEqualVotes = useCallback(() => {
-    setEqualAllocations()
-  }, [setEqualAllocations])
-
-  const handleCustomise = useCallback(() => {
-    setIsCustomising(true)
-  }, [])
 
   const handleCloseModal = useCallback(() => {
     setIsCustomising(false)
@@ -95,7 +87,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             <VotingPowerSection
               vot3Balance={vot3Balance}
               isLoading={isLoadingBalance}
-              button={<CustomiseAllocationButton onClick={handleCustomise} />}
+              button={<CustomiseAllocationButton onClick={() => setIsCustomising(true)} />}
             />
             <SelectedAppsPreview apps={selectedApps} />
           </>
@@ -104,7 +96,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             <VotingPowerSection
               vot3Balance={vot3Balance}
               isLoading={isLoadingBalance}
-              button={<EqualVotesButton onClick={handleEqualVotes} />}
+              button={<EqualVotesButton onClick={setEqualAllocations} />}
             />
             <SelectedAppsSection
               apps={selectedApps}
