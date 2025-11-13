@@ -102,8 +102,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
               isLoading={isLoadingBalance}
               button={
                 <Button
-                  variant="ghost"
-                  colorPalette="blue"
+                  variant="link"
                   onClick={() => setIsCustomising(true)}
                   w="full"
                   justifyContent="center"
@@ -122,8 +121,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
               isLoading={isLoadingBalance}
               button={
                 <Button
-                  variant="ghost"
-                  colorPalette="blue"
+                  variant="link"
                   onClick={setEqualAllocations}
                   w="full"
                   justifyContent="center"
