@@ -4,11 +4,11 @@ import { ethers } from "ethers"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiZap } from "react-icons/fi"
+import { parseEther } from "viem"
 
+import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
-
-import { AllocationWithWeight } from "../../../confirm-vote-modal"
 
 interface UseAllocationVotingProps {
   roundId: string
@@ -25,6 +25,10 @@ interface UseAllocationVotingProps {
  */
 export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingProps) => {
   const { t } = useTranslation()
+
+  // Get user's voting power at snapshot
+  const { votesAtSnapshot } = useVotingPowerAtSnapshot()
+
   const [customUI, setCustomUI] = useState<TransactionCustomUI>({
     pending: {
       title: t("Waiting for confirmation..."),
@@ -57,18 +61,29 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
   }, [pendingVotes, customUI, castAllocationVotes])
 
   const handleConfirmVote = useCallback(
-    (allocations: Map<string, AllocationWithWeight>) => {
+    (allocations: Map<string, number>) => {
+      if (!votesAtSnapshot?.totalVotesWithDeposits) return
+
+      // Convert percentages to weighted votes
+      const totalVotingPower = parseEther(votesAtSnapshot.totalVotesWithDeposits)
+      const allocationsWithWeight = new Map<string, bigint>()
+
+      allocations.forEach((percentage, appId) => {
+        const weight = (totalVotingPower * BigInt(Math.round(percentage * 100))) / 10000n
+        if (weight > 0n) {
+          allocationsWithWeight.set(appId, weight)
+        }
+      })
+
       // Filter out zero votes and prepare data for transaction
-      const appVotes = Array.from(allocations.entries())
-        .filter(([, allocation]) => allocation.weight > 0n)
-        .map(([appId, allocation]) => ({
-          appId,
-          votes: Number(ethers.formatEther(allocation.weight)),
-        }))
+      const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
+        appId,
+        votes: Number(ethers.formatEther(weight)),
+      }))
 
       // Calculate total voting weight for display in modal
-      const totalVotingWeight = Array.from(allocations.values()).reduce(
-        (sum, allocation) => sum + Number(ethers.formatEther(allocation.weight)),
+      const totalVotingWeight = Array.from(allocationsWithWeight.values()).reduce(
+        (sum, weight) => sum + Number(ethers.formatEther(weight)),
         0,
       )
 
@@ -113,7 +128,7 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
       // Set pending votes - useEffect will trigger transaction when customUI is updated
       setPendingVotes(appVotes)
     },
-    [t],
+    [t, votesAtSnapshot],
   )
 
   return {

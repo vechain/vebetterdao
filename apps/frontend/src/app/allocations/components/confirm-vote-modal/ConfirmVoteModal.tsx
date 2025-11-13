@@ -1,14 +1,10 @@
 "use client"
 
 import { Button, VStack, HStack } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
-import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useAllocationRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useAllocationRoundSnapshot"
-import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { Modal } from "@/components/Modal"
 
 import type { AppWithVotes } from "../../page"
@@ -29,29 +25,8 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
 
-  const { account } = useWallet()
-
-  // Get current round ID and its snapshot block
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: snapshotBlock } = useAllocationRoundSnapshot(currentRoundId ?? "")
-
-  // Get VOT3 balance at snapshot block
-  const { data: votesAtSnapshot, isLoading: isLoadingBalance } = useTotalVotesOnBlock(
-    snapshotBlock ? Number(snapshotBlock) : undefined,
-    account?.address,
-  )
-
-  // Format the balance for display
-  const vot3Balance = useMemo(() => {
-    if (!votesAtSnapshot?.totalVotesWithDeposits) return undefined
-    const scaled = votesAtSnapshot.totalVotesWithDeposits
-    const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
-    return {
-      original: scaled,
-      scaled,
-      formatted,
-    }
-  }, [votesAtSnapshot])
+  // Get user's voting power at snapshot
+  const { vot3Balance, isLoading: isLoadingBalance } = useVotingPowerAtSnapshot()
 
   // Memoize appIds to prevent unnecessary recreations
   const appIds = useMemo(() => selectedApps.map(app => app.id), [selectedApps])

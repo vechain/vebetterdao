@@ -1,24 +1,18 @@
 "use client"
 
 import { Icon, Text, Button, Dialog, Skeleton } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
-import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
-import { formatEther } from "viem"
 
+import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import { StatCard } from "./StatCard"
 
 export const VotingPowerBox = () => {
-  const { account } = useWallet()
   const { isMobile } = useBreakpoints()
-  const { data: vot3Balance, isLoading } = useGetVot3Balance(account?.address)
+  const { vot3Balance, isLoading } = useVotingPowerAtSnapshot()
 
-  const original = vot3Balance ? Number(vot3Balance.original) : 0
-  const scaled = formatEther(BigInt(original))
-  const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
+  const formatted = vot3Balance?.formatted ?? "0"
 
   return (
     <StatCard
