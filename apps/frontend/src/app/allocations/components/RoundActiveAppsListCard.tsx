@@ -21,18 +21,19 @@ const RoundActiveAppCard = ({ id, name, votesReceived }: Pick<AppWithVotes, "id"
       display="grid"
       gridTemplateColumns="auto 1fr auto"
       alignItems="center"
-      p="3"
+      p={{ base: "2", md: "3" }}
+      px={{ base: "1", md: "3" }}
       columnGap="4">
       <AppImage boxSize="11" appId={id || ""} flexShrink={0} shape="square" borderRadius="lg" />
       <VStack gap="1" alignItems="start">
-        <Text textStyle="lg" color="text.default" fontWeight="semibold">
+        <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
           {name || "-"}
         </Text>
-        <Text textStyle="md" fontWeight="semibold">
-          {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))}
+        <Text textStyle={{ base: "xs", md: "md" }} fontWeight={{ base: "normal", md: "semibold" }}>
+          {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" B3TR"}
         </Text>
       </VStack>
-      <IconButton variant="ghost">
+      <IconButton variant="ghost" p="0" minWidth="unset">
         <Icon as={NavArrowRight} boxSize={5} color="icon.default" />
       </IconButton>
     </Card.Root>
@@ -53,7 +54,7 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
   const hasMoreApps = filteredApps.length > INITIAL_DISPLAY_COUNT
 
   return (
-    <Card.Root p="6" gap="6" height="max-content">
+    <Card.Root p={{ base: "4", md: "6" }} gap="6" height="max-content">
       <Card.Header gap="6" p="0">
         <HStack justifyContent="space-between">
           <Heading as={HStack} size="lg" fontWeight="semibold">

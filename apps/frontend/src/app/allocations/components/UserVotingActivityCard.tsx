@@ -15,6 +15,7 @@ import {
   Button,
   Collapsible,
   Skeleton,
+  Separator,
 } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -64,7 +65,7 @@ const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
       </Box>
 
       <VStack gap="1" align="start">
-        <Heading size={{ base: "sm", md: "md" }} color="text.subtle" fontWeight="semibold">
+        <Heading size={{ base: "sm", md: "md" }} color="text.default" fontWeight="semibold" lineClamp={1}>
           {app?.name || "-"}
         </Heading>
         <Badge variant="neutral" size="sm" rounded="sm">
@@ -144,7 +145,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     <Card.Root p="6" height="max-content" minHeight="500px">
       <Card.Header as={HStack} gap="2">
         <Icon as={Activity} boxSize="5" color="icon.default" />
-        <Heading size="lg" fontWeight="semibold">
+        <Heading size={{ base: "md", md: "lg" }} fontWeight="semibold">
           {"Your voting activity"}
         </Heading>
       </Card.Header>
@@ -163,8 +164,15 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
             description="You haven't voted in this round"
           />
         ) : (
-          <Grid gridTemplateColumns="repeat(2,1fr)" rowGap="8" columnGap="3">
-            <Card.Root p="4" bg="card.subtle" gap="1">
+          <Grid
+            gridTemplateColumns={{ base: "1fr 1px 1fr", md: "repeat(2,1fr)" }}
+            rowGap="8"
+            columnGap={{ base: "8", md: "3" }}>
+            <Card.Root
+              p={{ base: 0, md: "4" }}
+              bg={{ base: "transparent", md: "card.subtle" }}
+              gap="1"
+              height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {"Voting power used"}
               </Text>
@@ -172,7 +180,12 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                 {votingPowerUsed}
               </Text>
             </Card.Root>
-            <Card.Root p="4" bg="card.subtle" gap="1" height="max-content">
+            <Separator hideFrom="md" orientation="vertical" borderColor="border.secondary" />
+            <Card.Root
+              p={{ base: 0, md: "4" }}
+              bg={{ base: "transparent", md: "card.subtle" }}
+              gap="1"
+              height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {"Rewards earned"}
               </Text>
@@ -185,7 +198,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                 </Text>
               </Skeleton>
             </Card.Root>
-            <VStack gridColumn="1 / 3" align="stretch" gap="3">
+            <VStack gridColumn={{ base: "1 / 4", md: "1 / 3" }} align="stretch" gap="3">
               <HStack justifyContent="space-between">
                 <Heading size="sm">{"Voted for"}</Heading>
                 <Badge variant="neutral" size="sm" rounded="sm">

@@ -1,15 +1,17 @@
 import { ButtonGroup, IconButton, Pagination, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
-import { executeCallClause } from "@vechain/vechain-kit"
 import Link from "next/link"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
+import { fetchContractEvents } from "@/api/contracts/governance/fetchContractEvents"
 import { fetchClient } from "@/api/indexer/api"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
+import { blockNumberToDate } from "@/utils/date"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
 import { RoundHistoryCard } from "../components/tabs/round-info/RoundHistoryCard"
+import { getCurrentRoundId } from "../page"
 
 const BreadcrumItems = [
   {
@@ -22,25 +24,15 @@ const BreadcrumItems = [
   },
 ]
 
-const xAllocationVotingAbi = XAllocationVoting__factory.abi
-const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
-
-export const getCurrentRoundId = async () => {
-  const thor = await getNodeJsThorClient()
-  const [currentRoundId] = await executeCallClause({
-    thor,
-    abi: xAllocationVotingAbi,
-    contractAddress: xAllocationVotingAddress,
-    method: "currentRoundId",
-    args: [],
-  })
-  return Number(currentRoundId)
-}
+const abi = XAllocationVoting__factory.abi
+const contractAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 
 const PAGE_SIZE = 10
 
 export interface RoundEarnings {
   roundId: number
+  roundStart: Date
+  roundEnd: Date
   totalAmount: string
   unallocatedAmount: string
   teamAllocationAmount: string
@@ -53,6 +45,7 @@ interface RoundsPageResponse {
 }
 
 export const getRounds = async (page = 1): Promise<RoundsPageResponse> => {
+  const thor = await getNodeJsThorClient()
   try {
     const currentRoundId = await getCurrentRoundId()
     const startRoundId = currentRoundId - (page - 1) * PAGE_SIZE
@@ -72,11 +65,31 @@ export const getRounds = async (page = 1): Promise<RoundsPageResponse> => {
       ),
     )
 
+    const bestBlockCompressed = await thor.blocks.getBestBlockCompressed()
+    const roundDatesEntries = await fetchContractEvents({
+      thor,
+      abi,
+      contractAddress,
+      eventName: "RoundCreated",
+      mapResponse: ({ decodedData }) => [
+        decodedData.args.roundId,
+        [decodedData.args.voteStart, decodedData.args.voteEnd].map(block =>
+          blockNumberToDate(block, bestBlockCompressed),
+        ),
+      ],
+    })
+
+    const roundDatesRecord = Object.fromEntries(roundDatesEntries)
+
     const roundsData: RoundEarnings[] = earningsResults
       .map((earnings, idx) => {
         if (!earnings) return null
+        const roundId = roundIds[idx]!
+        const [roundStart, roundEnd] = roundDatesRecord[roundId]
         return {
-          roundId: roundIds[idx],
+          roundId,
+          roundStart,
+          roundEnd,
           totalAmount: earnings.totalAmount?.toString() || "0",
           unallocatedAmount: earnings.unallocatedAmount?.toString() || "0",
           teamAllocationAmount: earnings.teamAllocationAmount?.toString() || "0",

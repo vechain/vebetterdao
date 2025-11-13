@@ -5,7 +5,7 @@ import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
-import { executeMultipleClausesCall } from "@vechain/vechain-kit"
+import { executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { redirect } from "next/navigation"
 
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
@@ -37,7 +37,6 @@ export interface AllocationRoundDetails {
   currentRoundId: number
   totalVoters: number
   totalVP: bigint
-  roundStartBlock: bigint
   roundStart?: Date
   roundEnd?: Date
   currentRoundDeadline?: Date
@@ -132,12 +131,14 @@ export const getRoundDetails = async (cycle: bigint) => {
   })
 
   const [xAllocationsAmount, vote2EarnAmount, treasuryAmount, gmAmount] = emissions
-  const [roundStart, roundEnd, currentRoundDeadline] = await Promise.all(
-    [roundStartBlock, roundDeadlineBlock, currentRoundDeadlineBlock].map(block => blockNumberToDate(thor, block)),
-  )
+  const bestBlockCompressed = await thor.blocks.getBestBlockCompressed()
+  const [roundStart, roundEnd, currentRoundDeadline] = [
+    roundStartBlock,
+    roundDeadlineBlock,
+    currentRoundDeadlineBlock,
+  ].map(block => blockNumberToDate(block, bestBlockCompressed))
 
   return {
-    roundStartBlock,
     roundStart,
     currentRoundDeadline,
     roundEnd,
@@ -151,19 +152,20 @@ export const getRoundDetails = async (cycle: bigint) => {
   }
 }
 
-const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDetails> => {
+export const getCurrentRoundId = async () => {
   const thor = await getNodeJsThorClient()
-  const [currentRoundId] = await executeMultipleClausesCall({
+  const [currentRoundId] = await executeCallClause({
     thor,
-    calls: [
-      {
-        abi: xAllocationVotingAbi,
-        address: xAllocationVotingAddress,
-        functionName: "currentRoundId",
-        args: [],
-      },
-    ],
+    abi: xAllocationVotingAbi,
+    contractAddress: xAllocationVotingAddress,
+    method: "currentRoundId",
+    args: [],
   })
+  return Number(currentRoundId)
+}
+
+export const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDetails> => {
+  const currentRoundId = await getCurrentRoundId()
 
   const roundId = round ?? Number(currentRoundId)
 
