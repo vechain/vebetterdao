@@ -2,6 +2,7 @@ import { getConfig } from "@repo/config"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import {
   type StargateNFT,
+  GalaxyMember__factory,
   StargateNFT__factory,
   TokenAuction__factory,
   type X2EarnApps,
@@ -19,10 +20,13 @@ import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
 const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const stargateNFTContractAddress = getConfig().stargateNFTContractAddress as `0x${string}`
 const legacyNodesContractAddress = getConfig().tokenAuctionContractAddress as `0x${string}`
+const galaxyMemberContractAddress = getConfig().galaxyMemberContractAddress as `0x${string}`
 
 const x2EarnAppsAbi = X2EarnApps__factory.abi
 const stargateNFTAbi = StargateNFT__factory.abi
 const legacyNodesAbi = TokenAuction__factory.abi
+const galaxyMemberAbi = GalaxyMember__factory.abi
+
 enum NodeType {
   X = "XNode",
   ECONOMIC = "Economic Node",
@@ -55,6 +59,8 @@ export type UserNode = TokenOverview & {
   isOnCooldown: boolean
   currentUserIsManager: boolean
   currentUserIsOwner: boolean
+  gmAttachedTokenId: bigint
+  isGmAttached: boolean
 }
 export type UserNodesInfo = {
   allNodes: UserNode[]
@@ -115,6 +121,7 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
       let nodeIsXArray: boolean[] = []
       let nodeToEndorsedAppArray: string[] = []
       let nodeCooldownArray: boolean[] = []
+      let nodeGmAttachedTokenIdArray: bigint[] = []
       if (nodeIds?.length > 0) {
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
         nodePointsArray = await executeMultipleClausesCall({
@@ -175,6 +182,16 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
             args: [BigInt(nodeId)],
           })),
         })
+        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
+        nodeGmAttachedTokenIdArray = await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: galaxyMemberAbi,
+            address: galaxyMemberContractAddress,
+            functionName: "getIdAttachedToNode",
+            args: [BigInt(nodeId)],
+          })),
+        })
       }
 
       const nodesWithPoints = tokensOverview?.map((node, index) => ({
@@ -191,6 +208,8 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
         isOnCooldown: nodeCooldownArray?.[index] ?? false,
         currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
         currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
+        gmAttachedTokenId: nodeGmAttachedTokenIdArray[index] ?? BigInt(0),
+        isGmAttached: !!nodeGmAttachedTokenIdArray[index],
       }))
       const totalEndorsementScore = usersEndorsementScore ?? BigInt(0)
       const hasLegacyNode = legacyNodesCount ? legacyNodesCount > BigInt(0) : false
