@@ -27,12 +27,12 @@ export const VotingPowerSection = ({ vot3Balance, isLoading, button }: VotingPow
           borderColor="border.secondary">
           <HStack gap={1}>
             <Icon as={Flash} boxSize={4} color="text.subtle" />
-            <Text textStyle="s" color="text.subtle" fontWeight="semibold" lineHeight="16px">
+            <Text textStyle="sm" color="text.subtle" fontWeight="semibold" lineHeight="16px">
               {t("Voting Power")}
             </Text>
           </HStack>
           <Skeleton loading={isLoading}>
-            <Text textStyle="md" fontWeight="semibold" lineHeight="24px" textAlign="center">
+            <Text textStyle="sm" fontWeight="semibold" lineHeight="24px" textAlign="center">
               {formatted}
             </Text>
           </Skeleton>
