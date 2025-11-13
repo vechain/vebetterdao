@@ -5,7 +5,6 @@ import { FormattingUtils } from "@repo/utils"
 import { Minus, Plus } from "iconoir-react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { formatEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 
@@ -37,9 +36,8 @@ export const AppAllocationCard = ({
 
   const votingPowerForApp = useMemo(() => {
     if (!vot3Balance) return "0"
-    const original = Number(vot3Balance.original)
-    const scaled = formatEther(BigInt(original))
-    const allocated = (parseFloat(scaled) * percentage) / 100
+    const scaled = parseFloat(vot3Balance.scaled)
+    const allocated = (scaled * percentage) / 100
     return allocated === 0 ? "0" : FormattingUtils.humanNumber(allocated.toString())
   }, [vot3Balance, percentage])
 
