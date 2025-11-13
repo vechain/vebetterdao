@@ -2,7 +2,6 @@ import { Card, HStack, Image, Stack, Text, useMediaQuery, VStack } from "@chakra
 import { useTranslation } from "react-i18next"
 
 import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
-import { convertUriToUrl } from "../../../../utils/uri"
 
 export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
@@ -36,7 +35,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
           color="white"
           flexGrow={4}>
           <Image
-            src={convertUriToUrl(xNode?.metadata?.image ?? "")}
+            src={xNode?.metadata?.image}
             alt={xNode?.metadata?.name ?? ""}
             w={isAbove800 ? "132px" : "68px"}
             h={isAbove800 ? "132px" : "68px"}

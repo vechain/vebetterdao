@@ -5,7 +5,6 @@ import { FaChevronRight } from "react-icons/fa"
 
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
-import { convertUriToUrl } from "@/utils/uri"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
@@ -14,24 +13,9 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
   const { isMobile } = useBreakpoints()
   return (
     <LinkBox flex={1}>
-      <Card.Root
-        variant="subtle"
-        alignItems="center"
-        flexDirection="row"
-        gap="8px"
-        borderStyle={node ? "solid" : "dashed"}
-        _dark={{
-          border: node ? "none" : "1px dashed #FFFFFF33",
-        }}
-        p="16px"
-        rounded="8px">
+      <Card.Root variant="subtle" alignItems="center" flexDirection="row" gap="8px">
         <Card.Header p="0">
-          <Image
-            src={convertUriToUrl(node?.metadata?.image ?? "")}
-            alt={node?.metadata?.name ?? ""}
-            boxSize="62px"
-            rounded="8px"
-          />
+          <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} boxSize="62px" rounded="8px" />
         </Card.Header>
         <Card.Body p="0" gap="0">
           {node ? (

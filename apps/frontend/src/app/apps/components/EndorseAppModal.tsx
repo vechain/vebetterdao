@@ -14,7 +14,6 @@ import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
 import { useAppEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useEndorseApp } from "../../../hooks/xApp/useEndorseApp"
-import { convertUriToUrl } from "../../../utils/uri"
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type Props = {
@@ -103,12 +102,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   p="16px"
                   rounded="8px">
                   <Card.Header p="0">
-                    <Image
-                      src={convertUriToUrl(node?.metadata?.image)}
-                      alt={node?.metadata?.name}
-                      boxSize="62px"
-                      rounded="8px"
-                    />
+                    <Image src={node?.metadata?.image} alt={node?.metadata?.name} boxSize="62px" rounded="8px" />
                   </Card.Header>
 
                   <RadioGroup.Item

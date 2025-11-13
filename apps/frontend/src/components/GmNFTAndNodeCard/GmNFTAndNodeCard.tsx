@@ -84,7 +84,7 @@ export const GmNFTAndNodeCard = () => {
                   subtitle={t("Galaxy Member")}
                   title={selectedGM?.metadata?.name || "name"}
                   footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
-                  imagesIpfsUri={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
+                  images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
                   href={`/galaxy-member/${selectedGM?.tokenId}`}
                 />
               ) : (
@@ -103,9 +103,7 @@ export const GmNFTAndNodeCard = () => {
                   title={`${userNodesInfo?.nodesManagedByUser?.[0]?.metadata?.name ?? ""} #${userNodesInfo?.nodesManagedByUser?.[0]?.id?.toString() || ""}`}
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
-                  imagesIpfsUri={userNodesInfo?.nodesManagedByUser?.map(
-                    (node: UserNode) => node?.metadata?.image ?? "",
-                  )}
+                  imges={userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => node?.metadata?.image)}
                   href={`/profile?tab=nodes`}
                 />
               ) : (

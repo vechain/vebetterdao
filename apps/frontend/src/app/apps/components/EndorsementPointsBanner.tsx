@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next"
 
 import { useEndorsementScoreThreshold } from "../../../api/contracts/xApps/hooks/useEndorsementScoreThreshold"
 import { useGetUserNodes, UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { convertUriToUrl } from "../../../utils/uri"
 
 export const EndorsementPointsBanner = () => {
   const { t } = useTranslation()
@@ -34,7 +33,7 @@ export const EndorsementPointsBanner = () => {
       gradientFrom="#29295C"
       gradientTo="#4747A5">
       <Image
-        src={convertUriToUrl(firstAvailableNode?.metadata?.image ?? "")}
+        src={firstAvailableNode?.metadata?.image}
         alt={firstAvailableNode?.metadata?.name ?? ""}
         h={["auto", "auto", "50px"]}
         w={["25%", "25%", "auto"]}
