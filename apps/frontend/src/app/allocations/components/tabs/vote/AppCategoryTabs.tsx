@@ -41,6 +41,7 @@ interface AppCategoryTabsProps {
   initialCategory?: string
   onCategoryChange?: (category: string) => void
   hasEnoughVotesAtSnapshot?: boolean
+  onVoteClick?: () => void
 }
 
 export function AppCategoryTabs({
@@ -55,6 +56,7 @@ export function AppCategoryTabs({
   initialCategory = "all",
   onCategoryChange,
   hasEnoughVotesAtSnapshot,
+  onVoteClick,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
@@ -130,6 +132,7 @@ export function AppCategoryTabs({
               <Button
                 variant="primary"
                 minWidth="36"
+                onClick={onVoteClick}
                 disabled={!hasEnoughVotesAtSnapshot && selectedAppIds && selectedAppIds.size > 0}>
                 {selectedAppIds && selectedAppIds.size > 0
                   ? selectedAppIds.size > 1
