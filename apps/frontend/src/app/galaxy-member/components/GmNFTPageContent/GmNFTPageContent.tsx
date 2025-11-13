@@ -31,28 +31,18 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
-  const gm = userGMs?.find(gm => gm.tokenId === gmId)
-  const [selectedNode, setSelectedNode] = useState(undefined)
-
-  const nodesAttachedToGMs = userGMs?.reduce(
-    (acc, gm) => {
-      if (gm.nodeIdAttached) {
-        acc[gm.nodeIdAttached] = gm.nodeIdAttached
-      }
-      return acc
-    },
-    {} as Record<string, string>,
-  )
-
-  const attachedNode = userNodesInfo?.nodesManagedByUser?.find(
-    node => node.id.toString() === gm?.nodeIdAttached?.toString(),
-  )
+  const [selectedNode, setSelectedNode] = useState<UserNode | undefined>(undefined)
 
   const {
     open: isAttachGMToXNodeModalOpen,
     onOpen: onAttachGMToXNodeModalOpen,
     onClose: onAttachGMToXNodeModalClose,
   } = useDisclosure()
+
+  const handleAttachClick = (node: UserNode) => {
+    setSelectedNode(node)
+    onAttachGMToXNodeModalOpen()
+  }
 
   const {
     open: isDetachGMToXNodeModalOpen,
@@ -62,29 +52,43 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
 
   if (isUserNodesLoading || isUserGMsLoading) return <Spinner size={"lg"} />
 
+  const gm = userGMs?.find(gm => gm.tokenId === gmId)
   if (!gm) return null
+
+  const userNodes = userNodesInfo?.nodesManagedByUser ?? []
+  const nodesAttachedToGMs = userNodes.filter(node => node.isGmAttached)
+  const attachedNode = nodesAttachedToGMs.find(node => node.gmAttachedTokenId.toString() === gm.tokenId)
+
+  //Convert to set to be more efficient searching
+  const nodeIdsAttachedToOtherGMs = new Set(
+    nodesAttachedToGMs.filter(node => node.gmAttachedTokenId.toString() !== gm.tokenId).map(node => node.id.toString()),
+  )
+
+  //Put nodes with attachment first
+  const sortedUserNodes = [...userNodes].sort((a, b) => {
+    if (a.id.toString() === gm.nodeIdAttached?.toString()) return -1
+    if (b.id.toString() === gm.nodeIdAttached?.toString()) return 1
+    return 0
+  })
 
   return (
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
-        {!!userNodesInfo?.nodesManagedByUser?.length && userNodesInfo?.nodesManagedByUser?.length > 0 && (
+        {userNodes.length > 0 && (
           <Card.Root flex={3} variant="primary" maxH={"fit-content"}>
             <Card.Header>
               <Heading textStyle="lg">
-                {t("Nodes")} {`(${userNodesInfo?.nodesManagedByUser?.length})`}
+                {t("Nodes")} {`(${userNodes.length})`}
               </Heading>
             </Card.Header>
             <Card.Body>
               <VStack align={"stretch"} gap="4">
-                {userNodesInfo?.nodesManagedByUser
-                  ?.sort((a, b) => {
-                    // Sort so that attached node appears first
-                    if (a.id.toString() === gm.nodeIdAttached?.toString()) return -1
-                    if (b.id.toString() === gm.nodeIdAttached?.toString()) return 1
-                    return 0
-                  })
-                  ?.map((node: UserNode) => (
+                {sortedUserNodes.map((node: UserNode) => {
+                  const isNodeAttachedToCurrentGM = attachedNode?.id === node.id
+                  const isNodeAttachedToOtherGM = nodeIdsAttachedToOtherGMs.has(node.id.toString())
+
+                  return (
                     <Card.Root
                       key={node.id}
                       variant="subtle"
@@ -125,24 +129,21 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                       </Card.Body>
 
                       <Card.Footer p="0">
-                        {attachedNode?.id === node.id ? (
+                        {isNodeAttachedToCurrentGM ? (
                           <Button
                             colorPalette="red"
                             size={isAbove800 ? "sm" : "xs"}
                             onClick={onDetachGMToXNodeModalOpen}>
                             {t("Detach")}
                           </Button>
-                        ) : nodesAttachedToGMs?.[node.id.toString()] ? (
+                        ) : isNodeAttachedToOtherGM ? (
                           <Tooltip content={t("This node is already attached to another GM")}>
                             <span>
                               <Button
-                                disabled={!!nodesAttachedToGMs?.[node.id.toString()]}
+                                disabled={true}
                                 variant="secondary"
                                 size={isAbove800 ? "sm" : "xs"}
-                                onClick={() => {
-                                  // setSelectedNode(node)
-                                  onAttachGMToXNodeModalOpen()
-                                }}>
+                                onClick={() => handleAttachClick(node)}>
                                 {t("Attached")}
                               </Button>
                             </span>
@@ -154,10 +155,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                                 disabled={!!attachedNode}
                                 variant="secondary"
                                 size={isAbove800 ? "sm" : "xs"}
-                                onClick={() => {
-                                  // setSelectedNode(node)
-                                  onAttachGMToXNodeModalOpen()
-                                }}>
+                                onClick={() => handleAttachClick(node)}>
                                 {t("Attach")}
                               </Button>
                             </span>
@@ -165,7 +163,8 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                         )}
                       </Card.Footer>
                     </Card.Root>
-                  ))}
+                  )
+                })}
               </VStack>
             </Card.Body>
           </Card.Root>
