@@ -10,7 +10,7 @@ import { useSelectGM } from "@/hooks/useSelectGM"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
-export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boolean }) => {
+export const ProfileGMCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boolean }) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const selectGMMutation = useSelectGM({ tokenId: gm?.tokenId })
