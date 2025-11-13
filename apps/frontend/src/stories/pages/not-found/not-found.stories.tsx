@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite"
 import Custom404 from "@/app/not-found"
 
 const meta = {
-  title: "Pages/NotFound",
+  title: "pages/not-found/NotFound",
   component: Custom404,
   parameters: { layout: "centered" },
 } satisfies Meta<typeof Custom404>

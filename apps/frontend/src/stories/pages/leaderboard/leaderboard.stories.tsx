@@ -17,7 +17,7 @@ const data = [
 ]
 
 const meta = {
-  title: "Pages/Leaderboard",
+  title: "pages/leaderboard/LeaderboardPageContent",
   component: LeaderboardPageContent,
   parameters: {
     msw: {
