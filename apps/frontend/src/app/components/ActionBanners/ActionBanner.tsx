@@ -1,15 +1,12 @@
 import { Box } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useMemo, useState } from "react"
-import {
-  A11y,
-  //Autoplay,
-  Pagination,
-} from "swiper/modules"
+import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 
@@ -97,6 +94,8 @@ export const ActionBanner = () => {
     isPerson,
     isLoading,
   } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
+
+  const { data: userNodesInfo } = useGetUserNodes(account?.address ?? undefined)
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
@@ -186,10 +185,9 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   // Legacy Node banners logic
-  const isLegacyNode = true //TODO: Get if user has any legacy node to display banner
+  const userHasLegacyNode = userNodesInfo?.hasLegacyNode ?? false
   // Remove the banner for every user at the end of this round
-  const showStargateBanner =
-    currentRoundId < 55 || (isLegacyNode && isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))
+  const showStargateBanner = userHasLegacyNode && isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION)
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
@@ -216,14 +214,14 @@ export const ActionBanner = () => {
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showStargateBanner)
-      bannerComponents.push(<StargateMigrationBanner isLegacyNode={isLegacyNode} key="stargate-migration" />)
+      bannerComponents.push(<StargateMigrationBanner isLegacyNode={userHasLegacyNode} key="stargate-migration" />)
 
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
     return bannerComponents
   }, [
-    isLegacyNode,
+    userHasLegacyNode,
     showCantVoteBanners,
     CantVoteBanner,
     showClaimB3trBanner,
@@ -261,19 +259,17 @@ export const ActionBanner = () => {
           },
         }}>
         <Swiper
-          modules={[
-            A11y,
-            //Autoplay,
-            Pagination,
-          ]}
+          modules={[A11y, Autoplay, Pagination]}
           rewind={true}
           pagination={slides.length > 1}
           wrapperClass="action-banner"
           spaceBetween={20}
-          // TODO: this autoplay feature will be enabled later.
-          // speed={800}
-          // autoplay={{ delay: 3000, disableOnInteraction: false }}
-        >
+          speed={800}
+          autoplay={{
+            delay: 6000,
+            pauseOnMouseEnter: true,
+            disableOnInteraction: false,
+          }}>
           {slides.map(slide => (
             <SwiperSlide key={`slide-${slide?.key}`} className="slide">
               {slide}
@@ -281,7 +277,7 @@ export const ActionBanner = () => {
           ))}
         </Swiper>
       </Box>
-      <NodeUpgradeModal isOpen={isLegacyNode && showModal} onClose={() => setShowModal(false)} />
+      <NodeUpgradeModal isOpen={userHasLegacyNode && showModal} onClose={() => setShowModal(false)} />
     </>
   )
 }
