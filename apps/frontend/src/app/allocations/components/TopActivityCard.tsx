@@ -70,7 +70,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
           </Circle>
         }
         title={""}
-        description="You haven’t voted for any app yet, start collecting your favourite once."
+        description="You haven’t voted for any app yet, start collecting your favourite ones."
       />
     )
   }
