@@ -153,12 +153,14 @@ export function AllocationTabs({
         </Box>
       </Presence>
 
-      <ConfirmVoteModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        selectedApps={selectedApps}
-        onConfirm={handleConfirmVote}
-      />
+      {isModalOpen && (
+        <ConfirmVoteModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          selectedApps={selectedApps}
+          onConfirm={handleConfirmVote}
+        />
+      )}
     </AllocationTabsContext.Provider>
   )
 }

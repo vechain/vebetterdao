@@ -2,7 +2,7 @@
 
 import { Button, VStack, HStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Modal } from "@/components/Modal"
@@ -37,15 +37,6 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
   const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
 
   const canSubmit = isValid()
-
-  // Set equal allocations when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setEqualAllocations()
-      setIsCustomising(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen])
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
