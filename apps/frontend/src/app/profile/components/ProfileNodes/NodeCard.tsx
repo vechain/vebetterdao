@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa"
 
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
+import { BlurredWrapper } from "@/components/BlurredWrapper"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
@@ -13,52 +14,60 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
   const { isMobile } = useBreakpoints()
   return (
     <LinkBox flex={1}>
-      <Card.Root variant="subtle" alignItems="center" flexDirection="row" gap="8px">
-        <Card.Header p="0">
-          <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} boxSize="62px" rounded="8px" />
-        </Card.Header>
-        <Card.Body p="0" gap="0">
-          {node ? (
-            <>
-              <ConditionalWrapper
-                condition={isClickable}
-                wrapper={({ children }) => (
-                  <LinkOverlay asChild>
-                    <NextLink href={`/xnode/${node.id}`}>{children}</NextLink>
-                  </LinkOverlay>
-                )}>
-                <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-                  {t("Node")}
+      <ConditionalWrapper
+        condition={!node?.currentUserIsManager}
+        wrapper={({ children }) => (
+          <BlurredWrapper title={t("Node not available")} description={t("It's currently managed by someone else")}>
+            {children}
+          </BlurredWrapper>
+        )}>
+        <Card.Root variant="subtle" alignItems="center" flexDirection="row" gap="8px">
+          <Card.Header p="0">
+            <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} boxSize="62px" rounded="8px" />
+          </Card.Header>
+          <Card.Body p="0" gap="0">
+            {node ? (
+              <>
+                <ConditionalWrapper
+                  condition={isClickable}
+                  wrapper={({ children }) => (
+                    <LinkOverlay asChild>
+                      <NextLink href={`/xnode/${node.id}`}>{children}</NextLink>
+                    </LinkOverlay>
+                  )}>
+                  <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
+                    {t("Node")}
+                  </Text>
+                </ConditionalWrapper>
+                <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
+                  {`${node.metadata?.name} #${node.id}`}
                 </Text>
-              </ConditionalWrapper>
-              <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
-                {`${node.metadata?.name} #${node.id}`}
+                <Box
+                  w="fit-content"
+                  display="inline-block"
+                  bg="#F8F8F8"
+                  _dark={{ bg: "#FFFFFF4A" }}
+                  rounded="8px"
+                  padding="4px 8px">
+                  <Text textStyle={"xs"} lineClamp={1}>
+                    {t("{{value}} points", { value: node.endorsementScore.toString() })}
+                  </Text>
+                </Box>
+              </>
+            ) : (
+              <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
+                {t("No Node attached")}
               </Text>
-              <Box
-                w="fit-content"
-                display="inline-block"
-                bg="#F8F8F8"
-                _dark={{ bg: "#FFFFFF4A" }}
-                rounded="8px"
-                padding="4px 8px">
-                <Text textStyle={"xs"} lineClamp={1}>
-                  {t("{{value}} points", { value: node.endorsementScore.toString() })}
-                </Text>
-              </Box>
-            </>
-          ) : (
-            <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-              {t("No Node attached")}
-            </Text>
-          )}
-        </Card.Body>
+            )}
+          </Card.Body>
 
-        {isClickable && !isMobile && (
-          <Card.Footer p="0">
-            <FaChevronRight />
-          </Card.Footer>
-        )}
-      </Card.Root>
+          {isClickable && !isMobile && (
+            <Card.Footer p="0">
+              <FaChevronRight />
+            </Card.Footer>
+          )}
+        </Card.Root>
+      </ConditionalWrapper>
     </LinkBox>
   )
 }
