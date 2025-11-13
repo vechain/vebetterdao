@@ -25,15 +25,13 @@ import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../
 import { FeatureFlag } from "../../../../constants/featureFlag"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
-export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
+export const AttachGMNFTCard = ({ node }: { node: UserNode }) => {
   const { t } = useTranslation()
   const { data: userGms, isLoading: isUserGmsLoading } = useGetUserGMs()
-  const isXNodeDelegator = false //TODO: Get if xNode is delegator
-  const isXNodeAttachedToGM = false //TODO: Get if xNode is attached to a GM
-  // TODO: Fetch attached GM from contract - use getAttachedGM(xNode.id)
-  const attachedGMNFT = userGms?.find((_gm: UserGM) => false) // TODO: Placeholder - needs proper implementation
+
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
+
   const handleDetachOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     detachGmToXNodeModal.onOpen()
@@ -44,7 +42,20 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
   }
 
+  // Derive all data at the top
+  const isXNodeDelegator = !node?.currentUserIsManager
+  const isXNodeAttachedToGM = node?.isGmAttached
+  const attachedGMNFT = userGms?.find((_gm: UserGM) => _gm.tokenId === node?.gmAttachedTokenId.toString())
+
   if (!attachedGMNFT) return null
+
+  // Extract data to avoid repeated type assertions
+  const gmTokenId = attachedGMNFT.tokenId
+  const gmTokenLevel = attachedGMNFT.tokenLevel
+  const gmMetadataImage = attachedGMNFT.metadata?.image ?? ""
+  const gmMetadataName = attachedGMNFT.metadata?.name ?? ""
+  const gmMultiplier = attachedGMNFT.multiplier?.toString() ?? "0"
+  const gmLevelGradient = getLevelGradient(Number(gmTokenLevel ?? "0"))
 
   return (
     <Card.Root variant="primary" w="full">
@@ -67,7 +78,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
             </Text>
           </VStack>
           <Flex asChild border="1px solid" rounded="12px" position="relative" cursor="pointer">
-            <NextLink href={`/galaxy-member/${(attachedGMNFT as any)?.tokenId ?? ""}`}>
+            <NextLink href={`/galaxy-member/${gmTokenId}`}>
               <Image
                 src={"/assets/backgrounds/nft-page-background.webp"}
                 alt="gm-nft-header"
@@ -85,25 +96,19 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                     w={"68px"}
                     h={"68px"}
                     rounded="8px"
-                    bgGradient={getLevelGradient(Number((attachedGMNFT as any)?.tokenLevel ?? "0"))}
+                    bgGradient={gmLevelGradient}
                     display="flex"
                     alignItems="center"
                     justifyContent="center">
-                    <Image
-                      src={(attachedGMNFT as any)?.metadata?.image ?? ""}
-                      alt="gm"
-                      w={"64px"}
-                      h={"64px"}
-                      rounded="7px"
-                    />
+                    <Image src={gmMetadataImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
                   </Box>
                 </Skeleton>
                 <VStack flex="1" align={"flex-start"}>
-                  <Text lineClamp={1}>{(attachedGMNFT as any)?.metadata?.name ?? ""}</Text>
+                  <Text lineClamp={1}>{gmMetadataName}</Text>
                   <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                     <HStack gap={1}>
                       <Text textStyle="sm" fontWeight="semibold">
-                        {(attachedGMNFT as any)?.multiplier?.toString() ?? "0"}
+                        {gmMultiplier}
                         {"x"}
                       </Text>
                       <Text textStyle="sm" lineClamp={1}>
@@ -127,15 +132,15 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
         </VStack>
       </Card.Body>
       <AttachGMToXNodeModal
-        gmId={""} //TODO: Get GM ID
-        node={xNode}
+        gmId={gmTokenId}
+        node={node}
         isOpen={attachGmToXNodeModal.open}
         onClose={attachGmToXNodeModal.onClose}
       />
       <DetachGMToXNodeModal
-        gmId={""} //TODO: Get GM ID
-        gmLevel={""} //TODO: Get GM Level
-        xNodeId={xNode.id.toString()}
+        gmId={gmTokenId}
+        gmLevel={gmTokenLevel}
+        xNodeId={node.id.toString()}
         isOpen={detachGmToXNodeModal.open}
         onClose={detachGmToXNodeModal.onClose}
       />

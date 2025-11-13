@@ -28,8 +28,8 @@ type Props = {
  * @param {Function} [props.onSuccess] - Optional callback function to be called on successful transaction.
  * @returns {Object} An object containing the transaction builder and related data.
  *
- * @note Detach the GM either from the connected account xNode,
- * or from the xNode receiver account that have an attached GM
+ * @note Detach the GM either from the connected account node,
+ * or from the node receiver account that have an attached GM
  */
 export const useDetachGMFromXNode = ({ xNodeId, onSuccess }: Props) => {
   const { data: userGms } = useGetUserGMs()

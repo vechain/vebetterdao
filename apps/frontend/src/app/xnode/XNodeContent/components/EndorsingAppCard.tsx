@@ -34,11 +34,11 @@ import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endo
 import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { GenericAlert } from "../../../components/Alert/GenericAlert"
 
-export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
+export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const isEndorsingApp = false //TODO: Get if xNode is endorsing an app
-  const { data: endorsedApps } = useNodesEndorsedApps([xNode.id.toString()])
+  const isEndorsingApp = false //TODO: Get if node is endorsing an app
+  const { data: endorsedApps } = useNodesEndorsedApps([node.id.toString()])
   const endorsedApp = endorsedApps?.[0]?.endorsedApp
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers("") //TODO: Get endorsed app ID
@@ -52,7 +52,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
 
   // get the last endorsement event for the endorsed app
   const { data: appEndorsedEvents } = useAppEndorsedEvents({
-    nodeId: xNode.id.toString(),
+    nodeId: node.id.toString(),
     appId: "", //TODO: Get endorsed app ID
     endorsed: true,
   })
@@ -65,10 +65,10 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    return false //TODO: Get if xNode is delegated or on cooldown
+    return false //TODO: Get if node is delegated or on cooldown
   }, [])
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account?.address && !false //TODO: Get if xNode is delegated
+    return account?.address && !false //TODO: Get if node is delegated
   }, [account?.address])
 
   return (
@@ -90,7 +90,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
           </VStack>
           {shouldDisplayCooldownAlert ? (
             <GenericAlert
-              type={!false ? "warning" : "error"} //TODO: Get if xNode is on cooldown
+              type={!false ? "warning" : "error"} //TODO: Get if node is on cooldown
               isLoading={roundInfoLoading}
               message={
                 false
@@ -180,9 +180,9 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
               bg="transparent"
               icon={<Icon as={UilSearch} boxSize={{ base: "16", md: "24" }} />}
               title={t("You’re not endorsing any app")}
-              //TODO: Get if xNode is delegator
+              //TODO: Get if node is delegator
               description={
-                false //TODO: Get if xNode is delegator
+                false //TODO: Get if node is delegator
                   ? t(
                       "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
                     )
@@ -190,7 +190,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                       "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
                     )
               }>
-              {!false && ( //TODO: Get if xNode is delegator
+              {!false && ( //TODO: Get if node is delegator
                 <Button variant="primary" asChild mt={4} w={["full", "full", "auto"]}>
                   <NextLink href="/apps">{t("Browse apps")}</NextLink>
                 </Button>
@@ -200,7 +200,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
         </VStack>
       </Card.Body>
       <UnendorseAppModal
-        xNodeId={xNode.id.toString()}
+        xNodeId={node.id.toString()}
         isOpen={unendorseAppModal.open}
         onClose={unendorseAppModal.onClose}
       />
