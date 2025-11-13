@@ -10,6 +10,7 @@ import { validateIpfsUri } from "./ipfs"
  * @param uri
  */
 export const convertUriToUrl = (uri: string) => {
+  if (!uri) return ""
   // if it is a data uri just return it
   if (uri.startsWith("data:")) return uri
   const splitUri = uri?.split("://")
