@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useMemo, useCall
 type TransactionCustomUIProps = {
   title?: string
   description?: React.ReactNode
-  buttonText?: string
+  customButton?: React.ReactNode
 }
 export type TransactionCustomUI = Partial<Record<TransactionStatus, TransactionCustomUIProps>>
 interface TransactionState {

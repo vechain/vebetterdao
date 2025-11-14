@@ -18,7 +18,7 @@ export type SuccessModalContentProps = {
   txId?: string
   isSuccessBeenTrack?: boolean
   onClose: () => void
-  buttonText?: string
+  customButton?: ReactNode
 }
 const okHandVariants = {
   initial: { rotateY: 0 },
@@ -56,7 +56,7 @@ export const SuccessModalContent = ({
   txId,
   isSuccessBeenTrack,
   onClose,
-  buttonText,
+  customButton,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
 
@@ -76,12 +76,12 @@ export const SuccessModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Heading size="3xl" data-testid={"tx-modal-title"}>
+      <Heading size="xl" textAlign="center" fontWeight="bold" data-testid={"tx-modal-title"}>
         {title}
       </Heading>
 
       {description && (
-        <VStack gap={2} mt={4}>
+        <VStack gap={2} mt={4} w="full">
           {description}
         </VStack>
       )}
@@ -113,11 +113,15 @@ export const SuccessModalContent = ({
           </HStack>
         </Link>
       </Flex>
-      <HStack w={"full"} alignItems={"center"} justifyContent={"center"} gap={2} mt={4}>
-        <Button variant={"primary"} w={"50%"} py={6} onClick={onClose}>
-          {buttonText || t("Done")}
-        </Button>
-      </HStack>
+      <VStack w={"full"} alignItems={"stretch"} gap={2} mt={4}>
+        {customButton ? (
+          customButton
+        ) : (
+          <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={onClose}>
+            {t("Done")}
+          </Button>
+        )}
+      </VStack>
     </VStack>
   )
 }
