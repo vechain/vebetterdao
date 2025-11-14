@@ -1,11 +1,7 @@
 import { Box } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useMemo, useState } from "react"
-import {
-  A11y,
-  //Autoplay,
-  Pagination,
-} from "swiper/modules"
+import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
@@ -264,19 +260,18 @@ export const ActionBanner = () => {
           },
         }}>
         <Swiper
-          modules={[
-            A11y,
-            //Autoplay,
-            Pagination,
-          ]}
+          modules={[A11y, Autoplay, Pagination]}
           rewind={true}
           pagination={slides.length > 1}
           wrapperClass="action-banner"
           spaceBetween={20}
-          // TODO: this autoplay feature will be enabled later.
-          // speed={800}
-          // autoplay={{ delay: 3000, disableOnInteraction: false }}
-        >
+          speed={800}
+          scrollbar={{ draggable: true }}
+          autoplay={{
+            delay: 6000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}>
           {slides.map(slide => (
             <SwiperSlide key={`slide-${slide?.key}`} className="slide">
               {slide}

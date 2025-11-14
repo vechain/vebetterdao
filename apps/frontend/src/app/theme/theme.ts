@@ -34,17 +34,17 @@ const config = defineConfig({
   // strictTokens: true,
   theme: {
     textStyles: {
-      "6xl": { value: { fontSize: "3.75rem", lineHeight: "3.75rem" } }, //60px
-      "5xl": { value: { fontSize: "3rem", lineHeight: "3.25rem" } }, //48px
-      "4xl": { value: { fontSize: "2.25rem", lineHeight: "2.75rem" } }, //36px
-      "3xl": { value: { fontSize: "1.75rem", lineHeight: "2.25rem" } }, //28px
-      "2xl": { value: { fontSize: "1.5rem", lineHeight: "2rem" } }, //24px
-      xl: { value: { fontSize: "1.25rem", lineHeight: "1.875rem" } }, //20px
-      lg: { value: { fontSize: "1.125rem", lineHeight: "1.75rem" } }, //18px
-      md: { value: { fontSize: "1rem", lineHeight: "1.5rem" } }, //16px
-      sm: { value: { fontSize: "0.875rem", lineHeight: "1.25rem" } }, //14px
-      xs: { value: { fontSize: "0.75rem", lineHeight: "1rem" } }, //12px
-      xxs: { value: { fontSize: "0.625rem", lineHeight: "0.875rem" } }, //10px
+      "6xl": { value: { fontSize: "3.75rem", lineHeight: "3.75rem" } }, //60px, 60px
+      "5xl": { value: { fontSize: "3rem", lineHeight: "3.25rem" } }, //48px, 52px
+      "4xl": { value: { fontSize: "2.25rem", lineHeight: "2.75rem" } }, //36px, 44px
+      "3xl": { value: { fontSize: "1.75rem", lineHeight: "2.25rem" } }, //28px, 36px
+      "2xl": { value: { fontSize: "1.5rem", lineHeight: "2rem" } }, //24px, 32px
+      xl: { value: { fontSize: "1.25rem", lineHeight: "1.875rem" } }, //20px, 30px
+      lg: { value: { fontSize: "1.125rem", lineHeight: "1.75rem" } }, //18px, 28px
+      md: { value: { fontSize: "1rem", lineHeight: "1.5rem" } }, //16px, 24px
+      sm: { value: { fontSize: "0.875rem", lineHeight: "1.25rem" } }, //14px, 20px
+      xs: { value: { fontSize: "0.75rem", lineHeight: "1rem" } }, //12px, 16px
+      xxs: { value: { fontSize: "0.625rem", lineHeight: "0.875rem" } }, //10px, 14px
     },
     recipes: {
       heading: headingRecipe,
