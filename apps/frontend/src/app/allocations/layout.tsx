@@ -2,6 +2,10 @@ import { getPageMetadata } from "@/utils/metadata"
 
 export const metadata = getPageMetadata("allocations")
 
-export default function AppsLayout({ children }: { children: React.ReactNode }) {
+interface AllocationsLayoutProps {
+  children: React.ReactNode
+}
+
+export default function AllocationsLayout({ children }: AllocationsLayoutProps) {
   return children
 }

@@ -22,11 +22,11 @@ import { Search, Search as SearchIcon } from "iconoir-react"
 import { useMemo, useState } from "react"
 
 import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
+import { AppWithVotes } from "@/app/allocations/lib/data"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
-import type { AppWithVotes } from "../../../page"
 import { AppRadioCard } from "../../AppRadioCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
 

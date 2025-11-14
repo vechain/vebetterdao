@@ -11,7 +11,7 @@ import { formatEther } from "viem"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
 
-import type { AllocationRoundDetails } from "../page"
+import { AllocationRoundDetails } from "../lib/data"
 
 import { StatCard } from "./StatCard"
 

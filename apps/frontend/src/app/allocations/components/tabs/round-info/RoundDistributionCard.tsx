@@ -6,7 +6,7 @@ import { formatEther } from "viem"
 
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 
-import { AllocationRoundDetails } from "../../../page"
+import { AllocationRoundDetails } from "../../../lib/data"
 
 export function RoundDistributionCard({
   roundDetails,

@@ -1,24 +1,17 @@
 export const dynamic = "force-dynamic"
 
-import { Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit"
-import { redirect } from "next/navigation"
 
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 import { fetchClient } from "@/api/indexer/api"
-import { FeatureFlag, featureFlags } from "@/constants/featureFlag"
 import { blockNumberToDate } from "@/utils/date"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
-import { CountdownBox } from "./components/CountdownBox"
-import { PotentialRewardBox } from "./components/PotentialRewardBox"
-import { AllocationTabs } from "./components/tabs/vote/AllocationTabs"
-import { VotingPowerBox } from "./components/VotingPowerBox"
-import { getRounds, RoundEarnings } from "./history/page"
+import { getRounds, RoundEarnings } from "../history/page"
 
 export interface AppWithVotes {
   id: string
@@ -187,44 +180,4 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
     apps: appsWithVotes,
     previous3RoundsEarnings: rounds.data.slice(1, 4),
   }
-}
-
-export default async function Page({ searchParams }: { searchParams: Promise<{ roundId?: string }> }) {
-  if (!featureFlags[FeatureFlag.ALLOCATION_REDESIGN].enabled) return redirect("/rounds")
-
-  const params = await searchParams
-  const roundIdParam = params.roundId
-
-  let roundDetails: AllocationRoundDetails
-
-  if (roundIdParam) {
-    const roundId = parseInt(roundIdParam, 10)
-    if (isNaN(roundId)) {
-      return redirect("/allocations")
-    } else roundDetails = await getHistoricalRoundData(roundId)
-  } else roundDetails = await getHistoricalRoundData()
-
-  return (
-    <>
-      <VStack alignItems="stretch" gap="2" w="full" mb="6">
-        <Heading size={{ base: "xl", md: "3xl" }}>{"Allocation"}</Heading>
-        <Grid
-          templateRows={{ base: "repeat(2,1fr)", md: "1fr" }}
-          templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }}
-          gap="2">
-          <GridItem colSpan={{ base: 2, md: 1 }} w="full">
-            <VotingPowerBox />
-          </GridItem>
-          <GridItem asChild>
-            <PotentialRewardBox roundDetails={roundDetails} />
-          </GridItem>
-          <GridItem asChild>
-            <CountdownBox deadline={roundDetails?.currentRoundDeadline} />
-          </GridItem>
-        </Grid>
-      </VStack>
-
-      <AllocationTabs roundDetails={roundDetails} previous3RoundsEarnings={roundDetails.previous3RoundsEarnings} />
-    </>
-  )
 }

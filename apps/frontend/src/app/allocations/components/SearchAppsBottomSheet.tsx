@@ -4,7 +4,7 @@ import { CloseButton, Flex, IconButton, Input, InputGroup } from "@chakra-ui/rea
 import { NavArrowLeft } from "iconoir-react"
 import { useRef } from "react"
 
-import type { AppWithVotes } from "@/app/allocations/page"
+import type { AppWithVotes } from "@/app/allocations/lib/data"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 
 import { AppCategoryTabs } from "./tabs/vote/AppCategoryTabs"

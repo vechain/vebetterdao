@@ -1,27 +1,36 @@
+"use client"
+
 import { Badge, Button, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useContext } from "react"
 
-import { RoundEarnings } from "@/app/allocations/history/page"
-
-import { AllocationRoundDetails } from "../../../page"
+import type { AllocationRoundDetails } from "../../../lib/data"
 import { RoundActiveAppsListCard } from "../../RoundActiveAppsListCard"
 import { UserVotingActivityCard } from "../../UserVotingActivityCard"
+import { AllocationTabsContext } from "../AllocationTabsProvider"
 
 import { RoundDistributionCard } from "./RoundDistributionCard"
 import { RoundHistoryCard } from "./RoundHistoryCard"
 
 const DATE_FORMAT = "MMM D"
 
-export function RoundInfoTab({
-  roundDetails,
-  previous3RoundsEarnings,
-}: {
-  roundDetails: AllocationRoundDetails
-  previous3RoundsEarnings: RoundEarnings[]
-}) {
+interface RoundInfoTabProps {
+  roundDetails?: AllocationRoundDetails
+}
+
+export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabProps) {
+  const context = useContext(AllocationTabsContext)
+  const contextRoundDetails = context?.roundDetails
+
+  const roundDetails = propRoundDetails || contextRoundDetails
+
+  if (!roundDetails) {
+    throw new Error("RoundInfoTab requires roundDetails prop or must be used within AllocationTabsProvider")
+  }
+  const previous3RoundsEarnings = roundDetails.previous3RoundsEarnings
   const router = useRouter()
   const searchParams = useSearchParams()
   const { cycleTotal, totalVoters, apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount } = roundDetails

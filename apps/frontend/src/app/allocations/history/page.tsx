@@ -11,7 +11,7 @@ import { blockNumberToDate } from "@/utils/date"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
 import { RoundHistoryCard } from "../components/tabs/round-info/RoundHistoryCard"
-import { getCurrentRoundId } from "../page"
+import { getCurrentRoundId } from "../lib/data"
 
 const BreadcrumItems = [
   {

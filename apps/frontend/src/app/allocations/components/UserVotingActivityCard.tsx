@@ -32,7 +32,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { useEvents } from "@/hooks/useEvents"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
-import { AllocationRoundDetails, AppWithVotes } from "../page"
+import { AllocationRoundDetails, AppWithVotes } from "../lib/data"
 
 const INITIAL_DISPLAY_COUNT = 3
 

@@ -14,7 +14,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { useEvents } from "@/hooks/useEvents"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
-import { AppWithVotes } from "../page"
+import { AppWithVotes } from "../lib/data"
 
 const isEmpty = false
 

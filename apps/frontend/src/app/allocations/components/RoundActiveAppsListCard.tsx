@@ -9,7 +9,7 @@ import { formatEther } from "viem"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { SearchField } from "@/components/SearchField/SearchField"
 
-import { AppWithVotes } from "../page"
+import { AppWithVotes } from "../lib/data"
 
 const INITIAL_DISPLAY_COUNT = 4
 

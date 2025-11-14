@@ -6,7 +6,7 @@ import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { RoundActiveAppsListCard } from "../../components/RoundActiveAppsListCard"
 import { RoundDistributionCard } from "../../components/tabs/round-info/RoundDistributionCard"
 import { UserVotingActivityCard } from "../../components/UserVotingActivityCard"
-import { AllocationRoundDetails, getHistoricalRoundData } from "../../page"
+import { AllocationRoundDetails, getHistoricalRoundData } from "../../lib/data"
 
 export type Props = {
   params: {
