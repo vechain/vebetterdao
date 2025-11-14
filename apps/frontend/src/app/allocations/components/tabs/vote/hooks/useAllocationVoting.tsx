@@ -9,6 +9,7 @@ import { parseEther } from "viem"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
 
 interface UseAllocationVotingProps {
   roundId: string
@@ -62,21 +63,21 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
     (allocations: Map<string, number>) => {
       if (!votesAtSnapshot?.totalVotesWithDeposits) return
 
-      // Convert percentages to weighted votes
+      // Convert percentages to weighted votes in wei
       const totalVotingPower = parseEther(votesAtSnapshot.totalVotesWithDeposits)
       const allocationsWithWeight = new Map<string, bigint>()
 
       allocations.forEach((percentage, appId) => {
-        const weight = (totalVotingPower * BigInt(Math.round(percentage * 100))) / 10000n
+        const weight = calculateVotingWeightFromPercentage(totalVotingPower, percentage)
         if (weight > 0n) {
           allocationsWithWeight.set(appId, weight)
         }
       })
 
-      // Filter out zero votes and prepare data for transaction
+      // Prepare data for transaction - pass wei values directly as strings
       const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
         appId,
-        votes: Number(ethers.formatEther(weight)),
+        votesWei: weight.toString(),
       }))
 
       // Calculate total voting weight for display in modal

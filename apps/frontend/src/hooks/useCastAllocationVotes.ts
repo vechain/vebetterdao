@@ -1,7 +1,6 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
@@ -21,12 +20,12 @@ import { useBuildTransaction } from "./useBuildTransaction"
 const GAS_PADDING = 0.15
 /**
  * CastAllocationVotesProps is the type of the data to send to the castAllocationVotes hook
- * id is the id of the app to vote
- * value is the percentage of the vote (not scaled)
+ * appId is the id of the app to vote
+ * votesWei is the voting weight in wei (as string to preserve precision)
  */
 export type CastAllocationVotesProps = {
   appId: string
-  votes: number
+  votesWei: string
 }[]
 type useCastAllocationVotesProps = {
   roundId: string
@@ -51,10 +50,10 @@ export const useCastAllocationVotes = ({
 
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
-      const filteredData = data.filter(value => value.votes > 0)
+      const filteredData = data.filter(value => BigInt(value.votesWei) > 0n)
 
       const apps = filteredData.map(value => value.appId)
-      const votes = filteredData.map(value => ethers.parseEther(value.votes.toString()))
+      const votes = filteredData.map(value => BigInt(value.votesWei))
 
       const clause: EnhancedClause = {
         to: getConfig().xAllocationVotingContractAddress,
