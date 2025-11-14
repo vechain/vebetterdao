@@ -70,10 +70,11 @@ export function AllocationTabs({
   )
 
   const onVoteSuccess = useCallback(() => {
-    closeTxModal()
     setSelectedAppIds(new Set())
     closeModal()
-  }, [closeTxModal, closeModal])
+    closeTxModal()
+    router.push("/")
+  }, [closeTxModal, closeModal, router])
 
   const { handleConfirmVote } = useAllocationVoting({
     roundId: currentRoundDetails.id.toString(),
