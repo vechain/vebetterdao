@@ -9,10 +9,6 @@ import {
   Button,
   Text,
   Progress,
-  Heading,
-  CloseButton,
-  Dialog,
-  Flex,
   Float,
   Circle,
   Icon,
@@ -105,18 +101,9 @@ export const VPSummaryMobileLight: Story = {
       <Modal
         isOpen
         onClose={() => {}}
-        title={
-          <Flex alignItems="center" justifyContent={"space-between"} pt="8" py="8" pb="6">
-            <Heading>Confirm your vote</Heading>
-
-            <Dialog.CloseTrigger asChild position="static">
-              <CloseButton size="md" />
-            </Dialog.CloseTrigger>
-          </Flex>
-        }
+        title="Confirm your vote"
         showCloseButton
         modalContentProps={{ maxWidth: "400px" }}
-        showHeader={false}
         footer={
           <SimpleGrid columns={2} gap={3} w="full">
             <Button variant="secondary" onClick={() => {}}>

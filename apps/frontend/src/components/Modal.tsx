@@ -15,7 +15,7 @@ type Props = {
   modalContentProps?: Partial<Dialog.ContentProps>
   showCloseButton?: boolean
   isCloseable?: boolean
-  title?: string
+  title?: string | React.ReactNode
   illustration?: string
   footer?: React.ReactNode
   description?: string | React.ReactNode
@@ -37,7 +37,7 @@ export const Modal = ({
   illustration,
   footer,
   description,
-  showLogo = true,
+  showLogo = false,
   showHeader = true,
 }: Props) => {
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
@@ -112,7 +112,11 @@ export const Modal = ({
       ariaTitle={ariaTitle ?? ""}
       isDismissable={isCloseable}
       ariaDescription={ariaDescription ?? ""}
-      footer={footer}>
+      footer={footer}
+      title={title}
+      illustration={illustration}
+      showCloseButton={showCloseButton}
+      description={description}>
       {children}
     </BaseBottomSheet>
   )
