@@ -82,15 +82,6 @@ const config: HardhatUserConfig = {
       },
       gas: 10000000,
     },
-    galactica_test: {
-      url: "https://galactica.live.dev.node.vechain.org",
-      accounts: {
-        mnemonic: getMnemonic(),
-        count: 20,
-        path: HDKey.VET_DERIVATION_PATH,
-      },
-      gas: 10000000,
-    },
   },
   docgen: {
     pages: "files",

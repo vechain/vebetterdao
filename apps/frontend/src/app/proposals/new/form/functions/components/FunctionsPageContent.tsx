@@ -12,7 +12,7 @@ import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtil
 
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 
-const devEnvs: EnvConfig[] = [AppEnv.LOCAL, AppEnv.E2E, AppEnv.TESTNET_STAGING, AppEnv.GALACTICA_TEST]
+const devEnvs: EnvConfig[] = [AppEnv.LOCAL, AppEnv.E2E, AppEnv.TESTNET_STAGING]
 export const FunctionsPageContent = () => {
   const env = getConfig().environment
   const { t } = useTranslation()
