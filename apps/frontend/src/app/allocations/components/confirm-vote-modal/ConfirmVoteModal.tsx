@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, VStack, HStack } from "@chakra-ui/react"
+import { Button, VStack, HStack, Heading, CloseButton, Flex, useMediaQuery } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -24,6 +24,7 @@ interface ConfirmVoteModalProps {
 export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
+  const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
 
   // Get user's voting power at snapshot
   const { vot3Balance, isLoading: isLoadingBalance } = useVotingPowerAtSnapshot()
@@ -47,13 +48,25 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
     onClose()
   }, [onClose])
 
+  const modalTitle = isDesktop ? (
+    <Flex justify="space-between" align="center" w="full" pb={4}>
+      <Heading size="xl" fontWeight="bold">
+        {t("Confirm your vote")}
+      </Heading>
+      <CloseButton onClick={handleCloseModal} />
+    </Flex>
+  ) : (
+    t("Confirm your vote")
+  )
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleCloseModal}
-      title={t("Confirm your vote")}
-      showCloseButton={true}
+      title={modalTitle}
+      showCloseButton={false}
       showLogo={false}
+      showHeader={false}
       modalContentProps={{
         maxH: "90vh",
         display: "flex",

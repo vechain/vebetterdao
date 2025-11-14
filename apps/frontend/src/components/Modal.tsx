@@ -40,7 +40,7 @@ export const Modal = ({
   showLogo = false,
   showHeader = true,
 }: Props) => {
-  const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
+  const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
   if (isDesktop)
     return (
       <Dialog.Root

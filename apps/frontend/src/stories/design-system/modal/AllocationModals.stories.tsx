@@ -206,12 +206,12 @@ export const VoteProcessingMobileLight: Story = {
           variant="subtle"
           mt="8"
           p={4}
-          bg="gray.50"
+          bg="bg.secondary"
           flexDirection="row"
           justifyContent="center"
           alignItems="center"
           gap="2">
-          <Text textStyle="sm" color="gray.600">
+          <Text textStyle="sm" color="text.subtle">
             You voted with
           </Text>
           <Badge
@@ -243,12 +243,12 @@ export const TransactionSuccessModal: Story = {
         variant="subtle"
         mt="8"
         p={4}
-        bg="gray.50"
+        bg="bg.secondary"
         flexDirection="row"
         justifyContent="center"
         alignItems="center"
         gap="2">
-        <Text textStyle="sm" color="gray.600">
+        <Text textStyle="sm" color="text.subtle">
           You voted with
         </Text>
         <Badge
