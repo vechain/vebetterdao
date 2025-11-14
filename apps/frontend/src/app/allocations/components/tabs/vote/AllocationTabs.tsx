@@ -1,9 +1,9 @@
 "use client"
 
-import { Box, Bleed, Button, Dialog, Presence, Tabs } from "@chakra-ui/react"
+import { Box, Bleed, Button, Dialog, Presence, Tabs, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter, useSearchParams } from "next/navigation"
-import { createContext, useRef, useState, useCallback } from "react"
+import { createContext, useRef, useState, useCallback, useMemo } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
@@ -11,6 +11,7 @@ import { RoundEarnings } from "@/app/allocations/history/page"
 import { useStickyState } from "@/hooks/useStickyState"
 
 import type { AllocationRoundDetails, AppWithVotes } from "../../../page"
+import { ConfirmVoteModal } from "../../confirm-vote-modal/ConfirmVoteModal"
 import { RoundInfoTab } from "../round-info/RoundInfoTab"
 
 import { VoteTab } from "./VoteTab"
@@ -41,8 +42,13 @@ export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3Ro
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
+  const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
 
   const currentTab = searchParams.get("tab") || "vote"
+
+  const selectedApps = useMemo(() => {
+    return currentRoundDetails.apps.filter(app => selectedAppIds.has(app.id))
+  }, [currentRoundDetails.apps, selectedAppIds])
 
   const toggleApp = useCallback(
     (appId: string) => {
@@ -55,6 +61,14 @@ export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3Ro
     },
     [onSelectedAppsChange],
   )
+
+  const handleConfirmVote = useCallback((allocations: Map<string, number>) => {
+    // @TODO: Implement the actual voting logic here
+    // eslint-disable-next-line no-console
+    console.log("Voting with allocations:", allocations)
+    // Clear selected apps after successful vote
+    setSelectedAppIds(new Set())
+  }, [])
 
   const handleTabChange = (details: { value: string }) => {
     const params = new URLSearchParams()
@@ -104,6 +118,7 @@ export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3Ro
             isStuck={isStuck}
             hasEnoughVotesAtSnapshot={hasVotesAtSnapshot}
             roundId={roundDetails.id.toString()}
+            onVoteClick={openModal}
           />
         </Tabs.Content>
         <Tabs.Content value="round">
@@ -127,13 +142,22 @@ export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3Ro
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <Dialog.Root>
             <Dialog.Trigger asChild>
-              <Button w="full" variant="primary" disabled={!hasVotesAtSnapshot}>
+              <Button w="full" variant="primary" disabled={!hasVotesAtSnapshot} onClick={openModal}>
                 {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
               </Button>
             </Dialog.Trigger>
           </Dialog.Root>
         </Box>
       </Presence>
+
+      {isModalOpen && (
+        <ConfirmVoteModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          selectedApps={selectedApps}
+          onConfirm={handleConfirmVote}
+        />
+      )}
     </AllocationTabsContext.Provider>
   )
 }

@@ -59,53 +59,46 @@ const config: StorybookConfig = {
   },
   staticDirs: ["../public"],
   async viteFinal(viteConfig) {
-    viteConfig.resolve ??= {}
-    viteConfig.resolve.alias ??= {}
-    viteConfig.optimizeDeps ??= {}
-    viteConfig.optimizeDeps.exclude ??= []
-    viteConfig.ssr ??= {}
-    viteConfig.plugins ??= []
-    viteConfig.logLevel = "silent"
+    // Merge custom configuration into the default config
+    const { mergeConfig } = await import("vite")
 
-    viteConfig.optimizeDeps.exclude.push("next/dist/compiled/gzip-size")
-
-    viteConfig.resolve.alias["next/dist/compiled/gzip-size"] = resolve(__dirname, "mocks/empty.ts")
-
-    // Force Vite to use mocks for packages with Node.js dependencies
-    viteConfig.resolve.alias["@repo/config"] = resolve(__dirname, "../__mocks__/@repo/config.ts")
-    viteConfig.resolve.alias["@vechain/vechain-kit"] = resolve(__dirname, "../__mocks__/@vechain/vechain-kit.tsx")
-    viteConfig.resolve.alias["@vechain/picasso"] = resolve(__dirname, "../__mocks__/@vechain/picasso.ts")
-    viteConfig.resolve.alias["thor-devkit"] = resolve(__dirname, "../__mocks__/thor-devkit.ts")
-    viteConfig.resolve.alias["openai"] = resolve(__dirname, "../__mocks__/openai.ts")
-    viteConfig.resolve.alias["crypto"] = resolve(__dirname, "../__mocks__/crypto.ts")
-    viteConfig.resolve.alias["fs"] = resolve(__dirname, "../__mocks__/fs.ts")
-    viteConfig.resolve.alias["stream"] = resolve(__dirname, "../__mocks__/stream.ts")
-    viteConfig.resolve.alias["path"] = resolve(__dirname, "../__mocks__/path.ts")
-    viteConfig.resolve.alias["zlib"] = resolve(__dirname, "../__mocks__/zlib.ts")
-
-    // Mock local modules that have complex dependencies
     const apiHooksMock = resolve(__dirname, "../src/api/__mocks__/hooks.ts")
-    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/sustainability/useUserScore.ts")] = apiHooksMock
-    viteConfig.resolve.alias[
-      resolve(__dirname, "../src/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId.ts")
-    ] = apiHooksMock
-    viteConfig.resolve.alias[resolve(__dirname, "../src/api/contracts/xApps/hooks/useXApps.ts")] = apiHooksMock
-    viteConfig.resolve.alias[resolve(__dirname, "../src/api/contracts/xApps/hooks/useUserSignalEvents.ts")] =
-      apiHooksMock
-    viteConfig.resolve.alias[resolve(__dirname, "../src/hooks/useTransak.ts")] = apiHooksMock
-    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/actions/useUserActionLeaderboard.ts")] =
-      apiHooksMock
-    viteConfig.resolve.alias[resolve(__dirname, "../src/api/indexer/actions/useUserActionOverview.ts")] = apiHooksMock
+    const noExt = viteConfig.ssr?.noExternal
 
-    // Add custom plugin to handle all contract imports
-    viteConfig.plugins.push(mockContractsPlugin())
-
-    const noExt = viteConfig.ssr.noExternal
-    viteConfig.ssr.noExternal = Array.isArray(noExt)
-      ? [...noExt, /next\/dist\/compiled\/gzip-size/]
-      : [/next\/dist\/compiled\/gzip-size/]
-
-    return viteConfig
+    return mergeConfig(viteConfig, {
+      resolve: {
+        alias: {
+          "next/dist/compiled/gzip-size": resolve(__dirname, "mocks/empty.ts"),
+          "@repo/config": resolve(__dirname, "../__mocks__/@repo/config.ts"),
+          "@vechain/vechain-kit": resolve(__dirname, "../__mocks__/@vechain/vechain-kit.tsx"),
+          "@vechain/picasso": resolve(__dirname, "../__mocks__/@vechain/picasso.ts"),
+          "thor-devkit": resolve(__dirname, "../__mocks__/thor-devkit.ts"),
+          openai: resolve(__dirname, "../__mocks__/openai.ts"),
+          crypto: resolve(__dirname, "../__mocks__/crypto.ts"),
+          fs: resolve(__dirname, "../__mocks__/fs.ts"),
+          stream: resolve(__dirname, "../__mocks__/stream.ts"),
+          path: resolve(__dirname, "../__mocks__/path.ts"),
+          zlib: resolve(__dirname, "../__mocks__/zlib.ts"),
+          [resolve(__dirname, "../src/api/indexer/sustainability/useUserScore.ts")]: apiHooksMock,
+          [resolve(__dirname, "../src/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId.ts")]: apiHooksMock,
+          [resolve(__dirname, "../src/api/contracts/xApps/hooks/useXApps.ts")]: apiHooksMock,
+          [resolve(__dirname, "../src/api/contracts/xApps/hooks/useUserSignalEvents.ts")]: apiHooksMock,
+          [resolve(__dirname, "../src/hooks/useTransak.ts")]: apiHooksMock,
+          [resolve(__dirname, "../src/api/indexer/actions/useUserActionLeaderboard.ts")]: apiHooksMock,
+          [resolve(__dirname, "../src/api/indexer/actions/useUserActionOverview.ts")]: apiHooksMock,
+        },
+      },
+      optimizeDeps: {
+        exclude: ["next/dist/compiled/gzip-size"],
+      },
+      ssr: {
+        noExternal: Array.isArray(noExt)
+          ? [...noExt, /next\/dist\/compiled\/gzip-size/]
+          : [/next\/dist\/compiled\/gzip-size/],
+      },
+      plugins: [mockContractsPlugin()],
+      logLevel: "silent",
+    })
   },
 }
 export default config

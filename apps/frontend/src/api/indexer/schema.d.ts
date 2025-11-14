@@ -296,6 +296,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/stargate/total-vtho-claimed/{account}/{tokenId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get total VTHO claimed by a given account and token ID */
+        get: operations["getTotalVthoClaimed_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stargate/total-vtho-claimed/historic/{range}": {
         parameters: {
             query?: never;
@@ -307,7 +324,7 @@ export interface paths {
          * Get historic data for total VTHO claimed
          * @description This endpoint returns a time series of total VTHO claimed by all Stargate users (Delegation only).
          */
-        get: operations["getTotalVthoClaimed_2"];
+        get: operations["getTotalVthoClaimed_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2679,6 +2696,68 @@ export interface operations {
     };
     getTotalVthoClaimed_2: {
         parameters: {
+            query?: {
+                /** @description Optional query parameter to filter rewards by type. If not provided, all types will be included. */
+                rewardsType?: "LEGACY" | "DELEGATION";
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description The account address to query for total VTHO claimed
+                 * @example 0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa
+                 */
+                account: string;
+                /**
+                 * @description The token id to query for total VTHO claimed
+                 * @example 1
+                 */
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": number;
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTotalVthoClaimed_3: {
+        parameters: {
             query?: never;
             header?: never;
             path: {
@@ -3259,7 +3338,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseString"];
                 };
             };
-            /** @description Invalid address supplied */
+            /** @description Validation errors occurred, eg: invalid input */
             400: {
                 headers: {
                     [name: string]: unknown;

@@ -21,6 +21,7 @@ interface VoteTabProps {
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
   roundId?: string
+  onVoteClick: () => void
 }
 
 export function VoteTab({
@@ -30,6 +31,7 @@ export function VoteTab({
   isStuck,
   hasEnoughVotesAtSnapshot,
   roundId,
+  onVoteClick,
 }: VoteTabProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -117,6 +119,7 @@ export function VoteTab({
             zIndex: 2,
           }}
           showPagination
+          onVoteClick={onVoteClick}
         />
       </Bleed>
 
