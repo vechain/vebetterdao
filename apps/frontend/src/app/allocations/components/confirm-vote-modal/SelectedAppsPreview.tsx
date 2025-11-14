@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Card, Circle, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Badge, Box, Card, Circle, Float, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { Check } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 
@@ -15,34 +15,36 @@ interface SelectedAppsPreviewProps {
 export const SelectedAppsPreview = ({ apps }: SelectedAppsPreviewProps) => {
   const { t } = useTranslation()
   return (
-    <VStack gap={3} alignItems="stretch">
-      <HStack justifyContent="space-between">
-        <Text textStyle="md" fontWeight="semibold">
+    <VStack gap={2} align="stretch">
+      <HStack justify="space-between">
+        <Text textStyle="sm" fontWeight="semibold">
           {t("Selected apps")}
         </Text>
-        <Text color="text.subtle" textStyle="sm" fontWeight="normal">
+        <Badge variant="neutral" size="sm" rounded="sm">
           {apps.length} {apps.length === 1 ? t("app") : t("apps")}
-        </Text>
+        </Badge>
       </HStack>
 
-      <Card.Root variant="subtle" p={6} display="flex" justifyContent="center" alignItems="center">
-        <HStack gap={3} justifyContent="center" flexWrap="wrap">
-          {apps.map(app => (
-            <Box key={app.id} position="relative">
-              <AppImage appId={app.id} boxSize="64px" borderRadius="lg" />
-              <Circle
-                position="absolute"
-                top="-1"
-                right="-1"
-                size="20px"
-                bg="green.500"
-                borderWidth="2px"
-                borderColor="white">
-                <Icon as={Check} boxSize="12px" color="white" strokeWidth="3" />
+      <Card.Root
+        variant="outline"
+        p={4}
+        border="sm"
+        borderColor="border.secondary"
+        display="flex"
+        justifyContent="center"
+        gap="3"
+        flexDirection="row"
+        overflowX="auto">
+        {apps.map(app => (
+          <Box key={app.id} display="inline-block" pos="relative">
+            <AppImage appId={app.id} boxSize="48px" borderRadius="lg" flexShrink={0} />
+            <Float placement="top-end">
+              <Circle background="status.positive.primary" border="sm" borderColor="status.positive.subtle">
+                <Icon as={Check} color="white" />
               </Circle>
-            </Box>
-          ))}
-        </HStack>
+            </Float>
+          </Box>
+        ))}
       </Card.Root>
     </VStack>
   )

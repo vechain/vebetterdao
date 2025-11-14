@@ -1,9 +1,9 @@
-import { HStack, Text } from "@chakra-ui/react"
+import { Badge, Button, Card, Icon, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ethers } from "ethers"
+import { Flash } from "iconoir-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FiZap } from "react-icons/fi"
 import { parseEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
@@ -38,7 +38,6 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
     },
     success: {
       title: t("Vote successfully submitted!"),
-      buttonText: t("Go back to Allocation"),
     },
     error: {
       title: t("Error submitting your vote"),
@@ -48,7 +47,6 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
 
   const castAllocationVotes = useCastAllocationVotes({
     roundId,
-    onSuccess,
     transactionModalCustomUI: customUI,
   })
 
@@ -92,17 +90,33 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
 
       // Create voting weight description
       const votingWeightDescription = (
-        <HStack key={formattedWeight} justify="center" gap={2} bg="bg.subtle" px={4} py={2} borderRadius="lg">
+        <Card.Root
+          key={formattedWeight}
+          variant="subtle"
+          mt="8"
+          p={4}
+          bg="bg.secondary"
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+          gap="2">
           <Text textStyle="sm" color="text.subtle">
             {t("You voted with")}
           </Text>
-          <HStack gap={1} bg="bg.success.subtle" px={3} py={1} borderRadius="md">
-            <FiZap color="green" />
-            <Text textStyle="sm" fontWeight="semibold" color="text.success">
-              {formattedWeight}
-            </Text>
-          </HStack>
-        </HStack>
+          <Badge
+            variant="outline"
+            rounded="md"
+            size="lg"
+            borderWidth="2px"
+            borderColor="status.positive.primary"
+            color="status.positive.primary"
+            px={3}
+            py={1}
+            textStyle="md">
+            <Icon as={Flash} color="status.positive.primary" boxSize="5" />
+            {formattedWeight}
+          </Badge>
+        </Card.Root>
       )
 
       // Update custom UI with dynamic voting weight
@@ -118,7 +132,18 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
         success: {
           title: t("Vote successfully submitted!"),
           description: votingWeightDescription,
-          buttonText: t("Go back to Allocation"),
+          customButton: (
+            <Button
+              variant="primary"
+              alignSelf="center"
+              px={8}
+              py={2.5}
+              textStyle="lg"
+              fontWeight="semibold"
+              onClick={onSuccess}>
+              {t("Back to Home")}
+            </Button>
+          ),
         },
         error: {
           title: t("Error submitting your vote"),

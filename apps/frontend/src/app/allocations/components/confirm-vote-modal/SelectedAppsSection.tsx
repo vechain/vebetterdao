@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, HStack, Text, VStack } from "@chakra-ui/react"
+import { Badge, HStack, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import type { AppWithVotes } from "../../page"
@@ -24,14 +24,14 @@ export const SelectedAppsSection = ({
 }: SelectedAppsSectionProps) => {
   const { t } = useTranslation()
   return (
-    <Box>
-      <HStack justifyContent="space-between" mb={2}>
-        <Text textStyle="md" fontWeight="semibold">
+    <VStack gap={2} align="stretch">
+      <HStack justify="space-between">
+        <Text textStyle="sm" fontWeight="semibold">
           {t("Selected apps")}
         </Text>
-        <Text color="text.subtle" textStyle="sm" fontWeight="normal">
+        <Badge variant="neutral" size="sm" rounded="sm">
           {apps.length} {apps.length === 1 ? t("app") : t("apps")}
-        </Text>
+        </Badge>
       </HStack>
 
       <VStack gap={3} alignItems="stretch">
@@ -46,6 +46,6 @@ export const SelectedAppsSection = ({
           />
         ))}
       </VStack>
-    </Box>
+    </VStack>
   )
 }
