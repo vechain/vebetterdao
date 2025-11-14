@@ -1,16 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  Flex,
-  Heading,
-  HStack,
-  Image,
-  Skeleton,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Flex, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
@@ -18,11 +6,9 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { getLevelGradient } from "../../../../api/contracts/galaxyMember/utils/getLevelGradient"
 import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
-import { FeatureFlagWrapper } from "../../../../components/FeatureFlagWrapper"
+import { GMNFTCard } from "../../../../components/GMNFTCard"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../constants/AnalyticsEvents"
-import { FeatureFlag } from "../../../../constants/featureFlag"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
@@ -67,44 +53,13 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
           </VStack>
           <Flex asChild border="1px solid" rounded="12px" position="relative" cursor="pointer">
             <NextLink href={`/galaxy-member/${attachedGMNFT?.tokenId}`}>
-              <Image
-                src={"/assets/backgrounds/nft-page-background.webp"}
-                alt="gm-nft-header"
-                position={"absolute"}
-                rounded={"12px"}
-                left={0}
-                top={0}
-                w="100%"
-                h="100%"
-                zIndex={0}
-              />
-              <HStack p="9px 12px" justify="space-between" gap={6} flex={1} zIndex={1} color="white">
-                <Skeleton loading={isUserGmsLoading} w={"68px"} h={"68px"} rounded="8px">
-                  <Box
-                    w={"68px"}
-                    h={"68px"}
-                    rounded="8px"
-                    bgGradient={getLevelGradient(Number(attachedGMNFT?.tokenLevel))}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center">
-                    <Image src={attachedGMNFT?.metadata?.image} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
-                  </Box>
-                </Skeleton>
-                <VStack flex="1" align={"flex-start"}>
-                  <Text lineClamp={1}>{attachedGMNFT?.metadata?.name}</Text>
-                  <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-                    <HStack gap={1}>
-                      <Text textStyle="sm" fontWeight="semibold">
-                        {attachedGMNFT?.multiplier}
-                        {"x"}
-                      </Text>
-                      <Text textStyle="sm" lineClamp={1}>
-                        {t("GM reward weight")}
-                      </Text>
-                    </HStack>
-                  </FeatureFlagWrapper>
-                </VStack>
+              <GMNFTCard
+                imageUrl={attachedGMNFT?.metadata?.image}
+                name={attachedGMNFT?.metadata?.name}
+                tokenLevel={Number(attachedGMNFT?.tokenLevel)}
+                multiplier={attachedGMNFT?.multiplier}
+                isLoading={isUserGmsLoading}
+                size="medium">
                 {isXNodeAttachedToGM ? (
                   <Button colorPalette="red" disabled={isXNodeDelegator} onClick={handleDetachOnClick}>
                     {t("Detach")}
@@ -114,7 +69,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                     {t("Attach")}
                   </Button>
                 )}
-              </HStack>
+              </GMNFTCard>
             </NextLink>
           </Flex>
         </VStack>
