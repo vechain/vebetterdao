@@ -142,8 +142,8 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
   const hasMoreApps = topVotedApps.length > INITIAL_DISPLAY_COUNT
 
   return (
-    <Card.Root p="6" height="max-content" minHeight="500px">
-      <Card.Header as={HStack} gap="2">
+    <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight="500px">
+      <Card.Header as={HStack} gap="2" pb={{ base: "5", md: "6" }}>
         <Icon as={Activity} boxSize="5" color="icon.default" />
         <Heading size={{ base: "md", md: "lg" }} fontWeight="semibold">
           {"Your voting activity"}
@@ -176,7 +176,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {"Voting power used"}
               </Text>
-              <Text textStyle="md" fontWeight="semibold">
+              <Text textStyle="xl" fontWeight="semibold">
                 {votingPowerUsed}
               </Text>
             </Card.Root>
@@ -191,7 +191,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               </Text>
 
               <Skeleton loading={isRewardClaimedLoading}>
-                <Text textStyle="md" fontWeight="semibold" color="status.positive.primary">
+                <Text textStyle="xl" fontWeight="semibold" color="status.positive.primary">
                   {"+"}
                   {getCompactFormatter(2).format(Number(rewardClaimed))}
                   {" B3TR"}
@@ -206,7 +206,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                 </Badge>
               </HStack>
               <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
-                <VStack gap="2" align="stretch">
+                <VStack mt={{ base: "0", md: "1.5" }} gap="2" align="stretch">
                   {visibleApps.map(app => (
                     <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
                   ))}
@@ -220,8 +220,8 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                           ))}
                         </VStack>
                       </Collapsible.Content>
-                      <Collapsible.Trigger asChild mt="2">
-                        <Button variant="plain" colorPalette="blue" fontWeight="semibold" textStyle="md">
+                      <Collapsible.Trigger asChild>
+                        <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
                           <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
                         </Button>
                       </Collapsible.Trigger>

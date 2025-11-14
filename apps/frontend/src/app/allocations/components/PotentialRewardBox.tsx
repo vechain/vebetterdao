@@ -2,8 +2,9 @@
 
 import { Text, Skeleton, Mark } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
-import { useCallClause, useWallet } from "@vechain/vechain-kit"
+import { useMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { formatEther } from "viem"
 
@@ -17,44 +18,75 @@ import { StatCard } from "./StatCard"
 const voterRewardsAbi = VoterRewards__factory.abi
 const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 
+const emissionsAbi = Emissions__factory.abi
+const emissionsAddress = getConfig().emissionsContractAddress as `0x${string}`
+
 export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationRoundDetails }) => {
-  const { currentRoundId, cycleTotal, vote2EarnAmount, gmAmount, cycleTotalGMWeight } = roundDetails
+  const { currentRoundId } = roundDetails
   const { account } = useWallet()
+  const thor = useThor()
 
-  const { data: userVoterTotal, isLoading: isUserVoterTotalLoading } = useCallClause({
-    abi: voterRewardsAbi,
-    address: voterRewardsAddress,
-    method: "cycleToVoterToTotal",
-    args: [BigInt(currentRoundId), account?.address as `0x{string}`],
-    queryOptions: { select: data => data[0] },
+  const { data, isLoading } = useMultipleClausesCall({
+    thor,
+    queryKey: ["potentialRewardQueryKey"],
+    calls: [
+      {
+        abi: voterRewardsAbi,
+        address: voterRewardsAddress,
+        functionName: "cycleToTotal" as const,
+        args: [BigInt(currentRoundId)],
+      },
+      {
+        abi: voterRewardsAbi,
+        address: voterRewardsAddress,
+        functionName: "cycleToTotalGMWeight" as const,
+        args: [BigInt(currentRoundId)],
+      },
+      {
+        abi: voterRewardsAbi,
+        address: voterRewardsAddress,
+        functionName: "cycleToVoterToTotal" as const,
+        args: [BigInt(currentRoundId), account?.address as `0x{string}`],
+      },
+      {
+        abi: voterRewardsAbi,
+        address: voterRewardsAddress,
+        functionName: "getGMReward" as const,
+        args: [BigInt(currentRoundId), account?.address as `0x{string}`],
+      },
+      {
+        abi: emissionsAbi,
+        address: emissionsAddress,
+        functionName: "emissions" as const,
+        args: [BigInt(currentRoundId)],
+      },
+    ],
   })
 
-  const { data: userGMWeight, isLoading: isUserGMWeightLoading } = useCallClause({
-    abi: voterRewardsAbi,
-    address: voterRewardsAddress,
-    method: "getGMReward",
-    args: [BigInt(currentRoundId), account?.address as `0x{string}`],
-    queryOptions: { select: data => data[0] },
-  })
+  const potentialReward = useMemo(() => {
+    if (data) {
+      const [
+        cycleTotal,
+        cycleTotalGMWeight,
+        userVoterTotal,
+        userGMWeight,
+        [_xAllocationsAmount, vote2EarnAmount, _treasuryAmount, gmAmount],
+      ] = data
 
-  const isLoading = isUserVoterTotalLoading || isUserGMWeightLoading
+      return calculatePotentialRewards({
+        voterTotal: userVoterTotal,
+        cycleTotal: cycleTotal,
+        vote2EarnAmount,
+        gmEmissionsAmount: gmAmount,
+        gmWeightTotal: userGMWeight,
+        cycleGMTotal: cycleTotalGMWeight,
+        relayerFeePercentage: 10,
+        hadAutoVotingEnabled: false,
+      })
+    }
 
-  const potentialReward = useMemo(
-    () =>
-      userVoterTotal !== undefined && userGMWeight !== undefined
-        ? calculatePotentialRewards({
-            voterTotal: userVoterTotal,
-            cycleTotal: cycleTotal,
-            vote2EarnAmount,
-            gmEmissionsAmount: gmAmount,
-            gmWeightTotal: userGMWeight,
-            cycleGMTotal: cycleTotalGMWeight,
-            relayerFeePercentage: 10,
-            hadAutoVotingEnabled: false,
-          })
-        : null,
-    [cycleTotal, cycleTotalGMWeight, gmAmount, userGMWeight, userVoterTotal, vote2EarnAmount],
-  )
+    return null
+  }, [data])
 
   return (
     <StatCard

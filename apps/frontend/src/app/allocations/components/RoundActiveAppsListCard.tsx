@@ -65,7 +65,12 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
             {`${filteredApps.length} ${filteredApps.length === 1 ? "app" : "apps"}`}
           </Badge>
         </HStack>
-        <SearchField placeholder="Search by app name" value={searchQuery} onChange={setSearchQuery} />
+        <SearchField
+          inputProps={{ size: "xl" }}
+          placeholder="Search by app name"
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
       </Card.Header>
       <Card.Body asChild maxHeight="1000px" overflowY="auto">
         <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
@@ -84,8 +89,8 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
                   </VStack>
                 </Collapsible.Content>
 
-                <Collapsible.Trigger asChild mt="2">
-                  <Button variant="plain" colorPalette="blue" fontWeight="semibold" textStyle="md">
+                <Collapsible.Trigger asChild>
+                  <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
                     <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
                   </Button>
                 </Collapsible.Trigger>
