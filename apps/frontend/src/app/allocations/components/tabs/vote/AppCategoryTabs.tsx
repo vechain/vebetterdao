@@ -21,6 +21,7 @@ import {
 import { Search, Search as SearchIcon } from "iconoir-react"
 import { useMemo, useState } from "react"
 
+import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { APP_CATEGORIES } from "@/types/appDetails"
@@ -41,6 +42,7 @@ interface AppCategoryTabsProps {
   initialCategory?: string
   onCategoryChange?: (category: string) => void
   hasEnoughVotesAtSnapshot?: boolean
+  roundId?: string
 }
 
 export function AppCategoryTabs({
@@ -55,22 +57,24 @@ export function AppCategoryTabs({
   initialCategory = "all",
   onCategoryChange,
   hasEnoughVotesAtSnapshot,
+  roundId,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
+  const { data: appShares } = useXAppsShares(
+    apps.map(app => app.id),
+    roundId,
+  )
 
   const categoryCollection = createListCollection({
     items: APP_CATEGORIES.map(category => ({ label: category.name, value: category.id })),
   })
 
-  const totalVotes = useMemo(
-    () =>
-      apps.reduce((acc, cum) => {
-        return acc + (cum?.votesReceived ? cum.votesReceived : 0n)
-      }, 0n),
-    [apps],
-  )
+  const appSharesMap = useMemo(() => {
+    if (!appShares) return new Map()
+    return new Map(appShares.map(share => [share.app, share.share + share.unallocatedShare]))
+  }, [appShares])
 
   const filteredApps = useMemo(() => {
     return apps.filter(app => {
@@ -239,8 +243,8 @@ export function AppCategoryTabs({
                   appId={app.id}
                   appName={app.name}
                   appVoters={app.voters}
-                  appVotesReceived={app.votesReceived}
-                  totalVotes={totalVotes}
+                  appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
+                  allocationSharePercentage={appSharesMap.get(app.id)}
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
                 />

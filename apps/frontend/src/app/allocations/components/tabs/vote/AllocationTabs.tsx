@@ -103,6 +103,7 @@ export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3Ro
             onToggleApp={toggleApp}
             isStuck={isStuck}
             hasEnoughVotesAtSnapshot={hasVotesAtSnapshot}
+            roundId={roundDetails.id.toString()}
           />
         </Tabs.Content>
         <Tabs.Content value="round">

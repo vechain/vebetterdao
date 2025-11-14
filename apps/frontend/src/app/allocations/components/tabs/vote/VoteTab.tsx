@@ -20,9 +20,17 @@ interface VoteTabProps {
   onToggleApp: (appId: string) => void
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
+  roundId?: string
 }
 
-export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot }: VoteTabProps) {
+export function VoteTab({
+  apps,
+  selectedAppIds,
+  onToggleApp,
+  isStuck,
+  hasEnoughVotesAtSnapshot,
+  roundId,
+}: VoteTabProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -99,6 +107,7 @@ export function VoteTab({ apps, selectedAppIds, onToggleApp, isStuck, hasEnoughV
           onCategoryChange={handleCategoryChange}
           searchQuery={urlSearchQuery}
           hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
+          roundId={roundId}
           tabsListProps={{
             position: "sticky",
             top: "52px",
