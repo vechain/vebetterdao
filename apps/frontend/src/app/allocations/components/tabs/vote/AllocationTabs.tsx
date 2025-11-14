@@ -47,8 +47,8 @@ export function AllocationTabs({ roundDetails, onSelectedAppsChange, previous3Ro
   const currentTab = searchParams.get("tab") || "vote"
 
   const selectedApps = useMemo(() => {
-    return currentRoundDetails.apps.filter(app => selectedAppIds.has(app.id))
-  }, [currentRoundDetails.apps, selectedAppIds])
+    return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
+  }, [roundDetails.apps, selectedAppIds])
 
   const toggleApp = useCallback(
     (appId: string) => {

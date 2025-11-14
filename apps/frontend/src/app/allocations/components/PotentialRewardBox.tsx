@@ -28,7 +28,7 @@ export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationR
 
   const { data, isLoading } = useMultipleClausesCall({
     thor,
-    queryKey: ["potentialRewardQueryKey"],
+    queryKey: ["potentialRewardQueryKey", currentRoundId.toString(), account?.address ?? ""],
     calls: [
       {
         abi: voterRewardsAbi,

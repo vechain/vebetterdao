@@ -58,12 +58,14 @@ export const AppRadioCard = ({
                 {"Voters"}
               </Text>
             </Text>
-            <Text textStyle={{ base: "xs", md: "sm" }} fontWeight="bold">
-              {allocationSharePercentage + "% "}
-              <Text hideBelow="md" textStyle={{ base: "xs", md: "sm" }} display="inline" fontWeight="bold">
-                {"supported"}
+            {allocationSharePercentage && (
+              <Text textStyle={{ base: "xs", md: "sm" }} fontWeight="bold">
+                {allocationSharePercentage.toFixed(2) + "% "}
+                <Text hideBelow="md" textStyle={{ base: "xs", md: "sm" }} display="inline" fontWeight="bold">
+                  {"supported"}
+                </Text>
               </Text>
-            </Text>
+            )}
           </Flex>
           <Progress.Root w="full" size="xs" mt="1" value={allocationSharePercentage}>
             <Progress.Track rounded="lg">
