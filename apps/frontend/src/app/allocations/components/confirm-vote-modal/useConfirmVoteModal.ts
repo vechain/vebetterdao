@@ -58,8 +58,8 @@ export const useConfirmVoteModal = (appIds: string[]) => {
 
   const isValid = useCallback(() => {
     const total = getTotalPercentage()
-    // Allow voting if total is between 0 and 100 (inclusive)
-    return total > 0 && total <= 100
+    // Allow voting if total is exactly 100
+    return total === 100
   }, [getTotalPercentage])
 
   return {
