@@ -98,10 +98,12 @@ export const useBuildTransaction = <ClausesParams = void>({
   /**
    * Function to send a transaction based on the provided parameters.
    * @param props - The parameters to be passed to the `clauseBuilder` function.
+   * @param overrideCustomUI - Optional custom UI to override the hook-level transactionModalCustomUI
    */
   const sendTransaction = useCallback(
-    async (props?: ClausesParams) => {
-      setupModal(async () => result.sendTransaction(clauseBuilder(props as any)), transactionModalCustomUI)
+    async (props?: ClausesParams, overrideCustomUI?: TransactionCustomUI) => {
+      const uiToUse = overrideCustomUI ?? transactionModalCustomUI
+      setupModal(async () => result.sendTransaction(clauseBuilder(props as any)), uiToUse)
       return result.sendTransaction(clauseBuilder(props as any))
     },
     [clauseBuilder, result, setupModal, transactionModalCustomUI],
