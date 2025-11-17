@@ -61,15 +61,7 @@ export function RoundDistributionCard({
               {"Summary"}
             </Text>
           </HStack>
-
-          {/* <HStack gap="1"> */}
-          {/*   <Icon as={Prohibition} boxSize="4" color="status.negative.primary" /> */}
-          {/*   <Text textStyle="xs" fontWeight="semibold"> */}
-          {/*     {"Minimum quorum (30%) is not reached"} */}
-          {/*   </Text> */}
-          {/* </HStack> */}
         </GridItem>
-
         {(
           [
             ["Total apps", SmartphoneDevice, roundDetails.totalApp],

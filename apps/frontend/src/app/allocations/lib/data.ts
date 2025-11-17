@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic"
+export const revalidate = 60 // minute
 
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
