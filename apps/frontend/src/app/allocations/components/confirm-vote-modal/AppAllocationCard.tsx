@@ -99,6 +99,7 @@ export const AppAllocationCard = ({
                 <IconButton
                   aria-label={t("Decrease percentage")}
                   rounded="full"
+                  color="actions.secondary.text"
                   bg="actions.secondary.default"
                   _hover={{ bg: "actions.secondary.hover" }}
                   size="xs"
@@ -141,6 +142,7 @@ export const AppAllocationCard = ({
                 <IconButton
                   aria-label={t("Increase percentage")}
                   rounded="full"
+                  color="actions.secondary.text"
                   bg="actions.secondary.default"
                   _hover={{ bg: "actions.secondary.hover" }}
                   size="xs"

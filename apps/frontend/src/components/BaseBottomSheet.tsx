@@ -107,7 +107,7 @@ export const BaseBottomSheet = ({
               />
               {(title || illustration || showCloseButton) && (
                 <Box mb={4}>
-                  <Box position="relative" mb={4}>
+                  <Box position="relative">
                     {illustration && (
                       <Box position="relative" boxSize="16" mx="auto">
                         <Image alt="modal-illustration" src={illustration} fill />
@@ -120,11 +120,7 @@ export const BaseBottomSheet = ({
                     )}
                   </Box>
                   {title && (
-                    <Heading
-                      fontWeight="bold"
-                      textStyle="xl"
-                      textAlign={illustration ? "center" : "left"}
-                      mb={description ? 2 : 0}>
+                    <Heading fontWeight="bold" textStyle="md" textAlign="center">
                       {title}
                     </Heading>
                   )}
