@@ -35,13 +35,43 @@ export const useConfirmVoteModal = (appIds: string[]) => {
   // Initialize allocations with equal distribution
   const [allocations, setAllocations] = useState<Map<string, number>>(() => getEqualDistribution())
 
-  const setAllocation = useCallback((appId: string, percentage: number) => {
-    setAllocations(prev => {
-      const next = new Map(prev)
-      next.set(appId, percentage)
-      return next
-    })
-  }, [])
+  const setAllocation = useCallback(
+    (appId: string, percentage: number) => {
+      setAllocations(prev => {
+        const next = new Map(prev)
+        next.set(appId, percentage)
+
+        // Calculate remaining percentage to distribute among other apps
+        const remaining = 100 - percentage
+
+        // Get other app IDs (excluding the one being changed)
+        const otherAppIds = appIds.filter(id => id !== appId)
+
+        if (otherAppIds.length > 0) {
+          // Distribute remaining equally among other apps
+          const basePercentage = Math.floor((remaining / otherAppIds.length) * 100) / 100
+          let total = percentage
+
+          // Assign base percentage to all other apps
+          otherAppIds.forEach(id => {
+            next.set(id, basePercentage)
+            total += basePercentage
+          })
+
+          // Add remainder to the last other app to ensure total is exactly 100%
+          const remainder = parseFloat((100 - total).toFixed(2))
+          if (remainder !== 0) {
+            const lastOtherAppId = otherAppIds[otherAppIds.length - 1]!
+            const finalPercentage = parseFloat((basePercentage + remainder).toFixed(2))
+            next.set(lastOtherAppId, finalPercentage)
+          }
+        }
+
+        return next
+      })
+    },
+    [appIds],
+  )
 
   const setEqualAllocations = () => {
     setAllocations(getEqualDistribution())
