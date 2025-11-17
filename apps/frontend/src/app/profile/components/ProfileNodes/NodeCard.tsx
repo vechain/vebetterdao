@@ -14,12 +14,12 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
 
-  const isDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
+  const isNodeDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
 
   return (
     <LinkBox flex={1}>
       <ConditionalWrapper
-        condition={isDelegator}
+        condition={isNodeDelegator}
         wrapper={({ children }) => (
           <BlurredWrapper
             title={t("Node managed externally")}

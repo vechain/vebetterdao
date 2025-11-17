@@ -29,8 +29,8 @@ export const AttachGMNFTCard = ({ node }: { node: UserNode }) => {
   }
 
   // Derive all data at the top
-  const isXNodeDelegator = !node?.currentUserIsManager
-  const isXNodeAttachedToGM = node?.isGmAttached
+  const isNodeDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
+  const isNodeAttachedToGM = node?.isGmAttached
   const attachedGMNFT = userGms?.find((_gm: UserGM) => _gm.tokenId === node?.gmAttachedTokenId.toString())
 
   if (!attachedGMNFT) return null
@@ -46,14 +46,14 @@ export const AttachGMNFTCard = ({ node }: { node: UserNode }) => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading textStyle="lg">
-                {t(isXNodeAttachedToGM ? "Attached Galaxy Member NFTs" : "Attach to upgrade")}
+                {t(isNodeAttachedToGM ? "Attached Galaxy Member NFTs" : "Attach to upgrade")}
               </Heading>
             </HStack>
             <Text textStyle="sm">
               {t(
-                isXNodeAttachedToGM
+                isNodeAttachedToGM
                   ? "Your Node is attached to the following GM NFT"
-                  : isXNodeDelegator
+                  : isNodeDelegator
                     ? "Remove the Node delegation to attach GM NFT to this node"
                     : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
@@ -68,12 +68,12 @@ export const AttachGMNFTCard = ({ node }: { node: UserNode }) => {
                 multiplier={attachedGMNFT?.multiplier}
                 isLoading={isUserGmsLoading}
                 size="medium">
-                {isXNodeAttachedToGM ? (
-                  <Button colorPalette="red" disabled={isXNodeDelegator} onClick={handleDetachOnClick}>
+                {isNodeAttachedToGM ? (
+                  <Button colorPalette="red" disabled={isNodeDelegator} onClick={handleDetachOnClick}>
                     {t("Detach")}
                   </Button>
                 ) : (
-                  <Button variant="link" onClick={() => handleAttachOnClick()} disabled={isXNodeDelegator}>
+                  <Button variant="link" onClick={() => handleAttachOnClick()} disabled={isNodeDelegator}>
                     {t("Attach")}
                   </Button>
                 )}

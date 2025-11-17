@@ -6,8 +6,8 @@ import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 export const XNodePageHeader = ({ node }: { node: UserNode }) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-  const isXNodeDelegator = !node?.currentUserIsManager && node?.currentUserIsOwner
-  const isXNodeDelegatee = node?.currentUserIsManager
+  const isDelegator = !node?.currentUserIsManager && node?.currentUserIsOwner
+  const isDelegatee = node?.currentUserIsManager
   const xNodePoints = node?.endorsementScore?.toString() ?? "0"
   return (
     <Card.Root variant="primary" p="0">
@@ -50,10 +50,10 @@ export const XNodePageHeader = ({ node }: { node: UserNode }) => {
             </Text>
 
             <HStack>
-              {(isXNodeDelegator || isXNodeDelegatee) && (
+              {(isDelegator || isDelegatee) && (
                 <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
                   <Text color="white" textStyle={isAbove800 ? "md" : "xs"}>
-                    {isXNodeDelegator ? "Node Owner" : "Manager"}
+                    {isDelegator ? "Node Owner" : "Manager"}
                   </Text>
                 </HStack>
               )}
