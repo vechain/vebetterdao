@@ -1,27 +1,23 @@
 "use client"
 
 import { Box, Bleed, Tabs } from "@chakra-ui/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useRef } from "react"
 
 import { useStickyState } from "@/hooks/useStickyState"
 
 interface TabNavigationProps {
   children: React.ReactNode
+  currentTab: string
 }
 
-export function TabNavigation({ children }: TabNavigationProps) {
+export function TabNavigation({ children, currentTab }: TabNavigationProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
 
-  const currentTab = searchParams.get("tab") || "vote"
-
   const handleTabChange = (details: { value: string }) => {
-    const params = new URLSearchParams()
-    params.set("tab", details.value)
-    router.push(`?${params.toString()}`)
+    router.push(`/allocations/${details.value}`)
   }
 
   return (

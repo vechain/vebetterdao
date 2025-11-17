@@ -66,7 +66,7 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
           </Badge>
         </HStack>
         <SearchField
-          inputProps={{ size: "xl" }}
+          inputProps={{ size: { base: "md", md: "xl" } }}
           placeholder="Search by app name"
           value={searchQuery}
           onChange={setSearchQuery}

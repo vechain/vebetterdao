@@ -142,9 +142,7 @@ export default async function Page({
           <Pagination.PrevTrigger asChild>
             <Link href={`/allocations/history?page=${pageNum - 1}`}>
               <IconButton asChild>
-                <button>
-                  <LuChevronLeft />
-                </button>
+                <LuChevronLeft />
               </IconButton>
             </Link>
           </Pagination.PrevTrigger>
@@ -152,9 +150,7 @@ export default async function Page({
           <Pagination.NextTrigger asChild>
             <Link href={`/allocations/history?page=${pageNum + 1}`}>
               <IconButton asChild>
-                <button>
-                  <LuChevronRight />
-                </button>
+                <LuChevronRight />
               </IconButton>
             </Link>
           </Pagination.NextTrigger>

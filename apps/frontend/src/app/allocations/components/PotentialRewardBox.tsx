@@ -3,15 +3,15 @@
 import { Text, Skeleton, Mark } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
+import { RelayerRewardsPool__factory } from "@vechain/vebetterdao-contracts/factories/RelayerRewardsPool__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { useMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { formatEther } from "viem"
 
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
-
-import { AllocationRoundDetails } from "../lib/data"
 
 import { StatCard } from "./StatCard"
 
@@ -21,8 +21,13 @@ const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${stri
 const emissionsAbi = Emissions__factory.abi
 const emissionsAddress = getConfig().emissionsContractAddress as `0x${string}`
 
-export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationRoundDetails }) => {
-  const { currentRoundId } = roundDetails
+const xAllocatingVotingAbi = XAllocationVoting__factory.abi
+const xAllocatingVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
+
+const relayerRewardsAbi = RelayerRewardsPool__factory.abi
+const relayerRewardsAddress = getConfig().relayerRewardsPoolContractAddress as `0x${string}`
+
+export const PotentialRewardBox = ({ currentRoundId }: { currentRoundId: number }) => {
   const { account } = useWallet()
   const thor = useThor()
 
@@ -60,6 +65,18 @@ export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationR
         functionName: "emissions" as const,
         args: [BigInt(currentRoundId)],
       },
+      {
+        abi: relayerRewardsAbi,
+        address: relayerRewardsAddress,
+        functionName: "getRelayerFeePercentage" as const,
+        args: [],
+      },
+      {
+        abi: xAllocatingVotingAbi,
+        address: xAllocatingVotingAddress,
+        functionName: "isUserAutoVotingEnabledInCurrentRound" as const,
+        args: [(account?.address || "") as `0x${string}`],
+      },
     ],
   })
 
@@ -71,6 +88,8 @@ export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationR
         userVoterTotal,
         userGMWeight,
         [_xAllocationsAmount, vote2EarnAmount, _treasuryAmount, gmAmount],
+        relayerFeePercentage,
+        hadAutoVotingEnabled = false,
       ] = data
 
       return calculatePotentialRewards({
@@ -80,8 +99,8 @@ export const PotentialRewardBox = ({ roundDetails }: { roundDetails: AllocationR
         gmEmissionsAmount: gmAmount,
         gmWeightTotal: userGMWeight,
         cycleGMTotal: cycleTotalGMWeight,
-        relayerFeePercentage: 10,
-        hadAutoVotingEnabled: false,
+        relayerFeePercentage: relayerFeePercentage,
+        hadAutoVotingEnabled,
       })
     }
 

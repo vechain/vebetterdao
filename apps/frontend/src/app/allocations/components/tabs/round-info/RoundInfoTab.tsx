@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge, Button, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Badge, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
@@ -14,6 +14,7 @@ import { AllocationTabsContext } from "../AllocationTabsProvider"
 
 import { RoundDistributionCard } from "./RoundDistributionCard"
 import { RoundHistoryCard } from "./RoundHistoryCard"
+import { ViewAllRoundsButton } from "./ViewAllRoundsButton"
 
 const DATE_FORMAT = "MMM D"
 
@@ -38,9 +39,8 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
 
   const handleRoundNavigation = (newRoundId: number) => {
     const params = new URLSearchParams(searchParams)
-    params.set("tab", "round")
     params.set("roundId", newRoundId.toString())
-    router.push(`?${params.toString()}`)
+    router.push(`/allocations/round/?${params.toString()}`)
   }
 
   return (
@@ -97,9 +97,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
             aria-label="Next round">
             <NavArrowRight />
           </IconButton>
-          <Button variant="link" p="0" size="md">
-            {"View all rounds"}
-          </Button>
+          <ViewAllRoundsButton currentRoundId={roundDetails.currentRoundId} />
         </Flex>
       </Card.Root>
 

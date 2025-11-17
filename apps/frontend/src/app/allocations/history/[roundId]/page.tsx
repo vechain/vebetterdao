@@ -21,9 +21,9 @@ export default async function Page({ params }: Readonly<Props>) {
   if (roundIdParam) {
     const roundId = parseInt(roundIdParam, 10)
     if (isNaN(roundId)) {
-      return redirect("/allocations?tab=round")
+      return redirect("/allocations/round")
     } else roundDetails = await getHistoricalRoundData(roundId)
-  } else return redirect("/allocations?tab=round")
+  } else return redirect("/allocations/round")
 
   const { apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount, cycleTotal } = roundDetails
   const totalVoters = apps.reduce((sum, app) => sum + (app.voters ?? 0), 0)
