@@ -64,6 +64,7 @@ export const useConfirmVoteModal = (appIds: string[]) => {
         setLockedApps(prevLocked => new Set(prevLocked).add(appId))
 
         // Step 3: Calculate total of all locked apps
+        // Note: Using stale lockedApps is intentional - we exclude current app and add it separately
         let totalLocked = 0
         lockedApps.forEach(lockedId => {
           if (lockedId !== appId) {

@@ -57,7 +57,7 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
       castAllocationVotes.sendTransaction(pendingVotes)
       setPendingVotes(null) // Clear after sending
     }
-  }, [pendingVotes, customUI, castAllocationVotes])
+  }, [pendingVotes, customUI, castAllocationVotes.sendTransaction])
 
   const handleConfirmVote = useCallback(
     (allocations: Map<string, number>) => {
@@ -154,7 +154,7 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
       // Set pending votes - useEffect will trigger transaction when customUI is updated
       setPendingVotes(appVotes)
     },
-    [t, votesAtSnapshot],
+    [t, votesAtSnapshot, onSuccess],
   )
 
   return {

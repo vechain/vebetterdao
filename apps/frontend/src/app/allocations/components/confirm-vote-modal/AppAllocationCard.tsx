@@ -90,7 +90,8 @@ export const AppAllocationCard = ({
             value={displayValue}
             onValueChange={handleValueChange}
             min={0}
-            step={1}
+            max={100}
+            step={10}
             clampValueOnBlur
             formatOptions={{ maximumFractionDigits: 2 }}>
             <HStack gap={3}>
