@@ -1,35 +1,30 @@
 import { Text, HStack, VStack, Box, Popover, Skeleton, Portal } from "@chakra-ui/react"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { HiDotsVertical } from "react-icons/hi"
 
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useNodeEndorsementScore } from "@/hooks/node/useNodeEndorsementScore"
+import { useGetNodeManager } from "@/hooks/node/useNodeManager"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 
 type Props = {
-  appId: string
   isAppAdmin: boolean
-  endorserAddress: string
-  endorsementEvents: AppEndorsedEvent[]
+  event: AppEndorsedEvent
   setIsConfirmOpen: (value: boolean) => void
   setSelectedEndorserAddress: (value: string) => void
   setSelectedEndorserNodeId: (value: string) => void
   setSelectedEndorserNodePoints: (value: string) => void
 }
 export const EndorsersItem = ({
-  appId,
   isAppAdmin,
-  endorserAddress,
-  endorsementEvents,
+  event,
   setIsConfirmOpen,
   setSelectedEndorserAddress,
   setSelectedEndorserNodeId,
@@ -37,16 +32,12 @@ export const EndorsersItem = ({
 }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
-  const { data: userNodes, isLoading: endorserNodesLoading } = useGetUserNodes(endorserAddress)
-  const endorserNodeId = useMemo(() => {
-    return userNodes?.nodesManagedByUser
-      ?.find((node: UserNode) => compareAddresses(node.endorsedAppId ?? "", appId ?? ""))
-      ?.id.toString()
-  }, [userNodes, appId])
-  const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId ?? "")
-  // Find the first element in events (ie most recent) where the endorser endorsed the app
-  const lastEndorsementEvent = endorsementEvents.find(event => event.nodeId === endorserNodeId && event.endorsed)
-  const lastEndorsementEpoch = useEstimateBlockTimestamp({ blockNumber: lastEndorsementEvent?.blockNumber })
+  const endorserNodeId = event.nodeId
+
+  // Get the current node manager address (handles ownership and delegation)
+  const { data: endorserAddress, isLoading: endorserAddressLoading } = useGetNodeManager(endorserNodeId)
+  const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId)
+  const lastEndorsementEpoch = useEstimateBlockTimestamp({ blockNumber: event.blockNumber })
   const endorsingSince = dayjs(lastEndorsementEpoch).fromNow()
   // Popover state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
@@ -55,8 +46,8 @@ export const EndorsersItem = ({
   const handleRemoveClick = () => {
     setIsPopoverOpen(false)
     setIsConfirmOpen(true)
-    setSelectedEndorserAddress(endorserAddress)
-    setSelectedEndorserNodeId(endorserNodeId ?? "")
+    setSelectedEndorserAddress(endorserAddress ?? "")
+    setSelectedEndorserNodeId(endorserNodeId)
     setSelectedEndorserNodePoints(nodePoints ?? "")
   }
   const goToEndorserUserProfilePage = () => {
@@ -75,22 +66,22 @@ export const EndorsersItem = ({
       alignItems={"center"}
       justify={"space-between"}>
       <HStack alignItems={"center"} gap={4}>
-        <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
+        <AddressIcon address={endorserAddress ?? ""} rounded="full" h="28px" w="28px" />
         <VStack align="start" justify={"center"} gap={0}>
-          <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress, 6, 3)}</Text>
-          <Skeleton loading={endorserNodesLoading}>
-            <Text textStyle="xs" color="text.subtle">
-              {t("Endorsing since {{date}}", { date: endorsingSince })}
-            </Text>
+          <Skeleton loading={endorserAddressLoading}>
+            <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress ?? "", 6, 3)}</Text>
           </Skeleton>
+          <Text textStyle="xs" color="text.subtle">
+            {t("Endorsing since {{date}}", { date: endorsingSince })}
+          </Text>
         </VStack>
       </HStack>
       <HStack alignItems={"center"} gap={4}>
-        <Skeleton loading={endorserNodesLoading || nodePointsLoading}>
+        <Skeleton loading={nodePointsLoading}>
           <Text textStyle={"md"} fontWeight="semibold">
             <Trans
               i18nKey="{{value}} pts."
-              values={{ value: nodePoints }}
+              values={{ value: nodePoints?.toString() ?? "0" }}
               components={{
                 Text: <Text as="span" />,
               }}

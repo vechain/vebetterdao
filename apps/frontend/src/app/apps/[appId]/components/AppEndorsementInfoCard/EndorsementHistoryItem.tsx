@@ -61,7 +61,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
             <Text fontWeight="semibold" color={isEndorsingColor}>
               <Trans
                 i18nKey="{{value}} pts."
-                values={{ value: nodePoints }}
+                values={{ value: nodePoints?.toString() ?? "0" }}
                 components={{
                   Text: <Text as="span" fontWeight="semibold" color={isEndorsingColor} />,
                 }}
