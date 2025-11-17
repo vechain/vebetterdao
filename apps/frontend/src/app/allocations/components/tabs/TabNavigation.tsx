@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, Bleed, Tabs } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
+import NextLink from "next/link"
 import { useRef } from "react"
 
 import { useStickyState } from "@/hooks/useStickyState"
@@ -12,26 +12,21 @@ interface TabNavigationProps {
 }
 
 export function TabNavigation({ children, currentTab }: TabNavigationProps) {
-  const router = useRouter()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
-
-  const handleTabChange = (details: { value: string }) => {
-    router.push(`/allocations/${details.value}`)
-  }
 
   return (
     <>
       <Box ref={sentinelRef} height="1px" />
 
       <Tabs.Root
+        id="allocation-tabs"
         value={currentTab}
         variant="line"
         size={{ base: "md", md: "lg" }}
         w="full"
         lazyMount
-        unmountOnExit
-        onValueChange={handleTabChange}>
+        unmountOnExit>
         <Bleed
           position={{ base: "sticky", md: "static" }}
           top="0"
@@ -39,11 +34,11 @@ export function TabNavigation({ children, currentTab }: TabNavigationProps) {
           inlineStart={{ base: "4", md: "0" }}
           inlineEnd={{ base: "4", md: "0" }}>
           <Tabs.List pt={isStuck ? "3" : undefined} px={{ base: "4", md: "0" }} bg={isStuck ? "bg.primary" : undefined}>
-            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote">
-              {"Vote for apps"}
+            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote" asChild>
+              <NextLink href="/allocations/vote#allocation-tabs">{"Vote for apps"}</NextLink>
             </Tabs.Trigger>
-            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round">
-              {"Round info"}
+            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round" asChild>
+              <NextLink href="/allocations/round#allocation-tabs">{"Round info"}</NextLink>
             </Tabs.Trigger>
           </Tabs.List>
         </Bleed>

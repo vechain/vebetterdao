@@ -57,7 +57,7 @@ export function VoteTab() {
       } else {
         params.delete("category")
       }
-      router.push(`?${params.toString()}`)
+      router.push(`?${params.toString()}`, { scroll: false })
     },
     [searchParams, router],
   )

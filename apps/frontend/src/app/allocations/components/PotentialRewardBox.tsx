@@ -113,7 +113,7 @@ export const PotentialRewardBox = ({ currentRoundId }: { currentRoundId: number 
       title="Potential rewards"
       icon={<B3TRIcon />}
       subtitle={
-        <Skeleton asChild loading={isLoading || !potentialReward}>
+        <Skeleton asChild loading={isLoading}>
           <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>
             <Mark variant="text" fontWeight="semibold">
               {potentialReward ? Number(formatEther(potentialReward.netTotal)).toFixed(2) : "-"}
