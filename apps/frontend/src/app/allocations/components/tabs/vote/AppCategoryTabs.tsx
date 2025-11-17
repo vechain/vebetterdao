@@ -297,19 +297,17 @@ export function AppCategoryTabs({
                   <Pagination.PageText format="long" textStyle="sm" />
                 </HStack>
 
-                <ButtonGroup variant="ghost" size="sm">
+                <ButtonGroup hideBelow="md" variant="ghost" size="sm">
                   <Pagination.PrevTrigger asChild>
                     <IconButton>
                       <HiChevronLeft />
                     </IconButton>
                   </Pagination.PrevTrigger>
-
                   <Pagination.Items
                     render={page => (
                       <IconButton variant={{ base: "ghost", _selected: "outline" }}>{page.value}</IconButton>
                     )}
                   />
-
                   <Pagination.NextTrigger asChild>
                     <IconButton>
                       <HiChevronRight />
