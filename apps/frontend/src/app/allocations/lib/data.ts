@@ -4,7 +4,7 @@ import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
-import { executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit"
+import { executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit/utils"
 
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 import { fetchClient } from "@/api/indexer/api"

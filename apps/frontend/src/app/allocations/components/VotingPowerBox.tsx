@@ -38,7 +38,7 @@ export const VotingPowerBox = () => {
       }
       cta={
         <>
-          <Button variant="primary">
+          <Button variant="primary" onClick={() => setIsOpen(true)}>
             <Icon as={Flash} boxSize="4" />
             {"Power up"}
           </Button>

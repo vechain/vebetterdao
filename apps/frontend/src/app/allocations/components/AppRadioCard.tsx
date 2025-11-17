@@ -54,14 +54,14 @@ export const AppRadioCard = ({
             <Text display="flex" alignItems="center" gap={{ base: "2", md: "1" }} textStyle={{ base: "xs", md: "sm" }}>
               <Icon as={Group} boxSize="4" />
               {appVoters ?? 0}
-              <Text hideBelow="md" display="inline" textStyle={{ base: "xs", md: "sm" }}>
+              <Text as="span" hideBelow="md" display="inline" textStyle={{ base: "xs", md: "sm" }}>
                 {"Voters"}
               </Text>
             </Text>
             {allocationSharePercentage && (
               <Text textStyle={{ base: "xs", md: "sm" }} fontWeight="bold">
                 {allocationSharePercentage.toFixed(2) + "% "}
-                <Text hideBelow="md" textStyle={{ base: "xs", md: "sm" }} display="inline" fontWeight="bold">
+                <Text as="span" hideBelow="md" textStyle={{ base: "xs", md: "sm" }} display="inline" fontWeight="bold">
                   {"supported"}
                 </Text>
               </Text>
