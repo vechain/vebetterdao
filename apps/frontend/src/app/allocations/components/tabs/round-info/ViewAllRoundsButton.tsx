@@ -37,7 +37,7 @@ export const ViewAllRoundsButton = ({ currentRoundId }: { currentRoundId: number
   const [searchQuery, setSearchQuery] = useState("")
 
   const searchParams = useSearchParams()
-  const selectedRound = searchParams.get("roundId") || null
+  const selectedRound = searchParams.get("roundId") || currentRoundId.toString()
 
   const roundsArray = Array(currentRoundId)
     .fill(null)
@@ -86,28 +86,32 @@ export const ViewAllRoundsButton = ({ currentRoundId }: { currentRoundId: number
               {round => (
                 <RadioCard.Item key={round} as={LinkBox} value={round.toString()} rounded="lg">
                   <RadioCard.ItemHiddenInput />
-                  <RadioCard.ItemControl alignItems="center">
+                  <RadioCard.ItemControl alignItems="center" gap="3">
                     <RadioCard.ItemIndicator />
-                    <RadioCard.ItemContent>
-                      <RadioCard.ItemText
-                        w="full"
-                        display="flex"
-                        flexDirection="row"
-                        alignItems="center"
-                        justifyContent="space-between">
-                        <LinkOverlay asChild onClick={() => setIsRoundSelectionModalOpen(false)}>
-                          <NextLink href={`/allocations/round/?roundId=${round}`}>{round}</NextLink>
-                        </LinkOverlay>
-                        {currentRoundId === round && <Badge variant="positive">{"Active"}</Badge>}
-                      </RadioCard.ItemText>
-                      <Skeleton loading={roundsDatesMapLoading}>
-                        <RadioCard.ItemDescription>
-                          {roundsDatesMap
-                            ? `${dayjs(roundsDatesMap.get(round)?.startDate).format(DATE_FORMAT)} - ${dayjs(roundsDatesMap.get(round)?.endDate).format(DATE_FORMAT)}`
-                            : ""}
-                        </RadioCard.ItemDescription>
-                      </Skeleton>
-                    </RadioCard.ItemContent>
+                    <LinkOverlay asChild onClick={() => setIsRoundSelectionModalOpen(false)} w="full">
+                      <NextLink href={`/allocations/round/?roundId=${round}`}>
+                        <RadioCard.ItemContent gap="1">
+                          <RadioCard.ItemText
+                            w="full"
+                            display="flex"
+                            flexDirection="row"
+                            alignItems="center"
+                            justifyContent="space-between">
+                            <VStack gap="1" align="start">
+                              {round}
+                              <Skeleton loading={roundsDatesMapLoading}>
+                                <Text textStyle="sm" color="text.subtle">
+                                  {roundsDatesMap
+                                    ? `${dayjs(roundsDatesMap.get(round)?.startDate).format(DATE_FORMAT)} - ${dayjs(roundsDatesMap.get(round)?.endDate).format(DATE_FORMAT)}`
+                                    : ""}
+                                </Text>
+                              </Skeleton>
+                            </VStack>
+                            {currentRoundId === round && <Badge variant="positive">{"Active"}</Badge>}
+                          </RadioCard.ItemText>
+                        </RadioCard.ItemContent>
+                      </NextLink>
+                    </LinkOverlay>
                   </RadioCard.ItemControl>
                 </RadioCard.Item>
               )}
