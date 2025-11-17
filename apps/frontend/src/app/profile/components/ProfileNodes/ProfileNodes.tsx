@@ -35,12 +35,15 @@ export const ProfileNodes = ({ address }: { address: string }) => {
                   </Icon>
                 }
                 title={t("No nodes found.")}
-                description={t("Visit Stargate to know more about nodes and how to get one.")}
-                rootProps={{ size: "sm", bg: "transparent" }}
-                action={{
-                  label: t("Visit Stargate"),
-                  onClick: () => window.open(STARGATE_URL, "_blank"),
-                }}
+                {...(isCurrentUser
+                  ? {
+                      description: t("Visit Stargate to know more about nodes and how to get one."),
+                      action: {
+                        label: t("Visit Stargate"),
+                        onClick: () => window.open(STARGATE_URL, "_blank"),
+                      },
+                    }
+                  : {})}
               />
             ) : (
               <VStack gap="4" align="stretch">
