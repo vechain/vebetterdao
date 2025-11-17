@@ -1,19 +1,4 @@
-import {
-  Button,
-  Box,
-  Image,
-  Dialog,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Stack,
-  useMediaQuery,
-  Card,
-  Alert,
-  Skeleton,
-  CloseButton,
-} from "@chakra-ui/react"
+import { Button, Box, Dialog, Heading, Text, VStack, HStack, Card, Alert, CloseButton } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
@@ -23,12 +8,10 @@ import { gmNfts } from "@/constants/gmNfts"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 import { useNextLevelImage } from "../../../api/contracts/galaxyMember/hooks/useNextLevelImage"
-import { getLevelGradient } from "../../../api/contracts/galaxyMember/utils/getLevelGradient"
 import { CustomModalContent } from "../../../components/CustomModalContent"
-import { FeatureFlagWrapper } from "../../../components/FeatureFlagWrapper"
+import { GMNFTCard } from "../../../components/GMNFTCard"
 import { B3TRIcon } from "../../../components/Icons/B3TRIcon"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
-import { FeatureFlag } from "../../../constants/featureFlag"
 
 const compactFormatter = getCompactFormatter(2)
 interface UpgradeGMModalProps {
@@ -48,8 +31,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   onClose,
   sendTransaction,
 }) => {
-  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-
   const { t } = useTranslation()
 
   const handleClose = useCallback(() => {
@@ -107,68 +88,15 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               {t("You’re upgrading to")}
             </Text>
             {/*GM CARD */}
-            <Card.Root>
-              <Image
-                src={"/assets/backgrounds/nft-page-background.webp"}
-                alt="gm-nft-header"
-                position={"absolute"}
-                w="full"
-                h="full"
-                rounded={"8px"}
+            <Card.Root position="relative">
+              <GMNFTCard
+                imageUrl={nextLevelGMImage}
+                name={`${nextLevelGM?.name} #${tokenId}`}
+                tokenLevel={gmLevel && !isNaN(Number(gmLevel)) ? Number(gmLevel) + 1 : 1}
+                multiplier={nextLevelGM?.multiplier}
+                isLoading={nextLevelGMImageLoading}
+                size={"medium"}
               />
-              <Stack
-                direction={isAbove800 ? "row" : "column"}
-                p={isAbove800 ? "16px" : "12px"}
-                align={isAbove800 ? "stretch" : "flex-start"}
-                gap={2}
-                zIndex={"2"}
-                h={"full"}>
-                <HStack
-                  align={isAbove800 ? "stretch" : "center"}
-                  justify="space-between"
-                  rounded="12px"
-                  gap={isAbove800 ? 5 : 3}
-                  flex={1}
-                  color="white"
-                  flexGrow={4}>
-                  <Box
-                    w={isAbove800 ? "70px" : "46px"}
-                    h={isAbove800 ? "70px" : "46px"}
-                    rounded="8px"
-                    bgGradient={
-                      gmLevel && !isNaN(Number(gmLevel)) ? getLevelGradient(Number(gmLevel) + 1) : getLevelGradient(1)
-                    }
-                    display="flex"
-                    alignSelf="center"
-                    alignItems="center"
-                    justifyContent="center">
-                    <Skeleton loading={nextLevelGMImageLoading}>
-                      <Image
-                        src={nextLevelGMImage}
-                        alt="gm"
-                        w={isAbove800 ? "64px" : "42px"}
-                        h={isAbove800 ? "64px" : "42px"}
-                        rounded="7px"
-                      />
-                    </Skeleton>
-                  </Box>
-                  <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
-                    <Text lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
-                      {`${nextLevelGM?.name} #${tokenId}`}
-                    </Text>
-                    <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-                      <HStack rounded="8px" justifyContent="space-between">
-                        <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
-                          {nextLevelGM?.multiplier}
-                        </Text>
-                        <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
-                          {t("GM reward weight").toLowerCase()}
-                        </Text>
-                      </HStack>
-                    </FeatureFlagWrapper>
-                  </VStack>
-                </HStack>
-              </Stack>
             </Card.Root>
             {/*END GM CARD */}
           </VStack>

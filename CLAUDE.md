@@ -28,14 +28,13 @@ Turborepo monorepo with:
 - testnet-staging: Staging testnet
 - testnet: VeChain testnet
 - mainnet: VeChain mainnet
-- galactica-test: Galactica test network
 
 # Common commands
 
 ## Development
 
 - `yarn dev`: Local dev with endorsed xapps
-- `yarn dev:<env>`: Dev for specific environment (staging/testnet/mainnet/galactica-test)
+- `yarn dev:<env>`: Dev for specific environment (staging/testnet/mainnet)
 - `yarn start:<env>`: Production build for specific environment
 
 ## Building
@@ -150,12 +149,14 @@ MCP servers configured in `.mcp.json`:
 ### Story Variations Pattern
 
 For all component stories, create 4 variations:
+
 1. `{Name}LightMode` - main component (default)
 2. `{Name}DarkMode` - cloneElement with dark theme
 3. `{Name}MobileLightMode` - cloneElement with mobile viewport
 4. `{Name}MobileDarkMode` - cloneElement with dark theme + mobile viewport
 
 Example:
+
 ```tsx
 export const LightMode = () => <YourComponent />
 

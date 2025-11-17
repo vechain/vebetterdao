@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 
-import { GMNftCard } from "./GMNftCard"
+import { ProfileGMCard } from "./ProfileGMCard"
 
 export const ProfileGMLevel = ({ address }: { address: string }) => {
   const { t } = useTranslation()
@@ -23,7 +23,7 @@ export const ProfileGMLevel = ({ address }: { address: string }) => {
             ) : (
               <VStack gap="4" align="stretch">
                 {userGMs.map(gm => (
-                  <GMNftCard key={gm.tokenId} gm={gm} isClickable={account?.address === address} />
+                  <ProfileGMCard key={gm.tokenId} gm={gm} isClickable={account?.address === address} />
                 ))}
               </VStack>
             )}
