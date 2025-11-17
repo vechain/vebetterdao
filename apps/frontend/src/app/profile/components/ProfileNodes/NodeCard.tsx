@@ -13,10 +13,13 @@ import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: boolean }) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
+
+  const isDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
+
   return (
     <LinkBox flex={1}>
       <ConditionalWrapper
-        condition={!node?.currentUserIsManager}
+        condition={isDelegator}
         wrapper={({ children }) => (
           <BlurredWrapper
             title={t("Node managed externally")}
