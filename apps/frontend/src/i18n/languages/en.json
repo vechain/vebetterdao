@@ -1560,5 +1560,7 @@
   "Node managed externally": "Node managed externally",
   "This node is managed by {{address}}. To manage it, open Stargate": "This node is managed by {{address}}. To manage it, open Stargate",
   "Visit Stargate to know more about nodes and how to get one.": "Visit Stargate to know more about nodes and how to get one.",
-  "Visit Stargate": "Visit Stargate"
+  "Visit Stargate": "Visit Stargate",
+  "Accumulate B3TR and participate in the allocation rounds to be able to mint a GM NFT.": "Accumulate B3TR and participate in the allocation rounds to be able to mint a GM NFT.",
+  "Go to Round Info": "Go to Round Info"
 }
