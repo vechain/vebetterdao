@@ -27,7 +27,6 @@ export function TabNavigation({ children, currentTab }: TabNavigationProps) {
         variant="line"
         size={{ base: "md", md: "lg" }}
         w="full"
-        lazyMount
         unmountOnExit>
         <Bleed
           position={{ base: "sticky", md: "static" }}
