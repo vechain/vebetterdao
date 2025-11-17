@@ -265,10 +265,11 @@ export const ActionBanner = () => {
           wrapperClass="action-banner"
           spaceBetween={20}
           speed={800}
+          scrollbar={{ draggable: true }}
           autoplay={{
             delay: 6000,
-            pauseOnMouseEnter: true,
             disableOnInteraction: false,
+            pauseOnMouseEnter: true,
           }}>
           {slides.map(slide => (
             <SwiperSlide key={`slide-${slide?.key}`} className="slide">
