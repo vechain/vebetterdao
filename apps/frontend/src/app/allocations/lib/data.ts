@@ -1,11 +1,8 @@
-export const dynamic = "force-dynamic"
-export const revalidate = 60 // minute
-
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
-import { executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit/utils"
+import { executeMultipleClausesCall } from "@vechain/vechain-kit/utils"
 
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 import { fetchClient } from "@/api/indexer/api"
@@ -127,14 +124,7 @@ export const getRoundDetails = async (cycle: bigint) => {
 
 export const getCurrentRoundId = async () => {
   const thor = await getNodeJsThorClient()
-  const [currentRoundId] = await executeCallClause({
-    thor,
-    abi: xAllocationVotingAbi,
-    contractAddress: xAllocationVotingAddress,
-    method: "currentRoundId",
-    args: [],
-  })
-  return Number(currentRoundId)
+  return Number(await thor.contracts.load(xAllocationVotingAddress, xAllocationVotingAbi).read.currentRoundId())
 }
 
 export const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDetails> => {
@@ -143,8 +133,7 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
   const roundId = round ?? Number(currentRoundId)
 
   const roundDetails = await getRoundDetails(BigInt(roundId))
-  const rounds = await getRounds()
-
+  const rounds = await getRounds({ roundId: round, pageSize: 6 })
   const res = await getRoundResults(roundId)
 
   if (!res.data) throw Error("There is an error getting the data. Please try again.")
@@ -172,6 +161,6 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
     totalVP: roundDetails.cycleTotal,
     ...roundDetails,
     apps: appsWithVotes,
-    previous3RoundsEarnings: rounds.data.slice(1, 4),
+    previous3RoundsEarnings: rounds.data,
   }
 }
