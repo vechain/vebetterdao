@@ -3,6 +3,7 @@ import Image from "next/image"
 import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
+import { STARGATE_APP_URL } from "@/constants/links"
 
 import { setBannerEnabled, BannerStorageKey } from "../../Banners/GenericBanner"
 
@@ -44,7 +45,7 @@ export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
             {t("Later")}
           </Button>
           <Button flex={1} asChild variant="primary">
-            <Link href="https://app.stargate.vechain.org/" target="_blank" rel="noopener noreferrer">
+            <Link href={STARGATE_APP_URL} target="_blank" rel="noopener noreferrer">
               {t("Migrate now")}
             </Link>
           </Button>

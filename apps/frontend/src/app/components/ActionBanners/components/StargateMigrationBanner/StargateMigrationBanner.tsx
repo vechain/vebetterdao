@@ -3,7 +3,7 @@ import { t } from "i18next"
 import Link from "next/link"
 
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
-
+import { STARGATE_APP_URL } from "@/constants/links"
 export type Props = { isLegacyNode?: boolean }
 
 export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
@@ -18,7 +18,7 @@ export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
       }
       cta={
         <Button size={{ base: "sm", md: "md" }} asChild variant="primary" maxWidth="max-content">
-          <Link href="https://app.stargate.vechain.org/" target="_blank" rel="noopener noreferrer">
+          <Link href={STARGATE_APP_URL} target="_blank" rel="noopener noreferrer">
             {isLegacyNode ? t("Migrate now") : t("Explore")}
           </Link>
         </Button>
