@@ -59,7 +59,7 @@ export const AttachGMNFTCard = ({ node }: { node: UserNode }) => {
               )}
             </Text>
           </VStack>
-          <Flex asChild border="1px solid" rounded="12px" position="relative" cursor="pointer">
+          <Flex asChild rounded="12px" position="relative" cursor="pointer">
             <NextLink href={`/galaxy-member/${attachedGMNFT?.tokenId}`}>
               <GMNFTCard
                 imageUrl={attachedGMNFT?.metadata?.image}
