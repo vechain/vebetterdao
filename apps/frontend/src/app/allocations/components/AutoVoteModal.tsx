@@ -1,53 +1,25 @@
 "use client"
 
-import { Box, Button, Card, HStack, Switch, Text, VStack, Link, useDisclosure } from "@chakra-ui/react"
-import { useState, useEffect } from "react"
+import { Box, Button, Card, HStack, Switch, Text, VStack, Link } from "@chakra-ui/react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Modal } from "@/components/Modal"
 
 interface AutoVoteModalProps {
-  isOpen?: boolean
-  onClose?: () => void
+  isOpen: boolean
+  onClose: () => void
   onApply?: (isEnabled: boolean) => void
   defaultEnabled?: boolean
-  autoOpen?: boolean
 }
 
-/**
- * If controlledIsOpen is provided, this will open the modal automatically when the component is mounted
- * Example:
- * <AutoVoteModal autoOpen />
- *
- * If controlledOnClose is provided, this will close the modal when the onClose function is called
- * Example:
- * const { open, onOpen, onClose } = useDisclosure()
- * <AutoVoteModal isOpen={open} onClose={onClose} />
- */
-export const AutoVoteModal = ({
-  isOpen: controlledIsOpen,
-  onClose: controlledOnClose,
-  onApply,
-  defaultEnabled = true,
-  autoOpen = false,
-}: AutoVoteModalProps) => {
+const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation#service-fee"
+
+export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true }: AutoVoteModalProps) => {
   const { t } = useTranslation()
   const [isAutomationOn, setIsAutomationOn] = useState(defaultEnabled)
-  const disclosure = useDisclosure()
-  const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation#service-fee"
-
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : disclosure.open
-  const onClose = controlledOnClose || disclosure.onClose
-
-  useEffect(() => {
-    if (autoOpen && !disclosure.open) {
-      disclosure.onOpen()
-    }
-  }, [autoOpen, disclosure])
 
   const handleApply = () => {
-    // Pass the auto-voting status to the parent component
-    // The parent will handle the rest of the flow (storing preferences and enabling auto-voting)
     if (onApply) {
       onApply(isAutomationOn)
     }
