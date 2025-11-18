@@ -25,8 +25,7 @@ export default async function Page({ params }: Readonly<Props>) {
     } else roundDetails = await getHistoricalRoundData(roundId)
   } else return redirect("/allocations/round")
 
-  const { apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount, cycleTotal } = roundDetails
-  const totalVoters = apps.reduce((sum, app) => sum + (app.voters ?? 0), 0)
+  const { apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount, totalVoters, totalVP } = roundDetails
 
   return (
     <VStack alignItems="stretch" w="full" gap="4">
@@ -55,7 +54,7 @@ export default async function Page({ params }: Readonly<Props>) {
         </VStack>
         <RoundDistributionCard
           roundDetails={{
-            totalVP: cycleTotal,
+            totalVP,
             totalVoters,
             totalApp: apps.length,
             xAllocationsAmount,
