@@ -1,6 +1,18 @@
 "use client"
 
-import { Card, HStack, Heading, Icon, Badge, VStack, Button, IconButton, Text, Collapsible } from "@chakra-ui/react"
+import {
+  Card,
+  HStack,
+  Heading,
+  Icon,
+  Badge,
+  VStack,
+  Button,
+  IconButton,
+  Text,
+  Collapsible,
+  Mark,
+} from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { SmartphoneDevice, NavArrowRight } from "iconoir-react"
 import { useState, useMemo } from "react"
@@ -13,7 +25,12 @@ import { AppWithVotes } from "../lib/data"
 
 const INITIAL_DISPLAY_COUNT = 4
 
-const RoundActiveAppCard = ({ id, name, votesReceived }: Pick<AppWithVotes, "id" | "name" | "votesReceived">) => (
+const RoundActiveAppCard = ({
+  id,
+  name,
+  votesReceived,
+  totalEarnings,
+}: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "totalEarnings">) => (
   <Button key={id} unstyled asChild>
     <Card.Root
       variant="action"
@@ -29,9 +46,21 @@ const RoundActiveAppCard = ({ id, name, votesReceived }: Pick<AppWithVotes, "id"
         <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
           {name || "-"}
         </Text>
-        <Text textStyle={{ base: "xs", md: "md" }} fontWeight={{ base: "normal", md: "semibold" }}>
-          {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" B3TR"}
-        </Text>
+        <HStack gap="1">
+          {totalEarnings && (
+            <Text textStyle={{ base: "xs", md: "md" }} gap="1">
+              <Mark variant="text" fontWeight="semibold" color="text.subtle">
+                {"Received: "}
+              </Mark>
+              {getCompactFormatter(2).format(Number(totalEarnings))} {" B3TR"}
+              <Mark fontWeight="semibold">{" • "}</Mark>
+            </Text>
+          )}
+
+          <Text textStyle={{ base: "xs", md: "md" }}>
+            {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" VP"}
+          </Text>
+        </HStack>
       </VStack>
       <IconButton variant="ghost" p="0" minWidth="unset">
         <Icon as={NavArrowRight} boxSize={5} color="icon.default" />
@@ -76,7 +105,13 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
         <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
           <VStack gap="2" align="stretch">
             {visibleApps.map(app => (
-              <RoundActiveAppCard key={app.id} id={app.id} name={app.name} votesReceived={app.votesReceived} />
+              <RoundActiveAppCard
+                key={app.id}
+                id={app.id}
+                name={app.name}
+                votesReceived={app.votesReceived}
+                totalEarnings={app.totalEarnings}
+              />
             ))}
 
             {hasMoreApps && (
@@ -84,7 +119,13 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
                 <Collapsible.Content>
                   <VStack gap="2" align="stretch">
                     {filteredApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
-                      <RoundActiveAppCard key={app.id} id={app.id} name={app.name} votesReceived={app.votesReceived} />
+                      <RoundActiveAppCard
+                        key={app.id}
+                        id={app.id}
+                        name={app.name}
+                        votesReceived={app.votesReceived}
+                        totalEarnings={app.totalEarnings}
+                      />
                     ))}
                   </VStack>
                 </Collapsible.Content>

@@ -24,6 +24,7 @@ export interface AppWithVotes {
   voters: number
   votesReceived: bigint
   metadata?: Awaited<ReturnType<typeof getXAppMetadata>>
+  totalEarnings?: number
 }
 
 export interface AllocationRoundDetails {
@@ -63,6 +64,15 @@ export const getRoundResults = async (roundId: number) =>
   fetchClient.GET("/api/v1/b3tr/xallocations/{roundId}/results", {
     params: { path: { roundId } },
   })
+
+export const getRoundAppsEarnings = async (roundId: number, appIds: string[]) =>
+  Promise.all(
+    appIds.map(appId =>
+      fetchClient.GET("/api/v1/b3tr/xallocations/earnings", {
+        params: { query: { roundId, appId } },
+      }),
+    ),
+  )
 
 export const getRoundDetails = async (cycle: bigint) => {
   const thor = await getNodeJsThorClient()
@@ -159,6 +169,15 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
 
   const apps = roundDetails!.apps
   const appsMetadata = await Promise.all(apps.map(app => getXAppMetadata(`ipfs://${app.metadataURI}`)))
+
+  const earningsResponses = await getRoundAppsEarnings(
+    roundId,
+    apps.map(app => app.id),
+  )
+  const earningsMap = new Map(
+    earningsResponses.map((response, index) => [apps[index].id, response.data?.[0]?.totalAmount]),
+  )
+
   const appsWithVotes = apps
     .map((app, index) => {
       const result = resultsMap.get(app.id)
@@ -167,6 +186,7 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
         voters: result?.voters ?? 0,
         votesReceived: result?.votesReceived ? BigInt(result.votesReceived.toString()) : 0n,
         metadata: appsMetadata[index],
+        totalEarnings: earningsMap.get(app.id),
       }
     })
     .sort((appA, appB) => (appA.votesReceived > appB.votesReceived ? -1 : 1))
