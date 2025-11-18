@@ -1,14 +1,15 @@
-import { CheckboxCard, Heading, Flex, Icon, Progress, Text } from "@chakra-ui/react"
+import { CheckboxCard, Heading, Flex, Icon, Progress, Text, VStack, Badge } from "@chakra-ui/react"
 import { Group } from "iconoir-react"
 
 import { AppImage } from "@/components/AppImage/AppImage"
+import { AppCategoryItem } from "@/types/appDetails"
 
 interface AppRadioCardProps {
   appId: string
   appName: string
+  appCategory?: AppCategoryItem
   appVoters: number
-  appVotesReceived: bigint
-  totalVotes: bigint
+  allocationSharePercentage?: number
   checked?: boolean
   onCheckedChange: VoidFunction
 }
@@ -17,44 +18,62 @@ export const AppRadioCard = ({
   checked = false,
   onCheckedChange,
   appId,
+  appCategory,
   appName,
   appVoters,
-  appVotesReceived,
-  totalVotes,
-}: AppRadioCardProps) => {
-  const percentage = totalVotes > 0n ? Number((appVotesReceived * 100n) / totalVotes) : 0
+  allocationSharePercentage,
+}: AppRadioCardProps) => (
+  <CheckboxCard.Root
+    rounded="lg"
+    p="3"
+    colorPalette="blue"
+    checked={checked}
+    onCheckedChange={onCheckedChange}
+    cursor="pointer">
+    <CheckboxCard.HiddenInput />
+    <CheckboxCard.Control alignItems="center" p="0" gap="3">
+      <CheckboxCard.Indicator rounded="sm" />
+      <AppImage boxSize={{ base: "44px", md: "60px" }} appId={appId} />
 
-  return (
-    <CheckboxCard.Root
-      rounded="lg"
-      p="3"
-      colorPalette="blue"
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      cursor="pointer">
-      <CheckboxCard.HiddenInput />
-      <CheckboxCard.Control alignItems="center" p="0" gap="3">
-        <CheckboxCard.Indicator rounded="sm" />
-        <AppImage appId={appId} gridRow="1 / 3" />
-        <CheckboxCard.Content gap="0.5">
-          <Heading fontSize="md">{appName}</Heading>
-          <Flex w="full" justifyContent="space-between">
-            <Text display="flex" gap="2" textStyle="xs">
+      <CheckboxCard.Content
+        flexDirection={{ base: "column", md: "row" }}
+        justifyContent="space-between"
+        alignItems="flex-start"
+        gap="0">
+        <VStack flex={1} gap="0.5" align="start">
+          <Heading size={{ base: "md", md: "lg" }}>{appName}</Heading>
+          {appCategory && (
+            <Badge hideBelow="md" variant="neutral" size="sm" rounded="sm" width="max-content" height="max-content">
+              {appCategory.name}
+            </Badge>
+          )}
+        </VStack>
+
+        <VStack flex={1} gap="0.5" alignSelf={{ base: "flex-start", md: "flex-end" }} w={{ base: "full", md: "unset" }}>
+          <Flex w="full" justifyContent="space-between" gap="4">
+            <Text display="flex" alignItems="center" gap={{ base: "2", md: "1" }} textStyle={{ base: "xs", md: "sm" }}>
               <Icon as={Group} boxSize="4" />
               {appVoters ?? 0}
+              <Text as="span" hideBelow="md" display="inline" textStyle={{ base: "xs", md: "sm" }}>
+                {"Voters"}
+              </Text>
             </Text>
-            <Text textStyle="xs" fontWeight="bold">
-              {percentage}
-              {"%"}
-            </Text>
+            {allocationSharePercentage && (
+              <Text textStyle={{ base: "xs", md: "sm" }} fontWeight="bold">
+                {allocationSharePercentage.toFixed(2) + "% "}
+                <Text as="span" hideBelow="md" textStyle={{ base: "xs", md: "sm" }} display="inline" fontWeight="bold">
+                  {"supported"}
+                </Text>
+              </Text>
+            )}
           </Flex>
-          <Progress.Root w="full" size="xs" colorPalette="green" mt="1" value={percentage}>
+          <Progress.Root w="full" size="xs" mt="1" value={allocationSharePercentage}>
             <Progress.Track rounded="lg">
-              <Progress.Range />
+              <Progress.Range bgColor="status.positive.primary" />
             </Progress.Track>
           </Progress.Root>
-        </CheckboxCard.Content>
-      </CheckboxCard.Control>
-    </CheckboxCard.Root>
-  )
-}
+        </VStack>
+      </CheckboxCard.Content>
+    </CheckboxCard.Control>
+  </CheckboxCard.Root>
+)

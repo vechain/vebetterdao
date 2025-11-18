@@ -1,3 +1,5 @@
+export const fetchCache = "force-no-store"
+
 import { getConfig } from "@repo/config"
 import { Metadata, Viewport } from "next"
 

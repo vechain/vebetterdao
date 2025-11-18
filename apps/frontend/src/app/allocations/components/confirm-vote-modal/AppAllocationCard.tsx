@@ -10,7 +10,7 @@ import { formatEther, parseEther } from "viem"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../lib/data"
 
 interface AppAllocationCardProps {
   app: AppWithVotes
