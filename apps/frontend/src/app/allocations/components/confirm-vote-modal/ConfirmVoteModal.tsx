@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { Modal } from "@/components/Modal"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../lib/data"
 
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"
@@ -34,7 +34,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
 
   const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
 
-  const canSubmit = isValid()
+  const canSubmit = isValid
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)

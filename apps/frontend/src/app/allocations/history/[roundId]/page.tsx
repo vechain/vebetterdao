@@ -1,9 +1,12 @@
 import { Heading, VStack, Text } from "@chakra-ui/react"
+import { redirect } from "next/navigation"
 
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 
+import { RoundActiveAppsListCard } from "../../components/RoundActiveAppsListCard"
 import { RoundDistributionCard } from "../../components/tabs/round-info/RoundDistributionCard"
-import { getRoundDetails, getRoundResults } from "../../page"
+import { UserVotingActivityCard } from "../../components/UserVotingActivityCard"
+import { AllocationRoundDetails, getHistoricalRoundData } from "../../lib/data"
 
 export type Props = {
   params: {
@@ -12,12 +15,17 @@ export type Props = {
 }
 
 export default async function Page({ params }: Readonly<Props>) {
-  const { xAllocationsAmount, treasuryAmount, vote2EarnAmount, cycleTotal } = await getRoundDetails(
-    BigInt(params.roundId),
-  )
-  const roundResults = await getRoundResults(Number(params.roundId))
+  let roundDetails: AllocationRoundDetails
 
-  const apps = roundResults.data || []
+  const roundIdParam = params.roundId
+  if (roundIdParam) {
+    const roundId = parseInt(roundIdParam, 10)
+    if (isNaN(roundId)) {
+      return redirect("/allocations/round")
+    } else roundDetails = await getHistoricalRoundData(roundId)
+  } else return redirect("/allocations/round")
+
+  const { apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount, cycleTotal } = roundDetails
   const totalVoters = apps.reduce((sum, app) => sum + (app.voters ?? 0), 0)
 
   return (
@@ -45,7 +53,6 @@ export default async function Page({ params }: Readonly<Props>) {
           <Heading size="md">{`Round ${params.roundId}`}</Heading>
           <Text textStyle="sm">{"Aug 3 - Aug 10"}</Text>
         </VStack>
-
         <RoundDistributionCard
           roundDetails={{
             totalVP: cycleTotal,
@@ -56,6 +63,8 @@ export default async function Page({ params }: Readonly<Props>) {
             vote2EarnAmount,
           }}
         />
+        <UserVotingActivityCard roundDetails={roundDetails} />
+        <RoundActiveAppsListCard apps={apps} />
       </VStack>
     </VStack>
   )

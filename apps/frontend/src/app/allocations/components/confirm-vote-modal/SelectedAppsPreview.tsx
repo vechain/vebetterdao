@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../lib/data"
 
 interface SelectedAppsPreviewProps {
   apps: AppWithVotes[]

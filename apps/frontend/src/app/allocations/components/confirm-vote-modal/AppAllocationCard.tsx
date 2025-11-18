@@ -2,16 +2,15 @@
 
 import { Box, HStack, IconButton, NumberInput, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
-import { ethers } from "ethers"
 import { Minus, Plus } from "iconoir-react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { parseEther } from "viem"
+import { formatEther, parseEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../lib/data"
 
 interface AppAllocationCardProps {
   app: AppWithVotes
@@ -45,7 +44,7 @@ export const AppAllocationCard = ({
 
     if (weight === 0n) return "0"
 
-    const allocated = ethers.formatEther(weight)
+    const allocated = formatEther(weight)
     return FormattingUtils.humanNumber(allocated)
   }, [vot3Balance, percentage])
 

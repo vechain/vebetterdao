@@ -24,7 +24,7 @@ interface RewardCalculationInput {
   /** Total GM weight from all voters in cycle */
   cycleGMTotal: bigint
   /** Relayer fee percentage (e.g., 10 = 10% fee) */
-  relayerFeePercentage?: number
+  relayerFeePercentage?: bigint
   /** Whether user had auto-voting enabled (determines if fees apply) */
   hadAutoVotingEnabled?: boolean
 }
@@ -59,9 +59,9 @@ function calculateRawReward(voterTotal: bigint, emissionsAmount: bigint, cycleTo
  */
 function calculateRelayerFee(
   totalReward: bigint,
-  feePercentage: number = 10, // Default 10%
+  feePercentage: bigint = 10n, // Default 10%
 ): bigint {
-  return (totalReward * BigInt(feePercentage)) / 100n
+  return (totalReward * feePercentage) / 100n
 }
 
 /**
@@ -75,7 +75,7 @@ export function calculatePotentialRewards({
   gmEmissionsAmount,
   gmWeightTotal,
   cycleGMTotal,
-  relayerFeePercentage = 10,
+  relayerFeePercentage = 10n,
   hadAutoVotingEnabled = false,
 }: RewardCalculationInput): RewardCalculationResult {
   // Calculate raw rewards

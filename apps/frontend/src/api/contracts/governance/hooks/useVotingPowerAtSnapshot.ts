@@ -2,8 +2,7 @@ import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { useAllocationRoundSnapshot } from "../../xAllocations/hooks/useAllocationRoundSnapshot"
-import { useCurrentAllocationsRoundId } from "../../xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useCurrentRoundSnapshot } from "../../xAllocations/hooks/useCurrentRoundSnapshot"
 
 import { useTotalVotesOnBlock } from "./useTotalVotesOnBlock"
 
@@ -14,9 +13,8 @@ import { useTotalVotesOnBlock } from "./useTotalVotesOnBlock"
 export const useVotingPowerAtSnapshot = () => {
   const { account } = useWallet()
 
-  // Get current round ID and its snapshot block
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: snapshotBlock } = useAllocationRoundSnapshot(currentRoundId ?? "")
+  // Get current round snapshot block
+  const { data: snapshotBlock } = useCurrentRoundSnapshot()
 
   // Get VOT3 balance at snapshot block
   const { data: votesAtSnapshot, isLoading } = useTotalVotesOnBlock(

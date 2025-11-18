@@ -1,18 +1,18 @@
 import { Box, Card, Icon, Separator, Text, VStack, HStack, SimpleGrid, Button, GridItem } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { Gift, NavArrowRight, SmartphoneDevice, Group, Flash, List, Prohibition } from "iconoir-react"
+import { Gift, NavArrowRight, SmartphoneDevice, Group, Flash, List } from "iconoir-react"
 import { useMemo } from "react"
 import { formatEther } from "viem"
 
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 
-import { AllocationCurrentRoundDetails } from "../../../page"
+import { AllocationRoundDetails } from "../../../lib/data"
 
 export function RoundDistributionCard({
   roundDetails,
 }: {
   roundDetails: Pick<
-    AllocationCurrentRoundDetails,
+    AllocationRoundDetails,
     "xAllocationsAmount" | "vote2EarnAmount" | "treasuryAmount" | "totalVoters" | "totalVP"
   > & {
     totalApp: number
@@ -61,39 +61,32 @@ export function RoundDistributionCard({
               {"Summary"}
             </Text>
           </HStack>
-
-          <HStack gap="1">
-            <Icon as={Prohibition} boxSize="4" color="status.negative.primary" />
-            <Text textStyle="xs" fontWeight="semibold">
-              {"Minimum quorum (30%) is not reached"}
-            </Text>
-          </HStack>
         </GridItem>
-
         {(
           [
             ["Total apps", SmartphoneDevice, roundDetails.totalApp],
-            ["Total voters", Group, getCompactFormatter(3).format(roundDetails.totalVoters)],
+            ["Total voters", Group, getCompactFormatter(2).format(roundDetails.totalVoters)],
             ["Total VP", Flash, getCompactFormatter(2).format(Number(formatEther(roundDetails.totalVP)))],
           ] as const
         ).map(([label, icon, value]) => (
-          <Card.Root
-            key={label}
-            p={{ base: "0", md: "4" }}
-            bg={{ base: "transparent", md: "card.subtle" }}
-            gap="1"
-            mx={{ base: "auto", md: "unset" }}>
-            <HStack gap="2">
-              <Icon as={icon} boxSize={{ base: "4", md: "5" }} color="icon.subtle" />
-              <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
-                {label}
-              </Text>
-            </HStack>
+          <GridItem key={label}>
+            <Card.Root
+              p={{ base: "0", md: "4" }}
+              bg={{ base: "transparent", md: "card.subtle" }}
+              gap="1"
+              mx={{ base: "auto", md: "unset" }}>
+              <HStack gap="2">
+                <Icon as={icon} boxSize={{ base: "4", md: "5" }} color="icon.subtle" />
+                <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
+                  {label}
+                </Text>
+              </HStack>
 
-            <Text textStyle="md" fontWeight="semibold">
-              {value}
-            </Text>
-          </Card.Root>
+              <Text textStyle="md" fontWeight="semibold">
+                {value}
+              </Text>
+            </Card.Root>
+          </GridItem>
         ))}
       </SimpleGrid>
 

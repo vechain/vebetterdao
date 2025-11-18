@@ -134,11 +134,7 @@ export const BaseBottomSheet = ({
               {children}
             </Drawer.Body>
 
-            {footer && (
-              <Box p={4} borderColor="border.default">
-                {footer}
-              </Box>
-            )}
+            {footer && <Drawer.Footer>{footer}</Drawer.Footer>}
           </Drawer.Content>
         </Drawer.Positioner>
       </Portal>

@@ -80,17 +80,16 @@ export const timestampToTimeLeftDecomposed = (endDate: number, startDate: number
 export const parseDate = (date: number): string => dayjs(date).format("D MMM")
 
 const VECHAIN_BLOCK_TIME_SECONDS = 10
-export const blockNumberToDate = async (
-  thor: ThorClient,
+export const blockNumberToDate = (
   blockNumber: bigint,
+  bestBlock?: Awaited<ReturnType<ThorClient["blocks"]["getBestBlockCompressed"]>>,
   currentBlockTimestamp?: number | null,
   currentBlockNumber?: bigint,
-): Promise<Date> => {
+): Date => {
   let blockTs = currentBlockTimestamp
   let currentBlock = currentBlockNumber
 
   if (!blockTs || !currentBlock) {
-    const bestBlock = await thor.blocks.getBestBlockCompressed()
     blockTs ??= bestBlock?.timestamp ?? Math.floor(Date.now() / 1000)
     currentBlock ??= bestBlock ? BigInt(bestBlock.number) : BigInt(0)
   }

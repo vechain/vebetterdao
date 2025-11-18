@@ -3,34 +3,22 @@
 import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
 import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useContext } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
 
-import type { AppWithVotes } from "../../../page"
 import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
+import { AllocationTabsContext } from "../AllocationTabsProvider"
 
 import { AppCategoryTabs } from "./AppCategoryTabs"
 
-interface VoteTabProps {
-  apps: AppWithVotes[]
-  selectedAppIds: Set<string>
-  onToggleApp: (appId: string) => void
-  isStuck: boolean
-  hasEnoughVotesAtSnapshot: boolean
-  onVoteClick: () => void
-}
+export function VoteTab() {
+  const context = useContext(AllocationTabsContext)
+  if (!context) throw new Error("VoteTab must be used within AllocationTabsProvider")
 
-export function VoteTab({
-  apps,
-  selectedAppIds,
-  onToggleApp,
-  isStuck,
-  hasEnoughVotesAtSnapshot,
-  onVoteClick,
-}: VoteTabProps) {
+  const { apps, roundId, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot, onVoteClick } = context
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -69,7 +57,7 @@ export function VoteTab({
       } else {
         params.delete("category")
       }
-      router.push(`?${params.toString()}`)
+      router.push(`?${params.toString()}`, { scroll: false })
     },
     [searchParams, router],
   )
@@ -107,6 +95,7 @@ export function VoteTab({
           onCategoryChange={handleCategoryChange}
           searchQuery={urlSearchQuery}
           hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
+          roundId={roundId}
           tabsListProps={{
             position: "sticky",
             top: "52px",

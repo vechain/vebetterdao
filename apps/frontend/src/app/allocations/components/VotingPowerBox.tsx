@@ -1,9 +1,11 @@
 "use client"
 
-import { Icon, Text, Button, Dialog, Skeleton } from "@chakra-ui/react"
+import { Icon, Text, Button, Skeleton } from "@chakra-ui/react"
 import { Flash } from "iconoir-react"
+import { useState } from "react"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { StatCard } from "./StatCard"
@@ -11,6 +13,8 @@ import { StatCard } from "./StatCard"
 export const VotingPowerBox = () => {
   const { isMobile } = useBreakpoints()
   const { vot3Balance, isLoading } = useVotingPowerAtSnapshot()
+
+  const [isOpen, setIsOpen] = useState(false)
 
   const formatted = vot3Balance?.formatted ?? "0"
 
@@ -28,14 +32,14 @@ export const VotingPowerBox = () => {
         </Skeleton>
       }
       cta={
-        <Dialog.Root>
-          <Dialog.Trigger asChild>
-            <Button variant="primary">
-              <Icon as={Flash} boxSize="4" />
-              {"Power up"}
-            </Button>
-          </Dialog.Trigger>
-        </Dialog.Root>
+        <>
+          <Button variant="primary" onClick={() => setIsOpen(true)}>
+            <Icon as={Flash} boxSize="4" />
+            {"Power up"}
+          </Button>
+
+          <ConvertModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        </>
       }
     />
   )
