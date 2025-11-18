@@ -155,7 +155,11 @@ export const GrantsPageContent = () => {
   )
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
-  const visibleProposal = filteredProposals?.slice(startRange, endRange)
+  const sortedFilteredProposals = useMemo(() => {
+    return filteredProposals?.sort((a, b) => b.createdAt - a.createdAt)
+  }, [filteredProposals])
+
+  const visibleProposal = sortedFilteredProposals?.slice(startRange, endRange)
 
   // COMPUTED VALUES
   const totalGrantsApproved = useMemo(() => {
@@ -306,15 +310,15 @@ export const GrantsPageContent = () => {
               <Grid templateColumns={{ base: "1fr" }} gap={5} w="full">
                 {isLoadingEnrichedGrantProposals && renderSkeleton()}
                 {!isLoadingEnrichedGrantProposals &&
-                  filteredProposals &&
-                  filteredProposals.length > 0 &&
+                  sortedFilteredProposals &&
+                  sortedFilteredProposals.length > 0 &&
                   renderProposals()}
 
-                {filteredProposals && filteredProposals.length > 0 && (
+                {sortedFilteredProposals && sortedFilteredProposals.length > 0 && (
                   <Pagination.Root
                     mx={{ base: "auto", md: "unset" }}
                     defaultPage={1}
-                    count={filteredProposals.length}
+                    count={sortedFilteredProposals.length}
                     pageSize={pageSize}
                     page={page}
                     onPageChange={e => setPage(e.page)}
@@ -358,7 +362,7 @@ export const GrantsPageContent = () => {
                 )}
 
                 {!isLoadingEnrichedGrantProposals &&
-                  (!filteredProposals || filteredProposals.length === 0) &&
+                  (!sortedFilteredProposals || sortedFilteredProposals.length === 0) &&
                   renderEmptyState()}
               </Grid>
             </VStack>
