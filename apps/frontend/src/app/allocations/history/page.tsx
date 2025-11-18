@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 import { ButtonGroup, IconButton, Pagination, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
