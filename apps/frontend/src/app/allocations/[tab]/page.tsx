@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
 
 import { Tabs } from "@chakra-ui/react"
 import { redirect } from "next/navigation"
