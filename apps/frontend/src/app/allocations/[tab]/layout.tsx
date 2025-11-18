@@ -3,10 +3,8 @@ import { VStack, Heading, Grid, GridItem } from "@chakra-ui/react"
 import { CountdownBox } from "../components/CountdownBox"
 import { PotentialRewardBox } from "../components/PotentialRewardBox"
 import { VotingPowerBox } from "../components/VotingPowerBox"
-import { getCurrentRoundId } from "../lib/data"
 
 export default async function TabLayout({ children }: { children: React.ReactNode }) {
-  const currentRoundId = await getCurrentRoundId()
   return (
     <>
       <VStack alignItems="stretch" gap="2" w="full" mb="6">
@@ -19,7 +17,7 @@ export default async function TabLayout({ children }: { children: React.ReactNod
             <VotingPowerBox />
           </GridItem>
           <GridItem asChild>
-            <PotentialRewardBox currentRoundId={currentRoundId} />
+            <PotentialRewardBox />
           </GridItem>
           <GridItem asChild>
             <CountdownBox />

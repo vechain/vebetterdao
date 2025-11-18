@@ -6,7 +6,7 @@ import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emi
 import { RelayerRewardsPool__factory } from "@vechain/vebetterdao-contracts/factories/RelayerRewardsPool__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
-import { useMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
+import { useCallClause, useMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { formatEther } from "viem"
 
@@ -21,49 +21,57 @@ const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${stri
 const emissionsAbi = Emissions__factory.abi
 const emissionsAddress = getConfig().emissionsContractAddress as `0x${string}`
 
-const xAllocatingVotingAbi = XAllocationVoting__factory.abi
-const xAllocatingVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
+const xAllocationVotingAbi = XAllocationVoting__factory.abi
+const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 
 const relayerRewardsAbi = RelayerRewardsPool__factory.abi
 const relayerRewardsAddress = getConfig().relayerRewardsPoolContractAddress as `0x${string}`
 
-export const PotentialRewardBox = ({ currentRoundId }: { currentRoundId: number }) => {
+export const PotentialRewardBox = () => {
   const { account } = useWallet()
   const thor = useThor()
 
+  const { data: currentRoundId } = useCallClause({
+    abi: xAllocationVotingAbi,
+    address: xAllocationVotingAddress,
+    method: "currentRoundId" as const,
+    args: [],
+    queryOptions: { select: data => data[0] },
+  })
+
   const { data, isLoading } = useMultipleClausesCall({
     thor,
-    queryKey: ["potentialRewardQueryKey", currentRoundId.toString(), account?.address ?? ""],
+    queryKey: ["potentialRewardQueryKey", (currentRoundId || "").toString(), account?.address ?? ""],
     calls: [
       {
         abi: voterRewardsAbi,
         address: voterRewardsAddress,
         functionName: "cycleToTotal" as const,
-        args: [BigInt(currentRoundId)],
+        args: [currentRoundId!],
       },
       {
         abi: voterRewardsAbi,
         address: voterRewardsAddress,
         functionName: "cycleToTotalGMWeight" as const,
-        args: [BigInt(currentRoundId)],
+        args: [currentRoundId!],
       },
       {
         abi: voterRewardsAbi,
         address: voterRewardsAddress,
         functionName: "cycleToVoterToTotal" as const,
-        args: [BigInt(currentRoundId), account?.address as `0x{string}`],
+        args: [currentRoundId!, account?.address as `0x{string}`],
       },
       {
         abi: voterRewardsAbi,
         address: voterRewardsAddress,
         functionName: "getGMReward" as const,
-        args: [BigInt(currentRoundId), account?.address as `0x{string}`],
+        args: [currentRoundId!, account?.address as `0x{string}`],
       },
       {
         abi: emissionsAbi,
         address: emissionsAddress,
         functionName: "emissions" as const,
-        args: [BigInt(currentRoundId)],
+        args: [currentRoundId!],
       },
       {
         abi: relayerRewardsAbi,
@@ -72,12 +80,13 @@ export const PotentialRewardBox = ({ currentRoundId }: { currentRoundId: number 
         args: [],
       },
       {
-        abi: xAllocatingVotingAbi,
-        address: xAllocatingVotingAddress,
+        abi: xAllocationVotingAbi,
+        address: xAllocationVotingAddress,
         functionName: "isUserAutoVotingEnabledInCurrentRound" as const,
         args: [(account?.address || "") as `0x${string}`],
       },
     ],
+    enabled: !!thor && !!currentRoundId,
   })
 
   const potentialReward = useMemo(() => {
