@@ -175,7 +175,7 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
     apps.map(app => app.id),
   )
   const earningsMap = new Map(
-    earningsResponses.map((response, index) => [apps[index].id, response.data?.[0]?.totalAmount]),
+    earningsResponses.map((response, index) => [apps[index]?.id, response.data?.[0]?.totalAmount]),
   )
 
   const appsWithVotes = apps
