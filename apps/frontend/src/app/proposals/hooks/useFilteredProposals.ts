@@ -98,14 +98,22 @@ export const useFilteredProposals = (
       //4 - Completed/executed
       ProposalState.Completed,
       ProposalState.Executed,
-      //5 - Canceled/Defeated/Deposit Not Met
-      ProposalState.Canceled,
-      ProposalState.Defeated,
-      ProposalState.DepositNotMet,
+      //5 - Failed states: Defeated/Deposit Not Met/Canceled (grouped together)
     ]
-    return proposals.sort((a: ProposalWithStateAndDeposit, b: ProposalWithStateAndDeposit) => {
+
+    const failedStates = [ProposalState.Defeated, ProposalState.DepositNotMet, ProposalState.Canceled]
+    const failedStatesPhaseIndex = stateOrder.length
+
+    const getPhaseIndex = (state: ProposalState) => {
+      if (failedStates.includes(state)) {
+        return failedStatesPhaseIndex
+      }
+      return stateOrder.indexOf(state)
+    }
+
+    return [...proposals].sort((a: ProposalWithStateAndDeposit, b: ProposalWithStateAndDeposit) => {
       // First, sort by phase (state order)
-      const phaseComparison = stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state)
+      const phaseComparison = getPhaseIndex(a.state) - getPhaseIndex(b.state)
 
       // If they're in the same phase, sort by newest to oldest (createdAt descending)
       if (phaseComparison === 0) {
