@@ -64,42 +64,54 @@ export const getRoundResults = async (roundId: number) =>
 export const getRoundDetails = async (cycle: bigint) => {
   const thor = await getNodeJsThorClient()
 
-  const [round, currentRoundDeadlineBlock, apps, cycleTotal, emissions] = await executeMultipleClausesCall({
-    thor,
-    calls: [
-      {
-        abi: xAllocationVotingAbi,
-        address: xAllocationVotingAddress,
-        functionName: "getRound" as const,
-        args: [cycle],
-      },
-      {
-        abi: xAllocationVotingAbi,
-        address: xAllocationVotingAddress,
-        functionName: "currentRoundDeadline" as const,
-        args: [],
-      },
-      {
-        abi: xAllocationVotingAbi,
-        address: xAllocationVotingAddress,
-        functionName: "getAppsOfRound" as const,
-        args: [cycle],
-      },
-      {
-        abi: voterRewardsAbi,
-        address: voterRewardsAddress,
-        functionName: "cycleToTotal" as const,
-        args: [cycle],
-      },
-
-      {
-        abi: emissionsAbi,
-        address: emissionsAddress,
-        functionName: "emissions",
-        args: [cycle],
-      },
-    ],
-  })
+  const [currentRoundDeadlineBlock, round, totalVotes, totalVoters, apps, cycleTotal, emissions] =
+    await executeMultipleClausesCall({
+      thor,
+      calls: [
+        {
+          abi: xAllocationVotingAbi,
+          address: xAllocationVotingAddress,
+          functionName: "currentRoundDeadline" as const,
+          args: [],
+        },
+        {
+          abi: xAllocationVotingAbi,
+          address: xAllocationVotingAddress,
+          functionName: "getRound" as const,
+          args: [cycle],
+        },
+        {
+          abi: xAllocationVotingAbi,
+          address: xAllocationVotingAddress,
+          functionName: "totalVotes" as const,
+          args: [cycle],
+        },
+        {
+          abi: xAllocationVotingAbi,
+          address: xAllocationVotingAddress,
+          functionName: "totalVoters" as const,
+          args: [cycle],
+        },
+        {
+          abi: xAllocationVotingAbi,
+          address: xAllocationVotingAddress,
+          functionName: "getAppsOfRound" as const,
+          args: [cycle],
+        },
+        {
+          abi: voterRewardsAbi,
+          address: voterRewardsAddress,
+          functionName: "cycleToTotal" as const,
+          args: [cycle],
+        },
+        {
+          abi: emissionsAbi,
+          address: emissionsAddress,
+          functionName: "emissions",
+          args: [cycle],
+        },
+      ],
+    })
 
   const [xAllocationsAmount, vote2EarnAmount, treasuryAmount, gmAmount] = emissions
   const bestBlockCompressed = await thor.blocks.getBestBlockCompressed()
@@ -113,6 +125,8 @@ export const getRoundDetails = async (cycle: bigint) => {
     roundStart,
     currentRoundDeadline,
     roundEnd,
+    totalVP: totalVotes,
+    totalVoters,
     apps,
     cycleTotal,
     xAllocationsAmount,
@@ -157,9 +171,8 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
   return {
     id: roundId,
     currentRoundId: Number(currentRoundId),
-    totalVoters: appsWithVotes.reduce((sum, app) => sum + (app.voters ?? 0), 0),
-    totalVP: roundDetails.cycleTotal,
     ...roundDetails,
+    totalVoters: Number(roundDetails.totalVoters),
     apps: appsWithVotes,
     previous3RoundsEarnings: rounds.data,
   }

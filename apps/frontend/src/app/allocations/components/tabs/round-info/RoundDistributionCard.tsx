@@ -65,7 +65,7 @@ export function RoundDistributionCard({
         {(
           [
             ["Total apps", SmartphoneDevice, roundDetails.totalApp],
-            ["Total voters", Group, getCompactFormatter(3).format(roundDetails.totalVoters)],
+            ["Total voters", Group, getCompactFormatter(2).format(roundDetails.totalVoters)],
             ["Total VP", Flash, getCompactFormatter(2).format(Number(formatEther(roundDetails.totalVP)))],
           ] as const
         ).map(([label, icon, value]) => (
