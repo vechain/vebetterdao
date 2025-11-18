@@ -34,7 +34,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
   const previous3RoundsEarnings = roundDetails.previous3RoundsEarnings
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { cycleTotal, totalVoters, apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount } = roundDetails
+  const { totalVP, totalVoters, apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount } = roundDetails
   const isCurrentRound = roundDetails.currentRoundId === roundDetails.id
 
   const handleRoundNavigation = (newRoundId: number) => {
@@ -103,7 +103,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
 
       <RoundDistributionCard
         roundDetails={{
-          totalVP: cycleTotal,
+          totalVP,
           totalVoters,
           totalApp: apps.length,
           xAllocationsAmount,
