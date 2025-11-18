@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 export interface AllocationData {
   appId: string
@@ -110,7 +110,7 @@ export const useConfirmVoteModal = (appIds: string[]) => {
   /**
    * Validates that allocations sum to 100% and all are non-negative
    */
-  const isValid = useCallback(() => {
+  const isValid = useMemo(() => {
     const total = getTotalPercentage()
     if (total !== 100) return false
 
