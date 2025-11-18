@@ -2,6 +2,7 @@
 
 import {
   Button,
+  ButtonGroup,
   Circle,
   CloseButton,
   createListCollection,
@@ -9,6 +10,7 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
   Input,
   InputGroup,
   Pagination,
@@ -19,13 +21,15 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { Search, Search as SearchIcon } from "iconoir-react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
+import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
+import { AppWithVotes } from "@/app/allocations/lib/data"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
-import type { AppWithVotes } from "../../../page"
 import { AppRadioCard } from "../../AppRadioCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
 
@@ -41,8 +45,13 @@ interface AppCategoryTabsProps {
   initialCategory?: string
   onCategoryChange?: (category: string) => void
   hasEnoughVotesAtSnapshot?: boolean
+  roundId?: string
   onVoteClick?: () => void
 }
+
+const categoryCollection = createListCollection({
+  items: APP_CATEGORIES.map(category => ({ label: category.name, value: category.id })),
+})
 
 export function AppCategoryTabs({
   apps = [],
@@ -56,41 +65,33 @@ export function AppCategoryTabs({
   initialCategory = "all",
   onCategoryChange,
   hasEnoughVotesAtSnapshot,
+  roundId,
   onVoteClick,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
-
-  const categoryCollection = createListCollection({
-    items: APP_CATEGORIES.map(category => ({ label: category.name, value: category.id })),
-  })
-
-  const totalVotes = useMemo(
-    () =>
-      apps.reduce((acc, cum) => {
-        return acc + (cum?.votesReceived ? cum.votesReceived : 0n)
-      }, 0n),
-    [apps],
+  const [currentPage, setCurrentPage] = useState(1)
+  const { data: appShares } = useXAppsShares(
+    apps.map(app => app.id),
+    roundId,
   )
 
+  const appSharesMap = useMemo(() => {
+    if (!appShares) return new Map()
+    return new Map(appShares.map(share => [share.app, share.share + share.unallocatedShare]))
+  }, [appShares])
+
   const filteredApps = useMemo(() => {
-    return apps
-      .filter(app => {
-        const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchesSearchDesktop = app.name.toLowerCase().includes(searchQueryDesktop.toLowerCase())
+    return apps.filter(app => {
+      const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearchDesktop = app.name.toLowerCase().includes(searchQueryDesktop.toLowerCase())
 
-        const matchesCategory =
-          selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
-        return (isMobile ? matchesSearch : matchesSearchDesktop) && matchesCategory
-      })
-      .sort((a, b) => (b.votesReceived > a.votesReceived ? 1 : -1))
+      const matchesCategory =
+        selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
+      return (isMobile ? matchesSearch : matchesSearchDesktop) && matchesCategory
+    })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
-
-  const areAllFilteredAppsSelected = useMemo(() => {
-    if (!selectedAppIds || filteredApps.length === 0) return false
-    return filteredApps.every(app => selectedAppIds.has(app.id))
-  }, [filteredApps, selectedAppIds])
 
   const sortedAppsWithSelected = useMemo(() => {
     return filteredApps.slice().sort((a, b) => {
@@ -101,23 +102,39 @@ export function AppCategoryTabs({
     })
   }, [filteredApps, selectedAppIds])
 
+  const visibleApps = useMemo(() => {
+    if (!showPagination) return sortedAppsWithSelected
+    const pageSize = 10
+    const startIndex = (currentPage - 1) * pageSize
+    return sortedAppsWithSelected.slice(startIndex, startIndex + pageSize)
+  }, [sortedAppsWithSelected, showPagination, currentPage])
+
+  const areAllVisibleAppsSelected = useMemo(() => {
+    if (!selectedAppIds || visibleApps.length === 0) return false
+    return visibleApps.every(app => selectedAppIds.has(app.id))
+  }, [visibleApps, selectedAppIds])
+
   const handleSelectAll = () => {
     if (!onToggleApp) return
 
-    if (areAllFilteredAppsSelected) {
-      filteredApps.forEach(app => {
+    if (areAllVisibleAppsSelected) {
+      visibleApps.forEach(app => {
         if (selectedAppIds?.has(app.id)) {
           onToggleApp(app.id)
         }
       })
     } else {
-      filteredApps.forEach(app => {
+      visibleApps.forEach(app => {
         if (!selectedAppIds?.has(app.id)) {
           onToggleApp(app.id)
         }
       })
     }
   }
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedCategory])
 
   return (
     <HStack asChild={isMobile} gap="6" alignItems="flex-start">
@@ -127,7 +144,7 @@ export function AppCategoryTabs({
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">
               <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
-                {areAllFilteredAppsSelected ? "Deselect all" : "Select all"}
+                {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
               </Button>
               <Button
                 variant="primary"
@@ -238,14 +255,14 @@ export function AppCategoryTabs({
             gap={tabsListProps?.mb ? "3" : "4"}
             p={tabsListProps?.mb ? undefined : "4"}>
             {filteredApps.length > 0 ? (
-              (showPagination ? sortedAppsWithSelected.slice(0, 10) : sortedAppsWithSelected).map(app => (
+              visibleApps.map(app => (
                 <AppRadioCard
                   key={app.id}
                   appId={app.id}
                   appName={app.name}
                   appVoters={app.voters}
-                  appVotesReceived={app.votesReceived}
-                  totalVotes={totalVotes}
+                  appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
+                  allocationSharePercentage={appSharesMap.get(app.id)}
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
                 />
@@ -268,8 +285,8 @@ export function AppCategoryTabs({
                 defaultPage={1}
                 count={filteredApps.length}
                 pageSize={10}
-                page={1}
-                onPageChange={() => {}}
+                page={currentPage}
+                onPageChange={details => setCurrentPage(details.page)}
                 display="flex"
                 alignItems="center"
                 justifyContent="space-between"
@@ -279,6 +296,24 @@ export function AppCategoryTabs({
 
                   <Pagination.PageText format="long" textStyle="sm" />
                 </HStack>
+
+                <ButtonGroup hideBelow="md" variant="ghost" size="sm">
+                  <Pagination.PrevTrigger asChild>
+                    <IconButton>
+                      <HiChevronLeft />
+                    </IconButton>
+                  </Pagination.PrevTrigger>
+                  <Pagination.Items
+                    render={page => (
+                      <IconButton variant={{ base: "ghost", _selected: "outline" }}>{page.value}</IconButton>
+                    )}
+                  />
+                  <Pagination.NextTrigger asChild>
+                    <IconButton>
+                      <HiChevronRight />
+                    </IconButton>
+                  </Pagination.NextTrigger>
+                </ButtonGroup>
 
                 <Button hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
                   {"View all"}

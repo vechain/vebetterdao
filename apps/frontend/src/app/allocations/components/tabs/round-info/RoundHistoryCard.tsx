@@ -5,6 +5,7 @@ import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
 import NextLink from "next/link"
 import { formatEther } from "viem"
 
@@ -16,7 +17,7 @@ const abi = VoterRewards__factory.abi
 const contractAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 
 export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
-  const { roundId, rewardsAllocationAmount: totalReward } = round
+  const { roundId, rewardsAllocationAmount: totalReward, roundStart, roundEnd } = round
   const { account } = useWallet()
   const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
     abi,
@@ -42,7 +43,9 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
                 <Heading size="md" fontWeight="semibold">
                   {roundId}
                 </Heading>
-                <Text textStyle="md">{"Jul 27 - Aug 2"}</Text>
+                <Text textStyle="md">
+                  {[roundStart, roundEnd].map(date => dayjs(date).format("MMM D")).join(" - ")}
+                </Text>
               </VStack>
 
               <VStack gap="2" alignItems="flex-end">

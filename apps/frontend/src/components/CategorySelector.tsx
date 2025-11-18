@@ -27,12 +27,7 @@ import {
 import { useTranslation } from "react-i18next"
 import { FaSearch, FaPlus } from "react-icons/fa"
 
-import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
-type CategoryType = {
-  id: string
-  name: string
-  color: string
-}
+import { APP_CATEGORIES, AppCategoryItem, MAX_CATEGORIES } from "@/types/appDetails"
 type CategorySelectorProps<T extends FieldValues> = {
   fieldName: Path<T>
   register: UseFormRegister<T>
@@ -40,7 +35,7 @@ type CategorySelectorProps<T extends FieldValues> = {
   watch: UseFormWatch<T>
   error?: string
   maxCategories?: number
-  categories?: CategoryType[]
+  categories?: AppCategoryItem[]
   registerOptions?: RegisterOptions<T, Path<T>>
 }
 export const CategorySelector = <T extends FieldValues>({
@@ -50,7 +45,7 @@ export const CategorySelector = <T extends FieldValues>({
   watch,
   error,
   maxCategories = MAX_CATEGORIES,
-  categories = APP_CATEGORIES,
+  categories = [...APP_CATEGORIES],
   registerOptions,
 }: CategorySelectorProps<T>) => {
   const { t } = useTranslation()

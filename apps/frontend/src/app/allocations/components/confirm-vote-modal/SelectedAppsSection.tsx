@@ -3,7 +3,7 @@
 import { Box, HStack, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../lib/data"
 
 import { AppAllocationCard } from "./AppAllocationCard"
 

@@ -11,7 +11,7 @@ import { useAllocationRoundSnapshot } from "@/api/contracts/xAllocations/hooks/u
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { Modal } from "@/components/Modal"
 
-import type { AppWithVotes } from "../../page"
+import type { AppWithVotes } from "../../lib/data"
 
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"

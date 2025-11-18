@@ -1,45 +1,36 @@
 "use client"
 
-import { Box, Bleed, Button, Dialog, Presence, Tabs, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Dialog, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useRouter, useSearchParams } from "next/navigation"
-import { createContext, useRef, useState, useCallback, useMemo } from "react"
+import { useRef, createContext, useState, useCallback, useMemo } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
-import { RoundEarnings } from "@/app/allocations/history/page"
 import { useStickyState } from "@/hooks/useStickyState"
 
-import type { AllocationCurrentRoundDetails, AppWithVotes } from "../../../page"
-import { ConfirmVoteModal } from "../../confirm-vote-modal/ConfirmVoteModal"
-import { RoundInfoTab } from "../round-info/RoundInfoTab"
-
-import { VoteTab } from "./VoteTab"
+import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
+import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
 
 interface AllocationTabsContextType {
-  roundId: number
+  roundId: string
+  roundDetails: AllocationRoundDetails
   apps: AppWithVotes[]
   selectedAppIds: Set<string>
   onToggleApp: (appId: string) => void
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
+  onVoteClick: () => void
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
 
-interface AllocationTabsProps {
-  currentRoundDetails: AllocationCurrentRoundDetails
+interface AllocationTabsProviderProps {
+  roundDetails: AllocationRoundDetails
   onSelectedAppsChange?: (selectedIds: Set<string>) => void
-  previous3RoundsEarnings: RoundEarnings[]
+  children: React.ReactNode
 }
 
-export function AllocationTabs({
-  currentRoundDetails,
-  onSelectedAppsChange,
-  previous3RoundsEarnings,
-}: AllocationTabsProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
@@ -48,11 +39,9 @@ export function AllocationTabs({
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
 
-  const currentTab = searchParams.get("tab") || "vote"
-
   const selectedApps = useMemo(() => {
-    return currentRoundDetails.apps.filter(app => selectedAppIds.has(app.id))
-  }, [currentRoundDetails.apps, selectedAppIds])
+    return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
+  }, [roundDetails.apps, selectedAppIds])
 
   const toggleApp = useCallback(
     (appId: string) => {
@@ -70,64 +59,24 @@ export function AllocationTabs({
     // @TODO: Implement the actual voting logic here
     // eslint-disable-next-line no-console
     console.log("Voting with allocations:", allocations)
-    // Clear selected apps after successful vote
     setSelectedAppIds(new Set())
   }, [])
-
-  const handleTabChange = (details: { value: string }) => {
-    const params = new URLSearchParams(searchParams)
-    params.set("tab", details.value)
-    router.push(`?${params.toString()}`)
-  }
 
   return (
     <AllocationTabsContext.Provider
       value={{
-        roundId: currentRoundDetails.id,
-        apps: currentRoundDetails.apps,
+        roundId: roundDetails.id.toString(),
+        roundDetails,
+        apps: roundDetails.apps,
         selectedAppIds,
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
+        onVoteClick: openModal,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
-      <Tabs.Root
-        value={currentTab}
-        variant="line"
-        size={{ base: "md", md: "lg" }}
-        w="full"
-        lazyMount
-        onValueChange={handleTabChange}>
-        <Bleed
-          position={{ base: "sticky", md: "static" }}
-          top="0"
-          zIndex={2}
-          inlineStart={{ base: "4", md: "0" }}
-          inlineEnd={{ base: "4", md: "0" }}>
-          <Tabs.List pt={isStuck ? "3" : undefined} px={{ base: "4", md: "0" }} bg={isStuck ? "bg.primary" : undefined}>
-            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote">
-              {"Vote for apps"}
-            </Tabs.Trigger>
-            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round">
-              {"Round info"}
-            </Tabs.Trigger>
-          </Tabs.List>
-        </Bleed>
-        <Tabs.Content value="vote" display="flex" flexDirection="column" gap="4">
-          <VoteTab
-            apps={currentRoundDetails.apps}
-            selectedAppIds={selectedAppIds}
-            onToggleApp={toggleApp}
-            isStuck={isStuck}
-            hasEnoughVotesAtSnapshot={hasVotesAtSnapshot}
-            onVoteClick={openModal}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="round">
-          <RoundInfoTab currentRoundDetails={currentRoundDetails} previous3RoundsEarnings={previous3RoundsEarnings} />
-        </Tabs.Content>
-      </Tabs.Root>
+      {children}
 
       <Presence
         hideFrom="md"
