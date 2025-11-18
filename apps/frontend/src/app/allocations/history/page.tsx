@@ -110,7 +110,6 @@ export const getRounds = async ({
       roundIds.map(roundId =>
         fetchClient
           .GET("/api/v1/b3tr/xallocations/earnings", {
-            cache: "no-cache",
             params: { query: { roundId } },
           })
           .then(data => data?.data?.[0]),

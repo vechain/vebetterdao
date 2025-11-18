@@ -1,5 +1,3 @@
-export const revalidate = 0 //minute
-
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
@@ -60,7 +58,6 @@ export type AllocationAmount = {
 
 export const getRoundResults = async (roundId: number) =>
   fetchClient.GET("/api/v1/b3tr/xallocations/{roundId}/results", {
-    cache: "no-cache",
     params: { path: { roundId } },
   })
 
