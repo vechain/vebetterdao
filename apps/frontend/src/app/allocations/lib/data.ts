@@ -60,6 +60,7 @@ export type AllocationAmount = {
 
 export const getRoundResults = async (roundId: number) =>
   fetchClient.GET("/api/v1/b3tr/xallocations/{roundId}/results", {
+    cache: "no-cache",
     params: { path: { roundId } },
   })
 
