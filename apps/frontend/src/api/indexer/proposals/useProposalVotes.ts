@@ -56,5 +56,6 @@ export const useProposalVotes = (proposalId: string) =>
         }
       },
       staleTime: 1000 * 60 * 5, // 5 minutes to be considered fresh
+      refetchInterval: 1000 * 60 * 5, // Automatically refetch every 5 minutes
     },
   )
