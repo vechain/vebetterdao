@@ -9,10 +9,6 @@ import {
   Button,
   Text,
   Progress,
-  Heading,
-  CloseButton,
-  Dialog,
-  Flex,
   Float,
   Circle,
   Icon,
@@ -23,7 +19,9 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite"
 import { Check, Flash } from "iconoir-react"
 import { useState } from "react"
 
+import { BaseModal } from "@/components/BaseModal"
 import { Modal } from "@/components/Modal"
+import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent/SuccessModalContent"
 
 const meta: Meta<typeof Modal> = {
   title: "design-system/components/Modal/Allocation Modals",
@@ -105,18 +103,9 @@ export const VPSummaryMobileLight: Story = {
       <Modal
         isOpen
         onClose={() => {}}
-        title={
-          <Flex alignItems="center" justifyContent={"space-between"} pt="8" py="8" pb="6">
-            <Heading>Confirm your vote</Heading>
-
-            <Dialog.CloseTrigger asChild position="static">
-              <CloseButton size="md" />
-            </Dialog.CloseTrigger>
-          </Flex>
-        }
+        title="Confirm your vote"
         showCloseButton
         modalContentProps={{ maxWidth: "400px" }}
-        showHeader={false}
         footer={
           <SimpleGrid columns={2} gap={3} w="full">
             <Button variant="secondary" onClick={() => {}}>
@@ -217,12 +206,12 @@ export const VoteProcessingMobileLight: Story = {
           variant="subtle"
           mt="8"
           p={4}
-          bg="gray.50"
+          bg="bg.secondary"
           flexDirection="row"
           justifyContent="center"
           alignItems="center"
           gap="2">
-          <Text textStyle="sm" color="gray.600">
+          <Text textStyle="sm" color="text.subtle">
             You voted with
           </Text>
           <Badge
@@ -240,6 +229,74 @@ export const VoteProcessingMobileLight: Story = {
           </Badge>
         </Card.Root>
       </Modal>
+    )
+  },
+}
+
+export const TransactionSuccessModal: Story = {
+  render: () => {
+    const [isOpen, setIsOpen] = useState(true)
+
+    // Mock voting weight description (matching the real implementation)
+    const votingWeightDescription = (
+      <Card.Root
+        variant="subtle"
+        mt="8"
+        p={4}
+        bg="bg.secondary"
+        flexDirection="row"
+        justifyContent="center"
+        alignItems="center"
+        gap="2">
+        <Text textStyle="sm" color="text.subtle">
+          You voted with
+        </Text>
+        <Badge
+          variant="outline"
+          rounded="md"
+          size="lg"
+          borderWidth="2px"
+          borderColor="status.positive.primary"
+          color="status.positive.primary"
+          px={3}
+          py={1}
+          textStyle="md">
+          <Icon as={Flash} color="status.positive.primary" boxSize="5" />
+          125,890
+        </Badge>
+      </Card.Root>
+    )
+
+    const customButton = (
+      <Button
+        variant="primary"
+        alignSelf="center"
+        px={8}
+        py={2.5}
+        textStyle="lg"
+        fontWeight="semibold"
+        onClick={() => setIsOpen(false)}>
+        Back to Home
+      </Button>
+    )
+
+    return (
+      <BaseModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        showCloseButton
+        isCloseable
+        modalContentProps={{ maxWidth: "400px" }}
+        modalBodyProps={{ p: 6 }}>
+        <SuccessModalContent
+          title="Vote successfully submitted!"
+          description={votingWeightDescription}
+          customButton={customButton}
+          txId="0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+          showSocialButtons={false}
+          onClose={() => setIsOpen(false)}
+        />
+      </BaseModal>
     )
   },
 }

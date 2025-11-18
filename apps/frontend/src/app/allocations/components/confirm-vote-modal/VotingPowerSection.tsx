@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, Center, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, Center, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
 import { Flash } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 
@@ -17,28 +17,27 @@ export const VotingPowerSection = ({ vot3Balance, isLoading, button }: VotingPow
   const formatted = vot3Balance?.formatted ?? "0"
 
   return (
-    <Card.Root variant="subtle" p={4}>
-      <VStack gap={3.5} alignItems="stretch">
-        <HStack
-          justify="space-between"
-          align="center"
-          pb={button ? 4 : 0}
-          borderBottomWidth={button ? "1px" : "0"}
-          borderColor="borders.primary">
-          <HStack gap={1}>
-            <Icon as={Flash} boxSize={4} color="text.subtle" />
-            <Text textStyle="sm" color="text.subtle" fontWeight="semibold">
-              {t("Voting Power")}
-            </Text>
-          </HStack>
-          <Skeleton loading={isLoading}>
-            <Text textStyle="sm" fontWeight="semibold" textAlign="center">
-              {formatted}
-            </Text>
-          </Skeleton>
+    <Card.Root variant="outline" p={4} border="sm" borderColor="border.secondary">
+      <HStack justify="space-between" align="center">
+        <HStack gap={2}>
+          <Icon as={Flash} boxSize={4} color="text.subtle" />
+          <Text textStyle="md" fontWeight="semibold">
+            {t("Voting Power")}
+          </Text>
         </HStack>
-        {button && <Center>{button}</Center>}
-      </VStack>
+        <Skeleton loading={isLoading}>
+          <Text textStyle="lg" fontWeight="bold" textAlign="center">
+            {formatted}
+          </Text>
+        </Skeleton>
+      </HStack>
+
+      {button && (
+        <>
+          <Separator color="border.secondary" my="4" />
+          <Center>{button}</Center>
+        </>
+      )}
     </Card.Root>
   )
 }

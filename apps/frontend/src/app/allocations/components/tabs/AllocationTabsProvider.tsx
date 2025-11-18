@@ -2,14 +2,18 @@
 
 import { Box, Button, Dialog, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import { useRouter } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useStickyState } from "@/hooks/useStickyState"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
+
+import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
 
 interface AllocationTabsContextType {
   roundId: string
@@ -31,6 +35,7 @@ interface AllocationTabsProviderProps {
 }
 
 export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
+  const router = useRouter()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
@@ -38,6 +43,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
+  const { onClose: closeTxModal } = useTransactionModal()
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -55,12 +61,17 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     [onSelectedAppsChange],
   )
 
-  const handleConfirmVote = useCallback((allocations: Map<string, number>) => {
-    // @TODO: Implement the actual voting logic here
-    // eslint-disable-next-line no-console
-    console.log("Voting with allocations:", allocations)
+  const onVoteSuccess = useCallback(() => {
     setSelectedAppIds(new Set())
-  }, [])
+    closeModal()
+    closeTxModal()
+    router.push("/")
+  }, [closeTxModal, closeModal, router])
+
+  const { handleConfirmVote } = useAllocationVoting({
+    roundId: roundDetails.currentRoundId.toString(),
+    onSuccess: onVoteSuccess,
+  })
 
   return (
     <AllocationTabsContext.Provider

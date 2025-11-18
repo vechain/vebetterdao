@@ -1,5 +1,6 @@
-import { Box, Drawer, Portal, VisuallyHidden } from "@chakra-ui/react"
+import { Box, Drawer, Portal, VisuallyHidden, CloseButton, Heading, Text } from "@chakra-ui/react"
 import { useDrag } from "@use-gesture/react"
+import Image from "next/image"
 import { useRef, useState } from "react"
 
 type Props = {
@@ -12,6 +13,11 @@ type Props = {
   isDismissable?: boolean
   customBgColor?: string
   minHeight?: string
+  footer?: React.ReactNode
+  title?: string | React.ReactNode
+  illustration?: string
+  showCloseButton?: boolean
+  description?: string | React.ReactNode
 }
 
 const DRAG_THRESHOLD = 150
@@ -25,6 +31,11 @@ export const BaseBottomSheet = ({
   ariaDescription,
   isDismissable = true,
   minHeight,
+  footer,
+  title,
+  illustration,
+  showCloseButton,
+  description,
 }: Props) => {
   const [dragY, setDragY] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -94,8 +105,36 @@ export const BaseBottomSheet = ({
                 cursor={isDismissable ? "grab" : "default"}
                 _active={isDismissable ? { cursor: "grabbing" } : {}}
               />
+              {(title || illustration || showCloseButton) && (
+                <Box mb={4}>
+                  <Box position="relative">
+                    {illustration && (
+                      <Box position="relative" boxSize="16" mx="auto">
+                        <Image alt="modal-illustration" src={illustration} fill />
+                      </Box>
+                    )}
+                    {showCloseButton && (
+                      <Box position="absolute" top={0} right={0}>
+                        <CloseButton size="md" onClick={onClose} />
+                      </Box>
+                    )}
+                  </Box>
+                  {title && (
+                    <Heading fontWeight="bold" textStyle="md" textAlign="center">
+                      {title}
+                    </Heading>
+                  )}
+                  {description && (
+                    <Text textAlign={illustration ? "center" : "left"} color="text.secondary">
+                      {description}
+                    </Text>
+                  )}
+                </Box>
+              )}
               {children}
             </Drawer.Body>
+
+            {footer && <Drawer.Footer>{footer}</Drawer.Footer>}
           </Drawer.Content>
         </Drawer.Positioner>
       </Portal>

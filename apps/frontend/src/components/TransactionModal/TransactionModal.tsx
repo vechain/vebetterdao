@@ -87,7 +87,7 @@ export const TransactionModal = () => {
       onClose={onClose}
       showCloseButton={canShowCloseButton}
       isCloseable={canShowCloseButton}
-      modalContentProps={{ zIndex: 10 }}
+      modalContentProps={{ zIndex: 10, maxWidth: "400px" }}
       modalBodyProps={{ p: 10 }}>
       {modalContent}
     </BaseModal>

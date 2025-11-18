@@ -12,11 +12,13 @@ import { ShareButtons } from "../../ShareButtons"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
+  description?: ReactNode
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
   txId?: string
   isSuccessBeenTrack?: boolean
   onClose: () => void
+  customButton?: ReactNode
 }
 const okHandVariants = {
   initial: { rotateY: 0 },
@@ -48,11 +50,13 @@ const MotionImage = motion(Image)
  */
 export const SuccessModalContent = ({
   title = "Transaction completed!",
+  description,
   showSocialButtons = false,
   socialDescriptionEncoded = "%F0%9F%8C%B1%20Excited%20to%20contribute%20to%20a%20%23Better%20future%20with%20my%20latest%20activity%20on%20%23VeBetterDAO%21%0A%0AVisit%20https%3A%2F%2Fvebetterdao.org%20and%20start%20making%20a%20difference%20today%21%20%F0%9F%92%AB%0A%0A%23VeBetterDAO%20%23Vechain",
   txId,
   isSuccessBeenTrack,
   onClose,
+  customButton,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
 
@@ -72,9 +76,15 @@ export const SuccessModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Heading size="3xl" data-testid={"tx-modal-title"}>
+      <Heading size="xl" textAlign="center" fontWeight="bold" data-testid={"tx-modal-title"}>
         {title}
       </Heading>
+
+      {description && (
+        <VStack gap={2} mt={4} w="full">
+          {description}
+        </VStack>
+      )}
 
       {showSocialButtons && (
         <VStack>
@@ -103,11 +113,15 @@ export const SuccessModalContent = ({
           </HStack>
         </Link>
       </Flex>
-      <HStack w={"full"} alignItems={"center"} justifyContent={"center"} gap={2} mt={4}>
-        <Button variant={"primary"} w={"50%"} py={6} onClick={onClose}>
-          {t("Done")}
-        </Button>
-      </HStack>
+      <VStack w={"full"} alignItems={"stretch"} gap={2} mt={4}>
+        {customButton ? (
+          customButton
+        ) : (
+          <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={onClose}>
+            {t("Done")}
+          </Button>
+        )}
+      </VStack>
     </VStack>
   )
 }

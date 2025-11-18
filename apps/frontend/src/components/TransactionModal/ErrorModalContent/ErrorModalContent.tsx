@@ -12,7 +12,7 @@ import errorAnimation from "./error.json"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
-  description?: string
+  description?: ReactNode
   showTryAgainButton?: boolean
   onTryAgain?: () => Promise<void>
   showExplorerButton?: boolean

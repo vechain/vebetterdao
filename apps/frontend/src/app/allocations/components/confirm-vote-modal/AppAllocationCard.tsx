@@ -5,8 +5,10 @@ import { FormattingUtils } from "@repo/utils"
 import { Minus, Plus } from "iconoir-react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { formatEther, parseEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
+import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
 
 import type { AppWithVotes } from "../../lib/data"
 
@@ -35,10 +37,15 @@ export const AppAllocationCard = ({
   }, [percentage])
 
   const votingPowerForApp = useMemo(() => {
-    if (!vot3Balance) return "0"
-    const scaled = parseFloat(vot3Balance.scaled)
-    const allocated = (scaled * percentage) / 100
-    return allocated === 0 ? "0" : FormattingUtils.humanNumber(allocated.toString())
+    if (!vot3Balance || percentage === 0) return "0"
+
+    const totalVotingPower = parseEther(vot3Balance.scaled)
+    const weight = calculateVotingWeightFromPercentage(totalVotingPower, percentage)
+
+    if (weight === 0n) return "0"
+
+    const allocated = formatEther(weight)
+    return FormattingUtils.humanNumber(allocated)
   }, [vot3Balance, percentage])
 
   const handleValueChange = useCallback(
@@ -83,7 +90,7 @@ export const AppAllocationCard = ({
             onValueChange={handleValueChange}
             min={0}
             max={100}
-            step={1}
+            step={10}
             clampValueOnBlur
             formatOptions={{ maximumFractionDigits: 2 }}>
             <HStack gap={3}>
@@ -91,6 +98,7 @@ export const AppAllocationCard = ({
                 <IconButton
                   aria-label={t("Decrease percentage")}
                   rounded="full"
+                  color="actions.secondary.text"
                   bg="actions.secondary.default"
                   _hover={{ bg: "actions.secondary.hover" }}
                   size="xs"
@@ -133,6 +141,7 @@ export const AppAllocationCard = ({
                 <IconButton
                   aria-label={t("Increase percentage")}
                   rounded="full"
+                  color="actions.secondary.text"
                   bg="actions.secondary.default"
                   _hover={{ bg: "actions.secondary.hover" }}
                   size="xs"
