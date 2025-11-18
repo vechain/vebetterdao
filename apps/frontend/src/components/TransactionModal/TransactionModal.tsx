@@ -64,7 +64,7 @@ export const TransactionModal = () => {
       ),
       unknown: <UnknownModalContent />,
     }
-    return statusComponentMap[transactionModalState?.status ?? "unknown"] || null
+    return statusComponentMap[transactionModalState?.status || "unknown"] || null
   }, [
     t,
     getCustomUIProps,

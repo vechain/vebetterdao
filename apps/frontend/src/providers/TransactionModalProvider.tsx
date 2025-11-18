@@ -51,11 +51,13 @@ export const TransactionModalProvider: React.FC<TransactionModalProviderProps> =
   const handleClose = useCallback(() => {
     if (transactionModalState?.status === "pending" || transactionModalState?.status === "waitingConfirmation") return //Prevent closing the modal if the transaction is pending or waiting for confirmation
     onClose()
-    setTransactionModalState(null)
+    // Don't clear state immediately - let it persist during close animation
   }, [onClose, transactionModalState?.status])
 
   const setupModal = useCallback(
     (tryAgain?: () => Promise<void>, customUI?: TransactionCustomUI) => {
+      // Clear previous state when opening new transaction
+      setTransactionModalState(null)
       onOpen()
       setTransactionModalState({
         ...initialState,
