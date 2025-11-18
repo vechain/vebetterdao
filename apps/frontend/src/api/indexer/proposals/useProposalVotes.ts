@@ -55,6 +55,6 @@ export const useProposalVotes = (proposalId: string) =>
           votes: groupedVotes,
         }
       },
-      refetchInterval: 10000,
+      staleTime: 1000 * 60 * 5, // 5 minutes to be considered fresh
     },
   )
