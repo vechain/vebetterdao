@@ -53,12 +53,7 @@ export const TransactionModal = () => {
         />
       ),
       success: (
-        <SuccessModalContent
-          {...getCustomUIProps("success")}
-          txId={transactionModalState?.txId}
-          showSocialButtons={true}
-          onClose={onClose}
-        />
+        <SuccessModalContent {...getCustomUIProps("success")} txId={transactionModalState?.txId} onClose={onClose} />
       ),
       ready: (
         <UnknownModalContent
