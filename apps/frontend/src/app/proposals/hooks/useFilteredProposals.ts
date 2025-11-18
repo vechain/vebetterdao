@@ -86,26 +86,32 @@ export const useFilteredProposals = (
   }, [selectedFilter, proposalsWithStateAndDeposit, defaultFilters])
 
   const sortByPhase = useCallback((proposals: ProposalWithStateAndDeposit[]) => {
-    const stateOrder = [
+    // Create phase index map for O(1) lookups
+    const phaseIndexMap = new Map<ProposalState, number>([
       //1 - Approval Phase
-      ProposalState.Succeeded,
-      ProposalState.Active,
+      [ProposalState.Succeeded, 0],
+      [ProposalState.Active, 1],
       //2 - Support Phase
-      ProposalState.Pending,
+      [ProposalState.Pending, 2],
       //3 - In Development
-      ProposalState.InDevelopment,
-      ProposalState.Queued,
+      [ProposalState.InDevelopment, 3],
+      [ProposalState.Queued, 4],
       //4 - Completed/executed
-      ProposalState.Completed,
-      ProposalState.Executed,
-      //5 - Canceled/Defeated/Deposit Not Met
-      ProposalState.Canceled,
-      ProposalState.Defeated,
-      ProposalState.DepositNotMet,
-    ]
-    return proposals.sort((a: ProposalWithStateAndDeposit, b: ProposalWithStateAndDeposit) => {
-      // First, sort by phase (state order)
-      const phaseComparison = stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state)
+      [ProposalState.Completed, 5],
+      [ProposalState.Executed, 6],
+      //5 - Failed states: Defeated/Deposit Not Met/Canceled (grouped together at index 7)
+      [ProposalState.Defeated, 7],
+      [ProposalState.DepositNotMet, 7],
+      [ProposalState.Canceled, 7],
+    ])
+
+    const UNKNOWN_PHASE_INDEX = Math.max(...phaseIndexMap.values()) + 1
+
+    return [...proposals].sort((a: ProposalWithStateAndDeposit, b: ProposalWithStateAndDeposit) => {
+      // First, sort by phase (O(1) lookup)
+      const phaseA = phaseIndexMap.get(a.state) ?? UNKNOWN_PHASE_INDEX
+      const phaseB = phaseIndexMap.get(b.state) ?? UNKNOWN_PHASE_INDEX
+      const phaseComparison = phaseA - phaseB
 
       // If they're in the same phase, sort by newest to oldest (createdAt descending)
       if (phaseComparison === 0) {
