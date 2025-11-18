@@ -2,7 +2,6 @@
 
 import { Box, Button, Dialog, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useRouter } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
@@ -36,7 +35,6 @@ interface AllocationTabsProviderProps {
 }
 
 export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
-  const router = useRouter()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
@@ -90,8 +88,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     setSelectedAppIds(new Set())
     closeModal()
     closeTxModal()
-    router.push("/")
-  }, [closeTxModal, closeModal, router])
+  }, [closeTxModal, closeModal])
 
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),

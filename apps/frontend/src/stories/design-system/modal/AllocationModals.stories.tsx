@@ -245,6 +245,7 @@ export const TransactionSuccessModal: Story = {
           customButton={customButton}
           txId="0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
           showSocialButtons={false}
+          showTransactionDetailsButton={false}
           onClose={() => setIsOpen(false)}
         />
       </BaseModal>

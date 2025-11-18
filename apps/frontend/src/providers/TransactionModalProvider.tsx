@@ -6,6 +6,9 @@ type TransactionCustomUIProps = {
   title?: string
   description?: React.ReactNode
   customButton?: React.ReactNode
+  showSocialButtons?: boolean
+  socialDescriptionEncoded?: string
+  showTransactionDetailsButton?: boolean
 }
 export type TransactionCustomUI = Partial<Record<TransactionStatus, TransactionCustomUIProps>>
 interface TransactionState {

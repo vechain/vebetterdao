@@ -95,7 +95,7 @@ export const AutoVoteModal = ({
           <Link href={AUTOMATION_DOCS_URL} target="_blank" textDecoration="underline">
             {t("fee")}
           </Link>{" "}
-          {t("will be taken from your rewards to cover the service.")}
+          {t("will be taken from your weekly rewards to cover the service.")}
         </Text>
 
         <Card.Root variant="outline" p={4} border="sm" borderColor="border.secondary">
