@@ -1,4 +1,4 @@
-import { create } from "zustand"
+import { create, StoreApi } from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
 import { BannerStorageKey } from "@/app/components/Banners/GenericBanner"
@@ -8,56 +8,79 @@ export type UserPreferences = {
 } & Partial<Record<BannerStorageKey, boolean>>
 
 export type UserPreferencesStoreState = {
-  preferences: Record<string, UserPreferences>
+  data: UserPreferences
   defaults: UserPreferences
-  setPreferences: (walletAddress: string, preferences: UserPreferences) => void
-  updatePreferences: (walletAddress: string, updates: Partial<UserPreferences>) => void
-  clearPreferences: (walletAddress: string) => void
+  setData: (preferences: UserPreferences) => void
+  updateData: (updates: Partial<UserPreferences>) => void
+  clearData: () => void
   setDefaults: (defaults: UserPreferences) => void
-  getPreferences: (walletAddress: string) => UserPreferences | null
+  getData: () => UserPreferences | null
+}
+
+// Map to store instances per wallet address
+const storeMap = new Map<string, StoreApi<UserPreferencesStoreState>>()
+
+/**
+ * Creates an isolated user preferences store for a specific wallet address
+ * Each wallet gets its own localStorage entry: USER_PREFERENCES_STORE_{walletAddress}
+ */
+export const createUserPreferencesStore = (walletAddress: string): StoreApi<UserPreferencesStoreState> => {
+  if (storeMap.has(walletAddress)) {
+    return storeMap.get(walletAddress)!
+  }
+
+  const store = create<UserPreferencesStoreState>()(
+    devtools(
+      persist(
+        (set, get) => ({
+          data: {},
+          defaults: {},
+          setData: (preferences: UserPreferences) =>
+            set(() => ({
+              data: preferences,
+            })),
+          updateData: (updates: Partial<UserPreferences>) =>
+            set(state => ({
+              data: {
+                ...state.data,
+                ...updates,
+              },
+            })),
+          clearData: () =>
+            set(() => ({
+              data: {},
+            })),
+          setDefaults: (defaults: UserPreferences) => set({ defaults }),
+          getData: () => {
+            const state = get()
+            return state.data && Object.keys(state.data).length > 0
+              ? state.data
+              : Object.keys(state.defaults).length > 0
+                ? state.defaults
+                : null
+          },
+        }),
+        {
+          name: `USER_PREFERENCES_STORE_${walletAddress}`,
+        },
+      ),
+    ),
+  )
+
+  storeMap.set(walletAddress, store)
+  return store
 }
 
 /**
- * Store for user preferences keyed by wallet address
+ * Get store for a wallet address, returns null if not yet created
  */
-export const useUserPreferencesStore = create<UserPreferencesStoreState>()(
-  devtools(
-    persist(
-      (set, get) => ({
-        preferences: {},
-        defaults: {},
-        setPreferences: (walletAddress: string, preferences: UserPreferences) =>
-          set(state => ({
-            preferences: {
-              ...state.preferences,
-              [walletAddress]: preferences,
-            },
-          })),
-        updatePreferences: (walletAddress: string, updates: Partial<UserPreferences>) =>
-          set(state => ({
-            preferences: {
-              ...state.preferences,
-              [walletAddress]: {
-                ...(state.preferences[walletAddress] || {}),
-                ...updates,
-              },
-            },
-          })),
-        clearPreferences: (walletAddress: string) =>
-          set(state => {
-            const { [walletAddress]: _, ...rest } = state.preferences
-            return { preferences: rest }
-          }),
-        setDefaults: (defaults: UserPreferences) => set({ defaults }),
-        getPreferences: (walletAddress: string) => {
-          const state = get()
-          const stored = state.preferences[walletAddress]
-          return stored || (Object.keys(state.defaults).length > 0 ? state.defaults : null)
-        },
-      }),
-      {
-        name: "USER_PREFERENCES_STORE",
-      },
-    ),
-  ),
-)
+export const getUserPreferencesStore = (walletAddress: string): StoreApi<UserPreferencesStoreState> | null => {
+  return storeMap.get(walletAddress) ?? null
+}
+
+/**
+ * Clear all store instances (useful for testing or logout)
+ */
+export const clearAllUserPreferencesStores = () => {
+  storeMap.clear()
+}

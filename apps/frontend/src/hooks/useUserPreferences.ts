@@ -1,8 +1,13 @@
 "use client"
 
 import { useWallet } from "@vechain/vechain-kit"
+import { useEffect, useMemo, useState } from "react"
 
-import { useUserPreferencesStore, UserPreferences } from "@/store/useUserPreferencesStore"
+import {
+  createUserPreferencesStore,
+  type UserPreferences,
+  type UserPreferencesStoreState,
+} from "@/store/useUserPreferencesStore"
 
 export type UseUserPreferencesReturn = {
   preferences: UserPreferences | null
@@ -14,16 +19,41 @@ export type UseUserPreferencesReturn = {
 
 /**
  * Hook for getting and managing user preferences based on connected wallet address
+ * Automatically creates/retrieves isolated store for current wallet
+ * Subscribes to store changes for instant UI updates
  * Returns wallet-specific preferences if stored, otherwise returns default preferences
  * Returns null when no wallet is connected and no defaults set
  */
 export const useUserPreferences = (): UseUserPreferencesReturn => {
   const { account } = useWallet()
-  const { setPreferences, updatePreferences, clearPreferences, setDefaults, getPreferences } = useUserPreferencesStore()
-
   const walletAddress = account?.address
 
-  if (!walletAddress) {
+  const store = useMemo(() => {
+    if (!walletAddress) return null
+    return createUserPreferencesStore(walletAddress)
+  }, [walletAddress])
+
+  const [storeState, setStoreState] = useState<UserPreferencesStoreState | null>(() => {
+    if (!store) return null
+    return store.getState()
+  })
+
+  useEffect(() => {
+    if (!store) {
+      setStoreState(null)
+      return
+    }
+
+    setStoreState(store.getState())
+
+    const unsubscribe = store.subscribe(newState => {
+      setStoreState(newState)
+    })
+
+    return unsubscribe
+  }, [store])
+
+  if (!walletAddress || !storeState) {
     return {
       preferences: null,
       setPreferences: () => {},
@@ -34,10 +64,10 @@ export const useUserPreferences = (): UseUserPreferencesReturn => {
   }
 
   return {
-    preferences: getPreferences(walletAddress),
-    setPreferences: (preferences: UserPreferences) => setPreferences(walletAddress, preferences),
-    updatePreferences: (updates: Partial<UserPreferences>) => updatePreferences(walletAddress, updates),
-    clearPreferences: () => clearPreferences(walletAddress),
-    setDefaults,
+    preferences: storeState.getData(),
+    setPreferences: (preferences: UserPreferences) => storeState.setData(preferences),
+    updatePreferences: (updates: Partial<UserPreferences>) => storeState.updateData(updates),
+    clearPreferences: () => storeState.clearData(),
+    setDefaults: (defaults: UserPreferences) => storeState.setDefaults(defaults),
   }
 }

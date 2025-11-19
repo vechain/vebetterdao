@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { BannerStorageKey, GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 import { DoActionModal } from "./components/DoActionModal"
 
@@ -20,6 +20,7 @@ export const DoActionBanner = () => {
   return (
     <>
       <GenericBanner
+        storageKey={BannerStorageKey.SHOW_DO_ACTION}
         title={t("Time to step up!")}
         description={description}
         illustration="/assets/icons/info-bell.webp"
