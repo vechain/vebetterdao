@@ -21,6 +21,7 @@ export type SuccessModalContentProps = {
   onClose: () => void
   customButton?: ReactNode
   hideDoneButton?: boolean
+  onSuccess?: () => void
 }
 const okHandVariants = {
   initial: { rotateY: 0 },
@@ -61,10 +62,16 @@ export const SuccessModalContent = ({
   isSuccessBeenTrack,
   onClose,
   customButton,
+  onSuccess,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
 
   const [isTracked, setIsTracked] = useState(isSuccessBeenTrack)
+
+  const handleClose = () => {
+    onSuccess?.()
+    onClose()
+  }
 
   if (isTracked && typeof title === "string") {
     AnalyticsUtils.trackEvent(title, buttonClickActions(ButtonClickProperties.SUCCESS_TX))
@@ -120,7 +127,7 @@ export const SuccessModalContent = ({
       <VStack w={"full"} alignItems={"stretch"} gap={2} mt={4}>
         {!hideDoneButton &&
           (customButton ?? (
-            <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={onClose}>
+            <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={handleClose}>
               {t("Done")}
             </Button>
           ))}

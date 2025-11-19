@@ -7,6 +7,7 @@ import { useRef, createContext, useState, useCallback, useMemo, useEffect } from
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useStickyState } from "@/hooks/useStickyState"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
 import { AutoVoteModal } from "../AutoVoteModal"
@@ -42,6 +43,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
+  const { onClose: closeTxModal } = useTransactionModal()
   const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
 
   // @TODO: Add tracking so we don't show the modal to users who have already seen it
@@ -82,9 +84,16 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     [onSelectedAppsChange],
   )
 
+  const onVoteSuccess = useCallback(() => {
+    setSelectedAppIds(new Set())
+    closeModal()
+    closeTxModal()
+  }, [closeTxModal, closeModal])
+
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
     isAutoVotingEnabled,
+    onSuccess: onVoteSuccess,
   })
 
   return (

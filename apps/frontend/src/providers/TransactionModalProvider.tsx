@@ -9,6 +9,7 @@ type TransactionCustomUIProps = {
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
   showTransactionDetailsButton?: boolean
+  onSuccess?: () => void
 }
 export type TransactionCustomUI = Partial<Record<TransactionStatus, TransactionCustomUIProps>>
 interface TransactionState {
@@ -50,9 +51,15 @@ export const TransactionModalProvider: React.FC<TransactionModalProviderProps> =
 
   const handleClose = useCallback(() => {
     if (transactionModalState?.status === "pending" || transactionModalState?.status === "waitingConfirmation") return //Prevent closing the modal if the transaction is pending or waiting for confirmation
+
+    // Call onSuccess callback if transaction was successful
+    if (transactionModalState?.status === "success") {
+      transactionModalState?.customUI?.success?.onSuccess?.()
+    }
+
     onClose()
     // Don't clear state immediately - let it persist during close animation
-  }, [onClose, transactionModalState?.status])
+  }, [onClose, transactionModalState?.status, transactionModalState?.customUI])
 
   const setupModal = useCallback(
     (tryAgain?: () => Promise<void>, customUI?: TransactionCustomUI) => {

@@ -16,6 +16,7 @@ import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 interface UseAllocationVotingProps {
   roundId: string
   isAutoVotingEnabled?: boolean
+  onSuccess?: () => void
 }
 
 /**
@@ -25,7 +26,7 @@ interface UseAllocationVotingProps {
  * - Direct transaction submission with custom UI
  * - Auto-voting setup flow (when isAutoVotingEnabled is true)
  */
-export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false }: UseAllocationVotingProps) => {
+export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false, onSuccess }: UseAllocationVotingProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -57,12 +58,13 @@ export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false }: Us
         showSocialButtons: false,
         showTransactionDetailsButton: false,
         hideDoneButton: true,
+        onSuccess,
       },
       error: {
         title: t("Error submitting your vote"),
       },
     }),
-    [t],
+    [t, onSuccess],
   )
 
   const handleConfirmVote = useCallback(
