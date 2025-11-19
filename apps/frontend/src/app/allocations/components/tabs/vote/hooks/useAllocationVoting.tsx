@@ -1,4 +1,3 @@
-import { Button } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
@@ -16,7 +15,6 @@ import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 
 interface UseAllocationVotingProps {
   roundId: string
-  onSuccess: () => void
   isAutoVotingEnabled?: boolean
 }
 
@@ -27,7 +25,7 @@ interface UseAllocationVotingProps {
  * - Direct transaction submission with custom UI
  * - Auto-voting setup flow (when isAutoVotingEnabled is true)
  */
-export const useAllocationVoting = ({ roundId, onSuccess, isAutoVotingEnabled = false }: UseAllocationVotingProps) => {
+export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false }: UseAllocationVotingProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -58,24 +56,13 @@ export const useAllocationVoting = ({ roundId, onSuccess, isAutoVotingEnabled = 
         description: votingWeightDescription,
         showSocialButtons: false,
         showTransactionDetailsButton: false,
-        customButton: (
-          <Button
-            variant="primary"
-            alignSelf="center"
-            px={8}
-            py={2.5}
-            textStyle="lg"
-            fontWeight="semibold"
-            onClick={onSuccess}>
-            {t("Back to Allocation")}
-          </Button>
-        ),
+        hideDoneButton: true,
       },
       error: {
         title: t("Error submitting your vote"),
       },
     }),
-    [t, onSuccess],
+    [t],
   )
 
   const handleConfirmVote = useCallback(
@@ -148,7 +135,6 @@ export const useAllocationVoting = ({ roundId, onSuccess, isAutoVotingEnabled = 
     [
       t,
       votesAtSnapshot,
-      onSuccess,
       isAutoVotingEnabled,
       account?.address,
       roundId,

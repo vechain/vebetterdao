@@ -20,6 +20,7 @@ export type SuccessModalContentProps = {
   isSuccessBeenTrack?: boolean
   onClose: () => void
   customButton?: ReactNode
+  hideDoneButton?: boolean
 }
 const okHandVariants = {
   initial: { rotateY: 0 },
@@ -55,6 +56,7 @@ export const SuccessModalContent = ({
   showSocialButtons = true,
   socialDescriptionEncoded = "%F0%9F%8C%B1%20Excited%20to%20contribute%20to%20a%20%23Better%20future%20with%20my%20latest%20activity%20on%20%23VeBetterDAO%21%0A%0AVisit%20https%3A%2F%2Fvebetterdao.org%20and%20start%20making%20a%20difference%20today%21%20%F0%9F%92%AB%0A%0A%23VeBetterDAO%20%23Vechain",
   showTransactionDetailsButton = true,
+  hideDoneButton = false,
   txId,
   isSuccessBeenTrack,
   onClose,
@@ -116,13 +118,12 @@ export const SuccessModalContent = ({
       )}
 
       <VStack w={"full"} alignItems={"stretch"} gap={2} mt={4}>
-        {customButton ? (
-          customButton
-        ) : (
-          <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={onClose}>
-            {t("Done")}
-          </Button>
-        )}
+        {!hideDoneButton &&
+          (customButton ?? (
+            <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={onClose}>
+              {t("Done")}
+            </Button>
+          ))}
       </VStack>
     </VStack>
   )
