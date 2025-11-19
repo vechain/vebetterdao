@@ -8,7 +8,7 @@ export interface AllocationData {
 
 export const useConfirmVoteModal = (appIds: string[]) => {
   /**
-   * Helper: Distributes a percentage equally among target app IDs
+   * Distributes a percentage equally among target app IDs
    * Ensures the total distributed equals exactly the input percentage
    */
   const distributeEqually = useCallback(
@@ -34,9 +34,7 @@ export const useConfirmVoteModal = (appIds: string[]) => {
     [],
   )
 
-  /**
-   * Helper: Creates initial equal distribution across all apps
-   */
+  // Creates initial equal distribution across all apps
   const getEqualDistribution = useCallback(() => {
     const map = new Map<string, number>()
     if (appIds.length === 0) return map
@@ -88,17 +86,13 @@ export const useConfirmVoteModal = (appIds: string[]) => {
     [appIds, lockedApps, distributeEqually],
   )
 
-  /**
-   * Resets all allocations to equal distribution and clears locks
-   */
+  // Resets all allocations to equal distribution and clears locks
   const setEqualAllocations = useCallback(() => {
     setAllocations(getEqualDistribution())
     setLockedApps(new Set())
   }, [getEqualDistribution])
 
-  /**
-   * Calculates total percentage across all allocations
-   */
+  // Calculates total percentage across all allocations
   const getTotalPercentage = useCallback(() => {
     let total = 0
     allocations.forEach(value => {
@@ -107,9 +101,7 @@ export const useConfirmVoteModal = (appIds: string[]) => {
     return parseFloat(total.toFixed(2))
   }, [allocations])
 
-  /**
-   * Validates that allocations sum to 100% and all are non-negative
-   */
+  // Validates that allocations sum to 100% and all are non-negative
   const isValid = useMemo(() => {
     const total = getTotalPercentage()
     if (total !== 100) return false

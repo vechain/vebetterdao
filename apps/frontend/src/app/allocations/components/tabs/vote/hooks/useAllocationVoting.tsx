@@ -1,67 +1,77 @@
-import { Badge, Button, Card, Icon, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { Flash } from "iconoir-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { parseEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
-import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
+import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
 import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
+
+import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 
 interface UseAllocationVotingProps {
   roundId: string
-  onSuccess: () => void
+  isAutoVotingEnabled?: boolean
+  onSuccess?: () => void
 }
 
 /**
  * Custom hook to manage allocation voting flow with dynamic transaction modal UI
  * Handles:
- * - Transaction modal custom UI state
- * - Pending votes state
- * - Vote confirmation logic
- * - Automatic transaction triggering when UI is ready
+ * - Vote confirmation logic with dynamic UI
+ * - Direct transaction submission with custom UI
+ * - Auto-voting setup flow (when isAutoVotingEnabled is true)
  */
-export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingProps) => {
+export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false, onSuccess }: UseAllocationVotingProps) => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
-  // Get user's voting power at snapshot
   const { votesAtSnapshot } = useVotingPowerAtSnapshot()
-
-  const [customUI, setCustomUI] = useState<TransactionCustomUI>({
-    pending: {
-      title: t("Waiting for confirmation..."),
-    },
-    waitingConfirmation: {
-      title: t("Sending transaction..."),
-    },
-    success: {
-      title: t("Vote successfully submitted!"),
-    },
-    error: {
-      title: t("Error submitting your vote"),
-    },
-  })
-  const [pendingVotes, setPendingVotes] = useState<CastAllocationVotesProps | null>(null)
-
+  const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const castAllocationVotes = useCastAllocationVotes({
     roundId,
-    transactionModalCustomUI: customUI,
   })
+  const enableAutoVotingAndVote = useEnableAutoVotingAndVote({ roundId })
 
-  // Effect to trigger transaction when customUI is updated with description and pendingVotes are ready
-  useEffect(() => {
-    if (pendingVotes && customUI.success?.description) {
-      castAllocationVotes.sendTransaction(pendingVotes)
-      setPendingVotes(null) // Clear after sending
-    }
-  }, [pendingVotes, customUI, castAllocationVotes.sendTransaction])
+  const createVotingWeightDescription = useCallback(
+    (formattedVotingWeight: string) => <VotingWeightDisplay formattedVotingWeight={formattedVotingWeight} />,
+    [],
+  )
+
+  const createCustomUI = useCallback(
+    (votingWeightDescription: JSX.Element, waitingTitle: string, successTitle: string) => ({
+      pending: {
+        title: t("Waiting for confirmation..."),
+        description: votingWeightDescription,
+      },
+      waitingConfirmation: {
+        title: waitingTitle,
+        description: votingWeightDescription,
+      },
+      success: {
+        title: successTitle,
+        description: votingWeightDescription,
+        showSocialButtons: false,
+        showTransactionDetailsButton: false,
+        hideDoneButton: true,
+        onSuccess,
+      },
+      error: {
+        title: t("Error submitting your vote"),
+      },
+    }),
+    [t, onSuccess],
+  )
 
   const handleConfirmVote = useCallback(
     (allocations: Map<string, number>) => {
-      if (!votesAtSnapshot?.totalVotesWithDeposits) return
+      if (!votesAtSnapshot?.totalVotesWithDeposits) {
+        throw new Error("Votes at snapshot not found")
+      }
 
       // Convert percentages to weighted votes in wei
       const totalVotingPower = parseEther(votesAtSnapshot.totalVotesWithDeposits)
@@ -74,91 +84,76 @@ export const useAllocationVoting = ({ roundId, onSuccess }: UseAllocationVotingP
         }
       })
 
-      // Prepare data for transaction - pass wei values directly as strings
-      const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
-        appId,
-        votesWei: weight.toString(),
-      }))
+      // Extract app IDs and weights
+      const appIds = Array.from(allocationsWithWeight.keys())
+      const voteWeights = Array.from(allocationsWithWeight.values())
 
       // Calculate total voting weight for display in modal
-      const totalVotingWeight = Array.from(allocationsWithWeight.values()).reduce(
-        (sum, weight) => sum + Number(ethers.formatEther(weight)),
-        0,
-      )
+      const totalVotingWeight = voteWeights.reduce((sum, weight) => sum + Number(ethers.formatEther(weight)), 0)
 
       const compactFormatter = getCompactFormatter(2)
       const formattedWeight = compactFormatter.format(totalVotingWeight)
 
       // Create voting weight description
-      const votingWeightDescription = (
-        <Card.Root
-          key={formattedWeight}
-          variant="subtle"
-          mt="8"
-          p={4}
-          bg="bg.secondary"
-          flexDirection="row"
-          justifyContent="center"
-          alignItems="center"
-          gap="2">
-          <Text textStyle="sm" color="text.subtle">
-            {t("You voted with")}
-          </Text>
-          <Badge
-            variant="outline"
-            rounded="md"
-            size="lg"
-            borderWidth="2px"
-            borderColor="status.positive.primary"
-            color="status.positive.primary"
-            px={3}
-            py={1}
-            textStyle="md">
-            <Icon as={Flash} color="status.positive.primary" boxSize="5" />
-            {formattedWeight}
-          </Badge>
-        </Card.Root>
-      )
+      const votingWeightDescription = createVotingWeightDescription(formattedWeight)
 
-      // Update custom UI with dynamic voting weight
-      setCustomUI({
-        pending: {
-          title: t("Waiting for confirmation..."),
-          description: votingWeightDescription,
-        },
-        waitingConfirmation: {
-          title: t("Sending transaction..."),
-          description: votingWeightDescription,
-        },
-        success: {
-          title: t("Vote successfully submitted!"),
-          description: votingWeightDescription,
-          customButton: (
-            <Button
-              variant="primary"
-              alignSelf="center"
-              px={8}
-              py={2.5}
-              textStyle="lg"
-              fontWeight="semibold"
-              onClick={onSuccess}>
-              {t("Back to Home")}
-            </Button>
-          ),
-        },
-        error: {
-          title: t("Error submitting your vote"),
-        },
-      })
+      if (isAutoVotingEnabled) {
+        // Auto-voting flow: enable auto-voting AND cast vote in same transaction
+        const waitingTitle = hasVoted ? t("Enabling automation...") : t("Enabling automation and submitting vote...")
+        const successTitle = hasVoted ? t("Automation enabled!") : t("Automation enabled & vote submitted!")
+        const customUI = createCustomUI(votingWeightDescription, waitingTitle, successTitle)
 
-      // Set pending votes - useEffect will trigger transaction when customUI is updated
-      setPendingVotes(appVotes)
+        // Call transaction directly with custom UI
+        if (account?.address) {
+          enableAutoVotingAndVote.sendTransaction(
+            {
+              roundId,
+              appIds,
+              voteWeights,
+              userAddress: account.address,
+              hasVoted: hasVoted ?? false,
+            },
+            customUI,
+          )
+        }
+      } else {
+        // Manual voting flow: just cast vote
+        // Prepare data for transaction - pass wei values directly as strings
+        const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
+          appId,
+          votesWei: weight.toString(),
+        }))
+
+        const customUI = createCustomUI(
+          votingWeightDescription,
+          t("Sending transaction..."),
+          t("Vote successfully submitted!"),
+        )
+
+        // Call transaction directly with custom UI
+        castAllocationVotes.sendTransaction(appVotes, customUI)
+      }
     },
-    [t, votesAtSnapshot, onSuccess],
+    [
+      t,
+      votesAtSnapshot,
+      isAutoVotingEnabled,
+      account?.address,
+      roundId,
+      hasVoted,
+      createVotingWeightDescription,
+      createCustomUI,
+      castAllocationVotes,
+      enableAutoVotingAndVote,
+    ],
   )
 
   return {
     handleConfirmVote,
-    isVoting: castAllocationVotes.status === "pending" || castAllocationVotes.status === "waitingConfirmation",
+    isVoting:
+      castAllocationVotes.status === "pending" ||
+      castAllocationVotes.status === "waitingConfirmation" ||
+      enableAutoVotingAndVote.status === "pending" ||
+      enableAutoVotingAndVote.status === "waitingConfirmation",
   }
 }

@@ -2,8 +2,7 @@
 
 import { Box, Button, Dialog, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useRouter } from "next/navigation"
-import { useRef, createContext, useState, useCallback, useMemo } from "react"
+import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
@@ -11,6 +10,7 @@ import { useStickyState } from "@/hooks/useStickyState"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
+import { AutoVoteModal } from "../AutoVoteModal"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
 
 import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
@@ -35,15 +35,38 @@ interface AllocationTabsProviderProps {
 }
 
 export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
-  const router = useRouter()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
+  const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(false)
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const { onClose: closeTxModal } = useTransactionModal()
+  const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
+
+  // @TODO: Add tracking so we don't show the modal to users who have already seen it
+  useEffect(() => {
+    // const hasSeenAutoVoteModal = localStorage.getItem("hasSeenAutoVoteModal")
+    // if (hasVotesAtSnapshot && !hasSeenAutoVoteModal) {
+    //   openAutoVoteModal()
+    //   localStorage.setItem("hasSeenAutoVoteModal", "true")
+    // }
+
+    if (hasVotesAtSnapshot) {
+      openAutoVoteModal()
+    }
+  }, [hasVotesAtSnapshot, openAutoVoteModal])
+
+  // Handler for auto-vote modal
+  const handleAutoVoteApply = useCallback(
+    (enabled: boolean) => {
+      setIsAutoVotingEnabled(enabled)
+      closeAutoVoteModal()
+    },
+    [closeAutoVoteModal],
+  )
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -65,11 +88,11 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     setSelectedAppIds(new Set())
     closeModal()
     closeTxModal()
-    router.push("/")
-  }, [closeTxModal, closeModal, router])
+  }, [closeTxModal, closeModal])
 
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
+    isAutoVotingEnabled,
     onSuccess: onVoteSuccess,
   })
 
@@ -105,7 +128,11 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <Dialog.Root>
             <Dialog.Trigger asChild>
-              <Button w="full" variant="primary" disabled={!hasVotesAtSnapshot} onClick={openModal}>
+              <Button
+                w="full"
+                variant="primary"
+                disabled={!hasVotesAtSnapshot || selectedAppIds.size === 0}
+                onClick={openModal}>
                 {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
               </Button>
             </Dialog.Trigger>
@@ -121,6 +148,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
           onConfirm={handleConfirmVote}
         />
       )}
+
+      <AutoVoteModal isOpen={isAutoVoteModalOpen} onClose={closeAutoVoteModal} onApply={handleAutoVoteApply} />
     </AllocationTabsContext.Provider>
   )
 }

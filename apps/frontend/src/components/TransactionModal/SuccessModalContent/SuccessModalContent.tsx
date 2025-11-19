@@ -15,10 +15,13 @@ export type SuccessModalContentProps = {
   description?: ReactNode
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
+  showTransactionDetailsButton?: boolean
   txId?: string
   isSuccessBeenTrack?: boolean
   onClose: () => void
   customButton?: ReactNode
+  hideDoneButton?: boolean
+  onSuccess?: () => void
 }
 const okHandVariants = {
   initial: { rotateY: 0 },
@@ -51,23 +54,31 @@ const MotionImage = motion(Image)
 export const SuccessModalContent = ({
   title = "Transaction completed!",
   description,
-  showSocialButtons = false,
+  showSocialButtons = true,
   socialDescriptionEncoded = "%F0%9F%8C%B1%20Excited%20to%20contribute%20to%20a%20%23Better%20future%20with%20my%20latest%20activity%20on%20%23VeBetterDAO%21%0A%0AVisit%20https%3A%2F%2Fvebetterdao.org%20and%20start%20making%20a%20difference%20today%21%20%F0%9F%92%AB%0A%0A%23VeBetterDAO%20%23Vechain",
+  showTransactionDetailsButton = true,
+  hideDoneButton = false,
   txId,
   isSuccessBeenTrack,
   onClose,
   customButton,
+  onSuccess,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
 
   const [isTracked, setIsTracked] = useState(isSuccessBeenTrack)
+
+  const handleClose = () => {
+    onSuccess?.()
+    onClose()
+  }
 
   if (isTracked && typeof title === "string") {
     AnalyticsUtils.trackEvent(title, buttonClickActions(ButtonClickProperties.SUCCESS_TX))
     setIsTracked(false)
   }
   return (
-    <VStack align={"center"}>
+    <VStack align={"center"} gapY={5}>
       <MotionImage
         src="/assets/icons/ok-hand.svg"
         boxSize={"150px"}
@@ -80,11 +91,7 @@ export const SuccessModalContent = ({
         {title}
       </Heading>
 
-      {description && (
-        <VStack gap={2} mt={4} w="full">
-          {description}
-        </VStack>
-      )}
+      {description && <VStack w="full">{description}</VStack>}
 
       {showSocialButtons && (
         <VStack>
@@ -92,35 +99,38 @@ export const SuccessModalContent = ({
           <ShareButtons descriptionEncoded={socialDescriptionEncoded} />
         </VStack>
       )}
-      <Flex w={"full"} justifyContent={"center"} mt={6}>
-        <Link
-          href={getExplorerTxLink(txId)}
-          target="_blank"
-          rel="noopener noreferrer"
-          color="gray.500"
-          textStyle="sm"
-          style={{ textDecoration: "none" }}
-          onClick={() =>
-            AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
-          }>
-          <HStack alignSelf={"center"}>
-            <Text textStyle="sm" fontWeight="semibold" color="brand.primary">
-              {t("See transaction information")}
-            </Text>
-            <Icon boxSize={6} color="icon.default">
-              <MdArrowOutward />
-            </Icon>
-          </HStack>
-        </Link>
-      </Flex>
+
+      {showTransactionDetailsButton && (
+        <Flex w={"full"} justifyContent={"center"} mt={6}>
+          <Link
+            href={getExplorerTxLink(txId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            color="gray.500"
+            textStyle="sm"
+            style={{ textDecoration: "none" }}
+            onClick={() =>
+              AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
+            }>
+            <HStack alignSelf={"center"}>
+              <Text textStyle="sm" fontWeight="semibold" color="brand.primary">
+                {t("See transaction information")}
+              </Text>
+              <Icon boxSize={6} color="icon.default">
+                <MdArrowOutward />
+              </Icon>
+            </HStack>
+          </Link>
+        </Flex>
+      )}
+
       <VStack w={"full"} alignItems={"stretch"} gap={2} mt={4}>
-        {customButton ? (
-          customButton
-        ) : (
-          <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={onClose}>
-            {t("Done")}
-          </Button>
-        )}
+        {!hideDoneButton &&
+          (customButton ?? (
+            <Button variant={"primary"} alignSelf="center" w={"50%"} py={6} onClick={handleClose}>
+              {t("Done")}
+            </Button>
+          ))}
       </VStack>
     </VStack>
   )

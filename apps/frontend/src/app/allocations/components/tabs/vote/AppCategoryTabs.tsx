@@ -150,7 +150,7 @@ export function AppCategoryTabs({
                 variant="primary"
                 minWidth="36"
                 onClick={onVoteClick}
-                disabled={!hasEnoughVotesAtSnapshot && selectedAppIds && selectedAppIds.size > 0}>
+                disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
                 {selectedAppIds && selectedAppIds.size > 0
                   ? selectedAppIds.size > 1
                     ? `Vote for ${selectedAppIds?.size} Apps`
@@ -323,6 +323,7 @@ export function AppCategoryTabs({
           </Tabs.Content>
         </Tabs.Root>
       </VStack>
+
       {!isMobile && (
         <VStack width="1/3" align="stretch" justifySelf="flex-start">
           <Heading size="lg">{"Your top 5 Apps"}</Heading>

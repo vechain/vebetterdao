@@ -42,6 +42,7 @@ export const LoadingModalContent = ({
           {typeof description === "string" ? <Text textStyle="sm">{description}</Text> : description}
         </VStack>
       )}
+
       {txId && (
         <Link
           href={getExplorerTxLink(txId)}
