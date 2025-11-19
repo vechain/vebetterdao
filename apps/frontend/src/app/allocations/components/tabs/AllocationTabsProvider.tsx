@@ -7,7 +7,6 @@ import { useRef, createContext, useState, useCallback, useMemo, useEffect } from
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useStickyState } from "@/hooks/useStickyState"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
 import { AutoVoteModal } from "../AutoVoteModal"
@@ -43,7 +42,6 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
-  const { onClose: closeTxModal } = useTransactionModal()
   const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
 
   // @TODO: Add tracking so we don't show the modal to users who have already seen it
@@ -84,15 +82,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     [onSelectedAppsChange],
   )
 
-  const onVoteSuccess = useCallback(() => {
-    setSelectedAppIds(new Set())
-    closeModal()
-    closeTxModal()
-  }, [closeTxModal, closeModal])
-
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
-    onSuccess: onVoteSuccess,
     isAutoVotingEnabled,
   })
 
@@ -128,7 +119,11 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <Dialog.Root>
             <Dialog.Trigger asChild>
-              <Button w="full" variant="primary" disabled={!hasVotesAtSnapshot} onClick={openModal}>
+              <Button
+                w="full"
+                variant="primary"
+                disabled={!hasVotesAtSnapshot || selectedAppIds.size === 0}
+                onClick={openModal}>
                 {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
               </Button>
             </Dialog.Trigger>
