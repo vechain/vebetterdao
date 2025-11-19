@@ -7,6 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { useUserPreferences } from "@/hooks/useUserPreferences"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 
 import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
@@ -26,7 +27,6 @@ import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 import { ProposalFilter } from "../../../store/useProposalFilters"
-import { BannerStorageKey, isBannerEnabled } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
@@ -51,7 +51,9 @@ const VTHO_THRESHOLD = 5
 
 export const ActionBanner = () => {
   const { account, connection } = useWallet()
-  const [showModal, setShowModal] = useState(!isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))
+  const { preferences } = useUserPreferences()
+  const isStargateModalHidden = preferences?.SHOW_STARGATE_BANNER !== true
+  const [showModal, setShowModal] = useState(isStargateModalHidden)
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
@@ -187,8 +189,7 @@ export const ActionBanner = () => {
   // Legacy Node banners logic
   const isLegacyNode = useMemo(() => (userNodes?.legacyNodes?.length ?? 0) > 0, [userNodes])
   // Remove the banner for every user at the end of this round
-  const showStargateBanner =
-    currentRoundId < 55 || (isLegacyNode && isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))
+  const showStargateBanner = currentRoundId < 55 || (isLegacyNode && isStargateModalHidden)
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
