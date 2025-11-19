@@ -1,8 +1,7 @@
-import { Badge, Button, Card, Icon, Text } from "@chakra-ui/react"
+import { Button } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { Flash } from "iconoir-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { parseEther } from "viem"
@@ -12,6 +11,8 @@ import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVot
 import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
 import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
+
+import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 
 interface UseAllocationVotingProps {
   roundId: string
@@ -38,36 +39,8 @@ export const useAllocationVoting = ({ roundId, onSuccess, isAutoVotingEnabled = 
   const enableAutoVotingAndVote = useEnableAutoVotingAndVote({ roundId })
 
   const createVotingWeightDescription = useCallback(
-    (formattedVotingWeight: string) => (
-      <Card.Root
-        key={formattedVotingWeight}
-        variant="subtle"
-        mt="4"
-        p={4}
-        bg="bg.secondary"
-        flexDirection="row"
-        justifyContent="center"
-        alignItems="center"
-        gap="2">
-        <Text textStyle="sm" color="text.subtle">
-          {t("You voted with")}
-        </Text>
-        <Badge
-          variant="outline"
-          rounded="md"
-          size="lg"
-          borderWidth="2px"
-          borderColor="status.positive.primary"
-          color="status.positive.primary"
-          px={3}
-          py={1}
-          textStyle="md">
-          <Icon as={Flash} color="status.positive.primary" boxSize="5" />
-          {formattedVotingWeight}
-        </Badge>
-      </Card.Root>
-    ),
-    [t],
+    (formattedVotingWeight: string) => <VotingWeightDisplay formattedVotingWeight={formattedVotingWeight} />,
+    [],
   )
 
   const createCustomUI = useCallback(

@@ -27,7 +27,7 @@ export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true 
   }
 
   const handleSkip = () => {
-    setIsAutomationOn(false)
+    onApply?.(false)
     onClose()
   }
 
@@ -72,7 +72,7 @@ export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true 
 
         <Card.Root variant="outline" p={4} border="sm" borderColor="border.secondary">
           <HStack justify="space-between">
-            <Text textStyle="md" fontWeight="semibold">
+            <Text textStyle={{ base: "md", md: "lg" }} fontWeight="semibold">
               {t("Automation")}
             </Text>
             <Switch.Root

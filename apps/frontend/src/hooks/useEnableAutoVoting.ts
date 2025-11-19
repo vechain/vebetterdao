@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
-import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
+import { useWallet, useThor } from "@vechain/vechain-kit"
+import { useMemo } from "react"
 
 import { getParticipatedInGovernanceQueryKey } from "@/api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
 import { getXAppRoundEarningsQueryKey } from "@/api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
@@ -14,7 +14,8 @@ import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 
-const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
+const abi = XAllocationVoting__factory.abi
+const address = getConfig().xAllocationVotingContractAddress
 
 type ClausesProps = {
   roundId: string
@@ -48,41 +49,27 @@ export const useEnableAutoVotingAndVote = ({
   transactionModalCustomUI,
 }: UseEnableAutoVotingAndVoteProps) => {
   const { account } = useWallet()
+  const thor = useThor()
 
-  const clauseBuilder = useCallback(({ roundId, appIds, voteWeights, userAddress, hasVoted }: ClausesProps) => {
-    const clauses: EnhancedClause[] = []
+  const contract = thor.contracts.load(address, abi)
 
-    // Set the user's voting preferences for future auto-voting
-    clauses.push({
-      to: getConfig().xAllocationVotingContractAddress,
-      value: 0,
-      data: XAllocationVotingInterface.encodeFunctionData("setUserVotingPreferences", [appIds]),
-      comment: "Set voting preferences for auto-voting",
-      abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("setUserVotingPreferences"))),
-    })
-
-    // Toggle auto-voting to enable it
-    clauses.push({
-      to: getConfig().xAllocationVotingContractAddress,
-      value: 0,
-      data: XAllocationVotingInterface.encodeFunctionData("toggleAutoVoting", [userAddress]),
-      comment: "Enable auto-voting",
-      abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("toggleAutoVoting"))),
-    })
-
-    // Cast vote for the current round (only if user hasn't voted yet)
-    if (!hasVoted) {
-      clauses.push({
-        to: getConfig().xAllocationVotingContractAddress,
-        value: 0,
-        data: XAllocationVotingInterface.encodeFunctionData("castVote", [roundId, appIds, voteWeights]),
-        comment: `Cast your vote on round ${roundId}`,
-        abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("castVote"))),
-      })
-    }
-
-    return clauses
-  }, [])
+  const clauseBuilder = ({ roundId, appIds, voteWeights, userAddress, hasVoted }: ClausesProps) =>
+    [
+      contract.clause.setUserVotingPreferences(appIds, {
+        comment: "Set voting preferences for auto-voting",
+      }).clause,
+      contract.clause.toggleAutoVoting(userAddress, {
+        comment: "Enable auto-voting",
+      }).clause,
+    ].concat(
+      hasVoted
+        ? []
+        : [
+            contract.clause.castVote(roundId, appIds, voteWeights, {
+              comment: `Cast your vote on round ${roundId}`,
+            }).clause,
+          ],
+    )
 
   const refetchQueryKeys = useMemo(() => {
     return [
