@@ -27,6 +27,7 @@ import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 import { ProposalFilter } from "../../../store/useProposalFilters"
+import { BannerStorageKey } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
@@ -141,8 +142,18 @@ export const ActionBanner = () => {
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled
   const showLowVthoBanner =
-    !!account?.address && isLowOnVtho && ownsTokens && !isBalanceLoading && !connection?.isConnectedWithPrivy
-  const showDoActionBanner = !!account?.address && !isPerson && !isLoading && !isDelegateeLoading
+    !!account?.address &&
+    isLowOnVtho &&
+    ownsTokens &&
+    !isBalanceLoading &&
+    !connection?.isConnectedWithPrivy &&
+    (preferences?.[BannerStorageKey.SHOW_LOW_VTHO] ?? true)
+  const showDoActionBanner =
+    !!account?.address &&
+    !isPerson &&
+    !isLoading &&
+    !isDelegateeLoading &&
+    (preferences?.[BannerStorageKey.SHOW_DO_ACTION] ?? true)
   const showDelegatingBanner = !!account?.address && isVeDelegated && !isDelegateeLoading
 
   const showCastVoteBanner = !!account?.address && !isLoading && canUserVote

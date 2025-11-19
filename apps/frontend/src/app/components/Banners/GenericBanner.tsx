@@ -53,7 +53,6 @@ type GenericBannerProps = {
   description: ReactNode
   storageKey?: BannerStorageKey
   cta?: ReactNode
-  closable?: boolean
   onClose?: () => void
   illustrationDimensions?: {
     width?: BoxProps["width"]
@@ -66,7 +65,6 @@ export const GenericBanner = ({
   title,
   description,
   cta,
-  closable = false,
   storageKey,
   onClose,
   illustration,
@@ -110,7 +108,7 @@ export const GenericBanner = ({
         <Image src={illustration || config.illustration} alt="" w="full" h="full" objectFit="contain" />
       </Flex>
 
-      {closable && (
+      {storageKey && (
         <CloseButton
           variant="secondary"
           onClick={handleClose}
