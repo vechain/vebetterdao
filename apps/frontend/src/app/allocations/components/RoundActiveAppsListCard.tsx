@@ -16,6 +16,7 @@ import {
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { SmartphoneDevice, NavArrowRight } from "iconoir-react"
 import { useState, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
@@ -70,6 +71,7 @@ const RoundActiveAppCard = ({
 )
 
 export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
 
@@ -88,7 +90,7 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
         <HStack justifyContent="space-between">
           <Heading as={HStack} size="lg" fontWeight="semibold">
             <Icon as={SmartphoneDevice} boxSize="5" color="icon.default" />
-            {"Active apps"}
+            {t("Active apps")}
           </Heading>
           <Badge variant="neutral" size="sm" rounded="sm">
             {`${filteredApps.length} ${filteredApps.length === 1 ? "app" : "apps"}`}

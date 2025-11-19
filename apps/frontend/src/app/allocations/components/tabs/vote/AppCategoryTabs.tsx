@@ -22,6 +22,7 @@ import {
 } from "@chakra-ui/react"
 import { Search, Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
@@ -68,6 +69,7 @@ export function AppCategoryTabs({
   roundId,
   onVoteClick,
 }: AppCategoryTabsProps) {
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
@@ -141,7 +143,7 @@ export function AppCategoryTabs({
       <VStack flex={1} gap="4" align="stretch">
         <VStack hideBelow="md" gap="4" align="stretch" px="4">
           <Flex alignItems="center" justifyContent="space-between">
-            <Heading size="lg">{"Active apps in current round"}</Heading>
+            <Heading size="lg">{t("Active apps in current round")}</Heading>
             <Flex gap="4">
               <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
                 {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
@@ -217,7 +219,7 @@ export function AppCategoryTabs({
                   </Select.Content>
                 </Select.Positioner>
               </Portal>
-            </Select.Root>{" "}
+            </Select.Root>
           </Flex>
         </VStack>
         <Tabs.Root
@@ -239,7 +241,7 @@ export function AppCategoryTabs({
             scrollbar="hidden"
             {...tabsListProps}>
             <Tabs.Trigger key="all" flex={1} justifyContent="center" value="all" minWidth="4rem">
-              {"All"}
+              {t("All")}
             </Tabs.Trigger>
             {APP_CATEGORIES.map(({ id, name }) => (
               <Tabs.Trigger key={id} flex={1} justifyContent="center" value={id} minWidth="max-content">
@@ -276,7 +278,7 @@ export function AppCategoryTabs({
                   </Circle>
                 }
                 title={""}
-                description="Hmm, we couldn't find that app. Please check the spelling."
+                description={t("Hmm, we couldn't find that app. Please check the spelling.")}
               />
             ) : null}
 
@@ -292,7 +294,7 @@ export function AppCategoryTabs({
                 justifyContent="space-between"
                 gap="4">
                 <HStack gap="1">
-                  <Text textStyle="sm">{"Showing"}</Text>
+                  <Text textStyle="sm">{t("Showing")}</Text>
 
                   <Pagination.PageText format="long" textStyle="sm" />
                 </HStack>
@@ -316,7 +318,7 @@ export function AppCategoryTabs({
                 </ButtonGroup>
 
                 <Button hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
-                  {"View all"}
+                  {t("View all")}
                 </Button>
               </Pagination.Root>
             )}
@@ -325,7 +327,7 @@ export function AppCategoryTabs({
       </VStack>
       {!isMobile && (
         <VStack width="1/3" align="stretch" justifySelf="flex-start">
-          <Heading size="lg">{"Your top 5 Apps"}</Heading>
+          <Heading size="lg">{t("Your top 5 Apps")}</Heading>
           <UserTopVotedAppsCard apps={apps} />
         </VStack>
       )}

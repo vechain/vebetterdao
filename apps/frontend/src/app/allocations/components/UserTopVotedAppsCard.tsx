@@ -6,6 +6,7 @@ import { FormattingUtils } from "@repo/utils"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
@@ -22,6 +23,7 @@ const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress
 
 export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { data: appsVotedInRounds, isLoading } = useEvents({
     abi,
@@ -70,7 +72,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
           </Circle>
         }
         title={""}
-        description="You haven’t voted for any app yet, start collecting your favourite once."
+        description={t("You haven’t voted for any app yet, start collecting your favourite once.")}
       />
     )
   }
@@ -80,7 +82,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
       <Card.Root variant="primary" p="8">
         <Card.Body gap="8">
           <Text textStyle="sm" color="text.subtle">
-            {"Most voted app of all time"}
+            {t("Most voted app of all time")}
           </Text>
           {top5VotedApps.map((app, idx) => (
             <Flex key={app!.id} gap="4" alignItems="center">
@@ -114,7 +116,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
                 </Text>
 
                 <Text textStyle="sm" color="text.subtle">
-                  {appVoteMetrics.timesVoted.get(app!.id)} {"rounds"}
+                  {appVoteMetrics.timesVoted.get(app!.id)} {t("rounds")}
                 </Text>
               </Flex>
             </Flex>

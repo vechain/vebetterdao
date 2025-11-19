@@ -3,6 +3,7 @@
 import { Icon, Text, Button, Skeleton } from "@chakra-ui/react"
 import { Flash } from "iconoir-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
@@ -11,6 +12,7 @@ import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { StatCard } from "./StatCard"
 
 export const VotingPowerBox = () => {
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const { vot3Balance, isLoading } = useVotingPowerAtSnapshot()
 
@@ -35,7 +37,7 @@ export const VotingPowerBox = () => {
         <>
           <Button variant="primary" onClick={() => setIsOpen(true)}>
             <Icon as={Flash} boxSize="4" />
-            {"Power up"}
+            {t("Power up")}
           </Button>
 
           <ConvertModal isOpen={isOpen} onClose={() => setIsOpen(false)} />

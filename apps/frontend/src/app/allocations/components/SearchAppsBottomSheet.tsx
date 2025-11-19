@@ -3,6 +3,7 @@
 import { CloseButton, Flex, IconButton, Input, InputGroup } from "@chakra-ui/react"
 import { NavArrowLeft } from "iconoir-react"
 import { useRef } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { AppWithVotes } from "@/app/allocations/lib/data"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
@@ -29,6 +30,7 @@ export function SearchAppsBottomSheet({
   onToggleApp,
 }: SearchAppsBottomSheetProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
 
   const handleClose = () => {
     onSearchChange("")
@@ -60,7 +62,7 @@ export function SearchAppsBottomSheet({
           <Input
             ref={inputRef}
             id="search-apps-input"
-            placeholder="Search app"
+            placeholder={t("Search app")}
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
             autoFocus

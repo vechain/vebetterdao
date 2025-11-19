@@ -1,14 +1,16 @@
 import { VStack, Heading, Grid, GridItem } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 
 import { CountdownBox } from "../components/CountdownBox"
 import { PotentialRewardBox } from "../components/PotentialRewardBox"
 import { VotingPowerBox } from "../components/VotingPowerBox"
 
-export default async function TabLayout({ children }: { children: React.ReactNode }) {
+export default function TabLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
   return (
     <>
       <VStack alignItems="stretch" gap="2" w="full" mb="6">
-        <Heading size={{ base: "xl", md: "3xl" }}>{"Allocation"}</Heading>
+        <Heading size={{ base: "xl", md: "3xl" }}>{t("Allocation")}</Heading>
         <Grid
           templateRows={{ base: "repeat(2,1fr)", md: "1fr" }}
           templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }}

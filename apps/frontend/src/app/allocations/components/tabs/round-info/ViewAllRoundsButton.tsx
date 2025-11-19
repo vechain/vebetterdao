@@ -23,6 +23,7 @@ import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Modal } from "@/components/Modal"
 import { SearchField } from "@/components/SearchField/SearchField"
@@ -32,6 +33,7 @@ const PAGE_SIZE = 10
 const DATE_FORMAT = "MMM D"
 
 export const ViewAllRoundsButton = ({ currentRoundId }: { currentRoundId: number }) => {
+  const { t } = useTranslation()
   const [isRoundSelectionModalOpen, setIsRoundSelectionModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
@@ -56,7 +58,7 @@ export const ViewAllRoundsButton = ({ currentRoundId }: { currentRoundId: number
   return (
     <>
       <Button variant="link" p="0" size="md" onClick={() => setIsRoundSelectionModalOpen(true)}>
-        {"View all rounds"}
+        {t("View all rounds")}
       </Button>
       <Modal
         isOpen={isRoundSelectionModalOpen}
@@ -68,7 +70,7 @@ export const ViewAllRoundsButton = ({ currentRoundId }: { currentRoundId: number
         showCloseButton={false}
         modalContentProps={{ maxWidth: "400px" }}>
         <HStack w="full" justifyContent="space-between" alignItems="center">
-          <Heading size="xl">{"All rounds"}</Heading>
+          <Heading size="xl">{t("All rounds")}</Heading>
           <Dialog.CloseTrigger asChild position="static">
             <CloseButton />
           </Dialog.CloseTrigger>
@@ -107,7 +109,7 @@ export const ViewAllRoundsButton = ({ currentRoundId }: { currentRoundId: number
                                 </Text>
                               </Skeleton>
                             </VStack>
-                            {currentRoundId === round && <Badge variant="positive">{"Active"}</Badge>}
+                            {currentRoundId === round && <Badge variant="positive">{t("Active")}</Badge>}
                           </RadioCard.ItemText>
                         </RadioCard.ItemContent>
                       </NextLink>
@@ -130,7 +132,7 @@ export const ViewAllRoundsButton = ({ currentRoundId }: { currentRoundId: number
             siblingCount={1}
             onPageChange={page => setCurrentPage(page.page)}>
             <HStack gap="1">
-              <Text textStyle="sm">{"Showing"}</Text>
+              <Text textStyle="sm">{t("Showing")}</Text>
               <Pagination.PageText format="long" textStyle="sm" />
             </HStack>
             <ButtonGroup variant="ghost" size="xs">
