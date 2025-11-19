@@ -142,7 +142,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
   const hasMoreApps = topVotedApps.length > INITIAL_DISPLAY_COUNT
 
   return (
-    <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight="500px">
+    <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight={{ base: "fit-content", md: "500px" }}>
       <Card.Header as={HStack} gap="2" pb={{ base: "5", md: "6" }}>
         <Icon as={Activity} boxSize="5" color="icon.default" />
         <Heading size={{ base: "md", md: "lg" }} fontWeight="semibold">
