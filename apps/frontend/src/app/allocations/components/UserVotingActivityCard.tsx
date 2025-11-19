@@ -166,7 +166,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
         ) : (
           <Grid
             gridTemplateColumns={{ base: "1fr 1px 1fr", md: "repeat(2,1fr)" }}
-            rowGap="8"
+            rowGap={{ base: "5", md: "8" }}
             columnGap={{ base: "8", md: "3" }}>
             <Card.Root
               p={{ base: 0, md: "4" }}
