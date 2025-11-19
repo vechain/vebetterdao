@@ -17,7 +17,7 @@ const abi = VoterRewards__factory.abi
 const contractAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 
 export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
-  const { roundId, rewardsAllocationAmount: totalReward, roundStart, roundEnd } = round
+  const { roundId, vote2EarnAmount: totalReward, roundStart, roundEnd } = round
   const { account } = useWallet()
   const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
     abi,
@@ -31,7 +31,7 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
       getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
   })
 
-  const total = getCompactFormatter(2).format(Number(totalReward))
+  const total = getCompactFormatter(2).format(Number(formatEther(totalReward)))
 
   return (
     <LinkBox key={roundId}>

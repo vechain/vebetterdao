@@ -142,7 +142,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
   const hasMoreApps = topVotedApps.length > INITIAL_DISPLAY_COUNT
 
   return (
-    <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight="500px">
+    <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight={{ base: "fit-content", md: "500px" }}>
       <Card.Header as={HStack} gap="2" pb={{ base: "5", md: "6" }}>
         <Icon as={Activity} boxSize="5" color="icon.default" />
         <Heading size={{ base: "md", md: "lg" }} fontWeight="semibold">
@@ -166,7 +166,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
         ) : (
           <Grid
             gridTemplateColumns={{ base: "1fr 1px 1fr", md: "repeat(2,1fr)" }}
-            rowGap="8"
+            rowGap={{ base: "5", md: "8" }}
             columnGap={{ base: "8", md: "3" }}>
             <Card.Root
               p={{ base: 0, md: "4" }}

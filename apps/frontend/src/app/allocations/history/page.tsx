@@ -3,6 +3,7 @@ export const fetchCache = "force-no-store"
 
 import { ButtonGroup, IconButton, Pagination, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { ThorClient, executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import Link from "next/link"
@@ -16,8 +17,11 @@ import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 import { RoundHistoryCard } from "../components/tabs/round-info/RoundHistoryCard"
 import { getCurrentRoundId } from "../lib/data"
 
-const abi = XAllocationVoting__factory.abi
-const contractAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
+const xAllocationVotingabi = XAllocationVoting__factory.abi
+const xAllocationVotingContractAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
+
+const emissionAbi = Emissions__factory.abi
+const emissionsContractAddress = getConfig().emissionsContractAddress as `0x${string}`
 
 const BreadcrumItems = [
   {
@@ -36,6 +40,7 @@ export interface RoundEarnings {
   roundId: number
   roundStart: Date
   roundEnd: Date
+  vote2EarnAmount: bigint
   totalAmount: string
   unallocatedAmount: string
   teamAllocationAmount: string
@@ -50,8 +55,8 @@ interface RoundsPageResponse {
 export const getRoundsDates = async (thor: ThorClient) => {
   const [currentRound] = await executeCallClause({
     thor,
-    abi,
-    contractAddress,
+    abi: xAllocationVotingabi,
+    contractAddress: xAllocationVotingContractAddress,
     method: "currentRoundId" as const,
     args: [],
   })
@@ -66,8 +71,8 @@ export const getRoundsDates = async (thor: ThorClient) => {
     calls: roundsArray.map(
       round =>
         ({
-          abi,
-          address: contractAddress,
+          abi: xAllocationVotingabi,
+          address: xAllocationVotingContractAddress,
           functionName: "getRound" as const,
           args: [BigInt(round)],
         }) as const,
@@ -119,6 +124,19 @@ export const getRounds = async ({
       ),
     )
 
+    const roundsVote2EarnAmounts = await executeMultipleClausesCall({
+      thor,
+      calls: roundIds.map(
+        round =>
+          ({
+            abi: emissionAbi,
+            address: emissionsContractAddress,
+            functionName: "getVote2EarnAmount" as const,
+            args: [BigInt(round)],
+          }) as const,
+      ),
+    })
+
     const roundsDatesMap = await getRoundsDates(thor)
 
     const roundsData: RoundEarnings[] = earningsResults
@@ -130,6 +148,7 @@ export const getRounds = async ({
           roundId,
           roundStart,
           roundEnd,
+          vote2EarnAmount: roundsVote2EarnAmounts[idx],
           totalAmount: earnings.totalAmount?.toString() || "0",
           unallocatedAmount: earnings.unallocatedAmount?.toString() || "0",
           teamAllocationAmount: earnings.teamAllocationAmount?.toString() || "0",
