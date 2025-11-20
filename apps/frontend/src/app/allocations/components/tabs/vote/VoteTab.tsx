@@ -1,13 +1,11 @@
 "use client"
 
 import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
 import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext } from "react"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
-import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
@@ -20,8 +18,18 @@ export function VoteTab() {
   const context = useContext(AllocationTabsContext)
   if (!context) throw new Error("VoteTab must be used within AllocationTabsProvider")
 
-  const { apps, roundId, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot, onVoteClick, roundDetails } =
-    context
+  const {
+    apps,
+    roundId,
+    selectedAppIds,
+    onToggleApp,
+    isStuck,
+    hasEnoughVotesAtSnapshot,
+    onVoteClick,
+    hasVoted,
+    hasVotedLoading,
+    isAutoVotingEnabled,
+  } = context
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -29,11 +37,6 @@ export function VoteTab() {
   const selectedCategory = searchParams.get("category") || "all"
   const isSearchOpen = searchParams.has("search")
   const { data: threshold } = useVotingThreshold()
-  const { account } = useWallet()
-  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(
-    roundDetails.id.toString(),
-    account?.address ?? undefined,
-  )
   const { isMobile } = useBreakpoints()
 
   const handleSearchChange = useCallback(
@@ -117,6 +120,7 @@ export function VoteTab() {
           hasVoted={hasVoted}
           hasVotedLoading={hasVotedLoading}
           threshold={threshold}
+          isAutoVotingEnabled={isAutoVotingEnabled}
         />
       </Bleed>
 

@@ -51,6 +51,7 @@ interface AppCategoryTabsProps {
   hasVoted?: boolean
   hasVotedLoading?: boolean
   threshold?: string
+  isAutoVotingEnabled?: boolean
 }
 
 const categoryCollection = createListCollection({
@@ -74,11 +75,13 @@ export function AppCategoryTabs({
   hasVoted = false,
   hasVotedLoading = false,
   threshold,
+  isAutoVotingEnabled = false,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
   const [currentPage, setCurrentPage] = useState(1)
+
   const { data: appShares } = useXAppsShares(
     apps.map(app => app.id),
     roundId,
@@ -167,8 +170,8 @@ export function AppCategoryTabs({
                 disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
                 {selectedAppIds && selectedAppIds.size > 0
                   ? selectedAppIds.size > 1
-                    ? `Vote for ${selectedAppIds?.size} Apps`
-                    : `Vote for 1 App`
+                    ? `${isAutoVotingEnabled && hasVoted ? "Automate" : "Vote"} for ${selectedAppIds?.size} Apps`
+                    : `${isAutoVotingEnabled && hasVoted ? "Automate" : "Vote"} for 1 App`
                   : "Vote"}
               </Button>
             </Flex>

@@ -7,6 +7,7 @@ import { useRef, createContext, useState, useCallback, useMemo, useEffect } from
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { useUserVotesInRound } from "@/api/contracts/xApps/hooks/useUserVotesInRound"
 import { useStickyState } from "@/hooks/useStickyState"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -27,6 +28,8 @@ interface AllocationTabsContextType {
   onVoteClick: () => void
   isAutoVotingEnabled: boolean
   onToggleAutoVoting: (enabled: boolean) => void
+  hasVoted: boolean
+  hasVotedLoading: boolean
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
@@ -36,35 +39,6 @@ interface AllocationTabsProviderProps {
   onSelectedAppsChange?: (selectedIds: Set<string>) => void
   children: React.ReactNode
 }
-
-/* @TODO: Include this modal after the release of allocation re-design.
-
-  useEffect(() => {
-    // @TODO: Handle localstorage to prevent showing the modal to users who have already seen it
-
-    if (hasVotesAtSnapshot) {
-      openAutoVoteModal()
-    }
-  }, [hasVotesAtSnapshot, openAutoVoteModal])
-
-  // Handler for auto-vote modal
-  const handleAutoVoteApply = useCallback(
-    (enabled: boolean) => {
-      setIsAutoVotingEnabled(enabled)
-      closeAutoVoteModal()
-    },
-    [closeAutoVoteModal],
-  )
-
-  const { isOpen: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
-
-  <AutoVoteModal
-    isOpen={isAutoVoteModalOpen}
-    onClose={closeAutoVoteModal}
-    onApply={handleAutoVoteApply}
-    currentState={isAutoVotingEnabled}
-  />
-  */
 
 export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -76,8 +50,12 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const { onClose: closeTxModal } = useTransactionModal()
-  const { data: hasVoted } = useHasVotedInRound(roundDetails.id.toString(), account?.address ?? undefined)
+  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(
+    roundDetails.id.toString(),
+    account?.address ?? undefined,
+  )
   const { data: castVotesEvent } = useUserVotesInRound(roundDetails.id.toString(), account?.address ?? undefined)
+  const { data: isAutoVotingEnabledOnChain } = useIsAutoVotingEnabled(account?.address)
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -115,6 +93,13 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     }
   }, [hasVoted, castVotesEvent, onSelectedAppsChange])
 
+  // Sync on-chain auto-voting status with local state
+  useEffect(() => {
+    if (isAutoVotingEnabledOnChain !== undefined) {
+      setIsAutoVotingEnabled(isAutoVotingEnabledOnChain)
+    }
+  }, [isAutoVotingEnabledOnChain])
+
   return (
     <AllocationTabsContext.Provider
       value={{
@@ -126,8 +111,10 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
         onVoteClick: openModal,
-        isAutoVotingEnabled,
+        isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
         onToggleAutoVoting: setIsAutoVotingEnabled,
+        hasVoted: hasVoted ?? false,
+        hasVotedLoading,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
@@ -154,7 +141,9 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
                 variant="primary"
                 disabled={!hasVotesAtSnapshot || selectedAppIds.size === 0}
                 onClick={openModal}>
-                {`Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
+                {isAutoVotingEnabled && hasVoted
+                  ? `Automate for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`
+                  : `Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
               </Button>
             </Dialog.Trigger>
           </Dialog.Root>
