@@ -32,6 +32,7 @@ import { APP_CATEGORIES } from "@/types/appDetails"
 
 import { AppRadioCard } from "../../AppRadioCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
+import { VotingAlerts } from "../../VotingAlerts"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
@@ -47,6 +48,9 @@ interface AppCategoryTabsProps {
   hasEnoughVotesAtSnapshot?: boolean
   roundId?: string
   onVoteClick?: () => void
+  hasVoted?: boolean
+  hasVotedLoading?: boolean
+  threshold?: string
 }
 
 const categoryCollection = createListCollection({
@@ -67,6 +71,9 @@ export function AppCategoryTabs({
   hasEnoughVotesAtSnapshot,
   roundId,
   onVoteClick,
+  hasVoted = false,
+  hasVotedLoading = false,
+  threshold,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
@@ -140,6 +147,13 @@ export function AppCategoryTabs({
     <HStack asChild={isMobile} gap="6" alignItems="flex-start">
       <VStack flex={1} gap="4" align="stretch">
         <VStack hideBelow="md" gap="4" align="stretch" px="4">
+          <VotingAlerts
+            hasVoted={hasVoted}
+            hasVotedLoading={hasVotedLoading}
+            selectedAppIds={selectedAppIds ?? new Set()}
+            hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot ?? true}
+            threshold={threshold}
+          />
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">

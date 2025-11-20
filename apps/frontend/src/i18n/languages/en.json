@@ -1558,7 +1558,7 @@
   "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens": "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens",
   "Send your app's funds received from allocations to your team wallet address.": "Send your app's funds received from allocations to your team wallet address.",
   "Not enough voting power to vote": "Not enough voting power to vote",
-  "You need at least {{threshold}} voting power to participate. Power up your balance!": "You need at least {{threshold}} voting power to participate. Power up your balance!",
+  "At least {{threshold}} voting power is needed to participate. Power up your balance!": "At least {{threshold}} voting power is needed to participate. Power up your balance!",
   "Confirm your vote": "Confirm your vote",
   "Customise votes": "Customise votes",
   "Equal votes": "Equal votes",
@@ -1586,5 +1586,6 @@
   "Enabling automation and submitting vote...": "Enabling automation and submitting vote...",
   "Automation enabled & vote submitted!": "Automation enabled & vote submitted!",
   "Enabling automation...": "Enabling automation...",
-  "Automation enabled!": "Automation enabled!"
+  "Automation enabled!": "Automation enabled!",
+  "You've already voted this round. Wait for the next round to vote again.": "You've already voted this round. Wait for the next round to vote again."
 }

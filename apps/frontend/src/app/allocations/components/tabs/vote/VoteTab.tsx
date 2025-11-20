@@ -1,15 +1,17 @@
 "use client"
 
 import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext } from "react"
-import { useTranslation } from "react-i18next"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
+import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
+import { VotingAlerts } from "../../VotingAlerts"
 import { AllocationTabsContext } from "../AllocationTabsProvider"
 
 import { AppCategoryTabs } from "./AppCategoryTabs"
@@ -18,15 +20,21 @@ export function VoteTab() {
   const context = useContext(AllocationTabsContext)
   if (!context) throw new Error("VoteTab must be used within AllocationTabsProvider")
 
-  const { apps, roundId, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot, onVoteClick } = context
+  const { apps, roundId, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot, onVoteClick, roundDetails } =
+    context
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const urlSearchQuery = searchParams.get("search") || ""
   const selectedCategory = searchParams.get("category") || "all"
   const isSearchOpen = searchParams.has("search")
-  const { t } = useTranslation()
   const { data: threshold } = useVotingThreshold()
+  const { account } = useWallet()
+  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(
+    roundDetails.id.toString(),
+    account?.address ?? undefined,
+  )
+  const { isMobile } = useBreakpoints()
 
   const handleSearchChange = useCallback(
     (query: string) => {
@@ -64,13 +72,13 @@ export function VoteTab() {
 
   return (
     <>
-      {selectedAppIds && selectedAppIds.size > 0 && !hasEnoughVotesAtSnapshot && (
-        <AllocationAlertCard
-          status="error"
-          title={t("Not enough voting power to vote")}
-          message={t("You need at least {{threshold}} voting power to participate. Power up your balance!", {
-            threshold: threshold ?? "1",
-          })}
+      {isMobile && (
+        <VotingAlerts
+          hasVoted={hasVoted ?? false}
+          hasVotedLoading={hasVotedLoading}
+          selectedAppIds={selectedAppIds}
+          hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
+          threshold={threshold}
         />
       )}
       <InputGroup
@@ -106,6 +114,9 @@ export function VoteTab() {
           }}
           showPagination
           onVoteClick={onVoteClick}
+          hasVoted={hasVoted}
+          hasVotedLoading={hasVotedLoading}
+          threshold={threshold}
         />
       </Bleed>
 
