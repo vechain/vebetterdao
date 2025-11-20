@@ -2,7 +2,7 @@
 
 import { Box, Button, Dialog, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
+import { useRef, createContext, useState, useCallback, useMemo } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
@@ -10,7 +10,6 @@ import { useStickyState } from "@/hooks/useStickyState"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
-import { AutoVoteModal } from "../AutoVoteModal"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
 
 import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
@@ -24,6 +23,8 @@ interface AllocationTabsContextType {
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
   onVoteClick: () => void
+  isAutoVotingEnabled: boolean
+  onToggleAutoVoting: (enabled: boolean) => void
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
@@ -34,25 +35,10 @@ interface AllocationTabsProviderProps {
   children: React.ReactNode
 }
 
-export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
-  const sentinelRef = useRef<HTMLDivElement>(null)
-  const isStuck = useStickyState(sentinelRef)
-  const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
-  const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(false)
-  const { account } = useWallet()
-  const { data: delegateeAddress } = useGetDelegatee(account?.address)
-  const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
-  const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
-  const { onClose: closeTxModal } = useTransactionModal()
-  const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
+/* @TODO: Include this modal after the release of allocation re-design.
 
-  // @TODO: Add tracking so we don't show the modal to users who have already seen it
   useEffect(() => {
-    // const hasSeenAutoVoteModal = localStorage.getItem("hasSeenAutoVoteModal")
-    // if (hasVotesAtSnapshot && !hasSeenAutoVoteModal) {
-    //   openAutoVoteModal()
-    //   localStorage.setItem("hasSeenAutoVoteModal", "true")
-    // }
+    // @TODO: Handle localstorage to prevent showing the modal to users who have already seen it
 
     if (hasVotesAtSnapshot) {
       openAutoVoteModal()
@@ -67,6 +53,27 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     },
     [closeAutoVoteModal],
   )
+
+  const { isOpen: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
+
+  <AutoVoteModal
+    isOpen={isAutoVoteModalOpen}
+    onClose={closeAutoVoteModal}
+    onApply={handleAutoVoteApply}
+    currentState={isAutoVotingEnabled}
+  />
+  */
+
+export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const isStuck = useStickyState(sentinelRef)
+  const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
+  const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(false)
+  const { account } = useWallet()
+  const { data: delegateeAddress } = useGetDelegatee(account?.address)
+  const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
+  const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
+  const { onClose: closeTxModal } = useTransactionModal()
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -107,6 +114,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
         onVoteClick: openModal,
+        isAutoVotingEnabled,
+        onToggleAutoVoting: setIsAutoVotingEnabled,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
@@ -148,8 +157,6 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
           onConfirm={handleConfirmVote}
         />
       )}
-
-      <AutoVoteModal isOpen={isAutoVoteModalOpen} onClose={closeAutoVoteModal} onApply={handleAutoVoteApply} />
     </AllocationTabsContext.Provider>
   )
 }

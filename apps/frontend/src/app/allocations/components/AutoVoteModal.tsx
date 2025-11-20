@@ -11,13 +11,20 @@ interface AutoVoteModalProps {
   onClose: () => void
   onApply?: (isEnabled: boolean) => void
   defaultEnabled?: boolean
+  currentState?: boolean
 }
 
 const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation#service-fee"
 
-export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true }: AutoVoteModalProps) => {
+export const AutoVoteModal = ({
+  isOpen,
+  onClose,
+  onApply,
+  defaultEnabled = true,
+  currentState,
+}: AutoVoteModalProps) => {
   const { t } = useTranslation()
-  const [isAutomationOn, setIsAutomationOn] = useState(defaultEnabled)
+  const [isAutomationOn, setIsAutomationOn] = useState(defaultEnabled ?? currentState)
 
   const handleApply = () => {
     if (onApply) {
