@@ -1,0 +1,88 @@
+name: Build and Push to ECR
+
+on:
+    workflow_call:
+        inputs:
+            ecr_repository:
+                description: "Name of the ECR repository"
+                required: true
+                type: string
+            image_tag:
+                description: "Tag for the Docker image"
+                required: true
+                type: string
+            dockerfile_path:
+                description: "Path to Dockerfile"
+                required: false
+                type: string
+                default: "./Dockerfile"
+            context_path:
+                description: "Build context path"
+                required: false
+                type: string
+                default: "."
+            aws_region:
+                description: "AWS region"
+                required: false
+                type: string
+                default: "eu-west-1"
+        secrets:
+            aws_role_arn:
+                description: "AWS IAM role ARN for OIDC authentication"
+                required: true
+        outputs:
+            tag:
+                description: "The image tag that was pushed"
+                value: ${{ jobs.build-and-push.outputs.tag }}
+            uri:
+                description: "Full URI of the pushed image"
+                value: ${{ jobs.build-and-push.outputs.uri }}
+
+jobs:
+    build-and-push:
+        name: Build and Push Docker Image
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        outputs:
+            tag: ${{ steps.meta.outputs.tag }}
+            uri: ${{ steps.meta.outputs.uri }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-region: ${{ inputs.aws_region }}
+                  role-to-assume: ${{ secrets.aws_role_arn }}
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Generate image metadata
+              id: meta
+              run: |
+                  IMAGE_TAG="${{ inputs.image_tag }}"
+                  IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${IMAGE_TAG}"
+                  echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+                  echo "uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ${{ inputs.context_path }}
+                  file: ${{ inputs.dockerfile_path }}
+                  push: true
+                  tags: ${{ steps.meta.outputs.uri }}
+                  platforms: linux/amd64
+                  provenance: false
+                  sbom: false
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max

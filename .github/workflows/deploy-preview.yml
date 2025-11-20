@@ -1,0 +1,309 @@
+name: Deploy Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+concurrency:
+  group: preview-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  # AWS Configuration
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY: block-explorer
+  TERRAFORM_VERSION: 1.6.0
+
+  # Project Configuration
+  PROJECT_NAME: block-explorer
+  PREVIEW_DOMAIN_SUFFIX: block-explorer-preview.vechain.org
+
+  # Terraform Paths
+  TERRAFORM_DIR: terraform/frontend
+  TERRAFORM_ENV_DIR: terraform/environments
+  TERRAFORM_BACKEND_CONFIG: ../environments/preview/backend.config
+
+jobs:
+  pr-comment:
+    name: Post Initial PR Comment
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    outputs:
+      comment_id: ${{ steps.comment.outputs.comment_id }}
+
+    steps:
+      - name: Post initial PR comment (Building)
+        id: comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            const projectName = process.env.PROJECT_NAME;
+
+            const body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+            | Name | Status | Preview | Updated (UTC) |
+            |------|--------|---------|---------------|
+            | **${projectName}-preview** | 🔨 Building ([${commitSha}](${commitUrl})) | Building image... | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
+            ---
+            <sub>Building with commit ${commitSha} • Preview environments are automatically destroyed when PRs are closed</sub>`;
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const existingComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes(`${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview`)
+            );
+
+            let commentId;
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+              commentId = existingComment.id;
+            } else {
+              // Create new comment
+              const comment = await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+              commentId = comment.data.id;
+            }
+
+            console.log(`Comment ID: ${commentId}`);
+            core.setOutput('comment_id', commentId);
+
+  prepare-metadata:
+    name: Prepare Build Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+
+    steps:
+      - name: Generate metadata
+        id: meta
+        run: |
+          SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)
+          IMAGE_TAG="pr-${{ github.event.pull_request.number }}-${SHORT_SHA}"
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+  build-and-push:
+    needs: [prepare-metadata]
+    uses: ./.github/workflows/build-push-ecr.yml
+    with:
+      ecr_repository: block-explorer
+      image_tag: ${{ needs.prepare-metadata.outputs.image_tag }}
+      aws_region: eu-west-1
+    secrets:
+      aws_role_arn: ${{ secrets.AWS_ACC_ROLE }}
+
+  deploy:
+    name: Deploy Preview Environment
+    runs-on: ubuntu-latest
+    needs: [prepare-metadata, build-and-push]
+    if: success()
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: preview-pr-${{ github.event.pull_request.number }}
+      url: https://pr-${{ github.event.pull_request.number }}.block-explorer-preview.vechain.org
+
+    outputs:
+      custom_url: ${{ steps.outputs.outputs.custom_url }}
+      service_url: ${{ steps.outputs.outputs.service_url }}
+      custom_domain_status: ${{ steps.outputs.outputs.custom_domain_status }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ACC_ROLE }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Create preview environment config
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          SHORT_SHA=${{ needs.prepare-metadata.outputs.short_sha }}
+          WORKSPACE_NAME="preview-pr-${PR_NUMBER}"
+
+          # Create workspace directory if it doesn't exist
+          mkdir -p "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+
+          # Copy and customize the preview config
+          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+
+          # Replace placeholders with actual values
+          sed -i "s/{PR_NUMBER}/${PR_NUMBER}/g" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+          sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+
+          # Show the config for debugging
+          echo "Generated config:"
+          cat "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+
+      - name: Terraform Init
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
+
+      - name: Terraform Workspace
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          WORKSPACE_NAME="preview-pr-${{ github.event.pull_request.number }}"
+          terraform workspace select ${WORKSPACE_NAME} || terraform workspace new ${WORKSPACE_NAME}
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform apply -auto-approve tfplan
+
+      - name: Get deployment URL
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        id: outputs
+        run: |
+          CUSTOM_URL=$(terraform output -raw custom_domain_url || echo "")
+          SERVICE_URL=$(terraform output -raw service_url || echo "")
+          DOMAIN_STATUS=$(terraform output -raw custom_domain_status || echo "unknown")
+          echo "custom_url=${CUSTOM_URL}" >> $GITHUB_OUTPUT
+          echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+          echo "custom_domain_status=${DOMAIN_STATUS}" >> $GITHUB_OUTPUT
+
+  update-comment:
+    name: Update PR Comment
+    runs-on: ubuntu-latest
+    needs: [pr-comment, prepare-metadata, build-and-push, deploy]
+    if: always() && needs.pr-comment.result == 'success'
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Update PR comment with final status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const projectName = process.env.PROJECT_NAME;
+
+            const buildResult = '${{ needs.build-and-push.result }}';
+            const deployResult = '${{ needs.deploy.result }}';
+
+            let body;
+
+            if (buildResult === 'failure') {
+              // Build failed
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ❌ Build Failed ([${commitSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
+              ---
+              <sub>Docker build failed for commit ${commitSha} • [Check logs](${runUrl}) for details</sub>`;
+            } else if (deployResult === 'failure') {
+              // Deploy failed
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ❌ Deployment Failed ([${commitSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
+              ---
+              <sub>Deployment failed for commit ${commitSha} • [Check logs](${runUrl}) for details</sub>`;
+            } else if (deployResult === 'success') {
+              // Success - get deployment URLs from deploy job outputs
+              const customUrl = '${{ needs.deploy.outputs.custom_url }}';
+              const serviceUrl = '${{ needs.deploy.outputs.service_url }}';
+              
+              let previewLinks = `[Custom Domain →](${customUrl})  • [Default URL →](${serviceUrl})`;
+              let statusNote = '\n\n> ⏱️ **Note:** Custom domain may take 5-10 minutes to activate on first deployment. Use Default URL in the meantime.';
+              
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ✅ Ready ([${commitSha}](${commitUrl})) | ${previewLinks} | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+              ${statusNote}
+
+              ---
+              <sub>Built with commit ${commitSha} • Preview environments are automatically destroyed when PRs are closed</sub>`;
+            } else {
+              // Unexpected state
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ⚠️ Unknown Status ([${commitSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
+              ---
+              <sub>Unexpected workflow state for commit ${commitSha} • [Check logs](${runUrl}) for details</sub>`;
+            }
+
+            // Find and update existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const existingComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes(`${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview`)
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+            }
+
+      - name: Deployment summary
+        if: needs.deploy.result == 'success'
+        run: |
+          echo "### Preview Environment Deployed! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image Tag:** \`${{ needs.build-and-push.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ needs.deploy.outputs.custom_url }}" ]; then
+            echo "**Custom Domain:** ${{ needs.deploy.outputs.custom_url }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "**Service URL:** ${{ needs.deploy.outputs.service_url }}" >> $GITHUB_STEP_SUMMARY

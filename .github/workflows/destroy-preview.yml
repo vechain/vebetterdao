@@ -1,0 +1,163 @@
+name: Destroy Preview Environment
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+env:
+  AWS_REGION: eu-west-1
+  TERRAFORM_VERSION: 1.6.0
+  
+  # Project Configuration
+  PROJECT_NAME: block-explorer
+  
+  # Terraform Paths
+  TERRAFORM_DIR: terraform/frontend
+  TERRAFORM_ENV_DIR: terraform/environments
+  TERRAFORM_BACKEND_CONFIG: ../environments/preview/backend.config
+
+jobs:
+  destroy:
+    name: Destroy Preview Environment
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    # Only run if the PR was actually deployed (has the environment)
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ACC_ROLE }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
+
+      - name: Terraform Workspace Select
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        id: workspace
+        continue-on-error: true
+        run: |
+          WORKSPACE_NAME="preview-pr-${{ github.event.pull_request.number }}"
+          terraform workspace select ${WORKSPACE_NAME}
+          echo "exists=true" >> $GITHUB_OUTPUT
+
+      - name: Recreate workspace config for destroy
+        if: steps.workspace.outputs.exists == 'true'
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)
+          WORKSPACE_NAME="preview-pr-${PR_NUMBER}"
+          
+          # Create workspace directory if it doesn't exist
+          mkdir -p "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+          
+          # Copy and customize the preview config
+          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+          
+          echo "Recreated config for destroy:"
+          cat "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+
+      - name: Terraform Destroy
+        if: steps.workspace.outputs.exists == 'true'
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform destroy -auto-approve
+
+      - name: Delete Terraform Workspace
+        if: steps.workspace.outputs.exists == 'true'
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          WORKSPACE_NAME="preview-pr-${{ github.event.pull_request.number }}"
+          terraform workspace select default
+          terraform workspace delete ${WORKSPACE_NAME}
+
+      - name: Clean up environment config
+        if: steps.workspace.outputs.exists == 'true'
+        run: |
+          WORKSPACE_NAME="preview-pr-${{ github.event.pull_request.number }}"
+          rm -rf "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+
+      - name: Update PR comment (Destroyed)
+        if: steps.workspace.outputs.exists == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            const projectName = process.env.PROJECT_NAME;
+            
+            const body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+            
+            | Name | Status | Preview | Updated (UTC) |
+            |------|--------|---------|---------------|
+            | **${projectName}-preview** | 🗑️ Destroyed ([${commitSha}](${commitUrl})) | Preview deleted | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+            
+            ---
+            <sub>Preview environment destroyed after PR was ${context.payload.action}</sub>`;
+            
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const existingComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes(`${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview`)
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment if none exists
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
+
+      - name: Destruction summary
+        if: steps.workspace.outputs.exists == 'true'
+        run: |
+          echo "### Preview Environment Destroyed! 🗑️" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Workspace:** \`preview-pr-${{ github.event.pull_request.number }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All resources have been cleaned up." >> $GITHUB_STEP_SUMMARY
+
+      - name: No workspace found
+        if: steps.workspace.outputs.exists != 'true'
+        run: |
+          echo "### No Preview Environment Found" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No workspace found for PR #${{ github.event.pull_request.number }}. Nothing to destroy." >> $GITHUB_STEP_SUMMARY
+

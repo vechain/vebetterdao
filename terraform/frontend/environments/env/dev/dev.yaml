@@ -1,0 +1,30 @@
+project_name: b3tr-frontend
+project_slug: governance-frontend
+environment: dev
+region: eu-west-1
+account_id: "211125319139"
+
+account_level_state_bucket: b3tr-terraform-state-dev
+account_level_state_key: workspaces/dev/frontend-account-level.tfstate
+account_level_state_region: eu-west-1
+
+service_name: governance-dev
+domain: dev.testnet.governance.vebetterdao.org
+enable_custom_domain: true
+manage_dns_records: false
+route53_zone_name: testnet.governance.vebetterdao.org
+
+image_tag: dev-latest
+cpu: 1024
+memory: 2048
+port: 3000
+min_size: 1
+max_size: 2
+max_concurrency: 50
+health_check_path: /
+node_env: dev
+auto_deployments_enabled: false
+
+environment_variables:
+  NEXT_PUBLIC_RUNTIME_ENV: dev
+
