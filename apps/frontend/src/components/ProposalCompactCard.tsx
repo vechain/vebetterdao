@@ -6,19 +6,22 @@ import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
 
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
+
 import { useProposalInteractionDates } from "../api/contracts/governance/hooks/useProposalInteractionDates"
-import { ProposalEnriched, ProposalState } from "../hooks/proposals/grants/types"
+import { ProposalState } from "../hooks/proposals/grants/types"
 
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
 
 type Props = {
-  proposal: ProposalEnriched
+  proposal: ProposalDetail | GrantDetail
   proposalState?: ProposalState
 }
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
-  const { id: proposalId, title: proposalTitle } = proposal
+  const proposalId = proposal.proposalId.toString()
   const { supportEndDate } = useProposalInteractionDates(proposalId)
   const { t } = useTranslation()
 
@@ -72,7 +75,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                   <VStack w="full" gap="1" align={"flex-start"}>
                     <VStack alignItems="flex-start">
                       <Text textStyle={"sm"} fontWeight="semibold">
-                        {proposalTitle}
+                        {proposal.metadata.title ?? "-"}
                       </Text>
                       {proposalExtraInfo}
                     </VStack>

@@ -2,7 +2,8 @@ import { Card, Tabs, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { useIsDepositReached } from "../../../../../api/contracts/governance/hooks/useIsDepositReached"
@@ -14,15 +15,17 @@ import { ProposalOverviewHeader } from "../ProposalOverviewHeader/ProposalOvervi
 
 type ProposalOverviewProps = {
   isGrant?: boolean
-  proposal?: ProposalEnriched | GrantProposalEnriched
+  proposal?: ProposalDetail | GrantDetail
 }
+
 export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
   const { account } = useWallet()
-  const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
-  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
-  const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
+  const proposalId = proposal?.proposalId.toString() ?? ""
+  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
+  const { data: depositReached } = useIsDepositReached(proposalId)
   const { isMobile } = useBreakpoints()
-  const proposerAddress = proposal?.proposerAddress ?? ""
+  const proposerAddress = proposal?.proposer ?? ""
   const hasUserVoted = !!userVoteEvent?.hasVoted
   const hasUserDeposited = useMemo(() => {
     return BigInt(userDeposits ?? 0) > BigInt(0)
@@ -50,7 +53,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
                 <ProposalContentAndActions proposal={proposal} />
               </Tabs.Content>
               <Tabs.Content value="milestones">
-                <MilestonesActions proposal={proposal as GrantProposalEnriched} />
+                <MilestonesActions proposal={proposal as GrantDetail} />
               </Tabs.Content>
             </Tabs.Root>
           ) : (

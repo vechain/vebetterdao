@@ -1,17 +1,19 @@
 import { Heading, HStack, VStack } from "@chakra-ui/react"
 
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
 
 import { GrantsProposalStatusBadge } from "../../../../../components/Proposal/Grants/GrantsProposalStatusBadge"
 import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
 
 type ProposalOverviewHeaderProps = {
-  proposal: ProposalEnriched | GrantProposalEnriched
+  proposal: ProposalDetail | GrantDetail
   hasUserDeposited: boolean
   hasUserVoted: boolean
   depositReached: boolean
   proposerAddress: string
 }
+
 export const ProposalOverviewHeader = ({
   proposal,
   hasUserDeposited,
@@ -24,7 +26,8 @@ export const ProposalOverviewHeader = ({
       {/* Status badge and proposer info */}
       <HStack justify={"space-between"} align={"flex-start"} w="full">
         <GrantsProposalStatusBadge
-          state={proposal?.state}
+          // TODO: fix this state
+          state={proposal?.state || 0}
           hasUserSupported={hasUserDeposited}
           hasUserVoted={hasUserVoted}
           depositReached={depositReached ?? false}
@@ -38,7 +41,7 @@ export const ProposalOverviewHeader = ({
         overflowWrap="break-word"
         size={["2xl", "4xl"]}
         py={{ base: "4", md: "10" }}>
-        {proposal?.title}
+        {proposal?.metadata?.title || "-"}
       </Heading>
     </VStack>
   )

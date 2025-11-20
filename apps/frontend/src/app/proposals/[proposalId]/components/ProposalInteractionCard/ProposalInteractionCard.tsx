@@ -21,6 +21,8 @@ import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks
 import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import { useVot3PastSupply } from "@/api/contracts/vot3/hooks/useVot3PastTotalSupply"
 import { useProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
 import { CountdownBoxes } from "@/components/CountdownBoxes/CountdownBoxes"
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
@@ -29,12 +31,7 @@ import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { MulticolorBar } from "@/components/MulticolorBar/MulticolorBar"
 import { ResultsDisplay } from "@/components/Proposal/ResultsDisplay"
-import {
-  ProposalType as GrantsProposalType,
-  ProposalEnriched,
-  ProposalState,
-  ProposalType,
-} from "@/hooks/proposals/grants/types"
+import { ProposalType as GrantsProposalType, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useMarkProposalCompleted } from "@/hooks/useMarkProposalCompleted"
@@ -56,7 +53,7 @@ export const ProposalInteractionCard = ({
   minutesLeft,
   isLoading,
 }: {
-  proposal?: ProposalEnriched
+  proposal?: ProposalDetail | GrantDetail
   isVotingPhase: boolean
   daysLeft: number
   hoursLeft: number
@@ -68,7 +65,7 @@ export const ProposalInteractionCard = ({
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
-  const proposalId = proposal?.id ?? ""
+  const proposalId = proposal?.proposalId.toString() ?? ""
   // ===== HOOKS =====
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -112,7 +109,7 @@ export const ProposalInteractionCard = ({
   const handleMarkProposalCompleted = useCallback(() => markProposalCompleted(), [markProposalCompleted])
 
   // ===== COMPUTED VALUES =====
-  const isProposer = compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
+  const isProposer = compareAddresses(account?.address ?? "", proposal?.proposer ?? "")
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? "0")
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
   const proposalQuorumBigInt = BigInt(proposalQuorum ?? "0")
@@ -475,7 +472,7 @@ export const ProposalInteractionCard = ({
         isSupportModalOpen={isSupportModalOpen}
         onClose={handleCloseSupportModal}
         proposalId={proposalId}
-        votingRoundId={Number(proposal?.votingRoundId ?? 0)}
+        votingRoundId={Number(proposal?.blockID ?? 0)}
         proposalThreshold={proposalDepositThreshold}
         proposalDeposits={currentDepositAmount}
       />

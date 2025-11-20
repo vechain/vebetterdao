@@ -4,7 +4,9 @@ import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { GrantProposalEnriched, MilestoneState } from "./types"
+import { GrantDetail } from "@/app/grants/types"
+
+import { MilestoneState } from "./types"
 
 const address = getConfig().grantsManagerContractAddress
 const abi = GrantsManager__factory.abi
@@ -17,24 +19,25 @@ export const getAllMilestoneStatesQueryKey = (proposalId?: string) => ["all-mile
  * Hook to get all milestone states for a proposal using executeMultipleClausesCall
  * This efficiently fetches all milestone states in a single batch call
  */
-export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
+export const useAllMilestoneStates = (proposal?: GrantDetail) => {
   const thor = useThor()
-  const milestones = useMemo(() => proposal?.milestones ?? [], [proposal?.milestones])
-  const hasValidData = !!proposal?.id && milestones.length > 0
+  const milestones = useMemo(() => proposal?.metadata?.milestones ?? [], [proposal?.metadata?.milestones])
+  const proposalId = proposal?.proposalId.toString()
+  const hasValidData = !!proposalId && milestones.length > 0
   return useQuery({
-    queryKey: getAllMilestoneStatesQueryKey(proposal?.id),
+    queryKey: getAllMilestoneStatesQueryKey(proposalId ?? ""),
     queryFn: async () => {
-      if (!thor || !proposal?.id || milestones.length === 0) {
+      if (!thor || !proposalId || milestones.length === 0) {
         return []
       }
       try {
         const calls = milestones.map(
-          (_, index) =>
+          (_: any, index: number) =>
             ({
               abi,
               functionName: method,
               address: address as `0x${string}`,
-              args: [BigInt(proposal.id), BigInt(index)],
+              args: [BigInt(proposalId), BigInt(index)],
             }) as const,
         )
         const results = await executeMultipleClausesCall({
@@ -48,12 +51,12 @@ export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
       } catch (error) {
         console.error("Error fetching milestone states:", error)
         // Return default pending states for all milestones on error
-        return milestones.map((_, index) => ({
+        return milestones.map((_: any, index: number) => ({
           state: MilestoneState.Pending,
           index,
         }))
       }
     },
-    enabled: hasValidData && !!thor,
+    enabled: !!thor && hasValidData && !!proposalId,
   })
 }

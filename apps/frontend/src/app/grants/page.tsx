@@ -1,28 +1,18 @@
-"use client"
-import { Spinner, VStack } from "@chakra-ui/react"
-import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { VStack } from "@chakra-ui/react"
 
-import { MotionVStack } from "../../components/MotionVStack"
-import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
+import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
-const GrantsPageContent = dynamic(() => import("./components/GrantsPageContent").then(mod => mod.GrantsPageContent), {
-  ssr: false,
-  loading: () => (
-    <VStack w="full" gap={12} h="80vh" justify="center">
-      <Spinner size={"lg"} />
-    </VStack>
-  ),
-})
+import { getProposalsAndGrants } from "../proposals/page"
 
-export default function Grants() {
-  useEffect(() => {
-    AnalyticsUtils.trackPage(`Grants`)
-  }, [])
+import { GrantsPageContent } from "./components/GrantsPageContent"
+
+export default async function Grants() {
+  const thor = await getNodeJsThorClient()
+  const { grants } = await getProposalsAndGrants(thor)
 
   return (
-    <MotionVStack>
-      <GrantsPageContent />
-    </MotionVStack>
+    <VStack>
+      <GrantsPageContent grants={grants} />
+    </VStack>
   )
 }

@@ -5,6 +5,8 @@ import { useEffect } from "react"
 
 import { MotionVStack } from "../../../components/MotionVStack"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { GrantDetail } from "../types"
+
 const GrantPageContent = dynamic(
   () => import("../../proposals/[proposalId]/components/ProposalPageContent").then(mod => mod.ProposalPageContent),
   {
@@ -16,18 +18,16 @@ const GrantPageContent = dynamic(
     ),
   },
 )
-type Props = {
-  params: {
-    grantId: string
-  }
-}
-export const GrantPage = ({ params }: Readonly<Props>) => {
+
+type Props = { grant: GrantDetail }
+
+export const GrantPage = ({ grant }: Readonly<Props>) => {
   useEffect(() => {
     AnalyticsUtils.trackPage("Grants")
   }, [])
   return (
     <MotionVStack>
-      <GrantPageContent proposalId={params.grantId} typeFilter="grant" />
+      <GrantPageContent proposal={grant} />
     </MotionVStack>
   )
 }

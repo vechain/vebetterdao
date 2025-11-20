@@ -9,13 +9,14 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
+import { MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimMilestone } from "@/hooks/useClaimMilestone"
 import { useRejectGrant } from "@/hooks/useRejectGrant"
 
 import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
 import { DatePicker } from "../../../components/DatePicker/DatePicker"
+import { GrantDetail } from "../types"
 
 type MilestoneWithState = {
   milestone?: {
@@ -30,7 +31,7 @@ type MilestoneWithState = {
 }
 type MilestoneItemProps = {
   milestoneData: MilestoneWithState
-  proposal: GrantProposalEnriched
+  proposal: GrantDetail
   isCurrentStep: boolean
   milestoneIndex: number
   mode?: "read" | "edit"
@@ -72,6 +73,7 @@ export const MilestoneItem = ({
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address)
+  const proposalId = proposal.proposalId.toString()
 
   const [duration, setDuration] = useState<{ from: string; to: string }>({
     from: milestoneData.milestone?.durationFrom
@@ -84,23 +86,23 @@ export const MilestoneItem = ({
 
   // Hooks with proper milestone context
   const { sendTransaction: approveMilestone, resetStatus: resetApproveMilestone } = useApproveMilestone({
-    proposalId: proposal.id,
+    proposalId,
     milestoneIndex,
   })
   const { sendTransaction: rejectMilestone, resetStatus: resetRejectMilestone } = useRejectGrant({
-    proposalId: proposal.id,
+    proposalId,
   })
   const { sendTransaction: claimMilestone, resetStatus: resetClaimMilestone } = useClaimMilestone({
-    proposalId: proposal.id,
+    proposalId,
     milestoneIndex,
   })
 
   // User permissions and roles
   const isGrantReceiver = useMemo(() => {
-    return account?.address && proposal.grantsReceiverAddress
-      ? compareAddresses(account.address, proposal.grantsReceiverAddress)
+    return account?.address && proposal.metadata.grantsReceiverAddress
+      ? compareAddresses(account?.address, proposal.metadata.grantsReceiverAddress)
       : false
-  }, [account?.address, proposal.grantsReceiverAddress])
+  }, [account?.address, proposal.metadata.grantsReceiverAddress])
 
   const isGrantApprover = useMemo(() => {
     return permissions?.isGrantApprover ?? false

@@ -1,20 +1,8 @@
-import {
-  Box,
-  Button,
-  Card,
-  createListCollection,
-  Grid,
-  HStack,
-  Spinner,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+"use client"
+import { Box, Button, Card, createListCollection, Grid, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-
-import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
 import { useProposalClaimableUserDeposits } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
@@ -22,7 +10,6 @@ import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/Mobil
 import { SearchField } from "../../../components/SearchField/SearchField"
 import { SelectField } from "../../../components/SelectField/SelectField"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
-import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { useDebounce } from "../../../hooks/useDebounce"
@@ -30,18 +17,18 @@ import { ProposalFilter, StateFilter, useProposalFilters } from "../../../store/
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { GrantsProposalCard } from "../../grants/components/GrantsProposalCard"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
+import { ProposalDetail } from "../types"
 
 import { ClaimDeposits } from "./components/ClaimDeposits"
 import { CreateProposalCard } from "./components/CreateProposalCard"
 import { NoProposalsCard } from "./components/NoProposalsCard"
 import { RequirementModal } from "./components/RequirementModal"
 
-export const ProposalsPageContent = () => {
+export const ProposalsPageContent = ({ proposals }: { proposals: ProposalDetail[] }) => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const { t } = useTranslation()
   const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
-  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] }, isLoading } = useProposalEnriched()
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
@@ -49,8 +36,8 @@ export const ProposalsPageContent = () => {
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)
-  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalEnriched[])
+  const searchedProposals = useProposalSearch(proposals, debouncedSearchTerm)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalDetail[])
 
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -75,13 +62,6 @@ export const ProposalsPageContent = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL))
     openRequirementModal()
   }, [account?.address, open, openRequirementModal])
-
-  if (isLoading)
-    return (
-      <VStack w="full" gap={12} h="80vh" justify="center">
-        <Spinner size={"lg"} />
-      </VStack>
-    )
 
   return (
     <>
@@ -123,7 +103,7 @@ export const ProposalsPageContent = () => {
                   placeholder={t("Search by proposal name")}
                   value={searchTerm}
                   onChange={setSearchTerm}
-                  disabled={!enrichedStandardProposals?.length}
+                  disabled={!proposals?.length}
                 />
 
                 {isMobile ? (
@@ -148,13 +128,13 @@ export const ProposalsPageContent = () => {
 
               {filteredProposals.map(proposal => (
                 <GrantsProposalCard
-                  key={proposal.id}
+                  key={proposal.proposalId.toString()}
                   variant="proposal"
-                  proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
+                  proposal={proposal as ProposalDetail & { isDepositReached: boolean }}
                 />
               ))}
 
-              {filteredProposals.length === 0 && !isLoading && (
+              {filteredProposals.length === 0 && (
                 <NoProposalsCard
                   onClick={onNewClick}
                   buttonText={t("Create proposal")}

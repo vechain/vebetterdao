@@ -1,22 +1,24 @@
 import { useCallback, useMemo } from "react"
 
-import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { ProposalFilter, StateFilter } from "@/store/useProposalFilters"
 
 import { useAllProposalsDepositReached } from "../../../api/contracts/governance/hooks/useAllProposalsDepositReached"
+import { ProposalDetail } from "../types"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
  */
 export const useFilteredProposals = (
   selectedFilter?: (ProposalFilter | StateFilter)[],
-  proposals?: ProposalEnriched[] | GrantProposalEnriched[],
+  proposals?: ProposalDetail[] | GrantDetail[],
   defaultFilters?: (ProposalFilter | StateFilter)[],
 ) => {
-  type ProposalWithStateAndDeposit = (ProposalEnriched | GrantProposalEnriched) & { isDepositReached?: boolean }
+  type ProposalWithStateAndDeposit = (ProposalDetail | GrantDetail) & { isDepositReached?: boolean }
 
   const proposalsIds = useMemo(() => {
-    return proposals?.map(proposal => proposal.id) || []
+    return proposals?.map(proposal => proposal.proposalId.toString()) || []
   }, [proposals])
 
   const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
@@ -27,7 +29,7 @@ export const useFilteredProposals = (
     return proposals.map(proposal => ({
       ...proposal,
       isDepositReached: allProposalsDepositReached?.find(
-        proposalDepositReached => proposalDepositReached.proposalId === proposal.id,
+        proposalDepositReached => proposalDepositReached.proposalId === proposal.proposalId.toString(),
       )?.depositReached,
     }))
   }, [proposals, allProposalsDepositReached])
@@ -115,7 +117,7 @@ export const useFilteredProposals = (
 
       // If they're in the same phase, sort by newest to oldest (createdAt descending)
       if (phaseComparison === 0) {
-        return (b.createdAt || 0) - (a.createdAt || 0)
+        return (b.blockTimestamp || 0) - (a.blockTimestamp || 0)
       }
 
       return phaseComparison

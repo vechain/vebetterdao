@@ -1,4 +1,4 @@
-import { Grid, GridItem, HStack, Icon, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, HStack, Icon, IconButton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
@@ -6,15 +6,16 @@ import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
+import { GrantDetail } from "@/app/grants/types"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 
 import { useIsDepositReached } from "../../../../api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalInteractionDates } from "../../../../api/contracts/governance/hooks/useProposalInteractionDates"
 import { useProposalUserDeposit } from "../../../../api/contracts/governance/hooks/useProposalUserDeposit"
 import { useUserSingleProposalVoteEvent } from "../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
-import { useProposalEnrichedById } from "../../../../hooks/proposals/common/useProposalEnrichedById"
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 import { PageBreadcrumb } from "../../../components/PageBreadcrumb/PageBreadcrumb"
+import { ProposalDetail } from "../../types"
 
 import { ProposalInteractionCard } from "./ProposalInteractionCard/ProposalInteractionCard"
 import { ProposalOverview } from "./ProposalOverview/ProposalOverview"
@@ -23,21 +24,16 @@ import { ProposalShareModal } from "./ProposalShareModal/ProposalShareModal"
 import { ProposalTimeline } from "./ProposalTimeline/ProposalTimeline"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
 
-type Props = {
-  proposalId: string
-  typeFilter?: "proposal" | "grant"
-}
-export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter }) => {
-  // ==========================================
-  // HOOKS
-  // ==========================================
+type Props = { proposal: ProposalDetail | GrantDetail }
+
+export const ProposalPageContent: React.FC<Props> = ({ proposal }) => {
+  const proposalId = proposal.proposalId.toString()
   const { account } = useWallet()
-  const { data: proposal, isLoading } = useProposalEnrichedById(proposalId)
   const { onOpen, onClose, open: isOpen } = useDisclosure()
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposalId)
-  const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
-  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
-  const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
+  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
+  const { data: depositReached } = useIsDepositReached(proposalId)
   const { isMobile } = useBreakpoints()
   const { t } = useTranslation()
   const router = useRouter()
@@ -48,14 +44,11 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
     result: { daysLeft: number; hoursLeft: number; minutesLeft: number }
   } | null>(null)
 
-  // ==========================================
-  // COMPUTED VALUES & CONSTANTS
-  // ==========================================
   const isGrant = useMemo(() => {
     return proposal?.type === ProposalType.Grant
   }, [proposal])
 
-  const proposerAddress = proposal?.proposerAddress ?? ""
+  const proposerAddress = proposal?.proposer ?? ""
   const hasUserVoted = !!userVoteEvent?.hasVoted
 
   const hasUserDeposited = useMemo(() => {
@@ -79,14 +72,11 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
   ]
 
   useEffect(() => {
-    if (isLoading || !proposal || !typeFilter) return
+    if (!proposal) return
 
-    if (typeFilter === "proposal" && proposal.type === ProposalType.Grant) {
-      router.replace(`/grants/${proposalId}`)
-    } else if (typeFilter === "grant" && proposal.type !== ProposalType.Grant) {
-      router.replace(`/proposals/${proposalId}`)
-    }
-  }, [isLoading, proposal, proposalId, router, typeFilter])
+    if (proposal.type === ProposalType.Grant) router.replace(`/grants/${proposalId}`)
+    else router.replace(`/proposals/${proposalId}`)
+  }, [proposal, proposalId, router])
 
   const { daysLeft, hoursLeft, minutesLeft } = useMemo(() => {
     if (!targetDate) return { daysLeft: 0, hoursLeft: 0, minutesLeft: 0 }
@@ -136,10 +126,10 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
         daysLeft={daysLeft}
         hoursLeft={hoursLeft}
         minutesLeft={minutesLeft}
-        isLoading={isLoading}
+        isLoading={false}
       />
     ),
-    [proposal, isVotingPhase, daysLeft, hoursLeft, minutesLeft, isLoading],
+    [proposal, isVotingPhase, daysLeft, hoursLeft, minutesLeft],
   )
 
   const memoizedProposalTimeline = useMemo(() => <ProposalTimeline proposal={proposal} />, [proposal])
@@ -164,9 +154,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
         <Grid templateColumns="repeat(3, 1fr)" gap={"40px"} w="full">
           {/* Left/Main Column */}
           <GridItem colSpan={[3, 3, 2]} order={[2, 2, 1]}>
-            <Skeleton loading={isLoading}>
-              <ProposalOverview isGrant={isGrant} proposal={proposal} />
-            </Skeleton>
+            <ProposalOverview isGrant={isGrant} proposal={proposal} />
           </GridItem>
 
           {/* Right/Sidebar Column */}

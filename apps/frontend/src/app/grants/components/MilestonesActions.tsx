@@ -7,30 +7,29 @@ import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
-import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { GrantFormData, MilestoneState } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
 import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 
 import { GenericAlert } from "../../components/Alert/GenericAlert"
+import { GrantDetail } from "../types"
 
 import { MilestoneItem } from "./MilestoneItem"
 
-export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
-  // ==========================================
-  // HOOKS
-  // ==========================================
+export const MilestonesActions = ({ proposal }: { proposal?: GrantDetail }) => {
   const { account } = useWallet()
   const { data: milestoneStatesData, isLoading } = useAllMilestoneStates(proposal)
+  const proposalId = proposal?.proposalId.toString() ?? ""
   const { t } = useTranslation()
   const [accordionValue, setAccordionValue] = useState<string[]>([])
   const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
   const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
   const { onMetadataUpload, metadataUploading } = useUploadGrantProposalMetadata()
-  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
+  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposalId)
   const milestones = useMemo(() => {
     return (
-      proposal?.milestones
+      proposal?.metadata.milestones
         .map((milestone, index) => ({
           milestone,
           state: milestoneStatesData?.find(item => item.index === index)?.state ?? MilestoneState.Pending,
@@ -38,7 +37,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         }))
         .filter(item => item.milestone !== undefined) || []
     )
-  }, [milestoneStatesData, proposal?.milestones])
+  }, [milestoneStatesData, proposal?.metadata.milestones])
   const currentStep = useMemo(() => {
     // Find first pending/rejected milestone, or return last index if all completed, or 0 if empty
     const firstPendingIndex = milestones.findIndex(
@@ -53,7 +52,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         if (milestoneEditIndex === undefined) return
         const milestones = [] as GrantFormData["milestones"]
         let index = 0
-        for (const milestone of proposal?.milestones ?? []) {
+        for (const milestone of proposal?.metadata.milestones ?? []) {
           if (index === milestoneEditIndex) {
             milestones.push({
               ...milestone,
@@ -76,7 +75,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         setMilestoneDuration(undefined)
       }
     },
-    [milestoneDuration, milestoneEditIndex, onMetadataUpload, proposal?.milestones, updateMilestoneMetadata],
+    [milestoneDuration, milestoneEditIndex, onMetadataUpload, proposal?.metadata.milestones, updateMilestoneMetadata],
   )
 
   // ==========================================
@@ -156,7 +155,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                         </Text>
                         {milestone.milestone?.durationFrom &&
                           dayjs(milestone.milestone.durationFrom * 1000).isAfter(dayjs()) &&
-                          compareAddresses(account?.address, proposal?.proposerAddress) && (
+                          compareAddresses(account?.address, proposal?.proposer) && (
                             <Button
                               variant="secondary"
                               size="sm"

@@ -7,8 +7,6 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { EmptyState } from "@/components/ui/empty-state"
-import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
-import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 import { SearchField } from "../../../components/SearchField/SearchField"
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
@@ -17,6 +15,7 @@ import { useDraftGrantProposalStore } from "../../../store/useGrantProposalFormS
 import { PageBreadcrumb } from "../../components/PageBreadcrumb/PageBreadcrumb"
 import { GrantsProposalCard } from "../components/GrantsProposalCard"
 import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
+import { GrantDetail } from "../types"
 
 const BreadcrumItems = [
   {
@@ -29,17 +28,15 @@ const BreadcrumItems = [
   },
 ]
 
-export function GrantsManagePageContent() {
+export function GrantsManagePageContent({ grants }: { grants: GrantDetail[] }) {
   const { account } = useWallet()
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] as GrantProposalEnriched[] } } =
-    useProposalEnriched()
   const { draftGrantProposals } = useDraftGrantProposalStore()
   const usersGrants = useMemo(() => {
-    return enrichedGrantProposals.filter(proposal => compareAddresses(proposal.proposerAddress, account?.address))
-  }, [enrichedGrantProposals, account?.address])
+    return grants.filter(proposal => compareAddresses(proposal.proposer, account?.address))
+  }, [grants, account?.address])
   const proposals = [...draftGrantProposals, ...usersGrants]
   const searchedProposals = useProposalSearch(proposals, debouncedSearchTerm)
 
@@ -72,13 +69,13 @@ export function GrantsManagePageContent() {
         <GridItem display="flex" flexDirection="column" gap="6">
           {userHasGrantsProposal ? (
             searchedProposals?.map(proposal =>
-              "id" in proposal ? (
-                <GrantsProposalCard
-                  key={proposal.id}
-                  proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
-                />
-              ) : (
+              "projectName" in proposal ? (
                 <GrantsProposalDraftCard key={proposal.projectName} proposal={proposal} />
+              ) : (
+                <GrantsProposalCard
+                  key={proposal.proposalId.toString()}
+                  proposal={proposal as GrantDetail & { isDepositReached: boolean }}
+                />
               ),
             )
           ) : (

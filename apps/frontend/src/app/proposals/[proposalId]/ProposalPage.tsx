@@ -5,6 +5,8 @@ import { useEffect } from "react"
 
 import { MotionVStack } from "../../../components/MotionVStack"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ProposalDetail } from "../types"
+
 const ProposalPageContent = dynamic(
   () => import("./components/ProposalPageContent").then(mod => mod.ProposalPageContent),
   {
@@ -16,18 +18,16 @@ const ProposalPageContent = dynamic(
     ),
   },
 )
-type Props = {
-  params: {
-    proposalId: string
-  }
-}
-export const ProposalPage = ({ params }: Props) => {
+
+type Props = { proposal: ProposalDetail }
+
+export const ProposalPage = ({ proposal }: Props) => {
   useEffect(() => {
     AnalyticsUtils.trackPage("Proposals")
   }, [])
   return (
     <MotionVStack>
-      <ProposalPageContent proposalId={params.proposalId} typeFilter="proposal" />
+      <ProposalPageContent proposal={proposal} />
     </MotionVStack>
   )
 }

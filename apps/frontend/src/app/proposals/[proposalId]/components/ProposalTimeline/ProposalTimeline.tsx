@@ -4,17 +4,14 @@ import { t } from "i18next"
 import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
 import { useProposalCompletedEvent } from "@/hooks/proposals/common/useProposalCompletedEvent.ts"
 import { useProposalInDevelopmentEvent } from "@/hooks/proposals/common/useProposalInDevelopmentEvent"
 
 import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
 import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
-import {
-  GrantProposalEnriched,
-  ProposalEnriched,
-  ProposalState,
-  ProposalType,
-} from "../../../../../hooks/proposals/grants/types"
+import { ProposalState, ProposalType } from "../../../../../hooks/proposals/grants/types"
 
 type CustomState = ProposalState | "Created"
 type TimelineStep = {
@@ -23,16 +20,17 @@ type TimelineStep = {
   description?: string
 }
 type Props = {
-  proposal?: ProposalEnriched | GrantProposalEnriched
+  proposal?: ProposalDetail | GrantDetail
 }
 
 export const ProposalTimeline = ({ proposal }: Props) => {
-  const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
-  const { data: proposalInDevelopmentEvent } = useProposalInDevelopmentEvent(proposal?.id ?? "")
-  const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposal?.id ?? "")
-  const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
-  const proposalCreatedAt = proposal?.createdAt ?? 0
-  const proposalVotingRoundId = proposal?.votingRoundId ?? 1
+  const proposalId = proposal?.proposalId.toString() || ""
+  const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposalId)
+  const { data: proposalInDevelopmentEvent } = useProposalInDevelopmentEvent(proposalId)
+  const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposalId)
+  const { data: isGrantRejected } = useIsGrantRejected(proposalId)
+  const proposalCreatedAt = proposal?.blockTimestamp ?? 0
+  const proposalVotingRoundId = proposal?.blockID ?? 1
   const standardProposalInDevelopmentStartDate = proposalInDevelopmentEvent?.[0]?.timestamp
   const standardProposalCompletedTimestamp = proposalCompletedEvent?.[0]?.timestamp
   const isGrant = proposal?.type === ProposalType.Grant

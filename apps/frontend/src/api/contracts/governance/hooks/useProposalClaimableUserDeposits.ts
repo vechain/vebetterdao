@@ -4,8 +4,8 @@ import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/
 import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { useGetProposalsAndGrants } from "@/app/rounds/hooks/useRoundProposals"
 
-import { useProposalEnriched } from "../../../../hooks/proposals/common/useProposalEnriched"
 import { ProposalFilter, StateFilter } from "../../../../store/useProposalFilters"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
@@ -34,11 +34,8 @@ export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) =>
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const thor = useThor()
-  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
-  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(
-    CLAIMABLE_STATES,
-    enrichedProposals,
-  )
+  const { data: { proposals } = {} } = useGetProposalsAndGrants()
+  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES, proposals)
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),
     enabled: !!thor && !!userAddress && !filteredProposalsLoading,
@@ -51,7 +48,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
               abi,
               address: GOVERNOR_CONTRACT,
               functionName: "getUserDeposit",
-              args: [BigInt(proposal.id || 0), userAddress],
+              args: [BigInt(proposal.proposalId || 0), userAddress],
             }) as const,
         ),
       })
@@ -59,7 +56,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
       const claimableDeposits = res
         .map((deposit, index) => {
           return {
-            proposalId: filteredProposals[index]?.id as string,
+            proposalId: filteredProposals[index]?.proposalId.toString()!,
             deposit: deposit.toString(),
           }
         })

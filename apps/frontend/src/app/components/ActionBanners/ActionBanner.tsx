@@ -6,11 +6,10 @@ import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 
 import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
-import { useHasVotedInProposals } from "../../../api/contracts/governance/hooks/useHasVotedInProposals"
+import { useHasVotedProposalsInCurrentRound } from "../../../api/contracts/governance/hooks/useHasVotedInProposals"
 import { useGMRewards } from "../../../api/contracts/rewards/hooks/useGMRewards"
 import { useVotingRewards } from "../../../api/contracts/rewards/hooks/useVotingRewards"
 import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
@@ -21,11 +20,9 @@ import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocation
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
-import { ProposalFilter } from "../../../store/useProposalFilters"
 import { BannerStorageKey, isBannerEnabled } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
@@ -71,17 +68,8 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
-  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
-  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
-    [ProposalFilter.InThisRound],
-    enrichedProposals,
-  )
-  const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
-    activeProposals?.map(proposal => proposal?.id),
-    account?.address ?? undefined,
-  )
-
-  const hasProposals = activeProposals?.length > 0 && !isLoadingProposals && !isLoadingHasVotedInProposals
+  const { data: hasVotedInProposals = {} } = useHasVotedProposalsInCurrentRound()
+  const hasProposals = Object.keys(hasVotedInProposals)?.length > 0
 
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
@@ -190,16 +178,17 @@ export const ActionBanner = () => {
   const showStargateBanner =
     currentRoundId < 55 || (isLegacyNode && isBannerEnabled(BannerStorageKey.STARGATE_MIGRATION))
 
-  //Custom compute proposal banners
-  const proposalsToVoteBanners = activeProposals
-    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.id])
-    .map(proposal => (
-      <CastProposalVoteBanners
-        key={`cast-vote-in-proposal-${proposal?.id}`}
-        id={proposal?.id}
-        description={proposal?.ipfsDescription ?? ""}
-      />
-    ))
+  const proposalsToVoteBanners = Object.entries(hasVotedInProposals)
+    .map(([proposalId, { hasVoted, ipfsDescription }]) =>
+      hasVoted ? null : (
+        <CastProposalVoteBanners
+          key={`cast-vote-in-proposal-${proposalId}`}
+          id={proposalId}
+          description={ipfsDescription}
+        />
+      ),
+    )
+    .filter(Boolean)
 
   const slides = useMemo(() => {
     const bannerComponents = []

@@ -225,6 +225,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/stargate/vtho-generated/{period}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stargate metrics by time period
+         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         *
+         *         ### Modes:
+         *         **Preset Mode**
+         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *
+         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
+         *         • `BLOCK` — returns raw per-block totals
+         *         • `ALL` — returns a single all-time summary
+         *
+         *         ### Custom Date Range Mode
+         *         Pass `from` and/or `to` (Unix timestamps).
+         *
+         *         • The `{period}` still controls the aggregation
+         *         • `from`/`to` simply filter which summarized records are returned
+         *           (e.g., DAY summaries within the range)
+         *
+         *         ### Pagination:
+         *         Supports `page`, `size`, and `direction`.
+         */
+        get: operations["getVthoGenerated"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stargate/vtho-claimed/{period}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stargate metrics by time period
+         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         *
+         *         ### Modes:
+         *         **Preset Mode**
+         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *
+         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
+         *         • `BLOCK` — returns raw per-block totals
+         *         • `ALL` — returns a single all-time summary
+         *
+         *         ### Custom Date Range Mode
+         *         Pass `from` and/or `to` (Unix timestamps).
+         *
+         *         • The `{period}` still controls the aggregation
+         *         • `from`/`to` simply filter which summarized records are returned
+         *           (e.g., DAY summaries within the range)
+         *
+         *         ### Pagination:
+         *         Supports `page`, `size`, and `direction`.
+         */
+        get: operations["getVthoClaimed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stargate/vet-staked/{period}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stargate metrics by time period
+         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         *
+         *         ### Modes:
+         *         **Preset Mode**
+         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *
+         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
+         *         • `BLOCK` — returns raw per-block totals
+         *         • `ALL` — returns a single all-time summary
+         *
+         *         ### Custom Date Range Mode
+         *         Pass `from` and/or `to` (Unix timestamps).
+         *
+         *         • The `{period}` still controls the aggregation
+         *         • `from`/`to` simply filter which summarized records are returned
+         *           (e.g., DAY summaries within the range)
+         *
+         *         ### Pagination:
+         *         Supports `page`, `size`, and `direction`.
+         */
+        get: operations["getVETStakedTimeFrame"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stargate/vet-delegated/{period}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stargate metrics by time period
+         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         *
+         *         ### Modes:
+         *         **Preset Mode**
+         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *
+         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
+         *         • `BLOCK` — returns raw per-block totals
+         *         • `ALL` — returns a single all-time summary
+         *
+         *         ### Custom Date Range Mode
+         *         Pass `from` and/or `to` (Unix timestamps).
+         *
+         *         • The `{period}` still controls the aggregation
+         *         • `from`/`to` simply filter which summarized records are returned
+         *           (e.g., DAY summaries within the range)
+         *
+         *         ### Pagination:
+         *         Supports `page`, `size`, and `direction`.
+         */
+        get: operations["getVETDelegatedTimeFrame"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stargate/total-vtho-generated": {
         parameters: {
             query?: never;
@@ -296,6 +448,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/stargate/total-vtho-claimed/{account}/{tokenId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get total VTHO claimed by a given account and token ID */
+        get: operations["getTotalVthoClaimed_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stargate/total-vtho-claimed/historic/{range}": {
         parameters: {
             query?: never;
@@ -307,7 +476,7 @@ export interface paths {
          * Get historic data for total VTHO claimed
          * @description This endpoint returns a time series of total VTHO claimed by all Stargate users (Delegation only).
          */
-        get: operations["getTotalVthoClaimed_2"];
+        get: operations["getTotalVthoClaimed_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -423,6 +592,44 @@ export interface paths {
         };
         /** Get total number of NFT holders in Stargate */
         get: operations["getNftHolders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stargate/nft-holders/{period}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stargate metrics by time period
+         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         *
+         *         ### Modes:
+         *         **Preset Mode**
+         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *
+         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
+         *         • `BLOCK` — returns raw per-block totals
+         *         • `ALL` — returns a single all-time summary
+         *
+         *         ### Custom Date Range Mode
+         *         Pass `from` and/or `to` (Unix timestamps).
+         *
+         *         • The `{period}` still controls the aggregation
+         *         • `from`/`to` simply filter which summarized records are returned
+         *           (e.g., DAY summaries within the range)
+         *
+         *         ### Pagination:
+         *         Supports `page`, `size`, and `direction`.
+         */
+        get: operations["getNFTHoldersTimeFrame"];
         put?: never;
         post?: never;
         delete?: never;
@@ -892,8 +1099,34 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Check if a user is an endorser of any Authority Master Node. */
+        /**
+         * Check if a user is an endorser of any Authority Master Node.
+         * @deprecated
+         */
         get: operations["checkUserIsEndorser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/totals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve total unique accounts overview
+         * @description Retrieves historical totals of unique VeChain accounts tracked per time frame (DAY, WEEK, MONTH, YEAR).
+         *                 The "ALL" account aggregates totals across all time frames.
+         *
+         *                 If no `timeFrame` is provided, the response defaults to showing the full cumulative totals (ALL).
+         */
+        get: operations["getTotalAccounts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1178,18 +1411,38 @@ export interface components {
             recipient: string;
             amount: string;
         };
+        PaginatedResponseTotalByPeriodDto: {
+            data: components["schemas"]["TotalByPeriodDto"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        TotalByPeriodDto: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            timeFrame: string;
+            total: number;
+            /** Format: int64 */
+            dayOfMonth: number;
+            /** Format: int64 */
+            weekOfYear: number;
+            /** Format: int64 */
+            month: number;
+            /** Format: int64 */
+            year: number;
+        };
         TimeSeriesRecordBigInteger: {
             /** Format: int64 */
             timestamp: number;
             value: number;
         };
-        VetStakedByBlock: {
-            total: number;
-            byLevel: {
-                [key: string]: number;
-            };
-        };
-        VetDelegatedByBlock: {
+        TotalByBlockDto: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
             total: number;
             byLevel: {
                 [key: string]: number;
@@ -1235,7 +1488,12 @@ export interface components {
             /** Format: int64 */
             year: number;
         };
-        NftHoldersByBlock: {
+        NftHoldersByBlockDto: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
             /** Format: int64 */
             total: number;
             byLevel: {
@@ -1552,6 +1810,24 @@ export interface components {
             nodeMaster: string;
             endorser?: string;
         };
+        Accounts: {
+            /** Format: int64 */
+            total?: number;
+            /** @enum {string} */
+            timeFrame?: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
+            /** Format: int64 */
+            dayOfMonth?: number;
+            /** Format: int64 */
+            weekOfYear?: number;
+            /** Format: int64 */
+            month?: number;
+            /** Format: int64 */
+            year?: number;
+        };
+        PaginatedResponseAccounts: {
+            data: components["schemas"]["Accounts"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
     };
     responses: never;
     parameters: never;
@@ -1616,6 +1892,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -1688,6 +1965,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -1753,6 +2031,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -1784,6 +2063,8 @@ export interface operations {
                 contractAddress?: string;
                 page?: number;
                 size?: number;
+                /** @description If true, include proposals that were used for testing. */
+                testProposals?: boolean;
             };
             header?: never;
             path?: never;
@@ -1808,6 +2089,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -1876,6 +2158,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -1944,6 +2227,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2015,6 +2299,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2083,6 +2368,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2156,6 +2442,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2232,6 +2519,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2292,6 +2580,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2363,6 +2652,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2434,6 +2724,249 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getVthoGenerated: {
+        parameters: {
+            query?: {
+                validator?: string;
+                /** @description Optional start of custom date range (Unix seconds) */
+                from?: number;
+                /** @description Optional end of custom date range (Unix seconds) */
+                to?: number;
+                page?: number;
+                size?: number;
+                direction?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Preset aggregation period */
+                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getVthoClaimed: {
+        parameters: {
+            query?: {
+                validator?: string;
+                /** @description Optional start of custom date range (Unix seconds) */
+                from?: number;
+                /** @description Optional end of custom date range (Unix seconds) */
+                to?: number;
+                page?: number;
+                size?: number;
+                direction?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Preset aggregation period */
+                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getVETStakedTimeFrame: {
+        parameters: {
+            query?: {
+                /** @description Optional start of custom date range (Unix seconds) */
+                from?: number;
+                /** @description Optional end of custom date range (Unix seconds) */
+                to?: number;
+                page?: number;
+                size?: number;
+                direction?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Preset aggregation period */
+                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getVETDelegatedTimeFrame: {
+        parameters: {
+            query?: {
+                /** @description Optional start of custom date range (Unix seconds) */
+                from?: number;
+                /** @description Optional end of custom date range (Unix seconds) */
+                to?: number;
+                page?: number;
+                size?: number;
+                direction?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Preset aggregation period */
+                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2488,6 +3021,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2542,6 +3076,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2598,6 +3133,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2655,6 +3191,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2678,6 +3215,69 @@ export interface operations {
         };
     };
     getTotalVthoClaimed_2: {
+        parameters: {
+            query?: {
+                /** @description Optional query parameter to filter rewards by type. If not provided, all types will be included. */
+                rewardsType?: "LEGACY" | "DELEGATION";
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description The account address to query for total VTHO claimed
+                 * @example 0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa
+                 */
+                account: string;
+                /**
+                 * @description The token id to query for total VTHO claimed
+                 * @example 1
+                 */
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": number;
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTotalVthoClaimed_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2709,6 +3309,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2752,7 +3353,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["VetStakedByBlock"];
+                    "*/*": components["schemas"]["TotalByBlockDto"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -2763,6 +3364,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2820,6 +3422,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2863,7 +3466,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["VetDelegatedByBlock"];
+                    "*/*": components["schemas"]["TotalByBlockDto"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -2874,6 +3477,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2941,6 +3545,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3006,6 +3611,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3049,7 +3655,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["NftHoldersByBlock"];
+                    "*/*": components["schemas"]["NftHoldersByBlockDto"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -3060,6 +3666,67 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getNFTHoldersTimeFrame: {
+        parameters: {
+            query?: {
+                /** @description Optional start of custom date range (Unix seconds) */
+                from?: number;
+                /** @description Optional end of custom date range (Unix seconds) */
+                to?: number;
+                page?: number;
+                size?: number;
+                direction?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Preset aggregation period */
+                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3117,6 +3784,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3194,6 +3862,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse_Public"];
                     "application/problem+json": components["schemas"]["ExceptionResponse_Public"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3267,6 +3936,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3344,6 +4014,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3403,6 +4074,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3463,6 +4135,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3522,6 +4195,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3590,6 +4264,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3641,6 +4316,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3707,6 +4383,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3758,6 +4435,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3828,6 +4506,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3883,6 +4562,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3951,6 +4631,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4009,6 +4690,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4072,6 +4754,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4136,6 +4819,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4203,6 +4887,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4256,6 +4941,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4324,6 +5010,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4379,6 +5066,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4430,6 +5118,62 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTotalAccounts: {
+        parameters: {
+            query?: {
+                /** @description Time frame to query totals for (DAY, WEEK, MONTH, YEAR, ALL). */
+                timeFrame?: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
+                page?: number;
+                size?: number;
+                direction?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseAccounts"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */

@@ -1,0 +1,47 @@
+{
+  "blockID": "0x015802c1bb534cc89fc0b823c8f48137526091e10380c58709118be4d3d5a4db",
+  "blockNumber": 22545089,
+  "blockTimestamp": 1755980680,
+  "txID": "0x9c740e7d1283e1e9f06740e37f33c0b7ec7362bbcd3c9eacc51c87722d2fe34a",
+  "txOrigin": "0x005a6d638e890159207c0ac1213c6c90ee7b5915",
+  "clauseIndex": 1,
+  "proposalId": "13373339441732385163501857127636252161575159894735284799562973849321047415303",
+  "proposer": "0x005A6D638e890159207c0ac1213c6C90EE7b5915",
+  "roundIdVoteStart": "62",
+  "targets": [],
+  "values": [],
+  "signatures": [],
+  "calldatas": [],
+  "description": "bafkreicjecr2i5dhqw52iofgbinu7vsnqaebizzsbcohbjhjxtippax6ey",
+  "depositThreshold": "5000000000000000000000000",
+  "type": 0,
+  "state": 4,
+  "votes": [
+    {
+      "proposalId": "13373339441732385163501857127636252161575159894735284799562973849321047415303",
+      "support": "FOR",
+      "voters": 1484,
+      "totalWeight": "72971513061779702941353203",
+      "totalPower": "182207423037300000000000"
+    },
+    {
+      "proposalId": "13373339441732385163501857127636252161575159894735284799562973849321047415303",
+      "support": "AGAINST",
+      "voters": 138,
+      "totalWeight": "23161421316331930976454667",
+      "totalPower": "30890191213224000000000"
+    },
+    {
+      "proposalId": "13373339441732385163501857127636252161575159894735284799562973849321047415303",
+      "support": "ABSTAIN",
+      "voters": 16722,
+      "totalWeight": "43522917589209879986916797",
+      "totalPower": "265886076144927000000000"
+    }
+  ],
+  "metadata": {
+    "title": "Unlocking Endorsement Capital to Foster Growth and Protecting the VebetterDao Ecosystem",
+    "shortDescription": "This proposal introduces a flexible and secure model designed to unlock dormant endorsement points and empower node holders. By moving to a partial-endorsement system, we can activate an additonal 1,052 points and give node holders granular control over their assets.",
+    "markdownDescription": "#### **1. The Current Problem: Locked Capital & Single Node dApp Endorsements.**\n\nThe current VeBetterDAO endorsement model, while functional, imposes significant limitations that lock up valuable endorsement capital and reduce security for node holders.\n\n* **Locked Endorsement Points:** The “all-or-nothing” system requires endorsers to commit their entire point value to a single dApp. For a Mjolnir X node holder, this means 100 points are locked in one dApp, even if that dApp only needed a few points to reach its goal. This creates a massive pool of dormant endorsement capital that could be used to endorse new dApps.   Or if a new dApp comes onto the DAO, an endorser may want to switch but has to bring all their points. Leaving a dApp they wish they could still endorse partially at risk.\n\n* **Centralized Endorsements:** The system allows a dApp to be fully endorsed by a single large node. This is not true decentralization and fails to represent broad community consensus, concentrating power instead of distributing it.\n\n#### **2. The Proposed Solution: Activating Capital and Flexible Governance**\n\nThis proposal introduces a flexible and secure model designed to unlock dormant endorsement points and empower node holders. By moving to a partial-endorsement system, we can activate an additonal **1,052 points** and give node holders granular control over their assets.\n\n* **Unlocking Capital with Multiple dApp Endorsements:** The single-dApp limit will be removed. Node holders will be able to split their points and distribute them across as many dApps as they wish. This immediately frees up their locked points, allowing them to flow to new and emerging projects and stimulating ecosystem-wide growth. \n* **Enhancing Security with Granular Control:** The un-endorsement process will become partial. If a node holder wishes to withdraw support, they can choose exactly how many points to remove. Only those specific points will enter the cooldown period, leaving the rest of the node's points active and available for use. This significantly enhances security and flexibility for the node holder.\n    - Any new points gained from a node upgrade will be added to the pool of available points for the node holder. \n* **Promoting Decentralization with an Endorsement Cap:** A single node holder can use up to 49 endorsement points of their 100 total per dApp. This ensures no single entity can unilaterally approve a project, forcing dApps to acquire genuine, broad-based community support.\n    - Additionally, a cap of 110 total endorsement points per dApp will be implemented. This will allow padding and give some security for each dApps endorsement on the DAO, as well as freeing up more endorsement points to be used elsewhere. The 100 points requirement to get endorsed will remain.\n\n#### **3. Transition for Existing Endorsements**\n\nBefore the new system is fully in place, a one-time migration will occur.  This process will refund the endorsement points where needed based on the 49 point endorser cap and 110 point per dApp cap.  The process also includes steps that will ensure current endorsers continue to endorse the dApp of their choosing.  Specific details below.\n\n* **Step 1 - 49 Point Cap Automatic Adjustment:** \n    * Any existing endorsement from a single node holder to a dApp that exceeds the 49-point limit will be automatically reduced to 49 points.\n    * All excess points will be instantly credited back to the node holder’s available point balance. \n* **Step 2 - Check if dApp endorsements need refunding:** \n    * If new dApp score ­≤ 110 = Skip\n    * If new dApp score > 110 = Proceed to step 3\n* **Step 3 - Calculate Reducible points:** \nFor each endorser: \n    * *reducible_points* = *current_points* - 1 (Ensures no endorser goes below 1 point)\n* **Step 4 - Calculate Total Reducible:**\n    * *total_reducible* = sum of all endorsers reducible_points\n* **Step 5 - Calculate Share of Reduction:** \nFor each endorser: \n    * *share* = *reducible_points* / *total_reducible*\n* **Step 6 - Calculate Reduction Amount:**\n    * *total_refund* = *current_score* - *target_score* (Target score is 110)\n    * For each endorser: \n        * *reduction* = *share* * *total_refund* (Rounded to the nearest whole number)\n* **Step 7 - Compare Total Reduction to Total Refund:**\n    * *total_reduction* = sum of all reductions after rounding\n    * If *total_reduction* < *total_refund* = refund the remaining points 1 at a time per node type, starting from the highest reducible until the dApp endorsement score sits between 100-110\n---- E.g. If 2 or more Mjolnir(X) are endorsing they all receive a 1 point refund\n* **Step 8 - Apply Reductions:**\n    * *new_points* = *current_points* - *reduction*\n    * Ensure *new_points* ≥ 1 for all endorsers.\n\nOnce steps are complete for this one-time event, these unlocked points will be immediately available for endorsing new dApps, and others who have entered the grace-period,  with no cooldown.  Activating the new, more flexible and secure system for everyone.\n\n\n---\n\n#### **4. Summary of Changes**\n\n##### **Added Features**\n\n* A new interface for assigning a specific number of endorsement points.\n* A new interface for removing a specific number of endorsement points.\n* A one-time, automatic migration script to adjust all existing endorsements.\n\n##### **Modified Features**\n\n* **Capital Unlocked:** Node holders can split points across multiple dApps.\n* **Security Enhanced:** Only withdrawn points enter cooldown, not the entire node's balance.\n* **Decentralization Fostered:** A 49-point maximum per node per dApp is introduced.\n* **Buffer Added:** The maximum endorsement cap for a dApp is now 110 points.\n\n##### **Removed Features**\n\n* The \"one dApp per node\" limitation is removed.\n* The \"all-or-nothing\" endorsement and un-endorsement model is deprecated.\n\n##### **Unchanged Features**\n\n* The requirement for a dApp to be successfully endorsed remains at 100 points.\n* The transfer and burn events of a node remains as is.  (Always handle 100% of the node's endorsement points) \n\n\n## Proposal Type\nSpecify the type of proposal:\n- [ ] On-chain Action\n- [X] Text-only Proposal\n\n\n## Community Engagement\nThe authors of this proposal have been very active on X, Discord, and have debated it on Discourse for over a month.  We're also in the process of creating graphics to help educate the community on this proposal as well as how to support/vote on proposals in general.  \n\n## References\nhttps://vechain.discourse.group/t/proposal-unlocking-endorsement-capital-to-foster-growth-and-protecting-the-vebetterdao-ecosystem/525\n\n---\n\n### Author Information\n- Name: BreakingBallz, Reheat, Liam Colebourn, Plunk\n- Contact Information: https://x.com/BreakingBallz1, https://x.com/reheatvet?s=11, https://x.com/colebournl947?s=11, https://x.com/plunkeh?s=11\n- Vechain address: 0x005a6d638e890159207c0ac1213c6c90ee7b5915\n\n**Date:**  \nAugust 23, 2025\n"
+  }
+}

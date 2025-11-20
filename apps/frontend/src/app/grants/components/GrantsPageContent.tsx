@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Button,
   ButtonGroup,
@@ -10,7 +12,6 @@ import {
   IconButton,
   Link,
   Pagination,
-  Skeleton,
   Stack,
   Text,
   useDisclosure,
@@ -33,14 +34,14 @@ import { EmptyStateCard } from "../../../components/EmptyStateCard"
 import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/MobileFilterDrawer"
 import { SearchField } from "../../../components/SearchField/SearchField"
 import { SelectField } from "../../../components/SelectField/SelectField"
-import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
-import { GrantProposalEnriched, ProposalState } from "../../../hooks/proposals/grants/types"
+import { ProposalState } from "../../../hooks/proposals/grants/types"
 import { useMilestoneClaimedEvents } from "../../../hooks/proposals/grants/useMilestoneClaimedEvents"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { useDebounce } from "../../../hooks/useDebounce"
 import { ProposalType } from "../../../types/proposals"
 import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
+import { GrantDetail } from "../types"
 
 import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsProposalCard } from "./GrantsProposalCard"
@@ -63,12 +64,10 @@ const DEFAULT_FILTERS = [
   StateFilter.Completed,
 ]
 
-export const GrantsPageContent = () => {
+export const GrantsPageContent = ({ grants }: { grants: GrantDetail[] }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const router = useRouter()
-
-  //CONSTANTS
 
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -143,14 +142,10 @@ export const GrantsPageContent = () => {
   const { hasMetProposalCriteria } = useMetProposalCriteria(ProposalType.GRANT)
 
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
-  const {
-    data: { enrichedGrantProposals } = { enrichedGrantProposals: [] },
-    isLoading: isLoadingEnrichedGrantProposals,
-  } = useProposalEnriched()
-  const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
+  const searchedProposals = useProposalSearch(grants, debouncedSearchTerm)
   const { filteredProposals } = useFilteredProposals(
     selectedFilter,
-    searchedProposals as GrantProposalEnriched[],
+    searchedProposals as GrantDetail[],
     DEFAULT_FILTERS,
   )
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
@@ -158,13 +153,11 @@ export const GrantsPageContent = () => {
   const visibleProposal = filteredProposals?.slice(startRange, endRange)
 
   // COMPUTED VALUES
-  const totalGrantsApproved = useMemo(() => {
-    return enrichedGrantProposals.filter(proposal =>
-      [ProposalState.Succeeded, ProposalState.InDevelopment, ProposalState.Completed, ProposalState.Executed].includes(
-        proposal.state,
-      ),
-    ).length
-  }, [enrichedGrantProposals])
+  const totalGrantsApproved = grants.filter(grant =>
+    [ProposalState.Succeeded, ProposalState.InDevelopment, ProposalState.Completed, ProposalState.Executed].includes(
+      grant.state as ProposalState,
+    ),
+  ).length
 
   const totalDistributedAmount = useMemo(() => {
     return (
@@ -179,26 +172,6 @@ export const GrantsPageContent = () => {
   const onApplyForGrant = useCallback(() => {
     router.push("/grants/new")
   }, [router])
-
-  // Render helpers
-  const renderSkeleton = () => (
-    <>
-      {Array.from({ length: 3 }).map((_, index) => (
-        <GridItem key={`grants-list-skeleton-${index + 1}`}>
-          <Skeleton loading={true} h="200px" w="full" borderRadius="md">
-            <div />
-          </Skeleton>
-        </GridItem>
-      ))}
-    </>
-  )
-
-  const renderProposals = () =>
-    visibleProposal?.map(proposal => (
-      <GridItem key={proposal.id}>
-        <GrantsProposalCard proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }} />
-      </GridItem>
-    ))
 
   const renderEmptyState = () => {
     const hasFiltersOrSearch = searchTerm || selectedFilter.length > 0
@@ -263,7 +236,7 @@ export const GrantsPageContent = () => {
         {showApplyForGrant && <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />}
         {!isMobile && (
           <GrantsStatsCards
-            totalApplications={enrichedGrantProposals?.length || 0}
+            totalApplications={grants?.length || 0}
             totalApproved={totalGrantsApproved}
             totalFunds={totalDistributedAmount.toNumber()}
           />
@@ -278,7 +251,7 @@ export const GrantsPageContent = () => {
                   placeholder={t("Search by grant name")}
                   value={searchTerm}
                   onChange={setSearchTerm}
-                  disabled={!enrichedGrantProposals?.length}
+                  disabled={!grants?.length}
                 />
 
                 {isMobile ? (
@@ -304,11 +277,13 @@ export const GrantsPageContent = () => {
               </HStack>
 
               <Grid templateColumns={{ base: "1fr" }} gap={5} w="full">
-                {isLoadingEnrichedGrantProposals && renderSkeleton()}
-                {!isLoadingEnrichedGrantProposals &&
-                  filteredProposals &&
+                {filteredProposals &&
                   filteredProposals.length > 0 &&
-                  renderProposals()}
+                  visibleProposal?.map(proposal => (
+                    <GridItem key={proposal.proposalId.toString()}>
+                      <GrantsProposalCard proposal={proposal as GrantDetail & { isDepositReached: boolean }} />
+                    </GridItem>
+                  ))}
 
                 {filteredProposals && filteredProposals.length > 0 && (
                   <Pagination.Root
@@ -357,9 +332,7 @@ export const GrantsPageContent = () => {
                   </Pagination.Root>
                 )}
 
-                {!isLoadingEnrichedGrantProposals &&
-                  (!filteredProposals || filteredProposals.length === 0) &&
-                  renderEmptyState()}
+                {(!filteredProposals || filteredProposals.length === 0) && renderEmptyState()}
               </Grid>
             </VStack>
           </GridItem>

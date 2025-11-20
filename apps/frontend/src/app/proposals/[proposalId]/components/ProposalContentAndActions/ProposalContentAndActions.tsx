@@ -15,8 +15,10 @@ import { Swiper, SwiperSlide } from "swiper/react"
 
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
 import { useColorModeValue } from "@/components/ui/color-mode"
-import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
+import { AttachmentFile, ProposalType } from "@/hooks/proposals/grants/types"
 
 import { ProposalExecutableActions } from "../../../../../components/ProposalExecutableActions/ProposalExecutableActions"
 import {
@@ -33,20 +35,18 @@ import "@/app/theme/swiper-custom.css"
 import "swiper/css"
 import "swiper/css/navigation"
 import "swiper/css/pagination"
-const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
+
+const isGrantProposal = (proposal?: ProposalDetail | GrantDetail): proposal is GrantDetail => {
   return proposal?.type === ProposalType.Grant
 }
-const isStandardProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is ProposalEnriched => {
+const isStandardProposal = (proposal?: ProposalDetail | GrantDetail): proposal is ProposalDetail => {
   return proposal?.type === ProposalType.Standard
 }
-type Props = {
-  proposal?: ProposalEnriched | GrantProposalEnriched
-}
+type Props = { proposal?: ProposalDetail | GrantDetail }
+
 const ipfs = getConfig().ipfsFetchingService
+
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
-  // ==========================================
-  // HOOKS
-  // ==========================================
   const { t } = useTranslation()
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
   const markdownPreviewTextColor = useColorModeValue("#2D3748", "#E4E4E4")
@@ -73,19 +73,19 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
 
   const hasAttachments = useMemo(() => {
     if (proposal?.type === ProposalType.Standard) return false
-    const typedProposal = proposal as GrantProposalEnriched
-    return typedProposal?.outcomesAttachment?.length && typedProposal?.outcomesAttachment?.length > 0
+    const typedProposal = proposal as GrantDetail
+    return typedProposal.metadata?.outcomesAttachment?.length && typedProposal?.metadata.outcomesAttachment?.length > 0
   }, [proposal])
 
   const hasSocials = useMemo(() => {
     if (proposal?.type === ProposalType.Standard) return false
-    const typedProposal = proposal as GrantProposalEnriched
+    const typedProposal = proposal as GrantDetail
     return (
-      typedProposal?.githubUsername ||
-      typedProposal?.discordUserId ||
-      typedProposal?.companyTelegram ||
-      typedProposal?.projectWebsite ||
-      typedProposal?.twitterUsername
+      typedProposal?.metadata.githubUsername ||
+      typedProposal?.metadata.discordUserId ||
+      typedProposal?.metadata.companyTelegram ||
+      typedProposal?.metadata.projectWebsite ||
+      typedProposal?.metadata.twitterUsername
     )
   }, [proposal])
 
@@ -99,61 +99,64 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
         <VStack gap={7} align="flex-start" w="full">
           {/* Company details section */}
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
-            <CollapsibleSectionItem title={t("Name")} value={proposal?.companyName} />
-            <CollapsibleSectionItem title={t("Registration number / VAT")} value={proposal?.companyRegisteredNumber} />
+            <CollapsibleSectionItem title={t("Name")} value={proposal?.metadata.companyName} />
+            <CollapsibleSectionItem
+              title={t("Registration number / VAT")}
+              value={proposal?.metadata.companyRegisteredNumber}
+            />
 
-            {proposal?.grantsReceiverAddress ? (
+            {proposal?.metadata.grantsReceiverAddress ? (
               <VStack align="flex-start" w="full" gap={0}>
                 <Text fontWeight="semibold">{t("Receiver Address")}</Text>
-                <AddressWithProfilePicture address={proposal?.grantsReceiverAddress} />
+                <AddressWithProfilePicture address={proposal?.metadata.grantsReceiverAddress} />
               </VStack>
             ) : null}
-            {proposal?.companyEmail || proposal?.companyTelegram ? (
+            {proposal?.metadata.companyEmail || proposal?.metadata.companyTelegram ? (
               <VStack py={2} align="flex-start" w="full">
-                {proposal?.companyEmail ? (
+                {proposal?.metadata.companyEmail ? (
                   <SocialLink
                     icon={LuMail}
-                    href={`mailto:${proposal.companyEmail}`}
+                    href={`mailto:${proposal.metadata.companyEmail}`}
                     label="Email"
-                    value={proposal.companyEmail}
+                    value={proposal.metadata.companyEmail}
                   />
                 ) : null}
 
-                {proposal?.companyLinkedin ? (
+                {proposal?.metadata.companyLinkedin ? (
                   <SocialLink
                     icon={Linkedin}
-                    href={proposal.companyLinkedin}
+                    href={proposal.metadata.companyLinkedin}
                     label="Linkedin"
-                    value={proposal.companyLinkedin}
+                    value={proposal.metadata.companyLinkedin}
                   />
                 ) : null}
 
-                {proposal?.companyTelegram ? (
+                {proposal?.metadata.companyTelegram ? (
                   <SocialLink
                     icon={RiTelegram2Line}
-                    href={proposal.companyTelegram}
+                    href={proposal.metadata.companyTelegram}
                     label="Telegram"
-                    value={proposal.companyTelegram}
+                    value={proposal.metadata.companyTelegram}
                   />
                 ) : null}
               </VStack>
             ) : null}
 
-            <CollapsibleSectionItem title={t("Project Intro")} value={proposal?.projectIntro} />
-            <CollapsibleSectionItem title={t("Team Overview")} value={proposal?.teamOverview} />
+            <CollapsibleSectionItem title={t("Project Intro")} value={proposal?.metadata.projectIntro} />
+            <CollapsibleSectionItem title={t("Team Overview")} value={proposal?.metadata.teamOverview} />
           </CollapsibleSection>
 
           {/* Grant details section */}
           <CollapsibleSection title={t("Grant details")} defaultOpen={true}>
             <VStack gap={4} align="flex-start" textAlign="flex-start" w="full">
-              <CollapsibleSectionItem title={t("Problem")} value={proposal?.problemDescription} />
-              <CollapsibleSectionItem title={t("Solution")} value={proposal?.solutionDescription} />
-              <CollapsibleSectionItem title={t("Execution plan")} value={proposal?.highLevelRoadmap} />
-              <CollapsibleSectionItem title={t("Target user")} value={proposal?.targetUsers} />
-              <CollapsibleSectionItem title={t("Revenue model")} value={proposal?.revenueModel} />
+              <CollapsibleSectionItem title={t("Problem")} value={proposal?.metadata.problemDescription} />
+              <CollapsibleSectionItem title={t("Solution")} value={proposal?.metadata.solutionDescription} />
+              <CollapsibleSectionItem title={t("Execution plan")} value={proposal?.metadata.highLevelRoadmap} />
+              <CollapsibleSectionItem title={t("Target user")} value={proposal?.metadata.targetUsers} />
+              <CollapsibleSectionItem title={t("Revenue model")} value={proposal?.metadata.revenueModel} />
               <CollapsibleSectionItem
                 title={t("Competitive edge / Differentiation factor")}
-                value={proposal?.competitiveEdge}
+                value={proposal?.metadata.competitiveEdge}
               />
             </VStack>
           </CollapsibleSection>
@@ -161,16 +164,16 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           {/* Outcomes section */}
           <CollapsibleSection title={t("Outcomes")}>
             <VStack gap={4} align="flex-start" w="full">
-              <CollapsibleSectionItem title={t("Benefits to users")} value={proposal?.benefitsToUsers} />
+              <CollapsibleSectionItem title={t("Benefits to users")} value={proposal?.metadata.benefitsToUsers} />
 
-              <CollapsibleSectionItem title={t("Benefits to apps")} value={proposal?.benefitsToDApps} />
+              <CollapsibleSectionItem title={t("Benefits to apps")} value={proposal?.metadata.benefitsToDApps} />
 
               <CollapsibleSectionItem
                 title={t("Benefits to VeChain ecosystem")}
-                value={proposal?.benefitsToVeChainEcosystem}
+                value={proposal?.metadata.benefitsToVeChainEcosystem}
               />
 
-              <CollapsibleSectionItem title={t("X2E model")} value={proposal?.x2EModel} />
+              <CollapsibleSectionItem title={t("X2E model")} value={proposal?.metadata.x2EModel} />
             </VStack>
           </CollapsibleSection>
 
@@ -178,34 +181,42 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           {hasSocials || hasAttachments ? (
             <CollapsibleSection title={t("Sources and additional")} showSeparator={false}>
               <VStack gap={4} align="flex-start" w="full">
-                {proposal?.discordUserId ? (
+                {proposal?.metadata.discordUserId ? (
                   <SocialLink
                     icon={AiOutlineDiscord}
-                    href={`https://discord.com/users/${proposal.discordUserId}`}
+                    href={`https://discord.com/users/${proposal.metadata.discordUserId}`}
                     label="Discord"
                   />
                 ) : null}
-                {proposal?.githubUsername ? (
-                  <SocialLink icon={UilGithub} href={`https://github.com/${proposal.githubUsername}`} label="Github" />
+                {proposal?.metadata.githubUsername ? (
+                  <SocialLink
+                    icon={UilGithub}
+                    href={`https://github.com/${proposal.metadata.githubUsername}`}
+                    label="Github"
+                  />
                 ) : null}
-                {proposal?.companyTelegram ? (
-                  <SocialLink icon={RiTelegram2Line} href={proposal.companyTelegram} label="Telegram" />
+                {proposal?.metadata.companyTelegram ? (
+                  <SocialLink icon={RiTelegram2Line} href={proposal.metadata.companyTelegram} label="Telegram" />
                 ) : null}
-                {proposal?.projectWebsite ? (
-                  <SocialLink icon={Link} href={proposal.projectWebsite} label="Project website" />
+                {proposal?.metadata.projectWebsite ? (
+                  <SocialLink icon={Link} href={proposal.metadata.projectWebsite} label="Project website" />
                 ) : null}
-                {proposal?.appTestnetUrl ? (
-                  <SocialLink icon={Link} href={proposal.appTestnetUrl} label="App Testnet URL" />
+                {proposal?.metadata.appTestnetUrl ? (
+                  <SocialLink icon={Link} href={proposal.metadata.appTestnetUrl} label="App Testnet URL" />
                 ) : null}
-                {proposal?.twitterUsername ? (
-                  <SocialLink icon={FaXTwitter} href={`https://x.com/${proposal.twitterUsername}`} label="Twitter" />
+                {proposal?.metadata.twitterUsername ? (
+                  <SocialLink
+                    icon={FaXTwitter}
+                    href={`https://x.com/${proposal.metadata.twitterUsername}`}
+                    label="Twitter"
+                  />
                 ) : null}
               </VStack>
               {/* File attachments */}
               {hasAttachments ? (
                 <VStack align="flex-start" w="full" gap={4} pt={10}>
                   <Grid templateColumns="repeat(2, 1fr)" w="full" gap={4}>
-                    {proposal?.outcomesAttachment?.map((attachment: AttachmentFile, index: number) => (
+                    {proposal?.metadata.outcomesAttachment?.map((attachment: AttachmentFile, index: number) => (
                       <GridItem key={attachment.ipfs} colSpan={{ base: 2, md: 1 }}>
                         <FileAttachmentPreview attachment={attachment} uniqueKey={index} />
                       </GridItem>
@@ -220,7 +231,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                           nextEl: ".custom-swiper-button-next",
                         }}
                         pagination>
-                        {proposal?.outcomesAttachment
+                        {proposal?.metadata.outcomesAttachment
                           ?.filter(attachment => attachment.type.startsWith("image"))
                           .map(attachment => (
                             <SwiperSlide
@@ -297,7 +308,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               },
             }}>
             <MDEditor.Markdown
-              source={removeTitleHeading(proposal?.markdownDescription, proposal?.title)}
+              source={removeTitleHeading(proposal?.metadata.markdownDescription, proposal?.metadata.title)}
               style={{
                 maxWidth: "100%",
                 wordBreak: "break-word",
