@@ -50,7 +50,7 @@ const variantConfig: Record<BannerVariant, BannerConfig> = {
   },
   b3mo: {
     bg: "banner.green",
-    illustration: "/assets/mascot/mascot-welcoming.webp",
+    illustration: "/assets/mascot/mascot-welcoming-left-head.webp",
     bgImageLight: "/assets/backgrounds/banner-bg-green-light.webp",
     bgImageDark: "/assets/backgrounds/banner-bg-green-dark.webp",
   },
@@ -62,7 +62,6 @@ type B3MOIllustration =
   | "/assets/mascot/mascot-warning-head.webp"
   | "/assets/mascot/mascot-holding-tokens.webp"
   | "/assets/mascot/mascot-welcoming-left-head.webp"
-  | "/assets/mascot/mascot-welcoming.webp"
   | "/assets/images/b3mo-stargate-greet.webp"
 
 type GenericBannerProps = {
