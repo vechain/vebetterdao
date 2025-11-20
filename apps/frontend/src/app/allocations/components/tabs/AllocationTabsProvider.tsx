@@ -2,10 +2,12 @@
 
 import { Box, Button, Dialog, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useRef, createContext, useState, useCallback, useMemo } from "react"
+import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
+import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useUserVotesInRound } from "@/api/contracts/xApps/hooks/useUserVotesInRound"
 import { useStickyState } from "@/hooks/useStickyState"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -74,6 +76,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const { onClose: closeTxModal } = useTransactionModal()
+  const { data: hasVoted } = useHasVotedInRound(roundDetails.id.toString(), account?.address ?? undefined)
+  const { data: castVotesEvent } = useUserVotesInRound(roundDetails.id.toString(), account?.address ?? undefined)
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -102,6 +106,14 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     isAutoVotingEnabled,
     onSuccess: onVoteSuccess,
   })
+
+  useEffect(() => {
+    if (hasVoted && castVotesEvent?.appsIds) {
+      const votedAppIds = new Set(castVotesEvent.appsIds)
+      setSelectedAppIds(votedAppIds)
+      onSelectedAppsChange?.(votedAppIds)
+    }
+  }, [hasVoted, castVotesEvent, onSelectedAppsChange])
 
   return (
     <AllocationTabsContext.Provider
