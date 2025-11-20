@@ -44,7 +44,6 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
-  const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(false)
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
@@ -56,6 +55,16 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   )
   const { data: castVotesEvent } = useUserVotesInRound(roundDetails.id.toString(), account?.address ?? undefined)
   const { data: isAutoVotingEnabledOnChain } = useIsAutoVotingEnabled(account?.address)
+
+  // Initialize local state from chain data
+  const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(isAutoVotingEnabledOnChain ?? false)
+
+  const handleOpenModal = useCallback(() => {
+    if (isAutoVotingEnabledOnChain !== undefined) {
+      setIsAutoVotingEnabled(isAutoVotingEnabledOnChain)
+    }
+    openModal()
+  }, [isAutoVotingEnabledOnChain, openModal])
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -82,6 +91,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
     isAutoVotingEnabled,
+    isAutoVotingEnabledOnChain: isAutoVotingEnabledOnChain ?? false,
     onSuccess: onVoteSuccess,
   })
 
@@ -93,13 +103,6 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     }
   }, [hasVoted, castVotesEvent, onSelectedAppsChange])
 
-  // Sync on-chain auto-voting status with local state
-  useEffect(() => {
-    if (isAutoVotingEnabledOnChain !== undefined) {
-      setIsAutoVotingEnabled(isAutoVotingEnabledOnChain)
-    }
-  }, [isAutoVotingEnabledOnChain])
-
   return (
     <AllocationTabsContext.Provider
       value={{
@@ -110,7 +113,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
-        onVoteClick: openModal,
+        onVoteClick: handleOpenModal,
         isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
         onToggleAutoVoting: setIsAutoVotingEnabled,
         hasVoted: hasVoted ?? false,
@@ -140,7 +143,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
                 w="full"
                 variant="primary"
                 disabled={!hasVotesAtSnapshot || selectedAppIds.size === 0}
-                onClick={openModal}>
+                onClick={handleOpenModal}>
                 {isAutoVotingEnabled && hasVoted
                   ? `Automate for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`
                   : `Vote for ${selectedAppIds.size} App${selectedAppIds.size !== 1 ? "s" : ""}`}
@@ -156,6 +159,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
           onClose={closeModal}
           selectedApps={selectedApps}
           onConfirm={handleConfirmVote}
+          isAutoVotingEnabled={isAutoVotingEnabled}
+          onToggleAutoVoting={setIsAutoVotingEnabled}
         />
       )}
     </AllocationTabsContext.Provider>

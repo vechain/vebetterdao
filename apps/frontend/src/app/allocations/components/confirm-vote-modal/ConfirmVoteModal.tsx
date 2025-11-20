@@ -8,6 +8,7 @@ import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVo
 import { Modal } from "@/components/Modal"
 
 import type { AppWithVotes } from "../../lib/data"
+import { AutomationToggleCard } from "../AutomationToggleCard"
 
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"
@@ -19,9 +20,18 @@ interface ConfirmVoteModalProps {
   onClose: () => void
   selectedApps: AppWithVotes[]
   onConfirm: (allocations: Map<string, number>) => void
+  isAutoVotingEnabled: boolean
+  onToggleAutoVoting: (enabled: boolean) => void
 }
 
-export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: ConfirmVoteModalProps) => {
+export const ConfirmVoteModal = ({
+  isOpen,
+  onClose,
+  selectedApps,
+  onConfirm,
+  isAutoVotingEnabled,
+  onToggleAutoVoting,
+}: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
@@ -128,6 +138,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             />
           </>
         )}
+        <AutomationToggleCard checked={isAutoVotingEnabled} onCheckedChange={onToggleAutoVoting} />
       </VStack>
     </Modal>
   )
