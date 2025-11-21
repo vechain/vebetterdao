@@ -59,7 +59,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
     return top5VotedAppIds.map(id => apps.find(app => app.id === id)).filter(Boolean)
   }, [apps, top5VotedAppIds])
 
-  if (apps.length === 0) {
+  if (top5VotedApps.length === 0) {
     return (
       <EmptyState
         icon={
