@@ -179,7 +179,7 @@ export const AppEndorsementInfoCard = ({
 
   return (
     <>
-      <Card.Root w={"full"} variant="primary">
+      <Card.Root w={"full"} variant="primary" gap={4}>
         <Card.Header>
           <HStack justifyContent="space-between" alignItems="center" w="full">
             <Heading size="xl">{t("Endorsement")}</Heading>

@@ -64,8 +64,8 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  *   EndorsementUpgradeable module.
  *
  * -------------------- Version 7 --------------------
- * - The contract has been upgraded to version 7 to include the V6 version of the contract.
- * - todo: add description of the changes
+ * - Integrated Stargate NFT contract for node management and endorsement verification.
+ * - Updated endorsement system to use Stargate NFT for node ownership and token management.
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
