@@ -1,66 +1,52 @@
-# syntax=docker/dockerfile:1.7
-
-###############################################################################
-# Base image – shared between stages
-###############################################################################
-FROM node:20-alpine AS base
-
-ENV NEXT_TELEMETRY_DISABLED=1 \
-    NODE_ENV=production
+# Build stage
+FROM node:20 AS builder
 
 WORKDIR /app
 
-# System deps required by many npm packages (canvas, sharp, etc.)
-RUN apk add --no-cache libc6-compat git python3 make g++ \
- && npm install -g yarn@1.22.22
+# Install build dependencies for native modules
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
+  && rm -rf /var/lib/apt/lists/*
 
-###############################################################################
-# Install dependencies once (leveraged by other stages)
-###############################################################################
-FROM base AS deps
-
-# Copy monorepo manifests/workspace definitions first for better layer caching
+# Install dependencies
 COPY package.json yarn.lock turbo.json ./
 COPY packages ./packages
 COPY apps ./apps
+RUN yarn install --frozen-lockfile
 
-RUN yarn install --frozen-lockfile --non-interactive
-
-###############################################################################
-# Build the Next.js frontend
-###############################################################################
-FROM deps AS builder
-
+# Build arguments
+ARG APP_BUILD_ENV=prod
 ARG NEXT_PUBLIC_APP_ENV
+
+# Set Node.js memory for both Node and WASM (Solidity compiler)
+ENV APP_BUILD_ENV=${APP_BUILD_ENV}
 ENV NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV}
+ENV NODE_OPTIONS="--max-old-space-size=6144"
 
-ARG NODE_OPTIONS
-ENV NODE_OPTIONS=${NODE_OPTIONS}
-
-# Copy the remainder of the repository (shared configs, tooling, etc.)
+# Copy source and build
 COPY . .
+RUN case "$APP_BUILD_ENV" in \
+      "staging") yarn build:staging ;; \
+      "dev") yarn build:testnet ;; \
+      "beta") yarn build:mainnet ;; \
+      "prod") yarn build:mainnet ;; \
+      *) echo "Unknown APP_BUILD_ENV: $APP_BUILD_ENV" >&2; exit 1 ;; \
+    esac
 
-RUN yarn workspace frontend build
+# Production stage
+FROM node:20-slim
 
-###############################################################################
-# Production runtime
-###############################################################################
-FROM base AS runner
+WORKDIR /app
 
-# Use non-root user provided by the Node image
-USER node
+ENV NODE_ENV=production
 
-# Reuse installed dependencies & built artifacts from previous stages
-COPY --chown=node:node --from=deps /app/node_modules ./node_modules
-COPY --chown=node:node --from=builder /app/package.json ./package.json
-COPY --chown=node:node --from=builder /app/yarn.lock ./yarn.lock
-COPY --chown=node:node --from=builder /app/turbo.json ./turbo.json
-COPY --chown=node:node --from=builder /app/apps ./apps
-COPY --chown=node:node --from=builder /app/packages ./packages
-COPY --chown=node:node --from=builder /app/apps/frontend/.next ./apps/frontend/.next
-COPY --chown=node:node --from=builder /app/apps/frontend/public ./apps/frontend/public
+# Copy built application
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/yarn.lock ./
+COPY --from=builder /app/turbo.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps ./apps
+COPY --from=builder /app/packages ./packages
 
 EXPOSE 3000
 
 CMD ["yarn", "workspace", "frontend", "start", "--hostname", "0.0.0.0", "--port", "3000"]
-
