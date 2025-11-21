@@ -8,6 +8,7 @@ import { FaChevronRight } from "react-icons/fa"
 
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
+import { Tooltip } from "@/components/ui/tooltip"
 import { STARGATE_APP_URL } from "@/constants/links"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
@@ -28,16 +29,19 @@ export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: b
           <Box position="relative">
             <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} boxSize="62px" rounded="8px" />
             {isNodeDelegator && (
-              <Circle
-                position="absolute"
-                top="-8px"
-                right="-8px"
-                size="20px"
-                bg="status.info.strong"
-                borderWidth="1px"
-                borderColor="status.info.subtle">
-                <Icon as={Lock} color="white" boxSize={"12px"} />
-              </Circle>
+              <Tooltip
+                content={t("Managed externally by {{addressOrDomain}}", { addressOrDomain: managerAddressOrDomain })}>
+                <Circle
+                  position="absolute"
+                  top="-8px"
+                  right="-8px"
+                  size="20px"
+                  bg="status.info.strong"
+                  borderWidth="1px"
+                  borderColor="status.info.subtle">
+                  <Icon as={Lock} color="white" boxSize={"12px"} />
+                </Circle>
+              </Tooltip>
             )}
           </Box>
         </Card.Header>
