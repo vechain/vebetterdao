@@ -114,7 +114,7 @@ jobs:
       image_tag: ${{ needs.prepare-metadata.outputs.image_tag }}
       aws_region: eu-west-1
     secrets:
-      aws_role_arn: ${{ secrets.AWS_ACC_ROLE }}
+      aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
   deploy:
     name: Deploy Preview Environment
