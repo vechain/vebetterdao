@@ -145,10 +145,11 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
             args: [BigInt(nodeId)],
           })),
         })
-        await Promise.all(
+
+        // Fetch metadata in order
+        nodeMetadataArray = await Promise.all(
           (rawNodeMetadata as string[])?.map(async metadataUri => {
-            const metadata = await getIpfsMetadata<StargateNFTMetadata>(metadataUri)
-            nodeMetadataArray.push(metadata)
+            return await getIpfsMetadata<StargateNFTMetadata>(metadataUri)
           }),
         )
 
