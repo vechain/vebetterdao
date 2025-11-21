@@ -1,24 +1,10 @@
 locals {
   service_name             = coalesce(lookup(local.env, "service_name", null), "${local.env.project_name}-${local.env.environment}")
   custom_domain_enabled    = lookup(local.env, "enable_custom_domain", false)
-  env_vars = merge(
-    {
-      NODE_ENV = local.env.node_env
-      PORT     = tostring(local.env.port)
-      HOSTNAME = "0.0.0.0"
-    },
-    lookup(local.env, "environment_variables", {})
-  )
   ssm_parameter_prefix = "/b3tr/frontend/"
   runtime_env_var_names = [
     "FRESHDESK_DOMAIN",
     "FRESHDESK_GROUP_ID",
-    "NEXT_PUBLIC_DELEGATOR_URL",
-    "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
-    "NEXT_PUBLIC_NETWORK_TYPE",
-    "NEXT_PUBLIC_PRIVY_APP_ID",
-    "NEXT_PUBLIC_PRIVY_CLIENT_ID",
-    "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
     "RESET_USER_SIGNAL_COUNT_DOMAIN",
   ]
   runtime_env_secret_names = [
@@ -26,14 +12,12 @@ locals {
     "FRESHDESK_API_TOKEN",
     "GITHUB_CLIENT_SECRET",
     "NEXTAUTH_SECRET",
-    "NEXT_PUBLIC_NFT_STORAGE_KEY",
     "RESET_USER_SIGNAL_COUNT_API_KEY",
     "TESTNET_STAGING_MNEMONIC",
     "TWITTER_CLIENT_SECRET",
     "DISCORD_CLIENT_ID",
     "GITHUB_CLIENT_ID",
     "TWITTER_CLIENT_ID",
-    "NEXT_PUBLIC_TRANSAK_API_KEY",
   ]
 }
 
@@ -74,13 +58,10 @@ resource "aws_apprunner_service" "frontend" {
 
       image_configuration {
         port = tostring(local.env.port)
-        runtime_environment_variables = merge(
-          local.env_vars,
-          {
+        runtime_environment_variables = {
             for name in local.runtime_env_var_names :
             name => data.aws_ssm_parameter.runtime_env_vars[name].value
           }
-        )
         runtime_environment_secrets = {
           for name in local.runtime_env_secret_names :
           name => data.aws_ssm_parameter.runtime_env_secrets[name].arn
