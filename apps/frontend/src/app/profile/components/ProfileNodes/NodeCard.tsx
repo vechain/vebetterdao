@@ -3,6 +3,7 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { Lock } from "iconoir-react"
 import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa"
 
@@ -22,6 +23,10 @@ export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: b
 
   const isNodeDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
 
+  const cardLink = useMemo(() => {
+    return isNodeDelegator ? new URL(`/nft/${node.id}`, STARGATE_APP_URL).toString() : `/xnode/${node.id}`
+  }, [isNodeDelegator, node.id])
+
   return (
     <LinkBox flex={1}>
       <Card.Root variant="subtle" border="none" alignItems="center" flexDirection="row" gap="13px">
@@ -39,7 +44,7 @@ export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: b
                   bg="status.info.strong"
                   borderWidth="1px"
                   borderColor="status.info.subtle">
-                  <Icon as={Lock} color="white" boxSize={"12px"} />
+                  <Icon as={Lock} color="text.alt" boxSize={"12px"} />
                 </Circle>
               </Tooltip>
             )}
@@ -48,10 +53,10 @@ export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: b
         <Card.Body gap="6px">
           <Box display="flex" p={0} m={0} alignItems="center" gap="6px">
             <ConditionalWrapper
-              condition={isClickable}
+              condition={isClickable || isNodeDelegator}
               wrapper={({ children }) => (
                 <LinkOverlay asChild>
-                  <NextLink href={`/xnode/${node.id}`}>{children}</NextLink>
+                  <NextLink href={cardLink}>{children}</NextLink>
                 </LinkOverlay>
               )}>
               <Text textStyle="sm">{t("Node")}</Text>
@@ -79,7 +84,7 @@ export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: b
           <Card.Footer p="0">
             {isNodeDelegator ? (
               <Button asChild variant="link" _hover={{ textDecoration: "none" }}>
-                <NextLink href={STARGATE_APP_URL} target="_blank" rel="noopener noreferrer">
+                <NextLink href={cardLink} target="_blank" rel="noopener noreferrer">
                   {t("Open Stargate")}
                 </NextLink>
               </Button>
