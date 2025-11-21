@@ -1,81 +1,90 @@
-import { Box, Card, Image, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { Badge, Box, Button, Card, Circle, HStack, Icon, Image, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
+import { Lock } from "iconoir-react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa"
 
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
-import { BlurredWrapper } from "@/components/BlurredWrapper"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
+import { STARGATE_APP_URL } from "@/constants/links"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
-export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: boolean }) => {
+export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: boolean }) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
+  const { data: vnsData } = useVechainDomain(node?.manager)
+
+  const managerAddressOrDomain = vnsData?.domain ? humanDomain(vnsData?.domain) : humanAddress(node?.manager)
 
   const isNodeDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
 
   return (
     <LinkBox flex={1}>
-      <ConditionalWrapper
-        condition={isNodeDelegator}
-        wrapper={({ children }) => (
-          <BlurredWrapper
-            title={t("Node managed externally")}
-            description={t("This node is managed by {{address}}. To manage it, open Stargate", {
-              address: humanAddress(node?.manager ?? ""),
-            })}>
-            {children}
-          </BlurredWrapper>
-        )}>
-        <Card.Root variant="subtle" alignItems="center" flexDirection="row" gap="8px">
-          <Card.Header p="0">
+      <Card.Root variant="subtle" border="none" alignItems="center" flexDirection="row" gap="13px">
+        <Card.Header p="0">
+          <Box position="relative">
             <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} boxSize="62px" rounded="8px" />
-          </Card.Header>
-          <Card.Body p="0" gap="0">
-            {node ? (
-              <>
-                <ConditionalWrapper
-                  condition={isClickable}
-                  wrapper={({ children }) => (
-                    <LinkOverlay asChild>
-                      <NextLink href={`/xnode/${node.id}`}>{children}</NextLink>
-                    </LinkOverlay>
-                  )}>
-                  <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-                    {t("Node")}
-                  </Text>
-                </ConditionalWrapper>
-                <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
-                  {`${node.metadata?.name} #${node.id}`}
-                </Text>
-                <Box
-                  w="fit-content"
-                  display="inline-block"
-                  bg="#F8F8F8"
-                  _dark={{ bg: "#FFFFFF4A" }}
-                  rounded="8px"
-                  padding="4px 8px">
-                  <Text textStyle={"xs"} lineClamp={1}>
-                    {t("{{value}} points", { value: node.endorsementScore.toString() })}
-                  </Text>
-                </Box>
-              </>
-            ) : (
-              <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-                {t("No Node attached")}
+            {isNodeDelegator && (
+              <Circle
+                position="absolute"
+                top="-8px"
+                right="-8px"
+                size="20px"
+                bg="status.info.strong"
+                borderWidth="1px"
+                borderColor="status.info.subtle">
+                <Icon as={Lock} color="white" boxSize={"12px"} />
+              </Circle>
+            )}
+          </Box>
+        </Card.Header>
+        <Card.Body gap="6px">
+          <Box display="flex" p={0} m={0} alignItems="center" gap="6px">
+            <ConditionalWrapper
+              condition={isClickable}
+              wrapper={({ children }) => (
+                <LinkOverlay asChild>
+                  <NextLink href={`/xnode/${node.id}`}>{children}</NextLink>
+                </LinkOverlay>
+              )}>
+              <Text textStyle="sm">{t("Node")}</Text>
+            </ConditionalWrapper>
+            {isNodeDelegator && (
+              <Badge variant="info" size="sm">
+                {t("Not managed")}
+              </Badge>
+            )}
+          </Box>
+          <Text textStyle="md" fontWeight="semibold">{`${node.metadata?.name} #${node.id}`}</Text>
+          <HStack>
+            <Badge w="fit-content" color="text.default" py={0} variant="neutral" borderRadius="sm">
+              {t("{{value}} points", { value: node?.endorsementScore?.toString() })}
+            </Badge>
+            {!isMobile && isNodeDelegator && (
+              <Text textStyle="sm" color="text.subtle">
+                {t("Managed externally by {{addressOrDomain}}", { addressOrDomain: managerAddressOrDomain })}
               </Text>
             )}
-          </Card.Body>
+          </HStack>
+        </Card.Body>
 
-          {isClickable && !isMobile && (
-            <Card.Footer p="0">
+        {!isMobile && (
+          <Card.Footer p="0">
+            {isNodeDelegator ? (
+              <Button asChild variant="link" _hover={{ textDecoration: "none" }}>
+                <NextLink href={STARGATE_APP_URL} target="_blank" rel="noopener noreferrer">
+                  {t("Open Stargate")}
+                </NextLink>
+              </Button>
+            ) : isClickable ? (
               <FaChevronRight />
-            </Card.Footer>
-          )}
-        </Card.Root>
-      </ConditionalWrapper>
+            ) : null}
+          </Card.Footer>
+        )}
+      </Card.Root>
     </LinkBox>
   )
 }

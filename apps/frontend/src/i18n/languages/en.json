@@ -1297,6 +1297,7 @@
   "NFT": "NFT",
   "Nodes": "Nodes",
   "Node": "Node",
+  "Not managed": "Not managed",
   "Endorse {{appName}} app": "Endorse {{appName}} app",
   "Select your node": "Select your node",
   "Current app score: {{score}}": "Current app score: {{score}}",
@@ -1557,10 +1558,10 @@
   "Hide proof": "Hide proof",
   "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens": "This user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens",
   "Send your app's funds received from allocations to your team wallet address.": "Send your app's funds received from allocations to your team wallet address.",
-  "Node managed externally": "Node managed externally",
-  "This node is managed by {{address}}. To manage it, open Stargate": "This node is managed by {{address}}. To manage it, open Stargate",
   "Visit Stargate to know more about nodes and how to get one.": "Visit Stargate to know more about nodes and how to get one.",
   "Visit Stargate": "Visit Stargate",
   "Accumulate B3TR and participate in the allocation rounds to be able to mint a GM NFT.": "Accumulate B3TR and participate in the allocation rounds to be able to mint a GM NFT.",
-  "Go to Round Info": "Go to Round Info"
+  "Go to Round Info": "Go to Round Info",
+  "Open Stargate": "Open Stargate",
+  "Managed externally by {{addressOrDomain}}": "Managed externally by {{addressOrDomain}}"
 }
