@@ -1,4 +1,4 @@
-import { Icon, Badge, BadgeProps, Skeleton } from "@chakra-ui/react"
+import { Icon, Badge, BadgeProps } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { TFunction } from "i18next"
 import { ReactNode } from "react"
@@ -7,14 +7,13 @@ import { FaRegHeart } from "react-icons/fa6"
 
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
-import { useIsDepositReached } from "../../api/contracts/governance/hooks/useIsDepositReached"
-import { DotSymbol } from "../DotSymbol"
+import { DotSymbol } from "../../../components/DotSymbol"
 
 type Props = {
-  proposalId: string
   renderIcon?: boolean
   proposalState?: ProposalState
   badgeProps?: BadgeProps
+  isDepositReached?: boolean
 }
 const getProposalBadgeDetails = ({
   t,
@@ -90,8 +89,12 @@ const getProposalBadgeDetails = ({
   }
 }
 
-export const ProposalStatusBadge = ({ proposalId, renderIcon = true, proposalState, badgeProps }: Props) => {
-  const { data: isDepositReached, isLoading: isDepositReachedLoading } = useIsDepositReached(proposalId)
+export const ProposalStatusBadge = ({
+  renderIcon = true,
+  isDepositReached = false,
+  proposalState,
+  badgeProps,
+}: Props) => {
   const { t } = useTranslation()
 
   const { text, variant, icon } = getProposalBadgeDetails({ t, proposalState, isDepositReached })
@@ -99,11 +102,9 @@ export const ProposalStatusBadge = ({ proposalId, renderIcon = true, proposalSta
   if (!text || !icon) return null
 
   return (
-    <Skeleton loading={!!isDepositReachedLoading}>
-      <Badge variant={variant} rounded="full" {...badgeProps}>
-        {renderIcon && icon}
-        {text}
-      </Badge>
-    </Skeleton>
+    <Badge variant={variant} rounded="full" {...badgeProps}>
+      {renderIcon && icon}
+      {text}
+    </Badge>
   )
 }

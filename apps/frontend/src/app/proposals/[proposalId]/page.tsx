@@ -8,7 +8,12 @@ import { getIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { ProposalType } from "@/hooks/proposals/grants/types"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
-import { ProposalVotes } from "../page"
+import {
+  ProposalVotes,
+  getProposalsDepositReached,
+  getProposalsDepositEvents,
+  getProposalsInteractionDates,
+} from "../page"
 import { ProposalCreatedEvent, ProposalMetadata } from "../types"
 
 import { ProposalPage } from "./ProposalPage"
@@ -41,21 +46,28 @@ export const getProposalDetails = async (proposalId: string) => {
 
   if (!proposal || !proposal.description) return null
 
-  const [votes = [], metadata, [state = 0] = []] = await Promise.all([
-    fetchClient
-      .GET("/api/v1/b3tr/proposals/{proposalId}/results", {
-        params: { path: { proposalId: proposalId } },
-      })
-      .then(res => res.data as ProposalVotes[]),
-    getIpfsMetadata(`ipfs://${proposal.description}`) as Promise<ProposalMetadata>,
-    executeCallClause({
-      thor,
-      abi,
-      contractAddress: address,
-      method: "state",
-      args: [BigInt(proposalId)],
-    }),
-  ])
+  const [votes = [], metadata, [state = 0] = [], depositReachedMap, depositEventsMap, interactionDatesMap] =
+    await Promise.all([
+      fetchClient
+        .GET("/api/v1/b3tr/proposals/{proposalId}/results", {
+          params: { path: { proposalId: proposalId } },
+        })
+        .then(res => res.data as ProposalVotes[]),
+      getIpfsMetadata(`ipfs://${proposal.description}`) as Promise<ProposalMetadata>,
+      executeCallClause({
+        thor,
+        abi,
+        contractAddress: address,
+        method: "state",
+        args: [BigInt(proposalId)],
+      }),
+      getProposalsDepositReached(thor, [BigInt(proposalId)]),
+      getProposalsDepositEvents(thor),
+      getProposalsInteractionDates(thor, [BigInt(proposalId)]),
+    ])
+
+  const depositData = depositEventsMap.get(proposalId) || { communityDeposits: 0, supportingUserCount: 0 }
+  const dates = interactionDatesMap.get(proposalId) || { supportEndDate: null, votingEndDate: null }
 
   return {
     ...proposal,
@@ -63,6 +75,13 @@ export const getProposalDetails = async (proposalId: string) => {
     state,
     votes,
     metadata,
+    depositReached: depositReachedMap.get(proposalId) || false,
+    communityDeposits: depositData.communityDeposits,
+    supportingUserCount: depositData.supportingUserCount,
+    interactionDates: {
+      supportEndDate: dates.supportEndDate,
+      votingEndDate: dates.votingEndDate,
+    },
   }
 }
 

@@ -9,21 +9,20 @@ import { FaAngleRight } from "react-icons/fa6"
 import { GrantDetail } from "@/app/grants/types"
 import { ProposalDetail } from "@/app/proposals/types"
 
-import { useProposalInteractionDates } from "../api/contracts/governance/hooks/useProposalInteractionDates"
-import { ProposalState } from "../hooks/proposals/grants/types"
+import { ProposalState } from "../../../hooks/proposals/grants/types"
 
-import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
-import { ProposalYourVote } from "./Proposal/ProposalYourVote"
+import { ProposalStatusBadge } from "./ProposalStatusBadge"
+import { ProposalYourVote } from "./ProposalYourVote"
 
 type Props = {
   proposal: ProposalDetail | GrantDetail
   proposalState?: ProposalState
 }
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const proposalId = proposal.proposalId.toString()
-  const { supportEndDate } = useProposalInteractionDates(proposalId)
-  const { t } = useTranslation()
+  const { supportEndDate } = proposal.interactionDates
 
   const proposalExtraInfo = useMemo(() => {
     if (proposal.state === ProposalState.Pending) {
@@ -71,7 +70,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
             <Card.Body p="0">
               <HStack justifyContent={"space-between"} w="full">
                 <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
-                  <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
+                  <ProposalStatusBadge proposalState={proposalState} isDepositReached={proposal.depositReached} />
                   <VStack w="full" gap="1" align={"flex-start"}>
                     <VStack alignItems="flex-start">
                       <Text textStyle={"sm"} fontWeight="semibold">

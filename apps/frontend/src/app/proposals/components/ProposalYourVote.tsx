@@ -4,12 +4,12 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
-import { useProposalSnapshot } from "../../api/contracts/governance/hooks/useProposalSnapshot"
-import { useUserSingleProposalVoteEvent } from "../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
-import { useGetVotesOnBlock } from "../../api/contracts/governance/hooks/useVotesOnBlock"
-import { useVotingThreshold } from "../../api/contracts/governance/hooks/useVotingThreshold"
+import { useProposalSnapshot } from "../../../api/contracts/governance/hooks/useProposalSnapshot"
+import { useGetVotesOnBlock } from "../../../api/contracts/governance/hooks/useVotesOnBlock"
+import { useVotingThreshold } from "../../../api/contracts/governance/hooks/useVotingThreshold"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"
@@ -48,7 +48,8 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { data: userVote } = useUserSingleProposalVoteEvent(proposalId)
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
+  const userVote = userVoteEvent?.userVote
 
   const isFinished = useMemo(() => {
     return [ProposalState.Defeated, ProposalState.Executed, ProposalState.Queued, ProposalState.Succeeded].includes(
@@ -65,7 +66,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
         </Text>
       )
 
-    const support = SupportMapping[Number(userVote.support) as keyof typeof SupportMapping]
+    const support = SupportMapping[Number(userVote) as keyof typeof SupportMapping]
 
     //if for some reason we are not able to map the support
     if (!support)

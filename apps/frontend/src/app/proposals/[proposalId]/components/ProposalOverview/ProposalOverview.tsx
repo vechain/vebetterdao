@@ -1,14 +1,12 @@
 import { Card, Tabs, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { GrantDetail } from "@/app/grants/types"
 import { ProposalDetail } from "@/app/proposals/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { useIsDepositReached } from "../../../../../api/contracts/governance/hooks/useIsDepositReached"
-import { useProposalUserDeposit } from "../../../../../api/contracts/governance/hooks/useProposalUserDeposit"
-import { useUserSingleProposalVoteEvent } from "../../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { MilestonesActions } from "../../../../grants/components/MilestonesActions"
 import { ProposalContentAndActions } from "../ProposalContentAndActions/ProposalContentAndActions"
 import { ProposalOverviewHeader } from "../ProposalOverviewHeader/ProposalOverviewHeader"
@@ -19,11 +17,9 @@ type ProposalOverviewProps = {
 }
 
 export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
-  const { account } = useWallet()
   const proposalId = proposal?.proposalId.toString() ?? ""
-  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
+  const { data: userDeposits } = useProposalUserDeposit(proposalId)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
-  const { data: depositReached } = useIsDepositReached(proposalId)
   const { isMobile } = useBreakpoints()
   const proposerAddress = proposal?.proposer ?? ""
   const hasUserVoted = !!userVoteEvent?.hasVoted
@@ -39,7 +35,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
               proposal={proposal}
               hasUserDeposited={hasUserDeposited}
               hasUserVoted={hasUserVoted}
-              depositReached={!!depositReached}
+              depositReached={!!proposal.depositReached}
               proposerAddress={proposerAddress}
             />
           )}

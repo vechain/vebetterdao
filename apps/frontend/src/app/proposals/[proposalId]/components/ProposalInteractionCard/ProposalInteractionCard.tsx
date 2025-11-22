@@ -1,6 +1,7 @@
 import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
 import { ethers } from "ethers"
 import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
@@ -9,8 +10,6 @@ import { useTranslation } from "react-i18next"
 import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { useGetProposalDeposits } from "@/api/contracts/governance/hooks/useGetProposalDeposits"
 import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
-import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useProposalDepositThreshold } from "@/api/contracts/governance/hooks/useProposalDepositThreshold"
 import { useProposalQuorumByType } from "@/api/contracts/governance/hooks/useProposalQuorumByType"
 import { useProposalQuorumNumeratorByType } from "@/api/contracts/governance/hooks/useProposalQuorumNumeratorByType"
@@ -20,7 +19,7 @@ import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProp
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import { useVot3PastSupply } from "@/api/contracts/vot3/hooks/useVot3PastTotalSupply"
-import { useProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import { GroupedProposalVotes, ProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
 import { GrantDetail } from "@/app/grants/types"
 import { ProposalDetail } from "@/app/proposals/types"
 import { CountdownBoxes } from "@/components/CountdownBoxes/CountdownBoxes"
@@ -60,26 +59,22 @@ export const ProposalInteractionCard = ({
   minutesLeft: number
   isLoading: boolean
 }) => {
-  // ===== STATE =====
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false)
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
   const proposalId = proposal?.proposalId.toString() ?? ""
-  // ===== HOOKS =====
+
   const { t } = useTranslation()
   const { account } = useWallet()
-
-  // ===== CONTRACT QUERIES =====
-  const { data: isDepositReached } = useIsDepositReached(proposalId)
+  const { data: userDeposits } = useProposalUserDeposit(proposalId)
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
   const { data: userHasAlreadyVotedInProposal } = useHasVotedInProposals([proposalId], account?.address ?? "")
   const { data: userVot3BalanceQueryData } = useGetVot3Balance(account?.address)
   const { data: proposalDepositThresholdQueryData } = useProposalDepositThreshold(proposalId)
   const { data: currentDepositAmountQueryData } = useGetProposalDeposits(proposalId)
   const { data: roundSnapshot } = useProposalSnapshot(proposalId)
   const { data: userVot3OnSnapshot } = useGetVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
-  const proposalDepositEvent = useProposalDepositEvent(proposalId)
-  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
   const { data: proposalQuorumNumerator } = useProposalQuorumNumeratorByType(
     proposal?.type ?? GrantsProposalType.Standard,
   )
@@ -88,9 +83,7 @@ export const ProposalInteractionCard = ({
     proposal?.type ?? GrantsProposalType.Standard,
   )
   const { data: votesAtSnapshotQueryData } = useVot3PastSupply(Number(roundSnapshot ?? 0))
-  const { data: proposalVotesQueryData } = useProposalVotes(proposalId)
   const { data: proposalTotalVotesQueryData } = useProposalTotalVotes(proposalId)
-  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
 
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
@@ -116,7 +109,7 @@ export const ProposalInteractionCard = ({
   const userVotingPower = Number(userVot3OnSnapshot ?? 0)
   const hasUserAlreadyVoted = userHasAlreadyVotedInProposal?.[proposalId] ?? false
   const userVot3Balance = Number(userVot3BalanceQueryData?.original ?? 0)
-  const proposalDepositReached = isDepositReached ?? false
+  const proposalDepositReached = proposal?.depositReached ?? false
   const currentUserCanExecute = permissions?.isProposalExecutor ?? false
   const proposalHasTargets = proposal?.targets && proposal?.targets.length > 0
   const userVoteOption = userVoteEvent?.userVote
@@ -238,43 +231,69 @@ export const ProposalInteractionCard = ({
     currentUserCanExecute,
   ])
 
-  // ===== VOTING DATA PROCESSING =====
+  const totalVoters = proposal?.votes.reduce((acc, item) => acc + item.voters, 0)
+  const totalPower = proposal?.votes.reduce((acc, item) => acc + BigInt((item.totalPower ?? 0).toString()), 0n)
+  const totalWeight = proposal?.votes.reduce((acc, item) => acc + BigInt((item.totalWeight ?? 0).toString()), 0n)
+
   const votingSegments: VotingSegment[] = useMemo(() => {
-    if (!proposalVotesQueryData?.votes) return []
+    if (!proposal?.votes) return []
+
+    const votes = proposal.votes.reduce((acc, item) => {
+      const itemWeight = BigNumber(item.totalWeight ?? 0)
+      const itemPower = BigNumber(item.totalPower ?? 0)
+      // Calculate percentages as (item / total) * 100 using BigNumber math
+      const percentage = totalWeight
+        ? totalWeight > 0
+          ? itemWeight.dividedBy(totalWeight).multipliedBy(100).toNumber()
+          : 0
+        : 0
+      const percentagePower = totalPower
+        ? totalPower > 0
+          ? itemPower.dividedBy(totalPower).multipliedBy(100).toNumber()
+          : 0
+        : 0
+      acc[item.support.toLowerCase() as Lowercase<ProposalVotes["support"]>] = {
+        totalWeight: BigInt(itemWeight?.toFixed() ?? "0"),
+        voters: item.voters,
+        percentage,
+        percentagePower,
+      }
+      return acc
+    }, {} as GroupedProposalVotes)
 
     return [
       {
         option: "Approve",
-        voters: proposalVotesQueryData.votes.for?.voters ?? 0,
-        votingPower: proposalVotesQueryData.votes.for?.totalWeight ?? BigInt(0),
-        totalWeight: proposalVotesQueryData.votes.for?.totalWeight ?? BigInt(0),
-        percentage: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
-        percentagePower: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
+        voters: votes.for?.voters ?? 0,
+        votingPower: votes.for?.totalWeight ?? BigInt(0),
+        totalWeight: votes.for?.totalWeight ?? BigInt(0),
+        percentage: votes.for?.percentagePower ?? 0,
+        percentagePower: votes.for?.percentagePower ?? 0,
         color: "status.positive.primary",
         icon: ThumbsUpIcon,
       },
       {
         option: "Abstain",
-        voters: proposalVotesQueryData.votes.abstain?.voters ?? 0,
-        votingPower: proposalVotesQueryData.votes.abstain?.totalWeight ?? BigInt(0),
-        totalWeight: proposalVotesQueryData.votes.abstain?.totalWeight ?? BigInt(0),
-        percentage: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
-        percentagePower: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
+        voters: votes.abstain?.voters ?? 0,
+        votingPower: votes.abstain?.totalWeight ?? BigInt(0),
+        totalWeight: votes.abstain?.totalWeight ?? BigInt(0),
+        percentage: votes.abstain?.percentagePower ?? 0,
+        percentagePower: votes.abstain?.percentagePower ?? 0,
         color: "status.warning.primary",
         icon: AbstainIcon,
       },
       {
         option: "Against",
-        voters: proposalVotesQueryData.votes.against?.voters ?? 0,
-        votingPower: proposalVotesQueryData.votes.against?.totalWeight ?? BigInt(0),
-        totalWeight: proposalVotesQueryData.votes.against?.totalWeight ?? BigInt(0),
-        percentage: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
-        percentagePower: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
+        voters: votes.against?.voters ?? 0,
+        votingPower: votes.against?.totalWeight ?? BigInt(0),
+        totalWeight: votes.against?.totalWeight ?? BigInt(0),
+        percentage: votes.against?.percentagePower ?? 0,
+        percentagePower: votes.against?.percentagePower ?? 0,
         color: "status.negative.primary",
         icon: ThumbsDownIcon,
       },
     ]
-  }, [proposalVotesQueryData?.votes])
+  }, [proposal?.votes, totalPower, totalWeight])
 
   const progressBarSegments = useMemo(() => {
     if (
@@ -454,9 +473,10 @@ export const ProposalInteractionCard = ({
         proposalQuorum={proposalQuorumBigInt}
         proposalQuorumNumerator={proposalQuorumNumerator ?? BigInt(0)}
         proposalTotalVotes={proposalTotalVotes}
-        proposalVotesData={proposalVotesQueryData}
+        totalVoters={totalVoters}
+        totalWeight={totalWeight}
         proposalSupportAmount={currentDepositAmount}
-        totalSupporters={proposalDepositEvent?.supportingUserCount ?? 0}
+        totalSupporters={proposal?.supportingUserCount ?? 0}
         proposalSupportThreshold={proposalDepositThreshold}
       />
 

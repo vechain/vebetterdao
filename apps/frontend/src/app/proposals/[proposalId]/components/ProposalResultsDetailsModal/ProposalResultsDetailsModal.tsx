@@ -6,7 +6,6 @@ import { Trans, useTranslation } from "react-i18next"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { formatEther, parseEther } from "viem"
 
-import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
 import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
 import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
 import { VotingSegment } from "@/types/voting"
@@ -24,12 +23,6 @@ interface ProgressBarSegment {
   percentage: number
   color: string
   icon: React.ElementType
-}
-interface ProposalVotesData {
-  totalVoters: number
-  totalPower: bigint
-  totalWeight: bigint
-  votes: GroupedProposalVotes
 }
 // Base interfaces
 interface BaseModalProps {
@@ -52,7 +45,8 @@ interface ChartQuorumProps extends BaseVotingProps {}
 
 interface VotingResultContentProps extends BaseProposalProps, BaseVotingProps {
   votingSegments: VotingSegment[]
-  proposalVotesData: ProposalVotesData
+  totalVoters?: number
+  totalWeight?: bigint
 }
 
 interface SupportResultContentProps extends BaseProposalProps {
@@ -65,11 +59,12 @@ interface SupportResultContentProps extends BaseProposalProps {
 interface ProposalResultsDetailsModalProps extends BaseModalProps, BaseProposalProps, BaseVotingProps {
   proposalState: ProposalState
   votingSegments: VotingSegment[]
-  proposalVotesData?: ProposalVotesData
   userDeposits: bigint
   proposalSupportAmount: bigint
   proposalSupportThreshold: bigint
   totalSupporters: number
+  totalVoters?: number
+  totalWeight?: bigint
 }
 
 // Components
@@ -81,7 +76,8 @@ const VotingResultContent = ({
   proposalQuorum,
   proposalQuorumNumerator,
   proposalTotalVotes,
-  proposalVotesData,
+  totalVoters,
+  totalWeight,
 }: VotingResultContentProps) => {
   const { t } = useTranslation()
   return (
@@ -124,10 +120,10 @@ const VotingResultContent = ({
                 </Text>
               </Table.Cell>
               <Table.Cell>
-                <Text color="text.subtle">{proposalVotesData.totalVoters}</Text>
+                <Text color="text.subtle">{totalVoters ?? "-"}</Text>
               </Table.Cell>
               <Table.Cell textAlign="end">
-                <Text color="text.subtle">{humanNumber(formatEther(proposalVotesData.totalWeight))}</Text>
+                <Text color="text.subtle">{totalWeight ? humanNumber(formatEther(totalWeight)) : "-"}</Text>
               </Table.Cell>
             </Table.Row>
           </Table.Body>
@@ -292,11 +288,12 @@ export const ProposalResultsDetailsModal = ({
   proposalTotalVotes,
   proposalSupportAmount,
   totalSupporters,
-  proposalVotesData,
+  totalVoters,
+  totalWeight,
 }: ProposalResultsDetailsModalProps) => {
   const { t } = useTranslation()
   // Determine display mode based on proposal state and data availability
-  const hasVotingData = proposalVotesData && votingSegments?.length > 0
+  const hasVotingData = totalVoters !== undefined && totalWeight !== undefined && votingSegments?.length > 0
   const isVotingOrPostVotingState = [
     ProposalState.Active,
     ProposalState.Succeeded,
@@ -326,7 +323,8 @@ export const ProposalResultsDetailsModal = ({
           proposalQuorum={proposalQuorum}
           proposalQuorumNumerator={proposalQuorumNumerator}
           proposalTotalVotes={proposalTotalVotes}
-          proposalVotesData={proposalVotesData}
+          totalVoters={totalVoters}
+          totalWeight={totalWeight}
         />
       ) : (
         <SupportResultContent

@@ -281,7 +281,7 @@ export const GrantsPageContent = ({ grants }: { grants: GrantDetail[] }) => {
                   filteredProposals.length > 0 &&
                   visibleProposal?.map(proposal => (
                     <GridItem key={proposal.proposalId.toString()}>
-                      <GrantsProposalCard proposal={proposal as GrantDetail & { isDepositReached: boolean }} />
+                      <GrantsProposalCard proposal={proposal} />
                     </GridItem>
                   ))}
 

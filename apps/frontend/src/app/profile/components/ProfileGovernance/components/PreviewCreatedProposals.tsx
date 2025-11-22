@@ -2,12 +2,13 @@ import { HStack, VStack, Heading, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
-import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
 
 import { ProposalBox } from "./ProposalBox"
 
 type Props = {
-  firstProposals?: ProposalEnriched[] | GrantProposalEnriched[]
+  firstProposals?: (ProposalDetail | GrantDetail)[]
   isMoreProposals?: boolean
   isCreatedProposals?: boolean
   onSeeAllProposals?: () => void
@@ -37,13 +38,11 @@ export const PreviewCreatedProposals = ({
         <VStack w={"full"} gap={4}>
           {firstProposals?.map(proposal => (
             <ProposalBox
-              key={proposal.id}
-              proposalId={proposal.id}
-              metadata={{
-                title: proposal.title,
-                shortDescription: proposal.description,
-                markdownDescription: proposal.markdownDescription,
-              }}
+              key={proposal.proposalId.toString()}
+              proposalId={proposal.proposalId}
+              metadata={proposal.metadata}
+              state={proposal.state}
+              depositReached={proposal.depositReached}
             />
           ))}
         </VStack>

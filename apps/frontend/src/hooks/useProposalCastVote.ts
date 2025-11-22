@@ -3,6 +3,7 @@ import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { getUserVotedProposalsQueryKey } from "@/api/contracts/governance/hooks/useUserVotedProposals"
 import { buildClause } from "@/utils/buildClause"
 
 import { getHasVotedQueryKey } from "../api/contracts/governance/hooks/useHasVotedInProposals"
@@ -20,13 +21,6 @@ type ClausesProps = {
   comment: string
 }
 type Props = { proposalId: string; onSuccess?: () => void }
-/**
- * Custom hook for casting a vote on a proposal.
- *
- * @param {string} proposalId - The ID of the proposal.
- *
- * @returns {ReturnType} - The return value of the custom hook.
- */
 export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
   const { account } = useWallet()
   const clauseBuilder = useCallback(({ proposalId, vote, comment = "" }: ClausesProps) => {
@@ -43,6 +37,7 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
   const refetchQueryKeys = useMemo(
     () => [
       getHasVotedQueryKey([proposalId], account?.address ?? undefined),
+      getUserVotedProposalsQueryKey(account?.address ?? ""),
       getProposalVotesQueryKey(proposalId),
       getIsProposalQuorumReachedQueryKey(proposalId),
       getUserProposalsVoteEventsQueryKey(account?.address ?? undefined),

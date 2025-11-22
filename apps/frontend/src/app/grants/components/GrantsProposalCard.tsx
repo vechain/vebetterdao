@@ -1,21 +1,18 @@
 import { Card, Heading, HStack, Separator, Stack, Text, VStack } from "@chakra-ui/react"
 import { formatTimeLeft } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
 import { formatEther } from "ethers"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { ProposalDetail } from "@/app/proposals/types"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { useIsDepositReached } from "../../../api/contracts/governance/hooks/useIsDepositReached"
-import { useProposalDepositEvent } from "../../../api/contracts/governance/hooks/useProposalDepositEvent"
-import { useProposalInteractionDates } from "../../../api/contracts/governance/hooks/useProposalInteractionDates"
-import { useProposalUserDeposit } from "../../../api/contracts/governance/hooks/useProposalUserDeposit"
-import { useUserSingleProposalVoteEvent } from "../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
-import { useProposalVotes } from "../../../api/indexer/proposals/useProposalVotes"
+import { GroupedProposalVotes, ProposalVotes } from "../../../api/indexer/proposals/useProposalVotes"
 import { GrantsProposalStatusBadge } from "../../../components/Proposal/Grants/GrantsProposalStatusBadge"
 import { AddressWithProfilePicture } from "../../components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { GrantDetail } from "../types"
@@ -24,7 +21,7 @@ import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
 import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
 
 type GrantsProposalCardProps = {
-  proposal: (GrantDetail | ProposalDetail) & { isDepositReached: boolean }
+  proposal: GrantDetail | ProposalDetail
   variant?: "grant" | "proposal"
 }
 const isGrantProposal = (proposal: GrantDetail | ProposalDetail): proposal is GrantDetail =>
@@ -32,19 +29,46 @@ const isGrantProposal = (proposal: GrantDetail | ProposalDetail): proposal is Gr
 
 export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsProposalCardProps) => {
   const { t } = useTranslation()
-  const { account } = useWallet()
   const { isMobile } = useBreakpoints()
 
   const proposalId = proposal.proposalId.toString()
-  const proposalDepositEvent = useProposalDepositEvent(proposalId)
-  const { data: proposalVotes } = useProposalVotes(proposalId)
-  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
-  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposalId)
+  const { data: userDeposits } = useProposalUserDeposit(proposalId)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
-  const { data: depositReached } = useIsDepositReached(proposalId)
+  const { supportEndDate, votingEndDate } = proposal.interactionDates
   const router = useRouter()
-  const communityDepositPercentage =
-    (proposalDepositEvent.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
+  const communityDepositPercentage = (proposal.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
+
+  const proposalVotes = useMemo(() => {
+    const data = proposal.votes
+    const totalPower = data.reduce((acc, item) => acc.plus(BigNumber(item.totalPower ?? 0)), BigNumber(0))
+    const totalVoters = data.reduce((acc, item) => acc + item.voters, 0)
+    const totalWeight = data.reduce((acc, item) => acc.plus(BigNumber(item.totalWeight ?? 0)), BigNumber(0))
+    const groupedVotes = data.reduce((acc, item) => {
+      const itemWeight = BigNumber(item.totalWeight ?? 0)
+      const itemPower = BigNumber(item.totalPower ?? 0)
+      // Calculate percentages as (item / total) * 100 using BigNumber math
+      const percentage = totalWeight.isGreaterThan(0)
+        ? itemWeight.dividedBy(totalWeight).multipliedBy(100).toNumber()
+        : 0
+      const percentagePower = totalPower.isGreaterThan(0)
+        ? itemPower.dividedBy(totalPower).multipliedBy(100).toNumber()
+        : 0
+      acc[item.support.toLowerCase() as Lowercase<ProposalVotes["support"]>] = {
+        totalWeight: BigInt(itemWeight?.toFixed() ?? "0"),
+        voters: item.voters,
+        percentage,
+        percentagePower,
+      }
+      return acc
+    }, {} as GroupedProposalVotes)
+
+    return {
+      totalVoters,
+      totalPower: BigInt(totalPower?.toFixed() ?? "0"), //Convert to big int without loosing precision
+      totalWeight: BigInt(totalWeight?.toFixed() ?? "0"), //Convert to big int without loosing precision
+      votes: groupedVotes,
+    }
+  }, [proposal.votes])
 
   const grantProposal = useMemo(() => {
     return isGrantProposal(proposal) ? proposal : null
@@ -66,7 +90,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
   }, [proposal.state, supportEndDate, votingEndDate])
 
   const timeLeftDisplay = useMemo(() => {
-    if (!isSupportOrVotingPhase) return null
+    if (!isSupportOrVotingPhase || !endsAt) return null
     return formatTimeLeft(endsAt)
   }, [endsAt, isSupportOrVotingPhase])
 
@@ -130,7 +154,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
                 state={proposal.state}
                 hasUserSupported={hasUserDeposited}
                 hasUserVoted={hasUserVoted}
-                depositReached={depositReached ?? false}
+                depositReached={proposal?.depositReached ?? false}
               />
               {isSupportOrVotingPhase && (
                 <ProposalCommunityInteractions
@@ -158,7 +182,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
                 state={proposal.state}
                 hasUserSupported={hasUserDeposited}
                 hasUserVoted={hasUserVoted}
-                depositReached={depositReached ?? false}
+                depositReached={proposal?.depositReached ?? false}
               />
               {timeLeftDisplay ? (
                 <Text textStyle="md" color="text.subtle">

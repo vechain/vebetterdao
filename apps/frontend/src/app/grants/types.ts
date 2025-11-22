@@ -7,6 +7,13 @@ export interface GrantDetail extends ProposalCreatedEvent {
   state: number
   votes: VoteEntry[]
   metadata: GrantMetadata
+  depositReached: boolean
+  communityDeposits: number
+  supportingUserCount: number
+  interactionDates: {
+    supportEndDate: number | null
+    votingEndDate: number | null
+  }
 }
 
 export type VoteSupport = "FOR" | "AGAINST" | "ABSTAIN"

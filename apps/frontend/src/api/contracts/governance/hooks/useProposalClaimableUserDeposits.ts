@@ -3,13 +3,13 @@ import { useQuery } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { useGetProposalsAndGrants } from "@/app/rounds/hooks/useRoundProposals"
+import { getProposalsWithTypes } from "@/app/proposals/page"
 
 import { ProposalFilter, StateFilter } from "../../../../store/useProposalFilters"
 
-const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
+const address = getConfig().b3trGovernorAddress as `0x${string}`
+
 // Filters for proposals that have claimable deposits
 const CLAIMABLE_STATES = [
   ProposalFilter.InThisRound, // Active
@@ -19,7 +19,10 @@ const CLAIMABLE_STATES = [
   StateFilter.Queued,
   StateFilter.Executed,
   StateFilter.DepositNotMet,
-]
+] as const
+
+type ClaimableState = (typeof CLAIMABLE_STATES)[number]
+
 export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) => ["allClaimableDeposits", userAddress]
 /**
  * Custom React hook that fetches and monitors claimable user deposits for each proposal.
@@ -34,33 +37,47 @@ export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) =>
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const thor = useThor()
-  const { data: { proposals } = {} } = useGetProposalsAndGrants()
-  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES, proposals)
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),
-    enabled: !!thor && !!userAddress && !filteredProposalsLoading,
+    enabled: !!thor && !!userAddress,
     queryFn: async () => {
-      const res = await executeMultipleClausesCall({
-        thor,
-        calls: filteredProposals.map(
-          proposal =>
-            ({
-              abi,
-              address: GOVERNOR_CONTRACT,
-              functionName: "getUserDeposit",
-              args: [BigInt(proposal.proposalId || 0), userAddress],
-            }) as const,
-        ),
-      })
+      const proposals = await getProposalsWithTypes(thor)
+      const [proposalDeposits, proposalStates] = await Promise.all([
+        executeMultipleClausesCall({
+          thor,
+          calls: proposals.map(
+            proposal =>
+              ({
+                abi,
+                address,
+                functionName: "getUserDeposit",
+                args: [BigInt(proposal.proposalId || 0), userAddress],
+              }) as const,
+          ),
+        }),
+        executeMultipleClausesCall({
+          thor,
+          calls: proposals.map(
+            proposal =>
+              ({
+                abi,
+                address,
+                functionName: "state",
+                args: [proposal.proposalId],
+              }) as const,
+          ),
+        }),
+      ])
 
-      const claimableDeposits = res
-        .map((deposit, index) => {
-          return {
-            proposalId: filteredProposals[index]?.proposalId.toString()!,
-            deposit: deposit.toString(),
-          }
-        })
-        .filter(({ deposit }) => deposit !== "0")
+      const claimableDeposits = proposalDeposits
+        .filter(
+          (deposit, idx) =>
+            deposit.toString() !== "0" && CLAIMABLE_STATES.includes(proposalStates[idx] as unknown as ClaimableState),
+        )
+        .map((deposit, idx) => ({
+          proposalId: proposals[idx]?.proposalId.toString()!,
+          deposit: deposit.toString(),
+        }))
 
       return {
         claimableDeposits,

@@ -6,6 +6,7 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
+import { ProposalCompactCard } from "@/app/proposals/components/ProposalCompactCard"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import { ProposalState } from "@/hooks/proposals/grants/types"
@@ -18,7 +19,6 @@ import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/h
 import { useMostVotedAppsInRound } from "../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
 import { AllocationStateBadge } from "../../components/AllocationStateBadge/AllocationStateBadge"
 import { B3TRIcon } from "../../components/Icons/B3TRIcon"
-import { ProposalCompactCard } from "../../components/ProposalCompactCard"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
 

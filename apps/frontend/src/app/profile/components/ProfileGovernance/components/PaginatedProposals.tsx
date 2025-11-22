@@ -2,7 +2,8 @@ import { VStack, Spinner, Box, Button, Card } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa"
 
-import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+import { GrantDetail } from "@/app/grants/types"
+import { ProposalDetail } from "@/app/proposals/types"
 
 import { useInfiniteScroll } from "../../../../../hooks/useInfiniteScroll"
 import { usePagination } from "../../../../../hooks/usePagination"
@@ -10,7 +11,7 @@ import { usePagination } from "../../../../../hooks/usePagination"
 import { ProposalBox } from "./ProposalBox"
 
 type PaginatedProposalsProps = {
-  proposals: ProposalEnriched[] | GrantProposalEnriched[]
+  proposals: (ProposalDetail | GrantDetail)[]
   itemsPerPage?: number
   goBack: () => void
 }
@@ -33,13 +34,11 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
         <VStack w="full" gap={4}>
           {currentItems?.map(proposal => (
             <ProposalBox
-              key={proposal.id}
-              proposalId={proposal.id}
-              metadata={{
-                title: proposal.title,
-                shortDescription: proposal.description,
-                markdownDescription: proposal.markdownDescription,
-              }}
+              key={proposal.proposalId.toString()}
+              proposalId={proposal.proposalId}
+              metadata={proposal.metadata}
+              state={proposal.state}
+              depositReached={proposal.depositReached}
             />
           ))}
         </VStack>

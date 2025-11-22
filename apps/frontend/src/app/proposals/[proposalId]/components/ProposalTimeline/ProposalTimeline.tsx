@@ -30,7 +30,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposalId)
   const { data: isGrantRejected } = useIsGrantRejected(proposalId)
   const proposalCreatedAt = proposal?.blockTimestamp ?? 0
-  const proposalVotingRoundId = proposal?.blockID ?? 1
+  const proposalVotingRoundId = proposal?.roundIdVoteStart ?? 1
   const standardProposalInDevelopmentStartDate = proposalInDevelopmentEvent?.[0]?.timestamp
   const standardProposalCompletedTimestamp = proposalCompletedEvent?.[0]?.timestamp
   const isGrant = proposal?.type === ProposalType.Grant

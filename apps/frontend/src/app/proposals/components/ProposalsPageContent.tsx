@@ -127,11 +127,7 @@ export const ProposalsPageContent = ({ proposals }: { proposals: ProposalDetail[
               </HStack>
 
               {filteredProposals.map(proposal => (
-                <GrantsProposalCard
-                  key={proposal.proposalId.toString()}
-                  variant="proposal"
-                  proposal={proposal as ProposalDetail & { isDepositReached: boolean }}
-                />
+                <GrantsProposalCard key={proposal.proposalId.toString()} variant="proposal" proposal={proposal} />
               ))}
 
               {filteredProposals.length === 0 && (

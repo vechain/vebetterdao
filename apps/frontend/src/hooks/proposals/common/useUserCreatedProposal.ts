@@ -1,7 +1,7 @@
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useQuery } from "@tanstack/react-query"
 
-import { useProposalEnriched } from "./useProposalEnriched"
+import { useGetProposalsAndGrants } from "@/app/rounds/hooks/useRoundProposals"
 
 export const getUserProposalsCreatedEventsQueryKey = (walletAddress: string) => [
   "PROPOSALS",
@@ -10,14 +10,13 @@ export const getUserProposalsCreatedEventsQueryKey = (walletAddress: string) => 
   walletAddress,
 ]
 export const useUserCreatedProposal = (walletAddress: string) => {
-  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { data: { proposals } = {} } = useGetProposalsAndGrants()
   return useQuery({
     queryKey: getUserProposalsCreatedEventsQueryKey(walletAddress),
     queryFn: () => {
-      const filteredProposals =
-        enrichedProposals?.filter(proposal => compareAddresses(proposal.proposerAddress, walletAddress)) ?? []
+      const filteredProposals = proposals?.filter(proposal => compareAddresses(proposal.proposer, walletAddress)) ?? []
       return filteredProposals
     },
-    enabled: !!walletAddress || (!!walletAddress && !!enrichedProposals),
+    enabled: !!walletAddress || (!!walletAddress && !!proposals),
   })
 }

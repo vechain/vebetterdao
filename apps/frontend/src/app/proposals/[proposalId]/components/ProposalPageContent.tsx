@@ -1,18 +1,15 @@
 import { Grid, GridItem, HStack, Icon, IconButton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { GrantDetail } from "@/app/grants/types"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 
-import { useIsDepositReached } from "../../../../api/contracts/governance/hooks/useIsDepositReached"
-import { useProposalInteractionDates } from "../../../../api/contracts/governance/hooks/useProposalInteractionDates"
-import { useProposalUserDeposit } from "../../../../api/contracts/governance/hooks/useProposalUserDeposit"
-import { useUserSingleProposalVoteEvent } from "../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 import { PageBreadcrumb } from "../../../components/PageBreadcrumb/PageBreadcrumb"
 import { ProposalDetail } from "../../types"
@@ -24,16 +21,15 @@ import { ProposalShareModal } from "./ProposalShareModal/ProposalShareModal"
 import { ProposalTimeline } from "./ProposalTimeline/ProposalTimeline"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
 
-type Props = { proposal: ProposalDetail | GrantDetail }
-
-export const ProposalPageContent: React.FC<Props> = ({ proposal }) => {
+export const ProposalPageContent = ({ proposal }: { proposal: ProposalDetail | GrantDetail }) => {
   const proposalId = proposal.proposalId.toString()
-  const { account } = useWallet()
   const { onOpen, onClose, open: isOpen } = useDisclosure()
-  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposalId)
-  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
+  const {
+    interactionDates: { supportEndDate, votingEndDate },
+    depositReached,
+  } = proposal
+  const { data: userDeposits } = useProposalUserDeposit(proposalId)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
-  const { data: depositReached } = useIsDepositReached(proposalId)
   const { isMobile } = useBreakpoints()
   const { t } = useTranslation()
   const router = useRouter()
@@ -115,9 +111,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposal }) => {
     return result
   }, [targetDate])
 
-  // ==========================================
-  // MEMOIZED COMPONENTS
-  // ==========================================
   const memoizedProposalInteractionCard = useMemo(
     () => (
       <ProposalInteractionCard

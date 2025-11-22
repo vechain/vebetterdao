@@ -48,9 +48,9 @@ export const ProfileGovernance = ({ address }: Props) => {
 
   const router = useRouter()
 
-  const votedProposalsIds = useMemo(() => votedProposals?.map(proposal => proposal.proposalId), [votedProposals])
+  const votedProposalsIds = useMemo(() => votedProposals?.map(proposal => proposal.proposalId) || [], [votedProposals])
 
-  const votedProposalsWithDescription = useUserVotedProposals(votedProposalsIds)
+  const { data: votedProposalsWithDescription = [] } = useUserVotedProposals(votedProposalsIds)
 
   const topVotedApps = useUserTopVotedApps(profileWalletAddress)
 

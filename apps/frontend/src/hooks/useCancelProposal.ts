@@ -10,14 +10,16 @@ import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useProposalState"
 
-import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
+
 type Props = { proposalId: string; onSuccess?: () => void }
+
 export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
   const { account } = useWallet()
-  const { data: proposal } = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalCreatedEvent(BigInt(proposalId))
   const proposalValues = proposal?.values
   const grantValues = useMemo(() => {
     return Array(proposal?.targets.length).fill("0")
@@ -33,12 +35,12 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
           proposal?.targets,
           values,
           proposal?.calldatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
+          ethers.keccak256(ethers.toUtf8Bytes(proposal?.description || "")),
         ],
         comment: "cancel proposal",
       }),
     ]
-  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, values])
+  }, [proposal?.calldatas, proposal?.description, proposal?.targets, values])
   const refetchQueryKeys = useMemo(
     () => [
       getProposalStateQueryKey(proposalId),

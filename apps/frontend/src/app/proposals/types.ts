@@ -24,6 +24,13 @@ export interface ProposalDetail extends ProposalCreatedEvent {
   state: number
   votes: VoteEntry[]
   metadata: ProposalMetadata
+  depositReached: boolean
+  communityDeposits: number
+  supportingUserCount: number
+  interactionDates: {
+    supportEndDate: number | null
+    votingEndDate: number | null
+  }
 }
 
 export type VoteSupport = "FOR" | "AGAINST" | "ABSTAIN"

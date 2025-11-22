@@ -25,8 +25,7 @@ export const useRoundProposals = (roundId: string) => {
   const otherProposals = useMemo(() => {
     if (roundId === currentRoundId) return []
     return currentRoundIdProposals.allProposals.filter(
-      // TODO: fix
-      proposal => proposal.blockID === roundId && proposal.state !== ProposalState.Canceled,
+      proposal => proposal.roundIdVoteStart.toString() === roundId && proposal.state !== ProposalState.Canceled,
     )
   }, [currentRoundIdProposals, roundId, currentRoundId])
   const { data: allocationRound, isLoading: allocationRoundLoading } = useAllocationsRound(roundId)

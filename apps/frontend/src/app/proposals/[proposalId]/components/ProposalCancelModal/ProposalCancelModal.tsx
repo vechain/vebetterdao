@@ -17,9 +17,7 @@ export const ProposalCancelModal = ({
   onClose: () => void
 }) => {
   const { t } = useTranslation()
-  const cancelProposalMutation = useCancelProposal({
-    proposalId,
-  })
+  const cancelProposalMutation = useCancelProposal({ proposalId })
   const handleCancelProposal = useCallback(() => {
     onClose()
     cancelProposalMutation.sendTransaction()

@@ -8,8 +8,8 @@ import { buildClause } from "@/utils/buildClause"
 import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useProposalState"
 
-import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 type Props = { proposalId: string; onSuccess?: () => void }
@@ -20,7 +20,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
  * @returns the queue transaction
  */
 export const useQueueProposal = ({ proposalId, onSuccess }: Props) => {
-  const { data: proposal } = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalCreatedEvent(BigInt(proposalId))
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
@@ -31,12 +31,12 @@ export const useQueueProposal = ({ proposalId, onSuccess }: Props) => {
           proposal?.targets,
           proposal?.values,
           proposal?.calldatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
+          ethers.keccak256(ethers.toUtf8Bytes(proposal?.description || "")),
         ],
         comment: "queue proposal",
       }),
     ]
-  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, proposal?.values])
+  }, [proposal?.calldatas, proposal?.description, proposal?.targets, proposal?.values])
   const refetchQueryKeys = useMemo(
     () => [getProposalStateQueryKey(proposalId), getAllProposalsStateQueryKey()],
     [proposalId],

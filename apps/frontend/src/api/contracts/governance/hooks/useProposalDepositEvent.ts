@@ -3,7 +3,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useMemo } from "react"
 
-import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
+import { useProposalCreatedEvent } from "@/hooks/useProposalCreatedEvent"
 
 import { useProposalsEvents } from "./useProposalsEvents"
 
@@ -14,7 +14,7 @@ import { useProposalsEvents } from "./useProposalsEvents"
  */
 export const useProposalDepositEvent = (proposalId: string) => {
   const { account } = useWallet()
-  const { data: proposal } = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalCreatedEvent(BigInt(proposalId))
   const events = useProposalsEvents()
   const proposalDeposits = useMemo(
     () => events.data?.deposits.filter(deposit => deposit.proposalId === proposalId) || [],

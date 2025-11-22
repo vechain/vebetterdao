@@ -6,7 +6,12 @@ import { executeCallClause } from "@vechain/vechain-kit"
 import { fetchContractEvents } from "@/api/contracts/governance/fetchContractEvents"
 import { fetchClient } from "@/api/indexer/api"
 import { getIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
-import { ProposalVotes } from "@/app/proposals/page"
+import {
+  ProposalVotes,
+  getProposalsDepositReached,
+  getProposalsDepositEvents,
+  getProposalsInteractionDates,
+} from "@/app/proposals/page"
 import { ProposalCreatedEvent } from "@/app/proposals/types"
 import { ProposalType } from "@/hooks/proposals/grants/types"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
@@ -48,21 +53,28 @@ export const getGrantsDetails = async (grantId: string): Promise<GrantDetail | n
 
   if (!grant || !grant.description) return null
 
-  const [votes, metadata, [state = 0] = []] = await Promise.all([
-    fetchClient
-      .GET("/api/v1/b3tr/proposals/{proposalId}/results", {
-        params: { path: { proposalId: grantId } },
-      })
-      .then(res => res.data as ProposalVotes[]),
-    getIpfsMetadata(`ipfs://${grant.description}`) as Promise<GrantMetadata>,
-    executeCallClause({
-      thor,
-      abi: grantsManagerAbi,
-      contractAddress: grantsManagerContractAddress,
-      method: "grantState",
-      args: [BigInt(grantId)],
-    }),
-  ])
+  const [votes, metadata, [state = 0] = [], depositReachedMap, depositEventsMap, interactionDatesMap] =
+    await Promise.all([
+      fetchClient
+        .GET("/api/v1/b3tr/proposals/{proposalId}/results", {
+          params: { path: { proposalId: grantId } },
+        })
+        .then(res => res.data as ProposalVotes[]),
+      getIpfsMetadata(`ipfs://${grant.description}`) as Promise<GrantMetadata>,
+      executeCallClause({
+        thor,
+        abi: grantsManagerAbi,
+        contractAddress: grantsManagerContractAddress,
+        method: "grantState",
+        args: [BigInt(grantId)],
+      }),
+      getProposalsDepositReached(thor, [BigInt(grantId)]),
+      getProposalsDepositEvents(thor),
+      getProposalsInteractionDates(thor, [BigInt(grantId)]),
+    ])
+
+  const depositData = depositEventsMap.get(grantId) || { communityDeposits: 0, supportingUserCount: 0 }
+  const dates = interactionDatesMap.get(grantId) || { supportEndDate: null, votingEndDate: null }
 
   return {
     ...grant,
@@ -70,6 +82,13 @@ export const getGrantsDetails = async (grantId: string): Promise<GrantDetail | n
     state,
     votes,
     metadata,
+    depositReached: depositReachedMap.get(grantId) || false,
+    communityDeposits: depositData.communityDeposits,
+    supportingUserCount: depositData.supportingUserCount,
+    interactionDates: {
+      supportEndDate: dates.supportEndDate,
+      votingEndDate: dates.votingEndDate,
+    },
   }
 }
 
