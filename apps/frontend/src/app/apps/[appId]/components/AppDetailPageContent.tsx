@@ -4,10 +4,9 @@ import { useMemo } from "react"
 
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 
-import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useIsAppAdmin } from "../../../../api/contracts/xApps/hooks/useIsAppAdmin"
 import { useIsAppModerator } from "../../../../api/contracts/xApps/hooks/useIsAppModerator"
-import { useCurrentAppInfo } from "../hooks/useCurrentAppInfo"
+import { AppDetailServerData } from "../types"
 
 import { AppBalanceCard } from "./AppBalanceCard/AppBalanceCard"
 import { AppCreationSteps } from "./AppCreationSteps/AppCreationSteps"
@@ -17,22 +16,22 @@ import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets/AppTweets"
 import { ProofValidationAlert } from "./ProofValidationAlert/ProofValidationAlert"
 
-export const AppDetailPageContent = () => {
-  const { app } = useCurrentAppInfo()
+type Props = {
+  appDetailData: AppDetailServerData
+}
+
+export const AppDetailPageContent = ({ appDetailData }: Props) => {
   const { account } = useWallet()
-  const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account?.address ?? "")
-  const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
-  const {
-    score: endorsementScore,
-    status: endorsementStatus,
-    threshold: endorsementThreshold,
-    isLoading: isEndorsementStatusLoading,
-  } = useAppEndorsementStatus(app?.id ?? "")
-  const isTeamWalletAddress = compareAddresses(app?.teamWalletAddress, account?.address)
-  const appHasBeenIntoAllocationRounds = app?.createdAtTimestamp !== "0"
+  const { data: isAppModerator } = useIsAppModerator(appDetailData.appInfo.id, account?.address ?? "")
+  const { data: isAppAdmin } = useIsAppAdmin(appDetailData.appInfo.id, account?.address ?? "")
+
+  const isTeamWalletAddress = compareAddresses(appDetailData.appInfo.teamWalletAddress, account?.address)
+  const appHasBeenIntoAllocationRounds = appDetailData.appInfo.createdAtTimestamp !== "0"
+
   const shouldRenderCreationSteps = useMemo(() => {
     return !appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin)
   }, [appHasBeenIntoAllocationRounds, isAppModerator, isAppAdmin])
+
   const shouldRenderBalance = useMemo(() => {
     return appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin || isTeamWalletAddress)
   }, [appHasBeenIntoAllocationRounds, isAppAdmin, isAppModerator, isTeamWalletAddress])
@@ -45,11 +44,13 @@ export const AppDetailPageContent = () => {
       data-testid="app-detail-grid">
       <GridItem w="full" colSpan={[1, 1, 3]}>
         <Stack direction="column" gap={4}>
-          {(isAppModerator || isAppAdmin) && app?.id && <ProofValidationAlert appId={app.id} />}
+          {(isAppModerator || isAppAdmin) && appDetailData.appInfo.id && (
+            <ProofValidationAlert appId={appDetailData.appInfo.id} />
+          )}
 
           <AppDetailOverview
-            endorsementStatus={endorsementStatus}
-            isEndorsementStatusLoading={isEndorsementStatusLoading}
+            endorsementStatus={appDetailData.endorsementData.status}
+            isEndorsementStatusLoading={false}
           />
         </Stack>
       </GridItem>
@@ -65,10 +66,10 @@ export const AppDetailPageContent = () => {
         <Stack direction="column" gap={8}>
           {shouldRenderBalance && <AppBalanceCard />}
           <AppEndorsementInfoCard
-            endorsementScore={endorsementScore}
-            endorsementStatus={endorsementStatus}
-            endorsementThreshold={endorsementThreshold}
-            isEndorsementStatusLoading={isEndorsementStatusLoading}
+            endorsementScore={appDetailData.endorsementData.score}
+            endorsementStatus={appDetailData.endorsementData.status}
+            endorsementThreshold={appDetailData.endorsementData.threshold}
+            isEndorsementStatusLoading={false}
           />
         </Stack>
       </GridItem>
