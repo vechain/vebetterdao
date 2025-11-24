@@ -69,8 +69,8 @@ export const ProposalSupportModal = ({
 
   // Calculate missing support
   const missingSupport = useMemo(() => {
-    const thresholdBN = new BigNumber(ethers.formatEther(proposalThreshold))
-    const currentBN = new BigNumber(ethers.formatEther(proposalDeposits))
+    const thresholdBN = BigNumber(ethers.formatEther(proposalThreshold))
+    const currentBN = BigNumber(ethers.formatEther(proposalDeposits))
     const missing = thresholdBN.minus(currentBN)
     return missing.isGreaterThan(0) ? missing.toString() : "0"
   }, [proposalThreshold, proposalDeposits])
@@ -91,11 +91,11 @@ export const ProposalSupportModal = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!e.target.value) return setAmount("0")
       const input = filterAmountInput(e.target.value, { maxBalance: vot3Balance?.scaled })
-      const scaledBalanceBN = new BigNumber(vot3Balance?.scaled ?? 0)
-      const missingSupportBN = new BigNumber(missingSupport ?? 0)
+      const scaledBalanceBN = BigNumber(vot3Balance?.scaled ?? 0)
+      const missingSupportBN = BigNumber(missingSupport ?? 0)
 
       // Get the minimum value, between the input, the scaled balance and the missing support
-      const cappedAmountBN = BigNumber.min(new BigNumber(input), scaledBalanceBN, missingSupportBN)
+      const cappedAmountBN = BigNumber.min(BigNumber(input), scaledBalanceBN, missingSupportBN)
 
       setAmount(cappedAmountBN.toString())
     },
@@ -106,8 +106,8 @@ export const ProposalSupportModal = ({
   const handleDepositMax = useCallback(() => {
     if (!vot3Balance) return
 
-    const scaledBalanceBN = new BigNumber(vot3Balance.scaled)
-    const missingSupportBN = new BigNumber(missingSupport)
+    const scaledBalanceBN = BigNumber(vot3Balance.scaled)
+    const missingSupportBN = BigNumber(missingSupport)
 
     if (scaledBalanceBN.gt(missingSupportBN)) {
       setAmount(missingSupportBN.toString())
@@ -130,7 +130,7 @@ export const ProposalSupportModal = ({
 
     if (forecastedTotal >= thresholdNumber) return 100
 
-    const expectedPercentage = new BigNumber(forecastedTotal.toString()).div(thresholdNumber.toString())
+    const expectedPercentage = BigNumber(forecastedTotal).div(thresholdNumber)
     return expectedPercentage.times(100).toNumber()
   }, [proposalDeposits, proposalThreshold, inputAmount])
   // Display data for progress and results

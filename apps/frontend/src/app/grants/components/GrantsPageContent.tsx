@@ -168,8 +168,7 @@ export const GrantsPageContent = () => {
 
   const totalDistributedAmount = useMemo(() => {
     return (
-      milestoneClaimedEvents?.reduce((acc, event) => acc.plus(new BigNumber(event.amount)), new BigNumber(0)) ??
-      new BigNumber(0)
+      milestoneClaimedEvents?.reduce((acc, event) => acc.plus(BigNumber(event.amount)), BigNumber(0)) ?? BigNumber(0)
     )
   }, [milestoneClaimedEvents])
 
