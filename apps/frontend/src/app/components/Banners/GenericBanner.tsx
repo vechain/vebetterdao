@@ -72,10 +72,10 @@ export const GenericBanner = ({
 }: GenericBannerProps) => {
   const config = variantConfig[variant]
   const bgImage = useColorModeValue(config.bgImageLight, config.bgImageDark)
-  const { setPreferences } = useUserPreferences()
+  const { updatePreferences } = useUserPreferences()
 
   const handleClose = () => {
-    if (storageKey) setPreferences({ [storageKey]: false })
+    if (storageKey) updatePreferences({ [storageKey]: false })
     onClose?.()
   }
 
