@@ -14,7 +14,7 @@ COPY apps ./apps
 RUN yarn install --frozen-lockfile
 
 # Build arguments (public config needed at build time)
-ARG APP_BUILD_ENV=prod
+ARG APP_BUILD_ENV
 ARG NEXT_PUBLIC_APP_ENV
 ARG NEXT_PUBLIC_DELEGATOR_URL
 ARG NEXT_PUBLIC_IPFS_PINNING_SERVICE

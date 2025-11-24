@@ -113,6 +113,7 @@ jobs:
       ecr_repository: block-explorer
       image_tag: ${{ needs.prepare-metadata.outputs.image_tag }}
       aws_region: eu-west-1
+      environment: "AWS staging governance build-time"
     secrets:
       aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
