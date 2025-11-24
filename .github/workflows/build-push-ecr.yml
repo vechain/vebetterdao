@@ -92,14 +92,14 @@ jobs:
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
                   build-args: |
-                      APP_BUILD_ENV=${{ secrets.APP_BUILD_ENV }}
-                      NEXT_PUBLIC_APP_ENV=${{ secrets.NEXT_PUBLIC_APP_ENV }}
-                      NEXT_PUBLIC_DELEGATOR_URL=${{ secrets.NEXT_PUBLIC_DELEGATOR_URL }}
-                      NEXT_PUBLIC_IPFS_PINNING_SERVICE=${{ secrets.NEXT_PUBLIC_IPFS_PINNING_SERVICE }}
-                      NEXT_PUBLIC_NETWORK_TYPE=${{ secrets.NEXT_PUBLIC_NETWORK_TYPE }}
-                      NEXT_PUBLIC_NFT_STORAGE_KEY=${{ secrets.NEXT_PUBLIC_NFT_STORAGE_KEY }}
-                      NEXT_PUBLIC_PRIVY_APP_ID=${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID }}
-                      NEXT_PUBLIC_PRIVY_CLIENT_ID=${{ secrets.NEXT_PUBLIC_PRIVY_CLIENT_ID }}
-                      NEXT_PUBLIC_TRANSAK_API_KEY=${{ secrets.NEXT_PUBLIC_TRANSAK_API_KEY }}
-                      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
-                      NODE_OPTIONS=${{ secrets.NODE_OPTIONS }}
+                      APP_BUILD_ENV=${{ vars.APP_BUILD_ENV }}
+                      NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV }}
+                      NEXT_PUBLIC_DELEGATOR_URL=${{ vars.NEXT_PUBLIC_DELEGATOR_URL }}
+                      NEXT_PUBLIC_IPFS_PINNING_SERVICE=${{ vars.NEXT_PUBLIC_IPFS_PINNING_SERVICE }}
+                      NEXT_PUBLIC_NETWORK_TYPE=${{ vars.NEXT_PUBLIC_NETWORK_TYPE }}
+                      NEXT_PUBLIC_NFT_STORAGE_KEY=${{ vars.NEXT_PUBLIC_NFT_STORAGE_KEY }}
+                      NEXT_PUBLIC_PRIVY_APP_ID=${{ vars.NEXT_PUBLIC_PRIVY_APP_ID }}
+                      NEXT_PUBLIC_PRIVY_CLIENT_ID=${{ vars.NEXT_PUBLIC_PRIVY_CLIENT_ID }}
+                      NEXT_PUBLIC_TRANSAK_API_KEY=${{ vars.NEXT_PUBLIC_TRANSAK_API_KEY }}
+                      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ vars.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
+                      NODE_OPTIONS=${{ vars.NODE_OPTIONS }}
