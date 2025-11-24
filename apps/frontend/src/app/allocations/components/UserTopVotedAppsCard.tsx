@@ -16,8 +16,6 @@ import { APP_CATEGORIES } from "@/types/appDetails"
 
 import { AppWithVotes } from "../lib/data"
 
-const isEmpty = false
-
 const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress
 
@@ -61,7 +59,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
     return top5VotedAppIds.map(id => apps.find(app => app.id === id)).filter(Boolean)
   }, [apps, top5VotedAppIds])
 
-  if (isEmpty) {
+  if (top5VotedApps.length === 0) {
     return (
       <EmptyState
         icon={
