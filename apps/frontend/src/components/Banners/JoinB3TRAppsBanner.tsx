@@ -9,8 +9,8 @@ export const JoinB3TRAppsBanner = () => {
   const { isMobile } = useBreakpoints()
   return (
     <Card.Root w={"full"} bg="banner.green" color="black" overflow={"hidden"} borderRadius={"xl"} p={6}>
-      <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">
-        <VStack alignItems={"flex-start"} w={{ base: "full", md: "50%" }} gap={4}>
+      <HStack justifyContent={{ base: "center", md: "space-between" }} w="full">
+        <VStack alignItems={"flex-start"} w={{ base: "full" }} gap={4}>
           {isMobile && (
             <Image
               src="/assets/mascot/mascot-welcoming-left-head.webp"
@@ -40,13 +40,13 @@ export const JoinB3TRAppsBanner = () => {
         </VStack>
         {!isMobile && (
           <Image
-            alignSelf={"flex-end"}
-            src="/assets/mascot/mascot-welcoming.webp"
+            alignSelf={"end"}
+            src="/assets/mascot/mascot-welcoming@2x.webp"
             alt="mascot-welcoming"
             boxSize="200px"
             overflow={"hidden"}
             objectFit="contain"
-            transform="rotate(-15deg) scale(2.3) translateY(15px) translateX(10px)"
+            transform="scaleX(-1) scale(1.5)"
           />
         )}
       </HStack>

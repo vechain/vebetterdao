@@ -1,4 +1,4 @@
-import { Box, Button, Card, Heading, HStack, Image, Stack, useDisclosure, useMediaQuery } from "@chakra-ui/react"
+import { Box, Button, Card, Heading, Image, Stack, useDisclosure } from "@chakra-ui/react"
 import { UilPlus } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -12,76 +12,48 @@ export const CreatorApplyNow = () => {
     router.push("/apps/creator/new")
   }
   const { onOpen, open: isOpen, onClose } = useDisclosure()
-  const [isMobile] = useMediaQuery(["(max-width: 767px)"])
   return (
     <>
       <Card.Root
         variant="primary"
         w="full"
-        maxW="100%"
         rounded="20px"
+        p={0}
+        borderColor="rgba(154, 225, 77, 0.1)"
         backgroundImage={`url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239AE14DFF' stroke-width='4' stroke-dasharray='16%2c 18%2c 13%2c 24' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e")`}>
-        <Card.Body px={6} py={2} position="relative">
-          <Box
-            w={{ base: "120px", md: "80px" }}
-            h={"full"}
-            overflow="hidden"
-            position="absolute"
-            left="0"
-            top="0"
-            borderRadius="9px">
-            <Image
-              src="/assets/mascot/mascot-welcoming.webp"
-              alt="mascot-welcoming"
-              position="absolute"
-              transform={"translate(-15%, 70%) rotate(30deg) scale(2.5)"}
-              objectFit="contain"
-              borderRadius="9px"
-            />
-          </Box>
-          <Stack direction={{ base: "column", md: "row" }} w="full" h="full" justify={"center"} align={"stretch"}>
-            {/* Left Section: Image, Title, and Description */}
-            <HStack>
-              {!isMobile && (
-                <Box w={"80px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
-                  <Image
-                    src="/assets/mascot/mascot-welcoming.webp"
-                    alt="mascot-welcoming"
-                    position="absolute"
-                    transform={"translate(-15%, 50%) rotate(30deg) scale(2.5)"}
-                    objectFit="contain"
-                    borderRadius="9px"
-                  />
-                </Box>
-              )}
-
-              <Stack
-                w={{ base: "full", md: "70%", lg: "80%" }}
-                align={{ base: "center", md: "end" }}
-                justify={{ base: "center", md: "end" }}
-                py={isMobile ? 4 : 2}>
-                <Heading fontWeight="bold" size={"lg"}>
-                  {t("Do you have an app to join the VeBetter DAO ecosystem?")}
-                </Heading>
-              </Stack>
-            </HStack>
-
-            {/* Right Section: Score */}
+        <Card.Body position="relative">
+          <Stack direction={{ base: "row", lg: "row" }} align="stretch" gap={0}>
+            {/* Left Section: Image taking full height */}
+            <Box h="100%" alignSelf="end">
+              <Image
+                src="/assets/mascot/mascot-welcoming@2x.webp"
+                alt="mascot-welcoming"
+                w={{ base: "full", md: "300px", lg: "200px" }}
+                objectFit="cover"
+                borderRadius="9px"
+              />
+            </Box>
+            {/* Right Section: Content */}
             <Stack
-              direction={{ base: "column", md: "row" }}
-              w={"full"}
-              align={"end"}
-              justify={"end"}
-              px={2}
-              py={isMobile ? 4 : 2}>
+              px={4}
+              py={4}
+              direction={{ base: "column", lg: "row" }}
+              w="full"
+              justify={{ base: "center", md: "space-between" }}
+              align="center"
+              gap={4}>
+              <Heading fontWeight="bold" size="md">
+                {t("Do you have an app to join the VeBetter DAO ecosystem?")}
+              </Heading>
+
               <Button
                 variant="secondary"
-                alignSelf="center"
                 textStyle="md"
                 fontWeight="semibold"
                 borderRadius="full"
                 onClick={onOpen}
-                w={{ base: "80%", md: "auto" }}>
+                flexShrink={0}
+                w={{ base: "full", lg: "auto" }}>
                 <UilPlus />
                 {t("Apply now")}
               </Button>
