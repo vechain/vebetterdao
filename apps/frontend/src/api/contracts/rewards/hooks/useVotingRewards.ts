@@ -60,7 +60,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
         const roundId = rounds[index] as string
         const formattedRewards = ethers.formatEther(rewards)
 
-        total = total.plus(rewards)
+        total = total.plus(rewards.toString())
 
         queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter || ""), [rewards])
 
@@ -75,7 +75,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
         const roundId = rounds[index] as string
         const formattedRewardsGM = ethers.formatEther(gmRewards)
 
-        totalGMRewards = totalGMRewards.plus(gmRewards)
+        totalGMRewards = totalGMRewards.plus(gmRewards.toString())
         return {
           roundId,
           rewards: gmRewards,
