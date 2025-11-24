@@ -59,12 +59,24 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   // Initialize local state from chain data
   const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(isAutoVotingEnabledOnChain ?? false)
 
-  const handleOpenModal = useCallback(() => {
+  // Keep local state synced with chain state
+  useEffect(() => {
     if (isAutoVotingEnabledOnChain !== undefined) {
       setIsAutoVotingEnabled(isAutoVotingEnabledOnChain)
     }
+  }, [isAutoVotingEnabledOnChain])
+
+  const handleOpenModal = useCallback(() => {
     openModal()
-  }, [isAutoVotingEnabledOnChain, openModal])
+  }, [openModal])
+
+  const handleCloseModal = useCallback(() => {
+    closeModal()
+    // Reset local state to match chain state when modal is closed
+    if (isAutoVotingEnabledOnChain !== undefined) {
+      setIsAutoVotingEnabled(isAutoVotingEnabledOnChain)
+    }
+  }, [closeModal, isAutoVotingEnabledOnChain])
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -84,9 +96,9 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
 
   const onVoteSuccess = useCallback(() => {
     setSelectedAppIds(new Set())
-    closeModal()
+    handleCloseModal()
     closeTxModal()
-  }, [closeTxModal, closeModal])
+  }, [closeTxModal, handleCloseModal])
 
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
@@ -156,7 +168,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
       {isModalOpen && (
         <ConfirmVoteModal
           isOpen={isModalOpen}
-          onClose={closeModal}
+          onClose={handleCloseModal}
           selectedApps={selectedApps}
           onConfirm={handleConfirmVote}
           isAutoVotingEnabled={isAutoVotingEnabled}
