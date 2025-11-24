@@ -2809,6 +2809,29 @@ describe("Galaxy Member - @shard3a", () => {
         expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(0)
         expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
       })
+
+      it("Should revert when trying to attach a non-existing node", async () => {
+        const { owner, galaxyMember, otherAccounts } = await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
+
+        await galaxyMember.setMaxLevel(10)
+
+        // Participate in voting to be able to mint
+        await participateInAllocationVoting(owner, false, otherAccounts[10])
+
+        // Mint GM token to owner
+        await galaxyMember.connect(owner).freeMint()
+        const gmId = await galaxyMember.tokenOfOwnerByIndex(await owner.getAddress(), 0)
+
+        // Try to attach a non-existing node (nodeId 999)
+        // This will revert with ERC721NonexistentToken error from the StargateNFT contract
+        await expect(galaxyMember.connect(owner).attachNode(999, gmId)).to.be.reverted
+
+        // GM should still be at level 1
+        expect(await galaxyMember.levelOf(gmId)).to.equal(1)
+      })
     })
 
     describe("Token Level Management with Delegated Nodes", () => {

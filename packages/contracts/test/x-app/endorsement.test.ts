@@ -2445,6 +2445,60 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(await x2EarnApps.getScore(app1Id)).to.eql(50n) // XAPP endorsement score is 50
     })
 
+    it("A random user who is neither owner nor manager cannot endorse with someone else's node", async function () {
+      const { x2EarnApps, otherAccounts, owner, stargateMock, stargateNftMock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      // Create a node owned by otherAccounts[1]
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1])
+
+      // otherAccounts[5] (random user) tries to endorse with otherAccounts[1]'s node
+      await expect(x2EarnApps.connect(otherAccounts[5]).endorseApp(app1Id, nodeId1)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonNodeHolder",
+      )
+
+      // App should still be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+    })
+
+    it("Node owner cannot endorse with their own delegated node", async function () {
+      const { x2EarnApps, otherAccounts, owner, stargateMock, stargateNftMock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      // Create a node owned by otherAccounts[1]
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1])
+
+      // Delegate node to otherAccounts[3]
+      await stargateNftMock.connect(otherAccounts[1]).addTokenManager(otherAccounts[3].address, nodeId1)
+
+      // Original owner (otherAccounts[1]) tries to endorse with their delegated node
+      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonNodeHolder",
+      )
+
+      // Manager should be able to endorse
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId1)
+      expect(await x2EarnApps.getScore(app1Id)).to.eql(100n)
+    })
+
     it("A user with multiple nodes delegated to them can endorse multiple apps", async function () {
       const { x2EarnApps, otherAccounts, owner, nodeManagement, stargateMock, stargateNftMock } =
         await getOrDeployContractInstances({
