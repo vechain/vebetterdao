@@ -1097,7 +1097,6 @@
   "Enabling allowance...": "Enabling allowance...",
   "Disabling allowance...": "Disabling allowance...",
   "Loading transactions...": "Loading transactions...",
-  "No transactions found": "No transactions found",
   "No transactions found for the selected type": "No transactions found for the selected type",
   "Reward Pool Update": "Reward Pool Update",
   "Rewards Pool Updates": "Rewards Pool Updates",
@@ -1587,5 +1586,13 @@
   "Automation enabled & vote submitted!": "Automation enabled & vote submitted!",
   "Enabling automation...": "Enabling automation...",
   "Automation enabled!": "Automation enabled!",
-  "You've already voted this round. Wait for the next round to vote again.": "You've already voted this round. Wait for the next round to vote again."
+  "You've already voted this round. Wait for the next round to vote again.": "You've already voted this round. Wait for the next round to vote again.",
+  "Disabling automation...": "Disabling automation...",
+  "Disabling automation and submitting vote...": "Disabling automation and submitting vote...",
+  "Automation disabled!": "Automation disabled!",
+  "Automation disabled & vote submitted!": "Automation disabled & vote submitted!",
+  "Error disabling automation": "Error disabling automation",
+  "Updating preferences...": "Updating preferences...",
+  "Preferences updated!": "Preferences updated!",
+  "Error updating preferences": "Error updating preferences"
 }

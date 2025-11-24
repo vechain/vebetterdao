@@ -9,6 +9,7 @@ type TransactionCustomUIProps = {
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
   showTransactionDetailsButton?: boolean
+  hideDoneButton?: boolean
   onSuccess?: () => void
 }
 export type TransactionCustomUI = Partial<Record<TransactionStatus, TransactionCustomUIProps>>
