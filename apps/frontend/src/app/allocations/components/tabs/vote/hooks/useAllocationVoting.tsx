@@ -7,8 +7,11 @@ import { parseEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
+import { getAutoVotingState } from "@/hooks/useAutoVotingState"
 import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
+import { useUpdateVotingPreferences } from "@/hooks/useUpdateVotingPreferences"
 import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
 
 import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
@@ -16,6 +19,7 @@ import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 interface UseAllocationVotingProps {
   roundId: string
   isAutoVotingEnabled?: boolean
+  isAutoVotingEnabledOnChain?: boolean
   onSuccess?: () => void
 }
 
@@ -24,18 +28,25 @@ interface UseAllocationVotingProps {
  * Handles:
  * - Vote confirmation logic with dynamic UI
  * - Direct transaction submission with custom UI
- * - Auto-voting setup flow (when isAutoVotingEnabled is true)
+ * - Auto-voting enable/disable flow
  */
-export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false, onSuccess }: UseAllocationVotingProps) => {
+export const useAllocationVoting = ({
+  roundId,
+  isAutoVotingEnabled = false,
+  isAutoVotingEnabledOnChain = false,
+  onSuccess,
+}: UseAllocationVotingProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
   const { votesAtSnapshot } = useVotingPowerAtSnapshot()
   const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
+  const { data: currentPreferences = [] } = useUserVotingPreferences(account?.address)
   const castAllocationVotes = useCastAllocationVotes({
     roundId,
   })
-  const enableAutoVotingAndVote = useEnableAutoVotingAndVote({ roundId })
+  const manageAutoVotingAndVote = useEnableAutoVotingAndVote({ roundId })
+  const updateVotingPreferences = useUpdateVotingPreferences({ roundId })
 
   const createVotingWeightDescription = useCallback(
     (formattedVotingWeight: string) => <VotingWeightDisplay formattedVotingWeight={formattedVotingWeight} />,
@@ -97,28 +108,112 @@ export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false, onSu
       // Create voting weight description
       const votingWeightDescription = createVotingWeightDescription(formattedWeight)
 
-      if (isAutoVotingEnabled) {
-        // Auto-voting flow: enable auto-voting AND cast vote in same transaction
-        const waitingTitle = hasVoted ? t("Enabling automation...") : t("Enabling automation and submitting vote...")
-        const successTitle = hasVoted ? t("Automation enabled!") : t("Automation enabled & vote submitted!")
-        const customUI = createCustomUI(votingWeightDescription, waitingTitle, successTitle)
+      // Calculate auto-voting state using centralized logic
+      const { shouldEnable, shouldDisable, needsPreferenceUpdate, isStandardVote, preferencesChanged } =
+        getAutoVotingState({
+          isAutoVotingEnabled,
+          isAutoVotingEnabledOnChain,
+          currentPreferences,
+          selectedAppIds: appIds,
+          hasVoted: hasVoted ?? false,
+        })
 
-        // Call transaction directly with custom UI
+      // Helper to get titles for auto-voting operations
+      const getAutoVotingTitles = (enable: boolean) => {
+        if (enable) {
+          return {
+            waiting: hasVoted ? t("Enabling automation...") : t("Enabling automation and submitting vote..."),
+            success: hasVoted ? t("Automation enabled!") : t("Automation enabled & vote submitted!"),
+          }
+        }
+        return {
+          waiting: hasVoted ? t("Disabling automation...") : t("Disabling automation and submitting vote..."),
+          success: hasVoted ? t("Automation disabled!") : t("Automation disabled & vote submitted!"),
+        }
+      }
+
+      // Auto-voting state is changing
+      if (shouldEnable || shouldDisable) {
+        const { waiting, success } = getAutoVotingTitles(shouldEnable)
+
+        let customUI
+
+        if (shouldEnable) {
+          customUI = createCustomUI(votingWeightDescription, waiting, success)
+        } else {
+          // When disabling, we only show weight description if we are also voting (Case 5)
+          // If we already voted (Case 4), we hide the description
+          const showDescription = !hasVoted
+          const description = showDescription ? votingWeightDescription : undefined
+
+          customUI = {
+            pending: {
+              title: t("Waiting for confirmation..."),
+              description,
+            },
+            waitingConfirmation: {
+              title: waiting,
+              description,
+            },
+            success: {
+              title: success,
+              description,
+              showSocialButtons: false,
+              showTransactionDetailsButton: false,
+              hideDoneButton: true,
+              onSuccess,
+            },
+            error: {
+              title: t("Error disabling automation"),
+            },
+          }
+        }
+
         if (account?.address) {
-          enableAutoVotingAndVote.sendTransaction(
+          manageAutoVotingAndVote.sendTransaction(
             {
               roundId,
               appIds,
               voteWeights,
               userAddress: account.address,
               hasVoted: hasVoted ?? false,
+              shouldEnable,
+              needsPreferenceUpdate,
             },
             customUI,
           )
         }
-      } else {
-        // Manual voting flow: just cast vote
-        // Prepare data for transaction - pass wei values directly as strings
+      }
+      // Auto-voting already enabled (and not changing), check if preferences changed
+      else if (!isStandardVote) {
+        if (preferencesChanged) {
+          const customUI = {
+            pending: {
+              title: t("Waiting for confirmation..."),
+            },
+            waitingConfirmation: {
+              title: t("Updating preferences..."),
+            },
+            success: {
+              title: t("Preferences updated!"),
+              showSocialButtons: false,
+              showTransactionDetailsButton: false,
+              hideDoneButton: true,
+              onSuccess,
+            },
+            error: {
+              title: t("Error updating preferences"),
+            },
+          }
+
+          updateVotingPreferences.sendTransaction({ appIds }, customUI)
+        } else {
+          // Preferences unchanged, nothing to do
+          console.warn("No transaction needed: preferences unchanged, relayer will handle voting")
+        }
+      }
+      // Default: No auto-voting involved, just regular vote
+      else {
         const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
           appId,
           votesWei: weight.toString(),
@@ -130,7 +225,6 @@ export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false, onSu
           t("Vote successfully submitted!"),
         )
 
-        // Call transaction directly with custom UI
         castAllocationVotes.sendTransaction(appVotes, customUI)
       }
     },
@@ -138,13 +232,17 @@ export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false, onSu
       t,
       votesAtSnapshot,
       isAutoVotingEnabled,
+      isAutoVotingEnabledOnChain,
       account?.address,
       roundId,
       hasVoted,
+      currentPreferences,
       createVotingWeightDescription,
       createCustomUI,
       castAllocationVotes,
-      enableAutoVotingAndVote,
+      manageAutoVotingAndVote,
+      updateVotingPreferences,
+      onSuccess,
     ],
   )
 
@@ -153,7 +251,9 @@ export const useAllocationVoting = ({ roundId, isAutoVotingEnabled = false, onSu
     isVoting:
       castAllocationVotes.status === "pending" ||
       castAllocationVotes.status === "waitingConfirmation" ||
-      enableAutoVotingAndVote.status === "pending" ||
-      enableAutoVotingAndVote.status === "waitingConfirmation",
+      manageAutoVotingAndVote.status === "pending" ||
+      manageAutoVotingAndVote.status === "waitingConfirmation" ||
+      updateVotingPreferences.status === "pending" ||
+      updateVotingPreferences.status === "waitingConfirmation",
   }
 }

@@ -8,8 +8,6 @@ import { getXAppRoundEarningsQueryKey } from "@/api/contracts/xAllocationPool/ho
 import { getAllocationVotersQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVoters"
 import { getAllocationVotesQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVotes"
 import { getHasVotedInRoundQueryKey } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { getIsAutoVotingEnabledQueryKey } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
-import { getUserVotingPreferencesQueryKey } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { getUserVotesInRoundQueryKey } from "@/api/contracts/xApps/hooks/useUserVotesInRound"
 import { getXAppsSharesQueryKey } from "@/api/contracts/xApps/hooks/useXAppShares"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
@@ -20,92 +18,42 @@ const abi = XAllocationVoting__factory.abi
 const address = getConfig().xAllocationVotingContractAddress
 
 type ClausesProps = {
-  roundId: string
   appIds: string[]
-  voteWeights: bigint[]
-  userAddress: string
-  hasVoted: boolean
-  shouldEnable: boolean
-  needsPreferenceUpdate?: boolean
 }
 
-type UseManageAutoVotingAndVoteProps = {
+type UseUpdateVotingPreferencesProps = {
   roundId: string
   onSuccess?: () => void
   transactionModalCustomUI?: TransactionCustomUI
 }
 
 /**
- * Hook to manage auto-voting state (enable/disable) and optionally cast vote
+ * Hook to update voting preferences when auto-voting is already enabled
+ * This handles Case 3: User has auto-voting on and wants to update their app preferences
  *
- * Handles multiple cases:
- * - Case 1: ENABLING auto-voting + voting
- *   Clauses: setUserVotingPreferences + toggleAutoVoting + castVote
- *
- * - Case 2a: ENABLING auto-voting (already voted, preferences changed)
- *   Clauses: setUserVotingPreferences + toggleAutoVoting
- *
- * - Case 2b: ENABLING auto-voting (already voted, preferences unchanged - optimization)
- *   Clauses: toggleAutoVoting only
- *
- * - Case 4: DISABLING auto-voting (already voted)
- *   Clauses: toggleAutoVoting
- *
- * - Case 5: DISABLING auto-voting + voting
- *   Clauses: toggleAutoVoting + castVote
+ * Operations:
+ * 1. setUserVotingPreferences - update the app IDs for future auto-voting
  *
  * @param roundId - The current round ID
  * @param onSuccess - Optional callback to run when transaction succeeds
  * @param transactionModalCustomUI - Optional custom UI for the transaction modal
  * @returns Transaction builder hook with sendTransaction function
  */
-export const useEnableAutoVotingAndVote = ({
+export const useUpdateVotingPreferences = ({
   roundId,
   onSuccess,
   transactionModalCustomUI,
-}: UseManageAutoVotingAndVoteProps) => {
+}: UseUpdateVotingPreferencesProps) => {
   const { account } = useWallet()
   const thor = useThor()
 
   const contract = thor.contracts.load(address, abi)
 
-  const clauseBuilder = ({
-    roundId,
-    appIds,
-    voteWeights,
-    userAddress,
-    hasVoted,
-    shouldEnable,
-    needsPreferenceUpdate = true,
-  }: ClausesProps) => {
-    const clauses = []
-
-    // Add vote clause if user hasn't voted yet
-    if (!hasVoted) {
-      clauses.push(
-        contract.clause.castVote(roundId, appIds, voteWeights, {
-          comment: `Cast your vote on round ${roundId}`,
-        }).clause,
-      )
-    }
-
-    // When ENABLING: set preferences first, then toggle
-    if (shouldEnable && needsPreferenceUpdate) {
-      clauses.push(
-        contract.clause.setUserVotingPreferences(appIds, {
-          comment: "Set voting preferences for auto-voting",
-        }).clause,
-      )
-    }
-
-    // Always toggle auto-voting (enable or disable)
-    clauses.push(
-      contract.clause.toggleAutoVoting(userAddress, {
-        comment: shouldEnable ? "Enable auto-voting" : "Disable auto-voting",
-      }).clause,
-    )
-    return clauses
-  }
+  const clauseBuilder = ({ appIds }: ClausesProps) => [
+    contract.clause.setUserVotingPreferences(appIds, {
+      comment: "Update voting preferences for auto-voting",
+    }).clause,
+  ]
 
   const refetchQueryKeys = useMemo(() => {
     return [
@@ -116,8 +64,6 @@ export const useEnableAutoVotingAndVote = ({
       getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
       getXAppRoundEarningsQueryKey(roundId),
       getParticipatedInGovernanceQueryKey(account?.address ?? ""),
-      getIsAutoVotingEnabledQueryKey(account?.address ?? ""),
-      getUserVotingPreferencesQueryKey(account?.address ?? ""),
     ]
   }, [roundId, account?.address])
 
