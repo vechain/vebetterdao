@@ -25,8 +25,6 @@ export default async function Page({ params }: Readonly<Props>) {
     } else roundDetails = await getHistoricalRoundData(roundId)
   } else return redirect("/allocations/round")
 
-  const { apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount, totalVoters, totalVP } = roundDetails
-
   return (
     <VStack alignItems="stretch" w="full" gap="4">
       <PageBreadcrumb
@@ -52,18 +50,9 @@ export default async function Page({ params }: Readonly<Props>) {
           <Heading size="md">{`Round ${params.roundId}`}</Heading>
           <Text textStyle="sm">{"Aug 3 - Aug 10"}</Text>
         </VStack>
-        <RoundDistributionCard
-          roundDetails={{
-            totalVP,
-            totalVoters,
-            totalApp: apps.length,
-            xAllocationsAmount,
-            treasuryAmount,
-            vote2EarnAmount,
-          }}
-        />
+        <RoundDistributionCard roundDetails={roundDetails} />
         <UserVotingActivityCard roundDetails={roundDetails} />
-        <RoundActiveAppsListCard apps={apps} />
+        <RoundActiveAppsListCard apps={roundDetails.apps} />
       </VStack>
     </VStack>
   )

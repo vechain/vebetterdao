@@ -13,15 +13,86 @@ import {
   Icon,
   Avatar,
   Separator,
+  Switch,
+  Link,
 } from "@chakra-ui/react"
 import type { Meta, StoryObj } from "@storybook/nextjs-vite"
 import { Check, Flash } from "iconoir-react"
 import { useState } from "react"
 
-import { AutoVoteModal } from "@/app/allocations/components/AutoVoteModal"
 import { BaseModal } from "@/components/BaseModal"
 import { Modal } from "@/components/Modal"
 import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent/SuccessModalContent"
+
+const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation#service-fee"
+
+const AutoVoteModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [isAutomationOn, setIsAutomationOn] = useState(true)
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <Box textAlign="center" color="text.default">
+          <Text textStyle={{ base: "xl", md: "3xl" }} fontWeight="bold">
+            New feature!
+          </Text>
+          <Text textStyle={{ base: "xl", md: "3xl" }} fontWeight="bold">
+            Auto-vote & claim rewards
+          </Text>
+        </Box>
+      }
+      illustration="/assets/3d-illustrations/sparkles.webp"
+      showCloseButton
+      footer={
+        <HStack gap={4} w="full">
+          <Button variant="secondary" onClick={onClose} flex={1}>
+            Skip
+          </Button>
+          <Button variant="primary" onClick={onClose} flex={1}>
+            Apply
+          </Button>
+        </HStack>
+      }>
+      <VStack gap={4} align="stretch" textAlign="left" pt="4">
+        <Text textStyle={{ base: "sm", md: "md" }} color="text.default">
+          Automate your weekly votes and reward claims — no effort needed, just stay active in the DAO.
+        </Text>
+
+        <Text textStyle={{ base: "sm", md: "md" }} color="text.default">
+          A small{" "}
+          <Link href={AUTOMATION_DOCS_URL} target="_blank" textDecoration="underline">
+            fee
+          </Link>{" "}
+          will be taken from your weekly rewards to cover the service.
+        </Text>
+
+        <Card.Root variant="outline" p={4} border="sm" borderColor="border.secondary">
+          <HStack justify="space-between">
+            <Text textStyle="md" fontWeight="semibold">
+              Automation
+            </Text>
+            <Switch.Root
+              size="md"
+              defaultChecked
+              checked={isAutomationOn}
+              onCheckedChange={e => setIsAutomationOn(e.checked)}>
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+          </HStack>
+        </Card.Root>
+
+        <Text textStyle="xs" color="text.default" fontWeight="semibold" letterSpacing={0}>
+          You can manage it anytime from your profile settings.
+        </Text>
+      </VStack>
+    </Modal>
+  )
+}
 
 const meta: Meta<typeof Modal> = {
   title: "design-system/components/Modal/Allocation Modals",
@@ -35,16 +106,7 @@ export const AutomationToggleMobileLight: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(true)
 
-    return (
-      <AutoVoteModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        onApply={() => {
-          setIsOpen(false)
-        }}
-        defaultEnabled={true}
-      />
-    )
+    return <AutoVoteModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
   },
 }
 

@@ -4,7 +4,7 @@ import { CountdownBox } from "../components/CountdownBox"
 import { PotentialRewardBox } from "../components/PotentialRewardBox"
 import { VotingPowerBox } from "../components/VotingPowerBox"
 
-export default async function TabLayout({ children }: { children: React.ReactNode }) {
+export default async function TabLayout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
   return (
     <>
       <VStack alignItems="stretch" gap="2" w="full" mb="6">
@@ -24,8 +24,8 @@ export default async function TabLayout({ children }: { children: React.ReactNod
           </GridItem>
         </Grid>
       </VStack>
-
       {children}
+      {modal}
     </>
   )
 }

@@ -2,6 +2,7 @@
 
 import { Box, Button, Dialog, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import { useRouter, usePathname } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
@@ -10,7 +11,6 @@ import { useStickyState } from "@/hooks/useStickyState"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
-import { AutoVoteModal } from "../AutoVoteModal"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
 
 import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
@@ -35,38 +35,31 @@ interface AllocationTabsProviderProps {
 }
 
 export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
+  const router = useRouter()
+  const pathname = usePathname()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
-  const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(false)
+  const [isAutoVotingEnabled, _] = useState(false)
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const { onClose: closeTxModal } = useTransactionModal()
-  const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
 
   // @TODO: Add tracking so we don't show the modal to users who have already seen it
   useEffect(() => {
     // const hasSeenAutoVoteModal = localStorage.getItem("hasSeenAutoVoteModal")
     // if (hasVotesAtSnapshot && !hasSeenAutoVoteModal) {
-    //   openAutoVoteModal()
+    //   router.push(`${pathname}/auto-vote`)
     //   localStorage.setItem("hasSeenAutoVoteModal", "true")
     // }
 
-    if (hasVotesAtSnapshot) {
-      openAutoVoteModal()
+    const hasSeenAutoVoteModal = localStorage.getItem("hasSeenAutoVoteModal")
+    if (hasVotesAtSnapshot && !hasSeenAutoVoteModal) {
+      router.push(`${pathname}/auto-vote`)
     }
-  }, [hasVotesAtSnapshot, openAutoVoteModal])
-
-  // Handler for auto-vote modal
-  const handleAutoVoteApply = useCallback(
-    (enabled: boolean) => {
-      setIsAutoVotingEnabled(enabled)
-      closeAutoVoteModal()
-    },
-    [closeAutoVoteModal],
-  )
+  }, [hasVotesAtSnapshot, router, pathname])
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -148,8 +141,6 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
           onConfirm={handleConfirmVote}
         />
       )}
-
-      <AutoVoteModal isOpen={isAutoVoteModalOpen} onClose={closeAutoVoteModal} onApply={handleAutoVoteApply} />
     </AllocationTabsContext.Provider>
   )
 }

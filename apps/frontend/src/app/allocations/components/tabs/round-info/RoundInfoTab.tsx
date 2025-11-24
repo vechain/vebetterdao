@@ -34,7 +34,6 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
   const previous3RoundsEarnings = roundDetails.previous3RoundsEarnings
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { totalVP, totalVoters, apps, xAllocationsAmount, treasuryAmount, vote2EarnAmount } = roundDetails
   const isCurrentRound = roundDetails.currentRoundId === roundDetails.id
 
   const handleRoundNavigation = (newRoundId: number) => {
@@ -100,18 +99,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
           <ViewAllRoundsButton currentRoundId={roundDetails.currentRoundId} />
         </Flex>
       </Card.Root>
-
-      <RoundDistributionCard
-        roundDetails={{
-          totalVP,
-          totalVoters,
-          totalApp: apps.length,
-          xAllocationsAmount,
-          treasuryAmount,
-          vote2EarnAmount,
-        }}
-      />
-
+      <RoundDistributionCard roundDetails={roundDetails} />
       <VStack hideFrom="md" gap="3" alignItems="stretch">
         <HStack justifyContent="space-between" w="full">
           <Heading size="lg" fontWeight="semibold">
@@ -136,7 +124,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
       </VStack>
       <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap="6">
         <UserVotingActivityCard roundDetails={roundDetails} />
-        <RoundActiveAppsListCard apps={apps} />
+        <RoundActiveAppsListCard apps={roundDetails.apps} />
       </Grid>
     </VStack>
   )

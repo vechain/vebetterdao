@@ -27,8 +27,10 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
       cycle: round.roundId,
       voter: account?.address,
     },
-    mapResponse: ({ decodedData }) =>
-      getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
+    mapResponse: ({ decodedData }) => {
+      const reward = decodedData.args.reward + decodedData.args.gmReward
+      return (reward > 0n ? "+" : "") + getCompactFormatter(2).format(Number(formatEther(reward)))
+    },
   })
 
   const total = getCompactFormatter(2).format(Number(formatEther(totalReward)))
@@ -43,18 +45,18 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
                 <Heading size="md" fontWeight="semibold">
                   {roundId}
                 </Heading>
-                <Text textStyle="md">
+                <Text textStyle="sm" color="text.subtle">
                   {[roundStart, roundEnd].map(date => dayjs(date).format("MMM D")).join(" - ")}
                 </Text>
               </VStack>
 
-              <VStack gap="2" alignItems="flex-end">
+              <VStack gap="0.5" alignItems="flex-end">
                 <HStack gap="2">
                   <Icon as={B3TR} boxSize="5" />
                   <Heading size="sm" fontWeight="semibold">
                     <Skeleton loading={isRewardClaimedLoading}>
                       <Mark variant="text" color="status.positive.strong">
-                        {rewardClaimed && rewardClaimed.length > 0 ? rewardClaimed : "-"}
+                        {rewardClaimed && rewardClaimed.length > 0 ? `${rewardClaimed[0]}` : "-"}
                       </Mark>
                       {` / ${total}`}
                     </Skeleton>

@@ -106,18 +106,20 @@ export const Modal = ({
     )
 
   return (
-    <BaseBottomSheet
-      isOpen={isOpen}
-      onClose={onClose}
-      ariaTitle={ariaTitle ?? ""}
-      isDismissable={isCloseable}
-      ariaDescription={ariaDescription ?? ""}
-      footer={footer}
-      title={title}
-      illustration={illustration}
-      showCloseButton={showCloseButton}
-      description={description}>
-      {children}
-    </BaseBottomSheet>
+    <Dialog.Root>
+      <BaseBottomSheet
+        isOpen={isOpen}
+        onClose={onClose}
+        ariaTitle={ariaTitle ?? ""}
+        isDismissable={isCloseable}
+        ariaDescription={ariaDescription ?? ""}
+        footer={footer}
+        title={title}
+        illustration={illustration}
+        showCloseButton={showCloseButton}
+        description={description}>
+        {children}
+      </BaseBottomSheet>
+    </Dialog.Root>
   )
 }
