@@ -88,11 +88,12 @@ export const useFilteredProposals = (
   const sortByPhase = useCallback((proposals: ProposalWithStateAndDeposit[]) => {
     // Create phase index map for O(1) lookups
     const phaseIndexMap = new Map<ProposalState, number>([
-      //1 - Approval Phase
-      [ProposalState.Succeeded, 0],
-      [ProposalState.Active, 1],
-      //2 - Support Phase
-      [ProposalState.Pending, 2],
+      //0 - Approval Phase
+      [ProposalState.Active, 0],
+      //1 - Support Phase
+      [ProposalState.Pending, 1],
+      //2 - Approved
+      [ProposalState.Succeeded, 2],
       //3 - In Development
       [ProposalState.InDevelopment, 3],
       [ProposalState.Queued, 4],
