@@ -4,8 +4,8 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { expect } from "chai"
 
 import { deployAndUpgrade, upgradeProxy } from "../../scripts/helpers"
-import { Stargate, StargateNFT, X2EarnApps, X2EarnAppsV6, XAllocationVoting } from "../../typechain-types"
-import { createLegacyNodeHolder, createNodeHolder, getOrDeployContractInstances, ZERO_ADDRESS } from "../helpers"
+import { Stargate, StargateNFT, X2EarnApps, X2EarnAppsV6 } from "../../typechain-types"
+import { createLegacyNodeHolder, getOrDeployContractInstances, ZERO_ADDRESS } from "../helpers"
 
 let config: ContractsConfig
 let x2EarnApps: X2EarnApps
@@ -13,7 +13,7 @@ let otherAccounts: SignerWithAddress[]
 let owner: SignerWithAddress
 let stargateMock: Stargate
 let stargateNftMock: StargateNFT
-describe("X-Apps - V7 Upgrade - @shard15c", function () {
+describe("X-Apps - V7 Upgrade - @shard15d", function () {
   beforeEach(async function () {
     config = createLocalConfig()
 
