@@ -3,8 +3,9 @@ import Image from "next/image"
 import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
+import { useUserPreferences } from "@/hooks/useUserPreferences"
 
-import { setBannerEnabled, BannerStorageKey } from "../../Banners/GenericBanner"
+import { BannerStorageKey } from "../../Banners/GenericBanner"
 
 type Props = {
   isOpen: boolean
@@ -13,6 +14,7 @@ type Props = {
 
 export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
+  const { setPreferences } = useUserPreferences()
 
   return (
     <BaseModal
@@ -38,7 +40,7 @@ export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
             flex={1}
             variant="secondary"
             onClick={() => {
-              setBannerEnabled(BannerStorageKey.STARGATE_MIGRATION)
+              setPreferences({ [BannerStorageKey.SHOW_STARGATE_MIGRATION]: true })
               onClose()
             }}>
             {t("Later")}
