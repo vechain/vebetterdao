@@ -141,8 +141,8 @@ export const useAllocationVoting = ({
         if (shouldEnable) {
           customUI = createCustomUI(votingWeightDescription, waiting, success)
         } else {
-          // When disabling, we only show weight description if we are also voting (Case 5)
-          // If we already voted (Case 4), we hide the description
+          // When disabling, we only show weight description if we are also voting
+          // If we already voted, we hide the description
           const showDescription = !hasVoted
           const description = showDescription ? votingWeightDescription : undefined
 
@@ -207,12 +207,9 @@ export const useAllocationVoting = ({
           }
 
           updateVotingPreferences.sendTransaction({ appIds }, customUI)
-        } else {
-          // Preferences unchanged, nothing to do
-          console.warn("No transaction needed: preferences unchanged, relayer will handle voting")
         }
       }
-      // Default: No auto-voting involved, just regular vote
+      // Default: No auto-voting involved, just manual vote
       else {
         const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
           appId,
