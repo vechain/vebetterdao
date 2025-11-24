@@ -1,3 +1,5 @@
+"use client"
+
 import { Box, Card, Icon, Separator, Text, VStack, HStack, SimpleGrid, Button, GridItem } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Gift, NavArrowRight, SmartphoneDevice, Group, Flash, List } from "iconoir-react"
