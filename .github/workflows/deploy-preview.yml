@@ -22,7 +22,7 @@ env:
 
   # Terraform Paths
   TERRAFORM_DIR: terraform/frontend/frontend-env-level
-  TERRAFORM_ENV_DIR: terraform/frontend/environments
+  TERRAFORM_ENV_DIR: terraform/frontend/environments/env
   TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
