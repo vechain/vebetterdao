@@ -54,7 +54,7 @@ export const ProposalSupportModal = ({
 
     // For percentages less than 100%, use bigint math to maintain precision
     // Calculate (deposits * 10000) / threshold for 2 decimal precision, then divide by 100
-    const basisPoints = deposits / threshold
+    const basisPoints = (deposits * 10000n) / threshold
     return Number(basisPoints) / 100
   }, [])
 

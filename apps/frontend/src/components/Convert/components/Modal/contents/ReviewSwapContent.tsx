@@ -51,7 +51,9 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
         py={4}
         mt={4}
         data-testid={"confirm-swap-button"}>
-        <Text textStyle={{ base: "sm", md: "lg" }}>{t("Confirm conversion")}</Text>
+        <Text color="white" textStyle={{ base: "sm", md: "lg" }}>
+          {t("Confirm conversion")}
+        </Text>
       </Button>
     </VStack>
   )

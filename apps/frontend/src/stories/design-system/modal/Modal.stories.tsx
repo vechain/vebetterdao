@@ -51,7 +51,7 @@ export const CenterAlignedWithImage = () => {
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        illustration="/assets/mascot/mascot-welcoming.webp"
+        illustration="/assets/mascot/mascot-welcoming-left-head.webp"
         title="Support this proposal with VOT3"
         description="Show your support to this proposal by contributing with your VOT3 tokens, allowing it to be up for voting on Round 12."
         footer={

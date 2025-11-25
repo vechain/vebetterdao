@@ -7735,10 +7735,10 @@
     fast-json-stable-stringify "^2.1.0"
     viem "^2.21.45"
 
-"@vechain/sdk-core@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.npmjs.org/@vechain/sdk-core/-/sdk-core-2.0.4.tgz#a2281cd2db56543c32a34b525e94ff5720e19150"
-  integrity sha512-NzJim2X3ir2q4OmMIpFe++ssYLfOzSs7470yx591FW2N8NKOaluD08AvXwl8QnMQVoR9GfiGNLjGt0Om1IsW+w==
+"@vechain/sdk-core@2.0.7":
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-core/-/sdk-core-2.0.7.tgz#119466c12abef12cea1e3bdc4d1715c50d41d3f3"
+  integrity sha512-thIvP/8z8hN2LCV4cWinCTR3PdlJ9Yf5Hofp0EfB6McXL49qbVN/jo9iYj1RuQ3Uq+Um7qWuctbROsXVKOr84A==
   dependencies:
     "@ethereumjs/rlp" "^5.0.2"
     "@noble/ciphers" "^1.1.1"
@@ -7747,8 +7747,8 @@
     "@scure/base" "^1.2.4"
     "@scure/bip32" "^1.4.0"
     "@scure/bip39" "^1.5.1"
-    "@vechain/sdk-errors" "2.0.4"
-    "@vechain/sdk-logging" "2.0.4"
+    "@vechain/sdk-errors" "2.0.7"
+    "@vechain/sdk-logging" "2.0.7"
     abitype "^1.0.6"
     ethers "^6.14.0"
     fast-json-stable-stringify "^2.1.0"
@@ -7764,10 +7764,10 @@
   resolved "https://registry.npmjs.org/@vechain/sdk-errors/-/sdk-errors-1.2.0-rc.2.tgz#cf546886f027dace6746f3fbca9e209bb48d5500"
   integrity sha512-B1j9Mwh0qetcHZ3NBZfZV6SV2zlYsSJ3czG+Hl1mv2CrIZUX8Lg3GffcFuXH0Y6q2RYJVe6779bMkQDp0pJPWw==
 
-"@vechain/sdk-errors@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.npmjs.org/@vechain/sdk-errors/-/sdk-errors-2.0.4.tgz#20d84b454382fd05650e2eafdf4587ab339696e4"
-  integrity sha512-pdaf1B2TF9Z4QfLU8+sLoyDVAz2f3JsggTf+AxTNSX/WutKQTzi3z069xHYi/DEwSd0YUJR75rx8zBaCy5v++w==
+"@vechain/sdk-errors@2.0.7":
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-2.0.7.tgz#66aeae4a68637f9963c7761944629a279ac27854"
+  integrity sha512-MECekhZlgpoq4Qu0W2D1fXn1m8uAopZKZJWBvvwmNQ6ZgNjz/0dIewcQAFBZh0OIwwyYlbVXdwb00+WF0m3sjQ==
 
 "@vechain/sdk-ethers-adapter@1.2.0-rc.2":
   version "1.2.0-rc.2"
@@ -7807,12 +7807,12 @@
   dependencies:
     "@vechain/sdk-errors" "1.2.0-rc.2"
 
-"@vechain/sdk-logging@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.npmjs.org/@vechain/sdk-logging/-/sdk-logging-2.0.4.tgz#4a8a8e5bd3cfc876630b3b8f1e88de926ab7b688"
-  integrity sha512-MhZ8iOhxl/JEmxOYFfBq4tZz/c4rJZRy5GtOBYvmCydeCfA+uJvJ4A4xjs1ttFGkGBggN82nuHR3dNV2mjZqfA==
+"@vechain/sdk-logging@2.0.7":
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-logging/-/sdk-logging-2.0.7.tgz#31b5e51690db283b609a7c713eeef6e6d7e9c623"
+  integrity sha512-aok9LYAhgA16/41PH6ozuBWqxO0N9JDDlQBQ1AJj4ha+sQDE62J4iByNshXAoQxGUvQZaqGRZyFJ+QQAvmlcQw==
   dependencies:
-    "@vechain/sdk-errors" "2.0.4"
+    "@vechain/sdk-errors" "2.0.7"
 
 "@vechain/sdk-network@1.2.0":
   version "1.2.0"
@@ -7840,15 +7840,15 @@
     ethers "6.13.4"
     viem "^2.21.45"
 
-"@vechain/sdk-network@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.npmjs.org/@vechain/sdk-network/-/sdk-network-2.0.4.tgz#a945b51ccea18413e385eaa23c70715cd6a87fde"
-  integrity sha512-U6QvxWSXg2KQesyRagsaqpmr2InfUSVLTkp5p18Te0UKzFkggcDKYBBXV5tsvSmHk1Hah/wTqhfLLpeZKF4zgQ==
+"@vechain/sdk-network@2.0.7":
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-network/-/sdk-network-2.0.7.tgz#6b5f15dc6a529cae9ca6ace03de7a3c8aad65ce8"
+  integrity sha512-tt8CEf7JQXpbYYRPNHgzBUCOEGzxxn+cH5GOL2dVEod4k8sYaoGRL7AAXVu7VS/c49FY3GLFMtDCZ6e8ovlKfg==
   dependencies:
     "@noble/curves" "^1.6.0"
-    "@vechain/sdk-core" "2.0.4"
-    "@vechain/sdk-errors" "2.0.4"
-    "@vechain/sdk-logging" "2.0.4"
+    "@vechain/sdk-core" "2.0.7"
+    "@vechain/sdk-errors" "2.0.7"
+    "@vechain/sdk-logging" "2.0.7"
     abitype "1.0.8"
     ethers "^6.14.0"
     viem "^2.21.54"
