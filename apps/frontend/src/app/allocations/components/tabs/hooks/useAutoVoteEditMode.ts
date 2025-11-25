@@ -24,12 +24,20 @@ export const useAutoVoteEditMode = ({
 }: UseAutoVoteEditModeProps) => {
   const [isEditingAutoVote, setIsEditingAutoVote] = useState(false)
 
+  // Check if user has existing preferences on chain
+  const hasExistingPreferences = storedPreferences.length > 0
+
   // Check if preferences have changed from chain state
+  // For enable mode (no existing preferences): any selection is valid
+  // For edit mode: compare against existing preferences
   const hasAutoVoteChanges = useMemo(() => {
     if (!isEditingAutoVote) return false
+    // Enable mode: any selection counts as a valid change
+    if (!hasExistingPreferences) return selectedAppIds.size > 0
+    // Edit mode: compare against existing preferences
     const selectedIds = Array.from(selectedAppIds)
     return storedPreferences.length !== selectedIds.length || !selectedIds.every(id => storedPreferences.includes(id))
-  }, [isEditingAutoVote, selectedAppIds, storedPreferences])
+  }, [isEditingAutoVote, selectedAppIds, storedPreferences, hasExistingPreferences])
 
   // Get apps to preselect: stored preferences (priority) or voted apps
   const getAppsToPreselect = useCallback(() => {
@@ -69,6 +77,7 @@ export const useAutoVoteEditMode = ({
   return {
     isEditingAutoVote,
     hasAutoVoteChanges,
+    hasExistingPreferences,
     handleEditAutoVote,
     handleCancelEditAutoVote,
     handleSaveAutoVote,

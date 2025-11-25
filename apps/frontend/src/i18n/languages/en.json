@@ -1603,5 +1603,7 @@
   "Save Auto-Vote": "Save Auto-Vote",
   "Vote for {{count}} Apps": "Vote for {{count}} Apps",
   "Vote for {{count}} App": "Vote for {{count}} App",
-  "Cancel Edit": "Cancel Edit"
+  "Cancel Edit": "Cancel Edit",
+  "Enable Auto-Voting & Claim": "Enable Auto-Voting & Claim",
+  "Edit selection": "Edit selection"
 }

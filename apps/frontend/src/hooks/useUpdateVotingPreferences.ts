@@ -8,6 +8,7 @@ import { getXAppRoundEarningsQueryKey } from "@/api/contracts/xAllocationPool/ho
 import { getAllocationVotersQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVoters"
 import { getAllocationVotesQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVotes"
 import { getHasVotedInRoundQueryKey } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { getUserVotingPreferencesQueryKey } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { getUserVotesInRoundQueryKey } from "@/api/contracts/xApps/hooks/useUserVotesInRound"
 import { getXAppsSharesQueryKey } from "@/api/contracts/xApps/hooks/useXAppShares"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
@@ -64,6 +65,7 @@ export const useUpdateVotingPreferences = ({
       getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
       getXAppRoundEarningsQueryKey(roundId),
       getParticipatedInGovernanceQueryKey(account?.address ?? ""),
+      getUserVotingPreferencesQueryKey(account?.address ?? ""),
     ]
   }, [roundId, account?.address])
 
