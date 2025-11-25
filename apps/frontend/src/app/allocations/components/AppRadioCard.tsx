@@ -4,9 +4,9 @@ import { Check, Group } from "iconoir-react"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { AppCategoryItem } from "@/types/appDetails"
 
-type DisplayMode = "checkbox" | "voted"
+export type DisplayMode = "checkbox" | "voted"
 
-interface AppRadioCardProps {
+export interface AppRadioCardProps {
   appId: string
   appName: string
   appCategory?: AppCategoryItem
