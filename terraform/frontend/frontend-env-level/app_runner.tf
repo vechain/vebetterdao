@@ -1,5 +1,5 @@
 locals {
-  service_name             = coalesce(lookup(local.env, "service_name", null), "${local.env.project_name}-${local.env.environment}")
+  service_name             = "${local.env.environment}-governance"
   custom_domain_enabled    = lookup(local.env, "enable_custom_domain", false)
   ssm_parameter_prefix = "/b3tr/frontend/"
   runtime_env_var_names = [
@@ -33,7 +33,7 @@ data "aws_ssm_parameter" "runtime_env_secrets" {
 }
 
 resource "aws_apprunner_auto_scaling_configuration_version" "frontend" {
-  auto_scaling_configuration_name = "${local.service_name}-scaling"
+  auto_scaling_configuration_name = local.service_name
 
   max_concurrency = local.env.max_concurrency
   min_size        = local.env.min_size
@@ -69,7 +69,7 @@ resource "aws_apprunner_service" "frontend" {
       }
     }
 
-    auto_deployments_enabled = lookup(local.env, "auto_deployments_enabled", false)
+    auto_deployments_enabled = local.env.auto_deployments_enabled
   }
 
   instance_configuration {
@@ -82,16 +82,17 @@ resource "aws_apprunner_service" "frontend" {
 
   health_check_configuration {
     protocol            = "HTTP"
-    path                = lookup(local.env, "health_check_path", "/")
-    interval            = lookup(local.env, "health_check_interval", 20)
-    timeout             = lookup(local.env, "health_check_timeout", 10)
-    healthy_threshold   = lookup(local.env, "health_check_healthy_threshold", 1)
-    unhealthy_threshold = lookup(local.env, "health_check_unhealthy_threshold", 3)
+    path                = local.env.health_check_path
+    interval            = 10
+    timeout             = 5
+    healthy_threshold   = 1
+    unhealthy_threshold = 3
   }
 
-  tags = merge(local.default_tags, {
-    Name = local.service_name
-  })
+  tags = {
+    Name        = local.service_name
+    Environment = local.env.environment
+  }
 }
 
 resource "aws_apprunner_custom_domain_association" "frontend" {
