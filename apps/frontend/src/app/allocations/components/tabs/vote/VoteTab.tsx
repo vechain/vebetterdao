@@ -34,6 +34,8 @@ export function VoteTab() {
     onCancelEditAutoVote,
     onSaveAutoVote,
     hasAutoVoteChanges,
+    hasExistingPreferences,
+    onEnableAutoVoting,
   } = context
   const router = useRouter()
   const pathname = usePathname()
@@ -131,6 +133,8 @@ export function VoteTab() {
           onCancelEditAutoVote={onCancelEditAutoVote}
           onSaveAutoVote={onSaveAutoVote}
           hasAutoVoteChanges={hasAutoVoteChanges}
+          hasExistingPreferences={hasExistingPreferences}
+          onEnableAutoVoting={onEnableAutoVoting}
         />
       </Bleed>
 

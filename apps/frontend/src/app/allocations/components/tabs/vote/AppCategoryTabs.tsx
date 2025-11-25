@@ -58,6 +58,8 @@ interface AppCategoryTabsProps {
   onCancelEditAutoVote?: () => void
   onSaveAutoVote?: () => void
   hasAutoVoteChanges?: boolean
+  hasExistingPreferences?: boolean
+  onEnableAutoVoting?: () => void
 }
 
 const categoryCollection = createListCollection({
@@ -87,6 +89,8 @@ export function AppCategoryTabs({
   onCancelEditAutoVote,
   onSaveAutoVote,
   hasAutoVoteChanges = false,
+  hasExistingPreferences = false,
+  onEnableAutoVoting,
 }: AppCategoryTabsProps) {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
@@ -115,14 +119,20 @@ export function AppCategoryTabs({
     })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
+  // Don't re-sort during editing to prevent apps jumping around
+  // Only sort when in "voted" display mode (not editing)
   const sortedAppsWithSelected = useMemo(() => {
+    // If editing, don't sort - keep stable order
+    if (isEditingAutoVote) return filteredApps
+
+    // Sort selected apps to top only when viewing (not editing)
     return filteredApps.slice().sort((a, b) => {
       const aSelected = selectedAppIds?.has(a.id) ?? false
       const bSelected = selectedAppIds?.has(b.id) ?? false
       if (aSelected === bSelected) return 0
       return aSelected ? -1 : 1
     })
-  }, [filteredApps, selectedAppIds])
+  }, [filteredApps, selectedAppIds, isEditingAutoVote])
 
   const visibleApps = useMemo(() => {
     if (!showPagination) return sortedAppsWithSelected
@@ -154,6 +164,59 @@ export function AppCategoryTabs({
     }
   }
 
+  // Helper to render action buttons based on voting state
+  const renderActionButtons = () => {
+    // Case 1: User hasn't voted yet - show vote button
+    if (!hasVoted) {
+      const voteButtonText =
+        selectedAppIds && selectedAppIds.size > 0
+          ? selectedAppIds.size > 1
+            ? t("Vote for {{count}} Apps", { count: selectedAppIds.size })
+            : t("Vote for {{count}} App", { count: selectedAppIds.size })
+          : t("Vote")
+
+      return (
+        <Button
+          variant="primary"
+          minWidth="36"
+          onClick={onVoteClick}
+          disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
+          {voteButtonText}
+        </Button>
+      )
+    }
+
+    // Case 2: User is editing auto-vote preferences - show cancel/save buttons
+    if (isEditingAutoVote) {
+      return (
+        <>
+          <Button variant="secondary" onClick={onCancelEditAutoVote}>
+            {t("Cancel Edit")}
+          </Button>
+          <Button variant="primary" minWidth="36" disabled={!hasAutoVoteChanges} onClick={onSaveAutoVote}>
+            {t("Save Auto-Vote")}
+          </Button>
+        </>
+      )
+    }
+
+    // Case 3: User has voted + auto-voting enabled - show edit button
+    if (isAutoVotingEnabled) {
+      return (
+        <Button variant="primary" minWidth="36" onClick={onEditAutoVote}>
+          {hasExistingPreferences ? t("Edit Auto-Vote") : t("Enable Auto-Voting & Claim")}
+        </Button>
+      )
+    }
+
+    // Case 4: User has voted + auto-voting NOT enabled - show enable button
+    return (
+      <Button variant="primary" minWidth="36" onClick={onEnableAutoVoting}>
+        {t("Enable Auto-Voting & Claim")}
+      </Button>
+    )
+  }
+
   useEffect(() => {
     setCurrentPage(1)
   }, [selectedCategory])
@@ -178,38 +241,7 @@ export function AppCategoryTabs({
                   {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
                 </Button>
               )}
-              {isAutoVotingEnabled && hasVoted ? (
-                isEditingAutoVote ? (
-                  <>
-                    <Button variant="secondary" onClick={onCancelEditAutoVote}>
-                      {t("Cancel Edit")}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      minWidth="36"
-                      disabled={!hasAutoVoteChanges || !selectedAppIds || selectedAppIds.size === 0}
-                      onClick={onSaveAutoVote}>
-                      {t("Save Auto-Vote")}
-                    </Button>
-                  </>
-                ) : (
-                  <Button variant="primary" minWidth="36" onClick={onEditAutoVote}>
-                    {t("Edit Auto-Vote")}
-                  </Button>
-                )
-              ) : (
-                <Button
-                  variant="primary"
-                  minWidth="36"
-                  onClick={onVoteClick}
-                  disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
-                  {selectedAppIds && selectedAppIds.size > 0
-                    ? selectedAppIds.size > 1
-                      ? t("Vote for {{count}} Apps", { count: selectedAppIds?.size })
-                      : t("Vote for {{count}} App", { count: selectedAppIds?.size })
-                    : t("Vote")}
-                </Button>
-              )}
+              {renderActionButtons()}
             </Flex>
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">

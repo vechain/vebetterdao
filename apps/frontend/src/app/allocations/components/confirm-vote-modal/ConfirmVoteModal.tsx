@@ -24,6 +24,8 @@ interface ConfirmVoteModalProps {
   isAutoVotingEnabledOnChain: boolean
   onToggleAutoVoting: (enabled: boolean) => void
   nextRoundNumber?: number | string
+  onEditSelection?: () => void
+  hasVoted: boolean
 }
 
 export const ConfirmVoteModal = ({
@@ -35,6 +37,8 @@ export const ConfirmVoteModal = ({
   isAutoVotingEnabledOnChain,
   onToggleAutoVoting,
   nextRoundNumber,
+  onEditSelection,
+  hasVoted,
 }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
@@ -50,8 +54,8 @@ export const ConfirmVoteModal = ({
 
   const canSubmit = isValid
 
-  // We only allow customisation if the user is manually voting AND auto-voting is not enabled on chain
-  const shouldShowCustomisation = !isAutoVotingEnabledOnChain
+  // Only allow customisation if user hasn't voted AND auto-voting is not enabled
+  const shouldShowCustomisation = !isAutoVotingEnabledOnChain && !hasVoted
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
@@ -119,7 +123,7 @@ export const ConfirmVoteModal = ({
                 ) : undefined
               }
             />
-            <SelectedAppsPreview apps={selectedApps} />
+            <SelectedAppsPreview apps={selectedApps} onEditSelection={onEditSelection} />
           </>
         ) : (
           <>

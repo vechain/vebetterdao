@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, Dialog, HStack, Presence, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, HStack, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -38,6 +38,8 @@ interface AllocationTabsContextType {
   onCancelEditAutoVote: () => void
   onSaveAutoVote: () => void
   hasAutoVoteChanges: boolean
+  hasExistingPreferences: boolean
+  onEnableAutoVoting: () => void
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
@@ -76,10 +78,25 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     }
   }, [isAutoVotingEnabledOnChain])
 
+  const handleOpenModal = useCallback(() => {
+    setIsAutoVotingEnabled(true)
+    openModal()
+  }, [openModal])
+
+  const handleEnableAutoVoting = useCallback(() => {
+    if (castVotesEvent?.appsIds) {
+      const votedApps = new Set(castVotesEvent.appsIds)
+      setSelectedAppIds(votedApps)
+      onSelectedAppsChange?.(votedApps)
+    }
+    handleOpenModal()
+  }, [handleOpenModal, castVotesEvent?.appsIds, onSelectedAppsChange])
+
   // Auto-vote edit mode
   const {
     isEditingAutoVote,
     hasAutoVoteChanges,
+    hasExistingPreferences,
     handleEditAutoVote,
     handleCancelEditAutoVote,
     handleSaveAutoVote,
@@ -90,12 +107,14 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     selectedAppIds,
     setSelectedAppIds,
     onSelectedAppsChange,
-    openModal,
+    openModal: handleOpenModal, // Use handleOpenModal to ensure toggle is set correctly
   })
 
-  const handleOpenModal = useCallback(() => {
-    openModal()
-  }, [openModal])
+  // Handler for "Edit selection" in modal - closes modal and enters edit mode
+  const handleEditSelection = useCallback(() => {
+    closeModal()
+    handleEditAutoVote()
+  }, [closeModal, handleEditAutoVote])
 
   const handleCloseModal = useCallback(() => {
     closeModal()
@@ -122,7 +141,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   )
 
   const onVoteSuccess = useCallback(() => {
-    setSelectedAppIds(new Set())
+    // Don't clear selectedAppIds - keep them so voted apps show as ticked
     resetEditMode()
     handleCloseModal()
     closeTxModal()
@@ -136,14 +155,20 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   })
 
   useEffect(() => {
-    if (hasVoted && castVotesEvent?.appsIds) {
+    // Initialise selectedAppIds from voted apps when data first loads
+    // Condition check for !isEditingAutoVote prevents updates during editing
+    if (hasVoted && castVotesEvent?.appsIds && !isEditingAutoVote) {
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
       onSelectedAppsChange?.(votedAppIds)
     }
-  }, [hasVoted, castVotesEvent, onSelectedAppsChange])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasVoted, castVotesEvent?.appsIds])
 
-  // Determine if we should show auto-vote edit UI
+  // Show when user has voted - either to edit existing preferences or enable auto-voting
+  const showAutoVoteUI = hasVoted ?? false
+
+  // Show edit mode only when auto-voting is already enabled on chain
   const showAutoVoteEditMode = (isAutoVotingEnabledOnChain ?? false) && (hasVoted ?? false)
 
   return (
@@ -166,6 +191,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         onCancelEditAutoVote: handleCancelEditAutoVote,
         onSaveAutoVote: handleSaveAutoVote,
         hasAutoVoteChanges,
+        hasExistingPreferences,
+        onEnableAutoVoting: handleEnableAutoVoting,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
@@ -173,7 +200,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
 
       <Presence
         hideFrom="md"
-        present={selectedAppIds.size > 0 || showAutoVoteEditMode}
+        present={selectedAppIds.size > 0 || showAutoVoteUI}
         animationName={{
           _open: "slide-from-bottom",
           _closed: "slide-to-bottom, fade-out",
@@ -185,40 +212,37 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         right={0}
         zIndex={50}>
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
-          <Dialog.Root>
-            <Dialog.Trigger asChild>
-              {showAutoVoteEditMode ? (
-                isEditingAutoVote ? (
-                  <HStack gap="3" w="full">
-                    <Button flex={1} variant="secondary" onClick={handleCancelEditAutoVote}>
-                      {t("Cancel Edit")}
-                    </Button>
-                    <Button
-                      flex={1}
-                      variant="primary"
-                      disabled={!hasAutoVoteChanges || selectedAppIds.size === 0}
-                      onClick={handleSaveAutoVote}>
-                      {t("Save Auto-Vote")}
-                    </Button>
-                  </HStack>
-                ) : (
-                  <Button w="full" variant="primary" onClick={handleEditAutoVote}>
-                    {t("Edit Auto-Vote")}
-                  </Button>
-                )
-              ) : (
-                <Button
-                  w="full"
-                  variant="primary"
-                  disabled={!hasVotesAtSnapshot || selectedAppIds.size === 0}
-                  onClick={handleOpenModal}>
-                  {selectedAppIds.size > 1
-                    ? t("Vote for {{count}} Apps", { count: selectedAppIds?.size })
-                    : t("Vote for {{count}} App", { count: selectedAppIds?.size })}
+          {showAutoVoteUI ? (
+            isEditingAutoVote ? (
+              // Edit mode: Cancel/Save buttons
+              <HStack gap="3" w="full">
+                <Button flex={1} variant="secondary" onClick={handleCancelEditAutoVote}>
+                  {t("Cancel Edit")}
                 </Button>
-              )}
-            </Dialog.Trigger>
-          </Dialog.Root>
+                <Button flex={1} variant="primary" disabled={!hasAutoVoteChanges} onClick={handleSaveAutoVote}>
+                  {t("Save Auto-Vote")}
+                </Button>
+              </HStack>
+            ) : showAutoVoteEditMode ? (
+              <Button w="full" variant="primary" onClick={handleEditAutoVote}>
+                {hasExistingPreferences ? t("Edit Auto-Vote") : t("Enable Auto-Voting & Claim")}
+              </Button>
+            ) : (
+              <Button w="full" variant="primary" onClick={handleEnableAutoVoting}>
+                {t("Enable Auto-Voting & Claim")}
+              </Button>
+            )
+          ) : (
+            <Button
+              w="full"
+              variant="primary"
+              disabled={!hasVotesAtSnapshot || selectedAppIds.size === 0}
+              onClick={handleOpenModal}>
+              {selectedAppIds.size > 1
+                ? t("Vote for {{count}} Apps", { count: selectedAppIds?.size })
+                : t("Vote for {{count}} App", { count: selectedAppIds?.size })}
+            </Button>
+          )}
         </Box>
       </Presence>
 
@@ -232,6 +256,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
           isAutoVotingEnabledOnChain={isAutoVotingEnabledOnChain ?? false}
           onToggleAutoVoting={setIsAutoVotingEnabled}
           nextRoundNumber={roundDetails.id + 1}
+          onEditSelection={handleEditSelection}
+          hasVoted={hasVoted ?? false}
         />
       )}
     </AllocationTabsContext.Provider>
