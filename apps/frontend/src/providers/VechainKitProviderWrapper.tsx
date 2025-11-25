@@ -74,8 +74,8 @@ export function VechainKitProviderWrapper({ children }: Props) {
         walletConnectOptions: {
           projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
           metadata: {
-            name: "VeBetterDAO App",
-            description: "This is the official VeBetterDAO app.",
+            name: "VeBetter App",
+            description: "This is the official VeBetter app.",
             url: typeof window !== "undefined" ? window.location.origin : "",
             icons: [typeof window !== "undefined" ? vebetterLogo : ""],
           },
@@ -96,7 +96,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
         termsAndConditions: [
           {
             url: "https://vebetterdao.org/terms-of-service",
-            displayName: "VeBetterDAO Terms of Service",
+            displayName: "VeBetter Terms of Service",
             version: 1,
             required: true,
           },
