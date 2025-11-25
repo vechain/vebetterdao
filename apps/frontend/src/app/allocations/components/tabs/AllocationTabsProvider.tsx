@@ -172,7 +172,9 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
           selectedApps={selectedApps}
           onConfirm={handleConfirmVote}
           isAutoVotingEnabled={isAutoVotingEnabled}
+          isAutoVotingEnabledOnChain={isAutoVotingEnabledOnChain ?? false}
           onToggleAutoVoting={setIsAutoVotingEnabled}
+          nextRoundNumber={roundDetails.id + 1}
         />
       )}
     </AllocationTabsContext.Provider>

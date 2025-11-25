@@ -21,7 +21,9 @@ interface ConfirmVoteModalProps {
   selectedApps: AppWithVotes[]
   onConfirm: (allocations: Map<string, number>) => void
   isAutoVotingEnabled: boolean
+  isAutoVotingEnabledOnChain: boolean
   onToggleAutoVoting: (enabled: boolean) => void
+  nextRoundNumber?: number | string
 }
 
 export const ConfirmVoteModal = ({
@@ -30,7 +32,9 @@ export const ConfirmVoteModal = ({
   selectedApps,
   onConfirm,
   isAutoVotingEnabled,
+  isAutoVotingEnabledOnChain,
   onToggleAutoVoting,
+  nextRoundNumber,
 }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
@@ -45,6 +49,9 @@ export const ConfirmVoteModal = ({
   const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
 
   const canSubmit = isValid
+
+  // We only allow customisation if the user is manually voting AND auto-voting is not enabled on chain
+  const shouldShowCustomisation = !isAutoVotingEnabledOnChain
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
@@ -99,15 +106,17 @@ export const ConfirmVoteModal = ({
               vot3Balance={vot3Balance}
               isLoading={isLoadingBalance}
               button={
-                <Button
-                  variant="link"
-                  onClick={() => setIsCustomising(true)}
-                  w="full"
-                  justifyContent="center"
-                  textStyle="md"
-                  fontWeight="semibold">
-                  {t("Customise votes")}
-                </Button>
+                shouldShowCustomisation ? (
+                  <Button
+                    variant="link"
+                    onClick={() => setIsCustomising(true)}
+                    w="full"
+                    justifyContent="center"
+                    textStyle="md"
+                    fontWeight="semibold">
+                    {t("Customise votes")}
+                  </Button>
+                ) : undefined
               }
             />
             <SelectedAppsPreview apps={selectedApps} />
@@ -138,7 +147,11 @@ export const ConfirmVoteModal = ({
             />
           </>
         )}
-        <AutomationToggleCard checked={isAutoVotingEnabled} onCheckedChange={onToggleAutoVoting} />
+        <AutomationToggleCard
+          checked={isAutoVotingEnabled}
+          onCheckedChange={onToggleAutoVoting}
+          nextRoundNumber={nextRoundNumber}
+        />
       </VStack>
     </Modal>
   )

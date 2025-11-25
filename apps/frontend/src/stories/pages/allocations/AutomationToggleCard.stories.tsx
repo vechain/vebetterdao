@@ -21,6 +21,7 @@ export const Default = () => {
         checked={checked}
         onCheckedChange={setChecked}
         icon={<Icon as={Settings} boxSize="5" color="text.subtle" />}
+        nextRoundNumber={10}
       />
     </VStack>
   )
