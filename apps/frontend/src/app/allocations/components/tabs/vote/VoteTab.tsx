@@ -29,6 +29,11 @@ export function VoteTab() {
     hasVoted,
     hasVotedLoading,
     isAutoVotingEnabled,
+    isEditingAutoVote,
+    onEditAutoVote,
+    onCancelEditAutoVote,
+    onSaveAutoVote,
+    hasAutoVoteChanges,
   } = context
   const router = useRouter()
   const pathname = usePathname()
@@ -121,6 +126,11 @@ export function VoteTab() {
           hasVotedLoading={hasVotedLoading}
           threshold={threshold}
           isAutoVotingEnabled={isAutoVotingEnabled}
+          isEditingAutoVote={isEditingAutoVote}
+          onEditAutoVote={onEditAutoVote}
+          onCancelEditAutoVote={onCancelEditAutoVote}
+          onSaveAutoVote={onSaveAutoVote}
+          hasAutoVoteChanges={hasAutoVoteChanges}
         />
       </Bleed>
 

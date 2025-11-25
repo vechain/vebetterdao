@@ -1598,5 +1598,10 @@
   "Auto-vote & claim": "Auto-vote & claim",
   "Activates from Round {{round}} onwards": "Activates from Round {{round}} onwards",
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.",
-  "<0>A fee</0> of 10% of your B3TR rewards will be deducted to cover the auto-voting service.": "<0>A fee</0> of 10% of your B3TR rewards will be deducted to cover the auto-voting service."
+  "<0>A fee</0> of 10% of your B3TR rewards will be deducted to cover the auto-voting service.": "<0>A fee</0> of 10% of your B3TR rewards will be deducted to cover the auto-voting service.",
+  "Edit Auto-Vote": "Edit Auto-Vote",
+  "Save Auto-Vote": "Save Auto-Vote",
+  "Vote for {{count}} Apps": "Vote for {{count}} Apps",
+  "Vote for {{count}} App": "Vote for {{count}} App",
+  "Cancel Edit": "Cancel Edit"
 }

@@ -22,6 +22,7 @@ import {
 } from "@chakra-ui/react"
 import { Search, Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
@@ -52,6 +53,11 @@ interface AppCategoryTabsProps {
   hasVotedLoading?: boolean
   threshold?: string
   isAutoVotingEnabled?: boolean
+  isEditingAutoVote?: boolean
+  onEditAutoVote?: () => void
+  onCancelEditAutoVote?: () => void
+  onSaveAutoVote?: () => void
+  hasAutoVoteChanges?: boolean
 }
 
 const categoryCollection = createListCollection({
@@ -76,7 +82,13 @@ export function AppCategoryTabs({
   hasVotedLoading = false,
   threshold,
   isAutoVotingEnabled = false,
+  isEditingAutoVote = false,
+  onEditAutoVote,
+  onCancelEditAutoVote,
+  onSaveAutoVote,
+  hasAutoVoteChanges = false,
 }: AppCategoryTabsProps) {
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
@@ -160,20 +172,44 @@ export function AppCategoryTabs({
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">
-              <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
-                {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
-              </Button>
-              <Button
-                variant="primary"
-                minWidth="36"
-                onClick={onVoteClick}
-                disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
-                {selectedAppIds && selectedAppIds.size > 0
-                  ? selectedAppIds.size > 1
-                    ? `${isAutoVotingEnabled && hasVoted ? "Automate" : "Vote"} for ${selectedAppIds?.size} Apps`
-                    : `${isAutoVotingEnabled && hasVoted ? "Automate" : "Vote"} for 1 App`
-                  : "Vote"}
-              </Button>
+              {/* Show select all only when not in auto-vote edit mode or when editing */}
+              {(!isAutoVotingEnabled || !hasVoted || isEditingAutoVote) && (
+                <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
+                  {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
+                </Button>
+              )}
+              {isAutoVotingEnabled && hasVoted ? (
+                isEditingAutoVote ? (
+                  <>
+                    <Button variant="secondary" onClick={onCancelEditAutoVote}>
+                      {t("Cancel Edit")}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      minWidth="36"
+                      disabled={!hasAutoVoteChanges || !selectedAppIds || selectedAppIds.size === 0}
+                      onClick={onSaveAutoVote}>
+                      {t("Save Auto-Vote")}
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="primary" minWidth="36" onClick={onEditAutoVote}>
+                    {t("Edit Auto-Vote")}
+                  </Button>
+                )
+              ) : (
+                <Button
+                  variant="primary"
+                  minWidth="36"
+                  onClick={onVoteClick}
+                  disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
+                  {selectedAppIds && selectedAppIds.size > 0
+                    ? selectedAppIds.size > 1
+                      ? t("Vote for {{count}} Apps", { count: selectedAppIds?.size })
+                      : t("Vote for {{count}} App", { count: selectedAppIds?.size })
+                    : t("Vote")}
+                </Button>
+              )}
             </Flex>
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">
@@ -282,7 +318,7 @@ export function AppCategoryTabs({
                   allocationSharePercentage={appSharesMap.get(app.id)}
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
-                  displayMode={hasVoted ? "voted" : "checkbox"}
+                  displayMode={hasVoted && !isEditingAutoVote ? "voted" : "checkbox"}
                 />
               ))
             ) : searchQuery.length > 0 && showEmptyState ? (
