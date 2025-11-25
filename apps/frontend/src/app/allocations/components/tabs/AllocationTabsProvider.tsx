@@ -76,6 +76,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     }
   }, [isAutoVotingEnabledOnChain])
 
+  // Auto-vote edit mode
   const {
     isEditingAutoVote,
     hasAutoVoteChanges,

@@ -1,8 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
-
-import { getAutoVotingState } from "@/hooks/useAutoVotingState"
+import { useCallback, useMemo, useState } from "react"
 
 interface UseAutoVoteEditModeProps {
   storedPreferences: string[]
@@ -15,7 +13,6 @@ interface UseAutoVoteEditModeProps {
 
 /**
  * Hook to manage auto-vote edit mode state and actions
- * Leverages getAutoVotingState for preference change detection
  */
 export const useAutoVoteEditMode = ({
   storedPreferences,
@@ -27,37 +24,37 @@ export const useAutoVoteEditMode = ({
 }: UseAutoVoteEditModeProps) => {
   const [isEditingAutoVote, setIsEditingAutoVote] = useState(false)
 
-  // Use getAutoVotingState to detect if preferences have changed from chain state
-  const { preferencesChanged } = getAutoVotingState({
-    isAutoVotingEnabled: true,
-    isAutoVotingEnabledOnChain: true,
-    selectedAppIds: Array.from(selectedAppIds),
-    currentPreferences: storedPreferences,
-    hasVoted: true,
-  })
+  // Check if preferences have changed from chain state
+  const hasAutoVoteChanges = useMemo(() => {
+    if (!isEditingAutoVote) return false
+    const selectedIds = Array.from(selectedAppIds)
+    return storedPreferences.length !== selectedIds.length || !selectedIds.every(id => storedPreferences.includes(id))
+  }, [isEditingAutoVote, selectedAppIds, storedPreferences])
 
-  // Only show "Save" as enabled when editing AND preferences differ from chain
-  const hasAutoVoteChanges = isEditingAutoVote && preferencesChanged
+  // Get apps to preselect: stored preferences (priority) or voted apps
+  const getAppsToPreselect = useCallback(() => {
+    return storedPreferences.length > 0
+      ? new Set(storedPreferences)
+      : votedAppIds
+        ? new Set(votedAppIds)
+        : new Set<string>()
+  }, [storedPreferences, votedAppIds])
 
   // Enter edit mode - load preferences from chain (priority) or voted apps
   const handleEditAutoVote = useCallback(() => {
-    const appsToPreselect =
-      storedPreferences.length > 0 ? new Set(storedPreferences) : votedAppIds ? new Set(votedAppIds) : new Set<string>()
-
+    const appsToPreselect = getAppsToPreselect()
     setSelectedAppIds(appsToPreselect)
     onSelectedAppsChange?.(appsToPreselect)
     setIsEditingAutoVote(true)
-  }, [storedPreferences, votedAppIds, setSelectedAppIds, onSelectedAppsChange])
+  }, [getAppsToPreselect, setSelectedAppIds, onSelectedAppsChange])
 
   // Cancel edit mode - reload from chain state
   const handleCancelEditAutoVote = useCallback(() => {
-    const appsToRestore =
-      storedPreferences.length > 0 ? new Set(storedPreferences) : votedAppIds ? new Set(votedAppIds) : new Set<string>()
-
+    const appsToRestore = getAppsToPreselect()
     setSelectedAppIds(appsToRestore)
     onSelectedAppsChange?.(appsToRestore)
     setIsEditingAutoVote(false)
-  }, [storedPreferences, votedAppIds, setSelectedAppIds, onSelectedAppsChange])
+  }, [getAppsToPreselect, setSelectedAppIds, onSelectedAppsChange])
 
   // Save auto-vote preferences (triggers confirm modal)
   const handleSaveAutoVote = useCallback(() => {
