@@ -30,14 +30,6 @@ locals {
 provider "aws" {
   region = local.env.region
 
-  dynamic "assume_role" {
-    for_each = lookup(local.env, "assume_role_arn", null) == null ? [] : [local.env.assume_role_arn]
-    content {
-      role_arn     = assume_role.value
-      session_name = "terraform-${local.env.environment}"
-    }
-  }
-
   default_tags {
     tags = local.default_tags
   }
