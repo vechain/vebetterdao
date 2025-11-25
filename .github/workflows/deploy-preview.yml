@@ -13,12 +13,12 @@ concurrency:
 env:
   # AWS Configuration
   AWS_REGION: eu-west-1
-  ECR_REPOSITORY: block-explorer
+  ECR_REPOSITORY: governance-frontend
   TERRAFORM_VERSION: 1.6.0
 
   # Project Configuration
-  PROJECT_NAME: block-explorer
-  PREVIEW_DOMAIN_SUFFIX: block-explorer-preview.vechain.org
+  PROJECT_NAME: governance-frontend
+  PREVIEW_DOMAIN_SUFFIX: preview-staging.governance.vebetterdao.org
 
   # Terraform Paths
   TERRAFORM_DIR: terraform/frontend
@@ -110,7 +110,7 @@ jobs:
     needs: [prepare-metadata]
     uses: ./.github/workflows/build-push-ecr.yml
     with:
-      ecr_repository: block-explorer
+      ecr_repository: governance-frontend
       image_tag: ${{ needs.prepare-metadata.outputs.image_tag }}
       aws_region: eu-west-1
       environment: "AWS staging governance build-time"
@@ -127,7 +127,7 @@ jobs:
       contents: read
     environment:
       name: preview-pr-${{ github.event.pull_request.number }}
-      url: https://pr-${{ github.event.pull_request.number }}.block-explorer-preview.vechain.org
+      url: https://pr-${{ github.event.pull_request.number }}.preview-staging.governance.vebetterdao.org
 
     outputs:
       custom_url: ${{ steps.outputs.outputs.custom_url }}
