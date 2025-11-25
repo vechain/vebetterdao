@@ -21,9 +21,9 @@ env:
   PREVIEW_DOMAIN_SUFFIX: preview-staging.governance.vebetterdao.org
 
   # Terraform Paths
-  TERRAFORM_DIR: terraform/frontend
-  TERRAFORM_ENV_DIR: terraform/environments
-  TERRAFORM_BACKEND_CONFIG: ../environments/preview/backend.config
+  TERRAFORM_DIR: terraform/frontend/frontend-env-level
+  TERRAFORM_ENV_DIR: terraform/frontend/environments
+  TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
   pr-comment:
@@ -142,7 +142,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ACC_ROLE }}
+          role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
