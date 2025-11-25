@@ -45,7 +45,7 @@ on:
 jobs:
     build-and-push:
         name: Build and Push Docker Image
-        runs-on: docker-build-amd64
+        runs-on: b3tr-e2e
         environment: ${{ inputs.environment }}
         permissions:
             id-token: write
