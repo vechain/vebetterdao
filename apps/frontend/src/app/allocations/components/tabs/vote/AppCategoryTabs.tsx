@@ -282,6 +282,7 @@ export function AppCategoryTabs({
                   allocationSharePercentage={appSharesMap.get(app.id)}
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
+                  displayMode={hasVoted ? "voted" : "checkbox"}
                 />
               ))
             ) : searchQuery.length > 0 && showEmptyState ? (
