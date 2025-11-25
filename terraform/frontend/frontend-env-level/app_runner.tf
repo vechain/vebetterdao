@@ -1,7 +1,7 @@
 locals {
   service_name             = "${local.env.environment}-governance"
   custom_domain_enabled    = lookup(local.env, "enable_custom_domain", false)
-  ssm_parameter_prefix = "/b3tr/frontend/"
+  ssm_parameter_prefix = lookup(local.env, "ssm_parameter_prefix", "/b3tr/frontend/")
   runtime_env_var_names = [
     "FRESHDESK_DOMAIN",
     "FRESHDESK_GROUP_ID",
