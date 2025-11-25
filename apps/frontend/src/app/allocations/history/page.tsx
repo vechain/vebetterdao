@@ -10,6 +10,7 @@ import Link from "next/link"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
 import { fetchClient } from "@/api/indexer/api"
+import { AppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { blockNumberToDate } from "@/utils/date"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
@@ -36,15 +37,10 @@ const BreadcrumItems = [
 
 const PAGE_SIZE = 10
 
-export interface RoundEarnings {
-  roundId: number
+export type RoundEarnings = AppEarnings[number] & {
   roundStart: Date
   roundEnd: Date
   vote2EarnAmount: bigint
-  totalAmount: string
-  unallocatedAmount: string
-  teamAllocationAmount: string
-  rewardsAllocationAmount: string
 }
 
 interface RoundsPageResponse {
@@ -149,10 +145,10 @@ export const getRounds = async ({
           roundStart,
           roundEnd,
           vote2EarnAmount: roundsVote2EarnAmounts[idx],
-          totalAmount: earnings.totalAmount?.toString() || "0",
-          unallocatedAmount: earnings.unallocatedAmount?.toString() || "0",
-          teamAllocationAmount: earnings.teamAllocationAmount?.toString() || "0",
-          rewardsAllocationAmount: earnings.rewardsAllocationAmount?.toString() || "0",
+          totalAmount: earnings.totalAmount || 0,
+          unallocatedAmount: earnings.unallocatedAmount || 0,
+          teamAllocationAmount: earnings.teamAllocationAmount || 0,
+          rewardsAllocationAmount: earnings.rewardsAllocationAmount || 0,
         }
       })
       .filter((round): round is RoundEarnings => round !== null)

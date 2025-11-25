@@ -1,4 +1,4 @@
-import { Input, InputGroup, InputProps } from "@chakra-ui/react"
+import { CloseButton, Input, InputGroup, InputProps } from "@chakra-ui/react"
 import { LuSearch } from "react-icons/lu"
 
 interface SearchFieldProps {
@@ -10,7 +10,10 @@ interface SearchFieldProps {
 }
 export const SearchField = ({ placeholder = "Search", value, onChange, disabled, inputProps }: SearchFieldProps) => {
   return (
-    <InputGroup flex="1" startElement={<LuSearch />}>
+    <InputGroup
+      flex="1"
+      startElement={<LuSearch />}
+      endElement={value ? <CloseButton size="xs" onClick={() => onChange?.("")} me="-2" /> : undefined}>
       <Input
         {...inputProps}
         {...(disabled && { disabled: true })}

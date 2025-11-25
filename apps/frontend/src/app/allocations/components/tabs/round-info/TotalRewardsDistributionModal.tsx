@@ -1,10 +1,12 @@
-import { Box, VStack, HStack, Progress, Card, Text, Heading, Dialog, CloseButton, Icon } from "@chakra-ui/react"
+import { Box, VStack, HStack, Card, Text, Heading, Dialog, CloseButton, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { formatEther } from "viem"
 
 import { AllocationRoundDetails } from "@/app/allocations/lib/data"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { Modal } from "@/components/Modal"
+
+import { TotalRewardDistributionProgress } from "./TotalRewardDistributionProgress"
 
 const DataRow = ({
   label,
@@ -113,25 +115,7 @@ export const TotalRewardsDistributionModal = ({
             {getCompactFormatter(2).format(Number(formatEther(rewardsTotal)))} {"B3TR"}
           </Text>
         </HStack>
-
-        <Progress.Root
-          size="sm"
-          value={100}
-          css={{
-            "--progress-green": "colors.status.positive.primary",
-            "--progress-orange": "colors.status.warning.primary",
-            "--progress-blue": "colors.status.info.strong",
-          }}>
-          <Progress.Track>
-            <Progress.Range
-              rounded="lg"
-              css={{
-                background: `linear-gradient(to right, var(--progress-green) 0%, var(--progress-green) ${percentages.apps}%, var(--progress-blue) ${percentages.apps}%, var(--progress-blue) ${percentages.apps + percentages.voters}%, var(--progress-orange) ${percentages.apps + percentages.voters}%, var(--progress-orange) 100%)`,
-              }}
-            />
-          </Progress.Track>
-        </Progress.Root>
-
+        <TotalRewardDistributionProgress apps={percentages.apps} voters={percentages.voters} />
         <VStack gap={3} align="stretch">
           <HStack justify="space-between" w="full" gap={3} pb={2} borderBottomWidth="1px">
             <Text textStyle="xs" fontWeight="semibold" color="text.subtle" flex={1}>

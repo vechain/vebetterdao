@@ -52,7 +52,7 @@ export default async function Page({ params }: Readonly<Props>) {
         </VStack>
         <RoundDistributionCard roundDetails={roundDetails} />
         <UserVotingActivityCard roundDetails={roundDetails} />
-        <RoundActiveAppsListCard apps={roundDetails.apps} />
+        <RoundActiveAppsListCard roundId={roundDetails.id} apps={roundDetails.apps} />
       </VStack>
     </VStack>
   )

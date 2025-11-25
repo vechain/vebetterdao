@@ -10,7 +10,8 @@ import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 
 import { AllocationRoundDetails } from "../../../lib/data"
 
-import { TotalRewardsDistributionModal } from "./TotalRewardDisributedModal"
+import { TotalRewardDistributionProgress } from "./TotalRewardDistributionProgress"
+import { TotalRewardsDistributionModal } from "./TotalRewardsDistributionModal"
 
 export function RoundDistributionCard({ roundDetails }: { roundDetails: AllocationRoundDetails }) {
   const [open, setOpen] = useState(false)
@@ -117,12 +118,11 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
             </HStack>
 
             <VStack alignItems="stretch" gap="1">
-              <Box h={{ base: "1", md: "2" }} bg="bg.subtle" rounded="full" overflow="hidden" display="flex">
-                <Box w={`${distribution.appsPercent}%`} bg="status.positive.primary" />
-                <Box w={`${distribution.votersPercent}%`} bg="status.info.strong" />
-                <Box w={`${distribution.treasuryPercent}%`} bg="status.warning.primary" />
-              </Box>
-
+              <TotalRewardDistributionProgress
+                size={{ base: "xs", md: "sm" }}
+                apps={distribution.appsPercent}
+                voters={distribution.votersPercent}
+              />
               <HStack gap="8" pt="1">
                 <HStack gap="1" flex={1} borderRight="1px" borderColor="border.secondary" pr="5">
                   <Box boxSize="1.5" bg="status.positive.primary" rounded="full" />

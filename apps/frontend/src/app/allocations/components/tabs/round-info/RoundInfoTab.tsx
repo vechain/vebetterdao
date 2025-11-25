@@ -124,7 +124,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
       </VStack>
       <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap="6">
         <UserVotingActivityCard roundDetails={roundDetails} />
-        <RoundActiveAppsListCard apps={roundDetails.apps} />
+        <RoundActiveAppsListCard roundId={roundDetails.id} apps={roundDetails.apps} />
       </Grid>
     </VStack>
   )
