@@ -211,7 +211,14 @@ export const getProposalsAndGrants = async (
 
   const allProposalIds = allProposals.map(p => p.proposalId)
 
-  const [proposalsStates, grantsStates, depositReachedMap, depositEventsMap, interactionDatesMap] = await Promise.all([
+  const [
+    proposalsStates,
+    grantsStates,
+    grantAmountRequested,
+    depositReachedMap,
+    depositEventsMap,
+    interactionDatesMap,
+  ] = await Promise.all([
     executeMultipleClausesCall({
       thor,
       calls: proposals.map(
@@ -236,6 +243,18 @@ export const getProposalsAndGrants = async (
           }) as const,
       ),
     }),
+    executeMultipleClausesCall({
+      thor,
+      calls: grants.map(
+        grant =>
+          ({
+            abi: grantsManagerAbi,
+            address: grantsManagerContractAddress,
+            functionName: "getTotalAmountForMilestones",
+            args: [grant.proposalId],
+          }) as const,
+      ),
+    }),
     getProposalsDepositReached(thor, allProposalIds),
     getProposalsDepositEvents(thor),
     getProposalsInteractionDates(thor, allProposalIds),
@@ -249,6 +268,7 @@ export const getProposalsAndGrants = async (
     return {
       ...grant,
       state: grantsStates[idx],
+      grantAmountRequested: grantAmountRequested[idx],
       targets: [...grant.targets],
       calldatas: [...grant.calldatas],
       metadata: grant.metadata as GrantDetail["metadata"],

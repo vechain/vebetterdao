@@ -53,25 +53,39 @@ export const getGrantsDetails = async (grantId: string): Promise<GrantDetail | n
 
   if (!grant || !grant.description) return null
 
-  const [votes, metadata, [state = 0] = [], depositReachedMap, depositEventsMap, interactionDatesMap] =
-    await Promise.all([
-      fetchClient
-        .GET("/api/v1/b3tr/proposals/{proposalId}/results", {
-          params: { path: { proposalId: grantId } },
-        })
-        .then(res => res.data as ProposalVotes[]),
-      getIpfsMetadata(`ipfs://${grant.description}`) as Promise<GrantMetadata>,
-      executeCallClause({
-        thor,
-        abi: grantsManagerAbi,
-        contractAddress: grantsManagerContractAddress,
-        method: "grantState",
-        args: [BigInt(grantId)],
-      }),
-      getProposalsDepositReached(thor, [BigInt(grantId)]),
-      getProposalsDepositEvents(thor),
-      getProposalsInteractionDates(thor, [BigInt(grantId)]),
-    ])
+  const [
+    votes,
+    metadata,
+    [state = 0] = [],
+    [grantAmountRequested = 0n],
+    depositReachedMap,
+    depositEventsMap,
+    interactionDatesMap,
+  ] = await Promise.all([
+    fetchClient
+      .GET("/api/v1/b3tr/proposals/{proposalId}/results", {
+        params: { path: { proposalId: grantId } },
+      })
+      .then(res => res.data as ProposalVotes[]),
+    getIpfsMetadata(`ipfs://${grant.description}`) as Promise<GrantMetadata>,
+    executeCallClause({
+      thor,
+      abi: grantsManagerAbi,
+      contractAddress: grantsManagerContractAddress,
+      method: "grantState",
+      args: [BigInt(grantId)],
+    }),
+    executeCallClause({
+      thor,
+      abi: grantsManagerAbi,
+      contractAddress: grantsManagerContractAddress,
+      method: "getTotalAmountForMilestones",
+      args: [BigInt(grantId)],
+    }),
+    getProposalsDepositReached(thor, [BigInt(grantId)]),
+    getProposalsDepositEvents(thor),
+    getProposalsInteractionDates(thor, [BigInt(grantId)]),
+  ])
 
   const depositData = depositEventsMap.get(grantId) || { communityDeposits: 0, supportingUserCount: 0 }
   const dates = interactionDatesMap.get(grantId) || { supportEndDate: null, votingEndDate: null }
@@ -80,6 +94,7 @@ export const getGrantsDetails = async (grantId: string): Promise<GrantDetail | n
     ...grant,
     type: ProposalType.Grant,
     state,
+    grantAmountRequested,
     votes,
     metadata,
     depositReached: depositReachedMap.get(grantId) || false,

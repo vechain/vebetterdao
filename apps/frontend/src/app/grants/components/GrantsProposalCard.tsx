@@ -1,5 +1,5 @@
-import { Card, Heading, HStack, Separator, Stack, Text, VStack } from "@chakra-ui/react"
-import { formatTimeLeft } from "@repo/utils/FormattingUtils"
+import { Card, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
+import { formatTimeLeft, humanNumber } from "@repo/utils/FormattingUtils"
 import BigNumber from "bignumber.js"
 import { formatEther } from "ethers"
 import { useRouter } from "next/navigation"
@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next"
 import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { ProposalDetail } from "@/app/proposals/types"
+import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
@@ -78,6 +79,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
 
+  const grantAmountRequested = formatEther(grantProposal?.grantAmountRequested || "")
   const userVoteOption = userVoteEvent?.userVote
   const hasUserVoted = !!userVoteEvent?.hasVoted
 
@@ -117,20 +119,20 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
             gap={{ base: 2, md: 3 }}
             flexWrap={{ base: "wrap", sm: "nowrap" }}
             w={{ base: "full", md: "auto" }}>
-            {/* {grantProposal && ( */}
-            {/*   <> */}
-            {/*     <HStack gap={2} minW="fit-content"> */}
-            {/*       <Icon as={B3trIcon} color="actions.primary.default" boxSize={{ base: 4, md: 5 }} /> */}
-            {/*       <Text textStyle={{ base: "sm", lg: "md" }} whiteSpace="nowrap"> */}
-            {/*         {humanNumber(grantProposal?.grantAmountRequested, grantProposal?.grantAmountRequested, "B3TR")} */}
-            {/*       </Text> */}
-            {/*       <Text display={{ base: "none", lg: "block" }} textStyle={{ base: "sm", lg: "md" }}> */}
-            {/*         {"•"} {grantProposal.type === "dapp" ? "App" : "Tooling"} */}
-            {/*       </Text> */}
-            {/*     </HStack> */}
-            {/*     <Separator orientation="vertical" h="16px" /> */}
-            {/*   </> */}
-            {/* )} */}
+            {grantProposal && (
+              <>
+                <HStack gap={2} minW="fit-content">
+                  <Icon as={B3trIcon} color="actions.primary.default" boxSize={{ base: 4, md: 5 }} />
+                  <Text textStyle={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
+                    {grantAmountRequested ? humanNumber(grantAmountRequested, grantAmountRequested, "B3TR") : "-"}
+                  </Text>
+                  <Text display={{ base: "none", lg: "block" }} textStyle={{ base: "sm", lg: "md" }}>
+                    {"•"} {grantProposal.metadata.grantType === "dapp" ? "App" : "Tooling"}
+                  </Text>
+                </HStack>
+                <Separator orientation="vertical" h="16px" />
+              </>
+            )}
             <HStack minW="fit-content">
               <AddressWithProfilePicture address={proposal.proposer} />
             </HStack>

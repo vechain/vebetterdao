@@ -8,11 +8,13 @@ import { fetchContractEvents } from "@/api/contracts/governance/fetchContractEve
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 
+export const getProposalCreatedEventKey = (proposalId: string) => ["proposalCreatedEvent", proposalId]
+
 export const useProposalCreatedEvent = (proposalId: bigint) => {
   const thor = useThor()
 
   return useQuery({
-    queryKey: [""],
+    queryKey: getProposalCreatedEventKey(proposalId.toString()),
     queryFn: () =>
       fetchContractEvents({
         thor,

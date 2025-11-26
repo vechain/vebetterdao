@@ -32,7 +32,7 @@ export const useAllMilestoneStates = (proposal?: GrantDetail) => {
       }
       try {
         const calls = milestones.map(
-          (_: any, index: number) =>
+          (_, index: number) =>
             ({
               abi,
               functionName: method,
@@ -51,7 +51,7 @@ export const useAllMilestoneStates = (proposal?: GrantDetail) => {
       } catch (error) {
         console.error("Error fetching milestone states:", error)
         // Return default pending states for all milestones on error
-        return milestones.map((_: any, index: number) => ({
+        return milestones.map((_, index: number) => ({
           state: MilestoneState.Pending,
           index,
         }))

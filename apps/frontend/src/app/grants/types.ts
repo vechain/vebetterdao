@@ -5,6 +5,7 @@ import { ProposalCreatedEvent } from "../proposals/types"
 export interface GrantDetail extends ProposalCreatedEvent {
   type: ProposalType.Grant
   state: number
+  grantAmountRequested: bigint
   votes: VoteEntry[]
   metadata: GrantMetadata
   depositReached: boolean

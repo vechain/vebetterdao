@@ -81,7 +81,7 @@ export const useHasVotedProposalsInCurrentRound = () => {
         abi,
         contractAddress,
         eventName: "ProposalCreated" as const,
-        filterParams: [BigInt(currentRoundId || "0")],
+        filterParams: { roundIdVoteStart: BigInt(currentRoundId || "0") },
         mapResponse: ({ decodedData }) => ({
           id: decodedData.args.proposalId.toString(),
           description: decodedData.args.description,
