@@ -24,8 +24,10 @@ export const AppRadioCard = ({
   allocationSharePercentage,
 }: AppRadioCardProps) => (
   <CheckboxCard.Root
+    bg="bg.primary"
     rounded="lg"
-    p="3"
+    border="1px"
+    p={{ base: "3", md: "5" }}
     colorPalette="blue"
     checked={checked}
     onCheckedChange={onCheckedChange}
@@ -33,7 +35,7 @@ export const AppRadioCard = ({
     <CheckboxCard.HiddenInput />
     <CheckboxCard.Control alignItems="center" p="0" gap="3">
       <CheckboxCard.Indicator rounded="sm" />
-      <AppImage boxSize={{ base: "44px", md: "60px" }} appId={appId} />
+      <AppImage boxSize={{ base: "44px", md: "60px" }} borderRadius="0.5rem" appId={appId} />
 
       <CheckboxCard.Content
         flexDirection={{ base: "column", md: "row" }}
