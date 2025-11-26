@@ -26,6 +26,8 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
   const { tab = "vote" } = await params
   const { roundId: roundIdParam } = await searchParams
 
+  if (tab !== "" && tab !== "vote" && tab !== "round") return redirect("/allocations")
+
   let roundDetails
 
   if (roundIdParam) {
