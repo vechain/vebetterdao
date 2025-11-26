@@ -1,3 +1,5 @@
+"use client"
+
 import { VStack, Heading, Grid, GridItem } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
