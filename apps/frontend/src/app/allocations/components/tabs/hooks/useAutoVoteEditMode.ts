@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react"
 interface UseAutoVoteEditModeProps {
   storedPreferences: string[]
   votedAppIds?: string[]
+  hasVoted: boolean
   selectedAppIds: Set<string>
   setSelectedAppIds: (ids: Set<string>) => void
   setSelectionOrder: (order: string[]) => void
@@ -18,6 +19,7 @@ interface UseAutoVoteEditModeProps {
 export const useAutoVoteEditMode = ({
   storedPreferences,
   votedAppIds,
+  hasVoted,
   selectedAppIds,
   setSelectedAppIds,
   setSelectionOrder,
@@ -62,14 +64,22 @@ export const useAutoVoteEditMode = ({
     setIsEditingAutoVote(true)
   }, [getAppsToPreselect, setSelectedAppIds, setSelectionOrder, onSelectedAppsChange])
 
-  // Cancel edit mode - reload from chain state
+  // Cancel edit mode - reset to read-only state (voted apps or empty)
   const handleCancelEditAutoVote = useCallback(() => {
-    const { ids, order } = getAppsToPreselect()
-    setSelectedAppIds(ids)
-    setSelectionOrder(order)
-    onSelectedAppsChange?.(ids)
+    if (hasVoted && votedAppIds) {
+      // User has voted - show their voted apps
+      const votedApps = new Set(votedAppIds)
+      setSelectedAppIds(votedApps)
+      setSelectionOrder(votedAppIds)
+      onSelectedAppsChange?.(votedApps)
+    } else {
+      // User hasn't voted - show empty read-only state
+      setSelectedAppIds(new Set())
+      setSelectionOrder([])
+      onSelectedAppsChange?.(new Set())
+    }
     setIsEditingAutoVote(false)
-  }, [getAppsToPreselect, setSelectedAppIds, setSelectionOrder, onSelectedAppsChange])
+  }, [hasVoted, votedAppIds, setSelectedAppIds, setSelectionOrder, onSelectedAppsChange])
 
   // Save auto-vote preferences (triggers confirm modal)
   const handleSaveAutoVote = useCallback(() => {

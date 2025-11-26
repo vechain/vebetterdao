@@ -38,6 +38,7 @@ interface AllocationTabsContextType {
   onToggleAutoVoting: (enabled: boolean) => void
   hasVoted: boolean
   hasVotedLoading: boolean
+  isVoteDataLoading: boolean
   isEditingAutoVote: boolean
   onEditAutoVote: () => void
   onCancelEditAutoVote: () => void
@@ -70,7 +71,10 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     roundDetails.id.toString(),
     account?.address ?? undefined,
   )
-  const { data: castVotesEvent } = useUserVotesInRound(roundDetails.id.toString(), account?.address ?? undefined)
+  const { data: castVotesEvent, isLoading: isCastVotesLoading } = useUserVotesInRound(
+    roundDetails.id.toString(),
+    account?.address ?? undefined,
+  )
   const { data: isAutoVotingEnabledOnChain } = useIsAutoVotingEnabled(account?.address)
   const { data: isAutoVotingEnabledInCurrentRound } = useIsAutoVotingEnabledInCurrentRound(account?.address)
   const { data: storedPreferences = [] } = useUserVotingPreferences(account?.address)
@@ -113,6 +117,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   } = useAutoVoteEditMode({
     storedPreferences,
     votedAppIds: castVotesEvent?.appsIds,
+    hasVoted: hasVoted ?? false,
     selectedAppIds,
     setSelectedAppIds,
     setSelectionOrder,
@@ -166,11 +171,24 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   )
 
   const onVoteSuccess = useCallback(() => {
-    // Don't clear selectedAppIds - keep them so voted apps show as ticked
+    // Reset selectedAppIds to show correct read-only state after save
+    if (hasVoted && castVotesEvent?.appsIds) {
+      // User has voted - show their voted apps
+      const votedApps = new Set(castVotesEvent.appsIds)
+      setSelectedAppIds(votedApps)
+      setSelectionOrder(castVotesEvent.appsIds)
+      onSelectedAppsChange?.(votedApps)
+    } else {
+      // User hasn't voted - show empty read-only state
+      setSelectedAppIds(new Set())
+      setSelectionOrder([])
+      onSelectedAppsChange?.(new Set())
+    }
+
     resetEditMode()
     handleCloseModal()
     closeTxModal()
-  }, [closeTxModal, handleCloseModal, resetEditMode])
+  }, [closeTxModal, handleCloseModal, resetEditMode, hasVoted, castVotesEvent?.appsIds, onSelectedAppsChange])
 
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
@@ -215,6 +233,9 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const showAutoVoteUI =
     (hasVoted ?? false) || (isAutoVotingEnabledOnChain ?? false) || (isAutoVotingEnabledInCurrentRound ?? false)
 
+  // Loading state: user has voted but vote data hasn't loaded yet
+  const isVoteDataLoading = (hasVoted ?? false) && isCastVotesLoading
+
   // Button configuration - single source of truth for button logic
   const buttonConfig = useVotingButtonConfig({
     hasVoted: hasVoted ?? false,
@@ -249,6 +270,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         onToggleAutoVoting: setIsAutoVotingEnabled,
         hasVoted: hasVoted ?? false,
         hasVotedLoading,
+        isVoteDataLoading,
         isEditingAutoVote,
         onEditAutoVote: handleEditAutoVote,
         onCancelEditAutoVote: handleCancelEditAutoVote,

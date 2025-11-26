@@ -20,6 +20,7 @@ interface SearchAppsBottomSheetProps {
   onToggleApp?: (appId: string) => void
   isAtSelectionLimit?: boolean
   hasVoted?: boolean
+  isVoteDataLoading?: boolean
   isAutoVotingEnabled?: boolean
   isAutoVotingEnabledInCurrentRound?: boolean
   isEditingAutoVote?: boolean
@@ -36,6 +37,7 @@ export function SearchAppsBottomSheet({
   onToggleApp,
   isAtSelectionLimit = false,
   hasVoted = false,
+  isVoteDataLoading = false,
   isAutoVotingEnabled = false,
   isAutoVotingEnabledInCurrentRound = false,
   isEditingAutoVote = false,
@@ -91,6 +93,7 @@ export function SearchAppsBottomSheet({
         tabsListProps={{ mb: "0" }}
         isAtSelectionLimit={isAtSelectionLimit}
         hasVoted={hasVoted}
+        isVoteDataLoading={isVoteDataLoading}
         isAutoVotingEnabled={isAutoVotingEnabled}
         isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
         isEditingAutoVote={isEditingAutoVote}

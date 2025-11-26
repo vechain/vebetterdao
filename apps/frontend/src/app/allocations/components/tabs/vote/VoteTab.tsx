@@ -29,6 +29,7 @@ export function VoteTab() {
     onVoteClick,
     hasVoted,
     hasVotedLoading,
+    isVoteDataLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
     isEditingAutoVote,
@@ -131,6 +132,7 @@ export function VoteTab() {
           onVoteClick={onVoteClick}
           hasVoted={hasVoted}
           hasVotedLoading={hasVotedLoading}
+          isVoteDataLoading={isVoteDataLoading}
           threshold={threshold}
           isAutoVotingEnabled={isAutoVotingEnabled}
           isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
@@ -156,6 +158,7 @@ export function VoteTab() {
         onToggleApp={onToggleApp}
         isAtSelectionLimit={isAtSelectionLimit}
         hasVoted={hasVoted}
+        isVoteDataLoading={isVoteDataLoading}
         isAutoVotingEnabled={isAutoVotingEnabled}
         isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
         isEditingAutoVote={isEditingAutoVote}

@@ -16,6 +16,7 @@ import {
   Pagination,
   Portal,
   Select,
+  Skeleton,
   Tabs,
   Text,
   VStack,
@@ -53,6 +54,7 @@ interface AppCategoryTabsProps {
   onVoteClick?: () => void
   hasVoted?: boolean
   hasVotedLoading?: boolean
+  isVoteDataLoading?: boolean
   threshold?: string
   isAutoVotingEnabled?: boolean
   isAutoVotingEnabledInCurrentRound?: boolean
@@ -87,6 +89,7 @@ export function AppCategoryTabs({
   onVoteClick,
   hasVoted = false,
   hasVotedLoading = false,
+  isVoteDataLoading = false,
   threshold,
   isAutoVotingEnabled = false,
   isAutoVotingEnabledInCurrentRound = false,
@@ -354,7 +357,12 @@ export function AppCategoryTabs({
             flexDirection="column"
             gap={tabsListProps?.mb ? "3" : "4"}
             p={tabsListProps?.mb ? undefined : "4"}>
-            {filteredApps.length > 0 ? (
+            {isVoteDataLoading ? (
+              // Show skeleton cards while vote data is loading (matches AppRadioCard styling)
+              Array.from({ length: visibleApps.length || 5 }).map((_, index) => (
+                <Skeleton key={index} height={{ base: "70px", md: "84px" }} rounded="lg" />
+              ))
+            ) : filteredApps.length > 0 ? (
               visibleApps.map(app => (
                 <AppRadioCard
                   key={app.id}
