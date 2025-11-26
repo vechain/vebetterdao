@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Modal } from "@/components/Modal"
+import { useUserPreferences } from "@/hooks/useUserPreferences"
 
 interface AutoVoteModalProps {
   isOpen: boolean
@@ -18,6 +19,7 @@ const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation
 export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true }: AutoVoteModalProps) => {
   const { t } = useTranslation()
   const [isAutomationOn, setIsAutomationOn] = useState(defaultEnabled)
+  const { setPreferences } = useUserPreferences()
 
   const handleApply = () => {
     if (onApply) {
@@ -28,6 +30,7 @@ export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true 
 
   const handleSkip = () => {
     onApply?.(false)
+    setPreferences({ SHOW_AUTOVOTING_MODAL: false })
     onClose()
   }
 
