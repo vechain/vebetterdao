@@ -69,15 +69,17 @@ export const ConfirmVoteModal = ({
     onClose()
   }, [onClose])
 
+  const titleText = hasVoted ? t("Confirm your auto-vote") : t("Confirm your vote")
+
   const modalTitle = isDesktop ? (
     <Flex justify="space-between" align="center" w="full" pb={4}>
       <Heading size="xl" fontWeight="bold">
-        {t("Confirm your vote")}
+        {titleText}
       </Heading>
       <CloseButton onClick={handleCloseModal} />
     </Flex>
   ) : (
-    t("Confirm your vote")
+    titleText
   )
 
   return (
@@ -99,7 +101,7 @@ export const ConfirmVoteModal = ({
             {t("Cancel")}
           </Button>
           <Button variant="primary" onClick={handleConfirm} disabled={!canSubmit} flex={1}>
-            {t("Vote")}
+            {hasVoted ? t("Save") : t("Vote")}
           </Button>
         </HStack>
       }>
