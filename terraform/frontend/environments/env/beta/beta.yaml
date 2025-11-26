@@ -8,11 +8,24 @@ account_level_state_bucket: b3tr-terraform-state-dev
 account_level_state_key: workspaces/dev/frontend-account-level.tfstate
 account_level_state_region: eu-west-1
 
-service_name: governance-beta
 domain: beta.governance.vebetterdao.org
 enable_custom_domain: true
 manage_dns_records: false
 route53_zone_name: beta.governance.vebetterdao.org
+
+ssm_parameter_prefix: /b3tr/frontend/beta/
+runtime_env_var_names:
+  - RESET_USER_SIGNAL_COUNT_DOMAIN
+  - GITHUB_CLIENT_ID
+  - FRESHDESK_GROUP_ID
+  - FRESHDESK_DOMAIN
+runtime_env_secret_names:
+  - TWITTER_CLIENT_SECRET
+  - RESET_USER_SIGNAL_COUNT_API_KEY
+  - NEXTAUTH_SECRET
+  - MNEMONIC
+  - GITHUB_CLIENT_SECRET
+  - FRESHDESK_API_TOKEN
 
 image_tag: beta-latest
 cpu: 1024

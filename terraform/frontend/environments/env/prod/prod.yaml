@@ -8,7 +8,6 @@ account_level_state_bucket: b3tr-terraform-state-prod
 account_level_state_key: frontend/account-level/prod/terraform.tfstate
 account_level_state_region: eu-west-1
 
-service_name: governance-prod
 domain: governance.vebetterdao.org
 enable_custom_domain: true
 manage_dns_records: false
@@ -31,4 +30,3 @@ auto_deployments_enabled: false
 
 environment_variables:
   NEXT_PUBLIC_RUNTIME_ENV: prod
-

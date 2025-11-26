@@ -8,7 +8,6 @@ account_level_state_bucket: b3tr-terraform-state-dev
 account_level_state_key: workspaces/dev/frontend-account-level.tfstate
 account_level_state_region: eu-west-1
 
-service_name: governance-preview-pr-{PR_NUMBER}
 domain: pr-{PR_NUMBER}.{ENVIRONMENT}.governance.vebetterdao.org
 enable_custom_domain: true
 manage_dns_records: false

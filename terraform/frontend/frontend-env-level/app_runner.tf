@@ -1,39 +1,22 @@
 locals {
-  service_name             = "${local.env.environment}-governance"
+  service_name             = "governance-${local.env.environment}"
   custom_domain_enabled    = lookup(local.env, "enable_custom_domain", false)
   ssm_parameter_prefix = lookup(local.env, "ssm_parameter_prefix", "/b3tr/frontend/")
-  runtime_env_var_names = [
-    "FRESHDESK_DOMAIN",
-    "FRESHDESK_GROUP_ID",
-    "RESET_USER_SIGNAL_COUNT_DOMAIN",
-  ]
-  runtime_env_secret_names = [
-    "DISCORD_CLIENT_SECRET",
-    "FRESHDESK_API_TOKEN",
-    "GITHUB_CLIENT_SECRET",
-    "NEXTAUTH_SECRET",
-    "RESET_USER_SIGNAL_COUNT_API_KEY",
-    "TESTNET_STAGING_MNEMONIC",
-    "TWITTER_CLIENT_SECRET",
-    "DISCORD_CLIENT_ID",
-    "GITHUB_CLIENT_ID",
-    "TWITTER_CLIENT_ID",
-  ]
 }
 
 data "aws_ssm_parameter" "runtime_env_vars" {
-  for_each = toset(local.runtime_env_var_names)
+  for_each = toset(local.env.runtime_env_var_names)
   name     = "${local.ssm_parameter_prefix}${each.value}"
 }
 
 data "aws_ssm_parameter" "runtime_env_secrets" {
-  for_each        = toset(local.runtime_env_secret_names)
+  for_each        = toset(local.env.runtime_env_secret_names)
   name            = "${local.ssm_parameter_prefix}${each.value}"
   with_decryption = true
 }
 
 resource "aws_apprunner_auto_scaling_configuration_version" "frontend" {
-  auto_scaling_configuration_name = local.service_name
+  auto_scaling_configuration_name = "${local.service_name}-scaling"
 
   max_concurrency = local.env.max_concurrency
   min_size        = local.env.min_size
@@ -59,11 +42,11 @@ resource "aws_apprunner_service" "frontend" {
       image_configuration {
         port = tostring(local.env.port)
         runtime_environment_variables = {
-            for name in local.runtime_env_var_names :
+            for name in local.env.runtime_env_var_names :
             name => data.aws_ssm_parameter.runtime_env_vars[name].value
           }
         runtime_environment_secrets = {
-          for name in local.runtime_env_secret_names :
+          for name in local.env.runtime_env_secret_names :
           name => data.aws_ssm_parameter.runtime_env_secrets[name].arn
         }
       }
@@ -89,10 +72,10 @@ resource "aws_apprunner_service" "frontend" {
     unhealthy_threshold = 3
   }
 
-  tags = {
-    Name        = local.service_name
+  tags = merge(local.default_tags, {
+    Name = local.env.project_slug
     Environment = local.env.environment
-  }
+  })
 }
 
 resource "aws_apprunner_custom_domain_association" "frontend" {
