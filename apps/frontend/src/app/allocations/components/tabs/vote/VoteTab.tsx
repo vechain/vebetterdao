@@ -1,13 +1,12 @@
 "use client"
 
-import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
-import { Search } from "iconoir-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useContext, useEffect, useState } from "react"
+import { Bleed } from "@chakra-ui/react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useContext, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
-import { useDebounce } from "@/hooks/useDebounce"
+import { SearchField } from "@/components/SearchField/SearchField"
 
 import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
@@ -21,56 +20,23 @@ export function VoteTab() {
 
   const { apps, roundId, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot, onVoteClick } = context
   const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
-  const urlSearchQuery = searchParams.get("search") || ""
   const selectedCategory = searchParams.get("category") || "all"
-  const isSearchOpen = searchParams.has("search")
   const { t } = useTranslation()
   const { data: threshold } = useVotingThreshold()
 
-  const [localSearchQuery, setLocalSearchQuery] = useState(urlSearchQuery)
-  const debouncedSearchQuery = useDebounce(localSearchQuery, 300)
+  const [isSearchOpen, setIsSearchOpen] = useState(searchParams.has("search"))
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get("search") || "")
 
-  useEffect(() => {
-    setLocalSearchQuery(urlSearchQuery)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (debouncedSearchQuery !== urlSearchQuery) {
-      const params = new URLSearchParams(searchParams)
-      if (debouncedSearchQuery) params.set("search", debouncedSearchQuery)
-      else params.delete("search")
-
-      router.replace(`${pathname}?${params.toString()}`)
-    }
-  }, [debouncedSearchQuery, urlSearchQuery, pathname, router, searchParams])
-
-  const handleSearchChange = useCallback((query: string) => {
-    setLocalSearchQuery(query)
-  }, [])
-
-  const handleViewAll = useCallback(() => {
-    const params = new URLSearchParams(searchParams)
-    params.set("search", "")
-    router.push(`?${params.toString()}`)
-  }, [searchParams, router])
-
-  const handleCloseSearch = useCallback(() => {
-    setLocalSearchQuery("")
-    const params = new URLSearchParams(searchParams)
-    params.delete("search")
-    router.push(`?${params.toString()}`)
-  }, [searchParams, router])
+  const handleViewAll = () => setIsSearchOpen(true)
+  const handleCloseSearch = () => setIsSearchOpen(false)
 
   const handleCategoryChange = useCallback(
     (category: string) => {
       const params = new URLSearchParams(searchParams)
-      if (category !== "all") {
-        params.set("category", category)
-      } else {
-        params.delete("category")
-      }
+      if (category !== "all") params.set("category", category)
+      else params.delete("category")
+
       router.push(`?${params.toString()}`, { scroll: false })
     },
     [searchParams, router],
@@ -87,19 +53,13 @@ export function VoteTab() {
           })}
         />
       )}
-      <InputGroup
-        hideFrom="md"
-        startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
-        rounded="xl"
-        borderColor="border.primary">
-        <Input
-          id="allocation-app-filter"
-          placeholder="Search app"
-          value={localSearchQuery}
-          onChange={e => handleSearchChange(e.target.value)}
-          onFocus={handleViewAll}
-        />
-      </InputGroup>
+      <SearchField
+        placeholder="Search app"
+        value={localSearchQuery}
+        onChange={setLocalSearchQuery}
+        inputProps={{ onFocus: handleViewAll }}
+        inputWrapperProps={{ hideFrom: "md" }}
+      />
       <Bleed inlineStart="4" inlineEnd="4">
         <AppCategoryTabs
           apps={apps}
@@ -108,7 +68,7 @@ export function VoteTab() {
           onViewAll={handleViewAll}
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
-          searchQuery={urlSearchQuery}
+          searchQuery={localSearchQuery}
           hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
           roundId={roundId}
           tabsListProps={{
@@ -128,7 +88,7 @@ export function VoteTab() {
         isOpen={isSearchOpen}
         onClose={handleCloseSearch}
         searchQuery={localSearchQuery}
-        onSearchChange={handleSearchChange}
+        onSearchChange={setLocalSearchQuery}
         apps={apps}
         selectedAppIds={selectedAppIds}
         onToggleApp={onToggleApp}
