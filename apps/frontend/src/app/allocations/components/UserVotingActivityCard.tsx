@@ -154,6 +154,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
       <Card.Body asChild>
         {!isLoading && appVoteMetrics.size === 0 ? (
           <EmptyState
+            bg="transparent"
             flex={1}
             display="flex"
             justifyContent="center"

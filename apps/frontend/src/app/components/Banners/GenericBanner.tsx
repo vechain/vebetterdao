@@ -2,34 +2,18 @@ import { Card, Image, Heading, Text, Box, CloseButton, Flex, BoxProps, Float } f
 import { ReactNode } from "react"
 
 import { useColorModeValue } from "@/components/ui/color-mode"
+import { useUserPreferences } from "@/hooks/useUserPreferences"
 
-// TODO: will be used when closing banners enabled
 export enum BannerStorageKey {
-  STARGATE_MIGRATION = "show_stargate_banner",
-  CAST_VOTE = "show_banner_cast_vote",
-  CLAIM_REWARDS = "show_banner_claim_rewards",
-  NEW_APP = "show_banner_new_app",
-  CREATOR_NFT = "show_banner_creator_nft",
-  LOW_VTHO = "show_banner_low_vtho",
-  USER_SIGNALED = "show_banner_user_signaled",
-  DELEGATING = "show_banner_delegating",
-  DO_ACTION = "show_banner_do_action",
-}
-
-export const isBannerEnabled = (storageKey: string): boolean => {
-  return localStorage.getItem(storageKey) === "true"
-}
-
-export const isBannerClosed = (storageKey: string): boolean => {
-  return localStorage.getItem(storageKey) !== "true"
-}
-
-export const setBannerEnabled = (storageKey: string): void => {
-  localStorage.setItem(storageKey, "true")
-}
-
-export const setBannerClosed = (storageKey: string): void => {
-  localStorage.setItem(storageKey, "false")
+  SHOW_STARGATE_MIGRATION = "SHOW_STARGATE_BANNER",
+  SHOW_CAST_VOTE = "SHOW_CAST_VOTE",
+  SHOW_CLAIM_REWARDS = "SHOW_CLAIM_REWARDS",
+  SHOW_NEW_APP = "SHOW_NEW_APP",
+  SHOW_CREATOR_NFT = "SHOW_CREATOR_NFT",
+  SHOW_LOW_VTHO = "SHOW_LOW_VTHO",
+  SHOW_USER_SIGNALED = "SHOW_USER_SIGNALED",
+  SHOW_DELEGATING = "SHOW_DELEGATING",
+  SHOW_DO_ACTION = "SHOW_DO_ACTION",
 }
 
 type BannerVariant = "default" | "b3mo"
@@ -64,13 +48,11 @@ type B3MOIllustration =
   | "/assets/mascot/mascot-welcoming-left-head.webp"
   | "/assets/mascot/mascot-welcoming.webp"
   | "/assets/images/b3mo-stargate-greet.webp"
-
 type GenericBannerProps = {
   title: string
   description: ReactNode
+  storageKey?: BannerStorageKey
   cta?: ReactNode
-  closable?: boolean
-  storageKey?: string
   onClose?: () => void
   illustrationDimensions?: {
     width?: BoxProps["width"]
@@ -83,7 +65,6 @@ export const GenericBanner = ({
   title,
   description,
   cta,
-  closable = false,
   storageKey,
   onClose,
   illustration,
@@ -91,10 +72,10 @@ export const GenericBanner = ({
 }: GenericBannerProps) => {
   const config = variantConfig[variant]
   const bgImage = useColorModeValue(config.bgImageLight, config.bgImageDark)
+  const { updatePreferences } = useUserPreferences()
 
   const handleClose = () => {
-    if (storageKey) setBannerClosed(storageKey)
-
+    if (storageKey) updatePreferences({ [storageKey]: false })
     onClose?.()
   }
 
@@ -127,7 +108,7 @@ export const GenericBanner = ({
         <Image src={illustration || config.illustration} alt="" w="full" h="full" objectFit="contain" />
       </Flex>
 
-      {closable && (
+      {storageKey && (
         <CloseButton
           variant="secondary"
           onClick={handleClose}
