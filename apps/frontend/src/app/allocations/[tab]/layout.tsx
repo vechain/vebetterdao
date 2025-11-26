@@ -12,7 +12,7 @@ export default async function TabLayout({ children, modal }: { children: React.R
         <Grid
           templateRows={{ base: "repeat(2,1fr)", md: "1fr" }}
           templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }}
-          gap="2">
+          gap={{ base: "2", md: "6" }}>
           <GridItem colSpan={{ base: 2, md: 1 }} w="full">
             <VotingPowerBox />
           </GridItem>

@@ -32,8 +32,8 @@ export const StatCard = ({
       justifyContent="space-between"
       gap={{ base: "2", md: "4" }}>
       {showIcon && icon && (
-        <Square rounded="md" bg={`status.${variant}.secondary`} aspectRatio={1} height={{ base: "32px", md: "60px" }}>
-          <Icon boxSize={{ base: "5", md: "6" }} color={`status.${variant}.strong`}>
+        <Square rounded="xl" bg={`status.${variant}.secondary`} aspectRatio={1} height={{ base: "32px", md: "60px" }}>
+          <Icon boxSize={{ base: "5", md: "9" }} color={`status.${variant}.strong`}>
             {icon}
           </Icon>
         </Square>

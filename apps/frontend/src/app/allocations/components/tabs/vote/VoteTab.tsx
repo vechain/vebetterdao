@@ -3,10 +3,11 @@
 import { Bleed, Icon, Input, InputGroup } from "@chakra-ui/react"
 import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useContext } from "react"
+import { useCallback, useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
+import { useDebounce } from "@/hooks/useDebounce"
 
 import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
@@ -28,14 +29,26 @@ export function VoteTab() {
   const { t } = useTranslation()
   const { data: threshold } = useVotingThreshold()
 
-  const handleSearchChange = useCallback(
-    (query: string) => {
+  const [localSearchQuery, setLocalSearchQuery] = useState(urlSearchQuery)
+  const debouncedSearchQuery = useDebounce(localSearchQuery, 300)
+
+  useEffect(() => {
+    setLocalSearchQuery(urlSearchQuery)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (debouncedSearchQuery !== urlSearchQuery) {
       const params = new URLSearchParams(searchParams)
-      params.set("search", query)
+      if (debouncedSearchQuery) params.set("search", debouncedSearchQuery)
+      else params.delete("search")
+
       router.replace(`${pathname}?${params.toString()}`)
-    },
-    [pathname, router, searchParams],
-  )
+    }
+  }, [debouncedSearchQuery, urlSearchQuery, pathname, router, searchParams])
+
+  const handleSearchChange = useCallback((query: string) => {
+    setLocalSearchQuery(query)
+  }, [])
 
   const handleViewAll = useCallback(() => {
     const params = new URLSearchParams(searchParams)
@@ -44,6 +57,7 @@ export function VoteTab() {
   }, [searchParams, router])
 
   const handleCloseSearch = useCallback(() => {
+    setLocalSearchQuery("")
     const params = new URLSearchParams(searchParams)
     params.delete("search")
     router.push(`?${params.toString()}`)
@@ -81,6 +95,7 @@ export function VoteTab() {
         <Input
           id="allocation-app-filter"
           placeholder="Search app"
+          value={localSearchQuery}
           onChange={e => handleSearchChange(e.target.value)}
           onFocus={handleViewAll}
         />
@@ -112,7 +127,7 @@ export function VoteTab() {
       <SearchAppsBottomSheet
         isOpen={isSearchOpen}
         onClose={handleCloseSearch}
-        searchQuery={urlSearchQuery}
+        searchQuery={localSearchQuery}
         onSearchChange={handleSearchChange}
         apps={apps}
         selectedAppIds={selectedAppIds}
