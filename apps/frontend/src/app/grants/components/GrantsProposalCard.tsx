@@ -79,7 +79,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
 
-  const grantAmountRequested = formatEther(grantProposal?.grantAmountRequested || "")
+  const grantAmountRequested = formatEther(grantProposal?.grantAmountRequested || 0n)
   const userVoteOption = userVoteEvent?.userVote
   const hasUserVoted = !!userVoteEvent?.hasVoted
 
