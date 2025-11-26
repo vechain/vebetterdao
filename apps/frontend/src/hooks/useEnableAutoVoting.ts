@@ -26,6 +26,8 @@ type ClausesProps = {
   userAddress: string
   hasVoted: boolean
   shouldEnable: boolean
+  shouldDisable: boolean
+  isAutoVotingEnabledOnChain: boolean
   needsPreferenceUpdate?: boolean
 }
 
@@ -39,8 +41,9 @@ type UseManageAutoVotingAndVoteProps = {
  * Hook to manage auto-voting state (enable/disable) and optionally cast vote
  *
  * Handles multiple cases:
- * - Case 1: ENABLING auto-voting + voting
- *   Clauses: setUserVotingPreferences + toggleAutoVoting + castVote
+ * - Case 1: ENABLING auto-voting (not voted yet)
+ *   Clauses: setUserVotingPreferences + toggleAutoVoting
+ *   Note: No castVote - relayer will vote for them
  *
  * - Case 2a: ENABLING auto-voting (already voted, preferences changed)
  *   Clauses: setUserVotingPreferences + toggleAutoVoting
@@ -48,11 +51,9 @@ type UseManageAutoVotingAndVoteProps = {
  * - Case 2b: ENABLING auto-voting (already voted, preferences unchanged - optimization)
  *   Clauses: toggleAutoVoting only
  *
- * - Case 4: DISABLING auto-voting (already voted)
- *   Clauses: toggleAutoVoting
- *
- * - Case 5: DISABLING auto-voting + voting
- *   Clauses: toggleAutoVoting + castVote
+ * - Case 3: DISABLING auto-voting
+ *   Clauses: toggleAutoVoting only
+ *   Note: No castVote - user can vote separately if needed
  *
  * @param roundId - The current round ID
  * @param onSuccess - Optional callback to run when transaction succeeds
@@ -76,12 +77,17 @@ export const useEnableAutoVotingAndVote = ({
     userAddress,
     hasVoted,
     shouldEnable,
+    shouldDisable,
+    isAutoVotingEnabledOnChain,
     needsPreferenceUpdate = true,
   }: ClausesProps) => {
     const clauses = []
 
-    // Add vote clause if user hasn't voted yet
-    if (!hasVoted) {
+    // Add vote clause only if:
+    // - User hasn't voted yet, AND
+    // - Auto-voting is NOT enabled on chain (user is voting manually)
+    // When auto-voting is enabled, relayer will vote for them
+    if (!hasVoted && !isAutoVotingEnabledOnChain) {
       clauses.push(
         contract.clause.castVote(roundId, appIds, voteWeights, {
           comment: `Cast your vote on round ${roundId}`,
@@ -98,12 +104,15 @@ export const useEnableAutoVotingAndVote = ({
       )
     }
 
-    // Always toggle auto-voting (enable or disable)
-    clauses.push(
-      contract.clause.toggleAutoVoting(userAddress, {
-        comment: shouldEnable ? "Enable auto-voting" : "Disable auto-voting",
-      }).clause,
-    )
+    // Only toggle auto-voting if we're actually enabling or disabling
+    // (don't toggle if user never had auto-voting enabled and is just voting normally)
+    if (shouldEnable || shouldDisable) {
+      clauses.push(
+        contract.clause.toggleAutoVoting(userAddress, {
+          comment: shouldEnable ? "Enable auto-voting" : "Disable auto-voting",
+        }).clause,
+      )
+    }
     return clauses
   }
 

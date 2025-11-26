@@ -50,7 +50,30 @@ export const useVotingButtonConfig = ({
   const { t } = useTranslation()
 
   return useMemo(() => {
-    // Case 1: User hasn't voted yet - show vote button
+    // Case 1: User is editing auto-vote preferences - show cancel/save buttons
+    if (isEditingAutoVote) {
+      return {
+        type: "editing" as const,
+        primaryText: t("Save Auto-Vote"),
+        primaryDisabled: !hasAutoVoteChanges,
+        primaryOnClick: onSaveAutoVote,
+        secondaryText: t("Cancel Edit"),
+        secondaryOnClick: onCancelEditAutoVote,
+      }
+    }
+
+    // Case 2: Auto-voting enabled - show edit button (regardless of hasVoted)
+    // This allows users to edit preferences even if relayer hasn't voted yet
+    if (isAutoVotingEnabled) {
+      return {
+        type: "edit" as const,
+        primaryText: hasExistingPreferences ? t("Edit Auto-Vote") : t("Enable Auto-Voting & Claim"),
+        primaryDisabled: false,
+        primaryOnClick: onEditAutoVote,
+      }
+    }
+
+    // Case 3: User hasn't voted yet - show vote button
     if (!hasVoted) {
       const count = selectedAppIds.size
       const text =
@@ -65,28 +88,6 @@ export const useVotingButtonConfig = ({
         primaryText: text,
         primaryDisabled: !hasEnoughVotesAtSnapshot || count === 0,
         primaryOnClick: onVoteClick,
-      }
-    }
-
-    // Case 2: User is editing auto-vote preferences - show cancel/save buttons
-    if (isEditingAutoVote) {
-      return {
-        type: "editing" as const,
-        primaryText: t("Save Auto-Vote"),
-        primaryDisabled: !hasAutoVoteChanges,
-        primaryOnClick: onSaveAutoVote,
-        secondaryText: t("Cancel Edit"),
-        secondaryOnClick: onCancelEditAutoVote,
-      }
-    }
-
-    // Case 3: User has voted + auto-voting enabled - show edit button
-    if (isAutoVotingEnabled) {
-      return {
-        type: "edit" as const,
-        primaryText: hasExistingPreferences ? t("Edit Auto-Vote") : t("Enable Auto-Voting & Claim"),
-        primaryDisabled: false,
-        primaryOnClick: onEditAutoVote,
       }
     }
 

@@ -247,8 +247,8 @@ export function AppCategoryTabs({
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">
-              {/* Show select all only when not in auto-vote edit mode or when editing */}
-              {(!isAutoVotingEnabled || !hasVoted || isEditingAutoVote) && (
+              {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
+              {((!hasVoted && !isAutoVotingEnabled) || isEditingAutoVote) && (
                 <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
                   {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
                 </Button>
@@ -362,7 +362,7 @@ export function AppCategoryTabs({
                   allocationSharePercentage={appSharesMap.get(app.id)}
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
-                  displayMode={hasVoted && !isEditingAutoVote ? "voted" : "checkbox"}
+                  displayMode={(hasVoted || isAutoVotingEnabled) && !isEditingAutoVote ? "voted" : "checkbox"}
                   disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
                 />
               ))

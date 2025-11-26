@@ -127,8 +127,8 @@ export const useAllocationVoting = ({
           }
         }
         return {
-          waiting: hasVoted ? t("Disabling automation...") : t("Disabling automation and submitting vote..."),
-          success: hasVoted ? t("Automation disabled!") : t("Automation disabled & vote submitted!"),
+          waiting: t("Disabling automation..."),
+          success: t("Automation disabled!"),
         }
       }
 
@@ -178,6 +178,8 @@ export const useAllocationVoting = ({
               userAddress: account.address,
               hasVoted: hasVoted ?? false,
               shouldEnable,
+              shouldDisable,
+              isAutoVotingEnabledOnChain,
               needsPreferenceUpdate,
             },
             customUI,

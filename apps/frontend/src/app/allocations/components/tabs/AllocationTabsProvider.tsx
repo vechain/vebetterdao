@@ -177,19 +177,30 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   })
 
   useEffect(() => {
-    // Initialise selectedAppIds from voted apps when data first loads
-    // Condition check for !isEditingAutoVote prevents updates during editing
-    if (hasVoted && castVotesEvent?.appsIds && !isEditingAutoVote) {
+    // Don't update during editing mode
+    if (isEditingAutoVote) return
+
+    // Case 1: User has voted - load from cast votes
+    if (hasVoted && castVotesEvent?.appsIds) {
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
       setSelectionOrder(castVotesEvent.appsIds)
       onSelectedAppsChange?.(votedAppIds)
+      return
+    }
+
+    // Case 2: Auto-voting enabled but relayer hasn't voted yet - load from stored preferences
+    if (isAutoVotingEnabledOnChain && !hasVoted && storedPreferences.length > 0) {
+      const preferenceAppIds = new Set(storedPreferences)
+      setSelectedAppIds(preferenceAppIds)
+      setSelectionOrder(storedPreferences)
+      onSelectedAppsChange?.(preferenceAppIds)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasVoted, castVotesEvent?.appsIds])
+  }, [hasVoted, castVotesEvent?.appsIds, isAutoVotingEnabledOnChain, storedPreferences])
 
-  // Show when user has voted - either to edit existing preferences or enable auto-voting
-  const showAutoVoteUI = hasVoted ?? false
+  // Show when user has voted OR has auto-voting enabled (even if relayer hasn't voted yet)
+  const showAutoVoteUI = (hasVoted ?? false) || (isAutoVotingEnabledOnChain ?? false)
 
   // Button configuration - single source of truth for button logic
   const buttonConfig = useVotingButtonConfig({

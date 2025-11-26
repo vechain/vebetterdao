@@ -153,6 +153,9 @@ export function VoteTab() {
         selectionOrder={selectionOrder}
         onToggleApp={onToggleApp}
         isAtSelectionLimit={isAtSelectionLimit}
+        hasVoted={hasVoted}
+        isAutoVotingEnabled={isAutoVotingEnabled}
+        isEditingAutoVote={isEditingAutoVote}
       />
     </>
   )

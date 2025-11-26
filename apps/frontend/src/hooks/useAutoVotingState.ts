@@ -29,7 +29,9 @@ export const getAutoVotingState = ({
   // 1. Detect State Change
   const autoVotingStateChanged = isAutoVotingEnabled !== isAutoVotingEnabledOnChain
   const shouldEnable = autoVotingStateChanged && isAutoVotingEnabled
-  const shouldDisable = autoVotingStateChanged && !isAutoVotingEnabled
+  // Only disable if user wants it OFF AND it's actually enabled on chain
+  // (can't disable something that was never enabled)
+  const shouldDisable = autoVotingStateChanged && !isAutoVotingEnabled && isAutoVotingEnabledOnChain
 
   // 2. Detect Preference Change
   const preferencesChanged =
