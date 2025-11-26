@@ -48,7 +48,7 @@ export const TotalRewardsDistributionModal = ({
   isOpen: boolean
   onClose: VoidFunction
 }) => {
-  const { totalVoters, vote2EarnAmount, gmAmount, xAllocationsAmount, treasuryAmount } = roundDetails
+  const { apps, totalVoters, vote2EarnAmount, gmAmount, xAllocationsAmount, treasuryAmount } = roundDetails
   const votingRewardsTotal = vote2EarnAmount + gmAmount
   const rewardsTotal = votingRewardsTotal + xAllocationsAmount + treasuryAmount
   const percentages = {
@@ -66,7 +66,7 @@ export const TotalRewardsDistributionModal = ({
   const dataList = [
     {
       label: "Apps",
-      amount: percentages.apps,
+      amount: apps.length || 0,
       reward: formattedXAllocations,
       showDot: true,
       dotColor: "status.positive.primary",
