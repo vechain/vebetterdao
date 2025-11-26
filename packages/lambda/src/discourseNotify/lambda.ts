@@ -1,7 +1,8 @@
 import { APIGatewayProxyResult, Context } from "aws-lambda"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 
-import { getData, publishMessage } from "../helpers"
+import { getData } from "../helpers"
+import { notify } from "../helpers/slack/notificationHelper"
 import { slackIds } from "../helpers/slack/slackIds"
 import { logger } from "../helpers/logger"
 
@@ -76,9 +77,8 @@ interface DiscourseSearchResponse {
 }
 
 const getSlackConfig = (): SlackConfig => {
-  // Use b3trDev channel for both environments
   return {
-    channelId: slackIds.b3trDev,
+    channelId: slackIds.b3trLambda,
     messagePrefix: "[DISCOURSE] ",
   }
 }
@@ -137,8 +137,16 @@ const postTopicsToSlack = async (topics: DiscourseTopic[]): Promise<void> => {
 
   const fullMessage = `${header}\n\n${messages.join("\n\n")}`
 
-  logger.info("Posting Discourse topics to Slack", { topicCount: topics.length })
-  await publishMessage(client, SLACK_CHANNEL_ID, fullMessage)
+  await notify({
+    level: "info",
+    message: fullMessage,
+    data: { topicCount: topics.length },
+    slack: {
+      client,
+      channelId: SLACK_CHANNEL_ID,
+      messagePrefix: "",
+    },
+  })
 }
 
 /**
@@ -181,12 +189,15 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     logger.error("Error fetching Discourse posts", error)
     console.error("Error fetching Discourse posts:", error)
 
-    // Publish an error message to the Slack channel
-    await publishMessage(
-      client,
-      SLACK_CHANNEL_ID,
-      `${SLACK_MESSAGE_PREFIX}:alert: Error fetching Discourse posts: ${error instanceof Error ? error.message : String(error)}`,
-    )
+    await notify({
+      level: "error",
+      message: `Error fetching Discourse posts: ${error instanceof Error ? error.message : String(error)}`,
+      slack: {
+        client,
+        channelId: SLACK_CHANNEL_ID,
+        messagePrefix: SLACK_MESSAGE_PREFIX,
+      },
+    })
 
     return {
       statusCode: 500,
