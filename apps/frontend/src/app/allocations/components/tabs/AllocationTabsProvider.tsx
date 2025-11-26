@@ -8,6 +8,7 @@ import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
+import { useIsAutoVotingEnabledInCurrentRound } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
 import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { useUserVotesInRound } from "@/api/contracts/xApps/hooks/useUserVotesInRound"
 import { useStickyState } from "@/hooks/useStickyState"
@@ -33,6 +34,7 @@ interface AllocationTabsContextType {
   hasEnoughVotesAtSnapshot: boolean
   onVoteClick: () => void
   isAutoVotingEnabled: boolean
+  isAutoVotingEnabledInCurrentRound: boolean
   onToggleAutoVoting: (enabled: boolean) => void
   hasVoted: boolean
   hasVotedLoading: boolean
@@ -70,6 +72,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   )
   const { data: castVotesEvent } = useUserVotesInRound(roundDetails.id.toString(), account?.address ?? undefined)
   const { data: isAutoVotingEnabledOnChain } = useIsAutoVotingEnabled(account?.address)
+  const { data: isAutoVotingEnabledInCurrentRound } = useIsAutoVotingEnabledInCurrentRound(account?.address)
   const { data: storedPreferences = [] } = useUserVotingPreferences(account?.address)
 
   // Initialize local state from chain data
@@ -173,6 +176,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     roundId: roundDetails.currentRoundId.toString(),
     isAutoVotingEnabled,
     isAutoVotingEnabledOnChain: isAutoVotingEnabledOnChain ?? false,
+    isAutoVotingEnabledInCurrentRound: isAutoVotingEnabledInCurrentRound ?? false,
     onSuccess: onVoteSuccess,
   })
 
@@ -189,24 +193,34 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
       return
     }
 
-    // Case 2: Auto-voting enabled but relayer hasn't voted yet - load from stored preferences
-    if (isAutoVotingEnabledOnChain && !hasVoted && storedPreferences.length > 0) {
+    // Case 2: Auto-voting enabled (current status OR in current round) but hasn't voted yet
+    // Load from stored preferences
+    const isAutoVotingActive = isAutoVotingEnabledOnChain || isAutoVotingEnabledInCurrentRound
+    if (isAutoVotingActive && !hasVoted && storedPreferences.length > 0) {
       const preferenceAppIds = new Set(storedPreferences)
       setSelectedAppIds(preferenceAppIds)
       setSelectionOrder(storedPreferences)
       onSelectedAppsChange?.(preferenceAppIds)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasVoted, castVotesEvent?.appsIds, isAutoVotingEnabledOnChain, storedPreferences])
+  }, [
+    hasVoted,
+    castVotesEvent?.appsIds,
+    isAutoVotingEnabledOnChain,
+    isAutoVotingEnabledInCurrentRound,
+    storedPreferences,
+  ])
 
-  // Show when user has voted OR has auto-voting enabled (even if relayer hasn't voted yet)
-  const showAutoVoteUI = (hasVoted ?? false) || (isAutoVotingEnabledOnChain ?? false)
+  // Show when user has voted OR has auto-voting enabled (current status OR in current round)
+  const showAutoVoteUI =
+    (hasVoted ?? false) || (isAutoVotingEnabledOnChain ?? false) || (isAutoVotingEnabledInCurrentRound ?? false)
 
   // Button configuration - single source of truth for button logic
   const buttonConfig = useVotingButtonConfig({
     hasVoted: hasVoted ?? false,
     isEditingAutoVote,
     isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
+    isAutoVotingEnabledInCurrentRound: isAutoVotingEnabledInCurrentRound ?? false,
     hasExistingPreferences,
     hasAutoVoteChanges,
     selectedAppIds,
@@ -231,6 +245,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
         onVoteClick: handleOpenModal,
         isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
+        isAutoVotingEnabledInCurrentRound: isAutoVotingEnabledInCurrentRound ?? false,
         onToggleAutoVoting: setIsAutoVotingEnabled,
         hasVoted: hasVoted ?? false,
         hasVotedLoading,

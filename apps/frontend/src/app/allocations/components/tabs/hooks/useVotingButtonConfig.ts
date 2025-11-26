@@ -7,6 +7,7 @@ interface UseVotingButtonConfigProps {
   hasVoted: boolean
   isEditingAutoVote: boolean
   isAutoVotingEnabled: boolean
+  isAutoVotingEnabledInCurrentRound: boolean
   hasExistingPreferences: boolean
   hasAutoVoteChanges: boolean
   selectedAppIds: Set<string>
@@ -37,6 +38,7 @@ export const useVotingButtonConfig = ({
   hasVoted,
   isEditingAutoVote,
   isAutoVotingEnabled,
+  isAutoVotingEnabledInCurrentRound,
   hasExistingPreferences,
   hasAutoVoteChanges,
   selectedAppIds,
@@ -62,9 +64,9 @@ export const useVotingButtonConfig = ({
       }
     }
 
-    // Case 2: Auto-voting enabled - show edit button (regardless of hasVoted)
-    // This allows users to edit preferences even if relayer hasn't voted yet
-    if (isAutoVotingEnabled) {
+    // Case 2: Auto-voting active (current status OR in current round) - show edit button
+    // This includes users who disabled mid-round but were enabled at round start
+    if (isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) {
       return {
         type: "edit" as const,
         primaryText: hasExistingPreferences ? t("Edit Auto-Vote") : t("Enable Auto-Voting & Claim"),
@@ -102,6 +104,7 @@ export const useVotingButtonConfig = ({
     hasVoted,
     isEditingAutoVote,
     isAutoVotingEnabled,
+    isAutoVotingEnabledInCurrentRound,
     hasExistingPreferences,
     hasAutoVoteChanges,
     selectedAppIds.size,

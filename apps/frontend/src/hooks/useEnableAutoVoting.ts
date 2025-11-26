@@ -27,7 +27,7 @@ type ClausesProps = {
   hasVoted: boolean
   shouldEnable: boolean
   shouldDisable: boolean
-  isAutoVotingEnabledOnChain: boolean
+  isAutoVotingEnabledInCurrentRound: boolean
   needsPreferenceUpdate?: boolean
 }
 
@@ -40,20 +40,21 @@ type UseManageAutoVotingAndVoteProps = {
 /**
  * Hook to manage auto-voting state (enable/disable) and optionally cast vote
  *
+ * Vote casting logic:
+ * - Cast vote only if: !hasVoted && !isAutoVotingEnabledInCurrentRound
+ * - If isAutoVotingEnabledInCurrentRound is true, relayer handles voting
+ *
  * Handles multiple cases:
- * - Case 1: ENABLING auto-voting (not voted yet)
- *   Clauses: setUserVotingPreferences + toggleAutoVoting
- *   Note: No castVote - relayer will vote for them
+ * - Case 1: ENABLING auto-voting (InCurrentRound=false, not voted yet)
+ *   Clauses: castVote + setUserVotingPreferences + toggleAutoVoting
  *
- * - Case 2a: ENABLING auto-voting (already voted, preferences changed)
+ * - Case 2: ENABLING auto-voting (InCurrentRound=true OR already voted)
  *   Clauses: setUserVotingPreferences + toggleAutoVoting
- *
- * - Case 2b: ENABLING auto-voting (already voted, preferences unchanged - optimization)
- *   Clauses: toggleAutoVoting only
+ *   Note: No castVote - relayer will vote or already voted
  *
  * - Case 3: DISABLING auto-voting
  *   Clauses: toggleAutoVoting only
- *   Note: No castVote - user can vote separately if needed
+ *   Note: No castVote when InCurrentRound=true (relayer handles it)
  *
  * @param roundId - The current round ID
  * @param onSuccess - Optional callback to run when transaction succeeds
@@ -78,16 +79,16 @@ export const useEnableAutoVotingAndVote = ({
     hasVoted,
     shouldEnable,
     shouldDisable,
-    isAutoVotingEnabledOnChain,
+    isAutoVotingEnabledInCurrentRound,
     needsPreferenceUpdate = true,
   }: ClausesProps) => {
     const clauses = []
 
     // Add vote clause only if:
     // - User hasn't voted yet, AND
-    // - Auto-voting is NOT enabled on chain (user is voting manually)
-    // When auto-voting is enabled, relayer will vote for them
-    if (!hasVoted && !isAutoVotingEnabledOnChain) {
+    // - User is NOT registered for auto-voting in current round (relayer won't vote for them)
+    // When isAutoVotingEnabledInCurrentRound is true, relayer will vote for them
+    if (!hasVoted && !isAutoVotingEnabledInCurrentRound) {
       clauses.push(
         contract.clause.castVote(roundId, appIds, voteWeights, {
           comment: `Cast your vote on round ${roundId}`,

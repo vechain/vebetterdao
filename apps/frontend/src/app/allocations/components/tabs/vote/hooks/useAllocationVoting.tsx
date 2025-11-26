@@ -20,6 +20,7 @@ interface UseAllocationVotingProps {
   roundId: string
   isAutoVotingEnabled?: boolean
   isAutoVotingEnabledOnChain?: boolean
+  isAutoVotingEnabledInCurrentRound?: boolean
   onSuccess?: () => void
 }
 
@@ -34,6 +35,7 @@ export const useAllocationVoting = ({
   roundId,
   isAutoVotingEnabled = false,
   isAutoVotingEnabledOnChain = false,
+  isAutoVotingEnabledInCurrentRound = false,
   onSuccess,
 }: UseAllocationVotingProps) => {
   const { t } = useTranslation()
@@ -179,7 +181,7 @@ export const useAllocationVoting = ({
               hasVoted: hasVoted ?? false,
               shouldEnable,
               shouldDisable,
-              isAutoVotingEnabledOnChain,
+              isAutoVotingEnabledInCurrentRound,
               needsPreferenceUpdate,
             },
             customUI,
@@ -232,6 +234,7 @@ export const useAllocationVoting = ({
       votesAtSnapshot,
       isAutoVotingEnabled,
       isAutoVotingEnabledOnChain,
+      isAutoVotingEnabledInCurrentRound,
       account?.address,
       roundId,
       hasVoted,

@@ -21,6 +21,7 @@ interface SearchAppsBottomSheetProps {
   isAtSelectionLimit?: boolean
   hasVoted?: boolean
   isAutoVotingEnabled?: boolean
+  isAutoVotingEnabledInCurrentRound?: boolean
   isEditingAutoVote?: boolean
 }
 
@@ -36,6 +37,7 @@ export function SearchAppsBottomSheet({
   isAtSelectionLimit = false,
   hasVoted = false,
   isAutoVotingEnabled = false,
+  isAutoVotingEnabledInCurrentRound = false,
   isEditingAutoVote = false,
 }: SearchAppsBottomSheetProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -90,6 +92,7 @@ export function SearchAppsBottomSheet({
         isAtSelectionLimit={isAtSelectionLimit}
         hasVoted={hasVoted}
         isAutoVotingEnabled={isAutoVotingEnabled}
+        isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
         isEditingAutoVote={isEditingAutoVote}
       />
     </BaseBottomSheet>

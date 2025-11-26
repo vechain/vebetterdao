@@ -55,6 +55,7 @@ interface AppCategoryTabsProps {
   hasVotedLoading?: boolean
   threshold?: string
   isAutoVotingEnabled?: boolean
+  isAutoVotingEnabledInCurrentRound?: boolean
   isEditingAutoVote?: boolean
   onEditAutoVote?: () => void
   onCancelEditAutoVote?: () => void
@@ -88,6 +89,7 @@ export function AppCategoryTabs({
   hasVotedLoading = false,
   threshold,
   isAutoVotingEnabled = false,
+  isAutoVotingEnabledInCurrentRound = false,
   isEditingAutoVote = false,
   onEditAutoVote,
   onCancelEditAutoVote,
@@ -187,6 +189,7 @@ export function AppCategoryTabs({
     hasVoted,
     isEditingAutoVote,
     isAutoVotingEnabled,
+    isAutoVotingEnabledInCurrentRound,
     hasExistingPreferences,
     hasAutoVoteChanges,
     selectedAppIds: selectedAppIds ?? new Set(),
@@ -248,7 +251,7 @@ export function AppCategoryTabs({
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">
               {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
-              {((!hasVoted && !isAutoVotingEnabled) || isEditingAutoVote) && (
+              {((!hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) || isEditingAutoVote) && (
                 <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
                   {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
                 </Button>
@@ -362,7 +365,11 @@ export function AppCategoryTabs({
                   allocationSharePercentage={appSharesMap.get(app.id)}
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
-                  displayMode={(hasVoted || isAutoVotingEnabled) && !isEditingAutoVote ? "voted" : "checkbox"}
+                  displayMode={
+                    (hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote
+                      ? "voted"
+                      : "checkbox"
+                  }
                   disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
                 />
               ))
