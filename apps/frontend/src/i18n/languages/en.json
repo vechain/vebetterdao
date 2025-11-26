@@ -1605,5 +1605,6 @@
   "Vote for {{count}} App": "Vote for {{count}} App",
   "Cancel Edit": "Cancel Edit",
   "Enable Auto-Voting & Claim": "Enable Auto-Voting & Claim",
-  "Edit selection": "Edit selection"
+  "Edit selection": "Edit selection",
+  "Maximum {{count}} apps can be selected per vote.": "Maximum {{count}} apps can be selected per vote."
 }

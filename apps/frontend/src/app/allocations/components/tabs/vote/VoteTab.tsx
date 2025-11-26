@@ -22,6 +22,7 @@ export function VoteTab() {
     apps,
     roundId,
     selectedAppIds,
+    selectionOrder,
     onToggleApp,
     isStuck,
     hasEnoughVotesAtSnapshot,
@@ -36,6 +37,7 @@ export function VoteTab() {
     hasAutoVoteChanges,
     hasExistingPreferences,
     onEnableAutoVoting,
+    isAtSelectionLimit,
   } = context
   const router = useRouter()
   const pathname = usePathname()
@@ -89,6 +91,7 @@ export function VoteTab() {
           selectedAppIds={selectedAppIds}
           hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
           threshold={threshold}
+          isAtSelectionLimit={isAtSelectionLimit}
         />
       )}
       <InputGroup
@@ -107,6 +110,7 @@ export function VoteTab() {
         <AppCategoryTabs
           apps={apps}
           selectedAppIds={selectedAppIds}
+          selectionOrder={selectionOrder}
           onToggleApp={onToggleApp}
           onViewAll={handleViewAll}
           initialCategory={selectedCategory}
@@ -135,6 +139,7 @@ export function VoteTab() {
           hasAutoVoteChanges={hasAutoVoteChanges}
           hasExistingPreferences={hasExistingPreferences}
           onEnableAutoVoting={onEnableAutoVoting}
+          isAtSelectionLimit={isAtSelectionLimit}
         />
       </Bleed>
 
@@ -145,7 +150,9 @@ export function VoteTab() {
         onSearchChange={handleSearchChange}
         apps={apps}
         selectedAppIds={selectedAppIds}
+        selectionOrder={selectionOrder}
         onToggleApp={onToggleApp}
+        isAtSelectionLimit={isAtSelectionLimit}
       />
     </>
   )

@@ -15,6 +15,7 @@ export interface AppRadioCardProps {
   checked?: boolean
   onCheckedChange?: VoidFunction
   displayMode?: DisplayMode // Display mode: "checkbox" shows checkbox indicator, "voted" shows tick icon on app image
+  disabled?: boolean // Disable selection (e.g., when max apps reached)
 }
 
 export const AppRadioCard = ({
@@ -26,9 +27,10 @@ export const AppRadioCard = ({
   appVoters,
   allocationSharePercentage,
   displayMode = "checkbox",
+  disabled = false,
 }: AppRadioCardProps) => {
   const isVotedMode = displayMode === "voted"
-  const isInteractive = !isVotedMode && !!onCheckedChange
+  const isInteractive = !isVotedMode && !!onCheckedChange && !disabled
 
   return (
     <CheckboxCard.Root
@@ -38,7 +40,8 @@ export const AppRadioCard = ({
       checked={checked}
       onCheckedChange={isInteractive ? onCheckedChange : undefined}
       cursor={isInteractive ? "pointer" : "default"}
-      pointerEvents={isInteractive ? "auto" : "none"}>
+      pointerEvents={isInteractive ? "auto" : "none"}
+      opacity={disabled && !checked ? 0.5 : 1}>
       {isInteractive && <CheckboxCard.HiddenInput />}
       <CheckboxCard.Control alignItems="center" p="0" gap="3">
         {!isVotedMode && <CheckboxCard.Indicator rounded="sm" />}

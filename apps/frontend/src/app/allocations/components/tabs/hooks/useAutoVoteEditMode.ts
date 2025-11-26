@@ -7,6 +7,7 @@ interface UseAutoVoteEditModeProps {
   votedAppIds?: string[]
   selectedAppIds: Set<string>
   setSelectedAppIds: (ids: Set<string>) => void
+  setSelectionOrder: (order: string[]) => void
   onSelectedAppsChange?: (ids: Set<string>) => void
   openModal: () => void
 }
@@ -19,6 +20,7 @@ export const useAutoVoteEditMode = ({
   votedAppIds,
   selectedAppIds,
   setSelectedAppIds,
+  setSelectionOrder,
   onSelectedAppsChange,
   openModal,
 }: UseAutoVoteEditModeProps) => {
@@ -40,29 +42,34 @@ export const useAutoVoteEditMode = ({
   }, [isEditingAutoVote, selectedAppIds, storedPreferences, hasExistingPreferences])
 
   // Get apps to preselect: stored preferences (priority) or voted apps
-  const getAppsToPreselect = useCallback(() => {
-    return storedPreferences.length > 0
-      ? new Set(storedPreferences)
-      : votedAppIds
-        ? new Set(votedAppIds)
-        : new Set<string>()
+  // Returns both the Set and the order array
+  const getAppsToPreselect = useCallback((): { ids: Set<string>; order: string[] } => {
+    if (storedPreferences.length > 0) {
+      return { ids: new Set(storedPreferences), order: storedPreferences }
+    }
+    if (votedAppIds) {
+      return { ids: new Set(votedAppIds), order: votedAppIds }
+    }
+    return { ids: new Set<string>(), order: [] }
   }, [storedPreferences, votedAppIds])
 
   // Enter edit mode - load preferences from chain (priority) or voted apps
   const handleEditAutoVote = useCallback(() => {
-    const appsToPreselect = getAppsToPreselect()
-    setSelectedAppIds(appsToPreselect)
-    onSelectedAppsChange?.(appsToPreselect)
+    const { ids, order } = getAppsToPreselect()
+    setSelectedAppIds(ids)
+    setSelectionOrder(order)
+    onSelectedAppsChange?.(ids)
     setIsEditingAutoVote(true)
-  }, [getAppsToPreselect, setSelectedAppIds, onSelectedAppsChange])
+  }, [getAppsToPreselect, setSelectedAppIds, setSelectionOrder, onSelectedAppsChange])
 
   // Cancel edit mode - reload from chain state
   const handleCancelEditAutoVote = useCallback(() => {
-    const appsToRestore = getAppsToPreselect()
-    setSelectedAppIds(appsToRestore)
-    onSelectedAppsChange?.(appsToRestore)
+    const { ids, order } = getAppsToPreselect()
+    setSelectedAppIds(ids)
+    setSelectionOrder(order)
+    onSelectedAppsChange?.(ids)
     setIsEditingAutoVote(false)
-  }, [getAppsToPreselect, setSelectedAppIds, onSelectedAppsChange])
+  }, [getAppsToPreselect, setSelectedAppIds, setSelectionOrder, onSelectedAppsChange])
 
   // Save auto-vote preferences (triggers confirm modal)
   const handleSaveAutoVote = useCallback(() => {
@@ -74,6 +81,11 @@ export const useAutoVoteEditMode = ({
     setIsEditingAutoVote(false)
   }, [])
 
+  // Enter edit mode without resetting selections (for "Edit selection" from modal)
+  const enterEditMode = useCallback(() => {
+    setIsEditingAutoVote(true)
+  }, [])
+
   return {
     isEditingAutoVote,
     hasAutoVoteChanges,
@@ -82,5 +94,6 @@ export const useAutoVoteEditMode = ({
     handleCancelEditAutoVote,
     handleSaveAutoVote,
     resetEditMode,
+    enterEditMode,
   }
 }

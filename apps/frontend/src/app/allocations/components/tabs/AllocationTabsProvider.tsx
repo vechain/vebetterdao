@@ -3,7 +3,6 @@
 import { Box, Button, HStack, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
-import { useTranslation } from "react-i18next"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
@@ -18,13 +17,17 @@ import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
 
 import { useAutoVoteEditMode } from "./hooks/useAutoVoteEditMode"
+import { useVotingButtonConfig } from "./hooks/useVotingButtonConfig"
 import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
+
+export const MAX_SELECTED_APPS = 15
 
 interface AllocationTabsContextType {
   roundId: string
   roundDetails: AllocationRoundDetails
   apps: AppWithVotes[]
   selectedAppIds: Set<string>
+  selectionOrder: string[]
   onToggleApp: (appId: string) => void
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
@@ -40,6 +43,7 @@ interface AllocationTabsContextType {
   hasAutoVoteChanges: boolean
   hasExistingPreferences: boolean
   onEnableAutoVoting: () => void
+  isAtSelectionLimit: boolean
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
@@ -51,10 +55,10 @@ interface AllocationTabsProviderProps {
 }
 
 export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
-  const { t } = useTranslation()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
+  const [selectionOrder, setSelectionOrder] = useState<string[]>([])
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
@@ -87,6 +91,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     if (castVotesEvent?.appsIds) {
       const votedApps = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedApps)
+      setSelectionOrder(castVotesEvent.appsIds)
       onSelectedAppsChange?.(votedApps)
     }
     handleOpenModal()
@@ -101,20 +106,23 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     handleCancelEditAutoVote,
     handleSaveAutoVote,
     resetEditMode,
+    enterEditMode,
   } = useAutoVoteEditMode({
     storedPreferences,
     votedAppIds: castVotesEvent?.appsIds,
     selectedAppIds,
     setSelectedAppIds,
+    setSelectionOrder,
     onSelectedAppsChange,
     openModal: handleOpenModal, // Use handleOpenModal to ensure toggle is set correctly
   })
 
   // Handler for "Edit selection" in modal - closes modal and enters edit mode
+  // Uses enterEditMode instead of handleEditAutoVote to preserve current selections
   const handleEditSelection = useCallback(() => {
     closeModal()
-    handleEditAutoVote()
-  }, [closeModal, handleEditAutoVote])
+    enterEditMode()
+  }, [closeModal, enterEditMode])
 
   const handleCloseModal = useCallback(() => {
     closeModal()
@@ -128,11 +136,25 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
   }, [roundDetails.apps, selectedAppIds])
 
+  const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
+
   const toggleApp = useCallback(
     (appId: string) => {
       setSelectedAppIds(prev => {
         const next = new Set(prev)
-        next.has(appId) ? next.delete(appId) : next.add(appId)
+        if (next.has(appId)) {
+          next.delete(appId)
+          // Remove from selection order
+          setSelectionOrder(order => order.filter(id => id !== appId))
+        } else {
+          // Enforce 15 app limit
+          if (next.size >= MAX_SELECTED_APPS) {
+            return prev // Don't add if at limit
+          }
+          next.add(appId)
+          // Append to selection order
+          setSelectionOrder(order => [...order, appId])
+        }
         onSelectedAppsChange?.(next)
         return next
       })
@@ -160,6 +182,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     if (hasVoted && castVotesEvent?.appsIds && !isEditingAutoVote) {
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
+      setSelectionOrder(castVotesEvent.appsIds)
       onSelectedAppsChange?.(votedAppIds)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,8 +191,21 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   // Show when user has voted - either to edit existing preferences or enable auto-voting
   const showAutoVoteUI = hasVoted ?? false
 
-  // Show edit mode only when auto-voting is already enabled on chain
-  const showAutoVoteEditMode = (isAutoVotingEnabledOnChain ?? false) && (hasVoted ?? false)
+  // Button configuration - single source of truth for button logic
+  const buttonConfig = useVotingButtonConfig({
+    hasVoted: hasVoted ?? false,
+    isEditingAutoVote,
+    isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
+    hasExistingPreferences,
+    hasAutoVoteChanges,
+    selectedAppIds,
+    hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
+    onVoteClick: handleOpenModal,
+    onEditAutoVote: handleEditAutoVote,
+    onCancelEditAutoVote: handleCancelEditAutoVote,
+    onSaveAutoVote: handleSaveAutoVote,
+    onEnableAutoVoting: handleEnableAutoVoting,
+  })
 
   return (
     <AllocationTabsContext.Provider
@@ -178,6 +214,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         roundDetails,
         apps: roundDetails.apps,
         selectedAppIds,
+        selectionOrder,
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
@@ -193,6 +230,7 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         hasAutoVoteChanges,
         hasExistingPreferences,
         onEnableAutoVoting: handleEnableAutoVoting,
+        isAtSelectionLimit,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
@@ -212,35 +250,26 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
         right={0}
         zIndex={50}>
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
-          {showAutoVoteUI ? (
-            isEditingAutoVote ? (
-              // Edit mode: Cancel/Save buttons
-              <HStack gap="3" w="full">
-                <Button flex={1} variant="secondary" onClick={handleCancelEditAutoVote}>
-                  {t("Cancel Edit")}
-                </Button>
-                <Button flex={1} variant="primary" disabled={!hasAutoVoteChanges} onClick={handleSaveAutoVote}>
-                  {t("Save Auto-Vote")}
-                </Button>
-              </HStack>
-            ) : showAutoVoteEditMode ? (
-              <Button w="full" variant="primary" onClick={handleEditAutoVote}>
-                {hasExistingPreferences ? t("Edit Auto-Vote") : t("Enable Auto-Voting & Claim")}
+          {buttonConfig.type === "editing" ? (
+            <HStack gap="3" w="full">
+              <Button flex={1} variant="secondary" onClick={buttonConfig.secondaryOnClick}>
+                {buttonConfig.secondaryText}
               </Button>
-            ) : (
-              <Button w="full" variant="primary" onClick={handleEnableAutoVoting}>
-                {t("Enable Auto-Voting & Claim")}
+              <Button
+                flex={1}
+                variant="primary"
+                disabled={buttonConfig.primaryDisabled}
+                onClick={buttonConfig.primaryOnClick}>
+                {buttonConfig.primaryText}
               </Button>
-            )
+            </HStack>
           ) : (
             <Button
               w="full"
               variant="primary"
-              disabled={!hasVotesAtSnapshot || selectedAppIds.size === 0}
-              onClick={handleOpenModal}>
-              {selectedAppIds.size > 1
-                ? t("Vote for {{count}} Apps", { count: selectedAppIds?.size })
-                : t("Vote for {{count}} App", { count: selectedAppIds?.size })}
+              disabled={buttonConfig.primaryDisabled}
+              onClick={buttonConfig.primaryOnClick}>
+              {buttonConfig.primaryText}
             </Button>
           )}
         </Box>

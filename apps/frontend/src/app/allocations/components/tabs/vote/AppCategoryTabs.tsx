@@ -22,7 +22,6 @@ import {
 } from "@chakra-ui/react"
 import { Search, Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
@@ -34,11 +33,14 @@ import { APP_CATEGORIES } from "@/types/appDetails"
 import { AppRadioCard } from "../../AppRadioCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
 import { VotingAlerts } from "../../VotingAlerts"
+import { MAX_SELECTED_APPS } from "../AllocationTabsProvider"
+import { useVotingButtonConfig } from "../hooks/useVotingButtonConfig"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
   searchQuery?: string
   selectedAppIds?: Set<string>
+  selectionOrder?: string[]
   onToggleApp?: (appId: string) => void
   tabsListProps?: Record<string, any>
   showEmptyState?: boolean
@@ -60,6 +62,7 @@ interface AppCategoryTabsProps {
   hasAutoVoteChanges?: boolean
   hasExistingPreferences?: boolean
   onEnableAutoVoting?: () => void
+  isAtSelectionLimit?: boolean
 }
 
 const categoryCollection = createListCollection({
@@ -70,6 +73,7 @@ export function AppCategoryTabs({
   apps = [],
   searchQuery = "",
   selectedAppIds,
+  selectionOrder = [],
   onToggleApp,
   tabsListProps,
   showEmptyState = false,
@@ -91,8 +95,8 @@ export function AppCategoryTabs({
   hasAutoVoteChanges = false,
   hasExistingPreferences = false,
   onEnableAutoVoting,
+  isAtSelectionLimit = false,
 }: AppCategoryTabsProps) {
-  const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
@@ -119,20 +123,28 @@ export function AppCategoryTabs({
     })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
-  // Don't re-sort during editing to prevent apps jumping around
-  // Only sort when in "voted" display mode (not editing)
+  // Sort selected apps to top, preserving selection order (append behavior)
   const sortedAppsWithSelected = useMemo(() => {
-    // If editing, don't sort - keep stable order
-    if (isEditingAutoVote) return filteredApps
-
-    // Sort selected apps to top only when viewing (not editing)
     return filteredApps.slice().sort((a, b) => {
       const aSelected = selectedAppIds?.has(a.id) ?? false
       const bSelected = selectedAppIds?.has(b.id) ?? false
-      if (aSelected === bSelected) return 0
-      return aSelected ? -1 : 1
+
+      // Both selected: sort by selection order (earlier selections first)
+      if (aSelected && bSelected) {
+        const aIndex = selectionOrder.indexOf(a.id)
+        const bIndex = selectionOrder.indexOf(b.id)
+        return aIndex - bIndex
+      }
+
+      // One selected, one not: selected goes first
+      if (aSelected !== bSelected) {
+        return aSelected ? -1 : 1
+      }
+
+      // Both unselected: keep original order
+      return 0
     })
-  }, [filteredApps, selectedAppIds, isEditingAutoVote])
+  }, [filteredApps, selectedAppIds, selectionOrder])
 
   const visibleApps = useMemo(() => {
     if (!showPagination) return sortedAppsWithSelected
@@ -150,69 +162,68 @@ export function AppCategoryTabs({
     if (!onToggleApp) return
 
     if (areAllVisibleAppsSelected) {
+      // Deselect all visible apps
       visibleApps.forEach(app => {
         if (selectedAppIds?.has(app.id)) {
           onToggleApp(app.id)
         }
       })
     } else {
+      // Select up to the limit
+      const currentCount = selectedAppIds?.size ?? 0
+      let addedCount = 0
+
       visibleApps.forEach(app => {
-        if (!selectedAppIds?.has(app.id)) {
+        if (!selectedAppIds?.has(app.id) && currentCount + addedCount < MAX_SELECTED_APPS) {
           onToggleApp(app.id)
+          addedCount++
         }
       })
     }
   }
 
-  // Helper to render action buttons based on voting state
+  // Button configuration from shared hook
+  const buttonConfig = useVotingButtonConfig({
+    hasVoted,
+    isEditingAutoVote,
+    isAutoVotingEnabled,
+    hasExistingPreferences,
+    hasAutoVoteChanges,
+    selectedAppIds: selectedAppIds ?? new Set(),
+    hasEnoughVotesAtSnapshot: hasEnoughVotesAtSnapshot ?? false,
+    onVoteClick: onVoteClick ?? (() => {}),
+    onEditAutoVote: onEditAutoVote ?? (() => {}),
+    onCancelEditAutoVote: onCancelEditAutoVote ?? (() => {}),
+    onSaveAutoVote: onSaveAutoVote ?? (() => {}),
+    onEnableAutoVoting: onEnableAutoVoting ?? (() => {}),
+  })
+
+  // Render action buttons using shared config
   const renderActionButtons = () => {
-    // Case 1: User hasn't voted yet - show vote button
-    if (!hasVoted) {
-      const voteButtonText =
-        selectedAppIds && selectedAppIds.size > 0
-          ? selectedAppIds.size > 1
-            ? t("Vote for {{count}} Apps", { count: selectedAppIds.size })
-            : t("Vote for {{count}} App", { count: selectedAppIds.size })
-          : t("Vote")
-
-      return (
-        <Button
-          variant="primary"
-          minWidth="36"
-          onClick={onVoteClick}
-          disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
-          {voteButtonText}
-        </Button>
-      )
-    }
-
-    // Case 2: User is editing auto-vote preferences - show cancel/save buttons
-    if (isEditingAutoVote) {
+    if (buttonConfig.type === "editing") {
       return (
         <>
-          <Button variant="secondary" onClick={onCancelEditAutoVote}>
-            {t("Cancel Edit")}
+          <Button variant="secondary" onClick={buttonConfig.secondaryOnClick}>
+            {buttonConfig.secondaryText}
           </Button>
-          <Button variant="primary" minWidth="36" disabled={!hasAutoVoteChanges} onClick={onSaveAutoVote}>
-            {t("Save Auto-Vote")}
+          <Button
+            variant="primary"
+            minWidth="36"
+            disabled={buttonConfig.primaryDisabled}
+            onClick={buttonConfig.primaryOnClick}>
+            {buttonConfig.primaryText}
           </Button>
         </>
       )
     }
 
-    // Case 3: User has voted + auto-voting enabled - show edit button
-    if (isAutoVotingEnabled) {
-      return (
-        <Button variant="primary" minWidth="36" onClick={onEditAutoVote}>
-          {hasExistingPreferences ? t("Edit Auto-Vote") : t("Enable Auto-Voting & Claim")}
-        </Button>
-      )
-    }
-
-    // Case 4: User has voted + auto-voting NOT enabled - show enable button
     return (
-      <Button variant="primary" minWidth="36" onClick={onEnableAutoVoting}>
-        {t("Enable Auto-Voting & Claim")}
+      <Button
+        variant="primary"
+        minWidth="36"
+        disabled={buttonConfig.primaryDisabled}
+        onClick={buttonConfig.primaryOnClick}>
+        {buttonConfig.primaryText}
       </Button>
     )
   }
@@ -231,6 +242,7 @@ export function AppCategoryTabs({
             selectedAppIds={selectedAppIds ?? new Set()}
             hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot ?? true}
             threshold={threshold}
+            isAtSelectionLimit={isAtSelectionLimit}
           />
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
@@ -351,6 +363,7 @@ export function AppCategoryTabs({
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
                   displayMode={hasVoted && !isEditingAutoVote ? "voted" : "checkbox"}
+                  disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
                 />
               ))
             ) : searchQuery.length > 0 && showEmptyState ? (
