@@ -5,9 +5,21 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
+      - dev-testnet
+  workflow_dispatch:
+    inputs:
+      flavor:
+        description: "Preview Flavor"
+        required: true
+        type: choice
+        options:
+          - staging
+          - dev-testnet
+          - prod
+        default: "prod"
 
 concurrency:
-  group: preview-pr-${{ github.event.pull_request.number }}
+  group: preview-pr-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -26,6 +38,75 @@ env:
   TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
+  prepare-metadata:
+    name: Prepare Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      flavor: ${{ steps.metadata.outputs.flavor }}
+      environment: ${{ steps.metadata.outputs.environment }}
+      ssm_prefix: ${{ steps.metadata.outputs.ssm_prefix }}
+      pr_number: ${{ steps.metadata.outputs.pr_number }}
+      short_sha: ${{ steps.metadata.outputs.short_sha }}
+      image_tag: ${{ steps.metadata.outputs.image_tag }}
+    steps:
+      - name: Determine Flavor and Params
+        id: metadata
+        run: |
+          # Default values
+          FLAVOR=""
+          SSM_PREFIX=""
+          DOMAIN_ENV=""
+          SHORT_SHA=""
+          PR_NUMBER=""
+          
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            FLAVOR="${{ inputs.flavor }}"
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            PR_NUMBER=$(gh pr list --head ${{ github.ref_name }} --state open --json number -q '.[0].number' || echo "" && exit 1)
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+
+            if [ "${{ github.base_ref }}" == "dev-testnet" ]; then
+              FLAVOR="dev-testnet"
+            elif [ "${{ github.base_ref }}" == "main" ]; then
+              FLAVOR="staging"
+            else
+              echo "Could not determine preview flavor from base ref"
+              exit 1
+            fi
+
+          else
+            echo "Unrecognised github event"
+            exit 1
+          fi
+
+          # Map flavor to Environment and SSM Prefix
+            case $FLAVOR in
+             "dev-testnet")
+               SSM_PREFIX="/b3tr/frontend/dev-testnet/"
+               DOMAIN_ENV="dev.testnet"
+               ;;
+             "staging")
+               SSM_PREFIX="/b3tr/frontend/"
+               DOMAIN_ENV="staging"
+               ;;
+             "prod")
+               SSM_PREFIX="/b3tr/frontend/beta/"
+               DOMAIN_ENV="beta"
+               ;;
+             *)
+               echo "Unrecognised flavor"
+               exit 1
+               ;;
+           esac
+          
+          echo "flavor=${FLAVOR}" >> $GITHUB_OUTPUT
+          echo "ssm_prefix=${SSM_PREFIX}" >> $GITHUB_OUTPUT
+          echo "domain_env=${DOMAIN_ENV}" >> $GITHUB_OUTPUT
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
   pr-comment:
     name: Post Initial PR Comment
     runs-on: ubuntu-latest
@@ -90,22 +171,6 @@ jobs:
             console.log(`Comment ID: ${commentId}`);
             core.setOutput('comment_id', commentId);
 
-  prepare-metadata:
-    name: Prepare Build Metadata
-    runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.meta.outputs.image_tag }}
-      short_sha: ${{ steps.meta.outputs.short_sha }}
-
-    steps:
-      - name: Generate metadata
-        id: meta
-        run: |
-          SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)
-          IMAGE_TAG="pr-${{ github.event.pull_request.number }}-${SHORT_SHA}"
-          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
-          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-
   build-and-push:
     needs: [prepare-metadata]
     uses: ./.github/workflows/build-push-ecr.yml
@@ -113,7 +178,7 @@ jobs:
       ecr_repository: governance-frontend
       image_tag: ${{ needs.prepare-metadata.outputs.image_tag }}
       aws_region: eu-west-1
-      environment: "AWS staging governance build-time"
+      environment: "AWS ${{ needs.prepare-metadata.outputs.flavor }} governance build-time"
     secrets:
       aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
