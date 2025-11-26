@@ -52,7 +52,9 @@ export const ConfirmVoteModal = ({
 
   const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
 
-  const canSubmit = isValid
+  // If user has voted, toggle is OFF, and auto-voting was never enabled, there's nothing to do
+  const nothingToDo = hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledOnChain
+  const canSubmit = isValid && !nothingToDo
 
   // Only allow customisation if user hasn't voted AND auto-voting is not enabled
   const shouldShowCustomisation = !isAutoVotingEnabledOnChain && !hasVoted
@@ -69,7 +71,7 @@ export const ConfirmVoteModal = ({
     onClose()
   }, [onClose])
 
-  const titleText = hasVoted ? t("Confirm your auto-vote") : t("Confirm your vote")
+  const titleText = hasVoted ? t("Confirm your preferences") : t("Confirm your vote")
 
   const modalTitle = isDesktop ? (
     <Flex justify="space-between" align="center" w="full" pb={4}>

@@ -202,32 +202,16 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     // Don't update during editing mode
     if (isEditingAutoVote) return
 
-    // Case 1: User has voted - load from cast votes
+    // Only show ticked apps in read-only mode if user has actually voted
+    // Preferences are loaded when entering edit mode via handleEditAutoVote
     if (hasVoted && castVotesEvent?.appsIds) {
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
       setSelectionOrder(castVotesEvent.appsIds)
       onSelectedAppsChange?.(votedAppIds)
-      return
-    }
-
-    // Case 2: Auto-voting enabled (current status OR in current round) but hasn't voted yet
-    // Load from stored preferences
-    const isAutoVotingActive = isAutoVotingEnabledOnChain || isAutoVotingEnabledInCurrentRound
-    if (isAutoVotingActive && !hasVoted && storedPreferences.length > 0) {
-      const preferenceAppIds = new Set(storedPreferences)
-      setSelectedAppIds(preferenceAppIds)
-      setSelectionOrder(storedPreferences)
-      onSelectedAppsChange?.(preferenceAppIds)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    hasVoted,
-    castVotesEvent?.appsIds,
-    isAutoVotingEnabledOnChain,
-    isAutoVotingEnabledInCurrentRound,
-    storedPreferences,
-  ])
+  }, [hasVoted, castVotesEvent?.appsIds])
 
   // Show when user has voted OR has auto-voting enabled (current status OR in current round)
   const showAutoVoteUI =

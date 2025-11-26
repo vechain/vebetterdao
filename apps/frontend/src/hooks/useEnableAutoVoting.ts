@@ -100,7 +100,7 @@ export const useEnableAutoVotingAndVote = ({
     if (shouldEnable && needsPreferenceUpdate) {
       clauses.push(
         contract.clause.setUserVotingPreferences(appIds, {
-          comment: "Set voting preferences for auto-voting",
+          comment: "Set voting preferences for auto-vote",
         }).clause,
       )
     }
@@ -110,7 +110,7 @@ export const useEnableAutoVotingAndVote = ({
     if (shouldEnable || shouldDisable) {
       clauses.push(
         contract.clause.toggleAutoVoting(userAddress, {
-          comment: shouldEnable ? "Enable auto-voting" : "Disable auto-voting",
+          comment: shouldEnable ? "Enable auto-vote" : "Disable auto-vote",
         }).clause,
       )
     }

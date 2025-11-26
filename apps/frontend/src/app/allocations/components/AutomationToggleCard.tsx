@@ -77,7 +77,7 @@ export const AutomationToggleCard = ({
               <Icon as={Check} boxSize="4" color="text.subtle" mt="0.5" />
               <Text textStyle="xs" color="text.subtle">
                 <Trans
-                  i18nKey="<0>A fee</0> of 10% of your B3TR rewards will be deducted to cover the auto-voting service."
+                  i18nKey="A 10% <0>service fee</0> is deducted from weekly B3TR rewards, capped at 100 B3TR."
                   components={[
                     <Link
                       key="0"

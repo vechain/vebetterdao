@@ -57,9 +57,9 @@ export const useVotingButtonConfig = ({
       return {
         type: "editing" as const,
         primaryText: t("Save auto-vote"),
-        primaryDisabled: !hasAutoVoteChanges,
+        primaryDisabled: !hasAutoVoteChanges || selectedAppIds.size === 0,
         primaryOnClick: onSaveAutoVote,
-        secondaryText: t("Cancel edit"),
+        secondaryText: t("Cancel"),
         secondaryOnClick: onCancelEditAutoVote,
       }
     }
@@ -69,7 +69,7 @@ export const useVotingButtonConfig = ({
     if (isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) {
       return {
         type: "edit" as const,
-        primaryText: hasExistingPreferences ? t("Edit auto-vote") : t("Enable auto-voting"),
+        primaryText: hasExistingPreferences ? t("Edit auto-vote") : t("Enable auto-vote"),
         primaryDisabled: false,
         primaryOnClick: onEditAutoVote,
       }
@@ -96,7 +96,7 @@ export const useVotingButtonConfig = ({
     // Case 4: User has voted + auto-voting NOT enabled - show enable button
     return {
       type: "enable" as const,
-      primaryText: t("Enable auto-voting"),
+      primaryText: t("Enable auto-vote"),
       primaryDisabled: false,
       primaryOnClick: onEnableAutoVoting,
     }
