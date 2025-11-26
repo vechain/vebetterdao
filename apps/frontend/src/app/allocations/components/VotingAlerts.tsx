@@ -11,6 +11,8 @@ interface VotingAlertsProps {
   hasEnoughVotesAtSnapshot: boolean
   threshold?: string
   isAtSelectionLimit?: boolean
+  isAutoVotingEnabled?: boolean
+  isAutoVotingEnabledInCurrentRound?: boolean
 }
 
 export const VotingAlerts = ({
@@ -20,6 +22,8 @@ export const VotingAlerts = ({
   hasEnoughVotesAtSnapshot,
   threshold,
   isAtSelectionLimit = false,
+  isAutoVotingEnabled = false,
+  isAutoVotingEnabledInCurrentRound = false,
 }: VotingAlertsProps) => {
   const { t } = useTranslation()
 
@@ -28,14 +32,23 @@ export const VotingAlerts = ({
     [hasVotedLoading, hasVoted, selectedAppIds, hasEnoughVotesAtSnapshot],
   )
 
+  // Determine which auto-voting message to show
+  const autoVotingMessage = useMemo((): string | null => {
+    if (isAutoVotingEnabledInCurrentRound && isAutoVotingEnabled) {
+      return t("Auto-voting active. Your vote and rewards will be handled automatically.")
+    }
+    if (isAutoVotingEnabledInCurrentRound && !isAutoVotingEnabled) {
+      return t("Auto-voting active this round. It will be disabled for future rounds.")
+    }
+    if (!isAutoVotingEnabledInCurrentRound && isAutoVotingEnabled) {
+      return t("Auto-voting enabled. It will start from next round onwards.")
+    }
+    return null
+  }, [isAutoVotingEnabledInCurrentRound, isAutoVotingEnabled, t])
+
   return (
     <>
-      {hasVoted && (
-        <AllocationAlertCard
-          status="info"
-          message={t("You've already voted this round. Wait for the next round to vote again.")}
-        />
-      )}
+      {autoVotingMessage && <AllocationAlertCard status="info" message={autoVotingMessage} />}
       {shouldShowInsufficientPowerAlert && (
         <AllocationAlertCard
           status="error"

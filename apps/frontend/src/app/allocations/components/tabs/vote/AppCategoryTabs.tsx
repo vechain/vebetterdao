@@ -249,6 +249,8 @@ export function AppCategoryTabs({
             hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot ?? true}
             threshold={threshold}
             isAtSelectionLimit={isAtSelectionLimit}
+            isAutoVotingEnabled={isAutoVotingEnabled}
+            isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
           />
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>

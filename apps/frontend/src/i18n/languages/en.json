@@ -1606,5 +1606,8 @@
   "Enable auto-vote": "Enable auto-vote",
   "Edit selection": "Edit selection",
   "Save auto-vote": "Save auto-vote",
-  "Maximum {{count}} apps can be selected per vote.": "Maximum {{count}} apps can be selected per vote."
+  "Maximum {{count}} apps can be selected per vote.": "Maximum {{count}} apps can be selected per vote.",
+  "Auto-voting active. Your vote and rewards will be handled automatically.": "Auto-voting active. Your vote and rewards will be handled automatically.",
+  "Auto-voting active this round. It will be disabled for future rounds.": "Auto-voting active this round. It will be disabled for future rounds.",
+  "Auto-voting enabled. It will start from next round onwards.": "Auto-voting enabled. It will start from next round onwards."
 }

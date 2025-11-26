@@ -94,6 +94,8 @@ export function VoteTab() {
           hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
           threshold={threshold}
           isAtSelectionLimit={isAtSelectionLimit}
+          isAutoVotingEnabled={isAutoVotingEnabled}
+          isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
         />
       )}
       <InputGroup
