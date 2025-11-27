@@ -39,7 +39,10 @@ export function VechainKitProviderWrapper({ children }: Props) {
   return (
     <VeChainKitProvider
       theme={{
-        backgroundColor: bgPrimary,
+        modal: {
+          backgroundColor: bgPrimary,
+          border: `1px solid ${borderSecondary}`,
+        },
         buttons: {
           primaryButton: {
             bg: primaryDefault,
