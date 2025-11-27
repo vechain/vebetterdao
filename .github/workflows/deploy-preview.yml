@@ -8,22 +8,18 @@ on:
       - dev-testnet
   workflow_dispatch:
     inputs:
-      pr_number:
-        description: "Pull Request Number (e.g., 123)"
-        required: true
-        type: string
       flavor:
         description: "Preview Flavor"
         required: true
         type: choice
         options:
           - staging
-          - dev
+          - dev-testnet
           - prod
         default: "prod"
 
 concurrency:
-  group: preview-pr-${{ github.event.pull_request.number || inputs.pr_number }}
+  group: preview-pr-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -31,172 +27,177 @@ env:
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: governance-frontend
   TERRAFORM_VERSION: 1.6.0
-  
+
   # Project Configuration
   PROJECT_NAME: governance-frontend
-  
+  PREVIEW_DOMAIN_SUFFIX: preview-staging.governance.vebetterdao.org
+
   # Terraform Paths
   TERRAFORM_DIR: terraform/frontend/frontend-env-level
   TERRAFORM_ENV_DIR: terraform/frontend/environments/env
   TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
-  determine-flavor:
-    name: Determine Flavor
+  prepare-metadata:
+    name: Prepare Metadata
     runs-on: ubuntu-latest
     outputs:
       flavor: ${{ steps.metadata.outputs.flavor }}
       environment: ${{ steps.metadata.outputs.environment }}
-      domain_env: ${{ steps.metadata.outputs.domain_env }}
+      ssm_prefix: ${{ steps.metadata.outputs.ssm_prefix }}
       pr_number: ${{ steps.metadata.outputs.pr_number }}
       short_sha: ${{ steps.metadata.outputs.short_sha }}
-      image_tag: ${{ steps.git.outputs.image_tag }}
     steps:
       - name: Determine Flavor and Params
         id: metadata
         run: |
           # Default values
           FLAVOR=""
-          ENVIRONMENT=""
+          SSM_PREFIX=""
           DOMAIN_ENV=""
+          SHORT_SHA=""
+          PR_NUMBER=""
           
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             FLAVOR="${{ inputs.flavor }}"
-            PR_NUMBER="${{ inputs.pr_number }}"
-          elif [ "${{ github.base_ref }}" == "dev-testnet" ]; then
-            FLAVOR="dev"
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            PR_NUMBER=$(gh pr list --head ${{ github.ref_name }} --state open --json number -q '.[0].number' || echo "" && exit 1)
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)
             PR_NUMBER="${{ github.event.pull_request.number }}"
+
+            if [ "${{ github.base_ref }}" == "dev-testnet" ]; then
+              FLAVOR="dev-testnet"
+            elif [ "${{ github.base_ref }}" == "main" ]; then
+              FLAVOR="staging"
+            else
+              echo "Could not determine preview flavor from base ref"
+              exit 1
+            fi
+
           else
-            FLAVOR="staging"
-            PR_NUMBER="${{ github.event.pull_request.number }}"
+            echo "Unrecognised github event"
+            exit 1
           fi
-          
-          # Map flavor to Environment and Domain pattern
-          case $FLAVOR in
-            "dev")
-              ENVIRONMENT="preview-dev"
-              DOMAIN_ENV="preview-dev"
-              ;;
-            "prod")
-              ENVIRONMENT="preview-prod"
-              DOMAIN_ENV="preview-prod"
-              ;;
-            *)
-              ENVIRONMENT="preview-staging"
-              DOMAIN_ENV="preview-staging"
-              ;;
-          esac
+
+          # Map flavor to Environment and SSM Prefix
+            case $FLAVOR in
+             "dev-testnet")
+               SSM_PREFIX="/b3tr/frontend/dev-testnet/"
+               DOMAIN_ENV="dev.testnet"
+               ;;
+             "staging")
+               SSM_PREFIX="/b3tr/frontend/"
+               DOMAIN_ENV="staging"
+               ;;
+             "prod")
+               SSM_PREFIX="/b3tr/frontend/beta/"
+               DOMAIN_ENV="beta"
+               ;;
+             *)
+               echo "Unrecognised flavor"
+               exit 1
+               ;;
+           esac
           
           echo "flavor=${FLAVOR}" >> $GITHUB_OUTPUT
-          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "ssm_prefix=${SSM_PREFIX}" >> $GITHUB_OUTPUT
           echo "domain_env=${DOMAIN_ENV}" >> $GITHUB_OUTPUT
           echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-
-      - name: Checkout to get SHA
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }} # Checkout specific commit if PR
-      
-      - name: Get Git Details
-        id: git
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            SHORT_SHA=$(git rev-parse --short HEAD)
-          else
-            SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)
-          fi
-          
-          PR_NUMBER="${{ steps.metadata.outputs.pr_number }}"
-          IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}-${{ steps.metadata.outputs.flavor }}"
-          
           echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
-          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-          
-          # Add back to metadata outputs for convenience
-          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
   pr-comment:
     name: Post Initial PR Comment
     runs-on: ubuntu-latest
-    needs: [determine-flavor]
     permissions:
       pull-requests: write
+    outputs:
+      comment_id: ${{ steps.comment.outputs.comment_id }}
+
     steps:
-      - name: Post initial PR comment
+      - name: Post initial PR comment (Building)
+        id: comment
         uses: actions/github-script@v7
-        env:
-          FLAVOR: ${{ needs.determine-flavor.outputs.flavor }}
-          SHORT_SHA: ${{ needs.determine-flavor.outputs.short_sha }}
-          PR_NUMBER: ${{ needs.determine-flavor.outputs.pr_number }}
-          PROJECT_NAME: ${{ env.PROJECT_NAME }}
         with:
           script: |
-            const prNumber = parseInt(process.env.PR_NUMBER);
-            const flavor = process.env.FLAVOR;
-            const commitSha = process.env.SHORT_SHA;
+            const prNumber = context.issue.number;
+            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
             const projectName = process.env.PROJECT_NAME;
-            
-            const flavorLabel = flavor.charAt(0).toUpperCase() + flavor.slice(1);
-            const body = `## ${projectName} – ${flavorLabel} Preview
-            
-            | Name | Flavor | Status | Updated (UTC) |
-            |------|--------|--------|---------------|
-            | **${projectName}-preview** | ${flavorLabel} | 🔨 Building... | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
-            
+
+            const body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+            | Name | Status | Preview | Updated (UTC) |
+            |------|--------|---------|---------------|
+            | **${projectName}-preview** | 🔨 Building ([${commitSha}](${commitUrl})) | Building image... | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
             ---
-            <sub>Building with commit ${commitSha}</sub>`;
-            
+            <sub>Building with commit ${commitSha} • Preview environments are automatically destroyed when PRs are closed</sub>`;
+
             // Find existing comment
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
-            
+
             const existingComment = comments.data.find(comment => 
               comment.user.type === 'Bot' && 
-              comment.body.includes(`${projectName} –`) &&
-              comment.body.includes("Preview")
+              comment.body.includes(`${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview`)
             );
-            
+
+            let commentId;
             if (existingComment) {
+              // Update existing comment
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: existingComment.id,
                 body: body
               });
+              commentId = existingComment.id;
             } else {
-              await github.rest.issues.createComment({
+              // Create new comment
+              const comment = await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: prNumber,
                 body: body
               });
+              commentId = comment.data.id;
             }
 
+            console.log(`Comment ID: ${commentId}`);
+            core.setOutput('comment_id', commentId);
+
   build-and-push:
-    needs: [determine-flavor]
+    needs: [prepare-metadata]
     uses: ./.github/workflows/build-push-ecr.yml
     with:
       ecr_repository: governance-frontend
-      image_tag: ${{ needs.determine-flavor.outputs.image_tag }}
+      image_tag: PR-${{ needs.prepare-metadata.outputs.pr_number }}-${{ needs.prepare-metadata.outputs.short_sha }}
       aws_region: eu-west-1
-      environment: ${{ needs.determine-flavor.outputs.environment }}
+      environment: "AWS ${{ needs.prepare-metadata.outputs.flavor }} governance build-time"
     secrets:
       aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
   deploy:
-    name: Deploy Preview
+    name: Deploy Preview Environment
     runs-on: ubuntu-latest
-    needs: [determine-flavor, build-and-push]
-    environment:
-      name: ${{ needs.determine-flavor.outputs.environment }}
-      url: https://pr-${{ needs.determine-flavor.outputs.pr_number }}.preview-staging.governance.vebetterdao.org
+    needs: [prepare-metadata, build-and-push]
+    if: success()
     permissions:
       id-token: write
       contents: read
-    
+    environment:
+      name: preview-pr-${{ github.event.pull_request.number }}
+      url: https://pr-${{ github.event.pull_request.number }}.preview-staging.governance.vebetterdao.org
+
+    outputs:
+      custom_url: ${{ steps.outputs.outputs.custom_url }}
+      service_url: ${{ steps.outputs.outputs.service_url }}
+      custom_domain_status: ${{ steps.outputs.outputs.custom_domain_status }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -220,22 +221,12 @@ jobs:
 
       - name: Create preview environment config
         run: |
-          PR_NUMBER=${{ needs.determine-flavor.outputs.pr_number }}
-          SHORT_SHA=${{ needs.determine-flavor.outputs.short_sha }}
-          FLAVOR=${{ needs.determine-flavor.outputs.flavor }}
-          IMAGE_TAG=${{ needs.determine-flavor.outputs.image_tag }}
-          DOMAIN_ENV=${{ needs.determine-flavor.outputs.domain_env }}
-          
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          SHORT_SHA=${{ needs.prepare-metadata.outputs.short_sha }}
           WORKSPACE_NAME="preview-pr-${PR_NUMBER}"
-          SOURCE_CONFIG="${{ env.TERRAFORM_ENV_DIR }}/${FLAVOR}/${FLAVOR}.yaml"
-          TARGET_FILE="${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
-          
-          # Create workspace directory
+
+          # Create workspace directory if it doesn't exist
           mkdir -p "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
-          
-          # Copy template
-          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${TARGET_FILE}"
-          
           # Replace values
           sed -i "s/{PR_NUMBER}/${PR_NUMBER}/g" "${TARGET_FILE}"
           sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${TARGET_FILE}"
@@ -259,19 +250,37 @@ jobs:
             echo "runtime_env_secret_names: []" >> "${TARGET_FILE}"
           fi
           
+
+          # Copy and customize the preview config
+          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+
+          # Replace placeholders with actual values
+          sed -i "s/{PR_NUMBER}/${PR_NUMBER}/g" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+          sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+
+          # Show the config for debugging
           echo "Generated config:"
-          cat "${TARGET_FILE}"
+          cat "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
 
-      - name: Terraform Apply
+      - name: Terraform Workspace
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: |
           WORKSPACE_NAME="preview-pr-${{ needs.determine-flavor.outputs.pr_number }}"
           terraform workspace select ${WORKSPACE_NAME} || terraform workspace new ${WORKSPACE_NAME}
-          terraform apply -auto-approve
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform apply -auto-approve tfplan
 
       - name: Get deployment URL
         working-directory: ${{ env.TERRAFORM_DIR }}
@@ -279,67 +288,96 @@ jobs:
         run: |
           CUSTOM_URL=$(terraform output -raw custom_domain_url || echo "")
           SERVICE_URL=$(terraform output -raw service_url || echo "")
+          DOMAIN_STATUS=$(terraform output -raw custom_domain_status || echo "unknown")
           echo "custom_url=${CUSTOM_URL}" >> $GITHUB_OUTPUT
           echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+          echo "custom_domain_status=${DOMAIN_STATUS}" >> $GITHUB_OUTPUT
 
   update-comment:
     name: Update PR Comment
     runs-on: ubuntu-latest
-    needs: [determine-flavor, pr-comment, build-and-push, deploy]
+    needs: [pr-comment, prepare-metadata, build-and-push, deploy]
     if: always() && needs.pr-comment.result == 'success'
     permissions:
       pull-requests: write
+
     steps:
-      - name: Update PR comment
+      - name: Update PR comment with final status
         uses: actions/github-script@v7
-        env:
-          FLAVOR: ${{ needs.determine-flavor.outputs.flavor }}
-          SHORT_SHA: ${{ needs.determine-flavor.outputs.short_sha }}
-          PR_NUMBER: ${{ needs.determine-flavor.outputs.pr_number }}
-          PROJECT_NAME: ${{ env.PROJECT_NAME }}
-          BUILD_RESULT: ${{ needs.build-and-push.result }}
-          DEPLOY_RESULT: ${{ needs.deploy.result }}
-          CUSTOM_URL: ${{ needs.deploy.outputs.custom_url }}
-          SERVICE_URL: ${{ needs.deploy.outputs.service_url }}
         with:
           script: |
-            const prNumber = parseInt(process.env.PR_NUMBER);
-            const flavor = process.env.FLAVOR;
-            const flavorLabel = flavor.charAt(0).toUpperCase() + flavor.slice(1);
+            const prNumber = context.issue.number;
+            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const projectName = process.env.PROJECT_NAME;
-            const buildResult = process.env.BUILD_RESULT;
-            const deployResult = process.env.DEPLOY_RESULT;
-            
-            let status = '⚠️ Unknown';
-            let links = `[View Logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
-            
-            if (buildResult === 'failure') status = '❌ Build Failed';
-            else if (deployResult === 'failure') status = '❌ Deploy Failed';
-            else if (deployResult === 'success') {
-              status = '✅ Ready';
-              links = `[Custom Domain](${process.env.CUSTOM_URL}) • [Service URL](${process.env.SERVICE_URL})`;
+
+            const buildResult = '${{ needs.build-and-push.result }}';
+            const deployResult = '${{ needs.deploy.result }}';
+
+            let body;
+
+            if (buildResult === 'failure') {
+              // Build failed
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ❌ Build Failed ([${commitSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
+              ---
+              <sub>Docker build failed for commit ${commitSha} • [Check logs](${runUrl}) for details</sub>`;
+            } else if (deployResult === 'failure') {
+              // Deploy failed
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ❌ Deployment Failed ([${commitSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
+              ---
+              <sub>Deployment failed for commit ${commitSha} • [Check logs](${runUrl}) for details</sub>`;
+            } else if (deployResult === 'success') {
+              // Success - get deployment URLs from deploy job outputs
+              const customUrl = '${{ needs.deploy.outputs.custom_url }}';
+              const serviceUrl = '${{ needs.deploy.outputs.service_url }}';
+              
+              let previewLinks = `[Custom Domain →](${customUrl})  • [Default URL →](${serviceUrl})`;
+              let statusNote = '\n\n> ⏱️ **Note:** Custom domain may take 5-10 minutes to activate on first deployment. Use Default URL in the meantime.';
+              
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ✅ Ready ([${commitSha}](${commitUrl})) | ${previewLinks} | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+              ${statusNote}
+
+              ---
+              <sub>Built with commit ${commitSha} • Preview environments are automatically destroyed when PRs are closed</sub>`;
+            } else {
+              // Unexpected state
+              body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+
+              | Name | Status | Preview | Updated (UTC) |
+              |------|--------|---------|---------------|
+              | **${projectName}-preview** | ⚠️ Unknown Status ([${commitSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+
+              ---
+              <sub>Unexpected workflow state for commit ${commitSha} • [Check logs](${runUrl}) for details</sub>`;
             }
-            
-            const body = `## ${projectName} – ${flavorLabel} Preview
-            
-            | Name | Flavor | Status | Preview | Updated (UTC) |
-            |------|--------|--------|---------|---------------|
-            | **${projectName}-preview** | ${flavorLabel} | ${status} | ${links} | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
-            
-            ---
-            <sub>Built with commit ${process.env.SHORT_SHA}</sub>`;
-            
+
+            // Find and update existing comment
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
-            
+
             const existingComment = comments.data.find(comment => 
               comment.user.type === 'Bot' && 
-              comment.body.includes(`${projectName} –`)
+              comment.body.includes(`${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview`)
             );
-            
+
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -348,3 +386,16 @@ jobs:
                 body: body
               });
             }
+      - name: Deployment summary
+        if: needs.deploy.result == 'success'
+        run: |
+          echo "### Preview Environment Deployed! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image Tag:** \`${{ needs.build-and-push.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ needs.deploy.outputs.custom_url }}" ]; then
+            echo "**Custom Domain:** ${{ needs.deploy.outputs.custom_url }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "**Service URL:** ${{ needs.deploy.outputs.service_url }}" >> $GITHUB_STEP_SUMMARY
+
