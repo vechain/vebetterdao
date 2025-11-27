@@ -40,7 +40,7 @@ export const VotingPowerBox = () => {
             </Text>
 
             {votingPowerNextRound > 0 && (
-              <Badge variant="neutral" bg="card.default" color="text.subtle" fontWeight="normal" size="sm">
+              <Badge variant="neutral" bg="card.default" color="text.subtle" fontWeight="normal" size="sm" rounded="sm">
                 <Trans
                   i18nKey="<bold>+{{votingPowerNextRound}}</bold> in next round"
                   values={{
