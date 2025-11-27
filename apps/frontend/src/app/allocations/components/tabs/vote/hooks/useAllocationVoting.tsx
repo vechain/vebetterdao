@@ -3,7 +3,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { parseEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
@@ -82,12 +81,13 @@ export const useAllocationVoting = ({
 
   const handleConfirmVote = useCallback(
     (allocations: Map<string, number>) => {
-      if (!votesAtSnapshot?.totalVotesWithDeposits) {
+      if (!votesAtSnapshot?.totalVotesWithDepositsWei) {
         throw new Error("Votes at snapshot not found")
       }
 
       // Convert percentages to weighted votes in wei
-      const totalVotingPower = parseEther(votesAtSnapshot.totalVotesWithDeposits)
+      // Use the wei value directly to preserve full precision (parseEther on formatted strings loses precision)
+      const totalVotingPower = votesAtSnapshot.totalVotesWithDepositsWei
       const allocationsWithWeight = new Map<string, bigint>()
 
       allocations.forEach((percentage, appId) => {

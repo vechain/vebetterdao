@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { parseEther } from "viem"
 
 import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
@@ -62,6 +61,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     account?.address ?? "",
   )
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const votesAtSnapshotWei = totalVotesAtSnapshotQuery.data?.totalVotesWithDepositsWei
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
   const { data: threshold } = useVotingThreshold()
@@ -101,11 +101,11 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   }, [votes, votesAtSnapshot])
 
   const onContinue = useCallback(() => {
-    if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
+    if (!votesAtSnapshotWei) throw new Error("Votes at snapshot not found")
 
-    const totalVotingPower = parseEther(votesAtSnapshot)
+    // Use the wei value directly to preserve full precision (parseEther on formatted strings loses precision)
     const appVotesPercentagesToValue: CastAllocationVotesProps = votes.map(vote => {
-      const weight = calculateVotingWeightFromPercentage(totalVotingPower, Number(vote.rawValue))
+      const weight = calculateVotingWeightFromPercentage(votesAtSnapshotWei, Number(vote.rawValue))
       return {
         appId: vote.appId,
         votesWei: weight.toString(),
@@ -114,7 +114,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_CONFIRM_TX))
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
-  }, [castAllocationVotes, votesAtSnapshot, votes])
+  }, [castAllocationVotes, votesAtSnapshotWei, votes])
 
   const shouldSeeThePage = useMemo(() => {
     return {
