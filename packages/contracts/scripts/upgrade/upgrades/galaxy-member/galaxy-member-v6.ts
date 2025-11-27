@@ -17,9 +17,15 @@ async function main() {
     `Upgrading GalaxyMember contract at address: ${config.galaxyMemberContractAddress} on network: ${config.network.name}`,
   )
 
-  const galaxyMemberV6 = (await upgradeProxy("GalaxyMemberV5", "GalaxyMember", config.galaxyMemberContractAddress, [], {
-    version: 6,
-  })) as GalaxyMember
+  const galaxyMemberV6 = (await upgradeProxy(
+    "GalaxyMemberV5",
+    "GalaxyMember",
+    config.galaxyMemberContractAddress,
+    [config.stargateNFTContractAddress],
+    {
+      version: 6,
+    },
+  )) as GalaxyMember
 
   console.log(`GalaxyMember upgraded`)
 
