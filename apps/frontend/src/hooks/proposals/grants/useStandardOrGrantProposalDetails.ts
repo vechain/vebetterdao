@@ -16,10 +16,10 @@ const contractAddress = getConfig().grantsManagerContractAddress
 const treasuryInterface = Treasury__factory.createInterface()
 
 const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
-  if (!calldata) return BigNumber(0)
+  if (!calldata) return new BigNumber(0)
   const decodedData = treasuryInterface.decodeFunctionData("transferB3TR", calldata)
   const formattedAmount = formatEther(decodedData?.[1]?.toString() ?? "0")
-  return BigNumber(formattedAmount)
+  return new BigNumber(formattedAmount)
 }
 
 /**
@@ -190,7 +190,7 @@ export const useStandardOrGrantProposalDetails = ({
       const query = grantProposalQueries[index]
       const ipfsMetadata = query?.data
       const allCalldatas = event.calldatas.map(calldata => getAndDecodeGrantAmount(calldata))
-      const grantAmountRequested = allCalldatas.reduce((acc, curr) => acc.plus(curr), BigNumber(0))
+      const grantAmountRequested = allCalldatas.reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
 
       grantProposalsDetailsMap[event.id] = {
         ...event,
