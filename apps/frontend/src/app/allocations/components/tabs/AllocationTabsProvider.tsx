@@ -53,15 +53,15 @@ export const AllocationTabsContext = createContext<AllocationTabsContextType | n
 
 interface AllocationTabsProviderProps {
   roundDetails: AllocationRoundDetails
-  onSelectedAppsChange?: (selectedIds: Set<string>) => void
   children: React.ReactNode
 }
 
-export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, children }: AllocationTabsProviderProps) {
+export function AllocationTabsProvider({ roundDetails, children }: AllocationTabsProviderProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
-  const [selectionOrder, setSelectionOrder] = useState<string[]>([])
+  // Derive selection order from Set (Set maintains insertion order)
+  const selectionOrder = useMemo(() => [...selectedAppIds], [selectedAppIds])
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
@@ -96,13 +96,12 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
 
   const handleEnableAutoVoting = useCallback(() => {
     if (castVotesEvent?.appsIds) {
+      // Set maintains insertion order from appsIds array
       const votedApps = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedApps)
-      setSelectionOrder(castVotesEvent.appsIds)
-      onSelectedAppsChange?.(votedApps)
     }
     handleOpenModal()
-  }, [handleOpenModal, castVotesEvent?.appsIds, onSelectedAppsChange])
+  }, [handleOpenModal, castVotesEvent?.appsIds])
 
   // Auto-vote edit mode
   const {
@@ -120,8 +119,6 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     hasVoted: hasVoted ?? false,
     selectedAppIds,
     setSelectedAppIds,
-    setSelectionOrder,
-    onSelectedAppsChange,
     openModal: handleOpenModal, // Use handleOpenModal to ensure toggle is set correctly
   })
 
@@ -146,49 +143,39 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
 
   const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
 
-  const toggleApp = useCallback(
-    (appId: string) => {
-      setSelectedAppIds(prev => {
-        const next = new Set(prev)
-        if (next.has(appId)) {
-          next.delete(appId)
-          // Remove from selection order
-          setSelectionOrder(order => order.filter(id => id !== appId))
-        } else {
-          // Enforce 15 app limit
-          if (next.size >= MAX_SELECTED_APPS) {
-            return prev // Don't add if at limit
-          }
-          next.add(appId)
-          // Append to selection order
-          setSelectionOrder(order => [...order, appId])
+  const toggleApp = useCallback((appId: string) => {
+    setSelectedAppIds(prev => {
+      const next = new Set(prev)
+      if (next.has(appId)) {
+        // Remove - Set maintains order of remaining items
+        next.delete(appId)
+      } else {
+        // Enforce 15 app limit
+        if (next.size >= MAX_SELECTED_APPS) {
+          return prev // Don't add if at limit
         }
-        onSelectedAppsChange?.(next)
-        return next
-      })
-    },
-    [onSelectedAppsChange],
-  )
+        // Add - Set adds to end, maintaining insertion order
+        next.add(appId)
+      }
+      return next
+    })
+  }, [])
 
   const onVoteSuccess = useCallback(() => {
     // Reset selectedAppIds to show correct read-only state after save
     if (hasVoted && castVotesEvent?.appsIds) {
-      // User has voted - show their voted apps
+      // User has voted - show their voted apps (Set maintains order from appsIds)
       const votedApps = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedApps)
-      setSelectionOrder(castVotesEvent.appsIds)
-      onSelectedAppsChange?.(votedApps)
     } else {
       // User hasn't voted - show empty read-only state
       setSelectedAppIds(new Set())
-      setSelectionOrder([])
-      onSelectedAppsChange?.(new Set())
     }
 
     resetEditMode()
     handleCloseModal()
     closeTxModal()
-  }, [closeTxModal, handleCloseModal, resetEditMode, hasVoted, castVotesEvent?.appsIds, onSelectedAppsChange])
+  }, [closeTxModal, handleCloseModal, resetEditMode, hasVoted, castVotesEvent?.appsIds])
 
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
@@ -204,11 +191,10 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
 
     // Only show ticked apps in read-only mode if user has actually voted
     // Preferences are loaded when entering edit mode via handleEditAutoVote
+    // Set maintains insertion order from appsIds array
     if (hasVoted && castVotesEvent?.appsIds) {
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
-      setSelectionOrder(castVotesEvent.appsIds)
-      onSelectedAppsChange?.(votedAppIds)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasVoted, castVotesEvent?.appsIds])

@@ -8,8 +8,6 @@ interface UseAutoVoteEditModeProps {
   hasVoted: boolean
   selectedAppIds: Set<string>
   setSelectedAppIds: (ids: Set<string>) => void
-  setSelectionOrder: (order: string[]) => void
-  onSelectedAppsChange?: (ids: Set<string>) => void
   openModal: () => void
 }
 
@@ -22,8 +20,6 @@ export const useAutoVoteEditMode = ({
   hasVoted,
   selectedAppIds,
   setSelectedAppIds,
-  setSelectionOrder,
-  onSelectedAppsChange,
   openModal,
 }: UseAutoVoteEditModeProps) => {
   const [isEditingAutoVote, setIsEditingAutoVote] = useState(false)
@@ -44,42 +40,36 @@ export const useAutoVoteEditMode = ({
   }, [isEditingAutoVote, selectedAppIds, storedPreferences, hasExistingPreferences])
 
   // Get apps to preselect: stored preferences (priority) or voted apps
-  // Returns both the Set and the order array
-  const getAppsToPreselect = useCallback((): { ids: Set<string>; order: string[] } => {
+  // Set maintains insertion order, so we just need to create Set from the ordered array
+  const getAppsToPreselect = useCallback((): Set<string> => {
     if (storedPreferences.length > 0) {
-      return { ids: new Set(storedPreferences), order: storedPreferences }
+      return new Set(storedPreferences)
     }
     if (votedAppIds) {
-      return { ids: new Set(votedAppIds), order: votedAppIds }
+      return new Set(votedAppIds)
     }
-    return { ids: new Set<string>(), order: [] }
+    return new Set<string>()
   }, [storedPreferences, votedAppIds])
 
   // Enter edit mode - load preferences from chain (priority) or voted apps
   const handleEditAutoVote = useCallback(() => {
-    const { ids, order } = getAppsToPreselect()
+    const ids = getAppsToPreselect()
     setSelectedAppIds(ids)
-    setSelectionOrder(order)
-    onSelectedAppsChange?.(ids)
     setIsEditingAutoVote(true)
-  }, [getAppsToPreselect, setSelectedAppIds, setSelectionOrder, onSelectedAppsChange])
+  }, [getAppsToPreselect, setSelectedAppIds])
 
   // Cancel edit mode - reset to read-only state (voted apps or empty)
   const handleCancelEditAutoVote = useCallback(() => {
     if (hasVoted && votedAppIds) {
-      // User has voted - show their voted apps
+      // User has voted - show their voted apps (Set maintains order from votedAppIds)
       const votedApps = new Set(votedAppIds)
       setSelectedAppIds(votedApps)
-      setSelectionOrder(votedAppIds)
-      onSelectedAppsChange?.(votedApps)
     } else {
       // User hasn't voted - show empty read-only state
       setSelectedAppIds(new Set())
-      setSelectionOrder([])
-      onSelectedAppsChange?.(new Set())
     }
     setIsEditingAutoVote(false)
-  }, [hasVoted, votedAppIds, setSelectedAppIds, setSelectionOrder, onSelectedAppsChange])
+  }, [hasVoted, votedAppIds, setSelectedAppIds])
 
   // Save auto-vote preferences (triggers confirm modal)
   const handleSaveAutoVote = useCallback(() => {

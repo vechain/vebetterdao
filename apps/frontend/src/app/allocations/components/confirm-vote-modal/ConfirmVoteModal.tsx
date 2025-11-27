@@ -114,7 +114,7 @@ export const ConfirmVoteModal = ({
               vot3Balance={vot3Balance}
               isLoading={isLoadingBalance}
               button={
-                shouldShowCustomisation ? (
+                shouldShowCustomisation && (
                   <Button
                     variant="link"
                     onClick={() => setIsCustomising(true)}
@@ -124,7 +124,7 @@ export const ConfirmVoteModal = ({
                     fontWeight="semibold">
                     {t("Customise votes")}
                   </Button>
-                ) : undefined
+                )
               }
             />
             <SelectedAppsPreview apps={selectedApps} onEditSelection={onEditSelection} />
