@@ -53,9 +53,7 @@ interface AppCategoryTabsProps {
   roundId?: string
   onVoteClick?: () => void
   hasVoted?: boolean
-  hasVotedLoading?: boolean
   isVoteDataLoading?: boolean
-  threshold?: string
   isAutoVotingEnabled?: boolean
   isAutoVotingEnabledInCurrentRound?: boolean
   isEditingAutoVote?: boolean
@@ -88,9 +86,7 @@ export function AppCategoryTabs({
   roundId,
   onVoteClick,
   hasVoted = false,
-  hasVotedLoading = false,
   isVoteDataLoading = false,
-  threshold,
   isAutoVotingEnabled = false,
   isAutoVotingEnabledInCurrentRound = false,
   isEditingAutoVote = false,
@@ -242,16 +238,7 @@ export function AppCategoryTabs({
     <HStack asChild={isMobile} gap="6" alignItems="flex-start">
       <VStack flex={1} gap="4" align="stretch">
         <VStack hideBelow="md" gap="4" align="stretch" px="4">
-          <VotingAlerts
-            hasVoted={hasVoted}
-            hasVotedLoading={hasVotedLoading}
-            selectedAppIds={selectedAppIds ?? new Set()}
-            hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot ?? true}
-            threshold={threshold}
-            isAtSelectionLimit={isAtSelectionLimit}
-            isAutoVotingEnabled={isAutoVotingEnabled}
-            isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
-          />
+          <VotingAlerts />
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">

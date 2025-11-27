@@ -5,7 +5,6 @@ import { Search } from "iconoir-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext } from "react"
 
-import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
@@ -28,7 +27,6 @@ export function VoteTab() {
     hasEnoughVotesAtSnapshot,
     onVoteClick,
     hasVoted,
-    hasVotedLoading,
     isVoteDataLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
@@ -47,7 +45,6 @@ export function VoteTab() {
   const urlSearchQuery = searchParams.get("search") || ""
   const selectedCategory = searchParams.get("category") || "all"
   const isSearchOpen = searchParams.has("search")
-  const { data: threshold } = useVotingThreshold()
   const { isMobile } = useBreakpoints()
 
   const handleSearchChange = useCallback(
@@ -86,18 +83,7 @@ export function VoteTab() {
 
   return (
     <>
-      {isMobile && (
-        <VotingAlerts
-          hasVoted={hasVoted ?? false}
-          hasVotedLoading={hasVotedLoading}
-          selectedAppIds={selectedAppIds}
-          hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
-          threshold={threshold}
-          isAtSelectionLimit={isAtSelectionLimit}
-          isAutoVotingEnabled={isAutoVotingEnabled}
-          isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
-        />
-      )}
+      {isMobile && <VotingAlerts />}
       <InputGroup
         hideFrom="md"
         startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
@@ -133,9 +119,7 @@ export function VoteTab() {
           showPagination
           onVoteClick={onVoteClick}
           hasVoted={hasVoted}
-          hasVotedLoading={hasVotedLoading}
           isVoteDataLoading={isVoteDataLoading}
-          threshold={threshold}
           isAutoVotingEnabled={isAutoVotingEnabled}
           isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
           isEditingAutoVote={isEditingAutoVote}

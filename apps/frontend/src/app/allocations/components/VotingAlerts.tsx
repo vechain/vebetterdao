@@ -1,31 +1,31 @@
-import { useMemo } from "react"
+import { useContext, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
+
 import { AllocationAlertCard } from "./AllocationAlertCard"
-import { MAX_SELECTED_APPS } from "./tabs/AllocationTabsProvider"
+import { AllocationTabsContext, MAX_SELECTED_APPS } from "./tabs/AllocationTabsProvider"
 
-interface VotingAlertsProps {
-  hasVoted: boolean
-  hasVotedLoading: boolean
-  selectedAppIds: Set<string>
-  hasEnoughVotesAtSnapshot: boolean
-  threshold?: string
-  isAtSelectionLimit?: boolean
-  isAutoVotingEnabled?: boolean
-  isAutoVotingEnabledInCurrentRound?: boolean
-}
+/**
+ * VotingAlerts component that displays alerts based on voting state.
+ * Uses AllocationTabsContext to get all required state.
+ */
+export const VotingAlerts = () => {
+  const context = useContext(AllocationTabsContext)
+  if (!context) throw new Error("VotingAlerts must be used within AllocationTabsProvider")
 
-export const VotingAlerts = ({
-  hasVoted,
-  hasVotedLoading,
-  selectedAppIds,
-  hasEnoughVotesAtSnapshot,
-  threshold,
-  isAtSelectionLimit = false,
-  isAutoVotingEnabled = false,
-  isAutoVotingEnabledInCurrentRound = false,
-}: VotingAlertsProps) => {
+  const {
+    hasVoted,
+    hasVotedLoading,
+    selectedAppIds,
+    hasEnoughVotesAtSnapshot,
+    isAutoVotingEnabled,
+    isAutoVotingEnabledInCurrentRound,
+  } = context
+
   const { t } = useTranslation()
+  const { data: threshold } = useVotingThreshold()
+  const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
 
   const shouldShowInsufficientPowerAlert = useMemo(
     () => !hasVotedLoading && !hasVoted && selectedAppIds && selectedAppIds.size > 0 && !hasEnoughVotesAtSnapshot,
