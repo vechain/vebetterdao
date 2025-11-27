@@ -162,20 +162,10 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   }, [])
 
   const onVoteSuccess = useCallback(() => {
-    // Reset selectedAppIds to show correct read-only state after save
-    if (hasVoted && castVotesEvent?.appsIds) {
-      // User has voted - show their voted apps (Set maintains order from appsIds)
-      const votedApps = new Set(castVotesEvent.appsIds)
-      setSelectedAppIds(votedApps)
-    } else {
-      // User hasn't voted - show empty read-only state
-      setSelectedAppIds(new Set())
-    }
-
     resetEditMode()
     handleCloseModal()
     closeTxModal()
-  }, [closeTxModal, handleCloseModal, resetEditMode, hasVoted, castVotesEvent?.appsIds])
+  }, [closeTxModal, handleCloseModal, resetEditMode])
 
   const { handleConfirmVote } = useAllocationVoting({
     roundId: roundDetails.currentRoundId.toString(),
@@ -186,18 +176,21 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   })
 
   useEffect(() => {
-    // Don't update during editing mode
-    if (isEditingAutoVote) return
+    // Don't update during editing mode or while modal is open (voting in progress)
+    if (isEditingAutoVote || isModalOpen) return
+    // Don't update while vote data is loading (query refetching)
+    if (isCastVotesLoading) return
 
-    // Only show ticked apps in read-only mode if user has actually voted
-    // Preferences are loaded when entering edit mode via handleEditAutoVote
-    // Set maintains insertion order from appsIds array
+    // After modal closes, sync to read-only state based on vote status
     if (hasVoted && castVotesEvent?.appsIds) {
+      // User has voted - show their voted apps
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
+    } else {
+      // User hasn't voted - show empty read-only state
+      setSelectedAppIds(new Set())
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasVoted, castVotesEvent?.appsIds])
+  }, [hasVoted, castVotesEvent?.appsIds, isModalOpen, isEditingAutoVote, isCastVotesLoading])
 
   // Show when user has voted OR has auto-voting enabled (current status OR in current round)
   const showAutoVoteUI =
