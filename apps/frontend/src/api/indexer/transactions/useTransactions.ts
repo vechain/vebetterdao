@@ -22,7 +22,7 @@ export const useTransactions = (account: string, queryOptions?: TransactionsQuer
   } = queryOptions || {}
   return indexerQueryClient.useInfiniteQuery(
     "get",
-    "/api/v1/history/{account}",
+    "/api/v2/history/{account}",
     {
       params: { path: { account }, query: { ...queryOptions, eventName }, enabled: !!account },
     },
