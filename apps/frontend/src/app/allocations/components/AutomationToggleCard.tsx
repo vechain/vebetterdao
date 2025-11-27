@@ -43,7 +43,7 @@ export const AutomationToggleCard = ({
               w={{ base: "8", md: "8" }}
               h={{ base: "8", md: "8" }}
               flexShrink={0}>
-              {icon ? icon : <Icon as={ProcessIcon} boxSize={{ base: "4", md: "5" }} color="text.subtle" />}
+              {icon ?? <Icon as={ProcessIcon} boxSize={{ base: "4", md: "5" }} color="text.subtle" />}
             </Box>
             <VStack alignItems="flex-start" gap="0.5" flex={1} minW={0}>
               <Text textStyle={{ base: "md", md: "md" }} fontWeight="semibold" color="text.default">
