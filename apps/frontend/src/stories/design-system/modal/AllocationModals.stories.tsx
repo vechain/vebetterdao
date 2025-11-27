@@ -42,7 +42,7 @@ export const AutomationToggleMobileLight: Story = {
         onApply={() => {
           setIsOpen(false)
         }}
-        defaultEnabled={true}
+        currentState={true}
       />
     )
   },
