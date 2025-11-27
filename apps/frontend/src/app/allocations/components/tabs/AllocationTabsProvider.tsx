@@ -75,8 +75,8 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
     roundDetails.id.toString(),
     account?.address ?? undefined,
   )
-  const { data: isAutoVotingEnabledOnChain } = useIsAutoVotingEnabled(account?.address)
-  const { data: isAutoVotingEnabledInCurrentRound } = useIsAutoVotingEnabledInCurrentRound(account?.address)
+  const { data: isAutoVotingEnabledOnChain } = useIsAutoVotingEnabled()
+  const { data: isAutoVotingEnabledInCurrentRound } = useIsAutoVotingEnabledInCurrentRound()
   const { data: storedPreferences = [] } = useUserVotingPreferences(account?.address)
 
   // Initialize local state from chain data
