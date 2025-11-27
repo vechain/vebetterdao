@@ -46,14 +46,20 @@ async function main() {
     `Upgrading X2EarnApps contract at address: ${config.x2EarnAppsContractAddress} on network: ${config.network.name}`,
   )
 
-  const x2EarnAppsV7 = (await upgradeProxy("X2EarnAppsV6", "X2EarnApps", config.x2EarnAppsContractAddress, [], {
-    version: 7,
-    libraries: {
-      AdministrationUtils: await AdministrationUtils.getAddress(),
-      EndorsementUtils: await EndorsementUtils.getAddress(),
-      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+  const x2EarnAppsV7 = (await upgradeProxy(
+    "X2EarnAppsV6",
+    "X2EarnApps",
+    config.x2EarnAppsContractAddress,
+    [config.stargateNFTContractAddress],
+    {
+      version: 7,
+      libraries: {
+        AdministrationUtils: await AdministrationUtils.getAddress(),
+        EndorsementUtils: await EndorsementUtils.getAddress(),
+        VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      },
     },
-  })) as X2EarnApps
+  )) as X2EarnApps
 
   console.log(`X2EarnApps upgraded`)
 
