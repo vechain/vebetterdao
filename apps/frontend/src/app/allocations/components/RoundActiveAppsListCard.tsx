@@ -23,15 +23,18 @@ import { SearchField } from "@/components/SearchField/SearchField"
 
 import { AppWithVotes } from "../lib/data"
 
+import { ActiveAppDetailModal } from "./ActiveAppDetailModal"
+
 const INITIAL_DISPLAY_COUNT = 4
 
 const RoundActiveAppCard = ({
   id,
   name,
   votesReceived,
-  totalEarnings,
-}: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "totalEarnings">) => (
-  <Button key={id} unstyled asChild>
+  earnings,
+  onClick,
+}: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & { onClick: (id: string) => void }) => (
+  <Button key={id} unstyled asChild onClick={() => onClick(id)}>
     <Card.Root
       variant="action"
       border="none"
@@ -47,12 +50,12 @@ const RoundActiveAppCard = ({
           {name || "-"}
         </Text>
         <HStack gap="1">
-          {totalEarnings && (
+          {earnings && (
             <Text textStyle={{ base: "xs", md: "md" }} gap="1">
               <Mark variant="text" fontWeight="semibold" color="text.subtle">
                 {"Received: "}
               </Mark>
-              {getCompactFormatter(2).format(Number(totalEarnings))} {" B3TR"}
+              {getCompactFormatter(2).format(Number(earnings.totalAmount))} {" B3TR"}
               <Mark fontWeight="semibold">{" • "}</Mark>
             </Text>
           )}
@@ -69,9 +72,12 @@ const RoundActiveAppCard = ({
   </Button>
 )
 
-export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
+export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[]; roundId: number }) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
+
+  const [clickedApp, setClickedApp] = useState<string | undefined>()
+  const appsMap = new Map(apps.map(app => [app.id, app]))
 
   const filteredApps = useMemo(() => {
     if (!searchQuery.trim()) return apps
@@ -83,63 +89,75 @@ export const RoundActiveAppsListCard = ({ apps }: { apps: AppWithVotes[] }) => {
   const hasMoreApps = filteredApps.length > INITIAL_DISPLAY_COUNT
 
   return (
-    <Card.Root p={{ base: "4", md: "6" }} gap="6" height="max-content">
-      <Card.Header gap="6" p="0">
-        <HStack justifyContent="space-between">
-          <Heading as={HStack} size="lg" fontWeight="semibold">
-            <Icon as={SmartphoneDevice} boxSize="5" color="icon.default" />
-            {"Active apps"}
-          </Heading>
-          <Badge variant="neutral" size="sm" rounded="sm">
-            {`${filteredApps.length} ${filteredApps.length === 1 ? "app" : "apps"}`}
-          </Badge>
-        </HStack>
-        <SearchField
-          inputProps={{ size: { base: "md", md: "xl" } }}
-          placeholder="Search by app name"
-          value={searchQuery}
-          onChange={setSearchQuery}
+    <>
+      <Card.Root p={{ base: "4", md: "6" }} gap="6" height="max-content">
+        <Card.Header gap="6" p="0">
+          <HStack justifyContent="space-between">
+            <Heading as={HStack} size="lg" fontWeight="semibold">
+              <Icon as={SmartphoneDevice} boxSize="5" color="icon.default" />
+              {"Active apps"}
+            </Heading>
+            <Badge variant="neutral" size="sm" rounded="sm">
+              {`${filteredApps.length} ${filteredApps.length === 1 ? "app" : "apps"}`}
+            </Badge>
+          </HStack>
+          <SearchField
+            inputProps={{ size: { base: "md", md: "xl" } }}
+            placeholder="Search by app name"
+            value={searchQuery}
+            onChange={setSearchQuery}
+          />
+        </Card.Header>
+        <Card.Body asChild maxHeight="1000px" overflowY="auto">
+          <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
+            <VStack gap="2" align="stretch">
+              {visibleApps.map(app => (
+                <RoundActiveAppCard
+                  key={app.id}
+                  id={app.id}
+                  name={app.name}
+                  votesReceived={app.votesReceived}
+                  earnings={app.earnings}
+                  onClick={setClickedApp}
+                />
+              ))}
+
+              {hasMoreApps && (
+                <>
+                  <Collapsible.Content>
+                    <VStack gap="2" align="stretch">
+                      {filteredApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
+                        <RoundActiveAppCard
+                          key={app.id}
+                          id={app.id}
+                          name={app.name}
+                          votesReceived={app.votesReceived}
+                          earnings={app.earnings}
+                          onClick={setClickedApp}
+                        />
+                      ))}
+                    </VStack>
+                  </Collapsible.Content>
+
+                  <Collapsible.Trigger asChild>
+                    <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
+                      <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
+                    </Button>
+                  </Collapsible.Trigger>
+                </>
+              )}
+            </VStack>
+          </Collapsible.Root>
+        </Card.Body>
+      </Card.Root>
+      {clickedApp && (
+        <ActiveAppDetailModal
+          roundId={roundId}
+          app={appsMap.get(clickedApp)!}
+          isOpen={!!clickedApp}
+          onClose={() => setClickedApp(undefined)}
         />
-      </Card.Header>
-      <Card.Body asChild maxHeight="1000px" overflowY="auto">
-        <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
-          <VStack gap="2" align="stretch">
-            {visibleApps.map(app => (
-              <RoundActiveAppCard
-                key={app.id}
-                id={app.id}
-                name={app.name}
-                votesReceived={app.votesReceived}
-                totalEarnings={app.totalEarnings}
-              />
-            ))}
-
-            {hasMoreApps && (
-              <>
-                <Collapsible.Content>
-                  <VStack gap="2" align="stretch">
-                    {filteredApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
-                      <RoundActiveAppCard
-                        key={app.id}
-                        id={app.id}
-                        name={app.name}
-                        votesReceived={app.votesReceived}
-                        totalEarnings={app.totalEarnings}
-                      />
-                    ))}
-                  </VStack>
-                </Collapsible.Content>
-
-                <Collapsible.Trigger asChild>
-                  <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
-                    <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
-                  </Button>
-                </Collapsible.Trigger>
-              </>
-            )}
-          </VStack>
-        </Collapsible.Root>
-      </Card.Body>
-    </Card.Root>
+      )}
+    </>
   )
 }

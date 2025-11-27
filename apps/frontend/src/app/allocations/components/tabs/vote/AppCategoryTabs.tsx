@@ -4,15 +4,12 @@ import {
   Button,
   ButtonGroup,
   Circle,
-  CloseButton,
   createListCollection,
   Flex,
   Heading,
   HStack,
   Icon,
   IconButton,
-  Input,
-  InputGroup,
   Pagination,
   Portal,
   Select,
@@ -20,12 +17,13 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Search, Search as SearchIcon } from "iconoir-react"
+import { Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
 import { AppWithVotes } from "@/app/allocations/lib/data"
+import { SearchField } from "@/components/SearchField/SearchField"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { APP_CATEGORIES } from "@/types/appDetails"
@@ -93,21 +91,12 @@ export function AppCategoryTabs({
     })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
-  const sortedAppsWithSelected = useMemo(() => {
-    return filteredApps.slice().sort((a, b) => {
-      const aSelected = selectedAppIds?.has(a.id) ?? false
-      const bSelected = selectedAppIds?.has(b.id) ?? false
-      if (aSelected === bSelected) return 0
-      return aSelected ? -1 : 1
-    })
-  }, [filteredApps, selectedAppIds])
-
   const visibleApps = useMemo(() => {
-    if (!showPagination) return sortedAppsWithSelected
+    if (!showPagination) return filteredApps
     const pageSize = 10
     const startIndex = (currentPage - 1) * pageSize
-    return sortedAppsWithSelected.slice(startIndex, startIndex + pageSize)
-  }, [sortedAppsWithSelected, showPagination, currentPage])
+    return filteredApps.slice(startIndex, startIndex + pageSize)
+  }, [filteredApps, showPagination, currentPage])
 
   const areAllVisibleAppsSelected = useMemo(() => {
     if (!selectedAppIds || visibleApps.length === 0) return false
@@ -160,24 +149,7 @@ export function AppCategoryTabs({
             </Flex>
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">
-            <InputGroup
-              flex={1}
-              startElement={<Icon as={Search} boxSize="4" color="text.subtle" />}
-              endElement={
-                searchQueryDesktop ? (
-                  <CloseButton size="xs" onClick={() => setSearchQueryDesktop("")} me="-2" />
-                ) : undefined
-              }
-              borderColor="border.primary">
-              <Input
-                id="allocation-app-filter-desktop"
-                variant="outline"
-                placeholder="Search app"
-                value={searchQueryDesktop}
-                onChange={e => setSearchQueryDesktop(e.target.value)}
-                rounded="xl"
-              />
-            </InputGroup>
+            <SearchField placeholder="Search app" value={searchQueryDesktop} onChange={setSearchQueryDesktop} />
             <Select.Root
               collection={categoryCollection}
               width="40"

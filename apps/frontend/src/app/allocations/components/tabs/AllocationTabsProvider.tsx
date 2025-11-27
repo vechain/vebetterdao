@@ -7,6 +7,7 @@ import { useRef, createContext, useState, useCallback, useMemo, useEffect } from
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useStickyState } from "@/hooks/useStickyState"
+import { useUserPreferences } from "@/hooks/useUserPreferences"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
@@ -45,28 +46,13 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const { onClose: closeTxModal } = useTransactionModal()
   const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
+  const { preferences } = useUserPreferences()
 
-  // @TODO: Add tracking so we don't show the modal to users who have already seen it
   useEffect(() => {
-    // const hasSeenAutoVoteModal = localStorage.getItem("hasSeenAutoVoteModal")
-    // if (hasVotesAtSnapshot && !hasSeenAutoVoteModal) {
-    //   openAutoVoteModal()
-    //   localStorage.setItem("hasSeenAutoVoteModal", "true")
-    // }
-
-    if (hasVotesAtSnapshot) {
+    if (preferences?.SHOW_AUTOVOTING_MODAL !== false && hasVotesAtSnapshot) {
       openAutoVoteModal()
     }
-  }, [hasVotesAtSnapshot, openAutoVoteModal])
-
-  // Handler for auto-vote modal
-  const handleAutoVoteApply = useCallback(
-    (enabled: boolean) => {
-      setIsAutoVotingEnabled(enabled)
-      closeAutoVoteModal()
-    },
-    [closeAutoVoteModal],
-  )
+  }, [hasVotesAtSnapshot, openAutoVoteModal, preferences?.SHOW_AUTOVOTING_MODAL])
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -82,6 +68,15 @@ export function AllocationTabsProvider({ roundDetails, onSelectedAppsChange, chi
       })
     },
     [onSelectedAppsChange],
+  )
+
+  // Handler for auto-vote modal
+  const handleAutoVoteApply = useCallback(
+    (enabled: boolean) => {
+      setIsAutoVotingEnabled(enabled)
+      closeAutoVoteModal()
+    },
+    [closeAutoVoteModal],
   )
 
   const onVoteSuccess = useCallback(() => {
