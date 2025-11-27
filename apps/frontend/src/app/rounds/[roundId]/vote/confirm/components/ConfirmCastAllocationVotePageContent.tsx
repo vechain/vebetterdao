@@ -24,7 +24,7 @@ import {
   useCastAllocationFormStore,
 } from "../../../../../../store/useCastAllocationFormStore"
 import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { calculateVotingWeightFromPercentage } from "../../../../../../utils/MathUtils/MathUtils"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 
 type Props = {
@@ -61,7 +61,6 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     account?.address ?? "",
   )
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
-  const votesAtSnapshotWei = totalVotesAtSnapshotQuery.data?.totalVotesWithDepositsWei
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
   const { data: threshold } = useVotingThreshold()
@@ -101,20 +100,18 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   }, [votes, votesAtSnapshot])
 
   const onContinue = useCallback(() => {
-    if (!votesAtSnapshotWei) throw new Error("Votes at snapshot not found")
-
-    // Use the wei value directly to preserve full precision (parseEther on formatted strings loses precision)
+    if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
     const appVotesPercentagesToValue: CastAllocationVotesProps = votes.map(vote => {
-      const weight = calculateVotingWeightFromPercentage(votesAtSnapshotWei, Number(vote.rawValue))
+      const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot), 100)
       return {
         appId: vote.appId,
-        votesWei: weight.toString(),
+        votes: rawValue,
       }
     })
 
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_CONFIRM_TX))
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
-  }, [castAllocationVotes, votesAtSnapshotWei, votes])
+  }, [castAllocationVotes, votesAtSnapshot, votes])
 
   const shouldSeeThePage = useMemo(() => {
     return {

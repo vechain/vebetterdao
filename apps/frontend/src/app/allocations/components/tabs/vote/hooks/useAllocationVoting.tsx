@@ -11,7 +11,7 @@ import { getAutoVotingState } from "@/hooks/useAutoVotingState"
 import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
 import { useUpdateVotingPreferences } from "@/hooks/useUpdateVotingPreferences"
-import { calculateVotingWeightFromPercentage } from "@/utils/MathUtils/MathUtils"
+import { scaledDivision } from "@/utils/MathUtils/MathUtils"
 
 import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 
@@ -81,18 +81,18 @@ export const useAllocationVoting = ({
 
   const handleConfirmVote = useCallback(
     (allocations: Map<string, number>) => {
-      if (!votesAtSnapshot?.totalVotesWithDepositsWei) {
+      if (!votesAtSnapshot?.totalVotesWithDeposits) {
         throw new Error("Votes at snapshot not found")
       }
 
-      // Convert percentages to weighted votes in wei
-      // Use the wei value directly to preserve full precision (parseEther on formatted strings loses precision)
-      const totalVotingPower = votesAtSnapshot.totalVotesWithDepositsWei
-      const allocationsWithWeight = new Map<string, bigint>()
+      // Convert percentages to weighted votes using scaledDivision
+      // This uses floor division which guarantees we never exceed total voting power
+      const totalVotingPower = Number(votesAtSnapshot.totalVotesWithDeposits)
+      const allocationsWithWeight = new Map<string, number>()
 
       allocations.forEach((percentage, appId) => {
-        const weight = calculateVotingWeightFromPercentage(totalVotingPower, percentage)
-        if (weight > 0n) {
+        const weight = scaledDivision(percentage * totalVotingPower, 100)
+        if (weight > 0) {
           allocationsWithWeight.set(appId, weight)
         }
       })
@@ -102,7 +102,7 @@ export const useAllocationVoting = ({
       const voteWeights = Array.from(allocationsWithWeight.values())
 
       // Calculate total voting weight for display in modal
-      const totalVotingWeight = voteWeights.reduce((sum, weight) => sum + Number(ethers.formatEther(weight)), 0)
+      const totalVotingWeight = voteWeights.reduce((sum, weight) => sum + weight, 0)
 
       const compactFormatter = getCompactFormatter(2)
       const formattedWeight = compactFormatter.format(totalVotingWeight)
@@ -172,11 +172,13 @@ export const useAllocationVoting = ({
         }
 
         if (account?.address) {
+          // Convert to bigint for contract call
+          const voteWeightsWei = voteWeights.map(w => ethers.parseEther(w.toString()))
           manageAutoVotingAndVote.sendTransaction(
             {
               roundId,
               appIds,
-              voteWeights,
+              voteWeights: voteWeightsWei,
               userAddress: account.address,
               hasVoted: hasVoted ?? false,
               shouldEnable,
@@ -217,7 +219,7 @@ export const useAllocationVoting = ({
       else {
         const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
           appId,
-          votesWei: weight.toString(),
+          votes: weight,
         }))
 
         const customUI = createCustomUI(
