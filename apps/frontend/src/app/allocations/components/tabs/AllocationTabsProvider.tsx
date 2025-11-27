@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, HStack, Presence, useDisclosure } from "@chakra-ui/react"
+import { Box, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
@@ -18,8 +18,8 @@ import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
 
 import { useAutoVoteEditMode } from "./hooks/useAutoVoteEditMode"
-import { useVotingButtonConfig } from "./hooks/useVotingButtonConfig"
 import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
+import { VoteButtons } from "./vote/VoteButtons"
 
 export const MAX_SELECTED_APPS = 15
 
@@ -206,23 +206,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   // Loading state: user has voted but vote data hasn't loaded yet
   const isVoteDataLoading = (hasVoted ?? false) && isCastVotesLoading
 
-  // Button configuration - single source of truth for button logic
-  const buttonConfig = useVotingButtonConfig({
-    hasVoted: hasVoted ?? false,
-    isEditingAutoVote,
-    isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
-    isAutoVotingEnabledInCurrentRound: isAutoVotingEnabledInCurrentRound ?? false,
-    hasExistingPreferences,
-    hasAutoVoteChanges,
-    selectedAppIds,
-    hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
-    onVoteClick: handleOpenModal,
-    onEditAutoVote: handleEditAutoVote,
-    onCancelEditAutoVote: handleCancelEditAutoVote,
-    onSaveAutoVote: handleSaveAutoVote,
-    onEnableAutoVoting: handleEnableAutoVoting,
-  })
-
   return (
     <AllocationTabsContext.Provider
       value={{
@@ -268,28 +251,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         right={0}
         zIndex={50}>
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
-          {buttonConfig.type === "editing" ? (
-            <HStack gap="3" w="full">
-              <Button flex={1} variant="secondary" onClick={buttonConfig.secondaryOnClick}>
-                {buttonConfig.secondaryText}
-              </Button>
-              <Button
-                flex={1}
-                variant="primary"
-                disabled={buttonConfig.primaryDisabled}
-                onClick={buttonConfig.primaryOnClick}>
-                {buttonConfig.primaryText}
-              </Button>
-            </HStack>
-          ) : (
-            <Button
-              w="full"
-              variant="primary"
-              disabled={buttonConfig.primaryDisabled}
-              onClick={buttonConfig.primaryOnClick}>
-              {buttonConfig.primaryText}
-            </Button>
-          )}
+          <VoteButtons variant="mobile" />
         </Box>
       </Presence>
 

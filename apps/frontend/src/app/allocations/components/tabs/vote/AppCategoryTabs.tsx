@@ -35,7 +35,8 @@ import { AppRadioCard } from "../../AppRadioCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
 import { VotingAlerts } from "../../VotingAlerts"
 import { MAX_SELECTED_APPS } from "../AllocationTabsProvider"
-import { useVotingButtonConfig } from "../hooks/useVotingButtonConfig"
+
+import { VoteButtons } from "./VoteButtons"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
@@ -49,20 +50,12 @@ interface AppCategoryTabsProps {
   onViewAll?: VoidFunction
   initialCategory?: string
   onCategoryChange?: (category: string) => void
-  hasEnoughVotesAtSnapshot?: boolean
   roundId?: string
-  onVoteClick?: () => void
   hasVoted?: boolean
   isVoteDataLoading?: boolean
   isAutoVotingEnabled?: boolean
   isAutoVotingEnabledInCurrentRound?: boolean
   isEditingAutoVote?: boolean
-  onEditAutoVote?: () => void
-  onCancelEditAutoVote?: () => void
-  onSaveAutoVote?: () => void
-  hasAutoVoteChanges?: boolean
-  hasExistingPreferences?: boolean
-  onEnableAutoVoting?: () => void
   isAtSelectionLimit?: boolean
 }
 
@@ -82,20 +75,12 @@ export function AppCategoryTabs({
   onViewAll,
   initialCategory = "all",
   onCategoryChange,
-  hasEnoughVotesAtSnapshot,
   roundId,
-  onVoteClick,
   hasVoted = false,
   isVoteDataLoading = false,
   isAutoVotingEnabled = false,
   isAutoVotingEnabledInCurrentRound = false,
   isEditingAutoVote = false,
-  onEditAutoVote,
-  onCancelEditAutoVote,
-  onSaveAutoVote,
-  hasAutoVoteChanges = false,
-  hasExistingPreferences = false,
-  onEnableAutoVoting,
   isAtSelectionLimit = false,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
@@ -183,53 +168,6 @@ export function AppCategoryTabs({
     }
   }
 
-  // Button configuration from shared hook
-  const buttonConfig = useVotingButtonConfig({
-    hasVoted,
-    isEditingAutoVote,
-    isAutoVotingEnabled,
-    isAutoVotingEnabledInCurrentRound,
-    hasExistingPreferences,
-    hasAutoVoteChanges,
-    selectedAppIds: selectedAppIds ?? new Set(),
-    hasEnoughVotesAtSnapshot: hasEnoughVotesAtSnapshot ?? false,
-    onVoteClick: onVoteClick ?? (() => {}),
-    onEditAutoVote: onEditAutoVote ?? (() => {}),
-    onCancelEditAutoVote: onCancelEditAutoVote ?? (() => {}),
-    onSaveAutoVote: onSaveAutoVote ?? (() => {}),
-    onEnableAutoVoting: onEnableAutoVoting ?? (() => {}),
-  })
-
-  // Render action buttons using shared config
-  const renderActionButtons = () => {
-    if (buttonConfig.type === "editing") {
-      return (
-        <>
-          <Button variant="secondary" onClick={buttonConfig.secondaryOnClick}>
-            {buttonConfig.secondaryText}
-          </Button>
-          <Button
-            variant="primary"
-            minWidth="36"
-            disabled={buttonConfig.primaryDisabled}
-            onClick={buttonConfig.primaryOnClick}>
-            {buttonConfig.primaryText}
-          </Button>
-        </>
-      )
-    }
-
-    return (
-      <Button
-        variant="primary"
-        minWidth="36"
-        disabled={buttonConfig.primaryDisabled}
-        onClick={buttonConfig.primaryOnClick}>
-        {buttonConfig.primaryText}
-      </Button>
-    )
-  }
-
   useEffect(() => {
     setCurrentPage(1)
   }, [selectedCategory])
@@ -248,7 +186,7 @@ export function AppCategoryTabs({
                   {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
                 </Button>
               )}
-              {renderActionButtons()}
+              <VoteButtons variant="desktop" />
             </Flex>
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">

@@ -1,23 +1,9 @@
 "use client"
 
-import { useMemo } from "react"
+import { useContext, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-interface UseVotingButtonConfigProps {
-  hasVoted: boolean
-  isEditingAutoVote: boolean
-  isAutoVotingEnabled: boolean
-  isAutoVotingEnabledInCurrentRound: boolean
-  hasExistingPreferences: boolean
-  hasAutoVoteChanges: boolean
-  selectedAppIds: Set<string>
-  hasEnoughVotesAtSnapshot: boolean
-  onVoteClick: () => void
-  onEditAutoVote: () => void
-  onCancelEditAutoVote: () => void
-  onSaveAutoVote: () => void
-  onEnableAutoVoting: () => void
-}
+import { AllocationTabsContext } from "../AllocationTabsProvider"
 
 export type VotingButtonType = "vote" | "editing" | "edit" | "enable"
 
@@ -33,22 +19,28 @@ export interface VotingButtonConfig {
 
 /**
  * Hook to determine which voting button(s) to show based on state.
+ * Consumes AllocationTabsContext directly.
  */
-export const useVotingButtonConfig = ({
-  hasVoted,
-  isEditingAutoVote,
-  isAutoVotingEnabled,
-  isAutoVotingEnabledInCurrentRound,
-  hasExistingPreferences,
-  hasAutoVoteChanges,
-  selectedAppIds,
-  hasEnoughVotesAtSnapshot,
-  onVoteClick,
-  onEditAutoVote,
-  onCancelEditAutoVote,
-  onSaveAutoVote,
-  onEnableAutoVoting,
-}: UseVotingButtonConfigProps): VotingButtonConfig => {
+export const useVotingButtonConfig = (): VotingButtonConfig => {
+  const context = useContext(AllocationTabsContext)
+  if (!context) throw new Error("useVotingButtonConfig must be used within AllocationTabsProvider")
+
+  const {
+    hasVoted,
+    isEditingAutoVote,
+    isAutoVotingEnabled,
+    isAutoVotingEnabledInCurrentRound,
+    hasExistingPreferences,
+    hasAutoVoteChanges,
+    selectedAppIds,
+    hasEnoughVotesAtSnapshot,
+    onVoteClick,
+    onEditAutoVote,
+    onCancelEditAutoVote,
+    onSaveAutoVote,
+    onEnableAutoVoting,
+  } = context
+
   const { t } = useTranslation()
 
   return useMemo(() => {

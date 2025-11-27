@@ -24,19 +24,11 @@ export function VoteTab() {
     selectionOrder,
     onToggleApp,
     isStuck,
-    hasEnoughVotesAtSnapshot,
-    onVoteClick,
     hasVoted,
     isVoteDataLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
     isEditingAutoVote,
-    onEditAutoVote,
-    onCancelEditAutoVote,
-    onSaveAutoVote,
-    hasAutoVoteChanges,
-    hasExistingPreferences,
-    onEnableAutoVoting,
     isAtSelectionLimit,
   } = context
   const router = useRouter()
@@ -106,7 +98,6 @@ export function VoteTab() {
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={urlSearchQuery}
-          hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
           roundId={roundId}
           tabsListProps={{
             position: "sticky",
@@ -117,18 +108,11 @@ export function VoteTab() {
             zIndex: 2,
           }}
           showPagination
-          onVoteClick={onVoteClick}
           hasVoted={hasVoted}
           isVoteDataLoading={isVoteDataLoading}
           isAutoVotingEnabled={isAutoVotingEnabled}
           isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
           isEditingAutoVote={isEditingAutoVote}
-          onEditAutoVote={onEditAutoVote}
-          onCancelEditAutoVote={onCancelEditAutoVote}
-          onSaveAutoVote={onSaveAutoVote}
-          hasAutoVoteChanges={hasAutoVoteChanges}
-          hasExistingPreferences={hasExistingPreferences}
-          onEnableAutoVoting={onEnableAutoVoting}
           isAtSelectionLimit={isAtSelectionLimit}
         />
       </Bleed>
