@@ -50,4 +50,3 @@ export function initVechainKitModalFix() {
     window.visualViewport.addEventListener("resize", fixModalPosition)
   }
 }
-
