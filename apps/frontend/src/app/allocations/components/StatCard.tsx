@@ -30,7 +30,8 @@ export const StatCard = ({
       flexDirection="row"
       alignItems="center"
       justifyContent="space-between"
-      gap={{ base: "2", md: "4" }}>
+      gap={{ base: "2", md: "4" }}
+      maxBlockSize={{ base: "fit-content", md: "unset" }}>
       {showIcon && icon && (
         <Square rounded="xl" bg={`status.${variant}.secondary`} aspectRatio={1} height={{ base: "32px", md: "60px" }}>
           <Icon boxSize={{ base: "5", md: "9" }} color={`status.${variant}.strong`}>

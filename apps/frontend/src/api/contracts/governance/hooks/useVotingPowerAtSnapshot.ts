@@ -1,6 +1,7 @@
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import { parseEther } from "viem"
 
 import { useCurrentRoundSnapshot } from "../../xAllocations/hooks/useCurrentRoundSnapshot"
 
@@ -28,7 +29,7 @@ export const useVotingPowerAtSnapshot = () => {
     const scaled = votesAtSnapshot.totalVotesWithDeposits
     const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
     return {
-      original: scaled,
+      original: parseEther(votesAtSnapshot.totalVotesWithDeposits).toString(),
       scaled,
       formatted,
     }

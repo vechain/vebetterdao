@@ -9,10 +9,7 @@ export default async function TabLayout({ children }: { children: React.ReactNod
     <>
       <VStack alignItems="stretch" gap="2" w="full" mb="6">
         <Heading size={{ base: "xl", md: "3xl" }}>{"Allocation"}</Heading>
-        <Grid
-          templateRows={{ base: "repeat(2,1fr)", md: "1fr" }}
-          templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }}
-          gap={{ base: "2", md: "6" }}>
+        <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }} gap={{ base: "2", md: "6" }}>
           <GridItem colSpan={{ base: 2, md: 1 }} w="full">
             <VotingPowerBox />
           </GridItem>

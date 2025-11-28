@@ -1,22 +1,30 @@
 "use client"
 
-import { Icon, Text, Button, Skeleton } from "@chakra-ui/react"
+import { Icon, Text, Button, Skeleton, VStack, Badge } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
 import { useState } from "react"
+import { Trans } from "react-i18next"
+import { formatEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import { StatCard } from "./StatCard"
 
 export const VotingPowerBox = () => {
   const { isMobile } = useBreakpoints()
-  const { vot3Balance, isLoading } = useVotingPowerAtSnapshot()
-
   const [isOpen, setIsOpen] = useState(false)
+  const { account } = useWallet()
+
+  const { vot3Balance, isLoading } = useVotingPowerAtSnapshot()
+  const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
 
   const formatted = vot3Balance?.formatted ?? "0"
+  const votingPowerNextRound = BigInt(currentVot3Balance?.original || "0") - BigInt(vot3Balance?.original || "0")
 
   return (
     <StatCard
@@ -25,10 +33,26 @@ export const VotingPowerBox = () => {
       title="Voting power"
       icon={<Flash />}
       subtitle={
-        <Skeleton loading={isLoading}>
-          <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="semibold">
-            {formatted}
-          </Text>
+        <Skeleton loading={isLoading || isCurrentVot3BalanceLoading}>
+          <VStack align="flex-start" gap="1">
+            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="semibold">
+              {formatted}
+            </Text>
+
+            {votingPowerNextRound > 0 && (
+              <Badge variant="neutral" bg="card.default" color="text.subtle" fontWeight="normal" size="sm" rounded="sm">
+                <Trans
+                  i18nKey="<bold>+{{votingPowerNextRound}}</bold> in next round"
+                  values={{
+                    votingPowerNextRound: getCompactFormatter(2).format(
+                      Number(formatEther(votingPowerNextRound, "wei")),
+                    ),
+                  }}
+                  components={{ bold: <Text color="status.positive.strong" as="span" /> }}
+                />
+              </Badge>
+            )}
+          </VStack>
         </Skeleton>
       }
       cta={

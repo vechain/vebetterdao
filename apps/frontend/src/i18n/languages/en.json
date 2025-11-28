@@ -1586,5 +1586,6 @@
   "Enabling automation and submitting vote...": "Enabling automation and submitting vote...",
   "Automation enabled & vote submitted!": "Automation enabled & vote submitted!",
   "Enabling automation...": "Enabling automation...",
-  "Automation enabled!": "Automation enabled!"
+  "Automation enabled!": "Automation enabled!",
+  "<bold>+{{votingPowerNextRound}}</bold> in next round": "<bold>+{{votingPowerNextRound}}</bold> in next round"
 }
