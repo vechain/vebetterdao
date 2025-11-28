@@ -251,7 +251,7 @@ export const ActionBanner = () => {
         <Swiper
           modules={[A11y, Autoplay, Pagination]}
           rewind={true}
-          pagination={slides.length > 1}
+          pagination={{ clickable: true }}
           wrapperClass="action-banner"
           spaceBetween={20}
           speed={800}
