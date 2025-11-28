@@ -11,14 +11,14 @@ interface AutoVoteModalProps {
   isOpen: boolean
   onClose: () => void
   onApply?: (isEnabled: boolean) => void
-  defaultEnabled?: boolean
+  currentState?: boolean
 }
 
 const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation#service-fee"
 
-export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true }: AutoVoteModalProps) => {
+export const AutoVoteModal = ({ isOpen, onClose, onApply, currentState = true }: AutoVoteModalProps) => {
   const { t } = useTranslation()
-  const [isAutomationOn, setIsAutomationOn] = useState(defaultEnabled)
+  const [isAutomationOn, setIsAutomationOn] = useState(currentState)
   const { setPreferences } = useUserPreferences()
 
   const handleApply = () => {
@@ -78,11 +78,7 @@ export const AutoVoteModal = ({ isOpen, onClose, onApply, defaultEnabled = true 
             <Text textStyle="md" fontWeight="semibold">
               {t("Automation")}
             </Text>
-            <Switch.Root
-              size="md"
-              defaultChecked
-              checked={isAutomationOn}
-              onCheckedChange={e => setIsAutomationOn(e.checked)}>
+            <Switch.Root size="md" checked={isAutomationOn} onCheckedChange={e => setIsAutomationOn(e.checked)}>
               <Switch.HiddenInput />
               <Switch.Control>
                 <Switch.Thumb />

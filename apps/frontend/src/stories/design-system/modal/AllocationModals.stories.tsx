@@ -18,6 +18,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite"
 import { Check, Flash } from "iconoir-react"
 import { useState } from "react"
 
+import { AutoVoteModal } from "@/app/allocations/components/AutoVoteModal"
 import { BaseModal } from "@/components/BaseModal"
 import { Modal } from "@/components/Modal"
 import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent/SuccessModalContent"
@@ -29,6 +30,23 @@ const meta: Meta<typeof Modal> = {
 
 export default meta
 type Story = StoryObj<typeof Modal>
+
+export const AutomationToggleMobileLight: Story = {
+  render: () => {
+    const [isOpen, setIsOpen] = useState(true)
+
+    return (
+      <AutoVoteModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onApply={() => {
+          setIsOpen(false)
+        }}
+        currentState={true}
+      />
+    )
+  },
+}
 
 export const VPSummaryMobileLight: Story = {
   render: () => {

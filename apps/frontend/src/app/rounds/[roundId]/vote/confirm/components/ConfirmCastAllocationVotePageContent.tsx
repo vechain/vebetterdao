@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { parseEther } from "viem"
 
 import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
@@ -25,7 +24,7 @@ import {
   useCastAllocationFormStore,
 } from "../../../../../../store/useCastAllocationFormStore"
 import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { calculateVotingWeightFromPercentage } from "../../../../../../utils/MathUtils/MathUtils"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 
 type Props = {
@@ -102,13 +101,11 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const onContinue = useCallback(() => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
-
-    const totalVotingPower = parseEther(votesAtSnapshot)
     const appVotesPercentagesToValue: CastAllocationVotesProps = votes.map(vote => {
-      const weight = calculateVotingWeightFromPercentage(totalVotingPower, Number(vote.rawValue))
+      const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot), 100)
       return {
         appId: vote.appId,
-        votesWei: weight.toString(),
+        votes: rawValue,
       }
     })
 

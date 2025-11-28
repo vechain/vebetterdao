@@ -20,9 +20,10 @@ export const scaledDivision = (numerator: number, denominator: number, scalingFa
  * @param totalVotingPowerWei - Total voting power in wei (bigint)
  * @param percentage - Percentage to convert to voting weight (e.g., 50.5 for 50.5%)
  * @returns Voting weight in wei (bigint)
+ *
+ * Important: This is a helper function for UI display purposes. It is not intended to be used for contract calls as we might get in-accurate precision.
  */
 export const calculateVotingWeightFromPercentage = (totalVotingPowerWei: bigint, percentage: number): bigint => {
-  // Convert percentage to basis points (e.g., 50.5% -> 5050) and calculate allocation
   return (totalVotingPowerWei * BigInt(Math.round(percentage * 100))) / 10000n
 }
 
