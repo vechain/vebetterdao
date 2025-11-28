@@ -88,8 +88,8 @@ export const useProposalEnriched = () => {
   // Step 7: Calculate total grant amount using useMemo
   const totalGrantAmount = useMemo(() => {
     return enrichedGrantProposals.reduce(
-      (acc, event) => acc.plus(BigNumber(event?.grantAmountRequested) ?? BigNumber(0)),
-      BigNumber(0),
+      (acc, event) => acc.plus(new BigNumber(event?.grantAmountRequested) ?? new BigNumber(0)),
+      new BigNumber(0),
     )
   }, [enrichedGrantProposals])
 

@@ -1,4 +1,5 @@
 "use client"
+import { useToken } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { NETWORK_TYPE } from "@repo/constants"
 import dynamic from "next/dynamic"
@@ -20,28 +21,45 @@ export function VechainKitProviderWrapper({ children }: Props) {
   const { i18n } = useTranslation()
   const isDarkMode = colorMode === "dark"
   const vebetterLogo = "https://i.ibb.co/7tBkpgvW/Ve-Better-Blue-300ppi.png"
-  const vechainLogo = "https://vechain.org/wp-content/uploads/2025/02/VeChain_Icon_Quartz_300ppi.png"
+  const vechainLogo = "https://vechain-brand-assets.s3.eu-north-1.amazonaws.com/VeChain_Logomark_Light.png"
   const networkType = getConfig().network.type
   const allowCustomTokens = networkType === ("test" as NETWORK_TYPE)
+
+  const [bgPrimary, primaryDefault, primaryText, primaryHover, secondaryDefault, secondaryHover, borderSecondary] =
+    useToken("colors", [
+      "bg.primary",
+      "actions.primary.default",
+      "actions.primary.text",
+      "actions.primary.hover",
+      "card.subtle",
+      "card.hover",
+      "border.secondary",
+    ])
+
   return (
     <VeChainKitProvider
+      theme={{
+        modal: {
+          backgroundColor: bgPrimary,
+          border: `1px solid ${borderSecondary}`,
+        },
+        buttons: {
+          primaryButton: {
+            bg: primaryDefault,
+            color: primaryText,
+            hoverBg: primaryHover,
+          },
+          secondaryButton: {
+            border: `1px solid ${borderSecondary}`,
+            bg: secondaryDefault,
+            hoverBg: secondaryHover,
+          },
+        },
+      }}
       privy={{
         appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
         clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID!,
-        loginMethods: [
-          "google",
-          "apple",
-          "twitter",
-          "farcaster",
-          // "email",
-          "discord",
-          "tiktok",
-          // "rabby_wallet",
-          // "coinbase_wallet",
-          // "rainbow",
-          // "phantom",
-          // "metamask",
-        ],
+        loginMethods: ["google", "apple", "sms", "twitter", "github", "farcaster", "discord", "tiktok", "line"],
         appearance: {
           loginMessage: "Select a login method",
           logo: vechainLogo,
@@ -59,8 +77,8 @@ export function VechainKitProviderWrapper({ children }: Props) {
         walletConnectOptions: {
           projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
           metadata: {
-            name: "VeBetterDAO App",
-            description: "This is the official VeBetterDAO app.",
+            name: "VeBetter App",
+            description: "This is the official VeBetter app.",
             url: typeof window !== "undefined" ? window.location.origin : "",
             icons: [typeof window !== "undefined" ? vebetterLogo : ""],
           },
@@ -78,11 +96,10 @@ export function VechainKitProviderWrapper({ children }: Props) {
       }}
       allowCustomTokens={allowCustomTokens}
       legalDocuments={{
-        allowAnalytics: true,
         termsAndConditions: [
           {
             url: "https://vebetterdao.org/terms-of-service",
-            displayName: "VeBetterDAO Terms of Service",
+            displayName: "VeBetter Terms of Service",
             version: 1,
             required: true,
           },
