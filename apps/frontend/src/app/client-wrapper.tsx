@@ -14,6 +14,7 @@ import AnalyticsUtils from "../utils/AnalyticsUtils/AnalyticsUtils"
 import { Providers } from "./providers"
 
 import "@/i18n"
+import "./theme/vechain-kit-fixes.css"
 
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"

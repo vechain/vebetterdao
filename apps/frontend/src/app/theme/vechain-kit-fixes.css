@@ -1,0 +1,14 @@
+/* 
+ * Fix for vechain-kit modal jumping when mobile keyboard opens
+ * Use fixed pixel height instead of vh units to prevent recalculation when keyboard appears
+ */
+
+.chakra-modal__content-container {
+  position: fixed !important;
+  height: 100% !important;
+}
+
+.chakra-modal__content {
+  max-height: calc(100vh - 2rem) !important;
+}
+
