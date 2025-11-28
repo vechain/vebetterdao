@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "../components/Footer/Footer"
 import { TransactionModal } from "../components/TransactionModal/TransactionModal"
 import AnalyticsUtils from "../utils/AnalyticsUtils/AnalyticsUtils"
+import { initVechainKitModalFix } from "../utils/fixVechainKitModal"
 
 import { Providers } from "./providers"
 
@@ -45,6 +46,11 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
     return () => {
       document.documentElement.removeAttribute("data-color-mode")
     }
+  }, [])
+
+  // Fix vechain-kit modal position on mobile keyboard open
+  useEffect(() => {
+    initVechainKitModalFix()
   }, [])
 
   // Defer analytics initialization until after page load
