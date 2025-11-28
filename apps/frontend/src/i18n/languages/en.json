@@ -1610,5 +1610,6 @@
   "Auto-voting active. Your vote and rewards will be handled automatically.": "Auto-voting active. Your vote and rewards will be handled automatically.",
   "Auto-voting active this round. It will be disabled for future rounds.": "Auto-voting active this round. It will be disabled for future rounds.",
   "Auto-voting enabled. It will start from next round onwards.": "Auto-voting enabled. It will start from next round onwards.",
-  "<bold>+{{votingPowerNextRound}}</bold> in next round": "<bold>+{{votingPowerNextRound}}</bold> in next round"
+  "<bold>+{{votingPowerNextRound}}</bold> in next round": "<bold>+{{votingPowerNextRound}}</bold> in next round",
+  "Voted": "Voted"
 }

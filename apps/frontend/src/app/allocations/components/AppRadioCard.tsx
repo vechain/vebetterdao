@@ -1,5 +1,6 @@
 import { Box, CheckboxCard, Circle, Float, Heading, Flex, Icon, Progress, Text, VStack, Badge } from "@chakra-ui/react"
 import { Check, Group } from "iconoir-react"
+import { useTranslation } from "react-i18next"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { AppCategoryItem } from "@/types/appDetails"
@@ -29,15 +30,18 @@ export const AppRadioCard = ({
   displayMode = "checkbox",
   disabled = false,
 }: AppRadioCardProps) => {
+  const { t } = useTranslation()
   const isVotedMode = displayMode === "voted"
   const isInteractive = !isVotedMode && !!onCheckedChange && !disabled
+  // In voted mode, don't pass checked to avoid blue border styling
+  const showCheckedState = !isVotedMode && checked
 
   return (
     <CheckboxCard.Root
       rounded="lg"
       p={{ base: "3", md: "5" }}
       colorPalette="blue"
-      checked={checked}
+      checked={showCheckedState}
       onCheckedChange={isInteractive ? onCheckedChange : undefined}
       cursor={isInteractive ? "pointer" : "default"}
       pointerEvents={isInteractive ? "auto" : "none"}
@@ -61,8 +65,17 @@ export const AppRadioCard = ({
           justifyContent="space-between"
           alignItems="flex-start"
           gap="2">
-          <VStack flex={1} gap="0.5" align="start">
-            <Heading size={{ base: "md", md: "lg" }}>{appName}</Heading>
+          <VStack flex={1} gap="0.5" align="start" minW={0}>
+            <Flex align="center" gap="2" w="full" minW={0}>
+              <Heading size={{ base: "md", md: "lg" }} lineClamp={1}>
+                {appName}
+              </Heading>
+              {isVotedMode && checked && (
+                <Badge variant="positive" size="sm" flexShrink={0}>
+                  {t("Voted")}
+                </Badge>
+              )}
+            </Flex>
             {appCategory && (
               <Badge hideBelow="md" variant="neutral" size="sm" rounded="sm" width="max-content" height="max-content">
                 {appCategory.name}
