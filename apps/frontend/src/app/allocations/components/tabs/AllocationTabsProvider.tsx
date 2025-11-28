@@ -137,6 +137,23 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     }
   }, [closeModal, isAutoVotingEnabledOnChain])
 
+  // TODO auto-voting: Uncomment this after the allocation redesign page is live
+  // const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
+  // const { preferences } = useUserPreferences()
+  // useEffect(() => {
+  //   if (preferences?.SHOW_AUTOVOTING_MODAL !== false && hasVotesAtSnapshot) {
+  //     openAutoVoteModal()
+  //   }
+  // }, [hasVotesAtSnapshot, openAutoVoteModal, preferences?.SHOW_AUTOVOTING_MODAL])
+  // Handler for auto-vote modal
+  // const handleAutoVoteApply = useCallback(
+  //   (enabled: boolean) => {
+  //     setIsAutoVotingEnabled(enabled)
+  //     closeAutoVoteModal()
+  //   },
+  //   [closeAutoVoteModal],
+  // )
+
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
   }, [roundDetails.apps, selectedAppIds])

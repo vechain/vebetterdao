@@ -9,6 +9,7 @@ import { executeMultipleClausesCall } from "@vechain/vechain-kit/utils"
 
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 import { fetchClient } from "@/api/indexer/api"
+import { AppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 import { blockNumberToDate } from "@/utils/date"
 import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
@@ -24,7 +25,7 @@ export interface AppWithVotes {
   voters: number
   votesReceived: bigint
   metadata?: Awaited<ReturnType<typeof getXAppMetadata>>
-  totalEarnings?: number
+  earnings?: AppEarnings[number]
 }
 
 export interface AllocationRoundDetails {
@@ -156,9 +157,7 @@ export const getCurrentRoundId = async () => {
 
 export const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDetails> => {
   const currentRoundId = await getCurrentRoundId()
-
   const roundId = round ?? Number(currentRoundId)
-
   const roundDetails = await getRoundDetails(BigInt(roundId))
   const rounds = await getRounds({ roundId: round, pageSize: 6 })
   const res = await getRoundResults(roundId)
@@ -174,9 +173,7 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
     roundId,
     apps.map(app => app.id),
   )
-  const earningsMap = new Map(
-    earningsResponses.map((response, index) => [apps[index]?.id, response.data?.[0]?.totalAmount]),
-  )
+  const earningsMap = new Map(earningsResponses.map((response, index) => [apps[index]?.id, response.data?.[0]]))
 
   const appsWithVotes = apps
     .map((app, index) => {
@@ -186,7 +183,7 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
         voters: result?.voters ?? 0,
         votesReceived: result?.votesReceived ? BigInt(result.votesReceived.toString()) : 0n,
         metadata: appsMetadata[index],
-        totalEarnings: earningsMap.get(app.id),
+        earnings: earningsMap.get(app.id),
       }
     })
     .sort((appA, appB) => (appA.votesReceived > appB.votesReceived ? -1 : 1))

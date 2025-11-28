@@ -73,6 +73,7 @@ export function SearchAppsBottomSheet({
           endElement={searchQuery ? <CloseButton size="xs" onClick={handleClear} me="-2" /> : undefined}>
           <Input
             ref={inputRef}
+            bg="bg.primary"
             id="search-apps-input"
             placeholder="Search app"
             value={searchQuery}

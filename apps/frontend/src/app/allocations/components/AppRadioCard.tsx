@@ -35,7 +35,7 @@ export const AppRadioCard = ({
   return (
     <CheckboxCard.Root
       rounded="lg"
-      p="3"
+      p={{ base: "3", md: "5" }}
       colorPalette="blue"
       checked={checked}
       onCheckedChange={isInteractive ? onCheckedChange : undefined}
@@ -46,7 +46,7 @@ export const AppRadioCard = ({
       <CheckboxCard.Control alignItems="center" p="0" gap="3">
         {!isVotedMode && <CheckboxCard.Indicator rounded="sm" />}
         <Box position="relative">
-          <AppImage boxSize={{ base: "44px", md: "60px" }} appId={appId} />
+          <AppImage boxSize={{ base: "44px", md: "60px" }} borderRadius="0.5rem" appId={appId} />
           {isVotedMode && checked && (
             <Float placement="top-end" offsetX="1" offsetY="1">
               <Circle size="18px" bg="actions.primary.default" border="2px solid" borderColor="white">

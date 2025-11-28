@@ -1,7 +1,7 @@
 import { Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { BannerStorageKey, GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { useBuyVtho } from "@/hooks/useTransak"
 
 export const LowVthoBanner = () => {
@@ -9,6 +9,7 @@ export const LowVthoBanner = () => {
   const { initTransak } = useBuyVtho()
   return (
     <GenericBanner
+      storageKey={BannerStorageKey.SHOW_LOW_VTHO}
       illustration="/assets/icons/lightning.webp"
       title={t("Not enough VTHO")}
       description={t("Get more VTHO to be able to vote and perform transactions!")}
