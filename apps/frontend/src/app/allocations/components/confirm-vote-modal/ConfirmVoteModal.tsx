@@ -56,8 +56,12 @@ export const ConfirmVoteModal = ({
   const nothingToDo = hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledOnChain
   const canSubmit = isValid && !nothingToDo
 
-  // Only allow customisation if user hasn't voted AND auto-voting is not enabled
-  const shouldShowCustomisation = !isAutoVotingEnabledOnChain && !hasVoted
+  // Show "Customise votes" only for first-time voters with toggle OFF
+  const shouldShowCustomisation = !hasVoted && !isAutoVotingEnabled
+
+  // Show "Edit selection" only for users enabling auto-vote (has voted but not enabled on-chain yet)
+  // User can click Cancel to go back to edit mode
+  const showEditSelection = hasVoted && !isAutoVotingEnabledOnChain
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
@@ -127,7 +131,10 @@ export const ConfirmVoteModal = ({
                 )
               }
             />
-            <SelectedAppsPreview apps={selectedApps} onEditSelection={onEditSelection} />
+            <SelectedAppsPreview
+              apps={selectedApps}
+              onEditSelection={showEditSelection ? onEditSelection : undefined}
+            />
           </>
         ) : (
           <>

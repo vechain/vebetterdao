@@ -89,8 +89,14 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     }
   }, [isAutoVotingEnabledOnChain])
 
-  const handleOpenModal = useCallback(() => {
+  // Handler for enabling auto-vote - forces toggle ON
+  const handleOpenModalWithAutoVote = useCallback(() => {
     setIsAutoVotingEnabled(true)
+    openModal()
+  }, [openModal])
+
+  // Handler for manual voting - respects on-chain state (toggle OFF)
+  const handleVoteClick = useCallback(() => {
     openModal()
   }, [openModal])
 
@@ -100,8 +106,8 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
       const votedApps = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedApps)
     }
-    handleOpenModal()
-  }, [handleOpenModal, castVotesEvent?.appsIds])
+    handleOpenModalWithAutoVote()
+  }, [handleOpenModalWithAutoVote, castVotesEvent?.appsIds])
 
   // Auto-vote edit mode
   const {
@@ -119,7 +125,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     hasVoted: hasVoted ?? false,
     selectedAppIds,
     setSelectedAppIds,
-    openModal: handleOpenModal, // Use handleOpenModal to ensure toggle is set correctly
+    openModal: handleOpenModalWithAutoVote, // Use handleOpenModalWithAutoVote to ensure toggle is set correctly
   })
 
   // Handler for "Edit selection" in modal - closes modal and enters edit mode
@@ -227,7 +233,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
-        onVoteClick: handleOpenModal,
+        onVoteClick: handleVoteClick,
         isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
         isAutoVotingEnabledInCurrentRound: isAutoVotingEnabledInCurrentRound ?? false,
         onToggleAutoVoting: setIsAutoVotingEnabled,
