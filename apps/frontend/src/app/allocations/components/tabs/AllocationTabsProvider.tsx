@@ -2,6 +2,7 @@
 
 import { Box, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import { usePathname } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
@@ -59,6 +60,8 @@ interface AllocationTabsProviderProps {
 export function AllocationTabsProvider({ roundDetails, children }: AllocationTabsProviderProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
+  const pathname = usePathname()
+  const isVoteTab = pathname === "/allocations" || pathname === "/allocations/vote"
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
   // Derive selection order from Set (Set maintains insertion order)
   const selectionOrder = useMemo(() => [...selectedAppIds], [selectedAppIds])
@@ -255,7 +258,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
       <Presence
         hideFrom="md"
-        present={selectedAppIds.size > 0 || showAutoVoteUI}
+        present={isVoteTab && (selectedAppIds.size > 0 || showAutoVoteUI)}
         animationName={{
           _open: "slide-from-bottom",
           _closed: "slide-to-bottom, fade-out",
