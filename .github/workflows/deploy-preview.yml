@@ -43,8 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       flavor: ${{ steps.metadata.outputs.flavor }}
-      environment: ${{ steps.metadata.outputs.environment }}
-      ssm_prefix: ${{ steps.metadata.outputs.ssm_prefix }}
+      domain_env: ${{ steps.metadata.outputs.domain_env }}
       pr_number: ${{ steps.metadata.outputs.pr_number }}
       short_sha: ${{ steps.metadata.outputs.short_sha }}
     steps:
@@ -53,7 +52,6 @@ jobs:
         run: |
           # Default values
           FLAVOR=""
-          SSM_PREFIX=""
           DOMAIN_ENV=""
           SHORT_SHA=""
           PR_NUMBER=""
@@ -80,28 +78,24 @@ jobs:
             exit 1
           fi
 
-          # Map flavor to Environment and SSM Prefix
-            case $FLAVOR in
-             "dev-testnet")
-               SSM_PREFIX="/b3tr/frontend/dev-testnet/"
-               DOMAIN_ENV="dev.testnet"
-               ;;
-             "staging")
-               SSM_PREFIX="/b3tr/frontend/"
-               DOMAIN_ENV="staging"
-               ;;
-             "prod")
-               SSM_PREFIX="/b3tr/frontend/beta/"
-               DOMAIN_ENV="beta"
-               ;;
-             *)
-               echo "Unrecognised flavor"
-               exit 1
-               ;;
-           esac
+          # Map flavor to domain pattern
+          case $FLAVOR in
+            "dev-testnet")
+              DOMAIN_ENV="dev.testnet"
+              ;;
+            "staging")
+              DOMAIN_ENV="staging"
+              ;;
+            "prod")
+              DOMAIN_ENV="beta"
+              ;;
+            *)
+              echo "Unrecognised flavor: ${FLAVOR}"
+              exit 1
+              ;;
+          esac
           
           echo "flavor=${FLAVOR}" >> $GITHUB_OUTPUT
-          echo "ssm_prefix=${SSM_PREFIX}" >> $GITHUB_OUTPUT
           echo "domain_env=${DOMAIN_ENV}" >> $GITHUB_OUTPUT
           echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
           echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
@@ -221,28 +215,69 @@ jobs:
 
       - name: Create preview environment config
         run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          SHORT_SHA=${{ needs.prepare-metadata.outputs.short_sha }}
+          # Get values from prepare-metadata job
+          PR_NUMBER="${{ needs.prepare-metadata.outputs.pr_number }}"
+          SHORT_SHA="${{ needs.prepare-metadata.outputs.short_sha }}"
+          FLAVOR="${{ needs.prepare-metadata.outputs.flavor }}"
+          DOMAIN_ENV="${{ needs.prepare-metadata.outputs.domain_env }}"
+          
+          # Map flavor to source config directory
+          # (flavor names don't always match directory names)
+          case $FLAVOR in
+            "dev-testnet") SOURCE_DIR="dev" ;;
+            "prod") SOURCE_DIR="beta" ;;
+            *) SOURCE_DIR="${FLAVOR}" ;;
+          esac
+          
+          # Define paths
           WORKSPACE_NAME="preview-pr-${PR_NUMBER}"
-
-          # Create workspace directory if it doesn't exist
-          mkdir -p "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
-          # Replace values
+          IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}"
+          SOURCE_CONFIG="${{ env.TERRAFORM_ENV_DIR }}/${SOURCE_DIR}/${SOURCE_DIR}.yaml"
+          TARGET_DIR="${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+          TARGET_FILE="${TARGET_DIR}/${WORKSPACE_NAME}.yaml"
+          
+          echo "=== Preview Config Generation ==="
+          echo "PR Number: ${PR_NUMBER}"
+          echo "Short SHA: ${SHORT_SHA}"
+          echo "Flavor: ${FLAVOR}"
+          echo "Source Dir: ${SOURCE_DIR}"
+          echo "Domain Env: ${DOMAIN_ENV}"
+          echo "Image Tag: ${IMAGE_TAG}"
+          echo "Source Config: ${SOURCE_CONFIG}"
+          echo "Target File: ${TARGET_FILE}"
+          echo ""
+          
+          # Step 1: Create workspace directory
+          mkdir -p "${TARGET_DIR}"
+          
+          # Step 2: Copy the preview template
+          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${TARGET_FILE}"
+          
+          # Step 3: Replace placeholders in the template
           sed -i "s/{PR_NUMBER}/${PR_NUMBER}/g" "${TARGET_FILE}"
           sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${TARGET_FILE}"
           sed -i "s/{ENVIRONMENT}/${DOMAIN_ENV}/g" "${TARGET_FILE}"
           
-          # Append Flavor-specific config using yq to merge/extract
+          # Step 4: Append flavor-specific config from source environment
           echo "" >> "${TARGET_FILE}"
-          echo "# Dynamic Config from ${FLAVOR}" >> "${TARGET_FILE}"
-          echo "# Image tag override" >> "${TARGET_FILE}"
+          echo "# ============================================" >> "${TARGET_FILE}"
+          echo "# Dynamic Config from ${FLAVOR} flavor (${SOURCE_DIR})" >> "${TARGET_FILE}"
+          echo "# ============================================" >> "${TARGET_FILE}"
+          
+          # Override image tag
           echo "image_tag: ${IMAGE_TAG}" >> "${TARGET_FILE}"
           
-          echo "Extracting config from ${SOURCE_CONFIG}..."
-          
+          # Extract and append SSM config from source environment
           if [ -f "${SOURCE_CONFIG}" ]; then
-            # Extract relevant keys, defaulting lists to empty if missing, and omitting ssm_parameter_prefix if null
-            yq eval '{"ssm_parameter_prefix": .ssm_parameter_prefix, "runtime_env_var_names": (.runtime_env_var_names // []), "runtime_env_secret_names": (.runtime_env_secret_names // [])} | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
+            echo "Extracting config from ${SOURCE_CONFIG}..."
+            
+            # Extract ssm_parameter_prefix, runtime_env_var_names, and runtime_env_secret_names
+            # Default lists to empty arrays if missing, omit ssm_parameter_prefix if null
+            yq eval '{
+              "ssm_parameter_prefix": .ssm_parameter_prefix,
+              "runtime_env_var_names": (.runtime_env_var_names // []),
+              "runtime_env_secret_names": (.runtime_env_secret_names // [])
+            } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
           else
             echo "Warning: Source config ${SOURCE_CONFIG} not found. Using defaults."
             # Ensure lists are present to prevent Terraform errors
@@ -250,17 +285,10 @@ jobs:
             echo "runtime_env_secret_names: []" >> "${TARGET_FILE}"
           fi
           
-
-          # Copy and customize the preview config
-          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
-
-          # Replace placeholders with actual values
-          sed -i "s/{PR_NUMBER}/${PR_NUMBER}/g" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
-          sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
-
-          # Show the config for debugging
-          echo "Generated config:"
-          cat "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+          # Step 5: Show the generated config for debugging
+          echo ""
+          echo "=== Generated Preview Config ==="
+          cat "${TARGET_FILE}"
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
@@ -269,7 +297,7 @@ jobs:
       - name: Terraform Workspace
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: |
-          WORKSPACE_NAME="preview-pr-${{ needs.determine-flavor.outputs.pr_number }}"
+          WORKSPACE_NAME="preview-pr-${{ needs.prepare-metadata.outputs.pr_number }}"
           terraform workspace select ${WORKSPACE_NAME} || terraform workspace new ${WORKSPACE_NAME}
 
       - name: Terraform Plan
