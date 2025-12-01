@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { EventLogs } from "@vechain/sdk-network"
-import { useThor } from "@vechain/vechain-kit"
+import { useThor, useWallet } from "@vechain/vechain-kit"
 import { Abi } from "abitype"
 import { useCallback } from "react"
 import { ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
@@ -35,6 +35,7 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, R>({
   mapResponse,
 }: UseEventsParams<T, K, R>) => {
   const thor = useThor()
+  const { account } = useWallet()
 
   const queryFn = useCallback(async () => {
     if (!thor) return []
@@ -52,7 +53,7 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, R>({
   return useQuery({
     queryFn,
     queryKey: getEventsKey({ eventName, filterParams }),
-    enabled: !!thor,
+    enabled: !!thor && !!account?.address,
   })
 }
 
