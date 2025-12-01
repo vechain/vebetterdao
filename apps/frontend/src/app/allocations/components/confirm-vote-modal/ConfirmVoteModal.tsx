@@ -59,9 +59,8 @@ export const ConfirmVoteModal = ({
   // Show "Customise votes" only for first-time voters with toggle OFF
   const shouldShowCustomisation = !hasVoted && !isAutoVotingEnabled
 
-  // Show "Edit selection" only for users enabling auto-vote (has voted but not enabled on-chain yet)
-  // User can click Cancel to go back to edit mode
-  const showEditSelection = hasVoted && !isAutoVotingEnabledOnChain
+  // Show "Edit selection" for users who have voted (enabling auto-vote or editing existing preferences)
+  const showEditSelection = hasVoted
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)

@@ -98,6 +98,17 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     openModal()
   }, [openModal])
 
+  // Handler for editing auto-vote preferences - loads preferences and opens modal directly
+  const handleEditAutoVotePreferences = useCallback(() => {
+    // Load stored preferences (priority) or voted apps
+    if (storedPreferences.length > 0) {
+      setSelectedAppIds(new Set(storedPreferences))
+    } else if (castVotesEvent?.appsIds) {
+      setSelectedAppIds(new Set(castVotesEvent.appsIds))
+    }
+    handleOpenModalWithAutoVote()
+  }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote])
+
   // Handler for manual voting - respects on-chain state (toggle OFF)
   const handleVoteClick = useCallback(() => {
     openModal()
@@ -117,7 +128,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     isEditingAutoVote,
     hasAutoVoteChanges,
     hasExistingPreferences,
-    handleEditAutoVote,
     handleCancelEditAutoVote,
     handleSaveAutoVote,
     resetEditMode,
@@ -244,7 +254,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         hasVotedLoading,
         isVoteDataLoading,
         isEditingAutoVote,
-        onEditAutoVote: handleEditAutoVote,
+        onEditAutoVote: handleEditAutoVotePreferences,
         onCancelEditAutoVote: handleCancelEditAutoVote,
         onSaveAutoVote: handleSaveAutoVote,
         hasAutoVoteChanges,

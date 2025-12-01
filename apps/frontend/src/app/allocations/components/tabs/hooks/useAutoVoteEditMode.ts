@@ -39,25 +39,6 @@ export const useAutoVoteEditMode = ({
     return storedPreferences.length !== selectedIds.length || !selectedIds.every(id => storedPreferences.includes(id))
   }, [isEditingAutoVote, selectedAppIds, storedPreferences, hasExistingPreferences])
 
-  // Get apps to preselect: stored preferences (priority) or voted apps
-  // Set maintains insertion order, so we just need to create Set from the ordered array
-  const getAppsToPreselect = useCallback((): Set<string> => {
-    if (storedPreferences.length > 0) {
-      return new Set(storedPreferences)
-    }
-    if (votedAppIds) {
-      return new Set(votedAppIds)
-    }
-    return new Set<string>()
-  }, [storedPreferences, votedAppIds])
-
-  // Enter edit mode - load preferences from chain (priority) or voted apps
-  const handleEditAutoVote = useCallback(() => {
-    const ids = getAppsToPreselect()
-    setSelectedAppIds(ids)
-    setIsEditingAutoVote(true)
-  }, [getAppsToPreselect, setSelectedAppIds])
-
   // Cancel edit mode - reset to read-only state (voted apps or empty)
   const handleCancelEditAutoVote = useCallback(() => {
     if (hasVoted && votedAppIds) {
@@ -90,7 +71,6 @@ export const useAutoVoteEditMode = ({
     isEditingAutoVote,
     hasAutoVoteChanges,
     hasExistingPreferences,
-    handleEditAutoVote,
     handleCancelEditAutoVote,
     handleSaveAutoVote,
     resetEditMode,
