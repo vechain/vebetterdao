@@ -35,13 +35,13 @@ export const VotingAlerts = () => {
   // Determine which auto-voting message to show
   const autoVotingMessage = useMemo((): string | null => {
     if (isAutoVotingEnabledInCurrentRound && isAutoVotingEnabled) {
-      return t("Auto-voting active. Your vote and rewards will be handled automatically.")
+      return t("Auto-voting is active. Your vote and rewards will be handled automatically.")
     }
     if (isAutoVotingEnabledInCurrentRound && !isAutoVotingEnabled) {
-      return t("Auto-voting active this round. It will be disabled for future rounds.")
+      return t("Auto-voting is disabled. It takes effect from the next round.")
     }
     if (!isAutoVotingEnabledInCurrentRound && isAutoVotingEnabled) {
-      return t("Auto-voting enabled. It will start from next round onwards.")
+      return t("Auto-voting is enabled. It takes effect from the next round.")
     }
     return null
   }, [isAutoVotingEnabledInCurrentRound, isAutoVotingEnabled, t])

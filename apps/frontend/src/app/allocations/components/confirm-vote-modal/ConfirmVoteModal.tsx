@@ -8,6 +8,7 @@ import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVo
 import { Modal } from "@/components/Modal"
 
 import type { AppWithVotes } from "../../lib/data"
+import { AllocationAlertCard } from "../AllocationAlertCard"
 import { AutomationToggleCard } from "../AutomationToggleCard"
 
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
@@ -50,14 +51,21 @@ export const ConfirmVoteModal = ({
   // Memoize appIds to prevent unnecessary recreations
   const appIds = useMemo(() => selectedApps.map(app => app.id), [selectedApps])
 
-  const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
+  const { allocations, setAllocation, setEqualAllocations, getTotalPercentage, isValid } = useConfirmVoteModal(appIds)
+
+  // Check if total allocation is exactly 100%
+  const totalPercentage = getTotalPercentage()
+  const isNot100Percent = totalPercentage !== 100
 
   // If user has voted, toggle is OFF, and auto-voting was never enabled, there's nothing to do
   const nothingToDo = hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledOnChain
   const canSubmit = isValid && !nothingToDo
 
-  // Only allow customisation if user hasn't voted AND auto-voting is not enabled
-  const shouldShowCustomisation = !isAutoVotingEnabledOnChain && !hasVoted
+  // Show "Customise votes" only for first-time voters with toggle OFF
+  const shouldShowCustomisation = !hasVoted && !isAutoVotingEnabled
+
+  // Show "Edit selection" for users who have voted (enabling auto-vote or editing existing preferences)
+  const showEditSelection = hasVoted
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
@@ -103,7 +111,7 @@ export const ConfirmVoteModal = ({
             {t("Cancel")}
           </Button>
           <Button variant="primary" onClick={handleConfirm} disabled={!canSubmit} flex={1}>
-            {hasVoted ? t("Save") : t("Vote")}
+            {hasVoted ? t("Confirm") : t("Vote")}
           </Button>
         </HStack>
       }>
@@ -127,7 +135,10 @@ export const ConfirmVoteModal = ({
                 )
               }
             />
-            <SelectedAppsPreview apps={selectedApps} onEditSelection={onEditSelection} />
+            <SelectedAppsPreview
+              apps={selectedApps}
+              onEditSelection={showEditSelection ? onEditSelection : undefined}
+            />
           </>
         ) : (
           <>
@@ -153,12 +164,19 @@ export const ConfirmVoteModal = ({
               vot3Balance={vot3Balance}
               isLoadingBalance={isLoadingBalance}
             />
+            {isNot100Percent && (
+              <AllocationAlertCard
+                status="warning"
+                message={t("Vote distribution must equal 100%. Current total: {{total}}%", { total: totalPercentage })}
+              />
+            )}
           </>
         )}
         <AutomationToggleCard
           checked={isAutoVotingEnabled}
           onCheckedChange={onToggleAutoVoting}
           nextRoundNumber={nextRoundNumber}
+          isEnabledOnChain={isAutoVotingEnabledOnChain}
         />
       </VStack>
     </Modal>
