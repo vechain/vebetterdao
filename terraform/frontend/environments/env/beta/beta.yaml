@@ -19,6 +19,8 @@ runtime_env_var_names:
   - GITHUB_CLIENT_ID
   - FRESHDESK_GROUP_ID
   - FRESHDESK_DOMAIN
+  - TWITTER_CLIENT_ID
+
 runtime_env_secret_names:
   - TWITTER_CLIENT_SECRET
   - RESET_USER_SIGNAL_COUNT_API_KEY
