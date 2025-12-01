@@ -71,8 +71,8 @@ export const AppRadioCard = ({
                 {appName}
               </Heading>
               {isVotedMode && checked && (
-                <Badge variant="positive" size="sm" flexShrink={0}>
-                  {t("Voted")}
+                <Badge variant="info" size="sm" flexShrink={0}>
+                  {t("Voted").toLowerCase()}
                 </Badge>
               )}
             </Flex>
