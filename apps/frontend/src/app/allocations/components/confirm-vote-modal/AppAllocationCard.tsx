@@ -72,17 +72,11 @@ export const AppAllocationCard = ({
             <Text textStyle="sm" color="text.subtle">
               {t("Allocate voting power")}
             </Text>
-            <VStack gap={0} alignItems="flex-end">
-              <Text textStyle="md" fontWeight="semibold">
-                {displayValue || "0"}
-                {"%"}
+            <Skeleton loading={isLoadingBalance}>
+              <Text textStyle="sm" fontWeight="semibold">
+                {votingPowerForApp}
               </Text>
-              <Skeleton loading={isLoadingBalance}>
-                <Text textStyle="xs" color="text.subtle">
-                  {votingPowerForApp}
-                </Text>
-              </Skeleton>
-            </VStack>
+            </Skeleton>
           </HStack>
 
           <NumberInput.Root

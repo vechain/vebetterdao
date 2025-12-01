@@ -2,6 +2,7 @@
 
 import { Box, Presence, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import { usePathname } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
@@ -59,6 +60,8 @@ interface AllocationTabsProviderProps {
 export function AllocationTabsProvider({ roundDetails, children }: AllocationTabsProviderProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
+  const pathname = usePathname()
+  const isVoteTab = pathname === "/allocations" || pathname === "/allocations/vote"
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
   // Derive selection order from Set (Set maintains insertion order)
   const selectionOrder = useMemo(() => [...selectedAppIds], [selectedAppIds])
@@ -89,8 +92,25 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     }
   }, [isAutoVotingEnabledOnChain])
 
-  const handleOpenModal = useCallback(() => {
+  // Handler for enabling auto-vote - forces toggle ON
+  const handleOpenModalWithAutoVote = useCallback(() => {
     setIsAutoVotingEnabled(true)
+    openModal()
+  }, [openModal])
+
+  // Handler for editing auto-vote preferences - loads preferences and opens modal directly
+  const handleEditAutoVotePreferences = useCallback(() => {
+    // Load stored preferences (priority) or voted apps
+    if (storedPreferences.length > 0) {
+      setSelectedAppIds(new Set(storedPreferences))
+    } else if (castVotesEvent?.appsIds) {
+      setSelectedAppIds(new Set(castVotesEvent.appsIds))
+    }
+    handleOpenModalWithAutoVote()
+  }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote])
+
+  // Handler for manual voting - respects on-chain state (toggle OFF)
+  const handleVoteClick = useCallback(() => {
     openModal()
   }, [openModal])
 
@@ -100,15 +120,14 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
       const votedApps = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedApps)
     }
-    handleOpenModal()
-  }, [handleOpenModal, castVotesEvent?.appsIds])
+    handleOpenModalWithAutoVote()
+  }, [handleOpenModalWithAutoVote, castVotesEvent?.appsIds])
 
   // Auto-vote edit mode
   const {
     isEditingAutoVote,
     hasAutoVoteChanges,
     hasExistingPreferences,
-    handleEditAutoVote,
     handleCancelEditAutoVote,
     handleSaveAutoVote,
     resetEditMode,
@@ -119,7 +138,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     hasVoted: hasVoted ?? false,
     selectedAppIds,
     setSelectedAppIds,
-    openModal: handleOpenModal, // Use handleOpenModal to ensure toggle is set correctly
+    openModal: handleOpenModalWithAutoVote, // Use handleOpenModalWithAutoVote to ensure toggle is set correctly
   })
 
   // Handler for "Edit selection" in modal - closes modal and enters edit mode
@@ -227,7 +246,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
-        onVoteClick: handleOpenModal,
+        onVoteClick: handleVoteClick,
         isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
         isAutoVotingEnabledInCurrentRound: isAutoVotingEnabledInCurrentRound ?? false,
         onToggleAutoVoting: setIsAutoVotingEnabled,
@@ -235,7 +254,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         hasVotedLoading,
         isVoteDataLoading,
         isEditingAutoVote,
-        onEditAutoVote: handleEditAutoVote,
+        onEditAutoVote: handleEditAutoVotePreferences,
         onCancelEditAutoVote: handleCancelEditAutoVote,
         onSaveAutoVote: handleSaveAutoVote,
         hasAutoVoteChanges,
@@ -249,7 +268,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
       <Presence
         hideFrom="md"
-        present={selectedAppIds.size > 0 || showAutoVoteUI}
+        present={isVoteTab && (selectedAppIds.size > 0 || showAutoVoteUI)}
         animationName={{
           _open: "slide-from-bottom",
           _closed: "slide-to-bottom, fade-out",

@@ -3,13 +3,10 @@
 import { Bleed } from "@chakra-ui/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext, useState } from "react"
-import { useTranslation } from "react-i18next"
 
-import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
 import { SearchField } from "@/components/SearchField/SearchField"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
 import { VotingAlerts } from "../../VotingAlerts"
 import { AllocationTabsContext } from "../AllocationTabsProvider"
@@ -34,13 +31,10 @@ export function VoteTab() {
     isAutoVotingEnabledInCurrentRound,
     isEditingAutoVote,
     isAtSelectionLimit,
-    hasEnoughVotesAtSnapshot,
   } = context
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get("category") || "all"
-  const { t } = useTranslation()
-  const { data: threshold } = useVotingThreshold()
 
   const [isSearchOpen, setIsSearchOpen] = useState(searchParams.has("search"))
   const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get("search") || "")
@@ -62,15 +56,6 @@ export function VoteTab() {
   return (
     <>
       {isMobile && <VotingAlerts />}
-      {selectedAppIds && selectedAppIds.size > 0 && !hasEnoughVotesAtSnapshot && (
-        <AllocationAlertCard
-          status="error"
-          title={t("Not enough voting power to vote")}
-          message={t("At least {{threshold}} voting power is needed to participate. Power up your balance!", {
-            threshold: threshold ?? "1",
-          })}
-        />
-      )}
       <SearchField
         placeholder="Search app"
         value={localSearchQuery}

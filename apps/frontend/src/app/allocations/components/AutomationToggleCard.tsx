@@ -14,6 +14,7 @@ export interface AutomationToggleCardProps {
   onCheckedChange?: (checked: boolean) => void
   icon?: React.ReactNode
   nextRoundNumber?: number | string
+  isEnabledOnChain?: boolean
 }
 
 export const AutomationToggleCard = ({
@@ -22,6 +23,7 @@ export const AutomationToggleCard = ({
   onCheckedChange,
   icon,
   nextRoundNumber,
+  isEnabledOnChain = false,
 }: AutomationToggleCardProps) => {
   const { t } = useTranslation()
   return (
@@ -64,6 +66,7 @@ export const AutomationToggleCard = ({
           </Switch.Root>
         </HStack>
 
+        {/* Show info when enabling (toggle ON) */}
         {checked && (
           <VStack alignItems="flex-start" gap="3" w="full">
             <HStack gap="2" alignItems="flex-start">
@@ -92,13 +95,26 @@ export const AutomationToggleCard = ({
               </Text>
             </HStack>
 
-            <HStack gap="2" alignItems="center">
-              <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
-              <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
-                {t("Activates from Round {{round}} onwards", { round: nextRoundNumber })}
-              </Text>
-            </HStack>
+            {/* Only show activation message when enabling for the first time (not when editing) */}
+            {!isEnabledOnChain && (
+              <HStack gap="2" alignItems="center">
+                <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
+                <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
+                  {t("Activates from Round {{round}} onwards", { round: nextRoundNumber })}
+                </Text>
+              </HStack>
+            )}
           </VStack>
+        )}
+
+        {/* Show deactivation message when disabling (toggle OFF but was enabled on-chain) */}
+        {!checked && isEnabledOnChain && (
+          <HStack gap="2" alignItems="center">
+            <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
+            <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
+              {t("Deactivates from next round onwards")}
+            </Text>
+          </HStack>
         )}
       </VStack>
     </Card.Root>
