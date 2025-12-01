@@ -16,7 +16,14 @@ interface SearchAppsBottomSheetProps {
   onSearchChange: (query: string) => void
   apps?: AppWithVotes[]
   selectedAppIds?: Set<string>
+  selectionOrder?: string[]
   onToggleApp?: (appId: string) => void
+  isAtSelectionLimit?: boolean
+  hasVoted?: boolean
+  isVoteDataLoading?: boolean
+  isAutoVotingEnabled?: boolean
+  isAutoVotingEnabledInCurrentRound?: boolean
+  isEditingAutoVote?: boolean
 }
 
 export function SearchAppsBottomSheet({
@@ -26,7 +33,14 @@ export function SearchAppsBottomSheet({
   onSearchChange,
   apps = [],
   selectedAppIds,
+  selectionOrder = [],
   onToggleApp,
+  isAtSelectionLimit = false,
+  hasVoted = false,
+  isVoteDataLoading = false,
+  isAutoVotingEnabled = false,
+  isAutoVotingEnabledInCurrentRound = false,
+  isEditingAutoVote = false,
 }: SearchAppsBottomSheetProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -74,9 +88,16 @@ export function SearchAppsBottomSheet({
         apps={apps}
         searchQuery={searchQuery}
         selectedAppIds={selectedAppIds}
+        selectionOrder={selectionOrder}
         onToggleApp={onToggleApp}
         showEmptyState
         tabsListProps={{ mb: "0" }}
+        isAtSelectionLimit={isAtSelectionLimit}
+        hasVoted={hasVoted}
+        isVoteDataLoading={isVoteDataLoading}
+        isAutoVotingEnabled={isAutoVotingEnabled}
+        isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
+        isEditingAutoVote={isEditingAutoVote}
       />
     </BaseBottomSheet>
   )

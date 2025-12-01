@@ -8,6 +8,7 @@ import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVo
 import { Modal } from "@/components/Modal"
 
 import type { AppWithVotes } from "../../lib/data"
+import { AutomationToggleCard } from "../AutomationToggleCard"
 
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"
@@ -19,9 +20,26 @@ interface ConfirmVoteModalProps {
   onClose: () => void
   selectedApps: AppWithVotes[]
   onConfirm: (allocations: Map<string, number>) => void
+  isAutoVotingEnabled: boolean
+  isAutoVotingEnabledOnChain: boolean
+  onToggleAutoVoting: (enabled: boolean) => void
+  nextRoundNumber?: number | string
+  onEditSelection?: () => void
+  hasVoted: boolean
 }
 
-export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: ConfirmVoteModalProps) => {
+export const ConfirmVoteModal = ({
+  isOpen,
+  onClose,
+  selectedApps,
+  onConfirm,
+  isAutoVotingEnabled,
+  isAutoVotingEnabledOnChain,
+  onToggleAutoVoting,
+  nextRoundNumber,
+  onEditSelection,
+  hasVoted,
+}: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
@@ -34,7 +52,12 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
 
   const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
 
-  const canSubmit = isValid
+  // If user has voted, toggle is OFF, and auto-voting was never enabled, there's nothing to do
+  const nothingToDo = hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledOnChain
+  const canSubmit = isValid && !nothingToDo
+
+  // Only allow customisation if user hasn't voted AND auto-voting is not enabled
+  const shouldShowCustomisation = !isAutoVotingEnabledOnChain && !hasVoted
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
@@ -48,15 +71,17 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
     onClose()
   }, [onClose])
 
+  const titleText = hasVoted ? t("Confirm your preferences") : t("Confirm your vote")
+
   const modalTitle = isDesktop ? (
     <Flex justify="space-between" align="center" w="full" pb={4}>
       <Heading size="xl" fontWeight="bold">
-        {t("Confirm your vote")}
+        {titleText}
       </Heading>
       <CloseButton onClick={handleCloseModal} />
     </Flex>
   ) : (
-    t("Confirm your vote")
+    titleText
   )
 
   return (
@@ -78,7 +103,7 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             {t("Cancel")}
           </Button>
           <Button variant="primary" onClick={handleConfirm} disabled={!canSubmit} flex={1}>
-            {t("Vote")}
+            {hasVoted ? t("Save") : t("Vote")}
           </Button>
         </HStack>
       }>
@@ -89,18 +114,20 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
               vot3Balance={vot3Balance}
               isLoading={isLoadingBalance}
               button={
-                <Button
-                  variant="link"
-                  onClick={() => setIsCustomising(true)}
-                  w="full"
-                  justifyContent="center"
-                  textStyle="md"
-                  fontWeight="semibold">
-                  {t("Customise votes")}
-                </Button>
+                shouldShowCustomisation && (
+                  <Button
+                    variant="link"
+                    onClick={() => setIsCustomising(true)}
+                    w="full"
+                    justifyContent="center"
+                    textStyle="md"
+                    fontWeight="semibold">
+                    {t("Customise votes")}
+                  </Button>
+                )
               }
             />
-            <SelectedAppsPreview apps={selectedApps} />
+            <SelectedAppsPreview apps={selectedApps} onEditSelection={onEditSelection} />
           </>
         ) : (
           <>
@@ -128,6 +155,11 @@ export const ConfirmVoteModal = ({ isOpen, onClose, selectedApps, onConfirm }: C
             />
           </>
         )}
+        <AutomationToggleCard
+          checked={isAutoVotingEnabled}
+          onCheckedChange={onToggleAutoVoting}
+          nextRoundNumber={nextRoundNumber}
+        />
       </VStack>
     </Modal>
   )

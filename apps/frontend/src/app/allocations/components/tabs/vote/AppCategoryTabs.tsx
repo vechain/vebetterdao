@@ -13,6 +13,7 @@ import {
   Pagination,
   Portal,
   Select,
+  Skeleton,
   Tabs,
   Text,
   VStack,
@@ -30,11 +31,16 @@ import { APP_CATEGORIES } from "@/types/appDetails"
 
 import { AppRadioCard } from "../../AppRadioCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
+import { VotingAlerts } from "../../VotingAlerts"
+import { MAX_SELECTED_APPS } from "../AllocationTabsProvider"
+
+import { VoteButtons } from "./VoteButtons"
 
 interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
   searchQuery?: string
   selectedAppIds?: Set<string>
+  selectionOrder?: string[]
   onToggleApp?: (appId: string) => void
   tabsListProps?: Record<string, any>
   showEmptyState?: boolean
@@ -42,9 +48,13 @@ interface AppCategoryTabsProps {
   onViewAll?: VoidFunction
   initialCategory?: string
   onCategoryChange?: (category: string) => void
-  hasEnoughVotesAtSnapshot?: boolean
   roundId?: string
-  onVoteClick?: () => void
+  hasVoted?: boolean
+  isVoteDataLoading?: boolean
+  isAutoVotingEnabled?: boolean
+  isAutoVotingEnabledInCurrentRound?: boolean
+  isEditingAutoVote?: boolean
+  isAtSelectionLimit?: boolean
 }
 
 const categoryCollection = createListCollection({
@@ -55,6 +65,7 @@ export function AppCategoryTabs({
   apps = [],
   searchQuery = "",
   selectedAppIds,
+  selectionOrder = [],
   onToggleApp,
   tabsListProps,
   showEmptyState = false,
@@ -62,14 +73,19 @@ export function AppCategoryTabs({
   onViewAll,
   initialCategory = "all",
   onCategoryChange,
-  hasEnoughVotesAtSnapshot,
   roundId,
-  onVoteClick,
+  hasVoted = false,
+  isVoteDataLoading = false,
+  isAutoVotingEnabled = false,
+  isAutoVotingEnabledInCurrentRound = false,
+  isEditingAutoVote = false,
+  isAtSelectionLimit = false,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
   const [currentPage, setCurrentPage] = useState(1)
+
   const { data: appShares } = useXAppsShares(
     apps.map(app => app.id),
     roundId,
@@ -91,12 +107,35 @@ export function AppCategoryTabs({
     })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
+  // Sort selected apps to top, preserving selection order (append behavior)
+  const sortedAppsWithSelected = useMemo(() => {
+    return filteredApps.slice().sort((a, b) => {
+      const aSelected = selectedAppIds?.has(a.id) ?? false
+      const bSelected = selectedAppIds?.has(b.id) ?? false
+
+      // Both selected: sort by selection order (earlier selections first)
+      if (aSelected && bSelected) {
+        const aIndex = selectionOrder.indexOf(a.id)
+        const bIndex = selectionOrder.indexOf(b.id)
+        return aIndex - bIndex
+      }
+
+      // One selected, one not: selected goes first
+      if (aSelected !== bSelected) {
+        return aSelected ? -1 : 1
+      }
+
+      // Both unselected: keep original order
+      return 0
+    })
+  }, [filteredApps, selectedAppIds, selectionOrder])
+
   const visibleApps = useMemo(() => {
-    if (!showPagination) return filteredApps
+    if (!showPagination) return sortedAppsWithSelected
     const pageSize = 10
     const startIndex = (currentPage - 1) * pageSize
-    return filteredApps.slice(startIndex, startIndex + pageSize)
-  }, [filteredApps, showPagination, currentPage])
+    return sortedAppsWithSelected.slice(startIndex, startIndex + pageSize)
+  }, [sortedAppsWithSelected, showPagination, currentPage])
 
   const areAllVisibleAppsSelected = useMemo(() => {
     if (!selectedAppIds || visibleApps.length === 0) return false
@@ -107,15 +146,21 @@ export function AppCategoryTabs({
     if (!onToggleApp) return
 
     if (areAllVisibleAppsSelected) {
+      // Deselect all visible apps
       visibleApps.forEach(app => {
         if (selectedAppIds?.has(app.id)) {
           onToggleApp(app.id)
         }
       })
     } else {
+      // Select up to the limit
+      const currentCount = selectedAppIds?.size ?? 0
+      let addedCount = 0
+
       visibleApps.forEach(app => {
-        if (!selectedAppIds?.has(app.id)) {
+        if (!selectedAppIds?.has(app.id) && currentCount + addedCount < MAX_SELECTED_APPS) {
           onToggleApp(app.id)
+          addedCount++
         }
       })
     }
@@ -129,23 +174,17 @@ export function AppCategoryTabs({
     <HStack asChild={isMobile} gap="6" alignItems="flex-start">
       <VStack flex={1} gap="4" align="stretch">
         <VStack hideBelow="md" gap="4" align="stretch" px="4">
+          <VotingAlerts />
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">
-              <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
-                {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
-              </Button>
-              <Button
-                variant="primary"
-                minWidth="36"
-                onClick={onVoteClick}
-                disabled={!hasEnoughVotesAtSnapshot || !selectedAppIds || selectedAppIds.size === 0}>
-                {selectedAppIds && selectedAppIds.size > 0
-                  ? selectedAppIds.size > 1
-                    ? `Vote for ${selectedAppIds?.size} Apps`
-                    : `Vote for 1 App`
-                  : "Vote"}
-              </Button>
+              {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
+              {((!hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) || isEditingAutoVote) && (
+                <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
+                  {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
+                </Button>
+              )}
+              <VoteButtons variant="desktop" />
             </Flex>
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">
@@ -226,7 +265,12 @@ export function AppCategoryTabs({
             flexDirection="column"
             gap={tabsListProps?.mb ? "3" : "4"}
             p={tabsListProps?.mb ? undefined : "4"}>
-            {filteredApps.length > 0 ? (
+            {isVoteDataLoading ? (
+              // Show skeleton cards while vote data is loading (matches AppRadioCard styling)
+              Array.from({ length: visibleApps.length || 5 }).map((_, index) => (
+                <Skeleton key={index} height={{ base: "70px", md: "84px" }} rounded="lg" />
+              ))
+            ) : filteredApps.length > 0 ? (
               visibleApps.map(app => (
                 <AppRadioCard
                   key={app.id}
@@ -237,6 +281,12 @@ export function AppCategoryTabs({
                   allocationSharePercentage={appSharesMap.get(app.id)}
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
+                  displayMode={
+                    (hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote
+                      ? "voted"
+                      : "checkbox"
+                  }
+                  disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
                 />
               ))
             ) : searchQuery.length > 0 && showEmptyState ? (

@@ -7,18 +7,35 @@ import { useTranslation } from "react-i18next"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
 import { SearchField } from "@/components/SearchField/SearchField"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { AllocationAlertCard } from "../../AllocationAlertCard"
 import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
+import { VotingAlerts } from "../../VotingAlerts"
 import { AllocationTabsContext } from "../AllocationTabsProvider"
 
 import { AppCategoryTabs } from "./AppCategoryTabs"
 
 export function VoteTab() {
+  const { isMobile } = useBreakpoints()
   const context = useContext(AllocationTabsContext)
   if (!context) throw new Error("VoteTab must be used within AllocationTabsProvider")
 
-  const { apps, roundId, selectedAppIds, onToggleApp, isStuck, hasEnoughVotesAtSnapshot, onVoteClick } = context
+  const {
+    apps,
+    roundId,
+    selectedAppIds,
+    selectionOrder,
+    onToggleApp,
+    isStuck,
+    hasVoted,
+    isVoteDataLoading,
+    isAutoVotingEnabled,
+    isAutoVotingEnabledInCurrentRound,
+    isEditingAutoVote,
+    isAtSelectionLimit,
+    hasEnoughVotesAtSnapshot,
+  } = context
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get("category") || "all"
@@ -44,11 +61,12 @@ export function VoteTab() {
 
   return (
     <>
+      {isMobile && <VotingAlerts />}
       {selectedAppIds && selectedAppIds.size > 0 && !hasEnoughVotesAtSnapshot && (
         <AllocationAlertCard
           status="error"
           title={t("Not enough voting power to vote")}
-          message={t("You need at least {{threshold}} voting power to participate. Power up your balance!", {
+          message={t("At least {{threshold}} voting power is needed to participate. Power up your balance!", {
             threshold: threshold ?? "1",
           })}
         />
@@ -64,12 +82,12 @@ export function VoteTab() {
         <AppCategoryTabs
           apps={apps}
           selectedAppIds={selectedAppIds}
+          selectionOrder={selectionOrder}
           onToggleApp={onToggleApp}
           onViewAll={handleViewAll}
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={localSearchQuery}
-          hasEnoughVotesAtSnapshot={hasEnoughVotesAtSnapshot}
           roundId={roundId}
           tabsListProps={{
             position: "sticky",
@@ -80,7 +98,12 @@ export function VoteTab() {
             zIndex: 2,
           }}
           showPagination
-          onVoteClick={onVoteClick}
+          hasVoted={hasVoted}
+          isVoteDataLoading={isVoteDataLoading}
+          isAutoVotingEnabled={isAutoVotingEnabled}
+          isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
+          isEditingAutoVote={isEditingAutoVote}
+          isAtSelectionLimit={isAtSelectionLimit}
         />
       </Bleed>
 
@@ -91,7 +114,14 @@ export function VoteTab() {
         onSearchChange={setLocalSearchQuery}
         apps={apps}
         selectedAppIds={selectedAppIds}
+        selectionOrder={selectionOrder}
         onToggleApp={onToggleApp}
+        isAtSelectionLimit={isAtSelectionLimit}
+        hasVoted={hasVoted}
+        isVoteDataLoading={isVoteDataLoading}
+        isAutoVotingEnabled={isAutoVotingEnabled}
+        isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
+        isEditingAutoVote={isEditingAutoVote}
       />
     </>
   )
