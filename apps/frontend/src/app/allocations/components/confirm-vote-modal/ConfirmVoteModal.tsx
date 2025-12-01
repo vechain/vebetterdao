@@ -8,6 +8,7 @@ import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVo
 import { Modal } from "@/components/Modal"
 
 import type { AppWithVotes } from "../../lib/data"
+import { AllocationAlertCard } from "../AllocationAlertCard"
 import { AutomationToggleCard } from "../AutomationToggleCard"
 
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
@@ -50,7 +51,11 @@ export const ConfirmVoteModal = ({
   // Memoize appIds to prevent unnecessary recreations
   const appIds = useMemo(() => selectedApps.map(app => app.id), [selectedApps])
 
-  const { allocations, setAllocation, setEqualAllocations, isValid } = useConfirmVoteModal(appIds)
+  const { allocations, setAllocation, setEqualAllocations, getTotalPercentage, isValid } = useConfirmVoteModal(appIds)
+
+  // Check if total allocation is exactly 100%
+  const totalPercentage = getTotalPercentage()
+  const isNot100Percent = totalPercentage !== 100
 
   // If user has voted, toggle is OFF, and auto-voting was never enabled, there's nothing to do
   const nothingToDo = hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledOnChain
@@ -159,12 +164,19 @@ export const ConfirmVoteModal = ({
               vot3Balance={vot3Balance}
               isLoadingBalance={isLoadingBalance}
             />
+            {isNot100Percent && (
+              <AllocationAlertCard
+                status="warning"
+                message={t("Vote distribution must equal 100%. Current total: {{total}}%", { total: totalPercentage })}
+              />
+            )}
           </>
         )}
         <AutomationToggleCard
           checked={isAutoVotingEnabled}
           onCheckedChange={onToggleAutoVoting}
           nextRoundNumber={nextRoundNumber}
+          isEnabledOnChain={isAutoVotingEnabledOnChain}
         />
       </VStack>
     </Modal>

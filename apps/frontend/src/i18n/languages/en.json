@@ -1598,6 +1598,8 @@
   "Error updating preferences": "Error updating preferences",
   "Auto-vote & claim": "Auto-vote & claim",
   "Activates from Round {{round}} onwards": "Activates from Round {{round}} onwards",
+  "Deactivates from next round onwards": "Deactivates from next round onwards",
+  "Vote distribution must equal 100%. Current total: {{total}}%": "Vote distribution must equal 100%. Current total: {{total}}%",
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.",
   "A 10% <0>service fee</0> is deducted from weekly B3TR rewards, capped at 100 B3TR.": "A 10% <0>service fee</0> is deducted from weekly B3TR rewards, capped at 100 B3TR.",
   "Edit auto-vote settings": "Edit auto-vote settings",
