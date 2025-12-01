@@ -16,7 +16,11 @@ export const VoteButtons = ({ variant = "desktop" }: VoteButtonsProps) => {
   if (buttonConfig.type === "editing") {
     const buttons = (
       <>
-        <Button flex={isMobile ? 1 : undefined} variant="secondary" onClick={buttonConfig.secondaryOnClick}>
+        <Button
+          flex={isMobile ? 1 : undefined}
+          minWidth="36"
+          variant="secondary"
+          onClick={buttonConfig.secondaryOnClick}>
           {buttonConfig.secondaryText}
         </Button>
         <Button

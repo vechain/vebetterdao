@@ -107,7 +107,7 @@ export const ConfirmVoteModal = ({
             {t("Cancel")}
           </Button>
           <Button variant="primary" onClick={handleConfirm} disabled={!canSubmit} flex={1}>
-            {hasVoted ? t("Save") : t("Vote")}
+            {hasVoted ? t("Confirm") : t("Vote")}
           </Button>
         </HStack>
       }>
