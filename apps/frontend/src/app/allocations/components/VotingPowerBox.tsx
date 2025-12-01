@@ -39,7 +39,7 @@ export const VotingPowerBox = () => {
               {formatted}
             </Text>
 
-            {votingPowerNextRound > 0 && (
+            {votingPowerNextRound !== 0n && (
               <Badge variant="neutral" bg="card.default" color="text.subtle" fontWeight="normal" size="sm" rounded="sm">
                 <Trans
                   i18nKey="<bold>+{{votingPowerNextRound}}</bold> in next round"
@@ -48,7 +48,14 @@ export const VotingPowerBox = () => {
                       Number(formatEther(votingPowerNextRound, "wei")),
                     ),
                   }}
-                  components={{ bold: <Text color="status.positive.strong" as="span" /> }}
+                  components={{
+                    bold: (
+                      <Text
+                        color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
+                        as="span"
+                      />
+                    ),
+                  }}
                 />
               </Badge>
             )}

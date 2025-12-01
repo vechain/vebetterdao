@@ -25,7 +25,7 @@ const config = defineConfig({
   preflight: true,
   cssVarsPrefix: "vbd",
   globalCss: {
-    "html,body": { bg: "bg.secondary" },
+    "html,body": { bg: "bg.secondary", scrollBehavior: "smooth !important" },
     ":where(button, [role=button], [type=button], a)": {
       cursor: "pointer",
     },
