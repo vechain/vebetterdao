@@ -213,15 +213,13 @@ export const ActionBanner = () => {
       )
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
-    if (showStargateBanner)
-      bannerComponents.push(<StargateMigrationBanner isLegacyNode={userHasLegacyNode} key="stargate-migration" />)
+    if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
     return bannerComponents
   }, [
-    userHasLegacyNode,
     showCantVoteBanners,
     CantVoteBanner,
     showClaimB3trBanner,
