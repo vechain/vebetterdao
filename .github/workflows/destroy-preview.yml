@@ -1,34 +1,37 @@
-name: Destroy Preview Environment
+name: Destroy Preview Environments
 
 on:
   pull_request:
     types: [closed]
     branches:
       - main
+      - dev-testnet
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
 
 env:
   AWS_REGION: eu-west-1
   TERRAFORM_VERSION: 1.6.0
+  BASE_DOMAIN: governance.vebetterdao.org
   
-  # Project Configuration
-  PROJECT_NAME: block-explorer
+  # All possible preview flavors
+  ALL_FLAVORS: "dev staging beta"
   
   # Terraform Paths
-  TERRAFORM_DIR: terraform/frontend
-  TERRAFORM_ENV_DIR: terraform/environments
-  TERRAFORM_BACKEND_CONFIG: ../environments/preview/backend.config
+  TERRAFORM_DIR: terraform/frontend/frontend-env-level
+  TERRAFORM_ENV_DIR: terraform/frontend/environments/env
+  TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
   destroy:
-    name: Destroy Preview Environment
+    name: Destroy Preview Environments
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-    # Only run if the PR was actually deployed (has the environment)
-    if: github.event.pull_request.head.repo.full_name == github.repository
-
+    outputs:
+      destroyed_flavors: ${{ steps.destroy.outputs.destroyed_flavors }}
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,119 +48,150 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
-      - name: Terraform Init
-        working-directory: ${{ env.TERRAFORM_DIR }}
+      - name: Install yq
         run: |
+          wget -q https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
+      - name: Destroy all preview environments
+        id: destroy
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          DESTROYED=""
+          
+          # Initialize Terraform once
+          cd ${{ env.TERRAFORM_DIR }}
           terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
-
-      - name: Terraform Workspace Select
-        working-directory: ${{ env.TERRAFORM_DIR }}
-        id: workspace
-        continue-on-error: true
-        run: |
-          WORKSPACE_NAME="preview-pr-${{ github.event.pull_request.number }}"
-          terraform workspace select ${WORKSPACE_NAME}
-          echo "exists=true" >> $GITHUB_OUTPUT
-
-      - name: Recreate workspace config for destroy
-        if: steps.workspace.outputs.exists == 'true'
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)
-          WORKSPACE_NAME="preview-pr-${PR_NUMBER}"
           
-          # Create workspace directory if it doesn't exist
-          mkdir -p "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+          for FLAVOR in ${{ env.ALL_FLAVORS }}; do
+            WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
+            
+            echo "=========================================="
+            echo "Checking for preview environment: ${WORKSPACE_NAME}"
+            echo "=========================================="
+            
+            # Check if workspace exists
+            if terraform workspace list | grep -q "${WORKSPACE_NAME}"; then
+              echo "Found workspace ${WORKSPACE_NAME}, destroying..."
+              
+              # Create config directory and file for this workspace
+              CONFIG_DIR="${{ github.workspace }}/${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+              CONFIG_FILE="${CONFIG_DIR}/${WORKSPACE_NAME}.yaml"
+              SOURCE_CONFIG="${{ github.workspace }}/${{ env.TERRAFORM_ENV_DIR }}/${FLAVOR}/${FLAVOR}.yaml"
+              
+              mkdir -p "${CONFIG_DIR}"
+              cp "${{ github.workspace }}/${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${CONFIG_FILE}"
+              
+              # Replace placeholders
+              sed -i "s/{PR_NUMBER}/${PR_NUMBER}-${FLAVOR}/g" "${CONFIG_FILE}"
+              sed -i "s/{COMMIT_SHA}/DESTROY/g" "${CONFIG_FILE}"
+              sed -i "s/{ENVIRONMENT}/${FLAVOR}/g" "${CONFIG_FILE}"
+              
+              # Append flavor-specific config
+              echo "" >> "${CONFIG_FILE}"
+              echo "image_tag: destroy" >> "${CONFIG_FILE}"
+              echo "runtime_env_var_names: []" >> "${CONFIG_FILE}"
+              echo "runtime_env_secret_names: []" >> "${CONFIG_FILE}"
+              
+              # If source config exists, extract SSM prefix
+              if [ -f "${SOURCE_CONFIG}" ]; then
+                yq eval '{"ssm_parameter_prefix": .ssm_parameter_prefix} | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${CONFIG_FILE}"
+              fi
+              
+              echo "Generated config for destroy:"
+              cat "${CONFIG_FILE}"
+              
+              # Select workspace and destroy
+              terraform workspace select "${WORKSPACE_NAME}"
+              
+              if terraform destroy -auto-approve; then
+                echo "Successfully destroyed ${WORKSPACE_NAME}"
+                
+                # Delete the workspace
+                terraform workspace select default
+                terraform workspace delete "${WORKSPACE_NAME}" || true
+                
+                DESTROYED="${DESTROYED}${FLAVOR},"
+              else
+                echo "::warning::Failed to destroy ${WORKSPACE_NAME}"
+              fi
+            else
+              echo "No workspace found for: ${FLAVOR}"
+            fi
+          done
           
-          # Copy and customize the preview config
-          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
-          
-          echo "Recreated config for destroy:"
-          cat "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}/${WORKSPACE_NAME}.yaml"
+          echo "destroyed_flavors=${DESTROYED%,}" >> $GITHUB_OUTPUT
 
-      - name: Terraform Destroy
-        if: steps.workspace.outputs.exists == 'true'
-        working-directory: ${{ env.TERRAFORM_DIR }}
-        run: |
-          terraform destroy -auto-approve
-
-      - name: Delete Terraform Workspace
-        if: steps.workspace.outputs.exists == 'true'
-        working-directory: ${{ env.TERRAFORM_DIR }}
-        run: |
-          WORKSPACE_NAME="preview-pr-${{ github.event.pull_request.number }}"
-          terraform workspace select default
-          terraform workspace delete ${WORKSPACE_NAME}
-
-      - name: Clean up environment config
-        if: steps.workspace.outputs.exists == 'true'
-        run: |
-          WORKSPACE_NAME="preview-pr-${{ github.event.pull_request.number }}"
-          rm -rf "${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
-
-      - name: Update PR comment (Destroyed)
-        if: steps.workspace.outputs.exists == 'true'
+  # Update PR comment to show destroyed status
+  comment-destroyed:
+    name: Update PR Comment
+    needs: destroy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR comment - Destroyed
         uses: actions/github-script@v7
+        env:
+          DESTROYED_FLAVORS: ${{ needs.destroy.outputs.destroyed_flavors }}
         with:
           script: |
             const prNumber = context.issue.number;
-            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
-            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
-            const projectName = process.env.PROJECT_NAME;
+            const merged = context.payload.pull_request.merged;
+            const destroyedFlavors = (process.env.DESTROYED_FLAVORS || '').split(',').filter(f => f);
+            const baseDomain = process.env.BASE_DOMAIN;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             
-            const body = `## ${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview
+            let statusText;
+            if (merged) {
+              statusText = '🎉 **PR Merged** - Preview environments destroyed';
+            } else {
+              statusText = '🗑️ **PR Closed** - Preview environments destroyed';
+            }
             
-            | Name | Status | Preview | Updated (UTC) |
-            |------|--------|---------|---------------|
-            | **${projectName}-preview** | 🗑️ Destroyed ([${commitSha}](${commitUrl})) | Preview deleted | ${new Date().toISOString().replace('T', ' ').substring(0, 19)} |
+            let flavorRows = '';
+            if (destroyedFlavors.length > 0) {
+              for (const flavor of destroyedFlavors) {
+                const domain = `pr-${prNumber}-${flavor}.preview.${baseDomain}`;
+                flavorRows += `| ${flavor} | 🗑️ **Destroyed** | ~~${domain}~~ | [View logs](${runUrl}) |\n`;
+              }
+            } else {
+              flavorRows = '| - | No previews found | - | - |\n';
+            }
             
-            ---
-            <sub>Preview environment destroyed after PR was ${context.payload.action}</sub>`;
-            
-            // Find existing comment
-            const comments = await github.rest.issues.listComments({
+            const commentBody = [
+              '## 🚀 Preview Environment Status',
+              '',
+              statusText,
+              '',
+              '| Flavor | Status | URL | Logs |',
+              '|--------|--------|-----|------|',
+              flavorRows.trim(),
+              '',
+              `_Last updated: ${new Date().toISOString()}_`
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
             
-            const existingComment = comments.data.find(comment => 
-              comment.user.type === 'Bot' && 
-              comment.body.includes(`${projectName.charAt(0).toUpperCase() + projectName.slice(1).replace(/-/g, ' ')} – Preview`)
+            const existingComment = comments.find(c => 
+              c.user.login === 'github-actions[bot]' && 
+              c.body.includes('Preview Environment Status')
             );
             
             if (existingComment) {
-              // Update existing comment
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: existingComment.id,
-                body: body
+                body: commentBody
               });
             } else {
-              // Create new comment if none exists
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: prNumber,
-                body: body
+                body: commentBody
               });
             }
-
-      - name: Destruction summary
-        if: steps.workspace.outputs.exists == 'true'
-        run: |
-          echo "### Preview Environment Destroyed! 🗑️" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Workspace:** \`preview-pr-${{ github.event.pull_request.number }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All resources have been cleaned up." >> $GITHUB_STEP_SUMMARY
-
-      - name: No workspace found
-        if: steps.workspace.outputs.exists != 'true'
-        run: |
-          echo "### No Preview Environment Found" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "No workspace found for PR #${{ github.event.pull_request.number }}. Nothing to destroy." >> $GITHUB_STEP_SUMMARY
-
