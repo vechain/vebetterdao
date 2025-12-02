@@ -1,0 +1,124 @@
+name: Deploy Frontend
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy to (dev, staging, beta, prod)"
+        required: true
+        type: string
+      image_tag:
+        description: "Docker image tag to deploy"
+        required: true
+        type: string
+      terraform_action:
+        description: "Terraform action to perform"
+        required: false
+        type: string
+        default: "deploy"
+    secrets:
+      AWS_ACC_ROLE:
+        description: "AWS IAM role ARN for prod account"
+        required: true
+      DEV_AWS_ACC_ROLE:
+        description: "AWS IAM role ARN for dev account"
+        required: true
+
+env:
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY: governance-frontend
+  TERRAFORM_VERSION: 1.6.0
+  TERRAFORM_DIR: terraform/frontend/frontend-env-level
+  TERRAFORM_ENV_DIR: terraform/frontend/environments/env
+
+jobs:
+  build-and-push-image:
+    name: Build and Push Image
+    uses: ./.github/workflows/build-push-ecr.yml
+    with:
+      ecr_repository: governance-frontend
+      image_tag: ${{ inputs.image_tag }}
+      aws_region: eu-west-1
+      environment: AWS ${{ inputs.environment }} governance build-time
+    secrets:
+        aws_role_arn: ${{ inputs.environment == 'prod' && secrets.AWS_ACC_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [build-and-push-image]
+    # Run if either build job succeeded (the other will be skipped)
+    if: always() && needs.build-and-push-image.result == 'success'
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ needs.build-and-push-image.outputs.uri }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.environment == 'prod' && secrets.AWS_ACC_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Update environment config with new image tag
+        run: |
+          CONFIG_FILE="${{ env.TERRAFORM_ENV_DIR }}/${{ inputs.environment }}/${{ inputs.environment }}.yaml"
+          echo "Updating image_tag in ${CONFIG_FILE} to: ${{ needs.build-and-push-image.outputs.tag }}"
+          sed -i "s/^image_tag:.*/image_tag: ${{ needs.build-and-push-image.outputs.tag }}/" "${CONFIG_FILE}"
+          echo "=== Updated config ==="
+          cat "${CONFIG_FILE}"
+
+      - name: Terraform Init
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform init -backend-config=../environments/env/${{ inputs.environment }}/backend.config
+
+      - name: Terraform Workspace
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: inputs.terraform_action == 'deploy'
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: terraform apply -auto-approve tfplan
+
+      - name: Get deployment URL
+        if: inputs.terraform_action == 'deploy'
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        id: outputs
+        run: |
+          CUSTOM_URL=$(terraform output -raw custom_domain_url 2>/dev/null || echo "")
+          SERVICE_URL=$(terraform output -raw service_url 2>/dev/null || echo "")
+          echo "custom_url=${CUSTOM_URL}" >> $GITHUB_OUTPUT
+          echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+
+      - name: Deployment summary
+        if: inputs.terraform_action == 'deploy'
+        run: |
+          echo "### Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image Tag:** \`${{ needs.build-and-push-image.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.outputs.outputs.custom_url }}" ]; then
+            echo "**URL:** ${{ steps.outputs.outputs.custom_url }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**URL:** ${{ steps.outputs.outputs.service_url }}" >> $GITHUB_STEP_SUMMARY
+          fi

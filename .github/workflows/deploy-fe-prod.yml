@@ -1,0 +1,43 @@
+# Deploy to Production via manual workflow dispatch
+name: Deploy Frontend - Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      terraform_action:
+        description: "Terraform action to perform"
+        required: true
+        default: "deploy"
+        type: choice
+        options:
+          - dry-run
+          - deploy
+
+jobs:
+  validate-ref:
+    name: Validate Release Tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.validate.outputs.tag_name }}
+    steps:
+      - name: Validate version tag format
+        id: validate
+        run: |
+          REF="${{ github.ref_name }}"
+          if [[ "$REF" == v.* ]]; then
+            echo "tag_name=${REF}" >> $GITHUB_OUTPUT
+            echo "::notice::Deploying version ${REF} to production"
+          else
+            echo "::error::Production deployments must be triggered from a version tag (v.*). Current ref: ${REF}"
+            exit 1
+          fi
+
+  deploy:
+    name: Deploy to Production
+    needs: validate-ref
+    uses: ./.github/workflows/deploy-fe.yml
+    secrets: inherit
+    with:
+      environment: prod
+      image_tag: ${{ needs.validate-ref.outputs.tag_name }}-prod
+      terraform_action: ${{ inputs.terraform_action }}
