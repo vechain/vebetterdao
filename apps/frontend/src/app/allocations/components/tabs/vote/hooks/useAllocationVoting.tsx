@@ -11,7 +11,11 @@ import { getAutoVotingState } from "@/hooks/useAutoVotingState"
 import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
 import { useUpdateVotingPreferences } from "@/hooks/useUpdateVotingPreferences"
-import { distributeVotingPowerEqually, percentagesToWeiWithExactSum } from "@/utils/MathUtils/MathUtils"
+import {
+  distributeVotingPowerEqually,
+  percentagesToWeiWithExactSum,
+  EQUAL_VOTES_DETECTION_THRESHOLD,
+} from "@/utils/MathUtils/MathUtils"
 
 import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 
@@ -89,9 +93,10 @@ export const useAllocationVoting = ({
       const appIds = Array.from(allocations.keys())
       const percentages = Array.from(allocations.values())
 
-      // Detect equal distribution: all percentages within 0.0001% of each other
-      // This avoids floating point issues when users select "Equal votes"
-      const isEqualDistribution = percentages.length > 0 && percentages.every(p => Math.abs(p - percentages[0]!) < 0.01)
+      // Detect if user selected "Equal votes" (all percentages within threshold of each other)
+      const isEqualDistribution =
+        percentages.length > 0 &&
+        percentages.every(p => Math.abs(p - percentages[0]!) < EQUAL_VOTES_DETECTION_THRESHOLD)
 
       // Use pure BigInt division for equal distribution
       // Use percentage conversion for custom allocations (might lose some precision)

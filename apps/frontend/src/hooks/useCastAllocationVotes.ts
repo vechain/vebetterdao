@@ -56,7 +56,7 @@ export const useCastAllocationVotes = ({
     (data: CastAllocationVotesProps) => {
       // Filter out zero votes (handle both number and string types)
       const filteredData = data.filter(value => {
-        // The new allocation flow uses biginit but the old flow uses ether strings. We need to handle both cases to ensure backwards compatibility.
+        // The new allocation flow uses bigint but the old flow uses ether strings. We need to handle both cases to ensure backwards compatibility.
         // @TODO: Remove check for string once the old flow is deprecated
         const numVotes = typeof value.votes === "string" ? parseFloat(value.votes) : value.votes
         return numVotes > 0

@@ -1,10 +1,15 @@
 import BigNumber from "bignumber.js"
 
+// Legacy constant for scaledDivision
 const SCALING_FACTOR = 1_000_000
 
-// Precision factor for percentage calculations (6 decimal places = 1_000_000)
-const PERCENTAGE_PRECISION = 1_000_000
-const PERCENTAGE_PRECISION_BIGINT = BigInt(PERCENTAGE_PRECISION)
+// 6 decimal places precision for percentage calculations (same value as SCALING_FACTOR)
+const PRECISION = 1_000_000
+const PRECISION_BIGINT = BigInt(PRECISION)
+
+// Threshold for detecting if user selected "Equal votes" (0.01 percentage points)
+// If all percentages are within this threshold of each other, use pure BigInt division
+export const EQUAL_VOTES_DETECTION_THRESHOLD = 0.01
 /**
  * scaledDivision
  * @param numerator
@@ -29,9 +34,7 @@ export const scaledDivision = (numerator: number, denominator: number, scalingFa
  * For truly equal distribution, use distributeVotingPowerEqually instead. This is for FE usage only.
  */
 export const calculateVotingWeightFromPercentage = (totalVotingPowerWei: bigint, percentage: number): bigint => {
-  return (
-    (totalVotingPowerWei * BigInt(Math.round(percentage * PERCENTAGE_PRECISION))) / (100n * PERCENTAGE_PRECISION_BIGINT)
-  )
+  return (totalVotingPowerWei * BigInt(Math.round(percentage * PRECISION))) / (100n * PRECISION_BIGINT)
 }
 
 /**
@@ -49,18 +52,18 @@ export const distributePercentagesEqually = (totalPercentage: number, count: num
   if (count === 1) return [totalPercentage]
 
   // Calculate base percentage with 6 decimal precision using floor
-  const basePercentage = Math.floor((totalPercentage / count) * PERCENTAGE_PRECISION) / PERCENTAGE_PRECISION
+  const basePercentage = Math.floor((totalPercentage / count) * PRECISION) / PRECISION
 
   // Calculate remainder: total - (base * count)
   const distributed = basePercentage * count
-  const remainder = Math.round((totalPercentage - distributed) * PERCENTAGE_PRECISION) / PERCENTAGE_PRECISION
+  const remainder = Math.round((totalPercentage - distributed) * PRECISION) / PRECISION
 
   // Build result array: all get base, last gets base + remainder
   const result: number[] = []
   for (let i = 0; i < count - 1; i++) {
     result.push(basePercentage)
   }
-  result.push(Math.round((basePercentage + remainder) * PERCENTAGE_PRECISION) / PERCENTAGE_PRECISION)
+  result.push(Math.round((basePercentage + remainder) * PRECISION) / PRECISION)
 
   return result
 }
@@ -107,9 +110,9 @@ export const percentageToWei = (totalVotingPowerWei: bigint, percentage: number)
 
   // Convert percentage to integer with 6 decimal precision
   // e.g., 16.666666% -> 16666666
-  const percentageScaled = BigInt(Math.round(percentage * PERCENTAGE_PRECISION))
+  const percentageScaled = BigInt(Math.round(percentage * PRECISION))
   // Calculate: (totalPower * percentageScaled) / (100 * PRECISION)
-  return (totalVotingPowerWei * percentageScaled) / (100n * PERCENTAGE_PRECISION_BIGINT)
+  return (totalVotingPowerWei * percentageScaled) / (100n * PRECISION_BIGINT)
 }
 
 /**
