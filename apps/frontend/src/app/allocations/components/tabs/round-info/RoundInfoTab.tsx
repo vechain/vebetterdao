@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
@@ -23,6 +24,7 @@ interface RoundInfoTabProps {
 }
 
 export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabProps) {
+  const { account } = useWallet()
   const context = useContext(AllocationTabsContext)
   const contextRoundDetails = context?.roundDetails
 
@@ -122,8 +124,8 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
           <RoundHistoryCard key={round.roundId} round={round} />
         ))}
       </VStack>
-      <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap="6">
-        <UserVotingActivityCard roundDetails={roundDetails} />
+      <Grid hideBelow="md" gridTemplateColumns={!!account?.address ? "repeat(2,1fr)" : "1fr"} gap="6">
+        {!!account?.address && <UserVotingActivityCard roundDetails={roundDetails} />}
         <RoundActiveAppsListCard roundId={roundDetails.id} apps={roundDetails.apps} />
       </Grid>
     </VStack>

@@ -17,11 +17,13 @@ export const useUserSignalsReset = (walletAddress?: string) => {
     abi,
     eventName: "UserSignalsReset",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      user: decodedData.args.user,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        user: decodedData.args.user,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
+    enabled: !!walletAddress,
   })
   const isLoading = rawUserSignalsResetEvents.isLoading
   const userSignalsResetEvents = useMemo(() => {

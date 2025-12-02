@@ -16,24 +16,26 @@ export const useSignalerAssignedToApp = (appId: string) => {
     abi,
     eventName: "SignalerAssignedToApp",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      signaler: decodedData.args.signaler,
-      appId: decodedData.args.app,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        signaler: decodedData.args.signaler,
+        appId: decodedData.args.app,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
   })
   const rawSignalerRemovedFromAppEvents = useEvents({
     contractAddress,
     abi,
     eventName: "SignalerRemovedFromApp",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      signaler: decodedData.args.signaler,
-      appId: decodedData.args.app,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        signaler: decodedData.args.signaler,
+        appId: decodedData.args.app,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
   })
   const signalerAssignedToAppEvents = rawSignalerAssignedToAppEvents.data || []
   const signalerRemovedFromAppEvents = rawSignalerRemovedFromAppEvents.data || []

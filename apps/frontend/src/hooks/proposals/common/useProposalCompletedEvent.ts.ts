@@ -11,12 +11,13 @@ export const useProposalCompletedEvent = (proposalId: string) => {
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCompleted",
     abi,
-    mapResponse: response => ({
-      id: response.decodedData.args.proposalId.toString(),
-      blockNumber: response.meta.blockNumber,
-      txOrigin: response.meta.txOrigin,
-      timestamp: response?.meta?.blockTimestamp ? response.meta.blockTimestamp * 1000 : 0,
-    }),
+    select: events =>
+      events.map(response => ({
+        id: response.decodedData.args.proposalId.toString(),
+        blockNumber: response.meta.blockNumber,
+        txOrigin: response.meta.txOrigin,
+        timestamp: response?.meta?.blockTimestamp ? response.meta.blockTimestamp * 1000 : 0,
+      })),
   })
 
   // Filter client-side by proposalId

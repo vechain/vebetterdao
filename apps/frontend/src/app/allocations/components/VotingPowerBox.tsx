@@ -63,14 +63,16 @@ export const VotingPowerBox = () => {
         </Skeleton>
       }
       cta={
-        <>
-          <Button variant="primary" onClick={() => setIsOpen(true)}>
-            <Icon as={Flash} boxSize="4" />
-            {"Power up"}
-          </Button>
+        !!account?.address && (
+          <>
+            <Button variant="primary" onClick={() => setIsOpen(true)}>
+              <Icon as={Flash} boxSize="4" />
+              {"Power up"}
+            </Button>
 
-          <ConvertModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
-        </>
+            <ConvertModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+          </>
+        )
       }
     />
   )

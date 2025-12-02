@@ -31,15 +31,16 @@ export const useAppRewardDistributedEvents = (appId: string, limit = 5) => {
     abi,
     eventName: "RewardDistributed",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      appId: decodedData.args.appId,
-      amount: ethers.formatEther(decodedData.args.amount),
-      receiver: decodedData.args.receiver,
-      proof: decodedData.args.proof,
-      distributor: decodedData.args.distributor,
-      blockNumber: meta.blockNumber,
-      txId: meta.txID,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        appId: decodedData.args.appId,
+        amount: ethers.formatEther(decodedData.args.amount),
+        receiver: decodedData.args.receiver,
+        proof: decodedData.args.proof,
+        distributor: decodedData.args.distributor,
+        blockNumber: meta.blockNumber,
+        txId: meta.txID,
+      })),
   })
 
   // Sort by block number (descending - newest first) and limit the results

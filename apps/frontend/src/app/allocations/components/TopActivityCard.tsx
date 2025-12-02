@@ -26,8 +26,12 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
     contractAddress,
     eventName: "AllocationVoteCast",
     filterParams: { voter: account?.address },
-    mapResponse: ({ decodedData }) =>
-      decodedData.args.appsIds.map((id, idx) => [id, decodedData.args.voteWeights[idx]]) as Array<[string, bigint]>,
+    select: events =>
+      events.map(
+        ({ decodedData }) =>
+          decodedData.args.appsIds.map((id, idx) => [id, decodedData.args.voteWeights[idx]]) as Array<[string, bigint]>,
+      ),
+    enabled: !!account?.address,
   })
 
   const appVoteMetrics = useMemo(() => {

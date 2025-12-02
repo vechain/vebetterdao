@@ -21,15 +21,16 @@ export const useAllocationsRoundsEvents = () => {
     contractAddress,
     abi,
     eventName: "RoundCreated",
-    mapResponse: ({ decodedData, meta }) => ({
-      roundId: decodedData.args.roundId.toString(),
-      proposer: decodedData.args.proposer,
-      voteStart: decodedData.args.voteStart.toString(),
-      voteEnd: decodedData.args.voteEnd.toString(),
-      appsIds: [...decodedData.args.appsIds],
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        roundId: decodedData.args.roundId.toString(),
+        proposer: decodedData.args.proposer,
+        voteStart: decodedData.args.voteStart.toString(),
+        voteEnd: decodedData.args.voteEnd.toString(),
+        appsIds: [...decodedData.args.appsIds],
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
   })
   const allocationEvents = rawAllocationCreatedEvents.data || []
   const isLoading = rawAllocationCreatedEvents.isLoading

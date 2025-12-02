@@ -18,6 +18,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
@@ -82,6 +83,7 @@ export function AppCategoryTabs({
   isAtSelectionLimit = false,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
+  const { account } = useWallet()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
   const [currentPage, setCurrentPage] = useState(1)
@@ -179,7 +181,8 @@ export function AppCategoryTabs({
             <Heading size="lg">{"Active apps in current round"}</Heading>
             <Flex gap="4">
               {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
-              {((!hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) || isEditingAutoVote) && (
+              {((!!account?.address && !hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) ||
+                isEditingAutoVote) && (
                 <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
                   {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
                 </Button>
@@ -282,7 +285,8 @@ export function AppCategoryTabs({
                   checked={selectedAppIds?.has(app.id)}
                   onCheckedChange={() => onToggleApp?.(app.id)}
                   displayMode={
-                    (hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote
+                    !account?.address ||
+                    ((hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote)
                       ? "voted"
                       : "checkbox"
                   }
@@ -346,7 +350,7 @@ export function AppCategoryTabs({
         </Tabs.Root>
       </VStack>
 
-      {!isMobile && (
+      {!isMobile && !!account?.address && (
         <VStack width="1/3" align="stretch" justifySelf="flex-start">
           <Heading size="lg">{"Your top 5 Apps"}</Heading>
           <UserTopVotedAppsCard apps={apps} />

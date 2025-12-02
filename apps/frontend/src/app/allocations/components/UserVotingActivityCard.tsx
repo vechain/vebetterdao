@@ -89,12 +89,16 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     contractAddress,
     eventName: "AllocationVoteCast",
     filterParams: { voter: account?.address, roundId: BigInt(roundId) },
-    mapResponse: ({ decodedData }) =>
-      decodedData.args.appsIds.map((id, idx) => [
-        decodedData.args.roundId,
-        id,
-        decodedData.args.voteWeights[idx],
-      ]) as Array<[bigint, string, bigint]>,
+    select: events =>
+      events.map(
+        ({ decodedData }) =>
+          decodedData.args.appsIds.map((id, idx) => [
+            decodedData.args.roundId,
+            id,
+            decodedData.args.voteWeights[idx],
+          ]) as Array<[bigint, string, bigint]>,
+      ),
+    enabled: !!account?.address,
   })
 
   const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
@@ -105,8 +109,11 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
       cycle: BigInt(roundId),
       voter: account?.address,
     },
-    mapResponse: ({ decodedData }) =>
-      getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
+    select: events =>
+      events.map(({ decodedData }) =>
+        getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
+      ),
+    enabled: !!account?.address,
   })
 
   const [appsVotedInRound] = voteCastEvents || []

@@ -4,19 +4,12 @@ import { Abi, ContractEventName, decodeEventLog as viemDecodeEventLog } from "vi
 
 import { decodeEventLog, getAllEventLogs } from "./getEvents"
 
-export type FetchContractEventsParams<T extends Abi, K extends ContractEventName<T>, R> = {
+export type FetchContractEventsParams<T extends Abi, K extends ContractEventName<T>> = {
   thor: ThorClient
   abi: T
   contractAddress: string
   eventName: K
   filterParams?: Record<string, unknown> | unknown[] | undefined
-  mapResponse: ({
-    meta,
-    decodedData,
-  }: {
-    meta: EventLogs["meta"]
-    decodedData: ReturnType<typeof viemDecodeEventLog<T, K>>
-  }) => R
 }
 
 /**
@@ -24,14 +17,14 @@ export type FetchContractEventsParams<T extends Abi, K extends ContractEventName
  * Works in both Node.js and browser environments (when thor client is provided).
  * Server-side compatible version of useEvents hook.
  */
-export const fetchContractEvents = async <T extends Abi, K extends ContractEventName<T>, R>({
+export const fetchContractEvents = async <T extends Abi, K extends ContractEventName<T>>({
   thor,
   abi,
   contractAddress,
   eventName,
   filterParams,
-  mapResponse,
-}: FetchContractEventsParams<T, K, R>): Promise<R[]> => {
+  // mapResponse,
+}: FetchContractEventsParams<T, K>) => {
   const eventAbi = thor.contracts.load(contractAddress, abi).getEventAbi(eventName)
   const topics = eventAbi.encodeFilterTopicsNoNull(filterParams ?? {})
 
@@ -62,10 +55,8 @@ export const fetchContractEvents = async <T extends Abi, K extends ContractEvent
     throw new Error(`Unknown event`)
   }
 
-  return events.map(event =>
-    mapResponse({
-      meta: event.meta,
-      decodedData: event.decodedData as ReturnType<typeof viemDecodeEventLog<T, K>>,
-    }),
-  )
+  return events.map(event => ({
+    meta: event.meta as EventLogs["meta"],
+    decodedData: event.decodedData as ReturnType<typeof viemDecodeEventLog<T, K>>,
+  }))
 }

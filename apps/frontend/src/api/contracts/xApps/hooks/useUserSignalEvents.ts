@@ -23,26 +23,30 @@ export const useUserSignalEvents = (user: string) => {
     abi,
     eventName: "UserSignaled",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      user: decodedData.args.user,
-      appId: decodedData.args.app,
-      reason: decodedData.args.reason,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        user: decodedData.args.user,
+        appId: decodedData.args.app,
+        reason: decodedData.args.reason,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
+    enabled: !!user,
   })
   const rawUnsignaledEvents = useEvents({
     contractAddress,
     abi,
     eventName: "UserSignalsResetForApp",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      user: decodedData.args.user,
-      appId: decodedData.args.app,
-      reason: decodedData.args.reason,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        user: decodedData.args.user,
+        appId: decodedData.args.app,
+        reason: decodedData.args.reason,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
+    enabled: !!user,
   })
   const signaledEvents = rawSignaledEvents.data || []
   const unsignaledEvents = rawUnsignaledEvents.data || []

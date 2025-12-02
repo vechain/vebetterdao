@@ -16,27 +16,29 @@ export const useProposalCreatedEvents = (): {
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCreated",
     abi,
-    mapResponse: response => ({
-      id: response.decodedData.args.proposalId.toString(),
-      ipfsDescription: response.decodedData.args.description,
-      votingRoundId: response.decodedData.args.roundIdVoteStart.toString(),
-      depositThreshold: response.decodedData.args.depositThreshold.toString(),
-      proposerAddress: response.decodedData.args.proposer,
-      calldatas: response.decodedData.args.calldatas,
-      targets: response.decodedData.args.targets,
-      createdAt: response.meta.blockTimestamp,
-      createdAtBlock: response.meta.blockNumber,
-      values: response.decodedData.args.values.map(value => value.toString()),
-    }),
+    select: events =>
+      events.map(response => ({
+        id: response.decodedData.args.proposalId.toString(),
+        ipfsDescription: response.decodedData.args.description,
+        votingRoundId: response.decodedData.args.roundIdVoteStart.toString(),
+        depositThreshold: response.decodedData.args.depositThreshold.toString(),
+        proposerAddress: response.decodedData.args.proposer,
+        calldatas: response.decodedData.args.calldatas,
+        targets: response.decodedData.args.targets,
+        createdAt: response.meta.blockTimestamp,
+        createdAtBlock: response.meta.blockNumber,
+        values: response.decodedData.args.values.map(value => value.toString()),
+      })),
   })
   const proposalTypeEvents = useEvents({
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCreatedWithType",
     abi,
-    mapResponse: response => ({
-      id: response.decodedData.args.proposalId.toString(),
-      type: response.decodedData.args.proposalType,
-    }),
+    select: events =>
+      events.map(response => ({
+        id: response.decodedData.args.proposalId.toString(),
+        type: response.decodedData.args.proposalType,
+      })),
   })
   const { standardProposals, grantProposals, allProposals } = useMemo(() => {
     // Early return if no data to prevent unnecessary processing

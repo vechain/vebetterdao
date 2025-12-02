@@ -20,14 +20,15 @@ export const useMilestoneClaimedEvents = () => {
     contractAddress: grantsManagerAddress,
     eventName: "MilestoneClaimed",
     abi,
-    mapResponse: response => ({
-      proposalId: response.decodedData.args.proposalId.toString(),
-      milestoneIndex: Number(response.decodedData.args.milestoneIndex),
-      amount: formatEther(response.decodedData.args.amount.toString()),
-      amountRaw: response.decodedData.args.amount.toString(),
-      blockTimestamp: response.meta.blockTimestamp,
-      blockNumber: response.meta.blockNumber,
-    }),
+    select: events =>
+      events.map(response => ({
+        proposalId: response.decodedData.args.proposalId.toString(),
+        milestoneIndex: Number(response.decodedData.args.milestoneIndex),
+        amount: formatEther(response.decodedData.args.amount.toString()),
+        amountRaw: response.decodedData.args.amount.toString(),
+        blockTimestamp: response.meta.blockTimestamp,
+        blockNumber: response.meta.blockNumber,
+      })),
   })
   // Group claimed events by proposal ID for easy lookup
   const claimedAmountsByProposal = useMemo(() => {
