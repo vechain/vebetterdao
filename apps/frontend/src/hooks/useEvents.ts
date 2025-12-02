@@ -2,15 +2,13 @@ import { useQuery } from "@tanstack/react-query"
 import { EventLogs } from "@vechain/sdk-network"
 import { useThor } from "@vechain/vechain-kit"
 import { Abi } from "abitype"
-import { ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
+import { ContractEventArgs, ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
 
 import { GetEventQueryOptions } from "@/api/contracts/governance/getEvents"
 
 import { fetchContractEvents } from "../api/contracts/governance/fetchContractEvents"
 
 import { useContractDeployBlock } from "./useContractDeployBlock"
-
-type FilterParams = Record<string, unknown> | unknown[] | undefined
 
 export type EventResult<T extends Abi, K extends ContractEventName<T>> = {
   meta: EventLogs["meta"]
@@ -21,7 +19,7 @@ export type UseEventsParams<T extends Abi, K extends ContractEventName<T>, TSele
   abi: T
   contractAddress: string
   eventName: K
-  filterParams?: FilterParams
+  filterParams?: ContractEventArgs<T, K>
   select?: (data: EventResult<T, K>[]) => TSelect
   enabled?: boolean
 } & Omit<GetEventQueryOptions, "from" | "to">
@@ -42,7 +40,7 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, TSelect
   const thor = useThor()
   const { data: from } = useContractDeployBlock(contractAddress)
   return useQuery({
-    queryKey: getEventsKey({ eventName, filterParams }),
+    queryKey: getEventsKey({ eventName, filterParams: filterParams as Record<string, unknown>, queryOptions }),
     queryFn: () =>
       fetchContractEvents({
         thor,
@@ -61,14 +59,16 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, TSelect
 
 export type GetEventsKeyParams = {
   eventName: string
-  filterParams?: FilterParams
+  filterParams?: Record<string, unknown>
+  queryOptions?: Omit<GetEventQueryOptions, "from" | "to">
 }
 
-export const getEventsKey = ({ eventName, filterParams }: GetEventsKeyParams) => [
-  eventName,
-  Array.isArray(filterParams)
-    ? filterParams
-    : filterParams && Object.values(filterParams).length > 0
-      ? Object.values(filterParams)
-      : "all",
-]
+export const getEventsKey = ({ eventName, filterParams, queryOptions }: GetEventsKeyParams) =>
+  [
+    eventName,
+    Array.isArray(filterParams)
+      ? filterParams
+      : filterParams && Object.values(filterParams).length > 0
+        ? Object.values(filterParams)
+        : "all",
+  ].concat(queryOptions ? Object.values(queryOptions) : [])

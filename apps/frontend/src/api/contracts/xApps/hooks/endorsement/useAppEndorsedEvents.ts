@@ -30,7 +30,7 @@ export const useAppEndorsedEvents = (filterOptions?: {
     abi,
     contractAddress,
     eventName: "AppEndorsed",
-    filterParams: filterOptions?.appId ? [filterOptions?.appId] : undefined,
+    filterParams: filterOptions?.appId ? { id: filterOptions.appId as `0x${string}` } : undefined,
     select: events =>
       events
         .map(({ meta, decodedData }) => ({
@@ -42,7 +42,7 @@ export const useAppEndorsedEvents = (filterOptions?: {
         }))
         .filter(
           event =>
-            (filterOptions?.nodeId ? event.nodeId === filterOptions?.nodeId : true) ||
+            (filterOptions?.nodeId ? event.nodeId === filterOptions?.nodeId : true) &&
             (filterOptions?.endorsed ? event.endorsed === filterOptions?.endorsed : true),
         ),
   })

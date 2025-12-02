@@ -24,7 +24,7 @@ export type RewardDistributedEvent = {
  * @param limit Optional limit on the number of events to return (default: 5)
  */
 export const useAppRewardDistributedEvents = (appId: string, limit = 5) => {
-  const filterParams = { appId }
+  const filterParams = { appId: appId as `0x${string}` }
 
   const { data, isLoading, ...rest } = useEvents({
     contractAddress,

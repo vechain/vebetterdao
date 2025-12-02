@@ -11,7 +11,7 @@ export const useGracePeriodEvent = (appId?: string) =>
     abi,
     contractAddress,
     eventName: "AppUnendorsedGracePeriodStarted",
-    filterParams: [appId],
+    filterParams: appId ? { appId: appId as `0x${string}` } : undefined,
     select: events =>
       events.map(({ meta, decodedData }) => {
         const { blockNumber, txOrigin } = meta

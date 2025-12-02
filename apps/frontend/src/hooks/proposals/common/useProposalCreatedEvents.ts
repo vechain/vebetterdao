@@ -13,9 +13,9 @@ export const useProposalCreatedEvents = (): {
   allProposals: ProposalCreatedEvent[]
 } => {
   const proposalEvents = useEvents({
+    abi,
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCreated",
-    abi,
     select: events =>
       events.map(response => ({
         id: response.decodedData.args.proposalId.toString(),
@@ -31,9 +31,9 @@ export const useProposalCreatedEvents = (): {
       })),
   })
   const proposalTypeEvents = useEvents({
+    abi,
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCreatedWithType",
-    abi,
     select: events =>
       events.map(response => ({
         id: response.decodedData.args.proposalId.toString(),

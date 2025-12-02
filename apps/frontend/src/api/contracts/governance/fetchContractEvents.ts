@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { EventLogs, FilterCriteria, ThorClient } from "@vechain/sdk-network"
-import { Abi, ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
+import { Abi, ContractEventArgs, ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
 
 import { decodeEventLog, getEventLogs, GetEventQueryOptions } from "./getEvents"
 
@@ -9,7 +9,7 @@ export type FetchContractEventsParams<T extends Abi, K extends ContractEventName
   abi: T
   contractAddress: string
   eventName: K
-  filterParams?: Record<string, unknown> | unknown[] | undefined
+  filterParams?: ContractEventArgs<T, K>
 } & GetEventQueryOptions
 
 const B3TR_GOVERNOR_CREATION_BLOCK = 18868872

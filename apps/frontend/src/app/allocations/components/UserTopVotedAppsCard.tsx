@@ -25,7 +25,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
     abi,
     contractAddress,
     eventName: "AllocationVoteCast",
-    filterParams: { voter: account?.address },
+    filterParams: { voter: (account?.address ?? "") as `0x${string}` },
     select: events =>
       events.map(
         ({ decodedData }) =>

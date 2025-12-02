@@ -14,13 +14,15 @@ export const useProposalVoteEvents = (proposalId: string) => {
     abi,
     contractAddress,
     eventName: "VoteCast",
-    filterParams: [account?.address, BigInt(proposalId)],
+    filterParams: { voter: (account?.address ?? "") as `0x${string}`, proposalId: BigInt(proposalId ?? 0) },
     select: events => {
       const votes = events.map(event => event.decodedData.args)
       const totalVot3UsedInVotes = votes.reduce((acc, event) => acc + Number(event.weight), 0)
       const totalVotingPowerUsedInVotes = votes.reduce((acc, event) => acc + Number(event.power), 0)
       const votesWithComment = votes.filter(event => !!event.reason)
-      const userVote = !!account?.address ? votes.find(event => compareAddresses(event.voter, account.address)) : []
+      const userVote = !!account?.address
+        ? votes.find(event => compareAddresses(event.voter, account.address))
+        : undefined
       const hasUserVoted = !!userVote
       return {
         hasUserVoted,

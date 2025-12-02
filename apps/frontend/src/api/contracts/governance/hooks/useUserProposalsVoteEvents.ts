@@ -32,7 +32,7 @@ export const useUserProposalsVoteEvents = () => {
     abi,
     contractAddress,
     eventName: "VoteCast",
-    filterParams: [account?.address],
+    filterParams: { voter: (account?.address ?? "") as `0x${string}` },
     select: events => events.map(event => event.decodedData.args),
     enabled: !!account?.address,
   })
@@ -44,7 +44,7 @@ export const useUserSingleProposalVoteEvent = (proposalId?: string) => {
     abi,
     contractAddress,
     eventName: "VoteCast",
-    filterParams: [account?.address, BigInt(proposalId ?? 0)],
+    filterParams: { voter: (account?.address ?? "") as `0x${string}`, proposalId: BigInt(proposalId ?? 0) },
     select: events => {
       const userVoteEvent = events?.[0]
       if (!userVoteEvent) return undefined

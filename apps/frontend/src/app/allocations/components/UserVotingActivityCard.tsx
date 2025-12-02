@@ -95,7 +95,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     abi,
     contractAddress,
     eventName: "AllocationVoteCast",
-    filterParams: { voter: account?.address, roundId: BigInt(roundId) },
+    filterParams: { voter: (account?.address ?? "") as `0x${string}`, roundId: BigInt(roundId) },
     select: events =>
       events.map(
         ({ decodedData }) =>
@@ -114,7 +114,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     eventName: "RewardClaimedV2",
     filterParams: {
       cycle: BigInt(roundId),
-      voter: account?.address,
+      voter: (account?.address ?? "") as `0x${string}`,
     },
     select: events =>
       events.map(({ decodedData }) =>
