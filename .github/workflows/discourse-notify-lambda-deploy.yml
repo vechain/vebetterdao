@@ -27,6 +27,9 @@ jobs:
     uses: ./.github/workflows/lambda-build.yml
     with:
       workspace: ${{ github.event.inputs.workspace || 'prod' }}
+    secrets:
+      TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+      MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
 
   deploy:
     name: Deploy Infrastructure
