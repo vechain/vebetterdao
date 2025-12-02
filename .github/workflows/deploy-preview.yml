@@ -25,7 +25,7 @@ env:
   TERRAFORM_VERSION: 1.6.0
 
   # Project Configuration
-  PROJECT_NAME: governance-frontend
+  PROJECT_NAME: Governance Frontend
   BASE_DOMAIN: governance.vebetterdao.org
 
   # Terraform Paths
@@ -79,31 +79,30 @@ jobs:
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
           SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
           RUN_URL: ${{ needs.setup.outputs.run_url }}
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
         with:
           script: |
             const flavors = JSON.parse(process.env.FLAVORS);
             const prNumber = process.env.PR_NUMBER;
             const shortSha = process.env.SHORT_SHA;
             const runUrl = process.env.RUN_URL;
-            const baseDomain = process.env.BASE_DOMAIN;
+            const projectName = process.env.PROJECT_NAME;
             const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
             
             let rows = '';
             for (const flavor of flavors) {
-              const domain = `pr-${prNumber}-${flavor}.preview.${baseDomain}`;
-              rows += `| ${flavor} | ⏳ **Deploying...** | [${domain}](https://${domain}) | [View logs](${runUrl}) |\n`;
+              rows += `| **${flavor}** | 🔨 Building ([${shortSha}](${commitUrl})) | Building image... | [View Logs →](${runUrl}) |\n`;
             }
             
             const commentBody = [
-              '## 🚀 Preview Environment Status',
+              `## ${projectName} – Preview`,
               '',
-              `Building from commit [\`${shortSha}\`](${commitUrl})`,
-              '',
-              '| Flavor | Status | URL | Logs |',
-              '|--------|--------|-----|------|',
+              '| Name | Status | Preview | Updated (UTC) |',
+              '|------|--------|---------|---------------|',
               rows.trim(),
               '',
-              `_Last updated: ${new Date().toISOString()}_`
+              '---',
+              `<sub>Building with commit ${shortSha} • Preview environments are automatically destroyed when PRs are closed</sub>`
             ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
@@ -114,7 +113,7 @@ jobs:
             
             const existingComment = comments.find(c => 
               c.user.login === 'github-actions[bot]' && 
-              c.body.includes('Preview Environment Status')
+              c.body.includes(`${projectName} – Preview`)
             );
             
             if (existingComment) {
@@ -160,6 +159,14 @@ jobs:
       matrix:
         flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
       fail-fast: false
+    outputs:
+      # Store URLs for each flavor using dynamic keys
+      custom_url_dev: ${{ steps.save-urls.outputs.custom_url_dev }}
+      service_url_dev: ${{ steps.save-urls.outputs.service_url_dev }}
+      custom_url_staging: ${{ steps.save-urls.outputs.custom_url_staging }}
+      service_url_staging: ${{ steps.save-urls.outputs.service_url_staging }}
+      custom_url_beta: ${{ steps.save-urls.outputs.custom_url_beta }}
+      service_url_beta: ${{ steps.save-urls.outputs.service_url_beta }}
 
     steps:
       - name: Checkout code
@@ -278,6 +285,13 @@ jobs:
           echo "custom_url=${CUSTOM_URL}" >> $GITHUB_OUTPUT
           echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
 
+      - name: Save URLs for flavor
+        id: save-urls
+        run: |
+          FLAVOR="${{ matrix.flavor }}"
+          echo "custom_url_${FLAVOR}=${{ steps.outputs.outputs.custom_url }}" >> $GITHUB_OUTPUT
+          echo "service_url_${FLAVOR}=${{ steps.outputs.outputs.service_url }}" >> $GITHUB_OUTPUT
+
   # Update comment with final results
   comment-result:
     name: Update PR Comment
@@ -294,49 +308,92 @@ jobs:
           RUN_URL: ${{ needs.setup.outputs.run_url }}
           BUILD_RESULT: ${{ needs.build-and-push.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+          # Pass all possible URL outputs
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          CUSTOM_URL_STAGING: ${{ needs.deploy.outputs.custom_url_staging }}
+          SERVICE_URL_STAGING: ${{ needs.deploy.outputs.service_url_staging }}
+          CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
+          SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
         with:
           script: |
             const flavors = JSON.parse(process.env.FLAVORS);
             const prNumber = process.env.PR_NUMBER;
             const shortSha = process.env.SHORT_SHA;
             const runUrl = process.env.RUN_URL;
-            const baseDomain = process.env.BASE_DOMAIN;
+            const projectName = process.env.PROJECT_NAME;
             const buildResult = process.env.BUILD_RESULT;
             const deployResult = process.env.DEPLOY_RESULT;
             const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
             
-            let rows = '';
-            for (const flavor of flavors) {
-              const domain = `pr-${prNumber}-${flavor}.preview.${baseDomain}`;
-              
-              let status;
-              if (buildResult === 'failure') {
-                status = '❌ **Build Failed**';
-              } else if (deployResult === 'failure') {
-                status = '❌ **Deploy Failed**';
-              } else if (deployResult === 'success') {
-                status = '✅ **Ready**';
-              } else {
-                status = '⚠️ **Unknown**';
+            // Get URLs for each flavor
+            const urls = {
+              dev: {
+                custom: process.env.CUSTOM_URL_DEV || '',
+                service: process.env.SERVICE_URL_DEV || ''
+              },
+              staging: {
+                custom: process.env.CUSTOM_URL_STAGING || '',
+                service: process.env.SERVICE_URL_STAGING || ''
+              },
+              beta: {
+                custom: process.env.CUSTOM_URL_BETA || '',
+                service: process.env.SERVICE_URL_BETA || ''
               }
+            };
+            
+            let rows = '';
+            let hasFailure = false;
+            
+            for (const flavor of flavors) {
+              const flavorUrls = urls[flavor] || { custom: '', service: '' };
+              const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
               
-              rows += `| ${flavor} | ${status} | [${domain}](https://${domain}) | [View logs](${runUrl}) |\n`;
+              if (buildResult === 'failure') {
+                hasFailure = true;
+                rows += `| **${flavor}** | ❌ Build Failed ([${shortSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${timestamp} |\n`;
+              } else if (deployResult === 'failure') {
+                hasFailure = true;
+                rows += `| **${flavor}** | ❌ Deploy Failed ([${shortSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${timestamp} |\n`;
+              } else if (deployResult === 'success') {
+                // Build preview links with both custom domain and default URL
+                let previewLinks = '';
+                if (flavorUrls.custom && flavorUrls.service) {
+                  previewLinks = `[Custom Domain →](${flavorUrls.custom}) • [Default URL →](${flavorUrls.service})`;
+                } else if (flavorUrls.custom) {
+                  previewLinks = `[Custom Domain →](${flavorUrls.custom})`;
+                } else if (flavorUrls.service) {
+                  previewLinks = `[Default URL →](${flavorUrls.service})`;
+                } else {
+                  previewLinks = `[View Logs →](${runUrl})`;
+                }
+                
+                rows += `| **${flavor}** | ✅ Ready ([${shortSha}](${commitUrl})) | ${previewLinks} | ${timestamp} |\n`;
+              } else {
+                rows += `| **${flavor}** | ⚠️ Unknown ([${shortSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${timestamp} |\n`;
+              }
             }
             
+            let statusNote = '';
+            if (deployResult === 'success') {
+              statusNote = '\n\n> ⏱️ **Note:** Custom domains may take 5-10 minutes to activate on first deployment. Use Default URL in the meantime.';
+            }
+            
+            let footerNote = hasFailure 
+              ? `<sub>Deployment failed for commit ${shortSha} • [Check logs](${runUrl}) for details</sub>`
+              : `<sub>Built with commit ${shortSha} • Preview environments are automatically destroyed when PRs are closed</sub>`;
+            
             const commentBody = [
-              '## 🚀 Preview Environment Status',
+              `## ${projectName} – Preview`,
               '',
-              `Built from commit [\`${shortSha}\`](${commitUrl})`,
-              '',
-              '| Flavor | Status | URL | Logs |',
-              '|--------|--------|-----|------|',
+              '| Name | Status | Preview | Updated (UTC) |',
+              '|------|--------|---------|---------------|',
               rows.trim(),
+              statusNote,
               '',
-              '> ⏱️ **Note:** Custom domains may take 5-10 minutes to activate on first deployment.',
-              '',
-              `_Last updated: ${new Date().toISOString()}_`,
-              '',
-              '_Preview environments are automatically destroyed when PRs are closed._'
+              '---',
+              footerNote
             ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
@@ -347,7 +404,7 @@ jobs:
             
             const existingComment = comments.find(c => 
               c.user.login === 'github-actions[bot]' && 
-              c.body.includes('Preview Environment Status')
+              c.body.includes(`${projectName} – Preview`)
             );
             
             if (existingComment) {
@@ -371,13 +428,23 @@ jobs:
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          CUSTOM_URL_STAGING: ${{ needs.deploy.outputs.custom_url_staging }}
+          SERVICE_URL_STAGING: ${{ needs.deploy.outputs.service_url_staging }}
+          CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
+          SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
         run: |
           echo "### Preview Environments Deployed! 🎉" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**PR:** #${{ needs.setup.outputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Flavor | URL |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| Flavor | Custom Domain | Default URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------------|-------------|" >> $GITHUB_STEP_SUMMARY
           for flavor in $(echo '${{ needs.setup.outputs.flavors }}' | jq -r '.[]'); do
-            echo "| ${flavor} | https://pr-${{ needs.setup.outputs.pr_number }}-${flavor}.preview.${{ env.BASE_DOMAIN }} |" >> $GITHUB_STEP_SUMMARY
+            CUSTOM_VAR="CUSTOM_URL_$(echo $flavor | tr '[:lower:]' '[:upper:]')"
+            SERVICE_VAR="SERVICE_URL_$(echo $flavor | tr '[:lower:]' '[:upper:]')"
+            CUSTOM_URL="${!CUSTOM_VAR}"
+            SERVICE_URL="${!SERVICE_VAR}"
+            echo "| ${flavor} | ${CUSTOM_URL:-N/A} | ${SERVICE_URL:-N/A} |" >> $GITHUB_STEP_SUMMARY
           done
