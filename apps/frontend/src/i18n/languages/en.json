@@ -1612,5 +1612,10 @@
   "Auto-voting is disabled. It takes effect from the next round.": "Auto-voting is disabled. It takes effect from the next round.",
   "Auto-voting is enabled. It takes effect from the next round.": "Auto-voting is enabled. It takes effect from the next round.",
   "Voted": "Voted",
-  "<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
+  "<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round",
+  "Active apps in current round": "Active apps in current round",
+  "Your top 5 Apps": "Your top 5 Apps",
+  "Explore rounds history": "Explore rounds history",
+  "Your voting activity": "Your voting activity",
+  "Active apps": "Active apps"
 }
