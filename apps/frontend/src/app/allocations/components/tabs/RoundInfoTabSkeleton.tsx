@@ -159,7 +159,7 @@ export function RoundInfoTabSkeleton() {
               </HStack>
               {[...Array(3)].map((_, i) => (
                 <Card.Root key={i} p="4" bg="card.subtle">
-                  <Grid gridTemplateColumns="12 1fr auto" gap="4" alignItems="center">
+                  <Grid gridTemplateColumns="auto 1fr auto" gap="4" alignItems="center">
                     <Skeleton width="11" height="11" rounded="lg" />
                     <VStack gap="1" align="start">
                       <Skeleton height="4.5" width="80%" rounded="md" />
