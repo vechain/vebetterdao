@@ -15,23 +15,30 @@ type Props = {
 export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
 
+  const onDismissClick = () => {
+    setBannerEnabled(BannerStorageKey.STARGATE_MIGRATION)
+    onClose()
+  }
+
   return (
     <BaseModal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={onDismissClick}
       isCloseable={true}
       showCloseButton={true}
       modalContentProps={{ rounded: "xl", maxW: "lg" }}>
       <VStack gap={6} w="full">
         <VStack gap={2} textAlign="center">
-          <Image src="/assets/3d-illustrations/node.webp" alt="Illustration 3d Fist" width="80" height="80" />
+          <Image src="/assets/3d-illustrations/node.webp" alt="Illustration 3d Fist" width={150} height={150} />
           <Text textStyle="xl" fontWeight="bold">
-            {t("Migrate your Node NFT before December 2")}
+            {t("Migrate your Legacy Node")}
           </Text>
         </VStack>
 
         <Text textStyle="sm" textAlign="center">
-          {t("You still hold an outdated NFT. Migrate before December 2 to avoid losing your endorsement capability.")}
+          {t(
+            "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.",
+          )}
         </Text>
 
         <HStack gap={4} w="full">
@@ -39,8 +46,7 @@ export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
             flex={1}
             variant="secondary"
             onClick={() => {
-              setBannerEnabled(BannerStorageKey.STARGATE_MIGRATION)
-              onClose()
+              onDismissClick()
             }}>
             {t("Later")}
           </Button>
