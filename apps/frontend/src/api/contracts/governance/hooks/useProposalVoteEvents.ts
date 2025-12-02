@@ -1,26 +1,26 @@
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useQuery } from "@tanstack/react-query"
-import { useWallet, useThor } from "@vechain/vechain-kit"
+import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { useWallet } from "@vechain/vechain-kit"
 
-import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
+import { useEvents } from "@/hooks/useEvents"
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 
-export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS", proposalId, "VOTES"]
-/**
- * Custom hook that retrieves the vote event for a specific proposal.
- * @param proposalId - The ID of the proposal.
- * @returns An object containing information about the vote event.
- */
+const abi = B3TRGovernor__factory.abi
+const contractAddress = getConfig().b3trGovernorAddress
+
 export const useProposalVoteEvents = (proposalId: string) => {
   const { account } = useWallet()
-  const thor = useThor()
-  return useQuery({
-    queryKey: getProposalVoteEventsQueryKey(proposalId),
-    queryFn: async () => {
-      const { votes } = await getProposalsVoteEvents(thor, proposalId)
+  return useEvents({
+    abi,
+    contractAddress,
+    eventName: "VoteCast",
+    filterParams: [account?.address, BigInt(proposalId)],
+    select: events => {
+      const votes = events.map(event => event.decodedData.args)
       const totalVot3UsedInVotes = votes.reduce((acc, event) => acc + Number(event.weight), 0)
       const totalVotingPowerUsedInVotes = votes.reduce((acc, event) => acc + Number(event.power), 0)
       const votesWithComment = votes.filter(event => !!event.reason)
-      const userVote = votes.find(event => compareAddresses(event.account, account?.address ?? ""))
+      const userVote = !!account?.address ? votes.find(event => compareAddresses(event.voter, account.address)) : []
       const hasUserVoted = !!userVote
       return {
         hasUserVoted,
@@ -31,6 +31,5 @@ export const useProposalVoteEvents = (proposalId: string) => {
         totalVotingPowerUsedInVotes,
       }
     },
-    enabled: !!thor,
   })
 }

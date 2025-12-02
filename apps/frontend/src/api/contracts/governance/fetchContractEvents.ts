@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { EventLogs, FilterCriteria, ThorClient } from "@vechain/sdk-network"
 import { Abi, ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
 
-import { decodeEventLog, getAllEventLogs } from "./getEvents"
+import { decodeEventLog, getEventLogs, GetEventQueryOptions } from "./getEvents"
 
 export type FetchContractEventsParams<T extends Abi, K extends ContractEventName<T>> = {
   thor: ThorClient
@@ -10,7 +10,9 @@ export type FetchContractEventsParams<T extends Abi, K extends ContractEventName
   contractAddress: string
   eventName: K
   filterParams?: Record<string, unknown> | unknown[] | undefined
-}
+} & GetEventQueryOptions
+
+const B3TR_GOVERNOR_CREATION_BLOCK = 18868872
 
 /**
  * Fetch and decode contract events from blockchain.
@@ -23,7 +25,11 @@ export const fetchContractEvents = async <T extends Abi, K extends ContractEvent
   contractAddress,
   eventName,
   filterParams,
-  // mapResponse,
+  from = B3TR_GOVERNOR_CREATION_BLOCK,
+  to,
+  order = "desc",
+  offset,
+  limit,
 }: FetchContractEventsParams<T, K>) => {
   const eventAbi = thor.contracts.load(contractAddress, abi).getEventAbi(eventName)
   const topics = eventAbi.encodeFilterTopicsNoNull(filterParams ?? {})
@@ -44,10 +50,15 @@ export const fetchContractEvents = async <T extends Abi, K extends ContractEvent
   ]
 
   const events = (
-    await getAllEventLogs({
+    await getEventLogs({
       thor,
       nodeUrl: getConfig().nodeUrl,
       filterCriteria,
+      from,
+      to,
+      order,
+      offset,
+      limit,
     })
   ).map(event => decodeEventLog(event, abi))
 

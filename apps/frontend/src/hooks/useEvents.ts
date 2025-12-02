@@ -4,7 +4,11 @@ import { useThor } from "@vechain/vechain-kit"
 import { Abi } from "abitype"
 import { ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
 
+import { GetEventQueryOptions } from "@/api/contracts/governance/getEvents"
+
 import { fetchContractEvents } from "../api/contracts/governance/fetchContractEvents"
+
+import { useContractDeployBlock } from "./useContractDeployBlock"
 
 type FilterParams = Record<string, unknown> | unknown[] | undefined
 
@@ -20,7 +24,7 @@ export type UseEventsParams<T extends Abi, K extends ContractEventName<T>, TSele
   filterParams?: FilterParams
   select?: (data: EventResult<T, K>[]) => TSelect
   enabled?: boolean
-}
+} & Omit<GetEventQueryOptions, "from" | "to">
 
 /**
  * Custom hook for fetching contract events (client-side).
@@ -33,9 +37,10 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, TSelect
   filterParams,
   select,
   enabled = true,
+  ...queryOptions
 }: UseEventsParams<T, K, TSelect>) => {
   const thor = useThor()
-
+  const { data: from } = useContractDeployBlock(contractAddress)
   return useQuery({
     queryKey: getEventsKey({ eventName, filterParams }),
     queryFn: () =>
@@ -45,9 +50,11 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, TSelect
         contractAddress,
         eventName,
         filterParams,
+        from,
+        ...queryOptions,
       }),
     select,
-    enabled,
+    enabled: enabled && from !== undefined,
     staleTime: 5 * 1000 * 60,
   })
 }
@@ -58,12 +65,10 @@ export type GetEventsKeyParams = {
 }
 
 export const getEventsKey = ({ eventName, filterParams }: GetEventsKeyParams) => [
-  "abcd",
   eventName,
   Array.isArray(filterParams)
     ? filterParams
     : filterParams && Object.values(filterParams).length > 0
       ? Object.values(filterParams)
       : "all",
-  // filterParams && Object.values(filterParams).length > 0 ? Object.values(filterParams) : "all",
 ]

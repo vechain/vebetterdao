@@ -1,19 +1,15 @@
-import { useQuery } from "@tanstack/react-query"
-import { useWallet, useThor } from "@vechain/vechain-kit"
-import { useMemo } from "react"
+import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { useWallet } from "@vechain/vechain-kit"
 
+import { useEvents } from "@/hooks/useEvents"
 import { VoteType } from "@/types/voting"
 
-import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
+const abi = B3TRGovernor__factory.abi
+const contractAddress = getConfig().b3trGovernorAddress
 
-/**
- * Map numeric support values to VoteType enum
- * @param support - The numeric support value (0, 1, 2)
- * @returns The corresponding VoteType enum value
- */
-const mapSupportToVoteType = (support: string): VoteType | undefined => {
-  const supportValue = Number(support)
-  switch (supportValue) {
+const mapSupportToVoteType = (support: number): VoteType | undefined => {
+  switch (support) {
     case 0:
       return VoteType.VOTE_AGAINST
     case 1:
@@ -24,44 +20,42 @@ const mapSupportToVoteType = (support: string): VoteType | undefined => {
       return undefined
   }
 }
+
 export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "VOTES", user]
 /**
  * Custom hook that retrieves the vote events of a specific user for all proposals.
  * @returns An object containing information about the vote event.
  */
-export const useUserProposalsVoteEvents = (user?: string) => {
-  const thor = useThor()
-  return useQuery({
-    queryKey: getUserProposalsVoteEventsQueryKey(user ?? undefined),
-    queryFn: async () => {
-      const { votes } = await getProposalsVoteEvents(thor, undefined, user ?? undefined)
-      return votes
-    },
-    enabled: !!thor && !!user,
+export const useUserProposalsVoteEvents = () => {
+  const { account } = useWallet()
+  return useEvents({
+    abi,
+    contractAddress,
+    eventName: "VoteCast",
+    filterParams: [account?.address],
+    select: events => events.map(event => event.decodedData.args),
+    enabled: !!account?.address,
   })
 }
-/**
- * Custom hook that retrieves the vote of a specific user for a specific proposal.
- * @param proposalId - The ID of the proposal.
- * @returns An object containing information about the vote event with mapped vote type.
- */
+
 export const useUserSingleProposalVoteEvent = (proposalId?: string) => {
   const { account } = useWallet()
-  const userProposalVoteEventsQuery = useUserProposalsVoteEvents(account?.address ?? undefined)
+  return useEvents({
+    abi,
+    contractAddress,
+    eventName: "VoteCast",
+    filterParams: [account?.address, BigInt(proposalId ?? 0)],
+    select: events => {
+      const userVoteEvent = events?.[0]
+      if (!userVoteEvent) return undefined
 
-  const vote = useMemo(() => {
-    const rawVote = userProposalVoteEventsQuery.data?.find(vote => vote.proposalId === proposalId)
-    if (!rawVote) return undefined
-
-    return {
-      ...rawVote,
-      userVote: mapSupportToVoteType(rawVote.support),
-      hasVoted: true,
-    }
-  }, [proposalId, userProposalVoteEventsQuery.data])
-
-  return {
-    ...userProposalVoteEventsQuery,
-    data: vote,
-  }
+      const rawVote = userVoteEvent.decodedData.args
+      return {
+        ...rawVote,
+        userVote: mapSupportToVoteType(rawVote.support),
+        hasVoted: true,
+      }
+    },
+    enabled: !!proposalId,
+  })
 }

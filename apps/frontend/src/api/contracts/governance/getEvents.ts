@@ -42,6 +42,9 @@ export type GetEventsProps = {
   to?: number
   filterCriteria: FilterEventLogsOptions["criteriaSet"]
 }
+
+export type GetEventQueryOptions = Pick<GetEventsProps, "order" | "offset" | "limit" | "from" | "to">
+
 /**
  * Get events from blockchain (auction created, auction successful, auction cancelled)
  * @param order
