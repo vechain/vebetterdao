@@ -110,8 +110,7 @@ AnnouncementBannersMobileDarkMode.globals = { theme: "dark", viewport: { value: 
 
 export const StargateAnnouncementsLightMode = () => (
   <VStack gap="8" w="full">
-    <StargateMigrationBanner isLegacyNode={false} />
-    <StargateMigrationBanner isLegacyNode={true} />
+    <StargateMigrationBanner />
   </VStack>
 )
 
