@@ -42,8 +42,9 @@ export const VotingPowerBox = () => {
             {votingPowerNextRound !== 0n && (
               <Badge variant="neutral" bg="card.default" color="text.subtle" fontWeight="normal" size="sm" rounded="sm">
                 <Trans
-                  i18nKey="<bold>+{{votingPowerNextRound}}</bold> in next round"
+                  i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
                   values={{
+                    sign: votingPowerNextRound > 0n ? "+" : "-",
                     votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
                   }}
                   components={{

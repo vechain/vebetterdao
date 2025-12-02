@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from "react"
 
+import { distributePercentagesEqually } from "@/utils/MathUtils/MathUtils"
+
 export interface AllocationData {
   appId: string
   percentage: number
@@ -15,21 +17,10 @@ export const useConfirmVoteModal = (appIds: string[]) => {
     (targetAppIds: string[], totalPercentage: number, resultMap: Map<string, number>) => {
       if (targetAppIds.length === 0) return
 
-      const basePercentage = Math.floor((totalPercentage / targetAppIds.length) * 100) / 100
-      let distributed = 0
-
-      // Assign base percentage to each app
-      targetAppIds.forEach(id => {
-        resultMap.set(id, basePercentage)
-        distributed += basePercentage
+      const percentages = distributePercentagesEqually(totalPercentage, targetAppIds.length)
+      targetAppIds.forEach((id, index) => {
+        resultMap.set(id, percentages[index]!)
       })
-
-      // Add remainder to last app to reach exact total
-      const remainder = parseFloat((totalPercentage - distributed).toFixed(2))
-      if (remainder !== 0) {
-        const lastAppId = targetAppIds[targetAppIds.length - 1]!
-        resultMap.set(lastAppId, parseFloat((basePercentage + remainder).toFixed(2)))
-      }
     },
     [],
   )

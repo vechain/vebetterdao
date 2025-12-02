@@ -11,7 +11,11 @@ import { getAutoVotingState } from "@/hooks/useAutoVotingState"
 import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
 import { useUpdateVotingPreferences } from "@/hooks/useUpdateVotingPreferences"
-import { scaledDivision } from "@/utils/MathUtils/MathUtils"
+import {
+  distributeVotingPowerEqually,
+  percentagesToWeiWithExactSum,
+  EQUAL_VOTES_DETECTION_THRESHOLD,
+} from "@/utils/MathUtils/MathUtils"
 
 import { VotingWeightDisplay } from "../../../VotingWeightDisplay"
 
@@ -81,31 +85,44 @@ export const useAllocationVoting = ({
 
   const handleConfirmVote = useCallback(
     (allocations: Map<string, number>) => {
-      if (!votesAtSnapshot?.totalVotesWithDeposits) {
+      if (!votesAtSnapshot?.totalVotesWithDepositsWei) {
         throw new Error("Votes at snapshot not found")
       }
 
-      // Convert percentages to weighted votes using scaledDivision
-      // This uses floor division which guarantees we never exceed total voting power
-      const totalVotingPower = Number(votesAtSnapshot.totalVotesWithDeposits)
-      const allocationsWithWeight = new Map<string, number>()
+      const totalVotingPowerWei = votesAtSnapshot.totalVotesWithDepositsWei
+      const appIds = Array.from(allocations.keys())
+      const percentages = Array.from(allocations.values())
 
-      allocations.forEach((percentage, appId) => {
-        const weight = scaledDivision(percentage * totalVotingPower, 100)
-        if (weight > 0) {
-          allocationsWithWeight.set(appId, weight)
+      // Detect if user selected "Equal votes" (all percentages within threshold of each other)
+      const isEqualDistribution =
+        percentages.length > 0 &&
+        percentages.every(p => Math.abs(p - percentages[0]!) < EQUAL_VOTES_DETECTION_THRESHOLD)
+
+      // Use pure BigInt division for equal distribution
+      // Use percentage conversion for custom allocations (might lose some precision)
+      const voteWeightsWei = isEqualDistribution
+        ? distributeVotingPowerEqually(totalVotingPowerWei, appIds.length)
+        : percentagesToWeiWithExactSum(totalVotingPowerWei, percentages)
+
+      // Filter out zero weights
+      const allocationsWithWeightWei = new Map<string, bigint>()
+      appIds.forEach((appId, index) => {
+        const weight = voteWeightsWei[index]
+        if (weight && weight > 0n) {
+          allocationsWithWeightWei.set(appId, weight)
         }
       })
 
-      // Extract app IDs and weights
-      const appIds = Array.from(allocationsWithWeight.keys())
-      const voteWeights = Array.from(allocationsWithWeight.values())
+      // Re-extract after filtering (in case any were zero)
+      const filteredAppIds = Array.from(allocationsWithWeightWei.keys())
+      const filteredVoteWeightsWei = Array.from(allocationsWithWeightWei.values())
 
       // Calculate total voting weight for display in modal
-      const totalVotingWeight = voteWeights.reduce((sum, weight) => sum + weight, 0)
+      const totalVotingWeightWei = filteredVoteWeightsWei.reduce((sum, weight) => sum + weight, 0n)
+      const totalVotingWeightEther = Number(ethers.formatEther(totalVotingWeightWei))
 
       const compactFormatter = getCompactFormatter(2)
-      const formattedWeight = compactFormatter.format(totalVotingWeight)
+      const formattedWeight = compactFormatter.format(totalVotingWeightEther)
 
       // Create voting weight description
       const votingWeightDescription = createVotingWeightDescription(formattedWeight)
@@ -116,7 +133,7 @@ export const useAllocationVoting = ({
           isAutoVotingEnabled,
           isAutoVotingEnabledOnChain,
           currentPreferences,
-          selectedAppIds: appIds,
+          selectedAppIds: filteredAppIds,
           hasVoted: hasVoted ?? false,
         })
 
@@ -172,13 +189,11 @@ export const useAllocationVoting = ({
         }
 
         if (account?.address) {
-          // Convert to bigint for contract call
-          const voteWeightsWei = voteWeights.map(w => ethers.parseEther(w.toString()))
           manageAutoVotingAndVote.sendTransaction(
             {
               roundId,
-              appIds,
-              voteWeights: voteWeightsWei,
+              appIds: filteredAppIds,
+              voteWeights: filteredVoteWeightsWei,
               userAddress: account.address,
               hasVoted: hasVoted ?? false,
               shouldEnable,
@@ -212,14 +227,14 @@ export const useAllocationVoting = ({
             },
           }
 
-          updateVotingPreferences.sendTransaction({ appIds }, customUI)
+          updateVotingPreferences.sendTransaction({ appIds: filteredAppIds }, customUI)
         }
       }
       // Default: No auto-voting involved, just manual vote
       else {
-        const appVotes = Array.from(allocationsWithWeight.entries()).map(([appId, weight]) => ({
+        const appVotes = Array.from(allocationsWithWeightWei.entries()).map(([appId, weightWei]) => ({
           appId,
-          votes: weight,
+          votes: ethers.formatEther(weightWei),
         }))
 
         const customUI = createCustomUI(
