@@ -11,11 +11,13 @@ async function main() {
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
-  console.log("Hardhat network name:", network.name, network)
+  console.log("Hardhat network name:", network.name)
 
   console.log(
     `Upgrading GalaxyMember contract at address: ${config.galaxyMemberContractAddress} on network: ${config.network.name}`,
   )
+
+  console.log(`StargateNFT contract address: ${config.stargateNFTContractAddress}`)
 
   const galaxyMemberV6 = (await upgradeProxy(
     "GalaxyMemberV5",

@@ -46,6 +46,8 @@ async function main() {
     `Upgrading X2EarnApps contract at address: ${config.x2EarnAppsContractAddress} on network: ${config.network.name}`,
   )
 
+  console.log(`StargateNFT contract address: ${config.stargateNFTContractAddress}`)
+
   const x2EarnAppsV7 = (await upgradeProxy(
     "X2EarnAppsV6",
     "X2EarnApps",
