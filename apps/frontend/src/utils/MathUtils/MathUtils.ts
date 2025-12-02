@@ -25,10 +25,13 @@ export const scaledDivision = (numerator: number, denominator: number, scalingFa
  * @param percentage - Percentage to convert to voting weight (e.g., 50.5 for 50.5%)
  * @returns Voting weight in wei (bigint)
  *
- * Important: This is a helper function for UI display purposes. It is not intended to be used for contract calls as we might get in-accurate precision.
+ * Note: Uses 6 decimal precision to match the voting calculation.
+ * For truly equal distribution, use distributeVotingPowerEqually instead. This is for FE usage only.
  */
 export const calculateVotingWeightFromPercentage = (totalVotingPowerWei: bigint, percentage: number): bigint => {
-  return (totalVotingPowerWei * BigInt(Math.round(percentage * 100))) / 10000n
+  return (
+    (totalVotingPowerWei * BigInt(Math.round(percentage * PERCENTAGE_PRECISION))) / (100n * PERCENTAGE_PRECISION_BIGINT)
+  )
 }
 
 /**
