@@ -45,7 +45,7 @@ export const SelectedAppsPreview = ({ apps, onEditSelection }: SelectedAppsPrevi
         overflowX="auto">
         {apps.map(app => (
           <Box key={app.id} display="inline-block" pos="relative">
-            <AppImage appId={app.id} boxSize="48px" borderRadius="lg" flexShrink={0} />
+            <AppImage appId={app.id} appLogo={app.metadata?.logo} boxSize="48px" borderRadius="lg" flexShrink={0} />
             <Float placement="top-end">
               <Circle background="status.positive.primary" border="sm" borderColor="status.positive.subtle">
                 <Icon as={Check} color="white" />

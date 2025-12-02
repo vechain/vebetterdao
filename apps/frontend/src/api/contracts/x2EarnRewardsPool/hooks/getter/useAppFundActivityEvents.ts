@@ -32,7 +32,7 @@ export const useAppFundActivityEvents = (appId: string) => {
   const [enrichedRewardsPoolEvents, setEnrichedRewardsPoolEvents] = useState<AppFundActivityEvent[]>([])
   const [isEnriching, setIsEnriching] = useState(false)
 
-  const filterParams = { appId }
+  const filterParams = { appId: appId as `0x${string}` }
   const rawDepositEvents = useEvents({
     contractAddress,
     abi,

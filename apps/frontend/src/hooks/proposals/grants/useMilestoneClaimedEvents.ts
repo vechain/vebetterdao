@@ -7,6 +7,7 @@ import { useEvents } from "../../useEvents"
 
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 const abi = GrantsManager__factory.abi
+
 export type MilestoneClaimedEvent = {
   proposalId: string
   milestoneIndex: number
@@ -15,11 +16,12 @@ export type MilestoneClaimedEvent = {
   blockTimestamp: number
   blockNumber: number
 }
+
 export const useMilestoneClaimedEvents = () => {
   const milestoneClaimedEvents = useEvents({
+    abi,
     contractAddress: grantsManagerAddress,
     eventName: "MilestoneClaimed",
-    abi,
     select: events =>
       events.map(response => ({
         proposalId: response.decodedData.args.proposalId.toString(),

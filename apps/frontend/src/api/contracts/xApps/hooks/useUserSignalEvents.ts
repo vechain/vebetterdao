@@ -17,7 +17,7 @@ export type SignalEvent = {
  * @param user The user address to get the signal events for
  */
 export const useUserSignalEvents = (user: string) => {
-  const filterParams = { user }
+  const filterParams = { user: user as `0x${string}` }
   const rawSignaledEvents = useEvents({
     contractAddress,
     abi,

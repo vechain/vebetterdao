@@ -179,16 +179,17 @@ export function AppCategoryTabs({
           <VotingAlerts />
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{"Active apps in current round"}</Heading>
-            <Flex gap="4">
-              {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
-              {((!!account?.address && !hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) ||
-                isEditingAutoVote) && (
-                <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
-                  {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
-                </Button>
-              )}
-              <VoteButtons variant="desktop" />
-            </Flex>
+            {!!account?.address && (
+              <Flex gap="4">
+                {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
+                {((!hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) || isEditingAutoVote) && (
+                  <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
+                    {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
+                  </Button>
+                )}
+                <VoteButtons variant="desktop" />
+              </Flex>
+            )}
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">
             <SearchField placeholder="Search app" value={searchQueryDesktop} onChange={setSearchQueryDesktop} />
@@ -278,6 +279,7 @@ export function AppCategoryTabs({
                 <AppRadioCard
                   key={app.id}
                   appId={app.id}
+                  appLogo={app.metadata?.logo}
                   appName={app.name}
                   appVoters={app.voters}
                   appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}

@@ -24,7 +24,7 @@ export const useUserVotesInAllRounds = (address?: string) => {
     abi,
     contractAddress,
     eventName,
-    filterParams: { voter: address },
+    filterParams: { voter: (address ?? "") as `0x${string}` },
     select: events =>
       events.map(({ decodedData }) => {
         const { voter, roundId, appsIds, voteWeights } = decodedData.args

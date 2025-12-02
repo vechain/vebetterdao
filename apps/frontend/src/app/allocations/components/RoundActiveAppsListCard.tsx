@@ -29,11 +29,15 @@ const INITIAL_DISPLAY_COUNT = 4
 
 const RoundActiveAppCard = ({
   id,
+  appLogo,
   name,
   votesReceived,
   earnings,
   onClick,
-}: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & { onClick: (id: string) => void }) => (
+}: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & {
+  appLogo?: string
+  onClick: (id: string) => void
+}) => (
   <Button key={id} unstyled asChild onClick={() => onClick(id)}>
     <Card.Root
       variant="action"
@@ -44,7 +48,7 @@ const RoundActiveAppCard = ({
       p={{ base: "2", md: "3" }}
       px={{ base: "1", md: "3" }}
       columnGap="4">
-      <AppImage boxSize="11" appId={id || ""} flexShrink={0} shape="square" borderRadius="lg" />
+      <AppImage appId={id || ""} appLogo={appLogo} boxSize="11" flexShrink={0} shape="square" borderRadius="lg" />
       <VStack gap="1" alignItems="start">
         <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
           {name || "-"}
@@ -131,6 +135,7 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
                           key={app.id}
                           id={app.id}
                           name={app.name}
+                          appLogo={app.metadata?.logo}
                           votesReceived={app.votesReceived}
                           earnings={app.earnings}
                           onClick={setClickedApp}

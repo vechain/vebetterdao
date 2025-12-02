@@ -24,8 +24,8 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
     contractAddress,
     eventName: "RewardClaimedV2",
     filterParams: {
-      cycle: round.roundId,
-      voter: account?.address,
+      cycle: BigInt(round.roundId),
+      voter: (account?.address ?? "") as `0x${string}`,
     },
     select: events =>
       events.map(({ decodedData }) => {
