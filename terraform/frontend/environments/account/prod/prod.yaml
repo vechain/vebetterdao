@@ -4,10 +4,9 @@ environment: prod
 region: eu-west-1
 account_id: "851725442887"
 
-hosted_zone_names:
-  prod: governance.vebetterdao.org
-
-# Optional role to assume when running Terraform (leave blank to use caller credentials)
-# assume_role_arn: "arn:aws:iam::851725442887:role/terraform-deployer"
+hosted_zones_and_certificates:
+  prod:
+    zone_name: governance.vebetterdao.org
+    certificate_names: [governance.vebetterdao.org]
 
 ecr_repository_name: governance-frontend

@@ -10,12 +10,11 @@ account_level_state_region: eu-west-1
 
 domain: dev.testnet.governance.vebetterdao.org
 enable_custom_domain: true
-manage_dns_records: false
 route53_zone_name: testnet.governance.vebetterdao.org
 
 ssm_parameter_prefix: /b3tr/frontend/dev-testnet/
-runtime_env_var_names:
-runtime_env_secret_names:
+runtime_env_var_names: []
+runtime_env_secret_names: []
 
 image_tag: dev-latest
 cpu: 1024

@@ -1,9 +1,14 @@
 ################################################################################
 # Hosted Zone & DNS Record creation
 ################################################################################
+
 resource "aws_route53_zone" "governance_public_zone" {
-  for_each = local.env.hosted_zone_names
-  name     = each.value
+  for_each = local.env.hosted_zones_and_certificates
+  name     = each.value.zone_name
+  
+  tags = merge(local.default_tags, {
+    Name = each.value.zone_name
+  })
 }
 
 # Add the dev zone NS records to the prod zone so only the root domain needs registering in root account

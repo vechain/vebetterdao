@@ -238,16 +238,16 @@ jobs:
           if [ -f "${SOURCE_CONFIG}" ]; then
             echo "Extracting config from ${SOURCE_CONFIG}..."
             
-            # Extract ssm_parameter_prefix, runtime_env_var_names, and runtime_env_secret_names
+            # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
             yq eval '{
               "ssm_parameter_prefix": .ssm_parameter_prefix,
+              "route53_zone_name": .route53_zone_name,
               "runtime_env_var_names": (.runtime_env_var_names // []),
               "runtime_env_secret_names": (.runtime_env_secret_names // [])
             } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
           else
-            echo "Warning: Source config ${SOURCE_CONFIG} not found. Using defaults."
-            echo "runtime_env_var_names: []" >> "${TARGET_FILE}"
-            echo "runtime_env_secret_names: []" >> "${TARGET_FILE}"
+            echo "Warning: Source config ${SOURCE_CONFIG} not found."
+            exit 1
           fi
           
           # Step 5: Show the generated config for debugging

@@ -10,7 +10,6 @@ account_level_state_region: eu-west-1
 
 domain: beta.governance.vebetterdao.org
 enable_custom_domain: true
-manage_dns_records: false
 route53_zone_name: beta.governance.vebetterdao.org
 
 ssm_parameter_prefix: /b3tr/frontend/beta/

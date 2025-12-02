@@ -59,7 +59,8 @@ jobs:
     needs: validate-version-format
     uses: ./.github/workflows/build-push-ecr.yml
     with:
-      ecr_repository: block-explorer
+      ecr_repository: governance-frontend
+      environment: prod
       image_tag: ${{ needs.validate-version-format.outputs.image_tag }}
       aws_region: eu-west-1
     secrets:
@@ -74,7 +75,7 @@ jobs:
       contents: read
     environment:
       name: prod
-      url: https://block-explorer.vechain.org
+      url: https://governance.vebetterdao.org
 
     steps:
       - name: Checkout code
