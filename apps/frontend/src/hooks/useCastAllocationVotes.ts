@@ -24,10 +24,11 @@ const GAS_PADDING = 0.15
  * CastAllocationVotesProps is the type of the data to send to the castAllocationVotes hook
  * appId is the id of the app to vote
  * votes is the vote weight in ether (will be converted to wei via parseEther)
+ * accepts number or string for precision (string is recommended)
  */
 export type CastAllocationVotesProps = {
   appId: string
-  votes: number
+  votes: number | string
 }[]
 
 type useCastAllocationVotesProps = {
@@ -53,7 +54,11 @@ export const useCastAllocationVotes = ({
 
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
-      const filteredData = data.filter(value => value.votes > 0)
+      // Filter out zero votes (handle both number and string types)
+      const filteredData = data.filter(value => {
+        const numVotes = typeof value.votes === "string" ? parseFloat(value.votes) : value.votes
+        return numVotes > 0
+      })
 
       const apps = filteredData.map(value => value.appId)
       const votes = filteredData.map(value => ethers.parseEther(value.votes.toString()))
