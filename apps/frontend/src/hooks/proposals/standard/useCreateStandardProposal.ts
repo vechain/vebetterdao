@@ -10,7 +10,6 @@ import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 import { getAllProposalsStateQueryKey } from "../../../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalClaimableUserDepositsQueryKey } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
-import { getProposalsEventsQueryKey } from "../../../api/contracts/governance/hooks/useProposalsEvents"
 import { useBuildTransaction } from "../../useBuildTransaction"
 import { getEventsKey } from "../../useEvents"
 import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
@@ -119,9 +118,6 @@ export const useCreateStandardProposal = ({ onSuccess, transactionModalCustomUI 
 
       // Invalidate user-specific data
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
-
-      // Legacy query keys for backwards compatibility
-      getProposalsEventsQueryKey(),
     ]
   }, [account?.address])
   return useBuildTransaction({

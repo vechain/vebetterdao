@@ -3,8 +3,8 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
 
-import { ProposalMetadata } from "../../../../../api/contracts/governance/getProposalsEvents"
 import { useProposalState } from "../../../../../api/contracts/governance/hooks/useProposalState"
+import { ProposalMetadata } from "../../../../../api/contracts/governance/types"
 import { ProposalStatusBadge } from "../../../../../components/Proposal/ProposalStatusBadge"
 
 type Props = {
