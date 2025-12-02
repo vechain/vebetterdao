@@ -16,7 +16,7 @@ data "aws_ssm_parameter" "runtime_env_secrets" {
 }
 
 resource "aws_apprunner_auto_scaling_configuration_version" "frontend" {
-  auto_scaling_configuration_name = "${local.service_name}"
+  auto_scaling_configuration_name = substr(local.service_name, 0, 32)
 
   max_concurrency = local.env.max_concurrency
   min_size        = local.env.min_size
