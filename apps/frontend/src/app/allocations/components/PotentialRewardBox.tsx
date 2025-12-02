@@ -127,7 +127,7 @@ export const PotentialRewardBox = () => {
             <Mark variant="text" fontWeight="semibold">
               {potentialReward ? Number(formatEther(potentialReward.netTotal)).toFixed(2) : "-"}
             </Mark>
-            {" B3TR"}
+            {potentialReward && " B3TR"}
           </Text>
         </Skeleton>
       }

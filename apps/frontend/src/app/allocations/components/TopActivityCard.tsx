@@ -89,7 +89,13 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
           {top5VotedApps.map((app, idx) => (
             <Flex key={app!.id} gap="4" alignItems="center">
               <Box position="relative">
-                <AppImage appId={app!.id} flexShrink={0} shape="square" borderRadius="lg" />
+                <AppImage
+                  appId={app!.id}
+                  appLogo={app?.metadata?.logo}
+                  flexShrink={0}
+                  shape="square"
+                  borderRadius="lg"
+                />
                 <Float placement="top-start">
                   <Circle
                     size="5"

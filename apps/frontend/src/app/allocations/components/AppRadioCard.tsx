@@ -10,6 +10,7 @@ export type DisplayMode = "checkbox" | "voted"
 export interface AppRadioCardProps {
   appId: string
   appName: string
+  appLogo?: string
   appCategory?: AppCategoryItem
   appVoters: number
   allocationSharePercentage?: number
@@ -25,6 +26,7 @@ export const AppRadioCard = ({
   appId,
   appCategory,
   appName,
+  appLogo,
   appVoters,
   allocationSharePercentage,
   displayMode = "checkbox",
@@ -50,7 +52,7 @@ export const AppRadioCard = ({
       <CheckboxCard.Control alignItems="center" p="0" gap="3">
         {!isVotedMode && <CheckboxCard.Indicator rounded="sm" />}
         <Box position="relative">
-          <AppImage boxSize={{ base: "44px", md: "60px" }} borderRadius="0.5rem" appId={appId} />
+          <AppImage appId={appId} appLogo={appLogo} boxSize={{ base: "44px", md: "60px" }} borderRadius="0.5rem" />
           {isVotedMode && checked && (
             <Float placement="top-end" offsetX="1" offsetY="1">
               <Circle size="18px" bg="actions.primary.default" border="2px solid" borderColor="white">

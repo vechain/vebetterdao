@@ -23,7 +23,7 @@ export const VotingPowerBox = () => {
   const { vot3Balance, isLoading } = useVotingPowerAtSnapshot()
   const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
 
-  const formatted = vot3Balance?.formatted ?? "0"
+  const formatted = vot3Balance?.formatted ?? "-"
   const votingPowerNextRound = BigInt(currentVot3Balance?.original || "0") - BigInt(vot3Balance?.original || "0")
 
   return (
@@ -44,9 +44,7 @@ export const VotingPowerBox = () => {
                 <Trans
                   i18nKey="<bold>+{{votingPowerNextRound}}</bold> in next round"
                   values={{
-                    votingPowerNextRound: getCompactFormatter(2).format(
-                      Number(formatEther(votingPowerNextRound, "wei")),
-                    ),
+                    votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
                   }}
                   components={{
                     bold: (

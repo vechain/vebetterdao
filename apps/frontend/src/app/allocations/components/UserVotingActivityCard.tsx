@@ -51,7 +51,14 @@ const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
   <Card.Root key={app?.id} p="4" bg="card.subtle" asChild>
     <Grid gridTemplateColumns="50px 1fr auto" alignItems="center">
       <Box position="relative">
-        <AppImage boxSize="11" appId={app?.id || ""} flexShrink={0} shape="square" borderRadius="lg" />
+        <AppImage
+          appId={app?.id || ""}
+          appLogo={app?.metadata?.logo}
+          boxSize="11"
+          flexShrink={0}
+          shape="square"
+          borderRadius="lg"
+        />
         <Float placement="top-end" offsetX="3" offsetY="1">
           <Circle
             size="4"
@@ -101,7 +108,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     enabled: !!account?.address,
   })
 
-  const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
+  const { data: [rewardClaimed] = [], isLoading: isRewardClaimedLoading } = useEvents({
     abi: voterRewardsAbi,
     contractAddress: voterRewardsAddress,
     eventName: "RewardClaimedV2",
@@ -191,6 +198,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
             <Separator hideFrom="md" orientation="vertical" borderColor="border.secondary" />
             <Card.Root
               p={{ base: 0, md: "4" }}
+              minH="full"
               bg={{ base: "transparent", md: "card.subtle" }}
               gap="1"
               height="max-content">
@@ -199,11 +207,15 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               </Text>
 
               <Skeleton loading={isRewardClaimedLoading}>
-                <Text textStyle="xl" fontWeight="semibold" color="status.positive.primary">
-                  {"+"}
-                  {getCompactFormatter(2).format(Number(rewardClaimed))}
-                  {" B3TR"}
-                </Text>
+                {rewardClaimed ? (
+                  <Text textStyle="xl" fontWeight="semibold" color="status.positive.primary">
+                    {"+"}
+                    {getCompactFormatter(2).format(Number(rewardClaimed))}
+                    {" B3TR"}
+                  </Text>
+                ) : (
+                  "-"
+                )}
               </Skeleton>
             </Card.Root>
             <VStack gridColumn={{ base: "1 / 4", md: "1 / 3" }} align="stretch" gap="3">
