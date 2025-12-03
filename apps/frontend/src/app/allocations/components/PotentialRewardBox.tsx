@@ -66,7 +66,7 @@ export const PotentialRewardBox = () => {
       {
         abi: voterRewardsAbi,
         address: voterRewardsAddress,
-        functionName: "getGMReward" as const,
+        functionName: "cycleToVoterToGMWeight" as const,
         args: [currentRoundId!, account?.address as `0x{string}`],
       },
       {

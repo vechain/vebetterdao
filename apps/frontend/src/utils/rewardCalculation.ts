@@ -105,9 +105,13 @@ export function calculatePotentialRewards({
   if (hadAutoVotingEnabled) {
     fee = calculateRelayerFee(totalRawReward, relayerFeePercentage)
 
-    // Apply proportional fee distribution
-    netReward = rawReward - (fee * rawReward) / totalRawReward
-    netGmReward = rawGmReward - (fee * rawGmReward) / totalRawReward
+    // Apply proportional fee distribution with underflow protection
+    const feePortionForReward = (fee * rawReward) / totalRawReward
+    const feePortionForGmReward = (fee * rawGmReward) / totalRawReward
+
+    // Ensure we don't underflow (fee portions should never exceed raw rewards)
+    netReward = rawReward >= feePortionForReward ? rawReward - feePortionForReward : 0n
+    netGmReward = rawGmReward >= feePortionForGmReward ? rawGmReward - feePortionForGmReward : 0n
   }
 
   return {
