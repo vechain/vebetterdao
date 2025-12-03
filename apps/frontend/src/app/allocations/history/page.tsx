@@ -7,6 +7,7 @@ import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emi
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { ThorClient, executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import Link from "next/link"
+import { Suspense } from "react"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
 import { fetchClient } from "@/api/indexer/api"
@@ -17,6 +18,8 @@ import { getNodeJsThorClient } from "@/utils/getNodeJsThorClient"
 
 import { RoundHistoryCard } from "../components/tabs/round-info/RoundHistoryCard"
 import { getCurrentRoundId } from "../lib/data"
+
+import { HistoryListSkeleton } from "./components/HistoryListSkeleton"
 
 const xAllocationVotingabi = XAllocationVoting__factory.abi
 const xAllocationVotingContractAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
@@ -166,14 +169,7 @@ export const getRounds = async ({
   }
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  const searchParamsData = await searchParams
-  const pageNum = Math.max(1, parseInt(String(searchParamsData.page || "1"), 10))
-
+async function HistoryListContent({ pageNum }: { pageNum: number }) {
   const roundsResponse = await getRounds({ page: pageNum })
   const { data: rounds, currentRoundId } = roundsResponse
 
@@ -212,5 +208,20 @@ export default async function Page({
         </ButtonGroup>
       </Pagination.Root>
     </VStack>
+  )
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const searchParamsData = await searchParams
+  const pageNum = Math.max(1, parseInt(String(searchParamsData.page || "1"), 10))
+
+  return (
+    <Suspense key={pageNum} fallback={<HistoryListSkeleton />}>
+      <HistoryListContent pageNum={pageNum} />
+    </Suspense>
   )
 }

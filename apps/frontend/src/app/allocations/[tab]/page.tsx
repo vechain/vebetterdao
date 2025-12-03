@@ -3,14 +3,17 @@ export const fetchCache = "force-no-store"
 
 import { Tabs } from "@chakra-ui/react"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 
 import { FeatureFlag, featureFlags } from "@/constants/featureFlag"
 import { getPageMetadata } from "@/utils/metadata"
 
 import { AllocationTabsProvider } from "../components/tabs/AllocationTabsProvider"
 import { RoundInfoTab } from "../components/tabs/round-info/RoundInfoTab"
+import { RoundInfoTabSkeleton } from "../components/tabs/RoundInfoTabSkeleton"
 import { TabNavigation } from "../components/tabs/TabNavigation"
 import { VoteTab } from "../components/tabs/vote/VoteTab"
+import { VoteTabSkeleton } from "../components/tabs/VoteTabSkeleton"
 import { getHistoricalRoundData } from "../lib/data"
 
 export const metadata = getPageMetadata("allocations")
@@ -20,14 +23,7 @@ interface TabsPageProps {
   searchParams: Promise<{ roundId?: string }>
 }
 
-export default async function TabsPage({ params, searchParams }: TabsPageProps) {
-  if (!featureFlags[FeatureFlag.ALLOCATION_REDESIGN].enabled) return redirect("/rounds")
-
-  const { tab = "vote" } = await params
-  const { roundId: roundIdParam } = await searchParams
-
-  if (tab !== "" && tab !== "vote" && tab !== "round") return redirect("/allocations")
-
+async function AllocationContent({ roundIdParam }: { roundIdParam?: string }) {
   let roundDetails
 
   if (roundIdParam) {
@@ -43,14 +39,40 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
 
   return (
     <AllocationTabsProvider roundDetails={roundDetails}>
-      <TabNavigation currentTab={tab}>
-        <Tabs.Content value="vote" display="flex" flexDirection="column" gap="4">
-          <VoteTab />
-        </Tabs.Content>
-        <Tabs.Content value="round">
-          <RoundInfoTab />
-        </Tabs.Content>
-      </TabNavigation>
+      <Tabs.Content value="vote" display="flex" flexDirection="column" gap="4">
+        <VoteTab />
+      </Tabs.Content>
+      <Tabs.Content value="round">
+        <RoundInfoTab />
+      </Tabs.Content>
     </AllocationTabsProvider>
+  )
+}
+
+export default async function TabsPage({ params, searchParams }: TabsPageProps) {
+  if (!featureFlags[FeatureFlag.ALLOCATION_REDESIGN].enabled) return redirect("/rounds")
+
+  const { tab = "vote" } = await params
+  const { roundId: roundIdParam } = await searchParams
+
+  if (tab !== "" && tab !== "vote" && tab !== "round") return redirect("/allocations")
+
+  const fallback =
+    tab === "round" ? (
+      <Tabs.Content value="round">
+        <RoundInfoTabSkeleton />
+      </Tabs.Content>
+    ) : (
+      <Tabs.Content value="vote" display="flex" flexDirection="column" gap="4">
+        <VoteTabSkeleton />
+      </Tabs.Content>
+    )
+
+  return (
+    <TabNavigation currentTab={tab}>
+      <Suspense key={roundIdParam ?? "current"} fallback={fallback}>
+        <AllocationContent roundIdParam={roundIdParam} />
+      </Suspense>
+    </TabNavigation>
   )
 }
