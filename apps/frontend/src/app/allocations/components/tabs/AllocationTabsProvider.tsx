@@ -285,6 +285,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
       </Presence>
 
       <ConfirmVoteModal
+        key={selectedApps.map(a => a.id).join(",")}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         selectedApps={selectedApps}
