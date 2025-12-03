@@ -8,6 +8,7 @@ import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { useCallClause, useMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
@@ -30,6 +31,7 @@ const relayerRewardsAddress = getConfig().relayerRewardsPoolContractAddress as `
 export const PotentialRewardBox = () => {
   const { account } = useWallet()
   const thor = useThor()
+  const { t } = useTranslation()
 
   const { data: currentRoundId } = useCallClause({
     abi: xAllocationVotingAbi,
@@ -119,7 +121,7 @@ export const PotentialRewardBox = () => {
   return (
     <StatCard
       variant="info"
-      title="Potential rewards"
+      title={t("Potential rewards")}
       icon={<B3TRIcon />}
       subtitle={
         <Skeleton asChild loading={isLoading}>

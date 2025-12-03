@@ -6,6 +6,7 @@ import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/facto
 import { useCallClause } from "@vechain/vechain-kit"
 import { Clock } from "iconoir-react"
 import Countdown from "react-countdown"
+import { useTranslation } from "react-i18next"
 
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { blockNumberToDate } from "@/utils/date"
@@ -16,6 +17,7 @@ const xAllocationVotingAbi = XAllocationVoting__factory.abi
 const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 
 export const CountdownBox = () => {
+  const { t } = useTranslation()
   const { data: [deadlineBlock] = [], isLoading } = useCallClause({
     abi: xAllocationVotingAbi,
     address: xAllocationVotingAddress,
@@ -28,7 +30,7 @@ export const CountdownBox = () => {
       isLoading={isLoading || iseLoadingBestBlockCompressed}
       variant="warning"
       icon={<Clock />}
-      title={"Left to vote"}
+      title={t("Left to vote")}
       subtitle={
         deadlineBlock ? (
           <Countdown

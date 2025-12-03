@@ -21,6 +21,7 @@ import {
 import { useWallet } from "@vechain/vechain-kit"
 import { Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
@@ -87,6 +88,7 @@ export function AppCategoryTabs({
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
   const [currentPage, setCurrentPage] = useState(1)
+  const { t } = useTranslation()
 
   const { data: appShares } = useXAppsShares(
     apps.map(app => app.id),
@@ -178,13 +180,13 @@ export function AppCategoryTabs({
         <VStack hideBelow="md" gap="4" align="stretch" px="4">
           <VotingAlerts />
           <Flex alignItems="center" justifyContent="space-between">
-            <Heading size="lg">{"Active apps in current round"}</Heading>
+            <Heading size="lg">{t("Active apps in current round")}</Heading>
             {!!account?.address && (
               <Flex gap="4">
                 {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
                 {((!hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) || isEditingAutoVote) && (
                   <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
-                    {areAllVisibleAppsSelected ? "Deselect all" : "Select all"}
+                    {areAllVisibleAppsSelected ? t("Deselect all") : t("Select all")}
                   </Button>
                 )}
                 <VoteButtons variant="desktop" />
@@ -192,7 +194,7 @@ export function AppCategoryTabs({
             )}
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">
-            <SearchField placeholder="Search app" value={searchQueryDesktop} onChange={setSearchQueryDesktop} />
+            <SearchField placeholder={t("Search app")} value={searchQueryDesktop} onChange={setSearchQueryDesktop} />
             <Select.Root
               collection={categoryCollection}
               width="40"
@@ -205,7 +207,7 @@ export function AppCategoryTabs({
               <Select.HiddenSelect />
               <Select.Control>
                 <Select.Trigger>
-                  <Select.ValueText placeholder="Category" />
+                  <Select.ValueText placeholder={t("Category")} />
                 </Select.Trigger>
                 <Select.IndicatorGroup>
                   {selectedCategory !== "all" ? (
@@ -232,7 +234,7 @@ export function AppCategoryTabs({
                   </Select.Content>
                 </Select.Positioner>
               </Portal>
-            </Select.Root>{" "}
+            </Select.Root>
           </Flex>
         </VStack>
         <Tabs.Root
@@ -254,7 +256,7 @@ export function AppCategoryTabs({
             scrollbar="hidden"
             {...tabsListProps}>
             <Tabs.Trigger key="all" flex={1} justifyContent="center" value="all" minWidth="4rem">
-              {"All"}
+              {t("All")}
             </Tabs.Trigger>
             {APP_CATEGORIES.map(({ id, name }) => (
               <Tabs.Trigger key={id} flex={1} justifyContent="center" value={id} minWidth="max-content">
@@ -304,7 +306,7 @@ export function AppCategoryTabs({
                   </Circle>
                 }
                 title={""}
-                description="Hmm, we couldn't find that app. Please check the spelling."
+                description={t("Hmm, we couldn't find that app. Please check the spelling.")}
               />
             ) : null}
 
@@ -320,7 +322,7 @@ export function AppCategoryTabs({
                 justifyContent="space-between"
                 gap="4">
                 <HStack gap="1">
-                  <Text textStyle="sm">{"Showing"}</Text>
+                  <Text textStyle="sm">{t("Showing")}</Text>
 
                   <Pagination.PageText format="long" textStyle="sm" />
                 </HStack>
@@ -344,7 +346,7 @@ export function AppCategoryTabs({
                 </ButtonGroup>
 
                 <Button hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
-                  {"View all"}
+                  {t("View all")}
                 </Button>
               </Pagination.Root>
             )}
@@ -354,7 +356,7 @@ export function AppCategoryTabs({
 
       {!isMobile && !!account?.address && (
         <VStack width="1/3" align="stretch" justifySelf="flex-start">
-          <Heading size="lg">{"Your top 5 Apps"}</Heading>
+          <Heading size="lg">{t("Your top 5 Apps")}</Heading>
           <UserTopVotedAppsCard apps={apps} />
         </VStack>
       )}

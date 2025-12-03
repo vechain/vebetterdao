@@ -1,5 +1,6 @@
 import { Box, VStack, HStack, Card, Text, Heading, Dialog, CloseButton, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { AllocationRoundDetails } from "@/app/allocations/lib/data"
@@ -48,6 +49,7 @@ export const TotalRewardsDistributionModal = ({
   isOpen: boolean
   onClose: VoidFunction
 }) => {
+  const { t } = useTranslation()
   const { apps, totalVoters, vote2EarnAmount, gmAmount, xAllocationsAmount, treasuryAmount } = roundDetails
   const votingRewardsTotal = vote2EarnAmount + gmAmount
   const rewardsTotal = votingRewardsTotal + xAllocationsAmount + treasuryAmount
@@ -65,33 +67,38 @@ export const TotalRewardsDistributionModal = ({
 
   const dataList = [
     {
-      label: "Apps",
+      key: "apps",
+      label: t("Apps"),
       amount: apps.length || 0,
       reward: formattedXAllocations,
       showDot: true,
       dotColor: "status.positive.primary",
     },
     {
-      label: "Voters",
+      key: "voters",
+      label: t("Voters"),
       amount: totalVoters,
       reward: formattedVotingRewardsTotal,
       showDot: true,
       dotColor: "status.info.strong",
     },
     {
-      label: "Voting rewards",
+      key: "rewards",
+      label: t("Voting rewards"),
       amount: "—",
       reward: formattedVotingRewards,
       indent: true,
     },
     {
-      label: "GM NFT Multiplier",
+      key: "multipliers",
+      label: t("GM NFT Multiplier"),
       amount: "—",
       reward: formattedGmAmount,
       indent: true,
     },
     {
-      label: "VeBetter treasury",
+      key: "treasury",
+      label: t("VeBetter treasury"),
       amount: "—",
       reward: formattedTreasuryAmount,
       showDot: true,
@@ -102,7 +109,7 @@ export const TotalRewardsDistributionModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} showHeader={false} showCloseButton={false} modalProps={{ size: "sm" }}>
       <HStack justifyContent={{ base: "center", md: "space-between" }}>
-        <Heading size="xl">{"Total rewards distributed"}</Heading>
+        <Heading size="xl">{t("Total rewards distributed")}</Heading>
         <Dialog.CloseTrigger hideBelow="md" position="static" asChild>
           <CloseButton />
         </Dialog.CloseTrigger>
@@ -119,23 +126,23 @@ export const TotalRewardsDistributionModal = ({
         <VStack gap={3} align="stretch">
           <HStack justify="space-between" w="full" gap={3} pb={2} borderBottomWidth="1px">
             <Text textStyle="xs" fontWeight="semibold" color="text.subtle" flex={1}>
-              {"To"}
+              {t("To")}
             </Text>
             <Text textStyle="xs" fontWeight="semibold" color="text.subtle" textAlign="right" minW="16">
-              {"Amount"}
+              {t("Amount")}
             </Text>
             <Text textStyle="xs" fontWeight="semibold" color="text.subtle" textAlign="right" minW="24">
-              {"Rewards"}
+              {t("Rewards")}
             </Text>
           </HStack>
 
-          {dataList.map(item => (
-            <DataRow key={item.label} {...item} />
+          {dataList.map(({ key, ...item }) => (
+            <DataRow key={key} {...item} />
           ))}
 
           <HStack justify="space-between" w="full" gap={3} pt={2} borderTopWidth="1px">
             <Text textStyle="xs" fontWeight="semibold" color="text.subtle" flex={1}>
-              {"Total"}
+              {t("Total")}
             </Text>
             <Text textStyle="sm" fontWeight="semibold" color="text.subtle" textAlign="right" minW="16">
               {"—"}

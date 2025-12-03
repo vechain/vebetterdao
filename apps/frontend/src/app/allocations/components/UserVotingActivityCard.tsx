@@ -24,6 +24,7 @@ import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/facto
 import { useWallet } from "@vechain/vechain-kit"
 import { Activity, Check } from "iconoir-react"
 import { useState, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
@@ -88,6 +89,7 @@ const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
 )
 
 export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: AllocationRoundDetails }) => {
+  const { t } = useTranslation()
   const { id: roundId, apps } = roundDetails
   const [isOpen, setIsOpen] = useState(false)
   const { account } = useWallet()
@@ -157,7 +159,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
       <Card.Header as={HStack} gap="2" pb={{ base: "5", md: "6" }}>
         <Icon as={Activity} boxSize="5" color="icon.default" />
         <Heading size={{ base: "md", md: "lg" }} fontWeight="semibold">
-          {"Your voting activity"}
+          {t("Your voting activity")}
         </Heading>
       </Card.Header>
       <Card.Body asChild>
@@ -173,7 +175,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               </Circle>
             }
             title=""
-            description="You haven't voted in this round"
+            description={t("You haven't voted in this round")}
           />
         ) : (
           <Grid
@@ -186,7 +188,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               gap="1"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
-                {"Voting power used"}
+                {t("Voting power used")}
               </Text>
               <Text textStyle="xl" fontWeight="semibold">
                 {votingPowerUsed}
@@ -199,7 +201,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               gap="1"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
-                {"Rewards earned"}
+                {t("Rewards earned")}
               </Text>
 
               <Skeleton loading={isRewardClaimedLoading}>
@@ -221,9 +223,9 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
             </Card.Root>
             <VStack gridColumn={{ base: "1 / 4", md: "1 / 3" }} align="stretch" gap="3">
               <HStack justifyContent="space-between">
-                <Heading size="sm">{"Voted for"}</Heading>
+                <Heading size="sm">{t("Voted for")}</Heading>
                 <Badge variant="neutral" size="sm" rounded="sm">
-                  {`${appVoteMetricsSortedByWeight.length} apps`}
+                  {`${appVoteMetricsSortedByWeight.length}`} {t("apps")}
                 </Badge>
               </HStack>
               <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
@@ -241,7 +243,9 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                       </Collapsible.Content>
                       <Collapsible.Trigger asChild>
                         <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
-                          <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
+                          <Collapsible.Context>
+                            {api => (api.open ? t("View less") : t("View all"))}
+                          </Collapsible.Context>
                         </Button>
                       </Collapsible.Trigger>
                     </>

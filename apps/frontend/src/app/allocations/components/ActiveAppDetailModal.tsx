@@ -4,6 +4,7 @@
 import { VStack, Card, HStack, Icon, Heading, Text, Box, Badge, CloseButton } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Flash, Activity } from "iconoir-react"
+import { useTranslation } from "react-i18next"
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import { formatEther } from "viem"
 
@@ -82,6 +83,7 @@ export const ActiveAppDetailModal = ({
   // const { data } = indexerQueryClient.useQuery("get", "/api/v1/b3tr/actions/global/overview", {
   //   params: { query: { roundId } },
   // })
+  const { t } = useTranslation()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const votingPowerValue = getCompactFormatter(2).format(Number(formatEther(app.votesReceived, "gwei")))
   const votersCount = app?.voters || 0
@@ -105,14 +107,14 @@ export const ActiveAppDetailModal = ({
     {
       type: "simple",
       icon: Flash,
-      label: "Voting power",
+      label: t("Voting power"),
       rows: [
         {
-          label: "Voting power received",
+          label: t("Voting power received"),
           value: votingPowerValue,
         },
         {
-          label: "Amount of voters",
+          label: t("Amount of voters"),
           value: votersCount,
         },
       ],
@@ -120,27 +122,27 @@ export const ActiveAppDetailModal = ({
     {
       type: "breakdown",
       icon: B3TR,
-      label: "B3TR received",
+      label: t("B3TR received"),
       breakdownRows: [
         {
-          label: "Voting",
+          label: t("Voting"),
           value: `${getCompactFormatter(2).format(totalAmount - dynamicBaseAllocationAmount)}`,
           dotColor: "#B3CCFF",
         },
         {
-          label: "Dynamic base",
+          label: t("Dynamic base"),
           value: `${getCompactFormatter(2).format(dynamicBaseAllocationAmount)}`,
           dotColor: "#004CFC",
         },
       ],
       chartData: isCurrentRound
         ? [
-            { name: "Voting", value: 1 },
-            { name: "Dynamic base", value: 0 },
+            { name: t("Voting"), value: 1 },
+            { name: t("Dynamic base"), value: 0 },
           ]
         : [
-            { name: "Voting", value: 100 - dynamicBaseAllocationPercentage },
-            { name: "Dynamic base", value: dynamicBaseAllocationPercentage },
+            { name: t("Voting"), value: 100 - dynamicBaseAllocationPercentage },
+            { name: t("Dynamic base"), value: dynamicBaseAllocationPercentage },
           ],
       chartColors: ["#B3CCFF", "#004CFC"],
       chartPercentage: isCurrentRound ? "0" : (100 - dynamicBaseAllocationPercentage).toFixed(0),
@@ -148,22 +150,22 @@ export const ActiveAppDetailModal = ({
     {
       type: "breakdown",
       icon: B3TR,
-      label: "B3TR distributed",
+      label: t("B3TR distributed"),
       breakdownRows: [
         {
-          label: "To users",
+          label: t("To users"),
           value: `${rewardsToUserPercentage}%`,
           dotColor: "#99E0B1",
         },
         {
-          label: "Retained by app",
+          label: t("Retained by app"),
           value: `${isCurrentRound ? 0 : 100 - rewardsToUserPercentage}%`,
           dotColor: "#047229",
         },
       ],
       chartData: [
-        { name: "To users", value: rewardsToUserPercentage },
-        { name: "Retained by app", value: 100 - rewardsToUserPercentage },
+        { name: t("To users"), value: rewardsToUserPercentage },
+        { name: t("Retained by app"), value: 100 - rewardsToUserPercentage },
       ],
       chartColors: ["#99E0B1", "#047229"],
       chartPercentage: rewardsToUserPercentage.toString(),
@@ -188,18 +190,18 @@ export const ActiveAppDetailModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} showHeader={false} showCloseButton={false}>
       <HStack align="center" justifyContent="space-between">
-        <Heading size="xl">{"Active app details"}</Heading>
+        <Heading size="xl">{t("Active app details")}</Heading>
         <CloseButton onClick={onClose} />
       </HStack>
 
       <VStack align="stretch" justifyContent="space-between" my="4">
         <HStack ml="auto">
           <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-            {"Round " + roundId}
+            {t("Round") + " " + roundId}
           </Text>
           {isCurrentRound && (
             <Badge size="sm" variant="positive">
-              {"Active"}
+              {t("Active")}
             </Badge>
           )}
         </HStack>
