@@ -31,9 +31,9 @@ export const getNodeEndorsementScoreFallbackQueryKey = (nodeId: string) => [
   BigInt(nodeId),
 ]
 /**
- * Hook to get the address of the user managing the node ID (endorsement) either through ownership or delegation
- * @param nodeId The ID of the node for which the manager address is being retrieved
- * @returns address The address of the manager of the specified node
+ * Hook to get the endorsement score for the specified node ID.
+ * @param nodeId The ID of the node for which the endorsement score is being retrieved.
+ * @returns The endorsement score for the specified node.
  */
 export const useNodeEndorsementScoreFallback = (nodeId: string) => {
   const thor = useThor()
