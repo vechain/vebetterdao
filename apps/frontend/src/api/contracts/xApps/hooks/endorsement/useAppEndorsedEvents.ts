@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { UseQueryResult } from "@tanstack/react-query"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
-import { useEvents } from "@/hooks/useEvents"
+import { getEventsKey, useEvents } from "@/hooks/useEvents"
 
 const abi = X2EarnApps__factory.abi
 const contractAddress = getConfig().x2EarnAppsContractAddress
@@ -19,7 +19,9 @@ export const getAppEndorsedEventsQueryKey = (filterOptions?: {
   appId?: string
   nodeId?: string
   endorsed?: boolean
-}) => ["AppEndorsedEvents", Object.values(filterOptions ?? {})]
+}) => {
+  return getEventsKey({ eventName: "AppEndorsed", filterParams: filterOptions })
+}
 
 export const useAppEndorsedEvents = (filterOptions?: {
   appId?: string

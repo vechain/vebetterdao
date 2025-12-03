@@ -7,6 +7,7 @@ import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useContext } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { AllocationRoundDetails } from "../../../lib/data"
 import { RoundActiveAppsListCard } from "../../RoundActiveAppsListCard"
@@ -25,6 +26,7 @@ interface RoundInfoTabProps {
 
 export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabProps) {
   const { account } = useWallet()
+  const { t } = useTranslation()
   const context = useContext(AllocationTabsContext)
   const contextRoundDetails = context?.roundDetails
 
@@ -49,9 +51,9 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
       <VStack hideFrom="md" alignItems="stretch" gap="2">
         <HStack gap="2">
           <Text textStyle="md" fontWeight="semibold">
-            {"Round"} {roundDetails.id}
+            {t("Round")} {roundDetails.id}
           </Text>
-          {roundDetails.currentRoundId === roundDetails.id && <Badge variant="positive">{"Active"}</Badge>}
+          {roundDetails.currentRoundId === roundDetails.id && <Badge variant="positive">{t("Active")}</Badge>}
         </HStack>
         <Text textStyle="sm" color="text.subtle">
           {dayjs(roundDetails.roundStart).format(DATE_FORMAT) + "-" + dayjs(roundDetails.roundEnd).format(DATE_FORMAT)}
@@ -61,13 +63,13 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
         <Grid gridTemplateColumns="repeat(3,max-content)" divideX="1px" divideColor="border.secondary" columnGap="6">
           <VStack gap="1" align="start">
             <Text textStyle="md" color="text.subtle">
-              {"Round"}
+              {t("Round")}
             </Text>
             <Heading size="4xl">{roundDetails.id}</Heading>
           </VStack>
           <VStack gap="1" pl="6" align="start">
             <Text textStyle="md" color="text.subtle">
-              {"Round dates"}
+              {t("Round dates")}
             </Text>
             <Heading size="lg">
               {dayjs(roundDetails.roundStart).format(DATE_FORMAT) +
@@ -77,7 +79,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
           </VStack>
           {isCurrentRound && (
             <Flex h="full" pl="6" alignItems="flex-start">
-              <Badge variant="positive">{"Active"}</Badge>
+              <Badge variant="positive">{t("Active")}</Badge>
             </Flex>
           )}
         </Grid>
@@ -87,7 +89,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
             boxSize={"44px"}
             onClick={() => handleRoundNavigation(roundDetails.id - 1)}
             disabled={roundDetails.id <= 1}
-            aria-label="Previous round">
+            aria-label={t("Previous round")}>
             <NavArrowLeft />
           </IconButton>
           <IconButton
@@ -95,7 +97,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
             variant="outline"
             boxSize={"44px"}
             onClick={() => handleRoundNavigation(roundDetails.id + 1)}
-            aria-label="Next round">
+            aria-label={t("Next round")}>
             <NavArrowRight />
           </IconButton>
           <ViewAllRoundsButton currentRoundId={roundDetails.currentRoundId} />
@@ -105,7 +107,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
       <VStack hideFrom="md" gap="3" alignItems="stretch">
         <HStack justifyContent="space-between" w="full">
           <Heading size="lg" fontWeight="semibold">
-            {"Explore rounds history"}
+            {t("Explore rounds history")}
           </Heading>
           <IconButton
             disabled={isCurrentRound}

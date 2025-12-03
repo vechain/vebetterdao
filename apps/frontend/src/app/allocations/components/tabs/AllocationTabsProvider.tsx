@@ -284,20 +284,18 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         </Box>
       </Presence>
 
-      {isModalOpen && (
-        <ConfirmVoteModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          selectedApps={selectedApps}
-          onConfirm={handleConfirmVote}
-          isAutoVotingEnabled={isAutoVotingEnabled}
-          isAutoVotingEnabledOnChain={isAutoVotingEnabledOnChain ?? false}
-          onToggleAutoVoting={setIsAutoVotingEnabled}
-          nextRoundNumber={roundDetails.id + 1}
-          onEditSelection={handleEditSelection}
-          hasVoted={hasVoted ?? false}
-        />
-      )}
+      <ConfirmVoteModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        selectedApps={selectedApps}
+        onConfirm={handleConfirmVote}
+        isAutoVotingEnabled={isAutoVotingEnabled}
+        isAutoVotingEnabledOnChain={isAutoVotingEnabledOnChain ?? false}
+        onToggleAutoVoting={setIsAutoVotingEnabled}
+        nextRoundNumber={roundDetails.id + 1}
+        onEditSelection={handleEditSelection}
+        hasVoted={hasVoted ?? false}
+      />
     </AllocationTabsContext.Provider>
   )
 }

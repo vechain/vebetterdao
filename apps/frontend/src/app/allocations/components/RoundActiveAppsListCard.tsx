@@ -16,6 +16,7 @@ import {
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { SmartphoneDevice, NavArrowRight } from "iconoir-react"
 import { useState, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { AppImage } from "@/components/AppImage/AppImage"
@@ -37,48 +38,52 @@ const RoundActiveAppCard = ({
 }: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & {
   appLogo?: string
   onClick: (id: string) => void
-}) => (
-  <Button key={id} unstyled asChild onClick={() => onClick(id)}>
-    <Card.Root
-      variant="action"
-      border="none"
-      display="grid"
-      gridTemplateColumns="auto 1fr auto"
-      alignItems="center"
-      p={{ base: "2", md: "3" }}
-      px={{ base: "1", md: "3" }}
-      columnGap="4">
-      <AppImage appId={id || ""} appLogo={appLogo} boxSize="11" flexShrink={0} shape="square" borderRadius="lg" />
-      <VStack gap="1" alignItems="start">
-        <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
-          {name || "-"}
-        </Text>
-        <HStack gap="1">
-          {earnings && (
-            <Text textStyle={{ base: "xs", md: "md" }} gap="1">
-              <Mark variant="text" fontWeight="semibold" color="text.subtle">
-                {"Received: "}
-              </Mark>
-              {getCompactFormatter(2).format(Number(earnings.totalAmount))} {" B3TR"}
-              <Mark fontWeight="semibold">{" • "}</Mark>
-            </Text>
-          )}
-
-          <Text textStyle={{ base: "xs", md: "md" }}>
-            {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" votes"}
+}) => {
+  const { t } = useTranslation()
+  return (
+    <Button key={id} unstyled asChild onClick={() => onClick(id)}>
+      <Card.Root
+        variant="action"
+        border="none"
+        display="grid"
+        gridTemplateColumns="auto 1fr auto"
+        alignItems="center"
+        p={{ base: "2", md: "3" }}
+        px={{ base: "1", md: "3" }}
+        columnGap="4">
+        <AppImage appId={id || ""} appLogo={appLogo} boxSize="11" flexShrink={0} shape="square" borderRadius="lg" />
+        <VStack gap="1" alignItems="start">
+          <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
+            {name || "-"}
           </Text>
-        </HStack>
-      </VStack>
-      <IconButton variant="ghost" p="0" minWidth="unset">
-        <Icon as={NavArrowRight} boxSize={5} color="icon.default" />
-      </IconButton>
-    </Card.Root>
-  </Button>
-)
+          <HStack gap="1">
+            {earnings && (
+              <Text textStyle={{ base: "xs", md: "md" }} gap="1">
+                <Mark variant="text" fontWeight="semibold" color="text.subtle">
+                  {t("Received: ")}
+                </Mark>
+                {getCompactFormatter(2).format(Number(earnings.totalAmount))} {" B3TR"}
+                <Mark fontWeight="semibold">{" • "}</Mark>
+              </Text>
+            )}
+
+            <Text textStyle={{ base: "xs", md: "md" }}>
+              {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" votes"}
+            </Text>
+          </HStack>
+        </VStack>
+        <IconButton variant="ghost" p="0" minWidth="unset">
+          <Icon as={NavArrowRight} boxSize={5} color="icon.default" />
+        </IconButton>
+      </Card.Root>
+    </Button>
+  )
+}
 
 export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[]; roundId: number }) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useTranslation()
 
   const [clickedApp, setClickedApp] = useState<string | undefined>()
   const appsMap = new Map(apps.map(app => [app.id, app]))
@@ -96,15 +101,15 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
           <HStack justifyContent="space-between">
             <Heading as={HStack} size="lg" fontWeight="semibold">
               <Icon as={SmartphoneDevice} boxSize="5" color="icon.default" />
-              {"Active apps"}
+              {t("Active apps")}
             </Heading>
             <Badge variant="neutral" size="sm" rounded="sm">
-              {`${filteredApps.length} ${filteredApps.length === 1 ? "app" : "apps"}`}
+              {`${filteredApps.length} ${filteredApps.length === 1 ? t("app") : t("apps")}`}
             </Badge>
           </HStack>
           <SearchField
             inputProps={{ size: { base: "md", md: "xl" } }}
-            placeholder="Search by app name"
+            placeholder={t("Search by app name")}
             value={searchQuery}
             onChange={setSearchQuery}
           />
@@ -143,7 +148,7 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
 
                   <Collapsible.Trigger asChild>
                     <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
-                      <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
+                      <Collapsible.Context>{api => (api.open ? t("View less") : t("View all"))}</Collapsible.Context>
                     </Button>
                   </Collapsible.Trigger>
                 </>

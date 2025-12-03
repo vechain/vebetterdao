@@ -1,7 +1,7 @@
 "use client"
 
 import { Button, VStack, HStack, Heading, CloseButton, Flex, useMediaQuery } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
@@ -48,10 +48,9 @@ export const ConfirmVoteModal = ({
   // Get user's voting power at snapshot
   const { vot3Balance, isLoading: isLoadingBalance } = useVotingPowerAtSnapshot()
 
-  // Memoize appIds to prevent unnecessary recreations
-  const appIds = useMemo(() => selectedApps.map(app => app.id), [selectedApps])
-
-  const { allocations, setAllocation, setEqualAllocations, getTotalPercentage, isValid } = useConfirmVoteModal(appIds)
+  const { allocations, setAllocation, setEqualAllocations, getTotalPercentage, isValid } = useConfirmVoteModal(
+    selectedApps.map(app => app.id),
+  )
 
   // Check if total allocation is exactly 100%
   const totalPercentage = getTotalPercentage()
@@ -100,6 +99,7 @@ export const ConfirmVoteModal = ({
       showCloseButton={false}
       showLogo={false}
       showHeader={false}
+      modalProps={{ unmountOnExit: false }}
       modalContentProps={{
         maxH: "90vh",
         display: "flex",

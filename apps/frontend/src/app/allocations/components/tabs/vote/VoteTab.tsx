@@ -3,6 +3,7 @@
 import { Bleed } from "@chakra-ui/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { SearchField } from "@/components/SearchField/SearchField"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
@@ -15,6 +16,8 @@ import { AppCategoryTabs } from "./AppCategoryTabs"
 
 export function VoteTab() {
   const { isMobile } = useBreakpoints()
+  const { t } = useTranslation()
+
   const context = useContext(AllocationTabsContext)
   if (!context) throw new Error("VoteTab must be used within AllocationTabsProvider")
 
@@ -57,7 +60,7 @@ export function VoteTab() {
     <>
       {isMobile && <VotingAlerts />}
       <SearchField
-        placeholder="Search app"
+        placeholder={t("Search app")}
         value={localSearchQuery}
         onChange={setLocalSearchQuery}
         inputProps={{ onFocus: handleViewAll }}

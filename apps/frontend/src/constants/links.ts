@@ -17,3 +17,5 @@ export const SUSTAINABILITY_PROOF_DOCS_LINK =
   "https://docs.vebetterdao.org/developer-guides/sustainability-proof-and-impacts"
 export const REWARD_METADATA_DOCS_LINK = "https://docs.vebetterdao.org/developer-guides/reward-metadata"
 export const REWARD_DISTRIBUTION_DOCS_LINK = "https://docs.vebetterdao.org/developer-guides/reward-distribution"
+export const STARGATE_URL = "https://stargate.vechain.org/"
+export const STARGATE_APP_URL = "https://app.stargate.vechain.org/"

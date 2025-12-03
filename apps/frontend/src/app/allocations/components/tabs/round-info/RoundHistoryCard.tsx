@@ -7,6 +7,7 @@ import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import NextLink from "next/link"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { RoundEarnings } from "@/app/allocations/history/page"
@@ -17,6 +18,7 @@ const abi = VoterRewards__factory.abi
 const contractAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 
 export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
+  const { t } = useTranslation()
   const { roundId, vote2EarnAmount: totalReward, roundStart, roundEnd } = round
   const { account } = useWallet()
   const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
@@ -64,7 +66,7 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
                     </Skeleton>
                   </Heading>
                 </HStack>
-                <Text textStyle="xs">{"Your rewards / total"}</Text>
+                <Text textStyle="xs">{t("Your rewards / total")}</Text>
               </VStack>
             </HStack>
           </NextLink>

@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, Heading, Stack, Flex, Image, Skeleton, useDisclosure, Box, Icon } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -6,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 import { useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { useGetUserNodes } from "../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useRetrieveProfilIdentity } from "../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
 import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
@@ -21,25 +23,26 @@ import { GmEmptyStateCard } from "./GmEmptyStateCard"
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
+  const { data: b3trBalance } = useGetB3trBalance(account?.address)
   const { isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
-  const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
-  const { data: nodes, isLoading: isNodesLoading } = useGetUserNodes()
-  const { data: b3trBalance } = useGetB3trBalance(account?.address)
+  const { data: userNodesInfo, isLoading: isNodesLoading } = useGetUserNodes()
   const { isMobile } = useBreakpoints()
   const {
     open: isGetGMAndNodeModalOpen,
     onOpen: onOpenGetGMAndNodeModal,
     onClose: onCloseGetGMAndNodeModal,
   } = useDisclosure()
+  const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
   const isLoading = isUserGMsLoading || isNodesLoading
-  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && nodes?.allNodes?.length === 0
-  const totalPoints = useMemo(() => {
-    return nodes?.allNodes?.reduce((acc, node) => acc + node.xNodePoints, 0) || 0
-  }, [nodes])
+  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodesManagedByUser?.length === 0
+
+  const totalPoints = userNodesInfo?.totalEndorsementScore?.toString() ?? "0"
+
   if (!account?.address && !viewMode) {
     return <NotConnectedWallet />
   }
+
   if (isLoading) {
     return <Skeleton height={isMobile ? "96" : "64"} width="full" rounded="xl" />
   }
@@ -95,12 +98,12 @@ export const GmNFTAndNodeCard = () => {
                 />
               )}
 
-              {nodes?.allNodes && nodes?.allNodes?.length > 0 ? (
+              {userNodesInfo?.nodesManagedByUser && userNodesInfo?.nodesManagedByUser?.length > 0 ? (
                 <GmCard
-                  title={`${nodes?.allNodes?.[0]?.name || ""} #${nodes?.allNodes?.[0]?.nodeId || ""}`}
+                  title={`${userNodesInfo?.nodesManagedByUser?.[0]?.metadata?.name ?? ""} #${userNodesInfo?.nodesManagedByUser?.[0]?.id?.toString() || ""}`}
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
-                  images={nodes?.allNodes?.map(node => node.image)}
+                  images={userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => node?.metadata?.image)}
                   href={`/profile?tab=nodes`}
                 />
               ) : (

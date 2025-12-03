@@ -99,7 +99,7 @@ export const AppRadioCard = ({
                 <Icon as={Group} boxSize="4" />
                 {appVoters ?? 0}
                 <Text as="span" hideBelow="md" display="inline" textStyle={{ base: "xs", md: "sm" }}>
-                  {"Voters"}
+                  {t("Voters")}
                 </Text>
               </Text>
               {allocationSharePercentage && (
@@ -111,7 +111,7 @@ export const AppRadioCard = ({
                     textStyle={{ base: "xs", md: "sm" }}
                     display="inline"
                     fontWeight="bold">
-                    {"supported"}
+                    {t("supported")}
                   </Text>
                 </Text>
               )}

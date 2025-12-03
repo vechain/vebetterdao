@@ -8,7 +8,7 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
-import { useRemoveNodeEndorsement } from "../../../../../hooks/useRemoveNodeEndorsement"
+import { useRemoveNodeEndorsement } from "../../../../../hooks/xApp/useRemoveNodeEndorsement"
 
 type Props = {
   isOpen: boolean

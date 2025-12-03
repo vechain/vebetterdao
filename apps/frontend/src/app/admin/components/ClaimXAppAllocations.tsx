@@ -19,7 +19,7 @@ import { useXAppRoundEarnings } from "../../../api/contracts/xAllocationPool/hoo
 import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
-import { useClaimXAppsAllocations } from "../../../hooks/useClaimXAppsAllocations"
+import { useClaimXAppsAllocations } from "../../../hooks/xApp/useClaimXAppsAllocations"
 export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<string>("1")

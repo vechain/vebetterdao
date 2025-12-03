@@ -5,7 +5,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
 import { useState } from "react"
-import { Trans } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
@@ -18,6 +18,7 @@ import { StatCard } from "./StatCard"
 export const VotingPowerBox = () => {
   const { isMobile } = useBreakpoints()
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useTranslation()
   const { account } = useWallet()
 
   const { vot3Balance, isLoading } = useVotingPowerAtSnapshot()
@@ -30,7 +31,7 @@ export const VotingPowerBox = () => {
     <StatCard
       showIcon={!isMobile}
       variant="positive"
-      title="Voting power"
+      title={t("Voting power")}
       icon={<Flash />}
       subtitle={
         <Skeleton loading={isLoading || isCurrentVot3BalanceLoading}>
@@ -66,7 +67,7 @@ export const VotingPowerBox = () => {
           <>
             <Button variant="primary" onClick={() => setIsOpen(true)}>
               <Icon as={Flash} boxSize="4" />
-              {"Power up"}
+              {t("Power up")}
             </Button>
 
             <ConvertModal isOpen={isOpen} onClose={() => setIsOpen(false)} />

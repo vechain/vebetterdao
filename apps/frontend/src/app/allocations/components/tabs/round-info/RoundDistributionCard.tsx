@@ -4,6 +4,7 @@ import { Box, Card, Icon, Separator, Text, VStack, HStack, SimpleGrid, Button, G
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Gift, NavArrowRight, SmartphoneDevice, Group, Flash, List } from "iconoir-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
@@ -17,6 +18,7 @@ import { TotalRewardsDistributionModal } from "./TotalRewardsDistributionModal"
 
 export function RoundDistributionCard({ roundDetails }: { roundDetails: AllocationRoundDetails }) {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const distribution = useMemo(() => {
     const toApps = Number(roundDetails.xAllocationsAmount)
@@ -66,7 +68,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
                   textStyle={{ base: "sm", md: "lg" }}
                   fontWeight={{ base: "normal", md: "semibold" }}
                   color="text.subtle">
-                  {"Summary"}
+                  {t("Summary")}
                 </Text>
               </HStack>
             </GridItem>
@@ -108,12 +110,12 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
                   textStyle={{ base: "sm", md: "lg" }}
                   fontWeight={{ base: "normal", md: "semibold" }}
                   color="text.subtle">
-                  {"Total rewards distributed"}
+                  {t("Total rewards distributed")}
                 </Text>
               </HStack>
               <Icon hideFrom="md" as={NavArrowRight} boxSize="4" color="text.subtle" />
               <Button hideBelow="md" variant="link" p="0" onClick={() => setOpen(true)}>
-                {"Details"}
+                {t("Details")}
               </Button>
             </HStack>
 
@@ -136,19 +138,19 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
                 <HStack gap="1" flex={1} borderRight="1px" borderColor="border.secondary" pr="5">
                   <Box boxSize="1.5" bg="status.positive.primary" rounded="full" />
                   <Text textStyle={{ base: "xs", md: "sm" }} color="text.default">
-                    {"To apps"}
+                    {t("To apps")}
                   </Text>
                 </HStack>
                 <HStack gap="1" flex={1} borderRight="1px" borderColor="border.secondary" pr="5">
                   <Box boxSize="1.5" bg="status.info.strong" rounded="full" />
                   <Text textStyle={{ base: "xs", md: "sm" }} color="text.default">
-                    {"To voters"}
+                    {t("To voters")}
                   </Text>
                 </HStack>
                 <HStack gap="1">
                   <Box boxSize="1.5" bg="status.warning.primary" rounded="full" />
                   <Text textStyle={{ base: "xs", md: "sm" }} color="text.default">
-                    {"To treasury"}
+                    {t("To treasury")}
                   </Text>
                 </HStack>
               </HStack>

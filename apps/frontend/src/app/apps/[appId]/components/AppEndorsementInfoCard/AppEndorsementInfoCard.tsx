@@ -5,7 +5,7 @@ import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 
@@ -49,14 +49,14 @@ export const AppEndorsementInfoCard = ({
     app?.id ?? "",
     account?.address ?? "",
   )
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
-  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
-  const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === app?.id)
-  const isXNodeHolder = userNodes?.allNodes?.some(node => node.isXNodeHolder && !node.endorsedAppId)
+  const nodeEndorsingApp = userNodesInfo?.nodesManagedByUser?.find((node: UserNode) => node.endorsedAppId === app?.id)
+  const userNodesHasPoints = userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsementScore > 0)
   const totalXNodePoints = Math.max(
-    ...(userNodes?.allNodes?.filter(node => !node.endorsedAppId).map(node => node.xNodePoints) ?? []),
+    ...(userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => Number(node.endorsementScore)) ?? []),
   )
 
   // Call to actions
@@ -66,22 +66,20 @@ export const AppEndorsementInfoCard = ({
     endorsementStatus === XAppStatus.UNENDORSED_NOT_ELIGIBLE
 
   const shouldRenderEndorseButton = useMemo(() => {
-    return isXNodeHolder && !nodeEndorsingApp && appUnendorsedStatus
-  }, [isXNodeHolder, nodeEndorsingApp, appUnendorsedStatus])
+    return userNodesHasPoints && !nodeEndorsingApp && appUnendorsedStatus
+  }, [userNodesHasPoints, nodeEndorsingApp, appUnendorsedStatus])
 
   const shouldRenderLookForEndorsersButton = useMemo(() => {
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    return (
-      nodeEndorsingApp?.isXNodeDelegator || nodeEndorsingApp?.isXNodeOnCooldown || nodeEndorsingApp?.xNodePoints === 0
-    )
+    return nodeEndorsingApp?.isOnCooldown
   }, [nodeEndorsingApp])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account && nodeEndorsingApp?.isXNodeOnCooldown && nodeEndorsingApp?.nodeId === app?.id
-  }, [account, app?.id, nodeEndorsingApp?.isXNodeOnCooldown, nodeEndorsingApp?.nodeId])
+    return nodeEndorsingApp?.isOnCooldown
+  }, [nodeEndorsingApp])
 
   // // Modals
   const {
@@ -228,7 +226,7 @@ export const AppEndorsementInfoCard = ({
 
       <EndorseAppModal xApp={app} isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} />
       <UnendorseAppModal
-        xNodeId={nodeEndorsingApp?.nodeId ?? ""}
+        xNodeId={nodeEndorsingApp?.id?.toString() ?? ""}
         isOpen={isUnendorsementModalOpen}
         onClose={onCloseUnendorsementModal}
       />

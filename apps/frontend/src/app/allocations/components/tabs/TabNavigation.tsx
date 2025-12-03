@@ -4,6 +4,7 @@ import { Box, Bleed, Tabs } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { useRef } from "react"
+import { useTranslation } from "react-i18next"
 
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useStickyState } from "@/hooks/useStickyState"
@@ -18,6 +19,7 @@ export function TabNavigation({ children, currentTab }: TabNavigationProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const { isMobile } = useBreakpoints()
+  const { t } = useTranslation()
 
   return (
     <>
@@ -39,12 +41,12 @@ export function TabNavigation({ children, currentTab }: TabNavigationProps) {
           <Tabs.List pt={isStuck ? "3" : undefined} px={{ base: "4", md: "0" }} bg={isStuck ? "bg.primary" : undefined}>
             <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote" asChild>
               <NextLink href={isMobile ? "/allocations/vote#allocation-tabs" : "/allocations/vote"}>
-                {account?.address ? "Vote for apps" : "Round apps"}
+                {account?.address ? t("Vote for apps") : t("Round apps")}
               </NextLink>
             </Tabs.Trigger>
             <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round" asChild>
               <NextLink href={isMobile ? "/allocations/round#allocation-tabs" : "/allocations/round"}>
-                {"Round info"}
+                {t("Round info")}
               </NextLink>
             </Tabs.Trigger>
           </Tabs.List>

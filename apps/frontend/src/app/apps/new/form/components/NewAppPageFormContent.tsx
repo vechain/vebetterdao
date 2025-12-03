@@ -11,8 +11,8 @@ import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 
 import { useCreatorSubmission } from "../../../../../api/contracts/x2EarnCreator/useCreatorSubmission"
 import { CreateEditAppFormData, CreateEditAppForm } from "../../../../../components/CreateEditAppForm/CreateEditAppForm"
-import { useSubmitNewApp } from "../../../../../hooks/useSubmitNewApp"
-import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
+import { useSubmitNewApp } from "../../../../../hooks/xApp/useSubmitNewApp"
+import { useUploadAppMetadata } from "../../../../../hooks/xApp/useUploadAppMetadata"
 
 import { PreviewAppCard } from "./PreviewAppCard"
 

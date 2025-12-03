@@ -1,57 +1,45 @@
 import { Text, Button, Image, Flex, Icon, VStack, Heading, Alert } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import { ClockSolid } from "iconoir-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { FaClock } from "react-icons/fa6"
 
+import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
 import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
-import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { useUnendorseApp } from "../../../hooks/useUnendorseApp"
+import { useGetUserNodes, UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useUnendorseApp } from "../../../hooks/xApp/useUnendorseApp"
+import { convertUriToUrl } from "../../../utils/uri"
 
 type Props = {
   xNodeId: string
   isOpen: boolean
   onClose: () => void
 }
-export type PropsEndorsement = {
-  isUnendorsing?: boolean
-  isEndorsing?: boolean
-  points?: number | string
-  endorsedAppName?: string
-  xNodeLevel?: number
-}
+
 export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
-  const { data: nodes } = useGetUserNodes()
-  const node = nodes?.allNodes?.find(node => node.nodeId === xNodeId)
-  const { data: endorsedApps = [] } = useNodesEndorsedApps([xNodeId])
-  const endorsedApp = endorsedApps[0]?.endorsedApp
+  const { data: userNodesInfo } = useGetUserNodes()
+  const node = userNodesInfo?.nodesManagedByUser?.find((node: UserNode) => node.id.toString() === xNodeId)
+  const { data: appMetadata } = useXAppMetadata(node?.endorsedAppId ?? "")
+  const endorsedApp = appMetadata
   const handleSuccess = useCallback(() => {
     onClose()
   }, [onClose])
   const unendorseAppMutation = useUnendorseApp({
-    appId: endorsedApp?.id,
-    nodeId: xNodeId,
+    appId: node?.endorsedAppId ?? "",
+    nodeId: node?.id.toString() ?? "",
     userAddress: account?.address ?? "",
     onSuccess: handleSuccess,
   })
+
   const handleUnendorsement = useCallback(() => {
     unendorseAppMutation.sendTransaction()
   }, [unendorseAppMutation])
 
-  //TODO: Add this to review modal before sending transaction
-  // const endorsementInfo: PropsEndorsement = {
-  //   isUnendorsing: true,
-  //   isEndorsing: false,
-  //   points: xNodePoints,
-  //   endorsedAppName: endorsedApp?.name,
-  //   xNodeLevel,
-  // }
   return (
     <BaseModal
       isOpen={isOpen && !isTxModalOpen}
@@ -64,8 +52,8 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
 
         <Flex position="relative" alignSelf={"center"}>
           <Image
-            src={endorsedApp?.metadata?.logo ?? ""}
-            alt={endorsedApp?.metadata?.name ?? ""}
+            src={endorsedApp?.logo ? convertUriToUrl(endorsedApp?.logo) : ""}
+            alt={endorsedApp?.name ?? ""}
             w="28"
             h="28"
             rounded="md"
@@ -81,13 +69,13 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
             textStyle="2xl"
             color="status.negative.primary">
             {"-"}
-            {node?.xNodePoints}
+            {node?.endorsementScore?.toString() ?? "0"}
           </Text>
         </Flex>
 
         <Alert.Root status="error" borderRadius={"lg"}>
           <Alert.Indicator asChild>
-            <Icon as={FaClock} boxSize={"36px"} color="status.negative.primary" />
+            <Icon as={ClockSolid} color="status.negative.primary" />
           </Alert.Indicator>
           <Alert.Content>
             <Alert.Title>

@@ -5,20 +5,19 @@ import { useTranslation } from "react-i18next"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 
-import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGetUserGMs, UserGM } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { GMNFTCard } from "../../../../components/GMNFTCard"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../constants/AnalyticsEvents"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
-export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
+export const AttachGMNFTCard = ({ node }: { node: UserNode }) => {
   const { t } = useTranslation()
   const { data: userGms, isLoading: isUserGmsLoading } = useGetUserGMs()
-  const isXNodeDelegator = xNode.isXNodeDelegator
-  const isXNodeAttachedToGM = !!xNode.gmTokenIdAttachedToNode
-  const attachedGMNFT = userGms?.find(gm => gm.tokenId === xNode.gmTokenIdAttachedToNode)
+
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
+
   const handleDetachOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     detachGmToXNodeModal.onOpen()
@@ -29,7 +28,16 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
   }
 
+  // Derive all data at the top
+  const isNodeDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
+  const isNodeAttachedToGM = node?.isGmAttached
+  const attachedGMNFT = userGms?.find((_gm: UserGM) => _gm.tokenId === node?.gmAttachedTokenId.toString())
+
   if (!attachedGMNFT) return null
+
+  // Extract data to avoid repeated type assertions
+  const gmTokenId = attachedGMNFT.tokenId
+  const gmTokenLevel = attachedGMNFT.tokenLevel
 
   return (
     <Card.Root variant="primary" w="full">
@@ -38,20 +46,20 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading textStyle="lg">
-                {t(isXNodeAttachedToGM ? "Attached Galaxy Member NFTs" : "Attach to upgrade")}
+                {t(isNodeAttachedToGM ? "Attached Galaxy Member NFTs" : "Attach to upgrade")}
               </Heading>
             </HStack>
             <Text textStyle="sm">
               {t(
-                isXNodeAttachedToGM
+                isNodeAttachedToGM
                   ? "Your Node is attached to the following GM NFT"
-                  : isXNodeDelegator
+                  : isNodeDelegator
                     ? "Remove the Node delegation to attach GM NFT to this node"
                     : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
-          <Flex asChild border="1px solid" rounded="12px" position="relative" cursor="pointer">
+          <Flex asChild rounded="12px" position="relative" cursor="pointer">
             <NextLink href={`/galaxy-member/${attachedGMNFT?.tokenId}`}>
               <GMNFTCard
                 imageUrl={attachedGMNFT?.metadata?.image}
@@ -60,12 +68,12 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                 multiplier={attachedGMNFT?.multiplier}
                 isLoading={isUserGmsLoading}
                 size="medium">
-                {isXNodeAttachedToGM ? (
-                  <Button colorPalette="red" disabled={isXNodeDelegator} onClick={handleDetachOnClick}>
+                {isNodeAttachedToGM ? (
+                  <Button colorPalette="red" disabled={isNodeDelegator} onClick={handleDetachOnClick}>
                     {t("Detach")}
                   </Button>
                 ) : (
-                  <Button variant="link" onClick={() => handleAttachOnClick()} disabled={isXNodeDelegator}>
+                  <Button variant="link" onClick={() => handleAttachOnClick()} disabled={isNodeDelegator}>
                     {t("Attach")}
                   </Button>
                 )}
@@ -75,15 +83,15 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
         </VStack>
       </Card.Body>
       <AttachGMToXNodeModal
-        gmId={xNode.gmTokenIdAttachedToNode || ""}
-        node={xNode}
+        gmId={gmTokenId}
+        node={node}
         isOpen={attachGmToXNodeModal.open}
         onClose={attachGmToXNodeModal.onClose}
       />
       <DetachGMToXNodeModal
-        gmId={xNode.gmTokenIdAttachedToNode || ""}
-        gmLevel={attachedGMNFT?.tokenLevel || ""}
-        xNodeId={xNode.nodeId}
+        gmId={gmTokenId}
+        gmLevel={gmTokenLevel}
+        xNodeId={node.id.toString()}
         isOpen={detachGmToXNodeModal.open}
         onClose={detachGmToXNodeModal.onClose}
       />
