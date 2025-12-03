@@ -1,31 +1,26 @@
 import { Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { ethers } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { MinXNodeLevel } from "@/constants/XNode"
-
-import { useNodesEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useNodesEndorsementScore"
-import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
 import { useEndorsementScoreThreshold } from "../../../api/contracts/xApps/hooks/useEndorsementScoreThreshold"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserNodes, UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 
 export const EndorsementPointsBanner = () => {
   const { t } = useTranslation()
-  const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
-  const nodesEndorsementScore = useNodesEndorsementScore()
-  const endorsedApps = useNodesEndorsedApps(nodes?.allNodes?.map(node => node.nodeId) ?? [])
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const requiredPoints = useEndorsementScoreThreshold()
-  const isLoading = isUserNodesLoading || nodesEndorsementScore.isLoading || endorsedApps.isLoading
+  const isLoading = isUserNodesLoading
+  const nodesNotEndorsingApp = useMemo(
+    () => userNodesInfo?.nodesManagedByUser?.filter((node: UserNode) => node.endorsedAppId === ethers.ZeroHash),
+    [userNodesInfo?.nodesManagedByUser],
+  )
   const availablePoints = useMemo(() => {
-    if (!nodes?.allNodes || !endorsedApps.data || !nodesEndorsementScore.data) return 0
-    const availableNodes = nodes?.allNodes?.filter((_node, index) => !endorsedApps.data[index]?.endorsedApp)
-    return (
-      availableNodes?.reduce((acc, node) => acc + Number(nodesEndorsementScore.data[Number(node.nodeLevel)]), 0) ?? 0
-    )
-  }, [nodesEndorsementScore.data, endorsedApps.data, nodes?.allNodes])
-  //TODO: Support multiple nodes
-  const nodeToDisplay = nodes?.allNodes?.[0]
-  const nodeType = (nodeToDisplay?.nodeLevel ?? 0) >= MinXNodeLevel ? "XNode" : "Node"
+    return nodesNotEndorsingApp?.reduce((acc, node) => acc + Number(node?.endorsementScore ?? 0), 0) ?? 0
+  }, [nodesNotEndorsingApp])
+
+  const firstAvailableNode = useMemo(() => nodesNotEndorsingApp?.[0], [nodesNotEndorsingApp])
+
   if (!availablePoints) return null
   return (
     <Stack
@@ -34,10 +29,12 @@ export const EndorsementPointsBanner = () => {
       w="full"
       p="24px"
       borderRadius={"16px"}
-      bgGradient={"linear(to-r, #29295C,#4747A5)"}>
+      bgGradient="to-r"
+      gradientFrom="#29295C"
+      gradientTo="#4747A5">
       <Image
-        src={nodeToDisplay?.image}
-        alt={`node-${nodeToDisplay?.nodeLevel}-image`}
+        src={firstAvailableNode?.metadata?.image}
+        alt={firstAvailableNode?.metadata?.name ?? ""}
         h={["auto", "auto", "50px"]}
         w={["25%", "25%", "auto"]}
         borderRadius={"24px"}
@@ -46,7 +43,7 @@ export const EndorsementPointsBanner = () => {
         <Skeleton loading={isLoading}>
           <Heading size="md" color="white">
             {t("As {{nodeType}} holder, you have {{value}} available points to endorse Apps", {
-              nodeType,
+              nodeType: firstAvailableNode?.type,
               value: availablePoints,
             })}
           </Heading>

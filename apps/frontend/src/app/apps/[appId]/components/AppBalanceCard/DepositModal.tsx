@@ -12,8 +12,8 @@ import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewards
 import { useXApp } from "../../../../../api/contracts/xApps/hooks/useXApp"
 import { BaseModal } from "../../../../../components/BaseModal"
 import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
-import { useDepositToAppBalance } from "../../../../../hooks/useDepositToAppBalance"
 import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
+import { useDepositToAppBalance } from "../../../../../hooks/xApp/useDepositToAppBalance"
 
 import { PercentageSelectorButtons } from "./components/PercentageSelectorButtons"
 

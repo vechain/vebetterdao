@@ -1,71 +1,96 @@
-import { Box, Card, Image, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
+import { Badge, Box, Button, Card, Circle, HStack, Icon, Image, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
+import { Lock } from "iconoir-react"
 import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa"
 
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
+import { Tooltip } from "@/components/ui/tooltip"
+import { STARGATE_APP_URL } from "@/constants/links"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
-export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: boolean }) => {
+export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: boolean }) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
+  const { data: vnsData } = useVechainDomain(node?.manager)
+
+  const managerAddressOrDomain = vnsData?.domain ? humanDomain(vnsData?.domain) : humanAddress(node?.manager)
+
+  const isNodeDelegator = (!node?.currentUserIsManager && node?.currentUserIsOwner) ?? false
+
+  const cardLink = useMemo(() => {
+    return isNodeDelegator ? new URL(`/nft/${node.id}`, STARGATE_APP_URL).toString() : `/xnode/${node.id}`
+  }, [isNodeDelegator, node.id])
+
   return (
     <LinkBox flex={1}>
-      <Card.Root
-        variant="subtle"
-        alignItems="center"
-        flexDirection="row"
-        gap="8px"
-        borderStyle={node ? "solid" : "dashed"}
-        _dark={{
-          border: node ? "none" : "1px dashed #FFFFFF33",
-        }}
-        p="16px"
-        rounded="8px">
+      <Card.Root variant="subtle" border="none" alignItems="center" flexDirection="row" gap="13px">
         <Card.Header p="0">
-          <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
+          <Box position="relative">
+            <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} boxSize="62px" rounded="8px" />
+            {isNodeDelegator && (
+              <Tooltip
+                content={t("Managed externally by {{addressOrDomain}}", { addressOrDomain: managerAddressOrDomain })}>
+                <Circle
+                  position="absolute"
+                  top="-8px"
+                  right="-8px"
+                  size="20px"
+                  bg="status.info.strong"
+                  borderWidth="1px"
+                  borderColor="status.info.subtle">
+                  <Icon as={Lock} color="text.alt" boxSize={"12px"} />
+                </Circle>
+              </Tooltip>
+            )}
+          </Box>
         </Card.Header>
-        <Card.Body p="0" gap="0">
-          {node ? (
-            <>
-              <ConditionalWrapper
-                condition={isClickable}
-                wrapper={({ children }) => (
-                  <LinkOverlay asChild>
-                    <NextLink href={`/xnode/${node.nodeId}`}>{children}</NextLink>
-                  </LinkOverlay>
-                )}>
-                <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-                  {t("Node")}
-                </Text>
-              </ConditionalWrapper>
-              <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
-                {`${node.name} #${node.nodeId}`}
+        <Card.Body gap="6px">
+          <Box display="flex" p={0} m={0} alignItems="center" gap="6px">
+            <ConditionalWrapper
+              condition={isClickable || isNodeDelegator}
+              wrapper={({ children }) => (
+                <LinkOverlay asChild>
+                  <NextLink href={cardLink}>{children}</NextLink>
+                </LinkOverlay>
+              )}>
+              <Text textStyle="sm">{t("Node")}</Text>
+            </ConditionalWrapper>
+            {isNodeDelegator && (
+              <Badge variant="info" size="sm">
+                {t("Not managed")}
+              </Badge>
+            )}
+          </Box>
+          <Text textStyle="md" fontWeight="semibold">{`${node.metadata?.name} #${node.id}`}</Text>
+          <HStack>
+            <Badge w="fit-content" color="text.default" py={0} variant="neutral" borderRadius="sm">
+              {t("{{value}} points", { value: node?.endorsementScore?.toString() })}
+            </Badge>
+            {!isMobile && isNodeDelegator && (
+              <Text textStyle="sm" color="text.subtle">
+                {t("Managed externally by {{addressOrDomain}}", { addressOrDomain: managerAddressOrDomain })}
               </Text>
-              <Box
-                w="fit-content"
-                display="inline-block"
-                bg="#F8F8F8"
-                _dark={{ bg: "#FFFFFF4A" }}
-                rounded="8px"
-                padding="4px 8px">
-                <Text textStyle={"xs"} lineClamp={1}>
-                  {t("{{value}} points", { value: node.xNodePoints })}
-                </Text>
-              </Box>
-            </>
-          ) : (
-            <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-              {t("No Node attached")}
-            </Text>
-          )}
+            )}
+          </HStack>
         </Card.Body>
 
-        {isClickable && !isMobile && (
+        {!isMobile && (
           <Card.Footer p="0">
-            <FaChevronRight />
+            {isNodeDelegator ? (
+              <Button asChild variant="link" _hover={{ textDecoration: "none" }}>
+                <NextLink href={cardLink} target="_blank" rel="noopener noreferrer">
+                  {t("Open Stargate")}
+                </NextLink>
+              </Button>
+            ) : isClickable ? (
+              <FaChevronRight />
+            ) : null}
           </Card.Footer>
         )}
       </Card.Root>

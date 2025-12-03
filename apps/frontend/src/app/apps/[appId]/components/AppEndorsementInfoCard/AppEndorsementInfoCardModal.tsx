@@ -58,9 +58,28 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
 
   const isUserAppEndorser = useMemo(() => {
     if (!appId) return false
-    return userNode?.isXNodeHolder && compareAddresses(appId, userNode?.endorsedAppId)
+    return compareAddresses(userNode?.endorsedAppId, appId)
   }, [appId, userNode])
 
+  // Get currently endorsed nodes by tracking the latest state for each node
+  const currentlyEndorsedEvents = useMemo(() => {
+    if (!endorsementEvents) return []
+
+    // Create a map to track the latest endorsement event for each nodeId
+    const latestEventByNode = new Map<string, (typeof endorsementEvents)[0]>()
+
+    // Process events from oldest to newest to get latest event per node
+    const sortedEvents = [...endorsementEvents]
+      .filter(event => event.appId === appId)
+      .sort((a, b) => a.blockNumber - b.blockNumber)
+
+    sortedEvents.forEach(event => {
+      latestEventByNode.set(event.nodeId, event)
+    })
+
+    // Return only nodes that are currently endorsed (latest event has endorsed:true)
+    return Array.from(latestEventByNode.values()).filter(event => event.endorsed)
+  }, [endorsementEvents, appId])
   // Confirm unendorsement, unendorsement modal controls
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [selectedEndorserAddress, setSelectedEndorserAddress] = useState("")
@@ -87,7 +106,13 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
   }
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} modalProps={{ size: "6xl" }}>
+    <BaseModal
+      isOpen={isOpen}
+      isCloseable
+      showCloseButton
+      onClose={onClose}
+      modalProps={{ size: "5xl" }}
+      modalContentProps={{ pt: 5 }}>
       <VStack gap={6} align="flex-start" w="full">
         <HStack w="full" justify="space-between">
           <Heading size={"2xl"}>{t("Endorsement history")}</Heading>
@@ -125,7 +150,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               </Card.Header>
 
               <Card.Body p={0}>
-                {appEndorsers && appEndorsers.length > 0 ? (
+                {currentlyEndorsedEvents.length ? (
                   <VStack flex={1} w="full" overflowY="auto" h="full" gap={2}>
                     {isAppAdmin && isConfirmOpen && (
                       <VStack
@@ -167,22 +192,17 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                       </VStack>
                     )}
 
-                    {appEndorsers
-                      .slice()
-                      .reverse()
-                      .map(endorser => (
-                        <EndorsersItem
-                          appId={appId}
-                          key={endorser}
-                          isAppAdmin={isAppAdmin || false}
-                          endorserAddress={endorser}
-                          endorsementEvents={endorsementEvents || []}
-                          setIsConfirmOpen={setIsConfirmOpen}
-                          setSelectedEndorserAddress={setSelectedEndorserAddress}
-                          setSelectedEndorserNodeId={setSelectedEndorserNodeId}
-                          setSelectedEndorserNodePoints={setSelectedEndorserNodePoints}
-                        />
-                      ))}
+                    {currentlyEndorsedEvents.map(event => (
+                      <EndorsersItem
+                        key={`${event.nodeId}-${event.txOrigin}-${event.blockNumber}`}
+                        isAppAdmin={isAppAdmin || false}
+                        event={event}
+                        setIsConfirmOpen={setIsConfirmOpen}
+                        setSelectedEndorserAddress={setSelectedEndorserAddress}
+                        setSelectedEndorserNodeId={setSelectedEndorserNodeId}
+                        setSelectedEndorserNodePoints={setSelectedEndorserNodePoints}
+                      />
+                    ))}
                   </VStack>
                 ) : (
                   <Center w="full" h="full">

@@ -7,7 +7,7 @@ import { useMultipleXAppRoundEarnings } from "../../../api/contracts/xAllocation
 import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useRoundXApps } from "../../../api/contracts/xApps/hooks/useRoundXApps"
-import { useClaimXAppsAllocations } from "../../../hooks/useClaimXAppsAllocations"
+import { useClaimXAppsAllocations } from "../../../hooks/xApp/useClaimXAppsAllocations"
 
 export const BulkClaimXAppsAllocations = () => {
   const [roundId, setRoundId] = useState<string>("1")

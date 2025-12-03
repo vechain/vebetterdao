@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
+import { useAdminCreatorNFT } from "@/hooks/galaxyMember/useAdminCreatorNFT"
 
 import { useAppsCountFromCreator } from "../../../api/contracts/xApps/hooks/useAppsCountFromCreator"
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"

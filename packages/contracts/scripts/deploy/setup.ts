@@ -1,23 +1,24 @@
+import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
+
 import {
   B3TR,
+  B3TRGovernor,
   Emissions,
+  Stargate,
   Treasury,
   VOT3,
   VoterRewards,
   X2EarnApps,
-  B3TRGovernor,
   XAllocationVoting,
-  Stargate,
 } from "../../typechain-types"
-import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
-import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
-import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintStargateNFTs, proposeUpgradeGovernance } from "../helpers"
+import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
+import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
+import { getSeedAccounts, getTestKeys, SeedStrategy } from "../helpers/seedAccounts"
 import { convertB3trForVot3 } from "../helpers/swap"
-import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
 import { ethers } from "hardhat"
 import { Address } from "@vechain/sdk-core"
+import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
 
 const accounts = getTestKeys(17)
 const xDappCreatorAccounts = accounts.slice(0, 8)

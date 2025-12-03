@@ -7,7 +7,7 @@ interface EmptyStateRootProps {
   /** The main title text */
   title: string
   /** The description text */
-  description: string
+  description?: string
   /** Optional action button configuration */
   action?: {
     label: string
@@ -47,7 +47,7 @@ export const EmptyStateCard = ({
         <EmptyState.Indicator {...indicatorProps}>{icon}</EmptyState.Indicator>
         <VStack textAlign="center" {...stackProps}>
           <EmptyState.Title {...titleProps}>{title}</EmptyState.Title>
-          <EmptyState.Description {...descriptionProps}>{description}</EmptyState.Description>
+          {description && <EmptyState.Description {...descriptionProps}>{description}</EmptyState.Description>}
           {action && (
             <Button variant="outline" size="sm" mt={4} {...buttonProps} onClick={onClick}>
               {label}
