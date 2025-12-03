@@ -45,7 +45,6 @@ type B3MOIllustration =
   | "/assets/mascot/mascot-explore-dapps@2x.webp"
   | "/assets/mascot/mascot-warning-head.webp"
   | "/assets/mascot/mascot-holding-tokens.webp"
-  | "/assets/mascot/mascot-welcoming-left-head.webp"
   | "/assets/mascot/mascot-welcoming.webp"
   | "/assets/images/b3mo-stargate-greet.webp"
 type GenericBannerProps = {

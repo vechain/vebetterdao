@@ -26,12 +26,12 @@ export const useProposalVotes = (proposalId: string) =>
     },
     {
       select(data) {
-        const totalPower = data.reduce((acc, item) => acc.plus(BigNumber(item.totalPower ?? 0)), BigNumber(0))
+        const totalPower = data.reduce((acc, item) => acc.plus(new BigNumber(item.totalPower ?? 0)), new BigNumber(0))
         const totalVoters = data.reduce((acc, item) => acc + item.voters, 0)
-        const totalWeight = data.reduce((acc, item) => acc.plus(BigNumber(item.totalWeight ?? 0)), BigNumber(0))
+        const totalWeight = data.reduce((acc, item) => acc.plus(new BigNumber(item.totalWeight ?? 0)), new BigNumber(0))
         const groupedVotes = data.reduce((acc, item) => {
-          const itemWeight = BigNumber(item.totalWeight ?? 0)
-          const itemPower = BigNumber(item.totalPower ?? 0)
+          const itemWeight = new BigNumber(item.totalWeight ?? 0)
+          const itemPower = new BigNumber(item.totalPower ?? 0)
           // Calculate percentages as (item / total) * 100 using BigNumber math
           const percentage = totalWeight.isGreaterThan(0)
             ? itemWeight.dividedBy(totalWeight).multipliedBy(100).toNumber()
@@ -55,6 +55,7 @@ export const useProposalVotes = (proposalId: string) =>
           votes: groupedVotes,
         }
       },
-      refetchInterval: 10000,
+      staleTime: 1000 * 60 * 5, // 5 minutes to be considered fresh
+      refetchInterval: 1000 * 60 * 5, // Automatically refetch every 5 minutes
     },
   )

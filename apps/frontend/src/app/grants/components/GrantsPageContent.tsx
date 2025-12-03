@@ -24,6 +24,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
+import { ProposalsBanners } from "@/app/components/Banners/proposals/ProposalsBanners"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
 
@@ -42,7 +43,6 @@ import { useDebounce } from "../../../hooks/useDebounce"
 import { ProposalType } from "../../../types/proposals"
 import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
 
-import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
@@ -168,7 +168,8 @@ export const GrantsPageContent = () => {
 
   const totalDistributedAmount = useMemo(() => {
     return (
-      milestoneClaimedEvents?.reduce((acc, event) => acc.plus(BigNumber(event.amount)), BigNumber(0)) ?? BigNumber(0)
+      milestoneClaimedEvents?.reduce((acc, event) => acc.plus(new BigNumber(event.amount)), new BigNumber(0)) ??
+      new BigNumber(0)
     )
   }, [milestoneClaimedEvents])
 
@@ -227,7 +228,7 @@ export const GrantsPageContent = () => {
   return (
     <>
       <VStack w="full" gap={8} pb={8}>
-        <GrantsBanners />
+        <ProposalsBanners />
         <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
           <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
             <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Grants")}</Heading>

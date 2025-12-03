@@ -95,7 +95,6 @@ export const setupEnvironment = async (
   switch (config) {
     case "local":
     case "testnet-staging":
-    case "galactica-test":
       await setupLocalEnvironment(
         emissions,
         treasury,

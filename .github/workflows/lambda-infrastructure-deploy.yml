@@ -34,7 +34,7 @@ on:
       AWS_ACCESS_ROLE:
         required: true
       DEV_AWS_ACC_ROLE:
-        required: true
+        required: false
       VECHAINCI_SSH_PRIVATE_KEYS:
         required: true
 
