@@ -1,3 +1,5 @@
+"use client"
+
 import { Box, Button, Card, Image, LinkBox, LinkOverlay, Text, HStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useCallback } from "react"
@@ -6,7 +8,7 @@ import { FaChevronRight } from "react-icons/fa"
 
 import { UserGM } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
-import { useSelectGM } from "@/hooks/useSelectGM"
+import { useSelectGM } from "@/hooks/galaxyMember/useSelectGM"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 

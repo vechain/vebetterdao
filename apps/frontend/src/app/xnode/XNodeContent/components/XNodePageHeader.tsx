@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next"
 
 import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
-export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
+export const XNodePageHeader = ({ node }: { node: UserNode }) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-  const { image: xNodeImage, name: xNodeName, nodeType, xNodePoints, isXNodeDelegator, isXNodeDelegatee } = xNode
+  const isDelegator = !node?.currentUserIsManager && node?.currentUserIsOwner
+  const isDelegatee = node?.currentUserIsManager
+  const xNodePoints = node?.endorsementScore?.toString() ?? "0"
   return (
     <Card.Root variant="primary" p="0">
       <Image
@@ -33,24 +35,26 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
           color="white"
           flexGrow={4}>
           <Image
-            src={xNodeImage}
-            alt="gm"
+            src={node?.metadata?.image}
+            alt={node?.metadata?.name ?? ""}
             w={isAbove800 ? "132px" : "68px"}
             h={isAbove800 ? "132px" : "68px"}
             rounded="8px"
           />
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
             <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="#FFFFFF80">
-              {nodeType}
+              {node?.type}
             </Text>
             <Text color="white" fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
-              {xNodeName}
+              {node?.metadata?.name ?? ""}
             </Text>
 
             <HStack>
-              {(isXNodeDelegator || isXNodeDelegatee) && (
+              {(isDelegator || isDelegatee) && (
                 <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                  <Text textStyle={isAbove800 ? "md" : "xs"}>{isXNodeDelegator ? "Node Owner" : "Manager"}</Text>
+                  <Text color="white" textStyle={isAbove800 ? "md" : "xs"}>
+                    {isDelegator ? "Node Owner" : "Manager"}
+                  </Text>
                 </HStack>
               )}
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>

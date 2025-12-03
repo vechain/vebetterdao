@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
+import { useUpdateAppAdminInfo } from "@/hooks/xApp/useUpdateAppAdminInfo"
 
 import { useAccountPermissions } from "../../../../../../api/contracts/account/hooks/useAccountPermissions"
 import { useCurrentAppAdmin } from "../../../hooks/useCurrentAppAdmin"

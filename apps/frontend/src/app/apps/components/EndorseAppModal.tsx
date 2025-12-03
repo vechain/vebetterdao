@@ -1,6 +1,7 @@
 import { VStack, Heading, Box, Text, Button, Skeleton, Card, Image, RadioGroup } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
+import { ethers } from "ethers"
 import { t } from "i18next"
 import { useCallback, useMemo, useState } from "react"
 
@@ -12,7 +13,7 @@ import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocation
 import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
 import { useAppEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { useEndorseApp } from "../../../hooks/useEndorseApp"
+import { useEndorseApp } from "../../../hooks/xApp/useEndorseApp"
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type Props = {
@@ -24,12 +25,12 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
   const { data: endorsementScore } = useAppEndorsementScore(xApp?.id ?? "")
-  const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const nodesNotEndorsingApp = useMemo(() => {
-    return nodes?.allNodes
-      .filter(node => !node.endorsedAppId && node.xNodePoints > 0)
-      .sort((a, b) => Number(b.xNodePoints) - Number(a.xNodePoints))
-  }, [nodes])
+    return userNodesInfo?.nodesManagedByUser
+      .filter(node => node.endorsementScore > 0 && node.endorsedAppId === ethers.ZeroHash)
+      .sort((a, b) => Number(b.endorsementScore) - Number(a.endorsementScore))
+  }, [userNodesInfo])
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
@@ -44,17 +45,25 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   })
 
   const appScore = useMemo(() => Number(endorsementScore ?? 0), [endorsementScore])
-  const newScore =
-    appScore +
-    Number(selectedNodeId ? nodesNotEndorsingApp?.find(node => node.nodeId === selectedNodeId)?.xNodePoints : 0)
+
+  const selectedNode = useMemo(() => {
+    if (!selectedNodeId || !nodesNotEndorsingApp) return null
+    return nodesNotEndorsingApp.find(node => node.id.toString() === selectedNodeId)
+  }, [selectedNodeId, nodesNotEndorsingApp])
+
+  const selectedNodeScore = useMemo(() => {
+    return Number(selectedNode?.endorsementScore ?? 0)
+  }, [selectedNode])
+
+  const newScore = appScore + selectedNodeScore
 
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.sendTransaction()
   }, [endorseAppMutation])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    const selectedNode = nodesNotEndorsingApp?.find(node => node.nodeId === selectedNodeId)
-    return account?.address && selectedNode && !selectedNode?.isXNodeOnCooldown
+    const selectedNode = nodesNotEndorsingApp?.find(node => node.id.toString() === selectedNodeId)
+    return account?.address && selectedNode && !selectedNode?.isOnCooldown
   }, [account, selectedNodeId, nodesNotEndorsingApp])
 
   return (
@@ -83,7 +92,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         <VStack w="full" alignItems="stretch" gap={4}>
           <RadioGroup.Root onValueChange={details => setSelectedNodeId(details.value)} value={selectedNodeId}>
             <VStack w="full" gap={4} alignItems="stretch">
-              {nodesNotEndorsingApp?.map(node => (
+              {nodesNotEndorsingApp?.map((node: any) => (
                 <Card.Root
                   key={node.nodeId}
                   variant="outline"
@@ -93,11 +102,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   p="16px"
                   rounded="8px">
                   <Card.Header p="0">
-                    <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
+                    <Image src={node?.metadata?.image} alt={node?.metadata?.name} boxSize="62px" rounded="8px" />
                   </Card.Header>
 
                   <RadioGroup.Item
-                    value={node.nodeId}
+                    value={node.id.toString()}
                     flex={1}
                     justifyContent="space-between"
                     alignItems="center"
@@ -107,11 +116,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                         {t("Node")}
                       </Text>
                       <Text lineHeight={1.6} lineClamp={1}>
-                        {`${node.name} #${node.nodeId}`}
+                        {`${node.metadata?.name} #${node.id}`}
                       </Text>
                       <Box w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
                         <Text textStyle="xs" _dark={{ color: "#FFFFFFB2" }}>
-                          {t("{{value}} points", { value: node.xNodePoints })}
+                          {t("{{value}} points", { value: node.endorsementScore.toString() })}
                         </Text>
                       </Box>
                     </Card.Body>

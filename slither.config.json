@@ -2,25 +2,27 @@
   "exclude_informational": true,
 
   "suppressions": [
-
-    { "check": "reentrancy-eth",
+    {
+      "check": "reentrancy-eth",
       "file": "contracts/Multisig.sol",
       "function": "executeTransaction\\(uint256\\)",
-      "reason": "CEI done; false positive" },
+      "reason": "CEI done; false positive"
+    },
 
-    { "check": "unused-return",
+    {
+      "check": "unused-return",
       "file": "packages/contracts/contracts/Stargate.sol",
       "function": "_getDelegationStatus\\(StargateStorage,uint256\\)",
-      "reason": "CEI done; false positive" },
+      "reason": "CEI done; false positive"
+    },
 
-    { "check": "low-level-calls",
-      "file": "contracts/Proxy.sol",
-      "line": 73,
-      "reason": "intended delegatecall" },
-   
-    { "check": "arbitrary-send",
+    { "check": "low-level-calls", "file": "contracts/Proxy.sol", "line": 73, "reason": "intended delegatecall" },
+
+    {
+      "check": "arbitrary-send",
       "file": "contracts/tokens/Token.sol",
       "lineRange": "120-128",
-      "reason": "admin-only sweep, reviewed" }
+      "reason": "admin-only sweep, reviewed"
+    }
   ]
 }

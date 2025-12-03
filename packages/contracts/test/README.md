@@ -10,8 +10,9 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 
 - **shard0**: B3TR Token, B3TR Multi Sig
 - **shard2**: Emissions
-- **shard3a**: (available for assignment)
-- **shard3b**: Galaxy Member
+- **shard3a**: Galaxy Member
+- **shard3b**: Galaxy Member - V6 Upgrade
+- **shard3c**: Galaxy Member - V6 Compatibility
 - **shard4a**: Governance - Governor and TimeLock
 - **shard4b**: Governance - Voting power with proposal deposit
 - **shard4c**: Governance - Milestone Creation
@@ -32,7 +33,11 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard12**: X2EarnRewardsPool
 - **shard13**: X-Allocation Pool
 - **shard14**: X-Allocation Voting
-- **shard15**: X-Apps
+- **shard15a**: X-Apps - Core Features
+- **shard15b**: X-Apps - Team Management
+- **shard15c**: X-Apps - Metadata and Endorsement
+- **shard15d**: X-Apps - V7 Upgrade
+- **shard15e**: X-Apps - Upgradeability
 - **shard16**: VeBetterPassport (additional tests)
 - **shard17a**: X-Apps (additional tests)
 - **shard17b**: X-Apps (additional tests)

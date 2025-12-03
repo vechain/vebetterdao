@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - testnet
+      - feat/stargate
   push:
     branches:
       - main
@@ -113,9 +114,11 @@ jobs:
           - shard: shard2
             label: Emissions
           - shard: shard3a
-            label: Available for Assignment
-          - shard: shard3b
             label: Galaxy Member
+          - shard: shard3b
+            label: Galaxy Member - V6 Upgrade
+          - shard: shard3c
+            label: Galaxy Member - V6 Compatibility
           - shard: shard4a
             label: Governor & TimeLock
           - shard: shard4b
@@ -170,8 +173,16 @@ jobs:
             label: X-Allocation Voting - Upgrade
           - shard: shard14b
             label: X-Allocation Voting - Auto Voting
-          - shard: shard15
-            label: X-Apps
+          - shard: shard15a
+            label: X-Apps - Core Features
+          - shard: shard15b
+            label: X-Apps - Team Management
+          - shard: shard15c
+            label: X-Apps - Metadata and Endorsement
+          - shard: shard15d
+            label: X-Apps - V7 Upgrade
+          - shard: shard15e
+            label: X-Apps - Upgradeability
           - shard: shard16
             label: VeBetterPassport Additional Tests
           - shard: shard17a
