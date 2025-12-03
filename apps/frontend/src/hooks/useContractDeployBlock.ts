@@ -10,7 +10,7 @@ export const useContractDeployBlock = (contractAddress: string) => {
     {
       staleTime: Infinity,
       gcTime: Infinity,
-      select: data => data.data?.[0]?.blockNumber ?? 0,
+      select: data => data.data?.[0]?.blockNumber,
       enabled: !!contractAddress,
     },
   )

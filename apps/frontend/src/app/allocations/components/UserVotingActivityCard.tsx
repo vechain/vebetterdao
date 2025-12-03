@@ -198,7 +198,6 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
             <Separator hideFrom="md" orientation="vertical" borderColor="border.secondary" />
             <Card.Root
               p={{ base: 0, md: "4" }}
-              minH="full"
               bg={{ base: "transparent", md: "card.subtle" }}
               gap="1"
               height="max-content">
@@ -207,15 +206,20 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               </Text>
 
               <Skeleton loading={isRewardClaimedLoading}>
-                {rewardClaimed ? (
-                  <Text textStyle="xl" fontWeight="semibold" color="status.positive.primary">
-                    {"+"}
-                    {getCompactFormatter(2).format(Number(rewardClaimed))}
-                    {" B3TR"}
-                  </Text>
-                ) : (
-                  "-"
-                )}
+                <Text
+                  textStyle="xl"
+                  fontWeight="semibold"
+                  color={rewardClaimed ? "status.positive.primary" : "text.default"}>
+                  {rewardClaimed ? (
+                    <>
+                      {"+"}
+                      {getCompactFormatter(2).format(Number(rewardClaimed))}
+                      {" B3TR"}
+                    </>
+                  ) : (
+                    "-"
+                  )}
+                </Text>
               </Skeleton>
             </Card.Root>
             <VStack gridColumn={{ base: "1 / 4", md: "1 / 3" }} align="stretch" gap="3">
