@@ -74,7 +74,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
               [
                 ["Total apps", SmartphoneDevice, (roundDetails?.apps || []).length],
                 ["Total voters", Group, getCompactFormatter(2).format(roundDetails.totalVoters)],
-                ["Total VP", Flash, getCompactFormatter(2).format(Number(formatEther(roundDetails.totalVP)))],
+                ["Total votes", Flash, getCompactFormatter(2).format(Number(formatEther(roundDetails.totalVP)))],
               ] as const
             ).map(([label, icon, value]) => (
               <GridItem key={label}>

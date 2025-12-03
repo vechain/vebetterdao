@@ -81,7 +81,7 @@ const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
       </VStack>
 
       <Text textStyle="md" fontWeight="semibold">
-        {getCompactFormatter(2).format(Number(formatEther(voteWeight)))}
+        {getCompactFormatter(2).format(Number(formatEther(voteWeight)))} {" votes"}
       </Text>
     </Grid>
   </Card.Root>
@@ -186,7 +186,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               gap="1"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
-                {"Voting power used"}
+                {"Total votes used"}
               </Text>
               <Text textStyle="xl" fontWeight="semibold">
                 {votingPowerUsed}
