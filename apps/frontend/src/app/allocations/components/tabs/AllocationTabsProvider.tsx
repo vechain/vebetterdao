@@ -98,17 +98,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     openModal()
   }, [openModal])
 
-  // Handler for editing auto-vote preferences - loads preferences and opens modal directly
-  const handleEditAutoVotePreferences = useCallback(() => {
-    // Load stored preferences (priority) or voted apps
-    if (storedPreferences.length > 0) {
-      setSelectedAppIds(new Set(storedPreferences))
-    } else if (castVotesEvent?.appsIds) {
-      setSelectedAppIds(new Set(castVotesEvent.appsIds))
-    }
-    handleOpenModalWithAutoVote()
-  }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote])
-
   // Handler for manual voting - respects on-chain state (toggle OFF)
   const handleVoteClick = useCallback(() => {
     openModal()
@@ -150,11 +139,27 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
   const handleCloseModal = useCallback(() => {
     closeModal()
+    // Reset to read-only state if we were editing
+    if (isEditingAutoVote) {
+      handleCancelEditAutoVote()
+    }
     // Reset local state to match chain state when modal is closed
     if (isAutoVotingEnabledOnChain !== undefined) {
       setIsAutoVotingEnabled(isAutoVotingEnabledOnChain)
     }
-  }, [closeModal, isAutoVotingEnabledOnChain])
+  }, [closeModal, isEditingAutoVote, handleCancelEditAutoVote, isAutoVotingEnabledOnChain])
+
+  // Handler for editing auto-vote preferences
+  const handleEditAutoVotePreferences = useCallback(() => {
+    // Load stored preferences (priority) or voted apps
+    if (storedPreferences.length > 0) {
+      setSelectedAppIds(new Set(storedPreferences))
+    } else if (castVotesEvent?.appsIds) {
+      setSelectedAppIds(new Set(castVotesEvent.appsIds))
+    }
+    enterEditMode() // Mark as editing so sync effect doesn't override
+    handleOpenModalWithAutoVote()
+  }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote, enterEditMode])
 
   // TODO auto-voting: Uncomment this after the allocation redesign page is live
   // const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
@@ -285,6 +290,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
       </Presence>
 
       <ConfirmVoteModal
+        key={selectedApps.map(a => a.id).join(",")}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         selectedApps={selectedApps}

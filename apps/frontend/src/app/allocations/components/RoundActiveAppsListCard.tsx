@@ -68,7 +68,7 @@ const RoundActiveAppCard = ({
             )}
 
             <Text textStyle={{ base: "xs", md: "md" }}>
-              {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" VP"}
+              {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" votes"}
             </Text>
           </HStack>
         </VStack>
