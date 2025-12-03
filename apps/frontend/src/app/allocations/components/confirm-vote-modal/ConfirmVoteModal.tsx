@@ -99,6 +99,7 @@ export const ConfirmVoteModal = ({
       showCloseButton={false}
       showLogo={false}
       showHeader={false}
+      modalProps={{ unmountOnExit: false }}
       modalContentProps={{
         maxH: "90vh",
         display: "flex",
