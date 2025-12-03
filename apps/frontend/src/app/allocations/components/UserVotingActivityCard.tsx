@@ -237,9 +237,11 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                   {topVotedApps.length > INITIAL_DISPLAY_COUNT && (
                     <>
                       <Collapsible.Content>
-                        {topVotedApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
-                          <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
-                        ))}
+                        <VStack gap="2" align="stretch">
+                          {topVotedApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
+                            <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
+                          ))}
+                        </VStack>
                       </Collapsible.Content>
                       <Collapsible.Trigger asChild>
                         <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
