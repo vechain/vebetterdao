@@ -1,6 +1,8 @@
 name: Validate PR Label
 on:
   pull_request:
+    branches:
+      - main
     types: [opened, reopened, labeled, unlabeled, synchronize]
   workflow_dispatch:
 
