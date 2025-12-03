@@ -118,10 +118,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
       cycle: BigInt(roundId),
       voter: (account?.address ?? "") as `0x${string}`,
     },
-    select: events =>
-      events.map(({ decodedData }) =>
-        getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
-      ),
+    select: events => events.map(({ decodedData }) => decodedData.args.reward + decodedData.args.gmReward),
     enabled: !!account?.address,
   })
 
@@ -212,7 +209,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                   {rewardClaimed ? (
                     <>
                       {"+"}
-                      {getCompactFormatter(2).format(Number(rewardClaimed))}
+                      {getCompactFormatter(2).format(Number(formatEther(rewardClaimed)))}
                       {" B3TR"}
                     </>
                   ) : (
