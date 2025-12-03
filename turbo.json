@@ -4,7 +4,6 @@
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
     "TESTNET_STAGING_MNEMONIC",
-    "GALACTICA_TEST_MNEMONIC",
     "NEXT_PUBLIC_DATADOG_APP_TOKEN",
     "NEXT_PUBLIC_DATADOG_CLIENT_TOKEN",
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
@@ -81,11 +80,6 @@
       "persistent": true,
       "dependsOn": ["^setup-contracts:mainnet"]
     },
-    "dev:galactica-test": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^setup-contracts:galactica-test"]
-    },
     "dev:simulation": {
       "cache": false,
       "persistent": true,
@@ -110,11 +104,6 @@
       "persistent": true,
       "dependsOn": ["^setup-contracts:mainnet"]
     },
-    "start:galactica-test": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^setup-contracts:galactica-test"]
-    },
     "setup-contracts": {
       "cache": false,
       "persistent": true,
@@ -135,11 +124,6 @@
       "persistent": true,
       "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment:mainnet"]
     },
-    "setup-contracts:galactica-test": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment:galactica-test"]
-    },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
@@ -159,16 +143,9 @@
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "@vechain/vebetterdao-contracts#check-contracts-deployment:galactica-test": {
-      "cache": false
-    },
     "@vechain/vebetterdao-contracts#simulation": {
       "cache": false,
       "dependsOn": ["^setup-contracts"]
-    },
-    "@vechain/vebetterdao-contracts#simulation-galactica": {
-      "cache": false,
-      "dependsOn": ["^setup-contracts:galactica-test"]
     },
     "clean": {
       "cache": false
@@ -197,9 +174,6 @@
     },
     "deploy:mainnet": {
       "dependsOn": ["^deploy:mainnet"]
-    },
-    "deploy:galactica-test": {
-      "dependsOn": ["^deploy:galactica-test"]
     },
     "deploy:hardhat": {
       "dependsOn": ["^deploy:hardhat"]

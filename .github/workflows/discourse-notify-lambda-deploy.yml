@@ -1,0 +1,44 @@
+name: Discourse Notify Lambda Deployment
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/discourse-notify/**'
+      - 'lambda/src/discourseNotify/**'
+      - '.github/workflows/discourse-notify-lambda-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: 'Terraform workspace to use (dev, prod)'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  build:
+    name: Build Lambda
+    uses: ./.github/workflows/lambda-build.yml
+    with:
+      workspace: ${{ github.event.inputs.workspace || 'prod' }}
+    secrets:
+      TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+      MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+
+  deploy:
+    name: Deploy Infrastructure
+    needs: build
+    uses: ./.github/workflows/lambda-infrastructure-deploy.yml
+    with:
+      workspace: ${{ github.event.inputs.workspace || 'prod' }}
+      lambda_name: discourseNotify
+      terraform_dir: terraform/discourse-notify
+    secrets:
+      AWS_ACCESS_ROLE: ${{ secrets.AWS_ACCESS_ROLE }}
+      VECHAINCI_SSH_PRIVATE_KEYS: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
