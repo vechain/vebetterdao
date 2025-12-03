@@ -110,7 +110,7 @@ export const ActiveAppDetailModal = ({
       label: t("Voting power"),
       rows: [
         {
-          label: "Total votes received",
+          label: t("Total votes received"),
           value: votingPowerValue,
         },
         {

@@ -188,7 +188,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               gap="1"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
-                {"Total votes used"}
+                {t("Total votes used")}
               </Text>
               <Text textStyle="xl" fontWeight="semibold">
                 {votingPowerUsed}
