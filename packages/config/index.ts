@@ -65,6 +65,7 @@ export type AppConfig = {
   xAllocationVotingLibraries: XAllocationVotingLibraries
   b3trMultiSigAddress?: string
   stargateNFTContractAddress: string
+  stargateContractAddress: string
   grantsManagerContractAddress: string
   dbaPoolContractAddress: string
   nodeUrl: string

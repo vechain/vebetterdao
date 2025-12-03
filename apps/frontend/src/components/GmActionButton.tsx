@@ -13,8 +13,8 @@ import { useGMMaxLevel } from "../api/contracts/galaxyMember/hooks/useGMMaxLevel
 import { useParticipatedInGovernance } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
 import { useCurrentAllocationsRoundId } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../constants/AnalyticsEvents"
-import { useMintNFT } from "../hooks/useMintNFT"
-import { useUpgradeGM } from "../hooks/useUpgradeGM"
+import { useMintNFT } from "../hooks/galaxyMember/useMintNFT"
+import { useUpgradeGM } from "../hooks/galaxyMember/useUpgradeGM"
 
 import { GetFreeNFTModal } from "./GmNFTAndNodeCard/GetFreeNFTModal"
 import { MintNFTModal } from "./MintNFTModal"

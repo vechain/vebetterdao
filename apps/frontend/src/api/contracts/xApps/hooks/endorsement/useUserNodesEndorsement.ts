@@ -88,17 +88,3 @@ export const useNodesEndorsedApps = (nodeIds: string[]) => {
     select: data => data.filter(node => node.endorsedApp?.id !== UNENDORSED_APP_ID),
   })
 }
-
-/**
- *  Hook to get the endorsed app for a single node
- * @param nodeId  the node id to fetch the endorsed app for
- * @returns  the endorsed app for the node
- */
-export const useNodeEndorsedApp = (nodeId?: string) => {
-  const { data, ...rest } = useNodesEndorsedApps(nodeId ? [nodeId] : [])
-
-  return {
-    data: data?.[0]?.endorsedApp,
-    ...rest,
-  }
-}

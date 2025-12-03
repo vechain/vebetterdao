@@ -11,8 +11,8 @@ import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.jso
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { OkHandIcon } from "../../../../../components/Icons/OkHandIcon"
-import { useUpdateAppDetails } from "../../../../../hooks/useUpdateAppDetails"
-import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
+import { useUpdateAppDetails } from "../../../../../hooks/xApp/useUpdateAppDetails"
+import { useUploadAppMetadata } from "../../../../../hooks/xApp/useUploadAppMetadata"
 import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
 import { useCurrentAppRole } from "../../hooks/useCurrentAppRole"
 

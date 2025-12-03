@@ -7,7 +7,7 @@ import {
   useAppSecurityLevel,
 } from "../../../../../api/contracts/vePassport/hooks/useAppSecurityLevel"
 import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
-import { useUpdateAppSecurityLevel } from "../../../../../hooks/useUpdateAppSecurityLevel"
+import { useUpdateAppSecurityLevel } from "../../../../../hooks/xApp/useUpdateAppSecurityLevel"
 
 export const AppSecurity = () => {
   const [appId, setAppId] = useState<string | undefined>()

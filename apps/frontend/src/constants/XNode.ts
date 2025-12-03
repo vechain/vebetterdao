@@ -11,7 +11,7 @@ export const NodeStrengthLevelToImage: { [key: string]: string } = {
   "6": "/assets/images/nodes/06-thunderX.webp",
   "7": "/assets/images/nodes/07-mjolnirX.webp",
 }
-//after this level the nfts are considered xNode
+//after this level the nfts are considered node
 export const MinXNodeLevel = 4
 export const EconomicNodeStrengthLevelToName: { [key: string]: string } = {
   "1": "Strength",

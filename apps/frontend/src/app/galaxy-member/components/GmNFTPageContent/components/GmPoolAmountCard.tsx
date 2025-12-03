@@ -2,7 +2,7 @@ import { Card, Heading, HStack, Text, VStack, Flex, Badge } from "@chakra-ui/rea
 import { useTranslation } from "react-i18next"
 
 import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useGMPoolAmount } from "../../../../../hooks/useGMPoolAmount"
+import { useGMPoolAmount } from "../../../../../hooks/galaxyMember/useGMPoolAmount"
 
 export const GmPoolAmountCard = () => {
   const { t } = useTranslation()

@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { useUserPreferences } from "@/hooks/useUserPreferences"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
@@ -21,7 +22,6 @@ import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUs
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
@@ -98,7 +98,7 @@ export const ActionBanner = () => {
     isLoading,
   } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
 
-  const { data: userNodes } = useGetUserNodes(account?.address ?? "")
+  const { data: userNodesInfo } = useGetUserNodes(account?.address ?? undefined)
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
@@ -198,9 +198,9 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   // Legacy Node banners logic
-  const isLegacyNode = useMemo(() => (userNodes?.legacyNodes?.length ?? 0) > 0, [userNodes])
+  const userHasLegacyNode = userNodesInfo?.hasLegacyNode ?? false
   // Remove the banner for every user at the end of this round
-  const showStargateBanner = currentRoundId < 55 || (isLegacyNode && isStargateModalHidden)
+  const showStargateBanner = userHasLegacyNode && isStargateModalHidden
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
@@ -226,15 +226,13 @@ export const ActionBanner = () => {
       )
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
-    if (showStargateBanner)
-      bannerComponents.push(<StargateMigrationBanner isLegacyNode={isLegacyNode} key="stargate-migration" />)
+    if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
     return bannerComponents
   }, [
-    isLegacyNode,
     showCantVoteBanners,
     CantVoteBanner,
     showClaimB3trBanner,
@@ -293,7 +291,7 @@ export const ActionBanner = () => {
           ))}
         </Swiper>
       </Box>
-      <NodeUpgradeModal isOpen={isLegacyNode && showModal} onClose={() => setShowModal(false)} />
+      <NodeUpgradeModal isOpen={userHasLegacyNode && showModal} onClose={() => setShowModal(false)} />
     </>
   )
 }

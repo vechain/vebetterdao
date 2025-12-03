@@ -18,8 +18,8 @@ import { useTranslation } from "react-i18next"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 
 import { useColorModeValue } from "@/components/ui/color-mode"
-import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/useAdminAssignCategories"
-import { useAppsWithoutCategories } from "@/hooks/useAppsWithoutCategories"
+import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/xApp/useAdminAssignCategories"
+import { useAppsWithoutCategories } from "@/hooks/xApp/useAppsWithoutCategories"
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 export const XAppAssignAppCategory = () => {
   const { t } = useTranslation()
@@ -57,11 +57,11 @@ export const XAppAssignAppCategory = () => {
     if (!appsWithoutCategories) return
 
     const validAssignments: AppCategoryAssignment[] = appsWithoutCategories
-      .filter(app => {
+      .filter((app: any) => {
         const categories = appCategories[app.id]
         return categories && categories.length > 0
       })
-      .map(app => ({
+      .map((app: any) => ({
         app,
         selectedCategories: appCategories[app.id]!,
       }))
@@ -171,7 +171,7 @@ export const XAppAssignAppCategory = () => {
                 {/* Carousel Container */}
                 <Box position="relative" overflow="hidden" borderRadius="md">
                   <Flex transition="transform 0.3s ease" transform={`translateX(-${carouselIndex * 100}%)`}>
-                    {appsWithoutCategories.map(app => {
+                    {appsWithoutCategories.map((app: any) => {
                       const selectedCategories = appCategories[app.id] || []
                       return (
                         <Box
@@ -241,7 +241,7 @@ export const XAppAssignAppCategory = () => {
                 {/* Dots Indicator */}
                 {appsWithoutCategories.length > 1 && (
                   <HStack justify="center" gap={2}>
-                    {appsWithoutCategories.map((app, index) => (
+                    {appsWithoutCategories.map((app: any, index: number) => (
                       <Box
                         key={app.id}
                         w={2}

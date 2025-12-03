@@ -6,10 +6,10 @@ import { Trans, useTranslation } from "react-i18next"
 
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { Clipboard } from "@/components/ui/clipboard"
+import { useNodeEndorsementScore } from "@/hooks/node/useNodeEndorsementScore"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 
-import { useGetNodeManager } from "../../../../../hooks/useNodeManager"
+import { useGetNodeManager } from "../../../../../hooks/node/useNodeManager"
 
 type Props = {
   event: AppEndorsedEvent
@@ -61,7 +61,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
             <Text fontWeight="semibold" color={isEndorsingColor}>
               <Trans
                 i18nKey="{{value}} pts."
-                values={{ value: nodePoints }}
+                values={{ value: nodePoints?.toString() ?? "0" }}
                 components={{
                   Text: <Text as="span" fontWeight="semibold" color={isEndorsingColor} />,
                 }}
