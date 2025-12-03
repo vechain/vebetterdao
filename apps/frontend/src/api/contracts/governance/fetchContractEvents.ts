@@ -27,7 +27,7 @@ export const fetchContractEvents = async <T extends Abi, K extends ContractEvent
   filterParams,
   from = B3TR_GOVERNOR_CREATION_BLOCK,
   to,
-  order = "desc",
+  order,
   offset,
   limit,
 }: FetchContractEventsParams<T, K>) => {

@@ -31,6 +31,7 @@ export const useAllocationsRoundsEvents = () => {
         blockNumber: meta.blockNumber,
         txOrigin: meta.txOrigin,
       })),
+    order: "asc",
   })
   const allocationEvents = rawAllocationCreatedEvents.data || []
   const isLoading = rawAllocationCreatedEvents.isLoading

@@ -13,6 +13,7 @@ export const useAllocationPoolEvents = ({ appId = "", limit = 10 }: { appId?: st
     eventName: "AllocationRewardsClaimed",
     filterParams: { appId: appId as `0x${string}` },
     select: events => events.map(event => event.decodedData.args),
+    order: "desc",
     limit,
     enabled: !!appId,
   })
