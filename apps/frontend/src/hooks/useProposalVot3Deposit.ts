@@ -6,12 +6,12 @@ import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
 import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { getProposalDepositEventsQueryKey } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
 
 import { getGetProposalDepositsQueryKey } from "../api/contracts/governance/hooks/useGetProposalDeposits"
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
-import { getProposalsEventsQueryKey } from "../api/contracts/governance/hooks/useProposalsEvents"
 import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
 
 import { useBuildTransaction } from "./useBuildTransaction"
@@ -60,7 +60,7 @@ export const useProposalVot3Deposit = ({
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
       getIsDepositReachedQueryKey(proposalId),
-      getProposalsEventsQueryKey(),
+      getProposalDepositEventsQueryKey(proposalId),
       getVot3BalanceQueryKey(account?.address ?? ""),
       getGetProposalDepositsQueryKey(proposalId),
     ],

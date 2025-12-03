@@ -1,37 +1,36 @@
 import { getConfig } from "@repo/config"
 import { EventLogs, FilterCriteria, ThorClient } from "@vechain/sdk-network"
-import { Abi, ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
+import { Abi, ContractEventArgs, ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
 
-import { decodeEventLog, getAllEventLogs } from "./getEvents"
+import { decodeEventLog, getEventLogs, GetEventQueryOptions } from "./getEvents"
 
-export type FetchContractEventsParams<T extends Abi, K extends ContractEventName<T>, R> = {
+export type FetchContractEventsParams<T extends Abi, K extends ContractEventName<T>> = {
   thor: ThorClient
   abi: T
   contractAddress: string
   eventName: K
-  filterParams?: Record<string, unknown> | unknown[] | undefined
-  mapResponse: ({
-    meta,
-    decodedData,
-  }: {
-    meta: EventLogs["meta"]
-    decodedData: ReturnType<typeof viemDecodeEventLog<T, K>>
-  }) => R
-}
+  filterParams?: ContractEventArgs<T, K>
+} & GetEventQueryOptions
+
+const B3TR_GOVERNOR_CREATION_BLOCK = 18868872
 
 /**
  * Fetch and decode contract events from blockchain.
  * Works in both Node.js and browser environments (when thor client is provided).
  * Server-side compatible version of useEvents hook.
  */
-export const fetchContractEvents = async <T extends Abi, K extends ContractEventName<T>, R>({
+export const fetchContractEvents = async <T extends Abi, K extends ContractEventName<T>>({
   thor,
   abi,
   contractAddress,
   eventName,
   filterParams,
-  mapResponse,
-}: FetchContractEventsParams<T, K, R>): Promise<R[]> => {
+  from = B3TR_GOVERNOR_CREATION_BLOCK,
+  to,
+  order,
+  offset,
+  limit,
+}: FetchContractEventsParams<T, K>) => {
   const eventAbi = thor.contracts.load(contractAddress, abi).getEventAbi(eventName)
   const topics = eventAbi.encodeFilterTopicsNoNull(filterParams ?? {})
 
@@ -51,10 +50,15 @@ export const fetchContractEvents = async <T extends Abi, K extends ContractEvent
   ]
 
   const events = (
-    await getAllEventLogs({
+    await getEventLogs({
       thor,
       nodeUrl: getConfig().nodeUrl,
       filterCriteria,
+      from,
+      to,
+      order,
+      offset,
+      limit,
     })
   ).map(event => decodeEventLog(event, abi))
 
@@ -62,10 +66,8 @@ export const fetchContractEvents = async <T extends Abi, K extends ContractEvent
     throw new Error(`Unknown event`)
   }
 
-  return events.map(event =>
-    mapResponse({
-      meta: event.meta,
-      decodedData: event.decodedData as ReturnType<typeof viemDecodeEventLog<T, K>>,
-    }),
-  )
+  return events.map(event => ({
+    meta: event.meta as EventLogs["meta"],
+    decodedData: event.decodedData as ReturnType<typeof viemDecodeEventLog<T, K>>,
+  }))
 }

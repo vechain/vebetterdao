@@ -7,7 +7,6 @@ import { buildClause } from "@/utils/buildClause"
 
 import { getHasVotedQueryKey } from "../api/contracts/governance/hooks/useHasVotedInProposals"
 import { getIsProposalQuorumReachedQueryKey } from "../api/contracts/governance/hooks/useIsProposalQuorumReached"
-import { getProposalsEventsQueryKey } from "../api/contracts/governance/hooks/useProposalsEvents"
 import { getUserProposalsVoteEventsQueryKey } from "../api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { getProposalVotesQueryKey } from "../api/indexer/proposals/useProposalVotes"
 
@@ -46,7 +45,6 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
       getProposalVotesQueryKey(proposalId),
       getIsProposalQuorumReachedQueryKey(proposalId),
       getUserProposalsVoteEventsQueryKey(account?.address ?? undefined),
-      getProposalsEventsQueryKey(),
     ],
     [proposalId, account?.address],
   )

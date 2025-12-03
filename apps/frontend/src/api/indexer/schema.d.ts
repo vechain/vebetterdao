@@ -106,6 +106,124 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/validators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get validators with optional filters
+         * @description This endpoint retrieves validator stats.
+         *
+         *                 You can filter the results by:
+         *                 - `validatorId`: specific validator ID
+         *                 - `status`: validator status
+         *                 - `endorser`: endorser address
+         *
+         *                 You can also sort the results by one of the supported fields and paginate.
+         *
+         *                 - `sortBy`: Choose between `validatorTvl`, `totalTvl`, or `blockProbability`
+         *                 - `page` and `size`: Controls pagination
+         *                 - `direction`: Either `asc` or `desc`
+         */
+        get: operations["getValidators"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/delegations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get delegations with optional filters
+         * @description This endpoint retrieves delegation records.
+         *
+         *                 You can filter by:
+         *                 - `validator`: delegations for a specific validator
+         *                 - `tokenId`: delegations for a specific NFT tokenId
+         *                 - `statuses`: array of statuses of interest
+         *
+         *                 You can also sort and paginate.
+         */
+        get: operations["getDelegations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/blocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get VTHO rewards for a validator for a given block
+         * @description Returns the block VTHO rewards generated for the specified block number or up to the latest block. You can optionally filter by a specific validator.
+         */
+        get: operations["getValidatorBlocks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/blocks/missed/{validator}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get percentage of missed blocks
+         * @description Calculates percentage of missed blocks for a validator in a block range. startBlock must be provided. If no endBlock is provided, endBlock defaults to best/latest block.
+         */
+        get: operations["getMissedBlocksPercentage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/blocks/historic/{validator}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get historic VTHO rewards in a custom time range
+         * @description Returns a time series of VTHO rewards between the given timestamps. Granularity (hourly/daily/weekly/monthly) is automatically chosen based on the time range. You can filter by validator address.
+         */
+        get: operations["getHistoricValidatorRewardsRange"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/transfers": {
         parameters: {
             query?: never;
@@ -272,7 +390,7 @@ export interface paths {
          *
          *         ### Modes:
          *         **Preset Mode**
-         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
          *
          *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
          *         • `BLOCK` — returns raw per-block totals
@@ -310,7 +428,7 @@ export interface paths {
          *
          *         ### Modes:
          *         **Preset Mode**
-         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
          *
          *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
          *         • `BLOCK` — returns raw per-block totals
@@ -348,7 +466,7 @@ export interface paths {
          *
          *         ### Modes:
          *         **Preset Mode**
-         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
          *
          *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
          *         • `BLOCK` — returns raw per-block totals
@@ -386,7 +504,7 @@ export interface paths {
          *
          *         ### Modes:
          *         **Preset Mode**
-         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
          *
          *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
          *         • `BLOCK` — returns raw per-block totals
@@ -647,7 +765,7 @@ export interface paths {
          *
          *         ### Modes:
          *         **Preset Mode**
-         *         Pass `{period}` as one of: `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
          *
          *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
          *         • `BLOCK` — returns raw per-block totals
@@ -1324,6 +1442,7 @@ export interface components {
             /** @enum {string} */
             state: "Pending" | "Active" | "Canceled" | "Defeated" | "Succeeded" | "Queued" | "Executed" | "DepositNotMet" | "InDevelopment" | "Completed";
             results?: components["schemas"]["VoteResults"];
+            description: string;
         };
         Result: {
             /** Format: int64 */
@@ -1385,6 +1504,106 @@ export interface components {
         PaginatedResponseHistoricProposals: {
             data: components["schemas"]["HistoricProposals"][];
             pagination: components["schemas"]["PaginationDetail"];
+        };
+        Decimal128: {
+            /** Format: int64 */
+            high?: number;
+            /** Format: int64 */
+            low?: number;
+            infinite?: boolean;
+            finite?: boolean;
+            naN?: boolean;
+            negative?: boolean;
+        };
+        PaginatedResponseValidator: {
+            data: components["schemas"]["Validator"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        Validator: {
+            id: string;
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            endorser?: string;
+            beneficiary?: string;
+            /** @enum {string} */
+            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+            vetStaked?: components["schemas"]["Decimal128"];
+            validatorVetStaked?: components["schemas"]["Decimal128"];
+            delegatorVetStaked?: components["schemas"]["Decimal128"];
+            queuedVetStaked?: components["schemas"]["Decimal128"];
+            exitingVetStaked?: components["schemas"]["Decimal128"];
+            /** Format: int64 */
+            cycleEndBlock?: number;
+            totalRewards?: components["schemas"]["Decimal128"];
+            blockProbability?: components["schemas"]["Decimal128"];
+            blocksPerEpoch?: components["schemas"]["Decimal128"];
+            totalTvl?: components["schemas"]["Decimal128"];
+            validatorTvl?: components["schemas"]["Decimal128"];
+            delegatorTvl?: components["schemas"]["Decimal128"];
+            validatorTvlPercentage?: components["schemas"]["Decimal128"];
+            tvlBasedYield?: components["schemas"]["Decimal128"];
+            validatorYield?: components["schemas"]["Decimal128"];
+            avgDelegatorYield?: components["schemas"]["Decimal128"];
+            nextCycleTvlBasedYield?: components["schemas"]["Decimal128"];
+            nextCycleValidatorYield?: components["schemas"]["Decimal128"];
+            nextCycleAvgDelegatorYield?: components["schemas"]["Decimal128"];
+            nftYieldsNextCycle?: {
+                [key: string]: components["schemas"]["Decimal128"];
+            };
+            totalWeight?: components["schemas"]["Decimal128"];
+            online?: boolean;
+            /** Format: int64 */
+            completedPeriods?: number;
+            /** Format: int64 */
+            startBlock?: number;
+            /** Format: int64 */
+            cyclePeriodLength?: number;
+            blocksPerYear?: components["schemas"]["Decimal128"];
+            percentageOffline?: components["schemas"]["Decimal128"];
+            /** Format: int64 */
+            offlineBlocks?: number;
+        };
+        Delegation: {
+            id: string;
+            validator: string;
+            tokenId: string;
+            owner: string;
+            /** @enum {string} */
+            status: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+            /** @enum {string} */
+            tokenLevel: "All" | "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
+            stakedAmount: string;
+            totalRewardsClaimed: number;
+        };
+        PaginatedResponseDelegation: {
+            data: components["schemas"]["Delegation"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        PaginatedResponseValidatorBlock: {
+            data: components["schemas"]["ValidatorBlock"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        ValidatorBlock: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            validator: string;
+            blockReward?: number;
+            priorityReward?: number;
+            total?: number;
+            /** @enum {string} */
+            status: "VALIDATED" | "MISSED";
+            delegatorRewards?: number;
+            validatorRewards?: number;
+            /** Format: int64 */
+            blocksOffline?: number;
+            /** Format: int64 */
+            onlineBlock?: number;
         };
         IndexedTransferEvent: {
             id: string;
@@ -1485,6 +1704,8 @@ export interface components {
             blockTimestamp: number;
             timeFrame: string;
             total: number;
+            /** Format: int64 */
+            hourOfDay: number;
             /** Format: int64 */
             dayOfMonth: number;
             /** Format: int64 */
@@ -1876,7 +2097,7 @@ export interface components {
             /** Format: int64 */
             total?: number;
             /** @enum {string} */
-            timeFrame?: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
+            timeFrame?: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
             /** Format: int64 */
             dayOfMonth?: number;
             /** Format: int64 */
@@ -1955,6 +2176,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2040,6 +2272,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -2089,6 +2332,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2153,6 +2407,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2222,6 +2487,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -2280,6 +2556,400 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidators: {
+        parameters: {
+            query?: {
+                endorser?: string;
+                validatorId?: string;
+                /** @description Filter by validator status */
+                status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+                /** @description The sort by field */
+                sortBy?: "validatorTvl" | "totalTvl" | "blockProbability" | "delegatorTvl" | "nft:Strength" | "nft:Thunder" | "nft:Mjolnir" | "nft:VeThorX" | "nft:StrengthX" | "nft:ThunderX" | "nft:MjolnirX" | "nft:Dawn" | "nft:Lightning" | "nft:Flash";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseValidator"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getDelegations: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Filter by validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+                /** @description A valid tokenId */
+                tokenId?: string;
+                /** @description Filter by one or more statuses */
+                statuses?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseDelegation"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidatorBlocks: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional block number. If provided, returns the total VTHO rewards as of this block.
+                 * @example 12345678
+                 */
+                blockNumber?: number;
+                /**
+                 * @description Optional validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+                /** @description Filter by block status - either VALIDATED or MISSED. */
+                status?: "VALIDATED" | "MISSED";
+                page?: number;
+                size?: number;
+                direction?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseValidatorBlock"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getMissedBlocksPercentage: {
+        parameters: {
+            query: {
+                startBlock: number;
+                endBlock?: number;
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description Validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": number;
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getHistoricValidatorRewardsRange: {
+        parameters: {
+            query: {
+                /**
+                 * @description Start timestamp (inclusive)
+                 * @example 1704143600
+                 */
+                startTimestamp: number;
+                /**
+                 * @description End timestamp (inclusive)
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description Validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ValidatorBlock"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2347,6 +3017,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -2408,6 +3089,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2483,6 +3175,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -2544,6 +3247,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2618,6 +3332,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2698,6 +3423,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -2756,6 +3492,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -2831,6 +3578,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -2903,6 +3661,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -2944,7 +3713,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Preset aggregation period */
-                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+                period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
         };
@@ -2967,6 +3736,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3011,7 +3791,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Preset aggregation period */
-                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+                period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
         };
@@ -3034,6 +3814,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3077,7 +3868,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Preset aggregation period */
-                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+                period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
         };
@@ -3100,6 +3891,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3143,7 +3945,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Preset aggregation period */
-                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+                period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
         };
@@ -3166,6 +3968,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3224,6 +4037,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -3276,6 +4100,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3336,6 +4171,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -3391,6 +4237,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3454,6 +4311,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -3509,6 +4377,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -3561,6 +4440,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3622,6 +4512,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -3674,6 +4575,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3731,6 +4643,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3797,6 +4720,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -3852,6 +4786,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -3892,7 +4837,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Preset aggregation period */
-                period: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
+                period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
         };
@@ -3915,6 +4860,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -3973,6 +4929,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4049,6 +5016,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -4120,6 +5098,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4202,6 +5191,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -4259,6 +5259,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4320,6 +5331,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -4374,6 +5396,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4449,6 +5482,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -4498,6 +5542,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4568,6 +5623,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -4617,6 +5683,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4703,6 +5780,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -4759,6 +5847,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4834,6 +5933,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -4896,6 +6006,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -4963,6 +6084,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -5025,6 +6157,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -5099,6 +6242,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -5150,6 +6304,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };
@@ -5231,6 +6396,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -5290,6 +6466,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -5345,6 +6532,17 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
             /** @description Requested resource was not found */
             404: {
                 headers: {
@@ -5397,6 +6595,17 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
                     "text/html": string;
                 };
             };

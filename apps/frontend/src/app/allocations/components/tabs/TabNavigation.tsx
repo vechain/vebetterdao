@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, Bleed, Tabs } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { useRef } from "react"
 
@@ -13,6 +14,7 @@ interface TabNavigationProps {
 }
 
 export function TabNavigation({ children, currentTab }: TabNavigationProps) {
+  const { account } = useWallet()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
   const { isMobile } = useBreakpoints()
@@ -37,7 +39,7 @@ export function TabNavigation({ children, currentTab }: TabNavigationProps) {
           <Tabs.List pt={isStuck ? "3" : undefined} px={{ base: "4", md: "0" }} bg={isStuck ? "bg.primary" : undefined}>
             <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote" asChild>
               <NextLink href={isMobile ? "/allocations/vote#allocation-tabs" : "/allocations/vote"}>
-                {"Vote for apps"}
+                {account?.address ? "Vote for apps" : "Round apps"}
               </NextLink>
             </Tabs.Trigger>
             <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round" asChild>

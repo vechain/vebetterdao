@@ -24,13 +24,15 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
     contractAddress,
     eventName: "RewardClaimedV2",
     filterParams: {
-      cycle: round.roundId,
-      voter: account?.address,
+      cycle: BigInt(round.roundId),
+      voter: (account?.address ?? "") as `0x${string}`,
     },
-    mapResponse: ({ decodedData }) => {
-      const reward = decodedData.args.reward + decodedData.args.gmReward
-      return (reward > 0n ? "+" : "") + getCompactFormatter(2).format(Number(formatEther(reward)))
-    },
+    select: events =>
+      events.map(({ decodedData }) => {
+        const reward = decodedData.args.reward + decodedData.args.gmReward
+        return (reward > 0n ? "+" : "") + getCompactFormatter(2).format(Number(formatEther(reward)))
+      }),
+    enabled: !!account?.address,
   })
 
   const total = getCompactFormatter(2).format(Number(formatEther(totalReward)))

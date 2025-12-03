@@ -29,11 +29,15 @@ const INITIAL_DISPLAY_COUNT = 4
 
 const RoundActiveAppCard = ({
   id,
+  appLogo,
   name,
   votesReceived,
   earnings,
   onClick,
-}: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & { onClick: (id: string) => void }) => (
+}: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & {
+  appLogo?: string
+  onClick: (id: string) => void
+}) => (
   <Button key={id} unstyled asChild onClick={() => onClick(id)}>
     <Card.Root
       variant="action"
@@ -44,7 +48,7 @@ const RoundActiveAppCard = ({
       p={{ base: "2", md: "3" }}
       px={{ base: "1", md: "3" }}
       columnGap="4">
-      <AppImage boxSize="11" appId={id || ""} flexShrink={0} shape="square" borderRadius="lg" />
+      <AppImage appId={id || ""} appLogo={appLogo} boxSize="11" flexShrink={0} shape="square" borderRadius="lg" />
       <VStack gap="1" alignItems="start">
         <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
           {name || "-"}
@@ -85,9 +89,6 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
     return apps.filter(app => app.name?.toLowerCase().includes(searchQuery.toLowerCase()))
   }, [apps, searchQuery])
 
-  const visibleApps = isOpen ? filteredApps : filteredApps.slice(0, INITIAL_DISPLAY_COUNT)
-  const hasMoreApps = filteredApps.length > INITIAL_DISPLAY_COUNT
-
   return (
     <>
       <Card.Root p={{ base: "4", md: "6" }} gap="6" height="max-content">
@@ -111,7 +112,7 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
         <Card.Body asChild maxHeight="1000px" overflowY="auto">
           <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
             <VStack gap="2" align="stretch">
-              {visibleApps.map(app => (
+              {filteredApps.slice(0, INITIAL_DISPLAY_COUNT).map(app => (
                 <RoundActiveAppCard
                   key={app.id}
                   id={app.id}
@@ -122,7 +123,7 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
                 />
               ))}
 
-              {hasMoreApps && (
+              {filteredApps.length > INITIAL_DISPLAY_COUNT && (
                 <>
                   <Collapsible.Content>
                     <VStack gap="2" align="stretch">
@@ -131,6 +132,7 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
                           key={app.id}
                           id={app.id}
                           name={app.name}
+                          appLogo={app.metadata?.logo}
                           votesReceived={app.votesReceived}
                           earnings={app.earnings}
                           onClick={setClickedApp}

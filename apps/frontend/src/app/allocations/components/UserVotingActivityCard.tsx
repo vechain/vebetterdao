@@ -51,7 +51,14 @@ const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
   <Card.Root key={app?.id} p="4" bg="card.subtle" asChild>
     <Grid gridTemplateColumns="50px 1fr auto" alignItems="center">
       <Box position="relative">
-        <AppImage boxSize="11" appId={app?.id || ""} flexShrink={0} shape="square" borderRadius="lg" />
+        <AppImage
+          appId={app?.id || ""}
+          appLogo={app?.metadata?.logo}
+          boxSize="11"
+          flexShrink={0}
+          shape="square"
+          borderRadius="lg"
+        />
         <Float placement="top-end" offsetX="3" offsetY="1">
           <Circle
             size="4"
@@ -88,25 +95,32 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     abi,
     contractAddress,
     eventName: "AllocationVoteCast",
-    filterParams: { voter: account?.address, roundId: BigInt(roundId) },
-    mapResponse: ({ decodedData }) =>
-      decodedData.args.appsIds.map((id, idx) => [
-        decodedData.args.roundId,
-        id,
-        decodedData.args.voteWeights[idx],
-      ]) as Array<[bigint, string, bigint]>,
+    filterParams: { voter: (account?.address ?? "") as `0x${string}`, roundId: BigInt(roundId) },
+    select: events =>
+      events.map(
+        ({ decodedData }) =>
+          decodedData.args.appsIds.map((id, idx) => [
+            decodedData.args.roundId,
+            id,
+            decodedData.args.voteWeights[idx],
+          ]) as Array<[bigint, string, bigint]>,
+      ),
+    enabled: !!account?.address,
   })
 
-  const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
+  const { data: [rewardClaimed] = [], isLoading: isRewardClaimedLoading } = useEvents({
     abi: voterRewardsAbi,
     contractAddress: voterRewardsAddress,
     eventName: "RewardClaimedV2",
     filterParams: {
       cycle: BigInt(roundId),
-      voter: account?.address,
+      voter: (account?.address ?? "") as `0x${string}`,
     },
-    mapResponse: ({ decodedData }) =>
-      getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
+    select: events =>
+      events.map(({ decodedData }) =>
+        getCompactFormatter(2).format(Number(formatEther(decodedData.args.reward + decodedData.args.gmReward))),
+      ),
+    enabled: !!account?.address,
   })
 
   const [appsVotedInRound] = voteCastEvents || []
@@ -137,9 +151,6 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
   const topVotedApps = useMemo(() => {
     return appVoteMetricsSortedByWeight.map(id => apps.find(app => app.id === id)).filter(Boolean)
   }, [apps, appVoteMetricsSortedByWeight])
-
-  const visibleApps = isOpen ? topVotedApps : topVotedApps.slice(0, INITIAL_DISPLAY_COUNT)
-  const hasMoreApps = topVotedApps.length > INITIAL_DISPLAY_COUNT
 
   return (
     <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight={{ base: "fit-content", md: "500px" }}>
@@ -192,10 +203,19 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               </Text>
 
               <Skeleton loading={isRewardClaimedLoading}>
-                <Text textStyle="xl" fontWeight="semibold" color="status.positive.primary">
-                  {"+"}
-                  {getCompactFormatter(2).format(Number(rewardClaimed))}
-                  {" B3TR"}
+                <Text
+                  textStyle="xl"
+                  fontWeight="semibold"
+                  color={rewardClaimed ? "status.positive.primary" : "text.default"}>
+                  {rewardClaimed ? (
+                    <>
+                      {"+"}
+                      {getCompactFormatter(2).format(Number(rewardClaimed))}
+                      {" B3TR"}
+                    </>
+                  ) : (
+                    "-"
+                  )}
                 </Text>
               </Skeleton>
             </Card.Root>
@@ -208,18 +228,16 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               </HStack>
               <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
                 <VStack mt={{ base: "0", md: "1.5" }} gap="2" align="stretch">
-                  {visibleApps.map(app => (
+                  {topVotedApps.slice(0, INITIAL_DISPLAY_COUNT).map(app => (
                     <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
                   ))}
 
-                  {hasMoreApps && (
+                  {topVotedApps.length > INITIAL_DISPLAY_COUNT && (
                     <>
                       <Collapsible.Content>
-                        <VStack gap="2" align="stretch">
-                          {topVotedApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
-                            <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
-                          ))}
-                        </VStack>
+                        {topVotedApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
+                          <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
+                        ))}
                       </Collapsible.Content>
                       <Collapsible.Trigger asChild>
                         <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">

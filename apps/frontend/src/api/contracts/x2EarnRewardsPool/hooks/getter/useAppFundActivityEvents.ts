@@ -32,44 +32,46 @@ export const useAppFundActivityEvents = (appId: string) => {
   const [enrichedRewardsPoolEvents, setEnrichedRewardsPoolEvents] = useState<AppFundActivityEvent[]>([])
   const [isEnriching, setIsEnriching] = useState(false)
 
-  const filterParams = { appId }
+  const filterParams = { appId: appId as `0x${string}` }
   const rawDepositEvents = useEvents({
     contractAddress,
     abi,
     eventName: "NewDeposit",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => {
-      const depositor = (decodedData.args.depositor as string).toLowerCase()
-      let txType = "DEPOSIT"
+    select: events =>
+      events.map(({ decodedData, meta }) => {
+        const depositor = (decodedData.args.depositor as string).toLowerCase()
+        let txType = "DEPOSIT"
 
-      if (depositor === xAllocationPoolAddress) {
-        txType = "VOTES_ALLOCATION"
-      } else if (depositor === dbaPoolAddress) {
-        txType = "DYNAMIC_BASE_ALLOCATION"
-      }
+        if (depositor === xAllocationPoolAddress) {
+          txType = "VOTES_ALLOCATION"
+        } else if (depositor === dbaPoolAddress) {
+          txType = "DYNAMIC_BASE_ALLOCATION"
+        }
 
-      return {
-        appId: decodedData.args.appId,
-        amount: ethers.formatEther(decodedData.args.amount),
-        blockNumber: meta.blockNumber,
-        txId: meta.txID,
-        txType,
-      }
-    },
+        return {
+          appId: decodedData.args.appId,
+          amount: ethers.formatEther(decodedData.args.amount),
+          blockNumber: meta.blockNumber,
+          txId: meta.txID,
+          txType,
+        }
+      }),
   })
   const rawTeamWithdrawalEvents = useEvents({
     contractAddress,
     abi,
     eventName: "TeamWithdrawal",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      appId: decodedData.args.appId,
-      amount: ethers.formatEther(decodedData.args.amount),
-      blockNumber: meta.blockNumber,
-      txId: meta.txID,
-      txType: "WITHDRAW",
-      reason: decodedData.args.reason as string,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        appId: decodedData.args.appId,
+        amount: ethers.formatEther(decodedData.args.amount),
+        blockNumber: meta.blockNumber,
+        txId: meta.txID,
+        txType: "WITHDRAW",
+        reason: decodedData.args.reason as string,
+      })),
   })
 
   const rawRewardsPoolBalanceUpdatedEvents = useEvents({
@@ -77,15 +79,16 @@ export const useAppFundActivityEvents = (appId: string) => {
     abi,
     eventName: "RewardsPoolBalanceUpdated",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      appId: decodedData.args.appId,
-      amount: ethers.formatEther(decodedData.args.amount),
-      availableFunds: ethers.formatEther(decodedData.args.availableFunds),
-      rewardsPoolBalance: ethers.formatEther(decodedData.args.rewardsPoolBalance),
-      blockNumber: meta.blockNumber,
-      txId: meta.txID,
-      txType: "REWARDS_POOL_UPDATED",
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        appId: decodedData.args.appId,
+        amount: ethers.formatEther(decodedData.args.amount),
+        availableFunds: ethers.formatEther(decodedData.args.availableFunds),
+        rewardsPoolBalance: ethers.formatEther(decodedData.args.rewardsPoolBalance),
+        blockNumber: meta.blockNumber,
+        txId: meta.txID,
+        txType: "REWARDS_POOL_UPDATED",
+      })),
   })
 
   const depositEvents = rawDepositEvents.data

@@ -108,7 +108,7 @@ export const TotalRewardsDistributionModal = ({
         </Dialog.CloseTrigger>
       </HStack>
 
-      <Card.Root variant="subtle" border="none" gap={4} my={5}>
+      <Card.Root variant="subtle" _hover={{ bg: "card.subtle" }} border="none" gap={4} my={5}>
         <HStack gap={2}>
           <Icon as={B3TRIcon} boxSize="5" />
           <Text textStyle="md" fontWeight="semibold">

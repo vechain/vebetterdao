@@ -10,30 +10,32 @@ const contractAddress = getConfig().veBetterPassportContractAddress
  * @param appId - The id of the app to fetch the signalers for.
  */
 export const useSignalerAssignedToApp = (appId: string) => {
-  const filterParams = { app: appId }
+  const filterParams = { app: appId as `0x${string}` }
   const rawSignalerAssignedToAppEvents = useEvents({
     contractAddress,
     abi,
     eventName: "SignalerAssignedToApp",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      signaler: decodedData.args.signaler,
-      appId: decodedData.args.app,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        signaler: decodedData.args.signaler,
+        appId: decodedData.args.app,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
   })
   const rawSignalerRemovedFromAppEvents = useEvents({
     contractAddress,
     abi,
     eventName: "SignalerRemovedFromApp",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      signaler: decodedData.args.signaler,
-      appId: decodedData.args.app,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        signaler: decodedData.args.signaler,
+        appId: decodedData.args.app,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
   })
   const signalerAssignedToAppEvents = rawSignalerAssignedToAppEvents.data || []
   const signalerRemovedFromAppEvents = rawSignalerRemovedFromAppEvents.data || []
