@@ -1,12 +1,12 @@
 import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
+import { FilterCriteria } from "@vechain/sdk-network"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { useMemo } from "react"
+import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
 
-import { getEventsKey, useEvents } from "../../../../../hooks/useEvents"
+import { decodeEventLog } from "../../../governance/getEvents"
 
 const abi = X2EarnApps__factory.abi
-const contractAddress = getConfig().x2EarnAppsContractAddress
-
 export type AppEndorsedEvent = {
   appId: string
   nodeId: string
@@ -14,50 +14,98 @@ export type AppEndorsedEvent = {
   blockNumber: number
   txOrigin: string
 }
+/**
+ * Fetches all AppEndorsed events
+ * @param {ThorClient} thor - The thor client
+ * @param {EnvConfig} env - The environment config
+ * @param {object} filterOptions - Filter options for appId, nodeId, and endorsed
+ * @returns {Promise<AppEndorsedEvent[]>}
+ */
+export const getAppEndorsedEvents = async (
+  thor: ThorClient,
+  filterOptions?: { appId?: string; nodeId?: string; endorsed?: boolean },
+): Promise<AppEndorsedEvent[]> => {
+  const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress
+  const eventAbi = thor.contracts.load(x2EarnAppsContractAddress, abi).getEventAbi("AppEndorsed")
+  const topics = eventAbi.encodeFilterTopicsNoNull({
+    endorsed: filterOptions?.endorsed ?? undefined,
+    id: filterOptions?.appId ?? undefined,
+    nodeId: filterOptions?.nodeId ?? undefined,
+  })
+  const filterCriteria: FilterCriteria[] = [
+    {
+      criteria: {
+        address: x2EarnAppsContractAddress,
+        topic0: topics[0] ?? undefined,
+        topic1: topics[1] ?? undefined,
+        topic2: topics[2] ?? undefined,
+        topic3: topics[3] ?? undefined,
+        topic4: topics[4] ?? undefined,
+      },
+      eventAbi,
+    },
+  ]
+
+  const events = (
+    await getAllEventLogs({
+      nodeUrl: getConfig().nodeUrl,
+      thor,
+      filterCriteria,
+    })
+  ).map(event => decodeEventLog(event, abi))
+
+  return events
+    .map(({ decodedData, meta }) => {
+      if (decodedData.eventName !== "AppEndorsed") throw new Error(`Unknown event: ${decodedData.eventName}`)
+
+      const { id: appId, nodeId, endorsed } = decodedData.args
+
+      return {
+        appId: appId.toString(),
+        nodeId: nodeId.toString(),
+        endorsed,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      }
+    })
+    .filter(event => {
+      if (filterOptions?.appId) {
+        return event.appId === filterOptions.appId
+      }
+      if (filterOptions?.nodeId) {
+        return event.nodeId === filterOptions.nodeId
+      }
+      if (filterOptions?.endorsed !== undefined) {
+        return event.endorsed === filterOptions.endorsed
+      }
+      return true
+    })
+}
 
 export const getAppEndorsedEventsQueryKey = (filterOptions?: {
   appId?: string
   nodeId?: string
   endorsed?: boolean
-}) => {
-  return getEventsKey({ eventName: "AppEndorsed", filterParams: filterOptions })
-}
+}) => ["AppEndorsedEvents", Object.values(filterOptions ?? {})]
 
 /**
  * Hook to get all AppEndorsed events from the X2EarnApps contract
- * @param filterOptions Filter options for appId, nodeId, and endorsed
- * @returns Query result with AppEndorsed events sorted by blockNumber descending
+ * @param {object} filterOptions - Filter options for appId, nodeId, and endorsed
+ * @returns {UseQueryResult<AppEndorsedEvent[], Error>}
  */
 export const useAppEndorsedEvents = (filterOptions?: { appId?: string; nodeId?: string; endorsed?: boolean }) => {
-  const filterParams = {
-    endorsed: filterOptions?.endorsed ?? undefined,
-    id: filterOptions?.appId ?? undefined,
-    nodeId: filterOptions?.nodeId ?? undefined,
-  }
+  const thor = useThor()
 
-  const { data, isLoading, ...rest } = useEvents({
-    contractAddress,
-    abi,
-    eventName: "AppEndorsed",
-    filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      appId: decodedData.args.id.toString(),
-      nodeId: decodedData.args.nodeId.toString(),
-      endorsed: decodedData.args.endorsed,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+  const result = useQuery({
+    queryKey: getAppEndorsedEventsQueryKey(filterOptions),
+    enabled: !!thor,
+    queryFn: async () => {
+      return getAppEndorsedEvents(thor, filterOptions)
+    },
   })
 
-  // Sort events by blockNumber in descending order
-  const sortedEvents = useMemo(() => {
-    if (!data) return []
-    return [...data].sort((a, b) => b.blockNumber - a.blockNumber)
-  }, [data])
+  // sort events by blockNumber in descending order
+  const sortedEvents = result.data?.sort((a, b) => b.blockNumber - a.blockNumber)
 
-  return {
-    data: sortedEvents,
-    isLoading,
-    ...rest,
-  }
+  return { ...result, data: sortedEvents }
 }
