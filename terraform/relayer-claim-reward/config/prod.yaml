@@ -15,6 +15,6 @@ lambda_timeout: 900
 lambda_source_dir: "packages/lambda/dist/mainnet/relayerClaimReward"
 
 # Schedule Configuration
-# Runs 5 minutes after start-emissions-round (which runs at 6:42 AM on Monday)
-schedule_expression: "cron(47 6 ? * MON *)" # Runs every Monday at 6:47 AM UTC
+# Runs 5 minutes after start-emissions-round (which runs at 6:44 AM on Monday)
+schedule_expression: "cron(49 6 ? * MON *)" # Runs every Monday at 6:49 AM UTC
 
