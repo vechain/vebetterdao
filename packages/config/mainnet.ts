@@ -23,7 +23,7 @@ const config: AppConfig = {
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",
   b3trMultiSigAddress: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
   stargateNFTContractAddress: "0x1856c533ac2d94340aaa8544d35a5c1d4a21dee7",
-  stargateContractAddress: "0x0000000000000000000000000000000000000000",
+  stargateContractAddress: "0x03C557bE98123fdb6faD325328AC6eB77de7248C",
   grantsManagerContractAddress: "0x055d20914657834c914d7c44bf65b566ab4b45a2",
   relayerRewardsPoolContractAddress: "0x34b56f892c9e977b9ba2e43ba64c27d368ab3c86",
   dbaPoolContractAddress: "0x98c1d097c39969bb5de754266f60d22bd105b368",

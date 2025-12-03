@@ -14,7 +14,7 @@ import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
 import "swiper/css"
 
-export const GrantsBanners = () => {
+export const ProposalsBanners = () => {
   const { account } = useWallet()
   // store controlled swiper instance
   const swiperRef = useRef<SwiperClass | null>(null) // Create a ref for the Swiper instance with type
