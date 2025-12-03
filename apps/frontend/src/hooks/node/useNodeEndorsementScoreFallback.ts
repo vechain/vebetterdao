@@ -23,8 +23,8 @@ const stargateNFTGetNodeLevelMethod = "getTokenLevel" as const
 const nodeManagementGetNodeLevelMethod = "getNodeLevel" as const
 
 /**
- * Get the query key for the address of the user managing the node ID (endorsement)
- * @param nodeId The ID of the node for which the manager address is being retrieved
+ * Get the query key for the endorsement score of a node.
+ * @param nodeId The ID of the node for which the endorsement score is being queried.
  */
 export const getNodeEndorsementScoreFallbackQueryKey = (nodeId: string) => [
   "node-endorsement-score-fallback",
