@@ -1,0 +1,12 @@
+project_name: b3tr-frontend
+project_slug: governance-frontend
+environment: prod
+region: eu-west-1
+account_id: "851725442887"
+
+hosted_zones_and_certificates:
+  prod:
+    zone_name: governance.vebetterdao.org
+    certificate_names: [governance.vebetterdao.org]
+
+ecr_repository_name: governance-frontend
