@@ -39,5 +39,5 @@ jobs:
     secrets: inherit
     with:
       environment: prod
-      image_tag: ${{ needs.validate-ref.outputs.tag_name }}-prod
+      image_tag: ${{ needs.validate-ref.outputs.tag_name }}
       terraform_action: ${{ inputs.terraform_action }}
