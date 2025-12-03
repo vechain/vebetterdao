@@ -152,9 +152,6 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     return appVoteMetricsSortedByWeight.map(id => apps.find(app => app.id === id)).filter(Boolean)
   }, [apps, appVoteMetricsSortedByWeight])
 
-  const visibleApps = isOpen ? topVotedApps : topVotedApps.slice(0, INITIAL_DISPLAY_COUNT)
-  const hasMoreApps = topVotedApps.length > INITIAL_DISPLAY_COUNT
-
   return (
     <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight={{ base: "fit-content", md: "500px" }}>
       <Card.Header as={HStack} gap="2" pb={{ base: "5", md: "6" }}>
@@ -231,16 +228,23 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               </HStack>
               <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
                 <VStack mt={{ base: "0", md: "1.5" }} gap="2" align="stretch">
-                  {visibleApps.map(app => (
+                  {topVotedApps.slice(0, INITIAL_DISPLAY_COUNT).map(app => (
                     <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
                   ))}
 
-                  {hasMoreApps && (
-                    <Collapsible.Trigger asChild>
-                      <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
-                        <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
-                      </Button>
-                    </Collapsible.Trigger>
+                  {topVotedApps.length > INITIAL_DISPLAY_COUNT && (
+                    <>
+                      <Collapsible.Content>
+                        {topVotedApps.slice(INITIAL_DISPLAY_COUNT).map(app => (
+                          <AppVoteItem key={app?.id} app={app} voteWeight={appVoteMetrics.get(app?.id || "") || 0n} />
+                        ))}
+                      </Collapsible.Content>
+                      <Collapsible.Trigger asChild>
+                        <Button size={{ base: "sm", md: "md" }} variant="link" fontWeight="semibold">
+                          <Collapsible.Context>{api => (api.open ? "View less" : "View all")}</Collapsible.Context>
+                        </Button>
+                      </Collapsible.Trigger>
+                    </>
                   )}
                 </VStack>
               </Collapsible.Root>

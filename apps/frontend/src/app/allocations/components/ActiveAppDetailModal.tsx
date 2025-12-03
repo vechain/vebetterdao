@@ -133,12 +133,17 @@ export const ActiveAppDetailModal = ({
           dotColor: "#004CFC",
         },
       ],
-      chartData: [
-        { name: "Voting", value: 100 - dynamicBaseAllocationPercentage },
-        { name: "Dynamic base", value: dynamicBaseAllocationPercentage },
-      ],
+      chartData: isCurrentRound
+        ? [
+            { name: "Voting", value: 1 },
+            { name: "Dynamic base", value: 0 },
+          ]
+        : [
+            { name: "Voting", value: 100 - dynamicBaseAllocationPercentage },
+            { name: "Dynamic base", value: dynamicBaseAllocationPercentage },
+          ],
       chartColors: ["#B3CCFF", "#004CFC"],
-      chartPercentage: (100 - dynamicBaseAllocationPercentage).toFixed(0),
+      chartPercentage: isCurrentRound ? "0" : (100 - dynamicBaseAllocationPercentage).toFixed(0),
     },
     {
       type: "breakdown",
@@ -152,7 +157,7 @@ export const ActiveAppDetailModal = ({
         },
         {
           label: "Retained by app",
-          value: `${100 - rewardsToUserPercentage}%`,
+          value: `${isCurrentRound ? 0 : 100 - rewardsToUserPercentage}%`,
           dotColor: "#047229",
         },
       ],
@@ -212,7 +217,7 @@ export const ActiveAppDetailModal = ({
 
       <VStack mt="4" mb="5" gap="3" align="stretch">
         {dataList.map((section, idx) => (
-          <Card.Root key={idx} variant="subtle" border="none" p="4" gap="3">
+          <Card.Root key={idx} variant="subtle" _hover={{ bg: "card.subtle" }} border="none" p="4" gap="3">
             <HStack gap="2">
               {typeof section.icon === "string" ? (
                 <Box boxSize="4" bg="gray.200" borderRadius="4px" />

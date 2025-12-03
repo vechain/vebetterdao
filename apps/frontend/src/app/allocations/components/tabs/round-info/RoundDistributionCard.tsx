@@ -6,7 +6,9 @@ import { Gift, NavArrowRight, SmartphoneDevice, Group, Flash, List } from "icono
 import { useMemo, useState } from "react"
 import { formatEther } from "viem"
 
+import { ConditionalWrapper } from "@/components/ConditionalWrapper"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { AllocationRoundDetails } from "../../../lib/data"
 
@@ -15,6 +17,7 @@ import { TotalRewardsDistributionModal } from "./TotalRewardsDistributionModal"
 
 export function RoundDistributionCard({ roundDetails }: { roundDetails: AllocationRoundDetails }) {
   const [open, setOpen] = useState(false)
+  const { isMobile } = useBreakpoints()
   const distribution = useMemo(() => {
     const toApps = Number(roundDetails.xAllocationsAmount)
     const toVoters = Number(roundDetails.vote2EarnAmount)
@@ -35,7 +38,13 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
 
   return (
     <>
-      <Button unstyled asChild onClick={() => setOpen(true)}>
+      <ConditionalWrapper
+        condition={isMobile}
+        wrapper={({ children }) => (
+          <Button unstyled asChild onClick={() => setOpen(true)}>
+            {children}
+          </Button>
+        )}>
         <Card.Root
           p="4"
           variant="outline"
@@ -103,7 +112,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
                 </Text>
               </HStack>
               <Icon hideFrom="md" as={NavArrowRight} boxSize="4" color="text.subtle" />
-              <Button hideBelow="md" variant="link" p="0">
+              <Button hideBelow="md" variant="link" p="0" onClick={() => setOpen(true)}>
                 {"Details"}
               </Button>
             </HStack>
@@ -146,7 +155,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
             </VStack>
           </VStack>
         </Card.Root>
-      </Button>
+      </ConditionalWrapper>
       <TotalRewardsDistributionModal roundDetails={roundDetails} isOpen={open} onClose={() => setOpen(false)} />
     </>
   )
