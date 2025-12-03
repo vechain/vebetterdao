@@ -1,10 +1,10 @@
-import { VECHAIN_DEFAULT_MNEMONIC } from "@vechain/hardhat-vechain"
-import { unitsUtils, addressUtils, mnemonic } from "@vechain/sdk-core"
+import { getMnemonic } from "./env"
+import { Address, HDKey, VET } from "@vechain/sdk-core"
+
 
 export type TestPk = {
   pk: Uint8Array
-  pkHex: string
-  address: string
+  address: Address
 }
 
 export type SeedAccount = {
@@ -18,18 +18,24 @@ export enum SeedStrategy {
   LINEAR,
 }
 
-const PHRASE = (process.env.MNEMONIC || VECHAIN_DEFAULT_MNEMONIC).split(" ")
+let hdnode: HDKey | null = null
 
-export const TEST_DERIVATION_PATH = "m"
+const getHDNode = (): HDKey => {
+  if (!hdnode) {
+    const mnemonic = getMnemonic(true) // Required for actual deployment/simulation
+    hdnode = HDKey.fromMnemonic(mnemonic.split(" "))
+  }
+  return hdnode
+}
 
-export const getTestKey = (index: number, derivationPath: string = TEST_DERIVATION_PATH): TestPk => {
-  const pk = mnemonic.derivePrivateKey(PHRASE, `${derivationPath}/${index}`)
-  const buffer = Buffer.from(pk)
-  const pkHex = buffer.toString("hex")
+export const getTestKey = (index: number): TestPk => {
+  const pk = getHDNode().deriveChild(index)
+  if (!pk.privateKey) {
+    throw new Error("Private key not found")
+  }
   return {
-    pk,
-    pkHex,
-    address: addressUtils.fromPrivateKey(pk),
+    pk: pk.privateKey,
+    address: Address.ofPrivateKey(pk.privateKey),
   }
 }
 
@@ -53,7 +59,7 @@ const getRandomStartingBalance = (min: number, max: number): bigint => {
   const scale = Math.log(max) - Math.log(min)
   const random = Math.random() ** 6 // Raise to a power to skew towards smaller values.
   const result = Math.exp(Math.log(min) + scale * random)
-  return unitsUtils.parseVET(Math.floor(result).toString())
+  return VET.of(Math.floor(result)).wei
 }
 
 /**
@@ -84,7 +90,7 @@ const getSeedAccountsFixed = (numAccounts: number, acctOffset: number): SeedAcco
   keys.slice(acctOffset).forEach(key => {
     seedAccounts.push({
       key,
-      amount: unitsUtils.parseVET("200000"),
+      amount: VET.of(200000).wei,
     })
   })
 
@@ -114,7 +120,7 @@ const getSeedAccountsLinear = (numAccounts: number, acctOffset: number): SeedAcc
   keys.slice(acctOffset).forEach((key, index) => {
     seedAccounts.push({
       key,
-      amount: unitsUtils.parseVET(((index + 1) * 5).toFixed(2)),
+      amount: VET.of(((index + 1) * 5).toFixed(2)).wei,
     })
   })
 
