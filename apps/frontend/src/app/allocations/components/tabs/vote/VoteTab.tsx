@@ -63,7 +63,12 @@ export function VoteTab() {
         placeholder={t("Search app")}
         value={localSearchQuery}
         onChange={setLocalSearchQuery}
-        inputProps={{ onFocus: handleViewAll }}
+        inputProps={{
+          onFocus: e => {
+            e.preventDefault()
+            handleViewAll()
+          },
+        }}
         inputWrapperProps={{ hideFrom: "md" }}
       />
       <Bleed inlineStart="4" inlineEnd="4">

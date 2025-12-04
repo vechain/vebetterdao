@@ -65,7 +65,7 @@ export function SearchAppsBottomSheet({
       ariaTitle={t("Search Apps")}
       ariaDescription={t("Search and filter applications")}
       isDismissable={true}
-      minHeight="100vh">
+      minHeight="100dvh">
       <Flex gap="4" mb="4" alignItems="center" justifyContent="space-between">
         <IconButton minWidth="unset" variant="ghost" boxSize="6" p="0" rounded="full" onClick={handleClose}>
           <NavArrowLeft />
