@@ -54,7 +54,7 @@ export const useXAppsSharesBasedOnMaxAllocation = (apps: string[], roundId: stri
       return new Map(
         appEarnings.map((earnings, index) => [
           apps[index],
-          Math.round(Number((earnings[0] * 100n) / maxAppAllocation)),
+          maxAppAllocation === 0n ? 0 : Math.round(Number((earnings[0] * 100n) / maxAppAllocation)),
         ]),
       )
     },
