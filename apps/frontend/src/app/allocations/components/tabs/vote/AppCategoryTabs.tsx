@@ -24,7 +24,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
-import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
+import { useXAppsSharesBasedOnMaxAllocation } from "@/api/contracts/xApps/hooks/useXAppSharesBasedOnMaxAllocation"
 import { AppWithVotes } from "@/app/allocations/lib/data"
 import { SearchField } from "@/components/SearchField/SearchField"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -90,15 +90,10 @@ export function AppCategoryTabs({
   const [currentPage, setCurrentPage] = useState(1)
   const { t } = useTranslation()
 
-  const { data: appShares } = useXAppsShares(
+  const { data: appSharesMap = new Map() } = useXAppsSharesBasedOnMaxAllocation(
     apps.map(app => app.id),
-    roundId,
+    roundId ?? "",
   )
-
-  const appSharesMap = useMemo(() => {
-    if (!appShares) return new Map()
-    return new Map(appShares.map(share => [share.app, share.share + share.unallocatedShare]))
-  }, [appShares])
 
   const filteredApps = useMemo(() => {
     return apps.filter(app => {
