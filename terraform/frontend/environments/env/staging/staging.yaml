@@ -4,8 +4,6 @@ environment: staging
 region: eu-west-1
 account_id: "211125319139"
 
-account_level_state_bucket: b3tr-terraform-state-dev
-account_level_state_key: workspaces/dev/frontend-account-level.tfstate
 account_level_state_region: eu-west-1
 
 domain: staging.testnet.governance.vebetterdao.org
