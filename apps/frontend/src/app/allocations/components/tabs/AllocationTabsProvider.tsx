@@ -297,6 +297,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onConfirm={handleConfirmVote}
         isAutoVotingEnabled={isAutoVotingEnabled}
         isAutoVotingEnabledOnChain={isAutoVotingEnabledOnChain ?? false}
+        isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound ?? false}
         onToggleAutoVoting={setIsAutoVotingEnabled}
         nextRoundNumber={roundDetails.id + 1}
         onEditSelection={handleEditSelection}
