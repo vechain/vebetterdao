@@ -15,7 +15,7 @@ import { AppConfig } from "@repo/config"
  * Strategy:
  * 1. Query isAppUnendorsed at the round start block (roundSnapshot)
  * 2. Query isAppUnendorsed at the round end block (roundDeadline)
- * 3. Compare the two states to determine if there were changes
+ * 3. Compare the two states to determine eligibility
  *
  * This approach is efficient (2 contract calls) and accurate (directly queries
  * blockchain state at specific blocks) without needing to parse events.
@@ -24,14 +24,14 @@ import { AppConfig } from "@repo/config"
  * @param config - The application configuration
  * @param roundId - The round ID to check
  * @param appId - The app ID to check
- * @returns Object with wasUnendorsedAtStart and hadEndorsementChanges flags
+ * @returns Object with wasUnendorsedAtStart and wasUnendorsedAtEnd flags
  */
 async function getEndorsementStatusForRound(
   thor: ThorClient,
   config: AppConfig,
   roundId: number,
   appId: string,
-): Promise<{ wasUnendorsedAtStart: boolean; hadEndorsementChanges: boolean }> {
+): Promise<{ wasUnendorsedAtStart: boolean; wasUnendorsedAtEnd: boolean }> {
   const votingContract = ABIContract.ofAbi(XAllocationVoting.abi as any)
 
   // Get round start and end blocks
@@ -48,7 +48,7 @@ async function getEndorsementStatusForRound(
   )
 
   if (!roundStartRes.success || !roundEndRes.success) {
-    return { wasUnendorsedAtStart: false, hadEndorsementChanges: false }
+    return { wasUnendorsedAtStart: false, wasUnendorsedAtEnd: false }
   }
 
   const roundStartBlock = Number(roundStartRes.result?.array?.[0] ?? 0)
@@ -79,14 +79,11 @@ async function getEndorsementStatusForRound(
   const wasUnendorsedAtStart = Boolean(unendorsedAtStartRes.result?.array?.[0] ?? false)
   const wasUnendorsedAtEnd = Boolean(unendorsedAtEndRes.result?.array?.[0] ?? false)
 
-  // If the endorsement status changed during the round, there were changes
-  const hadEndorsementChanges = wasUnendorsedAtStart !== wasUnendorsedAtEnd
-
   console.log(
-    `    Status at start: ${wasUnendorsedAtStart ? "UNENDORSED" : "ENDORSED"}, at end: ${wasUnendorsedAtEnd ? "UNENDORSED" : "ENDORSED"}${hadEndorsementChanges ? " (CHANGED)" : " (no change)"}`,
+    `    Status at start: ${wasUnendorsedAtStart ? "UNENDORSED" : "ENDORSED"}, at end: ${wasUnendorsedAtEnd ? "UNENDORSED" : "ENDORSED"}`,
   )
 
-  return { wasUnendorsedAtStart, hadEndorsementChanges }
+  return { wasUnendorsedAtStart, wasUnendorsedAtEnd }
 }
 
 /**
@@ -166,7 +163,7 @@ async function hasRewardedActions(
  * 1. App was eligible for voting in the round
  * 2. App rewarded at least 1 action with proofs during the round
  * 3. App received less than 7.5% of votes (750 in scaled format)
- * 4. App was fully endorsed during the round (not in grace period for entire round)
+ * 4. App should NOT get DBA only if it started the round unendorsed AND ended the round unendorsed
  *
  * @param thor - The ThorClient instance
  * @param config - The application configuration
@@ -235,23 +232,19 @@ export async function filterEligibleAppsForDBA(
       continue
     }
 
-    // Check endorsement status at round start and during the round
-    const { wasUnendorsedAtStart, hadEndorsementChanges } = await getEndorsementStatusForRound(
+    // Check endorsement status at round start and round end
+    const { wasUnendorsedAtStart, wasUnendorsedAtEnd } = await getEndorsementStatusForRound(
       thor,
       config,
       roundId,
       appId,
     )
 
-    // Exclude apps that remained in grace period (unendorsed) for the entire round
-    // An app is considered to have been in grace period for the entire round if:
-    // - It was unendorsed at the round start block, AND
-    // - It had no endorsement status changes during the round
-    //
-    // This means the app stayed unendorsed throughout the entire round duration.
-    // Apps that became endorsed during the round (had changes) are eligible.
-    if (wasUnendorsedAtStart && !hadEndorsementChanges) {
-      console.log(`  - App ${appId} remained in grace period (unendorsed) for entire round, skipping`)
+    // App should NOT get DBA only if it started the round unendorsed AND ended the round unendorsed
+    const shouldExcludeFromDBA = wasUnendorsedAtStart && wasUnendorsedAtEnd
+
+    if (shouldExcludeFromDBA) {
+      console.log(`  - App ${appId} started round unendorsed and ended round unendorsed, skipping`)
       continue
     }
 
