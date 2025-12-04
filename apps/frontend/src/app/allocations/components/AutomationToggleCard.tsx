@@ -77,14 +77,12 @@ export const AutomationToggleCard = ({
 
         {/* Show pending status when locked (relayer voting in progress) */}
         {isLockedPendingRelayerVote && (
-          <VStack alignItems="flex-start" gap="2" w="full">
-            <HStack gap="2" alignItems="flex-start">
-              <Icon as={ClockIcon} boxSize="4" color="text.subtle" mt="0.5" />
-              <Text textStyle="xs" color="text.subtle">
-                {t("Waiting for the relayer to cast your vote this round. You can disable after voting completes.")}
-              </Text>
-            </HStack>
-          </VStack>
+          <HStack gap="2" alignItems="flex-start">
+            <Icon as={ClockIcon} boxSize="4" color="text.subtle" mt="0.5" />
+            <Text textStyle="xs" color="text.subtle">
+              {t("Waiting for the relayer to cast your vote this round. You can disable after voting completes.")}
+            </Text>
+          </HStack>
         )}
 
         {/* Show info when enabling (toggle ON) - but not when locked */}
