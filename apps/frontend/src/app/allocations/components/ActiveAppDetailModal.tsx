@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import { formatEther } from "viem"
 
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { indexerQueryClient } from "@/api/indexer/api"
 import { AppImage } from "@/components/AppImage/AppImage"
 import B3TR from "@/components/Icons/svg/b3tr.svg"
 import { Modal } from "@/components/Modal"
@@ -79,10 +80,9 @@ export const ActiveAppDetailModal = ({
   isOpen: boolean
   onClose: VoidFunction
 }) => {
-  // TODO: add active users of app in that round
-  // const { data } = indexerQueryClient.useQuery("get", "/api/v1/b3tr/actions/global/overview", {
-  //   params: { query: { roundId } },
-  // })
+  const { data } = indexerQueryClient.useQuery("get", "/api/v1/b3tr/actions/apps/{appId}/overview", {
+    params: { path: { appId: app.id }, query: { roundId } },
+  })
   const { t } = useTranslation()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const votingPowerValue = getCompactFormatter(2).format(Number(formatEther(app.votesReceived, "gwei")))
@@ -95,9 +95,8 @@ export const ActiveAppDetailModal = ({
     teamAllocationAmount = 0,
     totalAmount = 0,
   } = app?.earnings || {}
-  const rewardsToUserPercentage = rewardsAllocationAmount
-    ? Math.round((rewardsAllocationAmount * 100) / (rewardsAllocationAmount + unallocatedAmount + teamAllocationAmount))
-    : 0
+  const rewardsToUserPercentage =
+    data?.totalRewardAmount && totalAmount ? Math.round((data?.totalRewardAmount * 100) / totalAmount) : 0
 
   let dynamicBaseAllocationAmount = totalAmount - (unallocatedAmount + teamAllocationAmount + rewardsAllocationAmount)
   dynamicBaseAllocationAmount = dynamicBaseAllocationAmount > 0 ? dynamicBaseAllocationAmount : 0
@@ -170,21 +169,21 @@ export const ActiveAppDetailModal = ({
       chartColors: ["#99E0B1", "#047229"],
       chartPercentage: rewardsToUserPercentage.toString(),
     },
-    // {
-    //   type: "simple",
-    //   icon: Activity,
-    //   label: "Activity",
-    //   rows: [
-    //     {
-    //       label: "Active users",
-    //       value: "XXX",
-    //     },
-    //     {
-    //       label: "Amount of B3TR actions",
-    //       value: "XXX",
-    //     },
-    //   ],
-    // },
+    {
+      type: "simple",
+      icon: Activity,
+      label: "Activity",
+      rows: [
+        {
+          label: "Active users",
+          value: data?.totalUniqueUserInteractions || 0,
+        },
+        {
+          label: "Amount of B3TR actions",
+          value: data?.actionsRewarded || 0,
+        },
+      ],
+    },
   ]
 
   return (
