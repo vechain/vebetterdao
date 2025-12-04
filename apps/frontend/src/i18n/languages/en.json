@@ -1669,5 +1669,6 @@
   "Open Stargate": "Open Stargate",
   "Managed externally by {{addressOrDomain}}": "Managed externally by {{addressOrDomain}}",
   "Migrate your Legacy Node": "Migrate your Legacy Node",
-  "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality."
+  "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.",
+  "Max allocation!": "Max allocation!"
 }

@@ -67,7 +67,7 @@ export const AppRadioCard = ({
           justifyContent="space-between"
           alignItems="flex-start"
           gap="2">
-          <VStack flex={1} gap="0.5" align="start" minW={0}>
+          <VStack flex={1} gap="0.5" align="start" minW={0} w="full">
             <Flex align="center" gap="2" w="full" minW={0}>
               <Heading size={{ base: "md", md: "lg" }} lineClamp={1}>
                 {appName}
@@ -75,6 +75,11 @@ export const AppRadioCard = ({
               {isVotedMode && checked && (
                 <Badge variant="info" size="sm" flexShrink={0}>
                   {t("Voted").toLowerCase()}
+                </Badge>
+              )}
+              {allocationSharePercentage !== undefined && allocationSharePercentage === 100 && (
+                <Badge variant="positive" size="sm" ml={{ base: "auto", md: "unset" }}>
+                  {t("Max allocation!")}
                 </Badge>
               )}
             </Flex>
@@ -102,7 +107,7 @@ export const AppRadioCard = ({
                   {t("Voters")}
                 </Text>
               </Text>
-              {allocationSharePercentage && (
+              {allocationSharePercentage !== undefined && allocationSharePercentage >= 0 && (
                 <Text textStyle={{ base: "xs", md: "sm" }} fontWeight="bold">
                   {allocationSharePercentage.toFixed(2) + "% "}
                   <Text
