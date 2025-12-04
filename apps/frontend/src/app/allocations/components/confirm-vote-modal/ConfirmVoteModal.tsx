@@ -23,6 +23,7 @@ interface ConfirmVoteModalProps {
   onConfirm: (allocations: Map<string, number>) => void
   isAutoVotingEnabled: boolean
   isAutoVotingEnabledOnChain: boolean
+  isAutoVotingEnabledInCurrentRound: boolean
   onToggleAutoVoting: (enabled: boolean) => void
   nextRoundNumber?: number | string
   onEditSelection?: () => void
@@ -36,6 +37,7 @@ export const ConfirmVoteModal = ({
   onConfirm,
   isAutoVotingEnabled,
   isAutoVotingEnabledOnChain,
+  isAutoVotingEnabledInCurrentRound,
   onToggleAutoVoting,
   nextRoundNumber,
   onEditSelection,
@@ -177,6 +179,8 @@ export const ConfirmVoteModal = ({
           onCheckedChange={onToggleAutoVoting}
           nextRoundNumber={nextRoundNumber}
           isEnabledOnChain={isAutoVotingEnabledOnChain}
+          hasVoted={hasVoted}
+          isActiveInCurrentRound={isAutoVotingEnabledInCurrentRound}
         />
       </VStack>
     </Modal>

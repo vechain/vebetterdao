@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, HStack, VStack, Text, Switch, Box, Icon, Link } from "@chakra-ui/react"
-import { Check, InfoCircle } from "iconoir-react"
+import { Check, InfoCircle, Clock as ClockIcon } from "iconoir-react"
 import { useTranslation, Trans } from "react-i18next"
 
 import ProcessIcon from "@/components/Icons/svg/process.svg"
@@ -15,6 +15,8 @@ export interface AutomationToggleCardProps {
   icon?: React.ReactNode
   nextRoundNumber?: number | string
   isEnabledOnChain?: boolean
+  hasVoted?: boolean
+  isActiveInCurrentRound?: boolean
 }
 
 export const AutomationToggleCard = ({
@@ -24,8 +26,15 @@ export const AutomationToggleCard = ({
   icon,
   nextRoundNumber,
   isEnabledOnChain = false,
+  hasVoted = false,
+  isActiveInCurrentRound = false,
 }: AutomationToggleCardProps) => {
   const { t } = useTranslation()
+
+  // Lock toggle when automation is active for current round but relayer hasn't voted yet
+  // This prevents users from disabling mid-round which would cause them to miss their vote
+  const isLockedPendingRelayerVote = !hasVoted && isActiveInCurrentRound
+
   return (
     <Card.Root
       variant="outline"
@@ -56,7 +65,7 @@ export const AutomationToggleCard = ({
           <Switch.Root
             size={{ base: "sm", md: "sm" }}
             checked={checked}
-            disabled={disabled}
+            disabled={disabled || isLockedPendingRelayerVote}
             onCheckedChange={e => onCheckedChange?.(e.checked)}
             flexShrink={0}>
             <Switch.HiddenInput />
@@ -66,8 +75,18 @@ export const AutomationToggleCard = ({
           </Switch.Root>
         </HStack>
 
-        {/* Show info when enabling (toggle ON) */}
-        {checked && (
+        {/* Show pending status when locked (relayer voting in progress) */}
+        {isLockedPendingRelayerVote && (
+          <HStack gap="2" alignItems="flex-start">
+            <Icon as={ClockIcon} boxSize="4" color="text.subtle" mt="0.5" />
+            <Text textStyle="xs" color="text.subtle">
+              {t("Waiting for the relayer to cast your vote this round. You can disable after voting completes.")}
+            </Text>
+          </HStack>
+        )}
+
+        {/* Show info when enabling (toggle ON) - but not when locked */}
+        {checked && !isLockedPendingRelayerVote && (
           <VStack alignItems="flex-start" gap="3" w="full">
             <HStack gap="2" alignItems="flex-start">
               <Icon as={Check} boxSize="4" color="text.subtle" mt="0.5" />
