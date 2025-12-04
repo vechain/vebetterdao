@@ -5,7 +5,6 @@ import { executeCallClause, executeMultipleClausesCall, useThor } from "@vechain
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
-// const method = "roundEarnings" as const
 /**
  *  Returns the query key for the shares of multiple xApps in an allocation round.
  * @param roundId  the roundId the get the shares for
