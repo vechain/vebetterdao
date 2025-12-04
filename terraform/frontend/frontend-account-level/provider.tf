@@ -27,15 +27,6 @@ locals {
     }
 }
 
-data "terraform_remote_state" "account_level" {
-  backend = "s3"
-  config = {
-    bucket = "b3tr-terraform-state-${terraform.workspace}"
-    key    = "frontend/account-level/${terraform.workspace}/terraform.tfstate"
-    region = "eu-west-1"
-  }
-}
-
 
 provider "aws" {
   region = local.env.region
