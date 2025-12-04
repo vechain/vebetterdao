@@ -16,6 +16,7 @@ interface SearchAppsBottomSheetProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   apps?: AppWithVotes[]
+  roundId: string
   selectedAppIds?: Set<string>
   selectionOrder?: string[]
   onToggleApp?: (appId: string) => void
@@ -33,6 +34,7 @@ export function SearchAppsBottomSheet({
   searchQuery,
   onSearchChange,
   apps = [],
+  roundId,
   selectedAppIds,
   selectionOrder = [],
   onToggleApp,
@@ -88,6 +90,7 @@ export function SearchAppsBottomSheet({
 
       <AppCategoryTabs
         apps={apps}
+        roundId={roundId}
         searchQuery={searchQuery}
         selectedAppIds={selectedAppIds}
         selectionOrder={selectionOrder}

@@ -96,6 +96,7 @@ export function VoteTab() {
       </Bleed>
 
       <SearchAppsBottomSheet
+        roundId={roundId}
         isOpen={isSearchOpen}
         onClose={handleCloseSearch}
         searchQuery={localSearchQuery}
