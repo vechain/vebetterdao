@@ -2,6 +2,7 @@ import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 
 import { alertSlotRecipe } from "./alert"
 import { badgeRecipe } from "./badge"
+import { breadrumbSlotRecipe } from "./breadcrumb"
 import { buttonRecipe } from "./button"
 import { cardSlotRecipe } from "./card"
 import { checkboxSlotRecipe } from "./checkbox"
@@ -24,7 +25,7 @@ const config = defineConfig({
   preflight: true,
   cssVarsPrefix: "vbd",
   globalCss: {
-    "html,body": { bg: "bg.secondary !important" },
+    "html,body": { bg: "bg.secondary !important", scrollBehavior: "smooth !important" },
     ":where(button, [role=button], [type=button], a)": {
       cursor: "pointer",
     },
@@ -57,6 +58,7 @@ const config = defineConfig({
 
     slotRecipes: {
       alert: alertSlotRecipe,
+      breadcrumb: breadrumbSlotRecipe,
       card: cardSlotRecipe,
       dialog: dialogSlotRecipe,
       steps: stepsSlotRecipe,
@@ -154,6 +156,32 @@ const config = defineConfig({
           800: { value: "#631616" },
           900: { value: "#400E0E" },
         },
+        green: {
+          DEFAULT: { value: "#3DBA67" },
+          50: { value: "#E9FDF1" },
+          100: { value: "#C8F7D9" },
+          200: { value: "#99E0B1" },
+          300: { value: "#6DD394" },
+          400: { value: "#3DBA67" },
+          500: { value: "#047229" },
+          600: { value: "#035A21" },
+          700: { value: "#024318" },
+          800: { value: "#023314" },
+          900: { value: "#212A23" },
+        },
+        orange: {
+          DEFAULT: { value: "#FFB566" },
+          50: { value: "#FFF3E5" },
+          100: { value: "#FFE4C3" },
+          200: { value: "#FFCC99" },
+          300: { value: "#FFB566" },
+          400: { value: "#F2A54E" },
+          500: { value: "#CC8833" },
+          600: { value: "#B2752C" },
+          700: { value: "#AF5F00" },
+          800: { value: "#804500" },
+          900: { value: "#402404" },
+        },
       },
     },
 
@@ -192,7 +220,7 @@ const config = defineConfig({
           primary: {
             default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
             hover: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.500}" } },
-            pressed: { value: { base: "{colors.blue.800}", _dark: "{colors.blue.600}" } },
+            pressed: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.500}" } },
             disabled: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.700}" } },
             text: { value: { base: "white", _dark: "white" } },
             "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
@@ -266,28 +294,28 @@ const config = defineConfig({
         },
         status: {
           positive: {
-            strong: { value: { base: "#047229", _dark: "#A3E706" } },
-            primary: { value: { base: "#3DBA67", _dark: "#26C9A1" } },
-            secondary: { value: { base: "#99E0B1", _dark: "#1EA181" } },
-            subtle: { value: { base: "#E9FDF1", _dark: "#212A23" } },
+            strong: { value: { base: "{colors.green.500}", _dark: "{colors.green.200}" } },
+            primary: { value: { base: "{colors.green.400}", _dark: "{colors.green.400}" } },
+            secondary: { value: { base: "{colors.green.200}", _dark: "{colors.green.600}" } },
+            subtle: { value: { base: "{colors.green.50}", _dark: "{colors.green.900}" } },
           },
           negative: {
-            strong: { value: { base: "#B6244C", _dark: "#EC4D9C" } },
-            primary: { value: { base: "#C84868", _dark: "#D23F63" } },
-            secondary: { value: { base: "#EC98AF", _dark: "#9C354E" } },
-            subtle: { value: { base: "#FCEEF1", _dark: "#2C1D21" } },
+            strong: { value: { base: "{colors.red.500}", _dark: "{colors.red.200}" } },
+            primary: { value: { base: "{colors.red.300}", _dark: "{colors.red.400}" } },
+            secondary: { value: { base: "{colors.red.200}", _dark: "{colors.red.700}" } },
+            subtle: { value: { base: "{colors.red.50}", _dark: "{colors.red.900}" } },
           },
           info: {
-            strong: { value: { base: "#2D65D1", _dark: "#CBD0FF" } },
-            primary: { value: { base: "#6194F5", _dark: "#A2C2FF" } },
-            secondary: { value: { base: "#CBD0FF", _dark: "#8930CE" } },
-            subtle: { value: { base: "#E5E5FF", _dark: "#2A303A" } },
+            strong: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.200}" } },
+            primary: { value: { base: "{colors.blue.300}", _dark: "{colors.blue.400}" } },
+            secondary: { value: { base: "{colors.blue.200}", _dark: "{colors.blue.700}" } },
+            subtle: { value: { base: "{colors.blue.50}", _dark: "{colors.blue.900}" } },
           },
           warning: {
-            strong: { value: { base: "#AF5F00", _dark: "#FFC985" } },
-            primary: { value: { base: "#F29832", _dark: "#F29832" } },
-            secondary: { value: { base: "#FFE4C3", _dark: "#B2752C" } },
-            subtle: { value: { base: "#FFF3E5", _dark: "#36322D" } },
+            strong: { value: { base: "{colors.orange.700}", _dark: "{colors.orange.200}" } },
+            primary: { value: { base: "{colors.orange.300}", _dark: "{colors.orange.400}" } },
+            secondary: { value: { base: "{colors.orange.100}", _dark: "{colors.orange.600}" } },
+            subtle: { value: { base: "{colors.orange.50}", _dark: "{colors.orange.900}" } },
           },
           neutral: {
             strong: { value: { base: "{colors.gray.600}", _dark: "{colors.gray.300}" } },

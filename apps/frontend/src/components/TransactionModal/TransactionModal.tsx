@@ -53,12 +53,7 @@ export const TransactionModal = () => {
         />
       ),
       success: (
-        <SuccessModalContent
-          {...getCustomUIProps("success")}
-          txId={transactionModalState?.txId}
-          showSocialButtons={true}
-          onClose={onClose}
-        />
+        <SuccessModalContent {...getCustomUIProps("success")} txId={transactionModalState?.txId} onClose={onClose} />
       ),
       ready: (
         <UnknownModalContent
@@ -69,7 +64,7 @@ export const TransactionModal = () => {
       ),
       unknown: <UnknownModalContent />,
     }
-    return statusComponentMap[transactionModalState?.status ?? "unknown"] || null
+    return statusComponentMap[transactionModalState?.status || "unknown"] || null
   }, [
     t,
     getCustomUIProps,
@@ -87,7 +82,7 @@ export const TransactionModal = () => {
       onClose={onClose}
       showCloseButton={canShowCloseButton}
       isCloseable={canShowCloseButton}
-      modalContentProps={{ zIndex: 10 }}
+      modalContentProps={{ zIndex: 10, maxWidth: "400px" }}
       modalBodyProps={{ p: 10 }}>
       {modalContent}
     </BaseModal>

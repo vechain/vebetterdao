@@ -1,37 +1,18 @@
 import { HStack, Heading, Image, Skeleton, Stat } from "@chakra-ui/react"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { ethers } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { formatEther } from "viem"
 
-import { useAllocationPoolEvents } from "../../../api/contracts/xAllocationPool/hooks/useAllocationPoolEvents"
+import { useAllocationPoolEvents } from "@/api/contracts/xAllocationPool/hooks/useAllocationPoolEvents"
 
 const compactFormatter = getCompactFormatter(2)
+
 export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
   const { t } = useTranslation()
-  const { data, isLoading } = useAllocationPoolEvents()
-  const appAllocations = useMemo(
-    () =>
-      data?.claimedRewards
-        ?.filter(allocation => compareAddresses(allocation.appId, appId))
-        .sort((a, b) => Number(a.roundId) - Number(b.roundId))
-        .map(allocation => {
-          return {
-            ...allocation,
-            scaledAmount: ethers.formatEther(allocation.totalAmount),
-          }
-        }) || [],
-    [data, appId],
-  )
-  const lastRoundAllocationReceived = useMemo(
-    () => Number(appAllocations[appAllocations.length - 1]?.scaledAmount) || 0,
-    [appAllocations],
-  )
-  const secondLastRoundAllocationReceived = useMemo(
-    () => Number(appAllocations[appAllocations.length - 2]?.scaledAmount) || 0,
-    [appAllocations],
-  )
+  const { data: appAllocations = [], isLoading } = useAllocationPoolEvents({ appId, limit: 3 })
+  const lastRoundAllocationReceived = Number(formatEther(appAllocations?.[0]?.totalAmount ?? 0n)) || 0
+  const secondLastRoundAllocationReceived = Number(formatEther(appAllocations?.[1]?.totalAmount ?? 0n)) || 0
   const percentageChange = useMemo(
     () =>
       // cannot divide by 0

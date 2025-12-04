@@ -1,0 +1,141 @@
+"use client"
+
+import { Card, HStack, VStack, Text, Switch, Box, Icon, Link } from "@chakra-ui/react"
+import { Check, InfoCircle, Clock as ClockIcon } from "iconoir-react"
+import { useTranslation, Trans } from "react-i18next"
+
+import ProcessIcon from "@/components/Icons/svg/process.svg"
+
+const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation#service-fee"
+
+export interface AutomationToggleCardProps {
+  checked?: boolean
+  disabled?: boolean
+  onCheckedChange?: (checked: boolean) => void
+  icon?: React.ReactNode
+  nextRoundNumber?: number | string
+  isEnabledOnChain?: boolean
+  hasVoted?: boolean
+  isActiveInCurrentRound?: boolean
+}
+
+export const AutomationToggleCard = ({
+  checked = false,
+  disabled = false,
+  onCheckedChange,
+  icon,
+  nextRoundNumber,
+  isEnabledOnChain = false,
+  hasVoted = false,
+  isActiveInCurrentRound = false,
+}: AutomationToggleCardProps) => {
+  const { t } = useTranslation()
+
+  // Lock toggle when automation is active for current round but relayer hasn't voted yet
+  // This prevents users from disabling mid-round which would cause them to miss their vote
+  const isLockedPendingRelayerVote = !hasVoted && isActiveInCurrentRound
+
+  return (
+    <Card.Root
+      variant="outline"
+      p={{ base: "3", md: "4" }}
+      border="sm"
+      borderColor="border.secondary"
+      bg="cards.default">
+      <VStack gap={{ base: "3", md: "6" }} w="full" alignItems="stretch">
+        <HStack justify="space-between" alignItems="center" gap={{ base: "2", md: "3" }} w="full">
+          <HStack gap={{ base: "2", md: "3" }} flex={1} alignItems="center">
+            <Box
+              bg="status.neutral.subtle"
+              borderRadius="4px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              w={{ base: "8", md: "8" }}
+              h={{ base: "8", md: "8" }}
+              flexShrink={0}>
+              {icon ?? <Icon as={ProcessIcon} boxSize={{ base: "4", md: "5" }} color="text.subtle" />}
+            </Box>
+            <VStack alignItems="flex-start" gap="0.5" flex={1} minW={0}>
+              <Text textStyle={{ base: "md", md: "md" }} fontWeight="semibold" color="text.default">
+                {t("Auto-vote & claim")}
+              </Text>
+            </VStack>
+          </HStack>
+          <Switch.Root
+            size={{ base: "sm", md: "sm" }}
+            checked={checked}
+            disabled={disabled || isLockedPendingRelayerVote}
+            onCheckedChange={e => onCheckedChange?.(e.checked)}
+            flexShrink={0}>
+            <Switch.HiddenInput />
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Root>
+        </HStack>
+
+        {/* Show pending status when locked (relayer voting in progress) */}
+        {isLockedPendingRelayerVote && (
+          <HStack gap="2" alignItems="flex-start">
+            <Icon as={ClockIcon} boxSize="4" color="text.subtle" mt="0.5" />
+            <Text textStyle="xs" color="text.subtle">
+              {t("Waiting for the relayer to cast your vote this round. You can disable after voting completes.")}
+            </Text>
+          </HStack>
+        )}
+
+        {/* Show info when enabling (toggle ON) - but not when locked */}
+        {checked && !isLockedPendingRelayerVote && (
+          <VStack alignItems="flex-start" gap="3" w="full">
+            <HStack gap="2" alignItems="flex-start">
+              <Icon as={Check} boxSize="4" color="text.subtle" mt="0.5" />
+              <Text textStyle="xs" color="text.subtle">
+                {t("Your votes and rewards will be handled weekly automatically. Stay active to keep it running.")}
+              </Text>
+            </HStack>
+
+            <HStack gap="2" alignItems="flex-start">
+              <Icon as={Check} boxSize="4" color="text.subtle" mt="0.5" />
+              <Text textStyle="xs" color="text.subtle">
+                <Trans
+                  i18nKey="A 10% <0>service fee</0> is deducted from weekly B3TR rewards, capped at 100 B3TR."
+                  components={[
+                    <Link
+                      key="0"
+                      href={AUTOMATION_DOCS_URL}
+                      target="_blank"
+                      textDecoration="underline"
+                      color="text.subtle"
+                      _hover={{ color: "text.default" }}
+                    />,
+                  ]}
+                />
+              </Text>
+            </HStack>
+
+            {/* Only show activation message when enabling for the first time (not when editing) */}
+            {!isEnabledOnChain && (
+              <HStack gap="2" alignItems="center">
+                <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
+                <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
+                  {t("Activates from Round {{round}} onwards", { round: nextRoundNumber })}
+                </Text>
+              </HStack>
+            )}
+          </VStack>
+        )}
+
+        {/* Show deactivation message when disabling (toggle OFF but was enabled on-chain) */}
+        {!checked && isEnabledOnChain && (
+          <HStack gap="2" alignItems="center">
+            <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
+            <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
+              {t("Deactivates from next round onwards")}
+            </Text>
+          </HStack>
+        )}
+      </VStack>
+    </Card.Root>
+  )
+}

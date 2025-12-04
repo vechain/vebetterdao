@@ -3,7 +3,7 @@ import { useCallback, useState } from "react"
 
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 
-import { ProposalMetadata } from "../api/contracts/governance/getProposalsEvents"
+import { ProposalMetadata } from "../api/contracts/governance/types"
 
 /**
  * Uploads proposal metadata to IPFS.

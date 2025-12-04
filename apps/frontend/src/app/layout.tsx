@@ -1,3 +1,5 @@
+export const fetchCache = "force-no-store"
+
 import { getConfig } from "@repo/config"
 import { Metadata, Viewport } from "next"
 
@@ -15,6 +17,7 @@ const imageExtension = platformMetadata?.imageExtension
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
+  interactiveWidget: "resizes-content",
 }
 // Export proper metadata for the platform with template support
 export const metadata: Metadata = {

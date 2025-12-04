@@ -11,7 +11,7 @@ export const inputRecipe = defineRecipe({
         fontSize: { base: "30px", md: "36px" },
         fontWeight: 700,
         _placeholder: {
-          color: "gray.500",
+          color: "text.subtle",
         },
         _dark: {
           _placeholder: {

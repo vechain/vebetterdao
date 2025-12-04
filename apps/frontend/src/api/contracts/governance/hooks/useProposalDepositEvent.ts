@@ -1,11 +1,18 @@
+import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useMemo } from "react"
 
 import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
+import { getEventsKey, useEvents } from "@/hooks/useEvents"
 
-import { useProposalsEvents } from "./useProposalsEvents"
+const abi = B3TRGovernor__factory.abi
+const contractAddress = getConfig().b3trGovernorAddress as `0x${string}`
+
+export const getProposalDepositEventsQueryKey = (proposalId: string) =>
+  getEventsKey({ eventName: "ProposalDeposit", filterParams: { proposalId: BigInt(proposalId) } })
 
 /**
  * Hook to get the proposal deposit event
@@ -15,11 +22,18 @@ import { useProposalsEvents } from "./useProposalsEvents"
 export const useProposalDepositEvent = (proposalId: string) => {
   const { account } = useWallet()
   const { data: proposal } = useProposalEnrichedById(proposalId)
-  const events = useProposalsEvents()
-  const proposalDeposits = useMemo(
-    () => events.data?.deposits.filter(deposit => deposit.proposalId === proposalId) || [],
-    [events.data?.deposits, proposalId],
-  )
+  const {
+    data: proposalDeposits = [],
+    isLoading,
+    error,
+  } = useEvents({
+    abi,
+    contractAddress,
+    eventName: "ProposalDeposit",
+    filterParams: { proposalId: BigInt(proposalId) },
+    select: events => events.map(({ decodedData }) => decodedData.args),
+  })
+
   // Get the number of supports
   const supportingUserCount = useMemo(
     () => [...new Set(proposalDeposits.map(deposit => deposit.depositor))].length,
@@ -32,7 +46,7 @@ export const useProposalDepositEvent = (proposalId: string) => {
   )
   // Get the community deposits
   const communityDepositsBN = useMemo(() => {
-    return proposalDeposits.reduce((acc, deposit) => acc + BigInt(deposit.amount), BigInt(0))
+    return proposalDeposits.reduce((acc, deposit) => acc + deposit.amount, 0n)
   }, [proposalDeposits])
   // How many missing support
   const missingSupport = useMemo(() => {
@@ -78,8 +92,8 @@ export const useProposalDepositEvent = (proposalId: string) => {
     othersSupport,
     othersSupportUserCount,
     hasUserSupported,
-    deposits: events.data?.deposits,
-    isLoading: events.isLoading,
-    error: events.error,
+    deposits: proposalDeposits,
+    isLoading,
+    error,
   }
 }

@@ -3,6 +3,7 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
 import { Analytics } from "@vercel/analytics/react"
+import { IconoirProvider } from "iconoir-react"
 import dynamic from "next/dynamic"
 
 import { Provider } from "@/components/ui/provider"
@@ -26,7 +27,9 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
         <Provider>
           <VechainKitProviderWrapper>
             <AuthSessionProvider>
-              <TransactionModalProvider>{children}</TransactionModalProvider>
+              <IconoirProvider iconProps={{ strokeWidth: "2" }}>
+                <TransactionModalProvider>{children}</TransactionModalProvider>
+              </IconoirProvider>
             </AuthSessionProvider>
           </VechainKitProviderWrapper>
         </Provider>

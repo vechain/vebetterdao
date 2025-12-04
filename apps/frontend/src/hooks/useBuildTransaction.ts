@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query"
+import { QueryKey, useQueryClient } from "@tanstack/react-query"
 import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 
@@ -6,7 +6,7 @@ import { useTransactionModal, TransactionCustomUI } from "@/providers/Transactio
 
 export type BuildTransactionProps<ClausesParams = void> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
-  refetchQueryKeys?: Array<(string | undefined | unknown[])[]>
+  refetchQueryKeys?: QueryKey[]
   onSuccess?: () => void
   invalidateCache?: boolean
   suggestedMaxGas?: number
@@ -98,10 +98,12 @@ export const useBuildTransaction = <ClausesParams = void>({
   /**
    * Function to send a transaction based on the provided parameters.
    * @param props - The parameters to be passed to the `clauseBuilder` function.
+   * @param overrideCustomUI - Optional custom UI to override the hook-level transactionModalCustomUI
    */
   const sendTransaction = useCallback(
-    async (props?: ClausesParams) => {
-      setupModal(async () => result.sendTransaction(clauseBuilder(props as any)), transactionModalCustomUI)
+    async (props?: ClausesParams, customUI?: TransactionCustomUI) => {
+      const uiToUse = customUI ?? transactionModalCustomUI
+      setupModal(async () => result.sendTransaction(clauseBuilder(props as any)), uiToUse)
       return result.sendTransaction(clauseBuilder(props as any))
     },
     [clauseBuilder, result, setupModal, transactionModalCustomUI],

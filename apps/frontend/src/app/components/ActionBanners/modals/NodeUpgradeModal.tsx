@@ -4,8 +4,9 @@ import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
 import { STARGATE_APP_URL } from "@/constants/links"
+import { useUserPreferences } from "@/hooks/useUserPreferences"
 
-import { setBannerEnabled, BannerStorageKey } from "../../Banners/GenericBanner"
+import { BannerStorageKey } from "../../Banners/GenericBanner"
 
 type Props = {
   isOpen: boolean
@@ -14,9 +15,10 @@ type Props = {
 
 export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
+  const { setPreferences } = useUserPreferences()
 
   const onDismissClick = () => {
-    setBannerEnabled(BannerStorageKey.STARGATE_MIGRATION)
+    setPreferences({ [BannerStorageKey.SHOW_STARGATE_MIGRATION]: true })
     onClose()
   }
 
@@ -42,12 +44,7 @@ export const NodeUpgradeModal = ({ isOpen, onClose }: Props) => {
         </Text>
 
         <HStack gap={4} w="full">
-          <Button
-            flex={1}
-            variant="secondary"
-            onClick={() => {
-              onDismissClick()
-            }}>
+          <Button flex={1} variant="secondary" onClick={onDismissClick}>
             {t("Later")}
           </Button>
           <Button flex={1} asChild variant="primary">

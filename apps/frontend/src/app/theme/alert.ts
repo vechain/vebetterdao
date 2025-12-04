@@ -51,6 +51,16 @@ export const alertSlotRecipe = defineSlotRecipe({
           color: "status.negative.strong",
         },
       },
+      neutral: {
+        root: {
+          bg: "status.neutral.subtle",
+          borderColor: "status.neutral.primary",
+          color: "status.neutral.strong",
+        },
+        indicator: {
+          color: "status.neutral.strong",
+        },
+      },
     },
   },
 })

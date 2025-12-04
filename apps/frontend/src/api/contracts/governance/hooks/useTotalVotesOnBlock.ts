@@ -29,11 +29,16 @@ export const useTotalVotesOnBlock = (block?: number, address?: string, enabled =
     queryOptions: {
       enabled: !!address && !!block && enabled,
       select: data => {
-        const depositsVotes = ethers.formatEther(data[0])
-        const totalVotesWithDeposits = parseFloat(votes || "0") + parseFloat(depositsVotes)
+        const depositsVotesWei = data[0]
+        const depositsVotes = ethers.formatEther(depositsVotesWei)
+        // Use bigint arithmetic to preserve full precision (parseFloat loses precision for large numbers)
+        const votesWei = votes ? ethers.parseEther(votes) : 0n
+        const totalVotesWithDepositsWei = votesWei + depositsVotesWei
+        const totalVotesWithDeposits = ethers.formatEther(totalVotesWithDepositsWei)
         return {
-          totalVotesWithDeposits: totalVotesWithDeposits.toString(),
-          depositsVotes: depositsVotes.toString(),
+          totalVotesWithDeposits,
+          totalVotesWithDepositsWei,
+          depositsVotes,
         }
       },
     },

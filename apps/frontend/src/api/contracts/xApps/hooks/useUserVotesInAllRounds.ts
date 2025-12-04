@@ -24,17 +24,17 @@ export const useUserVotesInAllRounds = (address?: string) => {
     abi,
     contractAddress,
     eventName,
-    filterParams: {
-      voter: address,
-    },
-    mapResponse: data => {
-      const { voter, roundId, appsIds, voteWeights } = data.decodedData.args
-      return {
-        voter,
-        roundId: roundId.toString(),
-        appsIds: [...appsIds],
-        voteWeights: [...voteWeights].map(weight => weight.toString()),
-      }
-    },
+    filterParams: { voter: (address ?? "") as `0x${string}` },
+    select: events =>
+      events.map(({ decodedData }) => {
+        const { voter, roundId, appsIds, voteWeights } = decodedData.args
+        return {
+          voter,
+          roundId: roundId.toString(),
+          appsIds: [...appsIds],
+          voteWeights: [...voteWeights].map(weight => weight.toString()),
+        }
+      }),
+    enabled: !!address,
   })
 }

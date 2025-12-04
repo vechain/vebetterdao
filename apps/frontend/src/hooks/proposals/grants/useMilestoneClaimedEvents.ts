@@ -7,6 +7,7 @@ import { useEvents } from "../../useEvents"
 
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 const abi = GrantsManager__factory.abi
+
 export type MilestoneClaimedEvent = {
   proposalId: string
   milestoneIndex: number
@@ -15,19 +16,21 @@ export type MilestoneClaimedEvent = {
   blockTimestamp: number
   blockNumber: number
 }
+
 export const useMilestoneClaimedEvents = () => {
   const milestoneClaimedEvents = useEvents({
+    abi,
     contractAddress: grantsManagerAddress,
     eventName: "MilestoneClaimed",
-    abi,
-    mapResponse: response => ({
-      proposalId: response.decodedData.args.proposalId.toString(),
-      milestoneIndex: Number(response.decodedData.args.milestoneIndex),
-      amount: formatEther(response.decodedData.args.amount.toString()),
-      amountRaw: response.decodedData.args.amount.toString(),
-      blockTimestamp: response.meta.blockTimestamp,
-      blockNumber: response.meta.blockNumber,
-    }),
+    select: events =>
+      events.map(response => ({
+        proposalId: response.decodedData.args.proposalId.toString(),
+        milestoneIndex: Number(response.decodedData.args.milestoneIndex),
+        amount: formatEther(response.decodedData.args.amount.toString()),
+        amountRaw: response.decodedData.args.amount.toString(),
+        blockTimestamp: response.meta.blockTimestamp,
+        blockNumber: response.meta.blockNumber,
+      })),
   })
   // Group claimed events by proposal ID for easy lookup
   const claimedAmountsByProposal = useMemo(() => {
