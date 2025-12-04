@@ -1,20 +1,8 @@
 "use client"
 
-import {
-  Card,
-  HStack,
-  Heading,
-  Icon,
-  Badge,
-  VStack,
-  Button,
-  IconButton,
-  Text,
-  Collapsible,
-  Mark,
-} from "@chakra-ui/react"
+import { Card, HStack, Heading, Icon, Badge, VStack, Button, Text, Collapsible, Mark } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { SmartphoneDevice, NavArrowRight } from "iconoir-react"
+import { SmartphoneDevice } from "iconoir-react"
 import { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
@@ -34,50 +22,54 @@ const RoundActiveAppCard = ({
   name,
   votesReceived,
   earnings,
-  onClick,
 }: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & {
   appLogo?: string
   onClick: (id: string) => void
 }) => {
   const { t } = useTranslation()
   return (
-    <Button key={id} unstyled asChild onClick={() => onClick(id)}>
-      <Card.Root
-        variant="action"
-        border="none"
-        display="grid"
-        gridTemplateColumns="auto 1fr auto"
-        alignItems="center"
-        p={{ base: "2", md: "3" }}
-        px={{ base: "1", md: "3" }}
-        columnGap="4">
-        <AppImage appId={id || ""} appLogo={appLogo} boxSize="11" flexShrink={0} shape="square" borderRadius="lg" />
-        <VStack gap="1" alignItems="start">
-          <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
-            {name || "-"}
-          </Text>
-          <HStack gap="1">
-            {earnings && (
-              <Text textStyle={{ base: "xs", md: "md" }} gap="1">
-                <Mark variant="text" fontWeight="semibold" color="text.subtle">
-                  {t("Received: ")}
-                </Mark>
-                {getCompactFormatter(2).format(Number(earnings.totalAmount))} {" B3TR"}
-                <Mark fontWeight="semibold">{" • "}</Mark>
-              </Text>
-            )}
-
-            <Text textStyle={{ base: "xs", md: "md" }}>
-              {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" votes"}
+    <Card.Root
+      variant="action"
+      // TODO: remove this after getting app detail modal ready
+      _hover={{ bg: "inherit" }}
+      border="none"
+      display="grid"
+      gridTemplateColumns="auto 1fr auto"
+      alignItems="center"
+      p={{ base: "2", md: "3" }}
+      px={{ base: "1", md: "3" }}
+      columnGap="4">
+      <AppImage appId={id || ""} appLogo={appLogo} boxSize="11" flexShrink={0} shape="square" borderRadius="lg" />
+      <VStack gap="1" alignItems="start">
+        <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
+          {name || "-"}
+        </Text>
+        <HStack gap="1">
+          {earnings && (
+            <Text textStyle={{ base: "xs", md: "md" }} gap="1">
+              <Mark variant="text" fontWeight="semibold" color="text.subtle">
+                {t("Received: ")}
+              </Mark>
+              {getCompactFormatter(2).format(Number(earnings.totalAmount))} {" B3TR"}
+              <Mark fontWeight="semibold">{" • "}</Mark>
             </Text>
-          </HStack>
-        </VStack>
-        <IconButton variant="ghost" p="0" minWidth="unset">
-          <Icon as={NavArrowRight} boxSize={5} color="icon.default" />
-        </IconButton>
-      </Card.Root>
-    </Button>
+          )}
+
+          <Text textStyle={{ base: "xs", md: "md" }}>
+            {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" votes"}
+          </Text>
+        </HStack>
+      </VStack>
+    </Card.Root>
   )
+  // return (
+  //   {/* <Button key={id} unstyled asChild onClick={() => onClick(id)}> */ }
+  //   {/*     <IconButton variant="ghost" p="0" minWidth="unset"> */ }
+  // {/*       <Icon as={NavArrowRight} boxSize={5} color="icon.default" /> */ }
+  // {/*     </IconButton> */ }
+  // {/*   </Card.Root> */ }
+  // {/* </Button> */ }
+  // )
 }
 
 export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[]; roundId: number }) => {
