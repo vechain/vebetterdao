@@ -13,7 +13,7 @@ jobs:
     secrets: inherit
     with:
       environment: staging
-      image_tag: ${{ github.ref_name }}-staging
+      image_tag: staging-${{ github.ref_name }}
 
   deploy-beta:
     name: Deploy to Beta
@@ -21,4 +21,4 @@ jobs:
     secrets: inherit
     with:
       environment: beta
-      image_tag: ${{ github.ref_name }}-beta
+      image_tag: beta-${{ github.ref_name }}

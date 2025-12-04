@@ -22,10 +22,10 @@ locals {
       },
       {
         rulePriority = 2
-        description  = "Keep last 20 beta/test images"
+        description  = "Keep last 20 beta/staging/dev images"
         selection = {
           tagStatus     = "tagged"
-          tagPrefixList = ["beta-", "test-"]
+          tagPrefixList = ["beta-", "staging-", "dev-"]
           countType     = "imageCountMoreThan"
           countNumber   = 20
         }
@@ -35,12 +35,12 @@ locals {
       },
       {
         rulePriority = 3
-        description  = "Keep last 10 preview images"
+        description  = "Keep last 15 preview images"
         selection = {
           tagStatus     = "tagged"
           tagPrefixList = ["pr-"]
           countType     = "imageCountMoreThan"
-          countNumber   = 10
+          countNumber   = 15
         }
         action = {
           type = "expire"
@@ -87,4 +87,3 @@ resource "aws_ecr_lifecycle_policy" "frontend" {
     rules = local.lifecycle_rules
   })
 }
-
