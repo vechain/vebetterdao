@@ -27,16 +27,18 @@ locals {
     }
 }
 
+data "terraform_remote_state" "account_level" {
+  backend = "s3"
+  config = {
+    bucket = "b3tr-terraform-state-${terraform.workspace}"
+    key    = "frontend/account-level/${terraform.workspace}/terraform.tfstate"
+    region = "eu-west-1"
+  }
+}
+
+
 provider "aws" {
   region = local.env.region
-
-  dynamic "assume_role" {
-    for_each = lookup(local.env, "assume_role_arn", null) == null ? [] : [local.env.assume_role_arn]
-    content {
-      role_arn     = assume_role.value
-      session_name = "terraform-${local.env.project_name}-${local.env.environment}"
-    }
-  }
 
   default_tags {
     tags = local.default_tags

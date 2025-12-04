@@ -4,6 +4,9 @@ environment: dev
 region: eu-west-1
 account_id: "211125319139"
 
+min_size: 1
+max_size: 4
+
 hosted_zones_and_certificates:
   testnet:
     zone_name: testnet.governance.vebetterdao.org

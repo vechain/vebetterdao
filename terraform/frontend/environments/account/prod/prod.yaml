@@ -4,6 +4,9 @@ environment: prod
 region: eu-west-1
 account_id: "851725442887"
 
+min_size: 1
+max_size: 20
+
 hosted_zones_and_certificates:
   prod:
     zone_name: governance.vebetterdao.org
