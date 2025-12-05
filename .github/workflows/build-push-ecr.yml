@@ -103,4 +103,8 @@ jobs:
                       NEXT_PUBLIC_PRIVY_CLIENT_ID=${{ vars.NEXT_PUBLIC_PRIVY_CLIENT_ID || ''}}
                       NEXT_PUBLIC_TRANSAK_API_KEY=${{ vars.NEXT_PUBLIC_TRANSAK_API_KEY || ''}}
                       NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ vars.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || ''}}
+                      NEXT_PUBLIC_DATADOG_ENV=${{ vars.NEXT_PUBLIC_DATADOG_ENV || ''}}
+                      NEXT_PUBLIC_DATADOG_APP_TOKEN=${{ vars.NEXT_PUBLIC_DATADOG_APP_TOKEN || ''}}
+                      NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${{ vars.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''}}
+                      NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ vars.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN || ''}}
                       NODE_OPTIONS=${{ vars.NODE_OPTIONS || ''}}
