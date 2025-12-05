@@ -39,8 +39,8 @@ export const StatCard = ({
           </Icon>
         </Square>
       )}
-      <VStack flex={1} lineClamp={2}>
-        <Text textStyle={{ base: "xs", md: "md" }} color="text.subtle">
+      <VStack flex={1} alignItems="start">
+        <Text textStyle={{ base: "xs", md: "md" }} color="text.subtle" lineClamp={1}>
           {title}
         </Text>
         {typeof subtitle === "string" ? (
