@@ -97,7 +97,6 @@ jobs:
               
               # Append flavor-specific config
               echo "" >> "${CONFIG_FILE}"
-              echo "image_tag: destroy" >> "${CONFIG_FILE}"
               echo "runtime_env_var_names: []" >> "${CONFIG_FILE}"
               echo "runtime_env_secret_names: []" >> "${CONFIG_FILE}"
               echo "route53_zone_name: ${DOMAIN_ENV}.governance.vebetterdao.org" >> "${CONFIG_FILE}"
