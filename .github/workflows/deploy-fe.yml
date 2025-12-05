@@ -24,6 +24,11 @@ on:
         description: "AWS IAM role ARN for dev account"
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
 env:
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: governance-frontend
