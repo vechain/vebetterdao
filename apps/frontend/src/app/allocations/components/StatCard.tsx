@@ -39,7 +39,7 @@ export const StatCard = ({
           </Icon>
         </Square>
       )}
-      <VStack flex={1} lineClamp={2}>
+      <VStack flex={1} alignItems="start" lineClamp={2}>
         <Text textStyle={{ base: "xs", md: "md" }} color="text.subtle">
           {title}
         </Text>
