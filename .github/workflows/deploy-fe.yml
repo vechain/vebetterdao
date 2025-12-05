@@ -17,12 +17,17 @@ on:
         type: string
         default: "deploy"
     secrets:
-      AWS_ACC_ROLE:
+      AWS_ACCESS_ROLE:
         description: "AWS IAM role ARN for prod account"
         required: true
       DEV_AWS_ACC_ROLE:
         description: "AWS IAM role ARN for dev account"
         required: true
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
 
 env:
   AWS_REGION: eu-west-1
@@ -41,7 +46,7 @@ jobs:
       aws_region: eu-west-1
       environment: AWS ${{ inputs.environment }} governance build-time
     secrets:
-        aws_role_arn: ${{ inputs.environment == 'prod' && secrets.AWS_ACC_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+        aws_role_arn: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
 
   deploy:
     name: Deploy to ${{ inputs.environment }}
@@ -62,7 +67,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.environment == 'prod' && secrets.AWS_ACC_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+          role-to-assume: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform

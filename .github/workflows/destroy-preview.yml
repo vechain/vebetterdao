@@ -70,6 +70,14 @@ jobs:
             echo "Checking for preview environment: ${WORKSPACE_NAME}"
             echo "=========================================="
             
+            # Map flavor to domain pattern (must match deploy-preview.yml)
+            case $FLAVOR in
+              "dev") DOMAIN_ENV="dev.testnet" ;;
+              "staging") DOMAIN_ENV="staging" ;;
+              "beta") DOMAIN_ENV="beta" ;;
+              *) DOMAIN_ENV="${FLAVOR}" ;;
+            esac
+            
             # Check if workspace exists
             if terraform workspace list | grep -q "${WORKSPACE_NAME}"; then
               echo "Found workspace ${WORKSPACE_NAME}, destroying..."
@@ -85,20 +93,35 @@ jobs:
               # Replace placeholders
               sed -i "s/{PR_NUMBER}/${PR_NUMBER}-${FLAVOR}/g" "${CONFIG_FILE}"
               sed -i "s/{COMMIT_SHA}/DESTROY/g" "${CONFIG_FILE}"
-              sed -i "s/{ENVIRONMENT}/${FLAVOR}/g" "${CONFIG_FILE}"
+              sed -i "s/{ENVIRONMENT}/${DOMAIN_ENV}/g" "${CONFIG_FILE}"
               
-              # Append flavor-specific config
+              # Append flavor-specific config from source environment
               echo "" >> "${CONFIG_FILE}"
-              echo "image_tag: destroy" >> "${CONFIG_FILE}"
-              echo "runtime_env_var_names: []" >> "${CONFIG_FILE}"
-              echo "runtime_env_secret_names: []" >> "${CONFIG_FILE}"
+              echo "# ============================================" >> "${CONFIG_FILE}"
+              echo "# Dynamic Config from ${FLAVOR} flavor" >> "${CONFIG_FILE}"
+              echo "# ============================================" >> "${CONFIG_FILE}"
               
-              # If source config exists, extract SSM prefix
+              # Override image tag (for destroy, we use a placeholder since image doesn't matter)
+              echo "image_tag: destroy-${PR_NUMBER}-${FLAVOR}" >> "${CONFIG_FILE}"
+              
+              # Extract and append config from source environment (same as deploy-preview.yml)
               if [ -f "${SOURCE_CONFIG}" ]; then
-                yq eval '{"ssm_parameter_prefix": .ssm_parameter_prefix} | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${CONFIG_FILE}"
+                echo "Extracting config from ${SOURCE_CONFIG}..."
+                
+                # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
+                yq eval '{
+                  "ssm_parameter_prefix": .ssm_parameter_prefix,
+                  "route53_zone_name": .route53_zone_name,
+                  "runtime_env_var_names": (.runtime_env_var_names // []),
+                  "runtime_env_secret_names": (.runtime_env_secret_names // [])
+                } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${CONFIG_FILE}"
+              else
+                echo "::error::Source config ${SOURCE_CONFIG} not found - cannot determine route53_zone_name"
+                exit 1
               fi
               
-              echo "Generated config for destroy:"
+              echo ""
+              echo "=== Generated config for destroy ==="
               cat "${CONFIG_FILE}"
               
               # Select workspace and destroy
@@ -114,9 +137,10 @@ jobs:
                 DESTROYED="${DESTROYED}${FLAVOR},"
               else
                 echo "::warning::Failed to destroy ${WORKSPACE_NAME}"
+                exit 1
               fi
             else
-              echo "No workspace found for: ${FLAVOR}"
+              echo "No workspace found for: ${WORKSPACE_NAME}"
             fi
           done
           
