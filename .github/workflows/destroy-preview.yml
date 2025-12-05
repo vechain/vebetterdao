@@ -95,14 +95,33 @@ jobs:
               sed -i "s/{COMMIT_SHA}/DESTROY/g" "${CONFIG_FILE}"
               sed -i "s/{ENVIRONMENT}/${DOMAIN_ENV}/g" "${CONFIG_FILE}"
               
-              # Append flavor-specific config
+              # Append flavor-specific config from source environment
               echo "" >> "${CONFIG_FILE}"
-              echo "runtime_env_var_names: []" >> "${CONFIG_FILE}"
-              echo "runtime_env_secret_names: []" >> "${CONFIG_FILE}"
-              echo "route53_zone_name: ${DOMAIN_ENV}.governance.vebetterdao.org" >> "${CONFIG_FILE}"
-              echo "ssm_parameter_prefix: /b3tr/frontend/${DOMAIN_ENV}/" >> "${CONFIG_FILE}"
+              echo "# ============================================" >> "${CONFIG_FILE}"
+              echo "# Dynamic Config from ${FLAVOR} flavor" >> "${CONFIG_FILE}"
+              echo "# ============================================" >> "${CONFIG_FILE}"
               
-              echo "Generated config for destroy:"
+              # Override image tag (for destroy, we use a placeholder since image doesn't matter)
+              echo "image_tag: destroy-${PR_NUMBER}-${FLAVOR}" >> "${CONFIG_FILE}"
+              
+              # Extract and append config from source environment (same as deploy-preview.yml)
+              if [ -f "${SOURCE_CONFIG}" ]; then
+                echo "Extracting config from ${SOURCE_CONFIG}..."
+                
+                # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
+                yq eval '{
+                  "ssm_parameter_prefix": .ssm_parameter_prefix,
+                  "route53_zone_name": .route53_zone_name,
+                  "runtime_env_var_names": (.runtime_env_var_names // []),
+                  "runtime_env_secret_names": (.runtime_env_secret_names // [])
+                } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${CONFIG_FILE}"
+              else
+                echo "::error::Source config ${SOURCE_CONFIG} not found - cannot determine route53_zone_name"
+                exit 1
+              fi
+              
+              echo ""
+              echo "=== Generated config for destroy ==="
               cat "${CONFIG_FILE}"
               
               # Select workspace and destroy
