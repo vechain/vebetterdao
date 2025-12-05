@@ -24,4 +24,4 @@ jobs:
     secrets: inherit
     with:
       environment: dev
-      image_tag: ${{ needs.prepare.outputs.short_sha }}-dev
+      image_tag: dev-${{ needs.prepare.outputs.short_sha }}
