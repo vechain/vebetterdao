@@ -27,6 +27,11 @@ output "app_runner_access_role_arn" {
   value       = aws_iam_role.app_runner_access_role.arn
 }
 
+output "app_runner_scaler_arn" {
+  description = "ARN of the App Runner scaler"
+  value       = aws_apprunner_auto_scaling_configuration_version.app_runner_scaler.arn
+}
+
 output "environment_metadata" {
   description = "Metadata useful for downstream stacks"
   value = {

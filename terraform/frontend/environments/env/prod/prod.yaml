@@ -4,13 +4,27 @@ environment: prod
 region: eu-west-1
 account_id: "851725442887"
 
-account_level_state_bucket: b3tr-terraform-state-prod
-account_level_state_key: frontend/account-level/prod/terraform.tfstate
 account_level_state_region: eu-west-1
 
 domain: governance.vebetterdao.org
 enable_custom_domain: true
 route53_zone_name: governance.vebetterdao.org
+
+ssm_parameter_prefix: /b3tr/frontend/
+runtime_env_var_names:
+  - FRESHDESK_DOMAIN
+  - FRESHDESK_GROUP_ID
+  - GITHUB_CLIENT_ID
+  - RESET_USER_SIGNAL_COUNT_DOMAIN
+  - TWITTER_CLIENT_ID
+
+runtime_env_secret_names:
+  - FRESHDESK_API_TOKEN
+  - GITHUB_CLIENT_SECRET
+  - MNEMONIC
+  - NEXTAUTH_SECRET
+  - RESET_USER_SIGNAL_COUNT_API_KEY
+  - TWITTER_CLIENT_SECRET
 
 image_tag: latest
 cpu: 1024

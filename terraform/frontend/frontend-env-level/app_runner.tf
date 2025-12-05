@@ -15,16 +15,8 @@ data "aws_ssm_parameter" "runtime_env_secrets" {
   with_decryption = true
 }
 
-resource "aws_apprunner_auto_scaling_configuration_version" "frontend" {
-  auto_scaling_configuration_name = substr(local.service_name, 0, 32)
-
-  max_concurrency = local.env.max_concurrency
-  min_size        = local.env.min_size
-  max_size        = local.env.max_size
-
-  tags = merge(local.default_tags, {
-    Name = "${local.service_name}"
-  })
+locals {
+  autoscaling_config_arn = data.terraform_remote_state.account_level.outputs.app_runner_scaler_arn
 }
 
 resource "aws_apprunner_service" "frontend" {
@@ -61,7 +53,7 @@ resource "aws_apprunner_service" "frontend" {
     instance_role_arn = data.terraform_remote_state.account_level.outputs.app_runner_instance_role_arn
   }
 
-  auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.frontend.arn
+  auto_scaling_configuration_arn = local.autoscaling_config_arn
 
   health_check_configuration {
     protocol            = "HTTP"

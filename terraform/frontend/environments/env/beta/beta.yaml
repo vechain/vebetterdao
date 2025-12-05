@@ -4,8 +4,6 @@ environment: beta
 region: eu-west-1
 account_id: "851725442887"
 
-account_level_state_bucket: b3tr-terraform-state-dev
-account_level_state_key: workspaces/dev/frontend-account-level.tfstate
 account_level_state_region: eu-west-1
 
 domain: beta.governance.vebetterdao.org
