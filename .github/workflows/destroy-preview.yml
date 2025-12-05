@@ -70,6 +70,14 @@ jobs:
             echo "Checking for preview environment: ${WORKSPACE_NAME}"
             echo "=========================================="
             
+            # Map flavor to domain pattern (must match deploy-preview.yml)
+            case $FLAVOR in
+              "dev") DOMAIN_ENV="dev.testnet" ;;
+              "staging") DOMAIN_ENV="staging" ;;
+              "beta") DOMAIN_ENV="beta" ;;
+              *) DOMAIN_ENV="${FLAVOR}" ;;
+            esac
+            
             # Check if workspace exists
             if terraform workspace list | grep -q "${WORKSPACE_NAME}"; then
               echo "Found workspace ${WORKSPACE_NAME}, destroying..."
@@ -82,10 +90,10 @@ jobs:
               mkdir -p "${CONFIG_DIR}"
               cp "${{ github.workspace }}/${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${CONFIG_FILE}"
               
-              # Replace placeholders
+              # Replace placeholders (use DOMAIN_ENV for correct domain mapping)
               sed -i "s/{PR_NUMBER}/${PR_NUMBER}-${FLAVOR}/g" "${CONFIG_FILE}"
               sed -i "s/{COMMIT_SHA}/DESTROY/g" "${CONFIG_FILE}"
-              sed -i "s/{ENVIRONMENT}/${FLAVOR}/g" "${CONFIG_FILE}"
+              sed -i "s/{ENVIRONMENT}/${DOMAIN_ENV}/g" "${CONFIG_FILE}"
               
               # Append flavor-specific config
               echo "" >> "${CONFIG_FILE}"
@@ -93,9 +101,19 @@ jobs:
               echo "runtime_env_var_names: []" >> "${CONFIG_FILE}"
               echo "runtime_env_secret_names: []" >> "${CONFIG_FILE}"
               
-              # If source config exists, extract SSM prefix
+              # If source config exists, extract required fields for destroy
               if [ -f "${SOURCE_CONFIG}" ]; then
-                yq eval '{"ssm_parameter_prefix": .ssm_parameter_prefix} | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${CONFIG_FILE}"
+                # Copy route53_zone_name (required for Route53 data source lookup)
+                ZONE_NAME=$(yq eval '.route53_zone_name // ""' "${SOURCE_CONFIG}")
+                if [ -n "${ZONE_NAME}" ]; then
+                  echo "route53_zone_name: ${ZONE_NAME}" >> "${CONFIG_FILE}"
+                fi
+                
+                # Copy ssm_parameter_prefix if it exists
+                SSM_PREFIX=$(yq eval '.ssm_parameter_prefix // ""' "${SOURCE_CONFIG}")
+                if [ -n "${SSM_PREFIX}" ]; then
+                  echo "ssm_parameter_prefix: ${SSM_PREFIX}" >> "${CONFIG_FILE}"
+                fi
               fi
               
               echo "Generated config for destroy:"
