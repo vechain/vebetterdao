@@ -10,6 +10,11 @@ import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "./components/LanguageSelector"
 import { version } from "../../../package.json"
 
+// Use build-time injected version from CI/CD, fallback to package.json for local development
+// Strip "v." prefix from git tags (e.g., "v.1.32.0" -> "1.32.0")
+const rawVersion = process.env.NEXT_PUBLIC_APP_VERSION || version
+const appVersion = rawVersion.replace(/^v\./, "")
+
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
 
@@ -45,7 +50,7 @@ export const Footer: React.FC = () => {
             {t("2024 VeBetterDAO. All rights reserved.")}
           </Text>
           <Text fontSize="14px" color="#8c8c8c">
-            {t("Version")} {version}
+            {t("Version")} {appVersion}
           </Text>
         </VStack>
         <HStack spacing={4}>
@@ -103,7 +108,7 @@ export const Footer: React.FC = () => {
           {t("2024 VeBetterDAO. All rights reserved.")}
         </Text>
         <Text fontSize="14px" color="#8c8c8c">
-          {t("Version")} {version}
+          {t("Version")} {appVersion}
         </Text>
       </VStack>
     </VStack>

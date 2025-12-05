@@ -1,0 +1,197 @@
+name: Destroy Preview Environments
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - dev-testnet
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  AWS_REGION: eu-west-1
+  TERRAFORM_VERSION: 1.6.0
+  BASE_DOMAIN: governance.vebetterdao.org
+  
+  # All possible preview flavors
+  ALL_FLAVORS: "dev staging beta"
+  
+  # Terraform Paths
+  TERRAFORM_DIR: terraform/frontend/frontend-env-level
+  TERRAFORM_ENV_DIR: terraform/frontend/environments/env
+  TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
+
+jobs:
+  destroy:
+    name: Destroy Preview Environments
+    runs-on: ubuntu-latest
+    outputs:
+      destroyed_flavors: ${{ steps.destroy.outputs.destroyed_flavors }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Install yq
+        run: |
+          wget -q https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
+      - name: Destroy all preview environments
+        id: destroy
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          DESTROYED=""
+          
+          # Initialize Terraform once
+          cd ${{ env.TERRAFORM_DIR }}
+          terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
+          
+          for FLAVOR in ${{ env.ALL_FLAVORS }}; do
+            WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
+            
+            echo "=========================================="
+            echo "Checking for preview environment: ${WORKSPACE_NAME}"
+            echo "=========================================="
+            
+            # Check if workspace exists
+            if terraform workspace list | grep -q "${WORKSPACE_NAME}"; then
+              echo "Found workspace ${WORKSPACE_NAME}, destroying..."
+              
+              # Create config directory and file for this workspace
+              CONFIG_DIR="${{ github.workspace }}/${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+              CONFIG_FILE="${CONFIG_DIR}/${WORKSPACE_NAME}.yaml"
+              SOURCE_CONFIG="${{ github.workspace }}/${{ env.TERRAFORM_ENV_DIR }}/${FLAVOR}/${FLAVOR}.yaml"
+              
+              mkdir -p "${CONFIG_DIR}"
+              cp "${{ github.workspace }}/${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${CONFIG_FILE}"
+              
+              # Replace placeholders
+              sed -i "s/{PR_NUMBER}/${PR_NUMBER}-${FLAVOR}/g" "${CONFIG_FILE}"
+              sed -i "s/{COMMIT_SHA}/DESTROY/g" "${CONFIG_FILE}"
+              sed -i "s/{ENVIRONMENT}/${FLAVOR}/g" "${CONFIG_FILE}"
+              
+              # Append flavor-specific config
+              echo "" >> "${CONFIG_FILE}"
+              echo "image_tag: destroy" >> "${CONFIG_FILE}"
+              echo "runtime_env_var_names: []" >> "${CONFIG_FILE}"
+              echo "runtime_env_secret_names: []" >> "${CONFIG_FILE}"
+              
+              # If source config exists, extract SSM prefix
+              if [ -f "${SOURCE_CONFIG}" ]; then
+                yq eval '{"ssm_parameter_prefix": .ssm_parameter_prefix} | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${CONFIG_FILE}"
+              fi
+              
+              echo "Generated config for destroy:"
+              cat "${CONFIG_FILE}"
+              
+              # Select workspace and destroy
+              terraform workspace select "${WORKSPACE_NAME}"
+              
+              if terraform destroy -auto-approve; then
+                echo "Successfully destroyed ${WORKSPACE_NAME}"
+                
+                # Delete the workspace
+                terraform workspace select default
+                terraform workspace delete "${WORKSPACE_NAME}" || true
+                
+                DESTROYED="${DESTROYED}${FLAVOR},"
+              else
+                echo "::warning::Failed to destroy ${WORKSPACE_NAME}"
+              fi
+            else
+              echo "No workspace found for: ${FLAVOR}"
+            fi
+          done
+          
+          echo "destroyed_flavors=${DESTROYED%,}" >> $GITHUB_OUTPUT
+
+  # Update PR comment to show destroyed status
+  comment-destroyed:
+    name: Update PR Comment
+    needs: destroy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR comment - Destroyed
+        uses: actions/github-script@v7
+        env:
+          DESTROYED_FLAVORS: ${{ needs.destroy.outputs.destroyed_flavors }}
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const merged = context.payload.pull_request.merged;
+            const destroyedFlavors = (process.env.DESTROYED_FLAVORS || '').split(',').filter(f => f);
+            const baseDomain = process.env.BASE_DOMAIN;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            
+            let statusText;
+            if (merged) {
+              statusText = '🎉 **PR Merged** - Preview environments destroyed';
+            } else {
+              statusText = '🗑️ **PR Closed** - Preview environments destroyed';
+            }
+            
+            let flavorRows = '';
+            if (destroyedFlavors.length > 0) {
+              for (const flavor of destroyedFlavors) {
+                const domain = `pr-${prNumber}-${flavor}.preview.${baseDomain}`;
+                flavorRows += `| ${flavor} | 🗑️ **Destroyed** | ~~${domain}~~ | [View logs](${runUrl}) |\n`;
+              }
+            } else {
+              flavorRows = '| - | No previews found | - | - |\n';
+            }
+            
+            const commentBody = [
+              '## 🚀 Preview Environment Status',
+              '',
+              statusText,
+              '',
+              '| Flavor | Status | URL | Logs |',
+              '|--------|--------|-----|------|',
+              flavorRows.trim(),
+              '',
+              `_Last updated: ${new Date().toISOString()}_`
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const existingComment = comments.find(c => 
+              c.user.login === 'github-actions[bot]' && 
+              c.body.includes('Preview Environment Status')
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }

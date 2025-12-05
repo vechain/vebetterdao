@@ -1,0 +1,110 @@
+name: Build and Push to ECR
+
+on:
+    workflow_call:
+        inputs:
+            environment:
+                description: "GitHub Environment to load secrets from"
+                required: true
+                type: string
+            ecr_repository:
+                description: "Name of the ECR repository"
+                required: true
+                type: string
+            image_tag:
+                description: "Tag for the Docker image"
+                required: true
+                type: string
+            dockerfile_path:
+                description: "Path to Dockerfile"
+                required: false
+                type: string
+                default: "./Dockerfile"
+            context_path:
+                description: "Build context path"
+                required: false
+                type: string
+                default: "."
+            aws_region:
+                description: "AWS region"
+                required: false
+                type: string
+                default: "eu-west-1"
+        secrets:
+            aws_role_arn:
+                description: "AWS IAM role ARN for OIDC authentication"
+                required: true
+        outputs:
+            tag:
+                description: "The image tag that was pushed"
+                value: ${{ jobs.build-and-push.outputs.tag }}
+            uri:
+                description: "Full URI of the pushed image"
+                value: ${{ jobs.build-and-push.outputs.uri }}
+
+jobs:
+    build-and-push:
+        name: Build and Push Docker Image
+        runs-on: b3tr-e2e
+        environment: ${{ inputs.environment }}
+        permissions:
+            id-token: write
+            contents: read
+        outputs:
+            tag: ${{ steps.meta.outputs.tag }}
+            uri: ${{ steps.meta.outputs.uri }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-region: ${{ inputs.aws_region }}
+                  role-to-assume: ${{ secrets.aws_role_arn }}
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Generate image metadata
+              id: meta
+              run: |
+                  IMAGE_TAG="${{ inputs.image_tag }}"
+                  IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${IMAGE_TAG}"
+                  echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+                  echo "uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ${{ inputs.context_path }}
+                  file: ${{ inputs.dockerfile_path }}
+                  push: true
+                  tags: ${{ steps.meta.outputs.uri }}
+                  platforms: linux/amd64
+                  provenance: false
+                  sbom: false
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+                  build-args: |
+                      APP_BUILD_ENV=${{ vars.APP_BUILD_ENV || ''}}
+                      NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV || ''}}
+                      NEXT_PUBLIC_APP_VERSION=${{ inputs.image_tag }}
+                      NEXT_PUBLIC_DELEGATOR_URL=${{ vars.NEXT_PUBLIC_DELEGATOR_URL || ''}}
+                      NEXT_PUBLIC_IPFS_PINNING_SERVICE=${{ vars.NEXT_PUBLIC_IPFS_PINNING_SERVICE || ''}}
+                      NEXT_PUBLIC_NETWORK_TYPE=${{ vars.NEXT_PUBLIC_NETWORK_TYPE || ''}}
+                      NEXT_PUBLIC_NFT_STORAGE_KEY=${{ vars.NEXT_PUBLIC_NFT_STORAGE_KEY || ''}}
+                      NEXT_PUBLIC_PRIVY_APP_ID=${{ vars.NEXT_PUBLIC_PRIVY_APP_ID || ''}}
+                      NEXT_PUBLIC_PRIVY_CLIENT_ID=${{ vars.NEXT_PUBLIC_PRIVY_CLIENT_ID || ''}}
+                      NEXT_PUBLIC_TRANSAK_API_KEY=${{ vars.NEXT_PUBLIC_TRANSAK_API_KEY || ''}}
+                      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ vars.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || ''}}
+                      NEXT_PUBLIC_DATADOG_ENV=${{ vars.NEXT_PUBLIC_DATADOG_ENV || ''}}
+                      NEXT_PUBLIC_DATADOG_APP_TOKEN=${{ vars.NEXT_PUBLIC_DATADOG_APP_TOKEN || ''}}
+                      NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${{ vars.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''}}
+                      NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ vars.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN || ''}}
+                      NODE_OPTIONS=${{ vars.NODE_OPTIONS || ''}}

@@ -1,0 +1,18 @@
+project_name: b3tr-frontend
+project_slug: governance-frontend
+environment: dev
+region: eu-west-1
+account_id: "211125319139"
+
+min_size: 1
+max_size: 4
+
+hosted_zones_and_certificates:
+  testnet:
+    zone_name: testnet.governance.vebetterdao.org
+    certificate_names: [staging.testnet.governance.vebetterdao.org, dev.testnet.governance.vebetterdao.org]
+  beta:
+    zone_name: beta.governance.vebetterdao.org
+    certificate_names: [beta.governance.vebetterdao.org]
+
+ecr_repository_name: governance-frontend
