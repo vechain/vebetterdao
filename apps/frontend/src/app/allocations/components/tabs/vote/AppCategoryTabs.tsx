@@ -261,11 +261,16 @@ export function AppCategoryTabs({
           </Tabs.List>
 
           <Tabs.Content
+            key={selectedCategory}
             value={selectedCategory}
             display="flex"
             flexDirection="column"
             gap={tabsListProps?.mb ? "3" : "4"}
-            p={tabsListProps?.mb ? undefined : "4"}>
+            p={tabsListProps?.mb ? undefined : "4"}
+            _open={{
+              animationName: "fade-in",
+              animationDuration: "750ms",
+            }}>
             {isVoteDataLoading ? (
               // Show skeleton cards while vote data is loading (matches AppRadioCard styling)
               Array.from({ length: visibleApps.length || 5 }).map((_, index) => (
