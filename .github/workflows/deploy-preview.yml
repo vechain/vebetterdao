@@ -151,7 +151,7 @@ jobs:
 
   # Deploy preview environment for each flavor
   deploy:
-    name: Deploy (${{ matrix.flavor }})
+    name: Deploy Preview (${{ matrix.flavor }})
     needs: [setup, build-and-push]
     if: always() && needs.build-and-push.result == 'success'
     runs-on: ubuntu-latest
@@ -196,14 +196,6 @@ jobs:
           SHORT_SHA="${{ needs.setup.outputs.short_sha }}"
           FLAVOR="${{ matrix.flavor }}"
           
-          # Map flavor to domain pattern
-          case $FLAVOR in
-            "dev") DOMAIN_ENV="dev.testnet" ;;
-            "staging") DOMAIN_ENV="staging" ;;
-            "beta") DOMAIN_ENV="beta" ;;
-            *) DOMAIN_ENV="${FLAVOR}" ;;
-          esac
-          
           # Define paths
           WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
           IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}-${FLAVOR}"
@@ -211,11 +203,22 @@ jobs:
           TARGET_DIR="${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
           TARGET_FILE="${TARGET_DIR}/${WORKSPACE_NAME}.yaml"
           
+          # Extract route53_zone_name from source environment to construct correct domain
+          if [ -f "${SOURCE_CONFIG}" ]; then
+            ROUTE53_ZONE=$(yq eval '.route53_zone_name' "${SOURCE_CONFIG}")
+            # Construct preview domain: pr-{PR}-{FLAVOR}.{FLAVOR}.{ZONE}
+            PREVIEW_DOMAIN="pr-${PR_NUMBER}-${FLAVOR}.${FLAVOR}.${ROUTE53_ZONE}"
+          else
+            echo "::error::Source config ${SOURCE_CONFIG} not found."
+            exit 1
+          fi
+          
           echo "=== Preview Config Generation ==="
           echo "PR Number: ${PR_NUMBER}"
           echo "Short SHA: ${SHORT_SHA}"
           echo "Flavor: ${FLAVOR}"
-          echo "Domain Env: ${DOMAIN_ENV}"
+          echo "Route53 Zone: ${ROUTE53_ZONE}"
+          echo "Preview Domain: ${PREVIEW_DOMAIN}"
           echo "Image Tag: ${IMAGE_TAG}"
           echo "Source Config: ${SOURCE_CONFIG}"
           echo "Target File: ${TARGET_FILE}"
@@ -230,9 +233,11 @@ jobs:
           # Step 3: Replace placeholders in the template
           sed -i "s/{PR_NUMBER}/${PR_NUMBER}-${FLAVOR}/g" "${TARGET_FILE}"
           sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${TARGET_FILE}"
-          sed -i "s/{ENVIRONMENT}/${DOMAIN_ENV}/g" "${TARGET_FILE}"
           
-          # Step 4: Append flavor-specific config from source environment
+          # Step 4: Override the domain with the correctly constructed one
+          sed -i "s|^domain:.*|domain: ${PREVIEW_DOMAIN}|g" "${TARGET_FILE}"
+          
+          # Step 5: Append flavor-specific config from source environment
           echo "" >> "${TARGET_FILE}"
           echo "# ============================================" >> "${TARGET_FILE}"
           echo "# Dynamic Config from ${FLAVOR} flavor" >> "${TARGET_FILE}"
@@ -242,22 +247,17 @@ jobs:
           echo "image_tag: ${IMAGE_TAG}" >> "${TARGET_FILE}"
           
           # Extract and append SSM config from source environment
-          if [ -f "${SOURCE_CONFIG}" ]; then
-            echo "Extracting config from ${SOURCE_CONFIG}..."
-            
-            # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
-            yq eval '{
-              "ssm_parameter_prefix": .ssm_parameter_prefix,
-              "route53_zone_name": .route53_zone_name,
-              "runtime_env_var_names": (.runtime_env_var_names // []),
-              "runtime_env_secret_names": (.runtime_env_secret_names // [])
-            } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
-          else
-            echo "Warning: Source config ${SOURCE_CONFIG} not found."
-            exit 1
-          fi
+          echo "Extracting config from ${SOURCE_CONFIG}..."
           
-          # Step 5: Show the generated config for debugging
+          # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
+          yq eval '{
+            "ssm_parameter_prefix": .ssm_parameter_prefix,
+            "route53_zone_name": .route53_zone_name,
+            "runtime_env_var_names": (.runtime_env_var_names // []),
+            "runtime_env_secret_names": (.runtime_env_secret_names // [])
+          } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
+          
+          # Step 6: Show the generated config for debugging
           echo ""
           echo "=== Generated Preview Config ==="
           cat "${TARGET_FILE}"
