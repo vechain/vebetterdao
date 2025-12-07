@@ -25,14 +25,14 @@ COPY packages/typescript-config/package.json ./packages/typescript-config/
 COPY packages/utils/package.json ./packages/utils/
 COPY apps/frontend/package.json ./apps/frontend/
 
-# Install dependencies (this layer is cached unless package.json files change)
+# Install dependencies
 RUN yarn install --frozen-lockfile
 
 # ============================================================================
-# LAYER 2: Source code and build (rebuilt when source changes)
+# LAYER 2: Source code and build
 # ============================================================================
 
-# Build arguments (must be declared before use)
+# Build arguments
 ARG APP_BUILD_ENV
 ARG NEXT_PUBLIC_APP_ENV
 ARG NEXT_PUBLIC_DELEGATOR_URL
@@ -68,7 +68,7 @@ ENV NEXT_PUBLIC_DATADOG_APP_TOKEN=${NEXT_PUBLIC_DATADOG_APP_TOKEN}
 ENV NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${NEXT_PUBLIC_DATADOG_CLIENT_TOKEN}
 ENV NODE_OPTIONS=${NODE_OPTIONS}
 
-# Copy source code (respects .dockerignore)
+# Copy source code
 COPY packages ./packages
 COPY apps ./apps
 

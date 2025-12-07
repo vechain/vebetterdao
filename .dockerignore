@@ -20,17 +20,24 @@ packages/contracts/cache
 packages/contracts/coverage
 packages/contracts/typechain-types
 
-# Test files
+# Test files (but keep packages/contracts/test/helpers which is needed for build)
 **/*.test.ts
 **/*.test.tsx
 **/*.spec.ts
 **/*.spec.tsx
-**/test
 **/tests
 **/__tests__
 **/__mocks__
 **/coverage
 **/.nyc_output
+apps/**/test
+packages/config/**/test
+packages/constants/**/test
+packages/eslint-config/**/test
+packages/lambda/**/test
+packages/typescript-config/**/test
+packages/utils/**/test
+# Note: packages/contracts/test is NOT excluded - build scripts depend on test/helpers
 
 # Development files
 .env
