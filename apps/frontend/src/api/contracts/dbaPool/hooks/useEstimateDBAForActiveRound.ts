@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { ABIContract } from "@vechain/sdk-core"
+import { ABIContract, Revision } from "@vechain/sdk-core"
 import {
   X2EarnApps__factory,
   X2EarnRewardsPool__factory,
@@ -27,7 +27,7 @@ const x2EarnRewardsPoolAddress = getConfig().x2EarnRewardsPoolContractAddress as
  * 4. Count eligible apps based on ALL criteria:
  *    - App has < 7.5% votes (< 750 in scaled format)
  *    - App has rewarded at least 1 action in the round (RewardDistributed event)
- *    - App is currently endorsed (not in grace period)
+ *    - App should NOT get DBA only if it started the round unendorsed AND is currently still unendorsed
  * 5. DBA per eligible app = total DBA pool / eligible apps count
  *
  * @param roundId The round ID
@@ -76,6 +76,20 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
           }
         }
 
+        // Get round start block (snapshot) to check historical endorsement status
+        const roundSnapshotRes = await thor.contracts.executeCall(
+          xAllocationVotingAddress,
+          ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("roundSnapshot"),
+          [BigInt(roundId)],
+        )
+
+        if (!roundSnapshotRes.success) {
+          throw new Error("Failed to get round snapshot")
+        }
+
+        const roundStartBlock = Number(roundSnapshotRes.result?.array?.[0] ?? 0)
+        const roundStartBlockStr = String(roundStartBlock)
+
         // 2. For each app, check full eligibility criteria
         const appsData = await Promise.all(
           appsInRound.map(async appId => {
@@ -93,8 +107,16 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
               [BigInt(roundId), appId],
             )
 
-            // Check if app is currently endorsed
-            const endorsedRes = await thor.contracts.executeCall(
+            // Check if app was unendorsed at round start
+            const unendorsedAtStartRes = await thor.contracts.executeCall(
+              x2EarnAppsAddress,
+              ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("isAppUnendorsed"),
+              [appId],
+              { revision: Revision.of(roundStartBlockStr) as any },
+            )
+
+            // Check if app is currently unendorsed
+            const unendorsedCurrentlyRes = await thor.contracts.executeCall(
               x2EarnAppsAddress,
               ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("isAppUnendorsed"),
               [appId],
@@ -126,21 +148,26 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
 
             const unallocatedAmount = (earningsRes.result?.array?.[1] as bigint) ?? 0n
             const appShare = Number(sharesRes.result?.array?.[0] ?? 0)
-            const isUnendorsed = (endorsedRes.result?.array?.[0] as boolean) ?? false
+            const wasUnendorsedAtStart = (unendorsedAtStartRes.result?.array?.[0] as boolean) ?? false
+            const isCurrentlyUnendorsed = (unendorsedCurrentlyRes.result?.array?.[0] as boolean) ?? false
             const hasRewardedActions = rewardEvents.length > 0
+
+            // App should NOT get DBA only if it started the round unendorsed AND is currently still unendorsed
+            const shouldExcludeFromDBA = wasUnendorsedAtStart && isCurrentlyUnendorsed
 
             // Full eligibility check
             const isEligible =
               appShare < DBA_ELIGIBILITY_THRESHOLD_SCALED && // < 7.5% votes (750 in scaled format)
               appShare > 0 && // Participated in voting
-              !isUnendorsed && // Currently endorsed
+              !shouldExcludeFromDBA && // Not excluded due to endorsement status
               hasRewardedActions // Has rewarded at least 1 action
 
             return {
               appId,
               unallocatedAmount,
               appShare,
-              isUnendorsed,
+              wasUnendorsedAtStart,
+              isCurrentlyUnendorsed,
               hasRewardedActions,
               isEligible,
             }

@@ -1,21 +1,28 @@
-import { useQuery } from "@tanstack/react-query"
-import { useThor } from "@vechain/vechain-kit"
+import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
 
-import { getGracePeriodEvent } from "../getGracePeriodEvents"
+import { useEvents } from "@/hooks/useEvents"
 
-export const getGracePeriodQueryKey = (appId = "all") => ["AppUnendorsedGracePeriodStarted", appId]
-/**
- * Hook to get the endorsement grace period events from the X2Earn contract (i.e the Endorsement grace period end block for the appId)
- * @returns the grace period events
- */
-export const useGracePeriodEvent = (appId?: string) => {
-  const thor = useThor()
-  const result = useQuery({
-    queryKey: getGracePeriodQueryKey(appId),
-    queryFn: async () => await getGracePeriodEvent(thor, appId),
-    enabled: !!thor,
+const abi = X2EarnApps__factory.abi
+const contractAddress = getConfig().x2EarnAppsContractAddress
+
+export const useGracePeriodEvent = (appId?: string) =>
+  useEvents({
+    abi,
+    contractAddress,
+    eventName: "AppUnendorsedGracePeriodStarted",
+    filterParams: appId ? { appId: appId as `0x${string}` } : undefined,
+    select: events =>
+      events.map(({ meta, decodedData }) => {
+        const { blockNumber, txOrigin } = meta
+        const { appId: id, startBlock, endBlock } = decodedData.args
+        return {
+          appId: id.toString(),
+          startBlock: startBlock.toString(),
+          endBlock: endBlock.toString(),
+          blockNumber,
+          txOrigin,
+        }
+      }),
+    enabled: !!appId,
   })
-  // sort events by blockNumber in descending order
-  const sortedEvents = result.data?.sort((a, b) => b.blockNumber - a.blockNumber)
-  return { ...result, data: sortedEvents }
-}

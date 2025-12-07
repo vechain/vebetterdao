@@ -4,7 +4,7 @@ import { cloneElement } from "react"
 import { NodeUpgradeModal } from "./NodeUpgradeModal"
 
 const meta = {
-  title: "pages/components/NodeUpgradeModal",
+  title: "pages/home/NodeUpgradeModal",
   component: NodeUpgradeModal,
   parameters: { layout: "centered" },
 } satisfies Meta<typeof NodeUpgradeModal>

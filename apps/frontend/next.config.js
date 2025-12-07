@@ -49,7 +49,7 @@ const nextConfig = {
     })
     return config
   },
-  rewrites: () => [{ source: "/storybook", destination: "/storybook/index.html" }],
+  rewrites: () => [{ source: "/allocations", destination: "/allocations/vote" }],
 }
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({

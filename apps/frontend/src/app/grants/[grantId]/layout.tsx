@@ -3,7 +3,7 @@ import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/
 import { ResolvingMetadata, Metadata } from "next"
 
 import { decodeEventLog } from "@/api/contracts/governance/getEvents"
-import { ProposalMetadata } from "@/api/contracts/governance/getProposalsEvents"
+import { ProposalMetadata } from "@/api/contracts/governance/types"
 import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
 import { getDefaultMetadata } from "@/utils/metadata"
 

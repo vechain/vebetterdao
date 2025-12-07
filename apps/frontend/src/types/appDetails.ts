@@ -28,7 +28,11 @@ export const APP_CATEGORIES = [
   { id: "education-learning", name: "Learning", color: "#E5E9F0" },
   { id: "green-finance-defi", name: "Web3", color: "#ffe0cd" },
   { id: "others", name: "Others", color: "#feeab6" },
-]
+] as const
+
+export type AppCategory = (typeof APP_CATEGORIES)[number]["id"]
+export type AppCategoryItem = (typeof APP_CATEGORIES)[number]
+
 // Track deprecated categories that should not count towards the category limit if present in metadata
 export const DEPRECATED_IDS = ["social-community-activism", "carbon-footprint"]
 // SORTING

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
-import { ProposalMetadata } from "../../../../../api/contracts/governance/getProposalsEvents"
+import { ProposalMetadata } from "../../../../../api/contracts/governance/types"
 import { useIpfsMetadata } from "../../../../../api/ipfs/hooks/useIpfsMetadata"
 import { toIPFSURL } from "../../../../../utils/ipfs"
 

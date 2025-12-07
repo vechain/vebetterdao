@@ -17,32 +17,36 @@ export type SignalEvent = {
  * @param user The user address to get the signal events for
  */
 export const useUserSignalEvents = (user: string) => {
-  const filterParams = { user }
+  const filterParams = { user: user as `0x${string}` }
   const rawSignaledEvents = useEvents({
     contractAddress,
     abi,
     eventName: "UserSignaled",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      user: decodedData.args.user,
-      appId: decodedData.args.app,
-      reason: decodedData.args.reason,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        user: decodedData.args.user,
+        appId: decodedData.args.app,
+        reason: decodedData.args.reason,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
+    enabled: !!user,
   })
   const rawUnsignaledEvents = useEvents({
     contractAddress,
     abi,
     eventName: "UserSignalsResetForApp",
     filterParams,
-    mapResponse: ({ decodedData, meta }) => ({
-      user: decodedData.args.user,
-      appId: decodedData.args.app,
-      reason: decodedData.args.reason,
-      blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
-    }),
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        user: decodedData.args.user,
+        appId: decodedData.args.app,
+        reason: decodedData.args.reason,
+        blockNumber: meta.blockNumber,
+        txOrigin: meta.txOrigin,
+      })),
+    enabled: !!user,
   })
   const signaledEvents = rawSignaledEvents.data || []
   const unsignaledEvents = rawUnsignaledEvents.data || []
