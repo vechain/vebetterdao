@@ -12,6 +12,12 @@ import { FreshDeskButton } from "./components/FreshDeskButton"
 import { LanguageSelector } from "./components/LanguageSelector"
 import { Socials } from "./components/Socials"
 import { TelegramButton } from "./components/TelegramButton"
+
+// Use build-time injected version from CI/CD, fallback to package.json for local development
+// Strip "v." prefix from git tags (e.g., "v.1.32.0" -> "1.32.0")
+const rawVersion = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version
+const appVersion = rawVersion.replace(/^v\./, "")
+
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
   const currentYear = dayjs().format("YYYY")
@@ -40,7 +46,7 @@ export const Footer: React.FC = () => {
             {t("{{currentYear}} VeBetter. All rights reserved.", { currentYear })}
           </Text>
           <Text textStyle="sm" color="#8c8c8c">
-            {t("Version")} {packageJson.version}
+            {t("Version")} {appVersion}
           </Text>
         </VStack>
         <HStack gap={4}>
@@ -91,7 +97,7 @@ export const Footer: React.FC = () => {
           {t("{{currentYear}} VeBetter. All rights reserved.", { currentYear })}
         </Text>
         <Text textStyle="sm" color="#8c8c8c">
-          {t("Version")} {packageJson.version}
+          {t("Version")} {appVersion}
         </Text>
       </VStack>
     </VStack>

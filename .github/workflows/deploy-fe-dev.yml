@@ -1,0 +1,27 @@
+# Deploy to Dev when PR is merged to dev-testnet
+name: Deploy Frontend - Dev
+
+on:
+  push:
+    branches:
+      - dev-testnet
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.sha.outputs.short_sha }}
+    steps:
+      - name: Get short SHA
+        id: sha
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Deploy to Dev
+    needs: prepare
+    uses: ./.github/workflows/deploy-fe.yml
+    secrets: inherit
+    with:
+      environment: dev
+      image_tag: dev-${{ needs.prepare.outputs.short_sha }}

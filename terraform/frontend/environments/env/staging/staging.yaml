@@ -1,0 +1,42 @@
+project_name: b3tr-frontend
+project_slug: governance-frontend
+environment: staging
+region: eu-west-1
+account_id: "211125319139"
+
+account_level_state_region: eu-west-1
+
+domain: staging.testnet.governance.vebetterdao.org
+enable_custom_domain: true
+route53_zone_name: testnet.governance.vebetterdao.org
+
+ssm_parameter_prefix: /b3tr/frontend/
+runtime_env_var_names:
+  - FRESHDESK_DOMAIN
+  - FRESHDESK_GROUP_ID
+  - RESET_USER_SIGNAL_COUNT_DOMAIN
+runtime_env_secret_names:
+  - DISCORD_CLIENT_SECRET
+  - FRESHDESK_API_TOKEN
+  - GITHUB_CLIENT_SECRET
+  - NEXTAUTH_SECRET
+  - RESET_USER_SIGNAL_COUNT_API_KEY
+  - TESTNET_STAGING_MNEMONIC
+  - TWITTER_CLIENT_SECRET
+  - DISCORD_CLIENT_ID
+  - GITHUB_CLIENT_ID
+  - TWITTER_CLIENT_ID
+
+image_tag: staging-latest
+cpu: 1024
+memory: 2048
+port: 3000
+min_size: 1
+max_size: 2
+max_concurrency: 50
+health_check_path: /
+node_env: staging
+auto_deployments_enabled: false
+
+environment_variables:
+  NEXT_PUBLIC_RUNTIME_ENV: staging
