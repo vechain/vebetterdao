@@ -32,6 +32,27 @@ jobs:
             exit 1
           fi
 
+  check-existing-release:
+    name: Check Existing Releases
+    runs-on: ubuntu-latest
+    needs: validate-ref
+    outputs:
+      NEW_RELEASE: ${{ steps.check-release.outputs.NEW_RELEASE }}
+    steps:
+      - name: Check if deployment version already exists
+        id: check-release
+        env:
+          VERSION: ${{ needs.validate-ref.outputs.tag_name }}
+        run: |
+          VERSION=${{ env.VERSION }}
+          RELEASES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/releases)
+          if echo "$RELEASES" | jq -e ".[] | select(.tag_name==\"$VERSION\")"; then
+            echo "NEW_RELEASE=false" >> $GITHUB_OUTPUT
+          else
+            echo "NEW_RELEASE=true" >> $GITHUB_OUTPUT
+          fi
+
   deploy:
     name: Deploy to Production
     needs: validate-ref
@@ -41,3 +62,24 @@ jobs:
       environment: prod
       image_tag: ${{ needs.validate-ref.outputs.tag_name }}
       terraform_action: ${{ inputs.terraform_action }}
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [deploy, validate-ref, check-existing-release]
+    if: ${{ needs.check-existing-release.outputs.NEW_RELEASE == 'true' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          tag: ${{ needs.validate-ref.outputs.tag_name }}
+        run: |
+          latest_release=$(curl -s -H "Authorization: token ${{ github.token }}" \
+            https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.tag_name')
+          echo "Latest release: ${latest_release}"
+          gh release create "${tag}" \
+              --repo="${{ github.repository }}" \
+              --title="Release ${tag}" \
+              --generate-notes \
+              --notes-start-tag "${latest_release}"
