@@ -37,10 +37,12 @@ records:
     routing_policy: simple
 
   - name: "www.vebetterdao.org"
-    type: CNAME
-    ttl: 300
-    records:
-      - "sites.framer.app"
+    type: A
+    ttl: null
+    alias_target:
+      dns_name: "dualstack.fw-vebetterdao-org-870672320.eu-west-1.elb.amazonaws.com"
+      zone_id: "Z32O12XQLNTSW2"
+      evaluate_target_health: false
     routing_policy: simple
 
   - name: "docs.vebetterdao.org"
