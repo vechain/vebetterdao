@@ -168,3 +168,4 @@ coverage
 **/media/media.zip
 
 packages/contracts/temp-verify-*
+.env*.local

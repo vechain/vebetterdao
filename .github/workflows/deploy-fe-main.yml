@@ -1,0 +1,24 @@
+# Deploy to Staging and Beta when a version tag is pushed
+name: Deploy Frontend - Staging & Beta
+
+on:
+  push:
+    tags:
+      - 'v.*'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    uses: ./.github/workflows/deploy-fe.yml
+    secrets: inherit
+    with:
+      environment: staging
+      image_tag: staging-${{ github.ref_name }}
+
+  deploy-beta:
+    name: Deploy to Beta
+    uses: ./.github/workflows/deploy-fe.yml
+    secrets: inherit
+    with:
+      environment: beta
+      image_tag: beta-${{ github.ref_name }}

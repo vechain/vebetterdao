@@ -17,6 +17,16 @@ records:
       - "ns-913.awsdns-50.net."
     routing_policy: simple
 
+  - name: "governance.vebetterdao.org"
+    type: NS
+    ttl: 300
+    records:
+      - "ns-1215.awsdns-23.org."
+      - "ns-485.awsdns-60.com."
+      - "ns-1591.awsdns-06.co.uk."
+      - "ns-954.awsdns-55.net."
+    routing_policy: simple
+
   - name: "vebetterdao.org"
     type: TXT
     ttl: 60
@@ -36,20 +46,6 @@ records:
     ttl: 60
     records:
       - "143e8c3363-hosting.gitbook.io"
-    routing_policy: simple
-
-  - name: "governance.vebetterdao.org"
-    type: CNAME
-    ttl: 300
-    records:
-      - "cname.vercel-dns.com"
-    routing_policy: simple
-
-  - name: "dev.testnet.governance.vebetterdao.org"
-    type: CNAME
-    ttl: 300
-    records:
-      - "cname.vercel-dns.com."
     routing_policy: simple
 
   - name: "www.connect.vebetterdao.org"
@@ -131,11 +127,4 @@ records:
     ttl: 300
     records:
       - "spfmx1.domainkey.freshemail.io"
-    routing_policy: simple
-  
-  - name: "beta.governance.vebetterdao.org"
-    type: CNAME
-    ttl: 300
-    records:
-      - "a6d34427de1f1a70.vercel-dns-013.com"
     routing_policy: simple
