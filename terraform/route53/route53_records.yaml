@@ -32,6 +32,7 @@ records:
     type: TXT
     ttl: 60
     records:
+      - "v=spf1 include:spf.protection.outlook.com include:145812633.spf08.hubspotemail.net -all"
       - "google-site-verification=mpFDV_wgT2zoCcAP-Lhbw9VG87_1UfUPhvGYODacaqk"
     routing_policy: simple
 
