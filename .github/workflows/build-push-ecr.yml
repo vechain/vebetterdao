@@ -72,9 +72,13 @@ jobs:
               id: meta
               run: |
                   IMAGE_TAG="${{ inputs.image_tag }}"
-                  IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:${IMAGE_TAG}"
+                  REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+                  REPO="${{ inputs.ecr_repository }}"
+                  IMAGE_URI="${REGISTRY}/${REPO}:${IMAGE_TAG}"
+                  CACHE_URI="${REGISTRY}/${REPO}:cache"
                   echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
                   echo "uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
+                  echo "cache_uri=${CACHE_URI}" >> $GITHUB_OUTPUT
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
@@ -89,8 +93,13 @@ jobs:
                   platforms: linux/amd64
                   provenance: false
                   sbom: false
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+                  # Use ECR registry cache (shared across all branches) + GHA cache as fallback
+                  cache-from: |
+                      type=registry,ref=${{ steps.meta.outputs.cache_uri }}
+                      type=gha
+                  cache-to: |
+                      type=registry,ref=${{ steps.meta.outputs.cache_uri }},mode=max,image-manifest=true
+                      type=gha,mode=max
                   build-args: |
                       APP_BUILD_ENV=${{ vars.APP_BUILD_ENV || ''}}
                       NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV || ''}}
