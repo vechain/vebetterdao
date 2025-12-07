@@ -151,7 +151,7 @@ jobs:
 
   # Deploy preview environment for each flavor
   deploy:
-    name: Deploy (${{ matrix.flavor }})
+    name: Deploy Preview (${{ matrix.flavor }})
     needs: [setup, build-and-push]
     if: always() && needs.build-and-push.result == 'success'
     runs-on: ubuntu-latest
