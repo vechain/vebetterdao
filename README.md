@@ -185,6 +185,53 @@ Preview environments are automatically created for every PR and posted as a comm
 - **PRs to `main`** → staging + beta previews
 - **PRs to `dev-testnet`** → dev preview
 
+### Adding Environment Variables
+
+There are two types of environment variables:
+
+#### Build-time Variables (non-sensitive only)
+
+These are baked into the Docker image at build time. They must be non-sensitive as they're visible in the build logs.
+
+To add a new build-time variable:
+
+1. Add it to the GitHub Environment **`AWS <env> governance build-time`** for each environment (dev, staging, beta, prod)
+2. Add the `ARG` and `ENV` lines to `Dockerfile`
+3. Add it to the `build-args` section in `.github/workflows/build-push-ecr.yml`
+
+Example:
+
+```dockerfile
+# Dockerfile
+ARG NEXT_PUBLIC_MY_NEW_VAR
+ENV NEXT_PUBLIC_MY_NEW_VAR=${NEXT_PUBLIC_MY_NEW_VAR}
+```
+
+```yaml
+# build-push-ecr.yml (in build-args section)
+NEXT_PUBLIC_MY_NEW_VAR=${{ vars.NEXT_PUBLIC_MY_NEW_VAR || ''}}
+```
+
+#### Runtime Variables (sensitive or non-sensitive)
+
+These are injected at runtime from AWS SSM Parameter Store. Use these for secrets or values that differ per environment.
+
+To add a new runtime variable:
+
+1. Add the value to **AWS SSM Parameter Store** under the environment's prefix (e.g., `/governance/beta/MY_SECRET`)
+2. Add the variable name to the environment's Terraform config:
+   - Non-sensitive: add to `runtime_env_var_names` in `terraform/frontend/environments/env/<env>/<env>.yaml`
+   - Sensitive: add to `runtime_env_secret_names` in the same file
+
+Example in `beta.yaml`:
+```yaml
+runtime_env_var_names:
+  - MY_NEW_VAR
+
+runtime_env_secret_names:
+  - MY_NEW_SECRET
+```
+
 ## Smart contracts
 
 Contracts can be found inside `./packages/contracts` folder.
