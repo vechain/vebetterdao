@@ -80,8 +80,20 @@ jobs:
                   echo "uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
                   echo "cache_uri=${CACHE_URI}" >> $GITHUB_OUTPUT
 
+            # Create/reuse a persistent BuildKit builder
+            # Named builder persists cache mounts on self-hosted runners
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
+              with:
+                  driver: docker-container
+                  driver-opts: |
+                      image=moby/buildkit:latest
+                      network=host
+                  # Named builder ensures cache mounts persist across runs
+                  # on self-hosted runner
+                  name: b3tr-builder
+                  # Don't cleanup builder to preserve cache
+                  cleanup: false
 
             - name: Build and push Docker image
               uses: docker/build-push-action@v5
@@ -93,13 +105,13 @@ jobs:
                   platforms: linux/amd64
                   provenance: false
                   sbom: false
-                  # Use ECR registry cache (shared across all branches) + GHA cache as fallback
+                  # GHA cache first (faster), registry cache as fallback
                   cache-from: |
-                      type=registry,ref=${{ steps.meta.outputs.cache_uri }}
                       type=gha
+                      type=registry,ref=${{ steps.meta.outputs.cache_uri }}
                   cache-to: |
-                      type=registry,ref=${{ steps.meta.outputs.cache_uri }},mode=max,image-manifest=true
                       type=gha,mode=max
+                      type=registry,ref=${{ steps.meta.outputs.cache_uri }},mode=max,image-manifest=true
                   build-args: |
                       APP_BUILD_ENV=${{ vars.APP_BUILD_ENV || ''}}
                       NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV || ''}}
