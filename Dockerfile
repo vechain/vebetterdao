@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 # Build stage
 FROM node:20 AS builder
 
@@ -25,14 +26,20 @@ COPY packages/typescript-config/package.json ./packages/typescript-config/
 COPY packages/utils/package.json ./packages/utils/
 COPY apps/frontend/package.json ./apps/frontend/
 
-# Install dependencies
-RUN yarn install --frozen-lockfile
+# Install dependencies with yarn cache mount
+RUN --mount=type=cache,target=/root/.yarn/berry/cache \
+    yarn install --frozen-lockfile
 
 # ============================================================================
 # LAYER 2: Source code and build
 # ============================================================================
 
-# Build arguments
+# Copy source code BEFORE setting volatile ARGs to maximize cache hits
+COPY packages ./packages
+COPY apps ./apps
+
+# Build arguments - these change frequently so they come AFTER source copy
+# This way, source code layer is cached even when version changes
 ARG APP_BUILD_ENV
 ARG NEXT_PUBLIC_APP_ENV
 ARG NEXT_PUBLIC_DELEGATOR_URL
@@ -68,12 +75,14 @@ ENV NEXT_PUBLIC_DATADOG_APP_TOKEN=${NEXT_PUBLIC_DATADOG_APP_TOKEN}
 ENV NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${NEXT_PUBLIC_DATADOG_CLIENT_TOKEN}
 ENV NODE_OPTIONS=${NODE_OPTIONS}
 
-# Copy source code
-COPY packages ./packages
-COPY apps ./apps
-
-# Build the application
-RUN case "$APP_BUILD_ENV" in \
+# Build the application with persistent caches:
+# - Hardhat cache: Persists Solidity compiler downloads (no more "Downloading compiler 0.8.20")
+# - Turbo cache: Persists turbo build cache across builds
+# - Next.js cache: Persists Next.js build cache
+RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
+    --mount=type=cache,target=/app/node_modules/.cache/turbo,id=turbo-cache \
+    --mount=type=cache,target=/app/apps/frontend/.next/cache,id=nextjs-cache \
+    case "$APP_BUILD_ENV" in \
       "staging") yarn build:staging ;; \
       "dev") yarn build:testnet ;; \
       "beta") yarn build:mainnet ;; \
