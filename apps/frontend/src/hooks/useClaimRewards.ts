@@ -6,6 +6,7 @@ import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { getVotingRewardsQueryKey } from "../api/contracts/rewards/hooks/useVotingRewards"
 import { RoundReward, buildClaimRewardsTx } from "../api/contracts/rewards/utils/buildClaimRewardsTx"
 import { useCurrentAllocationsRoundId } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useIsAutoVotingEnabledForRounds } from "../api/contracts/xAllocations/hooks/useIsAutoVotingEnabledForRounds"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
@@ -36,11 +37,21 @@ export const useClaimRewards = ({
   const currentRoundId = parseInt(currentRound ?? "0")
   //Make sure we don't go below 0
   const lastRoundId = Math.max(0, currentRoundId - 1)
+
+  const roundIds = useMemo(() => roundRewards.map(round => round.roundId), [roundRewards])
+  const { data: autoVotingActiveMap } = useIsAutoVotingEnabledForRounds(roundIds)
+
   const buildClauses = useCallback(() => {
     if (!account?.address) throw new Error("address is required")
-    const clauses = buildClaimRewardsTx(roundRewards, account?.address ?? "")
+    const clauses = buildClaimRewardsTx(roundRewards, account?.address ?? "", autoVotingActiveMap)
+
+    // Prevent sending empty transactions
+    if (clauses.length === 0) {
+      throw new Error("No rewards available to claim")
+    }
+
     return clauses
-  }, [account?.address, roundRewards])
+  }, [account?.address, roundRewards, autoVotingActiveMap])
   const refetchQueryKeys = useMemo(() => {
     return [
       getVotingRewardsQueryKey(account?.address ?? "", lastRoundId),
