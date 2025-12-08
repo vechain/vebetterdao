@@ -23,6 +23,7 @@ export const buildClaimRewardsTx = (
   autoVotingActiveMap?: Map<string, boolean>,
 ) => {
   const clauses = []
+
   for (const round of roundRewards) {
     if (!round.rewards || Number(round.rewards) <= 0) continue
     if (autoVotingActiveMap?.get(round.roundId) === true) continue

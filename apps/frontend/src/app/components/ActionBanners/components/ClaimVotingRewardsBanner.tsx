@@ -6,22 +6,24 @@ import { useTranslation } from "react-i18next"
 
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 
-import { useVotingRewards } from "../../../../api/contracts/rewards/hooks/useVotingRewards"
+import { RoundReward } from "../../../../api/contracts/rewards/utils/buildClaimRewardsTx"
 import { useIsAutoVotingEnabled } from "../../../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { GenericBanner } from "../../Banners/GenericBanner"
 
 const compactFormatter = getCompactFormatter(4)
-const EMPTY_ROUND_REWARDS: never[] = []
+
 export type Props = {
-  roundsRewardsQuery: ReturnType<typeof useVotingRewards>
+  roundRewards: RoundReward[]
+  totalFormatted: number
   gmRewards: number
 }
-export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Props) => {
+
+export const ClaimVotingRewardsBanner = ({ roundRewards, totalFormatted, gmRewards }: Props) => {
   const { t } = useTranslation()
   const { data: isAutoVotingEnabled } = useIsAutoVotingEnabled()
 
   const claimRewardsMutation = useClaimRewards({
-    roundRewards: roundsRewardsQuery.data?.roundsRewards ?? EMPTY_ROUND_REWARDS,
+    roundRewards: roundRewards,
     transactionModalCustomUI: {
       waitingConfirmation: { title: t("Claiming rewards...") },
       success: { title: t("Rewards claimed!") },
@@ -53,7 +55,7 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Prop
         <Button size={{ base: "sm", md: "md" }} onClick={handleClaim} variant="primary">
           <Icon as={UilGift} color="white" />
           {t("Claim {{b3trToClaim}} B3TR", {
-            b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
+            b3trToClaim: compactFormatter.format(totalFormatted),
           })}
         </Button>
       }
