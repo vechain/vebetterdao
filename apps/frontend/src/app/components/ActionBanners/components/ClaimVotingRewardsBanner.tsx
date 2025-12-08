@@ -30,10 +30,13 @@ export const ClaimVotingRewardsBanner = ({ roundRewards, totalFormatted, gmRewar
       error: { title: t("Error claiming rewards!") },
     },
   })
+
   const handleClaim = useCallback(() => {
     claimRewardsMutation.sendTransaction()
   }, [claimRewardsMutation])
+
   const hasGMRewards = gmRewards > 0
+  const isDisabled = claimRewardsMutation.isLoadingAutoVoting
 
   const getDescription = () => {
     if (isAutoVotingEnabled) {
@@ -52,7 +55,7 @@ export const ClaimVotingRewardsBanner = ({ roundRewards, totalFormatted, gmRewar
       illustration="/assets/icons/claim-b3tr-icon.webp"
       description={getDescription()}
       cta={
-        <Button size={{ base: "sm", md: "md" }} onClick={handleClaim} variant="primary">
+        <Button size={{ base: "sm", md: "md" }} onClick={handleClaim} variant="primary" disabled={isDisabled}>
           <Icon as={UilGift} color="white" />
           {t("Claim {{b3trToClaim}} B3TR", {
             b3trToClaim: compactFormatter.format(totalFormatted),

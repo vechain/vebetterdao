@@ -39,7 +39,7 @@ export const useClaimRewards = ({
   const lastRoundId = Math.max(0, currentRoundId - 1)
 
   const roundIds = useMemo(() => roundRewards.map(round => round.roundId), [roundRewards])
-  const { data: autoVotingActiveMap } = useIsAutoVotingEnabledForRounds(roundIds)
+  const { data: autoVotingActiveMap, isLoading: isLoadingAutoVoting } = useIsAutoVotingEnabledForRounds(roundIds)
 
   const buildClauses = useCallback(() => {
     if (!account?.address) throw new Error("address is required")
@@ -59,11 +59,16 @@ export const useClaimRewards = ({
     ]
   }, [account?.address, lastRoundId])
 
-  return useBuildTransaction({
+  const transaction = useBuildTransaction({
     clauseBuilder: buildClauses,
     onSuccess,
     onFailure,
     refetchQueryKeys,
     transactionModalCustomUI,
   })
+
+  return {
+    ...transaction,
+    isLoadingAutoVoting,
+  }
 }
