@@ -96,9 +96,13 @@ export function AppCategoryTabs({
   )
 
   const filteredApps = useMemo(() => {
+    const trimmedSearchQuery = searchQuery.trim()
+    const trimmedSearchQueryDesktop = searchQueryDesktop.trim()
+
     return apps.filter(app => {
-      const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesSearchDesktop = app.name.toLowerCase().includes(searchQueryDesktop.toLowerCase())
+      const matchesSearch = !trimmedSearchQuery || app.name.toLowerCase().includes(trimmedSearchQuery.toLowerCase())
+      const matchesSearchDesktop =
+        !trimmedSearchQueryDesktop || app.name.toLowerCase().includes(trimmedSearchQueryDesktop.toLowerCase())
 
       const matchesCategory =
         selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
@@ -297,7 +301,7 @@ export function AppCategoryTabs({
                   disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
                 />
               ))
-            ) : searchQuery.length > 0 && showEmptyState ? (
+            ) : (isMobile ? searchQuery.trim().length > 0 : searchQueryDesktop.trim().length > 0) && showEmptyState ? (
               <EmptyState
                 bgColor="transparent"
                 icon={
