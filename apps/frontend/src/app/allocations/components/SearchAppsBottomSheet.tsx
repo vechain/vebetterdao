@@ -74,7 +74,7 @@ export function SearchAppsBottomSheet({
           flex={1}
           rounded="lg"
           borderColor="border.primary"
-          endElement={searchQuery.trim() ? <CloseButton size="xs" onClick={handleClear} me="-2" /> : undefined}>
+          endElement={searchQuery ? <CloseButton size="xs" onClick={handleClear} me="-2" /> : undefined}>
           <Input
             ref={inputRef}
             bg="bg.primary"
