@@ -37,22 +37,11 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            apps/*/node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
-
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
       - name: Build Storybook
-        run: yarn build-storybook
-        env:
-          NEXT_PUBLIC_APP_ENV: staging
+        run: yarn --cwd apps/frontend build-storybook
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
