@@ -87,17 +87,6 @@ contract X2EarnApps is
     _disableInitializers();
   }
 
-  /**
-   * @notice Initialize the version 7 contract
-   * @param _stargateNft the address of the Stargate NFT contract
-   *
-   * @dev This function is called only once during the contract deployment
-   */
-  function initializeV7(address _stargateNft) external onlyRole(UPGRADER_ROLE) reinitializer(7) {
-    require(_stargateNft != address(0), "X2EarnApps: Invalid Stargate NFT contract address");
-    __Endorsement_init_v7(_stargateNft);
-  }
-
   // ---------- Modifiers ------------ //
 
   /**
