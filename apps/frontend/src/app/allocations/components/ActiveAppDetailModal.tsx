@@ -176,11 +176,11 @@ export const ActiveAppDetailModal = ({
       rows: [
         {
           label: "Active users",
-          value: data?.totalUniqueUserInteractions || 0,
+          value: data?.totalUniqueUserInteractions ?? 0,
         },
         {
           label: "Amount of B3TR actions",
-          value: data?.actionsRewarded || 0,
+          value: data?.actionsRewarded ?? 0,
         },
       ],
     },

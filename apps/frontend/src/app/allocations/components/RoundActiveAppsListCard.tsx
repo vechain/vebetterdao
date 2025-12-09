@@ -41,7 +41,7 @@ const RoundActiveAppCard = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Button key={id} unstyled asChild onClick={() => onClick(id)}>
+    <Button unstyled asChild onClick={() => onClick(id)}>
       <Card.Root
         variant="action"
         border="none"
