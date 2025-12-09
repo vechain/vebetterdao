@@ -137,7 +137,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "7";
+    return "8";
   }
 
   // ---------- Overrides ------------ //
