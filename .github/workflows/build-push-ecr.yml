@@ -75,10 +75,8 @@ jobs:
                   REGISTRY="${{ steps.login-ecr.outputs.registry }}"
                   REPO="${{ inputs.ecr_repository }}"
                   IMAGE_URI="${REGISTRY}/${REPO}:${IMAGE_TAG}"
-                  CACHE_URI="${REGISTRY}/${REPO}:cache"
                   echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
                   echo "uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
-                  echo "cache_uri=${CACHE_URI}" >> $GITHUB_OUTPUT
 
             # Create/reuse a persistent BuildKit builder
             # Named builder persists cache mounts on self-hosted runners
@@ -105,13 +103,9 @@ jobs:
                   platforms: linux/amd64
                   provenance: false
                   sbom: false
-                  # GHA cache first (faster), registry cache as fallback
-                  cache-from: |
-                      type=gha
-                      type=registry,ref=${{ steps.meta.outputs.cache_uri }}
-                  cache-to: |
-                      type=gha,mode=max
-                      type=registry,ref=${{ steps.meta.outputs.cache_uri }},mode=max,image-manifest=true
+                  # Use GitHub Actions cache only (ECR registry cache was too slow)
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
                   build-args: |
                       APP_BUILD_ENV=${{ vars.APP_BUILD_ENV || ''}}
                       NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV || ''}}

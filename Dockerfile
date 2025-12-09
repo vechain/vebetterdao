@@ -27,7 +27,8 @@ COPY packages/utils/package.json ./packages/utils/
 COPY apps/frontend/package.json ./apps/frontend/
 
 # Install dependencies with yarn cache mount
-RUN --mount=type=cache,target=/root/.yarn/berry/cache \
+# Note: Project uses Yarn 1 (Classic) which caches at /usr/local/share/.cache/yarn
+RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
     yarn install --frozen-lockfile
 
 # ============================================================================
