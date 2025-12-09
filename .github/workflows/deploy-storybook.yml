@@ -12,7 +12,7 @@ on:
       - ".github/workflows/deploy-storybook.yml"
 
 concurrency:
-  group: deploy-storybook-${{ github.ref }}
+  group: deploy-storybook
   cancel-in-progress: true
 
 permissions:
