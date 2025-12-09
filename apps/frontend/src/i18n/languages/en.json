@@ -1672,5 +1672,8 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.",
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "Waiting for the relayer to cast your vote this round. You can disable after voting completes.",
   "Max allocation!": "Max allocation!",
-  "Allocation": "Allocation"
+  "Allocation": "Allocation",
+  "Available": "Available",
+  "Voting power = VOT3 at snapshot": "Voting power = VOT3 at snapshot",
+  "Meaning Voting power is how much influence you’ll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Meaning Voting power is how much influence you’ll have in the next round. It's based on how much VOT3 you hold before next round starts."
 }

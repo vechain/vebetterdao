@@ -18,6 +18,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
   interactiveWidget: "resizes-content",
+  maximumScale: 1,
 }
 // Export proper metadata for the platform with template support
 export const metadata: Metadata = {

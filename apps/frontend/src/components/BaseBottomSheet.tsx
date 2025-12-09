@@ -18,6 +18,8 @@ type Props = {
   illustration?: string
   showCloseButton?: boolean
   description?: string | React.ReactNode
+  full?: boolean
+  initialFocusEl?: () => HTMLElement | null
 }
 
 const DRAG_THRESHOLD = 150
@@ -36,6 +38,8 @@ export const BaseBottomSheet = ({
   illustration,
   showCloseButton,
   description,
+  full = false,
+  initialFocusEl,
 }: Props) => {
   const [dragY, setDragY] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -63,7 +67,9 @@ export const BaseBottomSheet = ({
 
   return (
     <Drawer.Root
+      initialFocusEl={initialFocusEl}
       placement="bottom"
+      size="full"
       closeOnInteractOutside={isDismissable}
       open={isOpen}
       onOpenChange={e => {
@@ -79,8 +85,8 @@ export const BaseBottomSheet = ({
             aria-description={ariaDescription}
             bg="bg.primary"
             borderTopRadius="10px"
-            h="auto"
-            maxH="90dvh"
+            h={full ? "100dvh" : "auto"}
+            maxH={full ? "unset" : "90dvh"}
             minHeight={minHeight}
             overflow="hidden"
             display="flex"

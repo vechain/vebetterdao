@@ -21,6 +21,7 @@ type Props = {
   description?: string | React.ReactNode
   showLogo?: boolean
   showHeader?: boolean
+  initialFocusEl?: () => HTMLElement | null
 }
 
 export const Modal = ({
@@ -39,11 +40,13 @@ export const Modal = ({
   description,
   showLogo = false,
   showHeader = true,
+  initialFocusEl,
 }: Props) => {
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
   if (isDesktop)
     return (
       <Dialog.Root
+        initialFocusEl={initialFocusEl}
         open={isOpen}
         onOpenChange={details => {
           if (!details.open) onClose()
@@ -108,6 +111,7 @@ export const Modal = ({
   return (
     <Dialog.Root>
       <BaseBottomSheet
+        full
         isOpen={isOpen}
         onClose={onClose}
         ariaTitle={ariaTitle ?? ""}
@@ -117,7 +121,8 @@ export const Modal = ({
         title={title}
         illustration={illustration}
         showCloseButton={showCloseButton}
-        description={description}>
+        description={description}
+        initialFocusEl={initialFocusEl}>
         {children}
       </BaseBottomSheet>
     </Dialog.Root>
