@@ -1,0 +1,24 @@
+project_name: b3tr-frontend
+project_slug: governance-frontend
+environment: preview-pr-{PR_NUMBER}
+region: eu-west-1
+account_id: "211125319139"
+
+account_level_state_region: eu-west-1
+
+domain: pr-{PR_NUMBER}.{ENVIRONMENT}.governance.vebetterdao.org
+enable_custom_domain: true
+
+image_tag: pr-{PR_NUMBER}-{COMMIT_SHA}
+cpu: 512
+memory: 1024
+port: 3000
+min_size: 1
+max_size: 1
+max_concurrency: 25
+health_check_path: /
+node_env: preview
+auto_deployments_enabled: false
+
+environment_variables:
+  NEXT_PUBLIC_RUNTIME_ENV: preview

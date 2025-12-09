@@ -1,0 +1,41 @@
+project_name: b3tr-frontend
+project_slug: governance-frontend
+environment: beta
+region: eu-west-1
+account_id: "851725442887"
+
+account_level_state_region: eu-west-1
+
+domain: beta.governance.vebetterdao.org
+enable_custom_domain: true
+route53_zone_name: beta.governance.vebetterdao.org
+
+ssm_parameter_prefix: /b3tr/frontend/beta/
+runtime_env_var_names:
+  - RESET_USER_SIGNAL_COUNT_DOMAIN
+  - GITHUB_CLIENT_ID
+  - FRESHDESK_GROUP_ID
+  - FRESHDESK_DOMAIN
+  - TWITTER_CLIENT_ID
+
+runtime_env_secret_names:
+  - TWITTER_CLIENT_SECRET
+  - RESET_USER_SIGNAL_COUNT_API_KEY
+  - NEXTAUTH_SECRET
+  - MNEMONIC
+  - GITHUB_CLIENT_SECRET
+  - FRESHDESK_API_TOKEN
+
+image_tag: beta-latest
+cpu: 1024
+memory: 2048
+port: 3000
+min_size: 1
+max_size: 3
+max_concurrency: 50
+health_check_path: /
+node_env: beta
+auto_deployments_enabled: false
+
+environment_variables:
+  NEXT_PUBLIC_RUNTIME_ENV: beta

@@ -1,0 +1,448 @@
+name: Deploy Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - dev-testnet
+
+# Only allow one preview deployment per PR at a time
+# New commits cancel any in-progress runs for the same PR
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  # AWS Configuration
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY: governance-frontend
+  TERRAFORM_VERSION: 1.6.0
+
+  # Project Configuration
+  PROJECT_NAME: Governance Frontend
+  BASE_DOMAIN: governance.vebetterdao.org
+
+  # Terraform Paths
+  TERRAFORM_DIR: terraform/frontend/frontend-env-level
+  TERRAFORM_ENV_DIR: terraform/frontend/environments/env
+  TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
+
+jobs:
+  # Determine which flavors to deploy based on target branch
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      flavors: ${{ steps.determine.outputs.flavors }}
+      pr_number: ${{ steps.determine.outputs.pr_number }}
+      short_sha: ${{ steps.determine.outputs.short_sha }}
+      run_url: ${{ steps.determine.outputs.run_url }}
+    steps:
+      - name: Determine flavors and metadata
+        id: determine
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
+          
+          if [ "${{ github.base_ref }}" == "dev-testnet" ]; then
+            echo 'flavors=["dev"]' >> $GITHUB_OUTPUT
+            echo "::notice::PR to dev-testnet - deploying dev preview"
+          elif [ "${{ github.base_ref }}" == "main" ]; then
+            echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
+            echo "::notice::PR to main - deploying staging + beta previews"
+          else
+            echo "::error::Unsupported base branch: ${{ github.base_ref }}"
+            exit 1
+          fi
+
+  # Post initial "deploying" comment
+  comment-deploying:
+    name: Post Deploying Comment
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR comment - Deploying
+        uses: actions/github-script@v7
+        env:
+          FLAVORS: ${{ needs.setup.outputs.flavors }}
+          PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
+          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
+          RUN_URL: ${{ needs.setup.outputs.run_url }}
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+        with:
+          script: |
+            const flavors = JSON.parse(process.env.FLAVORS);
+            const prNumber = process.env.PR_NUMBER;
+            const shortSha = process.env.SHORT_SHA;
+            const runUrl = process.env.RUN_URL;
+            const projectName = process.env.PROJECT_NAME;
+            const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            
+            let rows = '';
+            for (const flavor of flavors) {
+              rows += `| **${flavor}** | 🔨 Building ([${shortSha}](${commitUrl})) | Building image... | [View Logs →](${runUrl}) |\n`;
+            }
+            
+            const commentBody = [
+              `## ${projectName} – Preview`,
+              '',
+              '| Name | Status | Preview | Updated (UTC) |',
+              '|------|--------|---------|---------------|',
+              rows.trim(),
+              '',
+              '---',
+              `<sub>Building with commit ${shortSha} • Preview environments are automatically destroyed when PRs are closed</sub>`
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt(prNumber),
+            });
+            
+            const existingComment = comments.find(c => 
+              c.user.login === 'github-actions[bot]' && 
+              c.body.includes(`${projectName} – Preview`)
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(prNumber),
+                body: commentBody
+              });
+            }
+
+  # Build and push Docker image for each flavor
+  build-and-push:
+    name: Build (${{ matrix.flavor }})
+    needs: [setup, comment-deploying]
+    strategy:
+      matrix:
+        flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
+      fail-fast: false
+    uses: ./.github/workflows/build-push-ecr.yml
+    with:
+      ecr_repository: governance-frontend
+      image_tag: pr-${{ needs.setup.outputs.pr_number }}-${{ needs.setup.outputs.short_sha }}-${{ matrix.flavor }}
+      aws_region: eu-west-1
+      environment: "AWS ${{ matrix.flavor }} governance build-time"
+    secrets:
+      aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
+
+  # Deploy preview environment for each flavor
+  deploy:
+    name: Deploy Preview (${{ matrix.flavor }})
+    needs: [setup, build-and-push]
+    if: always() && needs.build-and-push.result == 'success'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
+      fail-fast: false
+    outputs:
+      # Store URLs for each flavor using dynamic keys
+      custom_url_dev: ${{ steps.save-urls.outputs.custom_url_dev }}
+      service_url_dev: ${{ steps.save-urls.outputs.service_url_dev }}
+      custom_url_staging: ${{ steps.save-urls.outputs.custom_url_staging }}
+      service_url_staging: ${{ steps.save-urls.outputs.service_url_staging }}
+      custom_url_beta: ${{ steps.save-urls.outputs.custom_url_beta }}
+      service_url_beta: ${{ steps.save-urls.outputs.service_url_beta }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Install yq
+        run: |
+          wget -q https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
+      - name: Create preview environment config
+        run: |
+          # Get values
+          PR_NUMBER="${{ needs.setup.outputs.pr_number }}"
+          SHORT_SHA="${{ needs.setup.outputs.short_sha }}"
+          FLAVOR="${{ matrix.flavor }}"
+          
+          # Define paths
+          WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
+          IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}-${FLAVOR}"
+          SOURCE_CONFIG="${{ env.TERRAFORM_ENV_DIR }}/${FLAVOR}/${FLAVOR}.yaml"
+          TARGET_DIR="${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
+          TARGET_FILE="${TARGET_DIR}/${WORKSPACE_NAME}.yaml"
+          
+          # Extract route53_zone_name from source environment to construct correct domain
+          if [ -f "${SOURCE_CONFIG}" ]; then
+            ROUTE53_ZONE=$(yq eval '.route53_zone_name' "${SOURCE_CONFIG}")
+            # Construct preview domain: pr-{PR}-{FLAVOR}.{FLAVOR}.{ZONE}
+            PREVIEW_DOMAIN="pr-${PR_NUMBER}-${FLAVOR}.${FLAVOR}.${ROUTE53_ZONE}"
+          else
+            echo "::error::Source config ${SOURCE_CONFIG} not found."
+            exit 1
+          fi
+          
+          echo "=== Preview Config Generation ==="
+          echo "PR Number: ${PR_NUMBER}"
+          echo "Short SHA: ${SHORT_SHA}"
+          echo "Flavor: ${FLAVOR}"
+          echo "Route53 Zone: ${ROUTE53_ZONE}"
+          echo "Preview Domain: ${PREVIEW_DOMAIN}"
+          echo "Image Tag: ${IMAGE_TAG}"
+          echo "Source Config: ${SOURCE_CONFIG}"
+          echo "Target File: ${TARGET_FILE}"
+          echo ""
+          
+          # Step 1: Create workspace directory
+          mkdir -p "${TARGET_DIR}"
+          
+          # Step 2: Copy the preview template
+          cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${TARGET_FILE}"
+          
+          # Step 3: Replace placeholders in the template
+          sed -i "s/{PR_NUMBER}/${PR_NUMBER}-${FLAVOR}/g" "${TARGET_FILE}"
+          sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${TARGET_FILE}"
+          
+          # Step 4: Override the domain with the correctly constructed one
+          sed -i "s|^domain:.*|domain: ${PREVIEW_DOMAIN}|g" "${TARGET_FILE}"
+          
+          # Step 5: Append flavor-specific config from source environment
+          echo "" >> "${TARGET_FILE}"
+          echo "# ============================================" >> "${TARGET_FILE}"
+          echo "# Dynamic Config from ${FLAVOR} flavor" >> "${TARGET_FILE}"
+          echo "# ============================================" >> "${TARGET_FILE}"
+          
+          # Override image tag
+          echo "image_tag: ${IMAGE_TAG}" >> "${TARGET_FILE}"
+          
+          # Extract and append SSM config from source environment
+          echo "Extracting config from ${SOURCE_CONFIG}..."
+          
+          # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
+          yq eval '{
+            "ssm_parameter_prefix": .ssm_parameter_prefix,
+            "route53_zone_name": .route53_zone_name,
+            "runtime_env_var_names": (.runtime_env_var_names // []),
+            "runtime_env_secret_names": (.runtime_env_secret_names // [])
+          } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
+          
+          # Step 6: Show the generated config for debugging
+          echo ""
+          echo "=== Generated Preview Config ==="
+          cat "${TARGET_FILE}"
+
+      - name: Terraform Init
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
+
+      - name: Terraform Workspace
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          WORKSPACE_NAME="preview-pr-${{ needs.setup.outputs.pr_number }}-${{ matrix.flavor }}"
+          terraform workspace select ${WORKSPACE_NAME} || terraform workspace new ${WORKSPACE_NAME}
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: terraform apply -auto-approve
+
+      - name: Get deployment URL
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        id: outputs
+        run: |
+          CUSTOM_URL=$(terraform output -raw custom_domain_url 2>/dev/null || echo "")
+          SERVICE_URL=$(terraform output -raw service_url 2>/dev/null || echo "")
+          echo "custom_url=${CUSTOM_URL}" >> $GITHUB_OUTPUT
+          echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+
+      - name: Save URLs for flavor
+        id: save-urls
+        run: |
+          FLAVOR="${{ matrix.flavor }}"
+          echo "custom_url_${FLAVOR}=${{ steps.outputs.outputs.custom_url }}" >> $GITHUB_OUTPUT
+          echo "service_url_${FLAVOR}=${{ steps.outputs.outputs.service_url }}" >> $GITHUB_OUTPUT
+
+  # Update comment with final results
+  comment-result:
+    name: Update PR Comment
+    needs: [setup, build-and-push, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Update PR comment - Results
+        uses: actions/github-script@v7
+        env:
+          FLAVORS: ${{ needs.setup.outputs.flavors }}
+          PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
+          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
+          RUN_URL: ${{ needs.setup.outputs.run_url }}
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+          # Pass all possible URL outputs
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          CUSTOM_URL_STAGING: ${{ needs.deploy.outputs.custom_url_staging }}
+          SERVICE_URL_STAGING: ${{ needs.deploy.outputs.service_url_staging }}
+          CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
+          SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
+        with:
+          script: |
+            const flavors = JSON.parse(process.env.FLAVORS);
+            const prNumber = process.env.PR_NUMBER;
+            const shortSha = process.env.SHORT_SHA;
+            const runUrl = process.env.RUN_URL;
+            const projectName = process.env.PROJECT_NAME;
+            const buildResult = '${{ needs.build-and-push.result }}';
+            const deployResult = '${{ needs.deploy.result }}';
+            const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            
+            // Get URLs for each flavor
+            const urls = {
+              dev: {
+                custom: process.env.CUSTOM_URL_DEV || '',
+                service: process.env.SERVICE_URL_DEV || ''
+              },
+              staging: {
+                custom: process.env.CUSTOM_URL_STAGING || '',
+                service: process.env.SERVICE_URL_STAGING || ''
+              },
+              beta: {
+                custom: process.env.CUSTOM_URL_BETA || '',
+                service: process.env.SERVICE_URL_BETA || ''
+              }
+            };
+            
+            let rows = '';
+            let hasFailure = false;
+            
+            for (const flavor of flavors) {
+              const flavorUrls = urls[flavor] || { custom: '', service: '' };
+              const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+              
+              if (buildResult === 'failure') {
+                hasFailure = true;
+                rows += `| **${flavor}** | ❌ Build Failed ([${shortSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${timestamp} |\n`;
+              } else if (deployResult === 'failure') {
+                hasFailure = true;
+                rows += `| **${flavor}** | ❌ Deploy Failed ([${shortSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${timestamp} |\n`;
+              } else if (deployResult === 'success') {
+                // Build preview links with both custom domain and default URL
+                let previewLinks = '';
+                if (flavorUrls.custom && flavorUrls.service) {
+                  previewLinks = `[Custom Domain →](${flavorUrls.custom}) • [Default URL →](${flavorUrls.service})`;
+                } else if (flavorUrls.custom) {
+                  previewLinks = `[Custom Domain →](${flavorUrls.custom})`;
+                } else if (flavorUrls.service) {
+                  previewLinks = `[Default URL →](${flavorUrls.service})`;
+                } else {
+                  previewLinks = `[View Logs →](${runUrl})`;
+                }
+                
+                rows += `| **${flavor}** | ✅ Ready ([${shortSha}](${commitUrl})) | ${previewLinks} | ${timestamp} |\n`;
+              } else {
+                rows += `| **${flavor}** | ⚠️ Unknown ([${shortSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${timestamp} |\n`;
+              }
+            }
+            
+            let statusNote = '';
+            if (deployResult === 'success') {
+              statusNote = '\n\n> ⏱️ **Note:** Custom domains may take 5-10 minutes to activate on first deployment. Use Default URL in the meantime.';
+            }
+            
+            let footerNote = hasFailure 
+              ? `<sub>Deployment failed for commit ${shortSha} • [Check logs](${runUrl}) for details</sub>`
+              : `<sub>Built with commit ${shortSha} • Preview environments are automatically destroyed when PRs are closed</sub>`;
+            
+            const commentBody = [
+              `## ${projectName} – Preview`,
+              '',
+              '| Name | Status | Preview | Updated (UTC) |',
+              '|------|--------|---------|---------------|',
+              rows.trim(),
+              statusNote,
+              '',
+              '---',
+              footerNote
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt(prNumber),
+            });
+            
+            const existingComment = comments.find(c => 
+              c.user.login === 'github-actions[bot]' && 
+              c.body.includes(`${projectName} – Preview`)
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(prNumber),
+                body: commentBody
+              });
+            }
+
+      - name: Deployment summary
+        if: needs.deploy.result == 'success'
+        env:
+          FLAVORS: ${{ needs.setup.outputs.flavors }}
+          PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          CUSTOM_URL_STAGING: ${{ needs.deploy.outputs.custom_url_staging }}
+          SERVICE_URL_STAGING: ${{ needs.deploy.outputs.service_url_staging }}
+          CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
+          SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
+        run: |
+          echo "### Preview Environments Deployed! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** #${{ needs.setup.outputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Flavor | Custom Domain | Default URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------------|-------------|" >> $GITHUB_STEP_SUMMARY
+          for flavor in $(echo '${{ needs.setup.outputs.flavors }}' | jq -r '.[]'); do
+            CUSTOM_VAR="CUSTOM_URL_$(echo $flavor | tr '[:lower:]' '[:upper:]')"
+            SERVICE_VAR="SERVICE_URL_$(echo $flavor | tr '[:lower:]' '[:upper:]')"
+            CUSTOM_URL="${!CUSTOM_VAR}"
+            SERVICE_URL="${!SERVICE_VAR}"
+            echo "| ${flavor} | ${CUSTOM_URL:-N/A} | ${SERVICE_URL:-N/A} |" >> $GITHUB_STEP_SUMMARY
+          done

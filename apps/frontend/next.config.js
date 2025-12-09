@@ -34,6 +34,14 @@ const nextConfig = {
   swcMinify: true,
   compress: true,
   transpilePackages: ["express", "ts-node", "@vechain/vebetterdao-contracts"],
+  // Disable type checking and linting during build to save memory
+  // These checks are run in separate CI jobs
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

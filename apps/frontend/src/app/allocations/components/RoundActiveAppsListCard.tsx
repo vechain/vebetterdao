@@ -81,9 +81,10 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
   const appsMap = new Map(apps.map(app => [app.id, app]))
 
   const filteredApps = useMemo(() => {
-    if (!searchQuery.trim()) return apps
+    const trimmedQuery = searchQuery.trim()
+    if (!trimmedQuery) return apps
 
-    return apps.filter(app => app.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+    return apps.filter(app => app.name?.toLowerCase().includes(trimmedQuery.toLowerCase()))
   }, [apps, searchQuery])
 
   return (
