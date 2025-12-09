@@ -28,6 +28,17 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { AdministrationUtils } from "../libraries/AdministrationUtils.sol";
 import { IX2EarnCreator } from "../../interfaces/IX2EarnCreator.sol";
 import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
+
+/**
+ * @dev Custom error for invalid X2EarnRewardsPool contract address.
+ */
+error InvalidRewardsPoolAddress();
+
+/**
+ * @dev Custom error for invalid X2EarnCreator contract address.
+ */
+error InvalidX2EarnCreatorAddress();
+
 /**
  * @title AdministrationUpgradeable
  * @dev Contract module that provides the administration functionalities of the x2earn apps.
@@ -65,7 +76,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
       $.slot := AdministrationStorageLocation
     }
   }
-  
+
   /**
    * @dev Initializes the contract for version 4
    * @notice This function adds initialization logic for the V4 upgrade of x2earn apps.
@@ -180,7 +191,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   }
 
   /**
-   * @dev Internal function to enable the rewards pool for a new app by default 
+   * @dev Internal function to enable the rewards pool for a new app by default
    *
    * @param appId the hashed name of the app
    */
@@ -197,7 +208,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   function _setX2EarnRewardsPoolContract(address x2EarnRewardsPoolContracAddress) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
-    require(x2EarnRewardsPoolContracAddress != address(0), "X2EarnApps: Invalid rewards pool address");
+    if (x2EarnRewardsPoolContracAddress == address(0)) revert InvalidRewardsPoolAddress();
 
     $._x2EarnRewardsPoolContract = IX2EarnRewardsPool(x2EarnRewardsPoolContracAddress);
   }
@@ -277,7 +288,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   function _setX2EarnCreatorContract(address x2EarnCreatorContractAddress) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
-    require(x2EarnCreatorContractAddress != address(0), "X2EarnApps: Invalid x2EarnCreatorContract address");
+    if (x2EarnCreatorContractAddress == address(0)) revert InvalidX2EarnCreatorAddress();
 
     $._x2EarnCreatorContract = IX2EarnCreator(x2EarnCreatorContractAddress);
   }
