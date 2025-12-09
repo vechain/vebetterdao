@@ -1,14 +1,15 @@
-name: Build & Deploy Storybook (CloudFront/S3)
+name: Deploy Storybook
 
 on:
   workflow_dispatch:
 
-  workflow_call:
-    inputs:
-      git_ref:
-        description: Git ref to checkout (tag, branch, or SHA)
-        required: false
-        type: string
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/frontend/**"
+      - "packages/**"
+      - ".github/workflows/deploy-storybook.yml"
 
 concurrency:
   group: deploy-storybook-${{ github.ref }}
@@ -21,15 +22,14 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: storybook
     env:
       NODE_OPTIONS: "--max-old-space-size=4096"
+      CLOUDFRONT_DISTRIBUTION_ID: E1PQQGLHX5GA37
+      S3_BUCKET_NAME: dev-b3tr-storybook-20251209120228832400000002
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.git_ref || github.ref }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -62,12 +62,12 @@ jobs:
 
       - name: Upload to S3
         run: |
-          aws s3 sync ./apps/frontend/storybook-static s3://${{ vars.S3_BUCKET_NAME }} --delete
+          aws s3 sync ./apps/frontend/storybook-static s3://${{ env.S3_BUCKET_NAME }} --delete
 
       - name: Invalidate CloudFront cache
         run: |
           AWS_MAX_ATTEMPTS=10 aws cloudfront create-invalidation \
-            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths '/' '/*'
 
       - name: Deployment summary
@@ -76,8 +76,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Git Ref | ${{ inputs.git_ref || github.ref }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| S3 Bucket | ${{ vars.S3_BUCKET_NAME }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| CloudFront ID | ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| URL | https://storybook.b3tr.vechain.org |" >> $GITHUB_STEP_SUMMARY
-
+          echo "| Git Ref | ${{ github.ref }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| S3 Bucket | ${{ env.S3_BUCKET_NAME }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| CloudFront ID | ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| URL | https://storybook.dev.b3tr.vechain.org |" >> $GITHUB_STEP_SUMMARY
