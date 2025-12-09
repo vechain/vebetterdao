@@ -80,32 +80,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
   }
 
-  /**
-   * @dev Sets the value for the cooldown period.
-   */
-  function __Endorsement_init_v3(uint48 _cooldownPeriod, address _xAllocationVotingGovernor) internal onlyInitializing {
-    __Endorsement_init_unchained_v3(_cooldownPeriod, _xAllocationVotingGovernor);
-  }
-
-  function __Endorsement_init_unchained_v3(
-    uint48 _cooldownPeriod,
-    address _xAllocationVotingGovernor
-  ) internal onlyInitializing {
-    _setCooldownPeriod(_cooldownPeriod);
-    _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
-  }
-
-  /**
-   * @dev Sets the value for the cooldown period.
-   */
-  function __Endorsement_init_v7(address _stargateNFT) internal onlyInitializing {
-    __Endorsement_init_unchained_v7(_stargateNFT);
-  }
-
-  function __Endorsement_init_unchained_v7(address _stargateNFT) internal onlyInitializing {
-    _setStargateNFT(_stargateNFT);
-  }
-
   // ---------- Public ---------- //
 
   /**
@@ -502,9 +476,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @return The current grace period duration in blocks.
    */
   function gracePeriod() external view returns (uint256) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    return $._gracePeriodDuration;
+    return _getEndorsementStorage()._gracePeriodDuration;
   }
 
   /**
@@ -512,9 +484,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @return The current cooldown period duration in rounds.
    */
   function cooldownPeriod() external view returns (uint256) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    return $._cooldownPeriod;
+    return _getEndorsementStorage()._cooldownPeriod;
   }
 
   /**
@@ -548,9 +518,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev See {IX2EarnApps-unendorsedAppIds}.
    */
   function unendorsedAppIds() public view returns (bytes32[] memory) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    return $._unendorsedApps;
+    return _getEndorsementStorage()._unendorsedApps;
   }
 
   /**
@@ -565,8 +533,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev See {IX2EarnApps-getScore}.
    */
   function getScore(bytes32 appId) external view returns (uint256) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-    return $._appScores[appId];
+    return _getEndorsementStorage()._appScores[appId];
   }
 
   /**
