@@ -9,10 +9,10 @@ terraform {
   }
 
   backend "s3" {
-    key                  = "b3tr/storybook.tfstate"
-    region               = "eu-west-1"
+    region  = "eu-west-1"
+    encrypt = true
+    key     = "b3tr-storybook.tfstate"
     workspace_key_prefix = "workspaces"
-    encrypt              = true
   }
 }
 
@@ -43,4 +43,3 @@ provider "aws" {
     }
   }
 }
-

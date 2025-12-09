@@ -18,77 +18,57 @@ This Terraform project manages the AWS infrastructure for hosting the B3TR Story
 
 ## Environment
 
-| Environment | Domain                        | AWS Account             | Workspace |
-| ----------- | ----------------------------- | ----------------------- | --------- |
-| prod        | storybook.b3tr.vechain.org    | b3tr-dev (211125319139) | `prod`    |
+| Environment | Domain                            | AWS Account             | Workspace |
+| ----------- | --------------------------------- | ----------------------- | --------- |
+| dev         | storybook.dev.b3tr.vechain.org    | b3tr-dev (211125319139) | `dev`     |
 
-## Prerequisites
+## Deployment
+
+This infrastructure is deployed manually and is intended to be a "set it and forget it" setup. If changes are needed, they can be applied manually using the steps below.
+
+### Prerequisites
 
 1. **AWS Account**: Ensure you have access to the b3tr-dev AWS account
-2. **S3 State Bucket**: The following S3 bucket must exist for terraform state:
-   - `b3tr-terraform-state-dev` (in b3tr-dev account)
-3. **Route53 Zone**: The `b3tr.vechain.org` zone must exist
+2. **S3 State Bucket**: The `b3tr-terraform-state-dev` bucket must exist in the b3tr-dev account
+3. **Route53 Zone**: The `dev.b3tr.vechain.org` zone must exist
 
-## Usage
-
-### Initialize Terraform
+### Manual Deployment
 
 ```bash
-terraform init -backend-config="environments/prod/backend.config"
-```
+# Initialize terraform with backend config
+terraform init -backend-config="environments/dev/backend.config"
 
-### Select Workspace
+# Select workspace (or create if first time)
+terraform workspace select dev || terraform workspace new dev
 
-```bash
-# Create and select workspace for first time
-terraform workspace new prod
-
-# Or select existing workspace
-terraform workspace select prod
-```
-
-### Plan and Apply
-
-```bash
-# Plan changes
+# Plan and review changes
 terraform plan
 
 # Apply changes
 terraform apply
 ```
 
-## Post-Deployment Setup
+## GitHub Environment Setup
 
-After initial terraform apply, you need to:
+After terraform has been applied, configure the `storybook` GitHub environment with:
 
-1. Get the S3 bucket name from AWS Console (it includes a random suffix)
-2. Get the CloudFront distribution ID from AWS Console
-3. Update the GitHub repository environment variables:
-
-| Environment | Variables to Set                            |
-| ----------- | ------------------------------------------- |
-| storybook   | `S3_BUCKET_NAME`, `CLOUDFRONT_DISTRIBUTION_ID` |
-
-## GitHub Environment Secrets
-
-The storybook environment needs the following secrets:
-
-| Secret            | Description                                 |
-| ----------------- | ------------------------------------------- |
-| `DEV_AWS_ACC_ROLE`| IAM role ARN for GitHub OIDC authentication |
+| Type     | Name                        | Description                                 |
+| -------- | --------------------------- | ------------------------------------------- |
+| Variable | `S3_BUCKET_NAME`            | The S3 bucket name (from AWS Console)       |
+| Variable | `CLOUDFRONT_DISTRIBUTION_ID`| The CloudFront distribution ID              |
+| Secret   | `DEV_AWS_ACC_ROLE`          | IAM role ARN for GitHub OIDC authentication |
 
 ## Files
 
-| File                      | Description                                   |
-| ------------------------- | --------------------------------------------- |
-| `provider.tf`             | AWS provider and backend configuration        |
-| `environments.tf`         | Loads environment-specific YAML configuration |
-| `storybook.tf`            | S3 and CloudFront hosting module              |
-| `outputs.tf`              | Terraform outputs for CI/CD                   |
-| `environments/prod/*.yaml`| Environment-specific configuration            |
-| `environments/prod/*.config` | Backend configuration                      |
+| File                         | Description                                   |
+| ---------------------------- | --------------------------------------------- |
+| `provider.tf`                | AWS provider and backend configuration        |
+| `environments.tf`            | Loads environment-specific YAML configuration |
+| `storybook.tf`               | S3 and CloudFront hosting module              |
+| `outputs.tf`                 | Terraform outputs                             |
+| `environments/dev/dev.yaml`  | Environment-specific configuration            |
+| `environments/dev/backend.config` | Backend configuration                    |
 
 ## Modules Used
 
 - [`s3-cloudfront-hosting`](https://github.com/vechain/terraform_infrastructure_modules/tree/main/s3-cloudfront-hosting) - Creates S3 bucket, CloudFront distribution, ACM certificate, and Route53 records
-
