@@ -279,14 +279,11 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
           _closed: "slide-to-bottom, fade-out",
         }}
         animationDuration="fast"
-        pos="fixed"
         bottom={0}
         left={0}
         right={0}
         zIndex={50}>
-        <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
-          <VoteButtons variant="mobile" />
-        </Box>
+        <VoteButtons variant="mobile" />
       </Presence>
 
       <ConfirmVoteModal
