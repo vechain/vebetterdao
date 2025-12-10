@@ -2191,5 +2191,7 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "इस राउंड में आपके वोट डालने के लिए रिलेयर का इंतजार कर रहे हैं। आप वोटिंग पूरी होने के बाद इसे अक्षम कर सकते हैं।",
   "Max allocation!": "अधिकतम आवंटन!",
   "Allocation": "आवंटन",
-  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "स्वचालित मतदान सक्षम है! अभी अपने पिछले पुरस्कार का दावा करें। भविष्य के मतदान स्वचालित होंगे।"
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "स्वचालित मतदान सक्षम है! अभी अपने पिछले पुरस्कार का दावा करें। भविष्य के मतदान स्वचालित होंगे।",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "आपके साप्ताहिक वोट और पुरस्कार दावों को स्वचालित करें। कोई प्रयास की आवश्यकता नहीं, बस DAO में सक्रिय रहें।",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "आपके साप्ताहिक पुरस्कारों पर 10% सेवा शुल्क लागू होता है, जो 100 B3TR तक सीमित है।"
 }

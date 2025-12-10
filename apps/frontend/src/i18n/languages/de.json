@@ -2191,5 +2191,7 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "Warte darauf, dass der Relayer deine Stimme in dieser Runde abgibt. Du kannst deaktivieren, nachdem die Abstimmung abgeschlossen ist.",
   "Max allocation!": "Maximale Zuteilung!",
   "Allocation": "Zuteilung",
-  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Automatische Abstimmung ist aktiviert! Fordern Sie jetzt Ihre bisherigen Belohnungen an. Zukünftige werden automatisch sein."
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Automatische Abstimmung ist aktiviert! Fordern Sie jetzt Ihre bisherigen Belohnungen an. Zukünftige werden automatisch sein.",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automatisieren Sie Ihre wöchentlichen Abstimmungen und Belohnungsanforderungen. Kein Aufwand nötig, bleiben Sie einfach im DAO aktiv.",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Eine Servicegebühr von 10 % gilt für Ihre wöchentlichen Belohnungen, begrenzt auf 100 B3TR."
 }

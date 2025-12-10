@@ -2192,5 +2192,7 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "Wachten op de relay om je stem uit te brengen deze ronde. Je kunt dit uitschakelen nadat het stemmen is voltooid.",
   "Max allocation!": "Maximale toewijzing!",
   "Allocation": "Toewijzing",
-  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Automatisch stemmen is ingeschakeld! Claim nu je eerdere beloningen. Toekomstige beloningen worden automatisch verwerkt."
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Automatisch stemmen is ingeschakeld! Claim nu je eerdere beloningen. Toekomstige beloningen worden automatisch verwerkt.",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automatiseer je wekelijkse stemmen en beloningsclaims. Geen moeite nodig, blijf gewoon actief in de DAO.",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Een servicetoeslag van 10% is van toepassing op je wekelijkse beloningen, met een maximum van 100 B3TR."
 }

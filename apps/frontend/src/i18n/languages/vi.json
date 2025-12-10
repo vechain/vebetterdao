@@ -2191,5 +2191,7 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "Đang chờ trình chuyển tiếp đánh giá phiếu của bạn trong vòng này. Bạn có thể tắt sau khi bỏ phiếu hoàn tất.",
   "Max allocation!": "Phân bổ tối đa!",
   "Allocation": "Phân bổ",
-  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Chế độ tự động bình chọn đã được bật! Hãy nhận phần thưởng trước đây của bạn ngay bây giờ. Các phần thưởng trong tương lai sẽ được thực hiện tự động."
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Chế độ tự động bình chọn đã được bật! Hãy nhận phần thưởng trước đây của bạn ngay bây giờ. Các phần thưởng trong tương lai sẽ được thực hiện tự động.",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Tự động hóa các lượt bầu chọn hàng tuần và nhận phần thưởng của bạn. Không cần nỗ lực, chỉ cần hoạt động tích cực trong DAO.",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Một khoản phí dịch vụ 10% được áp dụng cho phần thưởng hàng tuần của bạn, tối đa là 100 B3TR."
 }
