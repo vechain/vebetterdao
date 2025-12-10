@@ -110,6 +110,7 @@ async function verifyContractComponents(
   proxyAddress: string,
   implementationAddress: string | null,
   chainId: string,
+  config: any,
 ): Promise<void> {
   console.log(`\nVerifying ${contractName} components...`)
 
@@ -124,7 +125,7 @@ async function verifyContractComponents(
     await verifySingleContract(implementationAddress, fileName, contractName, chainId)
 
     // 3. Verify Libraries if any
-    const libraries = await getContractLibraries(contractName, implementationAddress)
+    const libraries = await getContractLibraries(contractName, implementationAddress, config)
     if (libraries.length > 0) {
       console.log(`\n3. Libraries (${libraries.length} found):`)
       for (const lib of libraries) {
@@ -160,7 +161,7 @@ async function main() {
 
   for (const contract of contracts) {
     const implementation = await getImplementationAddress(contract.proxy)
-    const libraryAddresses = await getLibraryAddresses(contract.name, implementation)
+    const libraryAddresses = await getLibraryAddresses(contract.name, implementation, config)
     const status = await getVerificationStatus(contract.proxy, implementation, libraryAddresses, network.chainId)
 
     contractsInfo.push({
@@ -206,6 +207,7 @@ async function main() {
           contractData.proxy,
           implData.implementation,
           network.chainId.toString(),
+          config,
         )
       }
     }
@@ -217,7 +219,7 @@ async function main() {
   const contractsAfterVerification: ContractInfo[] = []
   for (const contract of contracts) {
     const implementation = await getImplementationAddress(contract.proxy)
-    const libraryAddresses = await getLibraryAddresses(contract.name, implementation)
+    const libraryAddresses = await getLibraryAddresses(contract.name, implementation, config)
     const status = await getVerificationStatus(contract.proxy, implementation, libraryAddresses, network.chainId)
 
     contractsAfterVerification.push({
