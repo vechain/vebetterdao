@@ -4,6 +4,7 @@ import { Box, Text, VStack, Link } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import { Modal } from "@/components/Modal"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 interface AutoVoteModalProps {
   isOpen: boolean
@@ -14,6 +15,7 @@ const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation
 
 export const AutoVoteModal = ({ isOpen, onClose }: AutoVoteModalProps) => {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoints()
 
   return (
     <Modal
@@ -30,7 +32,7 @@ export const AutoVoteModal = ({ isOpen, onClose }: AutoVoteModalProps) => {
         </Box>
       }
       illustration="/assets/3d-illustrations/sparkles.webp"
-      showCloseButton>
+      showCloseButton={!isMobile}>
       <VStack gap={4} align="stretch" textAlign="left" p={{ base: "4", md: "6" }}>
         <Text textStyle={{ base: "sm", md: "md" }} color="text.default">
           {t("Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.")}
