@@ -61,7 +61,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
           <Heading size={["xl", "2xl"]}>{t("Allocations")}</Heading>
           {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
             <Button asChild variant="link" textStyle="sm">
-              <NextLink href="/rounds">
+              <NextLink href="/allocations/history">
                 {t("See all rounds")}
                 <FiArrowUpRight />
               </NextLink>

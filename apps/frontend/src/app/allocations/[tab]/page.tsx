@@ -5,7 +5,6 @@ import { Tabs } from "@chakra-ui/react"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
-import { FeatureFlag, featureFlags } from "@/constants/featureFlag"
 import { getPageMetadata } from "@/utils/metadata"
 
 import { AllocationTabsProvider } from "../components/tabs/AllocationTabsProvider"
@@ -50,8 +49,6 @@ async function AllocationContent({ roundIdParam }: { roundIdParam?: string }) {
 }
 
 export default async function TabsPage({ params, searchParams }: TabsPageProps) {
-  if (!featureFlags[FeatureFlag.ALLOCATION_REDESIGN].enabled) return redirect("/rounds")
-
   const { tab = "vote" } = await params
   const { roundId: roundIdParam } = await searchParams
 
