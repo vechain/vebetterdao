@@ -203,29 +203,114 @@ export function discoverLibrariesFromArtifact(contractName: ContractName): strin
 }
 
 /**
- * Extract library addresses from deployed bytecode using deployedLinkReferences
+ * Extract library addresses using artifact's deployedLinkReferences
+ * These contain the exact byte positions where library addresses are embedded
+ * @param contractName - The contract name
+ * @param deployedBytecode - The deployed bytecode from the blockchain
+ * @returns Map of library names to their addresses
+ */
+function extractLibrariesFromLinkReferences(contractName: ContractName, deployedBytecode: string): Map<string, string> {
+  const result = new Map<string, string>()
+
+  try {
+    const artifactPath = getArtifactPath(contractName)
+    if (!fs.existsSync(artifactPath)) {
+      return result
+    }
+
+    const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"))
+    const linkRefs = artifact.deployedLinkReferences
+
+    if (!linkRefs || Object.keys(linkRefs).length === 0) {
+      return result
+    }
+
+    const hex = deployedBytecode.startsWith("0x") ? deployedBytecode.slice(2) : deployedBytecode
+
+    // deployedLinkReferences structure: { "path/to/Library.sol": { "LibraryName": [{ start: X, length: 20 }] } }
+    for (const [, libraries] of Object.entries(linkRefs)) {
+      for (const [libraryName, positions] of Object.entries(
+        libraries as Record<string, Array<{ start: number; length: number }>>,
+      )) {
+        if (positions.length > 0) {
+          const position = positions[0]
+          // start is byte offset, each byte is 2 hex chars
+          const startPos = position.start * 2
+          const endPos = startPos + position.length * 2
+
+          if (endPos <= hex.length) {
+            const addressHex = hex.slice(startPos, endPos).toLowerCase()
+            result.set(libraryName, "0x" + addressHex)
+          }
+        }
+      }
+    }
+  } catch (error) {
+    // Fall through to return empty result
+  }
+
+  return result
+}
+
+/**
+ * Get library addresses from config for a specific contract
+ * @param contractName - The contract name
+ * @param config - The app config containing library addresses
+ * @returns Map of library names to their deployed addresses from config
+ */
+export function getLibraryAddressesFromConfig(contractName: ContractName, config: any): Map<string, string> {
+  const result = new Map<string, string>()
+
+  if (contractName === "B3TRGovernor" && config.b3trGovernorLibraries) {
+    const libs = config.b3trGovernorLibraries
+    result.set("GovernorClockLogic", libs.governorClockLogicAddress)
+    result.set("GovernorConfigurator", libs.governorConfiguratorAddress)
+    result.set("GovernorDepositLogic", libs.governorDepositLogicAddress)
+    result.set("GovernorFunctionRestrictionsLogic", libs.governorFunctionRestrictionsLogicAddress)
+    result.set("GovernorProposalLogic", libs.governorProposalLogicAddressAddress)
+    result.set("GovernorQuorumLogic", libs.governorQuorumLogicAddress)
+    result.set("GovernorStateLogic", libs.governorStateLogicAddress)
+    result.set("GovernorVotesLogic", libs.governorVotesLogicAddress)
+  } else if (contractName === "VeBetterPassport" && config.passportLibraries) {
+    const libs = config.passportLibraries
+    result.set("PassportChecksLogic", libs.passportChecksLogicAddress)
+    result.set("PassportConfigurator", libs.passportConfiguratorAddress)
+    result.set("PassportEntityLogic", libs.passportEntityLogicAddress)
+    result.set("PassportDelegationLogic", libs.passportDelegationLogicAddress)
+    result.set("PassportPersonhoodLogic", libs.passportPersonhoodLogicAddress)
+    result.set("PassportPoPScoreLogic", libs.passportPoPScoreLogicAddress)
+    result.set("PassportSignalingLogic", libs.passportSignalingLogicAddress)
+    result.set("PassportWhitelistAndBlacklistLogic", libs.passportWhitelistAndBlacklistLogicAddress)
+  } else if (contractName === "XAllocationVoting" && config.xAllocationVotingLibraries) {
+    const libs = config.xAllocationVotingLibraries
+    result.set("AutoVotingLogic", libs.autoVotingLogicAddress)
+  }
+
+  return result
+}
+
+/**
+ * Extract library addresses - first tries config, then uses artifact's linkReferences
  * @param implementationAddress - The deployed implementation contract address
  * @param contractName - The contract name
+ * @param config - Optional app config containing library addresses
  * @returns Map of library names to their deployed addresses
  */
 export async function extractLibraryAddresses(
   implementationAddress: string,
   contractName: ContractName,
+  config?: any,
 ): Promise<Map<string, string>> {
+  // First try to get from config (most reliable)
+  if (config) {
+    const configLibraries = getLibraryAddressesFromConfig(contractName, config)
+    if (configLibraries.size > 0) {
+      return configLibraries
+    }
+  }
+
+  // Use artifact's deployedLinkReferences for exact positions
   try {
-    const artifactPath = getArtifactPath(contractName)
-
-    if (!fs.existsSync(artifactPath)) {
-      return new Map()
-    }
-
-    const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"))
-
-    if (!artifact.deployedLinkReferences || Object.keys(artifact.deployedLinkReferences).length === 0) {
-      return new Map()
-    }
-
-    // Get the deployed bytecode from the blockchain
     const deployedBytecode = await ethers.provider.getCode(implementationAddress)
 
     if (deployedBytecode === "0x") {
@@ -233,32 +318,7 @@ export async function extractLibraryAddresses(
       return new Map()
     }
 
-    const libraryAddresses = new Map<string, string>()
-
-    // deployedLinkReferences structure: { "path/to/Library.sol": { "LibraryName": [{ start: X, length: 20 }] } }
-    for (const [filePath, libraries] of Object.entries(artifact.deployedLinkReferences)) {
-      for (const [libraryName, positions] of Object.entries(
-        libraries as Record<string, Array<{ start: number; length: number }>>,
-      )) {
-        // Get the first position where this library is linked
-        if (positions.length > 0) {
-          const position = positions[0]
-          // Bytecode is hex string: "0x" + bytes
-          // Each byte is 2 hex chars, so position in hex string is: 2 + (start * 2)
-          const startPos = 2 + position.start * 2
-          const endPos = startPos + position.length * 2
-
-          if (endPos <= deployedBytecode.length) {
-            // Extract the address (20 bytes = 40 hex chars)
-            const addressHex = deployedBytecode.slice(startPos, endPos)
-            const address = "0x" + addressHex
-            libraryAddresses.set(libraryName, address)
-          }
-        }
-      }
-    }
-
-    return libraryAddresses
+    return extractLibrariesFromLinkReferences(contractName, deployedBytecode)
   } catch (error) {
     console.warn(`Error extracting library addresses for ${contractName}:`, error)
     return new Map()
@@ -267,14 +327,16 @@ export async function extractLibraryAddresses(
 
 /**
  * Get detailed library information (name and address) for contracts that use libraries
- * Dynamically discovers libraries from compiled artifacts and extracts addresses from deployed bytecode
+ * Uses config-provided addresses when available, falls back to bytecode extraction
  * @param contractName - The name of the contract to check
  * @param implementationAddress - The deployed implementation contract address
+ * @param config - Optional app config containing library addresses
  * @returns Array of LibraryInfo objects containing library names and addresses
  */
 export async function getContractLibraries(
   contractName: ContractName,
   implementationAddress: string | null,
+  config?: any,
 ): Promise<LibraryInfo[]> {
   const libraryNames = discoverLibrariesFromArtifact(contractName)
 
@@ -282,18 +344,19 @@ export async function getContractLibraries(
     return []
   }
 
-  const libraryAddresses = await extractLibraryAddresses(implementationAddress, contractName)
+  const libraryAddresses = await extractLibraryAddresses(implementationAddress, contractName, config)
   return libraryNames.map(name => ({
     name,
-    address: libraryAddresses.get(name) || "Not found in bytecode",
+    address: libraryAddresses.get(name) || "Not found",
   }))
 }
 
 export async function getLibraryAddresses(
   contractName: ContractName,
   implementationAddress: string | null,
+  config?: any,
 ): Promise<string[]> {
-  const libraries = await getContractLibraries(contractName, implementationAddress)
+  const libraries = await getContractLibraries(contractName, implementationAddress, config)
   return libraries.map(lib => lib.address)
 }
 
