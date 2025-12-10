@@ -2191,5 +2191,7 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "このラウンドでリレーラーがあなたの投票を行うのを待っています。投票完了後に無効にすることができます。",
   "Max allocation!": "最大配分！",
   "Allocation": "配分",
-  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "自動投票が有効になりました！ 過去の報酬を今すぐ受け取ってください。将来のものは自動になります。"
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "自動投票が有効になりました！ 過去の報酬を今すぐ受け取ってください。将来のものは自動になります。",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "ウィークリーボートと報酬請求を自動化します。努力は不要で、DAOでアクティブであるだけです。",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "ウィークリーリワードには10％のサービス料が適用され、上限は100 B3TRです。"
 }

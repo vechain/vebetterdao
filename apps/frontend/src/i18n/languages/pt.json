@@ -2191,5 +2191,7 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "Aguardando o relayer lançar seu voto nesta rodada. Você pode desativar após a conclusão da votação.",
   "Max allocation!": "Alocação máxima!",
   "Allocation": "Alocação",
-  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Votação automática está ativada! Resgate suas recompensas passadas agora. As futuras serão automáticas."
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Votação automática está ativada! Resgate suas recompensas passadas agora. As futuras serão automáticas.",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automatize seus votos semanais e reivindicações de recompensas. Nenhum esforço necessário, apenas continue ativo no DAO.",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Uma taxa de serviço de 10% se aplica às suas recompensas semanais, limitada a 100 B3TR."
 }
