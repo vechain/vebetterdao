@@ -4,6 +4,9 @@ import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
+import { useMemo } from "react"
+
+import { useIsAutoVotingEnabledForRounds } from "../../xAllocations/hooks/useIsAutoVotingEnabledForRounds"
 
 import { getRoundRewardQueryKey } from "./useVotingRoundReward"
 
@@ -22,7 +25,8 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
   const queryClient = useQueryClient()
   //Make sure we don't go below 0
   const lastRoundId = Math.max(0, currentRoundId - 1)
-  return useQuery({
+
+  const rewardsQuery = useQuery({
     queryKey: getVotingRewardsQueryKey(voter || "", lastRoundId),
     enabled: !!thor && !!voter,
     queryFn: async () => {
@@ -93,4 +97,44 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
       }
     },
   })
+
+  // Get auto-voting status for all rounds to calculate claimable totals
+  const roundIds = useMemo(
+    () => rewardsQuery.data?.roundsRewards.map(r => r.roundId) ?? [],
+    [rewardsQuery.data?.roundsRewards],
+  )
+  const { data: autoVotingActiveMap } = useIsAutoVotingEnabledForRounds(roundIds)
+
+  // Calculate claimable totals (excluding auto-voting rounds)
+  // Only calculate when we have both rewards data and auto-voting status
+  const { claimableTotal, claimableTotalFormatted } = useMemo(() => {
+    if (!rewardsQuery.data?.roundsRewards || !autoVotingActiveMap) {
+      return { claimableTotal: "0", claimableTotalFormatted: "0" }
+    }
+
+    const total = rewardsQuery.data.roundsRewards.reduce((sum, round) => {
+      const hasRewards = round.rewards && Number(round.rewards) > 0
+      const isAutoVotingRound = autoVotingActiveMap.get(round.roundId) === true
+      if (hasRewards && !isAutoVotingRound) {
+        return sum.plus(round.rewards)
+      }
+      return sum
+    }, new BigNumber(0))
+
+    return {
+      claimableTotal: total.toFixed(),
+      claimableTotalFormatted: ethers.formatEther(total.toFixed()),
+    }
+  }, [rewardsQuery.data?.roundsRewards, autoVotingActiveMap])
+
+  return {
+    ...rewardsQuery,
+    data: rewardsQuery.data
+      ? {
+          ...rewardsQuery.data,
+          claimableTotal,
+          claimableTotalFormatted,
+        }
+      : undefined,
+  }
 }
