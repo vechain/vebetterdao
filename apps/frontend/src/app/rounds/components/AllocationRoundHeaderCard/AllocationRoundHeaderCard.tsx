@@ -66,8 +66,8 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
 
   const navigateToVote = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CASTING_VOTE))
-    router.push(`/rounds/${roundId}/vote`)
-  }, [router, roundId])
+    router.push("/allocations/vote")
+  }, [router])
 
   const { data: shouldSeeVoteButton, isLoading: shouldSeeVoteButtonLoading } = useCanUserVote()
 
