@@ -136,7 +136,7 @@ export const AllApps = ({
 
         {hasMore && (
           <Center w="full" py={4}>
-            <Button onClick={loadMore} variant="outline" size="md">
+            <Button onClick={loadMore} variant="secondary" size="md">
               {t("Load more")}
             </Button>
           </Center>
