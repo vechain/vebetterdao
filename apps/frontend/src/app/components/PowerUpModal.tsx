@@ -94,9 +94,9 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
     },
     onSuccess: handleClose,
   })
-  const { data: convertVot3GasEstimation } = useEstimateGasFee({
+  const { data: convertB3trGasEstimation } = useEstimateGasFee({
     clauses: convertB3trMutation.clauses,
-    enabled: step === PowerUpStep.REVIEW && convertTo === "b3tr" && !!amount && amount !== "0",
+    enabled: step === PowerUpStep.REVIEW && !!amount && amount !== "0",
   })
 
   const convertVot3Mutation = useConvertVot3({
@@ -108,10 +108,11 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
     },
     onSuccess: handleClose,
   })
-  const { data: convertB3trGasEstimation } = useEstimateGasFee({
+  const { data: convertVot3GasEstimation } = useEstimateGasFee({
     clauses: convertVot3Mutation.clauses,
-    enabled: step === PowerUpStep.REVIEW && !!amount && amount !== "0",
+    enabled: step === PowerUpStep.REVIEW && convertTo === "b3tr" && !!amount && amount !== "0",
   })
+
   const estimatedGasFee = formatUnits(
     BigInt(convertB3trGasEstimation?.totalGas ?? convertVot3GasEstimation?.totalGas ?? 0),
     5,
