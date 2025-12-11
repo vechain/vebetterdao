@@ -9,7 +9,6 @@ import { gmNfts } from "@/constants/gmNfts"
 
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGMRequiredByProposalType } from "../../../../api/contracts/governance/hooks/useGMRequiredByProposalType"
-import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 type Props = {
   isOpen: UseDisclosureProps["open"]
@@ -22,7 +21,6 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
   const { data: gmRequired } = useGMRequiredByProposalType()
   const { data: userGMs } = useGetUserGMs()
   const router = useRouter()
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const userHasAnyGm = useMemo(() => {
     return !!userGMs?.length
@@ -46,13 +44,13 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
 
   const handleGetNftOrApply = useCallback(() => {
     if (!userHasAnyGm) {
-      router.push(`/rounds/${currentRoundId}`)
+      router.push("/allocations/round")
     } else if (!hasNft) {
       router.push(`/galaxy-member/${userHighestGm?.tokenId}`)
     } else {
       router.push("/proposals/new")
     }
-  }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId, currentRoundId])
+  }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId])
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton={true} modalProps={{ size: "md" }}>

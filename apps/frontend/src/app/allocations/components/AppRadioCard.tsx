@@ -1,5 +1,18 @@
-import { Box, CheckboxCard, Circle, Float, Heading, Flex, Icon, Progress, Text, VStack, Badge } from "@chakra-ui/react"
-import { Check, Group } from "iconoir-react"
+import {
+  Box,
+  Float,
+  Circle,
+  CheckboxCard,
+  Heading,
+  Flex,
+  Icon,
+  Progress,
+  Text,
+  VStack,
+  Badge,
+  HStack,
+} from "@chakra-ui/react"
+import { Check, CheckCircle, Group } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 
 import { AppImage } from "@/components/AppImage/AppImage"
@@ -16,8 +29,8 @@ export interface AppRadioCardProps {
   allocationSharePercentage?: number
   checked?: boolean
   onCheckedChange?: VoidFunction
-  displayMode?: DisplayMode // Display mode: "checkbox" shows checkbox indicator, "voted" shows tick icon on app image
-  disabled?: boolean // Disable selection (e.g., when max apps reached)
+  displayMode?: DisplayMode
+  disabled?: boolean
 }
 
 export const AppRadioCard = ({
@@ -35,15 +48,13 @@ export const AppRadioCard = ({
   const { t } = useTranslation()
   const isVotedMode = displayMode === "voted"
   const isInteractive = !isVotedMode && !!onCheckedChange && !disabled
-  // In voted mode, don't pass checked to avoid blue border styling
-  const showCheckedState = !isVotedMode && checked
 
   return (
     <CheckboxCard.Root
       rounded="lg"
       p={{ base: "3", md: "5" }}
       colorPalette="blue"
-      checked={showCheckedState}
+      checked={checked}
       onCheckedChange={isInteractive ? onCheckedChange : undefined}
       cursor={isInteractive ? "pointer" : "default"}
       pointerEvents={isInteractive ? "auto" : "none"}
@@ -55,7 +66,7 @@ export const AppRadioCard = ({
           <AppImage appId={appId} appLogo={appLogo} boxSize={{ base: "44px", md: "60px" }} borderRadius="0.5rem" />
           {isVotedMode && checked && (
             <Float placement="top-end" offsetX="1" offsetY="1">
-              <Circle size="18px" bg="actions.primary.default" border="2px solid" borderColor="white">
+              <Circle size="18px" bg="actions.primary.default">
                 <Icon as={Check} boxSize="3" color="white" />
               </Circle>
             </Float>
@@ -72,16 +83,6 @@ export const AppRadioCard = ({
               <Heading size={{ base: "md", md: "lg" }} lineClamp={1}>
                 {appName}
               </Heading>
-              {isVotedMode && checked && (
-                <Badge variant="info" size="sm" flexShrink={0}>
-                  {t("Voted").toLowerCase()}
-                </Badge>
-              )}
-              {allocationSharePercentage !== undefined && allocationSharePercentage === 100 && (
-                <Badge variant="positive" size="sm" ml={{ base: "auto", md: "unset" }}>
-                  {t("Max allocation!")}
-                </Badge>
-              )}
             </Flex>
             {appCategory && (
               <Badge hideBelow="md" variant="neutral" size="sm" rounded="sm" width="max-content" height="max-content">
@@ -108,17 +109,21 @@ export const AppRadioCard = ({
                 </Text>
               </Text>
               {allocationSharePercentage !== undefined && allocationSharePercentage >= 0 && (
-                <Text textStyle={{ base: "xs", md: "sm" }} fontWeight="bold">
-                  {allocationSharePercentage.toFixed(2) + "% "}
-                  <Text
-                    as="span"
-                    hideBelow="md"
-                    textStyle={{ base: "xs", md: "sm" }}
-                    display="inline"
-                    fontWeight="bold">
-                    {t("supported")}
+                <HStack gap="2">
+                  {allocationSharePercentage === 100 && <Icon as={CheckCircle} boxSize="4" />}
+
+                  <Text textStyle={{ base: "xs", md: "sm" }} fontWeight="bold">
+                    {allocationSharePercentage.toFixed(2) + "% "}
+                    <Text
+                      as="span"
+                      hideBelow="md"
+                      textStyle={{ base: "xs", md: "sm" }}
+                      display="inline"
+                      fontWeight="bold">
+                      {t("supported")}
+                    </Text>
                   </Text>
-                </Text>
+                </HStack>
               )}
             </Flex>
             <Progress.Root w="full" size="xs" mt="1" value={allocationSharePercentage}>

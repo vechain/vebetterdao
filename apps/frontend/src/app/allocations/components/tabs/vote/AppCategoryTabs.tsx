@@ -96,9 +96,13 @@ export function AppCategoryTabs({
   )
 
   const filteredApps = useMemo(() => {
+    const trimmedSearchQuery = searchQuery.trim()
+    const trimmedSearchQueryDesktop = searchQueryDesktop.trim()
+
     return apps.filter(app => {
-      const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesSearchDesktop = app.name.toLowerCase().includes(searchQueryDesktop.toLowerCase())
+      const matchesSearch = !trimmedSearchQuery || app.name.toLowerCase().includes(trimmedSearchQuery.toLowerCase())
+      const matchesSearchDesktop =
+        !trimmedSearchQueryDesktop || app.name.toLowerCase().includes(trimmedSearchQueryDesktop.toLowerCase())
 
       const matchesCategory =
         selectedCategory === "all" || (app.metadata?.categories && app.metadata.categories.includes(selectedCategory))
@@ -261,11 +265,16 @@ export function AppCategoryTabs({
           </Tabs.List>
 
           <Tabs.Content
+            key={selectedCategory}
             value={selectedCategory}
             display="flex"
             flexDirection="column"
             gap={tabsListProps?.mb ? "3" : "4"}
-            p={tabsListProps?.mb ? undefined : "4"}>
+            p={tabsListProps?.mb ? undefined : "4"}
+            _open={{
+              animationName: "fade-in",
+              animationDuration: "750ms",
+            }}>
             {isVoteDataLoading ? (
               // Show skeleton cards while vote data is loading (matches AppRadioCard styling)
               Array.from({ length: visibleApps.length || 5 }).map((_, index) => (
@@ -292,7 +301,7 @@ export function AppCategoryTabs({
                   disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
                 />
               ))
-            ) : searchQuery.length > 0 && showEmptyState ? (
+            ) : (isMobile ? searchQuery.trim().length > 0 : searchQueryDesktop.trim().length > 0) && showEmptyState ? (
               <EmptyState
                 bgColor="transparent"
                 icon={
