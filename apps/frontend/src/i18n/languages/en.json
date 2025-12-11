@@ -184,7 +184,7 @@
   "Last actions": "Last actions",
   "Your better actions": "Your better actions",
   "Proposal canceled by creator or VeBetter": "Proposal canceled by creator or VeBetter",
-  "Claim your {{b3trToClaim}} B3TR": "Claim your {{b3trToClaim}} B3TR",
+  "Claim {{b3trToClaim}} B3TR": "Claim {{b3trToClaim}} B3TR",
   "Better Actions": "Better Actions",
   "You reached the end!": "You reached the end!",
   "Reset filters": "Reset filters",
@@ -1573,7 +1573,7 @@
   "Back to Allocation": "Back to Allocation",
   "New feature!": "New feature!",
   "Auto-vote & claim rewards": "Auto-vote & claim rewards",
-  "Automate your weekly votes and reward claims — no effort needed, just stay active in the DAO.": "Automate your weekly votes and reward claims — no effort needed, just stay active in the DAO.",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.",
   "A small": "A small",
   "fee": "fee",
   "will be taken from your weekly rewards to cover the service.": "will be taken from your weekly rewards to cover the service.",
@@ -1682,5 +1682,7 @@
   "Convert now": "Convert now",
   "Estimated gas fee": "Estimated gas fee",
   "Conversion rate": "Conversion rate",
-  "Wallet": "Wallet"
+  "Wallet": "Wallet",
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "A 10% service fee applies to your weekly rewards, capped at 100 B3TR."
 }

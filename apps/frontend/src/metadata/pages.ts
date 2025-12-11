@@ -21,7 +21,7 @@ export const pagesMetadata = {
     imageExtension: "image/webp",
   },
   allocations: {
-    path: "/rounds",
+    path: "/allocations",
     title: "VeBetter Allocations | B3TR Rewards for the Ecosystem",
     description:
       "Explore how B3TR tokens are distributed through grants, incentives, and governance. Discover how your vote helps shape VeBetter’s real-world impact.",
