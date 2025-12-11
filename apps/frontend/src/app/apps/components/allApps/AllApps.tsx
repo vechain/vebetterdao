@@ -13,13 +13,14 @@ import {
 } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AppStatusFilter, useAppsFilters } from "@/store/useAppsFilters"
 
 import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
 import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useDebounce } from "../../../../hooks/useDebounce"
 import { usePagination } from "../../../../hooks/usePagination"
 import { useFilteredApps } from "../../hooks/useFilteredApps"
 import { AppsEmptyState } from "../AppsEmptyState"
@@ -51,8 +52,18 @@ export const AllApps = ({
   const { t } = useTranslation()
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
 
-  // Search state (local)
-  const [searchQuery, setSearchQuery] = useState("")
+  // Search state with debounce
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+
+  // Search helpers
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+  }, [])
+
+  const clearSearch = useCallback(() => {
+    setSearchTerm("")
+  }, [])
 
   // Get filter state from store
   const { statusFilter, setStatusFilter, categoryFilters, toggleCategoryFilter, sortOption, setSortOption } =
@@ -71,14 +82,14 @@ export const AllApps = ({
     endorsementLostApps,
   })
 
-  // Apply search on top of filtered apps (or search across all apps)
+  // Apply debounced search on top of filtered apps (or search across all apps)
   const searchedApps = useMemo(() => {
-    if (!searchQuery.trim()) return filteredApps
+    if (!debouncedSearchTerm.trim()) return filteredApps
 
-    const query = searchQuery.toLowerCase()
+    const query = debouncedSearchTerm.toLowerCase()
     // Search across ALL apps when there's a query
     return allApps.filter(app => app.name.toLowerCase().includes(query))
-  }, [searchQuery, filteredApps, allApps])
+  }, [debouncedSearchTerm, filteredApps, allApps])
 
   const isUserEndorsingAnyApp = useMemo(() => {
     return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsedAppId !== ethers.ZeroHash)
@@ -89,8 +100,9 @@ export const AllApps = ({
 
   const layout: LayoutKey = isUserEndorsingAnyApp ? "endorser" : "default"
   const showCreatorBanner = useMemo(
-    () => (statusFilter === AppStatusFilter.All || statusFilter === AppStatusFilter.Active) && !searchQuery.trim(),
-    [statusFilter, searchQuery],
+    () =>
+      (statusFilter === AppStatusFilter.All || statusFilter === AppStatusFilter.Active) && !debouncedSearchTerm.trim(),
+    [statusFilter, debouncedSearchTerm],
   )
 
   const handleSortChange = (option: typeof sortOption) => {
@@ -162,7 +174,7 @@ export const AllApps = ({
             w={headingComponent ? "300px" : "full"}
             gap={2}
             startElement={<UilSearch pointerEvents="none" size="1rem" />}
-            endElement={searchQuery ? <CloseButton onClick={() => setSearchQuery("")} /> : undefined}
+            endElement={searchTerm ? <CloseButton onClick={clearSearch} /> : undefined}
             startElementProps={{ paddingInline: "3" }}
             inputMode="search">
             <Input
@@ -174,8 +186,8 @@ export const AllApps = ({
               borderRadius="xl"
               placeholder="Search apps..."
               _placeholder={{ color: "text.subtle" }}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              value={searchTerm}
+              onChange={handleSearchChange}
               style={{ paddingInlineStart: "2.25rem" }}
               type="search"
             />
