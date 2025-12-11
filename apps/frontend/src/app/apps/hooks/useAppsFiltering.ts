@@ -24,7 +24,30 @@ export function useAppsFiltering(sortedApp: SortedAppsWithStatus, sortOption: So
   const [statusFilter, setStatusFilter] = useState(FILTER_ACTIVE_APPS)
   const [categoryFilters, setCategoryFilters] = useState<string[]>([])
   const { data: appCategories } = useXAppsCategories()
+
+  // Search across ALL apps regardless of status filter
+  const searchedApps = useMemo(() => {
+    if (!searchQuery.trim()) return null
+
+    const query = searchQuery.toLowerCase()
+    const { currentActiveApps, newApps, gracePeriodApps, endorsementLostApps } = sortedApp[sortOption]
+
+    // Combine all apps and filter by search query
+    const allApps = [...currentActiveApps, ...newApps, ...gracePeriodApps, ...endorsementLostApps]
+
+    // Remove duplicates by id (some apps might appear in multiple categories)
+    const uniqueApps = allApps.filter((app, index, self) => self.findIndex(a => a.id === app.id) === index)
+
+    return uniqueApps.filter(app => app.name.toLowerCase().includes(query))
+  }, [sortedApp, sortOption, searchQuery])
+
   const filteredAppsByStatus = useMemo(() => {
+    // If there's a search query, return search results across all apps
+    if (searchedApps !== null) {
+      return searchedApps
+    }
+
+    // Otherwise, filter by status as before
     let apps: AllApps[] = []
     switch (statusFilter) {
       case FILTER_ACTIVE_APPS:
@@ -42,14 +65,9 @@ export function useAppsFiltering(sortedApp: SortedAppsWithStatus, sortOption: So
       default:
         apps = sortedApp[sortOption].currentActiveApps
     }
-    // In case of search query change, filter again
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      return apps.filter(app => app.name.toLowerCase().includes(query))
-    }
 
     return apps
-  }, [statusFilter, sortedApp, sortOption, searchQuery])
+  }, [statusFilter, sortedApp, sortOption, searchedApps])
 
   const filteredAppsByCategory = useMemo(() => {
     return filteredAppsByStatus.filter(app => {
