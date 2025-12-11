@@ -40,7 +40,7 @@ export const ProfileGMLevel = ({ address }: { address: string }) => {
                       ),
                       action: {
                         label: t("Go to Round Info"),
-                        onClick: () => router.push("/rounds"),
+                        onClick: () => router.push("/allocations/round"),
                       },
                     }
                   : {})}

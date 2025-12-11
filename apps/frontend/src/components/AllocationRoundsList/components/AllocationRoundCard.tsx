@@ -42,7 +42,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
         data-testid={`round-card-#${roundId}`}
         p="4">
         <LinkOverlay asChild w="full" flex={1}>
-          <NextLink href={`rounds/${roundId}`}>
+          <NextLink href="/allocations/round">
             <Card.Body p="0">
               <HStack justify={"space-between"} w="full">
                 <Stack w="full" gap={1} flex={2}>
