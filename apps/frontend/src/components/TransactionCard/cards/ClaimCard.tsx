@@ -2,8 +2,8 @@ import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/reac
 import { UilGift } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
-import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
+import { formatEther, getAddress } from "viem"
 
 import { Transaction } from "../../../api/indexer/transactions/useTransactions"
 import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
@@ -17,7 +17,10 @@ const compactFormatter = getCompactFormatter(2)
 export const ClaimCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
   const actionModal = useDisclosure()
-  const { isConnectedUser } = useRetrieveProfilIdentity()
+  const { profile, isConnectedUser } = useRetrieveProfilIdentity()
+  const isRelayerClaim =
+    profile && transaction?.gasPayer ? getAddress(profile) !== getAddress(transaction.gasPayer) : false
+
   return (
     <Card.Root size="sm" variant="subtle" px={3} py={2} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>
@@ -36,11 +39,17 @@ export const ClaimCard = ({ transaction }: Props) => {
             <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text textStyle={"sm"} mr="1">
-                  {isConnectedUser ? t("You claimed") : t("Claimed")}
+                  {isRelayerClaim
+                    ? t("Auto-claimed voting rewards")
+                    : isConnectedUser
+                      ? t("You claimed")
+                      : t("Claimed")}
                 </Text>
-                <Text textStyle={"sm"} fontWeight="semibold">
-                  {t("voting rewards")}
-                </Text>
+                {!isRelayerClaim && (
+                  <Text textStyle={"sm"} fontWeight="semibold">
+                    {t("voting rewards")}
+                  </Text>
+                )}
               </HStack>
               <Text textStyle={"xs"} color={"#6A6A6A"}>
                 {dayjs.unix(transaction?.blockTimestamp ?? 0).fromNow()}
@@ -51,7 +60,7 @@ export const ClaimCard = ({ transaction }: Props) => {
             <HStack gap={2}>
               <Text fontWeight="semibold">
                 {"+"}
-                {compactFormatter.format(Number(ethers.formatEther(transaction?.value ?? 0)))}
+                {transaction?.value ? compactFormatter.format(Number(formatEther(BigInt(transaction.value)))) : "0"}
               </Text>
               <Text textStyle="sm">{"B3TR"}</Text>
             </HStack>
