@@ -16,14 +16,12 @@ import { ethers } from "ethers"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { FILTER_ACTIVE_APPS } from "@/types/appDetails"
+import { AppStatusFilter, useAppsFilters } from "@/store/useAppsFilters"
 
 import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
 import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { usePagination } from "../../../../hooks/usePagination"
-import { useAppsFiltering } from "../../hooks/useAppsFiltering"
-import { useAppsSearch } from "../../hooks/useAppsSearch"
-import { useAppsSorting } from "../../hooks/useAppsSorting"
+import { useFilteredApps } from "../../hooks/useFilteredApps"
 import { AppsEmptyState } from "../AppsEmptyState"
 import { CreatorBanner } from "../CreatorBanner"
 import { UnendorsedAppCard } from "../UnendorsedAppCard"
@@ -53,47 +51,57 @@ export const AllApps = ({
   const { t } = useTranslation()
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
 
-  const isUserEndorsingAnyApp = useMemo(() => {
-    return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsedAppId !== ethers.ZeroHash)
-  }, [userNodesInfo])
+  // Search state (local)
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange } = useAppsSorting(
+  // Get filter state from store
+  const { statusFilter, setStatusFilter, categoryFilters, toggleCategoryFilter, sortOption, setSortOption } =
+    useAppsFilters()
+
+  // Get filtered apps
+  const {
+    filteredApps,
+    allApps,
+    statusCounts,
+    isLoading: isSortingLoading,
+  } = useFilteredApps({
     currentActiveApps,
     newApps,
     gracePeriodApps,
     endorsementLostApps,
-  )
-  const { searchQuery, handleSearchChange, clearSearch } = useAppsSearch()
-  const { setStatusFilter, toggleCategoryFilter, filteredApps, statusFilterOptions, statusFilter } = useAppsFiltering(
-    sortedApps,
-    sortOption,
-    searchQuery,
-  )
+  })
+
+  // Apply search on top of filtered apps (or search across all apps)
+  const searchedApps = useMemo(() => {
+    if (!searchQuery.trim()) return filteredApps
+
+    const query = searchQuery.toLowerCase()
+    // Search across ALL apps when there's a query
+    return allApps.filter(app => app.name.toLowerCase().includes(query))
+  }, [searchQuery, filteredApps, allApps])
+
+  const isUserEndorsingAnyApp = useMemo(() => {
+    return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsedAppId !== ethers.ZeroHash)
+  }, [userNodesInfo])
 
   const itemsPerPage = 25
-  const { currentItems: displayAppsRestricted, hasMore, loadMore } = usePagination(filteredApps, itemsPerPage)
+  const { currentItems: displayAppsRestricted, hasMore, loadMore } = usePagination(searchedApps, itemsPerPage)
 
   const layout: LayoutKey = isUserEndorsingAnyApp ? "endorser" : "default"
-  const showCreatorBanner = useMemo(() => statusFilter === FILTER_ACTIVE_APPS, [statusFilter])
+  const showCreatorBanner = useMemo(
+    () => (statusFilter === AppStatusFilter.All || statusFilter === AppStatusFilter.Active) && !searchQuery.trim(),
+    [statusFilter, searchQuery],
+  )
 
-  // State for selected categories
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-
-  // Handle category selection
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategories((prev: string[]) => {
-      if (prev.includes(categoryId)) {
-        return prev.filter((id: string) => id !== categoryId)
-      } else {
-        return [...prev, categoryId]
-      }
-    })
-    toggleCategoryFilter(categoryId)
+  const handleSortChange = (option: typeof sortOption) => {
+    setSortOption(option === sortOption ? "default" : option)
   }
 
   const appsSection = useMemo(() => {
-    const isEmpty = !displayAppsRestricted?.length // if no apps, show empty state
-    return isXAppsLoading || isSorting || isUserNodesLoading ? (
+    const isEmpty = !displayAppsRestricted?.length
+    const isLoading = isXAppsLoading || isSortingLoading || isUserNodesLoading
+
+    return isLoading ? (
       <VStack w="full" gap={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size="lg" />
       </VStack>
@@ -116,7 +124,7 @@ export const AllApps = ({
 
         {hasMore && (
           <Center w="full" py={4}>
-            <Button onClick={loadMore} variant="secondary" size="md">
+            <Button onClick={loadMore} variant="outline" size="md">
               {t("Load more")}
             </Button>
           </Center>
@@ -126,7 +134,7 @@ export const AllApps = ({
   }, [
     displayAppsRestricted,
     isXAppsLoading,
-    isSorting,
+    isSortingLoading,
     isUserNodesLoading,
     showCreatorBanner,
     hasMore,
@@ -141,13 +149,12 @@ export const AllApps = ({
         {headingComponent && <Box flexShrink={0}>{headingComponent}</Box>}
         <HStack w="full" flexDir="row-reverse" gap={4} ml={headingComponent ? "auto" : 0}>
           <HStack gap={2}>
-            <SortingMenu sortOption={sortOption} onSortChange={onSortChange} />
+            <SortingMenu sortOption={sortOption} onSortChange={handleSortChange} />
             <FilteringMenu
-              selectedCategories={selectedCategories}
+              selectedCategories={categoryFilters}
               statusFilter={statusFilter}
-              statusFilterOptions={statusFilterOptions}
-              appWithStatusCounts={appWithStatusCounts}
-              onCategoryChange={handleCategoryChange}
+              appWithStatusCounts={statusCounts}
+              onCategoryChange={toggleCategoryFilter}
               onStatusFilterChange={setStatusFilter}
             />
           </HStack>
@@ -155,7 +162,7 @@ export const AllApps = ({
             w={headingComponent ? "300px" : "full"}
             gap={2}
             startElement={<UilSearch pointerEvents="none" size="1rem" />}
-            endElement={searchQuery ? <CloseButton onClick={clearSearch} /> : undefined}
+            endElement={searchQuery ? <CloseButton onClick={() => setSearchQuery("")} /> : undefined}
             startElementProps={{ paddingInline: "3" }}
             inputMode="search">
             <Input
@@ -168,7 +175,7 @@ export const AllApps = ({
               placeholder="Search apps..."
               _placeholder={{ color: "text.subtle" }}
               value={searchQuery}
-              onChange={handleSearchChange}
+              onChange={e => setSearchQuery(e.target.value)}
               style={{ paddingInlineStart: "2.25rem" }}
               type="search"
             />
