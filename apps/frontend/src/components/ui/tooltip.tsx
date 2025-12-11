@@ -51,7 +51,7 @@ export const Tooltip = React.forwardRef<HTMLDivElement, TooltipProps>(function T
           <ChakraTooltip.Content
             color="text.default"
             ref={ref}
-            css={{ "--tooltip-bg": "var(--vbd-colors-bg-alt)" }}
+            css={{ "--tooltip-bg": "var(--vbd-colors-bg-inverted)" }}
             {...contentProps}>
             {showArrow && (
               <ChakraTooltip.Arrow>

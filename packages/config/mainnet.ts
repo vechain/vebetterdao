@@ -27,6 +27,7 @@ const config: AppConfig = {
   grantsManagerContractAddress: "0x055d20914657834c914d7c44bf65b566ab4b45a2",
   relayerRewardsPoolContractAddress: "0x34b56f892c9e977b9ba2e43ba64c27d368ab3c86",
   dbaPoolContractAddress: "0x98c1d097c39969bb5de754266f60d22bd105b368",
+  oracleContractAddress: "0x49eC7192BF804Abc289645ca86F1eD01a6C17713",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "0xaa5621bfa33b3166c7ffb0a846e4eeeb5289218e",
     governorConfiguratorAddress: "0xc9528bd01d22eb049086ac5b877b6a3748c33a1f",

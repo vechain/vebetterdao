@@ -74,10 +74,6 @@ const config = defineConfig({
     },
 
     keyframes: {
-      // pulse: {
-      //   "0%": { transform: "scale(1, 1)", opacity: 1 },
-      //   "100%": { transform: "scale(1.5, 1.5)", opacity: 0 },
-      // },
       rotateBgPosition: {
         "0%": { backgroundPosition: "0% 50%" },
         "100%": { backgroundPosition: "100% 50%" },
@@ -85,6 +81,24 @@ const config = defineConfig({
       backdropBlur: {
         "0%": { backdropFilter: "blur(0px)" },
         "100%": { backdropFilter: "blur(10px)" },
+      },
+      mergeDown: {
+        "0%": { transform: "translateY(0)", opacity: "1" },
+        "50%": { transform: "translateY(calc(50% + 12px))", opacity: "1" },
+        "100%": { transform: "translateY(calc(50% + 12px))", opacity: "0" },
+      },
+      mergeUp: {
+        "0%": { transform: "translateY(0)", opacity: "1" },
+        "50%": { transform: "translateY(calc(-50% - 12px))", opacity: "1" },
+        "100%": { transform: "translateY(calc(-50% - 12px))", opacity: "0" },
+      },
+      fadeOutSwap: {
+        "0%": { opacity: "1", transform: "translate(-50%, -50%) scale(1)" },
+        "100%": { opacity: "0", transform: "translate(-50%, -50%) scale(0.5)" },
+      },
+      fadeInMerged: {
+        "0%": { opacity: "0", transform: "scale(0.95)" },
+        "100%": { opacity: "1", transform: "scale(1)" },
       },
     },
 
@@ -354,6 +368,10 @@ const config = defineConfig({
         pulse: { value: "pulse 1.5s infinite" },
         rotateBgPosition: { value: "rotateBgPosition 1.5s infinite alternate" },
         backdropBlur: { value: "backdropBlur 1s ease-in-out" },
+        mergeDown: { value: "mergeDown 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards" },
+        mergeUp: { value: "mergeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards" },
+        fadeOutSwap: { value: "fadeOutSwap 0.15s ease-out forwards" },
+        fadeInMerged: { value: "fadeInMerged 0.15s ease-out forwards" },
       },
     },
   },

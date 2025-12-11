@@ -1,6 +1,8 @@
 import { useCallClause } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
+import { getConfig } from "../../../../packages/config"
+
 const abi = [
   {
     inputs: [
@@ -27,7 +29,7 @@ const abi = [
     type: "function",
   },
 ] as const
-const address = "0x49eC7192BF804Abc289645ca86F1eD01a6C17713"
+const address = getConfig().oracleContractAddress
 const feedId = "0x623374722d757364000000000000000000000000000000000000000000000000" as const // b3tr-usd
 const UPDATE_INTERVAL_MS = 5 * 60 * 1000 // 5 mins
 
@@ -39,8 +41,8 @@ export const useB3TRExchangeRate = () =>
     args: [feedId],
     queryOptions: {
       select(data) {
-        const [value, updatedAt] = data
-        return [formatEther(value * 1000000n), updatedAt]
+        const [value, _updatedAt] = data
+        return formatEther(value * 1000000n)
       },
       refetchInterval({ state }) {
         if (!state?.data) return 3_000

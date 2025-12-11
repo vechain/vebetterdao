@@ -807,6 +807,7 @@
   "Swapping...": "Swapping...",
   "You'll convert": "You'll convert",
   "You'll receive": "You'll receive",
+  "Transaction details": "Transaction details",
   "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.": "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.",
   "loading": "loading",
   "Error getting state": "Error getting state",
@@ -1675,5 +1676,11 @@
   "Allocation": "Allocation",
   "Available": "Available",
   "Voting power = VOT3 at snapshot": "Voting power = VOT3 at snapshot",
-  "Meaning Voting power is how much influence you’ll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Meaning Voting power is how much influence you’ll have in the next round. It's based on how much VOT3 you hold before next round starts."
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.",
+  "Not enough VOT3": "Not enough VOT3",
+  "Not enough B3TR": "Not enough B3TR",
+  "Convert now": "Convert now",
+  "Estimated gas fee": "Estimated gas fee",
+  "Conversion rate": "Conversion rate",
+  "Wallet": "Wallet"
 }

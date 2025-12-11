@@ -9,10 +9,10 @@ import { Trans, useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { PowerUpModal } from "@/app/components/PowerUpModal"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
-import { PowerUpModal } from "./PowerUpModal"
 import { StatCard } from "./StatCard"
 
 export const VotingPowerBox = () => {

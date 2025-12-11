@@ -101,16 +101,22 @@ export const BaseBottomSheet = ({
             </VisuallyHidden>
 
             <Drawer.Body flex={1} overflowY="auto" p={4} display="flex" flexDirection="column">
-              <Box
-                mx="auto"
-                w="34px"
-                h="5px"
-                bg="#D7D6D4"
-                mb={4}
-                rounded="full"
-                cursor={isDismissable ? "grab" : "default"}
-                _active={isDismissable ? { cursor: "grabbing" } : {}}
-              />
+              {showCloseButton ? (
+                <Drawer.CloseTrigger asChild>
+                  <CloseButton size="md" />
+                </Drawer.CloseTrigger>
+              ) : (
+                <Box
+                  mx="auto"
+                  w="34px"
+                  h="5px"
+                  bg="#D7D6D4"
+                  mb={4}
+                  rounded="full"
+                  cursor={isDismissable ? "grab" : "default"}
+                  _active={isDismissable ? { cursor: "grabbing" } : {}}
+                />
+              )}
               {(title || illustration || showCloseButton) && (
                 <Box mb={4}>
                   <Box position="relative">
@@ -119,16 +125,13 @@ export const BaseBottomSheet = ({
                         <Image alt="modal-illustration" src={illustration} fill />
                       </Box>
                     )}
-                    {showCloseButton && (
-                      <Box position="absolute" top={0} right={0}>
-                        <CloseButton size="md" onClick={onClose} />
-                      </Box>
-                    )}
                   </Box>
-                  {title && (
+                  {title && typeof title === "string" ? (
                     <Heading fontWeight="bold" textStyle="md" textAlign="center">
                       {title}
                     </Heading>
+                  ) : (
+                    title
                   )}
                   {description && (
                     <Text textAlign={illustration ? "center" : "left"} color="text.secondary">
