@@ -72,7 +72,7 @@ export const AllApps = ({
   // Get filtered apps
   const {
     filteredApps,
-    allApps,
+    searchApps,
     statusCounts,
     isLoading: isSortingLoading,
   } = useFilteredApps({
@@ -88,8 +88,8 @@ export const AllApps = ({
 
     const query = debouncedSearchTerm.toLowerCase()
     // Search across ALL apps when there's a query
-    return allApps.filter(app => app.name.toLowerCase().includes(query))
-  }, [debouncedSearchTerm, filteredApps, allApps])
+    return searchApps.filter(app => app.name.toLowerCase().includes(query))
+  }, [debouncedSearchTerm, filteredApps, searchApps])
 
   const isUserEndorsingAnyApp = useMemo(() => {
     return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsedAppId !== ethers.ZeroHash)

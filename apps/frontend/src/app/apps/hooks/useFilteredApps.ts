@@ -15,15 +15,27 @@ type AppsCollection = {
   endorsementLostApps: UnendorsedApp[]
 }
 
+const addUniqueApps = (target: AllApps[], appsToAdd: AllApps[], seenIds: Set<string>) => {
+  for (const app of appsToAdd) {
+    if (seenIds.has(app.id)) continue
+    seenIds.add(app.id)
+    target.push(app)
+  }
+}
+
 /**
  * Hook for filtering and sorting apps
  * Following the same pattern as useFilteredProposals
  */
-export const useFilteredApps = (apps: AppsCollection) => {
+export const useFilteredApps = ({
+  currentActiveApps,
+  newApps,
+  gracePeriodApps,
+  endorsementLostApps,
+}: AppsCollection) => {
   const { statusFilter, categoryFilters, sortOption } = useAppsFilters()
   const { data: appCategories } = useXAppsCategories()
 
-  // Fetch rewards data for sorting
   const { data: rewardsData, isLoading: isRewardsLoading } = useAppActionLeaderboard({
     direction: "DESC",
     sortBy: "totalRewardAmount",
@@ -35,30 +47,30 @@ export const useFilteredApps = (apps: AppsCollection) => {
     return new Map(appIds.map((item, index) => [item.appId, index]))
   }, [rewardsData])
 
-  // Combine all apps for global search
-  const allApps = useMemo(() => {
-    const combined = [...apps.currentActiveApps, ...apps.newApps, ...apps.gracePeriodApps, ...apps.endorsementLostApps]
-    // Remove duplicates by id
-    return combined.filter((app, index, self) => self.findIndex(a => a.id === app.id) === index)
-  }, [apps])
+  const { searchApps, allExceptEndorsementLost } = useMemo(() => {
+    const seenIds = new Set<string>()
 
-  // All apps except endorsement lost (for "All" filter)
-  const allExceptEndorsementLost = useMemo(() => {
-    const combined = [...apps.currentActiveApps, ...apps.newApps, ...apps.gracePeriodApps]
-    // Remove duplicates by id
-    return combined.filter((app, index, self) => self.findIndex(a => a.id === app.id) === index)
-  }, [apps])
+    const allExceptEndorsementLost: AllApps[] = []
+    addUniqueApps(allExceptEndorsementLost, currentActiveApps, seenIds)
+    addUniqueApps(allExceptEndorsementLost, newApps, seenIds)
+    addUniqueApps(allExceptEndorsementLost, gracePeriodApps, seenIds)
+
+    const searchApps = [...allExceptEndorsementLost]
+    addUniqueApps(searchApps, endorsementLostApps, seenIds)
+
+    return { searchApps, allExceptEndorsementLost }
+  }, [currentActiveApps, newApps, gracePeriodApps, endorsementLostApps])
 
   // Status counts for filter badges
   const statusCounts = useMemo(
     () => ({
       [AppStatusFilter.All]: allExceptEndorsementLost.length,
-      [AppStatusFilter.Active]: apps.currentActiveApps.length,
-      [AppStatusFilter.New]: apps.newApps.length,
-      [AppStatusFilter.GracePeriod]: apps.gracePeriodApps.length,
-      [AppStatusFilter.EndorsementLost]: apps.endorsementLostApps.length,
+      [AppStatusFilter.Active]: currentActiveApps.length,
+      [AppStatusFilter.New]: newApps.length,
+      [AppStatusFilter.GracePeriod]: gracePeriodApps.length,
+      [AppStatusFilter.EndorsementLost]: endorsementLostApps.length,
     }),
-    [apps, allExceptEndorsementLost],
+    [currentActiveApps, newApps, gracePeriodApps, endorsementLostApps, allExceptEndorsementLost],
   )
 
   // Sorting function
@@ -94,16 +106,16 @@ export const useFilteredApps = (apps: AppsCollection) => {
         baseApps = allExceptEndorsementLost
         break
       case AppStatusFilter.Active:
-        baseApps = apps.currentActiveApps
+        baseApps = currentActiveApps
         break
       case AppStatusFilter.New:
-        baseApps = apps.newApps
+        baseApps = newApps
         break
       case AppStatusFilter.GracePeriod:
-        baseApps = apps.gracePeriodApps
+        baseApps = gracePeriodApps
         break
       case AppStatusFilter.EndorsementLost:
-        baseApps = apps.endorsementLostApps
+        baseApps = endorsementLostApps
         break
       default:
         baseApps = allExceptEndorsementLost
@@ -120,11 +132,22 @@ export const useFilteredApps = (apps: AppsCollection) => {
 
     // Step 3: Apply sorting
     return sortApps(result, sortOption)
-  }, [statusFilter, categoryFilters, sortOption, apps, appCategories, sortApps, allExceptEndorsementLost])
+  }, [
+    statusFilter,
+    categoryFilters,
+    sortOption,
+    currentActiveApps,
+    newApps,
+    gracePeriodApps,
+    endorsementLostApps,
+    appCategories,
+    sortApps,
+    allExceptEndorsementLost,
+  ])
 
   return {
     filteredApps,
-    allApps,
+    searchApps,
     statusCounts,
     isLoading: isRewardsLoading && sortOption === "rewards",
   }
