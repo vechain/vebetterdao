@@ -101,7 +101,7 @@ export const GmActionButton = ({
     if (!hasUserVoted && !isGMOwned) {
       return (
         <Button {...buttonProps} asChild>
-          <NextLink href={`/rounds/${currentRoundId}/vote`}>{t("Vote now")}</NextLink>
+          <NextLink href="/allocations/vote">{t("Vote now")}</NextLink>
         </Button>
       )
     }
