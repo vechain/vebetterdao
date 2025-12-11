@@ -3,18 +3,20 @@
 import {
   Box,
   Button,
+  ButtonGroup,
   Circle,
+  CloseButton,
+  Collapsible,
+  DataList,
+  Dialog,
+  Field,
   Flex,
-  Heading,
   HStack,
+  Heading,
   Icon,
   NumberInput,
   Text,
   VStack,
-  Field,
-  ButtonGroup,
-  Collapsible,
-  DataList,
 } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
 import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
@@ -147,8 +149,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
     const amountFormatted = getCompactFormatter(10).format(Number(amount)) || "0"
 
     const data = [
-      { label: t("Estimated gas fee"), value: `${estimatedGasFee} VTHO` },
-      { label: t("Conversion rate"), value: `1 B3TR = ${b3trToUsd} USD` },
+      { label: t("Estimated gas fee"), value: `${(estimatedGasFee || "").slice(0, 4)} VTHO` },
+      { label: t("Conversion rate"), value: `1 B3TR = ${(b3trToUsd || "").slice(0, 6)} USD` },
       { label: t("Wallet"), value: account?.address ? humanAddress(account.address) : "-" },
     ] as const
 
@@ -221,11 +223,15 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
             </Collapsible.Indicator>
           </Collapsible.Trigger>
           <Collapsible.Content>
-            <DataList.Root p="0" pt="4" gap="4">
+            <DataList.Root p="0" pt="4" gap="4" flexDirection={{ base: "column", md: "row" }}>
               {data.map(item => (
                 <DataList.Item key={item.label}>
-                  <DataList.ItemLabel>{item.label}</DataList.ItemLabel>
-                  <DataList.ItemValue>{item.value}</DataList.ItemValue>
+                  <DataList.ItemLabel color="text.subtle" textStyle="xs">
+                    {item.label}
+                  </DataList.ItemLabel>
+                  <DataList.ItemValue fontWeight="bold" textStyle="sm">
+                    {item.value}
+                  </DataList.ItemValue>
                 </DataList.Item>
               ))}
             </DataList.Root>
@@ -237,14 +243,21 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
 
   return (
     <Modal
+      modalProps={{ size: "md" }}
       isOpen={isOpen && !isTxModalOpen}
       onClose={handleClose}
       title={
-        <Heading textAlign="left" mr="auto" size="xl">
-          {t("Convert tokens")}
-        </Heading>
+        <HStack alignItems="center" justifyContent="space-between" mb={{ base: "unset", md: "8" }}>
+          <Heading textAlign="left" size="xl">
+            {t("Convert tokens")}
+          </Heading>
+          <Dialog.CloseTrigger asChild position="static">
+            <CloseButton size="md" />
+          </Dialog.CloseTrigger>
+        </HStack>
       }
-      showCloseButton>
+      showCloseButton
+      showHeader={false}>
       <VStack gap={6} w="full" h="full">
         {step === PowerUpStep.SWAP ? (
           <Box position="relative" w="full">
@@ -266,7 +279,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                 zIndex={convertTo === "vot3" ? 0 : 1}
                 minHeight="8rem">
                 <Field.Root
-                  gap="2"
+                  gap={{ base: "2", md: "4" }}
                   required
                   invalid={convertTo === "vot3" && !!amount && Number(amount) > Number(b3trBalanceScaled)}>
                   <Field.Label w="full" alignItems="center" justifyContent="space-between">
@@ -343,7 +356,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                 zIndex={convertTo === "b3tr" ? 0 : 1}
                 minHeight="8rem">
                 <Field.Root
-                  gap="2"
+                  gap={{ base: "2", md: "4" }}
                   required
                   invalid={convertTo === "b3tr" && !!amount && Number(amount) > Number(vot3BalanceScaled)}>
                   <Field.Label w="full" alignItems="center" justifyContent="space-between">
