@@ -1,12 +1,9 @@
 "use client"
 
-import { CloseButton, Flex, IconButton, Input, InputGroup } from "@chakra-ui/react"
-import { NavArrowLeft } from "iconoir-react"
-import { useRef } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { AppWithVotes } from "@/app/allocations/lib/data"
-import { BaseBottomSheet } from "@/components/BaseBottomSheet"
+import { SearchBottomSheet } from "@/components/SearchBottomSheet"
 
 import { AppCategoryTabs } from "./tabs/vote/AppCategoryTabs"
 
@@ -46,48 +43,16 @@ export function SearchAppsBottomSheet({
   isEditingAutoVote = false,
 }: SearchAppsBottomSheetProps) {
   const { t } = useTranslation()
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const handleClose = () => {
-    onSearchChange("")
-    onClose()
-  }
-
-  const handleClear = () => {
-    onSearchChange("")
-    inputRef.current?.focus()
-  }
 
   return (
-    <BaseBottomSheet
+    <SearchBottomSheet
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
+      searchQuery={searchQuery}
+      onSearchChange={onSearchChange}
+      placeholder={t("Search app")}
       ariaTitle={t("Search Apps")}
-      ariaDescription={t("Search and filter applications")}
-      isDismissable={true}
-      minHeight="100dvh">
-      <Flex gap="4" mb="4" alignItems="center" justifyContent="space-between">
-        <IconButton minWidth="unset" variant="ghost" boxSize="6" p="0" rounded="full" onClick={handleClose}>
-          <NavArrowLeft />
-        </IconButton>
-        <InputGroup
-          flex={1}
-          rounded="lg"
-          borderColor="border.primary"
-          endElement={searchQuery ? <CloseButton size="xs" onClick={handleClear} me="-2" /> : undefined}>
-          <Input
-            ref={inputRef}
-            bg="bg.primary"
-            id="search-apps-input"
-            placeholder={t("Search app")}
-            value={searchQuery}
-            onChange={e => onSearchChange(e.target.value)}
-            autoFocus
-            px="3"
-          />
-        </InputGroup>
-      </Flex>
-
+      ariaDescription={t("Search and filter applications")}>
       <AppCategoryTabs
         apps={apps}
         roundId={roundId}
@@ -104,6 +69,6 @@ export function SearchAppsBottomSheet({
         isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
         isEditingAutoVote={isEditingAutoVote}
       />
-    </BaseBottomSheet>
+    </SearchBottomSheet>
   )
 }
