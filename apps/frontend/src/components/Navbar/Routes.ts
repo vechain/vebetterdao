@@ -30,7 +30,7 @@ export const Routes: Route[] = [
   },
   {
     name: "Allocations",
-    onClick: "/rounds",
+    onClick: "/allocations",
     isVisible: true,
     icon: LiaChartPieSolid,
     description: "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
