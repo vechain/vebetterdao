@@ -17,6 +17,7 @@ runtime_env_var_names:
   - FRESHDESK_GROUP_ID
   - FRESHDESK_DOMAIN
   - TWITTER_CLIENT_ID
+  - NEXTAUTH_URL
 
 runtime_env_secret_names:
   - TWITTER_CLIENT_SECRET
@@ -36,6 +37,3 @@ max_concurrency: 50
 health_check_path: /
 node_env: beta
 auto_deployments_enabled: false
-
-environment_variables:
-  NEXT_PUBLIC_RUNTIME_ENV: beta
