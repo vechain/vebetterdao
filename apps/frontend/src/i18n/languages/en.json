@@ -1572,7 +1572,7 @@
   "Back to Allocation": "Back to Allocation",
   "New feature!": "New feature!",
   "Auto-vote & claim rewards": "Auto-vote & claim rewards",
-  "Automate your weekly votes and reward claims — no effort needed, just stay active in the DAO.": "Automate your weekly votes and reward claims — no effort needed, just stay active in the DAO.",
+  "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.",
   "A small": "A small",
   "fee": "fee",
   "will be taken from your weekly rewards to cover the service.": "will be taken from your weekly rewards to cover the service.",
@@ -1673,5 +1673,6 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "Waiting for the relayer to cast your vote this round. You can disable after voting completes.",
   "Max allocation!": "Max allocation!",
   "Allocation": "Allocation",
-  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto."
+  "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.",
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "A 10% service fee applies to your weekly rewards, capped at 100 B3TR."
 }
