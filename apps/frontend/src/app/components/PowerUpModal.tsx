@@ -248,6 +248,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
 
   return (
     <Modal
+      fullHeight
       modalProps={{ size: "md" }}
       isOpen={isOpen && !isTxModalOpen}
       onClose={handleClose}
