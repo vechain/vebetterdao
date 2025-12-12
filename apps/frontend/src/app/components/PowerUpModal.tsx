@@ -298,7 +298,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                         size="sm"
                         p="0"
                         onClick={() => handleAmountChange(maxBalance ?? "0")}>
-                        {"Use max"}
+                        {t("Use max")}
                       </Button>
                     )}
                   </Field.Label>
@@ -378,7 +378,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                         size="sm"
                         p="0"
                         onClick={() => handleAmountChange(maxBalance ?? "0")}>
-                        {"Use max"}
+                        {t("Use max")}
                       </Button>
                     )}
                   </Field.Label>
