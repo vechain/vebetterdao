@@ -62,6 +62,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const [step, setStep] = useState<PowerUpStep>(PowerUpStep.SWAP)
   const [animationState, setAnimationState] = useState<"merge" | "unmerge" | null>(null)
   const [convertTo, setConvertTo] = useState<"vot3" | "b3tr">("vot3")
+  const [amount, setAmount] = useState("0")
 
   const maxBalance = convertTo === "vot3" ? b3trBalance?.scaled : vot3Balance?.scaled
 
@@ -71,16 +72,15 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const b3trBalanceScaled = useMemo(() => b3trBalance?.scaled ?? "0", [b3trBalance?.scaled])
   const vot3BalanceScaled = useMemo(() => vot3Balance?.scaled ?? "0", [vot3Balance?.scaled])
 
-  const [amount, setAmount] = useState("")
-
   const handleAmountChange = (e: { value: string }) => {
     setAmount(e.value.replaceAll(",", ".").replace(/^0+(?=\d)/, ""))
   }
   const invalidAmount =
-    !!amount && Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
+    !!amount && amount !== "0" && Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
 
   const handleClose = useCallback(() => {
     onClose()
+    setConvertTo("vot3")
     setAmount("")
     setStep(PowerUpStep.SWAP)
   }, [onClose])
@@ -181,7 +181,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                 </Circle>
               ) : (
                 <Circle size="24px" bg="brand.secondary">
-                  <Icon as={VOT3Icon} boxSize="16px" />
+                  <Icon as={VOT3Icon} color="black" boxSize="16px" />
                 </Circle>
               )}
               <Text textStyle="xl" fontWeight="semibold">
@@ -201,7 +201,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
             <HStack gap={2}>
               {toToken === "VOT3" ? (
                 <Circle size="24px" bg="brand.secondary">
-                  <Icon as={VOT3Icon} boxSize="16px" />
+                  <Icon as={VOT3Icon} color="black" boxSize="16px" />
                 </Circle>
               ) : (
                 <Circle size="24px" bg="blue.50">
@@ -257,7 +257,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           </Dialog.CloseTrigger>
         </HStack>
       }
-      showCloseButton
+      showCloseButton={false}
       showHeader={false}>
       <VStack gap={6} w="full" h="full">
         {step === PowerUpStep.SWAP ? (
@@ -283,7 +283,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   gap={{ base: "2", md: "4" }}
                   required
                   invalid={convertTo === "vot3" && !!amount && Number(amount) > Number(b3trBalanceScaled)}>
-                  <Field.Label w="full" alignItems="center" justifyContent="space-between">
+                  <Field.Label w="full" alignItems="center" justifyContent="space-between" gap={{ base: "2", md: "4" }}>
                     <Text textStyle="sm" color="text.subtle">
                       {convertTo === "vot3" ? t("You'll convert") : t("You'll receive")}
                     </Text>
@@ -297,12 +297,11 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   <HStack w="full" justifyContent="space-between">
                     <VStack align="start" gap="1">
                       <NumberInput.Root
-                        autoFocus
+                        asChild
+                        autoFocus={convertTo === "vot3"}
                         p="0"
-                        inputMode="numeric"
                         min={0}
-                        value={amount}
-                        onValueChange={handleAmountChange}
+                        defaultValue={"0"}
                         allowOverflow={false}
                         lineClamp={1}
                         clampValueOnBlur
@@ -310,11 +309,12 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                         readOnly={convertTo === "b3tr"}>
                         <NumberInput.Input
                           p="0"
+                          value={amount}
+                          onChange={e => handleAmountChange({ value: e.target.value })}
                           border="none"
                           outline="none"
                           textStyle={(amount || "0").length > 10 ? "xl" : "3xl"}
                           transition="font-size 0.15s ease-out"
-                          autoFocus={convertTo === "vot3"}
                         />
                       </NumberInput.Root>
                       <Field.ErrorText>
@@ -360,7 +360,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   gap={{ base: "2", md: "4" }}
                   required
                   invalid={convertTo === "b3tr" && !!amount && Number(amount) > Number(vot3BalanceScaled)}>
-                  <Field.Label w="full" alignItems="center" justifyContent="space-between">
+                  <Field.Label w="full" alignItems="center" justifyContent="space-between" gap={{ base: "2", md: "4" }}>
                     <Text textStyle="sm" color="text.subtle">
                       {convertTo === "vot3" ? t("You'll receive") : t("You'll convert")}
                     </Text>
@@ -374,14 +374,15 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   <HStack w="full" justifyContent="space-between">
                     <VStack align="start" gap="1">
                       <NumberInput.Root
+                        asChild
+                        autoFocus={convertTo === "b3tr"}
                         min={0}
-                        value={amount}
-                        onValueChange={handleAmountChange}
                         allowOverflow={false}
                         clampValueOnBlur
-                        formatOptions={{ maximumFractionDigits: 18 }}
                         readOnly={convertTo === "vot3"}>
                         <NumberInput.Input
+                          value={amount}
+                          onChange={e => handleAmountChange({ value: e.target.value })}
                           p="0"
                           border="none"
                           outline="none"
@@ -429,7 +430,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                     <VStack align="end" gap={2} flexShrink={0}>
                       <HStack gap={2}>
                         <Circle size="24px" bg="brand.secondary">
-                          <Icon as={VOT3Icon} boxSize="16px" />
+                          <Icon as={VOT3Icon} color="black" boxSize="16px" />
                         </Circle>
                         <Text textStyle="lg" fontWeight="semibold">
                           {"VOT3"}
@@ -472,7 +473,6 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
         )}
 
         <ButtonGroup
-          mt="auto"
           w="full"
           size="sm"
           display="grid"
