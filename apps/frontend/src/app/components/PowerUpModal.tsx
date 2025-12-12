@@ -72,11 +72,15 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const b3trBalanceScaled = useMemo(() => b3trBalance?.scaled ?? "0", [b3trBalance?.scaled])
   const vot3BalanceScaled = useMemo(() => vot3Balance?.scaled ?? "0", [vot3Balance?.scaled])
 
-  const handleAmountChange = (e: { value: string }) => {
-    setAmount(e.value.replaceAll(",", ".").replace(/^0+(?=\d)/, ""))
+  const handleAmountChange = (value: string) => {
+    const rawAmount = value.replaceAll(",", ".").replace(/^0+(?=\d)/, "")
+    const dotIndex = rawAmount.indexOf(".")
+    setAmount(
+      dotIndex >= 0 ? rawAmount.slice(0, dotIndex + 1) + rawAmount.slice(dotIndex + 1, dotIndex + 19) : rawAmount,
+    )
   }
-  const invalidAmount =
-    !!amount && amount !== "0" && Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
+  const handleAmountBlur = () => setAmount(prev => prev.replace(/\.$/, ""))
+  const invalidAmount = !amount || Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
 
   const handleClose = useCallback(() => {
     onClose()
@@ -214,7 +218,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
             </HStack>
           </HStack>
         </VStack>
-        <Collapsible.Root w="full" pt="4">
+        <Collapsible.Root w="full" pt="4" defaultOpen>
           <Collapsible.Trigger w="full" display="flex" alignItems="center" justifyContent="space-between">
             <Text textStyle="sm" color="text.subtle">
               {t("Transaction details")}
@@ -288,32 +292,35 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                       {convertTo === "vot3" ? t("You'll convert") : t("You'll receive")}
                     </Text>
                     {convertTo === "vot3" && (
-                      <Button variant="link" height="5" size="sm" p="0" onClick={() => setAmount(maxBalance ?? "0")}>
+                      <Button
+                        variant="link"
+                        height="5"
+                        size="sm"
+                        p="0"
+                        onClick={() => handleAmountChange(maxBalance ?? "0")}>
                         {"Use max"}
                       </Button>
                     )}
                   </Field.Label>
 
                   <HStack w="full" justifyContent="space-between">
-                    <VStack align="start" gap="1">
+                    <VStack align="start" gap="2">
                       <NumberInput.Root
                         asChild
                         autoFocus={convertTo === "vot3"}
+                        textOverflow="ellipsis"
                         p="0"
-                        min={0}
-                        defaultValue={"0"}
                         allowOverflow={false}
-                        lineClamp={1}
-                        clampValueOnBlur
-                        formatOptions={{ maximumFractionDigits: 18 }}
                         readOnly={convertTo === "b3tr"}>
                         <NumberInput.Input
+                          min={0}
                           p="0"
                           value={amount}
-                          onChange={e => handleAmountChange({ value: e.target.value })}
+                          onChange={e => handleAmountChange(e.target.value)}
+                          onBlur={handleAmountBlur}
                           border="none"
                           outline="none"
-                          textStyle={(amount || "0").length > 10 ? "xl" : "3xl"}
+                          textStyle={(amount || "0").length > 15 ? "lg" : (amount || "0").length > 10 ? "xl" : "3xl"}
                           transition="font-size 0.15s ease-out"
                         />
                       </NumberInput.Root>
@@ -365,28 +372,34 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                       {convertTo === "vot3" ? t("You'll receive") : t("You'll convert")}
                     </Text>
                     {convertTo === "b3tr" && (
-                      <Button variant="link" height="5" size="sm" p="0" onClick={() => setAmount(maxBalance ?? "0")}>
+                      <Button
+                        variant="link"
+                        height="5"
+                        size="sm"
+                        p="0"
+                        onClick={() => handleAmountChange(maxBalance ?? "0")}>
                         {"Use max"}
                       </Button>
                     )}
                   </Field.Label>
 
-                  <HStack w="full" justifyContent="space-between">
+                  <HStack w="full" justifyContent="space-between" gap="2">
                     <VStack align="start" gap="1">
                       <NumberInput.Root
                         asChild
                         autoFocus={convertTo === "b3tr"}
                         min={0}
                         allowOverflow={false}
-                        clampValueOnBlur
-                        readOnly={convertTo === "vot3"}>
+                        readOnly={convertTo === "vot3"}
+                        textOverflow="ellipsis">
                         <NumberInput.Input
                           value={amount}
-                          onChange={e => handleAmountChange({ value: e.target.value })}
+                          onChange={e => handleAmountChange(e.target.value)}
+                          onBlur={handleAmountBlur}
                           p="0"
                           border="none"
                           outline="none"
-                          textStyle={(amount || "0").length > 10 ? "xl" : "3xl"}
+                          textStyle={(amount || "0").length > 15 ? "lg" : (amount || "0").length > 10 ? "xl" : "3xl"}
                           transition="font-size 0.15s ease-out"
                         />
                       </NumberInput.Root>
