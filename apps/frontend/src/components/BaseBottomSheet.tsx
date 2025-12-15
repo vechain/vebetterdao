@@ -54,10 +54,9 @@ export const BaseBottomSheet = ({
       }
     },
     {
-      from: () => [0, dragY],
       filterTaps: true,
       axis: "y",
-      bounds: { top: 0 },
+      pointer: { touch: true },
     },
   )
 
@@ -88,23 +87,23 @@ export const BaseBottomSheet = ({
             style={{
               transform: `translateY(${dragY}px)`,
               transition: dragY === 0 ? "transform 0.2s ease-out" : "none",
-            }}
-            {...(isDismissable ? bind() : {})}>
+            }}>
             <VisuallyHidden>
               <Drawer.Title>{ariaTitle}</Drawer.Title>
             </VisuallyHidden>
 
-            <Drawer.Body flex={1} overflowY="auto" p={4} display="flex" flexDirection="column">
-              <Box
-                mx="auto"
-                w="34px"
-                h="5px"
-                bg="#D7D6D4"
-                mb={4}
-                rounded="full"
-                cursor={isDismissable ? "grab" : "default"}
-                _active={isDismissable ? { cursor: "grabbing" } : {}}
-              />
+            <Box
+              w="full"
+              pt={4}
+              pb={2}
+              cursor={isDismissable ? "grab" : "default"}
+              _active={isDismissable ? { cursor: "grabbing" } : {}}
+              style={{ touchAction: "none" }}
+              {...(isDismissable ? bind() : {})}>
+              <Box mx="auto" w="34px" h="5px" bg="#D7D6D4" rounded="full" />
+            </Box>
+
+            <Drawer.Body flex={1} overflowY="auto" px={4} pb={4} display="flex" flexDirection="column">
               {(title || illustration || showCloseButton) && (
                 <Box mb={4}>
                   <Box position="relative">

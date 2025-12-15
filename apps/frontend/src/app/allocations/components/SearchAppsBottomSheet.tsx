@@ -80,9 +80,9 @@ export function SearchAppsBottomSheet({
             bg="bg.primary"
             id="search-apps-input"
             placeholder={t("Search app")}
+            fontSize="1rem"
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
-            autoFocus
             px="3"
           />
         </InputGroup>

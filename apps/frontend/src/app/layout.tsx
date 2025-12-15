@@ -17,6 +17,7 @@ const imageExtension = platformMetadata?.imageExtension
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
+  maximumScale: 1.0,
   interactiveWidget: "resizes-content",
 }
 // Export proper metadata for the platform with template support
