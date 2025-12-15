@@ -1,3 +1,5 @@
+"use client"
+
 import { Alert, VStack } from "@chakra-ui/react"
 
 import { StartRoundButton } from "@/app/admin/components/StartRoundCard/components/StartRoundButton"
@@ -8,7 +10,7 @@ export const StartNewRoundAlert = () => {
   const { isCurrentRoundActive } = useCurrentRoundActiveState()
   if (isCurrentRoundActive) return null
   return (
-    <Alert.Root status="error">
+    <Alert.Root status="error" my="4">
       <VStack
         direction={["column-reverse", "column-reverse", "row"]}
         align={["stretch", "stretch", "flex-start"]}

@@ -15,7 +15,6 @@ interface SearchAppsBottomSheetProps {
   apps?: AppWithVotes[]
   roundId: string
   selectedAppIds?: Set<string>
-  selectionOrder?: string[]
   onToggleApp?: (appId: string) => void
   isAtSelectionLimit?: boolean
   hasVoted?: boolean
@@ -33,7 +32,6 @@ export function SearchAppsBottomSheet({
   apps = [],
   roundId,
   selectedAppIds,
-  selectionOrder = [],
   onToggleApp,
   isAtSelectionLimit = false,
   hasVoted = false,
@@ -58,7 +56,6 @@ export function SearchAppsBottomSheet({
         roundId={roundId}
         searchQuery={searchQuery}
         selectedAppIds={selectedAppIds}
-        selectionOrder={selectionOrder}
         onToggleApp={onToggleApp}
         showEmptyState
         tabsListProps={{ mb: "0" }}

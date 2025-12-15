@@ -42,7 +42,6 @@ interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
   searchQuery?: string
   selectedAppIds?: Set<string>
-  selectionOrder?: string[]
   onToggleApp?: (appId: string) => void
   tabsListProps?: Record<string, any>
   showEmptyState?: boolean
@@ -57,6 +56,7 @@ interface AppCategoryTabsProps {
   isAutoVotingEnabledInCurrentRound?: boolean
   isEditingAutoVote?: boolean
   isAtSelectionLimit?: boolean
+  disabled?: boolean
 }
 
 const categoryCollection = createListCollection({
@@ -67,7 +67,6 @@ export function AppCategoryTabs({
   apps = [],
   searchQuery = "",
   selectedAppIds,
-  selectionOrder = [],
   onToggleApp,
   tabsListProps,
   showEmptyState = false,
@@ -82,6 +81,7 @@ export function AppCategoryTabs({
   isAutoVotingEnabledInCurrentRound = false,
   isEditingAutoVote = false,
   isAtSelectionLimit = false,
+  disabled = false,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const { account } = useWallet()
@@ -110,35 +110,12 @@ export function AppCategoryTabs({
     })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
-  // Sort selected apps to top, preserving selection order (append behavior)
-  const sortedAppsWithSelected = useMemo(() => {
-    return filteredApps.slice().sort((a, b) => {
-      const aSelected = selectedAppIds?.has(a.id) ?? false
-      const bSelected = selectedAppIds?.has(b.id) ?? false
-
-      // Both selected: sort by selection order (earlier selections first)
-      if (aSelected && bSelected) {
-        const aIndex = selectionOrder.indexOf(a.id)
-        const bIndex = selectionOrder.indexOf(b.id)
-        return aIndex - bIndex
-      }
-
-      // One selected, one not: selected goes first
-      if (aSelected !== bSelected) {
-        return aSelected ? -1 : 1
-      }
-
-      // Both unselected: keep original order
-      return 0
-    })
-  }, [filteredApps, selectedAppIds, selectionOrder])
-
   const visibleApps = useMemo(() => {
-    if (!showPagination) return sortedAppsWithSelected
+    if (!showPagination) return filteredApps
     const pageSize = 10
     const startIndex = (currentPage - 1) * pageSize
-    return sortedAppsWithSelected.slice(startIndex, startIndex + pageSize)
-  }, [sortedAppsWithSelected, showPagination, currentPage])
+    return filteredApps.slice(startIndex, startIndex + pageSize)
+  }, [filteredApps, showPagination, currentPage])
 
   const areAllVisibleAppsSelected = useMemo(() => {
     if (!selectedAppIds || visibleApps.length === 0) return false
@@ -294,6 +271,7 @@ export function AppCategoryTabs({
                   onCheckedChange={() => onToggleApp?.(app.id)}
                   displayMode={
                     !account?.address ||
+                    disabled ||
                     ((hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote)
                       ? "voted"
                       : "checkbox"

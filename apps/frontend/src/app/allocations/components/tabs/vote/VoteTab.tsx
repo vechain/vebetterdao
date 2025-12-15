@@ -2,7 +2,7 @@
 
 import { Bleed } from "@chakra-ui/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useContext, useState } from "react"
+import { useCallback, useContext, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { SearchField } from "@/components/SearchField/SearchField"
@@ -25,10 +25,11 @@ export function VoteTab() {
     apps,
     roundId,
     selectedAppIds,
-    selectionOrder,
     onToggleApp,
     isStuck,
     hasVoted,
+    hasVotedLoading,
+    hasEnoughVotesAtSnapshot,
     isVoteDataLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
@@ -38,9 +39,25 @@ export function VoteTab() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get("category") || "all"
+  const shouldShowInsufficientPowerAlert = useMemo(
+    () => !hasVotedLoading && !hasVoted && !hasEnoughVotesAtSnapshot,
+    [hasVotedLoading, hasVoted, hasEnoughVotesAtSnapshot],
+  )
 
   const [isSearchOpen, setIsSearchOpen] = useState(searchParams.has("search"))
   const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get("search") || "")
+
+  // Sort voted apps to top on initial render
+  const sortedApps = useMemo(() => {
+    if (!hasVoted || !selectedAppIds || selectedAppIds.size === 0) return apps
+    return [...apps].sort((a, b) => {
+      const aVoted = selectedAppIds.has(a.id)
+      const bVoted = selectedAppIds.has(b.id)
+      if (aVoted && !bVoted) return -1
+      if (!aVoted && bVoted) return 1
+      return 0
+    })
+  }, [apps, selectedAppIds, hasVoted])
 
   const handleViewAll = () => setIsSearchOpen(true)
   const handleCloseSearch = () => setIsSearchOpen(false)
@@ -74,9 +91,9 @@ export function VoteTab() {
       />
       <Bleed inlineStart="4" inlineEnd="4">
         <AppCategoryTabs
-          apps={apps}
+          disabled={shouldShowInsufficientPowerAlert}
+          apps={sortedApps}
           selectedAppIds={selectedAppIds}
-          selectionOrder={selectionOrder}
           onToggleApp={onToggleApp}
           onViewAll={handleViewAll}
           initialCategory={selectedCategory}
@@ -107,9 +124,8 @@ export function VoteTab() {
         onClose={handleCloseSearch}
         searchQuery={localSearchQuery}
         onSearchChange={setLocalSearchQuery}
-        apps={apps}
+        apps={sortedApps}
         selectedAppIds={selectedAppIds}
-        selectionOrder={selectionOrder}
         onToggleApp={onToggleApp}
         isAtSelectionLimit={isAtSelectionLimit}
         hasVoted={hasVoted}
