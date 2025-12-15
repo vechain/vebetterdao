@@ -18,16 +18,9 @@ export const SelectedAppsPreview = ({ apps, onEditSelection }: SelectedAppsPrevi
   return (
     <VStack gap={2} align="stretch">
       <HStack justify="space-between">
-        <HStack gap={2}>
-          <Text textStyle="sm" fontWeight="semibold">
-            {t("Selected apps")}
-          </Text>
-          {onEditSelection && (
-            <Button variant="link" size="sm" onClick={onEditSelection} fontWeight="semibold" color="text.link">
-              {t("Edit selection")}
-            </Button>
-          )}
-        </HStack>
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("Selected apps")}
+        </Text>
         <Badge variant="neutral" size="sm" rounded="sm">
           {apps.length} {apps.length === 1 ? t("app") : t("apps")}
         </Badge>
@@ -41,18 +34,46 @@ export const SelectedAppsPreview = ({ apps, onEditSelection }: SelectedAppsPrevi
         display="flex"
         justifyContent="center"
         gap="3"
-        flexDirection="row"
+        flexDirection="column"
+        alignItems="center"
         overflowX="auto">
-        {apps.map(app => (
-          <Box key={app.id} display="inline-block" pos="relative">
-            <AppImage appId={app.id} appLogo={app.metadata?.logo} boxSize="48px" borderRadius="lg" flexShrink={0} />
-            <Float placement="top-end">
-              <Circle background="status.positive.primary" border="sm" borderColor="status.positive.subtle">
-                <Icon as={Check} color="white" />
-              </Circle>
-            </Float>
-          </Box>
-        ))}
+        <HStack
+          gap="2"
+          overflowX="auto"
+          py={2}
+          pb={onEditSelection ? 4 : 2}
+          borderBottom={onEditSelection ? "1px solid" : "none"}
+          borderColor="border.secondary"
+          w="full"
+          justifyContent="center">
+          {apps.map(app => (
+            <Box key={app.id} display="inline-block" pos="relative">
+              <AppImage appId={app.id} appLogo={app.metadata?.logo} boxSize="11" borderRadius="lg" flexShrink={0} />
+              <Float placement="top-end" offset="0">
+                <Circle
+                  size="4.5"
+                  background="status.positive.primary"
+                  border="sm"
+                  borderColor="status.positive.subtle">
+                  <Icon as={Check} color="white" boxSize="3" />
+                </Circle>
+              </Float>
+            </Box>
+          ))}
+        </HStack>
+        {onEditSelection && (
+          <Button
+            variant="link"
+            size="sm"
+            onClick={onEditSelection}
+            fontWeight="semibold"
+            color="text.link"
+            px={2}
+            py={2}
+            borderRadius="full">
+            {t("Edit selection")}
+          </Button>
+        )}
       </Card.Root>
     </VStack>
   )
