@@ -105,18 +105,24 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
   )
   const { data: autoVotingActiveMap } = useIsAutoVotingEnabledForRounds(roundIds)
 
-  // Calculate claimable totals (excluding auto-voting rounds)
-  // Only calculate when we have both rewards data and auto-voting status
+  // Calculate claimable totals (excluding auto-voting active rounds)
   const { claimableTotal, claimableTotalFormatted } = useMemo(() => {
-    if (!rewardsQuery.data?.roundsRewards || !autoVotingActiveMap) {
+    if (!rewardsQuery.data?.roundsRewards || !rewardsQuery.data?.roundsRewardsWithGm || !autoVotingActiveMap) {
       return { claimableTotal: "0", claimableTotalFormatted: "0" }
     }
 
-    const total = rewardsQuery.data.roundsRewards.reduce((sum, round) => {
+    const roundsRewards = rewardsQuery.data.roundsRewards
+    const roundsRewardsWithGm = rewardsQuery.data.roundsRewardsWithGm
+
+    const total = roundsRewards.reduce((sum, round, index) => {
       const hasRewards = round.rewards && Number(round.rewards) > 0
+      const gmRewards = roundsRewardsWithGm[index]?.rewards ?? 0n
+      const hasGmRewards = gmRewards && Number(gmRewards) > 0
       const isAutoVotingRound = autoVotingActiveMap.get(round.roundId) === true
-      if (hasRewards && !isAutoVotingRound) {
-        return sum.plus(round.rewards)
+
+      if ((hasRewards || hasGmRewards) && !isAutoVotingRound) {
+        // Include both regular rewards and GM rewards
+        return sum.plus(round.rewards).plus(gmRewards.toString())
       }
       return sum
     }, new BigNumber(0))
@@ -125,7 +131,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
       claimableTotal: total.toFixed(),
       claimableTotalFormatted: ethers.formatEther(total.toFixed()),
     }
-  }, [rewardsQuery.data?.roundsRewards, autoVotingActiveMap])
+  }, [rewardsQuery.data?.roundsRewards, rewardsQuery.data?.roundsRewardsWithGm, autoVotingActiveMap])
 
   return {
     ...rewardsQuery,
