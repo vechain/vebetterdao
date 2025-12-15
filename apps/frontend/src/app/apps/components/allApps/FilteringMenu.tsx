@@ -2,20 +2,21 @@ import { IconButton, Menu, Text, Flex, VStack, Portal, Button, Badge, Checkbox }
 import { UilFilter } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
+import { AppStatusFilter } from "@/store/useAppsFilters"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 type Props = {
   selectedCategories: string[]
-  statusFilter: string
-  statusFilterOptions: string[]
-  appWithStatusCounts: Record<string, number>
+  statusFilter: AppStatusFilter
+  appWithStatusCounts: Record<AppStatusFilter, number>
   onCategoryChange: (categoryId: string) => void
-  onStatusFilterChange: (status: string) => void
+  onStatusFilterChange: (status: AppStatusFilter) => void
 }
+const STATUS_FILTER_OPTIONS = Object.values(AppStatusFilter)
+
 export const FilteringMenu = ({
   selectedCategories,
   statusFilter,
-  statusFilterOptions,
   appWithStatusCounts,
   onCategoryChange,
   onStatusFilterChange,
@@ -70,7 +71,7 @@ export const FilteringMenu = ({
               {t("Status")}
             </Text>
             <Flex flexWrap="wrap" gap={2} mb={4} flexDir="column">
-              {statusFilterOptions.map(status => (
+              {STATUS_FILTER_OPTIONS.map(status => (
                 <Button
                   key={status}
                   rounded="full"
@@ -82,7 +83,7 @@ export const FilteringMenu = ({
                   {status}{" "}
                   {statusFilter === status && (
                     <Badge ml={1} borderRadius="full">
-                      {appWithStatusCounts[status as keyof typeof appWithStatusCounts]}
+                      {appWithStatusCounts[status]}
                     </Badge>
                   )}
                 </Button>
