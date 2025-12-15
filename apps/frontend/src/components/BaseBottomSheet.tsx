@@ -95,14 +95,13 @@ export const BaseBottomSheet = ({
               w="full"
               // TODO: this is added to prevent veworld tab closes by swiping.
               // find a better solution for this
-              my={2}
               pt={4}
               pb={2}
               cursor={isDismissable ? "grab" : "default"}
               _active={isDismissable ? { cursor: "grabbing" } : {}}
               style={{ touchAction: "none" }}
               {...(isDismissable ? bind() : {})}>
-              <Box mx="auto" w="34px" h="5px" bg="#D7D6D4" rounded="full" />
+              <Box mx="auto" w="34px" h="5px" bg={isDismissable ? "#D7D6D4" : "transparent"} rounded="full" />
             </Box>
 
             <Drawer.Body flex={1} overflowY="auto" px={4} pb={4} display="flex" flexDirection="column">
