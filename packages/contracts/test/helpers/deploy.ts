@@ -37,6 +37,9 @@ import {
   AdministrationUtilsV6,
   EndorsementUtilsV6,
   VoteEligibilityUtilsV6,
+  AdministrationUtilsV7,
+  EndorsementUtilsV7,
+  VoteEligibilityUtilsV7,
 } from "../../typechain-types"
 import {
   deployAndUpgrade,
@@ -284,6 +287,10 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
+    // V7
+    AdministrationUtilsV7,
+    EndorsementUtilsV7,
+    VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: false, latestVersionOnly: false })
 
   // Deploy AutoVoting Libraries
@@ -451,7 +458,16 @@ export const getOrDeployContractInstances = async ({
   const x2EarnRewardsPoolAddress = otherAccounts[11].address
 
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
+    [
+      "X2EarnAppsV1",
+      "X2EarnAppsV2",
+      "X2EarnAppsV3",
+      "X2EarnAppsV4",
+      "X2EarnAppsV5",
+      "X2EarnAppsV6",
+      "X2EarnAppsV7",
+      "X2EarnApps",
+    ],
     [
       ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
       [
@@ -465,9 +481,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [await stargateNftMock.getAddress()],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
       libraries: [
         undefined,
         {
@@ -494,6 +511,11 @@ export const getOrDeployContractInstances = async ({
           AdministrationUtilsV6: await AdministrationUtilsV6.getAddress(),
           EndorsementUtilsV6: await EndorsementUtilsV6.getAddress(),
           VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6.getAddress(),
+        },
+        {
+          AdministrationUtilsV7: await AdministrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await EndorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await VoteEligibilityUtilsV7.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
@@ -1280,6 +1302,9 @@ export const getOrDeployContractInstances = async ({
     administrationUtilsV6: AdministrationUtilsV6,
     endorsementUtilsV6: EndorsementUtilsV6,
     voteEligibilityUtilsV6: VoteEligibilityUtilsV6,
+    administrationUtilsV7: AdministrationUtilsV7,
+    endorsementUtilsV7: EndorsementUtilsV7,
+    voteEligibilityUtilsV7: VoteEligibilityUtilsV7,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vthoTokenMock,

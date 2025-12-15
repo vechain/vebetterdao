@@ -114,6 +114,10 @@ export async function deployLatest(config: ContractsConfig) {
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
+    // V7
+    AdministrationUtilsV7,
+    EndorsementUtilsV7,
+    VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: true, latestVersionOnly: false })
 
   // ----------------------  Stargate Contracts and NodeManagement ----------------------
@@ -251,6 +255,11 @@ export async function deployLatest(config: ContractsConfig) {
           AdministrationUtilsV6: await AdministrationUtilsV6!!.getAddress(),
           EndorsementUtilsV6: await EndorsementUtilsV6!!.getAddress(),
           VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6!!.getAddress(),
+        },
+        {
+          AdministrationUtilsV7: await AdministrationUtilsV7!!.getAddress(),
+          EndorsementUtilsV7: await EndorsementUtilsV7!!.getAddress(),
+          VoteEligibilityUtilsV7: await VoteEligibilityUtilsV7!!.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),

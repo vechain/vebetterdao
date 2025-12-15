@@ -260,6 +260,10 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
+    // V7
+    AdministrationUtilsV7,
+    EndorsementUtilsV7,
+    VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: true, latestVersionOnly: false })
 
   console.log("Deploying AutoVoting Libraries")
@@ -280,6 +284,9 @@ export async function deployAll(config: ContractsConfig) {
   }
   if (!AdministrationUtilsV6 || !EndorsementUtilsV6 || !VoteEligibilityUtilsV6) {
     throw new Error("Failed to deploy X2Earn V6 libraries")
+  }
+  if (!AdministrationUtilsV7 || !EndorsementUtilsV7 || !VoteEligibilityUtilsV7) {
+    throw new Error("Failed to deploy X2Earn V7 libraries")
   }
   if (!AdministrationUtils || !EndorsementUtils || !VoteEligibilityUtils) {
     throw new Error("Failed to deploy X2Earn latest libraries")
@@ -440,6 +447,11 @@ export async function deployAll(config: ContractsConfig) {
           AdministrationUtilsV6: await AdministrationUtilsV6.getAddress(),
           EndorsementUtilsV6: await EndorsementUtilsV6.getAddress(),
           VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6.getAddress(),
+        },
+        {
+          AdministrationUtilsV7: await AdministrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await EndorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await VoteEligibilityUtilsV7.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
