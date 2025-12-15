@@ -76,6 +76,7 @@ export const ConfirmVoteModal = ({
   }, [onConfirm, allocations, onClose])
 
   const handleCloseModal = useCallback(() => {
+    setIsCustomising(false)
     onClose()
   }, [onClose])
 
