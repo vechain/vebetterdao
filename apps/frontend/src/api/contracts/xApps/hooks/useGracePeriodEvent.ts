@@ -12,17 +12,21 @@ export const useGracePeriodEvent = (appId?: string) =>
     contractAddress,
     eventName: "AppUnendorsedGracePeriodStarted",
     filterParams: appId ? { appId: appId as `0x${string}` } : undefined,
-    select: events =>
-      events.map(({ meta, decodedData }) => {
-        const { blockNumber, txOrigin } = meta
-        const { appId: id, startBlock, endBlock } = decodedData.args
-        return {
-          appId: id.toString(),
-          startBlock: startBlock.toString(),
-          endBlock: endBlock.toString(),
-          blockNumber,
-          txOrigin,
-        }
-      }),
+    order: "desc", //We care only to the latest grace period event to display a banner in app page
+    limit: 1,
+    select: events => {
+      const latest = events[0]
+      if (!latest) return undefined
+      const { meta, decodedData } = latest
+      const { blockNumber, txOrigin } = meta
+      const { appId: id, startBlock, endBlock } = decodedData.args
+      return {
+        appId: id.toString(),
+        startBlock: startBlock.toString(),
+        endBlock: endBlock.toString(),
+        blockNumber,
+        txOrigin,
+      }
+    },
     enabled: !!appId,
   })
