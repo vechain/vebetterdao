@@ -19,6 +19,3 @@ max_concurrency: 25
 health_check_path: /
 node_env: preview
 auto_deployments_enabled: false
-
-environment_variables:
-  NEXT_PUBLIC_RUNTIME_ENV: preview

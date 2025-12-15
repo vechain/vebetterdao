@@ -169,11 +169,11 @@ export const RoundInfoBottomSheet = () => {
               </HStack>
               <SimpleGrid w="full" columns={canVote ? 2 : 1} gap={4}>
                 <Button asChild variant="secondary" rounded={"full"}>
-                  <NextLink href={`/rounds/${allocationRound.roundId}`}>{t("See More")}</NextLink>
+                  <NextLink href="/allocations/round">{t("See More")}</NextLink>
                 </Button>
                 {canVote && (
                   <Button asChild variant="primary" rounded={"full"}>
-                    <NextLink href={`/rounds/${allocationRound.roundId}/vote`}>{t("Vote now")}</NextLink>
+                    <NextLink href="/allocations/vote">{t("Vote now")}</NextLink>
                   </Button>
                 )}
               </SimpleGrid>

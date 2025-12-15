@@ -17,6 +17,7 @@ runtime_env_var_names:
   - GITHUB_CLIENT_ID
   - RESET_USER_SIGNAL_COUNT_DOMAIN
   - TWITTER_CLIENT_ID
+  - NEXTAUTH_URL
 
 runtime_env_secret_names:
   - FRESHDESK_API_TOKEN
@@ -40,6 +41,3 @@ health_check_healthy_threshold: 1
 health_check_unhealthy_threshold: 3
 node_env: production
 auto_deployments_enabled: false
-
-environment_variables:
-  NEXT_PUBLIC_RUNTIME_ENV: prod

@@ -39,7 +39,7 @@ export const CastYourVoteCard: React.FC = () => {
     isError: hasVotingError,
   } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const onClick = () => {
-    router.push(`/rounds/${roundId}`)
+    router.push("/allocations/vote")
   }
   const hasVotes = Number(votesAtSnapshot) > 0
   if (!account?.address || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
