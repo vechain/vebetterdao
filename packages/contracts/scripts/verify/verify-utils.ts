@@ -246,7 +246,7 @@ function extractLibrariesFromLinkReferences(contractName: ContractName, deployed
       }
     }
   } catch (error) {
-    // Fall through to return empty result
+    console.warn(`Error extracting libraries from link references for ${contractName}:`, error)
   }
 
   return result
