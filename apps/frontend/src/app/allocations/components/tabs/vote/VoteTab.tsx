@@ -47,9 +47,8 @@ export function VoteTab() {
   const [isSearchOpen, setIsSearchOpen] = useState(searchParams.has("search"))
   const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get("search") || "")
 
-  // Sort voted apps to top on initial render
   const sortedApps = useMemo(() => {
-    if (!hasVoted || !selectedAppIds || selectedAppIds.size === 0) return apps
+    if (!hasVoted || isEditingAutoVote) return apps
     return [...apps].sort((a, b) => {
       const aVoted = selectedAppIds.has(a.id)
       const bVoted = selectedAppIds.has(b.id)
@@ -57,7 +56,7 @@ export function VoteTab() {
       if (!aVoted && bVoted) return 1
       return 0
     })
-  }, [apps, selectedAppIds, hasVoted])
+  }, [hasVoted, isEditingAutoVote, apps, selectedAppIds])
 
   const handleViewAll = () => setIsSearchOpen(true)
   const handleCloseSearch = () => setIsSearchOpen(false)

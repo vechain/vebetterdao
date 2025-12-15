@@ -7,8 +7,8 @@ import { StartRoundButton } from "@/app/admin/components/StartRoundCard/componen
 import { useCurrentRoundActiveState } from "../../api/contracts/xAllocations/hooks/useCurrentRoundActiveState"
 
 export const StartNewRoundAlert = () => {
-  const { isCurrentRoundActive } = useCurrentRoundActiveState()
-  if (isCurrentRoundActive) return null
+  const { isCurrentRoundActive, isLoading } = useCurrentRoundActiveState()
+  if (isLoading || isCurrentRoundActive) return null
   return (
     <Alert.Root status="error" my="4">
       <VStack
