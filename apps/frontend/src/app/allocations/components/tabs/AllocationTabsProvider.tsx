@@ -225,9 +225,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
       // User has voted - show their voted apps
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
-    } else {
-      // User hasn't voted - show empty read-only state
-      setSelectedAppIds(new Set())
     }
   }, [hasVoted, castVotesEvent?.appsIds, isModalOpen, isEditingAutoVote, isCastVotesLoading])
 
