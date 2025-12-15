@@ -300,34 +300,36 @@ export function AppCategoryTabs({
                 page={currentPage}
                 onPageChange={details => setCurrentPage(details.page)}
                 display="flex"
-                alignItems="center"
+                alignItems={{ base: "start", md: "center" }}
                 justifyContent="space-between"
                 gap="4">
-                <HStack gap="1">
-                  <Text textStyle="sm">{t("Showing")}</Text>
+                <HStack w="full" flexWrap="wrap" justifyContent={{ md: "space-between" }}>
+                  <HStack gap="1">
+                    <Text textStyle="sm">{t("Showing")}</Text>
 
-                  <Pagination.PageText format="long" textStyle="sm" />
+                    <Pagination.PageText format="long" textStyle="sm" />
+                  </HStack>
+
+                  <ButtonGroup variant="ghost" size="sm">
+                    <Pagination.PrevTrigger asChild>
+                      <IconButton>
+                        <HiChevronLeft />
+                      </IconButton>
+                    </Pagination.PrevTrigger>
+                    <Pagination.Items
+                      render={page => (
+                        <IconButton variant={{ base: "ghost", _selected: "outline" }}>{page.value}</IconButton>
+                      )}
+                    />
+                    <Pagination.NextTrigger asChild>
+                      <IconButton>
+                        <HiChevronRight />
+                      </IconButton>
+                    </Pagination.NextTrigger>
+                  </ButtonGroup>
                 </HStack>
 
-                <ButtonGroup hideBelow="md" variant="ghost" size="sm">
-                  <Pagination.PrevTrigger asChild>
-                    <IconButton>
-                      <HiChevronLeft />
-                    </IconButton>
-                  </Pagination.PrevTrigger>
-                  <Pagination.Items
-                    render={page => (
-                      <IconButton variant={{ base: "ghost", _selected: "outline" }}>{page.value}</IconButton>
-                    )}
-                  />
-                  <Pagination.NextTrigger asChild>
-                    <IconButton>
-                      <HiChevronRight />
-                    </IconButton>
-                  </Pagination.NextTrigger>
-                </ButtonGroup>
-
-                <Button hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
+                <Button height="5" flexShrink={0} hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
                   {t("View all")}
                 </Button>
               </Pagination.Root>
