@@ -8,7 +8,6 @@
       "function": "executeTransaction\\(uint256\\)",
       "reason": "CEI done; false positive"
     },
-
     {
       "check": "unused-return",
       "file": "packages/contracts/contracts/Stargate.sol",
@@ -17,7 +16,6 @@
     },
 
     { "check": "low-level-calls", "file": "contracts/Proxy.sol", "line": 73, "reason": "intended delegatecall" },
-
     {
       "check": "arbitrary-send",
       "file": "contracts/tokens/Token.sol",
