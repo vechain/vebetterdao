@@ -56,7 +56,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(bytes32 => uint256[]) _appEndorsers; // Maps each app ID to an array of node IDs that have endorsed it
     mapping(uint8 => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint48) _appGracePeriodStart; // The grace period elapsed by the app since endorsed
-    mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
+    mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses (LEGACY - V7 and before)
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in BLOCKS
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
     mapping(bytes32 => uint256) _appScores; // The score of each app
@@ -68,6 +68,12 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     IXAllocationVotingGovernor _xAllocationVotingGovernor; // The XAllocationVotingGovernor contract
     //------- Version 7 -------//
     IStargateNFT _stargateNFT; // The Stargate NFT contract
+    //------- Version 8: Split Endorsements -------//
+    mapping(uint256 => mapping(bytes32 => uint256)) _nodeAppPoints; // V8: Points allocated per node per app
+    mapping(uint256 => bytes32[]) _nodeEndorsedApps; // V8: List of apps a node is endorsing
+    mapping(uint256 => mapping(bytes32 => bool)) _isNodeEndorsingApp; // V8: Quick lookup if node endorses app
+    mapping(uint256 => uint256) _nodeTotalAllocated; // V8: Total points allocated by a node across all apps
+    mapping(uint256 => mapping(bytes32 => uint256)) _nodeAppEndorsementRound; // V8: Per-app cooldown tracking
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -197,8 +203,193 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     return _removeNodeEndorsement(appId, nodeId);
   }
 
+  // ---------- V8: Split Endorsement Functions ---------- //
+
   /**
-   * @notice this function returns the app that a node ID is endorsing
+   * @notice Allocates points from a node to an app (V8 split endorsement)
+   * @dev Nodes can split their endorsement points across multiple dApps
+   * @param appId The unique identifier of the app to endorse
+   * @param nodeId The unique identifier of the node allocating points
+   * @param points The number of points to allocate (max 49 per node per app)
+   */
+  function allocateEndorsementPoints(bytes32 appId, uint256 nodeId, uint256 points) public virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    // Check if the app exists
+    if (!_appSubmitted(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    // Check if the app is blacklisted
+    if (isBlacklisted(appId)) {
+      revert X2EarnAppBlacklisted(appId);
+    }
+
+    // Check if the caller is managing the node
+    if (nodeId == 0 || !$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+      revert X2EarnNonNodeHolder();
+    }
+
+    // Check cooldown for this specific node-app pair
+    if (checkCooldownForApp(nodeId, appId)) {
+      revert X2EarnNodeCooldownActive();
+    }
+
+    uint256 nodeScore = getNodeEndorsementScore(nodeId);
+    if (nodeScore == 0) {
+      revert NodeNotAllowedToEndorse();
+    }
+
+    // Allocate points using the library
+    EndorsementUtils.allocatePoints(
+      $._nodeAppPoints,
+      $._nodeEndorsedApps,
+      $._isNodeEndorsingApp,
+      $._appScores,
+      $._nodeTotalAllocated,
+      nodeScore,
+      nodeId,
+      appId,
+      points
+    );
+
+    // Update cooldown for this node-app pair
+    $._nodeAppEndorsementRound[nodeId][appId] = $._xAllocationVotingGovernor.currentRoundId();
+
+    // Add node to app endorsers if not already there
+    if (!_findAndRemoveNodeFromAppEndorsers(appId, nodeId, false)) {
+      $._appEndorsers[appId].push(nodeId);
+    }
+
+    // Check if the score threshold is now met
+    uint256 score = $._appScores[appId];
+    if (score >= _endorsementScoreThreshold()) {
+      _updateStatusIfThresholdMet(appId);
+    }
+  }
+
+  /**
+   * @notice Removes points from a node's allocation to an app (V8 split endorsement)
+   * @param appId The unique identifier of the app
+   * @param nodeId The unique identifier of the node removing points
+   * @param points The number of points to remove
+   */
+  function removeEndorsementPoints(bytes32 appId, uint256 nodeId, uint256 points) public virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    // Check if the caller is managing the node
+    if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+      revert X2EarnNonNodeHolder();
+    }
+
+    // Check cooldown for this specific node-app pair
+    if (checkCooldownForApp(nodeId, appId)) {
+      revert X2EarnNodeCooldownActive();
+    }
+
+    // Remove points using the library
+    EndorsementUtils.removePoints(
+      $._nodeAppPoints,
+      $._nodeEndorsedApps,
+      $._isNodeEndorsingApp,
+      $._appScores,
+      $._nodeTotalAllocated,
+      nodeId,
+      appId,
+      points
+    );
+
+    // Update cooldown for this node-app pair
+    $._nodeAppEndorsementRound[nodeId][appId] = $._xAllocationVotingGovernor.currentRoundId();
+
+    // If node has no more points on this app, remove from endorsers list
+    if ($._nodeAppPoints[nodeId][appId] == 0) {
+      _findAndRemoveNodeFromAppEndorsers(appId, nodeId, true);
+    }
+
+    // Check if app is still above threshold
+    uint256 score = $._appScores[appId];
+    if (score < _endorsementScoreThreshold()) {
+      _updateStatusIfThresholdNotMet(appId);
+    }
+  }
+
+  /**
+   * @notice Gets the available points a node can still allocate
+   */
+  function getAvailablePoints(uint256 nodeId) public view returns (uint256) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    uint256 max = getNodeEndorsementScore(nodeId);
+    uint256 used = $._nodeTotalAllocated[nodeId];
+    return max > used ? max - used : 0;
+  }
+
+  /**
+   * @notice Gets the points a node has allocated to a specific app
+   */
+  function getNodeAppPoints(uint256 nodeId, bytes32 appId) public view returns (uint256) {
+    return _getEndorsementStorage()._nodeAppPoints[nodeId][appId];
+  }
+
+  /**
+   * @notice Gets all apps a node is endorsing (V8)
+   */
+  function getNodeEndorsedApps(uint256 nodeId) public view returns (bytes32[] memory) {
+    return _getEndorsementStorage()._nodeEndorsedApps[nodeId];
+  }
+
+  /**
+   * @notice Gets the total points a node has allocated across all apps
+   */
+  function getNodeTotalAllocated(uint256 nodeId) public view returns (uint256) {
+    return _getEndorsementStorage()._nodeTotalAllocated[nodeId];
+  }
+
+  /**
+   * @notice Gets the maximum points per node per app constant (49)
+   */
+  function maxPointsPerNodePerApp() public pure returns (uint256) {
+    return EndorsementUtils.MAX_POINTS_PER_NODE_PER_APP;
+  }
+
+  /**
+   * @notice Gets the maximum points per app constant (110)
+   */
+  function maxPointsPerApp() public pure returns (uint256) {
+    return EndorsementUtils.MAX_POINTS_PER_APP;
+  }
+
+  /**
+   * @notice Checks if a node is in cooldown for a specific app
+   */
+  function checkCooldownForApp(uint256 nodeId, bytes32 appId) public view returns (bool) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._nodeAppEndorsementRound[nodeId][appId] + $._cooldownPeriod > $._xAllocationVotingGovernor.currentRoundId();
+  }
+
+  // ---------- V8 Internal Helpers ---------- //
+
+  /**
+   * @dev Checks if a node is already in the app's endorsers list and optionally removes it
+   */
+  function _findAndRemoveNodeFromAppEndorsers(bytes32 appId, uint256 nodeId, bool remove) internal returns (bool) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    uint256[] storage endorsers = $._appEndorsers[appId];
+    uint256 len = endorsers.length;
+    for (uint256 i = 0; i < len; i++) {
+      if (endorsers[i] == nodeId) {
+        if (remove) {
+          endorsers[i] = endorsers[len - 1];
+          endorsers.pop();
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @notice this function returns the app that a node ID is endorsing (LEGACY - for backward compatibility)
    * @param nodeId The unique identifier of the node ID.
    * @return bytes32 The unique identifier of the app that the node ID is endorsing.
    */

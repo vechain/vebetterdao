@@ -145,6 +145,31 @@ interface IX2EarnApps {
   error NodeNotAllowedToEndorse();
 
   /**
+   * @dev Thrown when trying to allocate more points than allowed per node per app (V8)
+   */
+  error ExceedsMaxPointsPerNodePerApp(uint256 requested, uint256 max);
+
+  /**
+   * @dev Thrown when trying to allocate more points than allowed per app total (V8)
+   */
+  error ExceedsMaxPointsPerApp(uint256 requested, uint256 max);
+
+  /**
+   * @dev Thrown when trying to allocate more points than the node has available (V8)
+   */
+  error InsufficientAvailablePoints(uint256 requested, uint256 available);
+
+  /**
+   * @dev Thrown when trying to remove more points than allocated (V8)
+   */
+  error InsufficientAllocatedPoints(uint256 requested, uint256 allocated);
+
+  /**
+   * @dev Thrown when trying to allocate zero points (V8)
+   */
+  error ZeroPointsNotAllowed();
+
+  /**
    * @dev Event fired when a new app is added.
    */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
@@ -248,6 +273,28 @@ interface IX2EarnApps {
    * @dev Event fired when the node strength scores are updated.
    */
   event NodeStrengthScoresUpdated(EndorsementUtils.NodeStrengthScores indexed nodeStrengthScores);
+
+  /**
+   * @dev Event fired when points are allocated to an app (V8).
+   */
+  event PointsAllocated(
+    bytes32 indexed appId,
+    uint256 indexed nodeId,
+    uint256 points,
+    uint256 totalNodePoints,
+    uint256 totalAppPoints
+  );
+
+  /**
+   * @dev Event fired when points are removed from an app (V8).
+   */
+  event PointsRemoved(
+    bytes32 indexed appId,
+    uint256 indexed nodeId,
+    uint256 points,
+    uint256 totalNodePoints,
+    uint256 totalAppPoints
+  );
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
@@ -707,4 +754,72 @@ interface IX2EarnApps {
    * @dev Get the Stargate NFT contract address.
    */
   function getStargateNFT() external view returns (IStargateNFT);
+
+  // ---------- V8: Split Endorsement Functions ---------- //
+
+  /**
+   * @notice Allocates points from a node to an app (V8 split endorsement)
+   * @dev Nodes can split their endorsement points across multiple dApps
+   * @param appId The unique identifier of the app to endorse
+   * @param nodeId The unique identifier of the node allocating points
+   * @param points The number of points to allocate (max 49 per node per app)
+   */
+  function allocateEndorsementPoints(bytes32 appId, uint256 nodeId, uint256 points) external;
+
+  /**
+   * @notice Removes points from a node's allocation to an app (V8 split endorsement)
+   * @param appId The unique identifier of the app
+   * @param nodeId The unique identifier of the node removing points
+   * @param points The number of points to remove
+   */
+  function removeEndorsementPoints(bytes32 appId, uint256 nodeId, uint256 points) external;
+
+  /**
+   * @notice Gets the available points a node can still allocate
+   * @param nodeId The node ID to check
+   * @return The number of points available for allocation
+   */
+  function getAvailablePoints(uint256 nodeId) external view returns (uint256);
+
+  /**
+   * @notice Gets the points a node has allocated to a specific app
+   * @param nodeId The node ID
+   * @param appId The app ID
+   * @return The number of points allocated
+   */
+  function getNodeAppPoints(uint256 nodeId, bytes32 appId) external view returns (uint256);
+
+  /**
+   * @notice Gets all apps a node is endorsing (V8)
+   * @param nodeId The node ID
+   * @return Array of app IDs the node is endorsing
+   */
+  function getNodeEndorsedApps(uint256 nodeId) external view returns (bytes32[] memory);
+
+  /**
+   * @notice Gets the total points a node has allocated across all apps
+   * @param nodeId The node ID
+   * @return The total points allocated
+   */
+  function getNodeTotalAllocated(uint256 nodeId) external view returns (uint256);
+
+  /**
+   * @notice Gets the maximum points per node per app constant
+   * @return The maximum points (49)
+   */
+  function maxPointsPerNodePerApp() external pure returns (uint256);
+
+  /**
+   * @notice Gets the maximum points per app constant
+   * @return The maximum points (110)
+   */
+  function maxPointsPerApp() external pure returns (uint256);
+
+  /**
+   * @notice Checks if a node is in cooldown for a specific app
+   * @param nodeId The node ID
+   * @param appId The app ID
+   * @return True if in cooldown, false otherwise
+   */
+  function checkCooldownForApp(uint256 nodeId, bytes32 appId) external view returns (bool);
 }

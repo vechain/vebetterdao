@@ -66,6 +66,13 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * -------------------- Version 7 --------------------
  * - Integrated Stargate NFT contract for node management and endorsement verification.
  * - Updated endorsement system to use Stargate NFT for node ownership and token management.
+ *
+ * -------------------- Version 8 --------------------
+ * - Split endorsements: Nodes can now split their points across multiple dApps.
+ * - Max 49 points per node per dApp.
+ * - Max 110 points total per dApp (from all nodes combined).
+ * - Per-app cooldown tracking for endorsement changes.
+ * - New functions: allocateEndorsementPoints, removeEndorsementPoints, getAvailablePoints, etc.
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,

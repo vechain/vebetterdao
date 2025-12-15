@@ -35,8 +35,24 @@ import { DataTypes } from "../../mocks/Stargate/StargateNFT/libraries/DataTypes.
  * @dev Utility library for handling endorsements of applications in a voting context.
  * It manages endorsements, endorsement scores, endorsement status, and app eligibility
  * for voting by interacting with node levels and managing endorsement checkpoints.
+ *
+ * -------------------- Version 8 --------------------
+ * - Split endorsements: Nodes can now split their points across multiple dApps
+ * - Max 49 points per node per dApp
+ * - Max 110 points total per dApp (from all nodes combined)
  */
 library EndorsementUtils {
+  // ------------------------------- Constants -------------------------------
+  /**
+   * @dev Maximum points a single node can allocate to a single dApp
+   */
+  uint256 public constant MAX_POINTS_PER_NODE_PER_APP = 49;
+
+  /**
+   * @dev Maximum total points a dApp can receive from all nodes combined
+   */
+  uint256 public constant MAX_POINTS_PER_APP = 110;
+
   // ------------------------------- Node Data Types -------------------------------
   /**
    * @dev The strength level of each node.
@@ -76,6 +92,32 @@ library EndorsementUtils {
     StargateNFT
   }
 
+  // ------------------------------- Errors -------------------------------
+  /**
+   * @dev Thrown when trying to allocate more points than allowed per node per app
+   */
+  error ExceedsMaxPointsPerNodePerApp(uint256 requested, uint256 max);
+
+  /**
+   * @dev Thrown when trying to allocate more points than allowed per app total
+   */
+  error ExceedsMaxPointsPerApp(uint256 requested, uint256 max);
+
+  /**
+   * @dev Thrown when trying to allocate more points than the node has available
+   */
+  error InsufficientAvailablePoints(uint256 requested, uint256 available);
+
+  /**
+   * @dev Thrown when trying to remove more points than allocated
+   */
+  error InsufficientAllocatedPoints(uint256 requested, uint256 allocated);
+
+  /**
+   * @dev Thrown when trying to allocate zero points
+   */
+  error ZeroPointsNotAllowed();
+
   // ------------------------------- Events -------------------------------
   /**
    * @dev Emitted when an app is endorsed or unendorsed.
@@ -84,6 +126,38 @@ library EndorsementUtils {
    * @param endorsed Boolean indicating endorsement (true) or unendorsement (false).
    */
   event AppEndorsed(bytes32 indexed appId, uint256 endorser, bool endorsed);
+
+  /**
+   * @dev Emitted when points are allocated to an app.
+   * @param appId The unique identifier of the app.
+   * @param nodeId The node ID allocating points.
+   * @param points The number of points allocated.
+   * @param totalNodePoints Total points this node has on this app after allocation.
+   * @param totalAppPoints Total points this app has after allocation.
+   */
+  event PointsAllocated(
+    bytes32 indexed appId,
+    uint256 indexed nodeId,
+    uint256 points,
+    uint256 totalNodePoints,
+    uint256 totalAppPoints
+  );
+
+  /**
+   * @dev Emitted when points are removed from an app.
+   * @param appId The unique identifier of the app.
+   * @param nodeId The node ID removing points.
+   * @param points The number of points removed.
+   * @param totalNodePoints Total points this node has on this app after removal.
+   * @param totalAppPoints Total points this app has after removal.
+   */
+  event PointsRemoved(
+    bytes32 indexed appId,
+    uint256 indexed nodeId,
+    uint256 points,
+    uint256 totalNodePoints,
+    uint256 totalAppPoints
+  );
 
   /**
    * @dev Emitted when node strength scores are updated.
@@ -378,5 +452,131 @@ library EndorsementUtils {
 
     // Return true if the required round has not yet been reached
     return requiredRound > xAllocationVotingGovernor.currentRoundId();
+  }
+
+  // ------------------------------- V8: Split Endorsement Functions -------------------------------
+
+  /**
+   * @notice Allocates points from a node to an app (V8 split endorsement)
+   * @param nodeAppPoints Mapping of node ID -> app ID -> points allocated
+   * @param nodeEndorsedApps Mapping of node ID -> list of apps endorsed
+   * @param isNodeEndorsingApp Mapping of node ID -> app ID -> bool (is endorsing)
+   * @param appScores Mapping of app ID -> total score
+   * @param nodeTotalAllocated Mapping of node ID -> total points allocated across all apps
+   * @param nodeMaxPoints The maximum points the node can allocate (based on node level)
+   * @param nodeId The node ID allocating points
+   * @param appId The app ID receiving points
+   * @param points The number of points to allocate
+   */
+  function allocatePoints(
+    mapping(uint256 => mapping(bytes32 => uint256)) storage nodeAppPoints,
+    mapping(uint256 => bytes32[]) storage nodeEndorsedApps,
+    mapping(uint256 => mapping(bytes32 => bool)) storage isNodeEndorsingApp,
+    mapping(bytes32 => uint256) storage appScores,
+    mapping(uint256 => uint256) storage nodeTotalAllocated,
+    uint256 nodeMaxPoints,
+    uint256 nodeId,
+    bytes32 appId,
+    uint256 points
+  ) external {
+    if (points == 0) revert ZeroPointsNotAllowed();
+
+    // Check available points
+    {
+      uint256 available = nodeMaxPoints > nodeTotalAllocated[nodeId] ? nodeMaxPoints - nodeTotalAllocated[nodeId] : 0;
+      if (points > available) {
+        revert InsufficientAvailablePoints(points, available);
+      }
+    }
+
+    // Calculate new values and validate limits
+    uint256 newNodeAppPoints = nodeAppPoints[nodeId][appId] + points;
+    if (newNodeAppPoints > MAX_POINTS_PER_NODE_PER_APP) {
+      revert ExceedsMaxPointsPerNodePerApp(newNodeAppPoints, MAX_POINTS_PER_NODE_PER_APP);
+    }
+
+    uint256 newAppScore = appScores[appId] + points;
+    if (newAppScore > MAX_POINTS_PER_APP) {
+      revert ExceedsMaxPointsPerApp(newAppScore, MAX_POINTS_PER_APP);
+    }
+
+    // Update storage
+    nodeAppPoints[nodeId][appId] = newNodeAppPoints;
+    appScores[appId] = newAppScore;
+    nodeTotalAllocated[nodeId] += points;
+
+    // Track if this is a new endorsement for this app
+    if (!isNodeEndorsingApp[nodeId][appId]) {
+      isNodeEndorsingApp[nodeId][appId] = true;
+      nodeEndorsedApps[nodeId].push(appId);
+      emit AppEndorsed(appId, nodeId, true);
+    }
+
+    emit PointsAllocated(appId, nodeId, points, newNodeAppPoints, newAppScore);
+  }
+
+  /**
+   * @notice Removes points from a node's allocation to an app (V8 split endorsement)
+   * @param nodeAppPoints Mapping of node ID -> app ID -> points allocated
+   * @param nodeEndorsedApps Mapping of node ID -> list of apps endorsed
+   * @param isNodeEndorsingApp Mapping of node ID -> app ID -> bool (is endorsing)
+   * @param appScores Mapping of app ID -> total score
+   * @param nodeTotalAllocated Mapping of node ID -> total points allocated across all apps
+   * @param nodeId The node ID removing points
+   * @param appId The app ID losing points
+   * @param points The number of points to remove
+   */
+  function removePoints(
+    mapping(uint256 => mapping(bytes32 => uint256)) storage nodeAppPoints,
+    mapping(uint256 => bytes32[]) storage nodeEndorsedApps,
+    mapping(uint256 => mapping(bytes32 => bool)) storage isNodeEndorsingApp,
+    mapping(bytes32 => uint256) storage appScores,
+    mapping(uint256 => uint256) storage nodeTotalAllocated,
+    uint256 nodeId,
+    bytes32 appId,
+    uint256 points
+  ) external {
+    if (points == 0) revert ZeroPointsNotAllowed();
+
+    uint256 currentNodeAppPoints = nodeAppPoints[nodeId][appId];
+    if (points > currentNodeAppPoints) {
+      revert InsufficientAllocatedPoints(points, currentNodeAppPoints);
+    }
+
+    uint256 newNodeAppPoints = currentNodeAppPoints - points;
+    uint256 newAppScore = appScores[appId] - points;
+
+    // Update storage
+    nodeAppPoints[nodeId][appId] = newNodeAppPoints;
+    appScores[appId] = newAppScore;
+    nodeTotalAllocated[nodeId] -= points;
+
+    // If node has no more points on this app, remove from endorsers list
+    if (newNodeAppPoints == 0) {
+      isNodeEndorsingApp[nodeId][appId] = false;
+      _removeAppFromNodeEndorsements(nodeEndorsedApps, nodeId, appId);
+      emit AppEndorsed(appId, nodeId, false);
+    }
+
+    emit PointsRemoved(appId, nodeId, points, newNodeAppPoints, newAppScore);
+  }
+
+  /**
+   * @dev Internal function to remove an app from a node's endorsed apps list
+   */
+  function _removeAppFromNodeEndorsements(
+    mapping(uint256 => bytes32[]) storage nodeEndorsedApps,
+    uint256 nodeId,
+    bytes32 appId
+  ) internal {
+    bytes32[] storage apps = nodeEndorsedApps[nodeId];
+    uint256 len = apps.length;
+    for (uint256 i = 0; i < len; i++) {
+      if (apps[i] == appId) {
+        apps[i] = apps[len - 1];
+        apps.pop();
+        break;
+      }
+    }
   }
 }
