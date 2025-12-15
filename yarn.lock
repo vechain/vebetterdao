@@ -7562,10 +7562,10 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.0.4.tgz#2e4e916d93e41c5aabd7f964c7df85d56d94bb01"
-  integrity sha512-2uESAB9LVuDl09PVrrH1/ty6XvQ1ByIh0kzJpNIGgLtdLrlCJOvF1zkSLnZKiclB9xhLcEC38A8iJ+rYVUf2Jg==
+"@vechain/vechain-kit@2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.2.3.tgz#489b41253942408eb0d41923624cf6e262c5b947"
+  integrity sha512-F4ZR8lIqHgzKDnfKwk2iMT3faqRNTe0Jm0mzrU+gRUfuKkaGgtS0y8kPdSQtfkRHSnhZv3ah02o8TNCLKRTJIQ==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"

@@ -13,9 +13,11 @@ import { useIsAutoVotingEnabledInCurrentRound } from "@/api/contracts/xAllocatio
 import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { useUserVotesInRound } from "@/api/contracts/xApps/hooks/useUserVotesInRound"
 import { useStickyState } from "@/hooks/useStickyState"
+import { useUserPreferences } from "@/hooks/useUserPreferences"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
+import { AutoVoteModal } from "../AutoVoteModal"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
 
 import { useAutoVoteEditMode } from "./hooks/useAutoVoteEditMode"
@@ -84,6 +86,17 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
   // Initialize local state from chain data
   const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(isAutoVotingEnabledOnChain ?? false)
+
+  // Auto-vote modal
+  const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
+  const { preferences, updatePreferences } = useUserPreferences()
+
+  // Show the AutoVoteModal once on first visit to vote tab if user has voting power
+  useEffect(() => {
+    if (isVoteTab && preferences?.SHOW_AUTOVOTING_MODAL !== false && hasVotesAtSnapshot) {
+      openAutoVoteModal()
+    }
+  }, [isVoteTab, hasVotesAtSnapshot, openAutoVoteModal, preferences?.SHOW_AUTOVOTING_MODAL])
 
   // Keep local state synced with chain state
   useEffect(() => {
@@ -161,22 +174,10 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     handleOpenModalWithAutoVote()
   }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote, enterEditMode])
 
-  // TODO auto-voting: Uncomment this after the allocation redesign page is live
-  // const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
-  // const { preferences } = useUserPreferences()
-  // useEffect(() => {
-  //   if (preferences?.SHOW_AUTOVOTING_MODAL !== false && hasVotesAtSnapshot) {
-  //     openAutoVoteModal()
-  //   }
-  // }, [hasVotesAtSnapshot, openAutoVoteModal, preferences?.SHOW_AUTOVOTING_MODAL])
-  // Handler for auto-vote modal
-  // const handleAutoVoteApply = useCallback(
-  //   (enabled: boolean) => {
-  //     setIsAutoVotingEnabled(enabled)
-  //     closeAutoVoteModal()
-  //   },
-  //   [closeAutoVoteModal],
-  // )
+  const handleCloseAutoVoteModal = useCallback(() => {
+    closeAutoVoteModal()
+    updatePreferences({ SHOW_AUTOVOTING_MODAL: false })
+  }, [closeAutoVoteModal, updatePreferences])
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -283,11 +284,13 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         bottom={0}
         left={0}
         right={0}
-        zIndex={50}>
+        zIndex={2}>
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <VoteButtons variant="mobile" />
         </Box>
       </Presence>
+
+      <AutoVoteModal isOpen={isAutoVoteModalOpen} onClose={handleCloseAutoVoteModal} />
 
       <ConfirmVoteModal
         key={selectedApps.map(a => a.id).join(",")}

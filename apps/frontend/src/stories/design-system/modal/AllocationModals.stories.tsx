@@ -35,16 +35,7 @@ export const AutomationToggleMobileLight: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(true)
 
-    return (
-      <AutoVoteModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        onApply={() => {
-          setIsOpen(false)
-        }}
-        currentState={true}
-      />
-    )
+    return <AutoVoteModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
   },
 }
 

@@ -1,0 +1,8 @@
+# B3TR Storybook - Dev Environment Configuration
+project: b3tr
+environment: dev
+region: eu-west-1
+
+# Domain configuration
+domain: storybook.dev.b3tr.vechain.org
+base_domain: dev.b3tr.vechain.org
