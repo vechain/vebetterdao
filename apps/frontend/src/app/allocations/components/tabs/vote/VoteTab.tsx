@@ -123,7 +123,7 @@ export function VoteTab() {
         onClose={handleCloseSearch}
         searchQuery={localSearchQuery}
         onSearchChange={setLocalSearchQuery}
-        apps={apps}
+        apps={sortedApps}
         selectedAppIds={selectedAppIds}
         onToggleApp={onToggleApp}
         isAtSelectionLimit={isAtSelectionLimit}
