@@ -64,7 +64,8 @@ export function VoteTab() {
         value={localSearchQuery}
         onChange={setLocalSearchQuery}
         inputProps={{
-          onFocus: e => {
+          readOnly: true,
+          onClick: e => {
             e.preventDefault()
             handleViewAll()
           },

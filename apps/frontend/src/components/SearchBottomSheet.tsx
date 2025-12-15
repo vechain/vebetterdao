@@ -45,7 +45,7 @@ export function SearchBottomSheet({
       onClose={handleClose}
       ariaTitle={ariaTitle}
       ariaDescription={ariaDescription}
-      isDismissable={true}
+      isDismissable={false}
       minHeight="100dvh">
       <Flex gap="4" mb="4" alignItems="center" justifyContent="space-between">
         <IconButton minWidth="unset" variant="ghost" boxSize="6" p="0" rounded="full" onClick={handleClose}>
@@ -61,9 +61,9 @@ export function SearchBottomSheet({
             bg="bg.primary"
             id="search-input"
             placeholder={placeholder}
+            fontSize="1rem"
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
-            autoFocus
             px="3"
           />
         </InputGroup>
