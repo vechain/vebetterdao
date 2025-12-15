@@ -91,9 +91,11 @@ export const BaseBottomSheet = ({
             <VisuallyHidden>
               <Drawer.Title>{ariaTitle}</Drawer.Title>
             </VisuallyHidden>
-
             <Box
               w="full"
+              // TODO: this is added to prevent veworld tab closes by swiping.
+              // find a better solution for this
+              my={2}
               pt={4}
               pb={2}
               cursor={isDismissable ? "grab" : "default"}
