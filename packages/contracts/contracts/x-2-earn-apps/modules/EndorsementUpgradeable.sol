@@ -68,12 +68,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     IXAllocationVotingGovernor _xAllocationVotingGovernor; // The XAllocationVotingGovernor contract
     //------- Version 7 -------//
     IStargateNFT _stargateNFT; // The Stargate NFT contract
-    //------- Version 8: Split Endorsements -------//
-    mapping(uint256 => mapping(bytes32 => uint256)) _nodeAppPoints; // V8: Points allocated per node per app
-    mapping(uint256 => bytes32[]) _nodeEndorsedApps; // V8: List of apps a node is endorsing
-    mapping(uint256 => mapping(bytes32 => bool)) _isNodeEndorsingApp; // V8: Quick lookup if node endorses app
-    mapping(uint256 => uint256) _nodeTotalAllocated; // V8: Total points allocated by a node across all apps
-    mapping(uint256 => mapping(bytes32 => uint256)) _nodeAppEndorsementRound; // V8: Per-app cooldown tracking
+
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
