@@ -52,6 +52,7 @@ export const AppRadioCard = ({
   return (
     <CheckboxCard.Root
       rounded="lg"
+      bg="card.default"
       p={{ base: "3", md: "5" }}
       colorPalette="blue"
       checked={checked}

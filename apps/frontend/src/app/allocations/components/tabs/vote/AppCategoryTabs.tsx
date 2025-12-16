@@ -4,6 +4,7 @@ import {
   Button,
   ButtonGroup,
   Circle,
+  Collapsible,
   createListCollection,
   Flex,
   Heading,
@@ -46,7 +47,6 @@ interface AppCategoryTabsProps {
   tabsListProps?: Record<string, any>
   showEmptyState?: boolean
   showPagination?: boolean
-  onViewAll?: VoidFunction
   initialCategory?: string
   onCategoryChange?: (category: string) => void
   roundId?: string
@@ -71,7 +71,6 @@ export function AppCategoryTabs({
   tabsListProps,
   showEmptyState = false,
   showPagination = false,
-  onViewAll,
   initialCategory = "all",
   onCategoryChange,
   roundId,
@@ -88,6 +87,7 @@ export function AppCategoryTabs({
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
   const [currentPage, setCurrentPage] = useState(1)
+  const [viewAll, setViewAll] = useState(false)
   const { t } = useTranslation()
 
   const { data: appSharesMap = new Map() } = useXAppsSharesBasedOnMaxAllocation(
@@ -292,48 +292,82 @@ export function AppCategoryTabs({
               />
             ) : null}
 
-            {showPagination && (
-              <Pagination.Root
-                defaultPage={1}
-                count={filteredApps.length}
-                pageSize={10}
-                page={currentPage}
-                onPageChange={details => setCurrentPage(details.page)}
-                display="flex"
-                alignItems={{ base: "start", md: "center" }}
-                justifyContent="space-between"
-                gap="4">
-                <HStack w="full" flexWrap="wrap" justifyContent={{ md: "space-between" }}>
-                  <HStack gap="1">
-                    <Text textStyle="sm">{t("Showing")}</Text>
+            <Collapsible.Root
+              open={viewAll}
+              onOpenChange={details => setViewAll(details.open)}
+              onExitComplete={() =>
+                document.getElementById("tabs:allocation-tabs")?.scrollIntoView({ behavior: "smooth" })
+              }>
+              <Collapsible.Content display="flex" flexDirection="column" gap="4">
+                {filteredApps.slice(10).map(app => (
+                  <AppRadioCard
+                    key={app.id}
+                    appId={app.id}
+                    appLogo={app.metadata?.logo}
+                    appName={app.name}
+                    appVoters={app.voters}
+                    appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
+                    allocationSharePercentage={appSharesMap.get(app.id)}
+                    checked={selectedAppIds?.has(app.id)}
+                    onCheckedChange={() => onToggleApp?.(app.id)}
+                    displayMode={
+                      !account?.address ||
+                      disabled ||
+                      ((hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote)
+                        ? "voted"
+                        : "checkbox"
+                    }
+                    disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
+                  />
+                ))}
+              </Collapsible.Content>
+              <HStack justifyContent="space-between" my="4">
+                {showPagination && !viewAll && (
+                  <Pagination.Root
+                    defaultPage={1}
+                    count={filteredApps.length}
+                    pageSize={10}
+                    page={currentPage}
+                    onPageChange={details => setCurrentPage(details.page)}
+                    display="flex"
+                    alignItems={{ base: "start", md: "center" }}
+                    justifyContent="space-between"
+                    gap="4">
+                    {!viewAll && (
+                      <HStack w="full" flexWrap="wrap" justifyContent={{ md: "space-between" }} gap="4">
+                        <HStack gap="1">
+                          <Text textStyle="sm">{t("Showing")}</Text>
 
-                    <Pagination.PageText format="long" textStyle="sm" />
-                  </HStack>
+                          <Pagination.PageText format="long" textStyle="sm" />
+                        </HStack>
 
-                  <ButtonGroup variant="ghost" size="sm">
-                    <Pagination.PrevTrigger asChild>
-                      <IconButton>
-                        <HiChevronLeft />
-                      </IconButton>
-                    </Pagination.PrevTrigger>
-                    <Pagination.Items
-                      render={page => (
-                        <IconButton variant={{ base: "ghost", _selected: "outline" }}>{page.value}</IconButton>
-                      )}
-                    />
-                    <Pagination.NextTrigger asChild>
-                      <IconButton>
-                        <HiChevronRight />
-                      </IconButton>
-                    </Pagination.NextTrigger>
-                  </ButtonGroup>
-                </HStack>
+                        <ButtonGroup variant="ghost" size="sm">
+                          <Pagination.PrevTrigger asChild>
+                            <IconButton variant="ghost">
+                              <HiChevronLeft />
+                            </IconButton>
+                          </Pagination.PrevTrigger>
+                          <Pagination.Items
+                            render={page => <IconButton disabled={page.value === currentPage}>{page.value}</IconButton>}
+                          />
+                          <Pagination.NextTrigger asChild>
+                            <IconButton variant="ghost">
+                              <HiChevronRight />
+                            </IconButton>
+                          </Pagination.NextTrigger>
+                        </ButtonGroup>
+                      </HStack>
+                    )}
+                  </Pagination.Root>
+                )}
 
-                <Button height="5" flexShrink={0} hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
-                  {t("View all")}
-                </Button>
-              </Pagination.Root>
-            )}
+                <Collapsible.Trigger asChild>
+                  <Button ml="auto" height="5" flexShrink={0} variant="link" p="0" size="sm">
+                    {viewAll ? t("View less") : t("View all")}
+                  </Button>
+                </Collapsible.Trigger>
+              </HStack>
+            </Collapsible.Root>
           </Tabs.Content>
         </Tabs.Root>
       </VStack>
