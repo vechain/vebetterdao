@@ -39,75 +39,63 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
 COPY packages ./packages
 COPY apps ./apps
 
-# Build arguments - these change frequently so they come AFTER source copy
-# This way, source code layer is cached even when version changes
-ARG APP_BUILD_ENV
-ARG NEXT_PUBLIC_APP_ENV
-ARG NEXT_PUBLIC_DELEGATOR_URL
-ARG NEXT_PUBLIC_IPFS_PINNING_SERVICE
-ARG NEXT_PUBLIC_NETWORK_TYPE
-ARG NEXT_PUBLIC_NFT_STORAGE_KEY
-ARG NEXT_PUBLIC_PRIVY_APP_ID
-ARG NEXT_PUBLIC_PRIVY_CLIENT_ID
-ARG NEXT_PUBLIC_TRANSAK_API_KEY
-ARG NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID
-ARG NEXT_PUBLIC_APP_VERSION
-ARG NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN
-ARG NEXT_PUBLIC_DATADOG_ENV
-ARG NEXT_PUBLIC_DATADOG_APP_TOKEN
-ARG NEXT_PUBLIC_DATADOG_CLIENT_TOKEN
-ARG NODE_OPTIONS
+# Build arguments - minimal args for single-image build
+# NEXT_PUBLIC_* vars come from .env.production (placeholders) and are substituted at runtime
+ARG NODE_OPTIONS="--max-old-space-size=6144"
+ARG SKIP_CONTRACTS_BUILD=false
+ARG USE_NPM_CONTRACTS=false
 
-# Set environment variables for build
-ENV APP_BUILD_ENV=${APP_BUILD_ENV}
-ENV NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV}
-ENV NEXT_PUBLIC_DELEGATOR_URL=${NEXT_PUBLIC_DELEGATOR_URL}
-ENV NEXT_PUBLIC_IPFS_PINNING_SERVICE=${NEXT_PUBLIC_IPFS_PINNING_SERVICE}
-ENV NEXT_PUBLIC_NETWORK_TYPE=${NEXT_PUBLIC_NETWORK_TYPE}
-ENV NEXT_PUBLIC_NFT_STORAGE_KEY=${NEXT_PUBLIC_NFT_STORAGE_KEY}
-ENV NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
-ENV NEXT_PUBLIC_PRIVY_CLIENT_ID=${NEXT_PUBLIC_PRIVY_CLIENT_ID}
-ENV NEXT_PUBLIC_TRANSAK_API_KEY=${NEXT_PUBLIC_TRANSAK_API_KEY}
-ENV NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
-ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
-ENV NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN}
-ENV NEXT_PUBLIC_DATADOG_ENV=${NEXT_PUBLIC_DATADOG_ENV}
-ENV NEXT_PUBLIC_DATADOG_APP_TOKEN=${NEXT_PUBLIC_DATADOG_APP_TOKEN}
-ENV NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${NEXT_PUBLIC_DATADOG_CLIENT_TOKEN}
 ENV NODE_OPTIONS=${NODE_OPTIONS}
+# Reduce memory usage during build
+ENV GENERATE_SOURCEMAP=false
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# If USE_NPM_CONTRACTS=true, switch to npm package instead of local workspace
+# This skips Solidity compilation when contracts haven't changed
+RUN if [ "$USE_NPM_CONTRACTS" = "true" ]; then \
+      echo "Using npm @vechain/vebetterdao-contracts package (no local build needed)..." && \
+      sed -i 's/"@vechain\/vebetterdao-contracts": "\*"/"@vechain\/vebetterdao-contracts": "latest"/g' apps/frontend/package.json && \
+      yarn install --frozen-lockfile || yarn install; \
+    fi
 
 # Build the application with persistent caches:
-# - Hardhat cache: Persists Solidity compiler downloads (no more "Downloading compiler 0.8.20")
-# - Turbo cache: Persists turbo build cache across builds
-# - Next.js cache: Persists Next.js build cache
+# - Uses .env.production with placeholder values for NEXT_PUBLIC_* vars
+# - Placeholders get substituted at container startup by docker-entrypoint.sh
+# - Single build for all environments (staging/beta/prod)
+# - SKIP_CONTRACTS_BUILD=true skips Solidity compilation (for local ARM64 testing)
 RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
     --mount=type=cache,target=/app/node_modules/.cache/turbo,id=turbo-cache \
     --mount=type=cache,target=/app/apps/frontend/.next/cache,id=nextjs-cache \
-    case "$APP_BUILD_ENV" in \
-      "staging") yarn build:staging ;; \
-      "dev") yarn build:testnet ;; \
-      "beta") yarn build:mainnet ;; \
-      "prod") yarn build:mainnet ;; \
-      *) echo "Unknown APP_BUILD_ENV: $APP_BUILD_ENV" >&2; exit 1 ;; \
-    esac
+    if [ "$USE_NPM_CONTRACTS" = "true" ] || [ "$SKIP_CONTRACTS_BUILD" = "true" ]; then \
+      echo "Building frontend only (skipping contracts)..." && \
+      yarn workspace frontend build; \
+    else \
+      echo "Building with local contracts..." && \
+      yarn build; \
+    fi
 
 # ============================================================================
-# Production stage (minimal image)
+# Production stage (standalone output - minimal image)
 # ============================================================================
-FROM node:20-slim
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy only what's needed to run the application
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/yarn.lock ./
-COPY --from=builder /app/turbo.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps ./apps
-COPY --from=builder /app/packages ./packages
+# Copy standalone output (includes minimal node_modules)
+COPY --from=builder /app/apps/frontend/.next/standalone ./
+# Copy static files (not included in standalone by default)
+COPY --from=builder /app/apps/frontend/.next/static ./apps/frontend/.next/static
+# Copy public folder
+COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
+
+# Copy entrypoint script for runtime env substitution
+COPY apps/frontend/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 3000
 
-CMD ["yarn", "workspace", "frontend", "start", "--hostname", "0.0.0.0", "--port", "3000"]
+# Entrypoint substitutes NEXT_PUBLIC_* placeholders at container start
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["node", "apps/frontend/server.js"]

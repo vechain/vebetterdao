@@ -6,6 +6,7 @@ if (typeof self === "undefined") {
 }
 
 const nextConfig = {
+  output: "standalone",
   experimental: {
     optimizePackageImports: [
       "@vechain/vebetterdao-contracts",

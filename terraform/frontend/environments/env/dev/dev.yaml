@@ -11,7 +11,20 @@ enable_custom_domain: true
 route53_zone_name: testnet.governance.vebetterdao.org
 
 ssm_parameter_prefix: /b3tr/frontend/dev-testnet/
-runtime_env_var_names: []
+runtime_env_var_names:
+  - NEXT_PUBLIC_APP_ENV
+  - NEXT_PUBLIC_PRIVY_APP_ID
+  - NEXT_PUBLIC_PRIVY_CLIENT_ID
+  - NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID
+  - NEXT_PUBLIC_TRANSAK_API_KEY
+  - NEXT_PUBLIC_DATADOG_ENV
+  - NEXT_PUBLIC_DATADOG_APP_TOKEN
+  - NEXT_PUBLIC_DATADOG_CLIENT_TOKEN
+  - NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN
+  - NEXT_PUBLIC_DELEGATOR_URL
+  - NEXT_PUBLIC_IPFS_PINNING_SERVICE
+  - NEXT_PUBLIC_NFT_STORAGE_KEY
+  - NEXT_PUBLIC_APP_VERSION
 runtime_env_secret_names: []
 
 image_tag: dev-latest

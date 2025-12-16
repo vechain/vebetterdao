@@ -7,18 +7,18 @@ on:
       - 'v.*'
 
 jobs:
-  deploy-staging:
-    name: Deploy to Staging
+  deploy:
+    name: Deploy to ${{ matrix.environment }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - environment: staging
+            image_tag: staging-${{ github.ref_name }}
+          - environment: beta
+            image_tag: beta-${{ github.ref_name }}
     uses: ./.github/workflows/deploy-fe.yml
     secrets: inherit
     with:
-      environment: staging
-      image_tag: staging-${{ github.ref_name }}
-
-  deploy-beta:
-    name: Deploy to Beta
-    uses: ./.github/workflows/deploy-fe.yml
-    secrets: inherit
-    with:
-      environment: beta
-      image_tag: beta-${{ github.ref_name }}
+      environment: ${{ matrix.environment }}
+      image_tag: ${{ matrix.image_tag }}

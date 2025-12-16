@@ -80,6 +80,12 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
   const appEnv = env || process.env.NEXT_PUBLIC_APP_ENV
   if (!appEnv) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set or a type must be passed to getConfig()")
 
+  // Handle Docker build-time placeholder - will be substituted at container start
+  // Returns mainnet config as placeholder during build (substituted at runtime)
+  if (appEnv.startsWith("__NEXT_PUBLIC_")) {
+    return mainnetConfig
+  }
+
   switch (appEnv) {
     case AppEnv.LOCAL:
       return localConfig

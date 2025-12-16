@@ -93,6 +93,18 @@ jobs:
                   # Don't cleanup builder to preserve cache
                   cleanup: false
 
+            - name: Check if contracts changed
+              id: contracts-check
+              run: |
+                  # Check if packages/contracts has changes compared to main
+                  if git diff --name-only origin/main...HEAD | grep -q "^packages/contracts/"; then
+                    echo "changed=true" >> $GITHUB_OUTPUT
+                    echo "Contracts changed - will build from local workspace"
+                  else
+                    echo "changed=false" >> $GITHUB_OUTPUT
+                    echo "Contracts unchanged - will use npm package (faster build)"
+                  fi
+
             - name: Build and push Docker image
               uses: docker/build-push-action@v5
               with:
@@ -106,20 +118,9 @@ jobs:
                   # Use GitHub Actions cache only (ECR registry cache was too slow)
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
+                  # Single-image build: NEXT_PUBLIC_* vars come from .env.production (placeholders)
+                  # and are substituted at container startup via docker-entrypoint.sh
+                  # USE_NPM_CONTRACTS=true when contracts haven't changed (skips Solidity build)
                   build-args: |
-                      APP_BUILD_ENV=${{ vars.APP_BUILD_ENV || ''}}
-                      NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV || ''}}
-                      NEXT_PUBLIC_APP_VERSION=${{ inputs.image_tag }}
-                      NEXT_PUBLIC_DELEGATOR_URL=${{ vars.NEXT_PUBLIC_DELEGATOR_URL || ''}}
-                      NEXT_PUBLIC_IPFS_PINNING_SERVICE=${{ vars.NEXT_PUBLIC_IPFS_PINNING_SERVICE || ''}}
-                      NEXT_PUBLIC_NETWORK_TYPE=${{ vars.NEXT_PUBLIC_NETWORK_TYPE || ''}}
-                      NEXT_PUBLIC_NFT_STORAGE_KEY=${{ vars.NEXT_PUBLIC_NFT_STORAGE_KEY || ''}}
-                      NEXT_PUBLIC_PRIVY_APP_ID=${{ vars.NEXT_PUBLIC_PRIVY_APP_ID || ''}}
-                      NEXT_PUBLIC_PRIVY_CLIENT_ID=${{ vars.NEXT_PUBLIC_PRIVY_CLIENT_ID || ''}}
-                      NEXT_PUBLIC_TRANSAK_API_KEY=${{ vars.NEXT_PUBLIC_TRANSAK_API_KEY || ''}}
-                      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ vars.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || ''}}
-                      NEXT_PUBLIC_DATADOG_ENV=${{ vars.NEXT_PUBLIC_DATADOG_ENV || ''}}
-                      NEXT_PUBLIC_DATADOG_APP_TOKEN=${{ vars.NEXT_PUBLIC_DATADOG_APP_TOKEN || ''}}
-                      NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${{ vars.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''}}
-                      NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ vars.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN || ''}}
                       NODE_OPTIONS=${{ vars.NODE_OPTIONS || ''}}
+                      USE_NPM_CONTRACTS=${{ steps.contracts-check.outputs.changed == 'false' }}
