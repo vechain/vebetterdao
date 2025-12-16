@@ -159,7 +159,9 @@ export const ActionBanner = () => {
   const showCastVoteBanner = !!account?.address && !isLoading && canUserVote
 
   const showClaimB3trBanner =
-    !!account?.address && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
+    !!account?.address &&
+    votingRewardsQuery.data?.claimableTotal &&
+    Number(votingRewardsQuery.data.claimableTotal) !== 0
 
   // Creator NFT banners logic
   const showCreatorRejectedBanner =
@@ -219,7 +221,8 @@ export const ActionBanner = () => {
     if (showClaimB3trBanner)
       bannerComponents.push(
         <ClaimVotingRewardsBanner
-          roundsRewardsQuery={votingRewardsQuery}
+          roundRewards={votingRewardsQuery.data?.roundsRewards ?? []}
+          totalFormatted={Number(votingRewardsQuery.data?.claimableTotalFormatted ?? 0)}
           gmRewards={Number(gmRewards)}
           key="claim-b3tr"
         />,
@@ -236,7 +239,8 @@ export const ActionBanner = () => {
     showCantVoteBanners,
     CantVoteBanner,
     showClaimB3trBanner,
-    votingRewardsQuery,
+    votingRewardsQuery.data?.roundsRewards,
+    votingRewardsQuery.data?.claimableTotalFormatted,
     gmRewards,
     showCastVoteBanner,
     showCastVoteInProposalBanners,

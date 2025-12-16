@@ -88,6 +88,8 @@ contract X2EarnApps is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   /// @notice The role that can manage the contract settings.
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+  /// @notice The role that can manage apps eligibility
+  bytes32 public constant APP_ELIGIBILITY_ROLE = keccak256("APP_ELIGIBILITY_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -113,6 +115,18 @@ contract X2EarnApps is
    */
   modifier onlyRoleAndAppAdminOrModerator(bytes32 role, bytes32 appId) {
     if (!hasRole(role, msg.sender) && !isAppAdmin(appId, msg.sender) && !isAppModerator(appId, msg.sender)) {
+      revert X2EarnUnauthorizedUser(msg.sender);
+    }
+    _;
+  }
+
+
+  /**
+   * @dev Modifier to restrict access to only the governance role and the specified role
+   * @param role the role to check
+   */
+  modifier onlyGovernanceOrRole(bytes32 role) {
+    if (!hasRole(role, msg.sender) && !hasRole(GOVERNANCE_ROLE, msg.sender)) {
       revert X2EarnUnauthorizedUser(msg.sender);
     }
     _;
@@ -152,7 +166,7 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual onlyRole(GOVERNANCE_ROLE) {
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual onlyGovernanceOrRole(APP_ELIGIBILITY_ROLE) {
     if (!_appSubmitted(_appId)) {
       revert X2EarnNonexistentApp(_appId);
     }

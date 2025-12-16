@@ -4,6 +4,9 @@ import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
+import { useMemo } from "react"
+
+import { useIsAutoVotingEnabledForRounds } from "../../xAllocations/hooks/useIsAutoVotingEnabledForRounds"
 
 import { getRoundRewardQueryKey } from "./useVotingRoundReward"
 
@@ -22,7 +25,8 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
   const queryClient = useQueryClient()
   //Make sure we don't go below 0
   const lastRoundId = Math.max(0, currentRoundId - 1)
-  return useQuery({
+
+  const rewardsQuery = useQuery({
     queryKey: getVotingRewardsQueryKey(voter || "", lastRoundId),
     enabled: !!thor && !!voter,
     queryFn: async () => {
@@ -93,4 +97,50 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
       }
     },
   })
+
+  // Get auto-voting status for all rounds to calculate claimable totals
+  const roundIds = useMemo(
+    () => rewardsQuery.data?.roundsRewards.map(r => r.roundId) ?? [],
+    [rewardsQuery.data?.roundsRewards],
+  )
+  const { data: autoVotingActiveMap } = useIsAutoVotingEnabledForRounds(roundIds)
+
+  // Calculate claimable totals (excluding auto-voting active rounds)
+  const { claimableTotal, claimableTotalFormatted } = useMemo(() => {
+    if (!rewardsQuery.data?.roundsRewards || !rewardsQuery.data?.roundsRewardsWithGm || !autoVotingActiveMap) {
+      return { claimableTotal: "0", claimableTotalFormatted: "0" }
+    }
+
+    const roundsRewards = rewardsQuery.data.roundsRewards
+    const roundsRewardsWithGm = rewardsQuery.data.roundsRewardsWithGm
+
+    const total = roundsRewards.reduce((sum, round, index) => {
+      const hasRewards = round.rewards && Number(round.rewards) > 0
+      const gmRewards = roundsRewardsWithGm[index]?.rewards ?? 0n
+      const hasGmRewards = gmRewards && Number(gmRewards) > 0
+      const isAutoVotingRound = autoVotingActiveMap.get(round.roundId) === true
+
+      if ((hasRewards || hasGmRewards) && !isAutoVotingRound) {
+        // Include both regular rewards and GM rewards
+        return sum.plus(round.rewards).plus(gmRewards.toString())
+      }
+      return sum
+    }, new BigNumber(0))
+
+    return {
+      claimableTotal: total.toFixed(),
+      claimableTotalFormatted: ethers.formatEther(total.toFixed()),
+    }
+  }, [rewardsQuery.data?.roundsRewards, rewardsQuery.data?.roundsRewardsWithGm, autoVotingActiveMap])
+
+  return {
+    ...rewardsQuery,
+    data: rewardsQuery.data
+      ? {
+          ...rewardsQuery.data,
+          claimableTotal,
+          claimableTotalFormatted,
+        }
+      : undefined,
+  }
 }
