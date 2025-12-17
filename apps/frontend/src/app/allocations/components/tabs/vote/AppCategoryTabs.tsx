@@ -294,7 +294,10 @@ export function AppCategoryTabs({
 
             <Collapsible.Root
               open={viewAll}
-              onOpenChange={details => setViewAll(details.open)}
+              onOpenChange={details => {
+                setCurrentPage(1)
+                setViewAll(details.open)
+              }}
               onExitComplete={() =>
                 document.getElementById("tabs:allocation-tabs")?.scrollIntoView({ behavior: "smooth" })
               }>
