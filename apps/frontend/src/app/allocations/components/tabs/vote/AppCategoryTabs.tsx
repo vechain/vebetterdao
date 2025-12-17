@@ -63,6 +63,8 @@ const categoryCollection = createListCollection({
   items: APP_CATEGORIES.map(category => ({ label: category.name, value: category.id })),
 })
 
+const APPS_PER_PAGE = 10
+
 export function AppCategoryTabs({
   apps = [],
   searchQuery = "",
@@ -112,9 +114,9 @@ export function AppCategoryTabs({
 
   const visibleApps = useMemo(() => {
     if (!showPagination) return filteredApps
-    const pageSize = 10
-    const startIndex = (currentPage - 1) * pageSize
-    return filteredApps.slice(startIndex, startIndex + pageSize)
+    const startIndex = (currentPage - 1) * APPS_PER_PAGE
+    const endIndex = startIndex + APPS_PER_PAGE
+    return filteredApps.slice(startIndex, endIndex)
   }, [filteredApps, showPagination, currentPage])
 
   const areAllVisibleAppsSelected = useMemo(() => {
@@ -302,7 +304,7 @@ export function AppCategoryTabs({
                 document.getElementById("tabs:allocation-tabs")?.scrollIntoView({ behavior: "smooth" })
               }>
               <Collapsible.Content display="flex" flexDirection="column" gap="4">
-                {filteredApps.slice(10).map(app => (
+                {filteredApps.slice(APPS_PER_PAGE).map(app => (
                   <AppRadioCard
                     key={app.id}
                     appId={app.id}
@@ -329,7 +331,7 @@ export function AppCategoryTabs({
                   <Pagination.Root
                     defaultPage={1}
                     count={filteredApps.length}
-                    pageSize={10}
+                    pageSize={APPS_PER_PAGE}
                     page={currentPage}
                     onPageChange={details => setCurrentPage(details.page)}
                     display="flex"
