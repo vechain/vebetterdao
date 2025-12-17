@@ -66,7 +66,6 @@ export function AppCategoryTabs({
   onToggleApp,
   tabsListProps,
   showEmptyState = false,
-  showPagination = false,
   initialCategory = "all",
   onCategoryChange,
   roundId,
@@ -107,11 +106,10 @@ export function AppCategoryTabs({
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
   const visibleApps = useMemo(() => {
-    if (!showPagination) return filteredApps
     const startIndex = (currentPage - 1) * APPS_PER_PAGE
     const endIndex = startIndex + APPS_PER_PAGE
     return filteredApps.slice(startIndex, endIndex)
-  }, [filteredApps, showPagination, currentPage])
+  }, [filteredApps, currentPage])
 
   const areAllVisibleAppsSelected = useMemo(() => {
     if (!selectedAppIds || visibleApps.length === 0) return false
