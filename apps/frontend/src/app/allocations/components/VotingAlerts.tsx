@@ -1,3 +1,4 @@
+import { useWallet } from "@vechain/vechain-kit"
 import { useContext, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -23,6 +24,7 @@ export const VotingAlerts = () => {
     isAutoVotingEnabledInCurrentRound,
   } = context
 
+  const { account } = useWallet()
   const { t } = useTranslation()
   const { data: threshold } = useVotingThreshold()
   const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
@@ -45,6 +47,8 @@ export const VotingAlerts = () => {
     }
     return null
   }, [isAutoVotingEnabledInCurrentRound, isAutoVotingEnabled, t])
+
+  if (!account?.address) return null
 
   return (
     <>
