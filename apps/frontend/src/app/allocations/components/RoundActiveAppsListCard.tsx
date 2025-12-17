@@ -19,6 +19,8 @@ import { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
+import { useTotalXAppEarnings } from "@/api/contracts/dbaPool/hooks/useTotalXAppEarnings"
+import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { SearchField } from "@/components/SearchField/SearchField"
 
@@ -34,12 +36,17 @@ const RoundActiveAppCard = ({
   name,
   votesReceived,
   earnings,
+  roundId,
+  percentage,
   onClick,
 }: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & {
   appLogo?: string
   onClick: (id: string) => void
+  roundId: number
+  percentage?: number
 }) => {
   const { t } = useTranslation()
+  const { data } = useTotalXAppEarnings(roundId.toString(), id, percentage ?? 0)
   return (
     <Button unstyled asChild onClick={() => onClick(id)}>
       <Card.Root
@@ -62,7 +69,7 @@ const RoundActiveAppCard = ({
                 <Mark variant="text" fontWeight="semibold" color="text.subtle">
                   {t("Received: ")}
                 </Mark>
-                {getCompactFormatter(2).format(Number(earnings.totalAmount))} {" B3TR"}
+                {getCompactFormatter(2).format(Number(data?.totalEarnings ?? earnings.totalAmount))} {" B3TR"}
                 <Mark fontWeight="semibold">{" • "}</Mark>
               </Text>
             )}
@@ -78,14 +85,6 @@ const RoundActiveAppCard = ({
       </Card.Root>
     </Button>
   )
-  // return (
-  //   {/* <Button key={id} unstyled asChild onClick={() => onClick(id)}> */ }
-  //   {/*     <IconButton variant="ghost" p="0" minWidth="unset"> */ }
-  // {/*       <Icon as={NavArrowRight} boxSize={5} color="icon.default" /> */ }
-  // {/*     </IconButton> */ }
-  // {/*   </Card.Root> */ }
-  // {/* </Button> */ }
-  // )
 }
 
 export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[]; roundId: number }) => {
@@ -94,7 +93,9 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
   const { t } = useTranslation()
 
   const [clickedApp, setClickedApp] = useState<string | undefined>()
+  const { data } = useXAppsShares(apps?.map(app => app.id) ?? [], roundId.toString())
   const appsMap = new Map(apps.map(app => [app.id, app]))
+  const appPercentageMap = new Map(data?.map(({ app, share }) => [app, share]))
 
   const filteredApps = useMemo(() => {
     const trimmedQuery = searchQuery.trim()
@@ -130,6 +131,8 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
                 <RoundActiveAppCard
                   key={app.id}
                   id={app.id}
+                  roundId={roundId}
+                  percentage={appPercentageMap.get(app.id)}
                   name={app.name}
                   votesReceived={app.votesReceived}
                   earnings={app.earnings}
@@ -145,6 +148,8 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
                         <RoundActiveAppCard
                           key={app.id}
                           id={app.id}
+                          roundId={roundId}
+                          percentage={appPercentageMap.get(app.id)}
                           name={app.name}
                           appLogo={app.metadata?.logo}
                           votesReceived={app.votesReceived}
