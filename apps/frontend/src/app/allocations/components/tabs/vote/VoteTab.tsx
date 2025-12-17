@@ -58,7 +58,6 @@ export function VoteTab() {
     })
   }, [hasVoted, isEditingAutoVote, apps, selectedAppIds])
 
-  const handleViewAll = () => setIsSearchOpen(true)
   const handleCloseSearch = () => setIsSearchOpen(false)
 
   const handleCategoryChange = useCallback(
@@ -83,7 +82,7 @@ export function VoteTab() {
           readOnly: true,
           onClick: e => {
             e.preventDefault()
-            handleViewAll()
+            setIsSearchOpen(true)
           },
         }}
         inputWrapperProps={{ hideFrom: "md" }}
@@ -94,7 +93,6 @@ export function VoteTab() {
           apps={sortedApps}
           selectedAppIds={selectedAppIds}
           onToggleApp={onToggleApp}
-          onViewAll={handleViewAll}
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={localSearchQuery}
