@@ -11,7 +11,7 @@ interface AutoVoteModalProps {
   onClose: () => void
 }
 
-const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation#service-fee"
+const AUTOMATION_DOCS_URL = "https://docs.vebetterdao.org/vebetterdao/automation"
 
 export const AutoVoteModal = ({ isOpen, onClose }: AutoVoteModalProps) => {
   const { t } = useTranslation()

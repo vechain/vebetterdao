@@ -58,10 +58,9 @@ export const BaseBottomSheet = ({
       }
     },
     {
-      from: () => [0, dragY],
       filterTaps: true,
       axis: "y",
-      bounds: { top: 0 },
+      pointer: { touch: true },
     },
   )
 

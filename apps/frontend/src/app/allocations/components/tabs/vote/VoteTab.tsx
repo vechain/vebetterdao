@@ -2,7 +2,7 @@
 
 import { Bleed } from "@chakra-ui/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useContext, useState } from "react"
+import { useCallback, useContext, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { SearchField } from "@/components/SearchField/SearchField"
@@ -25,10 +25,11 @@ export function VoteTab() {
     apps,
     roundId,
     selectedAppIds,
-    selectionOrder,
     onToggleApp,
     isStuck,
     hasVoted,
+    hasVotedLoading,
+    hasEnoughVotesAtSnapshot,
     isVoteDataLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
@@ -38,11 +39,25 @@ export function VoteTab() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get("category") || "all"
+  const shouldShowInsufficientPowerAlert = useMemo(
+    () => !hasVotedLoading && !hasVoted && !hasEnoughVotesAtSnapshot,
+    [hasVotedLoading, hasVoted, hasEnoughVotesAtSnapshot],
+  )
 
   const [isSearchOpen, setIsSearchOpen] = useState(searchParams.has("search"))
   const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get("search") || "")
 
-  const handleViewAll = () => setIsSearchOpen(true)
+  const sortedApps = useMemo(() => {
+    if (!hasVoted || isEditingAutoVote) return apps
+    return [...apps].sort((a, b) => {
+      const aVoted = selectedAppIds.has(a.id)
+      const bVoted = selectedAppIds.has(b.id)
+      if (aVoted && !bVoted) return -1
+      if (!aVoted && bVoted) return 1
+      return 0
+    })
+  }, [hasVoted, isEditingAutoVote, apps, selectedAppIds])
+
   const handleCloseSearch = () => setIsSearchOpen(false)
 
   const handleCategoryChange = useCallback(
@@ -64,20 +79,20 @@ export function VoteTab() {
         value={localSearchQuery}
         onChange={setLocalSearchQuery}
         inputProps={{
-          onFocus: e => {
+          readOnly: true,
+          onClick: e => {
             e.preventDefault()
-            handleViewAll()
+            setIsSearchOpen(true)
           },
         }}
         inputWrapperProps={{ hideFrom: "md" }}
       />
       <Bleed inlineStart="4" inlineEnd="4">
         <AppCategoryTabs
-          apps={apps}
+          disabled={shouldShowInsufficientPowerAlert}
+          apps={sortedApps}
           selectedAppIds={selectedAppIds}
-          selectionOrder={selectionOrder}
           onToggleApp={onToggleApp}
-          onViewAll={handleViewAll}
           initialCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           searchQuery={localSearchQuery}
@@ -106,9 +121,8 @@ export function VoteTab() {
         onClose={handleCloseSearch}
         searchQuery={localSearchQuery}
         onSearchChange={setLocalSearchQuery}
-        apps={apps}
+        apps={sortedApps}
         selectedAppIds={selectedAppIds}
-        selectionOrder={selectionOrder}
         onToggleApp={onToggleApp}
         isAtSelectionLimit={isAtSelectionLimit}
         hasVoted={hasVoted}

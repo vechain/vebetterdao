@@ -31,7 +31,6 @@ interface AllocationTabsContextType {
   roundDetails: AllocationRoundDetails
   apps: AppWithVotes[]
   selectedAppIds: Set<string>
-  selectionOrder: string[]
   onToggleApp: (appId: string) => void
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
@@ -65,8 +64,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const pathname = usePathname()
   const isVoteTab = pathname === "/allocations" || pathname === "/allocations/vote"
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
-  // Derive selection order from Set (Set maintains insertion order)
-  const selectionOrder = useMemo(() => [...selectedAppIds], [selectedAppIds])
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
@@ -228,9 +225,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
       // User has voted - show their voted apps
       const votedAppIds = new Set(castVotesEvent.appsIds)
       setSelectedAppIds(votedAppIds)
-    } else {
-      // User hasn't voted - show empty read-only state
-      setSelectedAppIds(new Set())
     }
   }, [hasVoted, castVotesEvent?.appsIds, isModalOpen, isEditingAutoVote, isCastVotesLoading])
 
@@ -248,7 +242,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         roundDetails,
         apps: roundDetails.apps,
         selectedAppIds,
-        selectionOrder,
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
@@ -284,7 +277,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         bottom={0}
         left={0}
         right={0}
-        zIndex={50}>
+        zIndex={2}>
         <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <VoteButtons variant="mobile" />
         </Box>
