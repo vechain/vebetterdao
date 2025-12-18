@@ -63,7 +63,7 @@ export const AppRadioCard = ({
       opacity={disabled && !checked ? 0.5 : 1}
       position="relative">
       {isInteractive && <CheckboxCard.HiddenInput />}
-      {isVotedMode && (
+      {isVotedMode && checked && (
         <Float placement="top-end" offsetX="10">
           <Tag.Root bg="status.info.subtle" border="sm" borderColor="borders.active" borderRadius="4px">
             <Tag.Label textStyle={{ base: "xxs", md: "sm" }} color="status.info.strong">
