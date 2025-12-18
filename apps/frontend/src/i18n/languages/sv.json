@@ -2193,5 +2193,9 @@
   "Allocation": "Tilldelning",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Automatisk röstning är aktiverad! Hämta dina tidigare belöningar nu. Framtida belöningar kommer att ske automatiskt.",
   "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automatisera dina veckovisa röster och belöningsanspråk. Inget arbete behövs, bara fortsätt vara aktiv i DAO.",
-  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "En serviceavgift på 10% tillämpas på dina veckobelöningar, begränsad till 100 B3TR."
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "En serviceavgift på 10% tillämpas på dina veckobelöningar, begränsad till 100 B3TR.",
+  "Auto-claimed voting rewards for you": "Automatiskt inkasserade röstbelöningar åt dig",
+  "Auto-claimed voting rewards": "Automatiskt inkasserade röstbelöningar",
+  "Potential B3TR amount to receive": "Potentiell B3TR-ersättning att få",
+  "Potential: ": "Potential: "
 }

@@ -2193,5 +2193,9 @@
   "Allocation": "配分",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "自動投票が有効になりました！ 過去の報酬を今すぐ受け取ってください。将来のものは自動になります。",
   "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "ウィークリーボートと報酬請求を自動化します。努力は不要で、DAOでアクティブであるだけです。",
-  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "ウィークリーリワードには10％のサービス料が適用され、上限は100 B3TRです。"
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "ウィークリーリワードには10％のサービス料が適用され、上限は100 B3TRです。",
+  "Auto-claimed voting rewards for you": "あなたのために自動請求された投票報酬",
+  "Auto-claimed voting rewards": "自動請求された投票報酬",
+  "Potential B3TR amount to receive": "受け取る可能性のあるB3TR額",
+  "Potential: ": "潜在的な: "
 }

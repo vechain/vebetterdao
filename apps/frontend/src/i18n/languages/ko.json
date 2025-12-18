@@ -2193,5 +2193,9 @@
   "Allocation": "할당",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "자동 투표가 활성화되었습니다! 지금까지의 보상을 청구하세요. 앞으로의 보상은 자동으로 처리됩니다.",
   "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "주간 투표와 보상 청구를 자동화하세요. 노력이 필요 없으며, DAO에서 활동적으로 남아있기만 하면 됩니다.",
-  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "주간 보상에 대해 10%의 서비스 요금이 적용되며, 최대 100 B3TR로 한정됩니다."
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "주간 보상에 대해 10%의 서비스 요금이 적용되며, 최대 100 B3TR로 한정됩니다.",
+  "Auto-claimed voting rewards for you": "자동 청구된 투표 보상",
+  "Auto-claimed voting rewards": "자동 청구된 투표 보상",
+  "Potential B3TR amount to receive": "수령할 가능성 있는 B3TR 양",
+  "Potential: ": "가능성: "
 }
