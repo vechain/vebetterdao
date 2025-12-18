@@ -320,7 +320,14 @@ export function AppCategoryTabs({
                 ))}
               </Collapsible.Content>
               <Collapsible.Trigger asChild>
-                <Button mt={viewAll ? "4" : "unset"} ml="auto" height="5" flexShrink={0} variant="link" p="0" size="sm">
+                <Button
+                  mt={viewAll ? "4" : "unset"}
+                  mx={{ base: "auto", md: "auto 0" }}
+                  height="5"
+                  flexShrink={0}
+                  variant="link"
+                  p="0"
+                  size="sm">
                   {viewAll ? t("View less") : t("View all")}
                 </Button>
               </Collapsible.Trigger>
