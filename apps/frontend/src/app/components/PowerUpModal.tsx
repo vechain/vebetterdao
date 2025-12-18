@@ -73,7 +73,10 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const vot3BalanceScaled = useMemo(() => vot3Balance?.scaled ?? "0", [vot3Balance?.scaled])
 
   const handleAmountChange = (value: string) => {
-    const rawAmount = value.replaceAll(",", ".").replace(/^0+(?=\d)/, "")
+    const rawAmount = value
+      .replaceAll(",", ".")
+      .replaceAll("-", "")
+      .replace(/^0+(?=\d)/, "")
     const dotIndex = rawAmount.indexOf(".")
     setAmount(
       dotIndex >= 0 ? rawAmount.slice(0, dotIndex + 1) + rawAmount.slice(dotIndex + 1, dotIndex + 19) : rawAmount,
@@ -312,7 +315,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                         textOverflow="ellipsis"
                         p="0"
                         allowOverflow={false}
-                        readOnly={convertTo === "b3tr"}>
+                        readOnly={convertTo === "b3tr"}
+                        min={0}>
                         <NumberInput.Input
                           min={0}
                           p="0"
