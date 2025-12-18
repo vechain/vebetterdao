@@ -3,7 +3,6 @@
 import { Box, Card, Icon, Separator, Text, VStack, HStack, SimpleGrid, Button, GridItem } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Gift, NavArrowRight, SmartphoneDevice, Group, Flash, List } from "iconoir-react"
-import { useRouter, usePathname } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
@@ -21,11 +20,6 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
   const [open, setOpen] = useState(false)
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-  const pathname = usePathname()
-  const router = useRouter()
-
-  const isRoundTab = pathname === "/allocations/round"
-
   const distribution = useMemo(() => {
     const toApps = Number(roundDetails.xAllocationsAmount)
     const toVoters = Number(roundDetails.vote2EarnAmount)
@@ -49,13 +43,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
       <ConditionalWrapper
         condition={isMobile}
         wrapper={({ children }) => (
-          <Button
-            unstyled
-            asChild
-            onClick={() => {
-              if (isRoundTab) router.push(`/allocations/history/${roundDetails.currentRoundId}`)
-              else setOpen(true)
-            }}>
+          <Button unstyled asChild onClick={() => setOpen(true)}>
             {children}
           </Button>
         )}>
