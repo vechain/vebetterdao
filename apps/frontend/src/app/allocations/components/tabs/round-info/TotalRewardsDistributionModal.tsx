@@ -50,7 +50,9 @@ export const TotalRewardsDistributionModal = ({
   onClose: VoidFunction
 }) => {
   const { t } = useTranslation()
-  const { apps, totalVoters, vote2EarnAmount, gmAmount, xAllocationsAmount, treasuryAmount } = roundDetails
+  const { apps, totalVoters, vote2EarnAmount, gmAmount, xAllocationsAmount, treasuryAmount, id, currentRoundId } =
+    roundDetails
+  const isCurrentRound = id === currentRoundId
   const votingRewardsTotal = vote2EarnAmount + gmAmount
   const rewardsTotal = votingRewardsTotal + xAllocationsAmount + treasuryAmount
   const percentages = {
@@ -109,7 +111,9 @@ export const TotalRewardsDistributionModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} showHeader={false} showCloseButton={false} modalProps={{ size: "sm" }}>
       <HStack justifyContent={{ base: "center", md: "space-between" }}>
-        <Heading size="xl">{t("Total rewards distributed")}</Heading>
+        <Heading size="xl">
+          {isCurrentRound ? t("Total rewards to distribute") : t("Total rewards distributed")}
+        </Heading>
         <Dialog.CloseTrigger hideBelow="md" position="static" asChild>
           <CloseButton />
         </Dialog.CloseTrigger>
