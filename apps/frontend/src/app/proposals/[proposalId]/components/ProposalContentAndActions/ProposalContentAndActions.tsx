@@ -16,7 +16,14 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
 import { useColorModeValue } from "@/components/ui/color-mode"
-import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
+import {
+  AttachmentFile,
+  GrantProposalEnriched,
+  ProposalEnriched,
+  ProposalState,
+  ProposalType,
+} from "@/hooks/proposals/grants/types"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { ProposalExecutableActions } from "../../../../../components/ProposalExecutableActions/ProposalExecutableActions"
 import {
@@ -27,6 +34,7 @@ import { ProposalFormAction } from "../../../../../store/useProposalFormStore"
 import { removeTitleHeading } from "../../../../../utils/MarkdownUtils/MarkdownUtils"
 import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { FileAttachmentPreview } from "../../../../grants/components/FileAttachmentPreview"
+import { B3MOProposalReviewBanner } from "../B3MOProposalReviewBanner/B3MOProposalReviewBanner"
 import { SocialLink } from "../SocialLink/SocialLink"
 
 import "@/app/theme/swiper-custom.css"
@@ -51,6 +59,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
   const markdownPreviewTextColor = useColorModeValue("#2D3748", "#E4E4E4")
   const markdownPreviewBackgroundColor = useColorModeValue("#F8F8F8", "#2D2D2F")
+  const { isMobile } = useBreakpoints()
   // ==========================================
   // COMPUTED VALUES & CONSTANTS
   // ==========================================
@@ -275,6 +284,13 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       {/* Standard proposal content */}
       {isStandardProposal(proposal) && (
         <VStack gap={8} align="flex-start" w="full">
+          {/* B3MO Proposal Review Banner */}
+          {!isMobile && (
+            <B3MOProposalReviewBanner
+              proposalId={proposal?.id}
+              status={proposal?.state === ProposalState.Succeeded ? "active" : "pending"}
+            />
+          )}
           {/* Markdown content */}
           <Box
             px={0}
@@ -306,7 +322,6 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               }}
             />
           </Box>
-
           {/* Error display */}
           {proposalDecodeError && (
             <Alert.Root status="error" borderRadius={"lg"}>
@@ -317,7 +332,6 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               </Box>
             </Alert.Root>
           )}
-
           {/* Executable actions */}
           {!!actions.length && <ProposalExecutableActions actions={actions} />}
         </VStack>

@@ -1,4 +1,4 @@
-import { Grid, GridItem, HStack, Icon, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Grid, GridItem, HStack, Icon, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
@@ -16,6 +16,7 @@ import { useProposalEnrichedById } from "../../../../hooks/proposals/common/useP
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 import { PageBreadcrumb } from "../../../components/PageBreadcrumb/PageBreadcrumb"
 
+import { B3MOProposalReviewBanner } from "./B3MOProposalReviewBanner/B3MOProposalReviewBanner"
 import { ProposalInteractionCard } from "./ProposalInteractionCard/ProposalInteractionCard"
 import { ProposalOverview } from "./ProposalOverview/ProposalOverview"
 import { ProposalOverviewHeader } from "./ProposalOverviewHeader/ProposalOverviewHeader"
@@ -62,8 +63,8 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
 
-  const isVotingPhase = proposal?.state === ProposalState.Active
-  const targetDate = isVotingPhase ? votingEndDate : supportEndDate
+  const activeProposal = proposal?.state === ProposalState.Active
+  const targetDate = activeProposal ? votingEndDate : supportEndDate
 
   const overviewHref = isGrant ? `/grants/${proposalId}` : `/proposals/${proposalId}`
 
@@ -132,14 +133,14 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
     () => (
       <ProposalInteractionCard
         proposal={proposal}
-        isVotingPhase={isVotingPhase}
+        isVotingPhase={activeProposal}
         daysLeft={daysLeft}
         hoursLeft={hoursLeft}
         minutesLeft={minutesLeft}
         isLoading={isLoading}
       />
     ),
-    [proposal, isVotingPhase, daysLeft, hoursLeft, minutesLeft, isLoading],
+    [proposal, activeProposal, daysLeft, hoursLeft, minutesLeft, isLoading],
   )
 
   const memoizedProposalTimeline = useMemo(() => <ProposalTimeline proposal={proposal} />, [proposal])
@@ -175,15 +176,28 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
               {/* Mobile */}
               {isMobile ? (
                 <>
-                  {!!proposal && (
-                    <ProposalOverviewHeader
-                      proposal={proposal}
-                      hasUserDeposited={!!hasUserDeposited}
-                      hasUserVoted={!!hasUserVoted}
-                      depositReached={!!depositReached}
-                      proposerAddress={proposerAddress}
-                    />
-                  )}
+                  <VStack align="stretch" gap={0} w="full">
+                    {!!proposal && (
+                      <ProposalOverviewHeader
+                        proposal={proposal}
+                        hasUserDeposited={!!hasUserDeposited}
+                        hasUserVoted={!!hasUserVoted}
+                        depositReached={!!depositReached}
+                        proposerAddress={proposerAddress}
+                      />
+                    )}
+
+                    {/* B3MO Proposal Review Banner - only for standard proposals */}
+                    {!isGrant && (
+                      <Box mt={{ base: 8, md: 0 }}>
+                        <B3MOProposalReviewBanner
+                          proposalId={proposalId}
+                          status={proposal?.state === ProposalState.Succeeded ? "active" : "pending"}
+                        />
+                      </Box>
+                    )}
+                  </VStack>
+
                   <Tabs.Root defaultValue="session" w="full" fitted>
                     <Tabs.List>
                       <Tabs.Trigger value="session">{t("Session")}</Tabs.Trigger>

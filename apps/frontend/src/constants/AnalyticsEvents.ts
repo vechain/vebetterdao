@@ -30,6 +30,7 @@ export enum ButtonClickProperties {
   CONTINUE_CREATE_PROPOSAL_ROUND_SELECTION = "Continue Create Proposal Round Selection",
   CONTINUE_CREATE_PROPOSAL_SUPPORT = "Continue Create Proposal Support",
   CREATE_PROPOSAL_SUBMITED = "Create Proposal Submited",
+  VIEW_B3MO_FULL_ANALYSIS = "View B3MO Full Analysis",
   // JOIN COMMUNITY
   JOIN_COMMUNITY = "Join Community",
   JOIN_DISCORD = "Join Discord",

@@ -212,7 +212,7 @@ const config = defineConfig({
           secondary: { value: { base: "#B1F16C", _dark: "#B4EA82" } },
           tertiary: { value: { base: "white", _dark: "black" } },
           "secondary-strong": { value: { base: "#6DCB09", _dark: "#4F5945" } },
-          "secondary-stronger": { value: { base: "#448300", _dark: "#383F31" } },
+          "secondary-stronger": { value: { base: "#448300", _dark: "#6DCB09" } },
           "secondary-subtle": { value: { base: "#CDFF9F", _dark: "#CDFF9F" } },
         },
 

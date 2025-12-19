@@ -37,7 +37,7 @@ export const ProposalOverviewHeader = ({
         wordBreak="break-word"
         overflowWrap="break-word"
         size={["2xl", "4xl"]}
-        py={{ base: "4", md: "10" }}>
+        pt={{ base: "4", md: "10" }}>
         {proposal?.title}
       </Heading>
     </VStack>
