@@ -12,8 +12,6 @@ type B3MOProposalReviewBannerProps = {
   status?: "pending" | "active"
 }
 
-const b3moDomain = "https://d1px0i9vqvp8ud.cloudfront.net" // TODO: To be updated once the AI team provides the correct domain
-
 export const B3MOProposalReviewBanner = ({ proposalId, status }: B3MOProposalReviewBannerProps) => {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
@@ -23,7 +21,7 @@ export const B3MOProposalReviewBanner = ({ proposalId, status }: B3MOProposalRev
   const b3moIcon = useColorModeValue("/assets/icons/b3mo.webp", "/assets/icons/b3mo-dark.webp")
 
   const handleFullAnalysisClick = () => {
-    if (isLoading || !proposalId) {
+    if (isLoading || !proposalId || !status) {
       return
     }
 
@@ -35,15 +33,16 @@ export const B3MOProposalReviewBanner = ({ proposalId, status }: B3MOProposalRev
       status,
     })
 
-    const pdfUrl = `${b3moDomain}/proposal_summaries/${proposalId}/${status}/outputs/07_phase1_support_summary.pdf`
+    // Use Next.js API route to proxy the PDF
+    const pdfUrl = `/api/download-b3mo-pdf?proposalId=${proposalId}&status=${status}`
 
-    // Open PDF in new tab - browser will handle download/display
+    // Open in new tab - API route will serve with proper headers
     window.open(pdfUrl, "_blank", "noopener,noreferrer")
 
     // Reset loading state after a brief moment
     setTimeout(() => {
       setIsLoading(false)
-    }, 1000)
+    }, 500)
   }
 
   return (
