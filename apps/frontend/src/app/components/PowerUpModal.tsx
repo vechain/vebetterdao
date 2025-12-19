@@ -72,16 +72,16 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const b3trBalanceScaled = useMemo(() => b3trBalance?.scaled ?? "0", [b3trBalance?.scaled])
   const vot3BalanceScaled = useMemo(() => vot3Balance?.scaled ?? "0", [vot3Balance?.scaled])
 
-  const handleAmountChange = (value: string) => {
-    const rawAmount = value
-      .replaceAll(",", ".")
-      .replaceAll("-", "")
-      .replace(/^0+(?=\d)/, "")
-    const dotIndex = rawAmount.indexOf(".")
+  const handleAmountChange = (value: string) =>
     setAmount(
-      dotIndex >= 0 ? rawAmount.slice(0, dotIndex + 1) + rawAmount.slice(dotIndex + 1, dotIndex + 19) : rawAmount,
+      value
+        .replaceAll(",", ".") // Replace comma with dot (mobile virtual keyboard behavior)
+        .replace(/[^\d\\.]/g, "") // Filter non-numeric characters except dot
+        .replace(/^0+(?=\d)/, "") // Filter 00000
+        .replace(/\.(?=.*\.)/g, "") // Filter duplicate decimal separators
+        .replace(/(\.\d{18})\d+/, "$1"), // remove digits after 18th decimal
     )
-  }
+
   const handleAmountBlur = () => setAmount(prev => prev.replace(/\.$/, ""))
   const invalidAmount = !amount || Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
 
@@ -221,7 +221,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
             </HStack>
           </HStack>
         </VStack>
-        <Collapsible.Root w="full" pt="4" defaultOpen>
+        <Collapsible.Root w="full" pt="4">
           <Collapsible.Trigger w="full" display="flex" alignItems="center" justifyContent="space-between">
             <Text textStyle="sm" color="text.subtle">
               {t("Transaction details")}
@@ -252,7 +252,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   return (
     <Modal
       fullHeight
-      modalProps={{ size: "md" }}
+      modalProps={{ closeOnInteractOutside: false, size: "md" }}
       isOpen={isOpen && !isTxModalOpen}
       onClose={handleClose}
       title={
@@ -308,7 +308,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   </Field.Label>
 
                   <HStack w="full" justifyContent="space-between">
-                    <VStack align="start" gap="2">
+                    <VStack align="start" gap="2" w="full">
                       <NumberInput.Root
                         asChild
                         autoFocus={convertTo === "vot3"}
@@ -389,7 +389,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   </Field.Label>
 
                   <HStack w="full" justifyContent="space-between" gap="2">
-                    <VStack align="start" gap="1">
+                    <VStack align="start" gap="1" w="full">
                       <NumberInput.Root
                         asChild
                         autoFocus={convertTo === "b3tr"}
