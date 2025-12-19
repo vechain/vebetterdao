@@ -42,6 +42,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
         modal: {
           backgroundColor: bgPrimary,
           border: `1px solid ${borderSecondary}`,
+          useBottomSheetOnMobile: true,
         },
         buttons: {
           primaryButton: {
