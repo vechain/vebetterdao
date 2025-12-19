@@ -284,8 +284,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       {/* Standard proposal content */}
       {isStandardProposal(proposal) && (
         <VStack gap={8} align="flex-start" w="full">
-          {/* B3MO Proposal Review Banner */}
-          {!isMobile && (
+          {/* B3MO Proposal Review Banner - only show for Pending or Succeeded states */}
+          {!isMobile && (proposal?.state === ProposalState.Pending || proposal?.state === ProposalState.Succeeded) && (
             <B3MOProposalReviewBanner
               proposalId={proposal?.id}
               status={proposal?.state === ProposalState.Succeeded ? "active" : "pending"}

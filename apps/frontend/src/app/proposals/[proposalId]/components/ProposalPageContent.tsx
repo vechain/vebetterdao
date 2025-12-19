@@ -187,15 +187,16 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
                       />
                     )}
 
-                    {/* B3MO Proposal Review Banner - only for standard proposals */}
-                    {!isGrant && (
-                      <Box mt={{ base: 8, md: 0 }}>
-                        <B3MOProposalReviewBanner
-                          proposalId={proposalId}
-                          status={proposal?.state === ProposalState.Succeeded ? "active" : "pending"}
-                        />
-                      </Box>
-                    )}
+                    {/* B3MO Proposal Review Banner - only for standard proposals in Pending or Succeeded state */}
+                    {!isGrant &&
+                      (proposal?.state === ProposalState.Pending || proposal?.state === ProposalState.Succeeded) && (
+                        <Box mt={{ base: 8, md: 0 }}>
+                          <B3MOProposalReviewBanner
+                            proposalId={proposalId}
+                            status={proposal?.state === ProposalState.Succeeded ? "active" : "pending"}
+                          />
+                        </Box>
+                      )}
                   </VStack>
 
                   <Tabs.Root defaultValue="session" w="full" fitted>
