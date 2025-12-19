@@ -78,12 +78,14 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
         .replaceAll(",", ".") // Replace comma with dot (mobile virtual keyboard behavior)
         .replace(/[^\d\\.]/g, "") // Filter non-numeric characters except dot
         .replace(/^0+(?=\d)/, "") // Filter 00000
+        .replace(/^\.(?=\d)/, "0.") // append 0 for floating numbers starting with dot
         .replace(/\.(?=.*\.)/g, "") // Filter duplicate decimal separators
         .replace(/(\.\d{18})\d+/, "$1"), // remove digits after 18th decimal
     )
 
   const handleAmountBlur = () => setAmount(prev => prev.replace(/\.$/, ""))
-  const invalidAmount = !amount || Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
+  const invalidAmount =
+    !amount || amount === "." || Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
 
   const handleClose = useCallback(() => {
     onClose()
