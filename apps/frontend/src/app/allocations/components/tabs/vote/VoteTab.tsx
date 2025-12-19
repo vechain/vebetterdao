@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next"
 import { SearchField } from "@/components/SearchField/SearchField"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { SearchAppsBottomSheet } from "../../SearchAppsBottomSheet"
 import { VotingAlerts } from "../../VotingAlerts"
 import { AllocationTabsContext } from "../AllocationTabsProvider"
 
@@ -44,7 +43,6 @@ export function VoteTab() {
     [hasVotedLoading, hasVoted, hasEnoughVotesAtSnapshot],
   )
 
-  const [isSearchOpen, setIsSearchOpen] = useState(searchParams.has("search"))
   const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get("search") || "")
 
   const sortedApps = useMemo(() => {
@@ -57,8 +55,6 @@ export function VoteTab() {
       return 0
     })
   }, [hasVoted, isEditingAutoVote, apps, selectedAppIds])
-
-  const handleCloseSearch = () => setIsSearchOpen(false)
 
   const handleCategoryChange = useCallback(
     (category: string) => {
@@ -78,13 +74,6 @@ export function VoteTab() {
         placeholder={t("Search app")}
         value={localSearchQuery}
         onChange={setLocalSearchQuery}
-        inputProps={{
-          readOnly: true,
-          onClick: e => {
-            e.preventDefault()
-            setIsSearchOpen(true)
-          },
-        }}
         inputWrapperProps={{ hideFrom: "md" }}
       />
       <Bleed inlineStart="4" inlineEnd="4">
@@ -105,7 +94,6 @@ export function VoteTab() {
             bg: isStuck ? "bg.primary" : undefined,
             zIndex: 2,
           }}
-          showPagination
           hasVoted={hasVoted}
           isVoteDataLoading={isVoteDataLoading}
           isAutoVotingEnabled={isAutoVotingEnabled}
@@ -114,23 +102,6 @@ export function VoteTab() {
           isAtSelectionLimit={isAtSelectionLimit}
         />
       </Bleed>
-
-      <SearchAppsBottomSheet
-        roundId={roundId}
-        isOpen={isSearchOpen}
-        onClose={handleCloseSearch}
-        searchQuery={localSearchQuery}
-        onSearchChange={setLocalSearchQuery}
-        apps={sortedApps}
-        selectedAppIds={selectedAppIds}
-        onToggleApp={onToggleApp}
-        isAtSelectionLimit={isAtSelectionLimit}
-        hasVoted={hasVoted}
-        isVoteDataLoading={isVoteDataLoading}
-        isAutoVotingEnabled={isAutoVotingEnabled}
-        isAutoVotingEnabledInCurrentRound={isAutoVotingEnabledInCurrentRound}
-        isEditingAutoVote={isEditingAutoVote}
-      />
     </>
   )
 }

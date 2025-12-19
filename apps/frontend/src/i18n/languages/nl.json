@@ -2194,5 +2194,10 @@
   "Allocation": "Toewijzing",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Automatisch stemmen is ingeschakeld! Claim nu je eerdere beloningen. Toekomstige beloningen worden automatisch verwerkt.",
   "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automatiseer je wekelijkse stemmen en beloningsclaims. Geen moeite nodig, blijf gewoon actief in de DAO.",
-  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Een servicetoeslag van 10% is van toepassing op je wekelijkse beloningen, met een maximum van 100 B3TR."
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Een servicetoeslag van 10% is van toepassing op je wekelijkse beloningen, met een maximum van 100 B3TR.",
+  "Auto-claimed voting rewards for you": "Automatisch geclaimde stem beloningen voor jou",
+  "Auto-claimed voting rewards": "Automatisch geclaimde stem beloningen",
+  "Potential B3TR amount to receive": "Potentieel B3TR-bedrag om te ontvangen",
+  "Potential: ": "Potentieel: ",
+  "Total rewards to distribute": "Totale beloningen om te verdelen"
 }

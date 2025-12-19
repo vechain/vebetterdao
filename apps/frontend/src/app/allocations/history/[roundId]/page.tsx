@@ -44,7 +44,11 @@ async function HistoryDetailContent({ roundIdParam }: { roundIdParam: string }) 
         </VStack>
         <RoundDistributionCard roundDetails={roundDetails} />
         <UserVotingActivityCard roundDetails={roundDetails} />
-        <RoundActiveAppsListCard roundId={roundDetails.id} apps={roundDetails.apps} />
+        <RoundActiveAppsListCard
+          currentRoundId={roundDetails.currentRoundId}
+          roundId={roundDetails.id}
+          apps={roundDetails.apps}
+        />
       </VStack>
     </VStack>
   )

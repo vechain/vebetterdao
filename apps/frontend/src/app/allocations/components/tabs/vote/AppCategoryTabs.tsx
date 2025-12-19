@@ -2,7 +2,6 @@
 
 import {
   Button,
-  ButtonGroup,
   Circle,
   Collapsible,
   createListCollection,
@@ -10,20 +9,16 @@ import {
   Heading,
   HStack,
   Icon,
-  IconButton,
-  Pagination,
   Portal,
   Select,
   Skeleton,
   Tabs,
-  Text,
   VStack,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useXAppsSharesBasedOnMaxAllocation } from "@/api/contracts/xApps/hooks/useXAppSharesBasedOnMaxAllocation"
 import { AppWithVotes } from "@/app/allocations/lib/data"
@@ -46,7 +41,6 @@ interface AppCategoryTabsProps {
   onToggleApp?: (appId: string) => void
   tabsListProps?: Record<string, any>
   showEmptyState?: boolean
-  showPagination?: boolean
   initialCategory?: string
   onCategoryChange?: (category: string) => void
   roundId?: string
@@ -72,7 +66,6 @@ export function AppCategoryTabs({
   onToggleApp,
   tabsListProps,
   showEmptyState = false,
-  showPagination = false,
   initialCategory = "all",
   onCategoryChange,
   roundId,
@@ -113,11 +106,10 @@ export function AppCategoryTabs({
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
   const visibleApps = useMemo(() => {
-    if (!showPagination) return filteredApps
     const startIndex = (currentPage - 1) * APPS_PER_PAGE
     const endIndex = startIndex + APPS_PER_PAGE
     return filteredApps.slice(startIndex, endIndex)
-  }, [filteredApps, showPagination, currentPage])
+  }, [filteredApps, currentPage])
 
   const areAllVisibleAppsSelected = useMemo(() => {
     if (!selectedAppIds || visibleApps.length === 0) return false
@@ -257,6 +249,7 @@ export function AppCategoryTabs({
             {isVoteDataLoading ? (
               // Show skeleton cards while vote data is loading (matches AppRadioCard styling)
               Array.from({ length: visibleApps.length || 5 }).map((_, index) => (
+                // eslint-disable-next-line react/no-array-index-key
                 <Skeleton key={index} height={{ base: "70px", md: "84px" }} rounded="lg" />
               ))
             ) : filteredApps.length > 0 ? (
@@ -326,52 +319,18 @@ export function AppCategoryTabs({
                   />
                 ))}
               </Collapsible.Content>
-              <HStack justifyContent="space-between" my="4">
-                {showPagination && !viewAll && (
-                  <Pagination.Root
-                    defaultPage={1}
-                    count={filteredApps.length}
-                    pageSize={APPS_PER_PAGE}
-                    page={currentPage}
-                    onPageChange={details => setCurrentPage(details.page)}
-                    display="flex"
-                    alignItems={{ base: "start", md: "center" }}
-                    justifyContent="space-between"
-                    gap="4">
-                    {!viewAll && (
-                      <HStack w="full" flexWrap="wrap" justifyContent={{ md: "space-between" }} gap="4">
-                        <HStack gap="1">
-                          <Text textStyle="sm">{t("Showing")}</Text>
-
-                          <Pagination.PageText format="long" textStyle="sm" />
-                        </HStack>
-
-                        <ButtonGroup variant="ghost" size="sm">
-                          <Pagination.PrevTrigger asChild>
-                            <IconButton variant="ghost">
-                              <HiChevronLeft />
-                            </IconButton>
-                          </Pagination.PrevTrigger>
-                          <Pagination.Items
-                            render={page => <IconButton disabled={page.value === currentPage}>{page.value}</IconButton>}
-                          />
-                          <Pagination.NextTrigger asChild>
-                            <IconButton variant="ghost">
-                              <HiChevronRight />
-                            </IconButton>
-                          </Pagination.NextTrigger>
-                        </ButtonGroup>
-                      </HStack>
-                    )}
-                  </Pagination.Root>
-                )}
-
-                <Collapsible.Trigger asChild>
-                  <Button ml="auto" height="5" flexShrink={0} variant="link" p="0" size="sm">
-                    {viewAll ? t("View less") : t("View all")}
-                  </Button>
-                </Collapsible.Trigger>
-              </HStack>
+              <Collapsible.Trigger asChild>
+                <Button
+                  mt={viewAll ? "4" : "unset"}
+                  mx={{ base: "auto", md: "auto 0" }}
+                  height="5"
+                  flexShrink={0}
+                  variant="link"
+                  p="0"
+                  size="sm">
+                  {viewAll ? t("View less") : t("View all")}
+                </Button>
+              </Collapsible.Trigger>
             </Collapsible.Root>
           </Tabs.Content>
         </Tabs.Root>

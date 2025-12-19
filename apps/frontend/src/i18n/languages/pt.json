@@ -2193,5 +2193,10 @@
   "Allocation": "Alocação",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Votação automática está ativada! Resgate suas recompensas passadas agora. As futuras serão automáticas.",
   "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Automatize seus votos semanais e reivindicações de recompensas. Nenhum esforço necessário, apenas continue ativo no DAO.",
-  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Uma taxa de serviço de 10% se aplica às suas recompensas semanais, limitada a 100 B3TR."
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Uma taxa de serviço de 10% se aplica às suas recompensas semanais, limitada a 100 B3TR.",
+  "Auto-claimed voting rewards for you": "Recompensas de votação reivindicadas automaticamente para você",
+  "Auto-claimed voting rewards": "Recompensas de votação reivindicadas automaticamente",
+  "Potential B3TR amount to receive": "Quantidade potencial de B3TR a receber",
+  "Potential: ": "Potencial: ",
+  "Total rewards to distribute": "Recompensas totais para distribuir"
 }

@@ -2193,5 +2193,10 @@
   "Allocation": "Tahsis",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Otomatik oy verme etkin! Geçmiş ödüllerinizi şimdi talep edin. Gelecek olanlar otomatik olacak.",
   "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "Haftalık oylarınızı ve ödül taleplerinizi otomatikleştirin. Hiçbir çabaya gerek yok, sadece DAO'da aktif kalın.",
-  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Haftalık ödüllerinize %10 hizmet ücreti uygulanır, 100 B3TR ile sınırlıdır."
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "Haftalık ödüllerinize %10 hizmet ücreti uygulanır, 100 B3TR ile sınırlıdır.",
+  "Auto-claimed voting rewards for you": "Sizin için otomatik talep edilen oylama ödülleri",
+  "Auto-claimed voting rewards": "Otomatik talep edilen oylama ödülleri",
+  "Potential B3TR amount to receive": "Alınabilecek potansiyel B3TR miktarı",
+  "Potential: ": "Potansiyel: ",
+  "Total rewards to distribute": "Dağıtılacak toplam ödül"
 }
