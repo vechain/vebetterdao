@@ -15,6 +15,14 @@ export async function middleware(request: NextRequest) {
   const appUrl = new URL(request.url)
   const refererURL = referer ? new URL(request.headers.get("referer") ?? "") : null
   const isAllowedOrigin = refererURL && refererURL.origin === appUrl.origin
+  console.log("isAllowedOrigin", isAllowedOrigin)
+  console.log("refererURL", refererURL)
+  console.log("appUrl", appUrl)
+  console.log("referer", referer)
+  console.log("request.url", request.url)
+  console.log("request.method", request.method)
+  console.log("request.body", request.body)
+  console.log("request.nextUrl", request.nextUrl)
   if (!isAllowedOrigin) {
     return NextResponse.json({ error: "Access Denied" }, { status: 403 })
   }
