@@ -70,7 +70,7 @@ export const VotingPowerBox = () => {
               {t("Power up")}
             </Button>
 
-            <PowerUpModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+            <PowerUpModal title={t("Power up")} isOpen={isOpen} onClose={() => setIsOpen(false)} />
           </>
         )
       }

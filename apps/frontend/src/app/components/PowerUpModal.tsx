@@ -44,6 +44,7 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
+  title?: string
 }
 
 enum PowerUpStep {
@@ -53,7 +54,7 @@ enum PowerUpStep {
 
 const compactFormatter = getCompactFormatter(4)
 
-export const PowerUpModal = ({ isOpen, onClose }: Props) => {
+export const PowerUpModal = ({ title = "Convert tokens", isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
@@ -87,14 +88,17 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
 
   const handleAmountBlur = () => setAmount(prev => prev.replace(/\.$/, ""))
   const invalidAmount =
-    !amount || amount === "." || Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
+    !amount ||
+    amount === "." ||
+    Number(amount) === 0 ||
+    Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
   const showTransferredVOT3Alert =
     convertTo === "b3tr" && BigInt(vot3Balance?.original || "0") > BigInt(swappableVot3Balance?.original || "0")
 
   const handleClose = useCallback(() => {
     onClose()
     setConvertTo("vot3")
-    setAmount("")
+    setAmount("0")
     setStep(PowerUpStep.SWAP)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -253,7 +257,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
       title={
         <HStack alignItems="center" justifyContent="space-between" mb={{ base: "unset", md: "8" }}>
           <Heading textAlign="left" size="xl">
-            {t("Power up")}
+            {title ?? t("Convert tokens")}
           </Heading>
           <Dialog.CloseTrigger asChild position="static">
             <CloseButton size="md" />
