@@ -34,28 +34,16 @@ function setHeaders(response: NextResponse, headers: Record<string, string>) {
 export async function middleware(request: NextRequest) {
   const appOrigin = getAppOrigin(request)
 
-  console.log("appOrigin", appOrigin)
-
   // Browser hardening: when present, this prevents cross-site calls in real browsers.
   // (Non-browser clients can spoof headers; session auth is still the real gate.)
   const secFetchSite = request.headers.get("sec-fetch-site")
-  console.log("secFetchSite", secFetchSite)
   if (secFetchSite && secFetchSite !== "same-origin") {
     return NextResponse.json({ error: "Access Denied" }, { status: 403 })
   }
 
   // Prefer Origin (CORS), fall back to Referer for same-origin GETs that omit Origin.
   const requestOrigin = safeOrigin(request.headers.get("origin")) ?? safeOrigin(request.headers.get("referer"))
-  console.log("requestOrigin", requestOrigin)
   const isAllowedOrigin = Boolean(appOrigin && requestOrigin && requestOrigin === appOrigin)
-  console.log("appOrigin", appOrigin)
-  console.log("requestOrigin", requestOrigin)
-  console.log("isAllowedOrigin", isAllowedOrigin)
-  console.log(
-    "appOrigin && requestOrigin && requestOrigin === appOrigin",
-    appOrigin && requestOrigin && requestOrigin === appOrigin,
-  )
-  console.log("isAllowedOrigin", isAllowedOrigin)
 
   const corsHeaders: Record<string, string> = {
     ...corsOptions,
