@@ -96,17 +96,19 @@ export const BaseBottomSheet = ({
             </VisuallyHidden>
 
             <Drawer.Body flex={1} overflowY="auto" p={4} display="flex" flexDirection="column">
-              <Box
-                mx="auto"
-                w="34px"
-                h="5px"
-                bg="#D7D6D4"
-                mb={4}
-                rounded="full"
-                cursor={isDismissable ? "grab" : "default"}
-                _active={isDismissable ? { cursor: "grabbing" } : {}}
-                {...(isDismissable ? bind() : {})}
-              />
+              {isDismissable && (
+                <Box
+                  mx="auto"
+                  w="34px"
+                  h="5px"
+                  bg="#D7D6D4"
+                  mb={4}
+                  rounded="full"
+                  cursor={isDismissable ? "grab" : "default"}
+                  _active={isDismissable ? { cursor: "grabbing" } : {}}
+                  {...(isDismissable ? bind() : {})}
+                />
+              )}
               {(title || illustration) && (
                 <Box mb={4}>
                   <Box position="relative">

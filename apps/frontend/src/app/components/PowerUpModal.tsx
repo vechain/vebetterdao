@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  Alert,
   Box,
   Button,
   ButtonGroup,
@@ -25,6 +26,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { formatUnits } from "viem"
 
+import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import SwapIcon from "@/components/Icons/svg/swap.svg"
 import { default as VOT3Icon } from "@/components/Icons/svg/vot3-icon.svg"
@@ -56,21 +58,21 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const { account } = useWallet()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
   const { data: b3trToUsd } = useB3TRExchangeRate()
 
   const { isTxModalOpen } = useTransactionModal()
   const [step, setStep] = useState<PowerUpStep>(PowerUpStep.SWAP)
-  const [animationState, setAnimationState] = useState<"merge" | "unmerge" | null>(null)
   const [convertTo, setConvertTo] = useState<"vot3" | "b3tr">("vot3")
   const [amount, setAmount] = useState("0")
 
-  const maxBalance = convertTo === "vot3" ? b3trBalance?.scaled : vot3Balance?.scaled
+  const maxBalance = convertTo === "vot3" ? b3trBalance?.scaled : swappableVot3Balance?.scaled
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
   const { open: openUpgradeModal } = useUpgradeSmartAccountModal({ accentColor: "#004CFC" })
 
   const b3trBalanceScaled = useMemo(() => b3trBalance?.scaled ?? "0", [b3trBalance?.scaled])
-  const vot3BalanceScaled = useMemo(() => vot3Balance?.scaled ?? "0", [vot3Balance?.scaled])
+  const vot3BalanceScaled = useMemo(() => swappableVot3Balance?.scaled ?? "0", [swappableVot3Balance?.scaled])
 
   const handleAmountChange = (value: string) =>
     setAmount(
@@ -86,6 +88,10 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const handleAmountBlur = () => setAmount(prev => prev.replace(/\.$/, ""))
   const invalidAmount =
     !amount || amount === "." || Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
+  const showTransferredVOT3Alert =
+    invalidAmount &&
+    Number(vot3Balance?.scaled) > Number(swappableVot3Balance?.scaled) &&
+    Number(vot3Balance?.scaled) > Number(amount)
 
   const handleClose = useCallback(() => {
     onClose()
@@ -138,19 +144,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
 
   const goToReview = () => {
     if (invalidAmount) return
-    setAnimationState("merge")
-  }
-
-  const goToSwap = () => {
-    setAnimationState("unmerge")
-    setStep(PowerUpStep.SWAP)
-  }
-
-  const handleAnimationEnd = () => {
-    if (animationState === "merge") {
-      setStep(PowerUpStep.REVIEW)
-    }
-    setAnimationState(null)
+    setStep(PowerUpStep.REVIEW)
   }
 
   const ReviewContainer = () => {
@@ -173,7 +167,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
         p={4}
         gap={4}
         w="full"
-        animation="fadeInMerged"
+        // animation="fadeInMerged"
         divideY="1px">
         <VStack gap={2} align="start" w="full">
           <Text textStyle="sm" color="text.subtle">
@@ -260,7 +254,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
       title={
         <HStack alignItems="center" justifyContent="space-between" mb={{ base: "unset", md: "8" }}>
           <Heading textAlign="left" size="xl">
-            {t("Convert tokens")}
+            {t("Power up")}
           </Heading>
           <Dialog.CloseTrigger asChild position="static">
             <CloseButton size="md" />
@@ -283,10 +277,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                 align="start"
                 w="full"
                 transform={convertTo === "vot3" ? "translateY(0)" : "translateY(calc(100% + 24px))"}
-                transition={animationState ? "none" : "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"}
-                animation={animationState === "merge" || animationState === "unmerge" ? "mergeDown" : undefined}
-                animationDirection={animationState === "unmerge" ? "reverse" : "normal"}
-                onAnimationEnd={handleAnimationEnd}
+                transition="transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                 zIndex={convertTo === "vot3" ? 0 : 1}
                 minHeight="8rem">
                 <Field.Root
@@ -365,9 +356,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                 align="start"
                 w="full"
                 transform={convertTo === "vot3" ? "translateY(0)" : "translateY(calc(-100% - 24px))"}
-                transition={animationState ? "none" : "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"}
-                animation={animationState === "merge" || animationState === "unmerge" ? "mergeUp" : undefined}
-                animationDirection={animationState === "unmerge" ? "reverse" : "normal"}
+                transition="transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                 zIndex={convertTo === "b3tr" ? 0 : 1}
                 minHeight="8rem">
                 <Field.Root
@@ -475,13 +464,10 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
               top="50%"
               transform={`translate(-50%, -50%) rotate(${convertTo === "vot3" ? 0 : 180}deg)`}
               transition="transform 0.3s ease"
-              animation={animationState ? "fadeOutSwap" : undefined}
-              animationDirection={animationState === "unmerge" ? "reverse" : "normal"}
-              onAnimationEnd={handleAnimationEnd}
               zIndex={2}
               cursor="pointer"
               onClick={() => {
-                setAmount("")
+                setAmount("0")
                 setConvertTo(prev => (prev === "vot3" ? "b3tr" : "vot3"))
               }}
               _hover={{ bg: "actions.primary.hover" }}>
@@ -492,13 +478,31 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           <ReviewContainer />
         )}
 
+        {showTransferredVOT3Alert && (
+          <Alert.Root status="error">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>
+                {t("You can convert max. of")} {` ${swappableVot3Balance?.formatted} `} {"VOT3"}
+              </Alert.Title>
+              <Alert.Description>{"You can’t convert VOT3 that someone else transferred to you."}</Alert.Description>
+            </Alert.Content>
+          </Alert.Root>
+        )}
+
         <ButtonGroup
           w="full"
           size="sm"
           display="grid"
           gridTemplateColumns={step === PowerUpStep.REVIEW ? "1fr 1fr" : "1fr"}>
           {step === PowerUpStep.REVIEW && (
-            <Button variant="secondary" w="full" rounded="full" size="lg" onClick={goToSwap} mt="auto">
+            <Button
+              variant="secondary"
+              w="full"
+              rounded="full"
+              size="lg"
+              onClick={() => setStep(PowerUpStep.SWAP)}
+              mt="auto">
               {t("Back")}
             </Button>
           )}
