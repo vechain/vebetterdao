@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { Search as SearchIcon } from "iconoir-react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useXAppsSharesBasedOnMaxAllocation } from "@/api/contracts/xApps/hooks/useXAppSharesBasedOnMaxAllocation"
@@ -30,7 +30,6 @@ import { APP_CATEGORIES } from "@/types/appDetails"
 import { AppRadioCard } from "../../AppRadioCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
 import { VotingAlerts } from "../../VotingAlerts"
-import { MAX_SELECTED_APPS } from "../AllocationTabsProvider"
 
 import { VoteButtons } from "./VoteButtons"
 
@@ -57,7 +56,7 @@ const categoryCollection = createListCollection({
   items: APP_CATEGORIES.map(category => ({ label: category.name, value: category.id })),
 })
 
-const APPS_PER_PAGE = 10
+const INITIALLY_VISIBLE_APP_COUNT = 10
 
 export function AppCategoryTabs({
   apps = [],
@@ -81,7 +80,6 @@ export function AppCategoryTabs({
   const { account } = useWallet()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
-  const [currentPage, setCurrentPage] = useState(1)
   const [viewAll, setViewAll] = useState(false)
   const { t } = useTranslation()
 
@@ -105,45 +103,6 @@ export function AppCategoryTabs({
     })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
-  const visibleApps = useMemo(() => {
-    const startIndex = (currentPage - 1) * APPS_PER_PAGE
-    const endIndex = startIndex + APPS_PER_PAGE
-    return filteredApps.slice(startIndex, endIndex)
-  }, [filteredApps, currentPage])
-
-  const areAllVisibleAppsSelected = useMemo(() => {
-    if (!selectedAppIds || visibleApps.length === 0) return false
-    return visibleApps.every(app => selectedAppIds.has(app.id))
-  }, [visibleApps, selectedAppIds])
-
-  const handleSelectAll = () => {
-    if (!onToggleApp) return
-
-    if (areAllVisibleAppsSelected) {
-      // Deselect all visible apps
-      visibleApps.forEach(app => {
-        if (selectedAppIds?.has(app.id)) {
-          onToggleApp(app.id)
-        }
-      })
-    } else {
-      // Select up to the limit
-      const currentCount = selectedAppIds?.size ?? 0
-      let addedCount = 0
-
-      visibleApps.forEach(app => {
-        if (!selectedAppIds?.has(app.id) && currentCount + addedCount < MAX_SELECTED_APPS) {
-          onToggleApp(app.id)
-          addedCount++
-        }
-      })
-    }
-  }
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [selectedCategory])
-
   return (
     <HStack asChild={isMobile} gap="6" alignItems="flex-start">
       <VStack flex={1} gap="4" align="stretch">
@@ -151,17 +110,7 @@ export function AppCategoryTabs({
           <VotingAlerts />
           <Flex alignItems="center" justifyContent="space-between">
             <Heading size="lg">{t("Active apps in current round")}</Heading>
-            {!!account?.address && (
-              <Flex gap="4">
-                {/* Show select all only when user can select apps (not in voted/auto-vote view mode) */}
-                {((!hasVoted && !isAutoVotingEnabled && !isAutoVotingEnabledInCurrentRound) || isEditingAutoVote) && (
-                  <Button variant="link" p="0" color="text.default" fontWeight="semibold" onClick={handleSelectAll}>
-                    {areAllVisibleAppsSelected ? t("Deselect all") : t("Select all")}
-                  </Button>
-                )}
-                <VoteButtons variant="desktop" />
-              </Flex>
-            )}
+            {!!account?.address && <VoteButtons variant="desktop" />}
           </Flex>
           <Flex gap="4" alignItems="center" justifyContent="space-between">
             <SearchField placeholder={t("Search app")} value={searchQueryDesktop} onChange={setSearchQueryDesktop} />
@@ -248,32 +197,34 @@ export function AppCategoryTabs({
             }}>
             {isVoteDataLoading ? (
               // Show skeleton cards while vote data is loading (matches AppRadioCard styling)
-              Array.from({ length: visibleApps.length || 5 }).map((_, index) => (
+              Array.from({ length: filteredApps.length || 5 }).map((_, index) => (
                 // eslint-disable-next-line react/no-array-index-key
                 <Skeleton key={index} height={{ base: "70px", md: "84px" }} rounded="lg" />
               ))
             ) : filteredApps.length > 0 ? (
-              visibleApps.map(app => (
-                <AppRadioCard
-                  key={app.id}
-                  appId={app.id}
-                  appLogo={app.metadata?.logo}
-                  appName={app.name}
-                  appVoters={app.voters}
-                  appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
-                  allocationSharePercentage={appSharesMap.get(app.id)}
-                  checked={selectedAppIds?.has(app.id)}
-                  onCheckedChange={() => onToggleApp?.(app.id)}
-                  displayMode={
-                    !account?.address ||
-                    disabled ||
-                    ((hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote)
-                      ? "voted"
-                      : "checkbox"
-                  }
-                  disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
-                />
-              ))
+              filteredApps
+                .slice(0, INITIALLY_VISIBLE_APP_COUNT)
+                .map(app => (
+                  <AppRadioCard
+                    key={app.id}
+                    appId={app.id}
+                    appLogo={app.metadata?.logo}
+                    appName={app.name}
+                    appVoters={app.voters}
+                    appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
+                    allocationSharePercentage={appSharesMap.get(app.id)}
+                    checked={selectedAppIds?.has(app.id)}
+                    onCheckedChange={() => onToggleApp?.(app.id)}
+                    displayMode={
+                      !account?.address ||
+                      disabled ||
+                      ((hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote)
+                        ? "voted"
+                        : "checkbox"
+                    }
+                    disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
+                  />
+                ))
             ) : (isMobile ? searchQuery.trim().length > 0 : searchQueryDesktop.trim().length > 0) && showEmptyState ? (
               <EmptyState
                 bgColor="transparent"
@@ -289,15 +240,12 @@ export function AppCategoryTabs({
 
             <Collapsible.Root
               open={viewAll}
-              onOpenChange={details => {
-                setCurrentPage(1)
-                setViewAll(details.open)
-              }}
+              onOpenChange={details => setViewAll(details.open)}
               onExitComplete={() =>
                 document.getElementById("tabs:allocation-tabs")?.scrollIntoView({ behavior: "smooth" })
               }>
               <Collapsible.Content display="flex" flexDirection="column" gap="4">
-                {filteredApps.slice(APPS_PER_PAGE).map(app => (
+                {filteredApps.slice(INITIALLY_VISIBLE_APP_COUNT).map(app => (
                   <AppRadioCard
                     key={app.id}
                     appId={app.id}
