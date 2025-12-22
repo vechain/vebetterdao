@@ -96,7 +96,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
     setConvertTo("vot3")
     setAmount("")
     setStep(PowerUpStep.SWAP)
-  }, [onClose])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const convertB3trMutation = useConvertB3tr({
     amount,
