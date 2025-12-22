@@ -1,5 +1,5 @@
 import i18next from "i18next"
-import detector from "i18next-browser-languagedetector"
+import LanguageDetector from "i18next-browser-languagedetector"
 import resourcesToBackend from "i18next-resources-to-backend"
 import { initReactI18next } from "react-i18next"
 
@@ -83,14 +83,23 @@ export const languages = [
   },
 ]
 
+const supportedLanguages = languages.map(lang => lang.code)
+
 i18next
-  .use(detector)
+  .use(LanguageDetector)
   .use(resourcesToBackend((language: string) => import(`./languages/${language}.json`)))
   .use(initReactI18next)
   .init({
     fallbackLng: "en",
-    lng: "en",
     debug: false,
+    detection: {
+      // Check localStorage first, then browser language
+      order: ["localStorage", "navigator"],
+      // Cache user language in localStorage
+      caches: ["localStorage"],
+      // Lookup localStorage key
+      lookupLocalStorage: "i18nextLng",
+    },
   })
 
 i18next.on("languageChanged", lng => {
@@ -98,3 +107,5 @@ i18next.on("languageChanged", lng => {
   const dayjsLocale = lng === "tw" ? "zh-tw" : lng
   dayjs.locale(dayjsLocale)
 })
+
+export default i18next
