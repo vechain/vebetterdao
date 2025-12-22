@@ -82,10 +82,6 @@ const config = defineConfig({
         "0%": { backdropFilter: "blur(0px)" },
         "100%": { backdropFilter: "blur(10px)" },
       },
-      fadeInMerged: {
-        "0%": { opacity: "0", transform: "scale(0.95)" },
-        "100%": { opacity: "1", transform: "scale(1)" },
-      },
     },
 
     tokens: {
@@ -354,7 +350,6 @@ const config = defineConfig({
         pulse: { value: "pulse 1.5s infinite" },
         rotateBgPosition: { value: "rotateBgPosition 1.5s infinite alternate" },
         backdropBlur: { value: "backdropBlur 1s ease-in-out" },
-        // fadeInMerged: { value: "fadeInMerged 0.15s ease-out forwards" },
       },
     },
   },

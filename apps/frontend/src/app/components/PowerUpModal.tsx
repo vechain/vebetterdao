@@ -89,9 +89,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const invalidAmount =
     !amount || amount === "." || Number(amount) > Number(convertTo === "vot3" ? b3trBalanceScaled : vot3BalanceScaled)
   const showTransferredVOT3Alert =
-    invalidAmount &&
-    Number(vot3Balance?.scaled) > Number(swappableVot3Balance?.scaled) &&
-    Number(vot3Balance?.scaled) > Number(amount)
+    convertTo === "b3tr" && BigInt(vot3Balance?.original || "0") > BigInt(swappableVot3Balance?.original || "0")
 
   const handleClose = useCallback(() => {
     onClose()
@@ -167,7 +165,6 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
         p={4}
         gap={4}
         w="full"
-        // animation="fadeInMerged"
         divideY="1px">
         <VStack gap={2} align="start" w="full">
           <Text textStyle="sm" color="text.subtle">
@@ -217,7 +214,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
             </HStack>
           </HStack>
         </VStack>
-        <Collapsible.Root w="full" pt="4">
+        <Collapsible.Root w="full" pt="4" defaultOpen={false}>
           <Collapsible.Trigger w="full" display="flex" alignItems="center" justifyContent="space-between">
             <Text textStyle="sm" color="text.subtle">
               {t("Transaction details")}
@@ -247,6 +244,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
 
   return (
     <Modal
+      isCloseable={false}
       fullHeight
       modalProps={{ closeOnInteractOutside: false, size: "md" }}
       isOpen={isOpen && !isTxModalOpen}
@@ -466,10 +464,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
               transition="transform 0.3s ease"
               zIndex={2}
               cursor="pointer"
-              onClick={() => {
-                setAmount("0")
-                setConvertTo(prev => (prev === "vot3" ? "b3tr" : "vot3"))
-              }}
+              onClick={() => setConvertTo(prev => (prev === "vot3" ? "b3tr" : "vot3"))}
               _hover={{ bg: "actions.primary.hover" }}>
               <Icon as={SwapIcon} color="white" boxSize="20px" />
             </Circle>
