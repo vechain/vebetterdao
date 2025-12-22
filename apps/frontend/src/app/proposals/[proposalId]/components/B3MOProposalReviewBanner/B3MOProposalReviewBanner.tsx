@@ -15,17 +15,19 @@ type B3MOProposalReviewBannerProps = {
 export const B3MOProposalReviewBanner = ({ proposalId, status }: B3MOProposalReviewBannerProps) => {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const borderColor = "brand.secondary-stronger"
   const textColor = "text.default"
   const linkColor = "brand.secondary-stronger"
   const b3moIcon = useColorModeValue("/assets/icons/b3mo.webp", "/assets/icons/b3mo-dark.webp")
 
-  const handleFullAnalysisClick = () => {
+  const handleFullAnalysisClick = async () => {
     if (isLoading || !proposalId || !status) {
       return
     }
 
     setIsLoading(true)
+    setHasError(false)
 
     AnalyticsUtils.trackEvent(buttonClicked, {
       ...buttonClickActions(ButtonClickProperties.VIEW_B3MO_FULL_ANALYSIS),
@@ -33,16 +35,25 @@ export const B3MOProposalReviewBanner = ({ proposalId, status }: B3MOProposalRev
       status,
     })
 
-    // Use Next.js API route to proxy the PDF
-    const pdfUrl = `/api/download-b3mo-pdf?proposalId=${proposalId}&status=${status}`
+    try {
+      // Check if PDF is available before opening new tab
+      const pdfUrl = `/api/download-b3mo-pdf?proposalId=${proposalId}&status=${status}`
+      const response = await fetch(pdfUrl)
 
-    // Open in new tab - API route will serve with proper headers
-    window.open(pdfUrl, "_blank", "noopener,noreferrer")
+      if (!response.ok) {
+        setHasError(true)
+        setIsLoading(false)
+        return
+      }
 
-    // Reset loading state after a brief moment
-    setTimeout(() => {
+      // If successful, open in new tab
+      window.open(pdfUrl, "_blank", "noopener,noreferrer")
       setIsLoading(false)
-    }, 500)
+    } catch (error) {
+      console.error("Error fetching B3MO analysis:", error)
+      setHasError(true)
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -76,13 +87,13 @@ export const B3MOProposalReviewBanner = ({ proposalId, status }: B3MOProposalRev
         onClick={handleFullAnalysisClick}
         transition="opacity 0.2s"
         _hover={{ opacity: isLoading ? 0.6 : 0.8 }}>
-        <Text fontSize="sm" fontWeight="semibold" color={linkColor}>
-          {t("Full analysis")}
+        <Text fontSize="sm" fontWeight="semibold" color={hasError ? "red.solid" : linkColor}>
+          {hasError ? t("Try again") : t("Full analysis")}
         </Text>
         {isLoading ? (
           <Spinner size="sm" color={linkColor} />
         ) : (
-          <Box as={UilArrowRight} boxSize={3.5} color={linkColor} />
+          <Box as={UilArrowRight} boxSize={3.5} color={hasError ? "red.solid" : linkColor} />
         )}
       </HStack>
     </Flex>
