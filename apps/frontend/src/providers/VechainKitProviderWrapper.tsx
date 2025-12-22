@@ -2,10 +2,13 @@
 import { useToken } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { NETWORK_TYPE } from "@repo/constants"
+import { useCurrentLanguage } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
+import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useColorMode } from "@/components/ui/color-mode"
+
 // Dynamic import is used here for several reasons:
 // 1. The VechainKit component uses browser-specific APIs that aren't available during server-side rendering
 // 2. Code splitting - this component will only be loaded when needed, reducing initial bundle size
@@ -13,12 +16,34 @@ import { useColorMode } from "@/components/ui/color-mode"
 const VeChainKitProvider = dynamic(() => import("@vechain/vechain-kit").then(mod => mod.VeChainKitProvider), {
   ssr: false,
 })
+
 interface Props {
   readonly children: React.ReactNode
 }
+
+function LanguageSync({ children }: Props) {
+  const { i18n: i18nInstance } = useTranslation()
+  const { setLanguage: setKitLanguage } = useCurrentLanguage()
+
+  useEffect(() => {
+    // Sync app i18n changes to VeChainKit
+    const handleLanguageChanged = (lng: string) => {
+      setKitLanguage(lng)
+    }
+
+    i18nInstance.on("languageChanged", handleLanguageChanged)
+
+    return () => {
+      i18nInstance.off("languageChanged", handleLanguageChanged)
+    }
+  }, [i18nInstance, setKitLanguage])
+
+  return <>{children}</>
+}
+
 export function VechainKitProviderWrapper({ children }: Props) {
   const { colorMode } = useColorMode()
-  const { i18n } = useTranslation()
+  const { i18n: i18nInstance } = useTranslation()
   const isDarkMode = colorMode === "dark"
   const vebetterLogo = "https://i.ibb.co/7tBkpgvW/Ve-Better-Blue-300ppi.png"
   const vechainLogo = "https://vechain-brand-assets.s3.eu-north-1.amazonaws.com/VeChain_Logomark_Light.png"
@@ -36,6 +61,13 @@ export function VechainKitProviderWrapper({ children }: Props) {
       "border.secondary",
     ])
 
+  // Sync VeChainKit language changes to app i18n
+  const handleLanguageChange = (language: string) => {
+    if (i18nInstance.language !== language) {
+      i18nInstance.changeLanguage(language)
+    }
+  }
+
   return (
     <VeChainKitProvider
       theme={{
@@ -49,6 +81,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
             bg: primaryDefault,
             color: primaryText,
             hoverBg: primaryHover,
+            rounded: "full",
           },
           secondaryButton: {
             border: `1px solid ${borderSecondary}`,
@@ -91,7 +124,8 @@ export function VechainKitProviderWrapper({ children }: Props) {
         { method: "ecosystem", gridColumn: 4 },
       ]}
       darkMode={isDarkMode}
-      language={i18n.language}
+      language={i18nInstance.language}
+      onLanguageChange={handleLanguageChange}
       network={{
         type: networkType,
       }}
@@ -106,7 +140,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
           },
         ],
       }}>
-      {children}
+      <LanguageSync>{children}</LanguageSync>
     </VeChainKitProvider>
   )
 }

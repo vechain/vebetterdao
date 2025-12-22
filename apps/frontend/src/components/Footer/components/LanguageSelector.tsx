@@ -27,13 +27,15 @@ const SelectValue = () => {
 }
 export const LanguageSelector: React.FC = () => {
   const { i18n } = useTranslation()
+  const currentLanguage = i18n.language || "en"
+  
   return (
     <Select.Root
       variant="subtle"
       rounded="full"
       collection={languageCollection}
       size={{ base: "md", md: "lg" }}
-      defaultValue={["en"]}
+      value={[currentLanguage]}
       positioning={{ placement: "bottom", flip: false, sameWidth: true }}
       onValueChange={value => i18n.changeLanguage(value.value[0])}>
       <Select.HiddenSelect />
