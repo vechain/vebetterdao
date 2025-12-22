@@ -61,7 +61,9 @@ export const AppRadioCard = ({
       cursor={isInteractive ? "pointer" : "default"}
       pointerEvents={isInteractive ? "auto" : "none"}
       opacity={disabled && !checked ? 0.5 : 1}
-      position="relative">
+      position="relative"
+      borderRadius="xl"
+      _checked={{ boxShadow: "none" }}>
       {isInteractive && <CheckboxCard.HiddenInput />}
       {isVotedMode && checked && (
         <Float placement="top-end" offsetX="10">

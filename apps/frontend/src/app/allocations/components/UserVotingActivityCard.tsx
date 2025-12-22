@@ -50,7 +50,7 @@ interface AppVoteItemProps {
 
 const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
   <Card.Root key={app?.id} p="4" bg="card.subtle" asChild>
-    <Grid gridTemplateColumns="50px 1fr auto" alignItems="center">
+    <Grid gap="3" gridTemplateColumns="50px 1fr auto" alignItems="center">
       <Box position="relative">
         <AppImage
           appId={app?.id || ""}

@@ -56,7 +56,13 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
           flexDirection={{ base: "column", md: "row" }}
           justifyContent={{ base: "unset", md: "space-between" }}
           gap={{ base: "unset", md: "12" }}>
-          <SimpleGrid flex={1} columns={3} rowGap="2" columnGap={{ base: "unset", md: "3" }}>
+          <SimpleGrid
+            flex={1}
+            columns={3}
+            rowGap="2"
+            columnGap={{ base: "unset", md: "3" }}
+            gridTemplateColumns={{ base: "auto auto auto", md: "repeat(3, 1fr)" }}
+            justifyContent={{ base: "space-between", md: "unset" }}>
             <GridItem
               hideBelow="md"
               display="flex"

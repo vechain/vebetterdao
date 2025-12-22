@@ -278,7 +278,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         left={0}
         right={0}
         zIndex={2}>
-        <Box p="4" bg="bg.primary" border="sm" borderColor="border.secondary">
+        <Box py="6" px="4" bg="bg.primary" border="sm" borderColor="border.secondary">
           <VoteButtons variant="mobile" />
         </Box>
       </Presence>

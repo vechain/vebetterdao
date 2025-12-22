@@ -4,8 +4,8 @@
 import { VStack, Card, HStack, Icon, Heading, Text, Box, Badge, CloseButton } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Flash, Activity } from "iconoir-react"
+import React from "react"
 import { useTranslation } from "react-i18next"
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import { formatEther } from "viem"
 
 import { useTotalXAppEarnings } from "@/api/contracts/dbaPool/hooks/useTotalXAppEarnings"
@@ -13,6 +13,7 @@ import { indexerQueryClient } from "@/api/indexer/api"
 import { AppImage } from "@/components/AppImage/AppImage"
 import B3TR from "@/components/Icons/svg/b3tr.svg"
 import { Modal } from "@/components/Modal"
+import { ProgressRing } from "@/components/ProgressRing"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 import { AppWithVotes } from "../lib/data"
@@ -38,34 +39,19 @@ type BreakdownSection = {
 
 type SectionData = SimpleSection | BreakdownSection
 
-const DonutChart = ({ data, colors, percentage }: { data: DataItem[]; colors: string[]; percentage: string }) => {
+const DonutChart = ({ colors, percentage }: { data: DataItem[]; colors: string[]; percentage: string }) => {
   return (
-    <Box h="70px" w="70px" position="relative">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={22}
-            outerRadius={35}
-            paddingAngle={0}
-            dataKey="value"
-            startAngle={90}
-            endAngle={-270}>
-            {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-      <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" textAlign="center">
-        <Text textStyle="sm" fontWeight="semibold" color="text.default">
-          {percentage}
-          {"%"}
+    <ProgressRing
+      size={70}
+      percent={Number(percentage)}
+      bgColor={colors[0]}
+      fgColor={colors[1]}
+      label={
+        <Text color="icon.subtle" textStyle="sm">
+          {`${percentage}%`}
         </Text>
-      </Box>
-    </Box>
+      }
+    />
   )
 }
 

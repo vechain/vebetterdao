@@ -66,7 +66,7 @@ const RoundActiveAppCard = ({
           <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
             {name || "-"}
           </Text>
-          <HStack w="full" gap="1" lineClamp={1}>
+          <HStack align="start" w="full" gap="1" lineClamp={1}>
             {earnings && (
               <Text display="inline" textStyle={{ base: "xs", md: "md" }} gap="1">
                 <Mark variant="text" fontWeight="semibold" color="text.subtle">
