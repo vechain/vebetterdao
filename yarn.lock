@@ -7506,23 +7506,23 @@
   resolved "https://registry.yarnpkg.com/@vechain/contract-getters/-/contract-getters-1.0.4.tgz#1a27288bc61b9066a435eb2b959c1eb684b2ca03"
   integrity sha512-n+o8WIyrrW6ztJtT9MXqPDGt7qu5axfE8RMC9fBZbKqY6pSbCpm68VtxxsPsBSO3ZkNYugW/8/AXFfpJkKvhwA==
 
-"@vechain/dapp-kit-react@2.1.0-rc.2":
-  version "2.1.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-2.1.0-rc.2.tgz#62d014bf7d479c5b6c04f0107d441cd2e84617e0"
-  integrity sha512-QpiZE/GylVkc+kMovoADk+0W1AUd4RZiSBNWi1JkJcS9wwRz97Oab1zJO8Dn+q7RjLZOhGRDSwtwoRkjWB2Pgg==
+"@vechain/dapp-kit-react@2.1.0-rc.4":
+  version "2.1.0-rc.4"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-2.1.0-rc.4.tgz#7192023cb75c8ffdafe55dee92b808877654b406"
+  integrity sha512-KT4t3o7RQq1lUi/fwk4h9azePjqr2bAHTni2YC16eYE4kfQHzVCpGGfWz8yFmE4Szf3WuMqlwrd4oLyqXXZJrQ==
   dependencies:
     "@lit/react" "^1.0.7"
-    "@vechain/dapp-kit" "2.1.0-rc.2"
-    "@vechain/dapp-kit-ui" "2.1.0-rc.2"
+    "@vechain/dapp-kit" "2.1.0-rc.4"
+    "@vechain/dapp-kit-ui" "2.1.0-rc.4"
     "@vechain/sdk-core" "^2.0.0"
     valtio "1.13.2"
 
-"@vechain/dapp-kit-ui@2.1.0-rc.2":
-  version "2.1.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-2.1.0-rc.2.tgz#37520610651b9463808d321e27072248cc41435d"
-  integrity sha512-RaDaVpB/GYh3pzl2VH2XeAtRGkTsMfPuMfF6XuWMrLfV2ydC5e9xkcUm4MrJZzlxOxn2dFRQiKPU75gQ5uPkug==
+"@vechain/dapp-kit-ui@2.1.0-rc.4":
+  version "2.1.0-rc.4"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-2.1.0-rc.4.tgz#b4257c4217d9d1a3585b87041f428659195444de"
+  integrity sha512-7SdxtS33vMkU2HIVXKBGjmRimqmnTjQUE9b4IUHTatZ7gbGSjkamHp19qRdgiEoUfrBqDrBvdFyJHx7JZZagkQ==
   dependencies:
-    "@vechain/dapp-kit" "2.1.0-rc.2"
+    "@vechain/dapp-kit" "2.1.0-rc.4"
     "@vechain/picasso" "2.1.1"
     "@vechain/sdk-core" "^2.0.0"
     "@vechain/sdk-network" "^2.0.0"
@@ -7533,10 +7533,10 @@
     qrcode "1.5.4"
     valtio "1.13.2"
 
-"@vechain/dapp-kit@2.1.0-rc.2":
-  version "2.1.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-2.1.0-rc.2.tgz#6008856dafc88acba55a0110dca98c75e2c7b8f5"
-  integrity sha512-Jqc8A7j3f7Z9ZwtwfgUXV+G1obvcOGZDAQ3YtxaWbXDkD876FuKIs5Lp1ehPndgBDvRUGtUXNl24zzSNn+/fWg==
+"@vechain/dapp-kit@2.1.0-rc.4":
+  version "2.1.0-rc.4"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-2.1.0-rc.4.tgz#ebad83759c486fbefd31d61a407c7210ae41f5a1"
+  integrity sha512-5AKJzSIVjQ+kzYK6r7O6BPyms5jCQSNtu+dKLrhHmr9tr3VnJTgm89VTweYbTfxX1nHMB+kbzZ5CP/xmpSR3Dg==
   dependencies:
     "@vechain/connex-wallet-buddy" "^0.1.11"
     "@vechain/sdk-core" "^2.0.0"
@@ -7691,10 +7691,10 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.3.0.tgz#44ed09a64686135f9ccdd368a7311a1bcaaf971a"
-  integrity sha512-EQSu9fKeG3l6Bh+pXKv4EtoVd/2i5tqjOZC4LjYvgg6Cgdy6cggyVwedhEysdB1QO9knICPfhE5kBpD8SsNp/w==
+"@vechain/vechain-kit@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.4.0.tgz#c155d88000bcc65c0ab616ae8a8fe5ef193fed12"
+  integrity sha512-Xmet1JDSZWFIwrjL+jDM5mPJV5PggrK0J6J+EoRgZRB309u5C2rjw/nSkDAV0/5VYK6W+EFtIvC52i1JrpKIDA==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
@@ -7705,7 +7705,7 @@
     "@tanstack/react-query" "^5.64.2"
     "@tanstack/react-query-devtools" "^5.64.1"
     "@vechain/contract-getters" "1.0.4"
-    "@vechain/dapp-kit-react" "2.1.0-rc.2"
+    "@vechain/dapp-kit-react" "2.1.0-rc.4"
     "@vechain/picasso" "^2.1.1"
     "@vechain/vechain-contract-types" "1.5.0"
     "@wagmi/core" "^2.17.2"
