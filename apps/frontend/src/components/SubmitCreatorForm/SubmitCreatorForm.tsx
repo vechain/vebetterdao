@@ -1,6 +1,6 @@
 import { Button, Card, Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
-// import { UilGithub } from "@iconscout/react-unicons"
-// import { signIn, signOut, useSession } from "next-auth/react"
+import { UilGithub } from "@iconscout/react-unicons"
+import { signIn, signOut, useSession } from "next-auth/react"
 import { useEffect } from "react"
 import {
   Control,
@@ -13,7 +13,7 @@ import {
   UseFormWatch,
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-// import { FaXTwitter } from "react-icons/fa6"
+import { FaXTwitter } from "react-icons/fa6"
 
 import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
 import { useCreatorSubmissionFormStore } from "../../store/useCreatorSubmissionFormStore"
@@ -52,7 +52,7 @@ type Props = {
 
 export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, resetForm, clearData }: Props) => {
   const { t } = useTranslation()
-  // const { data: session } = useSession()
+  const { data: session } = useSession()
 
   const checkboxList = [
     {
@@ -95,8 +95,8 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
     adminName,
     adminEmail,
     projectUrl,
-    githubUsername = "foo",
-    twitterUsername = "bar",
+    githubUsername,
+    twitterUsername,
     distributionStrategy,
     testnetProjectUrl,
     testnetAppId,
@@ -153,31 +153,31 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
     securityAntiFarming,
   ])
 
-  // // Set linked social media usernames if available in session
-  // useEffect(() => {
-  //   if (session?.user?.githubUsername || session?.user?.twitterUsername) {
-  //     if (session.user.githubUsername) {
-  //       setValue("githubUsername", session.user.githubUsername)
-  //       setData({ githubUsername: session.user.githubUsername })
-  //     }
-  //     if (session.user.twitterUsername) {
-  //       setValue("twitterUsername", session.user.twitterUsername)
-  //       setData({ twitterUsername: session.user.twitterUsername })
-  //     }
-  //   }
-  // }, [session?.user, setValue, setData])
+  // Set linked social media usernames if available in session
+  useEffect(() => {
+    if (session?.user?.githubUsername || session?.user?.twitterUsername) {
+      if (session.user.githubUsername) {
+        setValue("githubUsername", session.user.githubUsername)
+        setData({ githubUsername: session.user.githubUsername })
+      }
+      if (session.user.twitterUsername) {
+        setValue("twitterUsername", session.user.twitterUsername)
+        setData({ twitterUsername: session.user.twitterUsername })
+      }
+    }
+  }, [session?.user, setValue, setData])
 
   // Handle social media auth
-  // const handleAuth = (platform: "github" | "twitter") => {
-  //   const usernameField = platform === "github" ? "githubUsername" : "twitterUsername"
-  //   const isSignedIn = !!watch(usernameField as keyof SubmitCreatorFormData)
-  //   if (isSignedIn) {
-  //     signOut({ redirect: false })
-  //     setValue(usernameField as keyof SubmitCreatorFormData, "")
-  //   } else {
-  //     signIn(platform)
-  //   }
-  // }
+  const handleAuth = (platform: "github" | "twitter") => {
+    const usernameField = platform === "github" ? "githubUsername" : "twitterUsername"
+    const isSignedIn = !!watch(usernameField as keyof SubmitCreatorFormData)
+    if (isSignedIn) {
+      signOut({ redirect: false })
+      setValue(usernameField as keyof SubmitCreatorFormData, "")
+    } else {
+      signIn(platform)
+    }
+  }
 
   // Store form data on blur
   const onBlur = (field: keyof SubmitCreatorFormData) => {
@@ -187,7 +187,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
     }
   }
   const handleResetForm = () => {
-    // signOut({ redirect: false })
+    signOut({ redirect: false })
     resetForm()
     clearData()
   }
@@ -270,7 +270,10 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
                 register={{
                   ...register("projectUrl", {
                     required: "Project URL is required",
-                    maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
+                    maxLength: {
+                      value: 255,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }),
+                    },
                     pattern: patternUrlCheck,
                   }),
                 }}
@@ -298,7 +301,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
               {t("Your Information")}
             </Heading>
             <VStack w="full" gap={4} align="stretch" px={1}>
-              {/* <Field.Root invalid={!!errors.githubUsername}>
+              <Field.Root invalid={!!errors.githubUsername}>
                 <Field.Label textStyle="md">{t("GitHub Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
@@ -326,7 +329,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
                 </Button>
                 <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
                 <Field.ErrorText>{errors.twitterUsername?.message}</Field.ErrorText>
-              </Field.Root> */}
+              </Field.Root>
               <FormItem
                 label={t("Email")}
                 placeholder={"Eg. admin@myapp.vet"}
