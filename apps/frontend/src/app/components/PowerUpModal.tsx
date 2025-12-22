@@ -479,7 +479,7 @@ export const PowerUpModal = ({ title = "Convert tokens", isOpen, onClose }: Prop
         )}
 
         {showTransferredVOT3Alert && (
-          <Alert.Root status="error">
+          <Alert.Root status="warning">
             <Alert.Indicator />
             <Alert.Content>
               <Alert.Title>
