@@ -83,8 +83,6 @@ export const languages = [
   },
 ]
 
-const supportedLanguages = languages.map(lang => lang.code)
-
 i18next
   .use(LanguageDetector)
   .use(resourcesToBackend((language: string) => import(`./languages/${language}.json`)))

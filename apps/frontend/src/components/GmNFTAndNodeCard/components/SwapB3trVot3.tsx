@@ -5,7 +5,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 
 import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
-import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
+import { PowerUpModal } from "@/app/components/PowerUpModal"
 
 import { CountdownVoting } from "../../../app/components/Countdown/CountdownVoting"
 import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
@@ -100,7 +100,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
         </GridItem>
       </Grid>
       <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
-      <ConvertModal isOpen={isOpen} onClose={onClose} />
+      <PowerUpModal isOpen={isOpen} onClose={onClose} />
     </>
   )
 }

@@ -33,6 +33,7 @@ export const generateMockLocalConfig = () => {
     tokenAuctionContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     x2EarnRewardsPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     dbaPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    oracleContractAddress: "0xdcCAaBd81B38e0dEEf4c202bC7F1261A4D9192C6",
     "nodeManagementContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "veBetterPassportContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "x2EarnCreatorContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
