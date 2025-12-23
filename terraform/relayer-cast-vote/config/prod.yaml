@@ -15,6 +15,6 @@ lambda_timeout: 900
 lambda_source_dir: "packages/lambda/dist/mainnet/relayerCastVote"
 
 # Schedule Configuration
-# Runs 10 minutes after start-emissions-round (which runs at 6:44 AM on Monday)
+# Runs 10 minutes after start-emissions-round (which runs at 6:45 AM on Monday)
 # This ensures the round has started and is ready for auto-voting
-schedule_expression: "cron(54 6 ? * MON *)" # Runs every Monday at 6:54 AM UTC
+schedule_expression: "cron(55 6 ? * MON *)" # Runs every Monday at 6:55 AM UTC
