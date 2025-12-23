@@ -2,27 +2,23 @@
 
 import {
   Button,
-  ButtonGroup,
   Circle,
+  Collapsible,
   createListCollection,
   Flex,
   Heading,
   HStack,
   Icon,
-  IconButton,
-  Pagination,
   Portal,
   Select,
   Skeleton,
   Tabs,
-  Text,
   VStack,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { Search as SearchIcon } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useXAppsSharesBasedOnMaxAllocation } from "@/api/contracts/xApps/hooks/useXAppSharesBasedOnMaxAllocation"
 import { AppWithVotes } from "@/app/allocations/lib/data"
@@ -42,12 +38,9 @@ interface AppCategoryTabsProps {
   apps?: AppWithVotes[]
   searchQuery?: string
   selectedAppIds?: Set<string>
-  selectionOrder?: string[]
   onToggleApp?: (appId: string) => void
   tabsListProps?: Record<string, any>
   showEmptyState?: boolean
-  showPagination?: boolean
-  onViewAll?: VoidFunction
   initialCategory?: string
   onCategoryChange?: (category: string) => void
   roundId?: string
@@ -57,22 +50,22 @@ interface AppCategoryTabsProps {
   isAutoVotingEnabledInCurrentRound?: boolean
   isEditingAutoVote?: boolean
   isAtSelectionLimit?: boolean
+  disabled?: boolean
 }
 
 const categoryCollection = createListCollection({
   items: APP_CATEGORIES.map(category => ({ label: category.name, value: category.id })),
 })
 
+const APPS_PER_PAGE = 10
+
 export function AppCategoryTabs({
   apps = [],
   searchQuery = "",
   selectedAppIds,
-  selectionOrder = [],
   onToggleApp,
   tabsListProps,
   showEmptyState = false,
-  showPagination = false,
-  onViewAll,
   initialCategory = "all",
   onCategoryChange,
   roundId,
@@ -82,12 +75,14 @@ export function AppCategoryTabs({
   isAutoVotingEnabledInCurrentRound = false,
   isEditingAutoVote = false,
   isAtSelectionLimit = false,
+  disabled = false,
 }: AppCategoryTabsProps) {
   const { isMobile } = useBreakpoints()
   const { account } = useWallet()
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchQueryDesktop, setSearchQueryDesktop] = useState(searchQuery)
   const [currentPage, setCurrentPage] = useState(1)
+  const [viewAll, setViewAll] = useState(false)
   const { t } = useTranslation()
 
   const { data: appSharesMap = new Map() } = useXAppsSharesBasedOnMaxAllocation(
@@ -110,35 +105,11 @@ export function AppCategoryTabs({
     })
   }, [apps, isMobile, searchQuery, searchQueryDesktop, selectedCategory])
 
-  // Sort selected apps to top, preserving selection order (append behavior)
-  const sortedAppsWithSelected = useMemo(() => {
-    return filteredApps.slice().sort((a, b) => {
-      const aSelected = selectedAppIds?.has(a.id) ?? false
-      const bSelected = selectedAppIds?.has(b.id) ?? false
-
-      // Both selected: sort by selection order (earlier selections first)
-      if (aSelected && bSelected) {
-        const aIndex = selectionOrder.indexOf(a.id)
-        const bIndex = selectionOrder.indexOf(b.id)
-        return aIndex - bIndex
-      }
-
-      // One selected, one not: selected goes first
-      if (aSelected !== bSelected) {
-        return aSelected ? -1 : 1
-      }
-
-      // Both unselected: keep original order
-      return 0
-    })
-  }, [filteredApps, selectedAppIds, selectionOrder])
-
   const visibleApps = useMemo(() => {
-    if (!showPagination) return sortedAppsWithSelected
-    const pageSize = 10
-    const startIndex = (currentPage - 1) * pageSize
-    return sortedAppsWithSelected.slice(startIndex, startIndex + pageSize)
-  }, [sortedAppsWithSelected, showPagination, currentPage])
+    const startIndex = (currentPage - 1) * APPS_PER_PAGE
+    const endIndex = startIndex + APPS_PER_PAGE
+    return filteredApps.slice(startIndex, endIndex)
+  }, [filteredApps, currentPage])
 
   const areAllVisibleAppsSelected = useMemo(() => {
     if (!selectedAppIds || visibleApps.length === 0) return false
@@ -278,6 +249,7 @@ export function AppCategoryTabs({
             {isVoteDataLoading ? (
               // Show skeleton cards while vote data is loading (matches AppRadioCard styling)
               Array.from({ length: visibleApps.length || 5 }).map((_, index) => (
+                // eslint-disable-next-line react/no-array-index-key
                 <Skeleton key={index} height={{ base: "70px", md: "84px" }} rounded="lg" />
               ))
             ) : filteredApps.length > 0 ? (
@@ -294,6 +266,7 @@ export function AppCategoryTabs({
                   onCheckedChange={() => onToggleApp?.(app.id)}
                   displayMode={
                     !account?.address ||
+                    disabled ||
                     ((hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote)
                       ? "voted"
                       : "checkbox"
@@ -314,46 +287,51 @@ export function AppCategoryTabs({
               />
             ) : null}
 
-            {showPagination && (
-              <Pagination.Root
-                defaultPage={1}
-                count={filteredApps.length}
-                pageSize={10}
-                page={currentPage}
-                onPageChange={details => setCurrentPage(details.page)}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                gap="4">
-                <HStack gap="1">
-                  <Text textStyle="sm">{t("Showing")}</Text>
-
-                  <Pagination.PageText format="long" textStyle="sm" />
-                </HStack>
-
-                <ButtonGroup hideBelow="md" variant="ghost" size="sm">
-                  <Pagination.PrevTrigger asChild>
-                    <IconButton>
-                      <HiChevronLeft />
-                    </IconButton>
-                  </Pagination.PrevTrigger>
-                  <Pagination.Items
-                    render={page => (
-                      <IconButton variant={{ base: "ghost", _selected: "outline" }}>{page.value}</IconButton>
-                    )}
+            <Collapsible.Root
+              open={viewAll}
+              onOpenChange={details => {
+                setCurrentPage(1)
+                setViewAll(details.open)
+              }}
+              onExitComplete={() =>
+                document.getElementById("tabs:allocation-tabs")?.scrollIntoView({ behavior: "smooth" })
+              }>
+              <Collapsible.Content display="flex" flexDirection="column" gap="4">
+                {filteredApps.slice(APPS_PER_PAGE).map(app => (
+                  <AppRadioCard
+                    key={app.id}
+                    appId={app.id}
+                    appLogo={app.metadata?.logo}
+                    appName={app.name}
+                    appVoters={app.voters}
+                    appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
+                    allocationSharePercentage={appSharesMap.get(app.id)}
+                    checked={selectedAppIds?.has(app.id)}
+                    onCheckedChange={() => onToggleApp?.(app.id)}
+                    displayMode={
+                      !account?.address ||
+                      disabled ||
+                      ((hasVoted || isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isEditingAutoVote)
+                        ? "voted"
+                        : "checkbox"
+                    }
+                    disabled={isAtSelectionLimit && !selectedAppIds?.has(app.id)}
                   />
-                  <Pagination.NextTrigger asChild>
-                    <IconButton>
-                      <HiChevronRight />
-                    </IconButton>
-                  </Pagination.NextTrigger>
-                </ButtonGroup>
-
-                <Button hideFrom="md" variant="link" p="0" size="sm" onClick={onViewAll}>
-                  {t("View all")}
+                ))}
+              </Collapsible.Content>
+              <Collapsible.Trigger asChild>
+                <Button
+                  mt={viewAll ? "4" : "unset"}
+                  mx={{ base: "auto", md: "auto 0" }}
+                  height="5"
+                  flexShrink={0}
+                  variant="link"
+                  p="0"
+                  size="sm">
+                  {viewAll ? t("View less") : t("View all")}
                 </Button>
-              </Pagination.Root>
-            )}
+              </Collapsible.Trigger>
+            </Collapsible.Root>
           </Tabs.Content>
         </Tabs.Root>
       </VStack>

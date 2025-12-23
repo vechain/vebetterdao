@@ -18,6 +18,7 @@ type Props = {
   illustration?: string
   showCloseButton?: boolean
   description?: string | React.ReactNode
+  full?: boolean
 }
 
 const DRAG_THRESHOLD = 150
@@ -36,6 +37,7 @@ export const BaseBottomSheet = ({
   illustration,
   showCloseButton,
   description,
+  full = false,
 }: Props) => {
   const [dragY, setDragY] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -63,6 +65,7 @@ export const BaseBottomSheet = ({
   return (
     <Drawer.Root
       placement="bottom"
+      size="full"
       closeOnInteractOutside={isDismissable}
       open={isOpen}
       onOpenChange={e => {
@@ -78,8 +81,8 @@ export const BaseBottomSheet = ({
             aria-description={ariaDescription}
             bg="bg.primary"
             borderTopRadius="10px"
-            h="auto"
-            maxH="90dvh"
+            h={full ? "100dvh" : "auto"}
+            maxH={full ? "unset" : "90dvh"}
             minHeight={minHeight}
             overflow="hidden"
             display="flex"
@@ -91,21 +94,22 @@ export const BaseBottomSheet = ({
             <VisuallyHidden>
               <Drawer.Title>{ariaTitle}</Drawer.Title>
             </VisuallyHidden>
-            <Box
-              w="full"
-              // TODO: this is added to prevent veworld tab closes by swiping.
-              // find a better solution for this
-              pt={4}
-              pb={2}
-              cursor={isDismissable ? "grab" : "default"}
-              _active={isDismissable ? { cursor: "grabbing" } : {}}
-              style={{ touchAction: "none" }}
-              {...(isDismissable ? bind() : {})}>
-              <Box mx="auto" w="34px" h="5px" bg={isDismissable ? "#D7D6D4" : "transparent"} rounded="full" />
-            </Box>
 
-            <Drawer.Body flex={1} overflowY="auto" px={4} pb={4} display="flex" flexDirection="column">
-              {(title || illustration || showCloseButton) && (
+            <Drawer.Body flex={1} overflowY="auto" p={4} display="flex" flexDirection="column">
+              {isDismissable && (
+                <Box
+                  mx="auto"
+                  w="34px"
+                  h="5px"
+                  bg="#D7D6D4"
+                  mb={4}
+                  rounded="full"
+                  cursor={isDismissable ? "grab" : "default"}
+                  _active={isDismissable ? { cursor: "grabbing" } : {}}
+                  {...(isDismissable ? bind() : {})}
+                />
+              )}
+              {(title || illustration) && (
                 <Box mb={4}>
                   <Box position="relative">
                     {illustration && (
@@ -119,10 +123,12 @@ export const BaseBottomSheet = ({
                       </Box>
                     )}
                   </Box>
-                  {title && (
+                  {title && typeof title === "string" ? (
                     <Heading fontWeight="bold" textStyle="md" textAlign="center">
                       {title}
                     </Heading>
+                  ) : (
+                    title
                   )}
                   {description && (
                     <Text textAlign={illustration ? "center" : "left"} color="text.secondary">
