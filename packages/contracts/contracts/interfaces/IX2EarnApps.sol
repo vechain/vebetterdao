@@ -502,19 +502,6 @@ interface IX2EarnApps {
   function x2EarnRewardsPoolContract() external view returns (IX2EarnRewardsPool);
 
   /**
-   * @notice Checks endorsements for a given app and updates its voting eligibility based on the endorsements' scores.
-   *
-   * @dev This function is intended to be called by a cron job prior to the start of each voting round.
-   * If the app has less than 100 points, the grace period elasped is checked.
-   * If the grace period elapsed by the app is greater than the threshold grace period, the app is marked as not eligible for voting.
-   * If an endorser has lost its node status (level 0), it is removed from the endorsers list.
-   *
-   * @param appId The unique identifier of the app being checked.
-   * @return True if the app is eligible for voting.
-   */
-  function checkEndorsement(bytes32 appId) external returns (bool);
-
-  /**
    * @dev Update the metadata URI of the app.
    *
    * @param appId the id of the app
@@ -569,55 +556,6 @@ interface IX2EarnApps {
    */
   function baseURI() external view returns (string memory);
 
-  /**
-   * @dev return the grace period for an XApp to find new endorsers after the previous one was removed.
-   */
-  function gracePeriod() external view returns (uint256);
-
-  /**
-   * @dev return true if an app is pending for endorsement.
-   */
-  function isAppUnendorsed(bytes32 appId) external view returns (bool);
-
-  /**
-   * @notice Gets the ids of all apps that are looking for endorsement.
-   * @return the ids of the apps that are pending for endorsement
-   */
-  function unendorsedAppIds() external view returns (bytes32[] memory);
-
-  /**
-   * @notice Gets the information about all apps that are looking for endorsement.
-   * @return the information about the apps that are pending for endorsement
-   */
-  function unendorsedApps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
-
-  /**
-   * @dev Get the endorsement score of an app.
-   *
-   * @param appId the id of the app
-   */
-  function getScore(bytes32 appId) external returns (uint256);
-
-  /**
-   * @dev Get the endorsers of an app.
-   *
-   * @param appId the id of the app
-   */
-  function getEndorsers(bytes32 appId) external view returns (address[] memory);
-
-  /**
-   * @dev Get the endorsersment score of an individual.
-   *
-   * @param user the address of the user who holds a NODE
-   */
-  function getUsersEndorsementScore(address user) external view returns (uint256);
-
-  /**
-   * @dev Get the endorsersment score of a node ID.
-   *
-   * @param nodeId the ID of a node.
-   */
-  function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256);
 
   /**
    * @notice Get the version of the contract.
@@ -642,57 +580,6 @@ interface IX2EarnApps {
     string memory _appMetadataURI
   ) external;
 
-  /**
-   * @dev Update the the endorsement scores of each node level.
-   *
-   * @param _nodeStrengthScores The node level scores to update.
-   *
-   * Emits a {NodeStrengthScoreUpdated} event.
-   */
-  function updateNodeEndorsementScores(EndorsementUtils.NodeStrengthScores calldata _nodeStrengthScores) external;
-
-  /**
-   * @notice Update the endorsement score threshold
-   * @dev This should be minimum endorsement score required for an app to be eligible for voting.
-   *
-   * @param _scoreThreshold the new score threshold
-   *
-   * Emits a {EndorsementScoreThresholdUpdated} event.
-   */
-
-  function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external;
-
-  /**
-   * @notice This function can be called by an XAPP admin that wishes to remove an endorserment from a specific node ID
-   * @dev Can only be valled by DEFAULT_ADMIN or XAPP admin
-   * @param _appId The unique identifier of the app that wishes to be unendorsed.
-   * @param _nodeId The unique identifier of the node they wish to remove from their list of endorsers.
-   */
-  function removeNodeEndorsement(bytes32 _appId, uint256 _nodeId) external;
-
-  /**
-   * @dev Get the score threshold.
-   */
-  function endorsementScoreThreshold() external view returns (uint256);
-
-  /**
-   * @dev Remove an XApps submission.
-   */
-  function removeXAppSubmission(bytes32 _appId) external;
-
-  /**
-   * @notice this function returns the app that a node ID is endorsing
-   * @param nodeId The unique identifier of the node ID.
-   * @return bytes32 The unique identifier of the app that the node ID is endorsing.
-   */
-  function nodeToEndorsedApp(uint256 nodeId) external view returns (bytes32);
-
-  /**
-   * @notice this function returns the endorsement score of a node level
-   * @param nodeLevel The strength level of the node.
-   * @return uint256 The endorsement score of the node level.
-   */
-  function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256);
 
   /**
    * @dev Update the X2EarnCreator contract address.
@@ -701,125 +588,5 @@ interface IX2EarnApps {
    */
   function setX2EarnCreatorContract(address x2EarnCreatorContract) external;
 
-  /**
-   * @dev Get the X2EarnCreator contract address.
-   */
-  function x2EarnCreatorContract() external view returns (IX2EarnCreator);
 
-  /**
-   * @dev Update the XAllocationVotingGovernor contract address.
-   *
-   * @param _xAllocationVotingGovernor the address of the XAllocationVotingGovernor contract
-   */
-  function setXAllocationVotingGovernor(address _xAllocationVotingGovernor) external;
-
-  /**
-   * @dev Get the cooldown period for a node in seconds.
-   */
-  function cooldownPeriod() external view returns (uint256);
-
-  /**
-   * @dev Get the XAllocationVotingGovernor contract address.
-   */
-  function getXAllocationVotingGovernor() external view returns (IXAllocationVotingGovernor);
-
-  /**
-   * @notice Check if a node is in a cooldown period. A node is in a cooldown period after it has endorsed an app.
-   * @param nodeId The unique identifier of the node.
-   * @return bool True if the node is in a cooldown period.
-   */
-  function checkCooldown(uint256 nodeId) external view returns (bool);
-
-  /**
-   * @notice Function to update the grace period.
-   * @param _newGracePeriod The new grace period.
-   * Emits a {GracePeriodUpdated} event.
-   */
-  function updateGracePeriod(uint48 _newGracePeriod) external;
-
-  /**
-   * @notice Function to update the cooldown period.
-   * @param _newCooldownPeriod The new cooldown period.
-   * Emits a {CooldownPeriodUpdated} event.
-   */
-  function updateCooldownPeriod(uint256 _newCooldownPeriod) external;
-
-  /**
-   * @dev Set the Stargate NFT contract address.
-   * @param _stargateNft The address of the Stargate NFT contract.
-   */
-  function setStargateNFT(address _stargateNft) external;
-
-  /**
-   * @dev Get the Stargate NFT contract address.
-   */
-  function getStargateNFT() external view returns (IStargateNFT);
-
-  // ---------- V8: Split Endorsement Functions ---------- //
-
-  /**
-   * @notice Allocates points from a node to an app (V8 split endorsement)
-   * @dev Nodes can split their endorsement points across multiple dApps
-   * @param appId The unique identifier of the app to endorse
-   * @param nodeId The unique identifier of the node allocating points
-   * @param points The number of points to allocate (max 49 per node per app)
-   */
-  function allocateEndorsementPoints(bytes32 appId, uint256 nodeId, uint256 points) external;
-
-  /**
-   * @notice Removes points from a node's allocation to an app (V8 split endorsement)
-   * @param appId The unique identifier of the app
-   * @param nodeId The unique identifier of the node removing points
-   * @param points The number of points to remove
-   */
-  function removeEndorsementPoints(bytes32 appId, uint256 nodeId, uint256 points) external;
-
-  /**
-   * @notice Gets the available points a node can still allocate
-   * @param nodeId The node ID to check
-   * @return The number of points available for allocation
-   */
-  function getAvailablePoints(uint256 nodeId) external view returns (uint256);
-
-  /**
-   * @notice Gets the points a node has allocated to a specific app
-   * @param nodeId The node ID
-   * @param appId The app ID
-   * @return The number of points allocated
-   */
-  function getNodeAppPoints(uint256 nodeId, bytes32 appId) external view returns (uint256);
-
-  /**
-   * @notice Gets all apps a node is endorsing (V8)
-   * @param nodeId The node ID
-   * @return Array of app IDs the node is endorsing
-   */
-  function getNodeEndorsedApps(uint256 nodeId) external view returns (bytes32[] memory);
-
-  /**
-   * @notice Gets the total points a node has allocated across all apps
-   * @param nodeId The node ID
-   * @return The total points allocated
-   */
-  function getNodeTotalAllocated(uint256 nodeId) external view returns (uint256);
-
-  /**
-   * @notice Gets the maximum points per node per app constant
-   * @return The maximum points (49)
-   */
-  function maxPointsPerNodePerApp() external pure returns (uint256);
-
-  /**
-   * @notice Gets the maximum points per app constant
-   * @return The maximum points (110)
-   */
-  function maxPointsPerApp() external pure returns (uint256);
-
-  /**
-   * @notice Checks if a node is in cooldown for a specific app
-   * @param nodeId The node ID
-   * @param appId The app ID
-   * @return True if in cooldown, false otherwise
-   */
-  function checkCooldownForApp(uint256 nodeId, bytes32 appId) external view returns (bool);
 }

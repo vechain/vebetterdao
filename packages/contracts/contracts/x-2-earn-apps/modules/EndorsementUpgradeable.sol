@@ -167,17 +167,17 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementUtils.updateNodeEndorsementScores($._nodeEnodorsmentScore, nodeStrengthScores);
   }
 
-  /**
-   * @dev Update the endorsement status of an app.
-   * @param appId The unique identifier of the app.
-   * @param endorsed The endorsement status to set.
-   *
-   * Emits a {AppEndorsementStatusUpdated} event.
-   */
-  function _setEndorsementStatus(bytes32 appId, bool endorsed) internal override {
-    _updateAppsPendingEndorsement(appId, endorsed);
-    emit AppEndorsementStatusUpdated(appId, endorsed);
-  }
+  // /**
+  //  * @dev Update the endorsement status of an app.
+  //  * @param appId The unique identifier of the app.
+  //  * @param endorsed The endorsement status to set.
+  //  *
+  //  * Emits a {AppEndorsementStatusUpdated} event.
+  //  */
+  // function _setEndorsementStatus(bytes32 appId, bool endorsed) internal override {
+  //   _updateAppsPendingEndorsement(appId, endorsed);
+  //   emit AppEndorsementStatusUpdated(appId, endorsed);
+  // }
 
   /**
    * @dev Internal function to update the apps pending endorsement list.
@@ -349,11 +349,12 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       $._veBetterPassport.setAppSecurity(appId, $._appSecurity[appId]);
     }
 
+  //TODO: CHECK IF APP IS UNENDORSED
     // If the app is pending endorsement
-    if (isAppUnendorsed(appId)) {
-      // Mark the app as endorsed so that it is removed from the list of apps pending endorsement
-      _setEndorsementStatus(appId, true);
-    }
+    // if (isAppUnendorsed(appId)) {
+    //   // Mark the app as endorsed so that it is removed from the list of apps pending endorsement
+    //   _setEndorsementStatus(appId, true);
+    // }
 
     // Reset the grace period if the app has more than 100 points
     $._appGracePeriodStart[appId] = 0;
@@ -376,7 +377,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       $._unendorsedAppsIndex,
       $._veBetterPassport,
       $._gracePeriodDuration,
-      isAppUnendorsed(appId),
+      false,//isAppUnendorsed(appId),
       clock(),
       appId,
       isEligibleNow(appId)
@@ -408,22 +409,22 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     return _getEndorsementStorage()._cooldownPeriod;
   }
 
-  /**
-   * @dev See {IX2EarnApps-isAppUnendorsed}.
-   * @param appId The unique identifier of the app.
-   * @return True if the app is pending endorsement.
-   */
-  function isAppUnendorsed(bytes32 appId) public view override returns (bool) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
+  // /**
+  //  * @dev See {IX2EarnApps-isAppUnendorsed}.
+  //  * @param appId The unique identifier of the app.
+  //  * @return True if the app is pending endorsement.
+  //  */
+  // function isAppUnendorsed(bytes32 appId) public view override returns (bool) {
+  //   EndorsementStorage storage $ = _getEndorsementStorage();
 
-    // If the app is blacklisted, it cannot be pending endorsement
-    if (isBlacklisted(appId)) {
-      return false;
-    }
+  //   // If the app is blacklisted, it cannot be pending endorsement
+  //   if (isBlacklisted(appId)) {
+  //     return false;
+  //   }
 
-    // Check if the app is in the list of apps pending endorsement
-    return $._unendorsedAppsIndex[appId] > 0;
-  }
+  //   // Check if the app is in the list of apps pending endorsement
+  //   return $._unendorsedAppsIndex[appId] > 0;
+  // }
 
   /**
    * @dev See {IX2EarnApps-checkCooldown}.

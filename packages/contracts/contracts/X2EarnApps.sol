@@ -28,11 +28,12 @@ import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/Administratio
 import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
 import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
 import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeable.sol";
-import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgradeable.sol";
 import { EndorsementUtils } from "./x-2-earn-apps/libraries/EndorsementUtils.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IStargateNFT } from "./mocks/Stargate/interfaces/IStargateNFT.sol";
+import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title X2EarnApps
@@ -73,6 +74,7 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * - Max 110 points total per dApp (from all nodes combined).
  * - Per-app cooldown tracking for endorsement changes.
  * - New functions: allocateEndorsementPoints, removeEndorsementPoints, getAvailablePoints, etc.
+ *
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
@@ -80,7 +82,6 @@ contract X2EarnApps is
   ContractSettingsUpgradeable,
   VoteEligibilityUpgradeable,
   AppsStorageUpgradeable,
-  EndorsementUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -149,7 +150,6 @@ contract X2EarnApps is
   function version() public pure virtual returns (string memory) {
     return "8";
   }
-
   // ---------- Overrides ------------ //
 
   /**
@@ -174,11 +174,11 @@ contract X2EarnApps is
     if (appExists(_appId)) {
       _setVotingEligibility(_appId, _isEligible);
     }
-
+    //TODO: CHECK IF APP IS UNENDORSED
     // If the app is pending endorsement and the app is getting blacklisted remove it from the pending endorsement list
-    if (isAppUnendorsed(_appId) && !_isEligible) {
-      _updateAppsPendingEndorsement(_appId, true);
-    }
+    // if (isAppUnendorsed(_appId) && !_isEligible) {
+      //TODO: REMOVE FROM PENDING ENDORSEMENT LIST;
+    // }
 
     // Validate the app creators if the app is eligible and if not revoke the creators and burn their creator tokens
     _isEligible ? _validateAppCreators(_appId) : _revokeAppCreators(_appId);
@@ -295,76 +295,6 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-updateGracePeriod}.
-   */
-  function updateGracePeriod(uint48 _newGracePeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
-    _setGracePeriod(_newGracePeriod);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateCooldownPeriod}.
-   */
-  function updateCooldownPeriod(uint256 _newCooldownPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
-    _setCooldownPeriod(_newCooldownPeriod);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateNodeEndorsementScores}.
-   */
-  function updateNodeEndorsementScores(
-    EndorsementUtils.NodeStrengthScores calldata _nodeStrengthScores
-  ) external onlyRole(GOVERNANCE_ROLE) {
-    _updateNodeEndorsementScores(_nodeStrengthScores);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateEndorsementScoreThreshold}.
-   */
-  function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external onlyRole(GOVERNANCE_ROLE) {
-    _updateEndorsementScoreThreshold(_scoreThreshold);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-endorsementScoreThreshold}.
-   */
-  function endorsementScoreThreshold() external view returns (uint256) {
-    return _endorsementScoreThreshold();
-  }
-
-  /**
-   * @dev See {IX2EarnApps-removeNodeEndorsement}.
-   */
-  function removeNodeEndorsement(
-    bytes32 _appId,
-    uint256 _nodeId
-  ) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
-    _removeNodeEndorsement(_appId, _nodeId);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-removeXAppSubmission}.
-   */
-  function removeXAppSubmission(bytes32 _appId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
-    _removeXAppSubmission(_appId);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setVeBetterPassportContract}.
-   */
-  function setVeBetterPassportContract(address _veBetterPassportContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setVeBetterPassportContract(_veBetterPassportContract);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setXAllocationVotingGovernor}.
-   */
-  function setXAllocationVotingGovernor(
-    address _xAllocationVotingGovernor
-  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
-  }
-
-  /**
    * @dev See {IX2EarnApps-setX2EarnCreatorContract}.
    */
   function setX2EarnCreatorContract(address _x2EarnCreatorContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -378,10 +308,4 @@ contract X2EarnApps is
     _setX2EarnRewardsPoolContract(_x2EarnRewardsPoolContract);
   }
 
-  /**
-   * @dev See {IX2EarnApps-setStargateNFT}.
-   */
-  function setStargateNFT(address _stargateNft) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setStargateNFT(_stargateNft);
-  }
 }

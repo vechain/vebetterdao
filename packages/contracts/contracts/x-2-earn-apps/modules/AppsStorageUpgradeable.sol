@@ -135,7 +135,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
     _setTeamAllocationPercentage(id, 0);
-    _setEndorsementStatus(id, false);
+   //TODO: ROUTE THIS TO NEW ENDORSEMENT CONTRACT  _setEndorsementStatus(id, false);
     _addCreator(id, msg.sender);
     _enableRewardsPoolForNewApp(id);
 
