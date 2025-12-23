@@ -28,7 +28,7 @@ const SelectValue = () => {
 export const LanguageSelector: React.FC = () => {
   const { i18n } = useTranslation()
   const currentLanguage = i18n.language || "en"
-  
+
   return (
     <Select.Root
       variant="subtle"

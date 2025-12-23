@@ -1589,6 +1589,12 @@ export interface components {
             percentageOffline?: components["schemas"]["Decimal128"];
             /** Format: int64 */
             offlineBlocks?: number;
+            /** Format: int64 */
+            exitBlock?: number;
+            /** Format: int64 */
+            queuePosition?: number;
+            /** Format: int64 */
+            availableStartBlock?: number;
         };
         Delegation: {
             id: string;

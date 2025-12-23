@@ -32,10 +32,12 @@ export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: 
   const thor = useThor()
   const { account } = useWallet()
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
+  const clauses = useMemo(() => [buildConvertVot3Tx(thor, contractAmount)], [contractAmount, thor])
+
   const clauseBuilder = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
-    return [buildConvertVot3Tx(thor, contractAmount)]
-  }, [thor, contractAmount])
+    return clauses
+  }, [clauses, contractAmount])
   const refetchQueryKeys = useMemo(
     () => [
       getB3trBalanceQueryKey(account?.address ?? undefined),
@@ -48,11 +50,14 @@ export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: 
     [account?.address],
   )
 
-  return useBuildTransaction({
-    clauseBuilder,
-    refetchQueryKeys,
-    onSuccess,
-    transactionModalCustomUI,
-    gasPadding: GAS_PADDING,
-  })
+  return {
+    clauses,
+    ...useBuildTransaction({
+      clauseBuilder,
+      refetchQueryKeys,
+      onSuccess,
+      transactionModalCustomUI,
+      gasPadding: GAS_PADDING,
+    }),
+  }
 }
