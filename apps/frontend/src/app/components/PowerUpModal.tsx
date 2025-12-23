@@ -20,7 +20,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
-import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
+import { useGetTokenUsdPrice, useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
 import { InfoCircle, NavArrowDown, WarningTriangle } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -32,7 +32,6 @@ import SwapIcon from "@/components/Icons/svg/swap.svg"
 import { default as VOT3Icon } from "@/components/Icons/svg/vot3-icon.svg"
 import { Modal } from "@/components/Modal"
 import { Tooltip } from "@/components/ui/tooltip"
-import { useB3TRExchangeRate } from "@/hooks/useB3TRExchangeRate"
 import { useConvertB3tr } from "@/hooks/useConvertB3tr"
 import { useConvertVot3 } from "@/hooks/useConvertVot3"
 import { useEstimateGasFee } from "@/hooks/useEstimateGasFee"
@@ -60,7 +59,8 @@ export const PowerUpModal = ({ title = "Convert tokens", isOpen, onClose }: Prop
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
-  const { data: b3trToUsd } = useB3TRExchangeRate()
+  const { data: b3trToUsd } = useGetTokenUsdPrice("B3TR")
+  const {} = useEstimateGasFee
 
   const { isTxModalOpen } = useTransactionModal()
   const [step, setStep] = useState<PowerUpStep>(PowerUpStep.SWAP)
@@ -157,7 +157,7 @@ export const PowerUpModal = ({ title = "Convert tokens", isOpen, onClose }: Prop
 
     const data = [
       { label: t("Estimated gas fee"), value: `${(estimatedGasFee || "").slice(0, 4)} VTHO` },
-      { label: t("Conversion rate"), value: `1 B3TR = ${(b3trToUsd || "").slice(0, 6)} USD` },
+      { label: t("Conversion rate"), value: `1 B3TR = ${b3trToUsd.toFixed(4) || ""} USD` },
       { label: t("Wallet"), value: account?.address ? humanAddress(account.address) : "-" },
     ] as const
 
@@ -450,7 +450,10 @@ export const PowerUpModal = ({ title = "Convert tokens", isOpen, onClose }: Prop
                       </HStack>
                       <Text textStyle="xs" color="text.subtle">
                         {t("Available")}
-                        {":"} {compactFormatter.format(Number(vot3BalanceScaled))}
+                        {":"}
+                        {compactFormatter.format(
+                          Number(convertTo === "b3tr" ? vot3BalanceScaled : vot3Balance?.scaled),
+                        )}
                       </Text>
                     </VStack>
                   </HStack>
