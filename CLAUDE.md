@@ -3,17 +3,6 @@
 **BE EXTREMELY CONCISE IN ALL TASKS UNLESS EXPLICITLY STATED OTHERWISE.**
 Sacrifice grammar for concision.
 
-## PR Creation
-
-When I say "PR" (uppercase):
-
-- **ALWAYS push commits first**: `git push -u origin <branch>`
-- Then run: `gh pr create -a="@me" -B main -r vechain/b3tr`
-- Description: Bare minimum necessary info only
-- Format: Bullet points
-- NO EMOJIS
-- Use comparison tables/measurements only if critical
-
 # Project structure
 
 Turborepo monorepo with:
@@ -79,7 +68,6 @@ Turborepo monorepo with:
 
 # Workflow
 
-- Always typecheck after making code changes
 - Use turbo for parallel builds/tests when possible
 - Contracts must be compiled before frontend dev
 

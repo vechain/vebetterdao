@@ -16,10 +16,10 @@ on:
                 required: true
                 type: string
             dockerfile_path:
-                description: "Path to Dockerfile"
+                description: "Path to Dockerfile (auto-detected if not specified)"
                 required: false
                 type: string
-                default: "./Dockerfile"
+                default: ""
             context_path:
                 description: "Build context path"
                 required: false
@@ -30,6 +30,11 @@ on:
                 required: false
                 type: string
                 default: "eu-west-1"
+            contracts_npm_version:
+                description: "Version of @vechain/vebetterdao-contracts npm package (when using npm-based build)"
+                required: false
+                type: string
+                default: "latest"
         secrets:
             aws_role_arn:
                 description: "AWS IAM role ARN for OIDC authentication"
@@ -41,6 +46,9 @@ on:
             uri:
                 description: "Full URI of the pushed image"
                 value: ${{ jobs.build-and-push.outputs.uri }}
+            contracts_changed:
+                description: "Whether contracts package changed"
+                value: ${{ jobs.build-and-push.outputs.contracts_changed }}
 
 jobs:
     build-and-push:
@@ -53,10 +61,33 @@ jobs:
         outputs:
             tag: ${{ steps.meta.outputs.tag }}
             uri: ${{ steps.meta.outputs.uri }}
+            contracts_changed: ${{ steps.check-contracts.outputs.contracts }}
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+
+            - name: Check if contracts changed
+              uses: dorny/paths-filter@v3
+              id: check-contracts
+              with:
+                  filters: |
+                      contracts:
+                        - 'packages/contracts/**'
+
+            - name: Determine Dockerfile
+              id: dockerfile
+              run: |
+                  # Use explicit path if provided, otherwise auto-detect
+                  if [ -n "${{ inputs.dockerfile_path }}" ]; then
+                    echo "path=${{ inputs.dockerfile_path }}" >> $GITHUB_OUTPUT
+                  elif [ "${{ steps.check-contracts.outputs.contracts }}" == "true" ]; then
+                    echo "Using standard Dockerfile (contracts changed)"
+                    echo "path=./Dockerfile" >> $GITHUB_OUTPUT
+                  else
+                    echo "Using npm-contracts Dockerfile (no contracts changes)"
+                    echo "path=./Dockerfile.npm-contracts" >> $GITHUB_OUTPUT
+                  fi
 
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v4
@@ -97,7 +128,7 @@ jobs:
               uses: docker/build-push-action@v5
               with:
                   context: ${{ inputs.context_path }}
-                  file: ${{ inputs.dockerfile_path }}
+                  file: ${{ steps.dockerfile.outputs.path }}
                   push: true
                   tags: ${{ steps.meta.outputs.uri }}
                   platforms: linux/amd64
@@ -123,3 +154,4 @@ jobs:
                       NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${{ vars.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''}}
                       NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ vars.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN || ''}}
                       NODE_OPTIONS=${{ vars.NODE_OPTIONS || ''}}
+                      CONTRACTS_NPM_VERSION=${{ inputs.contracts_npm_version }}
