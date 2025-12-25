@@ -152,7 +152,11 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
   }, [apps, appVoteMetricsSortedByWeight])
 
   return (
-    <Card.Root p={{ base: "4", md: "6" }} height="max-content" minHeight={{ base: "fit-content", md: "500px" }}>
+    <Card.Root
+      variant="primary"
+      p={{ base: "4", md: "6" }}
+      height="max-content"
+      minHeight={{ base: "fit-content", md: "500px" }}>
       <Card.Header as={HStack} gap="2" pb={{ base: "5", md: "6" }}>
         <Icon as={Activity} boxSize="5" color="icon.default" />
         <Heading size={{ base: "md", md: "lg" }} fontWeight="semibold">

@@ -51,7 +51,7 @@ const RoundActiveAppCard = ({
   const { t } = useTranslation()
   const { data } = useTotalXAppEarnings(roundId.toString(), id, percentage ?? 0)
   return (
-    <Button unstyled asChild onClick={() => onClick(id)}>
+    <Button unstyled focusVisibleRing="none" _focusWithin={{ bg: "card.hover" }} asChild onClick={() => onClick(id)}>
       <Card.Root
         variant="action"
         border="none"
@@ -118,7 +118,7 @@ export const RoundActiveAppsListCard = ({
 
   return (
     <>
-      <Card.Root id={CARD_ID} p={{ base: "4", md: "6" }} gap="6" height="max-content">
+      <Card.Root id={CARD_ID} variant="primary" p={{ base: "4", md: "6" }} gap="6" height="max-content">
         <Card.Header gap="6" p="0">
           <HStack justifyContent="space-between">
             <Heading as={HStack} size="lg" fontWeight="semibold">
