@@ -157,7 +157,7 @@ export const PowerUpModal = ({ title = "Convert tokens", isOpen, onClose }: Prop
 
     const data = [
       { label: t("Estimated gas fee"), value: `${(estimatedGasFee || "").slice(0, 4)} VTHO` },
-      { label: t("Conversion rate"), value: `1 B3TR = ${b3trToUsd.toFixed(4) || ""} USD` },
+      { label: t("Conversion rate"), value: `1 B3TR = ${b3trToUsd?.toFixed(4) || ""} USD` },
       { label: t("Wallet"), value: account?.address ? humanAddress(account.address) : "-" },
     ] as const
 
