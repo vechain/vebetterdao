@@ -36,13 +36,18 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
   const { account } = useWallet()
   const requiresSelfDelegation = useVot3RequireSelfDelegation()
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
+
+  const convertClause = useMemo(
+    () => [
+      buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress),
+      buildConvertB3trTx(thor, contractAmount),
+    ],
+    [contractAmount, thor],
+  )
+
   const clauseBuilder = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
     if (!account?.address) throw new Error("account address is required")
-    const convertClause = [
-      buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress),
-      buildConvertB3trTx(thor, contractAmount),
-    ]
 
     // If the user requires self delegation, add the delegation clause
     // This is required for privy users, in order to be able to capture the vot3 balance at the snapshot block
@@ -51,7 +56,7 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
       convertClause.unshift(buildDelegateVot3Tx(thor, account?.address))
     }
     return convertClause
-  }, [thor, contractAmount, requiresSelfDelegation, account?.address])
+  }, [contractAmount, account?.address, requiresSelfDelegation, convertClause, thor])
 
   const refetchQueryKeys = useMemo(
     () => [
@@ -65,11 +70,14 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
     [account?.address],
   )
 
-  return useBuildTransaction({
-    clauseBuilder,
-    refetchQueryKeys,
-    onSuccess,
-    transactionModalCustomUI,
-    gasPadding: GAS_PADDING,
-  })
+  return {
+    clauses: convertClause,
+    ...useBuildTransaction({
+      clauseBuilder,
+      refetchQueryKeys,
+      onSuccess,
+      transactionModalCustomUI,
+      gasPadding: GAS_PADDING,
+    }),
+  }
 }

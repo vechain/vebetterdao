@@ -25,11 +25,11 @@ import { useTranslation } from "react-i18next"
 import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
 import { ProposalsBanners } from "@/app/components/Banners/proposals/ProposalsBanners"
+import { PowerUpModal } from "@/app/components/PowerUpModal"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
 
 import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
-import { ConvertModal } from "../../../components/Convert/components/Modal/ConvertModal"
 import { EmptyStateCard } from "../../../components/EmptyStateCard"
 import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/MobileFilterDrawer"
 import { SearchField } from "../../../components/SearchField/SearchField"
@@ -371,7 +371,7 @@ export const GrantsPageContent = () => {
       </VStack>
 
       {/* Convert/Swap Modal */}
-      <ConvertModal isOpen={isOpenConvertModal} onClose={onCloseConvertModal} />
+      <PowerUpModal isOpen={isOpenConvertModal} onClose={onCloseConvertModal} />
     </>
   )
 }

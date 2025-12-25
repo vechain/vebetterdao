@@ -807,6 +807,7 @@
   "Swapping...": "Swapping...",
   "You'll convert": "You'll convert",
   "You'll receive": "You'll receive",
+  "Transaction details": "Transaction details",
   "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.": "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.",
   "loading": "loading",
   "Error getting state": "Error getting state",
@@ -1673,6 +1674,16 @@
   "Waiting for the relayer to cast your vote this round. You can disable after voting completes.": "Waiting for the relayer to cast your vote this round. You can disable after voting completes.",
   "Max allocation!": "Max allocation!",
   "Allocation": "Allocation",
+  "Available": "Available",
+  "Voting power = VOT3 at snapshot": "Voting power = VOT3 at snapshot",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.",
+  "Not enough VOT3": "Not enough VOT3",
+  "Not enough B3TR": "Not enough B3TR",
+  "Convert now": "Convert now",
+  "Estimated gas fee": "Estimated gas fee",
+  "Conversion rate": "Conversion rate",
+  "Wallet": "Wallet",
+  "Use max": "Use max",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.",
   "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.",
   "Auto-claimed voting rewards for you": "Auto-claimed voting rewards for you",
@@ -1681,5 +1692,6 @@
   "Potential: ": "Potential: ",
   "Rounds history": "Rounds history",
   "Round details": "Round details",
-  "Potential B3TR amount to receive": "Potential B3TR amount to receive"
+  "Potential B3TR amount to receive": "Potential B3TR amount to receive",
+  "You can convert max. of": "You can convert max. of"
 }

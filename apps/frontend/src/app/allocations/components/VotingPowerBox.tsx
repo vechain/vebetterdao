@@ -9,7 +9,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
-import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
+import { PowerUpModal } from "@/app/components/PowerUpModal"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
@@ -71,7 +71,7 @@ export const VotingPowerBox = () => {
               {t("Power up")}
             </Button>
 
-            <ConvertModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+            <PowerUpModal title={t("Power up")} isOpen={isOpen} onClose={() => setIsOpen(false)} />
           </>
         )
       }
