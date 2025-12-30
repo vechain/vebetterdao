@@ -75,7 +75,6 @@ const mockConfig = {
     autoVotingLogicAddress: "",
   },
   dbaPoolContractAddress: "",
-  oracleContractAddress: "",
 }
 
 export const getConfig = () => mockConfig

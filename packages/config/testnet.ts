@@ -26,7 +26,6 @@ const config: AppConfig = {
   grantsManagerContractAddress: "0x0000000000000000000000000000000000000001",
   relayerRewardsPoolContractAddress: "0x0000000000000000000000000000000000000000",
   dbaPoolContractAddress: "0x0000000000000000000000000000000000000000",
-  oracleContractAddress: "0xdcCAaBd81B38e0dEEf4c202bC7F1261A4D9192C6",
   indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
