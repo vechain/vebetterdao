@@ -19,8 +19,8 @@ import { useMostVotedAppsInRound } from "../../api/contracts/xApps/hooks/useMost
 import { AllocationStateBadge } from "../../components/AllocationStateBadge/AllocationStateBadge"
 import { B3TRIcon } from "../../components/Icons/B3TRIcon"
 import { ProposalCompactCard } from "../../components/ProposalCompactCard"
-import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
-import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
+import { NoActiveProposalCard } from "../proposals/components/components/NoActiveProposalCard"
+import { useRoundProposals } from "../proposals/hooks/useRoundProposals"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
