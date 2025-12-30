@@ -39,7 +39,7 @@ type BreakdownSection = {
 
 type SectionData = SimpleSection | BreakdownSection
 
-const DonutChart = ({ colors, percentage }: { data: DataItem[]; colors: string[]; percentage: string }) => {
+const DonutChart = ({ colors, percentage }: { colors: string[]; percentage: string }) => {
   return (
     <ProgressRing
       size={70}
