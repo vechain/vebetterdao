@@ -11,6 +11,7 @@ import {
   VStack,
   Badge,
   HStack,
+  Tag,
 } from "@chakra-ui/react"
 import { Check, CheckCircle, Group } from "iconoir-react"
 import { useTranslation } from "react-i18next"
@@ -52,14 +53,25 @@ export const AppRadioCard = ({
   return (
     <CheckboxCard.Root
       rounded="lg"
-      p={{ base: "3", md: "5" }}
+      bg="card.default"
+      p={{ base: "4", md: "5" }}
       colorPalette="blue"
       checked={checked}
       onCheckedChange={isInteractive ? onCheckedChange : undefined}
       cursor={isInteractive ? "pointer" : "default"}
       pointerEvents={isInteractive ? "auto" : "none"}
-      opacity={disabled && !checked ? 0.5 : 1}>
+      opacity={disabled && !checked ? 0.5 : 1}
+      position="relative">
       {isInteractive && <CheckboxCard.HiddenInput />}
+      {isVotedMode && checked && (
+        <Float placement="top-end" offsetX="10">
+          <Tag.Root bg="status.info.subtle" border="sm" borderColor="borders.active" borderRadius="4px">
+            <Tag.Label textStyle={{ base: "xxs", md: "sm" }} color="status.info.strong">
+              {t("Voted")}
+            </Tag.Label>
+          </Tag.Root>
+        </Float>
+      )}
       <CheckboxCard.Control alignItems="center" p="0" gap="3">
         {!isVotedMode && <CheckboxCard.Indicator rounded="sm" />}
         <Box position="relative">

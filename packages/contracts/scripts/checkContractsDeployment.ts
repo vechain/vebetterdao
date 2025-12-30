@@ -4,7 +4,6 @@ import { getConfig, getContractsConfig } from "@repo/config"
 import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
-import { Network } from "@repo/constants"
 import { AppEnv } from "@repo/config/contracts"
 
 const config = getConfig()
@@ -59,6 +58,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     veBetterPassportContractAddress: await contracts.veBetterPassport.getAddress(),
     grantsManagerContractAddress: await contracts.grantsManager.getAddress(),
     dbaPoolContractAddress: await contracts.dynamicBaseAllocationPool.getAddress(),
+    oracleContractAddress: config.oracleContractAddress,
     stargateContractAddress: await contracts.stargate.getAddress(),
     stargateNFTContractAddress: await contracts.stargateNFT.getAddress(),
     b3trGovernorLibraries: {

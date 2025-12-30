@@ -270,7 +270,10 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
                 register={{
                   ...register("projectUrl", {
                     required: "Project URL is required",
-                    maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
+                    maxLength: {
+                      value: 255,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }),
+                    },
                     pattern: patternUrlCheck,
                   }),
                 }}

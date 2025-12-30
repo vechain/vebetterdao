@@ -2194,5 +2194,10 @@
   "Allocation": "分配",
   "Auto-voting is enabled! Claim your past rewards now. Future ones will be auto.": "自動投票已啟用！立即領取您過去的獎勵。未來的將自動處理。",
   "Automate your weekly votes and reward claims. No effort needed, just stay active in the DAO.": "自動化您的每週投票和獎勵索取。無需努力，只需在DAO中保持活躍。",
-  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "每週獎勵適用10%的服務費，最高達到100 B3TR。"
+  "A 10% service fee applies to your weekly rewards, capped at 100 B3TR.": "每週獎勵適用10%的服務費，最高達到100 B3TR。",
+  "Auto-claimed voting rewards for you": "自動領取的投票獎勵",
+  "Auto-claimed voting rewards": "自動領取的投票獎勵",
+  "Potential B3TR amount to receive": "可能接收到的 B3TR 金額",
+  "Potential: ": "潛力：",
+  "Total rewards to distribute": "總獎勵分配"
 }

@@ -158,7 +158,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
   try {
     const thorClient = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const secretsClient = new SecretsManagerClient({ region: "eu-west-1" })
-    const BATCH_SIZE = 10
+    const BATCH_SIZE = 50
 
     // Slack notification options - disabled during dry-run
     const slackOptions = dryRun
@@ -179,38 +179,13 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     })
 
     // Fetch all users with auto-voting enabled
-    // Starting from block 0 to the round start block
-    const allUsersWithEnabledStatus = await getAllAutoVotingEnabledUsers(
+    // Starting from block 0 will just skip to find the nearest block with AutoVotingToggled event
+    const usersToVoteFor = await getAllAutoVotingEnabledUsers(
       thorClient,
       CONFIG.xAllocationVotingContractAddress,
       0,
       roundStartBlock,
     )
-
-    // Verify that all users are 'active' at the round start block
-    const {
-      allValid,
-      validUsers: usersToVoteFor,
-      invalidUsers,
-    } = await verifyAutoVotingUsersIsActive(
-      thorClient,
-      CONFIG.xAllocationVotingContractAddress,
-      allUsersWithEnabledStatus,
-      currentRoundId,
-    )
-
-    if (!allValid) {
-      await notify({
-        level: "warn",
-        message: `Found ${invalidUsers.length} invalid auto-voting users in round ${currentRoundId}. Check logs for more details.`,
-        data: {
-          roundId: currentRoundId,
-          invalidUsersCount: invalidUsers.length,
-          invalidUsers,
-        },
-        slack: slackOptions,
-      })
-    }
 
     if (usersToVoteFor.length === 0) {
       await notify({

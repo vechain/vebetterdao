@@ -4,8 +4,10 @@ export const fetchCache = "force-no-store"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { executeMultipleClausesCall } from "@vechain/vechain-kit/utils"
+import { formatEther } from "viem"
 
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 import { fetchClient } from "@/api/indexer/api"
@@ -48,6 +50,9 @@ export interface AllocationRoundDetails {
 const xAllocationVotingAbi = XAllocationVoting__factory.abi
 const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 
+const xAllocationPoolAbi = XAllocationPool__factory.abi
+const xAllocationPoolAddress = getConfig().xAllocationPoolContractAddress as `0x${string}`
+
 const voterRewardsAbi = VoterRewards__factory.abi
 const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 
@@ -65,15 +70,6 @@ export const getRoundResults = async (roundId: number) =>
   fetchClient.GET("/api/v1/b3tr/xallocations/{roundId}/results", {
     params: { path: { roundId } },
   })
-
-export const getRoundAppsEarnings = async (roundId: number, appIds: string[]) =>
-  Promise.all(
-    appIds.map(appId =>
-      fetchClient.GET("/api/v1/b3tr/xallocations/earnings", {
-        params: { query: { roundId, appId } },
-      }),
-    ),
-  )
 
 export const getRoundDetails = async (cycle: bigint) => {
   const thor = await getNodeJsThorClient()
@@ -156,6 +152,7 @@ export const getCurrentRoundId = async () => {
 }
 
 export const getHistoricalRoundData = async (round?: number): Promise<AllocationRoundDetails> => {
+  const thor = await getNodeJsThorClient()
   const currentRoundId = await getCurrentRoundId()
   const roundId = round ?? Number(currentRoundId)
   const roundDetails = await getRoundDetails(BigInt(roundId))
@@ -167,13 +164,46 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
   const resultsMap = new Map(res.data.map(result => [result.appId, result]))
 
   const apps = roundDetails!.apps
+  const appIds = apps.map(app => app.id)
   const appsMetadata = await Promise.all(apps.map(app => getXAppMetadata(`ipfs://${app.metadataURI}`)))
 
-  const earningsResponses = await getRoundAppsEarnings(
-    roundId,
-    apps.map(app => app.id),
-  )
-  const earningsMap = new Map(earningsResponses.map((response, index) => [apps[index]?.id, response.data?.[0]]))
+  const earnings = await (currentRoundId === roundId
+    ? executeMultipleClausesCall({
+        thor,
+        calls: appIds.map(
+          appId =>
+            ({
+              abi: xAllocationPoolAbi,
+              address: xAllocationPoolAddress,
+              functionName: "roundEarnings",
+              args: [BigInt(roundId), appId as `0x${string}`],
+            }) as const,
+        ),
+      }).then(appArr =>
+        appArr.map((app, idx) => {
+          const [totalAmount = 0, unallocatedAmount = 0, teamAllocationAmount = 0, rewardsAllocationAmount = 0] =
+            app.map(amount => Number(formatEther(amount)))
+
+          return {
+            roundId,
+            appId: appIds[idx],
+            totalAmount,
+            unallocatedAmount,
+            teamAllocationAmount,
+            rewardsAllocationAmount,
+          }
+        }),
+      )
+    : Promise.all(
+        appIds.map(appId =>
+          fetchClient
+            .GET("/api/v1/b3tr/xallocations/earnings", {
+              params: { query: { roundId, appId } },
+            })
+            .then(response => response.data?.[0]),
+        ),
+      ))
+  const earningsMap = new Map(earnings.map((response, index) => [apps[index]?.id, response]))
 
   const appsWithVotes = apps
     .map((app, index) => {
