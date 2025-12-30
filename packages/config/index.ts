@@ -68,7 +68,6 @@ export type AppConfig = {
   stargateContractAddress: string
   grantsManagerContractAddress: string
   dbaPoolContractAddress: string
-  oracleContractAddress: string
   nodeUrl: string
   indexerUrl?: string
   network: Network
