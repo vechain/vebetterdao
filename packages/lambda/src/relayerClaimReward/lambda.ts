@@ -155,7 +155,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
   try {
     const thorClient = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const secretsClient = new SecretsManagerClient({ region: "eu-west-1" })
-    const BATCH_SIZE = 10
+    const BATCH_SIZE = 50
 
     // Slack notification options - disabled during dry-run
     const slackOptions = dryRun
