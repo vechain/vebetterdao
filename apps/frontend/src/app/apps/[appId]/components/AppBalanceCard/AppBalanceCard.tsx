@@ -83,13 +83,9 @@ export const AppBalanceCard = () => {
               <HStack>
                 <Text textStyle="md">{t("Balance")}</Text>
                 <Tooltip
-                  content={
-                    <Text>
-                      {t(
-                        "Amount of B3TR tokens that the app has available for withdrawal, and that can be used to distribute rewards if the rewards pool is enabled.",
-                      )}
-                    </Text>
-                  }>
+                  content={t(
+                    "Amount of B3TR tokens that the app has available for withdrawal, and that can be used to distribute rewards if the rewards pool is enabled.",
+                  )}>
                   <Icon as={FiInfo} color="icon.default" position={"relative"} />
                 </Tooltip>
               </HStack>
@@ -119,7 +115,7 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"start"} gap={0}>
               <HStack alignItems="center">
                 <Text textStyle="md">{t("Rewards Pool")}</Text>
-                <Tooltip content={<Text>{t("Amount of B3TR available for rewards distribution")}</Text>}>
+                <Tooltip content={t("Amount of B3TR available for rewards distribution")}>
                   <Icon as={FiInfo} color="icon.default" position={"relative"} />
                 </Tooltip>
               </HStack>
