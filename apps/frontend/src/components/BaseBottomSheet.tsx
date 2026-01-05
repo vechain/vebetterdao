@@ -23,6 +23,12 @@ type Props = {
 
 const DRAG_THRESHOLD = 150
 const VELOCITY_THRESHOLD = 0.5
+const SCROLL_LOCK_TIMEOUT = 100
+
+const isScrollable = (el: HTMLElement) => {
+  const style = window.getComputedStyle(el)
+  return /(auto|scroll)/.test(style.overflow + style.overflowX + style.overflowY)
+}
 
 export const BaseBottomSheet = ({
   isOpen,
@@ -41,14 +47,51 @@ export const BaseBottomSheet = ({
 }: Props) => {
   const [dragY, setDragY] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
+  const isAllowedToDrag = useRef(false)
+  const lastTimeDragPrevented = useRef<Date | null>(null)
+
+  const shouldDrag = (target: EventTarget) => {
+    let el = target as HTMLElement
+    const now = new Date()
+
+    if (
+      lastTimeDragPrevented.current &&
+      now.getTime() - lastTimeDragPrevented.current.getTime() < SCROLL_LOCK_TIMEOUT
+    ) {
+      lastTimeDragPrevented.current = now
+      return false
+    }
+
+    while (el) {
+      if (el.scrollHeight > el.clientHeight && isScrollable(el)) {
+        if (el.scrollTop > 0) {
+          lastTimeDragPrevented.current = now
+          return false
+        }
+      }
+      el = el.parentNode as HTMLElement
+    }
+
+    return true
+  }
 
   const bind = useDrag(
-    ({ down, movement: [, my], velocity: [, vy], direction: [, dy] }) => {
+    ({ down, movement: [, my], velocity: [, vy], direction: [, dy], first, event, cancel }) => {
       if (!isDismissable) return
+
+      if (first && event.target) {
+        isAllowedToDrag.current = shouldDrag(event.target)
+      }
+
+      if (!isAllowedToDrag.current && my > 0) {
+        cancel()
+        return
+      }
 
       if (down && my > 0) {
         setDragY(my)
       } else {
+        isAllowedToDrag.current = false
         if (my > DRAG_THRESHOLD || (vy > VELOCITY_THRESHOLD && dy > 0)) {
           onClose()
         }
@@ -95,20 +138,14 @@ export const BaseBottomSheet = ({
               <Drawer.Title>{ariaTitle}</Drawer.Title>
             </VisuallyHidden>
 
-            <Drawer.Body flex={1} overflowY="auto" p={4} display="flex" flexDirection="column">
-              {isDismissable && (
-                <Box
-                  mx="auto"
-                  w="34px"
-                  h="5px"
-                  bg="#D7D6D4"
-                  mb={4}
-                  rounded="full"
-                  cursor={isDismissable ? "grab" : "default"}
-                  _active={isDismissable ? { cursor: "grabbing" } : {}}
-                  {...(isDismissable ? bind() : {})}
-                />
-              )}
+            <Drawer.Body
+              flex={1}
+              overflowY="auto"
+              p={4}
+              display="flex"
+              flexDirection="column"
+              {...(isDismissable ? bind() : {})}>
+              {isDismissable && <Box mx="auto" w="34px" h="5px" bg="#D7D6D4" mb={4} rounded="full" />}
               {(title || illustration) && (
                 <Box mb={4}>
                   <Box position="relative">
