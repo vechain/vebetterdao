@@ -1,7 +1,7 @@
 import { Box, Drawer, Portal, VisuallyHidden, CloseButton, Heading, Text } from "@chakra-ui/react"
 import { useDrag } from "@use-gesture/react"
 import Image from "next/image"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 type Props = {
   isOpen: boolean
@@ -24,6 +24,7 @@ type Props = {
 const DRAG_THRESHOLD = 150
 const VELOCITY_THRESHOLD = 0.5
 const SCROLL_LOCK_TIMEOUT = 100
+const CLOSE_ANIMATION_DURATION = 200
 
 const isScrollable = (el: HTMLElement) => {
   const style = window.getComputedStyle(el)
@@ -49,6 +50,21 @@ export const BaseBottomSheet = ({
   const contentRef = useRef<HTMLDivElement>(null)
   const isAllowedToDrag = useRef(false)
   const lastTimeDragPrevented = useRef<Date | null>(null)
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) {
+      setDragY(0)
+    }
+  }, [isOpen])
 
   const shouldDrag = (target: EventTarget) => {
     let el = target as HTMLElement
@@ -92,10 +108,17 @@ export const BaseBottomSheet = ({
         setDragY(my)
       } else {
         isAllowedToDrag.current = false
-        if (my > DRAG_THRESHOLD || (vy > VELOCITY_THRESHOLD && dy > 0)) {
-          onClose()
+        const shouldClose =
+          dy === 0 ? my > DRAG_THRESHOLD : dy > 0 && my > DRAG_THRESHOLD / 2 && vy > VELOCITY_THRESHOLD
+
+        if (shouldClose) {
+          setDragY(window.innerHeight)
+          closeTimeoutRef.current = setTimeout(() => {
+            onClose()
+          }, CLOSE_ANIMATION_DURATION)
+        } else {
+          setDragY(0)
         }
-        setDragY(0)
       }
     },
     {
@@ -132,7 +155,7 @@ export const BaseBottomSheet = ({
             flexDirection="column"
             style={{
               transform: `translateY(${dragY}px)`,
-              transition: dragY === 0 ? "transform 0.2s ease-out" : "none",
+              transition: "transform 0.2s ease-out",
             }}>
             <VisuallyHidden>
               <Drawer.Title>{ariaTitle}</Drawer.Title>
