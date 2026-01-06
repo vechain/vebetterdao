@@ -21,10 +21,11 @@ type Props = {
   full?: boolean
 }
 
-const DRAG_THRESHOLD = 180
-const VELOCITY_THRESHOLD = 0.3
+const DRAG_THRESHOLD = 80
+const VELOCITY_THRESHOLD = 0.5
+const CLOSE_RATIO = 0.3
 const SCROLL_LOCK_TIMEOUT = 100
-const CLOSE_ANIMATION_DURATION = 200
+const CLOSE_ANIMATION_DURATION = 100
 
 const isScrollable = (el: HTMLElement) => {
   const style = window.getComputedStyle(el)
@@ -47,6 +48,7 @@ export const BaseBottomSheet = ({
   full = false,
 }: Props) => {
   const [dragY, setDragY] = useState(0)
+  const isDraggingRef = useRef(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const isAllowedToDrag = useRef(false)
   const lastTimeDragPrevented = useRef<Date | null>(null)
@@ -61,7 +63,7 @@ export const BaseBottomSheet = ({
   }, [])
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
       setDragY(0)
     }
   }, [isOpen])
@@ -105,11 +107,15 @@ export const BaseBottomSheet = ({
       }
 
       if (down && my > 0) {
+        isDraggingRef.current = true
         setDragY(my)
       } else {
+        isDraggingRef.current = false
         isAllowedToDrag.current = false
+        const sheetHeight = contentRef.current?.clientHeight ?? window.innerHeight
+        const percentageDragged = my / sheetHeight
         const shouldClose =
-          dy === 0 ? my > DRAG_THRESHOLD : dy > 0 && my > DRAG_THRESHOLD / 2 && vy > VELOCITY_THRESHOLD
+          percentageDragged > CLOSE_RATIO || (dy >= 0 && my > DRAG_THRESHOLD && vy > VELOCITY_THRESHOLD)
 
         if (shouldClose) {
           setDragY(window.innerHeight)
@@ -155,7 +161,7 @@ export const BaseBottomSheet = ({
             flexDirection="column"
             style={{
               transform: `translateY(${dragY}px)`,
-              transition: "transform 0.2s ease-out",
+              transition: isDraggingRef.current ? "none" : "transform 0.2s ease-out",
             }}>
             <VisuallyHidden>
               <Drawer.Title>{ariaTitle}</Drawer.Title>
