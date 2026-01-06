@@ -21,8 +21,8 @@ type Props = {
   full?: boolean
 }
 
-const DRAG_THRESHOLD = 150
-const VELOCITY_THRESHOLD = 0.5
+const DRAG_THRESHOLD = 180
+const VELOCITY_THRESHOLD = 0.3
 const SCROLL_LOCK_TIMEOUT = 100
 const CLOSE_ANIMATION_DURATION = 200
 
