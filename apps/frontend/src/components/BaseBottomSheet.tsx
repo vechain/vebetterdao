@@ -174,7 +174,7 @@ export const BaseBottomSheet = ({
               display="flex"
               flexDirection="column"
               {...(isDismissable ? bind() : {})}>
-              {isDismissable && <Box mx="auto" w="34px" h="5px" bg="#D7D6D4" mb={4} rounded="full" />}
+              {isDismissable && <Box flexShrink={0} mx="auto" w="34px" h="5px" bg="#D7D6D4" mb={4} rounded="full" />}
               {(title || illustration) && (
                 <Box mb={4}>
                   <Box position="relative">
