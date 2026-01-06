@@ -4,6 +4,12 @@ import { buildGasEstimate, buildTxBody } from "../transaction"
 import { logger } from "../logger"
 
 /**
+ * Delay between operations to prevent rate limiting (in milliseconds)
+ */
+const ISOLATION_DELAY_MS = 20
+const BATCH_DELAY_MS = 100
+
+/**
  * Represents an execution that failed
  */
 export interface FailedExecution<T = string> {
@@ -18,6 +24,7 @@ export interface FailedExecution<T = string> {
 export interface BatchResult<T = string> {
   successfulExecutions: number
   failedExecutions: FailedExecution<T>[]
+  transientFailures: FailedExecution<T>[]
   transactionIds: string[]
 }
 
@@ -93,6 +100,9 @@ export const isolateFailedExecutions = async <T>(
         vmError: result.vmError,
       })
     }
+
+    // Add delay between simulations to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, ISOLATION_DELAY_MS))
   }
 
   logger.info("Isolation complete", {
@@ -160,9 +170,6 @@ const processSingleBatch = async (
         txId: tx.id,
       })
 
-      // Small delay to give node breathing room before next gas estimation
-      await new Promise(resolve => setTimeout(resolve, 100)) // 0.1 second
-
       return { success: true, txId: tx.id }
     } else {
       logger.warn("Batch transaction reverted", { batchNumber, txId: tx.id })
@@ -184,7 +191,7 @@ const processSingleBatch = async (
  * @param privateKey - The private key for signing (as hex string or Uint8Array)
  * @param batchSize - Size of each batch (default: 10)
  * @param dryRun - If true, only simulate without sending transactions (default: false)
- * @param maxRetries - Maximum number of retries per item (default: 3)
+ * @param maxRetries - Maximum number of total attempts (default: 3)
  * @returns BatchResult with counts and failure details
  */
 export const processBatchedClauses = async <T>(
@@ -216,9 +223,8 @@ export const processBatchedClauses = async <T>(
 
   const queue = [...items] // Create a copy to work with
   const failedExecutions: FailedExecution<T>[] = []
+  const transientFailures: FailedExecution<T>[] = []
   const transactionIds: string[] = []
-  const retryCount = new Map<T, number>() // Track retry attempts per item
-  const lastError = new Map<T, string>() // Track last error for each item
   let successfulExecutions = 0
   let batchNumber = 0
 
@@ -232,11 +238,6 @@ export const processBatchedClauses = async <T>(
     if (result.success && result.txId) {
       transactionIds.push(result.txId)
       successfulExecutions += batch.length
-      // Clear retry counts and errors for successful items
-      batch.forEach(item => {
-        retryCount.delete(item)
-        lastError.delete(item)
-      })
     } else if (result.needsIsolation) {
       // Batch failed, need to isolate which items are bad
       let toRetry: T[] = []
@@ -257,48 +258,71 @@ export const processBatchedClauses = async <T>(
         }))
       }
 
-      // Add failed executions to our tracking list
+      // Add failed executions to tracking list
       failedExecutions.push(...definitelyFailed)
 
-      // Store the error for all items in this batch
-      if (result.error) {
-        batch.forEach(item => lastError.set(item, result.error!))
-      }
-
-      // Filter items based on retry count to prevent infinite loops
-      const itemsToRetry: T[] = []
-      for (const item of toRetry) {
-        const currentRetries = retryCount.get(item) || 0
-
-        if (currentRetries >= maxRetries) {
-          // Max retries exceeded, mark as failed with the actual error
-          const error = lastError.get(item) || "Unknown error"
-          logger.warn("Item exceeded max retries", {
-            item,
-            retries: currentRetries,
-            maxRetries,
-            lastError: error,
-          })
-          failedExecutions.push({
-            item,
-            reason: `Max retries (${maxRetries}) exceeded. Last error: ${error}`,
-          })
-          lastError.delete(item)
-          retryCount.delete(item)
-        } else {
-          // Increment retry count and add back to queue
-          retryCount.set(item, currentRetries + 1)
-          itemsToRetry.push(item)
-        }
-      }
-
-      // Add items that can be retried back to the front of the queue
-      if (itemsToRetry.length > 0) {
-        logger.info("Adding items back to queue for retry", {
-          count: itemsToRetry.length,
-          itemsExceededRetries: toRetry.length - itemsToRetry.length,
+      // Process verified items IMMEDIATELY (no queue, no mixing with untested items)
+      if (toRetry.length > 0) {
+        logger.info("Processing verified items immediately", {
+          verifiedCount: toRetry.length,
+          permanentFailures: definitelyFailed.length,
         })
-        queue.unshift(...itemsToRetry)
+
+        let remainingItems = toRetry
+        let attemptNumber = 0
+
+        // Retry loop for verified items
+        while (remainingItems.length > 0 && attemptNumber < maxRetries) {
+          const verifiedClauses = remainingItems.map(clauseBuilder)
+          const verifiedResult = await processSingleBatch(
+            thor,
+            verifiedClauses,
+            walletAddress,
+            privateKey,
+            batchNumber,
+            dryRun,
+          )
+
+          if (verifiedResult.success && verifiedResult.txId) {
+            // All verified items processed
+            logger.info("Verified items processed successfully", {
+              count: remainingItems.length,
+              attemptNumber,
+              totalAttempts: attemptNumber + 1,
+            })
+            transactionIds.push(verifiedResult.txId)
+            successfulExecutions += remainingItems.length
+            remainingItems = [] // Done
+          } else {
+            // RPC/network issue - retry (no re-isolation needed)
+            attemptNumber++
+            logger.warn("Verified items processing failed, retrying", {
+              count: remainingItems.length,
+              attemptNumber,
+              maxRetries,
+              error: verifiedResult.error,
+            })
+
+            // Brief delay before retry to give node time to recover
+            await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS))
+          }
+        }
+
+        // If items still remain after all retries, mark as transient failures
+        if (remainingItems.length > 0) {
+          logger.error("Verified items failed after max retries", {
+            count: remainingItems.length,
+            maxRetries,
+            totalAttempts: maxRetries,
+            lastError: "Exhausted all retry attempts",
+          })
+          remainingItems.forEach(item => {
+            transientFailures.push({
+              item,
+              reason: `Transient failure after ${maxRetries} attempts: Unknown RPC/network error`,
+            })
+          })
+        }
       }
     } else {
       // Handle unexpected state
@@ -319,14 +343,15 @@ export const processBatchedClauses = async <T>(
   logger.info("Batch processing complete", {
     successfulExecutions,
     failedExecutionsCount: failedExecutions.length,
+    transientFailuresCount: transientFailures.length,
     totalTransactions: transactionIds.length,
     dryRun,
-    failedExecutions: failedExecutions.length > 0 ? failedExecutions : undefined,
   })
 
   return {
     successfulExecutions,
     failedExecutions,
+    transientFailures,
     transactionIds,
   }
 }
