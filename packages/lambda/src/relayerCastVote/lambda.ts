@@ -232,24 +232,40 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
           roundId: currentRoundId,
           totalAttempted: usersToVoteFor.length,
           failedVotes: batchResult.failedVotes,
+          transientFailures: batchResult.transientFailures,
         },
         slack: slackOptions,
       })
       return buildResponse(CustomApiError.TRANSACTION_REVERTED, {
         message: `Failed to cast any votes in round ${currentRoundId}`,
         failedVotes: batchResult.failedVotes,
+        transientFailures: batchResult.transientFailures,
       })
     }
 
-    // Log failed votes if any
+    // Log failures (no voting power or invalid state) if any
     if (batchResult.failedVotes.length > 0) {
       await notify({
         level: "warn",
-        message: `${batchResult.failedVotes.length} votes failed to be cast in round ${currentRoundId}. Check logs for more details.`,
+        message: `${batchResult.failedVotes.length} votes failed in round ${currentRoundId} (no voting power or invalid state).`,
         data: {
           successfulVotes: batchResult.successfulVotes,
           failedVotes: batchResult.failedVotes.length,
           failedVoteDetails: batchResult.failedVotes,
+        },
+        slack: slackOptions,
+      })
+    }
+
+    // Log transient failures (RPC/network issues) if any
+    if (batchResult.transientFailures.length > 0) {
+      await notify({
+        level: "warn",
+        message: `${batchResult.transientFailures.length} votes failed due to RPC/network issues in round ${currentRoundId}. These users are valid but hit max retries.`,
+        data: {
+          successfulVotes: batchResult.successfulVotes,
+          transientFailures: batchResult.transientFailures.length,
+          transientFailureDetails: batchResult.transientFailures,
         },
         slack: slackOptions,
       })
@@ -264,11 +280,15 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
         totalUsers: usersToVoteFor.length,
         successfulVotes: batchResult.successfulVotes,
         failedVotes: batchResult.failedVotes.length,
+        transientFailures: batchResult.transientFailures.length,
         roundId: currentRoundId,
         transactions: batchResult.transactionIds.length,
         dryRun,
-        // Include detailed failed votes in dry-run mode for easier debugging
+        // Include detailed failures in dry-run mode for easier debugging
         ...(dryRun && batchResult.failedVotes.length > 0 ? { failedVoteDetails: batchResult.failedVotes } : {}),
+        ...(dryRun && batchResult.transientFailures.length > 0
+          ? { transientFailureDetails: batchResult.transientFailures }
+          : {}),
       },
       slack: slackOptions,
     })
@@ -276,6 +296,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     return buildResponse(SuccessResponseType.SUCCESS, {
       successfulVotes: batchResult.successfulVotes,
       failedVotes: batchResult.failedVotes,
+      transientFailures: batchResult.transientFailures,
       transactionIds: batchResult.transactionIds,
       roundId: currentRoundId,
       dryRun,
