@@ -78,9 +78,9 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^15.5.4",
     "@chakra-ui/cli": "^3.5.0",
     "@chromatic-com/storybook": "^4.1.2",
+    "@next/bundle-analyzer": "^15.5.4",
     "@next/eslint-plugin-next": "^14.2.25",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
