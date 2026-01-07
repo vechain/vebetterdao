@@ -18,6 +18,7 @@ runtime_env_var_names:
   - FRESHDESK_DOMAIN
   - TWITTER_CLIENT_ID
   - NEXTAUTH_URL
+  - B3MO_DOMAIN
 
 runtime_env_secret_names:
   - TWITTER_CLIENT_SECRET
@@ -26,6 +27,7 @@ runtime_env_secret_names:
   - MNEMONIC
   - GITHUB_CLIENT_SECRET
   - FRESHDESK_API_TOKEN
+  - PROPOSAL_SUMMARY_B3MO_API_KEY
 
 image_tag: beta-latest
 cpu: 1024

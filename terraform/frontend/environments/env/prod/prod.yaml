@@ -18,6 +18,7 @@ runtime_env_var_names:
   - RESET_USER_SIGNAL_COUNT_DOMAIN
   - TWITTER_CLIENT_ID
   - NEXTAUTH_URL
+  - B3MO_DOMAIN
 
 runtime_env_secret_names:
   - FRESHDESK_API_TOKEN
@@ -26,6 +27,7 @@ runtime_env_secret_names:
   - NEXTAUTH_SECRET
   - RESET_USER_SIGNAL_COUNT_API_KEY
   - TWITTER_CLIENT_SECRET
+  - PROPOSAL_SUMMARY_B3MO_API_KEY
 
 image_tag: latest
 cpu: 1024

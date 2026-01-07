@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
-const b3moDomain = "https://d1px0i9vqvp8ud.cloudfront.net" // TODO: change to the actual domain when AI team finishes their work
+const b3moDomain = process.env.B3MO_DOMAIN || "https://d1px0i9vqvp8ud.cloudfront.net"
+const b3moApiKey = process.env.PROPOSAL_SUMMARY_B3MO_API_KEY
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -11,10 +12,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
   }
 
+  if (!b3moApiKey) {
+    console.error("PROPOSAL_SUMMARY_B3MO_API_KEY is not configured")
+    return NextResponse.json({ error: "Service configuration error" }, { status: 500 })
+  }
+
   const pdfUrl = `${b3moDomain}/proposal_summaries/${proposalId}/${status}/outputs/07_phase1_support_summary.pdf`
 
   try {
-    const response = await fetch(pdfUrl)
+    const response = await fetch(pdfUrl, {
+      headers: {
+        "X-API-KEY": b3moApiKey,
+      },
+    })
 
     if (!response.ok) {
       return NextResponse.json({ error: "Failed to fetch PDF" }, { status: response.status })
