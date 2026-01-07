@@ -312,6 +312,8 @@ export const ProposalResultsDetailsModal = ({
 
   return (
     <Modal
+      fullHeight
+      isCloseable
       modalProps={{ size: { base: "xs", md: "lg" } }}
       showHeader={false}
       title={
@@ -319,7 +321,7 @@ export const ProposalResultsDetailsModal = ({
           <Heading textAlign="left" size="xl">
             {t("Result details")}
           </Heading>
-          <Dialog.CloseTrigger asChild position="static">
+          <Dialog.CloseTrigger hideBelow="md" asChild position="static">
             <CloseButton size="md" />
           </Dialog.CloseTrigger>
         </HStack>

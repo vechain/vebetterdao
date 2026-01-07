@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { vnsUtils } from "@vechain/sdk-network"
 import { useThor } from "@vechain/vechain-kit"
 
-export const useGetVetDomains = (addresses?: `0x${string}`[]) => {
+export const useGetVetDomains = (addresses?: string[]) => {
   const thor = useThor()
 
   return useQuery({

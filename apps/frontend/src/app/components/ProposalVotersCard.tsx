@@ -37,7 +37,7 @@ const VOTE_OPTION_CONFIG = {
 const isValidVetDomain = (term: string) => !term.startsWith("0x") && term.endsWith(".vet")
 
 type Voter = {
-  voter: `0x${string}`
+  voter: string
   proposalId: bigint
   support: number
   weight: bigint
@@ -198,6 +198,7 @@ export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: st
           pageSize={5}
           page={page}
           display="flex"
+          flexWrap="wrap"
           alignItems="center"
           justifyContent="space-between"
           gap="4"
