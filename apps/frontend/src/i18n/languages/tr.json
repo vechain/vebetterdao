@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "Otomatik talep edilen oylama ödülleri",
   "Potential B3TR amount to receive": "Alınabilecek potansiyel B3TR miktarı",
   "Potential: ": "Potansiyel: ",
-  "Total rewards to distribute": "Dağıtılacak toplam ödül"
+  "Total rewards to distribute": "Dağıtılacak toplam ödül",
+  "Transaction details": "İşlem detayları",
+  "Available": "Mevcut",
+  "Voting power = VOT3 at snapshot": "Anlık görüntüde Oylama gücü = VOT3",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Bu, oylama gücünüzün bir sonraki turda ne kadar etkiye sahip olacağınızı ifade eder. Bir sonraki tur başlamadan önce sahip olduğunuz VOT3 miktarına dayanır.",
+  "Not enough VOT3": "Yeterli VOT3 yok",
+  "Not enough B3TR": "Yeterli B3TR yok",
+  "Estimated gas fee": "Tahmini gaz ücreti",
+  "Conversion rate": "Dönüşüm oranı",
+  "Wallet": "Cüzdan",
+  "Use max": "Maksimum kullan",
+  "You can convert max. of": "Maksimum bu kadar dönüştürebilirsiniz:",
+  "Search voter address or domain": "Oy veren adresi veya alan adı ara",
+  "Voter": "Oy veren",
+  "Voted Option": "Oy verilen Seçenek",
+  "Voting Time": "Oylama Zamanı"
 }

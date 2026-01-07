@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "स्वचालित दावा किए गए मतदान पुरस्कार",
   "Potential B3TR amount to receive": "प्राप्त करने के लिए संभावित B3TR राशि",
   "Potential: ": "संभावना: ",
-  "Total rewards to distribute": "वितरण के लिए कुल पुरस्कार"
+  "Total rewards to distribute": "वितरण के लिए कुल पुरस्कार",
+  "Transaction details": "लेन-देन का विवरण",
+  "Available": "उपलब्ध",
+  "Voting power = VOT3 at snapshot": "वोटिंग शक्ति = स्नैपशॉट पर VOT3",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "मतलब, वोटिंग शक्ति यह दर्शाती है कि अगले दौर में आपका कितना प्रभाव होगा। यह उसके आधार पर होता है कि अगले दौर के शुरू होने से पहले आपके पास कितना VOT3 है।",
+  "Not enough VOT3": "पर्याप्त VOT3 नहीं है",
+  "Not enough B3TR": "पर्याप्त B3TR नहीं है",
+  "Estimated gas fee": "अनुमानित गैस शुल्क",
+  "Conversion rate": "विनिमय दर",
+  "Wallet": "वॉलेट",
+  "Use max": "अधिकतम उपयोग करें",
+  "You can convert max. of": "आप अधिकतम रूपांतरित कर सकते हैं",
+  "Search voter address or domain": "मतदाता पता या डोमेन खोजें",
+  "Voter": "मतदाता",
+  "Voted Option": "मतदान किया गया विकल्प",
+  "Voting Time": "मतदान का समय"
 }

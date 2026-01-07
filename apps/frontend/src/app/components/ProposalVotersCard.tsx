@@ -16,6 +16,7 @@ import dayjs from "dayjs"
 import { t } from "i18next"
 import { ArrowSeparateVertical, NavArrowDown, NavArrowLeft, NavArrowRight, NavArrowUp } from "iconoir-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useProposalVoteEvents } from "@/api/contracts/governance/hooks/useProposalVoteEvents"
@@ -80,21 +81,22 @@ const VoterTable = ({
   isLoading?: boolean
   onOrderToggle?: VoidFunction
 }) => {
+  const { t } = useTranslation()
   return (
     <Table.Root size="sm" mt={4} tableLayout="fixed" borderCollapse="separate">
       <Table.Header>
         <Table.Row>
           <Table.ColumnHeader fontWeight="semibold" textStyle="xs">
-            {"Voter"}
+            {t("Voter")}
           </Table.ColumnHeader>
           <Table.ColumnHeader w="20%" fontWeight="semibold" textStyle="xs">
-            {"Voting Power"}
+            {t("Voting Power")}
           </Table.ColumnHeader>
           <Table.ColumnHeader fontWeight="semibold" textStyle="xs">
-            {"Voted Option"}
+            {t("Voted Option")}
           </Table.ColumnHeader>
           <Table.ColumnHeader w="20%" fontWeight="semibold" textStyle="xs" alignItems="center">
-            {"Voting Time"}
+            {t("Voting Time")}
             <IconButton ml="0.5" size="xs" unstyled onClick={onOrderToggle}>
               <Icon as={ArrowSeparateVertical} size="sm" />
             </IconButton>
@@ -173,7 +175,7 @@ export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: st
         <SearchField
           inputWrapperProps={{ p: "0.5", mt: "4" }}
           inputProps={{ minW: "200px", flex: 1 }}
-          placeholder={"Search voter"}
+          placeholder={"Search voter address or domain"}
           value={searchTerm}
           onChange={term => {
             if (page !== 1) setPage(1)
