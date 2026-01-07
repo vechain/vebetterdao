@@ -108,7 +108,7 @@ const VoterTable = ({
               {isLoading ? (
                 <SkeletonText w="50%" noOfLines={1} />
               ) : (
-                <Link color="actions.primary.default" textStyle="sm">
+                <Link href={`/profile/${voter.voter}`} color="actions.primary.default" textStyle="sm">
                   {domains?.[idx] ? humanDomain(domains[idx]) : humanAddress(voter?.voter || "")}
                 </Link>
               )}
@@ -184,7 +184,10 @@ export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: st
           voters={voters}
           domains={domains}
           isLoading={isVoteEventsLoading || isDomainsLoading}
-          onOrderToggle={() => setOrder(old => (old === "asc" ? "desc" : "asc"))}
+          onOrderToggle={() => {
+            if (page !== 1) setPage(1)
+            setOrder(old => (old === "asc" ? "desc" : "asc"))
+          }}
         />
         <Pagination.Root
           mx={{ base: "auto", md: "unset" }}
