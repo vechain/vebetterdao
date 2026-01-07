@@ -21,9 +21,10 @@ export type RewardDistributedEvent = {
 /**
  * Hook to get the latest RewardDistributed events for a specific app
  * @param appId The app ID to get the reward distribution events from
+ * @param order The order of the events (asc or desc) (default: desc)
  * @param limit Optional limit on the number of events to return (default: 5)
  */
-export const useAppRewardDistributedEvents = (appId: string, limit = 5) => {
+export const useAppRewardDistributedEvents = (appId: string, order: "asc" | "desc" = "desc", limit = 5) => {
   const filterParams = { appId: appId as `0x${string}` }
 
   const { data, isLoading, ...rest } = useEvents({
@@ -31,6 +32,7 @@ export const useAppRewardDistributedEvents = (appId: string, limit = 5) => {
     abi,
     eventName: "RewardDistributed",
     filterParams,
+    order,
     select: events =>
       events.map(({ decodedData, meta }) => ({
         appId: decodedData.args.appId,
@@ -46,7 +48,7 @@ export const useAppRewardDistributedEvents = (appId: string, limit = 5) => {
   // Sort by block number (descending - newest first) and limit the results
   const limitedData = useMemo(() => {
     if (!data) return []
-    return [...data].sort((a, b) => b.blockNumber - a.blockNumber).slice(0, limit)
+    return data.slice(0, limit)
   }, [data, limit])
 
   return {
