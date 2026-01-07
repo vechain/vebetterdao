@@ -262,11 +262,7 @@ export const ActiveAppDetailModal = ({
                     </HStack>
                   ))}
                 </VStack>
-                <DonutChart
-                  data={section.chartData}
-                  colors={section.chartColors}
-                  percentage={section.chartPercentage}
-                />
+                <DonutChart colors={section.chartColors} percentage={section.chartPercentage} />
               </HStack>
             )}
           </Card.Root>
