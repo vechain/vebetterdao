@@ -19,7 +19,7 @@ type Props = {
  */
 export const ProofValidationAlert = ({ appId }: Props) => {
   const { t } = useTranslation()
-  const { data: rewardEvents, isLoading } = useAppRewardDistributedEvents(appId, 5)
+  const { data: rewardEvents, isLoading } = useAppRewardDistributedEvents(appId, "desc", 5)
   const { data: allowedImpactKeys, isLoading: isLoadingImpactKeys } = useAllowedImpactKeys()
   const { open, onOpen, onClose } = useDisclosure()
 
