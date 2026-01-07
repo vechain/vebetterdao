@@ -1,37 +1,41 @@
 import { getConfig } from "@repo/config"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
-import { useWallet } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
 
-import { useEvents } from "@/hooks/useEvents"
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+import { fetchContractEvents } from "../fetchContractEvents"
 
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress
+const PAGE_SIZE = 5
 
-export const useProposalVoteEvents = (proposalId: string) => {
-  const { account } = useWallet()
-  return useEvents({
-    abi,
-    contractAddress,
-    eventName: "VoteCast",
-    filterParams: { voter: (account?.address ?? "") as `0x${string}`, proposalId: BigInt(proposalId ?? 0) },
-    select: events => {
-      const votes = events.map(event => event.decodedData.args)
-      const totalVot3UsedInVotes = votes.reduce((acc, event) => acc + Number(event.weight), 0)
-      const totalVotingPowerUsedInVotes = votes.reduce((acc, event) => acc + Number(event.power), 0)
-      const votesWithComment = votes.filter(event => !!event.reason)
-      const userVote = !!account?.address
-        ? votes.find(event => compareAddresses(event.voter, account.address))
-        : undefined
-      const hasUserVoted = !!userVote
-      return {
-        hasUserVoted,
-        userVote,
-        votesWithComment,
-        votes,
-        totalVot3UsedInVotes,
-        totalVotingPowerUsedInVotes,
-      }
-    },
+export const useProposalVoteEvents = ({
+  proposalId,
+  voter,
+  page = 0,
+  order = "asc",
+}: {
+  proposalId: string
+  voter?: `0x${string}`
+  page?: number
+  order?: "asc" | "desc"
+}) => {
+  const thor = useThor()
+
+  return useQuery({
+    queryKey: ["proposalVoteEvents", proposalId, voter, page, order],
+    queryFn: () =>
+      fetchContractEvents({
+        thor,
+        abi,
+        contractAddress,
+        eventName: "VoteCast",
+        filterParams: { proposalId: BigInt(proposalId), voter },
+        order,
+        offset: page * PAGE_SIZE,
+        limit: PAGE_SIZE,
+      }),
+    placeholderData: keepPreviousData,
+    enabled: !!proposalId && !!thor,
   })
 }

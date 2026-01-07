@@ -8,7 +8,7 @@ import { VoteType } from "@/types/voting"
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress
 
-const mapSupportToVoteType = (support: number): VoteType | undefined => {
+export const mapSupportToVoteType = (support: number): VoteType | undefined => {
   switch (support) {
     case 0:
       return VoteType.VOTE_AGAINST

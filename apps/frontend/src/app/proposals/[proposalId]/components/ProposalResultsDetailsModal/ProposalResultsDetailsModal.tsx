@@ -1,4 +1,4 @@
-import { Box, HStack, Icon, Link, Stack, Table, Text, VStack } from "@chakra-ui/react"
+import { Box, CloseButton, Dialog, Heading, HStack, Icon, Link, Stack, Table, Text, VStack } from "@chakra-ui/react"
 import { UilCheckCircle } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
@@ -7,16 +7,16 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { formatEther, parseEther } from "viem"
 
 import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import { ProposalVotersCard } from "@/app/components/ProposalVotersCard"
 import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import { Modal } from "@/components/Modal"
 import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
 import { VotingSegment } from "@/types/voting"
 
 import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
 import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
-import { RegularModal } from "../../../../../components/RegularModal"
 import { ProposalState } from "../../../../../hooks/proposals/grants/types"
 
-// Types
 interface ProgressBarSegment {
   option?: string
   votingPower?: bigint
@@ -92,12 +92,12 @@ const VotingResultContent = ({
         </Text>
         <MulticolorBar segments={progressBarSegments} />
         <ResultsDisplay proposalId={proposalId} segments={progressBarSegments} />
-        <Table.Root>
+        <Table.Root columnGap="auto">
           <Table.Header w="full">
             <Table.Row>
               <Table.ColumnHeader>{t("Option")}</Table.ColumnHeader>
               <Table.ColumnHeader>{t("Voters")}</Table.ColumnHeader>
-              <Table.ColumnHeader>{t("Voting power")}</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="end">{t("Voting power")}</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -295,6 +295,7 @@ export const ProposalResultsDetailsModal = ({
   proposalVotesData,
 }: ProposalResultsDetailsModalProps) => {
   const { t } = useTranslation()
+
   // Determine display mode based on proposal state and data availability
   const hasVotingData = proposalVotesData && votingSegments?.length > 0
   const isVotingOrPostVotingState = [
@@ -310,24 +311,36 @@ export const ProposalResultsDetailsModal = ({
   const showVotingResults = hasVotingData && isVotingOrPostVotingState
 
   return (
-    <RegularModal
-      size={{ base: "xs", md: "lg" }}
-      showCloseButton
-      isCloseable
-      ariaTitle={t("Result details")}
+    <Modal
+      modalProps={{ size: { base: "xs", md: "lg" } }}
+      showHeader={false}
+      title={
+        <HStack alignItems="center" justifyContent="space-between" mb={{ base: "unset", md: "8" }}>
+          <Heading textAlign="left" size="xl">
+            {t("Result details")}
+          </Heading>
+          <Dialog.CloseTrigger asChild position="static">
+            <CloseButton size="md" />
+          </Dialog.CloseTrigger>
+        </HStack>
+      }
       isOpen={isResultsModalOpen}
       onClose={onClose}>
       {showVotingResults ? (
-        <VotingResultContent
-          progressBarSegments={progressBarSegments}
-          proposalId={proposalId}
-          totalVotesAtSnapshot={totalVotesAtSnapshot}
-          votingSegments={votingSegments}
-          proposalQuorum={proposalQuorum}
-          proposalQuorumNumerator={proposalQuorumNumerator}
-          proposalTotalVotes={proposalTotalVotes}
-          proposalVotesData={proposalVotesData}
-        />
+        <VStack gap="2">
+          <VotingResultContent
+            progressBarSegments={progressBarSegments}
+            proposalId={proposalId}
+            totalVotesAtSnapshot={totalVotesAtSnapshot}
+            votingSegments={votingSegments}
+            proposalQuorum={proposalQuorum}
+            proposalQuorumNumerator={proposalQuorumNumerator}
+            proposalTotalVotes={proposalTotalVotes}
+            proposalVotesData={proposalVotesData}
+          />
+
+          <ProposalVotersCard proposalId={proposalId} totalVoters={proposalVotesData.totalVoters} />
+        </VStack>
       ) : (
         <SupportResultContent
           progressBarSegments={progressBarSegments}
@@ -338,6 +351,6 @@ export const ProposalResultsDetailsModal = ({
           totalSupporters={totalSupporters}
         />
       )}
-    </RegularModal>
+    </Modal>
   )
 }
