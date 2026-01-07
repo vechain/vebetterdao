@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
+// TODO: Remove temp link when AI team finishes their work
 const b3moDomain = process.env.B3MO_DOMAIN || "https://d1px0i9vqvp8ud.cloudfront.net"
 const b3moApiKey = process.env.PROPOSAL_SUMMARY_B3MO_API_KEY
 
