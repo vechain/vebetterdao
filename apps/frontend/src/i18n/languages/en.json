@@ -1694,5 +1694,8 @@
   "Search voter address or domain": "Search voter address or domain",
   "Voter": "Voter",
   "Voted Option": "Voted Options",
-  "Voting Time": "Voting Time"
+  "Voting Time": "Voting Time",
+  "Rounds history": "Rounds history",
+  "Round details": "Round details",
+  "Potential B3TR amount to receive": "Potential B3TR amount to receive"
 }

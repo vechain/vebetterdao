@@ -10,7 +10,7 @@ import mainnetConfig from "@repo/config/mainnet"
 import { getSecret } from "../helpers/secret"
 import { CustomApiError, StandardApiError, SuccessResponseType } from "../helpers/api.types"
 import { buildResponse } from "../helpers/api/response"
-import { parseDryRunFlag } from "../helpers/api"
+import { parseDryRunFlag, parseBatchSize, parseWalletAddresses } from "../helpers/api"
 import { logger } from "../helpers/logger"
 import { AppEnv } from "@repo/config/contracts"
 import { AppConfig } from "@repo/config"
@@ -142,6 +142,8 @@ const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKe
 
 export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
   const dryRun = parseDryRunFlag(event)
+  const BATCH_SIZE = parseBatchSize(event, 50)
+  const providedWallets = parseWalletAddresses(event)
 
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
@@ -151,11 +153,14 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
   console.log(`VoterRewards contract: ${CONFIG.voterRewardsContractAddress}`)
   console.log(`XAllocationVoting contract: ${CONFIG.xAllocationVotingContractAddress}`)
   console.log(`Dry Run Mode: ${dryRun}`)
+  console.log(`Batch Size: ${BATCH_SIZE}`)
+  console.log(
+    `Wallet Mode: ${providedWallets ? `Specific (${providedWallets.length} addresses)` : "Auto-detect from events"}`,
+  )
 
   try {
     const thorClient = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const secretsClient = new SecretsManagerClient({ region: "eu-west-1" })
-    const BATCH_SIZE = 50
 
     // Slack notification options - disabled during dry-run
     const slackOptions = dryRun
@@ -175,14 +180,22 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       previousRoundId,
     )
 
-    // Fetch all users with auto-voting enabled
-    // Starting from block 0 to the round start block
-    const usersToClaimFor = await getAllAutoVotingEnabledUsers(
-      thorClient,
-      CONFIG.xAllocationVotingContractAddress,
-      0,
-      previousRoundStartBlock,
-    )
+    // Determine which users to claim for: provided wallets or all auto-voting enabled users
+    let usersToClaimFor: string[]
+    if (providedWallets) {
+      usersToClaimFor = providedWallets
+      logger.info(`Processing specific wallets`, { count: providedWallets.length })
+    } else {
+      // Fetch all users with auto-voting enabled
+      // Starting from block 0 to the round start block
+      usersToClaimFor = await getAllAutoVotingEnabledUsers(
+        thorClient,
+        CONFIG.xAllocationVotingContractAddress,
+        0,
+        previousRoundStartBlock,
+      )
+      logger.info(`Fetched auto-voting enabled users`, { count: usersToClaimFor.length })
+    }
 
     if (usersToClaimFor.length === 0) {
       await notify({

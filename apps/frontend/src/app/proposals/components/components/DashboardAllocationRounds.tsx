@@ -11,7 +11,8 @@ import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocat
 import { DotSymbol } from "../../../../components/DotSymbol"
 import { ProposalCompactCard } from "../../../../components/ProposalCompactCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
-import { NoActiveProposalCard } from "../NoActiveProposalCard"
+
+import { NoActiveProposalCard } from "./NoActiveProposalCard"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()

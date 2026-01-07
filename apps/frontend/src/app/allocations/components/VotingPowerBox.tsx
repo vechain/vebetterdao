@@ -29,6 +29,7 @@ export const VotingPowerBox = () => {
 
   return (
     <StatCard
+      gap={{ base: "0.5", md: "1" }}
       showIcon={!isMobile}
       variant="positive"
       title={t("Voting power")}
