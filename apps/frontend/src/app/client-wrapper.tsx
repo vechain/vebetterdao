@@ -86,7 +86,7 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
       {isProduction && <FreshDeskWidget widgetId={103000007852} />}
-      <VStack minH="100vh" gap={0} align="stretch" bg="layout-bg">
+      <VStack minH="100vh" gap={0} align="stretch">
         <Navbar />
         <Flex flex={1}>
           <Container

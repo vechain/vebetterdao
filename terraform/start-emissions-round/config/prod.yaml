@@ -15,4 +15,4 @@ lambda_timeout: 900
 lambda_source_dir: "packages/lambda/dist/mainnet/startRound"
 
 # Schedule Configuration
-schedule_expression: "cron(44 6 ? * MON *)" # Runs every Monday at 6:44 AM UTC
+schedule_expression: "cron(45 6 ? * MON *)" # Runs every Monday at 6:45 AM UTC

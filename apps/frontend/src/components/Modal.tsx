@@ -21,6 +21,7 @@ type Props = {
   description?: string | React.ReactNode
   showLogo?: boolean
   showHeader?: boolean
+  fullHeight?: boolean
 }
 
 export const Modal = ({
@@ -39,6 +40,7 @@ export const Modal = ({
   description,
   showLogo = false,
   showHeader = true,
+  fullHeight = false,
 }: Props) => {
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
   if (isDesktop)
@@ -108,6 +110,7 @@ export const Modal = ({
   return (
     <Dialog.Root>
       <BaseBottomSheet
+        full={fullHeight}
         isOpen={isOpen}
         onClose={onClose}
         ariaTitle={ariaTitle ?? ""}

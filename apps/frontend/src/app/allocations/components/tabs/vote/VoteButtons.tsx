@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, HStack } from "@chakra-ui/react"
+import { Button, ButtonGroup, HStack } from "@chakra-ui/react"
 
 import { useVotingButtonConfig } from "../hooks/useVotingButtonConfig"
 
@@ -15,7 +15,7 @@ export const VoteButtons = ({ variant = "desktop" }: VoteButtonsProps) => {
 
   if (buttonConfig.type === "editing") {
     const buttons = (
-      <>
+      <ButtonGroup w={{ base: "full", md: "unset" }}>
         <Button
           flex={isMobile ? 1 : undefined}
           minWidth="36"
@@ -31,7 +31,7 @@ export const VoteButtons = ({ variant = "desktop" }: VoteButtonsProps) => {
           onClick={buttonConfig.primaryOnClick}>
           {buttonConfig.primaryText}
         </Button>
-      </>
+      </ButtonGroup>
     )
 
     // Mobile wraps in HStack, desktop returns fragment

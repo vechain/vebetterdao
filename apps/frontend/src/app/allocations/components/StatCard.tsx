@@ -9,6 +9,7 @@ interface StatCardProps extends Omit<CardRootProps, "variant"> {
   icon?: ReactNode
   cta?: ReactNode
   isLoading?: boolean
+  gap?: CardRootProps["gap"]
 }
 
 export const StatCard = ({
@@ -19,6 +20,7 @@ export const StatCard = ({
   showIcon = true,
   icon,
   cta,
+  gap,
 }: StatCardProps) => {
   return (
     <Card.Root
@@ -33,13 +35,17 @@ export const StatCard = ({
       gap={{ base: "2", md: "4" }}
       maxBlockSize={{ base: "fit-content", md: "unset" }}>
       {showIcon && icon && (
-        <Square rounded="xl" bg={`status.${variant}.secondary`} aspectRatio={1} height={{ base: "32px", md: "60px" }}>
+        <Square
+          rounded={{ base: "8px", md: "12px" }}
+          bg={`status.${variant}.secondary`}
+          aspectRatio={1}
+          height={{ base: "32px", md: "60px" }}>
           <Icon boxSize={{ base: "5", md: "9" }} color={`status.${variant}.strong`}>
             {icon}
           </Icon>
         </Square>
       )}
-      <VStack flex={1} alignItems="start">
+      <VStack flex={1} alignItems="start" gap={gap ?? "1"}>
         <Text textStyle={{ base: "xs", md: "md" }} color="text.subtle" lineClamp={1}>
           {title}
         </Text>

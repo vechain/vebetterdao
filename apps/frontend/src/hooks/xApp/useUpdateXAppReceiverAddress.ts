@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
-import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"
@@ -21,11 +21,7 @@ type Props = {
  * @param onSuccess callback to run when the upgrade is successful
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useUpdateXAppReceiverAddress = ({
-  appId,
-  newAddress,
-  onSuccess,
-}: Props): UseSendTransactionReturnValue => {
+export const useUpdateXAppReceiverAddress = ({ appId, newAddress, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     const clauses: EnhancedClause[] = [
       buildClause({

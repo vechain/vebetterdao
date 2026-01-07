@@ -1,8 +1,7 @@
 import { Grid, GridItem, useMediaQuery, VStack } from "@chakra-ui/react"
 
-import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
-
 import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
+import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
 
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"

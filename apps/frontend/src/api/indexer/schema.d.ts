@@ -924,6 +924,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/contracts/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retrieve a contract by address */
+        get: operations["getContract"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contracts/by-master/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get contracts where address is master */
+        get: operations["getContractsByMaster"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/b3tr/xallocations/{roundId}/results": {
         parameters: {
             query?: never;
@@ -1310,6 +1344,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/accounts/overview/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/balance/vet/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retrieve VET balance history for an address */
+        get: operations["getVetBalanceHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1589,6 +1656,12 @@ export interface components {
             percentageOffline?: components["schemas"]["Decimal128"];
             /** Format: int64 */
             offlineBlocks?: number;
+            /** Format: int64 */
+            exitBlock?: number;
+            /** Format: int64 */
+            queuePosition?: number;
+            /** Format: int64 */
+            availableStartBlock?: number;
         };
         Delegation: {
             id: string;
@@ -1959,6 +2032,22 @@ export interface components {
             cumulativeNumTransactions: number;
             cumulativeNumClauses: number;
         };
+        Contract: {
+            address: string;
+            /** Format: int64 */
+            createdOn: number;
+            deploymentTxId: string;
+            /** Format: int64 */
+            deploymentClauseIndex: number;
+            master: string;
+            isErc20?: boolean;
+            isErc721?: boolean;
+            isErc1155?: boolean;
+        };
+        PaginatedResponseContract: {
+            data: components["schemas"]["Contract"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
         XAllocResultResponse: {
             /** Format: int32 */
             roundId: number;
@@ -2146,7 +2235,11 @@ export interface components {
             nodeMaster: string;
             endorser?: string;
         };
-        Accounts: {
+        PaginatedResponseTotalAccounts: {
+            data: components["schemas"]["TotalAccounts"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        TotalAccounts: {
             /** Format: int64 */
             total?: number;
             /** @enum {string} */
@@ -2160,9 +2253,28 @@ export interface components {
             /** Format: int64 */
             year?: number;
         };
-        PaginatedResponseAccounts: {
-            data: components["schemas"]["Accounts"][];
-            pagination: components["schemas"]["PaginationDetail"];
+        AccountOverview: {
+            address: string;
+            /** Format: int64 */
+            firstSeen: number;
+            /** Format: int64 */
+            lastSeen: number;
+            /** Format: int64 */
+            transactionsSent: number;
+            /** Format: int64 */
+            clausesSent: number;
+            vthoBurned: number;
+            vthoDelegated: number;
+            gasUsed: number;
+            vetSent: number;
+            vetReceived: number;
+        };
+        VetBalance: {
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            balance: number;
         };
     };
     responses: never;
@@ -5411,6 +5523,151 @@ export interface operations {
             };
         };
     };
+    getContract: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The address of the contract to retrieve.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Contract"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getContractsByMaster: {
+        parameters: {
+            query?: {
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description The address to query as master.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseContract"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getXAllocResults: {
         parameters: {
             query?: {
@@ -6702,7 +6959,150 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PaginatedResponseAccounts"];
+                    "*/*": components["schemas"]["PaginatedResponseTotalAccounts"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The address of the account to retrieve the overview for.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountOverview"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                    "text/html": string;
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                    "text/html": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getVetBalanceHistory: {
+        parameters: {
+            query: {
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                startTimestamp: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description The address to retrieve the VET balance history for.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VetBalance"][];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */

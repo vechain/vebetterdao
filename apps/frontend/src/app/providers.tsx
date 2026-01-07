@@ -2,7 +2,6 @@
 // app/providers.tsx
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
-import { Analytics } from "@vercel/analytics/react"
 import { IconoirProvider } from "iconoir-react"
 import dynamic from "next/dynamic"
 
@@ -34,7 +33,6 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
           </VechainKitProviderWrapper>
         </Provider>
       </PersistQueryClientProvider>
-      <Analytics />
     </>
   )
 }

@@ -4,7 +4,6 @@ import { getConfig, getContractsConfig } from "@repo/config"
 import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
-import { Network } from "@repo/constants"
 import { AppEnv } from "@repo/config/contracts"
 
 const config = getConfig()
