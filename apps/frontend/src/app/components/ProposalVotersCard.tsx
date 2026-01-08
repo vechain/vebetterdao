@@ -1,20 +1,21 @@
 import {
+  Box,
   ButtonGroup,
   Collapsible,
+  Grid,
   HStack,
   Icon,
   IconButton,
   Link,
   Pagination,
   SkeletonText,
-  Table,
   Text,
 } from "@chakra-ui/react"
 import { humanAddress, humanDomain, humanNumber } from "@repo/utils/FormattingUtils"
 import { isValidAddress } from "@vechain/vechain-kit/utils"
 import dayjs from "dayjs"
 import { t } from "i18next"
-import { ArrowSeparateVertical, NavArrowDown, NavArrowLeft, NavArrowRight, NavArrowUp } from "iconoir-react"
+import { SortUp, SortDown, NavArrowDown, NavArrowLeft, NavArrowRight, NavArrowUp } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
@@ -56,6 +57,7 @@ const VoteOptionBadge = ({ support }: { support: number }) => {
     <HStack
       bg="bg.primary"
       borderWidth="1px"
+      w="120px"
       borderColor={config.color}
       borderRadius="lg"
       px={3}
@@ -74,39 +76,49 @@ const VoterTable = ({
   voters,
   domains,
   isLoading,
+  order,
   onOrderToggle,
 }: {
   voters?: Voter[]
   domains?: (string | null)[]
   isLoading?: boolean
+  order?: "asc" | "desc"
   onOrderToggle?: VoidFunction
 }) => {
   const { t } = useTranslation()
   return (
-    <Table.Root size="sm" mt={4} tableLayout="fixed" borderCollapse="separate">
-      <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeader fontWeight="semibold" textStyle="xs">
-            {t("Voter")}
-          </Table.ColumnHeader>
-          <Table.ColumnHeader w="20%" fontWeight="semibold" textStyle="xs">
-            {t("Voting Power")}
-          </Table.ColumnHeader>
-          <Table.ColumnHeader fontWeight="semibold" textStyle="xs">
-            {t("Voted Option")}
-          </Table.ColumnHeader>
-          <Table.ColumnHeader w="20%" fontWeight="semibold" textStyle="xs" alignItems="center">
-            {t("Voting Time")}
-            <IconButton ml="0.5" size="xs" unstyled onClick={onOrderToggle}>
-              <Icon as={ArrowSeparateVertical} size="sm" />
-            </IconButton>
-          </Table.ColumnHeader>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
+    <Box height="auto" overflowX={{ base: "scroll", md: "unset" }}>
+      <Grid
+        justifyItems="space-between"
+        templateColumns="auto auto 120px auto"
+        gap={3}
+        columnGap={{ base: "4", md: "6" }}
+        width={{ base: "max-content", md: "100%" }}>
+        <Text h="4" fontWeight="semibold" textStyle="xs" color="text.default">
+          {t("Voter")}
+        </Text>
+        <Text h="4" fontWeight="semibold" textStyle="xs" color="text.default">
+          {t("Voting Power")}
+        </Text>
+        <Text h="4" fontWeight="semibold" textStyle="xs" color="text.default">
+          {t("Voted Option")}
+        </Text>
+        <IconButton
+          variant="ghost"
+          size="xs"
+          textStyle="xs"
+          fontWeight="semibold"
+          textAlign="end"
+          h="4"
+          justifySelf="end"
+          onClick={onOrderToggle}>
+          {t("Voting Time")}
+          <Icon as={order === "asc" ? SortUp : SortDown} boxSize="4" />
+        </IconButton>
+
         {voters?.map((voter, idx) => (
-          <Table.Row key={voter.voter}>
-            <Table.Cell>
+          <Box key={voter.voter} display="contents">
+            <Box h="28px" display="flex" alignItems="center">
               {isLoading ? (
                 <SkeletonText w="50%" noOfLines={1} />
               ) : (
@@ -114,27 +126,27 @@ const VoterTable = ({
                   {domains?.[idx] ? humanDomain(domains[idx]) : humanAddress(voter?.voter || "")}
                 </Link>
               )}
-            </Table.Cell>
-            <Table.Cell color="text.subtle" textStyle="sm">
+            </Box>
+            <Box h="28px" display="flex" alignItems="center" color="text.subtle" textStyle="sm">
               {voter?.power ? humanNumber(formatEther(voter?.power)) : "-"}
-            </Table.Cell>
-            <Table.Cell>
+            </Box>
+            <Box h="28px" display="flex" alignItems="center">
               <VoteOptionBadge support={voter?.support} />
-            </Table.Cell>
-            <Table.Cell color="text.subtle" textStyle="sm">
+            </Box>
+            <Box h="28px" display="flex" alignItems="center" justifyContent="end" color="text.subtle" textStyle="sm">
               {dayjs.unix(voter?.blockTimestamp ?? 0).fromNow()}
-            </Table.Cell>
-          </Table.Row>
+            </Box>
+          </Box>
         ))}
-      </Table.Body>
-    </Table.Root>
+      </Grid>
+    </Box>
   )
 }
 
 export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: string; totalVoters?: number }) => {
   const [open, setOpen] = useState(false)
   const [page, setPage] = useState(1)
-  const [order, setOrder] = useState<"asc" | "desc">("asc")
+  const [order, setOrder] = useState<"asc" | "desc">("desc")
 
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
@@ -173,7 +185,7 @@ export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: st
       </Collapsible.Trigger>
       <Collapsible.Content>
         <SearchField
-          inputWrapperProps={{ p: "0.5", mt: "4" }}
+          inputWrapperProps={{ p: "0.5", mt: "4", mb: "6" }}
           inputProps={{ minW: "200px", flex: 1 }}
           placeholder={"Search voter address or domain"}
           value={searchTerm}
@@ -186,6 +198,7 @@ export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: st
           voters={voters}
           domains={domains}
           isLoading={isVoteEventsLoading || isDomainsLoading}
+          order={order}
           onOrderToggle={() => {
             if (page !== 1) setPage(1)
             setOrder(old => (old === "asc" ? "desc" : "asc"))
@@ -193,7 +206,7 @@ export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: st
         />
         <Pagination.Root
           mx={{ base: "auto", md: "unset" }}
-          mt="2"
+          mt="6"
           count={voter ? 1 : totalVoters}
           pageSize={5}
           page={page}
@@ -205,7 +218,7 @@ export const ProposalVotersCard = ({ proposalId, totalVoters }: { proposalId: st
           siblingCount={1}
           onPageChange={page => setPage(page.page)}>
           <Pagination.PageText format="compact" textStyle="sm" />
-          <ButtonGroup variant="ghost" size="xs">
+          <ButtonGroup variant="ghost" size="xs" flexWrap="wrap">
             <Pagination.PrevTrigger asChild>
               <IconButton>
                 <NavArrowLeft />

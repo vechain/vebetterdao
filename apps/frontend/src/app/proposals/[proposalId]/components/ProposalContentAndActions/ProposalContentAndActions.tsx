@@ -303,7 +303,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 wordBreak: "break-word",
                 backgroundColor: "transparent",
                 color: markdownPreviewTextColor,
-                overflow: "scroll",
+                overflow: "auto",
               }}
             />
           </Box>
