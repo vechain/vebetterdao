@@ -1,0 +1,17 @@
+{
+  "name": "@repo/scripts",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "analyze-auto-voting": "ts-node src/analyzeAutoVotingRounds.ts"
+  },
+  "dependencies": {
+    "@repo/config": "*",
+    "@vechain/vebetterdao-contracts": "*"
+  },
+  "devDependencies": {
+    "@vechain/sdk-core": "2.0.7",
+    "@vechain/sdk-network": "2.0.7",
+    "ts-node": "^10.9.2"
+  }
+}
