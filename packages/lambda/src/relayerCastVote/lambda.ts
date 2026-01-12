@@ -10,16 +10,12 @@ import mainnetConfig from "@repo/config/mainnet"
 import { getSecret } from "../helpers/secret"
 import { CustomApiError, StandardApiError, SuccessResponseType } from "../helpers/api.types"
 import { buildResponse } from "../helpers/api/response"
-import { parseDryRunFlag } from "../helpers/api"
+import { parseBatchSize, parseDryRunFlag, parseWalletAddresses } from "../helpers/api"
 import { logger } from "../helpers/logger"
 import { AppEnv } from "@repo/config/contracts"
 import { AppConfig } from "@repo/config"
 import { getCurrentRoundId } from "../helpers/xApps"
-import {
-  getAllAutoVotingEnabledUsers,
-  getRoundSnapshot,
-  verifyAutoVotingUsersIsActive,
-} from "../helpers/xallocationvoting"
+import { getAllAutoVotingEnabledUsers, getRoundSnapshot } from "../helpers/xallocationvoting"
 import { processBatchedVotes } from "../helpers/xallocationvoting/batchVoteProcessor"
 import { slackIds } from "../helpers/slack/slackIds"
 import { notify } from "../helpers/slack/notificationHelper"
@@ -146,6 +142,8 @@ const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKe
 
 export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
   const dryRun = parseDryRunFlag(event)
+  const BATCH_SIZE = parseBatchSize(event, 50)
+  const providedWallets = parseWalletAddresses(event)
 
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
@@ -154,11 +152,14 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
   console.log(`Network: ${NODE_URL}`)
   console.log(`XAllocationVoting contract: ${CONFIG.xAllocationVotingContractAddress}`)
   console.log(`Dry Run Mode: ${dryRun}`)
+  console.log(`Batch Size: ${BATCH_SIZE}`)
+  console.log(
+    `Wallet Mode: ${providedWallets ? `Specific (${providedWallets.length} addresses)` : "Auto-detect from events"}`,
+  )
 
   try {
     const thorClient = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const secretsClient = new SecretsManagerClient({ region: "eu-west-1" })
-    const BATCH_SIZE = 10
 
     // Slack notification options - disabled during dry-run
     const slackOptions = dryRun
@@ -178,38 +179,21 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       snapshotBlock: roundStartBlock,
     })
 
-    // Fetch all users with auto-voting enabled
-    // Starting from block 0 to the round start block
-    const allUsersWithEnabledStatus = await getAllAutoVotingEnabledUsers(
-      thorClient,
-      CONFIG.xAllocationVotingContractAddress,
-      0,
-      roundStartBlock,
-    )
-
-    // Verify that all users are 'active' at the round start block
-    const {
-      allValid,
-      validUsers: usersToVoteFor,
-      invalidUsers,
-    } = await verifyAutoVotingUsersIsActive(
-      thorClient,
-      CONFIG.xAllocationVotingContractAddress,
-      allUsersWithEnabledStatus,
-      currentRoundId,
-    )
-
-    if (!allValid) {
-      await notify({
-        level: "warn",
-        message: `Found ${invalidUsers.length} invalid auto-voting users in round ${currentRoundId}. Check logs for more details.`,
-        data: {
-          roundId: currentRoundId,
-          invalidUsersCount: invalidUsers.length,
-          invalidUsers,
-        },
-        slack: slackOptions,
-      })
+    // Determine which users to vote for: provided wallets or all auto-voting enabled users
+    let usersToVoteFor: string[]
+    if (providedWallets) {
+      usersToVoteFor = providedWallets
+      logger.info(`Processing specific wallets`, { count: providedWallets.length })
+    } else {
+      // Fetch all users with auto-voting enabled
+      // Starting from block 0 will just skip to find the nearest block with AutoVotingToggled event
+      usersToVoteFor = await getAllAutoVotingEnabledUsers(
+        thorClient,
+        CONFIG.xAllocationVotingContractAddress,
+        0,
+        roundStartBlock,
+      )
+      logger.info(`Fetched auto-voting enabled users`, { count: usersToVoteFor.length })
     }
 
     if (usersToVoteFor.length === 0) {

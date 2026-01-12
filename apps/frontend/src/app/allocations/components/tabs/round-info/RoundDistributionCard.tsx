@@ -20,6 +20,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
   const [open, setOpen] = useState(false)
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
+  const isCurrentRound = roundDetails.id === roundDetails.currentRoundId
   const distribution = useMemo(() => {
     const toApps = Number(roundDetails.xAllocationsAmount)
     const toVoters = Number(roundDetails.vote2EarnAmount)
@@ -49,13 +50,17 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
         )}>
         <Card.Root
           p="4"
-          variant="outline"
-          border="sm"
-          borderColor="border.secondary"
+          variant="primary"
           flexDirection={{ base: "column", md: "row" }}
           justifyContent={{ base: "unset", md: "space-between" }}
           gap={{ base: "unset", md: "12" }}>
-          <SimpleGrid flex={1} columns={3} rowGap="2" columnGap={{ base: "unset", md: "3" }}>
+          <SimpleGrid
+            flex={1}
+            columns={3}
+            rowGap="2"
+            columnGap={{ base: "unset", md: "3" }}
+            gridTemplateColumns={{ base: "auto auto auto", md: "repeat(3, 1fr)" }}
+            justifyContent={{ base: "space-between", md: "unset" }}>
             <GridItem
               hideBelow="md"
               display="flex"
@@ -110,7 +115,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
                   textStyle={{ base: "sm", md: "lg" }}
                   fontWeight={{ base: "normal", md: "semibold" }}
                   color="text.subtle">
-                  {t("Total rewards distributed")}
+                  {isCurrentRound ? t("Total rewards to distribute") : t("Total rewards distributed")}
                 </Text>
               </HStack>
               <Icon hideFrom="md" as={NavArrowRight} boxSize="4" color="text.subtle" />

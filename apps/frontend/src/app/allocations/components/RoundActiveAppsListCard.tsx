@@ -19,6 +19,8 @@ import { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
+import { useTotalXAppEarnings } from "@/api/contracts/dbaPool/hooks/useTotalXAppEarnings"
+import { useXAppsShares } from "@/api/contracts/xApps/hooks/useXAppShares"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { SearchField } from "@/components/SearchField/SearchField"
 
@@ -27,6 +29,7 @@ import { AppWithVotes } from "../lib/data"
 import { ActiveAppDetailModal } from "./ActiveAppDetailModal"
 
 const INITIAL_DISPLAY_COUNT = 4
+const CARD_ID = "active-round-apps-card"
 
 const RoundActiveAppCard = ({
   id,
@@ -34,14 +37,21 @@ const RoundActiveAppCard = ({
   name,
   votesReceived,
   earnings,
+  roundId,
+  percentage,
   onClick,
+  isCurrentRound = false,
 }: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & {
+  isCurrentRound?: boolean
   appLogo?: string
   onClick: (id: string) => void
+  roundId: number
+  percentage?: number
 }) => {
   const { t } = useTranslation()
+  const { data } = useTotalXAppEarnings(roundId.toString(), id, percentage ?? 0)
   return (
-    <Button unstyled asChild onClick={() => onClick(id)}>
+    <Button unstyled focusVisibleRing="none" _focusWithin={{ bg: "card.hover" }} asChild onClick={() => onClick(id)}>
       <Card.Root
         variant="action"
         border="none"
@@ -56,18 +66,18 @@ const RoundActiveAppCard = ({
           <Text textStyle={{ base: "md", md: "lg" }} color="text.default" fontWeight="semibold">
             {name || "-"}
           </Text>
-          <HStack gap="1">
+          <HStack align="start" w="full" gap="1" lineClamp={1}>
             {earnings && (
-              <Text textStyle={{ base: "xs", md: "md" }} gap="1">
+              <Text display="inline" textStyle={{ base: "xs", md: "md" }} gap="1">
                 <Mark variant="text" fontWeight="semibold" color="text.subtle">
-                  {t("Received: ")}
+                  {isCurrentRound ? t("Potential: ") : t("Received: ")}
                 </Mark>
-                {getCompactFormatter(2).format(Number(earnings.totalAmount))} {" B3TR"}
+                {getCompactFormatter(2).format(Number(data?.totalEarnings ?? earnings.totalAmount))} {" B3TR"}
                 <Mark fontWeight="semibold">{" • "}</Mark>
               </Text>
             )}
 
-            <Text textStyle={{ base: "xs", md: "md" }}>
+            <Text display="inline" textStyle={{ base: "xs", md: "md" }}>
               {getCompactFormatter(2).format(Number(formatEther(votesReceived, "gwei")))} {" votes"}
             </Text>
           </HStack>
@@ -78,23 +88,26 @@ const RoundActiveAppCard = ({
       </Card.Root>
     </Button>
   )
-  // return (
-  //   {/* <Button key={id} unstyled asChild onClick={() => onClick(id)}> */ }
-  //   {/*     <IconButton variant="ghost" p="0" minWidth="unset"> */ }
-  // {/*       <Icon as={NavArrowRight} boxSize={5} color="icon.default" /> */ }
-  // {/*     </IconButton> */ }
-  // {/*   </Card.Root> */ }
-  // {/* </Button> */ }
-  // )
 }
 
-export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[]; roundId: number }) => {
+export const RoundActiveAppsListCard = ({
+  apps,
+  roundId,
+  currentRoundId,
+}: {
+  apps: AppWithVotes[]
+  roundId: number
+  currentRoundId: number
+}) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const { t } = useTranslation()
+  const isCurrentRound = roundId === currentRoundId
 
   const [clickedApp, setClickedApp] = useState<string | undefined>()
+  const { data } = useXAppsShares(apps?.map(app => app.id) ?? [], roundId.toString())
   const appsMap = new Map(apps.map(app => [app.id, app]))
+  const appPercentageMap = new Map(data?.map(({ app, share }) => [app, share]))
 
   const filteredApps = useMemo(() => {
     const trimmedQuery = searchQuery.trim()
@@ -105,7 +118,7 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
 
   return (
     <>
-      <Card.Root p={{ base: "4", md: "6" }} gap="6" height="max-content">
+      <Card.Root id={CARD_ID} variant="primary" p={{ base: "4", md: "6" }} gap="6" height="max-content">
         <Card.Header gap="6" p="0">
           <HStack justifyContent="space-between">
             <Heading as={HStack} size="lg" fontWeight="semibold">
@@ -123,13 +136,19 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
             onChange={setSearchQuery}
           />
         </Card.Header>
-        <Card.Body asChild maxHeight="1000px" overflowY="auto">
-          <Collapsible.Root open={isOpen} onOpenChange={details => setIsOpen(details.open)}>
+        <Card.Body asChild maxHeight={{ base: "unset", md: "1000px" }} overflowY="auto">
+          <Collapsible.Root
+            open={isOpen}
+            onOpenChange={details => setIsOpen(details.open)}
+            onExitComplete={() => document.getElementById(CARD_ID)?.scrollIntoView({ block: "center" })}>
             <VStack gap="2" align="stretch">
               {filteredApps.slice(0, INITIAL_DISPLAY_COUNT).map(app => (
                 <RoundActiveAppCard
                   key={app.id}
                   id={app.id}
+                  roundId={roundId}
+                  isCurrentRound={isCurrentRound}
+                  percentage={appPercentageMap.get(app.id)}
                   name={app.name}
                   votesReceived={app.votesReceived}
                   earnings={app.earnings}
@@ -145,6 +164,9 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
                         <RoundActiveAppCard
                           key={app.id}
                           id={app.id}
+                          isCurrentRound={isCurrentRound}
+                          roundId={roundId}
+                          percentage={appPercentageMap.get(app.id)}
                           name={app.name}
                           appLogo={app.metadata?.logo}
                           votesReceived={app.votesReceived}
@@ -169,7 +191,9 @@ export const RoundActiveAppsListCard = ({ apps, roundId }: { apps: AppWithVotes[
       {clickedApp && (
         <ActiveAppDetailModal
           roundId={roundId}
+          currentRoundId={currentRoundId}
           app={appsMap.get(clickedApp)!}
+          percentage={appPercentageMap.get(clickedApp)!}
           isOpen={!!clickedApp}
           onClose={() => setClickedApp(undefined)}
         />

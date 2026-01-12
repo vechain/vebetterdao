@@ -38,9 +38,10 @@ const simulateSingleClause = async (
   thor: ThorClient,
   clause: Clause,
   walletAddress: string,
+  gasPadding: number = 0.1, // 10% padding
 ): Promise<SimulationResult> => {
   try {
-    const gasResult = await thor.gas.estimateGas([clause], walletAddress)
+    const gasResult = await thor.gas.estimateGas([clause], walletAddress, { gasPadding })
 
     if (gasResult.reverted) {
       const reasonRaw = gasResult.revertReasons?.[0]
@@ -158,6 +159,10 @@ const processSingleBatch = async (
         clausesCount: clauses.length,
         txId: tx.id,
       })
+
+      // Small delay to give node breathing room before next gas estimation
+      await new Promise(resolve => setTimeout(resolve, 100)) // 0.1 second
+
       return { success: true, txId: tx.id }
     } else {
       logger.warn("Batch transaction reverted", { batchNumber, txId: tx.id })

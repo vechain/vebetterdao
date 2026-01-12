@@ -192,6 +192,11 @@ export async function distributeEmissions(thor: ThorClient) {
   // Wait for the transaction to be processed and get the receipt
   const receipt = await thor.transactions.waitForTransaction(tx.id)
 
+  if (!receipt) {
+    console.log("WARNING: Emissions distribution transaction was sent but receipt was not received")
+    console.log(`Transaction ID: ${tx.id}`)
+  }
+
   return { receipt, gasResult }
 }
 
@@ -293,6 +298,11 @@ export async function distributeXAllocations(thor: ThorClient) {
   const tx = await thor.transactions.sendTransaction(signedTx)
 
   const receipt = await thor.transactions.waitForTransaction(tx.id)
+
+  if (!receipt) {
+    console.log("WARNING: X-Allocations distribution transaction was sent but receipt was not received")
+    console.log(`Transaction ID: ${tx.id}`)
+  }
 
   // Return the transaction receipt
   return { receipt, gasResult }
@@ -408,6 +418,13 @@ async function distributeDBARewards(thor: ThorClient) {
 
   // Wait for the transaction to be processed and get the receipt
   const receipt = await thor.transactions.waitForTransaction(tx.id)
+
+  // Check if receipt was received
+  if (!receipt) {
+    console.log(`WARNING: DBA distribution transaction was sent but receipt was not received for round ${roundId}`)
+    console.log(`Transaction ID: ${tx.id}`)
+    return { receipt: null, eligibleAppsCount: eligibleApps.length, gasResult }
+  }
 
   console.log(`DBA distribution successful for round ${roundId}`)
 
@@ -617,6 +634,13 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
 
     const { receipt: receiptDBA, eligibleAppsCount, skipped, notDeployed, notReady } = dbaResult
 
+    // Log DBA result for debugging
+    console.log("DBA Result:", {
+      hasReceipt: !!receiptDBA,
+      receiptType: receiptDBA ? typeof receiptDBA : "null/undefined",
+      dbaResult,
+    })
+
     if (notDeployed) {
       console.log("DBA Pool not deployed yet, skipping")
       await publishMessage(
@@ -634,13 +658,15 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     } else if (skipped) {
       console.log("DBA distribution skipped (no eligible apps)")
     } else if (!receiptDBA) {
+      console.log("DBA distribution: receipt is null or undefined")
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: DBA distribution transaction reverted`,
+        `${SLACK_MESSAGE_PREFIX}:alert: DBA distribution transaction reverted or receipt not received. Please check the logs.`,
       )
     } else {
       console.log("DBA distribution successful")
+      console.log("DBA Receipt:", receiptDBA)
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,

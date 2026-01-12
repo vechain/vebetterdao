@@ -9,6 +9,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useContext } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+
 import type { AllocationRoundDetails } from "../../../lib/data"
 import { RoundActiveAppsListCard } from "../../RoundActiveAppsListCard"
 import { UserVotingActivityCard } from "../../UserVotingActivityCard"
@@ -29,6 +31,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
   const { t } = useTranslation()
   const context = useContext(AllocationTabsContext)
   const contextRoundDetails = context?.roundDetails
+  const { isMobile } = useBreakpoints()
 
   const roundDetails = propRoundDetails || contextRoundDetails
 
@@ -104,6 +107,13 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
         </Flex>
       </Card.Root>
       <RoundDistributionCard roundDetails={roundDetails} />
+      {isMobile && (
+        <RoundActiveAppsListCard
+          currentRoundId={roundDetails.currentRoundId}
+          roundId={roundDetails.id}
+          apps={roundDetails.apps}
+        />
+      )}
       <VStack hideFrom="md" gap="3" alignItems="stretch">
         <HStack justifyContent="space-between" w="full">
           <Heading size="lg" fontWeight="semibold">
@@ -128,7 +138,11 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
       </VStack>
       <Grid hideBelow="md" gridTemplateColumns={!!account?.address ? "repeat(2,1fr)" : "1fr"} gap="6">
         {!!account?.address && <UserVotingActivityCard roundDetails={roundDetails} />}
-        <RoundActiveAppsListCard roundId={roundDetails.id} apps={roundDetails.apps} />
+        <RoundActiveAppsListCard
+          currentRoundId={roundDetails.currentRoundId}
+          roundId={roundDetails.id}
+          apps={roundDetails.apps}
+        />
       </Grid>
     </VStack>
   )

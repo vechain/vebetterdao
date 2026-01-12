@@ -4,15 +4,16 @@
 import { VStack, Card, HStack, Icon, Heading, Text, Box, Badge, CloseButton } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Flash, Activity } from "iconoir-react"
+import React from "react"
 import { useTranslation } from "react-i18next"
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import { formatEther } from "viem"
 
-import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useTotalXAppEarnings } from "@/api/contracts/dbaPool/hooks/useTotalXAppEarnings"
 import { indexerQueryClient } from "@/api/indexer/api"
 import { AppImage } from "@/components/AppImage/AppImage"
 import B3TR from "@/components/Icons/svg/b3tr.svg"
 import { Modal } from "@/components/Modal"
+import { ProgressRing } from "@/components/ProgressRing"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 import { AppWithVotes } from "../lib/data"
@@ -38,69 +39,67 @@ type BreakdownSection = {
 
 type SectionData = SimpleSection | BreakdownSection
 
-const DonutChart = ({ data, colors, percentage }: { data: DataItem[]; colors: string[]; percentage: string }) => {
+const DonutChart = ({ colors, percentage }: { colors: string[]; percentage: string }) => {
   return (
-    <Box h="70px" w="70px" position="relative">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={22}
-            outerRadius={35}
-            paddingAngle={0}
-            dataKey="value"
-            startAngle={90}
-            endAngle={-270}>
-            {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-      <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" textAlign="center">
-        <Text textStyle="sm" fontWeight="semibold" color="text.default">
-          {percentage}
-          {"%"}
+    <ProgressRing
+      size={70}
+      percent={Number(percentage)}
+      bgColor={colors[0]}
+      fgColor={colors[1]}
+      label={
+        <Text color="icon.subtle" textStyle="sm">
+          {`${percentage}%`}
         </Text>
-      </Box>
-    </Box>
+      }
+    />
   )
 }
 
 export const ActiveAppDetailModal = ({
   roundId,
+  currentRoundId,
   app,
   isOpen,
   onClose,
+  percentage,
 }: {
   roundId: number
+  currentRoundId: number
   app: AppWithVotes
   isOpen: boolean
   onClose: VoidFunction
+  percentage: number
 }) => {
+  const { t } = useTranslation()
   const { data } = indexerQueryClient.useQuery("get", "/api/v1/b3tr/actions/apps/{appId}/overview", {
     params: { path: { appId: app.id }, query: { roundId } },
   })
-  const { t } = useTranslation()
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
   const votingPowerValue = getCompactFormatter(2).format(Number(formatEther(app.votesReceived, "gwei")))
   const votersCount = app?.voters || 0
-  const isCurrentRound = currentRoundId === roundId.toString()
+  const isCurrentRound = currentRoundId === roundId
 
-  const {
+  let {
     rewardsAllocationAmount = 0,
     unallocatedAmount = 0,
     teamAllocationAmount = 0,
     totalAmount = 0,
   } = app?.earnings || {}
+  const {
+    data: { dbaEarnings, totalEarnings },
+  } = useTotalXAppEarnings(roundId.toString(), app.id, percentage ?? 0)
   const rewardsToUserPercentage =
     data?.totalRewardAmount && totalAmount ? Math.round((data?.totalRewardAmount * 100) / totalAmount) : 0
 
   let dynamicBaseAllocationAmount = totalAmount - (unallocatedAmount + teamAllocationAmount + rewardsAllocationAmount)
   dynamicBaseAllocationAmount = dynamicBaseAllocationAmount > 0 ? dynamicBaseAllocationAmount : 0
-  const dynamicBaseAllocationPercentage = (dynamicBaseAllocationAmount * 100) / totalAmount
+  let dynamicBaseAllocationPercentage = (dynamicBaseAllocationAmount * 100) / totalAmount
+
+  if (isCurrentRound) {
+    totalAmount = Number(totalEarnings)
+    dynamicBaseAllocationAmount = Number(dbaEarnings)
+    dynamicBaseAllocationPercentage = (dynamicBaseAllocationAmount * 100) / totalAmount
+  }
 
   const dataList: SectionData[] = [
     {
@@ -121,7 +120,7 @@ export const ActiveAppDetailModal = ({
     {
       type: "breakdown",
       icon: B3TR,
-      label: t("B3TR received"),
+      label: isCurrentRound ? t("Potential B3TR amount to receive") : t("B3TR received"),
       breakdownRows: [
         {
           label: t("Voting"),
@@ -134,41 +133,40 @@ export const ActiveAppDetailModal = ({
           dotColor: "#004CFC",
         },
       ],
-      chartData: isCurrentRound
-        ? [
-            { name: t("Voting"), value: 1 },
-            { name: t("Dynamic base"), value: 0 },
-          ]
-        : [
-            { name: t("Voting"), value: 100 - dynamicBaseAllocationPercentage },
-            { name: t("Dynamic base"), value: dynamicBaseAllocationPercentage },
-          ],
-      chartColors: ["#B3CCFF", "#004CFC"],
-      chartPercentage: isCurrentRound ? "0" : (100 - dynamicBaseAllocationPercentage).toFixed(0),
-    },
-    {
-      type: "breakdown",
-      icon: B3TR,
-      label: t("B3TR distributed"),
-      breakdownRows: [
-        {
-          label: t("To users"),
-          value: `${rewardsToUserPercentage}%`,
-          dotColor: "#99E0B1",
-        },
-        {
-          label: t("Retained by app"),
-          value: `${isCurrentRound ? 0 : 100 - rewardsToUserPercentage}%`,
-          dotColor: "#047229",
-        },
-      ],
       chartData: [
-        { name: t("To users"), value: rewardsToUserPercentage },
-        { name: t("Retained by app"), value: 100 - rewardsToUserPercentage },
+        { name: t("Voting"), value: 100 - dynamicBaseAllocationPercentage },
+        { name: t("Dynamic base"), value: dynamicBaseAllocationPercentage },
       ],
-      chartColors: ["#99E0B1", "#047229"],
-      chartPercentage: rewardsToUserPercentage.toString(),
+      chartColors: ["#B3CCFF", "#004CFC"],
+      chartPercentage: (100 - dynamicBaseAllocationPercentage).toFixed(0),
     },
+    ...(isCurrentRound
+      ? []
+      : [
+          {
+            type: "breakdown" as const,
+            icon: B3TR,
+            label: t("B3TR distributed"),
+            breakdownRows: [
+              {
+                label: t("To users"),
+                value: `${rewardsToUserPercentage}%`,
+                dotColor: "#99E0B1",
+              },
+              {
+                label: t("Retained by app"),
+                value: `${100 - rewardsToUserPercentage}%`,
+                dotColor: "#047229",
+              },
+            ],
+            chartData: [
+              { name: t("To users"), value: rewardsToUserPercentage },
+              { name: t("Retained by app"), value: 100 - rewardsToUserPercentage },
+            ],
+            chartColors: ["#99E0B1", "#047229"],
+            chartPercentage: rewardsToUserPercentage.toString(),
+          },
+        ]),
     {
       type: "simple",
       icon: Activity,
@@ -264,11 +262,7 @@ export const ActiveAppDetailModal = ({
                     </HStack>
                   ))}
                 </VStack>
-                <DonutChart
-                  data={section.chartData}
-                  colors={section.chartColors}
-                  percentage={section.chartPercentage}
-                />
+                <DonutChart colors={section.chartColors} percentage={section.chartPercentage} />
               </HStack>
             )}
           </Card.Root>

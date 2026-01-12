@@ -19,8 +19,8 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
   const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
   const { app, isAppInfoLoading } = useCurrentAppInfo()
-  const { data: gracePeriodEvents, isLoading: isGracePeriodEventLoading } = useGracePeriodEvent(app?.id)
-  const gracePeriodEndBlockNumber = Number(gracePeriodEvents?.[0]?.endBlock) || 0
+  const { data: gracePeriodEvent, isLoading: isGracePeriodEventLoading } = useGracePeriodEvent(app?.id)
+  const gracePeriodEndBlockNumber = Number(gracePeriodEvent?.endBlock) || 0
   const gracePeriodEndTimestamp = useEstimateBlockTimestamp({ blockNumber: gracePeriodEndBlockNumber })
   const gracePeriodEndDate =
     gracePeriodEndTimestamp === 0 ? "Pending" : dayjs(gracePeriodEndTimestamp).format("ddd DD MMM")
