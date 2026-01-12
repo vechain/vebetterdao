@@ -24,7 +24,7 @@ import * as path from "path"
 import mainnetConfig from "@repo/config/mainnet"
 
 // First round with auto-voting enabled on mainnet
-const FIRST_AUTO_VOTING_ROUND = 65
+const FIRST_AUTO_VOTING_ROUND = 69
 
 // Contract addresses from mainnet config
 const CONFIG = mainnetConfig
@@ -872,9 +872,12 @@ async function analyzeRound(thor: ThorClient, roundId: number): Promise<RoundAna
  */
 function printTable(rounds: RoundAnalytics[]): void {
   console.log("\n")
-  console.log("=".repeat(120))
+  // Conversion rate for B3TR to VTHO
+  const B3TR_TO_VTHO_RATE = 19
+
+  console.log("=".repeat(150))
   console.log("AUTO-VOTING ANALYTICS REPORT")
-  console.log("=".repeat(120))
+  console.log("=".repeat(150))
 
   // Header
   const header = [
@@ -882,22 +885,51 @@ function printTable(rounds: RoundAnalytics[]): void {
     "Users".padEnd(6),
     "Voted".padEnd(6),
     "Claimed".padEnd(8),
+    "Relayers".padEnd(9),
     "Status".padEnd(22),
-    "VTHO Spent".padEnd(18),
-    "Fee Rewards".padEnd(22),
+    "VTHO Spent".padEnd(14),
+    "Fee Rewards*".padEnd(32),
+    "ROI".padEnd(10),
   ].join(" | ")
 
   console.log(header)
-  console.log("-".repeat(120))
+  console.log("-".repeat(155))
 
   // Rows
   for (const round of rounds) {
-    // Show actual rewards if deposited, otherwise show estimated with (~) prefix
-    let feeRewardsDisplay: string
+    // Get the B3TR amount (actual or estimated)
+    let feeRewardsB3TR: number
+    let isEstimated = false
+
     if (round.totalRelayerRewardsRaw !== "0") {
-      feeRewardsDisplay = round.totalRelayerRewards
+      feeRewardsB3TR = Number(round.totalRelayerRewardsRaw) / 1e18
     } else if (round.estimatedRelayerRewardsRaw !== "0") {
-      feeRewardsDisplay = `~${round.estimatedRelayerRewards}`
+      feeRewardsB3TR = Number(round.estimatedRelayerRewardsRaw) / 1e18
+      isEstimated = true
+    } else {
+      feeRewardsB3TR = 0
+    }
+
+    // Convert B3TR to VTHO equivalent
+    const feeRewardsVTHO = feeRewardsB3TR * B3TR_TO_VTHO_RATE
+    const vthoSpent = Number(round.vthoSpentTotalRaw) / 1e18
+
+    // Calculate ROI
+    let roiDisplay: string
+    if (vthoSpent === 0) {
+      roiDisplay = "N/A"
+    } else {
+      const profit = feeRewardsVTHO - vthoSpent
+      const roiPercent = (profit / vthoSpent) * 100
+      const sign = profit >= 0 ? "+" : ""
+      roiDisplay = `${sign}${roiPercent.toFixed(0)}%`
+    }
+
+    // Format fee rewards with VTHO equivalent in parentheses
+    let feeRewardsDisplay: string
+    if (feeRewardsB3TR > 0) {
+      const prefix = isEstimated ? "~" : ""
+      feeRewardsDisplay = `${prefix}${feeRewardsB3TR.toFixed(2)} B3TR (~${feeRewardsVTHO.toFixed(0)} VTHO)`
     } else {
       feeRewardsDisplay = "0.00 B3TR"
     }
@@ -907,14 +939,17 @@ function printTable(rounds: RoundAnalytics[]): void {
       round.autoVotingUsersCount.toString().padEnd(6),
       round.votedForCount.toString().padEnd(6),
       round.rewardsClaimedCount.toString().padEnd(8),
+      round.numRelayers.toString().padEnd(9),
       round.actionStatus.padEnd(22),
-      round.vthoSpentTotal.padEnd(18),
-      feeRewardsDisplay.padEnd(22),
+      round.vthoSpentTotal.padEnd(14),
+      feeRewardsDisplay.padEnd(32),
+      roiDisplay.padEnd(10),
     ].join(" | ")
     console.log(row)
   }
 
-  console.log("=".repeat(120))
+  console.log("=".repeat(155))
+  console.log("* VTHO equivalent calculated using conversion rate: 1 B3TR = 19 VTHO")
 }
 
 /**
