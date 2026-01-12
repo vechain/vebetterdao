@@ -16,6 +16,7 @@ import {
   XAllocationVoting__factory,
   VoterRewards__factory,
   RelayerRewardsPool__factory,
+  Emissions__factory,
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import * as fs from "fs"
 import * as path from "path"
@@ -33,10 +34,10 @@ interface RoundAnalytics {
   autoVotingUsersCount: number
   votedForCount: number
   rewardsClaimedCount: number
-  relayerRewardsClaimable: boolean
-  relayerRewardsClaimableReason: string
   totalRelayerRewards: string
   totalRelayerRewardsRaw: string
+  estimatedRelayerRewards: string // Estimated from summing getRelayerFee for all voted users
+  estimatedRelayerRewardsRaw: string
   numRelayers: number
   vthoSpentOnVoting: string
   vthoSpentOnVotingRaw: string
@@ -44,6 +45,14 @@ interface RoundAnalytics {
   vthoSpentOnClaimingRaw: string
   vthoSpentTotal: string
   vthoSpentTotalRaw: string
+  // Action verification
+  expectedActions: number // Total weighted actions expected
+  completedActions: number // Total weighted actions completed
+  reducedUsersCount: number // Users legitimately skipped (VOT3→B3TR, invalid passport)
+  missedUsersCount: number // Users actually missed by relayer
+  allActionsOk: boolean // True if all expected work was done
+  actionStatus: string // Human readable status
+  isRoundEnded: boolean // True if the round has ended
 }
 
 interface AnalyticsReport {
@@ -108,6 +117,18 @@ async function getRoundDeadline(thor: ThorClient, contractAddress: string, round
   }
 
   return Number(result.result?.array?.[0] ?? 0)
+}
+
+/**
+ * Check if a round/cycle has ended using Emissions contract
+ */
+async function isCycleEnded(thor: ThorClient, emissionsAddress: string, roundId: number): Promise<boolean> {
+  const emissionsContract = ABIContract.ofAbi(Emissions__factory.abi)
+  const result = await thor.contracts.executeCall(emissionsAddress, emissionsContract.getFunction("isCycleEnded"), [
+    roundId,
+  ])
+
+  return result.success ? (result.result?.array?.[0] as boolean) : false
 }
 
 /**
@@ -301,43 +322,64 @@ async function getAutoClaimsForRound(
 }
 
 /**
- * Get relayer rewards status for a specific round
+ * Get total relayer rewards deposited for a specific round
  */
-async function getRelayerRewardsStatus(
-  thor: ThorClient,
-  contractAddress: string,
-  roundId: number,
-): Promise<{ isClaimable: boolean; totalRewards: bigint; reason: string }> {
+async function getTotalRelayerRewards(thor: ThorClient, contractAddress: string, roundId: number): Promise<bigint> {
   const relayerPoolContract = ABIContract.ofAbi(RelayerRewardsPool__factory.abi)
 
-  // Check if rewards are claimable
-  const claimableResult = await thor.contracts.executeCall(
-    contractAddress,
-    relayerPoolContract.getFunction("isRewardClaimable"),
-    [roundId],
-  )
-
-  // Get total rewards
   const rewardsResult = await thor.contracts.executeCall(
     contractAddress,
     relayerPoolContract.getFunction("getTotalRewards"),
     [roundId],
   )
 
-  const isClaimable = claimableResult.success ? (claimableResult.result?.array?.[0] as boolean) : false
   const rawRewards = rewardsResult.success ? rewardsResult.result?.array?.[0] : undefined
-  const totalRewards = rawRewards ? BigInt(String(rawRewards)) : BigInt(0)
+  return rawRewards ? BigInt(String(rawRewards)) : BigInt(0)
+}
 
-  let reason = ""
-  if (isClaimable) {
-    reason = "Yes"
-  } else if (totalRewards === BigInt(0)) {
-    reason = "No rewards deposited"
-  } else {
-    reason = "Round not complete or not ended"
+/**
+ * Estimate relayer rewards by summing getRelayerFee for each voted user
+ */
+async function estimateRelayerRewards(
+  thor: ThorClient,
+  voterRewardsAddress: string,
+  roundId: number,
+  votedUsers: Set<string>,
+): Promise<bigint> {
+  if (votedUsers.size === 0) {
+    return BigInt(0)
   }
 
-  return { isClaimable, totalRewards, reason }
+  const voterRewardsContract = ABIContract.ofAbi(VoterRewards__factory.abi)
+  let totalEstimatedFees = BigInt(0)
+
+  // Process in batches to avoid overloading
+  const userArray = Array.from(votedUsers)
+  const BATCH_SIZE = 50
+
+  for (let i = 0; i < userArray.length; i += BATCH_SIZE) {
+    const batch = userArray.slice(i, i + BATCH_SIZE)
+
+    // Call getRelayerFee for each user in parallel
+    const feePromises = batch.map(async user => {
+      const result = await thor.contracts.executeCall(
+        voterRewardsAddress,
+        voterRewardsContract.getFunction("getRelayerFee"),
+        [roundId, user],
+      )
+      if (result.success && result.result?.array?.[0]) {
+        return BigInt(String(result.result.array[0]))
+      }
+      return BigInt(0)
+    })
+
+    const fees = await Promise.all(feePromises)
+    for (const fee of fees) {
+      totalEstimatedFees += fee
+    }
+  }
+
+  return totalEstimatedFees
 }
 
 /**
@@ -389,6 +431,108 @@ async function getNumRelayersForRound(
   })
 
   return Number(decodedData.args.numRelayers ?? 0)
+}
+
+/**
+ * Get action verification data from RelayerRewardsPool contract
+ * - totalWeightedActions: Expected weighted actions for the round
+ * - completedWeightedActions: Actual weighted actions completed
+ * - missedAutoVotingUsersCount: Users that were completely missed
+ */
+async function getActionVerificationData(
+  thor: ThorClient,
+  contractAddress: string,
+  roundId: number,
+): Promise<{ expectedActions: number; completedActions: number; missedUsersCount: number }> {
+  const relayerPoolContract = ABIContract.ofAbi(RelayerRewardsPool__factory.abi)
+
+  // Get total weighted actions (expected)
+  const totalWeightedResult = await thor.contracts.executeCall(
+    contractAddress,
+    relayerPoolContract.getFunction("totalWeightedActions"),
+    [roundId],
+  )
+  const expectedActions = totalWeightedResult.success ? Number(totalWeightedResult.result?.array?.[0] ?? 0) : 0
+
+  // Get completed weighted actions
+  const completedWeightedResult = await thor.contracts.executeCall(
+    contractAddress,
+    relayerPoolContract.getFunction("completedWeightedActions"),
+    [roundId],
+  )
+  const completedActions = completedWeightedResult.success ? Number(completedWeightedResult.result?.array?.[0] ?? 0) : 0
+
+  // Get missed auto-voting users count
+  const missedResult = await thor.contracts.executeCall(
+    contractAddress,
+    relayerPoolContract.getFunction("getMissedAutoVotingUsersCount"),
+    [roundId],
+  )
+  const missedUsersCount = missedResult.success ? Number(missedResult.result?.array?.[0] ?? 0) : 0
+
+  return { expectedActions, completedActions, missedUsersCount }
+}
+
+/**
+ * Get count of users legitimately reduced via ExpectedActionsReduced events
+ * These are users who couldn't vote (VOT3→B3TR conversion, invalid passport, etc.)
+ */
+async function getReducedUsersCount(
+  thor: ThorClient,
+  contractAddress: string,
+  roundId: number,
+  fromBlock: number,
+  toBlock?: number,
+): Promise<number> {
+  const relayerPoolContract = ABIContract.ofAbi(RelayerRewardsPool__factory.abi)
+  const reducedEvent = relayerPoolContract.getEvent("ExpectedActionsReduced") as any
+
+  // Encode roundId as topic (indexed parameter)
+  const roundIdHex = "0x" + roundId.toString(16).padStart(64, "0")
+
+  let totalReducedUsers = 0
+  let offset = 0
+  const MAX_EVENTS_PER_REQUEST = 1000
+
+  while (true) {
+    const logs = await thor.logs.filterEventLogs({
+      range: {
+        unit: "block" as const,
+        from: fromBlock,
+        to: toBlock,
+      },
+      options: {
+        offset,
+        limit: MAX_EVENTS_PER_REQUEST,
+      },
+      order: "asc",
+      criteriaSet: [
+        {
+          criteria: {
+            address: contractAddress,
+            topic0: reducedEvent.encodeFilterTopicsNoNull({})[0],
+            topic1: roundIdHex,
+          },
+          eventAbi: reducedEvent,
+        },
+      ],
+    })
+
+    for (const log of logs) {
+      const decodedData = reducedEvent.decodeEventLog({
+        topics: log.topics.map((topic: string) => Hex.of(topic)),
+        data: Hex.of(log.data),
+      })
+      totalReducedUsers += Number(decodedData.args.userCount ?? 0)
+    }
+
+    if (logs.length < MAX_EVENTS_PER_REQUEST) {
+      break
+    }
+    offset += MAX_EVENTS_PER_REQUEST
+  }
+
+  return totalReducedUsers
 }
 
 /**
@@ -593,9 +737,18 @@ async function analyzeRound(thor: ThorClient, roundId: number): Promise<RoundAna
   )
   console.log(`    - Users with rewards claimed: ${claimedUsers.size}`)
 
-  // Get relayer rewards status
-  const relayerStatus = await getRelayerRewardsStatus(thor, CONFIG.relayerRewardsPoolContractAddress, roundId)
-  console.log(`    - Relayer rewards claimable: ${relayerStatus.reason}`)
+  // Get total relayer rewards deposited
+  const totalRelayerRewards = await getTotalRelayerRewards(thor, CONFIG.relayerRewardsPoolContractAddress, roundId)
+  console.log(`    - Total relayer rewards: ${formatB3TR(totalRelayerRewards)}`)
+
+  // Estimate relayer rewards by summing getRelayerFee for all voted users
+  const estimatedRelayerRewards = await estimateRelayerRewards(
+    thor,
+    CONFIG.voterRewardsContractAddress,
+    roundId,
+    votedForUsers,
+  )
+  console.log(`    - Estimated relayer rewards: ${formatB3TR(estimatedRelayerRewards)}`)
 
   // Get number of relayers for this round
   const numRelayers = await getNumRelayersForRound(
@@ -647,15 +800,56 @@ async function analyzeRound(thor: ThorClient, roundId: number): Promise<RoundAna
   const vthoSpentTotal = vthoSpentOnVoting + vthoSpentOnClaiming
   console.log(`    - Total VTHO spent this round: ${formatVTHO(vthoSpentTotal)}`)
 
+  // Get action verification data from contract
+  const verificationData = await getActionVerificationData(thor, CONFIG.relayerRewardsPoolContractAddress, roundId)
+  console.log(`    - Expected actions: ${verificationData.expectedActions}`)
+  console.log(`    - Completed actions: ${verificationData.completedActions}`)
+
+  // Get count of legitimately reduced users (VOT3→B3TR, invalid passport, etc.)
+  const reducedUsersCount = await getReducedUsersCount(
+    thor,
+    CONFIG.relayerRewardsPoolContractAddress,
+    roundId,
+    roundSnapshot,
+    undefined,
+  )
+  console.log(`    - Reduced users (legit skips): ${reducedUsersCount}`)
+
+  // Check if round has ended
+  const isRoundEnded = await isCycleEnded(thor, CONFIG.emissionsContractAddress, roundId)
+  console.log(`    - Round ended: ${isRoundEnded ? "Yes" : "No"}`)
+
+  // Simple status check based on user counts (not weighted actions)
+  // For round N: Did we vote for all eligible users? (users - legitSkips)
+  const expectedToVote = autoVotingUsers.length - reducedUsersCount
+  const votingComplete = votedForUsers.size >= expectedToVote
+  const missedVotes = expectedToVote - votedForUsers.size
+
+  let actionStatus: string
+  const allActionsOk = votingComplete
+
+  if (autoVotingUsers.length === 0) {
+    actionStatus = "N/A"
+  } else if (votingComplete) {
+    if (reducedUsersCount === 0) {
+      actionStatus = "✓ All voted"
+    } else {
+      actionStatus = `✓ OK (${reducedUsersCount} skips)`
+    }
+  } else {
+    actionStatus = `⚠ ${missedVotes} not voted`
+  }
+  console.log(`    - Action status: ${actionStatus}`)
+
   return {
     roundId,
     autoVotingUsersCount: autoVotingUsers.length,
     votedForCount: votedForUsers.size,
     rewardsClaimedCount: claimedUsers.size,
-    relayerRewardsClaimable: relayerStatus.isClaimable,
-    relayerRewardsClaimableReason: relayerStatus.reason,
-    totalRelayerRewards: formatB3TR(relayerStatus.totalRewards),
-    totalRelayerRewardsRaw: relayerStatus.totalRewards.toString(),
+    totalRelayerRewards: formatB3TR(totalRelayerRewards),
+    totalRelayerRewardsRaw: totalRelayerRewards.toString(),
+    estimatedRelayerRewards: formatB3TR(estimatedRelayerRewards),
+    estimatedRelayerRewardsRaw: estimatedRelayerRewards.toString(),
     numRelayers,
     vthoSpentOnVoting: formatVTHO(vthoSpentOnVoting),
     vthoSpentOnVotingRaw: vthoSpentOnVoting.toString(),
@@ -663,6 +857,13 @@ async function analyzeRound(thor: ThorClient, roundId: number): Promise<RoundAna
     vthoSpentOnClaimingRaw: vthoSpentOnClaiming.toString(),
     vthoSpentTotal: formatVTHO(vthoSpentTotal),
     vthoSpentTotalRaw: vthoSpentTotal.toString(),
+    expectedActions: verificationData.expectedActions,
+    completedActions: verificationData.completedActions,
+    reducedUsersCount,
+    missedUsersCount: verificationData.missedUsersCount,
+    allActionsOk,
+    actionStatus,
+    isRoundEnded,
   }
 }
 
@@ -671,9 +872,9 @@ async function analyzeRound(thor: ThorClient, roundId: number): Promise<RoundAna
  */
 function printTable(rounds: RoundAnalytics[]): void {
   console.log("\n")
-  console.log("=".repeat(110))
+  console.log("=".repeat(120))
   console.log("AUTO-VOTING ANALYTICS REPORT")
-  console.log("=".repeat(110))
+  console.log("=".repeat(120))
 
   // Header
   const header = [
@@ -681,31 +882,39 @@ function printTable(rounds: RoundAnalytics[]): void {
     "Users".padEnd(6),
     "Voted".padEnd(6),
     "Claimed".padEnd(8),
-    "Relayers".padEnd(9),
+    "Status".padEnd(22),
     "VTHO Spent".padEnd(18),
-    "Claimable".padEnd(12),
-    "B3TR Rewards".padEnd(18),
+    "Fee Rewards".padEnd(22),
   ].join(" | ")
 
   console.log(header)
-  console.log("-".repeat(110))
+  console.log("-".repeat(120))
 
   // Rows
   for (const round of rounds) {
+    // Show actual rewards if deposited, otherwise show estimated with (~) prefix
+    let feeRewardsDisplay: string
+    if (round.totalRelayerRewardsRaw !== "0") {
+      feeRewardsDisplay = round.totalRelayerRewards
+    } else if (round.estimatedRelayerRewardsRaw !== "0") {
+      feeRewardsDisplay = `~${round.estimatedRelayerRewards}`
+    } else {
+      feeRewardsDisplay = "0.00 B3TR"
+    }
+
     const row = [
       round.roundId.toString().padEnd(6),
       round.autoVotingUsersCount.toString().padEnd(6),
       round.votedForCount.toString().padEnd(6),
       round.rewardsClaimedCount.toString().padEnd(8),
-      round.numRelayers.toString().padEnd(9),
+      round.actionStatus.padEnd(22),
       round.vthoSpentTotal.padEnd(18),
-      (round.relayerRewardsClaimable ? "Yes" : "No").padEnd(12),
-      round.totalRelayerRewards.padEnd(18),
+      feeRewardsDisplay.padEnd(22),
     ].join(" | ")
     console.log(row)
   }
 
-  console.log("=".repeat(110))
+  console.log("=".repeat(120))
 }
 
 /**
