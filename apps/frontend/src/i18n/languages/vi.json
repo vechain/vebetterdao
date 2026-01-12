@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "Đã tự động nhận thưởng bình chọn",
   "Potential B3TR amount to receive": "Số lượng B3TR tiềm năng để nhận",
   "Potential: ": "Tiềm năng: ",
-  "Total rewards to distribute": "Tổng phần thưởng để phân phối"
+  "Total rewards to distribute": "Tổng phần thưởng để phân phối",
+  "Transaction details": "Chi tiết giao dịch",
+  "Available": "Có sẵn",
+  "Voting power = VOT3 at snapshot": "Quyền biểu quyết = VOT3 tại thời điểm chụp nhanh",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Quyền biểu quyết có nghĩa là mức độ ảnh hưởng bạn sẽ có trong vòng tiếp theo. Nó dựa trên lượng VOT3 bạn nắm giữ trước khi vòng tiếp theo bắt đầu.",
+  "Not enough VOT3": "Không đủ VOT3",
+  "Not enough B3TR": "Không đủ B3TR",
+  "Estimated gas fee": "Phí gas ước tính",
+  "Conversion rate": "Tỷ lệ chuyển đổi",
+  "Wallet": "Ví",
+  "Use max": "Sử dụng tối đa",
+  "You can convert max. of": "Bạn có thể chuyển đổi tối đa là",
+  "Search voter address or domain": "Tìm kiếm địa chỉ hoặc tên miền của cử tri",
+  "Voter": "Cử tri",
+  "Voted Option": "Lựa chọn đã bầu",
+  "Voting Time": "Thời gian biểu quyết"
 }

@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "Recompensas de votación reclamadas automáticamente",
   "Potential B3TR amount to receive": "Monto potencial de B3TR a recibir",
   "Potential: ": "Potencial: ",
-  "Total rewards to distribute": "Total de recompensas para distribuir"
+  "Total rewards to distribute": "Total de recompensas para distribuir",
+  "Transaction details": "Detalles de la transacción",
+  "Available": "Disponible",
+  "Voting power = VOT3 at snapshot": "Poder de voto = VOT3 en la captura",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "El poder de voto significa cuánta influencia tendrás en la próxima ronda. Se basa en cuánto VOT3 tienes antes de que comience la próxima ronda.",
+  "Not enough VOT3": "No hay suficiente VOT3",
+  "Not enough B3TR": "No hay suficiente B3TR",
+  "Estimated gas fee": "Tarifa de gas estimada",
+  "Conversion rate": "Tipo de cambio",
+  "Wallet": "Cartera",
+  "Use max": "Usar máximo",
+  "You can convert max. of": "Puedes convertir un máximo de",
+  "Search voter address or domain": "Buscar dirección o dominio del votante",
+  "Voter": "Votante",
+  "Voted Option": "Opción votada",
+  "Voting Time": "Hora de votación"
 }

@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "自動請求された投票報酬",
   "Potential B3TR amount to receive": "受け取る可能性のあるB3TR額",
   "Potential: ": "潜在的な: ",
-  "Total rewards to distribute": "配布する報酬の合計"
+  "Total rewards to distribute": "配布する報酬の合計",
+  "Transaction details": "取引の詳細",
+  "Available": "利用可能",
+  "Voting power = VOT3 at snapshot": "スナップショット時の投票力 = VOT3",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "つまり、投票力とは次のラウンドでどれだけ影響力を持つかを示し、次のラウンドが始まる前に保有しているVOT3の量に基づきます。",
+  "Not enough VOT3": "VOT3が不足しています",
+  "Not enough B3TR": "B3TRが不足しています",
+  "Estimated gas fee": "推定ガス料金",
+  "Conversion rate": "換算レート",
+  "Wallet": "ウォレット",
+  "Use max": "最大を使用",
+  "You can convert max. of": "最大変換可能数:",
+  "Search voter address or domain": "投票者のアドレスまたはドメインを検索",
+  "Voter": "投票者",
+  "Voted Option": "投票されたオプション",
+  "Voting Time": "投票時間"
 }

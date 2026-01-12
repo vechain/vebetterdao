@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "자동 청구된 투표 보상",
   "Potential B3TR amount to receive": "수령할 가능성 있는 B3TR 양",
   "Potential: ": "가능성: ",
-  "Total rewards to distribute": "배포할 총 보상"
+  "Total rewards to distribute": "배포할 총 보상",
+  "Transaction details": "거래 세부사항",
+  "Available": "사용 가능",
+  "Voting power = VOT3 at snapshot": "투표 권한 = 스냅샷 시 VOT3",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "투표 권한은 다음 라운드에서 당신이 행사할 수 있는 영향력의 크기를 의미합니다. 이는 다음 라운드 시작 전에 보유한 VOT3의 양에 따라 결정됩니다.",
+  "Not enough VOT3": "충분하지 않은 VOT3",
+  "Not enough B3TR": "충분하지 않은 B3TR",
+  "Estimated gas fee": "예상 가스 수수료",
+  "Conversion rate": "환율",
+  "Wallet": "지갑",
+  "Use max": "최대 사용",
+  "You can convert max. of": "최대 변환 가능:",
+  "Search voter address or domain": "투표자 주소 또는 도메인 검색",
+  "Voter": "투표자",
+  "Voted Option": "투표한 옵션",
+  "Voting Time": "투표 시간"
 }
