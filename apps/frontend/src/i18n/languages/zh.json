@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "自动领取的投票奖励",
   "Potential B3TR amount to receive": "可能接收到的B3TR数量",
   "Potential: ": "可能的：",
-  "Total rewards to distribute": "总奖励分配"
+  "Total rewards to distribute": "总奖励分配",
+  "Transaction details": "交易详情",
+  "Available": "可用",
+  "Voting power = VOT3 at snapshot": "投票权 = 快照时的VOT3",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "这意味着投票权决定你在下一轮中的影响力。它取决于你在下一轮开始之前持有的VOT3数量。",
+  "Not enough VOT3": "VOT3不足",
+  "Not enough B3TR": "B3TR不足",
+  "Estimated gas fee": "预估燃气费用",
+  "Conversion rate": "兑换汇率",
+  "Wallet": "钱包",
+  "Use max": "使用最大值",
+  "You can convert max. of": "你最多可以转换",
+  "Search voter address or domain": "搜索投票者地址或域名",
+  "Voter": "投票者",
+  "Voted Option": "投票选项",
+  "Voting Time": "投票时间"
 }

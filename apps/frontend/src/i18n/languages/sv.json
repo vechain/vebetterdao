@@ -2198,5 +2198,20 @@
   "Auto-claimed voting rewards": "Automatiskt inkasserade röstbelöningar",
   "Potential B3TR amount to receive": "Potentiell B3TR-ersättning att få",
   "Potential: ": "Potential: ",
-  "Total rewards to distribute": "Totala belöningar att distribuera"
+  "Total rewards to distribute": "Totala belöningar att distribuera",
+  "Transaction details": "Transaktionsdetaljer",
+  "Available": "Tillgänglig",
+  "Voting power = VOT3 at snapshot": "Röstkraft = VOT3 vid ögonblicksbild",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Röstkraft innebär hur mycket inflytande du kommer att ha i nästa omgång. Det baseras på hur mycket VOT3 du har innan nästa omgång börjar.",
+  "Not enough VOT3": "Inte tillräckligt med VOT3",
+  "Not enough B3TR": "Inte tillräckligt med B3TR",
+  "Estimated gas fee": "Uppskattad gasavgift",
+  "Conversion rate": "Omvandlingskurs",
+  "Wallet": "Plånbok",
+  "Use max": "Använd max",
+  "You can convert max. of": "Du kan konvertera max av",
+  "Search voter address or domain": "Sök efter väljare adress eller domän",
+  "Voter": "Väljare",
+  "Voted Option": "Den röstade alternativet",
+  "Voting Time": "Röstningsperiod"
 }

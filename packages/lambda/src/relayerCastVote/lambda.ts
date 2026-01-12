@@ -10,16 +10,12 @@ import mainnetConfig from "@repo/config/mainnet"
 import { getSecret } from "../helpers/secret"
 import { CustomApiError, StandardApiError, SuccessResponseType } from "../helpers/api.types"
 import { buildResponse } from "../helpers/api/response"
-import { parseDryRunFlag } from "../helpers/api"
+import { parseBatchSize, parseDryRunFlag, parseWalletAddresses } from "../helpers/api"
 import { logger } from "../helpers/logger"
 import { AppEnv } from "@repo/config/contracts"
 import { AppConfig } from "@repo/config"
 import { getCurrentRoundId } from "../helpers/xApps"
-import {
-  getAllAutoVotingEnabledUsers,
-  getRoundSnapshot,
-  verifyAutoVotingUsersIsActive,
-} from "../helpers/xallocationvoting"
+import { getAllAutoVotingEnabledUsers, getRoundSnapshot } from "../helpers/xallocationvoting"
 import { processBatchedVotes } from "../helpers/xallocationvoting/batchVoteProcessor"
 import { slackIds } from "../helpers/slack/slackIds"
 import { notify } from "../helpers/slack/notificationHelper"
@@ -146,6 +142,8 @@ const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKe
 
 export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
   const dryRun = parseDryRunFlag(event)
+  const BATCH_SIZE = parseBatchSize(event, 50)
+  const providedWallets = parseWalletAddresses(event)
 
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
@@ -154,11 +152,14 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
   console.log(`Network: ${NODE_URL}`)
   console.log(`XAllocationVoting contract: ${CONFIG.xAllocationVotingContractAddress}`)
   console.log(`Dry Run Mode: ${dryRun}`)
+  console.log(`Batch Size: ${BATCH_SIZE}`)
+  console.log(
+    `Wallet Mode: ${providedWallets ? `Specific (${providedWallets.length} addresses)` : "Auto-detect from events"}`,
+  )
 
   try {
     const thorClient = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const secretsClient = new SecretsManagerClient({ region: "eu-west-1" })
-    const BATCH_SIZE = 50
 
     // Slack notification options - disabled during dry-run
     const slackOptions = dryRun
@@ -178,14 +179,22 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       snapshotBlock: roundStartBlock,
     })
 
-    // Fetch all users with auto-voting enabled
-    // Starting from block 0 will just skip to find the nearest block with AutoVotingToggled event
-    const usersToVoteFor = await getAllAutoVotingEnabledUsers(
-      thorClient,
-      CONFIG.xAllocationVotingContractAddress,
-      0,
-      roundStartBlock,
-    )
+    // Determine which users to vote for: provided wallets or all auto-voting enabled users
+    let usersToVoteFor: string[]
+    if (providedWallets) {
+      usersToVoteFor = providedWallets
+      logger.info(`Processing specific wallets`, { count: providedWallets.length })
+    } else {
+      // Fetch all users with auto-voting enabled
+      // Starting from block 0 will just skip to find the nearest block with AutoVotingToggled event
+      usersToVoteFor = await getAllAutoVotingEnabledUsers(
+        thorClient,
+        CONFIG.xAllocationVotingContractAddress,
+        0,
+        roundStartBlock,
+      )
+      logger.info(`Fetched auto-voting enabled users`, { count: usersToVoteFor.length })
+    }
 
     if (usersToVoteFor.length === 0) {
       await notify({
@@ -223,24 +232,40 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
           roundId: currentRoundId,
           totalAttempted: usersToVoteFor.length,
           failedVotes: batchResult.failedVotes,
+          transientFailures: batchResult.transientFailures,
         },
         slack: slackOptions,
       })
       return buildResponse(CustomApiError.TRANSACTION_REVERTED, {
         message: `Failed to cast any votes in round ${currentRoundId}`,
         failedVotes: batchResult.failedVotes,
+        transientFailures: batchResult.transientFailures,
       })
     }
 
-    // Log failed votes if any
+    // Log failures (no voting power or invalid state) if any
     if (batchResult.failedVotes.length > 0) {
       await notify({
         level: "warn",
-        message: `${batchResult.failedVotes.length} votes failed to be cast in round ${currentRoundId}. Check logs for more details.`,
+        message: `${batchResult.failedVotes.length} votes failed in round ${currentRoundId} (no voting power or invalid state).`,
         data: {
           successfulVotes: batchResult.successfulVotes,
           failedVotes: batchResult.failedVotes.length,
           failedVoteDetails: batchResult.failedVotes,
+        },
+        slack: slackOptions,
+      })
+    }
+
+    // Log transient failures (RPC/network issues) if any
+    if (batchResult.transientFailures.length > 0) {
+      await notify({
+        level: "warn",
+        message: `${batchResult.transientFailures.length} votes failed due to RPC/network issues in round ${currentRoundId}. These users are valid but hit max retries.`,
+        data: {
+          successfulVotes: batchResult.successfulVotes,
+          transientFailures: batchResult.transientFailures.length,
+          transientFailureDetails: batchResult.transientFailures,
         },
         slack: slackOptions,
       })
@@ -255,11 +280,15 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
         totalUsers: usersToVoteFor.length,
         successfulVotes: batchResult.successfulVotes,
         failedVotes: batchResult.failedVotes.length,
+        transientFailures: batchResult.transientFailures.length,
         roundId: currentRoundId,
         transactions: batchResult.transactionIds.length,
         dryRun,
-        // Include detailed failed votes in dry-run mode for easier debugging
+        // Include detailed failures in dry-run mode for easier debugging
         ...(dryRun && batchResult.failedVotes.length > 0 ? { failedVoteDetails: batchResult.failedVotes } : {}),
+        ...(dryRun && batchResult.transientFailures.length > 0
+          ? { transientFailureDetails: batchResult.transientFailures }
+          : {}),
       },
       slack: slackOptions,
     })
@@ -267,6 +296,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     return buildResponse(SuccessResponseType.SUCCESS, {
       successfulVotes: batchResult.successfulVotes,
       failedVotes: batchResult.failedVotes,
+      transientFailures: batchResult.transientFailures,
       transactionIds: batchResult.transactionIds,
       roundId: currentRoundId,
       dryRun,

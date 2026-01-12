@@ -2199,5 +2199,20 @@
   "Auto-claimed voting rewards": "Automatisch geclaimde stem beloningen",
   "Potential B3TR amount to receive": "Potentieel B3TR-bedrag om te ontvangen",
   "Potential: ": "Potentieel: ",
-  "Total rewards to distribute": "Totale beloningen om te verdelen"
+  "Total rewards to distribute": "Totale beloningen om te verdelen",
+  "Transaction details": "Transactiedetails",
+  "Available": "Beschikbaar",
+  "Voting power = VOT3 at snapshot": "Stemkracht = VOT3 bij momentopname",
+  "Meaning Voting power is how much influence you'll have in the next round. It's based on how much VOT3 you hold before next round starts.": "Dit betekent dat stemkracht bepaalt hoeveel invloed je zult hebben in de volgende ronde. Het is gebaseerd op hoeveel VOT3 je hebt voordat de volgende ronde begint.",
+  "Not enough VOT3": "Niet genoeg VOT3",
+  "Not enough B3TR": "Niet genoeg B3TR",
+  "Estimated gas fee": "Geschatte gaskosten",
+  "Conversion rate": "Conversiekoers",
+  "Wallet": "Portemonnee",
+  "Use max": "Gebruik max",
+  "You can convert max. of": "Je kunt maximaal converteren van",
+  "Search voter address or domain": "Zoek kiezeradres of domein",
+  "Voter": "Kiezer",
+  "Voted Option": "Gestemde optie",
+  "Voting Time": "Stemtijd"
 }
