@@ -18,6 +18,7 @@ export interface FailedClaim {
 export interface ClaimBatchResult {
   successfulClaims: number
   failedClaims: FailedClaim[]
+  transientFailures: FailedClaim[]
   transactionIds: string[]
 }
 
@@ -41,6 +42,11 @@ const convertBatchResult = (result: BatchResult<string>): ClaimBatchResult => {
   return {
     successfulClaims: result.successfulExecutions,
     failedClaims: result.failedExecutions.map(fe => ({
+      user: fe.item,
+      reason: fe.reason,
+      vmError: fe.vmError,
+    })),
+    transientFailures: result.transientFailures.map(fe => ({
       user: fe.item,
       reason: fe.reason,
       vmError: fe.vmError,

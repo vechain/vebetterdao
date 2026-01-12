@@ -23,6 +23,7 @@ export interface FailedVote {
 export interface VoteBatchResult {
   successfulVotes: number
   failedVotes: FailedVote[]
+  transientFailures: FailedVote[]
   transactionIds: string[]
 }
 
@@ -46,6 +47,11 @@ const convertBatchResult = (result: BatchResult<string>): VoteBatchResult => {
   return {
     successfulVotes: result.successfulExecutions,
     failedVotes: result.failedExecutions.map(fe => ({
+      user: fe.item,
+      reason: fe.reason,
+      vmError: fe.vmError,
+    })),
+    transientFailures: result.transientFailures.map(fe => ({
       user: fe.item,
       reason: fe.reason,
       vmError: fe.vmError,

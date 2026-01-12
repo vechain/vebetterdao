@@ -233,24 +233,40 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
           previousRoundId: previousRoundId,
           totalAttempted: usersToClaimFor.length,
           failedClaims: batchResult.failedClaims,
+          transientFailures: batchResult.transientFailures,
         },
         slack: slackOptions,
       })
       return buildResponse(CustomApiError.TRANSACTION_REVERTED, {
         message: `Failed to claim any rewards for round ${previousRoundId}`,
         failedClaims: batchResult.failedClaims,
+        transientFailures: batchResult.transientFailures,
       })
     }
 
-    // Log failed claims if any
+    // Log failures (bad wallets) if any
     if (batchResult.failedClaims.length > 0) {
       await notify({
         level: "warn",
-        message: `${batchResult.failedClaims.length} claims failed to be processed for round ${previousRoundId}. Check logs for more details.`,
+        message: `${batchResult.failedClaims.length} claims failed in round ${previousRoundId} (no rewards or invalid state).`,
         data: {
           successfulClaims: batchResult.successfulClaims,
           failedClaims: batchResult.failedClaims.length,
           failedClaimDetails: batchResult.failedClaims,
+        },
+        slack: slackOptions,
+      })
+    }
+
+    // Log transient failures (RPC/network issues) if any
+    if (batchResult.transientFailures.length > 0) {
+      await notify({
+        level: "warn",
+        message: `${batchResult.transientFailures.length} claims failed due to RPC/network issues for round ${previousRoundId}. These wallets are valid but hit max retries.`,
+        data: {
+          successfulClaims: batchResult.successfulClaims,
+          transientFailures: batchResult.transientFailures.length,
+          transientFailureDetails: batchResult.transientFailures,
         },
         slack: slackOptions,
       })
@@ -265,11 +281,15 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
         totalUsers: usersToClaimFor.length,
         successfulClaims: batchResult.successfulClaims,
         failedClaims: batchResult.failedClaims.length,
+        transientFailures: batchResult.transientFailures.length,
         previousRoundId: previousRoundId,
         transactions: batchResult.transactionIds.length,
         dryRun,
-        // Include detailed failed claims in dry-run mode for easier debugging
+        // Include detailed failures in dry-run mode for easier debugging
         ...(dryRun && batchResult.failedClaims.length > 0 ? { failedClaimDetails: batchResult.failedClaims } : {}),
+        ...(dryRun && batchResult.transientFailures.length > 0
+          ? { transientFailureDetails: batchResult.transientFailures }
+          : {}),
       },
       slack: slackOptions,
     })
@@ -277,6 +297,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
     return buildResponse(SuccessResponseType.SUCCESS, {
       successfulClaims: batchResult.successfulClaims,
       failedClaims: batchResult.failedClaims,
+      transientFailures: batchResult.transientFailures,
       transactionIds: batchResult.transactionIds,
       previousRoundId: previousRoundId,
       dryRun,
