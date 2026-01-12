@@ -272,7 +272,7 @@ export const processBatchedClauses = async <T>(
         let attemptNumber = 0
 
         // Retry loop for verified items
-        while (remainingItems.length > 0 && attemptNumber < maxRetries) {
+        while (remainingItems.length > 0 && attemptNumber < maxRetries - 1) {
           const verifiedClauses = remainingItems.map(clauseBuilder)
           const verifiedResult = await processSingleBatch(
             thor,
