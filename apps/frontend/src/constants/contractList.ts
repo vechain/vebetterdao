@@ -50,6 +50,11 @@ export const CONTRACT_LIST = [
     roles: ["DEFAULT_ADMIN_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"],
   },
   {
+    name: "B3TR MultiSig",
+    contractAddress: config.b3trMultiSigAddress,
+    roles: [],
+  },
+  {
     name: "VOT3",
     contractAddress: config.vot3ContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "PAUSER_ROLE"],
