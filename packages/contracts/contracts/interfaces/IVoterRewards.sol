@@ -232,6 +232,17 @@ interface IVoterRewards {
   /// @param votePower The vote power
   function registerVote(uint256 proposalStart, address voter, uint256 votes, uint256 votePower) external;
 
+  /// @notice Registers navigator vote and tracks total power for proportional claims
+  /// @param proposalId The proposal (round) ID
+  /// @param navigatorAddress The navigator's address
+  /// @param totalVotingPower The total aggregated voting power
+  function registerNavigatorVote(uint256 proposalId, address navigatorAddress, uint256 totalVotingPower) external;
+
+  /// @notice Claims delegator's proportional share of navigator rewards
+  /// @param cycle The cycle to claim for
+  /// @param delegator The delegator's address
+  function claimDelegatorReward(uint256 cycle, address delegator) external;
+
   /// @notice Renounces role for caller
   /// @param role The role to renounce
   /// @param callerConfirmation The caller's address for confirmation

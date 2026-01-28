@@ -274,7 +274,7 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
   /**
    * @dev Check if a user has voted in a given round
    */
-  function hasVoted(uint256 roundId, address user) public view returns (bool) {
+  function hasVoted(uint256 roundId, address user) public view virtual override returns (bool) {
     RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].hasVoted[user];
   }

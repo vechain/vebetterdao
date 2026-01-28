@@ -36,6 +36,7 @@ import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
+import { INavigator } from "../interfaces/INavigator.sol";
 
 /**
  * @title XAllocationVotingGovernor
@@ -63,6 +64,10 @@ import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
  * - Added autovoting functionality allowing users to enable automatic voting with predefined app preferences
  * - Added refactoring to code for voting
  * - Integrate RelayerRewardsPool contract to handle relayer rewards for autovoting
+ *
+ * ----- Version 9 -----
+ * - Added Navigator delegation support for X-Allocation voting
+ * - Navigators can vote on behalf of delegated users via castVoteAsNavigator
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,
@@ -121,6 +126,7 @@ abstract contract XAllocationVotingGovernor is
    * @dev Cast a vote for a set of x-2-earn applications.
    * @notice Only addresses with a valid passport can vote.
    * @notice Reverts if autovoting is enabled for the voter.
+   * @notice Reverts if the voter is delegated to a navigator.
    */
   function castVote(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
     require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
@@ -128,6 +134,14 @@ abstract contract XAllocationVotingGovernor is
 
     if (this.isUserAutoVotingEnabledAtTimepoint(_msgSender(), SafeCast.toUint48(currentRoundSnapshot()))) {
       revert AutoVotingEnabled(_msgSender());
+    }
+
+    // Check if user is delegated to a navigator - they cannot vote directly
+    if (address(navigator()) != address(0)) {
+      address userNavigator = navigator().getNavigatorAtTimepoint(_msgSender(), currentRoundSnapshot());
+      if (userNavigator != address(0)) {
+        revert DelegatedToNavigator(_msgSender(), userNavigator);
+      }
     }
 
     validatePersonhoodForCurrentRound(_msgSender());
@@ -140,10 +154,19 @@ abstract contract XAllocationVotingGovernor is
   /**
    * @dev Cast a vote for a set of x-2-earn applications on behalf of an account (used for autovoting).
    * @notice Reverts if autovoting is not enabled for the voter.
+   * @notice Reverts if the voter is delegated to a navigator.
    */
   function castVoteOnBehalfOf(address voter, uint256 roundId) public {
     if (!this.isUserAutoVotingEnabledAtTimepoint(voter, SafeCast.toUint48(roundSnapshot(roundId)))) {
       revert AutoVotingNotEnabled(voter);
+    }
+
+    // Check if user is delegated to a navigator - navigator takes precedence
+    if (address(navigator()) != address(0)) {
+      address userNavigator = navigator().getNavigatorAtTimepoint(voter, roundSnapshot(roundId));
+      if (userNavigator != address(0)) {
+        revert DelegatedToNavigator(voter, userNavigator);
+      }
     }
 
     _checkEarlyAccessEligibility(roundId, voter);
@@ -173,6 +196,93 @@ abstract contract XAllocationVotingGovernor is
     }
 
     _handleCastVote(voter, roundId, finalAppIds, voteWeights, true);
+  }
+
+  /**
+   * @dev Cast votes as a Navigator using aggregate delegated voting power.
+   * @notice Only active Navigators can call this function.
+   * @notice Uses checkpointed aggregate power - O(1) operation, no loops.
+   * @notice Delegators can claim their proportional share of rewards via claimDelegatorReward.
+   * @param roundId The round ID to vote in
+   * @param appIds Array of app IDs to vote for
+   * @param voteWeights Array of vote weight percentages (must sum to 100)
+   */
+  function castVoteAsNavigator(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
+    require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
+    require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
+
+    INavigator nav = navigator();
+    require(nav.isNavigatorActive(_msgSender()), "XAllocationVotingGovernor: caller is not an active navigator");
+
+    // Check if navigator already voted
+    require(!hasVoted(roundId, _msgSender()), "XAllocationVotingGovernor: navigator already voted");
+
+    uint256 snapshot = roundSnapshot(roundId);
+
+    // Get navigator's aggregate voting power at snapshot - O(1) checkpoint lookup
+    uint256 votingPower = nav.getNavigatorVotingPower(_msgSender(), snapshot);
+    require(votingPower > 0, "XAllocationVotingGovernor: no delegated voting power");
+
+    // Calculate actual vote weights from percentages
+    uint256[] memory actualWeights = _calculateVoteWeights(voteWeights, votingPower);
+
+    // Cast single vote with aggregate power under navigator's address
+    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
+    _countNavigatorVote(roundId, _msgSender(), appIds, actualWeights, votingPower);
+
+    emit NavigatorVoteCast(_msgSender(), roundId, votingPower, appIds, voteWeights);
+  }
+
+  /**
+   * @dev Count navigator vote and register with VoterRewards using navigator-specific registration.
+   * @notice This tracks the navigator's total voting power for proportional delegator claims.
+   */
+  function _countNavigatorVote(
+    uint256 roundId,
+    address navigatorAddress,
+    bytes32[] memory appIds,
+    uint256[] memory weights,
+    uint256 totalVotingPower
+  ) internal virtual {
+    // Count the vote in the allocation system (marks hasVoted, updates app votes, etc.)
+    _countVote(roundId, navigatorAddress, appIds, weights);
+
+    // Override the standard registerVote with navigator-specific registration
+    // This is done by calling registerNavigatorVote which tracks total power for proportional claims
+    voterRewards().registerNavigatorVote(roundId, navigatorAddress, totalVotingPower);
+  }
+
+  /**
+   * @dev Calculate actual vote weights from percentages and total voting power
+   * @param percentages The percentage distribution (must sum to 100)
+   * @param votingPower The total voting power to distribute
+   */
+  function _calculateVoteWeights(
+    uint256[] memory percentages,
+    uint256 votingPower
+  ) internal pure returns (uint256[] memory) {
+    uint256[] memory weights = new uint256[](percentages.length);
+    uint256 totalPercentage = 0;
+
+    for (uint256 i = 0; i < percentages.length; i++) {
+      totalPercentage += percentages[i];
+    }
+
+    require(totalPercentage == 100, "XAllocationVotingGovernor: percentages must sum to 100");
+
+    uint256 totalAllocated = 0;
+    for (uint256 i = 0; i < percentages.length; i++) {
+      weights[i] = (votingPower * percentages[i]) / 100;
+      totalAllocated += weights[i];
+    }
+
+    // Handle rounding remainder
+    uint256 remainder = votingPower - totalAllocated;
+    if (remainder > 0 && percentages.length > 0) {
+      weights[0] += remainder;
+    }
+
+    return weights;
   }
 
   /**  @dev Internal function to handle common voting logic
@@ -265,7 +375,7 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the version of the governor.
    */
   function version() public view virtual returns (string memory) {
-    return "8";
+    return "9";
   }
 
   /**
@@ -498,4 +608,14 @@ abstract contract XAllocationVotingGovernor is
     uint256 roundId,
     bytes32[] memory preferredApps
   ) internal virtual returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights, uint256 votingPower);
+
+  /**
+   * @dev Returns the Navigator contract.
+   */
+  function navigator() public view virtual returns (INavigator);
+
+  /**
+   * @dev Returns whether a user has already voted in a round.
+   */
+  function hasVoted(uint256 roundId, address account) public view virtual returns (bool);
 }

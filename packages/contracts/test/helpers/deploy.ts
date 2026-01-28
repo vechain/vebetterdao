@@ -66,9 +66,7 @@ type ToCamelCaseKeys<T> = {
 }
 
 export interface DeployInstance
-  extends ToCamelCaseKeys<GovernanceLibraries>,
-    ToCamelCaseKeys<PassportLibraries>,
-    ToCamelCaseKeys<X2EarnLibraries> {
+  extends ToCamelCaseKeys<GovernanceLibraries>, ToCamelCaseKeys<PassportLibraries>, ToCamelCaseKeys<X2EarnLibraries> {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3
@@ -1058,11 +1056,8 @@ export const getOrDeployContractInstances = async ({
   await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
-  // Set governor and veBetterPassport addresses in XAllocationVoting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)
-  await xAllocationVoting.connect(owner).setB3TRGovernor(await governor.getAddress())
-  await xAllocationVoting.connect(owner).setVeBetterPassport(await veBetterPassport.getAddress())
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -1110,11 +1105,6 @@ export const getOrDeployContractInstances = async ({
     .connect(owner)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
     .then(async tx => await tx.wait())
-  await xAllocationVoting
-    .connect(owner)
-    .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
-    .then(async tx => await tx.wait())
-  await xAllocationVoting.connect(owner).setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
   await voterRewards.connect(owner).setRelayerRewardsPool(await relayerRewardsPool.getAddress())
   await voterRewards.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
 

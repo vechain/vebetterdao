@@ -96,6 +96,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error AutoVotingEnabled(address voter);
 
   /**
+   * @dev The `voter` is delegated to a navigator and cannot vote directly.
+   */
+  error DelegatedToNavigator(address voter, address navigator);
+
+  /**
    * @dev Thrown when a zero address is provided for a contract address parameter
    * @param contractName The name/type of the contract that cannot be zero address
    */
@@ -147,6 +152,17 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev Emitted when the preferred apps are updated for an account.
    */
   event PreferredAppsUpdated(address indexed account, bytes32[] apps);
+
+  /**
+   * @dev Emitted when a Navigator casts votes with aggregate delegated power.
+   */
+  event NavigatorVoteCast(
+    address indexed navigator,
+    uint256 indexed roundId,
+    uint256 votingPower,
+    bytes32[] appsIds,
+    uint256[] votePercentages
+  );
 
   /**
    * @notice module:core
