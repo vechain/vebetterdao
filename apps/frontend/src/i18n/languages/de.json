@@ -2213,5 +2213,15 @@
   "Search voter address or domain": "Wähleradresse oder Domain suchen",
   "Voter": "Wähler",
   "Voted Option": "Gewählte Option",
-  "Voting Time": "Abstimmungszeit"
+  "Voting Time": "Abstimmungszeit",
+  "GM Level Required": "GM-Stufe erforderlich",
+  "Level {{level}} ({{name}}) needed to apply": "Stufe {{level}} ({{name}}) erforderlich, um sich zu bewerben",
+  "Your current level: {{level}} ({{name}})": "Ihre aktuelle Stufe: {{level}} ({{name}})",
+  "Requirement": "Anforderung",
+  "Upgrade your GM Level to apply": "Aktualisieren Sie Ihre GM-Stufe, um sich zu bewerben",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "Um sich für einen Zuschuss zu bewerben, benötigen Sie ein Galaxy Member NFT der Stufe {{level}} ({{name}}) oder höher.",
+  "Upgrade GM": "GM aktualisieren",
+  "Get GM NFT": "GM NFT erhalten",
+  "Rounds history": "Rundenverlauf",
+  "Round details": "Rundendetails"
 }

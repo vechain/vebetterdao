@@ -2213,5 +2213,15 @@
   "Search voter address or domain": "Oy veren adresi veya alan adı ara",
   "Voter": "Oy veren",
   "Voted Option": "Oy verilen Seçenek",
-  "Voting Time": "Oylama Zamanı"
+  "Voting Time": "Oylama Zamanı",
+  "GM Level Required": "GM Seviyesi Gerekli",
+  "Level {{level}} ({{name}}) needed to apply": "Başvurmak için Seviye {{level}} ({{name}}) gerekiyor",
+  "Your current level: {{level}} ({{name}})": "Mevcut seviyeniz: {{level}} ({{name}})",
+  "Requirement": "Gereklilik",
+  "Upgrade your GM Level to apply": "Başvurmak için GM Seviyenizi yükseltin",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "Bir hibe başvurusunda bulunmak için Seviye {{level}} ({{name}}) veya daha yüksek düzeyde bir Galaxy Üyesi NFT'sine ihtiyacınız var.",
+  "Upgrade GM": "GM Yükselt",
+  "Get GM NFT": "GM NFT Al",
+  "Rounds history": "Turlar Geçmişi",
+  "Round details": "Tur Detayları"
 }

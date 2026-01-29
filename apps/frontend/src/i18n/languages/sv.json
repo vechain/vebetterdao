@@ -2213,5 +2213,15 @@
   "Search voter address or domain": "Sök efter väljare adress eller domän",
   "Voter": "Väljare",
   "Voted Option": "Den röstade alternativet",
-  "Voting Time": "Röstningsperiod"
+  "Voting Time": "Röstningsperiod",
+  "GM Level Required": "GM-nivå krävs",
+  "Level {{level}} ({{name}}) needed to apply": "Nivå {{level}} ({{name}}) behövs för att ansöka",
+  "Your current level: {{level}} ({{name}})": "Din nuvarande nivå: {{level}} ({{name}})",
+  "Requirement": "Krav",
+  "Upgrade your GM Level to apply": "Uppgradera din GM-nivå för att ansöka",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "För att ansöka om ett bidrag behöver du en Galaxy Member NFT på nivå {{level}} ({{name}}) eller högre.",
+  "Upgrade GM": "Uppgradera GM",
+  "Get GM NFT": "Skaffa GM NFT",
+  "Rounds history": "Rundhistorik",
+  "Round details": "Runddetaljer"
 }

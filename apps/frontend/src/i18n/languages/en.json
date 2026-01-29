@@ -1,4 +1,12 @@
 {
+  "GM Level Required": "GM Level Required",
+  "Level {{level}} ({{name}}) needed to apply": "Level {{level}} ({{name}}) needed to apply",
+  "Your current level: {{level}} ({{name}})": "Your current level: {{level}} ({{name}})",
+  "Requirement": "Requirement",
+  "Upgrade your GM Level to apply": "Upgrade your GM Level to apply",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.",
+  "Upgrade GM": "Upgrade GM",
+  "Get GM NFT": "Get GM NFT",
   "{{value}} tokens": "{{value}} tokens",
   "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
   "You’re upgrading to": "You’re upgrading to",

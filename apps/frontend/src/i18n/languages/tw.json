@@ -2214,5 +2214,15 @@
   "Search voter address or domain": "搜索投票者地址或域名",
   "Voter": "投票者",
   "Voted Option": "投票選項",
-  "Voting Time": "投票時間"
+  "Voting Time": "投票時間",
+  "GM Level Required": "需要 GM 等級",
+  "Level {{level}} ({{name}}) needed to apply": "需要達到等級 {{level}} ({{name}}) 才能申請",
+  "Your current level: {{level}} ({{name}})": "您目前的等級：{{level}} ({{name}})",
+  "Requirement": "要求",
+  "Upgrade your GM Level to apply": "升級您的 GM 等級以申請",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "要申請資助，您需要擁有等級 {{level}} ({{name}}) 或更高的 Galaxy Member NFT。",
+  "Upgrade GM": "升級 GM",
+  "Get GM NFT": "獲取 GM NFT",
+  "Rounds history": "回合歷史",
+  "Round details": "回合詳情"
 }

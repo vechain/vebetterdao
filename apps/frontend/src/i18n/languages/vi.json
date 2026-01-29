@@ -2213,5 +2213,15 @@
   "Search voter address or domain": "Tìm kiếm địa chỉ hoặc tên miền của cử tri",
   "Voter": "Cử tri",
   "Voted Option": "Lựa chọn đã bầu",
-  "Voting Time": "Thời gian biểu quyết"
+  "Voting Time": "Thời gian biểu quyết",
+  "GM Level Required": "Yêu cầu cấp độ GM",
+  "Level {{level}} ({{name}}) needed to apply": "Cần cấp độ {{level}} ({{name}}) để áp dụng",
+  "Your current level: {{level}} ({{name}})": "Cấp độ hiện tại của bạn: {{level}} ({{name}})",
+  "Requirement": "Yêu cầu",
+  "Upgrade your GM Level to apply": "Nâng cấp cấp độ GM của bạn để áp dụng",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "Để xin trợ cấp, bạn cần một Galaxy Member NFT ở cấp độ {{level}} ({{name}}) trở lên.",
+  "Upgrade GM": "Nâng cấp GM",
+  "Get GM NFT": "Nhận GM NFT",
+  "Rounds history": "Lịch sử các vòng",
+  "Round details": "Chi tiết vòng"
 }
