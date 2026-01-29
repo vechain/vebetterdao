@@ -2213,5 +2213,15 @@
   "Search voter address or domain": "मतदाता पता या डोमेन खोजें",
   "Voter": "मतदाता",
   "Voted Option": "मतदान किया गया विकल्प",
-  "Voting Time": "मतदान का समय"
+  "Voting Time": "मतदान का समय",
+  "GM Level Required": "जीएम स्तर आवश्यक",
+  "Level {{level}} ({{name}}) needed to apply": "आवेदन करने के लिए स्तर {{level}} ({{name}}) की आवश्यकता है",
+  "Your current level: {{level}} ({{name}})": "आपका वर्तमान स्तर: {{level}} ({{name}})",
+  "Requirement": "आवश्यकता",
+  "Upgrade your GM Level to apply": "आवेदन करने के लिए अपना जीएम स्तर बढ़ाएँ",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "अनुदान के लिए आवेदन करने के लिए, आपको स्तर {{level}} ({{name}}) या उच्चतर स्तर पर एक गैलेक्सी सदस्य एनएफटी की आवश्यकता होती है।",
+  "Upgrade GM": "जीएम अपग्रेड करें",
+  "Get GM NFT": "जीएम एनएफटी प्राप्त करें",
+  "Rounds history": "दौर इतिहास",
+  "Round details": "दौर विवरण"
 }

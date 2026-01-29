@@ -2213,5 +2213,15 @@
   "Search voter address or domain": "投票者のアドレスまたはドメインを検索",
   "Voter": "投票者",
   "Voted Option": "投票されたオプション",
-  "Voting Time": "投票時間"
+  "Voting Time": "投票時間",
+  "GM Level Required": "必要なGMレベル",
+  "Level {{level}} ({{name}}) needed to apply": "{{level}}レベル（{{name}}）が申請に必要です",
+  "Your current level: {{level}} ({{name}})": "現在のレベル: {{level}}（{{name}}）",
+  "Requirement": "要件",
+  "Upgrade your GM Level to apply": "申請するためにGMレベルをアップグレード",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "助成金を申請するには、レベル{{level}}（{{name}}）以上のGalaxy Member NFTが必要です。",
+  "Upgrade GM": "GMをアップグレード",
+  "Get GM NFT": "GM NFTを取得",
+  "Rounds history": "ラウンド履歴",
+  "Round details": "ラウンドの詳細"
 }

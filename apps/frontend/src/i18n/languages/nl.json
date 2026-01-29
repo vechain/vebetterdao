@@ -2214,5 +2214,15 @@
   "Search voter address or domain": "Zoek kiezeradres of domein",
   "Voter": "Kiezer",
   "Voted Option": "Gestemde optie",
-  "Voting Time": "Stemtijd"
+  "Voting Time": "Stemtijd",
+  "GM Level Required": "GM-niveau vereist",
+  "Level {{level}} ({{name}}) needed to apply": "Niveau {{level}} ({{name}}) vereist om te solliciteren",
+  "Your current level: {{level}} ({{name}})": "Uw huidige niveau: {{level}} ({{name}})",
+  "Requirement": "Vereiste",
+  "Upgrade your GM Level to apply": "Upgrade uw GM-niveau om te solliciteren",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "Om een ​​toelage aan te vragen, heeft u een Galaxy Member NFT op niveau {{level}} ({{name}}) of hoger nodig.",
+  "Upgrade GM": "Upgrade GM",
+  "Get GM NFT": "Verkrijg GM NFT",
+  "Rounds history": "Geschiedenis van rondes",
+  "Round details": "Ronde details"
 }

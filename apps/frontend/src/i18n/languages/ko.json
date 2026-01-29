@@ -2213,5 +2213,15 @@
   "Search voter address or domain": "투표자 주소 또는 도메인 검색",
   "Voter": "투표자",
   "Voted Option": "투표한 옵션",
-  "Voting Time": "투표 시간"
+  "Voting Time": "투표 시간",
+  "GM Level Required": "GM 레벨 필요",
+  "Level {{level}} ({{name}}) needed to apply": "{{level}} 레벨 ({{name}}) 필요",
+  "Your current level: {{level}} ({{name}})": "현재 레벨: {{level}} ({{name}})",
+  "Requirement": "요구 사항",
+  "Upgrade your GM Level to apply": "GM 레벨을 업그레이드하여 신청",
+  "To apply for a grant, you need a Galaxy Member NFT at level {{level}} ({{name}}) or higher.": "보조금을 신청하려면 {{level}} 레벨 ({{name}}) 이상인 Galaxy Member NFT가 필요합니다.",
+  "Upgrade GM": "GM 업그레이드",
+  "Get GM NFT": "GM NFT 얻기",
+  "Rounds history": "라운드 역사",
+  "Round details": "라운드 세부 정보"
 }

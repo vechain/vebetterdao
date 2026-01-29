@@ -46,6 +46,7 @@ import { HowToSupportCard } from "../../proposals/components/components/HowToSup
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
+import { InsufficientGMBanner } from "./InsufficientGMBanner"
 
 const pageSize = 10
 
@@ -177,6 +178,10 @@ export const GrantsPageContent = () => {
     return account?.address && hasMetProposalCriteria
   }, [account?.address, hasMetProposalCriteria])
 
+  const showInsufficientGMBanner = useMemo(() => {
+    return account?.address && !hasMetProposalCriteria
+  }, [account?.address, hasMetProposalCriteria])
+
   const onApplyForGrant = useCallback(() => {
     router.push("/grants/new")
   }, [router])
@@ -262,6 +267,7 @@ export const GrantsPageContent = () => {
         </Stack>
 
         {showApplyForGrant && <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />}
+        {showInsufficientGMBanner && <InsufficientGMBanner />}
         {!isMobile && (
           <GrantsStatsCards
             totalApplications={enrichedGrantProposals?.length || 0}
