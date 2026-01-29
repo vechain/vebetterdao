@@ -12,7 +12,7 @@ Sacrifice grammar for concision.
 When I say "PR" (uppercase):
 
 - **ALWAYS push commits first**: `git push -u origin <branch>`
-- Then run: `gh pr create -a="@me" -B main -r vechain/b3tr`
+- Then provide the PR creation URL: `https://github.com/vechain/b3tr/compare/main...<branch>`
 - Description: Bare minimum necessary info only
 - Format: Bullet points
 - NO EMOJIS
@@ -128,7 +128,6 @@ Stop: `make solo-down` | Reset: `make solo-clean && make solo-up`
 
 # Tools
 
-- Use GitHub CLI for repo operations
 - Use Playwright/Chrome DevTools MCP for browser testing/debugging
 - Turbo handles workspace dependencies automatically
 
