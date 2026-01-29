@@ -2,12 +2,66 @@
 
 Instructions specific to `packages/contracts` directory.
 
+## Domain Knowledge
+
+### VeBetterDAO Overview
+
+VeBetterDAO is a DAO supporting sustainable applications (XApps) and community governance on VeChain. It incentivizes participation through rewards.
+
+### Tokens
+
+- **B3TR**: Reward token earned by interacting with XApps. Can be swapped for VOT3.
+- **VOT3**: Governance token used to vote on proposals and allocation rounds.
+
+### XApps (Sustainable Applications)
+
+Smart contract-based apps that reward users with B3TR for sustainable actions. Example: Mugshot rewards users for using reusable mugs (AI verifies photo submissions).
+
+XApps may have limitations (daily action limits, qualification requirements).
+
+### Rounds & Voting
+
+Governance operates on **weekly rounds** (Monday-Sunday):
+
+- **Proposals**: Users propose platform changes. Accepted if minimum VOT3 allocated before round ends.
+- **Allocation Rounds**: Users vote for favorite XApps → DAO distributes treasury B3TR to apps based on vote percentages → Apps use B3TR to reward their users.
+
+### XApp Onboarding Flow
+
+1. **Creator NFT**: Submit app for approval → receive Creator NFT → can deploy XApps
+2. **Endorsement**: Listed XApp needs **100 endorsement points** to participate in rounds. Only **XNode holders** can endorse.
+3. **Rounds**: If 100 points reached before round ends → included in next round → users can vote for it
+
+### Key Terminology
+
+| Term | Meaning |
+|------|---------|
+| Round | Weekly governance cycle (Mon-Sun) |
+| Cycle | Same as round (used interchangeably in code) |
+| Allocation | B3TR distribution to XApps based on votes |
+| Emissions | B3TR released from treasury each round |
+| Snapshot | Block number when voting power is measured |
+| XNode | VeChain node that grants endorsement rights |
+| Creator NFT | Required to submit XApps to platform |
+| Endorsement Points | XApps need 100 to participate in rounds |
+| VeWorld | VeChain's wallet (like MetaMask) |
+
 ## Stack
 
 - Solidity 0.8.20 with Paris EVM
 - Hardhat + VeChain SDK plugin
 - OpenZeppelin Contracts 5.0.2 (upgradeable)
 - TypeChain for type generation
+
+## Getting Contract Documentation
+
+If you need more details about a specific contract, generate and read the NatSpec docs:
+
+```bash
+yarn contracts:generate-docs
+```
+
+Then read the generated documentation in `packages/contracts/docs/`.
 
 ## Commands
 
@@ -291,6 +345,144 @@ await veBetterPassport.connect(owner).toggleCheck(1) // Enable whitelist check
 - Use `describe.only()` to run single test suite
 - Check role assignments if getting "AccessControl" errors
 - Verify contract addresses are set correctly before operations
+
+## Creating New Contracts
+
+### Base Template
+
+Use `contracts/templates/BaseUpgradeable.sol` as the standard template for new upgradeable contracts:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
+contract MyNewContract is AccessControlUpgradeable, UUPSUpgradeable {
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
+    error UnauthorizedUser(address user);
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    // ---------- Storage ------------ //
+    // Use namespaced storage pattern (ERC-7201)
+    struct MyContractStorage {
+        // your storage variables
+    }
+
+    bytes32 private constant MyContractStorageLocation =
+        0x...; // keccak256(abi.encode(uint256(keccak256("storage.MyContract")) - 1)) & ~bytes32(uint256(0xff))
+
+    function _getMyContractStorage() private pure returns (MyContractStorage storage $) {
+        assembly {
+            $.slot := MyContractStorageLocation
+        }
+    }
+
+    function initialize(address _upgrader, address[] memory _admins) external initializer {
+        require(_upgrader != address(0), "MyContract: upgrader is the zero address");
+
+        __UUPSUpgradeable_init();
+        __AccessControl_init();
+
+        _grantRole(UPGRADER_ROLE, _upgrader);
+        for (uint256 i; i < _admins.length; i++) {
+            require(_admins[i] != address(0), "MyContract: admin address cannot be zero");
+            _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+        }
+    }
+
+    modifier onlyRoleOrAdmin(bytes32 role) {
+        if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+            revert UnauthorizedUser(msg.sender);
+        }
+        _;
+    }
+
+    function _authorizeUpgrade(address) internal virtual override onlyRole(UPGRADER_ROLE) {}
+
+    function version() public pure virtual returns (string memory) {
+        return "1";
+    }
+}
+```
+
+### Contract Size Management
+
+- **Small/simple contracts**: Libraries not required
+- **Large contracts**: Extract logic into libraries to avoid 24KB contract size limit
+
+When to use libraries:
+- Contract approaching size limit (check with `yarn contracts:compile` - shows sizes)
+- Reusable logic shared across multiple contracts
+- Complex calculations that can be isolated
+
+## Security Requirements
+
+### CRITICAL: Non-Negotiable Rules
+
+1. **Reentrancy Guards** - Always use `nonReentrant` modifier on external functions that transfer funds or modify state:
+   ```solidity
+   import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+
+   function claimRewards() external nonReentrant {
+       // ...
+   }
+   ```
+
+2. **Overflow/Underflow Checks** - Solidity 0.8+ has built-in checks, but be explicit with critical math:
+   ```solidity
+   // Use SafeMath patterns for critical calculations
+   require(balance >= amount, "Insufficient balance");
+   uint256 newBalance = balance - amount; // Safe in 0.8+, but validate first
+   ```
+
+3. **Double Vote Prevention** - Always track and verify voting status:
+   ```solidity
+   mapping(uint256 => mapping(address => bool)) private _hasVoted;
+
+   function vote(uint256 roundId, ...) external {
+       require(!_hasVoted[roundId][msg.sender], "Already voted");
+       _hasVoted[roundId][msg.sender] = true;
+       // ... voting logic
+   }
+   ```
+
+4. **Double Claim Prevention** - Track claimed rewards per cycle/round:
+   ```solidity
+   mapping(uint256 => mapping(address => bool)) private _hasClaimed;
+
+   function claimReward(uint256 cycleId) external {
+       require(!_hasClaimed[cycleId][msg.sender], "Already claimed");
+       _hasClaimed[cycleId][msg.sender] = true;
+       // ... claim logic
+   }
+   ```
+
+### Preserve Core Logic
+
+**CRITICAL: Existing tests define expected behavior.** Before modifying any contract:
+
+1. Run `yarn contracts:test` to ensure all tests pass
+2. Read related test files to understand expected behavior
+3. Do NOT change logic that would break existing tests without explicit approval
+4. New features must have corresponding tests before merging
+
+### Security Checklist
+
+Before submitting contract changes:
+- [ ] Reentrancy guard on all external state-changing functions
+- [ ] No double vote/claim vulnerabilities
+- [ ] Access control on admin functions (`onlyRole`)
+- [ ] Events emitted for all state changes
+- [ ] Input validation on all parameters
+- [ ] All existing tests still pass
+- [ ] New functionality has test coverage
 
 ## Code Style
 
