@@ -117,10 +117,10 @@ For stories with testable logic, also include:
 ### For stories that change UI, also include:
 
 ```
-"Verify in browser using dev-browser skill"
+"Verify in browser"
 ```
 
-Frontend stories are NOT complete until visually verified. Ralph will use the dev-browser skill to navigate to the page, interact with the UI, and confirm changes work.
+Frontend stories are NOT complete until visually verified in the browser.
 
 ---
 
@@ -202,7 +202,7 @@ Add ability to mark tasks with different statuses.
                 "Each task card shows colored status badge",
                 "Badge colors: gray=pending, blue=in_progress, green=done",
                 "Typecheck passes",
-                "Verify in browser using dev-browser skill"
+                "Verify in browser"
             ],
             "priority": 2,
             "passes": false,
@@ -217,7 +217,7 @@ Add ability to mark tasks with different statuses.
                 "Changing status saves immediately",
                 "UI updates without page refresh",
                 "Typecheck passes",
-                "Verify in browser using dev-browser skill"
+                "Verify in browser"
             ],
             "priority": 3,
             "passes": false,
@@ -231,7 +231,7 @@ Add ability to mark tasks with different statuses.
                 "Filter dropdown: All | Pending | In Progress | Done",
                 "Filter persists in URL params",
                 "Typecheck passes",
-                "Verify in browser using dev-browser skill"
+                "Verify in browser"
             ],
             "priority": 4,
             "passes": false,
@@ -243,18 +243,25 @@ Add ability to mark tasks with different statuses.
 
 ---
 
-## Archiving Previous Runs
+## Archiving Previous Runs & Reset
 
 **Before writing a new prd.json, check if there is an existing one from a different feature:**
 
 1. Read the current `prd.json` if it exists
 2. Check if `branchName` differs from the new feature's branch name
-3. If different AND `progress.txt` has content beyond the header:
+3. If different AND `progress.txt` has content:
     - Create archive folder: `archive/YYYY-MM-DD-feature-name/`
     - Copy current `prd.json` and `progress.txt` to archive
-    - Reset `progress.txt` with fresh header
 
-**The ralph.sh script handles this automatically** when you run it, but if you are manually updating prd.json between runs, archive first.
+**ALWAYS reset progress.txt:**
+
+After writing the new `prd.json`, reset `progress.txt` to empty:
+
+```bash
+echo "" > progress.txt
+```
+
+This ensures Ralph starts fresh with no leftover progress from previous runs.
 
 ---
 
@@ -266,6 +273,7 @@ Before writing prd.json, verify:
 -   [ ] Each story is completable in one iteration (small enough)
 -   [ ] Stories are ordered by dependency (schema to backend to UI)
 -   [ ] Every story has "Typecheck passes" as criterion
--   [ ] UI stories have "Verify in browser using dev-browser skill" as criterion
+-   [ ] UI stories have "Verify in browser" as criterion
 -   [ ] Acceptance criteria are verifiable (not vague)
 -   [ ] No story depends on a later story
+-   [ ] **progress.txt reset to empty** after writing prd.json
