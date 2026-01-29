@@ -34,17 +34,17 @@ Governance operates on **weekly rounds** (Monday-Sunday):
 
 ### Key Terminology
 
-| Term | Meaning |
-|------|---------|
-| Round | Weekly governance cycle (Mon-Sun) |
-| Cycle | Same as round (used interchangeably in code) |
-| Allocation | B3TR distribution to XApps based on votes |
-| Emissions | B3TR released from treasury each round |
-| Snapshot | Block number when voting power is measured |
-| XNode | VeChain node that grants endorsement rights |
-| Creator NFT | Required to submit XApps to platform |
-| Endorsement Points | XApps need 100 to participate in rounds |
-| VeWorld | VeChain's wallet (like MetaMask) |
+| Term               | Meaning                                      |
+| ------------------ | -------------------------------------------- |
+| Round              | Weekly governance cycle (Mon-Sun)            |
+| Cycle              | Same as round (used interchangeably in code) |
+| Allocation         | B3TR distribution to XApps based on votes    |
+| Emissions          | B3TR released from treasury each round       |
+| Snapshot           | Block number when voting power is measured   |
+| XNode              | VeChain node that grants endorsement rights  |
+| Creator NFT        | Required to submit XApps to platform         |
+| Endorsement Points | XApps need 100 to participate in rounds      |
+| VeWorld            | VeChain's wallet (like MetaMask)             |
 
 ## Stack
 
@@ -110,9 +110,17 @@ When upgrading contracts, **always update both**:
 
 These files must stay aligned - changes to one usually require changes to the other.
 
+### Adding a New Contract
+
+When adding a completely new contract, also update:
+
+1. **`packages/config/scripts/generateMockLocalConfig.mjs`** - Add mock address for local config generation
+2. **`packages/contracts/scripts/checkContractsDeployment.ts`** - Add deployment check for the new contract
+
 ### Library Deployment
 
 Specific scripts exist for deploying contract libraries:
+
 - `scripts/libraries/governanceLibraries.ts`
 - `scripts/libraries/passportLibraries.ts`
 - `scripts/libraries/x2EarnLibraries.ts`
@@ -120,7 +128,9 @@ Specific scripts exist for deploying contract libraries:
 
 ### Custom Proxy Deployment
 
-**Always use helpers in `scripts/helpers/upgrades.ts`** for deployment:
+**Always use helpers in `scripts/helpers/upgrades.ts`** for deployment.
+
+**Note:** `StargateProxy` is only for mocking Stargate contracts (external VeChain project). Use `B3TRProxy` for all other contracts.
 
 ```typescript
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../helpers"
@@ -143,8 +153,6 @@ const upgraded = await upgradeProxy("OldVersion", "NewVersion", proxyAddress, [r
 - **NEVER modify existing storage variable order** - causes storage collision
 - **NEVER remove storage variables** - only add new ones at the end
 - **NEVER change types of existing variables**
-- Use storage gaps for future upgrades: `uint256[50] private __gap;`
-- After adding new storage, reduce gap: `uint256[49] private __gap;`
 
 ### Version Pattern
 
@@ -156,6 +164,26 @@ const upgraded = await upgradeProxy("OldVersion", "NewVersion", proxyAddress, [r
 6. Update `test/helpers/deploy.ts` to mirror deployment changes
 7. Create upgrade test: `test/{contract}/v{N}-upgrade.test.ts`
 8. Create compatibility test: `test/{contract}/v{N}-compatibility.test.ts`
+
+### Why Keep Deprecated Versions Locally?
+
+Deprecated versions in `contracts/deprecated/V{N}/` enable **upgrade tests that verify no storage corruption**:
+
+```typescript
+// Deploy previous version first
+const v5 = await deployProxy("GalaxyMemberV5", [...])
+await v5.someAction() // Create state
+
+// Upgrade to new version
+const v6 = await upgradeProxy("GalaxyMemberV5", "GalaxyMember", await v5.getAddress(), [...])
+
+// Verify state preserved correctly
+expect(await v6.existingData()).to.equal(expectedValue)
+```
+
+### Library Redeployment
+
+**Always redeploy all libraries when upgrading.** Libraries are redeployed fresh with each contract upgrade - there's no library versioning or reuse.
 
 ### CLI Upgrade System
 
@@ -184,11 +212,11 @@ async function main() {
 
   // Upgrade
   const upgraded = await upgradeProxy(
-    "ContractNameV{N-1}",  // Previous version
-    "ContractName",        // New version
+    "ContractNameV{N-1}", // Previous version
+    "ContractName", // New version
     config.contractAddress,
-    [initArg1, initArg2],  // reinitializer args
-    { version: N }
+    [initArg1, initArg2], // reinitializer args
+    { version: N },
   )
 
   // Verify
@@ -212,11 +240,13 @@ function initializeV2(address newParam) public reinitializer(2) {
 ### Running Tests
 
 Run single test file from monorepo root:
+
 ```bash
 yarn contracts:test --grep "test name"
 ```
 
 Or directly (from `packages/contracts`):
+
 ```bash
 NEXT_PUBLIC_APP_ENV=local npx hardhat test --network hardhat test/YourTest.test.ts
 ```
@@ -346,6 +376,14 @@ await veBetterPassport.connect(owner).toggleCheck(1) // Enable whitelist check
 - Check role assignments if getting "AccessControl" errors
 - Verify contract addresses are set correctly before operations
 
+## Block-Based Timing
+
+Rounds are **block-based**, not time-based. In local/test environment:
+
+- 1 round = 24 blocks
+- Tests mine blocks to advance rounds using `waitForRoundToEnd()` helper
+- Production has longer rounds (configured per environment)
+
 ## Creating New Contracts
 
 ### Base Template
@@ -418,6 +456,7 @@ contract MyNewContract is AccessControlUpgradeable, UUPSUpgradeable {
 - **Large contracts**: Extract logic into libraries to avoid 24KB contract size limit
 
 When to use libraries:
+
 - Contract approaching size limit (check with `yarn contracts:compile` - shows sizes)
 - Reusable logic shared across multiple contracts
 - Complex calculations that can be isolated
@@ -427,6 +466,7 @@ When to use libraries:
 ### CRITICAL: Non-Negotiable Rules
 
 1. **Reentrancy Guards** - Always use `nonReentrant` modifier on external functions that transfer funds or modify state:
+
    ```solidity
    import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
@@ -436,6 +476,7 @@ When to use libraries:
    ```
 
 2. **Overflow/Underflow Checks** - Solidity 0.8+ has built-in checks, but be explicit with critical math:
+
    ```solidity
    // Use SafeMath patterns for critical calculations
    require(balance >= amount, "Insufficient balance");
@@ -443,6 +484,7 @@ When to use libraries:
    ```
 
 3. **Double Vote Prevention** - Always track and verify voting status:
+
    ```solidity
    mapping(uint256 => mapping(address => bool)) private _hasVoted;
 
@@ -454,6 +496,7 @@ When to use libraries:
    ```
 
 4. **Double Claim Prevention** - Track claimed rewards per cycle/round:
+
    ```solidity
    mapping(uint256 => mapping(address => bool)) private _hasClaimed;
 
@@ -476,6 +519,7 @@ When to use libraries:
 ### Security Checklist
 
 Before submitting contract changes:
+
 - [ ] Reentrancy guard on all external state-changing functions
 - [ ] No double vote/claim vulnerabilities
 - [ ] Access control on admin functions (`onlyRole`)
@@ -565,11 +609,13 @@ Slither runs in CI on contract changes. Mark false positives in `slither.config.
 
 ```json
 {
-  "suppressions": [{
-    "check": "reentrancy-eth",
-    "file": "contracts/MyContract.sol",
-    "function": "myFunction(uint256)",
-    "reason": "CEI pattern followed"
-  }]
+  "suppressions": [
+    {
+      "check": "reentrancy-eth",
+      "file": "contracts/MyContract.sol",
+      "function": "myFunction(uint256)",
+      "reason": "CEI pattern followed"
+    }
+  ]
 }
 ```
