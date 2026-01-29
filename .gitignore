@@ -2,8 +2,6 @@
 
 build/**
 
-# AI
-.claude
 #codex
 AGENTS.md
 
@@ -169,3 +167,8 @@ coverage
 
 packages/contracts/temp-verify-*
 .env*.local
+
+# Ralph autonomous agent
+prd.json
+progress.txt
+tasks/
