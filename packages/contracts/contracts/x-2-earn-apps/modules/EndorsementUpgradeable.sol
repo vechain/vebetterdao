@@ -316,7 +316,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function _setXAllocationVotingGovernor(address _xAllocationVotingGovernor) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    require(_xAllocationVotingGovernor != address(0), "XAllocationVotingGovernor address cannot be 0");
+    if (_xAllocationVotingGovernor == address(0)) {
+      revert X2EarnInvalidAddress(_xAllocationVotingGovernor);
+    }
     $._xAllocationVotingGovernor = IXAllocationVotingGovernor(_xAllocationVotingGovernor);
   }
 
@@ -405,7 +407,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @notice This function can be called to update the VeBetterPassport contract
    */
   function _setVeBetterPassportContract(address veBetterPassportContract) internal virtual {
-    require(veBetterPassportContract != address(0), "VeBetterPassport address cannot be 0");
+    if (veBetterPassportContract == address(0)) {
+      revert X2EarnInvalidAddress(veBetterPassportContract);
+    }
     _getEndorsementStorage()._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
   }
 
@@ -413,7 +417,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @notice This function can be called to update the Stargate NFT contract
    */
   function _setStargateNFT(address stargateNft) internal virtual {
-    require(stargateNft != address(0), "Stargate NFT address cannot be 0");
+    if (stargateNft == address(0)) {
+      revert X2EarnInvalidAddress(stargateNft);
+    }
     _getEndorsementStorage()._stargateNFT = IStargateNFT(stargateNft);
   }
 

@@ -197,7 +197,9 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   function _setX2EarnRewardsPoolContract(address x2EarnRewardsPoolContracAddress) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
-    require(x2EarnRewardsPoolContracAddress != address(0), "X2EarnApps: Invalid rewards pool address");
+    if (x2EarnRewardsPoolContracAddress == address(0)) {
+      revert X2EarnInvalidAddress(x2EarnRewardsPoolContracAddress);
+    }
 
     $._x2EarnRewardsPoolContract = IX2EarnRewardsPool(x2EarnRewardsPoolContracAddress);
   }
@@ -277,7 +279,9 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   function _setX2EarnCreatorContract(address x2EarnCreatorContractAddress) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
-    require(x2EarnCreatorContractAddress != address(0), "X2EarnApps: Invalid x2EarnCreatorContract address");
+    if (x2EarnCreatorContractAddress == address(0)) {
+      revert X2EarnInvalidAddress(x2EarnCreatorContractAddress);
+    }
 
     $._x2EarnCreatorContract = IX2EarnCreator(x2EarnCreatorContractAddress);
   }
