@@ -5,6 +5,7 @@ import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import { Address } from "@vechain/sdk-core"
 
 import stagingConfig from "@repo/config/testnet-staging"
+import testnetConfig from "@repo/config/testnet"
 import mainnetConfig from "@repo/config/mainnet"
 
 import { getSecret } from "../helpers/secret"
@@ -46,6 +47,12 @@ const getNetworkConfig = (): NetworkConfig => {
         config: mainnetConfig,
       }
 
+    case AppEnv.TESTNET:
+      return {
+        nodeUrl: TESTNET_URL,
+        config: testnetConfig,
+      }
+
     case AppEnv.TESTNET_STAGING:
       return {
         nodeUrl: TESTNET_URL,
@@ -68,6 +75,12 @@ const getSecretsConfig = (): SecretsConfig => {
     case AppEnv.MAINNET:
       return {
         secretId: "relayer_cast_vote_mainnet",
+        privateKeyId: "relayer-cast-vote-pk",
+      }
+
+    case AppEnv.TESTNET:
+      return {
+        secretId: "relayer_cast_vote_testnet",
         privateKeyId: "relayer-cast-vote-pk",
       }
 
@@ -96,6 +109,12 @@ const getSlackConfig = (): SlackConfig => {
       return {
         channelId: slackIds.b3trLambda,
         messagePrefix: "[MAINNET][Auto-Voting] ",
+      }
+
+    case AppEnv.TESTNET:
+      return {
+        channelId: slackIds.b3trLambda,
+        messagePrefix: "[TESTNET][Auto-Voting] ",
       }
 
     case AppEnv.TESTNET_STAGING:

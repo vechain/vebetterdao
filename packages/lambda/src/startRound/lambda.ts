@@ -1,6 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import mainnetConfig from "@repo/config/mainnet"
+import testnetConfig from "@repo/config/testnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 import { AppEnv } from "@repo/config/contracts"
 import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
@@ -41,6 +42,12 @@ const getNetworkConfig = (): NetworkConfig => {
         config: mainnetConfig,
       }
 
+    case AppEnv.TESTNET:
+      return {
+        nodeUrl: TESTNET_URL,
+        config: testnetConfig,
+      }
+
     case AppEnv.TESTNET_STAGING:
       return {
         nodeUrl: TESTNET_URL,
@@ -62,6 +69,12 @@ const getSecretsConfig = (): SecretsConfig => {
 
   switch (environment) {
     case AppEnv.MAINNET:
+      return {
+        secretId: "start_emissions_pk",
+        privateKeyId: "start-emissions-pk",
+      }
+
+    case AppEnv.TESTNET:
       return {
         secretId: "start_emissions_pk",
         privateKeyId: "start-emissions-pk",
@@ -112,13 +125,19 @@ const getSlackConfig = (): SlackConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
 
-  // C06BLEJE5SA - b3tr-dev (slack channel)
+  // C06BLEJE5SA - b3tr-testnet (slack channel)
   // We are pointing this channel for both testnet and mainnet
   switch (environment) {
     case AppEnv.MAINNET:
       return {
         channelId: slackIds.b3trDev,
         messagePrefix: "",
+      }
+
+    case AppEnv.TESTNET:
+      return {
+        channelId: slackIds.b3trLambda,
+        messagePrefix: "[TESTNET] ",
       }
 
     case AppEnv.TESTNET_STAGING:

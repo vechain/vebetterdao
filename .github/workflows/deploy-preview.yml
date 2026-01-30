@@ -5,7 +5,6 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
-      - dev-testnet
 
 # Only allow one preview deployment per PR at a time
 # New commits cancel any in-progress runs for the same PR
@@ -55,10 +54,7 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
           
-          if [ "${{ github.base_ref }}" == "dev-testnet" ]; then
-            echo 'flavors=["dev"]' >> $GITHUB_OUTPUT
-            echo "::notice::PR to dev-testnet - deploying dev preview"
-          elif [ "${{ github.base_ref }}" == "main" ]; then
+          if [ "${{ github.base_ref }}" == "main" ]; then
             echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
             echo "::notice::PR to main - deploying staging + beta previews"
           else

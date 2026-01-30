@@ -4,6 +4,7 @@ import { AppEnv } from "@repo/config/contracts"
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 
 import mainnetConfig from "@repo/config/mainnet"
+import testnetConfig from "@repo/config/testnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 
 import { checkEndorsements, getSecret, publishMessage } from "../helpers"
@@ -35,6 +36,12 @@ const getNetworkConfig = (): NetworkConfig => {
         config: mainnetConfig,
       }
 
+    case AppEnv.TESTNET:
+      return {
+        nodeUrl: TESTNET_URL,
+        config: testnetConfig,
+      }
+
     case AppEnv.TESTNET_STAGING:
       return {
         nodeUrl: TESTNET_URL,
@@ -56,6 +63,12 @@ const getSecretsConfig = (): SecretsConfig => {
 
   switch (environment) {
     case AppEnv.MAINNET:
+      return {
+        secretId: "start_emissions_pk",
+        privateKeyKey: "start-emissions-pk",
+      }
+
+    case AppEnv.TESTNET:
       return {
         secretId: "start_emissions_pk",
         privateKeyKey: "start-emissions-pk",
@@ -86,6 +99,12 @@ const getSlackConfig = (): SlackConfig => {
       return {
         channelId: slackIds.b3trDev,
         messagePrefix: "",
+      }
+
+    case AppEnv.TESTNET:
+      return {
+        channelId: slackIds.b3trLambda,
+        messagePrefix: "[TESTNET] ",
       }
 
     case AppEnv.TESTNET_STAGING:

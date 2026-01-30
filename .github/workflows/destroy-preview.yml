@@ -5,7 +5,6 @@ on:
     types: [closed]
     branches:
       - main
-      - dev-testnet
 
 permissions:
   id-token: write
@@ -18,7 +17,7 @@ env:
   BASE_DOMAIN: governance.vebetterdao.org
   
   # All possible preview flavors
-  ALL_FLAVORS: "dev staging beta"
+  ALL_FLAVORS: "testnet staging beta"
   
   # Terraform Paths
   TERRAFORM_DIR: terraform/frontend/frontend-env-level

@@ -1,0 +1,36 @@
+# Deploy to Testnet (manual)
+name: Deploy Frontend - Testnet
+
+on: workflow_dispatch
+
+jobs:
+  guard-main:
+    name: Guard (main only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure workflow runs from main
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "::error::This workflow must be run from the main branch. Current ref: ${GITHUB_REF}"
+            exit 1
+          fi
+
+  prepare:
+    name: Prepare
+    needs: guard-main
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.sha.outputs.short_sha }}
+    steps:
+      - name: Get short SHA
+        id: sha
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Deploy to Testnet
+    needs: prepare
+    uses: ./.github/workflows/deploy-fe.yml
+    secrets: inherit
+    with:
+      environment: testnet
+      image_tag: testnet-${{ needs.prepare.outputs.short_sha }}

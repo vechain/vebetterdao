@@ -5,6 +5,7 @@ import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { getSecret } from "../helpers/secret"
 import { X2EarnCreator__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import mainnetConfig from "@repo/config/mainnet"
+import testnetConfig from "@repo/config/testnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 import { AppEnv } from "@repo/config/contracts"
 import { isValid } from "@repo/utils/AddressUtils"
@@ -33,6 +34,12 @@ const getNetworkConfig = (): NetworkConfig => {
         config: mainnetConfig,
       }
 
+    case AppEnv.TESTNET:
+      return {
+        nodeUrl: TESTNET_URL,
+        config: testnetConfig,
+      }
+
     case AppEnv.TESTNET_STAGING:
       return {
         nodeUrl: TESTNET_URL,
@@ -57,6 +64,12 @@ const getSecretsConfig = (): SecretsConfig => {
       return {
         secretId: "mint_creator_nft_pk",
         secretName: "mint-creator-nft-pk",
+      }
+
+    case AppEnv.TESTNET:
+      return {
+        secretId: "creator_nft_minter_pk",
+        secretName: "creator-nft-minter-pk",
       }
 
     case AppEnv.TESTNET_STAGING:

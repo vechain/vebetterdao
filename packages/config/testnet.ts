@@ -1,6 +1,6 @@
 import { AppConfig } from "."
 const config: AppConfig = {
-  environment: "testnet-staging",
+  environment: "testnet",
   basePath: "https://b3tr-frontend.vercel.app",
   ipfsPinningService: "https://api.dev.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
   ipfsFetchingService: "https://api.dev.gateway-proxy.vechain.org/ipfs",

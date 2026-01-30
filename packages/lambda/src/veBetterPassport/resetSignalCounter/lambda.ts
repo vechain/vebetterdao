@@ -8,6 +8,7 @@ import { isValid } from "@repo/utils/AddressUtils"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 import stagingConfig from "@repo/config/testnet-staging"
+import testnetConfig from "@repo/config/testnet"
 import mainnetConfig from "@repo/config/mainnet"
 
 import { getSecret } from "../../helpers/secret"
@@ -54,10 +55,11 @@ const getNetworkConfig = (): NetworkConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
 
-  const TESTNET_VET_DOMAINS_ADDRESS = stagingConfig.externalContractIntegrations?.vetDomainsContractAddress
+  const TESTNET_VET_DOMAINS_ADDRESS = testnetConfig.externalContractIntegrations?.vetDomainsContractAddress
+  const TESTNET_STAGING_VET_DOMAINS_ADDRESS = stagingConfig.externalContractIntegrations?.vetDomainsContractAddress
   const MAINNET_VET_DOMAINS_ADDRESS = mainnetConfig.externalContractIntegrations?.vetDomainsContractAddress
 
-  if (!TESTNET_VET_DOMAINS_ADDRESS || !MAINNET_VET_DOMAINS_ADDRESS) {
+  if (!TESTNET_VET_DOMAINS_ADDRESS || !TESTNET_STAGING_VET_DOMAINS_ADDRESS || !MAINNET_VET_DOMAINS_ADDRESS) {
     throw new Error("VET Domains contract address is not set")
   }
 
@@ -69,10 +71,17 @@ const getNetworkConfig = (): NetworkConfig => {
         veBetterPassportContractAddress: mainnetConfig.veBetterPassportContractAddress,
       }
 
-    case AppEnv.TESTNET_STAGING:
+    case AppEnv.TESTNET:
       return {
         nodeUrl: TESTNET_URL,
         vetDomainsContractAddress: TESTNET_VET_DOMAINS_ADDRESS,
+        veBetterPassportContractAddress: testnetConfig.veBetterPassportContractAddress,
+      }
+
+    case AppEnv.TESTNET_STAGING:
+      return {
+        nodeUrl: TESTNET_URL,
+        vetDomainsContractAddress: TESTNET_STAGING_VET_DOMAINS_ADDRESS,
         veBetterPassportContractAddress: stagingConfig.veBetterPassportContractAddress,
       }
 
@@ -80,7 +89,7 @@ const getNetworkConfig = (): NetworkConfig => {
       // Fallback to testnet for any other environment
       return {
         nodeUrl: TESTNET_URL,
-        vetDomainsContractAddress: TESTNET_VET_DOMAINS_ADDRESS,
+        vetDomainsContractAddress: TESTNET_STAGING_VET_DOMAINS_ADDRESS,
         veBetterPassportContractAddress: stagingConfig.veBetterPassportContractAddress,
       }
   }
@@ -94,6 +103,13 @@ const getSecretsConfig = (): SecretsConfig => {
     case AppEnv.MAINNET:
       return {
         secretId: "vebetterpassport_reset_signal_mainnet",
+        walletKey: "WALLET",
+        privateKeyKey: "RESET_SIGNALER_PK",
+      }
+
+    case AppEnv.TESTNET:
+      return {
+        secretId: "vebetterpassport_reset_signal_testnet",
         walletKey: "WALLET",
         privateKeyKey: "RESET_SIGNALER_PK",
       }

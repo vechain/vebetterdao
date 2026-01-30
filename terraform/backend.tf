@@ -8,7 +8,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "b3tr-terraform-state-dev"
+    bucket = "b3tr-terraform-state-testnet"
     key    = "b3tr-thor-solo.tfstate"
     region = "eu-west-1"
     workspace_key_prefix = "workspaces"

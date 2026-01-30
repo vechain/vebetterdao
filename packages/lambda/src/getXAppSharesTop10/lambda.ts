@@ -3,6 +3,7 @@ import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import { Clause, Address, ABIContract } from "@vechain/sdk-core"
 
 import mainnetConfig from "@repo/config/mainnet"
+import testnetConfig from "@repo/config/testnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 import { AppEnv } from "@repo/config/contracts"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
@@ -29,6 +30,15 @@ const getNetworkConfig = (): NetworkConfig => {
         ipfsFetchingService: mainnetConfig.ipfsFetchingService.endsWith("/")
           ? mainnetConfig.ipfsFetchingService
           : mainnetConfig.ipfsFetchingService + "/",
+      }
+
+    case AppEnv.TESTNET:
+      return {
+        nodeUrl: TESTNET_URL,
+        config: testnetConfig,
+        ipfsFetchingService: testnetConfig.ipfsFetchingService.endsWith("/")
+          ? testnetConfig.ipfsFetchingService
+          : testnetConfig.ipfsFetchingService + "/",
       }
 
     case AppEnv.TESTNET_STAGING:

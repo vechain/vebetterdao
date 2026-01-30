@@ -11,14 +11,15 @@ Terraform configuration that deploys the B3TR governance frontend to AWS App Run
 
 ## Environments & Workspaces
 
-| Workspace | AWS Account | Domain | Notes |
-|-----------|-------------|--------|-------|
-| `prod`    | `b3tr-prod` (`851725442887`) | `governance.vebetterdao.org` | Production |
-| `beta`    | `b3tr-prod` (`851725442887`) | `beta.governance.vebetterdao.org` | Public beta |
-| `test`    | `b3tr-dev` (`211125319139`) | `dev.testnet.governance.vebetterdao.org` | Shared non-prod |
-| `preview` | `b3tr-dev` (`211125319139`) | `pr-{PR}.dev.testnet.governance.vebetterdao.org` | Template used to spin up ephemeral PR previews (`preview-pr-{id}` workspaces) |
+| Workspace | AWS Account                     | Domain                                       | Notes                                                                         |
+| --------- | ------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
+| `prod`    | `b3tr-prod` (`851725442887`)    | `governance.vebetterdao.org`                 | Production                                                                    |
+| `beta`    | `b3tr-prod` (`851725442887`)    | `beta.governance.vebetterdao.org`            | Public beta                                                                   |
+| `test`    | `b3tr-testnet` (`211125319139`) | `testnet.governance.vebetterdao.org`         | Shared non-prod                                                               |
+| `preview` | `b3tr-testnet` (`211125319139`) | `pr-{PR}.testnet.governance.vebetterdao.org` | Template used to spin up ephemeral PR previews (`preview-pr-{id}` workspaces) |
 
 Each workspace has:
+
 - `backend.config` under `terraform/frontend/environments/env/<workspace>/`
 - `<workspace>.yaml` describing App Runner parameters (CPU/memory, domain, env vars, state bucket references)
 
@@ -43,7 +44,7 @@ The CI pipeline copies this file, replaces `{PR_NUMBER}` / `{COMMIT_SHA}`, and w
 `terraform/frontend/environments/env/preview-pr-XXX/`.
 
 ```yaml
-domain: pr-{PR_NUMBER}.dev.testnet.governance.vebetterdao.org
+domain: pr-{PR_NUMBER}.testnet.governance.vebetterdao.org
 image_tag: pr-{PR_NUMBER}-{COMMIT_SHA}
 min_size: 1
 max_size: 1
@@ -62,11 +63,11 @@ For previews replace `prod` with `preview-pr-123`, copy the template config, the
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `service_url` | Default AWS-managed endpoint |
-| `custom_domain_url` | Desired vanity domain (if enabled) |
-| `custom_domain_status` | Status returned by App Runner |
+| Output                             | Description                                          |
+| ---------------------------------- | ---------------------------------------------------- |
+| `service_url`                      | Default AWS-managed endpoint                         |
+| `custom_domain_url`                | Desired vanity domain (if enabled)                   |
+| `custom_domain_status`             | Status returned by App Runner                        |
 | `custom_domain_validation_records` | CNAMEs that the DNS stack must create for validation |
 
 ## DNS Responsibilities
@@ -77,7 +78,7 @@ For previews replace `prod` with `preview-pr-123`, copy the template config, the
 
 ## Required Prerequisites
 
-1. Run `frontend-account-level` in both AWS accounts (workspace `dev` and `prod`)
+1. Run `frontend-account-level` in both AWS accounts (workspace `testnet` and `prod`)
 2. Push Docker images to the shared ECR repository (`governance-frontend`)
 3. Ensure Route53 hosted zones + ACM certificates already exist (handled elsewhere)
 

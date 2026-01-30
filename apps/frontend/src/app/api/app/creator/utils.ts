@@ -72,7 +72,7 @@ ${twitterUsername ? `<strong>Twitter:</strong> <a href="https://twitter.com/${tw
 <h2>🌐 Project URLs</h2>
 ${projectUrl ? `<strong>Mainnet Project URL:</strong> <a href="${projectUrl}" target="_blank">${projectUrl}</a><br>` : "N/A"}
 ${testnetProjectUrl ? `<strong>Testnet Project URL:</strong> <a href="${testnetProjectUrl}" target="_blank">${testnetProjectUrl}</a><br>` : "N/A"}
-${testnetAppId ? `<strong>Testnet App ID:</strong> <a href="https://dev.testnet.governance.vebetterdao.org/apps/${testnetAppId}" target="_blank">${testnetAppId}</a>` : "N/A"}<br>
+${testnetAppId ? `<strong>Testnet App ID:</strong> <a href="https://testnet.governance.vebetterdao.org/apps/${testnetAppId}" target="_blank">${testnetAppId}</a>` : "N/A"}<br>
 
 <h2>📦 Distribution Strategy</h2>
 <p>${distributionStrategy || "No strategy provided."}</p>

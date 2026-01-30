@@ -137,22 +137,24 @@ The dev testnet environment is a testnet that is used for testing purposes by de
 It is not the "testnet" environment used the first time we deployed, but a new one that is used for testing purposes.
 This environment is more focused on developer ux and needs (eg: faster voting rounds, a B3TR faucet, all can see settings, priority is given to the developer's needs).
 
-To deploy changes to this environment, push your changes to the `dev-testnet` branch. This will automatically trigger a deployment to dev.testnet.governance.vebetterdao.org.
+To deploy changes to this environment, use the `Deploy Frontend - Testnet` workflow in the Actions tab.
+It will deploy the latest commit to the https://testnet.governance.vebetterdao.org domain.
 
 ## Frontend App Deployment
 
 ### Environments
 
-| Environment | How to Deploy |
-|-------------|---------------|
-| **Dev** | Push to `dev-testnet` branch |
-| **Staging & Beta** | Merge PR to `main` with version label |
-| **Production** | Manual deploy from Github Actions (see below) |
-| **Preview** | Automatic for every PR |
+| Environment        | How to Deploy                                 |
+| ------------------ | --------------------------------------------- |
+| **Dev**            | Push to `dev-testnet` branch                  |
+| **Staging & Beta** | Merge PR to `main` with version label         |
+| **Production**     | Manual deploy from Github Actions (see below) |
+| **Preview**        | Automatic for every PR                        |
 
 ### Versioning
 
 All PRs require a version label:
+
 - `increment:patch` - Bug fixes
 - `increment:minor` - New features, backwards compatible
 - `increment:major` - New features/changes, backwards incompatible
@@ -160,13 +162,13 @@ All PRs require a version label:
 There is no longer any need to manually update the version field in package.json. Versioning is managed entirely by the git tags - all you need to do is select the appropriate label for your PR, depending on the type of changes it contains. Versions are reflected in the UI Footer as follows:
 
 - Production:
-Version tag deployed eg `Version 1.40.2`
+  Version tag deployed eg `Version 1.40.2`
 - Staging & Beta:
-Version tag prefixed with env eg `Version beta-v.1.40.2`
+  Version tag prefixed with env eg `Version beta-v.1.40.2`
 - Dev-testnet:
-Short git SHA prefixed with env eg `Version dev-2190d5e`
+  Short git SHA prefixed with env eg `Version dev-2190d5e`
 - Previews:
-<pull request number>-<commit sha>-<flavor> eg `Version `pr-2930-29f07d1-staging`
+  <pull request number>-<commit sha>-<flavor> eg `Version `pr-2930-29f07d1-staging`
 
 ### Deploying to Production
 
@@ -224,6 +226,7 @@ To add a new runtime variable:
    - Sensitive: add to `runtime_env_secret_names` in the same file
 
 Example in `beta.yaml`:
+
 ```yaml
 runtime_env_var_names:
   - MY_NEW_VAR
