@@ -15,6 +15,7 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
+  X2EarnCreatorV1,
   GrantsManager,
   RelayerRewardsPool,
   GrantsManagerV1,
@@ -355,7 +356,14 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as TimeLock
 
-  const x2EarnCreator = (await deployProxy("X2EarnCreator", [TEMP_ADMIN, TEMP_ADMIN])) as X2EarnCreator
+  const x2EarnCreatorV1 = (await deployProxy("X2EarnCreatorV1", [TEMP_ADMIN, TEMP_ADMIN])) as X2EarnCreatorV1
+  const x2EarnCreator = (await upgradeProxy(
+    "X2EarnCreatorV1",
+    "X2EarnCreator",
+    await x2EarnCreatorV1.getAddress(),
+    [],
+    { version: 2 },
+  )) as X2EarnCreator
 
   const treasury = (await deployProxy(
     "Treasury",
