@@ -59,16 +59,16 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   return (
     <LinkBox asChild>
-      <LinkOverlay asChild>
-        <NextLink href={`/apps/${appId}`}>
-          <Card.Root variant="subtle" w="full" maxW="full">
-            <Card.Body>
+      <Card.Root variant="subtle" w="full" maxW="full" h="full">
+        <Card.Body>
+          <LinkOverlay asChild>
+            <NextLink href={`/apps/${appId}`}>
               <Stack
                 direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
                 align="stretch"
                 w="full"
                 h="full">
-                <Stack direction="row" gap={4} align="center" flex="1">
+                <Stack direction="row" gap={4} align="center" flex="1" minW={0} overflow="hidden">
                   <Avatar.Root shape="rounded" boxSize="3.5rem" borderRadius="0.75rem">
                     <Avatar.Image
                       src={logo?.image ?? notFoundImage}
@@ -103,7 +103,15 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                       </HStack>
                     </Skeleton>
                     <Skeleton loading={appMetadataLoading}>
-                      <Text textStyle="sm" color="text.subtle" overflow="hidden" textOverflow="ellipsis" lineClamp={2}>
+                      <Text
+                        textStyle="sm"
+                        color="text.subtle"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        wordBreak="break-word"
+                        lineClamp={2}
+                        w="full"
+                        minW={0}>
                         {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                       </Text>
                     </Skeleton>
@@ -150,10 +158,10 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                   <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color="icon.default" alignSelf={"center"} />
                 </Stack>
               </Stack>
-            </Card.Body>
-          </Card.Root>
-        </NextLink>
-      </LinkOverlay>
+            </NextLink>
+          </LinkOverlay>
+        </Card.Body>
+      </Card.Root>
     </LinkBox>
   )
 }
