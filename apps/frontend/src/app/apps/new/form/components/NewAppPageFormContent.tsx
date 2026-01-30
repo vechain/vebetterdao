@@ -1,12 +1,14 @@
-import { VStack, Grid, GridItem, Heading, Text, Button, Image, Box } from "@chakra-ui/react"
+import { VStack, Grid, GridItem, Heading, Text, Button, Image, Box, Spinner } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useIsSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useIsSelfMintEnabled"
+import { useSelfMintCreatorNFT } from "@/api/contracts/x2EarnCreator/useSelfMintCreatorNFT"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 
 import { useCreatorSubmission } from "../../../../../api/contracts/x2EarnCreator/useCreatorSubmission"
@@ -23,6 +25,19 @@ export const NewAppPageFormContent = () => {
   const { data: submission } = useCreatorSubmission(account?.address ?? "")
   const { onMetadataUpload } = useUploadAppMetadata() //TODO: Add this to review modal before sending transaction
   const { data: hasCreatorNft } = useHasCreatorNFT(account?.address ?? "")
+  const { data: isSelfMintEnabled } = useIsSelfMintEnabled()
+  const [isMinting, setIsMinting] = useState(false)
+  const [mintError, setMintError] = useState(false)
+  const mintAttemptedRef = useRef(false)
+  const selfMint = useSelfMintCreatorNFT({
+    onSuccess: () => setIsMinting(false),
+    onFailure: () => {
+      setMintError(true)
+      setIsMinting(false)
+    },
+  })
+  const selfMintRef = useRef(selfMint)
+  selfMintRef.current = selfMint
   const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
   const [isSuccessSubmission, setIsSuccessSubmission] = useState(false)
   const latestSubmission = submission?.submissions[0]
@@ -42,9 +57,15 @@ export const NewAppPageFormContent = () => {
     })
   const { errors } = formState
   useEffect(() => {
-    //Users without Creator NFT should be redirected to home
-    if (!!account?.address && !hasCreatorNft) router.push("/")
-  }, [hasCreatorNft, router, account?.address])
+    if (!account?.address || hasCreatorNft) return
+    if (isSelfMintEnabled && !mintAttemptedRef.current) {
+      mintAttemptedRef.current = true
+      setIsMinting(true)
+      selfMintRef.current.sendTransaction()
+      return
+    }
+    if (!isSelfMintEnabled) router.push("/")
+  }, [hasCreatorNft, router, account?.address, isSelfMintEnabled])
 
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)
@@ -144,6 +165,28 @@ export const NewAppPageFormContent = () => {
       </Grid>
     )
   }, [appData?.banner, appData?.logo, appData?.name, onVisitAppPage, appId, t])
+
+  if (isMinting) {
+    return (
+      <VStack gap={4} py={20} align="center">
+        <Spinner size="xl" />
+        <Text textStyle="lg">{t("Minting your Creator NFT...")}</Text>
+      </VStack>
+    )
+  }
+
+  if (mintError) {
+    return (
+      <VStack gap={4} py={20} align="center">
+        <Text textStyle="lg" color="red.500">
+          {t("Failed to mint Creator NFT. Please try again.")}
+        </Text>
+        <Button variant="primary" onClick={() => router.push("/apps")}>
+          {t("Go back")}
+        </Button>
+      </VStack>
+    )
+  }
 
   return <>{!isSuccessSubmission ? renderAppSubmissionForm : renderAppSubmissionSuccess}</>
 }

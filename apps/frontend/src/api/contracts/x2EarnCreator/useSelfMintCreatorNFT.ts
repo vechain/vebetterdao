@@ -9,7 +9,10 @@ import { buildClause } from "@/utils/buildClause"
 
 const selfMintInterface = new Interface(["function selfMint()"])
 
-export const useSelfMintCreatorNFT = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
+export const useSelfMintCreatorNFT = ({
+  onSuccess,
+  onFailure,
+}: { onSuccess?: () => void; onFailure?: () => void } = {}) => {
   const { account } = useWallet()
 
   const buildSelfMintClause = useCallback(() => {
@@ -30,6 +33,7 @@ export const useSelfMintCreatorNFT = ({ onSuccess }: { onSuccess?: () => void } 
 
   return useBuildTransaction({
     onSuccess,
+    onFailure,
     clauseBuilder: buildSelfMintClause,
     refetchQueryKeys,
   })
