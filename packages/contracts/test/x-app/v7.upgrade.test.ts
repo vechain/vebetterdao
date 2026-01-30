@@ -87,9 +87,9 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
       endorsementUtilsV6,
       voteEligibilityUtilsV6,
       //X2EarnAppsV7
-      administrationUtils,
-      endorsementUtils,
-      voteEligibilityUtils,
+      administrationUtilsV7,
+      endorsementUtilsV7,
+      voteEligibilityUtilsV7,
     } = await getOrDeployContractInstances({ forceDeploy: true, deployMocks: true })
 
     //-------------------------------- Setup fresh X2EarnAppsV6 --------------------------------
@@ -186,15 +186,15 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
     //-------------------------------- Upgrade X2EarnAppsV6 to X2EarnAppsV7 --------------------------------//
     const x2EarnAppsV7 = (await upgradeProxy(
       "X2EarnAppsV6",
-      "X2EarnApps",
+      "X2EarnAppsV7",
       await x2EarnAppsV6.getAddress(),
       [await freshStargateNftMock.getAddress()],
       {
         version: 7,
         libraries: {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          AdministrationUtilsV7: await administrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await endorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await voteEligibilityUtilsV7.getAddress(),
         },
       },
     )) as X2EarnApps
@@ -262,9 +262,9 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
       endorsementUtilsV6,
       voteEligibilityUtilsV6,
       //X2EarnAppsV7
-      administrationUtils,
-      endorsementUtils,
-      voteEligibilityUtils,
+      administrationUtilsV7,
+      endorsementUtilsV7,
+      voteEligibilityUtilsV7,
     } = await getOrDeployContractInstances({ forceDeploy: true, deployMocks: true })
 
     //-------------------------------- Setup fresh X2EarnAppsV6 --------------------------------
@@ -361,15 +361,15 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
     //-------------------------------- Upgrade X2EarnAppsV6 to X2EarnAppsV7 --------------------------------//
     const x2EarnAppsV7 = (await upgradeProxy(
       "X2EarnAppsV6",
-      "X2EarnApps",
+      "X2EarnAppsV7",
       await x2EarnAppsV6.getAddress(),
       [await freshStargateNftMock.getAddress()],
       {
         version: 7,
         libraries: {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          AdministrationUtilsV7: await administrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await endorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await voteEligibilityUtilsV7.getAddress(),
         },
       },
     )) as X2EarnApps
@@ -424,9 +424,9 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
       endorsementUtilsV6,
       voteEligibilityUtilsV6,
       //X2EarnAppsV7
-      administrationUtils,
-      endorsementUtils,
-      voteEligibilityUtils,
+      administrationUtilsV7,
+      endorsementUtilsV7,
+      voteEligibilityUtilsV7,
     } = await getOrDeployContractInstances({ forceDeploy: true, deployMocks: true })
 
     //-------------------------------- Setup fresh X2EarnAppsV6 --------------------------------
@@ -517,15 +517,15 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
     //-------------------------------- Upgrade X2EarnAppsV6 to X2EarnAppsV7 --------------------------------//
     const x2EarnAppsV7 = (await upgradeProxy(
       "X2EarnAppsV6",
-      "X2EarnApps",
+      "X2EarnAppsV7",
       await x2EarnAppsV6.getAddress(),
       [await freshStargateNftMock.getAddress()],
       {
         version: 7,
         libraries: {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          AdministrationUtilsV7: await administrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await endorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await voteEligibilityUtilsV7.getAddress(),
         },
       },
     )) as X2EarnApps
@@ -572,9 +572,9 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
       endorsementUtilsV6,
       voteEligibilityUtilsV6,
       //X2EarnAppsV7
-      administrationUtils,
-      endorsementUtils,
-      voteEligibilityUtils,
+      administrationUtilsV7,
+      endorsementUtilsV7,
+      voteEligibilityUtilsV7,
     } = await getOrDeployContractInstances({ forceDeploy: true, deployMocks: true })
 
     //-------------------------------- Setup fresh X2EarnAppsV6 --------------------------------
@@ -679,15 +679,15 @@ describe("X-Apps - V7 Upgrade - @shard15d", function () {
     //-------------------------------- Upgrade X2EarnAppsV6 to X2EarnAppsV7 --------------------------------//
     const x2EarnAppsV7 = (await upgradeProxy(
       "X2EarnAppsV6",
-      "X2EarnApps",
+      "X2EarnAppsV7",
       await x2EarnAppsV6.getAddress(),
       [await freshStargateNftMock.getAddress()],
       {
         version: 7,
         libraries: {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          AdministrationUtilsV7: await administrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await endorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await voteEligibilityUtilsV7.getAddress(),
         },
       },
     )) as X2EarnApps

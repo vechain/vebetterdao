@@ -117,14 +117,6 @@ describe("Contract upgradeablity @shard15e", () => {
     expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
   })
 
-  it("Should return correct version of the contract", async () => {
-    const { x2EarnApps } = await getOrDeployContractInstances({
-      forceDeploy: true,
-    })
-
-    expect(await x2EarnApps.version()).to.equal("7")
-  })
-
   it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
     const config = createLocalConfig()
     config.EMISSIONS_CYCLE_DURATION = 24

@@ -66,9 +66,7 @@ type ToCamelCaseKeys<T> = {
 }
 
 export interface DeployInstance
-  extends ToCamelCaseKeys<GovernanceLibraries>,
-    ToCamelCaseKeys<PassportLibraries>,
-    ToCamelCaseKeys<X2EarnLibraries> {
+  extends ToCamelCaseKeys<GovernanceLibraries>, ToCamelCaseKeys<PassportLibraries>, ToCamelCaseKeys<X2EarnLibraries> {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3
@@ -284,6 +282,10 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
+    // V7
+    AdministrationUtilsV7,
+    EndorsementUtilsV7,
+    VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: false, latestVersionOnly: false })
 
   // Deploy AutoVoting Libraries
@@ -1280,6 +1282,9 @@ export const getOrDeployContractInstances = async ({
     administrationUtilsV6: AdministrationUtilsV6,
     endorsementUtilsV6: EndorsementUtilsV6,
     voteEligibilityUtilsV6: VoteEligibilityUtilsV6,
+    administrationUtilsV7: AdministrationUtilsV7,
+    endorsementUtilsV7: EndorsementUtilsV7,
+    voteEligibilityUtilsV7: VoteEligibilityUtilsV7,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vthoTokenMock,
