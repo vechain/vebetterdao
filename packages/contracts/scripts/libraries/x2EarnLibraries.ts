@@ -24,6 +24,10 @@ import {
   VoteEligibilityUtilsV6,
   EndorsementUtilsV6,
   AdministrationUtilsV6,
+  // ------------------- V7 ------------------- //
+  VoteEligibilityUtilsV7,
+  EndorsementUtilsV7,
+  AdministrationUtilsV7,
 } from "../../typechain-types"
 
 interface DeployX2EarnLibrariesArgs {
@@ -53,6 +57,9 @@ export type X2EarnLibraries = X2EarnLatestLibraries & {
   AdministrationUtilsV6: AdministrationUtilsV6
   EndorsementUtilsV6: EndorsementUtilsV6
   VoteEligibilityUtilsV6: VoteEligibilityUtilsV6
+  AdministrationUtilsV7: AdministrationUtilsV7
+  EndorsementUtilsV7: EndorsementUtilsV7
+  VoteEligibilityUtilsV7: VoteEligibilityUtilsV7
 }
 
 export async function x2EarnLibraries<T extends DeployX2EarnLibrariesArgs>({
@@ -170,6 +177,19 @@ export async function x2EarnLibraries<T extends DeployX2EarnLibrariesArgs>({
   const VoteEligibilityUtilsLibV6 = await VoteEligibilityUtilsV6.deploy()
   await VoteEligibilityUtilsLibV6.waitForDeployment()
 
+  // ---------------------- Version 7 ----------------------
+  const AdministrationUtilsV7 = await ethers.getContractFactory("AdministrationUtilsV7")
+  const AdministrationUtilsLibV7 = await AdministrationUtilsV7.deploy()
+  await AdministrationUtilsLibV7.waitForDeployment()
+
+  const EndorsementUtilsV7 = await ethers.getContractFactory("EndorsementUtilsV7")
+  const EndorsementUtilsLibV7 = await EndorsementUtilsV7.deploy()
+  await EndorsementUtilsLibV7.waitForDeployment()
+
+  const VoteEligibilityUtilsV7 = await ethers.getContractFactory("VoteEligibilityUtilsV7")
+  const VoteEligibilityUtilsLibV7 = await VoteEligibilityUtilsV7.deploy()
+  await VoteEligibilityUtilsLibV7.waitForDeployment()
+
   return {
     // ------------------- V2 ------------------- //
     AdministrationUtilsV2: AdministrationUtilsLibV2,
@@ -191,6 +211,10 @@ export async function x2EarnLibraries<T extends DeployX2EarnLibrariesArgs>({
     AdministrationUtilsV6: AdministrationUtilsLibV6,
     EndorsementUtilsV6: EndorsementUtilsLibV6,
     VoteEligibilityUtilsV6: VoteEligibilityUtilsLibV6,
+    // ------------------- V7 ------------------- //
+    AdministrationUtilsV7: AdministrationUtilsLibV7,
+    EndorsementUtilsV7: EndorsementUtilsLibV7,
+    VoteEligibilityUtilsV7: VoteEligibilityUtilsLibV7,
     // ------------------- LATEST VERSION ------------------- //
     AdministrationUtils: AdministrationUtilsLib,
     EndorsementUtils: EndorsementUtilsLib,

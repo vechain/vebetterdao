@@ -32,7 +32,6 @@ import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgra
 import { EndorsementUtils } from "./x-2-earn-apps/libraries/EndorsementUtils.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title X2EarnApps
@@ -66,6 +65,9 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * -------------------- Version 7 --------------------
  * - Integrated Stargate NFT contract for node management and endorsement verification.
  * - Updated endorsement system to use Stargate NFT for node ownership and token management.
+ *
+ * -------------------- Version 8 --------------------
+ * - Refactor for size optimizations and custom error usage (no functional changes).
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
@@ -137,7 +139,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "7";
+    return "8";
   }
 
   // ---------- Overrides ------------ //
