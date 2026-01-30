@@ -32,7 +32,8 @@ export const useMetProposalCriteria = (proposalType: ProposalType = ProposalType
   }, [userGMs, gmRequired])
 
   return {
-    hasMetProposalCriteria: !!hasRequiredGM && hasAllowedGrantApproverPermission,
+    isGrantApprover: hasAllowedGrantApproverPermission,
+    hasMetProposalCriteria: !!hasRequiredGM,
     isLoading: isLoadingGMRequired || isLoadingUserGMs,
   }
 }
