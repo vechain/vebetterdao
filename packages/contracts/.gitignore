@@ -16,3 +16,5 @@ docs
 
 # GalaxyMember metadata
 metadata/galaxyMember/metadata.zip
+# Local upgrade worklog (not deployed yet)
+.upgrade-worklog.md
