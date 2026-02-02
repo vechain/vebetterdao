@@ -23,63 +23,190 @@
 
 pragma solidity 0.8.20;
 
-import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
-import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { X2EarnAppsStorageTypes } from "./X2EarnAppsStorageTypes.sol";
 
 /**
  * @title AppStorageUtils
- * @dev Utility library for managing paginated access to app data stored in a mapping.
- * Provides functionality for retrieving a subset of apps based on specified start index and count.
+ * @dev Utility library for managing app storage in X2EarnApps contract.
  */
 library AppStorageUtils {
-
-  /**
-   * @dev Error thrown when the specified start index for pagination is invalid.
-   * This typically occurs when the start index exceeds the total number of available apps.
-   */
+  using Checkpoints for Checkpoints.Trace208;
   error X2EarnInvalidStartIndex();
+  error X2EarnNonexistentApp(bytes32 appId);
+  error X2EarnAppAlreadyExists(bytes32 appId);
+  error X2EarnInvalidAddress(address addr);
+  error X2EarnUnverifiedCreator(address creator);
+  error CreatorNFTAlreadyUsed(address creator);
 
-  /**
-   * @notice Retrieves a subset of apps from the app storage based on pagination parameters.
-   * @param _apps Mapping of app IDs to `X2EarnAppsDataTypes.App` structs representing each app's data.
-   * @param _appIds Array of app IDs used to reference apps in the `_apps` mapping.
-   * @param startIndex The starting index in `_appIds` from which to begin retrieval.
-   * @param count The number of apps to retrieve from `startIndex`.
-   * @return X2EarnAppsDataTypes.App[] An array of apps retrieved from the specified range.
-   *
-   * Requirements:
-   * - `startIndex` must be less than the length of `_appIds`.
-   * - If `startIndex + count` exceeds `_appIds` length, only available apps up to the end of `_appIds` are returned.
-   *
-   * Reverts:
-   * - If `startIndex` is invalid (i.e., greater than or equal to the length of `_appIds`), reverts with `X2EarnInvalidStartIndex`.
-   */
+  event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
+
   function getPaginatedApps(
-    mapping(bytes32 appId => X2EarnAppsDataTypes.App) storage _apps,
-    bytes32[] memory _appIds,
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
     uint startIndex,
     uint count
-  ) internal view returns (X2EarnAppsDataTypes.App[] memory) {
-    uint256 length = _appIds.length;
+  ) external view returns (X2EarnAppsDataTypes.App[] memory) {
+    uint256 length = $._appIds.length;
     if (length <= startIndex) {
       revert X2EarnInvalidStartIndex();
     }
 
-    // Calculate the end index based on the requested count, limited by available apps
     uint256 endIndex = startIndex + count;
     if (endIndex > length) {
       endIndex = length;
     }
 
-    // Create an array to hold the paginated apps
     X2EarnAppsDataTypes.App[] memory paginatedApps = new X2EarnAppsDataTypes.App[](endIndex - startIndex);
 
-    // Populate the paginated array with the apps in the specified range
     for (uint i = startIndex; i < endIndex; i++) {
-      paginatedApps[i - startIndex] = _apps[_appIds[i]];
+      paginatedApps[i - startIndex] = $._apps[$._appIds[i]];
     }
 
     return paginatedApps;
+  }
+
+  function appSubmitted(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    bytes32 appId
+  ) external view returns (bool) {
+    return $._apps[appId].id != bytes32(0);
+  }
+
+  function appExists(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    bytes32 appId
+  ) external view returns (bool) {
+    return $._apps[appId].createdAtTimestamp != 0;
+  }
+
+  function getAppStorage(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    bytes32 appId
+  ) external view returns (X2EarnAppsDataTypes.App memory) {
+    if ($._apps[appId].id == bytes32(0)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+    return $._apps[appId];
+  }
+
+  function appsCount(X2EarnAppsStorageTypes.AppsStorageStorage storage $) external view returns (uint256) {
+    return $._appIds.length;
+  }
+
+  function hashAppName(string memory appName) external pure returns (bytes32) {
+    return keccak256(abi.encodePacked(appName));
+  }
+
+  function addApp(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    bytes32 appId
+  ) external {
+    $._apps[appId].createdAtTimestamp = block.timestamp;
+    $._appIds.push(appId);
+  }
+
+  function registerApp(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    address teamWalletAddr,
+    address admin,
+    string memory appName
+  ) external returns (bytes32) {
+    if (teamWalletAddr == address(0)) {
+      revert X2EarnInvalidAddress(teamWalletAddr);
+    }
+    if (admin == address(0)) {
+      revert X2EarnInvalidAddress(admin);
+    }
+
+    bytes32 id = keccak256(abi.encodePacked(appName));
+
+    if ($._apps[id].id != bytes32(0)) {
+      revert X2EarnAppAlreadyExists(id);
+    }
+
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, 0);
+
+    return id;
+  }
+
+  function getAppsInfo(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage,
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage,
+    bytes32[] memory appIds
+  ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    uint256 length = appIds.length;
+    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
+      length
+    );
+
+    for (uint i; i < length; i++) {
+      X2EarnAppsDataTypes.App memory _app = $._apps[appIds[i]];
+      bool appExistsNow = _app.createdAtTimestamp != 0;
+      bool isEligibleNow = appExistsNow && voteStorage._isAppEligibleCheckpoints[_app.id].latest() == 1;
+      
+      allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
+        _app.id,
+        adminStorage._teamWalletAddress[_app.id],
+        _app.name,
+        adminStorage._metadataURI[_app.id],
+        _app.createdAtTimestamp,
+        isEligibleNow
+      );
+    }
+    return allApps;
+  }
+
+  function app(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage,
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage,
+    bytes32 appId
+  ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType memory) {
+    if ($._apps[appId].id == bytes32(0)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+    
+    X2EarnAppsDataTypes.App memory _app = $._apps[appId];
+    bool appExistsNow = _app.createdAtTimestamp != 0;
+    bool isEligibleNow = appExistsNow && voteStorage._isAppEligibleCheckpoints[appId].latest() == 1;
+
+    return X2EarnAppsDataTypes.AppWithDetailsReturnType(
+      _app.id,
+      adminStorage._teamWalletAddress[appId],
+      _app.name,
+      adminStorage._metadataURI[appId],
+      _app.createdAtTimestamp,
+      isEligibleNow
+    );
+  }
+
+  function apps(
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
+    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage,
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage
+  ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    uint256 length = $._appIds.length;
+    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
+      length
+    );
+
+    for (uint i; i < length; i++) {
+      bytes32 appId = $._appIds[i];
+      X2EarnAppsDataTypes.App memory _app = $._apps[appId];
+      bool appExistsNow = _app.createdAtTimestamp != 0;
+      bool isEligibleNow = appExistsNow && voteStorage._isAppEligibleCheckpoints[appId].latest() == 1;
+      
+      allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
+        _app.id,
+        adminStorage._teamWalletAddress[appId],
+        _app.name,
+        adminStorage._metadataURI[appId],
+        _app.createdAtTimestamp,
+        isEligibleNow
+      );
+    }
+    return allApps;
   }
 }

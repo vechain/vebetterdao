@@ -4,6 +4,7 @@ import {
   AdministrationUtils,
   EndorsementUtils,
   VoteEligibilityUtils,
+  AppStorageUtils,
   // ------------------- V2 ------------------- //
   AdministrationUtilsV2,
   EndorsementUtilsV2,
@@ -39,6 +40,7 @@ export type X2EarnLatestLibraries = {
   AdministrationUtils: AdministrationUtils
   EndorsementUtils: EndorsementUtils
   VoteEligibilityUtils: VoteEligibilityUtils
+  AppStorageUtils: AppStorageUtils
 }
 
 export type X2EarnLibraries = X2EarnLatestLibraries & {
@@ -87,11 +89,18 @@ export async function x2EarnLibraries<T extends DeployX2EarnLibrariesArgs>({
   await VoteEligibilityUtilsLib.waitForDeployment()
   logOutput && console.log("VoteEligibilityUtils Library deployed")
 
+  // Deploy App Storage Utils
+  const AppStorageUtils = await ethers.getContractFactory("AppStorageUtils")
+  const AppStorageUtilsLib = (await AppStorageUtils.deploy()) as AppStorageUtils
+  await AppStorageUtilsLib.waitForDeployment()
+  logOutput && console.log("AppStorageUtils Library deployed")
+
   if (latestVersionOnly) {
     return {
       AdministrationUtils: AdministrationUtilsLib,
       EndorsementUtils: EndorsementUtilsLib,
       VoteEligibilityUtils: VoteEligibilityUtilsLib,
+      AppStorageUtils: AppStorageUtilsLib,
     } as T["latestVersionOnly"] extends true ? X2EarnLatestLibraries : X2EarnLibraries
   }
 
@@ -219,5 +228,6 @@ export async function x2EarnLibraries<T extends DeployX2EarnLibrariesArgs>({
     AdministrationUtils: AdministrationUtilsLib,
     EndorsementUtils: EndorsementUtilsLib,
     VoteEligibilityUtils: VoteEligibilityUtilsLib,
+    AppStorageUtils: AppStorageUtilsLib,
   } as T["latestVersionOnly"] extends true ? X2EarnLatestLibraries : X2EarnLibraries
 }

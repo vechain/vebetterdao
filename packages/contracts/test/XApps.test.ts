@@ -694,6 +694,7 @@ describe("X-Apps - Core Features - @shard15a", function () {
         endorsementUtils,
         administrationUtils,
         voteEligibilityUtils,
+        appStorageUtils,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -734,6 +735,7 @@ describe("X-Apps - Core Features - @shard15a", function () {
             AdministrationUtils: await administrationUtils.getAddress(),
             EndorsementUtils: await endorsementUtils.getAddress(),
             VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+            AppStorageUtils: await appStorageUtils.getAddress(),
           },
         }),
         "Exclude app from the allocation voting rounds",

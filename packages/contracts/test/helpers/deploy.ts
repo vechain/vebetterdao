@@ -262,6 +262,7 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtils,
     EndorsementUtils,
     VoteEligibilityUtils,
+    AppStorageUtils,
     // V2
     AdministrationUtilsV2,
     EndorsementUtilsV2,
@@ -501,6 +502,7 @@ export const getOrDeployContractInstances = async ({
           AdministrationUtils: await AdministrationUtils.getAddress(),
           EndorsementUtils: await EndorsementUtils.getAddress(),
           VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+          AppStorageUtils: await AppStorageUtils.getAddress(),
         },
       ],
     },
@@ -1032,6 +1034,7 @@ export const getOrDeployContractInstances = async ({
       EndorsementUtils: await EndorsementUtils.getAddress(),
       AdministrationUtils: await AdministrationUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
     },
     XAllocationVoting: {
       AutoVotingLogic: await AutoVotingLogic.getAddress(),
@@ -1267,6 +1270,7 @@ export const getOrDeployContractInstances = async ({
     administrationUtils: AdministrationUtils,
     endorsementUtils: EndorsementUtils,
     voteEligibilityUtils: VoteEligibilityUtils,
+    appStorageUtils: AppStorageUtils,
     administrationUtilsV2: AdministrationUtilsV2,
     endorsementUtilsV2: EndorsementUtilsV2,
     voteEligibilityUtilsV2: VoteEligibilityUtilsV2,

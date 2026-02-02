@@ -24,39 +24,31 @@
 pragma solidity 0.8.20;
 
 import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
-import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IStargateNFT } from "../../mocks/Stargate/interfaces/IStargateNFT.sol";
 import { DataTypes } from "../../mocks/Stargate/StargateNFT/libraries/DataTypes.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { X2EarnAppsStorageTypes } from "./X2EarnAppsStorageTypes.sol";
 
 /**
  * @title EndorsementUtils
  * @dev Utility library for handling endorsements of applications in a voting context.
- * It manages endorsements, endorsement scores, endorsement status, and app eligibility
- * for voting by interacting with node levels and managing endorsement checkpoints.
  */
 library EndorsementUtils {
+  using Checkpoints for Checkpoints.Trace208;
   // ------------------------------- Node Data Types -------------------------------
-  /**
-   * @dev The strength level of each node.
-   */
   enum NodeStrengthLevel {
     None,
-    // Normal Token
     Strength,
     Thunder,
     Mjolnir,
-    // X Token
     VeThorX,
     StrengthX,
     ThunderX,
     MjolnirX
   }
 
-  /**
-   * @dev The score of a node.
-   */
   struct NodeStrengthScores {
     uint256 strength;
     uint256 thunder;
@@ -67,68 +59,47 @@ library EndorsementUtils {
     uint256 mjolnirX;
   }
 
-  /**
-   * @dev The source of a node: VeChainNodes legacy contract or Stargate.
-   */
   enum NodeSource {
     None,
     VeChainNodes,
     StargateNFT
   }
 
+  // ------------------------------- Errors -------------------------------
+  error X2EarnNonexistentApp(bytes32 appId);
+  error X2EarnAppBlacklisted(bytes32 appId);
+  error X2EarnNonNodeHolder();
+  error X2EarnAppAlreadyEndorsed(bytes32 appId);
+  error X2EarnAlreadyEndorser();
+  error X2EarnNodeCooldownActive();
+  error NodeNotAllowedToEndorse();
+  error X2EarnNonEndorser();
+  error NodeManagementXAppAlreadyIncluded(bytes32 appId);
+  error X2EarnInvalidAddress(address addr);
+
   // ------------------------------- Events -------------------------------
-  /**
-   * @dev Emitted when an app is endorsed or unendorsed.
-   * @param appId The unique identifier of the app.
-   * @param endorser The node ID of the endorser.
-   * @param endorsed Boolean indicating endorsement (true) or unendorsement (false).
-   */
   event AppEndorsed(bytes32 indexed appId, uint256 endorser, bool endorsed);
-
-  /**
-   * @dev Emitted when node strength scores are updated.
-   * @param nodeStrengthScores Updated scores for different node levels.
-   */
   event NodeStrengthScoresUpdated(NodeStrengthScores nodeStrengthScores);
-
-  /**
-   * @dev Emitted when the endorsement status of an app changes.
-   * @param appId The unique identifier of the app.
-   * @param endorsed Boolean indicating endorsement (true) or unendorsement (false).
-   */
   event AppEndorsementStatusUpdated(bytes32 indexed appId, bool endorsed);
-
-  /**
-   * @dev Emitted when the grace period starts for an app that has been unendorsed.
-   * @param appId The unique identifier of the app.
-   * @param startBlock The block number when the grace period started.
-   * @param endBlock The block number when the grace period ends.
-   */
   event AppUnendorsedGracePeriodStarted(bytes32 indexed appId, uint48 startBlock, uint48 endBlock);
+  event GracePeriodUpdated(uint256 oldGracePeriod, uint256 newGracePeriod);
+  event CooldownPeriodUpdated(uint256 oldCooldownPeriod, uint256 newCooldownPeriod);
+  event EndorsementScoreThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
 
   // ------------------------------- Getter Functions -------------------------------
-  /**
-   * @notice Retrieves the endorsers of a given app.
-   * @param _appEndorsers Mapping of app IDs to arrays of endorsing node IDs.
-   * @param _stargateNFT The Stargate NFT contract to retrieve node information.
-   * @param appId The unique identifier of the app.
-   * @return address[] Array of addresses of the endorsers.
-   */
   function getEndorsers(
-    mapping(bytes32 => uint256[]) storage _appEndorsers,
-    IStargateNFT _stargateNFT,
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
     bytes32 appId
   ) external view returns (address[] memory) {
-    uint256 length = _appEndorsers[appId].length;
+    uint256 length = $._appEndorsers[appId].length;
     address[] memory endorsers = new address[](length);
     uint256 count = 0;
 
     for (uint256 i = 0; i < length; i++) {
-      //if token does not exist, skip
-      if (!_stargateNFT.tokenExists(_appEndorsers[appId][i])) {
+      if (!$._stargateNFT.tokenExists($._appEndorsers[appId][i])) {
         continue;
       }
-      address endorser = _stargateNFT.getTokenManager(_appEndorsers[appId][i]);
+      address endorser = $._stargateNFT.getTokenManager($._appEndorsers[appId][i]);
       if (endorser != address(0)) {
         endorsers[count] = endorser;
         count++;
@@ -142,241 +113,431 @@ library EndorsementUtils {
     return endorsers;
   }
 
-  /**
-   * @notice Calculates the total endorsement score for a user's nodes.
-   * @param _nodeEnodorsmentScore Mapping of endorsement scores for each node level.
-   * @param _stargateNFT Stargate NFT contract to retrieve node information.
-   * @param user The address of the user whose endorsement score to calculate.
-   * @return uint256 The total endorsement score for the user's nodes.
-   */
   function getUsersEndorsementScore(
-    mapping(uint8 => uint256) storage _nodeEnodorsmentScore,
-    IStargateNFT _stargateNFT,
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
     address user
   ) external view returns (uint256) {
-    DataTypes.Token[] memory nodeLevels = _stargateNFT.tokensManagedBy(user);
+    DataTypes.Token[] memory nodeLevels = $._stargateNFT.tokensManagedBy(user);
     uint256 totalScore;
 
     for (uint256 i; i < nodeLevels.length; i++) {
-      totalScore += _nodeEnodorsmentScore[nodeLevels[i].levelId];
+      totalScore += $._nodeEnodorsmentScore[nodeLevels[i].levelId];
     }
 
     return totalScore;
   }
 
+  function getNodeEndorsementScore(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    uint256 nodeId
+  ) external view returns (uint256) {
+    uint8 nodeLevel = $._stargateNFT.getTokenLevel(nodeId);
+    return $._nodeEnodorsmentScore[nodeLevel];
+  }
+
+  function nodeToEndorsedApp(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    uint256 nodeId
+  ) external view returns (bytes32) {
+    return $._nodeToEndorsedApp[nodeId];
+  }
+
+  function nodeLevelEndorsementScore(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    uint8 nodeLevel
+  ) external view returns (uint256) {
+    return $._nodeEnodorsmentScore[nodeLevel];
+  }
+
+  function gracePeriod(X2EarnAppsStorageTypes.EndorsementStorage storage $) external view returns (uint256) {
+    return $._gracePeriodDuration;
+  }
+
+  function cooldownPeriod(X2EarnAppsStorageTypes.EndorsementStorage storage $) external view returns (uint256) {
+    return $._cooldownPeriod;
+  }
+
+  function endorsementScoreThreshold(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $
+  ) external view returns (uint256) {
+    return $._endorsementScoreThreshold;
+  }
+
+  function isAppUnendorsed(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    bytes32 appId,
+    bool isBlacklisted
+  ) external view returns (bool) {
+    if (isBlacklisted) {
+      return false;
+    }
+    return $._unendorsedAppsIndex[appId] > 0;
+  }
+
+  function checkCooldown(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    uint256 nodeId
+  ) external view returns (bool) {
+    uint256 requiredRound = $._endorsementRound[nodeId] + $._cooldownPeriod;
+    return requiredRound > $._xAllocationVotingGovernor.currentRoundId();
+  }
+
+  function unendorsedAppIds(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $
+  ) external view returns (bytes32[] memory) {
+    return $._unendorsedApps;
+  }
+
+  function getScore(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    bytes32 appId
+  ) external view returns (uint256) {
+    return $._appScores[appId];
+  }
+
+  function getXAllocationVotingGovernor(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $
+  ) external view returns (IXAllocationVotingGovernor) {
+    return $._xAllocationVotingGovernor;
+  }
+
+  function getVeBetterPassportContract(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $
+  ) external view returns (IVeBetterPassport) {
+    return $._veBetterPassport;
+  }
+
+  function getStargateNFT(X2EarnAppsStorageTypes.EndorsementStorage storage $) external view returns (IStargateNFT) {
+    return $._stargateNFT;
+  }
+
   // ------------------------------- Setter Functions -------------------------------
-  /**
-   * @notice Calculates the score of an app based on its endorsers, and removes a specified endorser if needed.
-   * @param _nodeEnodorsmentScore Mapping of endorsement scores for each node level.
-   * @param _nodeToEndorsedApp Mapping of node IDs to the app ID they are currently endorsing.
-   * @param _appEndorsers Mapping of app IDs to arrays of node IDs that have endorsed them.
-   * @param _appScores Mapping of app IDs to their calculated endorsement scores.
-   * @param _stargateNFT The Stargate NFT contract to retrieve node levels.
-   * @param appId The unique identifier of the app.
-   * @param endorserNodeIdToRemove The node ID of the endorser to remove.
-   * @return uint256 The updated score of the app.
-   */
   function getScoreAndRemoveEndorsement(
-    mapping(uint8 => uint256) storage _nodeEnodorsmentScore,
-    mapping(uint256 => bytes32) storage _nodeToEndorsedApp,
-    mapping(bytes32 => uint256[]) storage _appEndorsers,
-    mapping(bytes32 => uint256) storage _appScores,
-    IStargateNFT _stargateNFT,
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
     bytes32 appId,
     uint256 endorserNodeIdToRemove
-  ) external returns (uint256) {
+  ) public returns (uint256) {
     uint256 score;
 
-    // Iterate over the list of endorsers for the given app
-    for (uint256 i; i < _appEndorsers[appId].length; ) {
-      // Get the current endorser's node id
-      uint256 endorserNodeId = _appEndorsers[appId][i];
-      // Get the node level of the endorser
-      uint8 nodeLevel = _stargateNFT.getTokenLevel(endorserNodeId);
+    for (uint256 i; i < $._appEndorsers[appId].length; ) {
+      uint256 endorserNodeId = $._appEndorsers[appId][i];
+      uint8 nodeLevel = $._stargateNFT.getTokenLevel(endorserNodeId);
 
-      // Check if the endorser's node level is 0 or if the endorser is the one to be removed
       if (nodeLevel == 0 || endorserNodeId == endorserNodeIdToRemove) {
-        // Remove endorser by swapping with the last element and then reducing the length
-        _appEndorsers[appId][i] = _appEndorsers[appId][_appEndorsers[appId].length - 1];
-        _appEndorsers[appId].pop();
-
-        // Emit an event indicating the app has been unendorsed by the node ID
+        $._appEndorsers[appId][i] = $._appEndorsers[appId][$._appEndorsers[appId].length - 1];
+        $._appEndorsers[appId].pop();
         emit AppEndorsed(appId, endorserNodeId, false);
-
-        // Delete the endorser from the endorsers mapping
-        delete _nodeToEndorsedApp[endorserNodeId];
+        delete $._nodeToEndorsedApp[endorserNodeId];
       } else {
-        // Add the endorser's score to the total score
-        score += _nodeEnodorsmentScore[nodeLevel];
-        i++; // Only increment i if we didn't remove an endorser
+        score += $._nodeEnodorsmentScore[nodeLevel];
+        i++;
       }
     }
 
-    // Store the latest score of the app
-    _appScores[appId] = score;
-
-    // Return the total score of the app
+    $._appScores[appId] = score;
     return score;
   }
 
-  /**
-   * @notice Updates the list of apps pending endorsement by adding or removing the specified app.
-   * @param unendorsedApps The list of currently unendorsed apps.
-   * @param unendorsedAppsIndex Mapping of app IDs to their index in the unendorsedApps array.
-   * @param appId The unique identifier of the app to update.
-   * @param remove Boolean indicating if the app should be removed from pending endorsement (true).
-   */
+  function updateNodeEndorsementScores(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    NodeStrengthScores calldata nodeStrengthScores
+  ) external {
+    $._nodeEnodorsmentScore[1] = nodeStrengthScores.strength;
+    $._nodeEnodorsmentScore[2] = nodeStrengthScores.thunder;
+    $._nodeEnodorsmentScore[3] = nodeStrengthScores.mjolnir;
+    $._nodeEnodorsmentScore[4] = nodeStrengthScores.veThorX;
+    $._nodeEnodorsmentScore[5] = nodeStrengthScores.strengthX;
+    $._nodeEnodorsmentScore[6] = nodeStrengthScores.thunderX;
+    $._nodeEnodorsmentScore[7] = nodeStrengthScores.mjolnirX;
+    emit NodeStrengthScoresUpdated(nodeStrengthScores);
+  }
+
   function updateAppsPendingEndorsement(
-    bytes32[] storage unendorsedApps,
-    mapping(bytes32 => uint256) storage unendorsedAppsIndex,
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
     bytes32 appId,
     bool remove
   ) public {
     if (remove) {
-      /**
-       *  If the app is no longer pending endorsement we need to remove it from the _unendorsedApps array
-       *
-       * In order to remove an app from the _unendorsedApps array correctly we need to:
-       * 1) Move the element in the last position of the array to the index we want to remove
-       * 2) Update the `_unendorsedAppsIndex` mapping accordingly.
-       * 3) Pop the last element of the _unendorsedApps array and delete the index mapping of the app we removed
-       *
-       * Example:
-       *
-       * _unendorsedApps = [A, B, C, D, E]
-       * _unendorsedAppsIndex = {A: 1, B: 2, C: 3, D: 4, E: 5}
-       *
-       * If we want to remove C:
-       *
-       * 1) Move E to the index of C
-       * _unendorsedApps = [A, B, E, D, E]
-       *
-       * 2) Update the index of E in the mapping
-       * _unendorsedAppsIndex = {A: 1, B: 2, C: 3, D: 4, E: 3}
-       *
-       * 3) Pop the last element of the array and delete the index mapping of the app we removed
-       * _unendorsedApps = [A, B, E, D]
-       * _unendorsedAppsIndex = {A: 1, B: 2, D: 4, E: 3}
-       *
-       */
-      uint256 index = unendorsedAppsIndex[appId] - 1;
-      uint256 lastIndex = unendorsedApps.length - 1;
-      bytes32 lastAppId = unendorsedApps[lastIndex];
+      uint256 index = $._unendorsedAppsIndex[appId] - 1;
+      uint256 lastIndex = $._unendorsedApps.length - 1;
+      bytes32 lastAppId = $._unendorsedApps[lastIndex];
 
-      unendorsedApps[index] = lastAppId;
-      unendorsedAppsIndex[lastAppId] = index + 1;
+      $._unendorsedApps[index] = lastAppId;
+      $._unendorsedAppsIndex[lastAppId] = index + 1;
 
-      unendorsedApps.pop();
-      delete unendorsedAppsIndex[appId];
+      $._unendorsedApps.pop();
+      delete $._unendorsedAppsIndex[appId];
     } else {
-      // If the app is pending endorsement we need to add it to the _unendorsedApps array
-      unendorsedApps.push(appId);
-      // Store index + 1 to avoid zero index
-      unendorsedAppsIndex[appId] = unendorsedApps.length;
+      $._unendorsedApps.push(appId);
+      $._unendorsedAppsIndex[appId] = $._unendorsedApps.length;
     }
   }
 
-  /**
-   * @notice Updates the endorsement scores for each node strength level.
-   * @param nodeEnodorsmentScores Mapping of endorsement scores for each node level.
-   * @param nodeStrengthScores New scores for each node strength level.
-   *
-   * Emits a {NodeStrengthScoresUpdated} event.
-   */
-  function updateNodeEndorsementScores(
-    mapping(uint8 => uint256) storage nodeEnodorsmentScores,
-    NodeStrengthScores calldata nodeStrengthScores
+  function setGracePeriod(X2EarnAppsStorageTypes.EndorsementStorage storage $, uint48 gracePeriodDuration) external {
+    emit GracePeriodUpdated($._gracePeriodDuration, gracePeriodDuration);
+    $._gracePeriodDuration = gracePeriodDuration;
+  }
+
+  function setCooldownPeriod(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    uint256 cooldownPeriodDuration
   ) external {
-    // Set the endorsement score for each node level
-    nodeEnodorsmentScores[1] = nodeStrengthScores.strength; // Strength Node score
-    nodeEnodorsmentScores[2] = nodeStrengthScores.thunder; // Thunder Node score
-    nodeEnodorsmentScores[3] = nodeStrengthScores.mjolnir; // Mjolnir Node score
-
-    nodeEnodorsmentScores[4] = nodeStrengthScores.veThorX; // VeThor X Node score
-    nodeEnodorsmentScores[5] = nodeStrengthScores.strengthX; // Strength X Node score
-    nodeEnodorsmentScores[6] = nodeStrengthScores.thunderX; // Thunder X Node score
-    nodeEnodorsmentScores[7] = nodeStrengthScores.mjolnirX; // Mjolnir X Node score
-
-    emit NodeStrengthScoresUpdated(nodeStrengthScores);
+    emit CooldownPeriodUpdated($._cooldownPeriod, cooldownPeriodDuration);
+    $._cooldownPeriod = cooldownPeriodDuration;
   }
 
-  /**
-   * @notice Updates an app's status if its endorsement score threshold is not met.
-   * @param appGracePeriodStart Mapping of app IDs to their grace period start time.
-   * @param appSecurity Mapping of app IDs to their security status.
-   * @param unendorsedApps The list of currently unendorsed apps.
-   * @param unendorsedAppsIndex Mapping of app IDs to their index in unendorsedApps.
-   * @param veBetterPassport The VeBetterPassport contract to update app security.
-   * @param gracePeriodDuration The grace period duration for an unendorsed app.
-   * @param isAppUnendorsed Boolean indicating if the app is currently unendorsed.
-   * @param clock The current block number.
-   * @param appId The unique identifier of the app.
-   * @param isEligibleNow Boolean indicating if the app is currently eligible for voting.
-   * @return stillEligible Boolean indicating if the app remains eligible for voting.
-   *
-   * Emits an {AppEndorsementStatusUpdated} or {AppUnendorsedGracePeriodStarted} event.
-   */
-  function updateStatusIfThresholdNotMet(
-    mapping(bytes32 => uint48) storage appGracePeriodStart,
-    mapping(bytes32 => PassportTypes.APP_SECURITY) storage appSecurity,
-    bytes32[] storage unendorsedApps,
-    mapping(bytes32 => uint256) storage unendorsedAppsIndex,
-    IVeBetterPassport veBetterPassport,
-    uint48 gracePeriodDuration,
-    bool isAppUnendorsed,
-    uint48 clock,
+  function setXAllocationVotingGovernor(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    address xAllocationVotingGovernor
+  ) external {
+    if (xAllocationVotingGovernor == address(0)) {
+      revert X2EarnInvalidAddress(xAllocationVotingGovernor);
+    }
+    $._xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernor);
+  }
+
+  function updateEndorsementScoreThreshold(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    uint256 scoreThreshold
+  ) external {
+    emit EndorsementScoreThresholdUpdated($._endorsementScoreThreshold, scoreThreshold);
+    $._endorsementScoreThreshold = scoreThreshold;
+  }
+
+  function setVeBetterPassportContract(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    address veBetterPassportContract
+  ) external {
+    if (veBetterPassportContract == address(0)) {
+      revert X2EarnInvalidAddress(veBetterPassportContract);
+    }
+    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
+  }
+
+  function setStargateNFT(X2EarnAppsStorageTypes.EndorsementStorage storage $, address stargateNft) external {
+    if (stargateNft == address(0)) {
+      revert X2EarnInvalidAddress(stargateNft);
+    }
+    $._stargateNFT = IStargateNFT(stargateNft);
+  }
+
+  function setEndorsementStatus(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
     bytes32 appId,
+    bool endorsed
+  ) public {
+    updateAppsPendingEndorsement($, appId, endorsed);
+    emit AppEndorsementStatusUpdated(appId, endorsed);
+  }
+
+  // ------------------------------- Core Logic Functions -------------------------------
+  function endorseApp(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
+    bytes32 appId,
+    uint256 nodeId,
+    bool isBlacklisted,
+    bool appExists,
     bool isEligibleNow
-  ) external returns (bool stillEligible) {
-    // If the app is not pending endorsement
-    if (!isAppUnendorsed) {
-      // Mark the app as not endorsed so that it is added to the list of apps pending endorsement
-      updateAppsPendingEndorsement(unendorsedApps, unendorsedAppsIndex, appId, false);
-      emit AppEndorsementStatusUpdated(appId, false);
+  ) external {
+    if (appsStorage._apps[appId].id == bytes32(0)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+    if (isBlacklisted) {
+      revert X2EarnAppBlacklisted(appId);
+    }
+    if (nodeId == 0) {
+      revert X2EarnNonNodeHolder();
+    }
+    // Check if app is pending endorsement
+    if ($._unendorsedAppsIndex[appId] == 0 || isBlacklisted) {
+      revert X2EarnAppAlreadyEndorsed(appId);
+    }
+    if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+      revert X2EarnNonNodeHolder();
+    }
+    if ($._nodeToEndorsedApp[nodeId] != bytes32(0)) {
+      revert X2EarnAlreadyEndorser();
     }
 
-    // If the app has a grace period of 0, set the grace period
-    if (appGracePeriodStart[appId] == 0 && isEligibleNow) {
-      // Set the grace period start (current block number)
-      appGracePeriodStart[appId] = clock;
+    // Check cooldown
+    uint256 requiredRound = $._endorsementRound[nodeId] + $._cooldownPeriod;
+    if (requiredRound > $._xAllocationVotingGovernor.currentRoundId()) {
+      revert X2EarnNodeCooldownActive();
+    }
 
-      // Emit an event indicating the grace period has started for the app
-      emit AppUnendorsedGracePeriodStarted(appId, clock, clock + gracePeriodDuration);
+    uint8 nodeLevel = $._stargateNFT.getTokenLevel(nodeId);
+    if ($._nodeEnodorsmentScore[nodeLevel] == 0) {
+      revert NodeNotAllowedToEndorse();
+    }
 
-      // Return true indicating the app is eligible for voting
-      return true;
+    $._appEndorsers[appId].push(nodeId);
+    $._nodeToEndorsedApp[nodeId] = appId;
+    $._endorsementRound[nodeId] = $._xAllocationVotingGovernor.currentRoundId();
 
-      // If the X2Earn app is no longer in the grace period and is eligible for voting
-    } else if ((clock > appGracePeriodStart[appId] + gracePeriodDuration) && isEligibleNow) {
-      // Store the security score of the app
-      appSecurity[appId] = veBetterPassport.appSecurity(appId);
+    uint256 score = getScoreAndRemoveEndorsement($, appId, 0);
 
-      // Set the XAPP security score to 0 in VeBetterPassport
-      veBetterPassport.setAppSecurity(appId, PassportTypes.APP_SECURITY.NONE);
+    if (score >= $._endorsementScoreThreshold) {
+      _updateStatusIfThresholdMet($, appsStorage, appId, appExists, isEligibleNow, isBlacklisted);
+    }
 
-      // Return false indicating the app is not eligible for voting
+    emit AppEndorsed(appId, nodeId, true);
+  }
+
+  function unendorseApp(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
+    bytes32 appId,
+    uint256 nodeId,
+    bool isBlacklisted,
+    bool isEligibleNow
+  ) external {
+    if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
+      revert X2EarnNonNodeHolder();
+    }
+
+    uint256 requiredRound = $._endorsementRound[nodeId] + $._cooldownPeriod;
+    if (requiredRound > $._xAllocationVotingGovernor.currentRoundId()) {
+      revert X2EarnNodeCooldownActive();
+    }
+
+    removeNodeEndorsement($, appsStorage, appId, nodeId, isBlacklisted, isEligibleNow);
+  }
+
+  function removeNodeEndorsement(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
+    bytes32 appId,
+    uint256 nodeId,
+    bool isBlacklisted,
+    bool isEligibleNow
+  ) public {
+    if (appsStorage._apps[appId].id == bytes32(0)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+    if ($._nodeToEndorsedApp[nodeId] != appId) {
+      revert X2EarnNonEndorser();
+    }
+
+    uint256 score = getScoreAndRemoveEndorsement($, appId, nodeId);
+
+    if (!isEligibleNow || isBlacklisted) {
+      return;
+    }
+
+    if (score < $._endorsementScoreThreshold) {
+      _updateStatusIfThresholdNotMet($, appId, isBlacklisted, isEligibleNow);
+    }
+
+    $._endorsementRound[nodeId] = 0;
+  }
+
+  function removeXAppSubmission(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
+    bytes32 appId
+  ) external {
+    if (appsStorage._apps[appId].id == bytes32(0)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+    if (appsStorage._apps[appId].createdAtTimestamp != 0) {
+      revert NodeManagementXAppAlreadyIncluded(appId);
+    }
+    updateAppsPendingEndorsement($, appId, true);
+  }
+
+  function checkEndorsement(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage,
+    bytes32 appId,
+    uint48 clock
+  ) external returns (bool) {
+    if (appsStorage._apps[appId].id == bytes32(0)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    bool isBlacklisted = voteStorage._blackList[appId];
+    if (isBlacklisted) {
       return false;
     }
 
-    // Return true indicating the app is still eligible for voting
+    uint256 score = getScoreAndRemoveEndorsement($, appId, 0);
+    bool appExists = appsStorage._apps[appId].createdAtTimestamp != 0;
+    bool isEligibleNow = appExists && voteStorage._isAppEligibleCheckpoints[appId].latest() == 1;
+
+    if (score < $._endorsementScoreThreshold) {
+      return _updateStatusIfThresholdNotMetWithVote($, appId, isBlacklisted, isEligibleNow, clock);
+    } else {
+      _updateStatusIfThresholdMet($, appsStorage, appId, appExists, isEligibleNow, isBlacklisted);
+    }
+
     return true;
   }
 
-  /**
-   * @dev Ensures that the cooldown period for a node has elapsed before performing an action.
-   * @param nodeId The unique identifier of the node being checked.
-   * @return True if the cooldown period has not yet elapsed, false otherwise.
-   */
-  function checkCooldown(
-    mapping(uint256 => uint256) storage endorsementRound,
-    uint256 cooldownPeriod,
-    IXAllocationVotingGovernor xAllocationVotingGovernor,
-    uint256 nodeId
-  ) external view returns (bool) {
-    // Calculate the required round for the cooldown period
-    uint256 requiredRound = endorsementRound[nodeId] + cooldownPeriod;
+  // ------------------------------- Private Functions -------------------------------
+  function _updateStatusIfThresholdMet(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
+    bytes32 appId,
+    bool appExists,
+    bool isEligibleNow,
+    bool isBlacklisted
+  ) private {
+    if (!appExists) {
+      appsStorage._apps[appId].createdAtTimestamp = block.timestamp;
+      appsStorage._appIds.push(appId);
+      $._veBetterPassport.setAppSecurity(appId, PassportTypes.APP_SECURITY.LOW);
+    } else if (!isEligibleNow) {
+      $._veBetterPassport.setAppSecurity(appId, $._appSecurity[appId]);
+    }
 
-    // Return true if the required round has not yet been reached
-    return requiredRound > xAllocationVotingGovernor.currentRoundId();
+    // Check if app is unendorsed
+    bool appUnendorsed = !isBlacklisted && $._unendorsedAppsIndex[appId] > 0;
+    if (appUnendorsed) {
+      setEndorsementStatus($, appId, true);
+    }
+
+    $._appGracePeriodStart[appId] = 0;
+  }
+
+  function _updateStatusIfThresholdNotMet(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    bytes32 appId,
+    bool isBlacklisted,
+    bool isEligibleNow
+  ) private returns (bool) {
+    bool appUnendorsed = !isBlacklisted && $._unendorsedAppsIndex[appId] > 0;
+    if (!appUnendorsed) {
+      setEndorsementStatus($, appId, false);
+    }
+    return isEligibleNow;
+  }
+
+  function _updateStatusIfThresholdNotMetWithVote(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    bytes32 appId,
+    bool isBlacklisted,
+    bool isEligibleNow,
+    uint48 clock
+  ) private returns (bool stillEligible) {
+    bool appUnendorsed = !isBlacklisted && $._unendorsedAppsIndex[appId] > 0;
+
+    if (!appUnendorsed) {
+      updateAppsPendingEndorsement($, appId, false);
+      emit AppEndorsementStatusUpdated(appId, false);
+    }
+
+    if ($._appGracePeriodStart[appId] == 0 && isEligibleNow) {
+      $._appGracePeriodStart[appId] = clock;
+      emit AppUnendorsedGracePeriodStarted(appId, clock, clock + $._gracePeriodDuration);
+      return true;
+    } else if ((clock > $._appGracePeriodStart[appId] + $._gracePeriodDuration) && isEligibleNow) {
+      $._appSecurity[appId] = $._veBetterPassport.appSecurity(appId);
+      $._veBetterPassport.setAppSecurity(appId, PassportTypes.APP_SECURITY.NONE);
+      return false;
+    }
+
+    return true;
   }
 }
