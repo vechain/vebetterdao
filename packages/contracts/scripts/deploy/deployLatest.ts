@@ -824,7 +824,7 @@ export async function deployLatest(config: ContractsConfig) {
       await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      if (appEnv === "testnet-staging") {
+      if (appEnv === "testnet-staging" || appEnv === "testnet") {
         await setupLocalEnvironment(
           emissions,
           treasury,
