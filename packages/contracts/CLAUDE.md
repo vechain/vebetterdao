@@ -2,6 +2,10 @@
 
 Instructions specific to `packages/contracts` directory.
 
+## Important Notes
+
+If you figure new rules out, or important things to remember for next time you will work on smart contracts changes, told to you by the devs, please add them to the file.
+
 ## Domain Knowledge
 
 ### VeBetterDAO Overview
