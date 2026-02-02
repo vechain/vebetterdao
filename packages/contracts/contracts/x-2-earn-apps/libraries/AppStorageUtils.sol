@@ -73,10 +73,7 @@ library AppStorageUtils {
     return $._apps[appId].id != bytes32(0);
   }
 
-  function appExists(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    bytes32 appId
-  ) external view returns (bool) {
+  function appExists(X2EarnAppsStorageTypes.AppsStorageStorage storage $, bytes32 appId) external view returns (bool) {
     return $._apps[appId].createdAtTimestamp != 0;
   }
 
@@ -98,10 +95,7 @@ library AppStorageUtils {
     return keccak256(abi.encodePacked(appName));
   }
 
-  function addApp(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    bytes32 appId
-  ) external {
+  function addApp(X2EarnAppsStorageTypes.AppsStorageStorage storage $, bytes32 appId) external {
     $._apps[appId].createdAtTimestamp = block.timestamp;
     $._appIds.push(appId);
   }
@@ -145,7 +139,7 @@ library AppStorageUtils {
       X2EarnAppsDataTypes.App memory _app = $._apps[appIds[i]];
       bool appExistsNow = _app.createdAtTimestamp != 0;
       bool isEligibleNow = appExistsNow && voteStorage._isAppEligibleCheckpoints[_app.id].latest() == 1;
-      
+
       allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
         _app.id,
         adminStorage._teamWalletAddress[_app.id],
@@ -167,19 +161,20 @@ library AppStorageUtils {
     if ($._apps[appId].id == bytes32(0)) {
       revert X2EarnNonexistentApp(appId);
     }
-    
+
     X2EarnAppsDataTypes.App memory _app = $._apps[appId];
     bool appExistsNow = _app.createdAtTimestamp != 0;
     bool isEligibleNow = appExistsNow && voteStorage._isAppEligibleCheckpoints[appId].latest() == 1;
 
-    return X2EarnAppsDataTypes.AppWithDetailsReturnType(
-      _app.id,
-      adminStorage._teamWalletAddress[appId],
-      _app.name,
-      adminStorage._metadataURI[appId],
-      _app.createdAtTimestamp,
-      isEligibleNow
-    );
+    return
+      X2EarnAppsDataTypes.AppWithDetailsReturnType(
+        _app.id,
+        adminStorage._teamWalletAddress[appId],
+        _app.name,
+        adminStorage._metadataURI[appId],
+        _app.createdAtTimestamp,
+        isEligibleNow
+      );
   }
 
   function apps(
@@ -197,7 +192,7 @@ library AppStorageUtils {
       X2EarnAppsDataTypes.App memory _app = $._apps[appId];
       bool appExistsNow = _app.createdAtTimestamp != 0;
       bool isEligibleNow = appExistsNow && voteStorage._isAppEligibleCheckpoints[appId].latest() == 1;
-      
+
       allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
         _app.id,
         adminStorage._teamWalletAddress[appId],
