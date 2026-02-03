@@ -390,8 +390,9 @@ library EndorsementUtils {
     bytes32 appId,
     uint256 nodeId,
     bool isBlacklisted,
-    bool isEligibleNow
-  ) external {
+    bool isEligibleNow,
+    uint48 clock
+  ) external returns (bool stillEligible) {
     if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
@@ -401,7 +402,7 @@ library EndorsementUtils {
       revert X2EarnNodeCooldownActive();
     }
 
-    removeNodeEndorsement($, appsStorage, appId, nodeId, isBlacklisted, isEligibleNow);
+    return removeNodeEndorsement($, appsStorage, appId, nodeId, isBlacklisted, isEligibleNow, clock);
   }
 
   function removeNodeEndorsement(
@@ -410,8 +411,9 @@ library EndorsementUtils {
     bytes32 appId,
     uint256 nodeId,
     bool isBlacklisted,
-    bool isEligibleNow
-  ) public {
+    bool isEligibleNow,
+    uint48 clock
+  ) public returns (bool stillEligible) {
     if (appsStorage._apps[appId].id == bytes32(0)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -422,14 +424,18 @@ library EndorsementUtils {
     uint256 score = getScoreAndRemoveEndorsement($, appId, nodeId);
 
     if (!isEligibleNow || isBlacklisted) {
-      return;
+      $._endorsementRound[nodeId] = 0;
+      return isEligibleNow;
     }
 
     if (score < $._endorsementScoreThreshold) {
-      _updateStatusIfThresholdNotMet($, appId, isBlacklisted, isEligibleNow);
+      stillEligible = _updateStatusIfThresholdNotMetWithVote($, appId, isBlacklisted, isEligibleNow, clock);
+    } else {
+      stillEligible = true;
     }
 
     $._endorsementRound[nodeId] = 0;
+    return stillEligible;
   }
 
   function removeXAppSubmission(
@@ -499,19 +505,6 @@ library EndorsementUtils {
     }
 
     $._appGracePeriodStart[appId] = 0;
-  }
-
-  function _updateStatusIfThresholdNotMet(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    bytes32 appId,
-    bool isBlacklisted,
-    bool isEligibleNow
-  ) private returns (bool) {
-    bool appUnendorsed = !isBlacklisted && $._unendorsedAppsIndex[appId] > 0;
-    if (!appUnendorsed) {
-      setEndorsementStatus($, appId, false);
-    }
-    return isEligibleNow;
   }
 
   function _updateStatusIfThresholdNotMetWithVote(

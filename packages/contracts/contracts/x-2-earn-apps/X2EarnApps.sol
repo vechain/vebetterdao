@@ -789,14 +789,19 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @param nodeId The unique identifier of the node that will unendorse.
    */
   function unendorseApp(bytes32 appId, uint256 nodeId) external {
-    EndorsementUtils.unendorseApp(
+    bool stillEligible = EndorsementUtils.unendorseApp(
       _getEndorsementStorage(),
       _getAppsStorageStorage(),
       appId,
       nodeId,
       isBlacklisted(appId),
-      isEligibleNow(appId)
+      isEligibleNow(appId),
+      clock()
     );
+
+    if (!stillEligible && isEligibleNow(appId)) {
+      _setVotingEligibility(appId, false);
+    }
   }
 
   /**
@@ -826,14 +831,19 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     bytes32 _appId,
     uint256 _nodeId
   ) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
-    EndorsementUtils.removeNodeEndorsement(
+    bool stillEligible = EndorsementUtils.removeNodeEndorsement(
       _getEndorsementStorage(),
       _getAppsStorageStorage(),
       _appId,
       _nodeId,
       isBlacklisted(_appId),
-      isEligibleNow(_appId)
+      isEligibleNow(_appId),
+      clock()
     );
+
+    if (!stillEligible && isEligibleNow(_appId)) {
+      _setVotingEligibility(_appId, false);
+    }
   }
 
   /**
