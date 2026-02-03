@@ -146,13 +146,19 @@ jobs:
           - shard: shard7b
             label: Dynamic Base Allocation Pool
           - shard: shard8
-            label: VeBetterPassport
+            label: VeBetterPassport - Core
           - shard: shard8a
             label: VeBetterPassport - Upgrade
           - shard: shard8b
             label: VeBetterPassport - Signaling
           - shard: shard8c
             label: VeBetterPassport - Reset Signal Count
+          - shard: shard8d
+            label: VeBetterPassport - Upgrades
+          - shard: shard8e
+            label: VeBetterPassport - Entities
+          - shard: shard8f
+            label: VeBetterPassport - Delegation
           - shard: shard9
             label: VOT3
           - shard: shard10
@@ -184,7 +190,11 @@ jobs:
           - shard: shard15e
             label: X-Apps - Upgradeability
           - shard: shard16
-            label: VeBetterPassport Additional Tests
+            label: VeBetterPassport - PoP Score
+          - shard: shard16a
+            label: VeBetterPassport - Whitelisting
+          - shard: shard16b
+            label: VeBetterPassport - GM & Governance
           - shard: shard17a
             label: X-Apps Additional Tests A
           - shard: shard17b

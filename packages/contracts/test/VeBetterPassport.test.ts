@@ -133,7 +133,10 @@ describe("VeBetterPassport - @shard8", function () {
       ])
     })
   })
-  // deployment
+})
+
+// Upgrades section split to separate shard
+describe("VeBetterPassport Upgrades - @shard8d", function () {
   describe("Upgrades", function () {
     it("should return the correct version", async function () {
       const { veBetterPassport } = await getOrDeployContractInstances({
@@ -1053,7 +1056,10 @@ describe("VeBetterPassport - @shard8", function () {
         )
     })
   })
+})
 
+// Continue shard8 with smaller sections
+describe("VeBetterPassport Checks & Config - @shard8", function () {
   describe("Passport Checks", function () {
     it("Should initialize correctly", async function () {
       const {
@@ -1272,7 +1278,10 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await veBetterPassport.thresholdPoPScore()).to.equal(0n)
     })
   })
+})
 
+// Passport Entities split to separate shard
+describe("VeBetterPassport Entities - @shard8e", function () {
   describe("Passport Entities", function () {
     it("Should revert if an entity is trying to become a passport", async function () {
       const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
@@ -3069,7 +3078,10 @@ describe("VeBetterPassport - @shard8", function () {
       ).to.be.revertedWithCustomError(veBetterPassport, "DelegatedEntity")
     })
   })
+})
 
+// Passport Delegation split to separate shard
+describe("VeBetterPassport Delegation - @shard8f", function () {
   describe("Passport Delegation", function () {
     it("Should be able to delegate personhood with signature", async function () {
       const {
@@ -4994,7 +5006,10 @@ describe("VeBetterPassport - @shard8", function () {
       )
     })
   })
+})
 
+// Continue shard8 with Passport Clock
+describe("VeBetterPassport Clock - @shard8", function () {
   describe("Passport Clock", function () {
     it("Should return current block number when calling clock", async function () {
       const { veBetterPassport } = await getOrDeployContractInstances({
@@ -5873,7 +5888,10 @@ describe("VeBetterPassport - @shard16", function () {
       )
     })
   })
+})
 
+// Passport Whitelisting & Blacklisting split to separate shard
+describe("VeBetterPassport Whitelisting - @shard16a", function () {
   describe("Passport Whitelisting & Blacklisting", function () {
     it("WHITELISTER_ROLE should be able to whitelist and blacklist users", async function () {
       const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
@@ -6257,7 +6275,10 @@ describe("VeBetterPassport - @shard16", function () {
       ])
     })
   })
+})
 
+// Passport GM check and Governance split to separate shard
+describe("VeBetterPassport GM & Governance - @shard16b", function () {
   describe("Passport GM check", function () {
     it("isPerson should return true if user has GM token above threshold level", async function () {
       const config = createLocalConfig()
