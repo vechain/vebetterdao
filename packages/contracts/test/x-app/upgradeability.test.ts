@@ -1036,8 +1036,6 @@ describe("Contract upgradeablity @shard15e", () => {
       },
     )) as X2EarnAppsV4
 
-    expect(await x2EarnAppsV4.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
-
     const storageSlotsAdministrationAfterV4 = await getStorageSlots(
       await x2EarnAppsV2.getAddress(),
       initialSlotAdministration,
@@ -1107,8 +1105,6 @@ describe("Contract upgradeablity @shard15e", () => {
       },
     })) as X2EarnAppsV5
 
-    expect(await x2EarnAppsV5.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
-    expect(await x2EarnAppsV5.x2EarnCreatorContract()).to.eql(await x2EarnCreator.getAddress())
     const storageSlotsAdministrationAfterV5 = await getStorageSlots(
       await x2EarnAppsV2.getAddress(),
       initialSlotAdministration,
@@ -1177,8 +1173,6 @@ describe("Contract upgradeablity @shard15e", () => {
         VoteEligibilityUtilsV6: await voteEligibilityUtilsV6.getAddress(),
       },
     })) as X2EarnAppsV6
-
-    expect(await x2EarnAppsV6.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
 
     // check the storage slots for each module
     // Administion utils

@@ -423,18 +423,6 @@ interface IX2EarnApps {
   function enableRewardsPoolForNewApp(bytes32 appId) external;
 
   /**
-   * @dev Update the X2EarnRewardsPool contract address.
-   *
-   * @param  _x2EarnRewardsPoolContract the address of the X2EarnRewardsPool contract
-   */
-  function setX2EarnRewardsPoolContract(address _x2EarnRewardsPoolContract) external;
-
-  /**
-   * @dev Get the X2EarnRewardsPool contract address.
-   */
-  function x2EarnRewardsPoolContract() external view returns (IX2EarnRewardsPool);
-
-  /**
    * @notice Checks endorsements for a given app and updates its voting eligibility based on the endorsements' scores.
    *
    * @dev This function is intended to be called by a cron job prior to the start of each voting round.
@@ -628,33 +616,9 @@ interface IX2EarnApps {
   function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256);
 
   /**
-   * @dev Update the X2EarnCreator contract address.
-   *
-   * @param x2EarnCreatorContract the address of the X2EarnCreator contract
-   */
-  function setX2EarnCreatorContract(address x2EarnCreatorContract) external;
-
-  /**
-   * @dev Get the X2EarnCreator contract address.
-   */
-  function x2EarnCreatorContract() external view returns (IX2EarnCreator);
-
-  /**
-   * @dev Update the XAllocationVotingGovernor contract address.
-   *
-   * @param _xAllocationVotingGovernor the address of the XAllocationVotingGovernor contract
-   */
-  function setXAllocationVotingGovernor(address _xAllocationVotingGovernor) external;
-
-  /**
    * @dev Get the cooldown period for a node in seconds.
    */
   function cooldownPeriod() external view returns (uint256);
-
-  /**
-   * @dev Get the XAllocationVotingGovernor contract address.
-   */
-  function getXAllocationVotingGovernor() external view returns (IXAllocationVotingGovernor);
 
   /**
    * @notice Check if a node is in a cooldown period. A node is in a cooldown period after it has endorsed an app.
@@ -676,15 +640,4 @@ interface IX2EarnApps {
    * Emits a {CooldownPeriodUpdated} event.
    */
   function updateCooldownPeriod(uint256 _newCooldownPeriod) external;
-
-  /**
-   * @dev Set the Stargate NFT contract address.
-   * @param _stargateNft The address of the Stargate NFT contract.
-   */
-  function setStargateNFT(address _stargateNft) external;
-
-  /**
-   * @dev Get the Stargate NFT contract address.
-   */
-  function getStargateNFT() external view returns (IStargateNFT);
 }

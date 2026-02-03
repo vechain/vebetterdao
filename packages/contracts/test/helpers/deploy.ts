@@ -37,6 +37,7 @@ import {
   AdministrationUtilsV6,
   EndorsementUtilsV6,
   VoteEligibilityUtilsV6,
+  X2EarnAppsV7,
 } from "../../typechain-types"
 import {
   deployAndUpgrade,
@@ -453,8 +454,9 @@ export const getOrDeployContractInstances = async ({
   // Set a temporary address for the x2EarnRewardsPool to then set the correct address in x2EarnApps
   const x2EarnRewardsPoolAddress = otherAccounts[11].address
 
-  const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
+  // Deploy up to V7
+  const x2EarnAppsV7 = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnAppsV7"],
     [
       ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
       [
@@ -506,7 +508,7 @@ export const getOrDeployContractInstances = async ({
         },
       ],
     },
-  )) as X2EarnApps
+  )) as X2EarnAppsV7
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     [
@@ -519,7 +521,7 @@ export const getOrDeployContractInstances = async ({
       "X2EarnRewardsPool",
     ],
     [
-      [owner.address, owner.address, owner.address, await b3tr.getAddress(), await x2EarnApps.getAddress()],
+      [owner.address, owner.address, owner.address, await b3tr.getAddress(), await x2EarnAppsV7.getAddress()],
       [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
       [veBetterPassportContractAddress],
       [],
@@ -549,7 +551,7 @@ export const getOrDeployContractInstances = async ({
         owner.address,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-        await x2EarnApps.getAddress(),
+        await x2EarnAppsV7.getAddress(),
         await x2EarnRewardsPool.getAddress(),
       ],
       [],
@@ -657,7 +659,7 @@ export const getOrDeployContractInstances = async ({
           admins: [await timeLock.getAddress(), owner.address],
           upgrader: owner.address,
           contractsAddressManager: owner.address,
-          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          x2EarnAppsAddress: await x2EarnAppsV7.getAddress(),
           baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
           appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
@@ -692,7 +694,7 @@ export const getOrDeployContractInstances = async ({
     "VeBetterPassportV1",
     [
       {
-        x2EarnApps: await x2EarnApps.getAddress(),
+        x2EarnApps: await x2EarnAppsV7.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
         galaxyMember: await galaxyMember.getAddress(),
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
@@ -977,7 +979,7 @@ export const getOrDeployContractInstances = async ({
   const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
     {
       admin: owner.address,
-      x2EarnApps: await x2EarnApps.getAddress(),
+      x2EarnApps: await x2EarnAppsV7.getAddress(),
       xAllocationPool: await xAllocationPool.getAddress(),
       x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
       b3tr: await b3tr.getAddress(),
@@ -1001,6 +1003,21 @@ export const getOrDeployContractInstances = async ({
       logOutput: false,
     },
   )) as DBAPool
+
+  // Upgrade to X2EarnAppsV8
+  // This is done here because in versions > 7 the setters have been removed.
+  // Setup the X2EarnApps XAllocationVote address
+  await x2EarnAppsV7.connect(owner).setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+  // Set up the X2EarnRewardsPool contract in x2EarnApps
+  await x2EarnAppsV7.connect(owner).setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
+  await x2EarnAppsV7
+    .connect(owner)
+    .setVeBetterPassportContract(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+
+  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
+    version: 8,
+  })) as X2EarnApps
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -1080,11 +1097,6 @@ export const getOrDeployContractInstances = async ({
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
-
-  // Setup the X2EarnApps XAllocationVote address
-  await x2EarnApps.connect(owner).setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
-  // Set up the X2EarnRewardsPool contract in x2EarnApps
-  await x2EarnApps.connect(owner).setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
 
   // Set up veBetterPassport
   await veBetterPassport

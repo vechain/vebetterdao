@@ -24,6 +24,7 @@ import {
   Stargate,
   NodeManagementV3,
   TokenAuction,
+  X2EarnAppsV7,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -391,8 +392,8 @@ export async function deployAll(config: ContractsConfig) {
   // Set XAllocationVoting to temp address
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
-  const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
+  const x2EarnAppsV7 = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnAppsV7"],
     [
       [
         config.XAPP_BASE_URI,
@@ -449,7 +450,11 @@ export async function deployAll(config: ContractsConfig) {
       ],
       logOutput: true,
     },
-  )) as X2EarnApps
+  )) as X2EarnAppsV7
+
+  // IMPORTANT: We will upgrade X2EarnAppsV7 to X2EarnAppsV8 in next steps since
+  // we will first need to initialize it with some contracts addresses (xAllocationVoting, x2EarnRewardsPool)
+  // It cannot be done here because in versions > 7 the setters have been removed.
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     [
@@ -466,7 +471,7 @@ export async function deployAll(config: ContractsConfig) {
         config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
         TEMP_ADMIN, // upgrader //TODO: transferRole
         await b3tr.getAddress(),
-        await x2EarnApps.getAddress(),
+        await x2EarnAppsV7.getAddress(),
       ],
       [
         config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
@@ -500,7 +505,7 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN, // contractsAddressManager
         await b3tr.getAddress(),
         await treasury.getAddress(),
-        await x2EarnApps.getAddress(),
+        await x2EarnAppsV7.getAddress(),
         await x2EarnRewardsPool.getAddress(),
       ],
       [],
@@ -655,7 +660,7 @@ export async function deployAll(config: ContractsConfig) {
           admins: [await timelock.getAddress(), TEMP_ADMIN],
           upgrader: TEMP_ADMIN,
           contractsAddressManager: TEMP_ADMIN,
-          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          x2EarnAppsAddress: await x2EarnAppsV7.getAddress(),
           baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
           appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
@@ -700,7 +705,7 @@ export async function deployAll(config: ContractsConfig) {
     "VeBetterPassportV1",
     [
       {
-        x2EarnApps: await x2EarnApps.getAddress(),
+        x2EarnApps: await x2EarnAppsV7.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
         galaxyMember: await galaxyMember.getAddress(),
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
@@ -973,7 +978,7 @@ export async function deployAll(config: ContractsConfig) {
   const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
     {
       admin: TEMP_ADMIN, // admin
-      x2EarnApps: await x2EarnApps.getAddress(),
+      x2EarnApps: await x2EarnAppsV7.getAddress(),
       xAllocationPool: await xAllocationPool.getAddress(),
       x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
       b3tr: await b3tr.getAddress(),
@@ -1001,6 +1006,28 @@ export async function deployAll(config: ContractsConfig) {
   )) as DBAPool
 
   console.log("DBAPool deployed and upgraded to V2")
+
+  console.log("Setting X2EarnApps addresses and upgrading to X2EarnAppsV8...")
+  // Setup X2EarnApps addresses
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
+    .then(async tx => await tx.wait())
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setVeBetterPassportContract(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+
+  // This is done here because in versions > 7 the setters have been removed.
+  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
+    version: 8,
+  })) as X2EarnApps
+
+  console.log("X2EarnApps addresses set and upgraded to X2EarnAppsV8")
 
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
@@ -1165,16 +1192,6 @@ export async function deployAll(config: ContractsConfig) {
     .setVote2EarnAddress(await voterRewards.getAddress())
     .then(async tx => await tx.wait())
   console.log("XAllocationsGovernor and Vote2Earn address set in Emissions contract")
-
-  // Setup X2EarnApps addresses
-  await x2EarnApps
-    .connect(deployer)
-    .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
-    .then(async tx => await tx.wait())
-  await x2EarnApps
-    .connect(deployer)
-    .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
-    .then(async tx => await tx.wait())
 
   // Setup XAllocationPool addresses
   await xAllocationPool

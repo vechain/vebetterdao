@@ -79,6 +79,9 @@ import { VoteEligibilityUtils } from "./libraries/VoteEligibilityUtils.sol";
  *
  * -------------------- Version 8 --------------------
  * - Refactor: modules replaced with libraries for size optimization.
+ * - Removed some unused functions to reduce contract size (isAppCreator, getAppStorage, getPaginatedApps, appsCount)
+ * - Removed contracts setters and getters to reduce contract size (x2earn creator contract, x2earn rewards pool contract, etc.)
+ * - Marked functions as external to reduce contract size
  */
 contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208;
@@ -148,16 +151,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
 
   // ---------- Initializers ---------- //
 
-  /**
-   * @notice Initialize the version 7 contract
-   * @param _stargateNft the address of the Stargate NFT contract
-   * @dev This function is called only once during the contract deployment
-   */
-  function initializeV7(address _stargateNft) external onlyRole(UPGRADER_ROLE) reinitializer(7) {
-    require(_stargateNft != address(0), "X2EarnApps: Invalid Stargate NFT contract address");
-    EndorsementUtils.setStargateNFT(_getEndorsementStorage(), _stargateNft);
-  }
-
   // ---------- Modifiers ---------- //
 
   /**
@@ -217,7 +210,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-hashAppName}.
    */
-  function hashAppName(string memory appName) public pure returns (bytes32) {
+  function hashAppName(string memory appName) external pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
   }
 
@@ -246,7 +239,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-appURI}.
    */
-  function appURI(bytes32 appId) public view returns (string memory) {
+  function appURI(bytes32 appId) external view returns (string memory) {
     if (!AppStorageUtils.appSubmitted(_getAppsStorageStorage(), appId)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -258,7 +251,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-allEligibleApps}.
    */
-  function allEligibleApps() public view returns (bytes32[] memory) {
+  function allEligibleApps() external view returns (bytes32[] memory) {
     return _getVoteEligibilityStorage()._eligibleApps;
   }
 
@@ -290,7 +283,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual onlyRole(GOVERNANCE_ROLE) {
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) external virtual onlyRole(GOVERNANCE_ROLE) {
     if (!AppStorageUtils.appSubmitted(_getAppsStorageStorage(), _appId)) {
       revert X2EarnNonexistentApp(_appId);
     }
@@ -312,7 +305,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-appAdmin}.
    */
-  function appAdmin(bytes32 appId) public view returns (address) {
+  function appAdmin(bytes32 appId) external view returns (address) {
     return _getAdministrationStorage()._admin[appId];
   }
 
@@ -329,7 +322,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @dev Returns the list of moderators of the app.
    * @param appId the hashed name of the app
    */
-  function appModerators(bytes32 appId) public view returns (address[] memory) {
+  function appModerators(bytes32 appId) external view returns (address[] memory) {
     return _getAdministrationStorage()._moderators[appId];
   }
 
@@ -370,7 +363,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @dev Get the address where the x2earn app receives allocation funds.
    * @param appId the hashed name of the app
    */
-  function teamWalletAddress(bytes32 appId) public view returns (address) {
+  function teamWalletAddress(bytes32 appId) external view returns (address) {
     return _getAdministrationStorage()._teamWalletAddress[appId];
   }
 
@@ -378,7 +371,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @dev Function to get the percentage of the allocation reserved for the team.
    * @param appId the app id
    */
-  function teamAllocationPercentage(bytes32 appId) public view returns (uint256) {
+  function teamAllocationPercentage(bytes32 appId) external view returns (uint256) {
     return _getAdministrationStorage()._teamAllocationPercentage[appId];
   }
 
@@ -386,7 +379,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @dev Returns the list of reward distributors of the app.
    * @param appId the hashed name of the app
    */
-  function rewardDistributors(bytes32 appId) public view returns (address[] memory) {
+  function rewardDistributors(bytes32 appId) external view returns (address[] memory) {
     return _getAdministrationStorage()._rewardDistributors[appId];
   }
 
@@ -395,7 +388,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @param appId the hashed name of the app
    * @param account the address of the account
    */
-  function isRewardDistributor(bytes32 appId, address account) public view returns (bool) {
+  function isRewardDistributor(bytes32 appId, address account) external view returns (bool) {
     return AdministrationUtils.isRewardDistributor(_getAdministrationStorage()._rewardDistributors, appId, account);
   }
 
@@ -405,20 +398,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    */
   function metadataURI(bytes32 appId) public view returns (string memory) {
     return _getAdministrationStorage()._metadataURI[appId];
-  }
-
-  /**
-   * @dev See {IX2EarnApps-x2EarnCreatorContract}.
-   */
-  function x2EarnCreatorContract() public view returns (IX2EarnCreator) {
-    return _getAdministrationStorage()._x2EarnCreatorContract;
-  }
-
-  /**
-   * @dev See {IX2EarnApps-x2EarnRewardsPoolContract}.
-   */
-  function x2EarnRewardsPoolContract() public view returns (IX2EarnRewardsPool) {
-    return _getAdministrationStorage()._x2EarnRewardsPoolContract;
   }
 
   // ---------- Endorsement Getters ---------- //
@@ -531,27 +510,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     return EndorsementUtils.checkCooldown(_getEndorsementStorage(), nodeId);
   }
 
-  /**
-   * @dev See {IX2EarnApps-getXAllocationVotingGovernor}.
-   */
-  function getXAllocationVotingGovernor() external view returns (IXAllocationVotingGovernor) {
-    return EndorsementUtils.getXAllocationVotingGovernor(_getEndorsementStorage());
-  }
-
-  /**
-   * @dev See {IX2EarnApps-getStargateNFT}.
-   */
-  function getStargateNFT() external view returns (IStargateNFT) {
-    return EndorsementUtils.getStargateNFT(_getEndorsementStorage());
-  }
-
-  /**
-   * @dev See {IX2EarnApps-getVeBetterPassportContract}.
-   */
-  function getVeBetterPassportContract() external view returns (IVeBetterPassport) {
-    return EndorsementUtils.getVeBetterPassportContract(_getEndorsementStorage());
-  }
-
   // ---------- Contract Settings ---------- //
 
   /**
@@ -567,7 +525,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    *
    * Emits a {BaseURIUpdated} event.
    */
-  function setBaseURI(string memory _baseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory _baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
     X2EarnAppsStorageTypes.ContractSettingsStorage storage $ = _getContractSettingsStorage();
     emit BaseURIUpdated($._baseURI, _baseURI);
     $._baseURI = _baseURI;
@@ -583,7 +541,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
-  ) public virtual {
+  ) external virtual {
     X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage = _getAdministrationStorage();
 
     if (adminStorage._x2EarnCreatorContract.balanceOf(msg.sender) == 0) {
@@ -609,7 +567,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-setAppAdmin}.
    */
-  function setAppAdmin(bytes32 _appId, address _newAdmin) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  function setAppAdmin(bytes32 _appId, address _newAdmin) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _setAppAdmin(_appId, _newAdmin);
   }
 
@@ -619,7 +577,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function updateTeamWalletAddress(
     bytes32 _appId,
     address _newReceiverAddress
-  ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _updateTeamWalletAddress(_appId, _newReceiverAddress);
   }
 
@@ -629,14 +587,17 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function setTeamAllocationPercentage(
     bytes32 _appId,
     uint256 _percentage
-  ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _setTeamAllocationPercentage(_appId, _percentage);
   }
 
   /**
    * @dev See {IX2EarnApps-addAppModerator}.
    */
-  function addAppModerator(bytes32 _appId, address _moderator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  function addAppModerator(
+    bytes32 _appId,
+    address _moderator
+  ) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     AdministrationUtils.addAppModerator(
       _getAdministrationStorage()._moderators,
       _appId,
@@ -652,7 +613,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function removeAppModerator(
     bytes32 _appId,
     address _moderator
-  ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     AdministrationUtils.removeAppModerator(
       _getAdministrationStorage()._moderators,
       _appId,
@@ -664,7 +625,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-removeAppCreator}.
    */
-  function removeAppCreator(bytes32 _appId, address _creator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  function removeAppCreator(bytes32 _appId, address _creator) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     X2EarnAppsStorageTypes.AdministrationStorage storage $ = _getAdministrationStorage();
     AdministrationUtils.removeAppCreator(
       $._creators,
@@ -679,7 +640,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-addCreator}.
    */
-  function addCreator(bytes32 _appId, address _creator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  function addCreator(bytes32 _appId, address _creator) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _addCreator(_appId, _creator);
   }
 
@@ -689,7 +650,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function addRewardDistributor(
     bytes32 _appId,
     address _distributor
-  ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     AdministrationUtils.addRewardDistributor(
       _getAdministrationStorage()._rewardDistributors,
       _appId,
@@ -705,7 +666,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function removeRewardDistributor(
     bytes32 _appId,
     address _distributor
-  ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     AdministrationUtils.removeRewardDistributor(
       _getAdministrationStorage()._rewardDistributors,
       _appId,
@@ -717,7 +678,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-enableRewardsPoolForNewApp}.
    */
-  function enableRewardsPoolForNewApp(bytes32 _appId) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function enableRewardsPoolForNewApp(bytes32 _appId) external onlyRole(DEFAULT_ADMIN_ROLE) {
     _enableRewardsPoolForNewApp(_appId);
   }
 
@@ -727,7 +688,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function updateAppMetadata(
     bytes32 _appId,
     string memory _newMetadataURI
-  ) public onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId) {
+  ) external onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId) {
     _updateAppMetadata(_appId, _newMetadataURI);
   }
 
@@ -807,7 +768,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function removeNodeEndorsement(
     bytes32 _appId,
     uint256 _nodeId
-  ) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     bool stillEligible = EndorsementUtils.removeNodeEndorsement(
       _getEndorsementStorage(),
       _getAppsStorageStorage(),
@@ -827,7 +788,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @dev See {IX2EarnApps-removeXAppSubmission}.
    * @notice This function can be called by an XAPP admin or contract admin that wishes to remove an XAPP submission.
    */
-  function removeXAppSubmission(bytes32 _appId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  function removeXAppSubmission(bytes32 _appId) external onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     EndorsementUtils.removeXAppSubmission(_getEndorsementStorage(), _getAppsStorageStorage(), _appId);
   }
 
@@ -836,14 +797,14 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   /**
    * @dev See {IX2EarnApps-updateGracePeriod}.
    */
-  function updateGracePeriod(uint48 _newGracePeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
+  function updateGracePeriod(uint48 _newGracePeriod) external onlyRole(GOVERNANCE_ROLE) {
     EndorsementUtils.setGracePeriod(_getEndorsementStorage(), _newGracePeriod);
   }
 
   /**
    * @dev See {IX2EarnApps-updateCooldownPeriod}.
    */
-  function updateCooldownPeriod(uint256 _newCooldownPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
+  function updateCooldownPeriod(uint256 _newCooldownPeriod) external onlyRole(GOVERNANCE_ROLE) {
     EndorsementUtils.setCooldownPeriod(_getEndorsementStorage(), _newCooldownPeriod);
   }
 
@@ -861,51 +822,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    */
   function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external onlyRole(GOVERNANCE_ROLE) {
     EndorsementUtils.updateEndorsementScoreThreshold(_getEndorsementStorage(), _scoreThreshold);
-  }
-
-  // ---------- Contract Address Setters ---------- //
-
-  /**
-   * @dev See {IX2EarnApps-setVeBetterPassportContract}.
-   */
-  function setVeBetterPassportContract(address _veBetterPassportContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    EndorsementUtils.setVeBetterPassportContract(_getEndorsementStorage(), _veBetterPassportContract);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setXAllocationVotingGovernor}.
-   */
-  function setXAllocationVotingGovernor(
-    address _xAllocationVotingGovernor
-  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    EndorsementUtils.setXAllocationVotingGovernor(_getEndorsementStorage(), _xAllocationVotingGovernor);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setX2EarnCreatorContract}.
-   */
-  function setX2EarnCreatorContract(address _x2EarnCreatorContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    if (_x2EarnCreatorContract == address(0)) {
-      revert X2EarnInvalidAddress(_x2EarnCreatorContract);
-    }
-    _getAdministrationStorage()._x2EarnCreatorContract = IX2EarnCreator(_x2EarnCreatorContract);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setX2EarnRewardsPoolContract}.
-   */
-  function setX2EarnRewardsPoolContract(address _x2EarnRewardsPoolContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    if (_x2EarnRewardsPoolContract == address(0)) {
-      revert X2EarnInvalidAddress(_x2EarnRewardsPoolContract);
-    }
-    _getAdministrationStorage()._x2EarnRewardsPoolContract = IX2EarnRewardsPool(_x2EarnRewardsPoolContract);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setStargateNFT}.
-   */
-  function setStargateNFT(address _stargateNft) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    EndorsementUtils.setStargateNFT(_getEndorsementStorage(), _stargateNft);
   }
 
   // ---------- Internal Functions ---------- //

@@ -19,6 +19,7 @@ import {
   GrantsManagerV1,
   StargateNFT,
   Stargate,
+  X2EarnAppsV7,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -202,7 +203,7 @@ export async function deployLatest(config: ContractsConfig) {
   // Set XAllocationVoting to temp address
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
-  const x2EarnApps = (await deployAndUpgrade(
+  const x2EarnAppsV7 = (await deployAndUpgrade(
     ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
     [
       [
@@ -259,7 +260,7 @@ export async function deployLatest(config: ContractsConfig) {
         },
       ],
     },
-  )) as X2EarnApps
+  )) as X2EarnAppsV7
 
   const x2EarnRewardsPool = (await deployAndInitializeLatest(
     "X2EarnRewardsPool",
@@ -271,7 +272,7 @@ export async function deployLatest(config: ContractsConfig) {
           config.CONTRACTS_ADMIN_ADDRESS,
           TEMP_ADMIN,
           await b3tr.getAddress(),
-          await x2EarnApps.getAddress(),
+          await x2EarnAppsV7.getAddress(),
         ],
       },
       {
@@ -298,7 +299,7 @@ export async function deployLatest(config: ContractsConfig) {
           TEMP_ADMIN, // contractsAddressManager
           await b3tr.getAddress(),
           await treasury.getAddress(),
-          await x2EarnApps.getAddress(),
+          await x2EarnAppsV7.getAddress(),
           await x2EarnRewardsPool.getAddress(),
         ],
       },
@@ -430,7 +431,7 @@ export async function deployLatest(config: ContractsConfig) {
             admins: [await timelock.getAddress(), TEMP_ADMIN],
             upgrader: TEMP_ADMIN,
             contractsAddressManager: TEMP_ADMIN,
-            x2EarnAppsAddress: await x2EarnApps.getAddress(),
+            x2EarnAppsAddress: await x2EarnAppsV7.getAddress(),
             baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
             appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
             votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
@@ -457,7 +458,7 @@ export async function deployLatest(config: ContractsConfig) {
         name: "initialize",
         args: [
           {
-            x2EarnApps: await x2EarnApps.getAddress(),
+            x2EarnApps: await x2EarnAppsV7.getAddress(),
             xAllocationVoting: await xAllocationVoting.getAddress(),
             galaxyMember: await galaxyMember.getAddress(),
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD,
@@ -586,6 +587,25 @@ export async function deployLatest(config: ContractsConfig) {
     },
   )) as GrantsManager
 
+  // Setup X2EarnApps addresses
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
+    .then(async tx => await tx.wait())
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setVeBetterPassportContract(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+
+  // This is done here because in versions > 7 the setters have been removed.
+  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
+    version: 8,
+  })) as X2EarnApps
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -599,7 +619,7 @@ export async function deployLatest(config: ContractsConfig) {
     Treasury: await treasury.getAddress(),
     VOT3: await vot3.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
-    X2EarnApps: await x2EarnApps.getAddress(),
+    X2EarnApps: await x2EarnAppsV7.getAddress(),
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
@@ -729,22 +749,8 @@ export async function deployLatest(config: ContractsConfig) {
     .then(async tx => await tx.wait())
   console.log("XAllocationsGovernor and Vote2Earn address set in Emissions contract")
 
-  // Setup X2EarnApps addresses
-  await x2EarnApps
-    .connect(deployer)
-    .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
-    .then(async tx => await tx.wait())
-  await x2EarnApps
-    .connect(deployer)
-    .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
-    .then(async tx => await tx.wait())
-
   // Setup VeBetterPassport addresses to replace TEMP Initialisation
-  await x2EarnApps
-    .connect(deployer)
-    .setVeBetterPassportContract(await veBetterPassport.getAddress())
-    .then(async tx => await tx.wait())
-  console.log("VeBetterPassport address set in X2EarnApps contract")
+
   await xAllocationVoting
     .connect(deployer)
     .setVeBetterPassport(await veBetterPassport.getAddress())

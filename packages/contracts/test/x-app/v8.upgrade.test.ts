@@ -135,7 +135,6 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
     })) as X2EarnApps
 
     expect(await x2EarnAppsV8.version()).to.equal("8")
-    expect(await x2EarnAppsV8.getStargateNFT()).to.equal(await freshStargateNftMock.getAddress())
 
     // Update X2EarnRewardsPool to point to the upgraded contract
     await x2EarnRewardsPool.setX2EarnApps(await x2EarnAppsV8.getAddress())
@@ -256,7 +255,6 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
     expect(await x2EarnAppsV7.baseURI()).to.equal("ipfs://")
     expect(await x2EarnAppsV7.gracePeriod()).to.equal(config.XAPP_GRACE_PERIOD)
     expect(await x2EarnAppsV7.cooldownPeriod()).to.equal(config.X2EARN_NODE_COOLDOWN_PERIOD)
-    expect(await x2EarnAppsV7.getStargateNFT()).to.equal(await freshStargateNftMock.getAddress())
 
     // Capture storage slots BEFORE upgrade
     const storageSlotsV7 = await getStorageSlots(
@@ -301,9 +299,5 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
     expect(await x2EarnAppsV8.baseURI()).to.equal("ipfs://")
     expect(await x2EarnAppsV8.gracePeriod()).to.equal(config.XAPP_GRACE_PERIOD)
     expect(await x2EarnAppsV8.cooldownPeriod()).to.equal(config.X2EARN_NODE_COOLDOWN_PERIOD)
-    expect(await x2EarnAppsV8.getStargateNFT()).to.equal(await freshStargateNftMock.getAddress())
-    expect(await x2EarnAppsV8.x2EarnCreatorContract()).to.equal(await x2EarnCreator.getAddress())
-    expect(await x2EarnAppsV8.x2EarnRewardsPoolContract()).to.equal(await x2EarnRewardsPool.getAddress())
-    expect(await x2EarnAppsV8.getVeBetterPassportContract()).to.equal(await veBetterPassport.getAddress())
   })
 })

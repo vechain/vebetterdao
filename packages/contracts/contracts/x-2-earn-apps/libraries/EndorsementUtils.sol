@@ -195,28 +195,12 @@ library EndorsementUtils {
     return $._appScores[appId];
   }
 
-  function getXAllocationVotingGovernor(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $
-  ) external view returns (IXAllocationVotingGovernor) {
-    return $._xAllocationVotingGovernor;
-  }
-
-  function getVeBetterPassportContract(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $
-  ) external view returns (IVeBetterPassport) {
-    return $._veBetterPassport;
-  }
-
-  function getStargateNFT(X2EarnAppsStorageTypes.EndorsementStorage storage $) external view returns (IStargateNFT) {
-    return $._stargateNFT;
-  }
-
   // ------------------------------- Setter Functions -------------------------------
-  function getScoreAndRemoveEndorsement(
+  function _getScoreAndRemoveEndorsement(
     X2EarnAppsStorageTypes.EndorsementStorage storage $,
     bytes32 appId,
     uint256 endorserNodeIdToRemove
-  ) public returns (uint256) {
+  ) internal returns (uint256) {
     uint256 score;
 
     for (uint256 i; i < $._appEndorsers[appId].length; ) {
@@ -286,39 +270,12 @@ library EndorsementUtils {
     $._cooldownPeriod = cooldownPeriodDuration;
   }
 
-  function setXAllocationVotingGovernor(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    address xAllocationVotingGovernor
-  ) external {
-    if (xAllocationVotingGovernor == address(0)) {
-      revert X2EarnInvalidAddress(xAllocationVotingGovernor);
-    }
-    $._xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernor);
-  }
-
   function updateEndorsementScoreThreshold(
     X2EarnAppsStorageTypes.EndorsementStorage storage $,
     uint256 scoreThreshold
   ) external {
     emit EndorsementScoreThresholdUpdated($._endorsementScoreThreshold, scoreThreshold);
     $._endorsementScoreThreshold = scoreThreshold;
-  }
-
-  function setVeBetterPassportContract(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    address veBetterPassportContract
-  ) external {
-    if (veBetterPassportContract == address(0)) {
-      revert X2EarnInvalidAddress(veBetterPassportContract);
-    }
-    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
-  }
-
-  function setStargateNFT(X2EarnAppsStorageTypes.EndorsementStorage storage $, address stargateNft) external {
-    if (stargateNft == address(0)) {
-      revert X2EarnInvalidAddress(stargateNft);
-    }
-    $._stargateNFT = IStargateNFT(stargateNft);
   }
 
   function setEndorsementStatus(
@@ -375,7 +332,7 @@ library EndorsementUtils {
     $._nodeToEndorsedApp[nodeId] = appId;
     $._endorsementRound[nodeId] = $._xAllocationVotingGovernor.currentRoundId();
 
-    uint256 score = getScoreAndRemoveEndorsement($, appId, 0);
+    uint256 score = _getScoreAndRemoveEndorsement($, appId, 0);
 
     if (score >= $._endorsementScoreThreshold) {
       _updateStatusIfThresholdMet($, appsStorage, appId, appExists, isEligibleNow, isBlacklisted);
@@ -421,7 +378,7 @@ library EndorsementUtils {
       revert X2EarnNonEndorser();
     }
 
-    uint256 score = getScoreAndRemoveEndorsement($, appId, nodeId);
+    uint256 score = _getScoreAndRemoveEndorsement($, appId, nodeId);
 
     if (!isEligibleNow || isBlacklisted) {
       $._endorsementRound[nodeId] = 0;
@@ -468,7 +425,7 @@ library EndorsementUtils {
       return false;
     }
 
-    uint256 score = getScoreAndRemoveEndorsement($, appId, 0);
+    uint256 score = _getScoreAndRemoveEndorsement($, appId, 0);
     bool appExists = appsStorage._apps[appId].createdAtTimestamp != 0;
     bool isEligibleNow = appExists && voteStorage._isAppEligibleCheckpoints[appId].latest() == 1;
 
