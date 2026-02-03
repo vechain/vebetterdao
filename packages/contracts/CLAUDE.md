@@ -185,6 +185,28 @@ const v6 = await upgradeProxy("GalaxyMemberV5", "GalaxyMember", await v5.getAddr
 expect(await v6.existingData()).to.equal(expectedValue)
 ```
 
+### CRITICAL: Upgrade Test Version Mismatch Pattern
+
+When working with upgrade tests, watch for this common bug:
+
+```typescript
+// Comment says V4 → V5
+// Upgrade X2EarnAppsV4 to X2EarnAppsV5
+const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", ...)) as X2EarnApps
+//                                                        ^^^^^^^^^^^ WRONG!
+```
+
+**Problem**: The test was written when V5 was the latest version. `"X2EarnApps"` referred to V5 back then. Now that we're at V8, `"X2EarnApps"` refers to V8, so this test incorrectly upgrades from V4 → V8, skipping V5/V6/V7.
+
+**Fix**: Always use explicit version names for intermediate upgrades:
+
+```typescript
+// Correct: explicit version
+const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnAppsV5", ...)) as X2EarnAppsV5
+```
+
+**Rule**: Only use `"ContractName"` (without version suffix) when upgrading TO the latest version. For intermediate versions, always use `"ContractNameVN"`.
+
 ### Library Redeployment
 
 **Always redeploy all libraries when upgrading.** Libraries are redeployed fresh with each contract upgrade - there's no library versioning or reuse.
