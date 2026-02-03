@@ -501,10 +501,9 @@ export const getOrDeployContractInstances = async ({
           VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6.getAddress(),
         },
         {
-          AdministrationUtils: await AdministrationUtils.getAddress(),
-          EndorsementUtils: await EndorsementUtils.getAddress(),
-          VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
-          AppStorageUtils: await AppStorageUtils.getAddress(),
+          AdministrationUtilsV7: await AdministrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await EndorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await VoteEligibilityUtilsV7.getAddress(),
         },
       ],
     },
@@ -1017,6 +1016,12 @@ export const getOrDeployContractInstances = async ({
 
   const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
     version: 8,
+    libraries: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
+    },
   })) as X2EarnApps
 
   const contractAddresses: Record<string, string> = {

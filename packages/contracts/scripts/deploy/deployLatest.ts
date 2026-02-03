@@ -95,6 +95,7 @@ export async function deployLatest(config: ContractsConfig) {
     AdministrationUtils,
     EndorsementUtils,
     VoteEligibilityUtils,
+    AppStorageUtils,
     // V2
     AdministrationUtilsV2,
     EndorsementUtilsV2,
@@ -115,6 +116,10 @@ export async function deployLatest(config: ContractsConfig) {
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
+    // V7
+    AdministrationUtilsV7,
+    EndorsementUtilsV7,
+    VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: true, latestVersionOnly: false })
 
   // ----------------------  Stargate Contracts and NodeManagement ----------------------
@@ -254,9 +259,9 @@ export async function deployLatest(config: ContractsConfig) {
           VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6!!.getAddress(),
         },
         {
-          AdministrationUtils: await AdministrationUtils.getAddress(),
-          EndorsementUtils: await EndorsementUtils.getAddress(),
-          VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+          AdministrationUtilsV7: await AdministrationUtilsV7!!.getAddress(),
+          EndorsementUtilsV7: await EndorsementUtilsV7!!.getAddress(),
+          VoteEligibilityUtilsV7: await VoteEligibilityUtilsV7!!.getAddress(),
         },
       ],
     },
@@ -604,6 +609,12 @@ export async function deployLatest(config: ContractsConfig) {
   // This is done here because in versions > 7 the setters have been removed.
   const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
     version: 8,
+    libraries: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
+    },
   })) as X2EarnApps
 
   const date = new Date(performance.now() - start)
@@ -658,6 +669,7 @@ export async function deployLatest(config: ContractsConfig) {
       AdministrationUtils: await AdministrationUtils.getAddress(),
       EndorsementUtils: await EndorsementUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
     },
   }
 
