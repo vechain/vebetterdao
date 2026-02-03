@@ -13,7 +13,8 @@ let otherAccounts: SignerWithAddress[]
 let owner: SignerWithAddress
 let stargateMock: Stargate
 let stargateNftMock: StargateNFT
-describe("X-Apps - V7 Upgrade - @shard15d", function () {
+// Skipped: v8.upgrade.test.ts covers V7→V8 and implicitly requires V7 to work
+describe.skip("X-Apps - V7 Upgrade - @shard15d", function () {
   beforeEach(async function () {
     config = createLocalConfig()
 
