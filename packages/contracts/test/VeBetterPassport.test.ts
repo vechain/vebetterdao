@@ -44,7 +44,7 @@ import {
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("VeBetterPassport - @shard8", function () {
+describe("VeBetterPassport - @shard8-core", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, xAllocationVoting, x2EarnApps, galaxyMember } = await getOrDeployContractInstances({
@@ -1059,7 +1059,7 @@ describe("VeBetterPassport Upgrades - @shard8d", function () {
 })
 
 // Continue shard8 with smaller sections
-describe("VeBetterPassport Checks & Config - @shard8", function () {
+describe("VeBetterPassport Checks & Config - @shard8-core", function () {
   describe("Passport Checks", function () {
     it("Should initialize correctly", async function () {
       const {
@@ -5009,7 +5009,7 @@ describe("VeBetterPassport Delegation - @shard8f", function () {
 })
 
 // Continue shard8 with Passport Clock
-describe("VeBetterPassport Clock - @shard8", function () {
+describe("VeBetterPassport Clock - @shard8-core", function () {
   describe("Passport Clock", function () {
     it("Should return current block number when calling clock", async function () {
       const { veBetterPassport } = await getOrDeployContractInstances({
@@ -5030,7 +5030,7 @@ describe("VeBetterPassport Clock - @shard8", function () {
 })
 
 // Isolated tests for shard16 because of the size of the tests
-describe("VeBetterPassport - @shard16", function () {
+describe("VeBetterPassport - @shard16-pop", function () {
   describe("Passport PoP Score", function () {
     it("Should be able to register participation of user with ACTION_REGISTRAR_ROLE", async function () {
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount, xAllocationVoting } =

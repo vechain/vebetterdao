@@ -23,7 +23,7 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard4h**: Governance - V8 Compatibility
 - **shard6**: TimeLock
 - **shard7**: Treasury
-- **shard8**: VeBetterPassport - Core (Contract parameters, Checks, Configurator, Clock)
+- **shard8-core**: VeBetterPassport - Core (Contract parameters, Checks, Configurator, Clock)
 - **shard8a**: VeBetterPassport - Upgrade
 - **shard8b**: VeBetterPassport - Signaling
 - **shard8c**: VeBetterPassport - Reset Signal Count
@@ -31,17 +31,21 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard8e**: VeBetterPassport - Entities
 - **shard8f**: VeBetterPassport - Delegation
 - **shard9**: VOT3
-- **shard10**: VoterRewards
+- **shard10-core**: VoterRewards
+- **shard10a**: VoterRewards - Upgrade
+- **shard10b**: VoterRewards - Relayer Claim Rewards
 - **shard11**: X2EarnCreator
 - **shard12**: X2EarnRewardsPool
 - **shard13**: X-Allocation Pool
-- **shard14**: X-Allocation Voting
+- **shard14-core**: X-Allocation Voting
+- **shard14a**: X-Allocation Voting - Upgrade
+- **shard14b**: X-Allocation Voting - Auto Voting
 - **shard15a**: X-Apps - Core Features
 - **shard15b**: X-Apps - Team Management
 - **shard15c**: X-Apps - Metadata and Endorsement
 - **shard15d**: X-Apps - V7 Upgrade
 - **shard15e**: X-Apps - Upgradeability
-- **shard16**: VeBetterPassport - PoP Score
+- **shard16-pop**: VeBetterPassport - PoP Score
 - **shard16a**: VeBetterPassport - Whitelisting
 - **shard16b**: VeBetterPassport - GM & Governance
 - **shard17a**: X-Apps (additional tests)

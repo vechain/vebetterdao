@@ -145,7 +145,7 @@ jobs:
             label: Treasury
           - shard: shard7b
             label: Dynamic Base Allocation Pool
-          - shard: shard8
+          - shard: shard8-core
             label: VeBetterPassport - Core
           - shard: shard8a
             label: VeBetterPassport - Upgrade
@@ -161,7 +161,7 @@ jobs:
             label: VeBetterPassport - Delegation
           - shard: shard9
             label: VOT3
-          - shard: shard10
+          - shard: shard10-core
             label: VoterRewards
           - shard: shard10a
             label: VoterRewards - Upgrade
@@ -173,7 +173,7 @@ jobs:
             label: X2EarnRewardsPool
           - shard: shard13
             label: X-Allocation Pool
-          - shard: shard14
+          - shard: shard14-core
             label: X-Allocation Voting
           - shard: shard14a
             label: X-Allocation Voting - Upgrade
@@ -189,7 +189,7 @@ jobs:
             label: X-Apps - V7 Upgrade
           - shard: shard15e
             label: X-Apps - Upgradeability
-          - shard: shard16
+          - shard: shard16-pop
             label: VeBetterPassport - PoP Score
           - shard: shard16a
             label: VeBetterPassport - Whitelisting
