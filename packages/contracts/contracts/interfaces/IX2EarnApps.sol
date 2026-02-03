@@ -264,18 +264,6 @@ interface IX2EarnApps {
   function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType memory);
 
   /**
-   * @dev Function to get the number of apps.
-   */
-  function appsCount() external view returns (uint256);
-
-  /**
-   * @dev Get a paginated list of apps
-   * @param startIndex The starting index of the pagination
-   * @param count The number of items to return
-   */
-  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
-
-  /**
    * @notice Get all the apps that exist in the VeBetter DAO ecosystem.
    * @dev An XApp must have been included in at least one allocation round to be considered an existing app.
    */

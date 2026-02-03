@@ -244,20 +244,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   }
 
   /**
-   * @dev See {IX2EarnApps-getPaginatedApps}.
-   */
-  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
-    return AppStorageUtils.getPaginatedApps(_getAppsStorageStorage(), startIndex, count);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-appsCount}.
-   */
-  function appsCount() external view returns (uint256) {
-    return AppStorageUtils.appsCount(_getAppsStorageStorage());
-  }
-
-  /**
    * @dev See {IX2EarnApps-appURI}.
    */
   function appURI(bytes32 appId) public view returns (string memory) {

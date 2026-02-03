@@ -334,29 +334,6 @@ describe("X-Apps - Core Features - @shard15a", function () {
   })
 
   describe("Fetch apps", function () {
-    it("Can get eligible apps count", async function () {
-      const { x2EarnApps, otherAccounts, owner, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      await x2EarnApps
-        .connect(creator1)
-        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
-
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      await endorseApp(app1Id, owner)
-
-      await x2EarnApps
-        .connect(creator2)
-        .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
-
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-      await endorseApp(app2Id, otherAccount)
-
-      const appsCount = await x2EarnApps.appsCount()
-      expect(appsCount).to.eql(2n)
-    })
-
     it("Can get unendorsed app ids", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -377,10 +354,6 @@ describe("X-Apps - Core Features - @shard15a", function () {
       // unendorsed apps
       const appIds = await x2EarnApps.unendorsedAppIds()
       expect(appIds).to.eql([app1Id, app2Id])
-
-      // endorsed apps
-      const appsCount = await x2EarnApps.appsCount()
-      expect(appsCount).to.eql(0n)
     })
 
     it("Can retrieve app by id", async function () {
@@ -434,45 +407,6 @@ describe("X-Apps - Core Features - @shard15a", function () {
       expect(apps.length).to.eql(2)
     })
 
-    it("Can paginate apps", async function () {
-      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      await x2EarnApps
-        .connect(creator1)
-        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      await endorseApp(app1Id, otherAccounts[0])
-
-      await x2EarnApps
-        .connect(creator2)
-        .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-      await endorseApp(app2Id, otherAccounts[1])
-
-      await x2EarnApps
-        .connect(creator3)
-        .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
-      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
-      await endorseApp(app3Id, otherAccounts[2])
-
-      await x2EarnApps
-        .connect(creator4)
-        .submitApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
-      const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
-      await endorseApp(app4Id, otherAccounts[3])
-
-      const apps1 = await x2EarnApps.getPaginatedApps(0, 2)
-      expect(apps1.length).to.eql(2)
-
-      const apps2 = await x2EarnApps.getPaginatedApps(2, 5)
-      expect(apps2.length).to.eql(2)
-
-      expect(apps1).to.not.eql(apps2)
-
-      const allApps = await x2EarnApps.getPaginatedApps(0, 4)
-      expect(allApps).to.eql([...apps1, ...apps2])
-    })
-
     it("Can get number of apps", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
@@ -500,13 +434,8 @@ describe("X-Apps - Core Features - @shard15a", function () {
       const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
       await endorseApp(app4Id, otherAccounts[3])
 
-      const count = await x2EarnApps.appsCount()
-      expect(count).to.eql(4n)
-
-      const apps = await x2EarnApps.getPaginatedApps(0, 4)
+      const apps = await x2EarnApps.apps()
       expect(apps.length).to.eql(4)
-
-      await expect(x2EarnApps.getPaginatedApps(4, 4)).to.revertedWithCustomError(x2EarnApps, "X2EarnInvalidStartIndex")
     })
 
     it("Can fetch up to 1000 apps without pagination", async function () {

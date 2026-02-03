@@ -42,30 +42,6 @@ library AppStorageUtils {
 
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
 
-  function getPaginatedApps(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    uint startIndex,
-    uint count
-  ) external view returns (X2EarnAppsDataTypes.App[] memory) {
-    uint256 length = $._appIds.length;
-    if (length <= startIndex) {
-      revert X2EarnInvalidStartIndex();
-    }
-
-    uint256 endIndex = startIndex + count;
-    if (endIndex > length) {
-      endIndex = length;
-    }
-
-    X2EarnAppsDataTypes.App[] memory paginatedApps = new X2EarnAppsDataTypes.App[](endIndex - startIndex);
-
-    for (uint i = startIndex; i < endIndex; i++) {
-      paginatedApps[i - startIndex] = $._apps[$._appIds[i]];
-    }
-
-    return paginatedApps;
-  }
-
   function appSubmitted(
     X2EarnAppsStorageTypes.AppsStorageStorage storage $,
     bytes32 appId
@@ -75,20 +51,6 @@ library AppStorageUtils {
 
   function appExists(X2EarnAppsStorageTypes.AppsStorageStorage storage $, bytes32 appId) external view returns (bool) {
     return $._apps[appId].createdAtTimestamp != 0;
-  }
-
-  function getAppStorage(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    bytes32 appId
-  ) external view returns (X2EarnAppsDataTypes.App memory) {
-    if ($._apps[appId].id == bytes32(0)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-    return $._apps[appId];
-  }
-
-  function appsCount(X2EarnAppsStorageTypes.AppsStorageStorage storage $) external view returns (uint256) {
-    return $._appIds.length;
   }
 
   function hashAppName(string memory appName) external pure returns (bytes32) {
