@@ -499,10 +499,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     string memory _appName,
     string memory _appMetadataURI
   ) external virtual {
-    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage = X2EarnAppsStorageTypes
-      ._getAdministrationStorage();
-
-    if (adminStorage._x2EarnCreatorContract.balanceOf(msg.sender) == 0) {
+    if (X2EarnAppsStorageTypes._getAdministrationStorage()._x2EarnCreatorContract.balanceOf(msg.sender) == 0) {
       revert X2EarnUnverifiedCreator(msg.sender);
     }
     if (isCreatorOfAnyApp(msg.sender)) {

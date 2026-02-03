@@ -653,26 +653,6 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
   )
 }
 
-export const addAppThroughGovernance = async (
-  proposer: HardhatEthersSigner,
-  voter: HardhatEthersSigner,
-  appName: string = "Bike 4 Life" + Math.random(),
-  appAddress: string,
-  metadataURI: string = "metadataURI",
-) => {
-  const { xAllocationVoting } = await getOrDeployContractInstances({})
-
-  await createProposalAndExecuteIt(
-    proposer,
-    voter,
-    xAllocationVoting,
-    await ethers.getContractFactory("XAllocationVoting"),
-    "Add app to the list",
-    "addApp",
-    [appAddress, appAddress, appName, metadataURI],
-  )
-}
-
 export const waitForBlock = async (blockNumber: number) => {
   const currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
 

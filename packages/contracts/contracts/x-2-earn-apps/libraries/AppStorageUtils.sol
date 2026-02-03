@@ -54,12 +54,6 @@ library AppStorageUtils {
     return keccak256(abi.encodePacked(appName));
   }
 
-  function addApp(bytes32 appId) external {
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $ = X2EarnAppsStorageTypes._getAppsStorageStorage();
-    $._apps[appId].createdAtTimestamp = block.timestamp;
-    $._appIds.push(appId);
-  }
-
   function registerApp(address teamWalletAddr, address admin, string memory appName) external returns (bytes32) {
     X2EarnAppsStorageTypes.AppsStorageStorage storage $ = X2EarnAppsStorageTypes._getAppsStorageStorage();
     if (teamWalletAddr == address(0)) {
