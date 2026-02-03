@@ -87,10 +87,9 @@ library EndorsementUtils {
   event EndorsementScoreThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
 
   // ------------------------------- Getter Functions -------------------------------
-  function getEndorsers(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    bytes32 appId
-  ) external view returns (address[] memory) {
+  function getEndorsers(bytes32 appId) external view returns (address[] memory) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     uint256 length = $._appEndorsers[appId].length;
     address[] memory endorsers = new address[](length);
     uint256 count = 0;
@@ -113,10 +112,9 @@ library EndorsementUtils {
     return endorsers;
   }
 
-  function getUsersEndorsementScore(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    address user
-  ) external view returns (uint256) {
+  function getUsersEndorsementScore(address user) external view returns (uint256) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     DataTypes.Token[] memory nodeLevels = $._stargateNFT.tokensManagedBy(user);
     uint256 totalScore;
 
@@ -127,72 +125,66 @@ library EndorsementUtils {
     return totalScore;
   }
 
-  function getNodeEndorsementScore(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    uint256 nodeId
-  ) external view returns (uint256) {
+  function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     uint8 nodeLevel = $._stargateNFT.getTokenLevel(nodeId);
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 
-  function nodeToEndorsedApp(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    uint256 nodeId
-  ) external view returns (bytes32) {
+  function nodeToEndorsedApp(uint256 nodeId) external view returns (bytes32) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     return $._nodeToEndorsedApp[nodeId];
   }
 
-  function nodeLevelEndorsementScore(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    uint8 nodeLevel
-  ) external view returns (uint256) {
+  function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 
-  function gracePeriod(X2EarnAppsStorageTypes.EndorsementStorage storage $) external view returns (uint256) {
+  function gracePeriod() external view returns (uint256) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     return $._gracePeriodDuration;
   }
 
-  function cooldownPeriod(X2EarnAppsStorageTypes.EndorsementStorage storage $) external view returns (uint256) {
+  function cooldownPeriod() external view returns (uint256) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     return $._cooldownPeriod;
   }
 
-  function endorsementScoreThreshold(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $
-  ) external view returns (uint256) {
+  function endorsementScoreThreshold() external view returns (uint256) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     return $._endorsementScoreThreshold;
   }
 
-  function isAppUnendorsed(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    bytes32 appId,
-    bool isBlacklisted
-  ) external view returns (bool) {
+  function isAppUnendorsed(bytes32 appId, bool isBlacklisted) external view returns (bool) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
     if (isBlacklisted) {
       return false;
     }
     return $._unendorsedAppsIndex[appId] > 0;
   }
 
-  function checkCooldown(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    uint256 nodeId
-  ) external view returns (bool) {
+  function checkCooldown(uint256 nodeId) external view returns (bool) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     uint256 requiredRound = $._endorsementRound[nodeId] + $._cooldownPeriod;
     return requiredRound > $._xAllocationVotingGovernor.currentRoundId();
   }
 
-  function unendorsedAppIds(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $
-  ) external view returns (bytes32[] memory) {
+  function unendorsedAppIds() external view returns (bytes32[] memory) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     return $._unendorsedApps;
   }
 
-  function getScore(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    bytes32 appId
-  ) external view returns (uint256) {
-    return $._appScores[appId];
+  function getScore(bytes32 appId) external view returns (uint256) {
+    return X2EarnAppsStorageTypes._getEndorsementStorage()._appScores[appId];
   }
 
   // ------------------------------- Setter Functions -------------------------------
@@ -222,10 +214,8 @@ library EndorsementUtils {
     return score;
   }
 
-  function updateNodeEndorsementScores(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    NodeStrengthScores calldata nodeStrengthScores
-  ) external {
+  function updateNodeEndorsementScores(NodeStrengthScores calldata nodeStrengthScores) external {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
     $._nodeEnodorsmentScore[1] = nodeStrengthScores.strength;
     $._nodeEnodorsmentScore[2] = nodeStrengthScores.thunder;
     $._nodeEnodorsmentScore[3] = nodeStrengthScores.mjolnir;
@@ -236,11 +226,8 @@ library EndorsementUtils {
     emit NodeStrengthScoresUpdated(nodeStrengthScores);
   }
 
-  function updateAppsPendingEndorsement(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    bytes32 appId,
-    bool remove
-  ) public {
+  function updateAppsPendingEndorsement(bytes32 appId, bool remove) public {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
     if (remove) {
       uint256 index = $._unendorsedAppsIndex[appId] - 1;
       uint256 lastIndex = $._unendorsedApps.length - 1;
@@ -257,46 +244,34 @@ library EndorsementUtils {
     }
   }
 
-  function setGracePeriod(X2EarnAppsStorageTypes.EndorsementStorage storage $, uint48 gracePeriodDuration) external {
+  function setGracePeriod(uint48 gracePeriodDuration) external {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
     emit GracePeriodUpdated($._gracePeriodDuration, gracePeriodDuration);
     $._gracePeriodDuration = gracePeriodDuration;
   }
 
-  function setCooldownPeriod(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    uint256 cooldownPeriodDuration
-  ) external {
+  function setCooldownPeriod(uint256 cooldownPeriodDuration) external {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
     emit CooldownPeriodUpdated($._cooldownPeriod, cooldownPeriodDuration);
     $._cooldownPeriod = cooldownPeriodDuration;
   }
 
-  function updateEndorsementScoreThreshold(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    uint256 scoreThreshold
-  ) external {
+  function updateEndorsementScoreThreshold(uint256 scoreThreshold) external {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
     emit EndorsementScoreThresholdUpdated($._endorsementScoreThreshold, scoreThreshold);
     $._endorsementScoreThreshold = scoreThreshold;
   }
 
-  function setEndorsementStatus(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    bytes32 appId,
-    bool endorsed
-  ) public {
-    updateAppsPendingEndorsement($, appId, endorsed);
+  function setEndorsementStatus(bytes32 appId, bool endorsed) public {
+    updateAppsPendingEndorsement(appId, endorsed);
     emit AppEndorsementStatusUpdated(appId, endorsed);
   }
 
   // ------------------------------- Core Logic Functions -------------------------------
-  function endorseApp(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
-    bytes32 appId,
-    uint256 nodeId,
-    bool isBlacklisted,
-    bool appExists,
-    bool isEligibleNow
-  ) external {
+  function endorseApp(bytes32 appId, uint256 nodeId, bool isBlacklisted, bool appExists, bool isEligibleNow) external {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     if (appsStorage._apps[appId].id == bytes32(0)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -342,14 +317,14 @@ library EndorsementUtils {
   }
 
   function unendorseApp(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
     bytes32 appId,
     uint256 nodeId,
     bool isBlacklisted,
     bool isEligibleNow,
     uint48 clock
   ) external returns (bool stillEligible) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
@@ -359,18 +334,19 @@ library EndorsementUtils {
       revert X2EarnNodeCooldownActive();
     }
 
-    return removeNodeEndorsement($, appsStorage, appId, nodeId, isBlacklisted, isEligibleNow, clock);
+    return removeNodeEndorsement(appId, nodeId, isBlacklisted, isEligibleNow, clock);
   }
 
   function removeNodeEndorsement(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
     bytes32 appId,
     uint256 nodeId,
     bool isBlacklisted,
     bool isEligibleNow,
     uint48 clock
   ) public returns (bool stillEligible) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
+
     if (appsStorage._apps[appId].id == bytes32(0)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -395,27 +371,24 @@ library EndorsementUtils {
     return stillEligible;
   }
 
-  function removeXAppSubmission(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
-    bytes32 appId
-  ) external {
+  function removeXAppSubmission(bytes32 appId) external {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
+
     if (appsStorage._apps[appId].id == bytes32(0)) {
       revert X2EarnNonexistentApp(appId);
     }
     if (appsStorage._apps[appId].createdAtTimestamp != 0) {
       revert NodeManagementXAppAlreadyIncluded(appId);
     }
-    updateAppsPendingEndorsement($, appId, true);
+    updateAppsPendingEndorsement(appId, true);
   }
 
-  function checkEndorsement(
-    X2EarnAppsStorageTypes.EndorsementStorage storage $,
-    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage,
-    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage,
-    bytes32 appId,
-    uint48 clock
-  ) external returns (bool) {
+  function checkEndorsement(bytes32 appId, uint48 clock) external returns (bool) {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage = X2EarnAppsStorageTypes
+      ._getVoteEligibilityStorage();
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+
     if (appsStorage._apps[appId].id == bytes32(0)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -458,7 +431,7 @@ library EndorsementUtils {
     // Check if app is unendorsed
     bool appUnendorsed = !isBlacklisted && $._unendorsedAppsIndex[appId] > 0;
     if (appUnendorsed) {
-      setEndorsementStatus($, appId, true);
+      setEndorsementStatus(appId, true);
     }
 
     $._appGracePeriodStart[appId] = 0;
@@ -474,7 +447,7 @@ library EndorsementUtils {
     bool appUnendorsed = !isBlacklisted && $._unendorsedAppsIndex[appId] > 0;
 
     if (!appUnendorsed) {
-      updateAppsPendingEndorsement($, appId, false);
+      updateAppsPendingEndorsement(appId, false);
       emit AppEndorsementStatusUpdated(appId, false);
     }
 

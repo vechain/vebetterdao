@@ -38,6 +38,16 @@ import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
  * @notice This library defines the primary storage types used within the X2EarnApps contract.
  */
 library X2EarnAppsStorageTypes {
+  bytes32 private constant VoteEligibilityStorageLocation =
+    0xb5b8d618af1ffb8d5bcc4bd23f445ba34ed08d7a16d1e1b5411cfbe7913e5900;
+  bytes32 private constant EndorsementStorageLocation =
+    0xc1a7bcdc0c77e8c77ade4541d1777901ab96ca598d164d89afa5c8dfbfc44300;
+  bytes32 private constant SettingsStorageLocation = 0x83b9a7e51f394efa93107c3888716138908bbbe611dfc86afa3639a826441100;
+  bytes32 private constant AppsStorageStorageLocation =
+    0xb6909058bd527140b8d55a44344c5e42f1f148f1b3b16df7641882df8dd72900;
+  bytes32 private constant AdministrationStorageLocation =
+    0x5830f0e95c01712d916c34d9e2fa42e9f749b325b67bce7382d70bb99c623500;
+
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.VoteEligibility
   struct VoteEligibilityStorage {
     bytes32[] _eligibleApps; // Array containing an up to date list of apps that are eligible for voting
@@ -92,5 +102,43 @@ library X2EarnAppsStorageTypes {
     mapping(address creator => uint256 apps) _creatorApps; // number of apps created by a creator
     IX2EarnCreator _x2EarnCreatorContract;
     IX2EarnRewardsPool _x2EarnRewardsPoolContract; // x2earn rewards pool contract to enable rewards pool for new apps
+  }
+
+  function _getVoteEligibilityStorage()
+    internal
+    pure
+    returns (X2EarnAppsStorageTypes.VoteEligibilityStorage storage $)
+  {
+    assembly {
+      $.slot := VoteEligibilityStorageLocation
+    }
+  }
+
+  function _getEndorsementStorage() internal pure returns (X2EarnAppsStorageTypes.EndorsementStorage storage $) {
+    assembly {
+      $.slot := EndorsementStorageLocation
+    }
+  }
+
+  function _getContractSettingsStorage()
+    internal
+    pure
+    returns (X2EarnAppsStorageTypes.ContractSettingsStorage storage $)
+  {
+    assembly {
+      $.slot := SettingsStorageLocation
+    }
+  }
+
+  function _getAppsStorageStorage() internal pure returns (X2EarnAppsStorageTypes.AppsStorageStorage storage $) {
+    assembly {
+      $.slot := AppsStorageStorageLocation
+    }
+  }
+
+  function _getAdministrationStorage() internal pure returns (X2EarnAppsStorageTypes.AdministrationStorage storage $) {
+    assembly {
+      $.slot := AdministrationStorageLocation
+    }
   }
 }

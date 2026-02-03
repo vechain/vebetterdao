@@ -42,32 +42,26 @@ library AppStorageUtils {
 
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
 
-  function appSubmitted(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    bytes32 appId
-  ) external view returns (bool) {
-    return $._apps[appId].id != bytes32(0);
+  function appSubmitted(bytes32 appId) external view returns (bool) {
+    return X2EarnAppsStorageTypes._getAppsStorageStorage()._apps[appId].id != bytes32(0);
   }
 
-  function appExists(X2EarnAppsStorageTypes.AppsStorageStorage storage $, bytes32 appId) external view returns (bool) {
-    return $._apps[appId].createdAtTimestamp != 0;
+  function appExists(bytes32 appId) external view returns (bool) {
+    return X2EarnAppsStorageTypes._getAppsStorageStorage()._apps[appId].createdAtTimestamp != 0;
   }
 
   function hashAppName(string memory appName) external pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
   }
 
-  function addApp(X2EarnAppsStorageTypes.AppsStorageStorage storage $, bytes32 appId) external {
+  function addApp(bytes32 appId) external {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $ = X2EarnAppsStorageTypes._getAppsStorageStorage();
     $._apps[appId].createdAtTimestamp = block.timestamp;
     $._appIds.push(appId);
   }
 
-  function registerApp(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    address teamWalletAddr,
-    address admin,
-    string memory appName
-  ) external returns (bytes32) {
+  function registerApp(address teamWalletAddr, address admin, string memory appName) external returns (bytes32) {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $ = X2EarnAppsStorageTypes._getAppsStorageStorage();
     if (teamWalletAddr == address(0)) {
       revert X2EarnInvalidAddress(teamWalletAddr);
     }
@@ -87,11 +81,14 @@ library AppStorageUtils {
   }
 
   function getAppsInfo(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage,
-    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage,
     bytes32[] memory appIds
   ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $ = X2EarnAppsStorageTypes._getAppsStorageStorage();
+    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage = X2EarnAppsStorageTypes
+      ._getAdministrationStorage();
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage = X2EarnAppsStorageTypes
+      ._getVoteEligibilityStorage();
+
     uint256 length = appIds.length;
     X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
       length
@@ -114,12 +111,13 @@ library AppStorageUtils {
     return allApps;
   }
 
-  function app(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage,
-    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage,
-    bytes32 appId
-  ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType memory) {
+  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType memory) {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $ = X2EarnAppsStorageTypes._getAppsStorageStorage();
+    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage = X2EarnAppsStorageTypes
+      ._getAdministrationStorage();
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage = X2EarnAppsStorageTypes
+      ._getVoteEligibilityStorage();
+
     if ($._apps[appId].id == bytes32(0)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -139,11 +137,13 @@ library AppStorageUtils {
       );
   }
 
-  function apps(
-    X2EarnAppsStorageTypes.AppsStorageStorage storage $,
-    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage,
-    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage
-  ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+  function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    X2EarnAppsStorageTypes.AppsStorageStorage storage $ = X2EarnAppsStorageTypes._getAppsStorageStorage();
+    X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage = X2EarnAppsStorageTypes
+      ._getAdministrationStorage();
+    X2EarnAppsStorageTypes.VoteEligibilityStorage storage voteStorage = X2EarnAppsStorageTypes
+      ._getVoteEligibilityStorage();
+
     uint256 length = $._appIds.length;
     X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
       length
