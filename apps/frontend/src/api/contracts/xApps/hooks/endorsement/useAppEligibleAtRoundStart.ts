@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
 import { useAllocationRoundSnapshot } from "../../../xAllocations/hooks/useAllocationRoundSnapshot"

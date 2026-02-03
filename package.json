@@ -128,8 +128,7 @@
     "cookie": "^0.7.1",
     "tmp": "^0.2.4",
     "hono": "^4.10.2",
-    "preact": "10.28.2",
-    "eslint-plugin-storybook": "0.10.2"
+    "preact": "10.28.2"
   },
   "packageManager": "yarn@1.22.22",
   "workspaces": [
