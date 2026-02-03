@@ -21,6 +21,7 @@ import {
   X2EarnAppsV4,
   X2EarnAppsV5,
   X2EarnAppsV6,
+  X2EarnAppsV7,
   X2EarnRewardsPool,
   X2EarnRewardsPoolV4,
   XAllocationPool,
@@ -56,7 +57,7 @@ describe("Contract upgradeablity @shard15e", () => {
   })
 
   it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
-    const { x2EarnApps, owner, administrationUtils, endorsementUtils, voteEligibilityUtils } =
+    const { x2EarnApps, owner, administrationUtils, endorsementUtils, voteEligibilityUtils, appStorageUtils } =
       await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -67,6 +68,7 @@ describe("Contract upgradeablity @shard15e", () => {
         AdministrationUtils: await administrationUtils.getAddress(),
         EndorsementUtils: await endorsementUtils.getAddress(),
         VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        AppStorageUtils: await appStorageUtils.getAddress(),
       },
     })
 
@@ -87,7 +89,7 @@ describe("Contract upgradeablity @shard15e", () => {
   })
 
   it("Only user with UPGRADER_ROLE should be able to upgrade the contract", async function () {
-    const { x2EarnApps, otherAccount, administrationUtils, endorsementUtils, voteEligibilityUtils } =
+    const { x2EarnApps, otherAccount, administrationUtils, endorsementUtils, voteEligibilityUtils, appStorageUtils } =
       await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -98,6 +100,7 @@ describe("Contract upgradeablity @shard15e", () => {
         AdministrationUtils: await administrationUtils.getAddress(),
         EndorsementUtils: await endorsementUtils.getAddress(),
         VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        AppStorageUtils: await appStorageUtils.getAddress(),
       },
     })
     const implementation = await Contract.deploy()
@@ -130,8 +133,10 @@ describe("Contract upgradeablity @shard15e", () => {
       administrationUtils,
       endorsementUtils,
       voteEligibilityUtils,
+      appStorageUtils,
       x2EarnRewardsPool,
       x2EarnCreator,
+      stargateNftMock,
       administrationUtilsV2,
       endorsementUtilsV2,
       voteEligibilityUtilsV2,
@@ -142,6 +147,15 @@ describe("Contract upgradeablity @shard15e", () => {
       administrationUtilsV4,
       endorsementUtilsV4,
       voteEligibilityUtilsV4,
+      administrationUtilsV5,
+      endorsementUtilsV5,
+      voteEligibilityUtilsV5,
+      administrationUtilsV6,
+      endorsementUtilsV6,
+      voteEligibilityUtilsV6,
+      administrationUtilsV7,
+      endorsementUtilsV7,
+      voteEligibilityUtilsV7,
     } = await getOrDeployContractInstances({
       forceDeploy: true,
     })
@@ -251,19 +265,71 @@ describe("Contract upgradeablity @shard15e", () => {
     expect(appsV3).to.eql(appsV4)
 
     // Upgrade X2EarnAppsV4 to X2EarnAppsV5
-    const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", await x2EarnAppsV4.getAddress(), [], {
+    const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnAppsV5", await x2EarnAppsV4.getAddress(), [], {
       version: 5,
       libraries: {
-        AdministrationUtils: await administrationUtils.getAddress(),
-        EndorsementUtils: await endorsementUtils.getAddress(),
-        VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        AdministrationUtilsV5: await administrationUtilsV5.getAddress(),
+        EndorsementUtilsV5: await endorsementUtilsV5.getAddress(),
+        VoteEligibilityUtilsV5: await voteEligibilityUtilsV5.getAddress(),
       },
-    })) as X2EarnApps
+    })) as X2EarnAppsV5
     // start new round
     await startNewAllocationRound()
 
     const appsV5 = await x2EarnAppsV5.apps()
     expect(appsV4).to.eql(appsV5)
+
+    // Upgrade X2EarnAppsV5 to X2EarnAppsV6
+    const x2EarnAppsV6 = (await upgradeProxy("X2EarnAppsV5", "X2EarnAppsV6", await x2EarnAppsV5.getAddress(), [], {
+      version: 6,
+      libraries: {
+        AdministrationUtilsV6: await administrationUtilsV6.getAddress(),
+        EndorsementUtilsV6: await endorsementUtilsV6.getAddress(),
+        VoteEligibilityUtilsV6: await voteEligibilityUtilsV6.getAddress(),
+      },
+    })) as X2EarnAppsV6
+    // start new round
+    await startNewAllocationRound()
+
+    const appsV6 = await x2EarnAppsV6.apps()
+    expect(appsV5).to.eql(appsV6)
+
+    // Upgrade X2EarnAppsV6 to X2EarnAppsV7
+    const x2EarnAppsV7 = (await upgradeProxy(
+      "X2EarnAppsV6",
+      "X2EarnAppsV7",
+      await x2EarnAppsV6.getAddress(),
+      [await stargateNftMock.getAddress()],
+      {
+        version: 7,
+        libraries: {
+          AdministrationUtilsV7: await administrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await endorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await voteEligibilityUtilsV7.getAddress(),
+        },
+      },
+    )) as X2EarnAppsV7
+    // start new round
+    await startNewAllocationRound()
+
+    const appsV7 = await x2EarnAppsV7.apps()
+    expect(appsV6).to.eql(appsV7)
+
+    // Upgrade X2EarnAppsV7 to X2EarnApps (V8 - latest)
+    const x2EarnAppsV8 = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
+      version: 8,
+      libraries: {
+        AdministrationUtils: await administrationUtils.getAddress(),
+        EndorsementUtils: await endorsementUtils.getAddress(),
+        VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        AppStorageUtils: await appStorageUtils.getAddress(),
+      },
+    })) as X2EarnApps
+    // start new round
+    await startNewAllocationRound()
+
+    const appsV8 = await x2EarnAppsV8.apps()
+    expect(appsV7).to.eql(appsV8)
   })
 
   it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
@@ -457,6 +523,7 @@ describe("Contract upgradeablity @shard15e", () => {
       administrationUtils,
       endorsementUtils,
       voteEligibilityUtils,
+      appStorageUtils,
     } = await getOrDeployContractInstances({
       forceDeploy: true,
     })
@@ -783,6 +850,7 @@ describe("Contract upgradeablity @shard15e", () => {
       endorsementUtils,
       administrationUtils,
       voteEligibilityUtils,
+      appStorageUtils,
       nodeManagement,
       x2EarnCreator,
       administrationUtilsV2,
@@ -1237,6 +1305,7 @@ describe("Contract upgradeablity @shard15e", () => {
       administrationUtils,
       endorsementUtils,
       voteEligibilityUtils,
+      appStorageUtils,
       administrationUtilsV2,
       endorsementUtilsV2,
       voteEligibilityUtilsV2,
