@@ -198,7 +198,22 @@ library AdministrationUtils {
     mapping(bytes32 appId => address[]) storage rewardDistributors,
     bytes32 appId,
     address account
-  ) public view returns (bool) {
+  ) external view returns (bool) {
+    return _isRewardDistributor(rewardDistributors, appId, account);
+  }
+
+  /**
+   * @dev Internal function to check if an account is a reward distributor for an app.
+   * @param rewardDistributors Mapping of app IDs to arrays of reward distributor addresses.
+   * @param appId The ID of the app.
+   * @param account The account address to check.
+   * @return True if the account is a reward distributor, false otherwise.
+   */
+  function _isRewardDistributor(
+    mapping(bytes32 appId => address[]) storage rewardDistributors,
+    bytes32 appId,
+    address account
+  ) internal view returns (bool) {
     return contains(rewardDistributors[appId], account);
   }
 
@@ -213,23 +228,23 @@ library AdministrationUtils {
     mapping(bytes32 appId => address[]) storage moderators,
     bytes32 appId,
     address account
-  ) public view returns (bool) {
-    return contains(moderators[appId], account);
+  ) external view returns (bool) {
+    return _isAppModerator(moderators, appId, account);
   }
 
   /**
-   * @dev Checks if an account is a creator for an app.
-   * @param creators Mapping of app IDs to arrays of creator addresses.
+   * @dev Internal function to check if an account is a moderator for an app.
+   * @param moderators Mapping of app IDs to arrays of moderator addresses.
    * @param appId The ID of the app.
    * @param account The account address to check.
-   * @return True if the account is a creator, false otherwise.
+   * @return True if the account is a moderator, false otherwise.
    */
-  function isAppCreator(
-    mapping(bytes32 appId => address[]) storage creators,
+  function _isAppModerator(
+    mapping(bytes32 appId => address[]) storage moderators,
     bytes32 appId,
     address account
-  ) public view returns (bool) {
-    return contains(creators[appId], account);
+  ) internal view returns (bool) {
+    return contains(moderators[appId], account);
   }
 
   // ------------------------------- Setter Functions -------------------------------
@@ -331,7 +346,7 @@ library AdministrationUtils {
       revert X2EarnNonexistentApp(appId);
     }
 
-    if (!isRewardDistributor(rewardDistributors, appId, distributor)) {
+    if (!_isRewardDistributor(rewardDistributors, appId, distributor)) {
       revert X2EarnNonexistentRewardDistributor(appId, distributor);
     }
 
@@ -409,7 +424,7 @@ library AdministrationUtils {
       revert X2EarnNonexistentApp(appId);
     }
 
-    if (!isAppModerator(moderators, appId, moderator)) {
+    if (!_isAppModerator(moderators, appId, moderator)) {
       revert X2EarnNonexistentModerator(appId, moderator);
     }
 
@@ -444,7 +459,8 @@ library AdministrationUtils {
       revert X2EarnNonexistentApp(appId);
     }
 
-    if (!isAppCreator(creators, appId, creator)) {
+    // Check if the address is a creator of the app
+    if (!contains(creators[appId], creator)) {
       revert X2EarnNonexistentCreator(appId, creator);
     }
 

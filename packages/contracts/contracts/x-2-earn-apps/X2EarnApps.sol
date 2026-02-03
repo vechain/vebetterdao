@@ -351,15 +351,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   }
 
   /**
-   * @dev Returns true if an account is a creator of the app.
-   * @param appId the hashed name of the app
-   * @param account the address of the account
-   */
-  function isAppCreator(bytes32 appId, address account) external view returns (bool) {
-    return AdministrationUtils.isAppCreator(_getAdministrationStorage()._creators, appId, account);
-  }
-
-  /**
    * @dev Returns true if the creator has already been used for another app.
    * @param creator the address of the creator
    */

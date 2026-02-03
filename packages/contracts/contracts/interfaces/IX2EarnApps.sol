@@ -334,14 +334,6 @@ interface IX2EarnApps {
   function appCreators(bytes32 appId) external view returns (address[] memory);
 
   /**
-   * @dev Check if an account is the creator of the app
-   *
-   * @param appId the hashed name of the app
-   * @param account the address of the account
-   */
-  function isAppCreator(bytes32 appId, address account) external view returns (bool);
-
-  /**
    * @dev Get the number of apps created by an account.
    *
    * @param creator the address of the creator
