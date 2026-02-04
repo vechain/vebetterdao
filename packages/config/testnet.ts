@@ -16,11 +16,17 @@ const config: AppConfig = {
   treasuryContractAddress: "0x3dB617e4ad9180ae507A56B777f8c6b4F5854855",
   x2EarnAppsContractAddress: "0x58fa1dDdFF32BB53dBDed2443Cea908951dFB306",
   x2EarnRewardsPoolContractAddress: "0x3B32C6e1892efEF917e5e630d45d898227F61166",
-  nodeManagementContractAddress: "0x0A548b38b03d0dA349483f5d3bcc46650313798D",
+  tokenAuctionContractAddress: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c",
+  nodeManagementContractAddress: "0x8bcbfc20ee39c94f4e60afc5d78c402f70b4f3b2",
   veBetterPassportContractAddress: "0xB08939f434Ac5610D3847063bABd1F8833a66d75",
   x2EarnCreatorContractAddress: "0x2ea5424e92E9a803c5971b50350d119cdD7e196E",
   b3trMultiSigAddress: "0x15bDc96B5C490A7948dA856B4Db32408DDD89a4B",
-  indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
+  stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
+  stargateContractAddress: "0x0000000000000000000000000000000000000000",
+  grantsManagerContractAddress: "0x0000000000000000000000000000000000000001",
+  relayerRewardsPoolContractAddress: "0x0000000000000000000000000000000000000000",
+  dbaPoolContractAddress: "0x0000000000000000000000000000000000000000",
+  indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",
@@ -73,6 +79,9 @@ const config: AppConfig = {
     passportPoPScoreLogicAddress: "0x01a488CF0f941098bE0e7dB14DE6046F1b51C164",
     passportSignalingLogicAddress: "0xd2599f2BBf3E3f45344d3FDFb1680f784eC3C911",
     passportWhitelistAndBlacklistLogicAddress: "0x1596e69Bd430388A860CEf94721aB39a12bcC1d1",
+  },
+  xAllocationVotingLibraries: {
+    autoVotingLogicAddress: "0x0000000000000000000000000000000000000000",
   },
 }
 export default config
