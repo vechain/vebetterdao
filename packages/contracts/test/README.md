@@ -21,8 +21,11 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard4f**: Governance - V7 Upgrade
 - **shard4g**: Governance - V8 Upgrade
 - **shard4h**: Governance - V8 Compatibility
+- **shard4i**: Governance - Grants Manager V2 Upgrade
+- **shard4j**: Governance - Grants Manager V2 Compatibility
 - **shard6**: TimeLock
 - **shard7**: Treasury
+- **shard7b**: Dynamic Base Allocation Pool
 - **shard8-core**: VeBetterPassport - Core (Contract parameters, Checks, Configurator, Clock)
 - **shard8a**: VeBetterPassport - Upgrade
 - **shard8b**: VeBetterPassport - Signaling
@@ -50,5 +53,6 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard16b**: VeBetterPassport - GM & Governance
 - **shard17a**: X-Apps (additional tests)
 - **shard17b**: X-Apps (additional tests)
+- **shard18**: RelayerRewardsPool
 
 When adding new tests, assign them to an appropriate shard to maintain balanced execution times across all shards.
