@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/factories/ve-better-passport/VeBetterPassport__factory"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/x-2-earn-apps/X2EarnApps__factory"
 import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"

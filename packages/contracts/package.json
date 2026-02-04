@@ -28,7 +28,7 @@
       "import": "./dist/esm/contracts/typechain-types/factories/contracts/*.js",
       "require": "./dist/cjs/contracts/typechain-types/factories/contracts/*.js",
       "types": "./dist/esm/contracts/typechain-types/factories/contracts/*.d.ts",
-      "default": "./typechain-types/factories/contracts/*"
+      "default": "./typechain-types/factories/*"
     },
     "./@openzeppelin/*": {
       "import": "./dist/esm/contracts/typechain-types/factories/@openzeppelin/contracts/*.js",
