@@ -13,18 +13,17 @@ for ((i=1; i<=$1; i++)); do
   echo "╚════════════════════════════════════════════════════════════════╝"
   echo ""
 
-  # Run claude with streaming output (no --print flag)
-  # --verbose shows context usage and other details
-  claude --verbose --dangerously-skip-permissions -p "@prd.json @progress.txt \
+  claude --dangerously-skip-permissions --verbose --print --output-format stream-json "@prd.json @progress.txt \
 1. Find the highest-priority feature with passes:false and work only on that feature. \
 2. Check that the types check via yarn kit:typecheck. \
 3. Update prd.json: set passes:true and add notes for the completed story. \
 4. Append your progress to progress.txt with details of what was done. \
 5. Make a git commit for that feature. \
 ONLY WORK ON A SINGLE FEATURE. \
-If all stories have passes:true, output <promise>COMPLETE</promise> and stop."
+If all stories have passes:true, output <promise>COMPLETE</promise> and stop." \
+  | jq -rj 'if .type == "assistant" then (.message.content[]? | if .type == "text" then .text else "\n🔧 Tool: \(.name)\n" end) elif .type == "result" then "\n✅ Done\n" else empty end' 2>/dev/null
 
-  exit_code=$?
+  exit_code=${PIPESTATUS[0]}
 
   echo ""
   echo "────────────────────────────────────────────────────────────────"
