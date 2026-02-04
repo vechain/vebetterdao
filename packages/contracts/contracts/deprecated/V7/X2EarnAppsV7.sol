@@ -27,7 +27,7 @@ import { X2EarnAppsUpgradeableV7 } from "./x-2-earn-apps/X2EarnAppsUpgradeableV7
 import { AdministrationUpgradeableV7 } from "./x-2-earn-apps/modules/AdministrationUpgradeableV7.sol";
 import { AppsStorageUpgradeableV7 } from "./x-2-earn-apps/modules/AppsStorageUpgradeableV7.sol";
 import { ContractSettingsUpgradeableV7 } from "./x-2-earn-apps/modules/ContractSettingsUpgradeableV7.sol";
-import { VoteEligibilityUpgradeableV7 } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeableV7.sol";
+import { VoteEligibilityUpgradeableV7 } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeableV7.sol";
 import { EndorsementUpgradeableV7 } from "./x-2-earn-apps/modules/EndorsementUpgradeableV7.sol";
 import { EndorsementUtilsV7 } from "./x-2-earn-apps/libraries/EndorsementUtilsV7.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
