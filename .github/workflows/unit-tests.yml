@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - testnet
-      - feat/stargate
+      - feat/reduce-contracts-size
   push:
     branches:
       - main
