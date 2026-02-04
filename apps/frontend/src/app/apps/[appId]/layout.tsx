@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/x-2-earn-apps/X2EarnApps__factory"
 import { Metadata, ResolvingMetadata } from "next"
 //Need precise import to avoid having dapp-kit imported and indexed somewhere
 
