@@ -29,15 +29,13 @@ export const NewAppPageFormContent = () => {
   const [isMinting, setIsMinting] = useState(false)
   const [mintError, setMintError] = useState(false)
   const mintAttemptedRef = useRef(false)
-  const selfMint = useSelfMintCreatorNFT({
+  const { sendTransaction: selfMint } = useSelfMintCreatorNFT({
     onSuccess: () => setIsMinting(false),
     onFailure: () => {
       setMintError(true)
       setIsMinting(false)
     },
   })
-  const selfMintRef = useRef(selfMint)
-  selfMintRef.current = selfMint
   const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
   const [isSuccessSubmission, setIsSuccessSubmission] = useState(false)
   const latestSubmission = submission?.submissions[0]
@@ -61,11 +59,11 @@ export const NewAppPageFormContent = () => {
     if (isSelfMintEnabled && !mintAttemptedRef.current) {
       mintAttemptedRef.current = true
       setIsMinting(true)
-      selfMintRef.current.sendTransaction()
+      selfMint()
       return
     }
     if (!isSelfMintEnabled) router.push("/")
-  }, [hasCreatorNft, router, account?.address, isSelfMintEnabled])
+  }, [hasCreatorNft, router, account?.address, isSelfMintEnabled, selfMint])
 
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)
