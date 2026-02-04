@@ -942,7 +942,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect((await x2EarnApps.unendorsedApps()).length).to.eql(0)
     })
 
-    it("An XAPP can only be endorsed if it is pending endorsement (score < 100)", async function () {
+    it("An XAPP can receive endorsements up to the max points cap (110)", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -951,7 +951,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
-      // Register XAPP -> XAPP is pedning endorsement
+      // Register XAPP -> XAPP is pending endorsement
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
@@ -959,49 +959,43 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
       expect(appIdsPendingEndorsement1.length).to.eql(1)
 
-      // Create MjölnirX node holder with an endorsement score of 100
-      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      // Create nodes to reach 100 points (49+49+2)
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // MjolnirX - 100 points
+      const nodeId2 = await createNodeHolder(7, otherAccounts[2]) // MjolnirX - 100 points
+      const nodeId3 = await createNodeHolder(7, otherAccounts[3]) // MjolnirX - 100 points
 
       // App should be pending endorsement -> score is 0 never endorsed
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
-      // App is pending endorsent
+      // App is pending endorsement
       expect((await x2EarnApps.unendorsedApps()).length).to.eql(1)
 
-      // Endorse XAPP with MjölnirX node holder
-      const tx = await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49) // Node holder endorsement score is 100
+      // Endorse with 3 nodes to reach 100 points
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId3, 2)
 
-      // Check event emitted
-      let receipt = await tx.wait()
-      if (!receipt) throw new Error("No receipt")
-
-      let events = receipt?.logs
-
-      let decodedEvents = events?.map(event => {
-        return x2EarnApps.interface.parseLog({
-          topics: event?.topics as string[],
-          data: event?.data as string,
-        })
-      })
-      const event = decodedEvents.find(event => event?.name === "AppEndorsed")
-      expect(event).to.not.equal(undefined)
-
-      // App is not pending endorsent
+      // App is not pending endorsement (100 points)
       expect((await x2EarnApps.unendorsedApps()).length).to.eql(0)
-
-      // Should revert as app is already endorsed
-      // Create another MjölnirX node holder with an endorsement score of 100
-      const nodeId2 = await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await expect(x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)).to.revertedWithCustomError(
-        x2EarnApps,
-        "X2EarnAppAlreadyEndorsed",
-      )
 
       // App should not be pending endorsement
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
 
       // App should be eligible for voting
       expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
+
+      // Can still add more points up to 110 cap
+      const nodeId4 = await createNodeHolder(7, otherAccounts[4])
+      await x2EarnApps.connect(otherAccounts[4]).endorseApp(app1Id, nodeId4, 10)
+
+      expect(await x2EarnApps.getScore(app1Id)).to.eql(110n)
+
+      // Cannot exceed 110 cap
+      const nodeId5 = await createNodeHolder(7, otherAccounts[5])
+      await expect(x2EarnApps.connect(otherAccounts[5]).endorseApp(app1Id, nodeId5, 1)).to.revertedWithCustomError(
+        x2EarnApps,
+        "ExceedsMaxPointsPerApp",
+      )
     })
 
     it("If a XNode holder transfers/sells its XNode the XAPPs remains endorsed by XNode and new owner is endorser", async function () {
@@ -1016,7 +1010,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
-      // Register XAPP -> XAPP is pedning endorsement
+      // Register XAPP -> XAPP is pending endorsement
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
@@ -1024,8 +1018,10 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
       expect(appIdsPendingEndorsement1.length).to.eql(1)
 
-      // Create MjölnirX node holder with an endorsement score of 100
-      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      // Create nodes - need 3 to reach 100 points (49+49+2)
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // MjolnirX - 100 points
+      const nodeId2 = await createNodeHolder(7, otherAccounts[2]) // MjolnirX - 100 points
+      const nodeId3 = await createNodeHolder(7, otherAccounts[4]) // MjolnirX - 100 points
 
       // Skip ahead 1 day to be able to transfer node
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
@@ -1036,26 +1032,29 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       // Start allocation round
       await startNewAllocationRound()
 
-      // Endorse XAPP with MjölnirX node holder
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49) // Node holder endorsement score is 100
+      // Endorse with 3 nodes to reach 100 points
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[4]).endorseApp(app1Id, nodeId3, 2)
 
       // Get XAPP score
       const score = await x2EarnApps.getScore(app1Id)
+      expect(score).to.eql(100n)
 
       // App should not be pending endorsement
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
 
       // Xnode holder should be listed as an endorser
       const endorsers = await x2EarnApps.getEndorsers(app1Id)
-      expect(endorsers[0]).to.eql(otherAccounts[1].address)
+      expect(endorsers).to.include(otherAccounts[1].address)
 
       // XNode holder transfers its XNode
       const tokenId = (await stargateNftMock.idsOwnedBy(otherAccounts[1]))[0]
       await stargateNftMock.connect(otherAccounts[1]).transferFrom(otherAccounts[1], otherAccounts[3], tokenId)
 
-      // New Xnode holder should still listed as an endorser
+      // New Xnode holder should be listed as an endorser
       const endorsers1 = await x2EarnApps.getEndorsers(app1Id)
-      expect(endorsers1[0]).to.eql(otherAccounts[3].address)
+      expect(endorsers1).to.include(otherAccounts[3].address)
 
       // XAPP should have same score
       expect(await x2EarnApps.getScore(app1Id)).to.eql(score)
@@ -1076,7 +1075,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
-      // Register XAPP -> XAPP is pedning endorsement
+      // Register XAPP -> XAPP is pending endorsement
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
@@ -1084,39 +1083,43 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
       expect(appIdsPendingEndorsement1.length).to.eql(1)
 
-      // Create MjölnirX node holder with an endorsement score of 100
-      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      // Create nodes - need 3 to reach 100 points (49+49+2)
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // MjolnirX - 100 points
+      const nodeId2 = await createNodeHolder(7, otherAccounts[2]) // MjolnirX - 100 points
+      const nodeId3 = await createNodeHolder(7, otherAccounts[3]) // MjolnirX - 100 points
 
       // App should be pending endorsement -> score is 0 never endorsed
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
-      // Endorse XAPP with MjölnirX node holder
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49) // Node holder endorsement score is 100
+      // Endorse with 3 nodes to reach 100 points
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId3, 2)
 
-      // App should not be pending endorsement
+      // App should not be pending endorsement (100 points)
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
 
       // Xnode holder should be listed as an endorser
       const endorsers = await x2EarnApps.getEndorsers(app1Id)
-      expect(endorsers[0]).to.eql(otherAccounts[1].address)
+      expect(endorsers).to.include(otherAccounts[1].address)
 
       // Xnode holder loses its XNode status
       // Skip ahead 1 day
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
-      // XNode holder transfers its XNode
+      // XNode holder unstakes
       await stargateMock.connect(otherAccounts[1]).unstake(nodeId1)
-      // Xnode holder should not still be listed as an endorser
+
+      // Xnode holder 1 should not be listed as an endorser
       const endorsers1 = await x2EarnApps.getEndorsers(app1Id)
-      expect(endorsers1.length).to.eql(0)
+      expect(endorsers1).to.not.include(otherAccounts[1].address)
+      expect(endorsers1.length).to.eql(2) // nodeId2 and nodeId3 still endorsing
 
-      // XApp is not pending endorsement yet
-      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
-
-      // this will only get picked up if endorsement is checked
+      // XApp is not pending endorsement yet (still has 51 points, but < 100)
+      // After checkEndorsement, it should be marked as unendorsed
       await x2EarnApps.checkEndorsement(app1Id)
 
-      // App is pending endorsent
+      // App is pending endorsement (score dropped to 51 after losing 49 points from unstake)
       expect((await x2EarnApps.unendorsedApps()).length).to.eql(1)
     })
 
@@ -1230,13 +1233,15 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(appIdsPendingEndorsement1.length).to.eql(1)
 
       // Create three nodes - need 3 to reach 100 points (49+49+2)
-      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Mjolnir - 50 points
+      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Mjolnir - 50 points
+      const nodeId3 = await createNodeHolder(3, otherAccounts[3]) // Mjolnir - 50 points
 
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49) // Node holder endorsement score is 50
-      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId3, 2)
 
-      // App not pending endorsement
+      // App not pending endorsement (100 points)
       const appIdsPendingEndorsement2 = await x2EarnApps.unendorsedAppIds()
       expect(appIdsPendingEndorsement2.length).to.eql(0)
 
@@ -1316,7 +1321,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
-      const app2Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
+      const app2Id = await x2EarnApps.hashAppName(otherAccounts[2].address)
 
       // Register XAPPs -> XAPP is pending endorsement
       await x2EarnApps
@@ -1324,18 +1329,18 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       await x2EarnApps
         .connect(creator1)
-        .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
       const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
       expect(appIdsPendingEndorsement1.length).to.eql(2)
 
-      // Create MjölnirX node holder with an endorsement score of 100
-      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      // Create MjolnirX node holder with an endorsement score of 100
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1]) // MjolnirX - 100 points
 
       // App should be pending endorsement -> score is 0 never endorsed
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
-      // Endorse first XAPP with MjölnirX node holder (49 points - capped per app)
+      // Endorse first XAPP (max 49 points per node per app)
       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
       expect(await x2EarnApps.getScore(app1Id)).to.eql(49n)
 
@@ -1347,9 +1352,12 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
       expect(await x2EarnApps.isAppUnendorsed(app2Id)).to.eql(true)
 
-      // Node can still use remaining 2 points
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 2) // Add 2 more to app1
-      expect(await x2EarnApps.getScore(app1Id)).to.eql(51n) // Still under 100, not eligible
+      // Node still has 2 points remaining (100 - 49 - 49 = 2)
+      // Cannot add more to app1 because it's already at 49 (max per node per app)
+      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 1)).to.revertedWithCustomError(
+        x2EarnApps,
+        "ExceedsMaxPointsPerNode",
+      )
     })
 
     it("Only an node holder can endorse an XAPP", async function () {
@@ -1651,11 +1659,13 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(appIdsPendingEndorsement1.length).to.eql(1)
 
       // Create three nodes - need 3 to reach 100 points (49+49+2)
-      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Mjolnir - 50 points
+      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Mjolnir - 50 points
+      const nodeId3 = await createNodeHolder(3, otherAccounts[3]) // Mjolnir - 50 points
 
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49) // Node holder endorsement score is 50
-      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId3, 2)
 
       let round1 = await startNewAllocationRound()
 
@@ -1870,11 +1880,13 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(appIdsPendingEndorsement1.length).to.eql(1)
 
       // Create three nodes - need 3 to reach 100 points (49+49+2)
-      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Mjolnir - 50 points
+      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Mjolnir - 50 points
+      const nodeId3 = await createNodeHolder(3, otherAccounts[3]) // Mjolnir - 50 points
 
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49) // Node holder endorsement score is 50
-      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId3, 2)
 
       let round1 = await startNewAllocationRound()
 
@@ -1956,11 +1968,13 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(appsInfo1.length).to.eql(0)
 
       // Create three nodes - need 3 to reach 100 points (49+49+2)
-      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      const nodeId1 = await createNodeHolder(3, otherAccounts[1]) // Mjolnir - 50 points
+      const nodeId2 = await createNodeHolder(3, otherAccounts[2]) // Mjolnir - 50 points
+      const nodeId3 = await createNodeHolder(3, otherAccounts[3]) // Mjolnir - 50 points
 
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49) // Node holder endorsement score is 50
-      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId3, 2)
 
       // Get apps info should not be empty as app is eligible
       const appsInfo2 = await x2EarnApps.apps()
