@@ -137,7 +137,9 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
     expect(await x2EarnAppsV8.version()).to.equal("8")
 
     // Update X2EarnRewardsPool to point to the upgraded contract
-    await x2EarnRewardsPool.setX2EarnApps(await x2EarnAppsV8.getAddress())
+    const CONTRACTS_ADDRESS_MANAGER_ROLE = await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE()
+    await x2EarnRewardsPool.connect(owner).grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, owner.address)
+    await x2EarnRewardsPool.connect(owner).setX2EarnApps(await x2EarnAppsV8.getAddress())
 
     // quick sanity: contract still callable
     const appId = await x2EarnAppsV8.hashAppName(otherAccounts[0].address)
