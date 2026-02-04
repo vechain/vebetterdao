@@ -173,7 +173,14 @@ library EndorsementUtils {
   function checkCooldown(uint256 nodeId) external view returns (bool) {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
 
-    uint256 requiredRound = $._endorsementRound[nodeId] + $._cooldownPeriod;
+    // Never-endorsed nodes are not in cooldown
+    uint256 endorsementRound = $._endorsementRound[nodeId];
+    if (endorsementRound == 0) {
+      return false;
+    }
+
+    uint256 requiredRound = endorsementRound + $._cooldownPeriod;
+
     return requiredRound > $._xAllocationVotingGovernor.currentRoundId();
   }
 
@@ -292,10 +299,13 @@ library EndorsementUtils {
       revert X2EarnAlreadyEndorser();
     }
 
-    // Check cooldown
-    uint256 requiredRound = $._endorsementRound[nodeId] + $._cooldownPeriod;
-    if (requiredRound > $._xAllocationVotingGovernor.currentRoundId()) {
-      revert X2EarnNodeCooldownActive();
+    // Check cooldown (only if node has previously endorsed)
+    uint256 endorsementRound = $._endorsementRound[nodeId];
+    if (endorsementRound != 0) {
+      uint256 requiredRound = endorsementRound + $._cooldownPeriod;
+      if (requiredRound > $._xAllocationVotingGovernor.currentRoundId()) {
+        revert X2EarnNodeCooldownActive();
+      }
     }
 
     uint8 nodeLevel = $._stargateNFT.getTokenLevel(nodeId);
@@ -329,9 +339,13 @@ library EndorsementUtils {
       revert X2EarnNonNodeHolder();
     }
 
-    uint256 requiredRound = $._endorsementRound[nodeId] + $._cooldownPeriod;
-    if (requiredRound > $._xAllocationVotingGovernor.currentRoundId()) {
-      revert X2EarnNodeCooldownActive();
+    // Check cooldown (only if node has previously endorsed)
+    uint256 endorsementRound = $._endorsementRound[nodeId];
+    if (endorsementRound != 0) {
+      uint256 requiredRound = endorsementRound + $._cooldownPeriod;
+      if (requiredRound > $._xAllocationVotingGovernor.currentRoundId()) {
+        revert X2EarnNodeCooldownActive();
+      }
     }
 
     return removeNodeEndorsement(appId, nodeId, isBlacklisted, isEligibleNow, clock);
