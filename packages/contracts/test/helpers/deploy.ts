@@ -23,6 +23,7 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
+  X2EarnCreatorV1,
   VeBetterPassportV2,
   B3TRMultiSig,
   VeBetterPassportV3,
@@ -66,9 +67,7 @@ type ToCamelCaseKeys<T> = {
 }
 
 export interface DeployInstance
-  extends ToCamelCaseKeys<GovernanceLibraries>,
-    ToCamelCaseKeys<PassportLibraries>,
-    ToCamelCaseKeys<X2EarnLibraries> {
+  extends ToCamelCaseKeys<GovernanceLibraries>, ToCamelCaseKeys<PassportLibraries>, ToCamelCaseKeys<X2EarnLibraries> {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3
@@ -378,7 +377,14 @@ export const getOrDeployContractInstances = async ({
     config.TREASURY_TRANSFER_LIMIT_VTHO,
   ])) as Treasury
 
-  const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
+  const x2EarnCreator = (await deployAndUpgrade(
+    ["X2EarnCreatorV1", "X2EarnCreator"],
+    [[owner.address, owner.address], [false]],
+    {
+      versions: [undefined, 2],
+      logOutput: true,
+    },
+  )) as X2EarnCreator
 
   // Deploy NodeManagement - deprecating...
   // const nodeManagementV1 = (await deployProxy("NodeManagementV1", [

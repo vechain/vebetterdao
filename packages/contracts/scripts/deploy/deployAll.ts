@@ -53,7 +53,7 @@ import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 import { deployStargateMock } from "./mocks/deployStargate"
 import { deployNodeManagementMock } from "./mocks/deployNodeManagement"
 import { getConfig } from "@repo/config"
-import { EnvConfig } from "@repo/config/contracts"
+import { AppEnv, EnvConfig } from "@repo/config/contracts"
 import { deployLegacyNodesMock } from "./mocks/deployLegacyNodes"
 
 // GalaxyMember NFT Values
@@ -354,7 +354,14 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as TimeLock
 
-  const x2EarnCreator = (await deployProxy("X2EarnCreator", [TEMP_ADMIN, TEMP_ADMIN])) as X2EarnCreator
+  const x2EarnCreator = (await deployAndUpgrade(
+    ["X2EarnCreatorV1", "X2EarnCreator"],
+    [[TEMP_ADMIN, TEMP_ADMIN], [network.name === AppEnv.TESTNET_STAGING ? true : false]],
+    {
+      versions: [undefined, 2],
+      logOutput: true,
+    },
+  )) as X2EarnCreator
 
   const treasury = (await deployProxy(
     "Treasury",
