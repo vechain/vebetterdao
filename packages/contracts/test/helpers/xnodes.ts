@@ -40,7 +40,7 @@ export const endorseApp = async (appId: string, endorser: HardhatEthersSigner, u
     nodeId = await createNodeHolder(7, endorser)
   }
 
-  const tx = await x2EarnApps.connect(endorser).endorseApp(appId, nodeId)
+  const tx = await x2EarnApps.connect(endorser).endorseApp(appId, nodeId, 49)
   const txReceipt = await tx.wait()
 
   const event = txReceipt?.logs[0]

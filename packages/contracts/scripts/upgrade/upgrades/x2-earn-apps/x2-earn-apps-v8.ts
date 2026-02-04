@@ -46,16 +46,30 @@ async function main() {
     `Upgrading X2EarnApps contract at address: ${config.x2EarnAppsContractAddress} on network: ${config.network.name}`,
   )
 
-  const x2EarnAppsV8 = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", config.x2EarnAppsContractAddress, [], {
-    version: 8,
-    libraries: {
-      AdministrationUtils: await AdministrationUtils.getAddress(),
-      EndorsementUtils: await EndorsementUtils.getAddress(),
-      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
-    },
-  })) as X2EarnApps
+  // V8 flexible endorsement default caps
+  const MAX_POINTS_PER_NODE_PER_APP = 49
+  const MAX_POINTS_PER_APP = 110
 
-  console.log("X2EarnApps upgraded")
+  console.log(
+    `Upgrading and initializing V8 with maxPointsPerNodePerApp=${MAX_POINTS_PER_NODE_PER_APP}, maxPointsPerApp=${MAX_POINTS_PER_APP}`,
+  )
+
+  const x2EarnAppsV8 = (await upgradeProxy(
+    "X2EarnAppsV7",
+    "X2EarnApps",
+    config.x2EarnAppsContractAddress,
+    [MAX_POINTS_PER_NODE_PER_APP, MAX_POINTS_PER_APP],
+    {
+      version: 8,
+      libraries: {
+        AdministrationUtils: await AdministrationUtils.getAddress(),
+        EndorsementUtils: await EndorsementUtils.getAddress(),
+        VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      },
+    },
+  )) as X2EarnApps
+
+  console.log("X2EarnApps upgraded and initialized")
 
   // check that upgrade was successful
   const version = await x2EarnAppsV8.version()

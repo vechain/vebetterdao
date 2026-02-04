@@ -1014,7 +1014,8 @@ export const getOrDeployContractInstances = async ({
     .setVeBetterPassportContract(await veBetterPassport.getAddress())
     .then(async tx => await tx.wait())
 
-  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
+  // V8 flexible endorsement caps: 49 per node per app, 110 total per app
+  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [49, 110], {
     version: 8,
     libraries: {
       AdministrationUtils: await AdministrationUtils.getAddress(),

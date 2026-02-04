@@ -79,9 +79,12 @@ import { VoteEligibilityUtils } from "./libraries/VoteEligibilityUtils.sol";
  *
  * -------------------- Version 8 --------------------
  * - Refactor: modules replaced with libraries for size optimization.
- * - Removed some unused functions to reduce contract size (isAppCreator, getAppStorage, getPaginatedApps, appsCount)
- * - Removed contracts setters and getters to reduce contract size (x2earn creator contract, x2earn rewards pool contract, etc.)
- * - Marked functions as external to reduce contract size
+ * - Removed some unused functions to reduce contract size.
+ * - Marked functions as external to reduce contract size.
+ * - Flexible endorsement: partial points, multiple apps per node, 49-point cap per app, 110 total cap.
+ * - New storage: activeEndorsements array with O(1) index lookup.
+ * - Per-app cooldown instead of per-node cooldown.
+ * - Migration support: pause mechanism and seedEndorsement().
  */
 contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208;
@@ -91,6 +94,8 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   /// @notice The role that can manage the contract settings.
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+  /// @notice The role that can seed endorsements during migration.
+  bytes32 public constant MIGRATION_ROLE = keccak256("MIGRATION_ROLE");
 
   /// @notice The maximum number of moderators allowed per app.
   uint256 public constant MAX_MODERATORS = 100;
@@ -146,6 +151,16 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    */
   function version() public pure virtual returns (string memory) {
     return "8";
+  }
+
+  /**
+   * @notice Initialize V8 flexible endorsement configuration.
+   * @param _maxPointsPerNodePerApp Max points a node can endorse to one app (default 49).
+   * @param _maxPointsPerApp Max total points an app can receive (default 110).
+   */
+  function initializeV8(uint256 _maxPointsPerNodePerApp, uint256 _maxPointsPerApp) external reinitializer(8) {
+    EndorsementUtils.setMaxPointsPerNodePerApp(_maxPointsPerNodePerApp);
+    EndorsementUtils.setMaxPointsPerApp(_maxPointsPerApp);
   }
 
   // ---------- Clock ---------- //
@@ -246,7 +261,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     }
 
     if (isAppUnendorsed(_appId) && !_isEligible) {
-      EndorsementUtils.updateAppsPendingEndorsement(_appId, true);
+      EndorsementUtils.updateUnendorsedApps(_appId, true);
     }
 
     _isEligible ? _validateAppCreators(_appId) : _revokeAppCreators(_appId);
@@ -427,6 +442,13 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   }
 
   /**
+   * @notice Get all endorser node IDs for an app.
+   */
+  function getEndorserNodes(bytes32 appId) external view returns (uint256[] memory) {
+    return EndorsementUtils.getEndorserNodes(appId);
+  }
+
+  /**
    * @dev See {IX2EarnApps-getUsersEndorsementScore}.
    */
   function getUsersEndorsementScore(address user) external view returns (uint256) {
@@ -441,30 +463,12 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   }
 
   /**
-   * @notice Returns the app that a node ID is endorsing.
-   * @param nodeId The unique identifier of the node ID.
-   * @return The unique identifier of the app that the node ID is endorsing.
-   */
-  function nodeToEndorsedApp(uint256 nodeId) external view returns (bytes32) {
-    return EndorsementUtils.nodeToEndorsedApp(nodeId);
-  }
-
-  /**
    * @notice Returns the endorsement score of a node level.
    * @param nodeLevel The node level.
    * @return The endorsement score of the node level.
    */
   function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256) {
     return EndorsementUtils.nodeLevelEndorsementScore(nodeLevel);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-checkCooldown}.
-   * @param nodeId The unique identifier of the node.
-   * @return True if the node is in a cooldown period.
-   */
-  function checkCooldown(uint256 nodeId) external view returns (bool) {
-    return EndorsementUtils.checkCooldown(nodeId);
   }
 
   // ---------- Contract Settings ---------- //
@@ -625,17 +629,25 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   // ---------- Endorsement Management ---------- //
 
   /**
-   * @notice Endorses an app.
+   * @notice Endorses an app with a specified number of points.
    * @param appId The unique identifier of the app being endorsed.
    * @param nodeId The unique identifier of the node they wish to use for endorsing app.
+   * @param points The number of points to endorse with (max 49 per app).
    */
-  function endorseApp(bytes32 appId, uint256 nodeId) external {
-    EndorsementUtils.endorseApp(appId, nodeId, isBlacklisted(appId), appExists(appId), isEligibleNow(appId));
+  function endorseApp(bytes32 appId, uint256 nodeId, uint256 points) external {
+    EndorsementUtils.endorseApp(
+      appId,
+      nodeId,
+      points,
+      isBlacklisted(appId),
+      appExists(appId),
+      isEligibleNow(appId)
+    );
 
     // Check if we need to set voting eligibility after endorsement
     X2EarnAppsStorageTypes.EndorsementStorage storage endorsementStorage = X2EarnAppsStorageTypes
       ._getEndorsementStorage();
-    if (endorsementStorage._appScores[appId] >= endorsementStorage._endorsementScoreThreshold) {
+    if (endorsementStorage._appEndorsementScore[appId] >= endorsementStorage._endorsementScoreThreshold) {
       if (!isEligibleNow(appId)) {
         _setVotingEligibility(appId, true);
       }
@@ -643,14 +655,16 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   }
 
   /**
-   * @notice Unendorses an app.
+   * @notice Unendorses an app by removing a specified number of points.
    * @param appId The unique identifier of the app being unendorsed.
    * @param nodeId The unique identifier of the node that will unendorse.
+   * @param points The number of points to remove (0 = remove all points).
    */
-  function unendorseApp(bytes32 appId, uint256 nodeId) external {
+  function unendorseApp(bytes32 appId, uint256 nodeId, uint256 points) external {
     bool stillEligible = EndorsementUtils.unendorseApp(
       appId,
       nodeId,
+      points,
       isBlacklisted(appId),
       isEligibleNow(appId),
       clock()
@@ -733,6 +747,106 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    */
   function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external onlyRole(GOVERNANCE_ROLE) {
     EndorsementUtils.updateEndorsementScoreThreshold(_scoreThreshold);
+  }
+
+  // ---------- V8 Endorsement Management ---------- //
+
+  /**
+   * @notice Pause all endorsement operations. Used during migration.
+   */
+  function pauseEndorsements() external onlyRole(GOVERNANCE_ROLE) {
+    EndorsementUtils.setEndorsementsPaused(true);
+  }
+
+  /**
+   * @notice Unpause endorsement operations. Used after migration.
+   */
+  function unpauseEndorsements() external onlyRole(GOVERNANCE_ROLE) {
+    EndorsementUtils.setEndorsementsPaused(false);
+  }
+
+  /**
+   * @notice Mark migration as completed. One-time operation.
+   */
+  function markMigrationComplete() external onlyRole(GOVERNANCE_ROLE) {
+    EndorsementUtils.setMigrationCompleted(true);
+  }
+
+  /**
+   * @notice Seed endorsement data during migration. Governance only.
+   * @param appId The app being endorsed.
+   * @param nodeId The node endorsing the app.
+   * @param points The number of points to endorse.
+   */
+  function seedEndorsement(bytes32 appId, uint256 nodeId, uint256 points) external onlyRole(MIGRATION_ROLE) {
+    EndorsementUtils.seedEndorsement(appId, nodeId, points);
+  }
+
+  /**
+   * @notice Set the maximum points a single node can endorse to one app.
+   * @param maxPoints The new max (default 49).
+   */
+  function setMaxPointsPerNodePerApp(uint256 maxPoints) external onlyRole(GOVERNANCE_ROLE) {
+    EndorsementUtils.setMaxPointsPerNodePerApp(maxPoints);
+  }
+
+  /**
+   * @notice Set the maximum total endorsement points an app can receive.
+   * @param maxPoints The new max (default 110).
+   */
+  function setMaxPointsPerApp(uint256 maxPoints) external onlyRole(GOVERNANCE_ROLE) {
+    EndorsementUtils.setMaxPointsPerApp(maxPoints);
+  }
+
+  /**
+   * @notice Get available endorsement points for a node.
+   */
+  function getNodeAvailablePoints(uint256 nodeId) external view returns (uint256) {
+    return EndorsementUtils.getNodeAvailablePoints(nodeId);
+  }
+
+  /**
+   * @notice Get comprehensive info about a node's endorsement points.
+   */
+  function getNodePointsInfo(uint256 nodeId) external view returns (X2EarnAppsStorageTypes.NodePointsInfo memory) {
+    return EndorsementUtils.getNodePointsInfo(nodeId);
+  }
+
+  /**
+   * @notice Get all active endorsements for a node.
+   */
+  function getNodeActiveEndorsements(
+    uint256 nodeId
+  ) external view returns (X2EarnAppsStorageTypes.Endorsement[] memory) {
+    return EndorsementUtils.getNodeActiveEndorsements(nodeId);
+  }
+
+  /**
+   * @notice Check if a node can unendorse an app (cooldown expired).
+   */
+  function canUnendorse(uint256 nodeId, bytes32 appId) external view returns (bool) {
+    return EndorsementUtils.canUnendorse(nodeId, appId);
+  }
+
+  /**
+   * @notice Get the max points per node per app.
+   */
+  function maxPointsPerNodePerApp() external view returns (uint256) {
+    return EndorsementUtils.maxPointsPerNodePerApp();
+  }
+
+  /**
+   * @notice Get the max points per app.
+   */
+  function maxPointsPerApp() external view returns (uint256) {
+    return EndorsementUtils.maxPointsPerApp();
+  }
+
+  /**
+   * @notice Check if endorsements are paused.
+   */
+  function endorsementsPaused() external view returns (bool) {
+    return EndorsementUtils.endorsementsPaused();
   }
 
   // ---------- Internal Functions ---------- //

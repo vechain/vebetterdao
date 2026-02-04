@@ -56,25 +56,51 @@ library X2EarnAppsStorageTypes {
     mapping(bytes32 => bool) _blackList; // Mapping to store the blacklisted apps
   }
 
+  /// @notice Represents an active endorsement from a node to an app
+  struct Endorsement {
+    bytes32 appId;
+    uint256 points;
+    uint256 endorsedAtBlock; // For cooldown tracking
+  }
+
+  /// @notice Summary of a node's endorsement points allocation
+  struct NodePointsInfo {
+    uint256 totalPoints; // Total points the node has based on its level
+    uint256 usedPoints; // Points currently allocated to apps
+    uint256 availablePoints; // Points available for new endorsements
+    uint256 lockedPoints; // Points under cooldown (cannot be unendorsed yet)
+  }
+
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
   struct EndorsementStorage {
     bytes32[] _unendorsedApps; // List of apps pending endorsement
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
-    mapping(bytes32 => uint256[]) _appEndorsers; // Maps each app ID to an array of node IDs that have endorsed it
+    mapping(bytes32 => uint256[]) _appEndorsers_DEPRECATED; // DEPRECATED V8: Use _activeEndorsements instead
     mapping(uint8 => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint48) _appGracePeriodStart; // The grace period elapsed by the app since endorsed
-    mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
+    mapping(uint256 => bytes32) _nodeToEndorsedApp_DEPRECATED; // DEPRECATED V8: Use _activeEndorsements instead
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in BLOCKS
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
-    mapping(bytes32 => uint256) _appScores; // The score of each app
+    mapping(bytes32 => uint256) _appScores_DEPRECATED; // DEPRECATED V8: Use _appEndorsementScore instead
     mapping(bytes32 => PassportTypes.APP_SECURITY) _appSecurity; // The security score of each app
     INodeManagementV3 _nodeManagementContract; // The token auction contract
     IVeBetterPassport _veBetterPassport; // The VeBetterPassport contract
-    mapping(uint256 => uint256) _endorsementRound; // The latest round in which a node endorsed an app
-    uint256 _cooldownPeriod; // Cooldown duration in rounds for a node to endorse an app
+    mapping(uint256 => uint256) _endorsementRound_DEPRECATED; // DEPRECATED V8: Cooldown now per-app in Endorsement struct
+    uint256 _cooldownPeriod; // Cooldown duration in blocks for unendorsing
     IXAllocationVotingGovernor _xAllocationVotingGovernor; // The XAllocationVotingGovernor contract
     //------- Version 7 -------//
     IStargateNFT _stargateNFT; // The Stargate NFT contract
+    //------- Version 8 - Flexible Endorsement -------//
+    // Notice: _activeEndorsements, _appEndorserNodes, _appEndorserNodesIndex need to be updated together, otherwise the mapping will be corrupted.
+    mapping(uint256 nodeId => Endorsement[]) _activeEndorsements; // All active endorsements by a node
+    mapping(uint256 nodeId => mapping(bytes32 appId => uint256 index)) _activeEndorsementsAppIndex; // Index lookup for O(1) access
+    mapping(bytes32 appId => uint256 score) _appEndorsementScore; // Total endorsement score per app
+    mapping(bytes32 appId => uint256[]) _appEndorserNodes; // Reverse mapping: nodes endorsing each app
+    mapping(bytes32 appId => mapping(uint256 nodeId => uint256 index)) _appEndorserNodesIndex; // Index for O(1) removal
+    uint256 _maxPointsPerNodePerApp; // Max points a single node can assign to one app (default 49)
+    uint256 _maxPointsPerApp; // Max total points an app can receive (default 110)
+    bool _endorsementsPaused; // Pause endorsements during migration
+    bool _migrationCompleted; // One-time migration flag
   }
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Settings
