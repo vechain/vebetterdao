@@ -54,6 +54,31 @@ describe("X-Apps - Core Features - @shard15a", function () {
       expect(await x2EarnApps.nodeLevelEndorsementScore(6)).to.eql(35n)
       expect(await x2EarnApps.nodeLevelEndorsementScore(7)).to.eql(100n)
     })
+
+    it("Version returns a string", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      const version = await x2EarnApps.version()
+      expect(typeof version).to.eql("string")
+      expect(version.length).to.be.greaterThan(0)
+    })
+
+    it("Cooldown period is set correctly", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      const config = createLocalConfig()
+      expect(await x2EarnApps.cooldownPeriod()).to.eql(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
+    })
+
+    it("hashAppName returns a bytes32 hash", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      const hash = await x2EarnApps.hashAppName("TestApp")
+      expect(hash).to.match(/^0x[a-fA-F0-9]{64}$/)
+      // Verify deterministic hashing
+      const hash2 = await x2EarnApps.hashAppName("TestApp")
+      expect(hash).to.eql(hash2)
+      // Different input produces different hash
+      const hash3 = await x2EarnApps.hashAppName("DifferentApp")
+      expect(hash).to.not.eql(hash3)
+    })
   })
 
   describe("Settings", function () {

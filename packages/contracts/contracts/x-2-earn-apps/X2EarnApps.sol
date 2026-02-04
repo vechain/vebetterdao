@@ -636,9 +636,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     X2EarnAppsStorageTypes.EndorsementStorage storage endorsementStorage = X2EarnAppsStorageTypes
       ._getEndorsementStorage();
     if (endorsementStorage._appScores[appId] >= endorsementStorage._endorsementScoreThreshold) {
-      if (!isEligibleNow(appId) && appExists(appId)) {
-        _setVotingEligibility(appId, true);
-      } else if (!appExists(appId)) {
+      if (!isEligibleNow(appId)) {
         _setVotingEligibility(appId, true);
       }
     }
