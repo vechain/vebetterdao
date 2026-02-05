@@ -23,7 +23,6 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
-  X2EarnCreatorV1,
   VeBetterPassportV2,
   B3TRMultiSig,
   VeBetterPassportV3,
@@ -35,18 +34,8 @@ import {
   DBAPool,
   DBAPoolV1,
   Stargate,
-  AdministrationUtilsV6,
-  EndorsementUtilsV6,
-  VoteEligibilityUtilsV6,
 } from "../../typechain-types"
-import {
-  deployAndUpgrade,
-  deployProxy,
-  deployProxyOnly,
-  deployStargateProxyWithoutInitialization,
-  initializeProxy,
-  upgradeProxy,
-} from "../../scripts/helpers"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import type { GovernanceLibraries } from "../../scripts/libraries/governanceLibraries"
 import type { PassportLibraries } from "../../scripts/libraries/passportLibraries"
@@ -55,8 +44,6 @@ import { setWhitelistedFunctions } from "../../scripts/deploy/deployLatest"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
-import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
-import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
 import { autoVotingLibraries } from "../../scripts/libraries"
 import { deployStargateMock } from "../../scripts/deploy/mocks/deployStargate"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
