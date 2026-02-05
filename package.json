@@ -86,8 +86,7 @@
     "contracts:verify:all:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-all-contracts.ts",
     "contracts:verify:all:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-all-contracts.ts",
     "contracts:check-verification-status:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/check-verification-status.ts",
-    "contracts:check-verification-status:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/check-verification-status.ts",
-    "chromatic": "dotenv -e .env -- npx chromatic --dry-run"
+    "contracts:check-verification-status:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/check-verification-status.ts"
   },
   "dependencies": {
     "dotenv-cli": "latest",
