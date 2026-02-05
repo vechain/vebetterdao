@@ -2394,12 +2394,7 @@ describe("VeBetterPassport Entities - @shard8e", function () {
       const creator1 = creators[0]
       const creator2 = creators[1]
 
-      // Bootstrap emissions
-      await bootstrapAndStartEmissions()
-      // simulate 5 rounds of actions
-      await moveToCycle(6)
-
-      // Add 3 apps
+      // Add 3 apps FIRST (before bootstrap) so they're eligible for all rounds
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       await x2EarnApps
         .connect(owner)
@@ -2413,9 +2408,15 @@ describe("VeBetterPassport Entities - @shard8e", function () {
         .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
+      // Endorse apps before bootstrapping so they're eligible from round 1
       await endorseApp(app1Id, otherAccounts[2])
       await endorseApp(app2Id, otherAccounts[3])
       await endorseApp(app3Id, otherAccounts[4])
+
+      // Bootstrap emissions after apps are endorsed
+      await bootstrapAndStartEmissions()
+      // simulate 5 rounds of actions - apps are now eligible for these rounds
+      await moveToCycle(6)
 
       // Set apps security to LOW
       await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
