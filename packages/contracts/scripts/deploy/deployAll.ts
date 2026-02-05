@@ -1366,6 +1366,7 @@ export async function deployAll(config: ContractsConfig) {
       .connect(deployer)
       .grantRole(await x2EarnCreator.BURNER_ROLE(), config.CONTRACTS_ADMIN_ADDRESS)
       .then(async tx => await tx.wait())
+    await transferUpgraderRole(x2EarnCreator, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(x2EarnCreator, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferSettingsManagerRole(veBetterPassport, deployer, config.CONTRACTS_ADMIN_ADDRESS)

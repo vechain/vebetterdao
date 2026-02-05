@@ -283,6 +283,7 @@ export const transferUpgraderRole = async (
     | XAllocationVoting
     | NodeManagementV3
     | X2EarnApps
+    | X2EarnCreator
     | GalaxyMember
     | VoterRewards
     | X2EarnRewardsPool,
