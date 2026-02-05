@@ -24,7 +24,7 @@ async function main() {
   console.log(
     `Deploying X2EarnApps libraries on network: ${config.network.name} (env: ${config.environment}) with account: ${deployer.address}`,
   )
-  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils } = await x2EarnLibraries({
+  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils, AppStorageUtils } = await x2EarnLibraries({
     logOutput: true,
     latestVersionOnly: true,
   })
@@ -36,6 +36,7 @@ async function main() {
       AdministrationUtils: await AdministrationUtils.getAddress(),
       EndorsementUtils: await EndorsementUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
     },
   }
 
@@ -65,6 +66,7 @@ async function main() {
         AdministrationUtils: await AdministrationUtils.getAddress(),
         EndorsementUtils: await EndorsementUtils.getAddress(),
         VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+        AppStorageUtils: await AppStorageUtils.getAddress(),
       },
     },
   )) as X2EarnApps

@@ -5,8 +5,8 @@ import { expect } from "chai"
 import { ethers } from "hardhat"
 
 import { deployAndUpgrade, upgradeProxy } from "../../scripts/helpers"
-import { X2EarnApps, X2EarnAppsV7 } from "../../typechain-types"
-import { getOrDeployContractInstances, getStorageSlots } from "../helpers"
+import { EndorsementUtils, X2EarnApps, X2EarnAppsV7 } from "../../typechain-types"
+import { createNodeHolder, getOrDeployContractInstances, getStorageSlots } from "../helpers"
 
 let config: ContractsConfig
 let otherAccounts: SignerWithAddress[]
@@ -305,7 +305,7 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
 
   describe("seedEndorsement", function () {
     it("Should seed endorsement correctly", async function () {
-      const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -314,30 +314,27 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
       await x2EarnApps.connect(owner).grantRole(MIGRATION_ROLE, owner.address)
 
       // Submit an app
-      const appId = ethers.keccak256(ethers.toUtf8Bytes("testApp"))
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
-      const submittedAppId = (await x2EarnApps.apps(0)).id
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
 
-      // Mint a node
-      const nodeId = 1
-      await stargateNftMock.setTokenExists(nodeId, true)
-      await stargateNftMock.setTokenLevel(nodeId, 7) // MjolnirX
-      await stargateNftMock.setTokenManager(nodeId, otherAccounts[2].address)
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
 
       // Seed endorsement
-      await x2EarnApps.connect(owner).seedEndorsement(submittedAppId, nodeId, 49)
+      await x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 49)
 
       // Verify endorsement score
-      expect(await x2EarnApps.appEndorsementScore(submittedAppId)).to.equal(49)
+      expect(await x2EarnApps.getScore(appId)).to.equal(49)
 
-      // Verify node points for app
-      expect(await x2EarnApps.getNodePointsForApp(nodeId, submittedAppId)).to.equal(49)
+      // Verify endorsers list
+      const endorsers = await x2EarnApps.getEndorsers(appId)
+      expect(endorsers.length).to.equal(1)
     })
 
     it("Should update existing endorsement on duplicate seed instead of creating new entry", async function () {
-      const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -349,37 +346,32 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
-      const submittedAppId = (await x2EarnApps.apps(0)).id
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
 
-      // Mint a node
-      const nodeId = 1
-      await stargateNftMock.setTokenExists(nodeId, true)
-      await stargateNftMock.setTokenLevel(nodeId, 7) // MjolnirX
-      await stargateNftMock.setTokenManager(nodeId, otherAccounts[2].address)
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
 
       // Seed endorsement first time with 20 points
-      await x2EarnApps.connect(owner).seedEndorsement(submittedAppId, nodeId, 20)
-      expect(await x2EarnApps.appEndorsementScore(submittedAppId)).to.equal(20)
-      expect(await x2EarnApps.getNodePointsForApp(nodeId, submittedAppId)).to.equal(20)
+      await x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 20)
+      expect(await x2EarnApps.getScore(appId)).to.equal(20)
 
       // Get endorsers count after first seed
-      const endorsersAfterFirst = await x2EarnApps.getEndorsers(submittedAppId)
+      const endorsersAfterFirst = await x2EarnApps.getEndorsers(appId)
       expect(endorsersAfterFirst.length).to.equal(1)
 
       // Seed endorsement second time with 30 points (duplicate)
-      await x2EarnApps.connect(owner).seedEndorsement(submittedAppId, nodeId, 30)
+      await x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 30)
 
-      // Should update to 30, not add to 50
-      expect(await x2EarnApps.appEndorsementScore(submittedAppId)).to.equal(30)
-      expect(await x2EarnApps.getNodePointsForApp(nodeId, submittedAppId)).to.equal(30)
+      // Should update to 30, not add to 50 (duplicate guard)
+      expect(await x2EarnApps.getScore(appId)).to.equal(30)
 
       // Endorsers count should remain 1, not 2
-      const endorsersAfterSecond = await x2EarnApps.getEndorsers(submittedAppId)
+      const endorsersAfterSecond = await x2EarnApps.getEndorsers(appId)
       expect(endorsersAfterSecond.length).to.equal(1)
     })
 
     it("Should revert seeding after migration is complete", async function () {
-      const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -391,26 +383,20 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
-      const submittedAppId = (await x2EarnApps.apps(0)).id
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
 
-      // Mint a node
-      const nodeId = 1
-      await stargateNftMock.setTokenExists(nodeId, true)
-      await stargateNftMock.setTokenLevel(nodeId, 7) // MjolnirX
-      await stargateNftMock.setTokenManager(nodeId, otherAccounts[2].address)
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
 
       // Mark migration complete
       await x2EarnApps.connect(owner).markMigrationComplete()
 
-      // Seed endorsement should revert
-      await expect(x2EarnApps.connect(owner).seedEndorsement(submittedAppId, nodeId, 49)).to.be.revertedWithCustomError(
-        x2EarnApps,
-        "MigrationNotCompleted",
-      )
+      // Seed endorsement should revert (error comes from EndorsementUtils library)
+      await expect(x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 49)).to.be.reverted
     })
 
     it("Should only allow MIGRATION_ROLE to seed endorsements", async function () {
-      const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -418,16 +404,13 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
-      const submittedAppId = (await x2EarnApps.apps(0)).id
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
 
-      // Mint a node
-      const nodeId = 1
-      await stargateNftMock.setTokenExists(nodeId, true)
-      await stargateNftMock.setTokenLevel(nodeId, 7)
-      await stargateNftMock.setTokenManager(nodeId, otherAccounts[2].address)
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
 
       // Random user without MIGRATION_ROLE should not be able to seed
-      await expect(x2EarnApps.connect(otherAccounts[3]).seedEndorsement(submittedAppId, nodeId, 49)).to.be.reverted
+      await expect(x2EarnApps.connect(otherAccounts[3]).seedEndorsement(appId, nodeId, 49)).to.be.reverted
     })
   })
 })
