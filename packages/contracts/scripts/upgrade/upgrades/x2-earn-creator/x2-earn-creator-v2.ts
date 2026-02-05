@@ -43,8 +43,10 @@ async function main() {
   const selfMintEnabled = await x2EarnCreatorV2.selfMintEnabled()
   console.log(`selfMintEnabled: ${selfMintEnabled}`)
 
-  if (!selfMintEnabled) {
-    throw new Error("selfMintEnabled should be true after upgrade")
+  const expectedSelfMintEnabled = config.environment === AppEnv.TESTNET_STAGING ? true : false
+
+  if (selfMintEnabled !== expectedSelfMintEnabled) {
+    throw new Error(`selfMintEnabled should be ${expectedSelfMintEnabled} after upgrade`)
   }
 
   console.log("Execution completed")
