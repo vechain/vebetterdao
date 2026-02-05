@@ -356,7 +356,7 @@ export async function deployAll(config: ContractsConfig) {
 
   const x2EarnCreator = (await deployAndUpgrade(
     ["X2EarnCreatorV1", "X2EarnCreator"],
-    [[TEMP_ADMIN, TEMP_ADMIN], [network.name === AppEnv.TESTNET_STAGING ? true : false]],
+    [[TEMP_ADMIN, TEMP_ADMIN], [config.NEXT_PUBLIC_APP_ENV === AppEnv.TESTNET_STAGING]],
     {
       versions: [undefined, 2],
       logOutput: true,
@@ -1286,7 +1286,7 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time
-  if (process.env.NEXT_PUBLIC_APP_ENV === "testnet" || network.name === "mainnet") {
+  if (config.NEXT_PUBLIC_APP_ENV === AppEnv.TESTNET || config.NEXT_PUBLIC_APP_ENV === AppEnv.MAINNET) {
     console.log("================ Updating contract roles after setup ")
     console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 
