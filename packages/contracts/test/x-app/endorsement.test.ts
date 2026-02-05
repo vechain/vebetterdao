@@ -2332,7 +2332,8 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
         const nodeHolder = accounts[i].address as unknown as HardhatEthersSigner
         const nodeId = await createNodeHolder(level, nodeHolder)
 
-        await x2EarnApps.connect(nodeHolder).endorseApp(app1Id, nodeId, 49)
+        // Level 1 nodes have 2 points each, endorse with 2 points (the node's capacity)
+        await x2EarnApps.connect(nodeHolder).endorseApp(app1Id, nodeId, 2)
       }
 
       const endorsers = await x2EarnApps.getEndorsers(app1Id)

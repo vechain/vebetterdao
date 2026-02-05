@@ -81,7 +81,8 @@ library EndorsementUtils {
   error ExceedsMaxPointsPerNode(uint256 nodeId, bytes32 appId, uint256 max);
   error InsufficientAvailablePoints(uint256 nodeId, uint256 available, uint256 requested);
   error InvalidPointsAmount();
-  error MigrationNotCompleted();
+  error MigrationAlreadyCompleted();
+  error InvalidEndorsementIndex(uint256 nodeId, bytes32 appId);
 
   // ------------------------------- Events -------------------------------
   event AppEndorsed(bytes32 indexed appId, uint256 indexed nodeId, address endorser, uint256 points);
@@ -760,8 +761,14 @@ library EndorsementUtils {
 
       if (!isValid) {
         // Get points from this endorsement
-        uint256 endorseIndex = $._activeEndorsementsAppIndex[nodeId][appId];
         X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
+        uint256 endorseIndex = $._activeEndorsementsAppIndex[nodeId][appId];
+
+        // Defensive validation before reading endorsement
+        if (endorseIndex >= endorsements.length || endorsements[endorseIndex].appId != appId) {
+          revert InvalidEndorsementIndex(nodeId, appId);
+        }
+
         uint256 pointsToRemove = endorsements[endorseIndex].points;
 
         // Remove endorsement from node's list
@@ -787,8 +794,15 @@ library EndorsementUtils {
         // Don't increment i since we swapped
       } else {
         // Valid node - add points to score
+        X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
         uint256 endorseIndex = $._activeEndorsementsAppIndex[nodeId][appId];
-        validScore += $._activeEndorsements[nodeId][endorseIndex].points;
+
+        // Defensive validation before reading endorsement
+        if (endorseIndex >= endorsements.length || endorsements[endorseIndex].appId != appId) {
+          revert InvalidEndorsementIndex(nodeId, appId);
+        }
+
+        validScore += endorsements[endorseIndex].points;
         i++;
       }
     }
@@ -810,7 +824,7 @@ library EndorsementUtils {
   function seedEndorsement(bytes32 appId, uint256 nodeId, uint256 points) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
 
-    if ($._migrationCompleted) revert MigrationNotCompleted();
+    if ($._migrationCompleted) revert MigrationAlreadyCompleted();
 
     X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
     uint256 existingIndex = $._activeEndorsementsAppIndex[nodeId][appId];
