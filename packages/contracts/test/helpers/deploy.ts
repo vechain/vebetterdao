@@ -366,7 +366,7 @@ export const getOrDeployContractInstances = async ({
 
   const x2EarnCreator = (await deployAndUpgrade(
     ["X2EarnCreatorV1", "X2EarnCreator"],
-    [[owner.address, owner.address], [false]],
+    [[config.CREATOR_NFT_URI, owner.address], [true]],
     {
       versions: [undefined, 2],
       logOutput: true,
