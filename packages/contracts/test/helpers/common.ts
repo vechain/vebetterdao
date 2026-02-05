@@ -740,7 +740,8 @@ export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEt
     await x2EarnApps.connect(owner).submitApp(app, app, app, "metadataURI")
     const appId = await x2EarnApps.hashAppName(app)
     appIds.push(appId)
-    endorseApp(appId, otherAccounts[i])
+    await endorseApp(appId, otherAccounts[i])
+    i++
   }
 
   return appIds
