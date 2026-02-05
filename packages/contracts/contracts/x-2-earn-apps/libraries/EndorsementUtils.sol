@@ -801,6 +801,7 @@ library EndorsementUtils {
   /**
    * @notice Seeds an endorsement during migration (bypasses validation).
    * @dev Only callable before migrationCompleted is set to true. Requires MIGRATION_ROLE.
+   *      Guards against duplicates: if (nodeId, appId) already exists, updates points instead of pushing.
    *      Emits standard AppEndorsed event for indexer compatibility.
    * @param appId The unique identifier of the app to endorse.
    * @param nodeId The unique identifier of the endorsing node.
@@ -811,17 +812,35 @@ library EndorsementUtils {
 
     if ($._migrationCompleted) revert MigrationNotCompleted();
 
-    // Add endorsement to node's list
-    $._activeEndorsements[nodeId].push(
-      X2EarnAppsStorageTypes.Endorsement({ appId: appId, points: points, endorsedAtBlock: block.number })
-    );
-    $._activeEndorsementsAppIndex[nodeId][appId] = $._activeEndorsements[nodeId].length - 1;
+    X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
+    uint256 existingIndex = $._activeEndorsementsAppIndex[nodeId][appId];
 
-    // Add to app's endorser nodes (reverse mapping)
-    $._appEndorserNodes[appId].push(nodeId);
-    $._appEndorserNodesIndex[appId][nodeId] = $._appEndorserNodes[appId].length - 1;
+    // Check if endorsement already exists for this (nodeId, appId)
+    bool exists = endorsements.length > 0 &&
+      existingIndex < endorsements.length &&
+      endorsements[existingIndex].appId == appId;
 
-    $._appEndorsementScore[appId] += points;
+    if (exists) {
+      // Update existing endorsement - adjust score delta
+      uint256 oldPoints = endorsements[existingIndex].points;
+      endorsements[existingIndex].points = points;
+      endorsements[existingIndex].endorsedAtBlock = block.number;
+
+      // Adjust app score: remove old, add new
+      $._appEndorsementScore[appId] = $._appEndorsementScore[appId] - oldPoints + points;
+    } else {
+      // Create new endorsement
+      endorsements.push(
+        X2EarnAppsStorageTypes.Endorsement({ appId: appId, points: points, endorsedAtBlock: block.number })
+      );
+      $._activeEndorsementsAppIndex[nodeId][appId] = endorsements.length - 1;
+
+      // Add to app's endorser nodes (reverse mapping) - only for new endorsements
+      $._appEndorserNodes[appId].push(nodeId);
+      $._appEndorserNodesIndex[appId][nodeId] = $._appEndorserNodes[appId].length - 1;
+
+      $._appEndorsementScore[appId] += points;
+    }
 
     // Get endorser address from node manager
     address endorser = $._stargateNFT.getTokenManager(nodeId);
