@@ -125,6 +125,7 @@ const config = defineConfig({
           700: { value: "#363A3F" },
           800: { value: "#272A2E" },
           900: { value: "#1B1D1F" },
+          950: { value: "#0F0F0F" },
         },
         blue: {
           DEFAULT: { value: "#004CFC" },
@@ -263,7 +264,7 @@ const config = defineConfig({
         },
         bg: {
           primary: { value: { base: "white", _dark: "{colors.gray.900}" } },
-          secondary: { value: { base: "{colors.gray.50}", _dark: "black" } },
+          secondary: { value: { base: "{colors.gray.50}", _dark: "{colors.gray.950}" } },
           tertiary: { value: { base: "#F5F5F5", _dark: "#262626" } },
           alt: { value: { base: "{colors.gray.900}", _dark: "{colors.gray.800}" } },
           "alt-subtle": { value: { base: "{colors.gray.400}", _dark: "{colors.gray.600}" } },
