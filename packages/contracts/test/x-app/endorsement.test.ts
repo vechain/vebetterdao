@@ -1001,7 +1001,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
     it("If a XNode holder transfers/sells its XNode the XAPPs remains endorsed by XNode and new owner is endorser", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 100 // Higher value for block-based cooldown
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 100 // Higher value for round-based cooldown
       const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -2869,7 +2869,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
     it("Node holder cannot unendorse XAPP if they are in cooldown period", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Need higher value for block-based cooldown
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Need higher value for round-based cooldown
       const { x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -2921,7 +2921,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
     it("If XApp removes XAPP endorsement they are no longer in cooldown period", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Need higher value for block-based cooldown
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Need higher value for round-based cooldown
       const { x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -3017,7 +3017,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
     it("Cooldown period should end when blocks pass based on when app was endorsed", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Use higher value for block-based cooldown
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Use higher value for round-based cooldown
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -3046,7 +3046,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       await waitForCurrentRoundToEnd()
       await startNewAllocationRound()
 
-      // Node should no longer be in cooldown period (can unendorse) - many blocks passed
+      // Node should no longer be in cooldown period (can unendorse) - many rounds passed
       expect(await x2EarnApps.canUnendorse(nodeId, app1Id)).to.eql(true)
 
       // Endorse a different app to test cooldown on new endorsement

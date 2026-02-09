@@ -191,9 +191,9 @@ library EndorsementUtils {
   }
 
   /**
-   * @notice Returns the cooldown period duration in blocks.
+   * @notice Returns the cooldown period duration in rounds.
    * @dev Cooldown prevents immediate un-endorsement after endorsing an app.
-   * @return The cooldown period duration in blocks.
+   * @return The cooldown period duration in rounds.
    */
   function cooldownPeriod() external view returns (uint256) {
     return X2EarnAppsStorageTypes._getEndorsementStorage()._cooldownPeriod;
@@ -260,7 +260,7 @@ library EndorsementUtils {
 
   /**
    * @notice Returns all active endorsements for a node.
-   * @dev Each endorsement contains appId, points, and endorsedAtBlock for cooldown tracking.
+   * @dev Each endorsement contains appId, points, and endorsedAtRound for cooldown tracking.
    * @param nodeId The unique identifier of the node.
    * @return Array of Endorsement structs representing all apps the node endorses.
    */
@@ -330,11 +330,11 @@ library EndorsementUtils {
     info.totalPoints = $._nodeEnodorsmentScore[nodeLevel];
 
     X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
-    uint256 cooldownPeriod = $._cooldownPeriod;
+    uint256 currentRound = $._xAllocationVotingGovernor.currentRoundId();
 
     for (uint256 i; i < endorsements.length; i++) {
       info.usedPoints += endorsements[i].points;
-      if (block.number < endorsements[i].endorsedAtBlock + cooldownPeriod) {
+      if (currentRound < endorsements[i].endorsedAtRound + $._cooldownPeriod) {
         info.lockedPoints += endorsements[i].points;
       }
     }
@@ -345,6 +345,7 @@ library EndorsementUtils {
   /**
    * @notice Checks if a node can unendorse a specific app (cooldown expired).
    * @dev Returns false if node doesn't endorse the app or if cooldown hasn't expired.
+   *      Cooldown is measured in rounds (VeBetterDAO allocation rounds).
    * @param nodeId The unique identifier of the node.
    * @param appId The unique identifier of the app.
    * @return True if the node can unendorse the app, false otherwise.
@@ -355,7 +356,7 @@ library EndorsementUtils {
     if (endorsements.length == 0) return false;
     uint256 index = $._activeEndorsementsAppIndex[nodeId][appId];
     if (index >= endorsements.length || endorsements[index].appId != appId) return false;
-    return block.number >= endorsements[index].endorsedAtBlock + $._cooldownPeriod;
+    return $._xAllocationVotingGovernor.currentRoundId() >= endorsements[index].endorsedAtRound + $._cooldownPeriod;
   }
 
   // ------------------------------- Setter Functions -------------------------------
@@ -414,7 +415,7 @@ library EndorsementUtils {
   /**
    * @notice Sets the cooldown period duration.
    * @dev Cooldown prevents immediate un-endorsement after endorsing an app.
-   * @param cooldownPeriodDuration The new cooldown period in blocks.
+   * @param cooldownPeriodDuration The new cooldown period in rounds.
    */
   function setCooldownPeriod(uint256 cooldownPeriodDuration) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
@@ -490,6 +491,7 @@ library EndorsementUtils {
    * @notice Endorses an app with a specified number of points from a node.
    * @dev Validates all constraints (paused, caps, node ownership) before creating endorsement.
    *      If node already endorses this app, adds points and resets cooldown.
+   *      Cooldown is tracked per-app using the current round ID.
    * @param appId The unique identifier of the app to endorse.
    * @param nodeId The unique identifier of the endorsing node.
    * @param points The number of points to endorse with.
@@ -511,7 +513,7 @@ library EndorsementUtils {
     _validateEndorsement($, appsStorage, appId, nodeId, points, isBlacklisted);
 
     uint256 currentAppPoints = _getNodePointsForAppInternal($, nodeId, appId);
-    _updateEndorsement($, nodeId, appId, points, currentAppPoints);
+    _updateEndorsement($, nodeId, appId, points, currentAppPoints, $._xAllocationVotingGovernor.currentRoundId());
     $._appEndorsementScore[appId] += points;
 
     if ($._appEndorsementScore[appId] >= $._endorsementScoreThreshold) {
@@ -560,16 +562,17 @@ library EndorsementUtils {
     uint256 nodeId,
     bytes32 appId,
     uint256 points,
-    uint256 currentAppPoints
+    uint256 currentAppPoints,
+    uint256 currentRound
   ) private {
     if (currentAppPoints > 0) {
       uint256 index = $._activeEndorsementsAppIndex[nodeId][appId];
       $._activeEndorsements[nodeId][index].points = currentAppPoints + points;
-      $._activeEndorsements[nodeId][index].endorsedAtBlock = block.number;
+      $._activeEndorsements[nodeId][index].endorsedAtRound = currentRound;
     } else {
       // Add to node's endorsements
       $._activeEndorsements[nodeId].push(
-        X2EarnAppsStorageTypes.Endorsement({ appId: appId, points: points, endorsedAtBlock: block.number })
+        X2EarnAppsStorageTypes.Endorsement({ appId: appId, points: points, endorsedAtRound: currentRound })
       );
       $._activeEndorsementsAppIndex[nodeId][appId] = $._activeEndorsements[nodeId].length - 1;
 
@@ -616,8 +619,8 @@ library EndorsementUtils {
       revert X2EarnNonEndorser();
     }
 
-    // Check cooldown (per-app)
-    if (block.number < endorsements[index].endorsedAtBlock + $._cooldownPeriod) {
+    // Check cooldown (per-app, measured in rounds)
+    if ($._xAllocationVotingGovernor.currentRoundId() < endorsements[index].endorsedAtRound + $._cooldownPeriod) {
       revert CooldownNotExpired(nodeId, appId);
     }
 
@@ -826,6 +829,7 @@ library EndorsementUtils {
 
     if ($._migrationCompleted) revert MigrationAlreadyCompleted();
 
+    uint256 currentRound = $._xAllocationVotingGovernor.currentRoundId();
     X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
     uint256 existingIndex = $._activeEndorsementsAppIndex[nodeId][appId];
 
@@ -838,14 +842,14 @@ library EndorsementUtils {
       // Update existing endorsement - adjust score delta
       uint256 oldPoints = endorsements[existingIndex].points;
       endorsements[existingIndex].points = points;
-      endorsements[existingIndex].endorsedAtBlock = block.number;
+      endorsements[existingIndex].endorsedAtRound = currentRound;
 
       // Adjust app score: remove old, add new
       $._appEndorsementScore[appId] = $._appEndorsementScore[appId] - oldPoints + points;
     } else {
       // Create new endorsement
       endorsements.push(
-        X2EarnAppsStorageTypes.Endorsement({ appId: appId, points: points, endorsedAtBlock: block.number })
+        X2EarnAppsStorageTypes.Endorsement({ appId: appId, points: points, endorsedAtRound: currentRound })
       );
       $._activeEndorsementsAppIndex[nodeId][appId] = endorsements.length - 1;
 

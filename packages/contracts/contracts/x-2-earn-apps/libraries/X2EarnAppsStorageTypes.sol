@@ -60,7 +60,7 @@ library X2EarnAppsStorageTypes {
   struct Endorsement {
     bytes32 appId;
     uint256 points;
-    uint256 endorsedAtBlock; // For cooldown tracking
+    uint256 endorsedAtRound; // Round in which the endorsement was created/updated (for cooldown tracking)
   }
 
   /// @notice Summary of a node's endorsement points allocation
@@ -86,7 +86,7 @@ library X2EarnAppsStorageTypes {
     INodeManagementV3 _nodeManagementContract; // The token auction contract
     IVeBetterPassport _veBetterPassport; // The VeBetterPassport contract
     mapping(uint256 => uint256) _endorsementRound_DEPRECATED; // DEPRECATED V8: Cooldown now per-app in Endorsement struct
-    uint256 _cooldownPeriod; // Cooldown duration in blocks for unendorsing
+    uint256 _cooldownPeriod; // Cooldown duration in rounds for unendorsing
     IXAllocationVotingGovernor _xAllocationVotingGovernor; // The XAllocationVotingGovernor contract
     //------- Version 7 -------//
     IStargateNFT _stargateNFT; // The Stargate NFT contract

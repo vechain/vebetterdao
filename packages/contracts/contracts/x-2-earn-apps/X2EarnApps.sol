@@ -849,6 +849,27 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     return EndorsementUtils.endorsementsPaused();
   }
 
+  /**
+   * @notice Check if the V8 migration has been completed.
+   */
+  function migrationCompleted() external view returns (bool) {
+    return EndorsementUtils.migrationCompleted();
+  }
+
+  /**
+   * @notice Get how many points a node has allocated to a specific app.
+   */
+  function getNodePointsForApp(uint256 nodeId, bytes32 appId) external view returns (uint256) {
+    return EndorsementUtils.getNodePointsForApp(nodeId, appId);
+  }
+
+  /**
+   * @notice Get the total points a node has used across all endorsements.
+   */
+  function getNodeUsedPoints(uint256 nodeId) external view returns (uint256) {
+    return EndorsementUtils.getNodeUsedPoints(nodeId);
+  }
+
   // ---------- Internal Functions ---------- //
 
   /**
