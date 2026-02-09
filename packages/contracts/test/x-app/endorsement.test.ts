@@ -2869,7 +2869,7 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
 
     it("Node holder cannot unendorse XAPP if they are in cooldown period", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Need higher value for round-based cooldown
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1 // 1 round cooldown
       const { x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -3015,9 +3015,9 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       expect(await x2EarnApps.canUnendorse(nodeId, app1Id)).to.eql(true)
     })
 
-    it("Cooldown period should end when blocks pass based on when app was endorsed", async function () {
+    it("Cooldown period should end when rounds pass based on when app was endorsed", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 10 // Use higher value for round-based cooldown
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1 // 1 round cooldown
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
