@@ -14,6 +14,9 @@ import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedB
 import { useBuildTransaction } from "./useBuildTransaction"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
+type ClausesProps = {
+  reason: string
+}
 type Props = { proposalId: string; onSuccess?: () => void }
 export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
   const { account } = useWallet()
@@ -23,22 +26,26 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     return Array(proposal?.targets.length).fill("0")
   }, [proposal?.targets])
   const values = Array.isArray(proposalValues) ? proposalValues : grantValues
-  const clauseBuilder = useCallback(() => {
-    return [
-      buildClause({
-        to: getConfig().b3trGovernorAddress,
-        contractInterface: GovernorInterface,
-        method: "cancel",
-        args: [
-          proposal?.targets,
-          values,
-          proposal?.calldatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
-        ],
-        comment: "cancel proposal",
-      }),
-    ]
-  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, values])
+  const clauseBuilder = useCallback(
+    ({ reason = "" }: ClausesProps) => {
+      return [
+        buildClause({
+          to: getConfig().b3trGovernorAddress,
+          contractInterface: GovernorInterface,
+          method: "cancel",
+          args: [
+            proposal?.targets,
+            values,
+            proposal?.calldatas,
+            ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
+            reason,
+          ],
+          comment: "cancel proposal",
+        }),
+      ]
+    },
+    [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, values],
+  )
   const refetchQueryKeys = useMemo(
     () => [
       getProposalStateQueryKey(proposalId),
@@ -48,7 +55,7 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     [proposalId, account?.address],
   )
 
-  return useBuildTransaction({
+  return useBuildTransaction<ClausesProps>({
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
