@@ -55,7 +55,7 @@ export const AdminPageContent = () => {
       <Tabs.List w="full" sm={{ gapX: "1" }} overflowY="hidden" scrollbar="hidden" justifyContent="space-evenly">
         <Tabs.Trigger value="emissions">{"Emissions"}</Tabs.Trigger>
         {Number(currentRoundId) > 0 && <Tabs.Trigger value="allocation-rewards">{"Allocation Rewards"}</Tabs.Trigger>}
-        <Tabs.Trigger value="x2earn-apps">{"X2Earn Apps"}</Tabs.Trigger>
+        {permissions?.isAdminOfX2EarnApps && <Tabs.Trigger value="x2earn-apps">{"X2Earn Apps"}</Tabs.Trigger>}
         <Tabs.Trigger value="utils">{"Utils"}</Tabs.Trigger>
         <Tabs.Trigger value="contracts">{"Contracts"}</Tabs.Trigger>
         {canSeePauseTab && <Tabs.Trigger value="pausing">{"Pausing"}</Tabs.Trigger>}
@@ -78,18 +78,16 @@ export const AdminPageContent = () => {
           </Grid>
         </Tabs.Content>
       )}
-      <Tabs.Content value="x2earn-apps">
-        <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
-          <XAppCheckEndorsement />
-          {permissions?.isAdminOfX2EarnApps && (
-            <>
-              <UpdateReceiverAddress />
-              <UpdateAppsEligibility />
-              <XAppAssignAppCategory />
-            </>
-          )}
-        </Grid>
-      </Tabs.Content>
+      {permissions?.isAdminOfX2EarnApps && (
+        <Tabs.Content value="x2earn-apps">
+          <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
+            <UpdateReceiverAddress />
+            <UpdateAppsEligibility />
+            <XAppCheckEndorsement />
+            <XAppAssignAppCategory />
+          </Grid>
+        </Tabs.Content>
+      )}
 
       <Tabs.Content value="utils">
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
