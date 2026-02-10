@@ -349,6 +349,42 @@
       "file": "contracts/XAllocationPool.sol",
       "function": "toggleQuadraticFunding()",
       "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "shadowing-local",
+      "file": "contracts/X2EarnCreator.sol",
+      "function": "initialize(string,address)",
+      "reason": "Intentional parameter naming; false positive"
+    },
+    {
+      "check": "shadowing-local",
+      "file": "contracts/X2EarnCreator.sol",
+      "function": "tokenURI(uint256)",
+      "reason": "Intentional parameter naming; false positive"
+    },
+    {
+      "check": "shadowing-local",
+      "file": "contracts/x-2-earn-apps/modules/AppsStorageUpgradeable.sol",
+      "function": "_registerApp(address,address,string,string)",
+      "reason": "Intentional parameter naming; false positive"
+    },
+    {
+      "check": "shadowing-local",
+      "file": "contracts/x-2-earn-apps/X2EarnAppsUpgradeable.sol",
+      "function": "_updateAppMetadata(bytes32,string)",
+      "reason": "Intentional parameter naming; false positive"
+    },
+    {
+      "check": "shadowing-local",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "markAsCompleted(GovernorStorageTypes.GovernorStorage,uint256)",
+      "reason": "Intentional parameter naming; false positive"
+    },
+    {
+      "check": "shadowing-local",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "markAsInDevelopment(GovernorStorageTypes.GovernorStorage,uint256)",
+      "reason": "Intentional parameter naming; false positive"
     }
   ]
 }
