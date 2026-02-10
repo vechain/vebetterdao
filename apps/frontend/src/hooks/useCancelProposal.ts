@@ -1,5 +1,4 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
@@ -13,7 +12,9 @@ import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useP
 import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
 import { useBuildTransaction } from "./useBuildTransaction"
 
-const GovernorInterface = B3TRGovernor__factory.createInterface()
+const GovernorInterface = new ethers.Interface([
+  "function cancel(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash, string reason) external returns (uint256)",
+])
 type ClausesProps = {
   reason: string
 }
