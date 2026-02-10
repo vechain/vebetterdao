@@ -97,6 +97,48 @@
       "file": "contracts/x-2-earn-apps/modules/EndorsementUpgradeable.sol",
       "function": "_updateStatusIfThresholdMet(bytes32)",
       "reason": "Trusted contract interactions; false positive"
+    },
+    {
+      "check": "uninitialized-local",
+      "file": "contracts/XAllocationPool.sol",
+      "function": "getAppShares(uint256,bytes32)",
+      "reason": "Default zero value is intentional; false positive"
+    },
+    {
+      "check": "uninitialized-local",
+      "file": "contracts/x-2-earn-apps/libraries/EndorsementUtils.sol",
+      "function": "getUsersEndorsementScore(mapping(uint8 => uint256),IStargateNFT,address)",
+      "reason": "Default zero value is intentional; false positive"
+    },
+    {
+      "check": "uninitialized-local",
+      "file": "contracts/ve-better-passport/libraries/PassportDelegationLogic.sol",
+      "function": "revokeDelegation(PassportStorageTypes.PassportStorage)",
+      "reason": "Default zero value is intentional; false positive"
+    },
+    {
+      "check": "uninitialized-local",
+      "file": "contracts/x-allocation-voting-governance/libraries/AutoVotingLogic.sol",
+      "function": "prepareAutoVoteArrays(address,address,uint256,bytes32[])",
+      "reason": "Default zero value is intentional; false positive"
+    },
+    {
+      "check": "uninitialized-local",
+      "file": "contracts/x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol",
+      "function": "_countVote(uint256,address,bytes32[],uint256[])",
+      "reason": "Default zero value is intentional; false positive"
+    },
+    {
+      "check": "uninitialized-local",
+      "file": "contracts/x-2-earn-apps/libraries/EndorsementUtils.sol",
+      "function": "getScoreAndRemoveEndorsement(mapping(uint8 => uint256),mapping(uint256 => bytes32),mapping(bytes32 => uint256[]),mapping(bytes32 => uint256),IStargateNFT,bytes32,uint256)",
+      "reason": "Default zero value is intentional; false positive"
+    },
+    {
+      "check": "uninitialized-local",
+      "file": "contracts/GalaxyMember.sol",
+      "function": "getTokenInfoByTokenId(uint256)",
+      "reason": "Default zero value is intentional; false positive"
     }
   ]
 }
