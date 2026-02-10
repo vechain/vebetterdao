@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { GoPlus } from "react-icons/go"
 
+import { useIsSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useIsSelfMintEnabled"
 import { SubmitCreatorFormModal } from "@/app/apps/components/SubmitCreatorFormModal"
 
 import { useBreakpoints } from "../../hooks/useBreakpoints"
@@ -11,6 +12,7 @@ export const JoinB3TRAppsBanner = () => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const router = useRouter()
+  const { data: isSelfMintEnabled } = useIsSelfMintEnabled()
   const { onOpen, open: isOpen, onClose } = useDisclosure()
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
@@ -38,7 +40,12 @@ export const JoinB3TRAppsBanner = () => {
                 "Do you have a sustainable application and want to become part of our ecosystem? Learn how to get started through our Grant Program. Join our Discord channel and introduce yourself and your app!",
               )}
             </Text>
-            <Button variant="secondary" size="md" onClick={onOpen} px={8} py={4}>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={isSelfMintEnabled ? () => router.push("/apps/new") : onOpen}
+              px={8}
+              py={4}>
               <GoPlus />
               <Text textStyle="md" color="current">
                 {t("Apply now")}

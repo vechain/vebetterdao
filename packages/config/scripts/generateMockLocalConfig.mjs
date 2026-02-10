@@ -40,6 +40,7 @@ export const generateMockLocalConfig = () => {
     "stargateContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "grantsManagerContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "relayerRewardsPoolContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    "b3trMultiSigAddress": "0x0000000000000000000000000000000000000000",
     "indexerUrl": "https://indexer.testnet.vechain.org/api/v1",
     "nodeUrl": "http://localhost:8669",
     "network": {
