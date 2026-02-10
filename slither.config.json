@@ -481,6 +481,144 @@
       "file": "contracts/x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol",
       "function": "getAppsOfRound(uint256)",
       "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "cancel(GovernorStorageTypes.GovernorStorage,address,bool,address[],uint256[],bytes[],bytes32)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "execute(GovernorStorageTypes.GovernorStorage,address,address[],uint256[],bytes[],bytes32)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "queue(GovernorStorageTypes.GovernorStorage,address,address[],uint256[],bytes[],bytes32)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "proposeGrant(GovernorStorageTypes.GovernorStorage,address[],uint256[],bytes[],string,uint256,uint256,address,string)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "_propose(GovernorStorageTypes.GovernorStorage,address,uint256,address[],uint256[],bytes[],string,uint256,uint256,GovernorTypes.ProposalType)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorDepositLogic.sol",
+      "function": "depositFunds(GovernorStorageTypes.GovernorStorage,uint256,address,uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorDepositLogic.sol",
+      "function": "withdraw(GovernorStorageTypes.GovernorStorage,uint256,address)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/governance/libraries/GovernorVotesLogic.sol",
+      "function": "castVote(GovernorStorageTypes.GovernorStorage,uint256,address,uint8,string)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/GrantsManager.sol",
+      "function": "_transferRemainingAmountToTreasury(uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/GrantsManager.sol",
+      "function": "rejectMilestones(uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/B3TRMultiSig.sol",
+      "function": "executeTransaction(uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/X2EarnRewardsPool.sol",
+      "function": "deposit(uint256,bytes32)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/RelayerRewardsPool.sol",
+      "function": "deposit(uint256,uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/X2EarnApps.sol",
+      "function": "setVotingEligibility(bytes32,bool)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-2-earn-apps/libraries/AdministrationUtils.sol",
+      "function": "removeAppCreator(mapping(bytes32 => address[]),mapping(address => uint256),IX2EarnCreator,bytes32,address,bool)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-2-earn-apps/libraries/AdministrationUtils.sol",
+      "function": "enableRewardsPoolForNewApp(IX2EarnRewardsPool,bytes32)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-2-earn-apps/libraries/AdministrationUtils.sol",
+      "function": "addCreator(mapping(bytes32 => address[]),mapping(address => uint256),IX2EarnCreator,bytes32,address,bool,uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-2-earn-apps/modules/EndorsementUpgradeable.sol",
+      "function": "endorseApp(bytes32,uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-2-earn-apps/modules/EndorsementUpgradeable.sol",
+      "function": "_updateStatusIfThresholdMet(bytes32)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol",
+      "function": "_startNewRound(address)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol",
+      "function": "_countVote(uint256,address,bytes32[],uint256[])",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol",
+      "function": "_handleCastVote(address,uint256,bytes32[],uint256[],bool)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "reentrancy-events",
+      "file": "contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol",
+      "function": "castVoteOnBehalfOf(address,uint256)",
+      "reason": "Event ordering after trusted calls is acceptable; false positive"
     }
   ]
 }
