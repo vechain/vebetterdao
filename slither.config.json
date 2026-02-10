@@ -37,6 +37,12 @@
       "file": "contracts/B3TRGovernor.sol",
       "function": "relay(address,uint256,bytes)",
       "reason": "Admin-gated function; false positive"
+    },
+    {
+      "check": "reentrancy-eth",
+      "file": "contracts/B3TRMultiSig.sol",
+      "function": "executeTransaction(uint256)",
+      "reason": "Multisig execution pattern; state updated before call; false positive"
     }
   ]
 }
