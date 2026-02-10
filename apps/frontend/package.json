@@ -19,8 +19,6 @@
     "start:mainnet": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "ts-node ./src/scripts/translations/generateTranslations.ts",
-    "complete-translations": "ts-node ./src/scripts/translations/completeTranslations.ts",
     "storybook": "NEXT_PUBLIC_APP_ENV=local storybook dev -p 6006",
     "build-storybook": "NEXT_PUBLIC_APP_ENV=staging storybook build",
     "generate:schema": "openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
@@ -45,7 +43,7 @@
     "@vechain/connex-framework": "^2.1.0",
     "@vechain/picasso": "^2.1.1",
     "@vechain/vebetterdao-contracts": "*",
-    "@vechain/vechain-kit": "2.4.1",
+    "@vechain/vechain-kit": "2.4.3",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
     "i18next": "^23.11.4",

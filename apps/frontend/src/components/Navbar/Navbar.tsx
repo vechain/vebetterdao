@@ -1,5 +1,6 @@
 "use client"
 import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
@@ -24,7 +25,10 @@ export const Navbar: React.FC = () => {
         return (
           route.isVisible &&
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Admin" ? permissions?.isAdmin : true) &&
+          // If in staging, or user is admin, and we are connected, show the admin route
+          (route.name === "Admin"
+            ? (getConfig().environment === "testnet-staging" || permissions?.isAdmin) && !!account?.address
+            : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true)
         )
