@@ -7652,10 +7652,10 @@
   dependencies:
     detect-browser "^5.2.0"
 
-"@vechain/contract-getters@1.0.4":
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/@vechain/contract-getters/-/contract-getters-1.0.4.tgz#1a27288bc61b9066a435eb2b959c1eb684b2ca03"
-  integrity sha512-n+o8WIyrrW6ztJtT9MXqPDGt7qu5axfE8RMC9fBZbKqY6pSbCpm68VtxxsPsBSO3ZkNYugW/8/AXFfpJkKvhwA==
+"@vechain/contract-getters@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@vechain/contract-getters/-/contract-getters-1.1.0.tgz#c72259036946fed4e6ccc9a19309f3fd3def5671"
+  integrity sha512-7ahP+T/aBfIilKnA1iKQsvfg4ZXekLQRcKzq2piUEqYFO+7jlc/FBCFArFNOMBR1wGpYmq9RcxGDinc0BN/Tfg==
 
 "@vechain/dapp-kit-react@2.1.0-rc.5":
   version "2.1.0-rc.5"
@@ -7842,10 +7842,10 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.4.3":
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.4.3.tgz#e68b94cfce66c586c3d535996472e1328863a15a"
-  integrity sha512-Q2j/tQO+L2kgjEKv6htcwWhvmzaNqmjJxCEB+u409YSJ4NVSpxt3+OJyMcfg7KGxgrDhFnUrLWhANsH0DMn9ng==
+"@vechain/vechain-kit@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.4.5.tgz#03ebc7d3d226806fc57720f060d5dd1a91358278"
+  integrity sha512-Iimc077ggC7SnpailnmowwxXXY6LX9jrW2pHrPDtoT/BvyqUa1quTpygq87mCExBDStQXsg2UygvWN4XQKf6Sw==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
@@ -7855,7 +7855,7 @@
     "@solana/web3.js" "^1.98.0"
     "@tanstack/react-query" "^5.64.2"
     "@tanstack/react-query-devtools" "^5.64.1"
-    "@vechain/contract-getters" "1.0.4"
+    "@vechain/contract-getters" "1.1.0"
     "@vechain/dapp-kit-react" "2.1.0-rc.5"
     "@vechain/picasso" "^2.1.1"
     "@vechain/vechain-contract-types" "1.6.0-rc"
