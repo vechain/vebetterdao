@@ -234,7 +234,7 @@ async function main() {
       for (const appId of new Set(endorsements.map(e => e.appId))) {
         try {
           const onChainScore = Number((await contractV8.getScore(appId)) as bigint)
-          const eventSum = endorsements.filter(e => e.appId === appId).reduce((s, e) => s + e.currentPoints, 0)
+          const eventSum = endorsements.filter(e => e.appId === appId).reduce((s, e) => s + (e.currentPoints ?? 0), 0)
           if (eventSum !== onChainScore) {
             console.warn(`App ${appId}: event sum=${eventSum}, getScore=${onChainScore} (frontend uses getScore).`)
           }
