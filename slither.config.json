@@ -385,6 +385,18 @@
       "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
       "function": "markAsInDevelopment(GovernorStorageTypes.GovernorStorage,uint256)",
       "reason": "Intentional parameter naming; false positive"
+    },
+    {
+      "check": "missing-zero-check",
+      "file": "contracts/Treasury.sol",
+      "function": "transferVET(address,uint256)",
+      "reason": "Admin-gated function; zero-check unnecessary; false positive"
+    },
+    {
+      "check": "missing-zero-check",
+      "file": "contracts/B3TRGovernor.sol",
+      "function": "relay(address,uint256,bytes)",
+      "reason": "Admin-gated function; zero-check unnecessary; false positive"
     }
   ]
 }
