@@ -43,6 +43,12 @@
       "file": "contracts/B3TRMultiSig.sol",
       "function": "executeTransaction(uint256)",
       "reason": "Multisig execution pattern; state updated before call; false positive"
+    },
+    {
+      "check": "unchecked-transfer",
+      "file": "contracts/GrantsManager.sol",
+      "function": "_transferRemainingAmountToTreasury(uint256)",
+      "reason": "B3TR token transfer always succeeds; false positive"
     }
   ]
 }
