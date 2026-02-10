@@ -619,6 +619,24 @@
       "file": "contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol",
       "function": "castVoteOnBehalfOf(address,uint256)",
       "reason": "Event ordering after trusted calls is acceptable; false positive"
+    },
+    {
+      "check": "timestamp",
+      "file": "contracts/governance/libraries/GovernorProposalLogic.sol",
+      "function": "queue(GovernorStorageTypes.GovernorStorage,address,address[],uint256[],bytes[],bytes32)",
+      "reason": "Block timestamp usage is standard for governance timing; false positive"
+    },
+    {
+      "check": "timestamp",
+      "file": "contracts/ve-better-passport/libraries/PassportEntityLogic.sol",
+      "function": "linkEntityToPassportWithSignature(PassportStorageTypes.PassportStorage,address,uint256,bytes)",
+      "reason": "Block timestamp usage is standard for governance timing; false positive"
+    },
+    {
+      "check": "timestamp",
+      "file": "contracts/ve-better-passport/libraries/PassportDelegationLogic.sol",
+      "function": "delegateWithSignature(PassportStorageTypes.PassportStorage,address,uint256,bytes)",
+      "reason": "Block timestamp usage is standard for governance timing; false positive"
     }
   ]
 }
