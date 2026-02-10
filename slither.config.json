@@ -85,6 +85,18 @@
       "file": "contracts/x-2-earn-apps/modules/AppsStorageUpgradeable.sol",
       "function": "_registerApp(address,address,string,string)",
       "reason": "Strict equality is intentional; false positive"
+    },
+    {
+      "check": "reentrancy-no-eth",
+      "file": "contracts/X2EarnApps.sol",
+      "function": "setVotingEligibility(bytes32,bool)",
+      "reason": "Trusted contract interactions; false positive"
+    },
+    {
+      "check": "reentrancy-no-eth",
+      "file": "contracts/x-2-earn-apps/modules/EndorsementUpgradeable.sol",
+      "function": "_updateStatusIfThresholdMet(bytes32)",
+      "reason": "Trusted contract interactions; false positive"
     }
   ]
 }
