@@ -229,6 +229,126 @@
       "file": "contracts/B3TRGovernor.sol",
       "function": "relay(address,uint256,bytes)",
       "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/libraries/PassportConfigurator.sol",
+      "function": "initializePassportStorage(PassportStorageTypes.PassportStorage,PassportTypes.InitializationData)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/libraries/PassportPoPScoreLogic.sol",
+      "function": "setThresholdPoPScore(PassportStorageTypes.PassportStorage,uint208)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/libraries/PassportEntityLogic.sol",
+      "function": "_pushCheckpoint(Checkpoints.Trace160,address)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/libraries/PassportDelegationLogic.sol",
+      "function": "_pushCheckpoint(Checkpoints.Trace160,address)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/VeBetterPassport.sol",
+      "function": "eip712Domain()",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/VeBetterPassport.sol",
+      "function": "isPersonAtTimepoint(address,uint48)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/VeBetterPassport.sol",
+      "function": "isPerson(address)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/VeBetterPassport.sol",
+      "function": "getPendingDelegations(address)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/ve-better-passport/VeBetterPassport.sol",
+      "function": "getPendingLinkings(address)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/x-allocation-voting-governance/libraries/AutoVotingLogic.sol",
+      "function": "toggleAutoVoting(XAllocationVotingDataTypes.AutoVotingStorage,address,address,uint48)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/x-allocation-voting-governance/modules/AutoVotingLogicUpgradeable.sol",
+      "function": "_prepareAutoVoteArrays(address,uint256,bytes32[])",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/x-allocation-voting-governance/modules/VotesQuorumFractionUpgradeable.sol",
+      "function": "_updateQuorumNumerator(uint256)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol",
+      "function": "castVoteOnBehalfOf(address,uint256)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/VoterRewards.sol",
+      "function": "toggleQuadraticRewarding()",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/Emissions.sol",
+      "function": "distribute()",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/Emissions.sol",
+      "function": "start()",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/x-2-earn-apps/libraries/VoteEligibilityUtils.sol",
+      "function": "_pushCheckpoint(Checkpoints.Trace208,uint48,uint208)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/GalaxyMember.sol",
+      "function": "_select(address,uint256)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/GalaxyMember.sol",
+      "function": "_update(address,uint256,address)",
+      "reason": "Return value unused by design; false positive"
+    },
+    {
+      "check": "unused-return",
+      "file": "contracts/XAllocationPool.sol",
+      "function": "toggleQuadraticFunding()",
+      "reason": "Return value unused by design; false positive"
     }
   ]
 }
