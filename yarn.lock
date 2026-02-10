@@ -1688,17 +1688,6 @@
     "@types/lodash.mergewith" "4.6.9"
     lodash.mergewith "4.6.2"
 
-"@chromatic-com/storybook@^4.1.2":
-  version "4.1.3"
-  resolved "https://registry.npmjs.org/@chromatic-com/storybook/-/storybook-4.1.3.tgz#3c2ff2a47bfe9de8741a2fd021fc68c8c58d29fc"
-  integrity sha512-hc0HO9GAV9pxqDE6fTVOV5KeLpTiCfV8Jrpk5ogKLiIgeq2C+NPjpt74YnrZTjiK8E19fYcMP+2WY9ZtX7zHmw==
-  dependencies:
-    "@neoconfetti/react" "^1.0.0"
-    chromatic "^13.3.3"
-    filesize "^10.0.12"
-    jsonfile "^6.1.0"
-    strip-ansi "^7.1.0"
-
 "@clack/core@0.5.0":
   version "0.5.0"
   resolved "https://registry.npmjs.org/@clack/core/-/core-0.5.0.tgz#970df024a927d6af90111667a0384e233b5ffa1a"
@@ -3727,11 +3716,6 @@
     "@emnapi/core" "^1.4.3"
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.10.0"
-
-"@neoconfetti/react@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/@neoconfetti/react/-/react-1.0.0.tgz#9a619d980a2285a829b1f8c78ca6484f0364a370"
-  integrity sha512-klcSooChXXOzIm+SE5IISIAn3bYzYfPjbX7D7HoqZL84oAfgREeSg5vSIaSFH+DaGzzvImTyWe1OyrJ67vik4A==
 
 "@next/bundle-analyzer@^15.5.4":
   version "15.5.9"
@@ -7851,17 +7835,17 @@
     ethers "^6.14.0"
     viem "^2.21.54"
 
-"@vechain/vechain-contract-types@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.npmjs.org/@vechain/vechain-contract-types/-/vechain-contract-types-1.5.0.tgz#952e98d68b62412adea33b394eb44e7cc8475366"
-  integrity sha512-XEmBayL2beBBs1ZiC8CtDVnZAuNCr94Ryfk3mzwg+TFX3A2d0zXHhBNuBRDEs+ePunAZwjOhE0IeSX599MD93Q==
+"@vechain/vechain-contract-types@1.6.0-rc":
+  version "1.6.0-rc"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-contract-types/-/vechain-contract-types-1.6.0-rc.tgz#49e0d196d91b7b544d63fa7ee8a4db563e56bd08"
+  integrity sha512-0GZvPfTAwpPxoH7pPL+K2kd/EapLBOIBd0Ec7ZZQg5FKs5q0axtPO994P9JD3AoDhpbdSHd/mQaxv4YBuTGYPw==
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.4.1":
-  version "2.4.1"
-  resolved "https://registry.npmjs.org/@vechain/vechain-kit/-/vechain-kit-2.4.1.tgz#b20db51c8ba9daa85376aa7a97e67db699b6d2b5"
-  integrity sha512-a3hhrN353hM5UrVoIZo9V/L5oVFkbeOm0tvSdndbwH39mjtxp3HtKEUw7MZ8mc/OAu0LJ2MvFbvSeUg3PnxppQ==
+"@vechain/vechain-kit@2.4.3":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.4.3.tgz#e68b94cfce66c586c3d535996472e1328863a15a"
+  integrity sha512-Q2j/tQO+L2kgjEKv6htcwWhvmzaNqmjJxCEB+u409YSJ4NVSpxt3+OJyMcfg7KGxgrDhFnUrLWhANsH0DMn9ng==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
@@ -7874,7 +7858,7 @@
     "@vechain/contract-getters" "1.0.4"
     "@vechain/dapp-kit-react" "2.1.0-rc.5"
     "@vechain/picasso" "^2.1.1"
-    "@vechain/vechain-contract-types" "1.5.0"
+    "@vechain/vechain-contract-types" "1.6.0-rc"
     "@wagmi/core" "^2.17.2"
     bignumber.js "^9.1.2"
     browser-image-compression "^2.0.2"
@@ -10709,11 +10693,6 @@ chokidar@^4.0.0, chokidar@^4.0.3:
   dependencies:
     readdirp "^4.0.1"
 
-chromatic@^13.3.3:
-  version "13.3.4"
-  resolved "https://registry.npmjs.org/chromatic/-/chromatic-13.3.4.tgz#2fd32d9da88891e1bc64e6a08627b63e2a46ebbb"
-  integrity sha512-TR5rvyH0ESXobBB3bV8jc87AEAFQC7/n+Eb4XWhJz6hW3YNxIQPVjcbgLv+a4oKHEl1dUBueWSoIQsOVGTd+RQ==
-
 ci-info@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/ci-info/-/ci-info-2.0.0.tgz#67a9e964be31a51e15e5010d58e6f12834002f46"
@@ -13029,11 +13008,6 @@ file-entry-cache@^6.0.1:
   integrity sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==
   dependencies:
     flat-cache "^3.0.4"
-
-filesize@^10.0.12:
-  version "10.1.6"
-  resolved "https://registry.npmjs.org/filesize/-/filesize-10.1.6.tgz#31194da825ac58689c0bce3948f33ce83aabd361"
-  integrity sha512-sJslQKU2uM33qH5nqewAwVB2QgR6w1aMNsYUp3aN5rMRyXEwJGmZvaWzeJFNTOXWlHQyBFCWrdj3fV/fsTOX8w==
 
 fill-range@^7.1.1:
   version "7.1.1"
@@ -15471,7 +15445,7 @@ jsonfile@^4.0.0:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonfile@^6.0.1, jsonfile@^6.1.0:
+jsonfile@^6.0.1:
   version "6.2.0"
   resolved "https://registry.npmjs.org/jsonfile/-/jsonfile-6.2.0.tgz#7c265bd1b65de6977478300087c99f1c84383f62"
   integrity sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg==
@@ -20084,7 +20058,7 @@ stringify-entities@^4.0.0:
   dependencies:
     ansi-regex "^5.0.1"
 
-strip-ansi@6.0.1, strip-ansi@^4.0.0, strip-ansi@^6.0.0, strip-ansi@^6.0.1, strip-ansi@^7.0.1, strip-ansi@^7.1.0:
+strip-ansi@6.0.1, strip-ansi@^4.0.0, strip-ansi@^6.0.0, strip-ansi@^6.0.1, strip-ansi@^7.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
