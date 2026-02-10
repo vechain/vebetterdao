@@ -397,6 +397,90 @@
       "file": "contracts/B3TRGovernor.sol",
       "function": "relay(address,uint256,bytes)",
       "reason": "Admin-gated function; zero-check unnecessary; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol",
+      "function": "isEligibleForVote(bytes32,uint256)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/DBAPool.sol",
+      "function": "seedDBARewardsForApps(uint256[],bytes32[],uint256[])",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/DBAPool.sol",
+      "function": "distributeDBARewards(uint256,bytes32[])",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-2-earn-apps/libraries/AdministrationUtils.sol",
+      "function": "validateAppCreators(mapping(bytes32 => address[]),mapping(address => uint256),IX2EarnCreator,bytes32)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-2-earn-apps/libraries/AdministrationUtils.sol",
+      "function": "revokeAppCreators(mapping(bytes32 => address[]),mapping(address => uint256),IX2EarnCreator,bytes32)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-allocation-voting-governance/libraries/AutoVotingLogic.sol",
+      "function": "setUserVotingPreferences(XAllocationVotingDataTypes.AutoVotingStorage,address,address,bytes32[])",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-allocation-voting-governance/libraries/AutoVotingLogic.sol",
+      "function": "prepareAutoVoteArrays(address,address,uint256,bytes32[])",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-2-earn-apps/libraries/EndorsementUtils.sol",
+      "function": "getEndorsers(mapping(bytes32 => uint256[]),IStargateNFT,bytes32)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-2-earn-apps/libraries/EndorsementUtils.sol",
+      "function": "getScoreAndRemoveEndorsement(mapping(uint8 => uint256),mapping(uint256 => bytes32),mapping(bytes32 => uint256[]),mapping(bytes32 => uint256),IStargateNFT,bytes32,uint256)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/GalaxyMember.sol",
+      "function": "getNodeLevelOf(uint256)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/GalaxyMember.sol",
+      "function": "_getNodeIdAttached(uint256,GalaxyMember.GalaxyMemberStorage)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/GalaxyMember.sol",
+      "function": "_getLevelOfAndB3TRleft(uint256,uint256)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/VoterRewards.sol",
+      "function": "_setLevelToMultiplier(uint256,uint256)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
+    },
+    {
+      "check": "calls-loop",
+      "file": "contracts/x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol",
+      "function": "getAppsOfRound(uint256)",
+      "reason": "Trusted contract calls in bounded loop; false positive"
     }
   ]
 }
