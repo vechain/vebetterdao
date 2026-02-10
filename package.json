@@ -77,8 +77,6 @@
     "contracts:get-app-shares": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-app-shares --filter=@vechain/vebetterdao-contracts",
     "solo-up": "make solo-up",
     "solo-down": "make solo-down",
-    "generate-translations": "dotenv -e .env -- turbo generate-translations",
-    "complete-translations": "dotenv -e .env -- turbo complete-translations",
     "prepare": "husky install",
     "contracts:verify:testnet": "dotenv -v VITE_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
     "contracts:verify:mainnet": "dotenv -v VITE_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
@@ -98,8 +96,7 @@
     "contracts:endorsement-migration:seed:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:seed:mainnet --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:verify:local --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:verify:testnet-staging --filter=@vechain/vebetterdao-contracts",
-    "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts",
-    "chromatic": "dotenv -e .env -- npx chromatic --dry-run"
+    "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts"
   },
   "dependencies": {
     "dotenv-cli": "latest",

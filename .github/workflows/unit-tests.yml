@@ -189,6 +189,10 @@ jobs:
             label: X-Apps - V7 Upgrade
           - shard: shard15e
             label: X-Apps - Upgradeability
+          - shard: shard15f
+            label: X-Apps - V8 Upgrade
+          - shard: shard15g
+            label: X-Apps - EndorsementUtils Coverage
           - shard: shard16-pop
             label: VeBetterPassport - PoP Score
           - shard: shard16a

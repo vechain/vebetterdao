@@ -311,12 +311,6 @@
     "generate-docs": {
       "cache": false
     },
-    "generate-translations": {
-      "cache": false
-    },
-    "complete-translations": {
-      "cache": false
-    },
     "estimate-voting-gas:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]

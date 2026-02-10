@@ -102,7 +102,7 @@ Stop: `make solo-down` | Reset: `make solo-clean && make solo-up`
 - `yarn storybook`: Start Storybook dev server (port 6006)
 - `yarn build-storybook`: Build static Storybook to public/storybook
 - Stories located in `apps/frontend/src/**/*.stories.@(js|jsx|mjs|ts|tsx)`
-- Storybook configured with: Chromatic, Docs, A11y, Vitest, Themes, MCP addons
+- Storybook configured with: Docs, A11y, Vitest, Themes, MCP addons
 - Uses Next.js Vite framework for optimal integration
 
 ## Contracts
@@ -342,6 +342,7 @@ Ralph is a script that runs Claude autonomously to implement features from a PRD
 ## How Ralph Works
 
 Each iteration:
+
 1. Find highest-priority story with `passes: false`
 2. Implement the feature
 3. Run type checks (`yarn typecheck`)
@@ -354,6 +355,7 @@ Stops when all stories have `passes: true` or iterations exhausted.
 ## Output
 
 Real-time progress with timestamps:
+
 ```
 [00:00] 💬 Looking at prd.json...
 [00:02] 🔧 Using tool: Read

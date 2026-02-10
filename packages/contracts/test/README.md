@@ -48,6 +48,8 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard15c**: X-Apps - Metadata and Endorsement
 - **shard15d**: X-Apps - V7 Upgrade
 - **shard15e**: X-Apps - Upgradeability
+- **shard15f**: X-Apps - V8 Upgrade
+- **shard15g**: X-Apps - EndorsementUtils Coverage
 - **shard16-pop**: VeBetterPassport - PoP Score
 - **shard16a**: VeBetterPassport - Whitelisting
 - **shard16b**: VeBetterPassport - GM & Governance
