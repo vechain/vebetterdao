@@ -73,6 +73,18 @@
       "file": "contracts/XAllocationPool.sol",
       "function": "_rewardAmount(uint256,uint256)",
       "reason": "Intentional integer math; false positive"
+    },
+    {
+      "check": "incorrect-equality",
+      "file": "contracts/x-2-earn-apps/libraries/AdministrationUtils.sol",
+      "function": "addCreator(mapping(bytes32 => address[]),mapping(address => uint256),IX2EarnCreator,bytes32,address,bool,uint256)",
+      "reason": "Strict equality is intentional; false positive"
+    },
+    {
+      "check": "incorrect-equality",
+      "file": "contracts/x-2-earn-apps/modules/AppsStorageUpgradeable.sol",
+      "function": "_registerApp(address,address,string,string)",
+      "reason": "Strict equality is intentional; false positive"
     }
   ]
 }
