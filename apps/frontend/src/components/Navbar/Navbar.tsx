@@ -3,6 +3,8 @@ import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { getConfig } from "@repo/config"
+
 import { useAccountPermissions } from "../../api/contracts/account/hooks/useAccountPermissions"
 import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 import { useHideOnScroll } from "../../hooks/useHideOnScroll"
@@ -24,7 +26,7 @@ export const Navbar: React.FC = () => {
         return (
           route.isVisible &&
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Admin" ? permissions?.isAdmin : true) &&
+          (route.name === "Admin" ? getConfig().environment === "testnet-staging" || permissions?.isAdmin : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true)
         )
