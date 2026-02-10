@@ -63,7 +63,7 @@ export type AppConfig = {
   b3trGovernorLibraries: B3TRGovernorLibraries
   passportLibraries: PassportLibraries
   xAllocationVotingLibraries: XAllocationVotingLibraries
-  b3trMultiSigAddress?: string
+  b3trMultiSigAddress: string
   stargateNFTContractAddress: string
   stargateContractAddress: string
   grantsManagerContractAddress: string

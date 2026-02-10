@@ -19,8 +19,6 @@
     "start:mainnet": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "ts-node ./src/scripts/translations/generateTranslations.ts",
-    "complete-translations": "ts-node ./src/scripts/translations/completeTranslations.ts",
     "storybook": "NEXT_PUBLIC_APP_ENV=local storybook dev -p 6006",
     "build-storybook": "NEXT_PUBLIC_APP_ENV=staging storybook build",
     "generate:schema": "openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
@@ -79,7 +77,6 @@
   },
   "devDependencies": {
     "@chakra-ui/cli": "^3.5.0",
-    "@chromatic-com/storybook": "^4.1.2",
     "@next/bundle-analyzer": "^15.5.4",
     "@next/eslint-plugin-next": "^14.2.25",
     "@repo/eslint-config": "*",
