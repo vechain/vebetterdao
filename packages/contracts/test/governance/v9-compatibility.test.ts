@@ -62,6 +62,7 @@ describe("Governance - V9 Compatibility - @shard4h", function () {
           [0],
           [encodedFunctionCall],
           ethers.keccak256(ethers.toUtf8Bytes(`description ${this.title}`)),
+          "reason",
         )
       const stateAfterCancel = await governor.state(proposalId)
       expect(stateAfterCancel).to.equal(2) // cancelled
