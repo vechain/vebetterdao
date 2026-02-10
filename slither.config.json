@@ -24,6 +24,19 @@
       "file": "contracts/tokens/Token.sol",
       "lineRange": "120-128",
       "reason": "admin-only sweep, reviewed"
+    },
+
+    {
+      "check": "arbitrary-send-eth",
+      "file": "contracts/Treasury.sol",
+      "function": "transferVET(address,uint256)",
+      "reason": "Admin-gated function; false positive"
+    },
+    {
+      "check": "arbitrary-send-eth",
+      "file": "contracts/B3TRGovernor.sol",
+      "function": "relay(address,uint256,bytes)",
+      "reason": "Admin-gated function; false positive"
     }
   ]
 }
