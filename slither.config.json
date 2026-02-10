@@ -49,6 +49,30 @@
       "file": "contracts/GrantsManager.sol",
       "function": "_transferRemainingAmountToTreasury(uint256)",
       "reason": "B3TR token transfer always succeeds; false positive"
+    },
+    {
+      "check": "divide-before-multiply",
+      "file": "contracts/ve-better-passport/libraries/PassportPoPScoreLogic.sol",
+      "function": "_cumulativeScoreWithDecay(PassportStorageTypes.PassportStorage,address,uint256)",
+      "reason": "Intentional integer math; false positive"
+    },
+    {
+      "check": "divide-before-multiply",
+      "file": "contracts/Emissions.sol",
+      "function": "_calculateTreasuryAndGMAmount()",
+      "reason": "Intentional integer math; false positive"
+    },
+    {
+      "check": "divide-before-multiply",
+      "file": "contracts/Emissions.sol",
+      "function": "_calculateNextXAllocation()",
+      "reason": "Intentional integer math; false positive"
+    },
+    {
+      "check": "divide-before-multiply",
+      "file": "contracts/XAllocationPool.sol",
+      "function": "_rewardAmount(uint256,uint256)",
+      "reason": "Intentional integer math; false positive"
     }
   ]
 }
