@@ -61,7 +61,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
     <LinkBox asChild>
       <LinkOverlay asChild>
         <NextLink href={`/apps/${appId}`}>
-          <Card.Root variant="subtle" w="full" maxW="full">
+          <Card.Root variant="subtle" w="full" maxW="full" minW={0} overflow="hidden">
             <Card.Body>
               <Stack
                 direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
