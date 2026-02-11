@@ -149,7 +149,7 @@ export const setupLocalEnvironment = async (
   // Make sure the first 10 accounts have a VTHO balance
   await airdropVTHO(
     accounts.slice(1, 10).map(acct => acct.address),
-    500n,
+    5000n,
     admin,
   )
 
@@ -185,39 +185,35 @@ export const setupLocalEnvironment = async (
   await startEmissions(emissionsContract, admin)
 
   if (endorseApps) {
-    // Use signers 7-19 as endorsers (0-6 are used for other roles like admin/app creators)
-    // With 8 apps needing ~100 pts each and max 49 pts/node/app, we need ~3 nodes per app = 24 nodes
-    // We mint multiple nodes per endorser so they can spread points across apps
+    // In V8, one node can endorse multiple apps (max 49 pts/node/app)
     const allSigners = await ethers.getSigners()
-    const endorserSigners = allSigners.slice(7, 19) // 12 endorsers
+    const endorserSigners = allSigners.slice(0, 10)
 
     await airdropVTHO(
       endorserSigners.map(acct => Address.of(acct.address)),
-      500n,
+      5000n,
       admin,
     )
 
-    // Mint 2 MjolnirX (level 7) nodes per endorser = 24 nodes total
-    // Each MjolnirX node has 100 endorsement score, capped at 49 pts per app
-    const allAcctsForMint: typeof endorserSigners = []
-    const allLevels: number[] = []
-    for (const acct of endorserSigners) {
-      allAcctsForMint.push(acct, acct)
-      allLevels.push(7, 7)
+    // First 2 endorsers get 2 MjolnirX each (for multi-node testing), rest get 1
+    // Total: 4 + 10 = 14 nodes x 100 pts = 1400 pts > 8 apps x 100 threshold
+    const mintAccounts: typeof endorserSigners = []
+    const mintLevels: number[] = []
+    for (const acct of endorserSigners.slice(0, 2)) {
+      mintAccounts.push(acct, acct)
+      mintLevels.push(7, 7)
     }
-    await mintStargateNFTs(stargateMock, allAcctsForMint, allLevels)
+    for (const acct of endorserSigners.slice(2)) {
+      mintAccounts.push(acct)
+      mintLevels.push(7)
+    }
+    await mintStargateNFTs(stargateMock, mintAccounts, mintLevels)
 
     const unendorsedApps = await x2EarnApps.unendorsedAppIds()
     await endorseXApps(endorserSigners, x2EarnApps, unendorsedApps, stargateMock)
-    /* Previously used a 1:1 endorser:app mapping with 6 endorsers for 8 apps,
-     * each endorsing 49 pts - not enough to reach the 100 pt threshold.
-     * First seed account will have a Mjölnir Economic Node
-     * Fifth seed account will have a Strength Economic Node
-     * Remaining accounts with have a Mjolnir X Node -> These will have an endorsement score of 100
-     * BEWARE : The first 8 accounts have to hold those nodes : Check if it is the case before running the script
-     */
   }
-  await proposeUpgradeGovernance(governor, xAllocationVoting)
+
+  // await proposeUpgradeGovernance(governor, xAllocationVoting)
 
   const end = new Date(performance.now() - start)
 

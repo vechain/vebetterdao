@@ -1305,17 +1305,22 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
-  await setupEnvironment(
-    config.NEXT_PUBLIC_APP_ENV,
-    emissions,
-    treasury,
-    x2EarnApps,
-    governor,
-    xAllocationVoting,
-    b3tr,
-    vot3,
-    stargateMock,
-  )
+  // Wrapped in try-catch so setup failures don't prevent config from being written
+  try {
+    await setupEnvironment(
+      config.NEXT_PUBLIC_APP_ENV,
+      emissions,
+      treasury,
+      x2EarnApps,
+      governor,
+      xAllocationVoting,
+      b3tr,
+      vot3,
+      stargateMock,
+    )
+  } catch (e) {
+    console.error("Setup environment failed (contracts are deployed, setup can be re-run):", e)
+  }
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time
