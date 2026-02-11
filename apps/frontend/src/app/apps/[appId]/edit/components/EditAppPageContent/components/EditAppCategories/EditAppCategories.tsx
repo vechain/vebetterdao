@@ -66,9 +66,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
     if (isOpen) {
       setSearchQuery("")
     }
-    register("categories", {
-      required: { value: true, message: t("Categories are required") },
-    })
+    register("categories")
   }, [isOpen, register, t])
 
   return (
