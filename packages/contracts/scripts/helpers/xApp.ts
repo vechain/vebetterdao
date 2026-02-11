@@ -16,6 +16,7 @@ import { EnvConfig } from "@repo/config/contracts"
 import { getConfig } from "@repo/config"
 import { ThorClient } from "@vechain/sdk-network"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { uploadBlobToIPFS } from "./ipfs"
 
 const thorClient = ThorClient.at(getConfig().nodeUrl)
 
@@ -24,6 +25,7 @@ export type App = {
   teamWalletAddress: string
   name: string
   metadataURI: string
+  categories?: string[]
 }
 
 export const registerXDapps = async (contractAddress: string, accounts: TestPk[], apps: App[]) => {
@@ -117,6 +119,63 @@ export const endorseXApps = async (
   }
 
   console.log(`\n========== Endorsement complete ==========\n`)
+}
+
+export const assignAppCategories = async (
+  x2EarnApps: X2EarnApps,
+  deployer: HardhatEthersSigner,
+  apps: App[],
+): Promise<void> => {
+  const config = getConfig()
+  const baseURI = await x2EarnApps.baseURI()
+  const allAppIds = await x2EarnApps.apps()
+  const appsWithCategories = apps.filter(a => a.categories && a.categories.length > 0)
+
+  if (appsWithCategories.length === 0) {
+    console.log("No apps with categories to assign, skipping...")
+    return
+  }
+
+  console.log(`\n========== Assigning categories to ${appsWithCategories.length} apps ==========`)
+
+  for (const app of appsWithCategories) {
+    const appEntry = allAppIds.find((a: any) => a.name === app.name)
+    if (!appEntry) {
+      console.log(`  [SKIP] ${app.name} — not found on-chain`)
+      continue
+    }
+    const appId = appEntry.id
+
+    // Fetch current metadata from IPFS
+    const metadataUri = await x2EarnApps.metadataURI(appId)
+    const fullUri = `${baseURI}${metadataUri}`
+    const fetchUrl = fullUri.replace("ipfs://", `${config.ipfsFetchingService}/`)
+
+    let metadata: Record<string, any> = {}
+    try {
+      const response = await fetch(fetchUrl)
+      if (response.ok) {
+        metadata = (await response.json()) as Record<string, any>
+      }
+    } catch {
+      // If fetch fails, start with minimal metadata
+      metadata = { name: app.name }
+    }
+
+    // Add categories
+    metadata.categories = app.categories
+
+    // Upload updated metadata to IPFS
+    const blob = new Blob([JSON.stringify(metadata)], { type: "application/json" })
+    const newCid = await uploadBlobToIPFS(blob, `${app.name}-metadata.json`)
+
+    // Update metadata on-chain (deployer has DEFAULT_ADMIN_ROLE)
+    await x2EarnApps.connect(deployer).updateAppMetadata(appId, newCid)
+
+    console.log(`  [OK] ${app.name} — categories: [${app.categories!.join(", ")}] — CID: ${newCid}`)
+  }
+
+  console.log(`\n========== Categories assigned ==========\n`)
 }
 
 export const castVotesToXDapps = async (

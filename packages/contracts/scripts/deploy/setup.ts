@@ -18,7 +18,7 @@ import { getSeedAccounts, getTestKeys, SeedStrategy } from "../helpers/seedAccou
 import { convertB3trForVot3 } from "../helpers/swap"
 import { ethers } from "hardhat"
 import { Address } from "@vechain/sdk-core"
-import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
+import { App, assignAppCategories, endorseXApps, registerXDapps } from "../helpers/xApp"
 
 const accounts = getTestKeys(17)
 const xDappCreatorAccounts = accounts.slice(0, 8)
@@ -29,48 +29,56 @@ export const APPS: App[] = [
     teamWalletAddress: accounts[6].address.toString(),
     name: "Mugshot",
     metadataURI: "bafkreidqiirz4ekvzyme5ll3obhh6fmcbt67uipqljeh6cvbb5mvkks2f4",
+    categories: ["nutrition", "plastic-waste-recycling"],
   },
   {
     admin: accounts[6].address.toString(),
     teamWalletAddress: accounts[6].address.toString(),
     name: "Cleanify",
     metadataURI: "bafkreifmgtvgcvgibtrvcmbao4zc2cn2z4ga6xxp3wro5a7z5cdtfxnvrq",
+    categories: ["plastic-waste-recycling"],
   },
   {
     admin: accounts[6].address.toString(),
     teamWalletAddress: accounts[6].address.toString(),
     name: "GreenCart",
     metadataURI: "bafkreif3wf422t4z6zyiztirmpplcdmemldk24dc3a4kow6ug5nznzmvhm",
+    categories: ["sustainable-shopping"],
   },
   {
     admin: accounts[6].address.toString(),
     teamWalletAddress: accounts[6].address.toString(),
     name: "Green Ambassador Challenge",
     metadataURI: "bafkreigui2fiwnir3r3k32w7c3irbbdbfkpqanbisxarz7f6gqxk4gzeay",
+    categories: ["education-learning", "green-mobility-travel"],
   },
   {
     admin: accounts[6].address.toString(),
     teamWalletAddress: accounts[6].address.toString(),
     name: "Oily",
     metadataURI: "bafkreiegiuaukybbauhae3vdy2ktdqrehf4wzfg6rnfn5ebd36c2k6pmxa",
+    categories: ["renewable-energy-efficiency"],
   },
   {
     admin: accounts[6].address.toString(),
     teamWalletAddress: accounts[6].address.toString(),
     name: "EVearn",
     metadataURI: "bafkreicz2cslyuzbmj2msmgyzpz2tqwmbyifb7yvb5jbnydp4yx4jnkfny",
+    categories: ["green-finance-defi", "renewable-energy-efficiency"],
   },
   {
     admin: accounts[6].address.toString(),
     teamWalletAddress: accounts[6].address.toString(),
     name: "Vyvo",
     metadataURI: "bafkreid3dbmrxe3orutmptc43me5gnvskz7hu53bjnlfgafwu6xb53w3mi",
+    categories: ["fitness-wellness"],
   },
   {
     admin: accounts[6].address.toString(),
     teamWalletAddress: accounts[6].address.toString(),
     name: "Non Fungible Book Club (NFBC)",
     metadataURI: "bafkreift6bsmzrjnxvdwkrpmxntbwpsrrxjvsvliycnfxoqznb63poeyka",
+    categories: ["education-learning"],
   },
 ]
 
@@ -152,6 +160,10 @@ export const setupLocalEnvironment = async (
   // Add x-apps to the XAllocationPool
   const x2EarnAppsAddress = await x2EarnApps.getAddress()
   await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
+
+  // Assign categories to apps (deployer has DEFAULT_ADMIN_ROLE)
+  const deployer = (await ethers.getSigners())[0]
+  await assignAppCategories(x2EarnApps, deployer, APPS)
 
   // Seed the first 5 accounts with some tokens
   const treasuryAddress = await treasury.getAddress()
