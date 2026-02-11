@@ -49,7 +49,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
   const nodeEndorsingApp = userNodes?.nodesManagedByUser?.find((node: UserNode) =>
-    compareAddresses(node.endorsedAppId ?? "", appId ?? ""),
+    node.activeEndorsements.some(e => compareAddresses(e.appId ?? "", appId ?? "")),
   )
   const isUserAppEndorser = useMemo(() => {
     if (!appId || !nodeEndorsingApp) return false
@@ -146,7 +146,9 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                       <VStack gap={0} alignItems="flex-start">
                         <Skeleton loading={isUserNodesLoading}>
                           <Text textStyle="2xl" color="#004CFC">
-                            {nodeEndorsingApp?.endorsementScore?.toString()}
+                            {nodeEndorsingApp?.activeEndorsements
+                              .find(e => compareAddresses(e.appId ?? "", appId ?? ""))
+                              ?.points?.toString() ?? "0"}
                           </Text>
                         </Skeleton>
                         <Text textStyle="xs" color="text.subtle">

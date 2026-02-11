@@ -1,5 +1,4 @@
 import { HStack, Text, VStack, Skeleton } from "@chakra-ui/react"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -32,11 +31,13 @@ export const EndorsementDetails = ({
   const { t } = useTranslation()
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const yourScore = useMemo(() => {
-    return (
-      userNodes?.nodesManagedByUser
-        ?.find((node: UserNode) => compareAddresses(node.endorsedAppId ?? "", appId ?? ""))
-        ?.endorsementScore?.toString() ?? BigInt(0)?.toString()
-    )
+    let total = BigInt(0)
+    userNodes?.nodesManagedByUser?.forEach((node: UserNode) => {
+      node.activeEndorsements.forEach(e => {
+        if (e.appId === appId) total += e.points
+      })
+    })
+    return total.toString()
   }, [userNodes, appId])
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus] ?? { color: "#6A6A6A" }

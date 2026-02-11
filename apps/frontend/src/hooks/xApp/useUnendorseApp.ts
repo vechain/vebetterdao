@@ -16,7 +16,7 @@ import { getUserNodesQueryKey } from "../../api/contracts/xNodes/useGetUserNodes
 import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-type Props = { appId?: string; nodeId?: string; userAddress?: string; onSuccess?: () => void }
+type Props = { appId?: string; nodeId?: string; points?: string; userAddress?: string; onSuccess?: () => void }
 /**
  * Hook for node holders to unendorse an app
  * @param appId  the app id to unendorse
@@ -25,18 +25,18 @@ type Props = { appId?: string; nodeId?: string; userAddress?: string; onSuccess?
  * @param onSuccess  the callback to call after the app is unendorsed
  * @returns the unendorse transaction
  */
-export const useUnendorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props) => {
+export const useUnendorseApp = ({ appId, nodeId, points, userAddress, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
         to: getConfig().x2EarnAppsContractAddress,
         contractInterface: X2EarnAppsInterface,
         method: "unendorseApp",
-        args: [appId, nodeId],
-        comment: `Unendorse app ${appId} with node ${nodeId}`,
+        args: [appId, nodeId, points],
+        comment: `Unendorse app ${appId} with node ${nodeId} (${points} points)`,
       }),
     ]
-  }, [appId, nodeId])
+  }, [appId, nodeId, points])
   const refetchQueryKeys = useMemo(
     () => [
       getUserNodesQueryKey(userAddress ?? ""),

@@ -13,7 +13,6 @@ import {
   Card,
 } from "@chakra-ui/react"
 import { UilTrash } from "@iconscout/react-unicons"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { normalize } from "@repo/utils/HexUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -57,8 +56,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
   const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account?.address ?? "")
 
   const isUserAppEndorser = useMemo(() => {
-    if (!appId) return false
-    return compareAddresses(userNode?.endorsedAppId, appId)
+    if (!appId || !userNode) return false
+    return userNode.activeEndorsements.some(e => e.appId === appId)
   }, [appId, userNode])
 
   // Get currently endorsed nodes by tracking the latest state for each node

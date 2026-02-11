@@ -12,7 +12,6 @@ import {
   CloseButton,
 } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
-import { ethers } from "ethers"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -92,7 +91,7 @@ export const AllApps = ({
   }, [debouncedSearchTerm, filteredApps, searchApps])
 
   const isUserEndorsingAnyApp = useMemo(() => {
-    return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsedAppId !== ethers.ZeroHash)
+    return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.activeEndorsements.length > 0)
   }, [userNodesInfo])
 
   const itemsPerPage = 25

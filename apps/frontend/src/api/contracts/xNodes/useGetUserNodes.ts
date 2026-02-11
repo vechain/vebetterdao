@@ -9,8 +9,6 @@ import {
   X2EarnApps__factory,
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
-import { ethers } from "ethers"
-
 import { notFoundImage } from "@/constants"
 import { convertUriToUrl } from "@/utils/uri"
 
@@ -51,13 +49,18 @@ type TokenOverview = {
   levelId: number // Converted from bigint to number at runtime
 }
 
+export type ActiveEndorsement = {
+  appId: string
+  points: bigint
+  endorsedAtRound: bigint
+}
+
 export type UserNode = TokenOverview & {
   endorsementScore: bigint
   metadata: StargateNFTMetadata
   type: NodeType
-  endorsedAppId: string
-  isEndorsingApp: boolean
-  isOnCooldown: boolean
+  activeEndorsements: ActiveEndorsement[]
+  availablePoints: bigint
   currentUserIsManager: boolean
   currentUserIsOwner: boolean
   gmAttachedTokenId: bigint
@@ -120,8 +123,8 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
       let nodePointsArray: bigint[] = []
       let nodeMetadataArray: StargateNFTMetadata[] = []
       let nodeIsXArray: boolean[] = []
-      let nodeToEndorsedAppArray: string[] = []
-      let nodeCooldownArray: boolean[] = []
+      let nodeActiveEndorsementsArray: { appId: string; points: bigint; endorsedAtRound: bigint }[][] = []
+      let nodeAvailablePointsArray: bigint[] = []
       let nodeGmAttachedTokenIdArray: bigint[] = []
       if (nodeIds?.length > 0) {
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
@@ -146,14 +149,12 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
           })),
         })
 
-        // Fetch metadata in order
         nodeMetadataArray = await Promise.all(
           (rawNodeMetadata as unknown as string[])?.map(async metadataUri => {
             return await getIpfsMetadata<StargateNFTMetadata>(metadataUri)
           }),
         )
 
-        //Get node level info
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
         nodeIsXArray = await executeMultipleClausesCall({
           thor,
@@ -165,22 +166,22 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
           })),
         })
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeToEndorsedAppArray = await executeMultipleClausesCall({
+        nodeActiveEndorsementsArray = await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "nodeToEndorsedApp",
+            functionName: "getNodeActiveEndorsements",
             args: [BigInt(nodeId)],
           })),
         })
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeCooldownArray = await executeMultipleClausesCall({
+        nodeAvailablePointsArray = await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "checkCooldown",
+            functionName: "getNodeAvailablePoints",
             args: [BigInt(nodeId)],
           })),
         })
@@ -198,35 +199,30 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
 
       const nodesWithPoints = tokensOverview?.map((node, index) => {
         const rawMetadata = nodeMetadataArray[index]
-        const endorsedAppId = nodeToEndorsedAppArray[index] ?? ethers.ZeroHash
         const gmTokenId = nodeGmAttachedTokenIdArray[index] ?? BigInt(0)
+        const rawEndorsements = nodeActiveEndorsementsArray[index]
+        const activeEndorsements: ActiveEndorsement[] = Array.isArray(rawEndorsements)
+          ? rawEndorsements.map((e: any) => ({
+              appId: e.appId ?? e[0],
+              points: BigInt(e.points ?? e[1] ?? 0),
+              endorsedAtRound: BigInt(e.endorsedAtRound ?? e[2] ?? 0),
+            }))
+          : []
 
         return {
-          // Base node properties (id, owner, manager, levelId)
           ...node,
-
-          // Node classification
           type: nodeIsXArray[index] ? NodeType.X : NodeType.ECONOMIC,
-
-          // Endorsement properties
           endorsementScore: nodePointsArray[index] ?? BigInt(0),
-          endorsedAppId,
-          isEndorsingApp: !endorsedAppId || endorsedAppId !== ethers.ZeroHash,
-          isOnCooldown: nodeCooldownArray?.[index] ?? false,
-
-          // Metadata
+          activeEndorsements,
+          availablePoints: nodeAvailablePointsArray[index] ?? BigInt(0),
           metadata: {
             name: rawMetadata?.name ?? "",
             description: rawMetadata?.description ?? "",
             attributes: rawMetadata?.attributes ?? [],
             image: rawMetadata?.image ? convertUriToUrl(rawMetadata.image) : notFoundImage,
           },
-
-          // User permissions
           currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
           currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
-
-          // Galaxy Member attachment
           gmAttachedTokenId: gmTokenId,
           isGmAttached: gmTokenId > BigInt(0),
         }
