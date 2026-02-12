@@ -141,6 +141,7 @@
   "App grant": "アプリ助成金",
   "App Grant": "アプリ助成金",
   "App grant amount must be less than or equal to {{value}} USD": "アプリの助成金額は{{value}} USD以下でなければなりません",
+  "App has reached maximum endorsement points": "アプリは最大承認ポイントに達しました",
   "App ID": "アプリID",
   "App Information": "アプリ情報",
   "App Name": "アプリ名",

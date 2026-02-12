@@ -5,6 +5,7 @@ import { useMemo } from "react"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 
 import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useMaxPointsPerApp } from "../../../../api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useIsAppAdmin } from "../../../../api/contracts/xApps/hooks/useIsAppAdmin"
 import { useIsAppModerator } from "../../../../api/contracts/xApps/hooks/useIsAppModerator"
 import { useCurrentAppInfo } from "../hooks/useCurrentAppInfo"
@@ -25,9 +26,9 @@ export const AppDetailPageContent = () => {
   const {
     score: endorsementScore,
     status: endorsementStatus,
-    threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(app?.id ?? "")
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
   const isTeamWalletAddress = compareAddresses(app?.teamWalletAddress, account?.address)
   const appHasBeenIntoAllocationRounds = app?.createdAtTimestamp !== "0"
   const shouldRenderCreationSteps = useMemo(() => {
@@ -67,7 +68,7 @@ export const AppDetailPageContent = () => {
           <AppEndorsementInfoCard
             endorsementScore={endorsementScore}
             endorsementStatus={endorsementStatus}
-            endorsementThreshold={endorsementThreshold}
+            endorsementThreshold={maxPointsPerAppValue?.toString()}
             isEndorsementStatusLoading={isEndorsementStatusLoading}
           />
         </Stack>

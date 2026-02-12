@@ -141,6 +141,7 @@
   "App grant": "Trợ cấp ứng dụng",
   "App Grant": "Tài trợ Ứng dụng",
   "App grant amount must be less than or equal to {{value}} USD": "Số tiền trợ cấp ứng dụng phải nhỏ hơn hoặc bằng {{value}} USD",
+  "App has reached maximum endorsement points": "Ứng dụng đã đạt điểm chứng thực tối đa",
   "App ID": "ID ứng dụng",
   "App Information": "Thông tin Ứng dụng",
   "App Name": "Tên ứng dụng",

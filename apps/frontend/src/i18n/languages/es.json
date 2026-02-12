@@ -141,6 +141,7 @@
   "App grant": "Subvención para aplicaciones",
   "App Grant": "Subsidio para Aplicaciones",
   "App grant amount must be less than or equal to {{value}} USD": "La cantidad de la subvención de la aplicación debe ser menor o igual a {{value}} USD",
+  "App has reached maximum endorsement points": "La app ha alcanzado el máximo de puntos de respaldo",
   "App ID": "ID de la aplicación",
   "App Information": "Información de la Aplicación",
   "App Name": "Nombre de la Aplicación",

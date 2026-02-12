@@ -4,6 +4,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAppEndorsementScore } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
+import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
@@ -37,6 +39,8 @@ export const AppEndorsementInfoCard = ({
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
   const { data: rawAppEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
+  const { data: appScoreStr } = useAppEndorsementScore(app?.id ?? "")
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
   const appEndorsers = useMemo(() => {
     if (!rawAppEndorsers) return []
     return [...new Set(rawAppEndorsers.map(a => a.toLowerCase()))].map(
@@ -69,9 +73,18 @@ export const AppEndorsementInfoCard = ({
     endorsementStatus === XAppStatus.UNENDORSED_AND_ELIGIBLE ||
     endorsementStatus === XAppStatus.UNENDORSED_NOT_ELIGIBLE
 
+  const appBelowMaxCap = useMemo(() => {
+    const score = Number(appScoreStr ?? 0)
+    const max = Number(maxPointsPerAppValue ?? 110)
+    return score < max
+  }, [appScoreStr, maxPointsPerAppValue])
+
+  const canReceiveEndorsements =
+    appUnendorsedStatus || (endorsementStatus === XAppStatus.ENDORSED_AND_ELIGIBLE && appBelowMaxCap)
+
   const shouldRenderEndorseButton = useMemo(() => {
-    return userNodesHasPoints && appUnendorsedStatus
-  }, [userNodesHasPoints, appUnendorsedStatus])
+    return userNodesHasPoints && canReceiveEndorsements
+  }, [userNodesHasPoints, canReceiveEndorsements])
 
   const shouldRenderLookForEndorsersButton = useMemo(() => {
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus

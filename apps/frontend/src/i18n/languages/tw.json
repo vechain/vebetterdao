@@ -141,6 +141,7 @@
   "App grant": "應用程式資助",
   "App Grant": "應用程式補助金",
   "App grant amount must be less than or equal to {{value}} USD": "應用程式補助金額必須小於或等於 {{value}} 美元",
+  "App has reached maximum endorsement points": "應用程式已達到最大背書分數",
   "App ID": "應用 ID",
   "App Information": "應用資訊",
   "App Name": "應用名稱",

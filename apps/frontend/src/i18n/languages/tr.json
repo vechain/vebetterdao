@@ -141,6 +141,7 @@
   "App grant": "Uygulama hibesi",
   "App Grant": "Uygulama Hibesi",
   "App grant amount must be less than or equal to {{value}} USD": "Uygulama hibe tutarı {{value}} USD'den az veya ona eşit olmalıdır",
+  "App has reached maximum endorsement points": "Uygulama maksimum onay puanına ulaştı",
   "App ID": "Uygulama Kimliği",
   "App Information": "Uygulama Bilgileri",
   "App Name": "Uygulama Adı",

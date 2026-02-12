@@ -141,6 +141,7 @@
   "App grant": "Appbidrag",
   "App Grant": "App-bidrag",
   "App grant amount must be less than or equal to {{value}} USD": "Appbidragsbeloppet måste vara mindre än eller lika med {{value}} USD",
+  "App has reached maximum endorsement points": "Appen har nått maximala stödpoäng",
   "App ID": "App-ID",
   "App Information": "Appinformation",
   "App Name": "Appnamn",

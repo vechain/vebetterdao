@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next"
 import NewAppIcon from "@/components/Icons/svg/new-app.svg"
 
 import { useAppEndorsementStatus } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useMaxPointsPerApp } from "../../../api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { useGetUserNodes, UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
@@ -41,10 +42,10 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   const {
     score: endorsementScore,
-    threshold: endorsementThreshold,
     status: endorsementStatus,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(appId)
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
   const STATUS_CONFIG = useXAppStatusConfig()
 
   const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
@@ -140,7 +141,10 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                           <Text textStyle="2xl" lineHeight={1} color={color}>
                             {endorsementScore}
                           </Text>
-                          <Text textStyle="sm" lineHeight={1} color={color}>{`/${endorsementThreshold}`}</Text>
+                          <Text
+                            textStyle="sm"
+                            lineHeight={1}
+                            color={color}>{`/${maxPointsPerAppValue?.toString() ?? "110"}`}</Text>
                         </HStack>
                       </Skeleton>
                       <Text textStyle="xs" color="text.subtle">
@@ -155,6 +159,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                             {nodeEndorsingApp?.activeEndorsements
                               .find(e => compareAddresses(e.appId ?? "", appId ?? ""))
                               ?.points?.toString() ?? "0"}
+                            {t("pts")}
                           </Text>
                         </Skeleton>
                         <Text textStyle="xs" color="text.subtle">

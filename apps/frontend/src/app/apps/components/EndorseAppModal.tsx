@@ -20,8 +20,8 @@ import { useTranslation } from "react-i18next"
 
 import { useAppEndorsementScore } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useMaxPointsPerNodePerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerNodePerApp"
-import { useEndorsementScoreThreshold } from "@/api/contracts/xApps/hooks/useEndorsementScoreThreshold"
 import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
@@ -43,16 +43,17 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { isTxModalOpen } = useTransactionModal()
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: endorsementScore } = useAppEndorsementScore(xApp?.id ?? "")
-  const { data: thresholdStr } = useEndorsementScoreThreshold()
   const { data: maxPointsPerNode } = useMaxPointsPerNodePerApp()
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
   const { status: endorsementStatus } = useAppEndorsementStatus(xApp?.id ?? "")
 
   const [step, setStep] = useState<1 | 2>(1)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [points, setPoints] = useState<string>("0")
 
-  const threshold = Number(thresholdStr ?? 100)
   const appScore = Number(endorsementScore ?? 0)
+  const maxAppPoints = Number(maxPointsPerAppValue ?? 110)
+  const appRemainingPoints = BigInt(Math.max(0, maxAppPoints - appScore))
 
   const allManagedNodes = useMemo(() => {
     return userNodesInfo?.nodesManagedByUser?.sort((a, b) => Number(b.availablePoints) - Number(a.availablePoints))
@@ -67,11 +68,12 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     (node: UserNode) => {
       const cap = maxPointsPerNode ?? BigInt(49)
       const currentForApp = node.activeEndorsements.find(e => e.appId === xApp?.id)?.points ?? BigInt(0)
-      const remainingCap = cap - currentForApp
+      const remainingNodeCap = cap - currentForApp
       const available = node.availablePoints
-      return remainingCap < available ? remainingCap : available
+      const nodeMax = remainingNodeCap < available ? remainingNodeCap : available
+      return nodeMax < appRemainingPoints ? nodeMax : appRemainingPoints
     },
-    [maxPointsPerNode, xApp?.id],
+    [maxPointsPerNode, xApp?.id, appRemainingPoints],
   )
 
   const currentPointsForApp = useMemo(() => {
@@ -82,10 +84,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const maxEndorsePoints = useMemo(() => {
     if (!selectedNode) return BigInt(0)
     const cap = maxPointsPerNode ?? BigInt(49)
-    const remaining = cap - currentPointsForApp
+    const remainingNodeCap = cap - currentPointsForApp
     const available = selectedNode.availablePoints
-    return remaining < available ? remaining : available
-  }, [selectedNode, maxPointsPerNode, currentPointsForApp])
+    const nodeMax = remainingNodeCap < available ? remainingNodeCap : available
+    return nodeMax < appRemainingPoints ? nodeMax : appRemainingPoints
+  }, [selectedNode, maxPointsPerNode, currentPointsForApp, appRemainingPoints])
 
   const handleSuccess = useCallback(() => {
     setStep(1)
@@ -166,7 +169,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   const nodeId = node.id.toString()
                   const isSelected = selectedNodeId === nodeId
                   const remaining = getNodeRemainingPoints(node)
-                  const disabled = remaining <= BigInt(0)
+                  const appAtMaxCapacity = appRemainingPoints <= BigInt(0)
+                  const disabled = remaining <= BigInt(0) || appAtMaxCapacity
                   const noAvailablePoints = node.availablePoints <= BigInt(0)
                   const usedPoints = node.endorsementScore - node.availablePoints
                   const totalPoints = node.endorsementScore
@@ -228,7 +232,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                             </Progress.Root>
                             {disabled && (
                               <Text textStyle="xs" color="fg.error">
-                                {noAvailablePoints ? t("No available points") : t("Max points reached for this app")}
+                                {appAtMaxCapacity
+                                  ? t("App has reached maximum endorsement points")
+                                  : noAvailablePoints
+                                    ? t("No available points")
+                                    : t("Max points reached for this app")}
                               </Text>
                             )}
                           </VStack>
@@ -251,7 +259,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                           </Progress.Root>
                           {disabled && (
                             <Text textStyle="xs" color="fg.error">
-                              {noAvailablePoints ? t("No available points") : t("Max points reached for this app")}
+                              {appAtMaxCapacity
+                                ? t("App has reached maximum endorsement points")
+                                : noAvailablePoints
+                                  ? t("No available points")
+                                  : t("Max points reached for this app")}
                             </Text>
                           )}
                         </VStack>
@@ -331,7 +343,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                     {t("Score")}
                   </Text>
                   <Text textStyle="md" fontWeight="semibold">
-                    {appScore} {" / "} {threshold} {t("pts")}
+                    {appScore} {" / "} {maxAppPoints} {t("pts")}
                   </Text>
                 </VStack>
               </HStack>

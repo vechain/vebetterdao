@@ -19,6 +19,7 @@ import { useMemo, useState } from "react"
 import { useTranslation, Trans } from "react-i18next"
 
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
@@ -47,9 +48,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
   const {
     score: endorsementScore,
     status: endorsementStatus,
-    threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(appId)
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
 
   const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account?.address ?? "")
 
@@ -178,7 +179,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                 appId={appId}
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
-                endorsementThreshold={endorsementThreshold}
+                endorsementThreshold={maxPointsPerAppValue?.toString()}
                 isEndorsementStatusLoading={isEndorsementStatusLoading}
                 isUserAppEndorser={isUserAppEndorser ?? false}
                 endorsers={uniqueEndorsers}

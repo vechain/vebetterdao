@@ -141,6 +141,7 @@
   "App grant": "应用资助",
   "App Grant": "应用资助",
   "App grant amount must be less than or equal to {{value}} USD": "应用程序的补助金额必须小于或等于 {{value}} 美元",
+  "App has reached maximum endorsement points": "应用已达到最大背书积分",
   "App ID": "应用程序ID",
   "App Information": "应用信息",
   "App Name": "应用名称",

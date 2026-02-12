@@ -61,7 +61,7 @@ export const EndorsementDetails = ({
         <VStack gap={0} alignItems="center">
           <Skeleton loading={isUserNodesLoading}>
             <Text textStyle={"2xl"} fontWeight="bold" color="status.info.primary">
-              {yourScore}
+              {yourScore} {t("pts")}
             </Text>
           </Skeleton>
           <Text textStyle="xs" color="text.subtle">

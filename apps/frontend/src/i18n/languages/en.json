@@ -142,6 +142,7 @@
   "App grant": "App grant",
   "App Grant": "App Grant",
   "App grant amount must be less than or equal to {{value}} USD": "App grant amount must be less than or equal to {{value}} USD",
+  "App has reached maximum endorsement points": "App has reached maximum endorsement points",
   "App ID": "App ID",
   "App Information": "App Information",
   "App Name": "App Name",
