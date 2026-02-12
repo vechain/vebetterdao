@@ -20,6 +20,7 @@ export const VotingAlerts = () => {
     hasVotedLoading,
     selectedAppIds,
     hasEnoughVotesAtSnapshot,
+    isCanVoteLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
   } = context
@@ -30,8 +31,8 @@ export const VotingAlerts = () => {
   const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
 
   const shouldShowInsufficientPowerAlert = useMemo(
-    () => !hasVotedLoading && !hasVoted && !hasEnoughVotesAtSnapshot,
-    [hasVotedLoading, hasVoted, hasEnoughVotesAtSnapshot],
+    () => !hasVotedLoading && !isCanVoteLoading && !hasVoted && !hasEnoughVotesAtSnapshot,
+    [hasVotedLoading, isCanVoteLoading, hasVoted, hasEnoughVotesAtSnapshot],
   )
 
   // Determine which auto-voting message to show
