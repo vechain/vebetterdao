@@ -753,6 +753,7 @@
   "Max app allocation": "अधिकतम ऐप आवंटन",
   "Max Level": "अधिकतम स्तर",
   "Max Level Reached!": "अधिकतम स्तर प्राप्त!",
+  "Max points reached for this app": "इस ऐप के लिए अधिकतम अंक पहुँच गए",
   "Maximum {{count}} apps can be selected per vote.": "प्रति वोट अधिकतम {{count}} ऐप्स का चयन किया जा सकता है।",
   "Maximum {{max}} categories per app.": "प्रति ऐप अधिकतम {{max}} श्रेणियाँ।",
   "Maybe later": "शायद बाद में",
@@ -791,6 +792,7 @@
   "NFT": "एनएफटी",
   "No App link available": "कोई ऐप लिंक उपलब्ध नहीं",
   "No Apps found": "कोई ऐप्स नहीं मिला",
+  "No available points": "कोई उपलब्ध अंक नहीं",
   "No better actions found": "कोई बेहतर क्रियाएँ नहीं मिलीं",
   "No categories found": "कोई श्रेणियाँ नहीं मिलीं",
   "No categories selected.": "कोई वर्ग चयनित नहीं।",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "स्नैपशॉट में आपके वोट",
   "Your voting activity": "आपकी वोटिंग गतिविधि",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "आपकी मतदान शक्ति <platform>veDelegate.vet</platform> को हस्तांतरित की गई है जो आपकी ओर से मतदान करता है। <br/> यदि आप यहां वोट करना चाहते हैं, तो आपको स्नैपशॉट से पहले veDelegate पर प्रतिनिधित्व निकालना होगा।",
-  "Your Voting Qualification": "आपकी वोटिंग योग्यता",
-  "Max points reached for this app": "इस ऐप के लिए अधिकतम अंक पहुँच गए",
-  "No available points": "कोई उपलब्ध अंक नहीं"
+  "Your Voting Qualification": "आपकी वोटिंग योग्यता"
 }

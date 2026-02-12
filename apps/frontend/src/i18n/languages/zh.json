@@ -753,6 +753,7 @@
   "Max app allocation": "最大应用程序分配",
   "Max Level": "最高等级",
   "Max Level Reached!": "达到最高等级！",
+  "Max points reached for this app": "此应用已达最大积分",
   "Maximum {{count}} apps can be selected per vote.": "每次投票最多可以选择{{count}}个应用。",
   "Maximum {{max}} categories per app.": "每个应用程序最多 {{max}} 个分类。",
   "Maybe later": "也许稍后",
@@ -791,6 +792,7 @@
   "NFT": "NFT",
   "No App link available": "无可用应用链接",
   "No Apps found": "未找到应用",
+  "No available points": "没有可用积分",
   "No better actions found": "未找到更好的操作",
   "No categories found": "未找到类别",
   "No categories selected.": "未选择任何类别。",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "快照时的您的投票",
   "Your voting activity": "您的投票活动",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票权已经转移到<platform>veDelegate.vet</platform>，该平台将代表您投票。<br/> 如果您想在此投票，必须在快照前在veDelegate上取消委托。",
-  "Your Voting Qualification": "您的投票资格",
-  "Max points reached for this app": "此应用已达最大积分",
-  "No available points": "没有可用积分"
+  "Your Voting Qualification": "您的投票资格"
 }

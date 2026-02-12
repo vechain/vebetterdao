@@ -753,6 +753,7 @@
   "Max app allocation": "최대 앱 할당량",
   "Max Level": "최대 레벨",
   "Max Level Reached!": "최대 레벨에 도달했습니다!",
+  "Max points reached for this app": "이 앱의 최대 포인트에 도달했습니다",
   "Maximum {{count}} apps can be selected per vote.": "투표당 최대 {{count}}개의 앱을 선택할 수 있습니다.",
   "Maximum {{max}} categories per app.": "앱당 최대 {{max}} 카테고리.",
   "Maybe later": "나중에 할게요",
@@ -791,6 +792,7 @@
   "NFT": "NFT",
   "No App link available": "앱 링크가 없습니다",
   "No Apps found": "앱을 찾을 수 없습니다",
+  "No available points": "사용 가능한 포인트 없음",
   "No better actions found": "더 나은 행동을 찾을 수 없음",
   "No categories found": "카테고리를 찾을 수 없습니다.",
   "No categories selected.": "선택된 카테고리가 없습니다.",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "스냅샷에서의 당신의 투표",
   "Your voting activity": "당신의 투표 활동",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "귀하의 투표 권한은 <platform>veDelegate.vet</platform>으로 이전되어 대리 투표됩니다. <br/> 여기에서 투표하려면, 스냅샷 전에 veDelegate에서 위임을 제거해야 합니다.",
-  "Your Voting Qualification": "당신의 투표 자격",
-  "Max points reached for this app": "이 앱의 최대 포인트에 도달했습니다",
-  "No available points": "사용 가능한 포인트 없음"
+  "Your Voting Qualification": "당신의 투표 자격"
 }

@@ -753,6 +753,7 @@
   "Max app allocation": "Asignación máxima por aplicación",
   "Max Level": "Nivel máximo",
   "Max Level Reached!": "¡Nivel máximo alcanzado!",
+  "Max points reached for this app": "Puntos máximos alcanzados para esta app",
   "Maximum {{count}} apps can be selected per vote.": "Se pueden seleccionar un máximo de {{count}} aplicaciones por voto.",
   "Maximum {{max}} categories per app.": "Máximo {{max}} categorías por aplicación.",
   "Maybe later": "Quizás más tarde",
@@ -791,6 +792,7 @@
   "NFT": "NFT",
   "No App link available": "No hay enlace disponible de la App",
   "No Apps found": "No se encontraron aplicaciones",
+  "No available points": "Sin puntos disponibles",
   "No better actions found": "No se encontraron mejores acciones",
   "No categories found": "No se encontraron categorías",
   "No categories selected.": "No se han seleccionado categorías.",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "Tus votos en la instantánea",
   "Your voting activity": "Tu actividad de votación",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Tu poder de voto ha sido transferido a <platform>veDelegate.vet</platform> que vota en tu nombre. <br/> Si deseas votar aquí, debes eliminar la delegación en veDelegate antes del snapshot.",
-  "Your Voting Qualification": "Tu Calificación de Voto",
-  "Max points reached for this app": "Puntos máximos alcanzados para esta app",
-  "No available points": "Sin puntos disponibles"
+  "Your Voting Qualification": "Tu Calificación de Voto"
 }

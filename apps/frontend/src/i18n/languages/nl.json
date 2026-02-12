@@ -753,6 +753,7 @@
   "Max app allocation": "Max app-toewijzing",
   "Max Level": "Maximaal niveau",
   "Max Level Reached!": "Maximaal niveau bereikt!",
+  "Max points reached for this app": "Maximale punten bereikt voor deze app",
   "Maximum {{count}} apps can be selected per vote.": "Maximaal {{count}} apps kunnen per stemming worden geselecteerd.",
   "Maximum {{max}} categories per app.": "Maximum {{max}} categorieën per app.",
   "Maybe later": "Misschien later",
@@ -791,6 +792,7 @@
   "NFT": "NFT",
   "No App link available": "Geen App-link beschikbaar",
   "No Apps found": "Geen apps gevonden",
+  "No available points": "Geen beschikbare punten",
   "No better actions found": "Geen betere acties gevonden",
   "No categories found": "Geen categorieën gevonden",
   "No categories selected.": "Geen categorieën geselecteerd.",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "Jouw stemmen bij snapshot",
   "Your voting activity": "Je stemactiviteit",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Uw stemkracht is overgedragen aan <platform>veDelegate.vet</platform> die namens u stemt. <br/> Als je hier wilt stemmen, moet je de delegatie bij veDelegate verwijderen voordat de snapshot plaatsvindt.",
-  "Your Voting Qualification": "Je stemkwalificatie",
-  "Max points reached for this app": "Maximale punten bereikt voor deze app",
-  "No available points": "Geen beschikbare punten"
+  "Your Voting Qualification": "Je stemkwalificatie"
 }

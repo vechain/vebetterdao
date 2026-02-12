@@ -753,6 +753,7 @@
   "Max app allocation": "Phân bổ ứng dụng tối đa",
   "Max Level": "Cấp độ tối đa",
   "Max Level Reached!": "Đạt cấp tối đa!",
+  "Max points reached for this app": "Đã đạt điểm tối đa cho ứng dụng này",
   "Maximum {{count}} apps can be selected per vote.": "Tối đa {{count}} ứng dụng có thể được chọn mỗi phiếu bầu.",
   "Maximum {{max}} categories per app.": "Tối đa {{max}} danh mục mỗi ứng dụng.",
   "Maybe later": "Có thể sau",
@@ -791,6 +792,7 @@
   "NFT": "NFT",
   "No App link available": "Không có liên kết Ứng dụng có sẵn",
   "No Apps found": "Không tìm thấy ứng dụng nào",
+  "No available points": "Không có điểm khả dụng",
   "No better actions found": "Không tìm thấy hành động tốt hơn",
   "No categories found": "Không tìm thấy danh mục",
   "No categories selected.": "Không có danh mục nào được chọn.",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "Phiếu bầu của bạn tại snapshot",
   "Your voting activity": "Hoạt động bình chọn của bạn",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Quyền biểu quyết của bạn đã được chuyển đến <platform>veDelegate.vet</platform> nơi bỏ phiếu thay mặt bạn. <br/> Nếu bạn muốn bỏ phiếu tại đây, bạn phải gỡ bỏ ủy quyền trên veDelegate trước khi chụp nhanh.",
-  "Your Voting Qualification": "Điều kiện Bỏ phiếu của bạn",
-  "Max points reached for this app": "Đã đạt điểm tối đa cho ứng dụng này",
-  "No available points": "Không có điểm khả dụng"
+  "Your Voting Qualification": "Điều kiện Bỏ phiếu của bạn"
 }

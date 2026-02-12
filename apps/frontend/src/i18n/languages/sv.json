@@ -753,6 +753,7 @@
   "Max app allocation": "Maximal appallokering",
   "Max Level": "Maxnivå",
   "Max Level Reached!": "Maxnivå uppnådd!",
+  "Max points reached for this app": "Maxpoäng nådd för denna app",
   "Maximum {{count}} apps can be selected per vote.": "Maximalt {{count}} appar kan väljas per röstning.",
   "Maximum {{max}} categories per app.": "Maximal {{max}} kategorier per app.",
   "Maybe later": "Kanske senare",
@@ -791,6 +792,7 @@
   "NFT": "NFT",
   "No App link available": "Ingen applänk tillgänglig",
   "No Apps found": "Inga appar hittades",
+  "No available points": "Inga tillgängliga poäng",
   "No better actions found": "Inga bättre åtgärder hittades",
   "No categories found": "Inga kategorier hittades",
   "No categories selected.": "Inga kategorier valda.",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "Dina röster vid ögonblicksbild",
   "Your voting activity": "Din röstningsaktivitet",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Din röstmakt har överförts till <platform>veDelegate.vet</platform> som röstar på dina vägnar. <br/> Om du vill rösta här måste du ta bort delegation på veDelegate före snapshot.",
-  "Your Voting Qualification": "Din röstkvalificering",
-  "Max points reached for this app": "Maxpoäng nådd för denna app",
-  "No available points": "Inga tillgängliga poäng"
+  "Your Voting Qualification": "Din röstkvalificering"
 }

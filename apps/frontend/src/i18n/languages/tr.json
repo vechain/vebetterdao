@@ -753,6 +753,7 @@
   "Max app allocation": "Maksimum uygulama tahsisi",
   "Max Level": "Maksimum Seviye",
   "Max Level Reached!": "Maksimum Seviye Erişildi!",
+  "Max points reached for this app": "Bu uygulama için maksimum puana ulaşıldı",
   "Maximum {{count}} apps can be selected per vote.": "Her oy için en fazla {{count}} uygulama seçilebilir.",
   "Maximum {{max}} categories per app.": "Uygulama başına maksimum {{max}} kategori.",
   "Maybe later": "Belki sonra",
@@ -791,6 +792,7 @@
   "NFT": "NFT",
   "No App link available": "Uygulama bağlantısı yok",
   "No Apps found": "Uygulama bulunamadı",
+  "No available points": "Kullanılabilir puan yok",
   "No better actions found": "Daha iyi bir eylem bulunamadı",
   "No categories found": "Kategori bulunamadı",
   "No categories selected.": "Hiçbir kategori seçilmedi.",
@@ -1709,7 +1711,5 @@
   "Your votes at snapshot": "Anlık görüntüdeki oylarınız",
   "Your voting activity": "Oylama etkinliğiniz",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Oylama gücünüz sizin adınıza oy veren <platform>veDelegate.vet</platform>'e aktarılmıştır. <br/> Burada oy kullanmak istiyorsanız, anlık görüntüleme öncesinde veDelegate üzerindeki devri iptal etmelisiniz.",
-  "Your Voting Qualification": "Oylama Yeterliliğiniz",
-  "Max points reached for this app": "Bu uygulama için maksimum puana ulaşıldı",
-  "No available points": "Kullanılabilir puan yok"
+  "Your Voting Qualification": "Oylama Yeterliliğiniz"
 }
