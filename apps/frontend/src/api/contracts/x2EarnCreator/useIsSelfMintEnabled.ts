@@ -6,7 +6,7 @@ const address = getConfig().x2EarnCreatorContractAddress as `0x${string}`
 const abi = X2EarnCreator__factory.abi
 
 export const useIsSelfMintEnabled = () => {
-  return useCallClause({
+  const isSelfMintEnabled = useCallClause({
     abi,
     address,
     method: "selfMintEnabled",
@@ -15,4 +15,9 @@ export const useIsSelfMintEnabled = () => {
       select: data => Boolean(data[0]),
     },
   })
+
+  // eslint-disable-next-line no-console
+  console.log("isSelfMintEnabled", isSelfMintEnabled)
+
+  return isSelfMintEnabled
 }
