@@ -4311,10 +4311,10 @@
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@privy-io/api-base@1.6.1":
-  version "1.6.1"
-  resolved "https://registry.npmjs.org/@privy-io/api-base/-/api-base-1.6.1.tgz#49467abfa28785a5199890c8b896fdf1d63478e7"
-  integrity sha512-GUGpW8FlwL+oTlKRNcuDRc5rfz2fPhfcqx2lHT58T4D3F54VxoXnX+NI8vsowogCddNq640d/p5FSKzBQJViZg==
+"@privy-io/api-base@1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/api-base/-/api-base-1.7.0.tgz#83467ddc240800e3195f211540b9e264d41d4748"
+  integrity sha512-ji6ARQAAuW/FzRTgft9NCjRuouWX9t+J7JMmvLPsnXQJDFEV9mqh4sWXZhQ8ddTq/iDZ4z/yz1ORJqN8bYAi4Q==
   dependencies:
     zod "^3.24.3"
 
@@ -4338,10 +4338,10 @@
   resolved "https://registry.npmjs.org/@privy-io/ethereum/-/ethereum-0.0.2.tgz#1b6eddf48e5e0c3aa13adb8ca61f62496f744677"
   integrity sha512-FnJ1dzgg/tij4jLeKHLlZM9uNk4WN+iIOkc8CG0FZKUQxqXH60Fs/dMF6Xbndd5CQkUO8LUU7FLom/405VKXpQ==
 
-"@privy-io/js-sdk-core@0.54.2":
-  version "0.54.2"
-  resolved "https://registry.npmjs.org/@privy-io/js-sdk-core/-/js-sdk-core-0.54.2.tgz#5bc606a7628c76a8b0b77c5763c77747c6e62485"
-  integrity sha512-EDg10NFnbRd+pUbKbg7Cbg9qUq31hKg4trEq4CDhFbixfno0uOO924Dj1vbFzdVBOkFudHsoAmmgfSZ8shXGyQ==
+"@privy-io/js-sdk-core@0.55.0":
+  version "0.55.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.55.0.tgz#c6b4aa6bfb7073e4bd56e20fb1a0213d3b61b572"
+  integrity sha512-halUc0CS0fKQY5fX7YOBpL1piBz5eg140rL+tjyL7yeBCjNkgf5DX6J4BWzRdr5AplRdMWRBUb1/6+g+pcm4Iw==
   dependencies:
     "@ethersproject/abstract-signer" "^5.7.0"
     "@ethersproject/bignumber" "^5.7.0"
@@ -4349,9 +4349,9 @@
     "@ethersproject/providers" "^5.7.2"
     "@ethersproject/transactions" "^5.7.0"
     "@ethersproject/units" "^5.7.0"
-    "@privy-io/api-base" "1.6.1"
+    "@privy-io/api-base" "1.7.0"
     "@privy-io/chains" "0.0.2"
-    "@privy-io/public-api" "2.44.2"
+    "@privy-io/public-api" "2.45.0"
     canonicalize "^2.0.0"
     eventemitter3 "^5.0.1"
     fetch-retry "^6.0.0"
@@ -4361,21 +4361,21 @@
     set-cookie-parser "^2.6.0"
     uuid ">=8 <10"
 
-"@privy-io/public-api@2.44.2":
-  version "2.44.2"
-  resolved "https://registry.npmjs.org/@privy-io/public-api/-/public-api-2.44.2.tgz#bf7ff5ed5123e0de3e5e6d3e85fa85d5353c2d17"
-  integrity sha512-w+IpGmHIbCHyPka4fmcsIOO8IOaWRV8la/LRAZ1pDhkeKxMNR8zVVJu8jlLFbxu45tAhREvChpz0OGyDu40hmA==
+"@privy-io/public-api@2.45.0":
+  version "2.45.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-2.45.0.tgz#3a09bc710ac61f383b16a57d684151a268e96e2a"
+  integrity sha512-gEYclrdjirGqKrJBn1ZXkTuZTL/gK9FjPppoxDJ8/dX1JD4/vXahdt0AdgUfNUf70ZfMdVKYhyos1RkvSLFGYQ==
   dependencies:
-    "@privy-io/api-base" "1.6.1"
+    "@privy-io/api-base" "1.7.0"
     bs58 "^5.0.0"
     libphonenumber-js "^1.10.31"
     viem "^2"
     zod "^3.24.3"
 
-"@privy-io/react-auth@2.24.0":
-  version "2.24.0"
-  resolved "https://registry.npmjs.org/@privy-io/react-auth/-/react-auth-2.24.0.tgz#ada898e264c0b837beefc4adbc9febe0b2134238"
-  integrity sha512-ujG/4LZEBSXLZPzlcsiRx+mq3l6fUAGccHWtNbFMJK072uys2tQDrwDO2RPwlgWPMnQmu8XH7uaW80MG2TxivQ==
+"@privy-io/react-auth@2.25.0":
+  version "2.25.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/react-auth/-/react-auth-2.25.0.tgz#4e403705d59aab9450e8c63e6a83279b4d4a5fa9"
+  integrity sha512-lcILJaXi2wYgxFsxbvSrIM1Cz8FAumMy90YS4R6wcBNWg79U6S6YTHKMa0U8xJPhJUoKrugAi/LTSifYdTCZjg==
   dependencies:
     "@base-org/account" "^1.1.0"
     "@coinbase/wallet-sdk" "4.3.2"
@@ -4384,11 +4384,11 @@
     "@heroicons/react" "^2.1.1"
     "@marsidev/react-turnstile" "^0.4.1"
     "@metamask/eth-sig-util" "^6.0.0"
-    "@privy-io/api-base" "1.6.1"
+    "@privy-io/api-base" "1.7.0"
     "@privy-io/chains" "0.0.2"
     "@privy-io/ethereum" "0.0.2"
-    "@privy-io/js-sdk-core" "0.54.2"
-    "@privy-io/public-api" "2.44.2"
+    "@privy-io/js-sdk-core" "0.55.0"
+    "@privy-io/public-api" "2.45.0"
     "@reown/appkit" "^1.7.11"
     "@scure/base" "^1.2.5"
     "@simplewebauthn/browser" "^9.0.1"
@@ -7849,16 +7849,16 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.4.5":
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.4.5.tgz#03ebc7d3d226806fc57720f060d5dd1a91358278"
-  integrity sha512-Iimc077ggC7SnpailnmowwxXXY6LX9jrW2pHrPDtoT/BvyqUa1quTpygq87mCExBDStQXsg2UygvWN4XQKf6Sw==
+"@vechain/vechain-kit@2.5.1":
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.5.1.tgz#d96963455a9e37182042f27c1e62d05f566c269b"
+  integrity sha512-fpHjJCRWtcdD04eEv2xZoh6oEeJYUDl4mA6dFQ+8B/5kB5P8/OZkQzpegoWRI1VB7vWPzlebstLehmTPjuRyCw==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
     "@emotion/styled" "^11.14.1"
     "@privy-io/cross-app-connect" "0.2.2"
-    "@privy-io/react-auth" "2.24.0"
+    "@privy-io/react-auth" "2.25.0"
     "@solana/web3.js" "^1.98.0"
     "@tanstack/react-query" "^5.64.2"
     "@tanstack/react-query-devtools" "^5.64.1"
