@@ -131,7 +131,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         defaultValue={getInitialTab()}
         lazyMount
         onValueChange={tab => handleTabChange(tab.value as Tab)}>
-        <Tabs.List justifyContent="space-around" zIndex="0" scrollbar="hidden" overflowX="scroll">
+        <Tabs.List justifyContent="space-around" zIndex="0" scrollbar="hidden" overflowX="auto" overflowY="hidden">
           {tabs.map(({ tab, label }) => (
             <Tabs.Trigger key={tab} value={tab} flexShrink={0} zIndex="1">
               {label}
