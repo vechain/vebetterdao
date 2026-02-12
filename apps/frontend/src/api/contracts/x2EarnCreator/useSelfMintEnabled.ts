@@ -5,7 +5,7 @@ import { useCallClause } from "@vechain/vechain-kit"
 const address = getConfig().x2EarnCreatorContractAddress as `0x${string}`
 const abi = X2EarnCreator__factory.abi
 
-export const useIsSelfMintEnabled = () => {
+export const useSelfMintEnabled = () => {
   return useCallClause({
     abi,
     address,

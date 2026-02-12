@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { GoPlus } from "react-icons/go"
 
-import { useIsSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useIsSelfMintEnabled"
+import { useSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useSelfMintEnabled"
 import { SubmitCreatorFormModal } from "@/app/apps/components/SubmitCreatorFormModal"
 
 import { useBreakpoints } from "../../hooks/useBreakpoints"
@@ -12,7 +12,7 @@ export const JoinB3TRAppsBanner = () => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const router = useRouter()
-  const { data: isSelfMintEnabled } = useIsSelfMintEnabled()
+  const { data: isSelfMintEnabled } = useSelfMintEnabled()
   const { onOpen, open: isOpen, onClose } = useDisclosure()
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
