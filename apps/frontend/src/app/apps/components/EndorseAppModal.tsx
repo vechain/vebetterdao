@@ -7,11 +7,11 @@ import {
   Skeleton,
   Card,
   Image,
-  RadioGroup,
   HStack,
   NumberInput,
   IconButton,
   Progress,
+  Circle,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { Minus, Plus } from "iconoir-react"
@@ -137,7 +137,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const isEndorseDisabled = Number(points) <= 0
 
   return (
-    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose}>
+    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
       {step === 1 ? (
         <VStack gap={6} align="flex-start" w="full">
           <Heading size="xl" fontWeight="bold">
@@ -150,31 +150,37 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
           <VStack w="full" alignItems="stretch" gap={3}>
             <Skeleton loading={isUserNodesLoading}>
-              <RadioGroup.Root
-                onValueChange={details => handleNodeSelect(details.value)}
-                value={selectedNodeId ?? undefined}>
-                <VStack w="full" gap={3} alignItems="stretch">
-                  {allManagedNodes?.map((node: UserNode) => {
-                    const remaining = getNodeRemainingPoints(node)
-                    const disabled = remaining <= BigInt(0)
-                    const noAvailablePoints = node.availablePoints <= BigInt(0)
-                    const usedPoints = node.endorsementScore - node.availablePoints
-                    const totalPoints = node.endorsementScore
-                    const progressPercent = totalPoints > 0 ? Number((usedPoints * BigInt(100)) / totalPoints) : 0
+              <VStack w="full" gap={3} alignItems="stretch">
+                {allManagedNodes?.map((node: UserNode) => {
+                  const nodeId = node.id.toString()
+                  const isSelected = selectedNodeId === nodeId
+                  const remaining = getNodeRemainingPoints(node)
+                  const disabled = remaining <= BigInt(0)
+                  const noAvailablePoints = node.availablePoints <= BigInt(0)
+                  const usedPoints = node.endorsementScore - node.availablePoints
+                  const totalPoints = node.endorsementScore
+                  const progressPercent = totalPoints > 0 ? Number((usedPoints * BigInt(100)) / totalPoints) : 0
 
-                    return (
-                      <Card.Root key={node.id.toString()} variant="outline" p={4} rounded="xl">
-                        <RadioGroup.Item
-                          value={node.id.toString()}
-                          disabled={disabled}
-                          w="full"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          flexDirection="row"
-                          gap={4}>
+                  return (
+                    <Card.Root
+                      key={nodeId}
+                      variant="outline"
+                      p={4}
+                      rounded="xl"
+                      cursor={disabled ? "not-allowed" : "pointer"}
+                      opacity={disabled ? 0.5 : 1}
+                      borderColor={isSelected ? "actions.primary.default" : undefined}
+                      onClick={() => !disabled && handleNodeSelect(nodeId)}>
+                      <VStack w="full" gap={3}>
+                        <HStack w="full" justifyContent="space-between" alignItems="center" gap={4}>
                           <HStack gap={3} flex={1}>
-                            <RadioGroup.ItemHiddenInput />
-                            <RadioGroup.ItemIndicator />
+                            <Circle
+                              size={5}
+                              borderWidth={2}
+                              borderColor={isSelected ? "actions.primary.default" : "border.primary"}
+                              bg={isSelected ? "actions.primary.default" : "transparent"}
+                              flexShrink={0}
+                            />
                             <Image
                               src={node.metadata?.image}
                               alt={node.metadata?.name}
@@ -189,11 +195,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                               <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
                                 {node.type}
                                 {" #"}
-                                {node.id.toString()}
+                                {nodeId}
                               </Text>
                             </VStack>
                           </HStack>
-                          <VStack gap={2} align="end" minW="270px">
+                          <VStack gap={2} align="end" minW="270px" display={{ base: "none", md: "flex" }}>
                             <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold">
                               <HStack gap={1}>
                                 <Text color="text.subtle">{t("Used points:")}</Text>
@@ -215,12 +221,34 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                               </Text>
                             )}
                           </VStack>
-                        </RadioGroup.Item>
-                      </Card.Root>
-                    )
-                  })}
-                </VStack>
-              </RadioGroup.Root>
+                        </HStack>
+                        <VStack gap={2} align="stretch" w="full" display={{ base: "flex", md: "none" }}>
+                          <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold">
+                            <HStack gap={1}>
+                              <Text color="text.subtle">{t("Used points:")}</Text>
+                              <Text>{usedPoints.toString()}</Text>
+                            </HStack>
+                            <HStack gap={1}>
+                              <Text color="text.subtle">{t("Available points:")}</Text>
+                              <Text>{node.availablePoints.toString()}</Text>
+                            </HStack>
+                          </HStack>
+                          <Progress.Root value={progressPercent} w="full" size="xs" colorPalette="green">
+                            <Progress.Track borderRadius="full">
+                              <Progress.Range borderRadius="full" />
+                            </Progress.Track>
+                          </Progress.Root>
+                          {disabled && (
+                            <Text textStyle="xs" color="fg.error">
+                              {noAvailablePoints ? t("No available points") : t("Max points reached for this app")}
+                            </Text>
+                          )}
+                        </VStack>
+                      </VStack>
+                    </Card.Root>
+                  )
+                })}
+              </VStack>
             </Skeleton>
           </VStack>
 
@@ -234,7 +262,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             {t("Endorse {{appName}}", { appName: xApp?.name })}
           </Heading>
 
-          <HStack gap={3} w="full">
+          <HStack gap={3} w="full" align="stretch">
             <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Node")}
@@ -253,7 +281,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 </Text>
               </HStack>
             </VStack>
-            <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
+            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Available points")}
               </Text>
