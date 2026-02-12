@@ -279,13 +279,6 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 {t("Node")}
               </Text>
               <HStack gap={2}>
-                <Image
-                  src={selectedNode?.metadata?.image}
-                  alt={selectedNode?.metadata?.name}
-                  boxSize="24px"
-                  rounded="sm"
-                  objectFit="cover"
-                />
                 <Text textStyle="md" fontWeight="semibold">
                   {selectedNode?.metadata?.name}
                   {" #" + selectedNode?.id.toString()}
@@ -300,6 +293,16 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 {selectedNode?.availablePoints.toString()} {t("pts")}
               </Text>
             </VStack>
+            {currentPointsForApp > BigInt(0) && (
+              <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
+                <Text textStyle="md" color="text.subtle">
+                  {t("Current endorsement")}
+                </Text>
+                <Text textStyle="md" fontWeight="semibold">
+                  {currentPointsForApp.toString()} {t("pts")}
+                </Text>
+              </VStack>
+            )}
           </HStack>
 
           <Card.Root variant="outline" w="full" p={6} rounded="xl">
@@ -325,7 +328,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
                 <VStack gap={0.5} align="end">
                   <Text textStyle="md" color="text.subtle">
-                    {t("Current score")}
+                    {t("Score")}
                   </Text>
                   <Text textStyle="md" fontWeight="semibold">
                     {appScore} {" / "} {threshold} {t("pts")}
