@@ -7,8 +7,6 @@ import { useTranslation } from "react-i18next"
 import { useAppEndorsementScore } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
-import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
-import { XAppStatus } from "@/types/appDetails"
 import { convertUriToUrl } from "@/utils/uri"
 
 import type { UnendorsedApp } from "../../../api/contracts/xApps/getXApps"
@@ -54,18 +52,13 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
   )
 }
 
-const AppListSection = ({ status, apps }: { status: XAppStatus; apps: UnendorsedApp[] }) => {
+const AppListSection = ({ title, apps }: { title: string; apps: UnendorsedApp[] }) => {
   if (!apps.length) return null
   return (
     <VStack align="stretch" gap={2}>
-      <EndorsementStatusCallout
-        endorsementStatus={status}
-        showDescription={false}
-        padding={2}
-        boxSize={4}
-        textStyle="sm"
-        flex="0"
-      />
+      <Text textStyle="md" fontWeight="bold" color="text.subtle">
+        {title}
+      </Text>
       {apps.map(app => (
         <AppSidebarItem key={app.id} appId={app.id} />
       ))}
@@ -90,9 +83,9 @@ export const AppsNeedEndorsementSidebar = ({
           </Heading>
           {hasAny ? (
             <VStack align="stretch" gap={4}>
-              <AppListSection status={XAppStatus.LOOKING_FOR_ENDORSEMENT} apps={newLookingForEndorsement} />
-              <AppListSection status={XAppStatus.UNENDORSED_AND_ELIGIBLE} apps={gracePeriodApps} />
-              <AppListSection status={XAppStatus.UNENDORSED_NOT_ELIGIBLE} apps={endorsementLostApps} />
+              <AppListSection title={t("New")} apps={newLookingForEndorsement} />
+              <AppListSection title={t("In grace period")} apps={gracePeriodApps} />
+              <AppListSection title={t("Endorsement lost")} apps={endorsementLostApps} />
             </VStack>
           ) : (
             <Text textStyle="sm" color="text.subtle">
