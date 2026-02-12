@@ -36,7 +36,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
           <Flex
             direction={{ base: "column", md: "row" }}
             gap={4}
-            align={{ base: "stretch", md: "flex-start" }}
+            align={{ base: "stretch", md: "flex-end" }}
             justify={{ md: "space-between" }}
             w="full">
             <HStack gap={4} align="start" minW={0}>
@@ -48,7 +48,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
                 rounded="lg"
                 flexShrink={0}
               />
-              <VStack align="start" gap={1} minW={0}>
+              <VStack align="start" gap={2} minW={0}>
                 <Heading textStyle="lg" fontWeight="bold">
                   {node?.metadata?.name ?? ""} {" #" + node?.id?.toString()}
                 </Heading>
@@ -69,7 +69,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
                     {t("Used")}
                     {": "}
                   </Text>
-                  <Text color="text.subtle">
+                  <Text>
                     {usedPoints.toString()} {t("pts")}
                   </Text>
                 </HStack>
