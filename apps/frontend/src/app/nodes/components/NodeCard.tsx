@@ -27,8 +27,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
 
   const usedPoints = node.activeEndorsements.reduce((sum, e) => sum + e.points, 0n)
   const totalPoints = Number(node.endorsementScore)
-  const usedUnlockablePercent = totalPoints > 0 ? (Number(usedPoints - node.pointsInCooldown) / totalPoints) * 100 : 0
-  const cooldownPercent = totalPoints > 0 ? (Number(node.pointsInCooldown) / totalPoints) * 100 : 0
+  const usedPercent = totalPoints > 0 ? (Number(usedPoints) / totalPoints) * 100 : 0
 
   return (
     <CardRoot variant="primary" w="full">
@@ -66,25 +65,14 @@ export const NodeCard = ({ node }: NodeCardProps) => {
             <VStack gap={2} align={{ base: "stretch", md: "end" }} minW={{ md: "240px" }}>
               <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold" flexWrap="wrap" gap={2}>
                 <HStack gap={1}>
-                  <Text color="status.positive.primary">
+                  <Text color="text.subtle">
                     {t("Used")}
                     {": "}
                   </Text>
-                  <Text color="status.positive.primary">
+                  <Text color="text.subtle">
                     {usedPoints.toString()} {t("pts")}
                   </Text>
                 </HStack>
-                {node.pointsInCooldown > 0 && (
-                  <HStack gap={1}>
-                    <Text color="status.warning.primary">
-                      {t("In cooldown")}
-                      {": "}
-                    </Text>
-                    <Text color="status.warning.primary">
-                      {node.pointsInCooldown.toString()} {t("pts")}
-                    </Text>
-                  </HStack>
-                )}
                 <HStack gap={1}>
                   <Text color="text.subtle">
                     {t("Available")}
@@ -103,12 +91,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
                 bg="bg.muted"
                 borderWidth="1px"
                 borderColor="border.primary">
-                {usedUnlockablePercent > 0 && (
-                  <Box w={`${usedUnlockablePercent}%`} h="full" bg="status.positive.primary" flexShrink={0} />
-                )}
-                {cooldownPercent > 0 && (
-                  <Box w={`${cooldownPercent}%`} h="full" bg="status.warning.primary" flexShrink={0} />
-                )}
+                {usedPercent > 0 && <Box w={`${usedPercent}%`} h="full" bg="status.positive.primary" flexShrink={0} />}
               </Flex>
             </VStack>
           </Flex>
