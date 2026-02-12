@@ -16,6 +16,7 @@ type Props = {
   padding?: number
   boxSize?: number
   textStyle?: string
+  flex?: string
 }
 export const EndorsementStatusCallout = ({
   endorsementStatus,
@@ -23,6 +24,7 @@ export const EndorsementStatusCallout = ({
   padding = 4,
   boxSize = 6,
   textStyle = "md",
+  flex = "1",
 }: Props) => {
   const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
@@ -40,7 +42,7 @@ export const EndorsementStatusCallout = ({
     icon: UilExclamationCircle,
   }
   return (
-    <VStack flex="1" p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
+    <VStack flex={flex} p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
       <HStack w="full">
         <Icon as={icon} boxSize={boxSize} color={color} />
         <Text textStyle={textStyle} fontWeight="semibold" color={color}>

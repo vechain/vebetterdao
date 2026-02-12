@@ -157,9 +157,14 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
       modalProps={{ size: "5xl" }}
       modalContentProps={{ pt: 5 }}>
       <VStack gap={6} align="flex-start" w="full">
-        <HStack w="full" justify="space-between">
+        <HStack w="full" justify="space-between" align="center">
           <Heading size={"2xl"}>{t("Endorsement history")}</Heading>
-          <EndorsementStatusCallout endorsementStatus={endorsementStatus} showDescription={false} padding={2} />
+          <EndorsementStatusCallout
+            endorsementStatus={endorsementStatus}
+            showDescription={false}
+            padding={2}
+            flex="none"
+          />
         </HStack>
 
         <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} gap={5}>

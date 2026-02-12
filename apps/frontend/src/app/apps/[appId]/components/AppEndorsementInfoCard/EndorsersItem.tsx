@@ -1,4 +1,4 @@
-import { Text, HStack, VStack, Popover, Portal } from "@chakra-ui/react"
+import { Text, HStack, VStack, Popover, Portal, Image, Skeleton } from "@chakra-ui/react"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
@@ -7,6 +7,7 @@ import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { HiDotsVertical } from "react-icons/hi"
 
+import { useNodeMetadata } from "@/api/contracts/xNodes/useNodeMetadata"
 import { AddressIcon } from "@/components/AddressIcon"
 
 export type EndorserGroupData = {
@@ -23,6 +24,57 @@ type Props = {
   group: EndorserGroupData
   isAppAdmin: boolean
   onRemoveNode: (nodeId: string, endorserAddress: string, points: string) => void
+}
+
+const EndorserNodeRow = ({
+  nodeId,
+  points,
+  isAppAdmin,
+  endorserAddress,
+  onRemoveNode,
+}: {
+  nodeId: string
+  points: bigint
+  isAppAdmin: boolean
+  endorserAddress: string
+  onRemoveNode: (nodeId: string, endorserAddress: string, points: string) => void
+}) => {
+  const { data: metadata, isLoading } = useNodeMetadata(nodeId)
+
+  return (
+    <HStack w="full" justify="space-between" pl={2} pr={2} py={2} borderRadius="md" bg="bg.subtle">
+      <HStack gap={2}>
+        <Skeleton loading={isLoading} boxSize="28px" rounded="md">
+          <Image src={metadata?.image} alt={metadata?.name} boxSize="28px" rounded="sm" objectFit="cover" />
+        </Skeleton>
+        <Skeleton loading={isLoading}>
+          <Text textStyle="sm" color="text.subtle" lineClamp={1}>
+            {metadata?.name}
+            {" #"}
+            {nodeId}
+          </Text>
+        </Skeleton>
+      </HStack>
+      <HStack gap={3}>
+        <Text textStyle="sm" fontWeight="semibold">
+          <Trans
+            i18nKey="{{value}} pts."
+            values={{ value: points.toString() }}
+            components={{ Text: <Text as="span" /> }}
+          />
+        </Text>
+        {isAppAdmin && (
+          <HStack
+            as="button"
+            color="status.negative.primary"
+            cursor="pointer"
+            onClick={() => onRemoveNode(nodeId, endorserAddress, points.toString())}>
+            <UilTrash size="16" />
+          </HStack>
+        )}
+      </HStack>
+    </HStack>
+  )
 }
 
 export const EndorsersItem = ({ group, isAppAdmin, onRemoveNode }: Props) => {
@@ -91,37 +143,14 @@ export const EndorsersItem = ({ group, isAppAdmin, onRemoveNode }: Props) => {
       </HStack>
 
       {group.nodes.map(node => (
-        <HStack
+        <EndorserNodeRow
           key={node.nodeId}
-          w="full"
-          justify="space-between"
-          pl={12}
-          pr={2}
-          py={1}
-          borderRadius="12px"
-          bg="bg.subtle">
-          <Text textStyle="sm" color="text.subtle">
-            {t("Node #{{id}}", { id: node.nodeId })}
-          </Text>
-          <HStack gap={3}>
-            <Text textStyle="sm" fontWeight="semibold">
-              <Trans
-                i18nKey="{{value}} pts."
-                values={{ value: node.points.toString() }}
-                components={{ Text: <Text as="span" /> }}
-              />
-            </Text>
-            {isAppAdmin && (
-              <HStack
-                as="button"
-                color="status.negative.primary"
-                cursor="pointer"
-                onClick={() => onRemoveNode(node.nodeId, group.endorserAddress, node.points.toString())}>
-                <UilTrash size="16" />
-              </HStack>
-            )}
-          </HStack>
-        </HStack>
+          nodeId={node.nodeId}
+          points={node.points}
+          isAppAdmin={isAppAdmin}
+          endorserAddress={group.endorserAddress}
+          onRemoveNode={onRemoveNode}
+        />
       ))}
     </VStack>
   )
