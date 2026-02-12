@@ -1,129 +1,128 @@
-import { Text, HStack, VStack, Box, Popover, Skeleton, Portal } from "@chakra-ui/react"
+import { Text, HStack, VStack, Popover, Portal } from "@chakra-ui/react"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { HiDotsVertical } from "react-icons/hi"
 
-import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { AddressIcon } from "@/components/AddressIcon"
-import { useNodeEndorsementScore } from "@/hooks/node/useNodeEndorsementScore"
-import { useGetNodeManager } from "@/hooks/node/useNodeManager"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+
+export type EndorserGroupData = {
+  endorserAddress: string
+  totalPoints: bigint
+  nodes: Array<{
+    nodeId: string
+    points: bigint
+    latestBlockNumber: number
+  }>
+}
 
 type Props = {
+  group: EndorserGroupData
   isAppAdmin: boolean
-  event: AppEndorsedEvent
-  setIsConfirmOpen: (value: boolean) => void
-  setSelectedEndorserAddress: (value: string) => void
-  setSelectedEndorserNodeId: (value: string) => void
-  setSelectedEndorserNodePoints: (value: string) => void
+  onRemoveNode: (nodeId: string, endorserAddress: string, points: string) => void
 }
-export const EndorsersItem = ({
-  isAppAdmin,
-  event,
-  setIsConfirmOpen,
-  setSelectedEndorserAddress,
-  setSelectedEndorserNodeId,
-  setSelectedEndorserNodePoints,
-}: Props) => {
+
+export const EndorsersItem = ({ group, isAppAdmin, onRemoveNode }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
-  const endorserNodeId = event.nodeId
-
-  // Get the current node manager address (handles ownership and delegation)
-  const { data: endorserAddress, isLoading: endorserAddressLoading } = useGetNodeManager(endorserNodeId)
-  const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId)
-  const lastEndorsementEpoch = useEstimateBlockTimestamp({ blockNumber: event.blockNumber })
-  const endorsingSince = dayjs(lastEndorsementEpoch).fromNow()
-  // Popover state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
-  // Popover actions
-  const handleRemoveClick = () => {
-    setIsPopoverOpen(false)
-    setIsConfirmOpen(true)
-    setSelectedEndorserAddress(endorserAddress ?? "")
-    setSelectedEndorserNodeId(endorserNodeId)
-    setSelectedEndorserNodePoints(nodePoints ?? "")
-  }
-  const goToEndorserUserProfilePage = () => {
-    router.push("/profile/" + endorserAddress + "?tab=gm")
-  }
-  const { data: vnsData } = useVechainDomain(endorserAddress)
+  const { data: vnsData } = useVechainDomain(group.endorserAddress)
   const domain = vnsData?.domain
+  const displayName = domain ? humanDomain(domain, 4, 26) : humanAddress(group.endorserAddress, 6, 3)
+
+  const goToEndorserUserProfilePage = () => {
+    router.push("/profile/" + group.endorserAddress + "?tab=gm")
+  }
 
   return (
-    <HStack
-      p={"12px"}
-      borderRadius={"16px"}
-      border="sm"
-      borderColor="border.secondary"
-      w={"full"}
-      alignItems={"center"}
-      justify={"space-between"}>
-      <HStack alignItems={"center"} gap={4}>
-        <AddressIcon address={endorserAddress ?? ""} rounded="full" h="28px" w="28px" />
-        <VStack align="start" justify={"center"} gap={0}>
-          <Skeleton loading={endorserAddressLoading}>
-            <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress ?? "", 6, 3)}</Text>
-          </Skeleton>
-          <Text textStyle="xs" color="text.subtle">
-            {t("Endorsing since {{date}}", { date: endorsingSince })}
-          </Text>
-        </VStack>
-      </HStack>
-      <HStack alignItems={"center"} gap={4}>
-        <Skeleton loading={nodePointsLoading}>
+    <VStack p={"12px"} borderRadius={"16px"} border="sm" borderColor="border.secondary" w={"full"} gap={2}>
+      <HStack w="full" justify="space-between">
+        <HStack alignItems={"center"} gap={4}>
+          <AddressIcon address={group.endorserAddress} rounded="full" h="28px" w="28px" />
+          <VStack align="start" justify={"center"} gap={0}>
+            <Text>{displayName}</Text>
+            <Text textStyle="xs" color="text.subtle">
+              <Trans
+                i18nKey="{{count}} node(s)"
+                values={{ count: group.nodes.length }}
+                components={{ Text: <Text as="span" /> }}
+              />
+            </Text>
+          </VStack>
+        </HStack>
+        <HStack alignItems={"center"} gap={4}>
           <Text textStyle={"md"} fontWeight="semibold">
             <Trans
               i18nKey="{{value}} pts."
-              values={{ value: nodePoints?.toString() ?? "0" }}
-              components={{
-                Text: <Text as="span" />,
-              }}
+              values={{ value: group.totalPoints.toString() }}
+              components={{ Text: <Text as="span" /> }}
             />
           </Text>
-        </Skeleton>
 
-        <Popover.Root
-          positioning={{
-            placement: "bottom-end",
-          }}
-          open={isPopoverOpen}
-          onOpenChange={details => setIsPopoverOpen(details.open)}>
-          <Popover.Trigger>
-            <Box as="button" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-              <HiDotsVertical />
-            </Box>
-          </Popover.Trigger>
-          <Portal>
-            <Popover.Positioner>
-              <Popover.Content width="auto" boxShadow="md" border="1px solid #EFEFEF">
-                <Popover.Body p={2}>
-                  <VStack alignItems="stretch" gap={3}>
-                    {isAppAdmin && (
-                      <HStack color="status.negative.primary" onClick={handleRemoveClick} cursor="pointer">
-                        <UilTrash />
-                        <Text whiteSpace="nowrap" textStyle={["sm", "md"]}>
-                          {t("Remove this endorsement")}
-                        </Text>
+          <Popover.Root
+            positioning={{ placement: "bottom-end" }}
+            open={isPopoverOpen}
+            onOpenChange={details => setIsPopoverOpen(details.open)}>
+            <Popover.Trigger>
+              <HStack as="button" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+                <HiDotsVertical />
+              </HStack>
+            </Popover.Trigger>
+            <Portal>
+              <Popover.Positioner>
+                <Popover.Content width="auto" boxShadow="md" border="1px solid #EFEFEF">
+                  <Popover.Body p={2}>
+                    <VStack alignItems="stretch" gap={3}>
+                      <HStack onClick={goToEndorserUserProfilePage} cursor="pointer">
+                        <UilCheck color={"#004CFC"} />
+                        <Text textStyle={["sm", "md"]}>{t("See endorser info")}</Text>
                       </HStack>
-                    )}
-                    <HStack onClick={goToEndorserUserProfilePage} cursor="pointer">
-                      <UilCheck color={"#004CFC"} />
-                      <Text textStyle={["sm", "md"]}>{t("See endorser info")}</Text>
-                    </HStack>
-                  </VStack>
-                </Popover.Body>
-              </Popover.Content>
-            </Popover.Positioner>
-          </Portal>
-        </Popover.Root>
+                    </VStack>
+                  </Popover.Body>
+                </Popover.Content>
+              </Popover.Positioner>
+            </Portal>
+          </Popover.Root>
+        </HStack>
       </HStack>
-    </HStack>
+
+      {group.nodes.map(node => (
+        <HStack
+          key={node.nodeId}
+          w="full"
+          justify="space-between"
+          pl={12}
+          pr={2}
+          py={1}
+          borderRadius="12px"
+          bg="bg.subtle">
+          <Text textStyle="sm" color="text.subtle">
+            {t("Node #{{id}}", { id: node.nodeId })}
+          </Text>
+          <HStack gap={3}>
+            <Text textStyle="sm" fontWeight="semibold">
+              <Trans
+                i18nKey="{{value}} pts."
+                values={{ value: node.points.toString() }}
+                components={{ Text: <Text as="span" /> }}
+              />
+            </Text>
+            {isAppAdmin && (
+              <HStack
+                as="button"
+                color="status.negative.primary"
+                cursor="pointer"
+                onClick={() => onRemoveNode(node.nodeId, group.endorserAddress, node.points.toString())}>
+                <UilTrash size="16" />
+              </HStack>
+            )}
+          </HStack>
+        </HStack>
+      ))}
+    </VStack>
   )
 }

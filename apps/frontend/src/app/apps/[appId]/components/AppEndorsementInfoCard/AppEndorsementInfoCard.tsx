@@ -36,7 +36,13 @@ export const AppEndorsementInfoCard = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
-  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
+  const { data: rawAppEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
+  const appEndorsers = useMemo(() => {
+    if (!rawAppEndorsers) return []
+    return [...new Set(rawAppEndorsers.map(a => a.toLowerCase()))].map(
+      lower => rawAppEndorsers.find(a => a.toLowerCase() === lower) ?? lower,
+    )
+  }, [rawAppEndorsers])
   const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(
     app?.id ?? "",
     account?.address ?? "",
