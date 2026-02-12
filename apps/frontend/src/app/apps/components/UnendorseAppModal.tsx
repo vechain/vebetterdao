@@ -105,6 +105,17 @@ export const UnendorseAppModal = ({ appId: appIdProp, appName, isOpen, onClose }
     points,
     userAddress: account?.address ?? "",
     onSuccess: handleSuccess,
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Removing endorsement..."),
+      },
+      success: {
+        title: t("Endorsement removed successfully"),
+      },
+      error: {
+        title: t("Error removing endorsement"),
+      },
+    },
   })
 
   const handleClose = useCallback(() => {

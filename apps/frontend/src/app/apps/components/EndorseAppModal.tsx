@@ -100,6 +100,17 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     points,
     userAddress: account?.address ?? "",
     onSuccess: handleSuccess,
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Endorsement in progress..."),
+      },
+      success: {
+        title: t("Endorsement successful"),
+      },
+      error: {
+        title: t("Error endorsing app"),
+      },
+    },
   })
 
   const handleClose = useCallback(() => {

@@ -13,10 +13,18 @@ import { getNodesEndorsedAppsQueryKey } from "../../api/contracts/xApps/hooks/en
 import { getAppExistsQueryKey } from "../../api/contracts/xApps/hooks/useAppExists"
 import { getXAppsQueryKey } from "../../api/contracts/xApps/hooks/useXApps"
 import { getUserNodesQueryKey } from "../../api/contracts/xNodes/useGetUserNodes"
+import { TransactionCustomUI } from "../../providers/TransactionModalProvider"
 import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-type Props = { appId?: string; nodeId?: string; points?: string; userAddress?: string; onSuccess?: () => void }
+type Props = {
+  appId?: string
+  nodeId?: string
+  points?: string
+  userAddress?: string
+  onSuccess?: () => void
+  transactionModalCustomUI?: TransactionCustomUI
+}
 /**
  * Hook for node holders to unendorse an app
  * @param appId  the app id to unendorse
@@ -25,7 +33,7 @@ type Props = { appId?: string; nodeId?: string; points?: string; userAddress?: s
  * @param onSuccess  the callback to call after the app is unendorsed
  * @returns the unendorse transaction
  */
-export const useUnendorseApp = ({ appId, nodeId, points, userAddress, onSuccess }: Props) => {
+export const useUnendorseApp = ({ appId, nodeId, points, userAddress, onSuccess, transactionModalCustomUI }: Props) => {
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
@@ -57,5 +65,6 @@ export const useUnendorseApp = ({ appId, nodeId, points, userAddress, onSuccess 
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
+    transactionModalCustomUI,
   })
 }
