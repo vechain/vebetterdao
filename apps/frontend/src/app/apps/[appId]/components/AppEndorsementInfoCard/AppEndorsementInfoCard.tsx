@@ -54,7 +54,9 @@ export const AppEndorsementInfoCard = ({
   )
   const firstNodeEndorsing = nodesEndorsingApp[0]
 
-  const userNodesHasPoints = userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.availablePoints > BigInt(0))
+  const userNodesHasPoints = userNodesInfo?.nodesManagedByUser?.some(
+    (node: UserNode) => node.availablePoints > BigInt(0),
+  )
   const totalAvailablePoints = useMemo(() => {
     return userNodesInfo?.nodesManagedByUser?.reduce((acc, node) => acc + Number(node.availablePoints), 0) ?? 0
   }, [userNodesInfo])
@@ -195,7 +197,7 @@ export const AppEndorsementInfoCard = ({
       <EndorseAppModal xApp={app} isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} />
       <UnendorseAppModal
         appId={app?.id ?? ""}
-        nodeId={firstNodeEndorsing?.id?.toString() ?? ""}
+        appName={app?.name ?? ""}
         isOpen={isUnendorsementModalOpen}
         onClose={onCloseUnendorsementModal}
       />

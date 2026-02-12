@@ -200,7 +200,7 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
       </Card.Body>
       <UnendorseAppModal
         appId={endorsedAppId ?? ""}
-        nodeId={node.id.toString()}
+        appName={appMetadata?.name ?? ""}
         isOpen={unendorseAppModal.open}
         onClose={unendorseAppModal.onClose}
       />
