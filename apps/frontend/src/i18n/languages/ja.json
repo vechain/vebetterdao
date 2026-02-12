@@ -1709,5 +1709,7 @@
   "Your votes at snapshot": "スナップショットでのあなたの投票",
   "Your voting activity": "あなたの投票活動",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "あなたの投票権は、あなたに代わって投票する<platform>veDelegate.vet</platform>に移管されました。<br/> ここで投票したい場合は、スナップショット前にveDelegateで委任を解除する必要があります。",
-  "Your Voting Qualification": "あなたの投票資格"
+  "Your Voting Qualification": "あなたの投票資格",
+  "Max points reached for this app": "このアプリのポイント上限に達しました",
+  "No available points": "利用可能なポイントがありません"
 }

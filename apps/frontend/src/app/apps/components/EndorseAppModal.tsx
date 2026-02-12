@@ -54,16 +54,25 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const threshold = Number(thresholdStr ?? 100)
   const appScore = Number(endorsementScore ?? 0)
 
-  const nodesWithAvailablePoints = useMemo(() => {
-    return userNodesInfo?.nodesManagedByUser
-      ?.filter((node: UserNode) => node.availablePoints > BigInt(0))
-      .sort((a, b) => Number(b.availablePoints) - Number(a.availablePoints))
+  const allManagedNodes = useMemo(() => {
+    return userNodesInfo?.nodesManagedByUser?.sort((a, b) => Number(b.availablePoints) - Number(a.availablePoints))
   }, [userNodesInfo])
 
   const selectedNode = useMemo(() => {
-    if (!selectedNodeId || !nodesWithAvailablePoints) return null
-    return nodesWithAvailablePoints.find(node => node.id.toString() === selectedNodeId) ?? null
-  }, [selectedNodeId, nodesWithAvailablePoints])
+    if (!selectedNodeId || !allManagedNodes) return null
+    return allManagedNodes.find(node => node.id.toString() === selectedNodeId) ?? null
+  }, [selectedNodeId, allManagedNodes])
+
+  const getNodeRemainingPoints = useCallback(
+    (node: UserNode) => {
+      const cap = maxPointsPerNode ?? BigInt(49)
+      const currentForApp = node.activeEndorsements.find(e => e.appId === xApp?.id)?.points ?? BigInt(0)
+      const remainingCap = cap - currentForApp
+      const available = node.availablePoints
+      return remainingCap < available ? remainingCap : available
+    },
+    [maxPointsPerNode, xApp?.id],
+  )
 
   const currentPointsForApp = useMemo(() => {
     if (!selectedNode || !xApp?.id) return BigInt(0)
@@ -145,7 +154,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 onValueChange={details => handleNodeSelect(details.value)}
                 value={selectedNodeId ?? undefined}>
                 <VStack w="full" gap={3} alignItems="stretch">
-                  {nodesWithAvailablePoints?.map((node: UserNode) => {
+                  {allManagedNodes?.map((node: UserNode) => {
+                    const remaining = getNodeRemainingPoints(node)
+                    const disabled = remaining <= BigInt(0)
+                    const noAvailablePoints = node.availablePoints <= BigInt(0)
                     const usedPoints = node.endorsementScore - node.availablePoints
                     const totalPoints = node.endorsementScore
                     const progressPercent = totalPoints > 0 ? Number((usedPoints * BigInt(100)) / totalPoints) : 0
@@ -154,6 +166,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                       <Card.Root key={node.id.toString()} variant="outline" p={4} rounded="xl">
                         <RadioGroup.Item
                           value={node.id.toString()}
+                          disabled={disabled}
                           w="full"
                           justifyContent="space-between"
                           alignItems="center"
@@ -196,6 +209,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                                 <Progress.Range borderRadius="full" />
                               </Progress.Track>
                             </Progress.Root>
+                            {disabled && (
+                              <Text textStyle="xs" color="fg.error">
+                                {noAvailablePoints ? t("No available points") : t("Max points reached for this app")}
+                              </Text>
+                            )}
                           </VStack>
                         </RadioGroup.Item>
                       </Card.Root>

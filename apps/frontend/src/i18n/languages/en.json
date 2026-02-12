@@ -1725,5 +1725,7 @@
   "Your votes at snapshot": "Your votes at snapshot",
   "Your voting activity": "Your voting activity",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
-  "Your Voting Qualification": "Your Voting Qualification"
+  "Your Voting Qualification": "Your Voting Qualification",
+  "Max points reached for this app": "Max points reached for this app",
+  "No available points": "No available points"
 }

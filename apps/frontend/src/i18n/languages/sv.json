@@ -1709,5 +1709,7 @@
   "Your votes at snapshot": "Dina röster vid ögonblicksbild",
   "Your voting activity": "Din röstningsaktivitet",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Din röstmakt har överförts till <platform>veDelegate.vet</platform> som röstar på dina vägnar. <br/> Om du vill rösta här måste du ta bort delegation på veDelegate före snapshot.",
-  "Your Voting Qualification": "Din röstkvalificering"
+  "Your Voting Qualification": "Din röstkvalificering",
+  "Max points reached for this app": "Maxpoäng nådd för denna app",
+  "No available points": "Inga tillgängliga poäng"
 }

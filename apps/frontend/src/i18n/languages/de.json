@@ -1709,5 +1709,7 @@
   "Your votes at snapshot": "Ihre Stimmen bei der Erfassung",
   "Your voting activity": "Ihre Abstimmaktivität",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Deine Stimmrechte wurden auf <platform>veDelegate.vet</platform> übertragen, das in deinem Namen abstimmt. <br/> Wenn du hier abstimmen möchtest, musst du die Delegation auf veDelegate vor dem Snapshot aufheben.",
-  "Your Voting Qualification": "Ihre Abstimmungsberechtigung"
+  "Your Voting Qualification": "Ihre Abstimmungsberechtigung",
+  "Max points reached for this app": "Maximale Punkte für diese App erreicht",
+  "No available points": "Keine verfügbaren Punkte"
 }

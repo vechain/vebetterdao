@@ -1709,5 +1709,7 @@
   "Your votes at snapshot": "Anlık görüntüdeki oylarınız",
   "Your voting activity": "Oylama etkinliğiniz",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Oylama gücünüz sizin adınıza oy veren <platform>veDelegate.vet</platform>'e aktarılmıştır. <br/> Burada oy kullanmak istiyorsanız, anlık görüntüleme öncesinde veDelegate üzerindeki devri iptal etmelisiniz.",
-  "Your Voting Qualification": "Oylama Yeterliliğiniz"
+  "Your Voting Qualification": "Oylama Yeterliliğiniz",
+  "Max points reached for this app": "Bu uygulama için maksimum puana ulaşıldı",
+  "No available points": "Kullanılabilir puan yok"
 }
