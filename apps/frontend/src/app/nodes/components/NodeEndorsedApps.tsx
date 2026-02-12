@@ -1,13 +1,16 @@
 "use client"
 
-import { Button, Card, HStack, Image, Link, Tag, Text, VStack } from "@chakra-ui/react"
-import { UilEdit } from "@iconscout/react-unicons"
+import { Button, Card, HStack, Icon, Image, Link, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { LuPencil, LuUsers } from "react-icons/lu"
 
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useAppEndorsers } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
-import { useXAppStatusConfig } from "@/app/apps/[appId]/hooks/useXAppStatusConfig"
+import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 import { XAppStatus } from "@/types/appDetails"
 import { convertUriToUrl } from "@/utils/uri"
 
@@ -20,37 +23,65 @@ type NodeEndorsedAppsProps = {
 const EndorsedAppRow = ({ appId, points }: { appId: string; points: bigint }) => {
   const { t } = useTranslation()
   const { data: metadata } = useXAppMetadata(appId)
-  const { status: endorsementStatus } = useAppEndorsementStatus(appId)
-  const statusConfig = useXAppStatusConfig()
-  const config = statusConfig[endorsementStatus as XAppStatus]
+  const { status: endorsementStatus, score } = useAppEndorsementStatus(appId)
+  const { data: rawEndorsers } = useAppEndorsers(appId)
+  const { data: maxPointsPerApp } = useMaxPointsPerApp()
+
+  const uniqueEndorsersCount = useMemo(() => {
+    if (!rawEndorsers) return 0
+    return new Set(rawEndorsers.map(a => a.toLowerCase())).size
+  }, [rawEndorsers])
 
   return (
-    <HStack justify="space-between" align="center" gap={4} w="full">
-      <HStack gap={3} minW={0} flex={1}>
-        <Image src={convertUriToUrl(metadata?.logo ?? "")} alt={metadata?.name ?? ""} w="10" h="10" rounded="lg" />
-        <VStack align="start" gap={0} minW={0}>
-          <Text textStyle="sm" fontWeight="semibold" lineClamp={1}>
-            {metadata?.name ?? appId}
-          </Text>
-          {config && (
-            <Tag.Root size="sm" variant="subtle" colorPalette="gray">
-              <Tag.Label>{config.title}</Tag.Label>
-            </Tag.Root>
-          )}
-        </VStack>
-      </HStack>
-      <HStack gap={2} flexShrink={0}>
-        <Text textStyle="sm" color="text.subtle">
-          {points.toString()} {t("pts")}
+    <HStack bg="bg.subtle" p={4} rounded="xl" gap={6} w="full" align="center">
+      <Image
+        src={convertUriToUrl(metadata?.logo ?? "")}
+        alt={metadata?.name ?? ""}
+        w="11"
+        h="11"
+        rounded="lg"
+        flexShrink={0}
+      />
+      <VStack align="start" gap={1} flex={1} minW={0}>
+        <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+          {metadata?.name ?? appId}
         </Text>
-        <Link asChild>
-          <NextLink href={`/apps/${appId}`}>
-            <Button size="xs" variant="ghost" aria-label="Edit">
-              <UilEdit />
-            </Button>
-          </NextLink>
-        </Link>
-      </HStack>
+        <HStack gap={3} w="full" align="center">
+          <EndorsementStatusCallout
+            endorsementStatus={endorsementStatus as XAppStatus}
+            appId={appId}
+            showDescription={false}
+            padding={1}
+            boxSize={4}
+            textStyle="sm"
+            flex="0"
+            whiteSpace="nowrap"
+          />
+          <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
+            <Icon boxSize={4} color="text.subtle">
+              <LuUsers />
+            </Icon>
+            <Text textStyle="sm" color="text.subtle">
+              {uniqueEndorsersCount}
+            </Text>
+          </HStack>
+          <HStack borderLeftWidth="1px" borderColor="border" pl={3}>
+            <Text textStyle="sm" color="text.subtle">
+              {score ?? "0"} {" / "} {maxPointsPerApp?.toString() ?? "0"} {t("pts")}
+            </Text>
+          </HStack>
+        </HStack>
+      </VStack>
+      <Text textStyle="md" fontWeight="semibold" flexShrink={0}>
+        {points.toString()} {t("pts")}
+      </Text>
+      <Link asChild>
+        <NextLink href={`/apps/${appId}`}>
+          <Icon boxSize={4} color="text.subtle">
+            <LuPencil />
+          </Icon>
+        </NextLink>
+      </Link>
     </HStack>
   )
 }
