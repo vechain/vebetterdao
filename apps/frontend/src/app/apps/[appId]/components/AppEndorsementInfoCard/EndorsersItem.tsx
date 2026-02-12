@@ -119,7 +119,7 @@ export const EndorsersItem = ({ group, isAppAdmin, onRemoveNode }: Props) => {
             positioning={{ placement: "bottom-end" }}
             open={isPopoverOpen}
             onOpenChange={details => setIsPopoverOpen(details.open)}>
-            <Popover.Trigger>
+            <Popover.Trigger asChild>
               <HStack as="button" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
                 <HiDotsVertical />
               </HStack>
