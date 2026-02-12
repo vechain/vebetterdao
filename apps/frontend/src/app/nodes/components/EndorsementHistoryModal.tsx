@@ -19,6 +19,7 @@ type EndorsementHistoryModalProps = {
 }
 
 const HistoryRow = ({ event }: { event: AppEndorsedEvent }) => {
+  const { t } = useTranslation()
   const { data: metadata } = useXAppMetadata(event.appId)
   const timestamp = useEstimateBlockTimestamp({ blockNumber: event.blockNumber })
   const dateStr = timestamp ? dayjs(timestamp).format("DD MMM, YYYY") : "—"
@@ -34,7 +35,7 @@ const HistoryRow = ({ event }: { event: AppEndorsedEvent }) => {
       <Table.Cell>
         <HStack gap={1}>
           {event.endorsed ? <UilCheck size={16} color="green" /> : <UilTimes size={16} color="red" />}
-          <Text textStyle="sm">{event.endorsed ? "Endorsed" : "Unendorsed"}</Text>
+          <Text textStyle="sm">{event.endorsed ? t("Endorsed") : t("Unendorsed")}</Text>
         </HStack>
       </Table.Cell>
       <Table.Cell>

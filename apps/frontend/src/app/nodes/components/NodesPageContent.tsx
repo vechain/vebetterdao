@@ -41,6 +41,7 @@ export const NodesPageContent = () => {
             <NodeCard key={node.id.toString()} node={node} />
           ))}
         </VStack>
+
         <AppsNeedEndorsementSidebar
           gracePeriodApps={xApps?.gracePeriod ?? []}
           endorsementLostApps={xApps?.endorsementLost ?? []}

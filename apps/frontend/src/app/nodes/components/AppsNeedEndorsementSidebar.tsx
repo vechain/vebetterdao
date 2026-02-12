@@ -75,25 +75,27 @@ export const AppsNeedEndorsementSidebar = ({
   const hasAny = gracePeriodApps.length > 0 || endorsementLostApps.length > 0 || newLookingForEndorsement.length > 0
 
   return (
-    <Card.Root variant="outline" w="full">
-      <Card.Body>
-        <VStack align="stretch" gap={4}>
-          <Heading textStyle="lg" size="xl">
-            {t("Apps looking for endorsement")}
-          </Heading>
-          {hasAny ? (
-            <VStack align="stretch" gap={4}>
-              <AppListSection title={t("New")} apps={newLookingForEndorsement} />
-              <AppListSection title={t("In grace period")} apps={gracePeriodApps} />
-              <AppListSection title={t("Endorsement lost")} apps={endorsementLostApps} />
-            </VStack>
-          ) : (
-            <Text textStyle="sm" color="text.subtle">
-              {t("No apps looking for endorsement right now.")}
-            </Text>
-          )}
-        </VStack>
-      </Card.Body>
-    </Card.Root>
+    <VStack align="stretch" gap={6}>
+      <Heading textStyle="xl" size="xl">
+        {t("Apps looking for endorsement")}
+      </Heading>
+      <Card.Root variant="outline" w="full">
+        <Card.Body>
+          <VStack align="stretch" gap={4}>
+            {hasAny ? (
+              <VStack align="stretch" gap={4}>
+                <AppListSection title={t("New")} apps={newLookingForEndorsement} />
+                <AppListSection title={t("In grace period")} apps={gracePeriodApps} />
+                <AppListSection title={t("Endorsement lost")} apps={endorsementLostApps} />
+              </VStack>
+            ) : (
+              <Text textStyle="sm" color="text.subtle">
+                {t("No apps looking for endorsement right now.")}
+              </Text>
+            )}
+          </VStack>
+        </Card.Body>
+      </Card.Root>
+    </VStack>
   )
 }

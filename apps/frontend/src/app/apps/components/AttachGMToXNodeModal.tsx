@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Flex, Heading, Stack, Text, useBreakpointValue, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -55,8 +55,6 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
     attachGMToXNodeMutation.sendTransaction()
   }, [attachGMToXNodeMutation])
 
-  const iconSize = useBreakpointValue({ base: "48px", md: "108px" })
-
   const steps = [
     {
       Icon: ThreeTokensIcon,
@@ -81,44 +79,38 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
       onClose={handleClose}
       ariaTitle={t("Attaching Node to GM NFT")}
       showCloseButton={true}
-      modalProps={{ size: "xl" }}
+      modalProps={{ size: "md" }}
       modalBodyProps={{ p: { base: 3, md: 5 } }}>
       <VStack align="stretch" gap={6}>
         <Heading textStyle="lg">{t("Attaching Node to GM NFT")}</Heading>
 
         <VStack align="stretch" gap={4}>
           <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
-          <Stack align="stretch" direction={["column", "column", "row"]}>
+          <VStack align="stretch" gap={4}>
             {steps.map((step, index) => (
               <VStack
                 key={`step-${uuid()}`}
                 flex={1}
-                bg="#FAFAFA"
-                p={[3, 3, 6]}
-                borderRadius={["xl", "xl", "3xl"]}
+                bg="bg.subtle"
+                p={{ base: 3, md: 6 }}
+                borderRadius={{ base: "xl", md: "3xl" }}
                 align="stretch">
-                <Stack align="stretch" direction={["row", "row", "column"]}>
-                  <Flex flexBasis={["48px", "48px", "108px"]}>
-                    <step.Icon size={iconSize} />
-                  </Flex>
-                  <VStack align="flex-start" gap={[0, 0, 2]}>
-                    <Text textStyle="xs" color="text.subtle">
-                      {t("STEP {{value}}", { value: index + 1 })}
-                    </Text>
-                    <Text textStyle="xl" color="#1E1E1E">
-                      {step.title}
-                    </Text>
-                    <Text hideBelow="md" textStyle="sm" color="text.subtle">
-                      {step.description}
-                    </Text>
-                  </VStack>
-                </Stack>
+                <VStack align="flex-start" gap={{ base: 0, md: 2 }}>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("STEP {{value}}", { value: index + 1 })}
+                  </Text>
+                  <Text textStyle="xl">{step.title}</Text>
+                  <Text hideBelow="md" textStyle="sm" color="text.subtle">
+                    {step.description}
+                  </Text>
+                </VStack>
+
                 <Text hideFrom="md" textStyle="sm" color="text.subtle">
                   {step.description}
                 </Text>
               </VStack>
             ))}
-          </Stack>
+          </VStack>
         </VStack>
 
         <VStack align="stretch" w="full">
@@ -133,7 +125,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
 
           <Tooltip
             disabled={!isNoAffectAttachment}
-            content={<Text>{t("This feature is available only to nodes that provide free upgrade to GM NFTs.")}</Text>}>
+            content={t("This feature is available only to nodes that provide free upgrade to GM NFTs.")}>
             <span>
               <Button
                 loading={isLoadingUserGMs}
