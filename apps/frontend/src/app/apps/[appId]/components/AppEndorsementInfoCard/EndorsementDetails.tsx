@@ -65,7 +65,7 @@ export const EndorsementDetails = ({
             </Text>
           </Skeleton>
           <Text textStyle="xs" color="text.subtle">
-            {t("Your score")}
+            {t("Your endorsement")}
           </Text>
         </VStack>
       )}
@@ -80,7 +80,7 @@ export const EndorsementDetails = ({
           </HStack>
         </Skeleton>
         <Text textStyle="xs" color="text.subtle">
-          {t("Users endorsing")}
+          {t("Endorsers")}
         </Text>
       </VStack>
     </HStack>

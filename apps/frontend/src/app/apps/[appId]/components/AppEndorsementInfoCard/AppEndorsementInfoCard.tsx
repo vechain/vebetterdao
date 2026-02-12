@@ -57,9 +57,6 @@ export const AppEndorsementInfoCard = ({
   const userNodesHasPoints = userNodesInfo?.nodesManagedByUser?.some(
     (node: UserNode) => node.availablePoints > BigInt(0),
   )
-  const totalAvailablePoints = useMemo(() => {
-    return userNodesInfo?.nodesManagedByUser?.reduce((acc, node) => acc + Number(node.availablePoints), 0) ?? 0
-  }, [userNodesInfo])
 
   const appUnendorsedStatus =
     endorsementStatus === XAppStatus.LOOKING_FOR_ENDORSEMENT ||
@@ -96,7 +93,7 @@ export const AppEndorsementInfoCard = ({
     if (shouldRenderEndorseButton) {
       buttonComponents.push(
         <Button key="endorseButton" variant="primary" onClick={onOpenEndorsementModal} w="full">
-          {t("Endorse with your {{value}} points", { value: totalAvailablePoints })}
+          {t("Endorse {{appName}}", { appName: app?.name ?? "" })}
         </Button>,
       )
     }
@@ -143,13 +140,13 @@ export const AppEndorsementInfoCard = ({
     firstNodeEndorsing,
     t,
     onOpenEndorsementModal,
-    totalAvailablePoints,
     onOpenUnendorsementModal,
+    app?.name,
   ])
 
   return (
     <>
-      <Card.Root w={"full"} variant="primary" gap={4}>
+      <Card.Root w={"full"} variant="primary" gap={8}>
         <Card.Header>
           <HStack justifyContent="space-between" alignItems="center" w="full">
             <Heading size="xl">{t("Endorsement")}</Heading>
@@ -165,7 +162,7 @@ export const AppEndorsementInfoCard = ({
         </Card.Header>
 
         <Card.Body>
-          <Stack gap={4} w="full">
+          <Stack gap={6} w="full">
             <Skeleton loading={isEndorsementStatusLoading}>
               <EndorsementStatusCallout endorsementStatus={endorsementStatus}></EndorsementStatusCallout>
             </Skeleton>

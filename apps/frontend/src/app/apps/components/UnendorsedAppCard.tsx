@@ -152,7 +152,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                           </Text>
                         </Skeleton>
                         <Text textStyle="xs" color="text.subtle">
-                          {t("Your score")}
+                          {t("Your endorsement")}
                         </Text>
                       </VStack>
                     )}
