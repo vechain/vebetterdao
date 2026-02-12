@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Card, HStack, Icon, Image, Link, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Image, Link, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -92,27 +92,26 @@ export const NodeEndorsedApps = ({ node }: NodeEndorsedAppsProps) => {
   const hasEndorsements = endorsements.length > 0
 
   return (
-    <Card.Root variant="outline" w="full" cursor="default">
-      <Card.Body>
-        <VStack align="stretch" gap={3}>
-          <Text textStyle="sm" color="text.subtle">
-            {(t as (k: string) => string)(
-              "Endorse your favourite apps to help them activate and unlock rewards for users.",
-            )}
-          </Text>
-          {hasEndorsements ? (
-            <VStack align="stretch" gap={3}>
-              {endorsements.map(e => (
-                <EndorsedAppRow key={e.appId} appId={e.appId} points={e.points} />
-              ))}
-            </VStack>
-          ) : (
-            <Button asChild variant="outline" size="sm" colorPalette="blue">
+    <>
+      <Heading textStyle="lg">{t("Endorsed apps")}</Heading>
+      <VStack align="stretch" gap={3}>
+        {hasEndorsements ? (
+          <VStack align="stretch" gap={3}>
+            {endorsements.map(e => (
+              <EndorsedAppRow key={e.appId} appId={e.appId} points={e.points} />
+            ))}
+          </VStack>
+        ) : (
+          <HStack justify="space-between" w="full">
+            <Text textStyle="sm" color="text.subtle">
+              {t("Endorse your favourite apps to help them activate and unlock rewards for users.")}
+            </Text>
+            <Button asChild variant="primary" size="sm" colorPalette="blue">
               <NextLink href="/apps">{t("Endorse")}</NextLink>
             </Button>
-          )}
-        </VStack>
-      </Card.Body>
-    </Card.Root>
+          </HStack>
+        )}
+      </VStack>
+    </>
   )
 }

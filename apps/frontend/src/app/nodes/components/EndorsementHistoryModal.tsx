@@ -61,7 +61,7 @@ export const EndorsementHistoryModal = ({ node, isOpen, onClose }: EndorsementHi
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header>
-              <Heading textStyle="lg">{(t as (k: string) => string)("Activity history")}</Heading>
+              <Heading textStyle="lg">{t("Activity history")}</Heading>
               <Dialog.CloseTrigger />
             </Dialog.Header>
             <Dialog.Body>
@@ -78,9 +78,9 @@ export const EndorsementHistoryModal = ({ node, isOpen, onClose }: EndorsementHi
                   <Table.Root size="sm">
                     <Table.Header>
                       <Table.Row>
-                        <Table.ColumnHeader>{(t as (k: string) => string)("App")}</Table.ColumnHeader>
-                        <Table.ColumnHeader>{(t as (k: string) => string)("Action")}</Table.ColumnHeader>
-                        <Table.ColumnHeader>{(t as (k: string) => string)("Points endorsed")}</Table.ColumnHeader>
+                        <Table.ColumnHeader>{t("App")}</Table.ColumnHeader>
+                        <Table.ColumnHeader>{t("Action")}</Table.ColumnHeader>
+                        <Table.ColumnHeader>{t("Points endorsed")}</Table.ColumnHeader>
                         <Table.ColumnHeader>{t("Date")}</Table.ColumnHeader>
                       </Table.Row>
                     </Table.Header>
@@ -92,7 +92,7 @@ export const EndorsementHistoryModal = ({ node, isOpen, onClose }: EndorsementHi
                   </Table.Root>
                 ) : (
                   <Text textStyle="sm" color="text.subtle">
-                    {(t as (k: string) => string)("No endorsement events")}
+                    {t("No endorsement events")}
                   </Text>
                 )}
               </VStack>

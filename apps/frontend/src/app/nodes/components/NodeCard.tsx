@@ -1,6 +1,18 @@
 "use client"
 
-import { Box, Button, Card, Flex, Heading, HStack, Image, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Text,
+  VStack,
+  useDisclosure,
+  Separator,
+} from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
@@ -96,17 +108,26 @@ export const NodeCard = ({ node }: NodeCardProps) => {
             </VStack>
           </Flex>
 
+          <Separator w="full" mt={4} />
+
           <NodeGMSection node={node} />
+
+          <Separator w="full" mt={4} />
+
           <NodeEndorsedApps node={node} />
 
-          <HStack justify="space-between" w="full" pt={2}>
-            <Button variant="link" size="sm" onClick={historyModal.onOpen}>
-              {(t as (k: string) => string)("View history")}
-            </Button>
-            <Button asChild size="sm" variant="outline" colorPalette="blue">
-              <NextLink href="/apps">{(t as (k: string) => string)("Endorse")}</NextLink>
-            </Button>
-          </HStack>
+          {/* Show this button here only if there are already endorsements, otherwise it is shown elsewhere */}
+          {node.activeEndorsements.length > 0 && (
+            <HStack justify="space-between" w="full" pt={2}>
+              <Button variant="link" size="sm" onClick={historyModal.onOpen}>
+                {t("View history")}
+              </Button>
+
+              <Button asChild size="sm" variant="primary">
+                <NextLink href="/apps">{t("Endorse")}</NextLink>
+              </Button>
+            </HStack>
+          )}
         </VStack>
       </CardBody>
       <EndorsementHistoryModal node={node} isOpen={historyModal.open} onClose={historyModal.onClose} />

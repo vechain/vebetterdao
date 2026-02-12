@@ -21,7 +21,7 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
 
   const stats = [
     {
-      label: (t as (k: string) => string)("Total owned"),
+      label: t("Total owned"),
       value: totalOwned.toString(),
       suffix: t("points"),
       icon: LuStar,
@@ -29,7 +29,7 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
       color: "status.info.primary",
     },
     {
-      label: (t as (k: string) => string)("Available to endorse"),
+      label: t("Available to endorse"),
       value: availablePoints.toString(),
       suffix: t("points"),
       icon: LuStar,
@@ -38,7 +38,7 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
     },
 
     {
-      label: (t as (k: string) => string)("In cooldown"),
+      label: t("In cooldown"),
       value: pointsInCooldown.toString(),
       suffix: t("points"),
       icon: LuStar,
@@ -46,7 +46,7 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
       color: "status.negative.primary",
     },
     {
-      label: (t as (k: string) => string)("Endorsed apps"),
+      label: t("Endorsed apps"),
       value: endorsedAppsCount.toString(),
       suffix: null,
       icon: PiSquaresFour,

@@ -35,7 +35,7 @@ export const NodesPageContent = () => {
       <Box display="grid" gridTemplateColumns={{ base: "1fr", lg: "1fr 415px" }} gap={8} mt={8} alignItems="start">
         <VStack align="stretch" gap={6}>
           <Heading textStyle="xl" size="xl">
-            {(t as (k: string) => string)("Your active nodes")}
+            {t("Your active nodes")}
           </Heading>
           {nodes.map(node => (
             <NodeCard key={node.id.toString()} node={node} />

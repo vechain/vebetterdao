@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Card, HStack, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, HStack, Heading, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { TbPaperclip } from "react-icons/tb"
@@ -30,54 +30,56 @@ export const NodeGMSection = ({ node }: NodeGMSectionProps) => {
   )
 
   return (
-    <Card.Root variant="outline" w="full" cursor="default">
-      <Card.Body>
-        <VStack align="stretch" gap={3}>
-          <Text textStyle="sm" color="text.subtle">
-            {(t as (k: string) => string)("NFTs provide reward multipliers. You can attach one GM NFT to this node.")}
-          </Text>
-          {isAttached && attachedGM ? (
-            <HStack gap={4} align="start">
-              <GMNFTCard
-                imageUrl={attachedGM.metadata?.image}
-                name={attachedGM.metadata?.name}
-                tokenLevel={Number(attachedGM.tokenLevel)}
-                multiplier={attachedGM.multiplier}
-                size="medium">
-                <HStack>
-                  <Button asChild size="sm" variant="outline">
-                    <NextLink href={`/galaxy-member/${attachedGM.tokenId}`}>
-                      <HStack gap={1} as="span">
-                        <TbPaperclip /> {(t as (k: string) => string)("View GM")}
-                      </HStack>
-                    </NextLink>
+    <>
+      <Heading textStyle="lg">{t("Attached Galaxy Member NFTs")}</Heading>
+
+      <VStack align="stretch" gap={3}>
+        {isAttached && attachedGM ? (
+          <HStack gap={4} align="start">
+            <GMNFTCard
+              imageUrl={attachedGM.metadata?.image}
+              name={attachedGM.metadata?.name}
+              tokenLevel={Number(attachedGM.tokenLevel)}
+              multiplier={attachedGM.multiplier}
+              size="medium">
+              <HStack>
+                <Button asChild size="sm" variant="outline">
+                  <NextLink href={`/galaxy-member/${attachedGM.tokenId}`}>
+                    <HStack gap={1} as="span">
+                      <TbPaperclip /> {t("View GM")}
+                    </HStack>
+                  </NextLink>
+                </Button>
+                {!isNodeDelegator && (
+                  <Button
+                    size="sm"
+                    colorPalette="red"
+                    variant="ghost"
+                    onClick={e => {
+                      e.stopPropagation()
+                      detachModal.onOpen()
+                    }}>
+                    {t("Detach")}
                   </Button>
-                  {!isNodeDelegator && (
-                    <Button
-                      size="sm"
-                      colorPalette="red"
-                      variant="ghost"
-                      onClick={e => {
-                        e.stopPropagation()
-                        detachModal.onOpen()
-                      }}>
-                      {t("Detach")}
-                    </Button>
-                  )}
-                </HStack>
-              </GMNFTCard>
-            </HStack>
-          ) : (
+                )}
+              </HStack>
+            </GMNFTCard>
+          </HStack>
+        ) : (
+          <HStack justify="space-between" w="full">
+            <Text textStyle="sm" color="text.subtle">
+              {t("NFTs provide reward multipliers. You can attach one GM NFT to this node.")}
+            </Text>
             <Button
               size="sm"
-              variant="outline"
+              variant="primary"
               onClick={attachModal.onOpen}
               disabled={isNodeDelegator || availableGMs.length === 0}>
-              <TbPaperclip /> {(t as (k: string) => string)("Attach")}
+              <TbPaperclip /> {t("Attach")}
             </Button>
-          )}
-        </VStack>
-      </Card.Body>
+          </HStack>
+        )}
+      </VStack>
       {attachedGM && (
         <>
           <AttachGMToXNodeModal
@@ -103,6 +105,6 @@ export const NodeGMSection = ({ node }: NodeGMSectionProps) => {
           onClose={attachModal.onClose}
         />
       )}
-    </Card.Root>
+    </>
   )
 }
