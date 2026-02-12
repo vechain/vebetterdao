@@ -1,0 +1,50 @@
+import { ethers } from "hardhat"
+import { getX2EarnAppsContract, loadMigrationData } from "./helpers"
+
+async function main() {
+  const data = loadMigrationData()
+  const x2EarnApps = await getX2EarnAppsContract()
+  const signer = (await ethers.getSigners())[0]
+  if (!signer) throw new Error("No signer")
+
+  const paused = await x2EarnApps.endorsementsPaused()
+  if (!paused) {
+    console.error("endorsementsPaused() is false. Pause endorsements before seeding.")
+    process.exit(1)
+  }
+
+  const completed = await x2EarnApps.migrationCompleted()
+  if (completed) {
+    console.error("migrationCompleted() is true. Migration already done.")
+    process.exit(1)
+  }
+
+  const MIGRATION_ROLE = await x2EarnApps.MIGRATION_ROLE()
+  const hasRole = await x2EarnApps.hasRole(MIGRATION_ROLE, signer.address)
+  if (!hasRole) {
+    console.error("Caller does not have MIGRATION_ROLE.")
+    process.exit(1)
+  }
+
+  const total = data.endorsements.length
+  let done = 0
+  for (const e of data.endorsements) {
+    try {
+      const tx = await x2EarnApps.seedEndorsement(e.appId, BigInt(e.nodeId), e.points)
+      await tx.wait()
+      done++
+      console.log(`[${done}/${total}] Seeding nodeId=${e.nodeId} -> appId=${e.appId} with ${e.points} points`)
+    } catch (err) {
+      console.error(`[${done + 1}/${total}] Failed nodeId=${e.nodeId} appId=${e.appId} points=${e.points}:`, err)
+      process.exit(1)
+    }
+  }
+  console.log(`Seeded ${done} endorsements.`)
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch(e => {
+    console.error(e)
+    process.exit(1)
+  })

@@ -100,7 +100,19 @@
     "verify:all:contracts:mainnet": "npx hardhat run scripts/verify/verify-all-contracts.ts --network vechain_mainnet",
     "verify:all:contracts:testnet-staging": "npx hardhat run scripts/verify/verify-all-contracts.ts --network vechain_testnet",
     "check-verification-status:mainnet": "npx hardhat run scripts/verify/check-verification-status.ts --network vechain_mainnet",
-    "check-verification-status:testnet-staging": "npx hardhat run scripts/verify/check-verification-status.ts --network vechain_testnet"
+    "check-verification-status:testnet-staging": "npx hardhat run scripts/verify/check-verification-status.ts --network vechain_testnet",
+    "endorsement-migration:fetch:local": "npx hardhat run scripts/endorsement-migration/1_fetch.ts --network vechain_solo",
+    "endorsement-migration:fetch:testnet-staging": "npx hardhat run scripts/endorsement-migration/1_fetch.ts --network vechain_testnet",
+    "endorsement-migration:fetch:mainnet": "npx hardhat run scripts/endorsement-migration/1_fetch.ts --network vechain_mainnet",
+    "endorsement-migration:simulate:local": "npx hardhat run scripts/endorsement-migration/2_simulate.ts --network vechain_solo",
+    "endorsement-migration:simulate:testnet-staging": "npx hardhat run scripts/endorsement-migration/2_simulate.ts --network vechain_testnet",
+    "endorsement-migration:simulate:mainnet": "npx hardhat run scripts/endorsement-migration/2_simulate.ts --network vechain_mainnet",
+    "endorsement-migration:seed:local": "npx hardhat run scripts/endorsement-migration/3_seed.ts --network vechain_solo",
+    "endorsement-migration:seed:testnet-staging": "npx hardhat run scripts/endorsement-migration/3_seed.ts --network vechain_testnet",
+    "endorsement-migration:seed:mainnet": "npx hardhat run scripts/endorsement-migration/3_seed.ts --network vechain_mainnet",
+    "endorsement-migration:verify:local": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_solo",
+    "endorsement-migration:verify:testnet-staging": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_testnet",
+    "endorsement-migration:verify:mainnet": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_mainnet"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",

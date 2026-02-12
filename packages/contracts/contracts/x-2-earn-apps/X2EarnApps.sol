@@ -635,14 +635,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
    * @param points The number of points to endorse with (max 49 per app).
    */
   function endorseApp(bytes32 appId, uint256 nodeId, uint256 points) external {
-    EndorsementUtils.endorseApp(
-      appId,
-      nodeId,
-      points,
-      isBlacklisted(appId),
-      appExists(appId),
-      isEligibleNow(appId)
-    );
+    EndorsementUtils.endorseApp(appId, nodeId, points, isBlacklisted(appId), appExists(appId), isEligibleNow(appId));
 
     // Check if we need to set voting eligibility after endorsement
     X2EarnAppsStorageTypes.EndorsementStorage storage endorsementStorage = X2EarnAppsStorageTypes
