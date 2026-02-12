@@ -14,8 +14,16 @@ type Props = {
   endorsementStatus: XAppStatus
   showDescription?: boolean
   padding?: number
+  boxSize?: number
+  textStyle?: string
 }
-export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = true, padding = 4 }: Props) => {
+export const EndorsementStatusCallout = ({
+  endorsementStatus,
+  showDescription = true,
+  padding = 4,
+  boxSize = 6,
+  textStyle = "md",
+}: Props) => {
   const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
   const { app, isAppInfoLoading } = useCurrentAppInfo()
@@ -34,8 +42,8 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
   return (
     <VStack flex="1" p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
       <HStack w="full">
-        <Icon as={icon} boxSize={6} color={color} />
-        <Text textStyle="md" fontWeight="semibold" color={color}>
+        <Icon as={icon} boxSize={boxSize} color={color} />
+        <Text textStyle={textStyle} fontWeight="semibold" color={color}>
           {title}
         </Text>
       </HStack>

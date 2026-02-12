@@ -30,7 +30,6 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
 import { EndorsementStatusCallout } from "../[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
-import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type Props = {
   isOpen: boolean
@@ -142,7 +141,9 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
           <VStack w="full" alignItems="stretch" gap={3}>
             <Skeleton loading={isUserNodesLoading}>
-              <RadioGroup.Root onValueChange={details => handleNodeSelect(details.value)} value={selectedNodeId ?? undefined}>
+              <RadioGroup.Root
+                onValueChange={details => handleNodeSelect(details.value)}
+                value={selectedNodeId ?? undefined}>
                 <VStack w="full" gap={3} alignItems="stretch">
                   {nodesWithAvailablePoints?.map((node: UserNode) => {
                     const usedPoints = node.endorsementScore - node.availablePoints
@@ -174,6 +175,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                               </Text>
                               <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
                                 {node.type}
+                                {" #"}
+                                {node.id.toString()}
                               </Text>
                             </VStack>
                           </HStack>
@@ -214,7 +217,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           </Heading>
 
           <HStack gap={3} w="full">
-            <HStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="space-between">
+            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Node")}
               </Text>
@@ -228,46 +231,55 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 />
                 <Text textStyle="md" fontWeight="semibold">
                   {selectedNode?.metadata?.name}
+                  {" #" + selectedNode?.id.toString()}
                 </Text>
               </HStack>
-            </HStack>
-            <HStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="space-between">
+            </VStack>
+            <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Available points")}
               </Text>
               <Text textStyle="md" fontWeight="semibold">
                 {selectedNode?.availablePoints.toString()} {t("pts")}
               </Text>
-            </HStack>
+            </VStack>
           </HStack>
 
           <Card.Root variant="outline" w="full" p={6} rounded="xl">
             <VStack gap={2} align="stretch">
-              <HStack gap={3}>
-                <AppImage appId={xApp?.id ?? ""} boxSize="44px" borderRadius="lg" />
-                <VStack gap={0.5} align="start">
-                  <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
-                    {xApp?.name}
+              <HStack justify="space-between" align="center">
+                <HStack gap={3}>
+                  <AppImage appId={xApp?.id ?? ""} boxSize="44px" borderRadius="lg" />
+                  <VStack gap={0.5} align="start">
+                    <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                      {xApp?.name}
+                    </Text>
+                    <HStack gap={2}>
+                      <EndorsementStatusCallout
+                        endorsementStatus={endorsementStatus}
+                        showDescription={false}
+                        padding={1}
+                        boxSize={4}
+                        textStyle="xs"
+                      />
+                    </HStack>
+                  </VStack>
+                </HStack>
+
+                <VStack gap={0.5} align="end">
+                  <Text textStyle="md" color="text.subtle">
+                    {t("Current score")}
                   </Text>
-                  <HStack gap={2}>
-                    <EndorsementStatusCallout
-                      endorsementStatus={endorsementStatus}
-                      showDescription={false}
-                      padding={1}
-                    />
-                  </HStack>
+                  <Text textStyle="md" fontWeight="semibold">
+                    {appScore} {" / "} {threshold} {t("pts")}
+                  </Text>
                 </VStack>
               </HStack>
 
-              <VStack gap={2} align="stretch">
-                <HStack justify="space-between">
-                  <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
-                    {t("Add points")}
-                  </Text>
-                  <Text textStyle="md" fontWeight="semibold">
-                    {appScore} / {threshold} {t("pts")}
-                  </Text>
-                </HStack>
+              <VStack gap={2} align="stretch" mt={4}>
+                <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
+                  {t("Add points")}
+                </Text>
 
                 <NumberInput.Root
                   value={points}
@@ -291,7 +303,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                         <Minus strokeWidth={2} />
                       </IconButton>
                     </NumberInput.DecrementTrigger>
-                    <Box flex={1} position="relative">
+                    <Box flex={12} position="relative">
                       <NumberInput.Input
                         placeholder="0"
                         textAlign="center"
@@ -313,7 +325,6 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                       <IconButton
                         aria-label={t("Increase points")}
                         rounded="full"
-                        color="actions.secondary.text"
                         bg="actions.secondary.default"
                         _hover={{ bg: "actions.secondary.hover" }}
                         size="xs"
@@ -323,28 +334,28 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                         <Plus strokeWidth={2} />
                       </IconButton>
                     </NumberInput.IncrementTrigger>
+                    <Button
+                      color="actions.secondary.text"
+                      bg="actions.secondary.default"
+                      _hover={{ bg: "actions.secondary.hover" }}
+                      boxSize={9}
+                      p={1}
+                      onClick={handleMaxPoints}
+                      mx="auto">
+                      {t("Max")}
+                    </Button>
                   </HStack>
                 </NumberInput.Root>
-
-                <Button variant="plain" size="sm" color="actions.primary.default" onClick={handleMaxPoints} mx="auto">
-                  {t("Max points")}
-                </Button>
               </VStack>
             </VStack>
           </Card.Root>
 
-          <GenericAlert
-            type="info"
-            isLoading={false}
-            message={t("Endorsements are snapshot-based and will be adjusted in the next cycle.")}
-          />
-
-          <HStack gap={4} w="full" justify="flex-end">
-            <Button variant="secondary" onClick={handleBack} minW="120px">
+          <HStack gap={4} justify="stretch" w="full" align="center" p={0}>
+            <Button variant="secondary" flex={1} onClick={handleBack}>
               {t("Back")}
             </Button>
             <Button variant="primary" flex={1} onClick={handleEndorsement} disabled={isEndorseDisabled}>
-              {t("Endorse")}
+              {t("Endorse now")}
             </Button>
           </HStack>
         </VStack>
