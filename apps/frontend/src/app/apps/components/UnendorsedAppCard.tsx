@@ -59,16 +59,22 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   return (
     <LinkBox asChild>
-      <Card.Root variant="subtle" w="full" maxW="full" h="full">
-        <Card.Body>
-          <LinkOverlay asChild>
-            <NextLink href={`/apps/${appId}`}>
+      <LinkOverlay asChild>
+        <NextLink href={`/apps/${appId}`}>
+          <Card.Root variant="subtle" w="full" maxW="full" minW={0} overflow="hidden">
+            <Card.Body>
               <Stack
                 direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
                 align="stretch"
                 w="full"
                 h="full">
-                <Stack direction="row" gap={4} align="center" flex="1" minW={0} overflow="hidden">
+                <Stack
+                  direction="row"
+                  gap={4}
+                  align="center"
+                  flex={{ base: "initial", lg: "1" }}
+                  minW={0}
+                  overflow="hidden">
                   <Avatar.Root shape="rounded" boxSize="3.5rem" borderRadius="0.75rem">
                     <Avatar.Image
                       src={logo?.image ?? notFoundImage}
@@ -160,10 +166,10 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                   <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color="icon.default" alignSelf={"center"} />
                 </Stack>
               </Stack>
-            </NextLink>
-          </LinkOverlay>
-        </Card.Body>
-      </Card.Root>
+            </Card.Body>
+          </Card.Root>
+        </NextLink>
+      </LinkOverlay>
     </LinkBox>
   )
 }

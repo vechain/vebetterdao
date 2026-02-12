@@ -6,6 +6,28 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+# Read branchName from prd.json
+BRANCH_NAME=$(jq -r '.branchName' prd.json 2>/dev/null)
+if [ -z "$BRANCH_NAME" ] || [ "$BRANCH_NAME" = "null" ]; then
+  echo "ERROR: No branchName found in prd.json"
+  exit 1
+fi
+
+CURRENT_BRANCH=$(git branch --show-current)
+
+# Never run on main
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+  echo "ERROR: Currently on '$CURRENT_BRANCH'. Ralph must never commit on main."
+  echo "Switching to '$BRANCH_NAME'..."
+  git checkout -B "$BRANCH_NAME"
+elif [ "$CURRENT_BRANCH" != "$BRANCH_NAME" ]; then
+  echo "WARNING: On '$CURRENT_BRANCH' but prd.json expects '$BRANCH_NAME'."
+  echo "Switching to '$BRANCH_NAME'..."
+  git checkout -B "$BRANCH_NAME"
+else
+  echo "On correct branch: $BRANCH_NAME"
+fi
+
 for ((i=1; i<=$1; i++)); do
   echo ""
   echo "╔════════════════════════════════════════════════════════════════╗"

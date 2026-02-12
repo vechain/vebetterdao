@@ -43,7 +43,7 @@
     "@vechain/connex-framework": "^2.1.0",
     "@vechain/picasso": "^2.1.1",
     "@vechain/vebetterdao-contracts": "*",
-    "@vechain/vechain-kit": "2.4.1",
+    "@vechain/vechain-kit": "2.4.5",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
     "i18next": "^23.11.4",
