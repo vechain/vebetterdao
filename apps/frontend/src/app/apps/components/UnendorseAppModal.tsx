@@ -156,8 +156,8 @@ export const UnendorseAppModal = ({ appId: appIdProp, appName, isOpen, onClose }
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
       {step === 1 ? (
         <VStack gap={6} align="flex-start" w="full">
-          <Heading size="xl" fontWeight="bold">
-            {t("Remove endorsement")}
+          <Heading size="xl" fontWeight="bold" lineClamp={1}>
+            {t("Unendorse {{appName}}", { appName: appName })}
           </Heading>
 
           <Text textStyle="lg" fontWeight="semibold">

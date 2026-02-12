@@ -151,8 +151,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
       {step === 1 ? (
         <VStack gap={6} align="flex-start" w="full">
-          <Heading size="xl" fontWeight="bold">
-            {t("Endorse app")}
+          <Heading size="xl" fontWeight="bold" lineClamp={1}>
+            {t("Endorse {{appName}}", { appName: xApp?.name })}
           </Heading>
 
           <Text textStyle="lg" fontWeight="semibold">
