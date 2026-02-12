@@ -3,14 +3,14 @@ import { UilPlus } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-import { useSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useSelfMintEnabled"
+import { useIsSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useIsSelfMintEnabled"
 
 import { SubmitCreatorFormModal } from "../SubmitCreatorFormModal"
 
 export const CreatorApplyNow = () => {
   const { t } = useTranslation()
   const router = useRouter()
-  const { data: isSelfMintEnabled } = useSelfMintEnabled()
+  const { data: isSelfMintEnabled } = useIsSelfMintEnabled()
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
   }

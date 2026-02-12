@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { useSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useSelfMintEnabled"
+import { useIsSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useIsSelfMintEnabled"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 
 import { useCreatorSubmission } from "../../../../../api/contracts/x2EarnCreator/useCreatorSubmission"
@@ -25,7 +25,7 @@ export const NewAppPageFormContent = () => {
   const { data: submission } = useCreatorSubmission(account?.address ?? "")
   const { onMetadataUpload } = useUploadAppMetadata() //TODO: Add this to review modal before sending transaction
   const { data: hasCreatorNft } = useHasCreatorNFT(account?.address ?? "")
-  const { data: isSelfMintEnabled } = useSelfMintEnabled()
+  const { data: isSelfMintEnabled } = useIsSelfMintEnabled()
   const [isMinting, setIsMinting] = useState(false)
   const [mintError, setMintError] = useState(false)
   const mintAttemptedRef = useRef(false)
