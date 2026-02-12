@@ -29,7 +29,9 @@ export const EndorsementStatusCallout = ({
   const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
   const { app, isAppInfoLoading } = useCurrentAppInfo()
-  const { data: gracePeriodEvent, isLoading: isGracePeriodEventLoading } = useGracePeriodEvent(app?.id)
+  const { data: gracePeriodEvent, isLoading: isGracePeriodEventLoading } = useGracePeriodEvent(
+    showDescription ? app?.id : undefined,
+  )
   const gracePeriodEndBlockNumber = Number(gracePeriodEvent?.endBlock) || 0
   const gracePeriodEndTimestamp = useEstimateBlockTimestamp({ blockNumber: gracePeriodEndBlockNumber })
   const gracePeriodEndDate =

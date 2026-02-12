@@ -203,7 +203,7 @@ export const AppEndorsementInfoCard = ({
         <Card.Body>
           <Stack gap={6} w="full">
             <Skeleton loading={isEndorsementStatusLoading}>
-              <EndorsementStatusCallout endorsementStatus={endorsementStatus}></EndorsementStatusCallout>
+              <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
             </Skeleton>
 
             <Stack direction="column" gap={4} w="full" justify="space-between" alignItems="center">

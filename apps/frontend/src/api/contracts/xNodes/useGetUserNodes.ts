@@ -9,6 +9,7 @@ import {
   X2EarnApps__factory,
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
+
 import { notFoundImage } from "@/constants"
 import { convertUriToUrl } from "@/utils/uri"
 
@@ -61,6 +62,8 @@ export type UserNode = TokenOverview & {
   type: NodeType
   activeEndorsements: ActiveEndorsement[]
   availablePoints: bigint
+  pointsInCooldown: bigint
+  vetAmountStaked: bigint
   currentUserIsManager: boolean
   currentUserIsOwner: boolean
   gmAttachedTokenId: bigint
@@ -126,6 +129,8 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
       let nodeActiveEndorsementsArray: { appId: string; points: bigint; endorsedAtRound: bigint }[][] = []
       let nodeAvailablePointsArray: bigint[] = []
       let nodeGmAttachedTokenIdArray: bigint[] = []
+      let nodeVetAmountStakedArray: bigint[] = []
+      let nodePointsInCooldownArray: bigint[] = []
       if (nodeIds?.length > 0) {
         // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
         nodePointsArray = await executeMultipleClausesCall({
@@ -195,6 +200,51 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
             args: [BigInt(nodeId)],
           })),
         })
+        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
+        const rawGetTokenResults = await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: stargateNFTAbi,
+            address: stargateNFTContractAddress,
+            functionName: "getToken",
+            args: [BigInt(nodeId)],
+          })),
+        })
+        nodeVetAmountStakedArray =
+          (rawGetTokenResults as ({ vetAmountStaked?: bigint } | bigint[])[] | undefined)?.map(
+            (t: { vetAmountStaked?: bigint } | bigint[]) => {
+              const raw =
+                typeof t === "object" && t !== null && "vetAmountStaked" in t
+                  ? (t as { vetAmountStaked?: bigint }).vetAmountStaked
+                  : Array.isArray(t)
+                    ? t[3]
+                    : undefined
+              return raw !== undefined ? BigInt(raw) : BigInt(0)
+            },
+          ) ?? []
+
+        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
+        const rawNodePointsInfoArray = await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: x2EarnAppsAbi,
+            address: x2EarnAppsContractAddress,
+            functionName: "getNodePointsInfo",
+            args: [BigInt(nodeId)],
+          })),
+        })
+        nodePointsInCooldownArray =
+          (rawNodePointsInfoArray as ({ lockedPoints?: bigint } | bigint[])[] | undefined)?.map(
+            (info: { lockedPoints?: bigint } | bigint[]) => {
+              const raw =
+                typeof info === "object" && info !== null && "lockedPoints" in info
+                  ? (info as { lockedPoints?: bigint }).lockedPoints
+                  : Array.isArray(info)
+                    ? info[3]
+                    : undefined
+              return raw !== undefined ? BigInt(raw) : BigInt(0)
+            },
+          ) ?? []
       }
 
       const nodesWithPoints = tokensOverview?.map((node, index) => {
@@ -215,6 +265,8 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
           endorsementScore: nodePointsArray[index] ?? BigInt(0),
           activeEndorsements,
           availablePoints: nodeAvailablePointsArray[index] ?? BigInt(0),
+          pointsInCooldown: nodePointsInCooldownArray[index] ?? BigInt(0),
+          vetAmountStaked: nodeVetAmountStakedArray[index] ?? BigInt(0),
           metadata: {
             name: rawMetadata?.name ?? "",
             description: rawMetadata?.description ?? "",

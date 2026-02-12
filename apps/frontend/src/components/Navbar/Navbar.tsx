@@ -6,6 +6,7 @@ import { useMemo } from "react"
 
 import { useAccountPermissions } from "../../api/contracts/account/hooks/useAccountPermissions"
 import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { useGetUserNodes } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useHideOnScroll } from "../../hooks/useHideOnScroll"
 
 import { DesktopNavBar } from "./DesktopNavbar"
@@ -17,23 +18,24 @@ export const Navbar: React.FC = () => {
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
+  const { data: userNodesInfo } = useGetUserNodes()
   const isNavbarVisible = useHideOnScroll()
-  // Filter routes based on user's role and if there are any allocation rounds
+  const hasNodes = (userNodesInfo?.nodesManagedByUser?.length ?? 0) > 0
   const routesToRender = useMemo(
     () =>
       Routes.filter(route => {
         return (
           route.isVisible &&
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
-          // If in staging, or user is admin, and we are connected, show the admin route
           (route.name === "Admin"
             ? (getConfig().environment === "testnet-staging" || permissions?.isAdmin) && !!account?.address
             : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true)
+          (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true) &&
+          (route.name === "Nodes" ? !!account?.address && hasNodes : true)
         )
       }),
-    [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
+    [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200, hasNodes],
   )
   const parsedRoutesToRender = useMemo(() => {
     if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []

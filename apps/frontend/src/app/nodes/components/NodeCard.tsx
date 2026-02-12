@@ -1,0 +1,132 @@
+"use client"
+
+import { Box, Button, Card, Flex, Heading, HStack, Image, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import NextLink from "next/link"
+import { useTranslation } from "react-i18next"
+import { formatEther } from "viem"
+
+import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
+
+import { EndorsementHistoryModal } from "./EndorsementHistoryModal"
+import { NodeEndorsedApps } from "./NodeEndorsedApps"
+import { NodeGMSection } from "./NodeGMSection"
+
+const compactFormatter = getCompactFormatter(2)
+
+const CardRoot = Card.Root
+const CardBody = Card.Body
+
+type NodeCardProps = {
+  node: UserNode
+}
+
+export const NodeCard = ({ node }: NodeCardProps) => {
+  const { t } = useTranslation()
+  const historyModal = useDisclosure()
+
+  const usedPoints = node.activeEndorsements.reduce((sum, e) => sum + e.points, 0n)
+  const totalPoints = Number(node.endorsementScore)
+  const usedUnlockablePercent = totalPoints > 0 ? (Number(usedPoints - node.pointsInCooldown) / totalPoints) * 100 : 0
+  const cooldownPercent = totalPoints > 0 ? (Number(node.pointsInCooldown) / totalPoints) * 100 : 0
+
+  return (
+    <CardRoot variant="primary" w="full">
+      <CardBody>
+        <VStack align="stretch" gap={4}>
+          <Flex
+            direction={{ base: "column", md: "row" }}
+            gap={4}
+            align={{ base: "stretch", md: "flex-start" }}
+            justify={{ md: "space-between" }}
+            w="full">
+            <HStack gap={4} align="start" minW={0}>
+              <Image
+                src={node?.metadata?.image}
+                alt={node?.metadata?.name ?? ""}
+                w="16"
+                h="16"
+                rounded="lg"
+                flexShrink={0}
+              />
+              <VStack align="start" gap={1} minW={0}>
+                <Heading textStyle="lg" fontWeight="bold">
+                  {node?.metadata?.name ?? ""} {" #" + node?.id?.toString()}
+                </Heading>
+                <Text textStyle="sm" color="text.subtle">
+                  {node?.type}
+                  {" • "}
+                  {t("Cost")}
+                  {": "}
+                  {compactFormatter.format(Number(formatEther(node.vetAmountStaked)))}
+                  {" VET"}
+                </Text>
+              </VStack>
+            </HStack>
+            <VStack gap={2} align={{ base: "stretch", md: "end" }} minW={{ md: "240px" }}>
+              <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold" flexWrap="wrap" gap={2}>
+                <HStack gap={1}>
+                  <Text color="status.positive.primary">
+                    {t("Used")}
+                    {": "}
+                  </Text>
+                  <Text color="status.positive.primary">
+                    {usedPoints.toString()} {t("pts")}
+                  </Text>
+                </HStack>
+                {node.pointsInCooldown > 0 && (
+                  <HStack gap={1}>
+                    <Text color="status.warning.primary">
+                      {t("In cooldown")}
+                      {": "}
+                    </Text>
+                    <Text color="status.warning.primary">
+                      {node.pointsInCooldown.toString()} {t("pts")}
+                    </Text>
+                  </HStack>
+                )}
+                <HStack gap={1}>
+                  <Text color="text.subtle">
+                    {t("Available")}
+                    {": "}
+                  </Text>
+                  <Text>
+                    {node.availablePoints.toString()} {t("pts")}
+                  </Text>
+                </HStack>
+              </HStack>
+              <Flex
+                w="full"
+                h="2"
+                borderRadius="full"
+                overflow="hidden"
+                bg="bg.muted"
+                borderWidth="1px"
+                borderColor="border.primary">
+                {usedUnlockablePercent > 0 && (
+                  <Box w={`${usedUnlockablePercent}%`} h="full" bg="status.positive.primary" flexShrink={0} />
+                )}
+                {cooldownPercent > 0 && (
+                  <Box w={`${cooldownPercent}%`} h="full" bg="status.warning.primary" flexShrink={0} />
+                )}
+              </Flex>
+            </VStack>
+          </Flex>
+
+          <NodeGMSection node={node} />
+          <NodeEndorsedApps node={node} />
+
+          <HStack justify="space-between" w="full" pt={2}>
+            <Button variant="link" size="sm" onClick={historyModal.onOpen}>
+              {(t as (k: string) => string)("View history")}
+            </Button>
+            <Button asChild size="sm" variant="outline" colorPalette="blue">
+              <NextLink href="/apps">{(t as (k: string) => string)("Endorse")}</NextLink>
+            </Button>
+          </HStack>
+        </VStack>
+      </CardBody>
+      <EndorsementHistoryModal node={node} isOpen={historyModal.open} onClose={historyModal.onClose} />
+    </CardRoot>
+  )
+}

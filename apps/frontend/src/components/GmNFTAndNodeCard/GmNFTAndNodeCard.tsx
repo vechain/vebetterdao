@@ -1,7 +1,8 @@
 "use client"
 
-import { Card, Heading, Stack, Flex, Image, Skeleton, useDisclosure, Box, Icon } from "@chakra-ui/react"
+import { Card, Heading, Stack, Flex, Image, Skeleton, Box, Icon } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -16,23 +17,18 @@ import { GmActionButton } from "../GmActionButton"
 
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { SwapB3trVot3 } from "./components/SwapB3trVot3"
-import { GetNodeModal } from "./GetNodeModal"
 import { GmCard } from "./GmCard"
 import { GmEmptyStateCard } from "./GmEmptyStateCard"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
+  const router = useRouter()
   const { t } = useTranslation()
   const { data: b3trBalance } = useGetB3trBalance(account?.address)
   const { isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
   const { data: userNodesInfo, isLoading: isNodesLoading } = useGetUserNodes()
   const { isMobile } = useBreakpoints()
-  const {
-    open: isGetGMAndNodeModalOpen,
-    onOpen: onOpenGetGMAndNodeModal,
-    onClose: onCloseGetGMAndNodeModal,
-  } = useDisclosure()
   const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
   const isLoading = isUserGMsLoading || isNodesLoading
   const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodesManagedByUser?.length === 0
@@ -104,13 +100,13 @@ export const GmNFTAndNodeCard = () => {
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
                   images={userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => node?.metadata?.image)}
-                  href={`/profile?tab=nodes`}
+                  href="/nodes"
                 />
               ) : (
                 <GmEmptyStateCard
                   icon={<Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />}
                   text={t("You have no nodes yet.")}
-                  onCardClick={onOpenGetGMAndNodeModal}
+                  onCardClick={() => router.push("/nodes")}
                 />
               )}
             </Stack>
@@ -129,7 +125,6 @@ export const GmNFTAndNodeCard = () => {
 
         {account?.address && !isOnProfilePage && <SwapB3trVot3 address={account?.address} />}
       </Flex>
-      <GetNodeModal isOpen={isGetGMAndNodeModalOpen} onClose={onCloseGetGMAndNodeModal} />
     </Card.Root>
   )
 }

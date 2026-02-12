@@ -1,7 +1,7 @@
 import { FaUser } from "react-icons/fa"
 import { FaGear } from "react-icons/fa6"
 import { LiaBalanceScaleSolid, LiaChartPieSolid } from "react-icons/lia"
-import { LuHouse } from "react-icons/lu"
+import { LuHouse, LuServer } from "react-icons/lu"
 import { PiSquaresFour } from "react-icons/pi"
 
 export interface Route {
@@ -54,6 +54,7 @@ export const Routes: Route[] = [
       },
     ],
   },
+  { name: "Nodes", onClick: "/nodes", isVisible: true, icon: LuServer },
   { name: "Profile", onClick: "/profile", isVisible: true, icon: FaUser },
   { name: "Admin", onClick: "/admin", isVisible: true, icon: FaGear },
 ]
