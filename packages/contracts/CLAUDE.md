@@ -284,6 +284,26 @@ NEXT_PUBLIC_APP_ENV=local npx hardhat test --network hardhat test/YourTest.test.
 - `{contract}/v{N}-compatibility.test.ts` - Backward compatibility tests
 - `{contract}/{feature}.test.ts` - Feature-specific tests
 
+### CI Unit Test Shards
+
+Unit tests run in parallel via shards in `.github/workflows/unit-tests.yml`. Each shard has a `label` and runs tests matched by `grep` on that label. Test describe blocks use `@shard15x` (or similar) in their name to match.
+
+**When adding a new test shard** (e.g. for a new feature or coverage-focused suite):
+
+1. Add `@shard15x` (or next available) to the describe block name in the test file
+2. **Add the shard to `.github/workflows/unit-tests.yml`** in the `strategy.matrix` - otherwise CI will not run it
+
+Example matrix entry:
+
+```yaml
+- shard: shard15f
+  label: X-Apps - V8 Upgrade
+- shard: shard15g
+  label: X-Apps - EndorsementUtils Coverage
+```
+
+Shard assignments are documented in `packages/contracts/test/README.md`.
+
 ### Helper Functions
 
 Import from `./helpers`:

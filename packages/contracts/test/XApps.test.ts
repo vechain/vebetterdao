@@ -433,8 +433,7 @@ describe("X-Apps - Core Features - @shard15a", function () {
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await endorseApp(appId, otherAccounts[0])
+      await endorseApp(app1Id, otherAccounts[0])
 
       let roundId = await startNewAllocationRound()
 
@@ -492,8 +491,7 @@ describe("X-Apps - Core Features - @shard15a", function () {
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
-      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await endorseApp(appId, otherAccounts[0])
+      await endorseApp(app1Id, otherAccounts[0])
 
       expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
       await x2EarnApps.connect(owner).setVotingEligibility(app1Id, false)
@@ -555,8 +553,7 @@ describe("X-Apps - Core Features - @shard15a", function () {
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await endorseApp(appId, otherAccounts[0])
+      await endorseApp(app1Id, otherAccounts[0])
 
       await expect(x2EarnApps.isEligible(app1Id, (await xAllocationVoting.clock()) + 1n)).to.be.reverted
     })
@@ -668,8 +665,7 @@ describe("X-Apps - Core Features - @shard15a", function () {
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await endorseApp(appId, otherAccounts[0])
+      await endorseApp(app1Id, otherAccounts[0])
       let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(false)
 

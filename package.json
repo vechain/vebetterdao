@@ -84,7 +84,19 @@
     "contracts:verify:all:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-all-contracts.ts",
     "contracts:verify:all:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-all-contracts.ts",
     "contracts:check-verification-status:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/check-verification-status.ts",
-    "contracts:check-verification-status:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/check-verification-status.ts"
+    "contracts:check-verification-status:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/check-verification-status.ts",
+    "contracts:endorsement-migration:fetch:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:fetch:local --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:fetch:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:fetch:testnet-staging --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:fetch:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:fetch:mainnet --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:simulate:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:simulate:local --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:simulate:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:simulate:testnet-staging --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:simulate:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:simulate:mainnet --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:seed:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:seed:local --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:seed:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:seed:testnet-staging --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:seed:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:seed:mainnet --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:verify:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:verify:local --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:verify:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:verify:testnet-staging --filter=@vechain/vebetterdao-contracts",
+    "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts"
   },
   "dependencies": {
     "dotenv-cli": "latest",

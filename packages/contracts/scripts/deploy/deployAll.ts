@@ -1037,7 +1037,8 @@ export async function deployAll(config: ContractsConfig) {
     .then(async tx => await tx.wait())
 
   // This is done here because in versions > 7 the setters have been removed.
-  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [], {
+  // V8 flexible endorsement caps: 49 per node per app, 110 total per app
+  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [49, 110], {
     version: 8,
     libraries: {
       AdministrationUtils: await AdministrationUtils.getAddress(),

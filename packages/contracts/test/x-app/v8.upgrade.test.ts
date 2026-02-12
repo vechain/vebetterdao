@@ -5,8 +5,8 @@ import { expect } from "chai"
 import { ethers } from "hardhat"
 
 import { deployAndUpgrade, upgradeProxy } from "../../scripts/helpers"
-import { X2EarnApps, X2EarnAppsV7 } from "../../typechain-types"
-import { getOrDeployContractInstances, getStorageSlots } from "../helpers"
+import { EndorsementUtils, X2EarnApps, X2EarnAppsV7 } from "../../typechain-types"
+import { createNodeHolder, getOrDeployContractInstances, getStorageSlots } from "../helpers"
 
 let config: ContractsConfig
 let otherAccounts: SignerWithAddress[]
@@ -301,5 +301,116 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
     expect(await x2EarnAppsV8.baseURI()).to.equal("ipfs://")
     expect(await x2EarnAppsV8.gracePeriod()).to.equal(config.XAPP_GRACE_PERIOD)
     expect(await x2EarnAppsV8.cooldownPeriod()).to.equal(config.X2EARN_NODE_COOLDOWN_PERIOD)
+  })
+
+  describe("seedEndorsement", function () {
+    it("Should seed endorsement correctly", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant MIGRATION_ROLE to owner
+      const MIGRATION_ROLE = await x2EarnApps.MIGRATION_ROLE()
+      await x2EarnApps.connect(owner).grantRole(MIGRATION_ROLE, owner.address)
+
+      // Submit an app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
+
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
+
+      // Seed endorsement
+      await x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 49)
+
+      // Verify endorsement score
+      expect(await x2EarnApps.getScore(appId)).to.equal(49)
+
+      // Verify endorsers list
+      const endorsers = await x2EarnApps.getEndorsers(appId)
+      expect(endorsers.length).to.equal(1)
+    })
+
+    it("Should update existing endorsement on duplicate seed instead of creating new entry", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant MIGRATION_ROLE to owner
+      const MIGRATION_ROLE = await x2EarnApps.MIGRATION_ROLE()
+      await x2EarnApps.connect(owner).grantRole(MIGRATION_ROLE, owner.address)
+
+      // Submit an app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
+
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
+
+      // Seed endorsement first time with 20 points
+      await x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 20)
+      expect(await x2EarnApps.getScore(appId)).to.equal(20)
+
+      // Get endorsers count after first seed
+      const endorsersAfterFirst = await x2EarnApps.getEndorsers(appId)
+      expect(endorsersAfterFirst.length).to.equal(1)
+
+      // Seed endorsement second time with 30 points (duplicate)
+      await x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 30)
+
+      // Should update to 30, not add to 50 (duplicate guard)
+      expect(await x2EarnApps.getScore(appId)).to.equal(30)
+
+      // Endorsers count should remain 1, not 2
+      const endorsersAfterSecond = await x2EarnApps.getEndorsers(appId)
+      expect(endorsersAfterSecond.length).to.equal(1)
+    })
+
+    it("Should revert seeding after migration is complete", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant MIGRATION_ROLE to owner
+      const MIGRATION_ROLE = await x2EarnApps.MIGRATION_ROLE()
+      await x2EarnApps.connect(owner).grantRole(MIGRATION_ROLE, owner.address)
+
+      // Submit an app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
+
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
+
+      // Mark migration complete
+      await x2EarnApps.connect(owner).markMigrationComplete()
+
+      // Seed endorsement should revert (error comes from EndorsementUtils library)
+      await expect(x2EarnApps.connect(owner).seedEndorsement(appId, nodeId, 49)).to.be.reverted
+    })
+
+    it("Should only allow MIGRATION_ROLE to seed endorsements", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Submit an app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, owner.address, "metadataURI")
+      const appId = await x2EarnApps.hashAppName(otherAccounts[1].address)
+
+      // Create a node holder with level 7 (MjolnirX)
+      const nodeId = await createNodeHolder(7, otherAccounts[2])
+
+      // Random user without MIGRATION_ROLE should not be able to seed
+      await expect(x2EarnApps.connect(otherAccounts[3]).seedEndorsement(appId, nodeId, 49)).to.be.reverted
+    })
   })
 })

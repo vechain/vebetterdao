@@ -84,7 +84,7 @@ export const endorseXApps = async (
 
     console.log(`Endorsing app ${apps[i]} with nodeId ${nodeId} for endorser ${owner.toString()}`)
     console.log("\n")
-    await x2EarnApps.connect(endorsers[i]).endorseApp(apps[i], nodeId)
+    await x2EarnApps.connect(endorsers[i]).endorseApp(apps[i], nodeId, 49)
   }
 
   console.log("x-apps endorsed.")
