@@ -1,8 +1,8 @@
 "use client"
 
 import { Card, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react"
+import { Star, StarDashed, StarSolid } from "iconoir-react"
 import { useTranslation } from "react-i18next"
-import { LuStar } from "react-icons/lu"
 import { PiSquaresFour } from "react-icons/pi"
 
 import { UserNodesInfo } from "../../../api/contracts/xNodes/useGetUserNodes"
@@ -24,7 +24,7 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
       label: t("Total owned"),
       value: totalOwned.toString(),
       suffix: t("points"),
-      icon: LuStar,
+      icon: StarSolid,
       bg: "status.info.subtle",
       color: "status.info.primary",
     },
@@ -32,7 +32,7 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
       label: t("Available to endorse"),
       value: availablePoints.toString(),
       suffix: t("points"),
-      icon: LuStar,
+      icon: Star,
       bg: "status.positive.subtle",
       color: "status.positive.primary",
     },
@@ -41,7 +41,7 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
       label: t("In cooldown"),
       value: pointsInCooldown.toString(),
       suffix: t("points"),
-      icon: LuStar,
+      icon: StarDashed,
       bg: "status.negative.subtle",
       color: "status.negative.primary",
     },

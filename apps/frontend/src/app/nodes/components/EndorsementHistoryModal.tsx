@@ -1,12 +1,12 @@
 "use client"
 
-import { Dialog, Heading, HStack, Image, Portal, Table, Text, VStack } from "@chakra-ui/react"
-import { UilCheck, UilTimes } from "@iconscout/react-unicons"
+import { Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 
 import { AppEndorsedEvent, useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
+import { BaseModal } from "@/components/BaseModal"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { convertUriToUrl } from "@/utils/uri"
 
@@ -23,30 +23,33 @@ const HistoryRow = ({ event }: { event: AppEndorsedEvent }) => {
   const { data: metadata } = useXAppMetadata(event.appId)
   const timestamp = useEstimateBlockTimestamp({ blockNumber: event.blockNumber })
   const dateStr = timestamp ? dayjs(timestamp).format("DD MMM, YYYY") : "—"
+  const pointsColor = event.endorsed ? "status.positive.primary" : "status.negative.primary"
 
   return (
-    <Table.Row>
-      <Table.Cell>
-        <HStack gap={2}>
-          <Image src={convertUriToUrl(metadata?.logo ?? "")} alt={metadata?.name ?? ""} w="8" h="8" rounded="md" />
-          <Text textStyle="sm">{metadata?.name ?? event.appId}</Text>
-        </HStack>
-      </Table.Cell>
-      <Table.Cell>
-        <HStack gap={1}>
-          {event.endorsed ? <UilCheck size={16} color="green" /> : <UilTimes size={16} color="red" />}
-          <Text textStyle="sm">{event.endorsed ? t("Endorsed") : t("Unendorsed")}</Text>
-        </HStack>
-      </Table.Cell>
-      <Table.Cell>
-        <Text textStyle="sm">{event.endorsed ? event.points : "—"}</Text>
-      </Table.Cell>
-      <Table.Cell>
-        <Text textStyle="sm" color="text.subtle">
-          {dateStr}
-        </Text>
-      </Table.Cell>
-    </Table.Row>
+    <HStack
+      p={2}
+      borderRadius="16px"
+      border="sm"
+      bg="bg.primary"
+      borderColor="border.secondary"
+      w="full"
+      align="center"
+      justify="space-between">
+      <HStack gap={2} flex={1}>
+        <Image src={convertUriToUrl(metadata?.logo ?? "")} alt={metadata?.name ?? ""} w="8" h="8" rounded="md" />
+        <VStack align="start" gap={0}>
+          <Text textStyle="sm" fontWeight="semibold">
+            {metadata?.name ?? event.appId}
+          </Text>
+          <Text textStyle="xs" color="text.subtle">
+            {dateStr}
+          </Text>
+        </VStack>
+      </HStack>
+      <Text fontWeight="semibold" color={pointsColor}>
+        {event.endorsed ? `+${event.points}` : `-${event.points}`} {t("pts")}
+      </Text>
+    </HStack>
   )
 }
 
@@ -56,51 +59,37 @@ export const EndorsementHistoryModal = ({ node, isOpen, onClose }: EndorsementHi
   const sortedEvents = (events ?? []).slice().sort((a, b) => b.blockNumber - a.blockNumber)
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={e => !e.open && onClose()}>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header>
-              <Heading textStyle="lg">{t("Activity history")}</Heading>
-              <Dialog.CloseTrigger />
-            </Dialog.Header>
-            <Dialog.Body>
-              <VStack align="stretch" gap={4}>
-                <HStack gap={2}>
-                  <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} w="10" h="10" rounded="lg" />
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {node?.metadata?.name ?? ""}
-                    {" #"}
-                    {node?.id?.toString()}
-                  </Text>
-                </HStack>
-                {sortedEvents.length > 0 ? (
-                  <Table.Root size="sm">
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.ColumnHeader>{t("App")}</Table.ColumnHeader>
-                        <Table.ColumnHeader>{t("Action")}</Table.ColumnHeader>
-                        <Table.ColumnHeader>{t("Points endorsed")}</Table.ColumnHeader>
-                        <Table.ColumnHeader>{t("Date")}</Table.ColumnHeader>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {sortedEvents.map(event => (
-                        <HistoryRow key={`${event.appId}-${event.nodeId}-${event.blockNumber}`} event={event} />
-                      ))}
-                    </Table.Body>
-                  </Table.Root>
-                ) : (
-                  <Text textStyle="sm" color="text.subtle">
-                    {t("No endorsement events")}
-                  </Text>
-                )}
-              </VStack>
-            </Dialog.Body>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      isCloseable
+      showCloseButton
+      modalContentProps={{ maxH: "80vh" }}
+      modalBodyProps={{ overflowY: "auto" }}>
+      <VStack align="start" gap={4} w="full">
+        <HStack gap={3}>
+          <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} w="10" h="10" rounded="lg" />
+          <VStack align="start" gap={0}>
+            <Heading size="2xl">{t("Activity history")}</Heading>
+            <Text textStyle="sm" color="text.subtle">
+              {node?.metadata?.name ?? ""} {"#"}
+              {node?.id?.toString()}
+            </Text>
+          </VStack>
+        </HStack>
+
+        {sortedEvents.length > 0 ? (
+          <VStack gap={2} w="full">
+            {sortedEvents.map(event => (
+              <HistoryRow key={`${event.appId}-${event.nodeId}-${event.blockNumber}`} event={event} />
+            ))}
+          </VStack>
+        ) : (
+          <Text textStyle="sm" color="text.subtle">
+            {t("No endorsement events")}
+          </Text>
+        )}
+      </VStack>
+    </BaseModal>
   )
 }

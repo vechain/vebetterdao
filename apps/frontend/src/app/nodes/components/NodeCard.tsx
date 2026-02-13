@@ -61,7 +61,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
                 flexShrink={0}
               />
               <VStack align="start" gap={2} minW={0}>
-                <Heading textStyle="lg" fontWeight="bold">
+                <Heading textStyle="xl" fontWeight="bold">
                   {node?.metadata?.name ?? ""} {" #" + node?.id?.toString()}
                 </Heading>
                 <Text textStyle="sm" color="text.subtle">
