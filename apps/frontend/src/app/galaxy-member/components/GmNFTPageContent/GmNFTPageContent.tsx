@@ -36,7 +36,12 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
     onClose: onDetachGMToXNodeModalClose,
   } = useDisclosure()
 
-  if (isUserNodesLoading || isUserGMsLoading) return <Spinner size={"lg"} />
+  if (isUserNodesLoading || isUserGMsLoading)
+    return (
+      <VStack align="center" justify="center" flex="1">
+        <Spinner size={"lg"} />
+      </VStack>
+    )
 
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
   if (!gm) return null
