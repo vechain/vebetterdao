@@ -48,7 +48,7 @@ export const useBuildTransaction = <ClausesParams = void>({
       await Promise.all(
         refetchQueryKeys.map(async queryKey => {
           await queryClient.cancelQueries({ queryKey })
-          await queryClient.invalidateQueries({ queryKey })
+          await queryClient.resetQueries({ queryKey })
         }),
       )
     }

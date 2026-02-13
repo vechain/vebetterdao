@@ -3,6 +3,7 @@ import {
   Card,
   Flex,
   HStack,
+  Icon,
   Image,
   Skeleton,
   Stack,
@@ -43,14 +44,14 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
       return (
         <>
           <HStack>
-            <UilTimesCircle size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
+            <Icon as={UilTimesCircle} boxSize={isAbove800 ? "24px" : "16px"} color="brand.secondary" />
             <HStack gap={0} alignItems={"baseline"}>
-              <Text color="white" textStyle={isAbove800 ? "md" : "xs"}>
+              <Text color="text.default" textStyle={isAbove800 ? "md" : "xs"}>
                 {t("You reached the max GM NFT level")}
               </Text>
             </HStack>
           </HStack>
-          <Text color="#FFFFFFBF" textStyle={isAbove800 ? "md" : "xs"}>
+          <Text color="text.subtle" textStyle={isAbove800 ? "md" : "xs"}>
             {t("You can't upgrade your GM NFT anymore")}
           </Text>
         </>
@@ -59,25 +60,25 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
     return (
       <>
         <HStack>
-          <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
+          <Icon as={UilArrowCircleUp} boxSize={isAbove800 ? "24px" : "16px"} color="brand.secondary" />
           <HStack gap={0} alignItems={"baseline"}>
             <Skeleton loading={isB3trBalanceLoading}>
-              <Text color="#B1F16C" textStyle="lg" fontWeight="bold">
+              <Text color="brand.secondary" textStyle="lg" fontWeight="bold">
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
             </Skeleton>
-            <Text color="white" textStyle={isAbove800 ? "md" : "xs"}>
+            <Text color="text.default" textStyle={isAbove800 ? "md" : "xs"}>
               {"/"}
               {compactFormatter.format(Number(b3trToUpgrade))}
               {" B3TR"}
             </Text>
           </HStack>
         </HStack>
-        <Text color="#FFFFFFBF" textStyle={isAbove800 ? "md" : "xs"}>
+        <Text color="text.subtle" textStyle={isAbove800 ? "md" : "xs"}>
           {t("B3TR needed to upgrade your GM level")}
         </Text>
         {b3trLeftover > 0 && (
-          <Text color="#B1F16C" textStyle={isAbove800 ? "sm" : "xs"} fontWeight="semibold">
+          <Text color="brand.secondary" textStyle={isAbove800 ? "sm" : "xs"} fontWeight="semibold">
             {t("You have {{amount}} B3TR leftover from a previous upgrade", {
               amount: compactFormatter.format(Number(b3trLeftover)),
             })}
@@ -89,14 +90,6 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
 
   return (
     <Card.Root p={0}>
-      <Image
-        src={"/assets/backgrounds/nft-page-background.webp"}
-        alt="gm-nft-header"
-        position={"absolute"}
-        w="100%"
-        h="100%"
-        rounded={"16px"}
-      />
       <Card.Body px={6} py={4}>
         <Stack
           direction={isAbove800 ? "row" : "column"}
@@ -109,7 +102,6 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
             rounded="12px"
             gap={6}
             flex={1}
-            color="white"
             flexGrow={4}>
             <Box
               w={isAbove800 ? "132px" : "68px"}
@@ -131,24 +123,24 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
             </Box>
 
             <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-              <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="#FFFFFF80">
+              <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="text.subtle">
                 {t("LEVEL {{level}}", { level: tokenLevel })}
               </Text>
-              <Heading color="white" fontWeight="bold" lineClamp={1} size={isAbove800 ? "xl" : "md"}>
+              <Heading color="text.default" fontWeight="bold" lineClamp={1} size={isAbove800 ? "xl" : "md"}>
                 {metadata?.name}
               </Heading>
-              <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                <Text color="white" textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
+              <HStack bg={{ base: "gray.100", _dark: "#FFFFFF4A" }} rounded="8px" padding="4px 8px" gap={1}>
+                <Text color="text.default" textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
                   {multiplier}
                   {"x"}
                 </Text>
-                <Text color="white" textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
+                <Text color="text.default" textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
                   {t("GM reward weight")}
                 </Text>
               </HStack>
             </VStack>
           </HStack>
-          <Flex w={isAbove800 ? "1px" : "full"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF4D" flexBasis={"1px"} />
+          <Flex w={isAbove800 ? "1px" : "full"} h={isAbove800 ? "auto" : "1px"} bg="border.primary" flexBasis={"1px"} />
           <VStack
             align={"stretch"}
             justify={"center"}
@@ -159,10 +151,9 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
             <GmActionButton
               b3trBalanceScaled={b3trBalance?.scaled}
               buttonProps={{
-                variant: "secondary",
+                variant: "primary",
                 w: "full",
                 // boxShadow: "0px 0px 9.4px 0px #B1F16C",
-                color: "#080F1E",
                 fontSize: "sm",
                 h: "30px",
                 mt: 2,

@@ -11,7 +11,6 @@ import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useGetUserGMs } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGMMaxLevel } from "../api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { useParticipatedInGovernance } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
-import { useCurrentAllocationsRoundId } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../constants/AnalyticsEvents"
 import { useMintNFT } from "../hooks/galaxyMember/useMintNFT"
 import { useUpgradeGM } from "../hooks/galaxyMember/useUpgradeGM"
@@ -32,7 +31,6 @@ export const GmActionButton = ({
   // Wallet and user data
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
   // GM NFT data
   const { data: maxGMLevel } = useGMMaxLevel()
   const { data: userGms } = useGetUserGMs()
@@ -137,7 +135,6 @@ export const GmActionButton = ({
     )
   }, [
     buttonProps,
-    currentRoundId,
     handleOnUpgrade,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,
