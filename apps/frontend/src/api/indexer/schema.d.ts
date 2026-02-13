@@ -1351,6 +1351,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Retrieve account overview with VTHO earnings
+         * @description Retrieves the account overview including VTHO earned from three sources:
+         *                 - Block rewards (pre-Hayabusa authority nodes + post-Hayabusa validators)
+         *                 - Passive VTHO generation from VET holdings (genesis to Hayabusa only)
+         *                 - Stargate VTHO claimed (delegation rewards)
+         *
+         *                 The response includes individual breakdowns and a computed total.
+         */
         get: operations["getOverview"];
         put?: never;
         post?: never;
@@ -2243,7 +2252,7 @@ export interface components {
             /** Format: int64 */
             year?: number;
         };
-        AccountOverview: {
+        AccountOverviewResponse: {
             address: string;
             /** Format: int64 */
             firstSeen: number;
@@ -2258,6 +2267,11 @@ export interface components {
             gasUsed: number;
             vetSent: number;
             vetReceived: number;
+            vetBalance: number;
+            vthoBlockRewards: number;
+            vthoPassiveGeneration: number;
+            vthoClaimedStargate: number;
+            vthoEarnedTotal: number;
         };
         VetBalance: {
             /** Format: int64 */
@@ -3198,7 +3212,18 @@ export interface operations {
             query?: {
                 address?: string;
                 tokenAddress?: string;
-                eventType?: "VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN";
+                /** @description Filter by transfer event type(s) */
+                eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -3274,7 +3299,18 @@ export interface operations {
             query: {
                 address: string;
                 tokenAddress?: string;
-                eventType?: "VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN";
+                /** @description Filter by transfer event type(s) */
+                eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -3433,7 +3469,18 @@ export interface operations {
             query: {
                 address: string;
                 tokenAddress?: string;
-                eventType?: "VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN";
+                /** @description Filter by transfer event type(s) */
+                eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -7018,7 +7065,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AccountOverview"];
+                    "*/*": components["schemas"]["AccountOverviewResponse"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
