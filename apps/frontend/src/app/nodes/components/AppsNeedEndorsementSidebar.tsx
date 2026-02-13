@@ -84,7 +84,7 @@ export const AppsNeedEndorsementSidebar = ({
           <VStack align="stretch" gap={4}>
             {hasAny ? (
               <VStack align="stretch" gap={4}>
-                <AppListSection title={t("New")} apps={newLookingForEndorsement} />
+                <AppListSection title={t("New apps")} apps={newLookingForEndorsement} />
                 <AppListSection title={t("In grace period")} apps={gracePeriodApps} />
                 <AppListSection title={t("Endorsement lost")} apps={endorsementLostApps} />
               </VStack>

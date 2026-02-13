@@ -2,7 +2,6 @@
 
 import { Button, Heading, HStack, Icon, IconButton, Image, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import NextLink from "next/link"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCalendar, LuClock, LuPencil, LuUsers } from "react-icons/lu"
@@ -22,6 +21,7 @@ import { convertUriToUrl } from "@/utils/uri"
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 
 import { EditEndorsementModal } from "./EditEndorsementModal"
+import { EndorseAppsModal } from "./EndorseAppsModal"
 
 type NodeEndorsedAppsProps = {
   node: UserNode
@@ -154,6 +154,7 @@ const EndorsedAppRow = ({
 
 export const NodeEndorsedApps = ({ node }: NodeEndorsedAppsProps) => {
   const { t } = useTranslation()
+  const [isEndorseOpen, setIsEndorseOpen] = useState(false)
   const endorsements = node?.activeEndorsements ?? []
   const hasEndorsements = endorsements.length > 0
   const hasEndorsementPower = node.endorsementScore > 0n
@@ -185,12 +186,13 @@ export const NodeEndorsedApps = ({ node }: NodeEndorsedAppsProps) => {
             <Text textStyle="sm" color="text.subtle">
               {t("Endorse your favourite apps to help them activate and unlock rewards for users.")}
             </Text>
-            <Button asChild variant="primary" size="sm" colorPalette="blue">
-              <NextLink href="/apps">{t("Endorse")}</NextLink>
+            <Button size="sm" variant="primary" onClick={() => setIsEndorseOpen(true)}>
+              {t("Endorse")}
             </Button>
           </HStack>
         )}
       </VStack>
+      <EndorseAppsModal isOpen={isEndorseOpen} onClose={() => setIsEndorseOpen(false)} node={node} />
     </>
   )
 }

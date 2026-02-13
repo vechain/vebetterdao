@@ -14,12 +14,12 @@ import {
   Separator,
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 
+import { EndorseAppsModal } from "./EndorseAppsModal"
 import { EndorsementHistoryModal } from "./EndorsementHistoryModal"
 import { NodeEndorsedApps } from "./NodeEndorsedApps"
 import { NodeGMSection } from "./NodeGMSection"
@@ -36,6 +36,7 @@ type NodeCardProps = {
 export const NodeCard = ({ node }: NodeCardProps) => {
   const { t } = useTranslation()
   const historyModal = useDisclosure()
+  const endorseModal = useDisclosure()
 
   const hasEndorsementPower = node.endorsementScore > 0n
   const usedPoints = node.activeEndorsements.reduce((sum, e) => sum + e.points, 0n)
@@ -126,15 +127,15 @@ export const NodeCard = ({ node }: NodeCardProps) => {
               <Button variant="link" size="sm" onClick={historyModal.onOpen}>
                 {t("View history")}
               </Button>
-
-              <Button asChild size="sm" variant="primary">
-                <NextLink href="/apps">{t("Endorse")}</NextLink>
+              <Button size="sm" variant="primary" onClick={endorseModal.onOpen}>
+                {t("Endorse")}
               </Button>
             </HStack>
           )}
         </VStack>
       </CardBody>
       <EndorsementHistoryModal node={node} isOpen={historyModal.open} onClose={historyModal.onClose} />
+      <EndorseAppsModal isOpen={endorseModal.open} onClose={endorseModal.onClose} node={node} />
     </CardRoot>
   )
 }

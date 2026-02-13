@@ -7,6 +7,7 @@ import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 
 import { AppsNeedEndorsementSidebar } from "./AppsNeedEndorsementSidebar"
+import { EndorsementFaqCard } from "./EndorsementFaqCard"
 import { NodeCard } from "./NodeCard"
 import { NodesHeroStats } from "./NodesHeroStats"
 import { NoNodesEmptyState } from "./NoNodesEmptyState"
@@ -42,11 +43,14 @@ export const NodesPageContent = () => {
           ))}
         </VStack>
 
-        <AppsNeedEndorsementSidebar
-          gracePeriodApps={xApps?.gracePeriod ?? []}
-          endorsementLostApps={xApps?.endorsementLost ?? []}
-          newLookingForEndorsement={xApps?.newLookingForEndorsement ?? []}
-        />
+        <VStack align="stretch" gap={6}>
+          <AppsNeedEndorsementSidebar
+            gracePeriodApps={xApps?.gracePeriod ?? []}
+            endorsementLostApps={xApps?.endorsementLost ?? []}
+            newLookingForEndorsement={xApps?.newLookingForEndorsement ?? []}
+          />
+          <EndorsementFaqCard />
+        </VStack>
       </Box>
     </Box>
   )
