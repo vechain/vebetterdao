@@ -116,7 +116,7 @@ export function createLocalConfig() {
     */
     GM_NFT_NODE_TO_FREE_LEVEL: [1, 2, 4, 6, 2, 4, 6, 7],
 
-    GM_NFT_MAX_LEVEL: 1,
+    GM_NFT_MAX_LEVEL: 5,
 
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
