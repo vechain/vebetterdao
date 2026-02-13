@@ -114,8 +114,6 @@ export const NodeCard = ({ node }: NodeCardProps) => {
             )}
           </Flex>
 
-          <Separator w="full" mt={4} />
-
           <NodeGMSection node={node} />
 
           <Separator w="full" mt={4} />
@@ -127,7 +125,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
               <Button variant="link" size="sm" onClick={historyModal.onOpen}>
                 {t("View history")}
               </Button>
-              <Button size="sm" variant="primary" onClick={endorseModal.onOpen}>
+              <Button size="sm" variant="primary" onClick={endorseModal.onOpen} disabled={node.availablePoints === 0n}>
                 {t("Endorse")}
               </Button>
             </HStack>

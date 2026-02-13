@@ -16,9 +16,7 @@ export const EndorsementFaqCard = () => {
       <Card.Root variant="outline" w="full">
         <Card.Body>
           <VStack align="stretch" gap={4}>
-            <Icon fontSize="2xl" color="text.subtle">
-              <LuCircleHelp />
-            </Icon>
+            <Icon as={LuCircleHelp} fontSize="2xl" color="text.subtle" />
             <VStack align="stretch" gap={1}>
               <Heading size="md">{t("How does endorsement work?")}</Heading>
               <Text textStyle="sm" color="text.subtle">

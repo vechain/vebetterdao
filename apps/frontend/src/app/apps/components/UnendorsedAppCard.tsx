@@ -75,9 +75,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                   <HStack gap={3} w="full" align="center" flexWrap="wrap">
                     <Skeleton loading={isEarningsLoading}>
                       <HStack gap={2} align="center">
-                        <Icon boxSize={4} color="text.subtle">
-                          <LuWallet />
-                        </Icon>
+                        <Icon as={LuWallet} boxSize={4} color="text.subtle" />
                         <Text textStyle="sm" color="text.subtle">
                           {compact.format(totalB3trReceived)} {"B3TR"}
                         </Text>
@@ -85,9 +83,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
                       <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-                        <Icon boxSize={4} color="text.subtle">
-                          <LuCoins />
-                        </Icon>
+                        <Icon as={LuCoins} boxSize={4} color="text.subtle" />
                         <Text textStyle="sm" color="text.subtle">
                           {compact.format(appOverview?.totalRewardAmount ?? 0)} {"B3TR distributed"}
                         </Text>
@@ -95,9 +91,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
                       <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-                        <Icon boxSize={4} color="text.subtle">
-                          <LuZap />
-                        </Icon>
+                        <Icon as={LuZap} boxSize={4} color="text.subtle" />
                         <Text textStyle="sm" color="text.subtle">
                           {compact.format(appOverview?.actionsRewarded ?? 0)} {"actions"}
                         </Text>
@@ -105,9 +99,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
                       <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-                        <Icon boxSize={4} color="text.subtle">
-                          <LuUsers />
-                        </Icon>
+                        <Icon as={LuUsers} boxSize={4} color="text.subtle" />
                         <Text textStyle="sm" color="text.subtle">
                           {compact.format(appOverview?.totalUniqueUserInteractions ?? 0)} {"users"}
                         </Text>

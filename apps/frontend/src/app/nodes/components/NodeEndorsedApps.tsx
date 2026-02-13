@@ -98,9 +98,7 @@ const EndorsedAppRow = ({
           {points.toString()} {t("pts")}
         </Text>
         <IconButton aria-label={t("Edit endorsement")} variant="ghost" size="xs" onClick={() => setIsEditOpen(true)}>
-          <Icon boxSize={4} color="text.subtle">
-            <LuPencil />
-          </Icon>
+          <Icon as={LuPencil} boxSize={4} color="text.subtle" />
         </IconButton>
       </HStack>
       <HStack gap={3} w="full" align="center" flexWrap="wrap">
@@ -116,18 +114,14 @@ const EndorsedAppRow = ({
         />
         {endorsedDateLabel && (
           <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-            <Icon boxSize={4} color="text.subtle">
-              <LuCalendar />
-            </Icon>
+            <Icon as={LuCalendar} boxSize={4} color="text.subtle" />
             <Text textStyle="sm" color="text.subtle">
               {endorsedDateLabel}
             </Text>
           </HStack>
         )}
         <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-          <Icon boxSize={4} color="text.subtle">
-            <LuUsers />
-          </Icon>
+          <Icon as={LuUsers} boxSize={4} color="text.subtle" />
           <Text textStyle="sm" color="text.subtle">
             {uniqueEndorsersCount}
           </Text>
@@ -139,9 +133,7 @@ const EndorsedAppRow = ({
         </HStack>
         {isInCooldown && (
           <HStack gap={1} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-            <Icon boxSize={4} color="fg.warning">
-              <LuClock />
-            </Icon>
+            <Icon as={LuClock} boxSize={4} color="fg.warning" />
             <Text textStyle="sm" color="fg.warning">
               {t("In cooldown")}
             </Text>

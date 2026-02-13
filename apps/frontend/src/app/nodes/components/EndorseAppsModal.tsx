@@ -121,9 +121,7 @@ const SelectableAppRow = ({
 
           <HStack gap={2} align="center">
             <HStack gap={2} flexShrink={0} borderLeftWidth="1px" borderColor="border" pl={3}>
-              <Icon boxSize={4} color="text.subtle">
-                <LuUsers />
-              </Icon>
+              <Icon as={LuUsers} boxSize={4} color="text.subtle" />
               <Text textStyle="sm" color="text.subtle">
                 {uniqueEndorsersCount}
               </Text>
@@ -477,9 +475,7 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
           <HStack gap={3} w="full">
             <Box flex={1} position="relative">
               <Box position="absolute" left={3} top="50%" transform="translateY(-50%)" zIndex={1} pointerEvents="none">
-                <Icon boxSize={4} color="text.subtle">
-                  <LuSearch />
-                </Icon>
+                <Icon as={LuSearch} boxSize={4} color="text.subtle" />
               </Box>
               <Input
                 placeholder={t("Search by app name")}
