@@ -28,19 +28,28 @@ async function main() {
   }
 
   const total = data.endorsements.length
-  let done = 0
-  for (const e of data.endorsements) {
+  let seeded = 0
+  let skipped = 0
+  for (let i = 0; i < total; i++) {
+    const e = data.endorsements[i]
+    const onChainPoints = Number(await x2EarnApps.getNodePointsForApp(BigInt(e.nodeId), e.appId))
+    if (onChainPoints === e.points) {
+      skipped++
+      console.log(`[${i + 1}/${total}] Already seeded, skipping nodeId=${e.nodeId} appId=${e.appId}`)
+      continue
+    }
     try {
       const tx = await x2EarnApps.seedEndorsement(e.appId, BigInt(e.nodeId), e.points)
       await tx.wait()
-      done++
-      console.log(`[${done}/${total}] Seeding nodeId=${e.nodeId} -> appId=${e.appId} with ${e.points} points`)
+      seeded++
+      console.log(`[${i + 1}/${total}] Seeded nodeId=${e.nodeId} -> appId=${e.appId} with ${e.points} points`)
     } catch (err) {
-      console.error(`[${done + 1}/${total}] Failed nodeId=${e.nodeId} appId=${e.appId} points=${e.points}:`, err)
+      console.error(`[${i + 1}/${total}] Failed nodeId=${e.nodeId} appId=${e.appId} points=${e.points}:`, err)
+      console.error(`Resume by re-running the script — already-seeded entries will be skipped.`)
       process.exit(1)
     }
   }
-  console.log(`Seeded ${done} endorsements.`)
+  console.log(`Done. Seeded: ${seeded}, skipped (already seeded): ${skipped}, total: ${total}`)
 }
 
 main()
