@@ -37,6 +37,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
   const { t } = useTranslation()
   const historyModal = useDisclosure()
 
+  const hasEndorsementPower = node.endorsementScore > 0n
   const usedPoints = node.activeEndorsements.reduce((sum, e) => sum + e.points, 0n)
   const totalPoints = Number(node.endorsementScore)
   const usedPercent = totalPoints > 0 ? (Number(usedPoints) / totalPoints) * 100 : 0
@@ -74,38 +75,42 @@ export const NodeCard = ({ node }: NodeCardProps) => {
                 </Text>
               </VStack>
             </HStack>
-            <VStack gap={2} align={{ base: "stretch", md: "end" }} minW={{ md: "240px" }}>
-              <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold" flexWrap="wrap" gap={2}>
-                <HStack gap={1}>
-                  <Text color="text.subtle">
-                    {t("Used")}
-                    {": "}
-                  </Text>
-                  <Text>
-                    {usedPoints.toString()} {t("pts")}
-                  </Text>
+            {hasEndorsementPower && (
+              <VStack gap={2} align={{ base: "stretch", md: "end" }} minW={{ md: "240px" }}>
+                <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold" flexWrap="wrap" gap={2}>
+                  <HStack gap={1}>
+                    <Text color="text.subtle">
+                      {t("Used")}
+                      {": "}
+                    </Text>
+                    <Text>
+                      {usedPoints.toString()} {t("pts")}
+                    </Text>
+                  </HStack>
+                  <HStack gap={1}>
+                    <Text color="text.subtle">
+                      {t("Available")}
+                      {": "}
+                    </Text>
+                    <Text>
+                      {node.availablePoints.toString()} {t("pts")}
+                    </Text>
+                  </HStack>
                 </HStack>
-                <HStack gap={1}>
-                  <Text color="text.subtle">
-                    {t("Available")}
-                    {": "}
-                  </Text>
-                  <Text>
-                    {node.availablePoints.toString()} {t("pts")}
-                  </Text>
-                </HStack>
-              </HStack>
-              <Flex
-                w="full"
-                h="2"
-                borderRadius="full"
-                overflow="hidden"
-                bg="bg.muted"
-                borderWidth="1px"
-                borderColor="border.primary">
-                {usedPercent > 0 && <Box w={`${usedPercent}%`} h="full" bg="status.positive.primary" flexShrink={0} />}
-              </Flex>
-            </VStack>
+                <Flex
+                  w="full"
+                  h="2"
+                  borderRadius="full"
+                  overflow="hidden"
+                  bg="bg.muted"
+                  borderWidth="1px"
+                  borderColor="border.primary">
+                  {usedPercent > 0 && (
+                    <Box w={`${usedPercent}%`} h="full" bg="status.positive.primary" flexShrink={0} />
+                  )}
+                </Flex>
+              </VStack>
+            )}
           </Flex>
 
           <Separator w="full" mt={4} />
@@ -116,8 +121,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
 
           <NodeEndorsedApps node={node} />
 
-          {/* Show this button here only if there are already endorsements, otherwise it is shown elsewhere */}
-          {node.activeEndorsements.length > 0 && (
+          {hasEndorsementPower && node.activeEndorsements.length > 0 && (
             <HStack justify="space-between" w="full" pt={2}>
               <Button variant="link" size="sm" onClick={historyModal.onOpen}>
                 {t("View history")}

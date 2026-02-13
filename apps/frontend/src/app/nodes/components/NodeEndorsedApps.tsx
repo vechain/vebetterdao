@@ -1,9 +1,9 @@
 "use client"
 
-import { Button, Heading, HStack, Icon, Image, Link, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, IconButton, Image, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import NextLink from "next/link"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCalendar, LuClock, LuPencil, LuUsers } from "react-icons/lu"
 
@@ -21,20 +21,25 @@ import { convertUriToUrl } from "@/utils/uri"
 
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 
+import { EditEndorsementModal } from "./EditEndorsementModal"
+
 type NodeEndorsedAppsProps = {
   node: UserNode
 }
 
 const EndorsedAppRow = ({
+  node,
   appId,
   points,
   endorsedAtRound,
 }: {
+  node: UserNode
   appId: string
   points: bigint
   endorsedAtRound: bigint
 }) => {
   const { t } = useTranslation()
+  const [isEditOpen, setIsEditOpen] = useState(false)
   const { data: metadata } = useXAppMetadata(appId)
   const { status: endorsementStatus, score } = useAppEndorsementStatus(appId)
   const { data: rawEndorsers } = useAppEndorsers(appId)
@@ -84,13 +89,11 @@ const EndorsedAppRow = ({
         <Text textStyle="md" fontWeight="semibold" flexShrink={0}>
           {points.toString()} {t("pts")}
         </Text>
-        <Link asChild>
-          <NextLink href={`/apps/${appId}`}>
-            <Icon boxSize={4} color="text.subtle">
-              <LuPencil />
-            </Icon>
-          </NextLink>
-        </Link>
+        <IconButton aria-label={t("Edit endorsement")} variant="ghost" size="xs" onClick={() => setIsEditOpen(true)}>
+          <Icon boxSize={4} color="text.subtle">
+            <LuPencil />
+          </Icon>
+        </IconButton>
       </HStack>
       <HStack gap={3} w="full" align="center" flexWrap="wrap">
         <EndorsementStatusCallout
@@ -137,6 +140,14 @@ const EndorsedAppRow = ({
           </HStack>
         )}
       </HStack>
+      <EditEndorsementModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        node={node}
+        appId={appId}
+        currentPoints={points}
+        endorsedAtRound={endorsedAtRound}
+      />
     </VStack>
   )
 }
@@ -145,15 +156,28 @@ export const NodeEndorsedApps = ({ node }: NodeEndorsedAppsProps) => {
   const { t } = useTranslation()
   const endorsements = node?.activeEndorsements ?? []
   const hasEndorsements = endorsements.length > 0
+  const hasEndorsementPower = node.endorsementScore > 0n
 
   return (
     <>
       <Heading textStyle="lg">{t("Endorsed apps")}</Heading>
       <VStack align="stretch" gap={3}>
-        {hasEndorsements ? (
+        {!hasEndorsementPower ? (
+          <Text textStyle="sm" color="text.subtle">
+            {t(
+              "This node level does not provide endorsement power. Upgrade to at least a Strength node to endorse apps.",
+            )}
+          </Text>
+        ) : hasEndorsements ? (
           <VStack align="stretch" gap={3}>
             {endorsements.map(e => (
-              <EndorsedAppRow key={e.appId} appId={e.appId} points={e.points} endorsedAtRound={e.endorsedAtRound} />
+              <EndorsedAppRow
+                key={e.appId}
+                node={node}
+                appId={e.appId}
+                points={e.points}
+                endorsedAtRound={e.endorsedAtRound}
+              />
             ))}
           </VStack>
         ) : (
