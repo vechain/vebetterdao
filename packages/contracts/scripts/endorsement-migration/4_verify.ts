@@ -1,8 +1,9 @@
-import { getX2EarnAppsContract, loadMigrationData } from "./helpers"
+import { getX2EarnAppsContract, loadMigrationData, validateMigrationData } from "./helpers"
 import type { EndorsementSnapshot } from "./types"
 
 async function main() {
   const data = loadMigrationData()
+  validateMigrationData(data)
   const x2EarnApps = await getX2EarnAppsContract()
 
   const expectedAppScore = new Map<string, number>()

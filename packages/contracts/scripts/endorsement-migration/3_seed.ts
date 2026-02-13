@@ -1,8 +1,9 @@
 import { ethers } from "hardhat"
-import { getX2EarnAppsContract, loadMigrationData } from "./helpers"
+import { getX2EarnAppsContract, loadMigrationData, validateMigrationData } from "./helpers"
 
 async function main() {
   const data = loadMigrationData()
+  validateMigrationData(data)
   const x2EarnApps = await getX2EarnAppsContract()
   const signer = (await ethers.getSigners())[0]
   if (!signer) throw new Error("No signer")
