@@ -6,7 +6,7 @@ import { ethers } from "hardhat"
 
 import { deployAndUpgrade, upgradeProxy } from "../../scripts/helpers"
 import { EndorsementUtils, X2EarnApps, X2EarnAppsV7 } from "../../typechain-types"
-import { createNodeHolder, getOrDeployContractInstances, getStorageSlots } from "../helpers"
+import { createNodeHolder, filterEventsByName, getOrDeployContractInstances, getStorageSlots } from "../helpers"
 
 let config: ContractsConfig
 let otherAccounts: SignerWithAddress[]
@@ -412,5 +412,196 @@ describe("X-Apps - V8 Upgrade - @shard15f", function () {
       // Random user without MIGRATION_ROLE should not be able to seed
       await expect(x2EarnApps.connect(otherAccounts[3]).seedEndorsement(appId, nodeId, 49)).to.be.reverted
     })
+  })
+
+  it("Should emit AppAdded event when app reaches endorsement threshold on V7 and V8", async function () {
+    const {
+      timeLock,
+      nodeManagement,
+      veBetterPassport,
+      x2EarnCreator,
+      xAllocationVoting: freshXAllocationVoting,
+      x2EarnRewardsPool,
+      stargateNftMock: freshStargateNftMock,
+      administrationUtilsV2,
+      endorsementUtilsV2,
+      voteEligibilityUtilsV2,
+      administrationUtilsV3,
+      endorsementUtilsV3,
+      voteEligibilityUtilsV3,
+      administrationUtilsV4,
+      endorsementUtilsV4,
+      voteEligibilityUtilsV4,
+      administrationUtilsV5,
+      endorsementUtilsV5,
+      voteEligibilityUtilsV5,
+      administrationUtilsV6,
+      endorsementUtilsV6,
+      voteEligibilityUtilsV6,
+      administrationUtilsV7,
+      endorsementUtilsV7,
+      voteEligibilityUtilsV7,
+      administrationUtils,
+      endorsementUtils,
+      voteEligibilityUtils,
+      appStorageUtils,
+    } = await getOrDeployContractInstances({ forceDeploy: true, deployMocks: true })
+
+    // Deploy V1 → V7
+    const x2EarnAppsV7 = (await deployAndUpgrade(
+      ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnAppsV7"],
+      [
+        ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
+        [
+          config.XAPP_GRACE_PERIOD,
+          await nodeManagement.getAddress(),
+          await veBetterPassport.getAddress(),
+          await x2EarnCreator.getAddress(),
+        ],
+        [config.X2EARN_NODE_COOLDOWN_PERIOD, await freshXAllocationVoting.getAddress()],
+        [await x2EarnRewardsPool.getAddress()],
+        [],
+        [],
+        [await freshStargateNftMock.getAddress()],
+      ],
+      {
+        versions: [undefined, 2, 3, 4, 5, 6, 7],
+        libraries: [
+          undefined,
+          {
+            AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+            EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+            VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          },
+          {
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          },
+          {
+            AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
+            EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
+            VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
+          },
+          {
+            AdministrationUtilsV5: await administrationUtilsV5.getAddress(),
+            EndorsementUtilsV5: await endorsementUtilsV5.getAddress(),
+            VoteEligibilityUtilsV5: await voteEligibilityUtilsV5.getAddress(),
+          },
+          {
+            AdministrationUtilsV6: await administrationUtilsV6.getAddress(),
+            EndorsementUtilsV6: await endorsementUtilsV6.getAddress(),
+            VoteEligibilityUtilsV6: await voteEligibilityUtilsV6.getAddress(),
+          },
+          {
+            AdministrationUtilsV7: await administrationUtilsV7.getAddress(),
+            EndorsementUtilsV7: await endorsementUtilsV7.getAddress(),
+            VoteEligibilityUtilsV7: await voteEligibilityUtilsV7.getAddress(),
+          },
+        ],
+      },
+    )) as X2EarnAppsV7
+
+    // Point rewards pool to this proxy so submitApp can enable rewards
+    const CONTRACTS_ADDRESS_MANAGER_ROLE = await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE()
+    await x2EarnRewardsPool.connect(owner).grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, owner.address)
+    await x2EarnRewardsPool.connect(owner).setX2EarnApps(await x2EarnAppsV7.getAddress())
+
+    // Allow the V7 proxy to call setAppSecurity on VeBetterPassport
+    await veBetterPassport
+      .connect(owner)
+      .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnAppsV7.getAddress())
+
+    // Grant GOVERNANCE_ROLE to owner so we can call governance-gated functions
+    const GOVERNANCE_ROLE = await x2EarnAppsV7.GOVERNANCE_ROLE()
+    await x2EarnAppsV7.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
+
+    // --- V7: Submit app and endorse to threshold ---
+    // otherAccounts[0..7] already have creator NFTs from the deploy — use higher indices
+    const app1Creator = otherAccounts[8]
+    await x2EarnCreator.connect(owner).safeMint(app1Creator.address)
+
+    const app1Name = "V7TestApp"
+    await x2EarnAppsV7.connect(app1Creator).submitApp(app1Creator.address, app1Creator.address, app1Name, "uri")
+    const app1Id = await x2EarnAppsV7.hashAppName(app1Name)
+
+    expect(await x2EarnAppsV7.isAppUnendorsed(app1Id)).to.eql(true)
+
+    // Create MjolnirX node (level 7 = 100 points, meets threshold of 100)
+    const nodeId1 = await createNodeHolder(7, otherAccounts[9])
+
+    // Endorse on V7 — single node with 100 points reaches the threshold
+    const v7EndorseTx = await x2EarnAppsV7.connect(otherAccounts[9]).endorseApp(app1Id, nodeId1)
+    const v7Receipt = await v7EndorseTx.wait()
+    if (!v7Receipt) throw new Error("No receipt")
+
+    // Verify AppAdded event emitted on V7 with appAvailableForAllocationVoting = true
+    const v7AppAddedEvents = filterEventsByName(v7Receipt.logs, "AppAdded")
+    expect(v7AppAddedEvents.length).to.equal(1)
+
+    const v7Decoded = x2EarnAppsV7.interface.parseLog({
+      topics: v7AppAddedEvents[0].topics as string[],
+      data: v7AppAddedEvents[0].data,
+    })
+    expect(v7Decoded?.args[0]).to.equal(app1Id) // id
+    expect(v7Decoded?.args[1]).to.equal(app1Creator.address) // teamWalletAddress
+    expect(v7Decoded?.args[2]).to.equal(app1Name) // name
+    expect(v7Decoded?.args[3]).to.equal(true) // appAvailableForAllocationVoting
+
+    expect(await x2EarnAppsV7.appExists(app1Id)).to.eql(true)
+    expect(await x2EarnAppsV7.isAppUnendorsed(app1Id)).to.eql(false)
+
+    // --- Upgrade to V8 ---
+    const x2EarnAppsV8 = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [49, 110], {
+      version: 8,
+      libraries: {
+        AdministrationUtils: await administrationUtils.getAddress(),
+        EndorsementUtils: await endorsementUtils.getAddress(),
+        VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        AppStorageUtils: await appStorageUtils.getAddress(),
+      },
+    })) as X2EarnApps
+
+    expect(await x2EarnAppsV8.version()).to.equal("8")
+    await x2EarnRewardsPool.connect(owner).setX2EarnApps(await x2EarnAppsV8.getAddress())
+
+    // --- V8: Submit a new app and endorse to threshold ---
+    const app2Creator = otherAccounts[10]
+    await x2EarnCreator.connect(owner).safeMint(app2Creator.address)
+
+    const app2Name = "V8TestApp"
+    await x2EarnAppsV8.connect(app2Creator).submitApp(app2Creator.address, app2Creator.address, app2Name, "uri")
+    const app2Id = await x2EarnAppsV8.hashAppName(app2Name)
+
+    expect(await x2EarnAppsV8.isAppUnendorsed(app2Id)).to.eql(true)
+
+    // V8 limits 49 points per node per app, so we need 3 endorsers: 49 + 49 + 2 = 100
+    const nodeId2 = await createNodeHolder(7, otherAccounts[11])
+    const nodeId3 = await createNodeHolder(7, otherAccounts[12])
+    const nodeId4 = await createNodeHolder(7, otherAccounts[13])
+
+    await x2EarnAppsV8.connect(otherAccounts[11]).endorseApp(app2Id, nodeId2, 49)
+    await x2EarnAppsV8.connect(otherAccounts[12]).endorseApp(app2Id, nodeId3, 49)
+
+    // Third endorsement crosses the 100-point threshold — should emit AppAdded
+    const v8EndorseTx = await x2EarnAppsV8.connect(otherAccounts[13]).endorseApp(app2Id, nodeId4, 2)
+    const v8Receipt = await v8EndorseTx.wait()
+    if (!v8Receipt) throw new Error("No receipt")
+
+    // Verify AppAdded event emitted on V8 with appAvailableForAllocationVoting = true
+    const v8AppAddedEvents = filterEventsByName(v8Receipt.logs, "AppAdded")
+    expect(v8AppAddedEvents.length).to.equal(1)
+
+    const v8Decoded = x2EarnAppsV8.interface.parseLog({
+      topics: v8AppAddedEvents[0].topics as string[],
+      data: v8AppAddedEvents[0].data,
+    })
+    expect(v8Decoded?.args[0]).to.equal(app2Id) // id
+    expect(v8Decoded?.args[1]).to.equal(app2Creator.address) // teamWalletAddress
+    expect(v8Decoded?.args[2]).to.equal(app2Name) // name
+    expect(v8Decoded?.args[3]).to.equal(true) // appAvailableForAllocationVoting
+
+    expect(await x2EarnAppsV8.appExists(app2Id)).to.eql(true)
+    expect(await x2EarnAppsV8.isAppUnendorsed(app2Id)).to.eql(false)
   })
 })
