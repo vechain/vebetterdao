@@ -12,19 +12,15 @@ import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 import { ProfileBalance } from "./ProfileBalance/ProfileBalance"
 import { ProfileBetterActions } from "./ProfileBetterActions/ProfileBetterActions"
-import { ProfileGMLevel } from "./ProfileGMLevel/ProfileGMLevel"
 import { ProfileGovernance } from "./ProfileGovernance/ProfileGovernance"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts/ProfileLinkedAcounts"
-import { ProfileNodes } from "./ProfileNodes/ProfileNodes"
 
 enum Tab {
   Balance = "balance",
   BetterActions = "better-actions",
   Governance = "governance",
   LinkedAccounts = "linked-accounts",
-  GM = "gm",
-  Nodes = "nodes",
 }
 interface ProfilePageContentProps {
   address?: string
@@ -55,8 +51,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     () => [
       { tab: Tab.Balance, label: t("Balance") },
       { tab: Tab.BetterActions, label: t("Better Actions") },
-      { tab: Tab.GM, label: t("GM Level") },
-      { tab: Tab.Nodes, label: t("Nodes") },
       { tab: Tab.Governance, label: t("Governance") },
       { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
     ],
@@ -149,12 +143,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         </Tabs.Content>
         <Tabs.Content value={Tab.LinkedAccounts}>
           <ProfileLinkedAcounts address={parsedAddress} />
-        </Tabs.Content>
-        <Tabs.Content value={Tab.GM}>
-          <ProfileGMLevel address={parsedAddress} />
-        </Tabs.Content>
-        <Tabs.Content value={Tab.Nodes}>
-          <ProfileNodes address={parsedAddress} />
         </Tabs.Content>
       </Tabs.Root>
     </VStack>

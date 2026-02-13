@@ -54,7 +54,7 @@ export const Routes: Route[] = [
       },
     ],
   },
-  { name: "Nodes", onClick: "/nodes", isVisible: true, icon: LuServer },
   { name: "Profile", onClick: "/profile", isVisible: true, icon: FaUser },
+  { name: "Nodes", onClick: "/nodes", isVisible: true, icon: LuServer },
   { name: "Admin", onClick: "/admin", isVisible: true, icon: FaGear },
 ]
