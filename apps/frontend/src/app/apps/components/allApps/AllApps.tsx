@@ -18,7 +18,6 @@ import { useTranslation } from "react-i18next"
 import { AppStatusFilter, useAppsFilters } from "@/store/useAppsFilters"
 
 import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
-import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { useDebounce } from "../../../../hooks/useDebounce"
 import { usePagination } from "../../../../hooks/usePagination"
 import { useFilteredApps } from "../../hooks/useFilteredApps"
@@ -38,8 +37,6 @@ type Props = {
   headingComponent?: React.ReactNode
 }
 
-type LayoutKey = "endorser" | "default"
-
 export const AllApps = ({
   currentActiveApps,
   newApps,
@@ -49,7 +46,6 @@ export const AllApps = ({
   headingComponent,
 }: Props) => {
   const { t } = useTranslation()
-  const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
 
   // Search state with debounce
   const [searchTerm, setSearchTerm] = useState("")
@@ -90,14 +86,9 @@ export const AllApps = ({
     return searchApps.filter(app => app.name.toLowerCase().includes(query))
   }, [debouncedSearchTerm, filteredApps, searchApps])
 
-  const isUserEndorsingAnyApp = useMemo(() => {
-    return userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.activeEndorsements.length > 0)
-  }, [userNodesInfo])
-
   const itemsPerPage = 25
   const { currentItems: displayAppsRestricted, hasMore, loadMore } = usePagination(searchedApps, itemsPerPage)
 
-  const layout: LayoutKey = isUserEndorsingAnyApp ? "endorser" : "default"
   const showCreatorBanner = useMemo(
     () =>
       (statusFilter === AppStatusFilter.All || statusFilter === AppStatusFilter.Active) && !debouncedSearchTerm.trim(),
@@ -110,7 +101,7 @@ export const AllApps = ({
 
   const appsSection = useMemo(() => {
     const isEmpty = !displayAppsRestricted?.length
-    const isLoading = isXAppsLoading || isSortingLoading || isUserNodesLoading
+    const isLoading = isXAppsLoading || isSortingLoading
 
     return isLoading ? (
       <VStack w="full" gap={12} h="80vh" justify="center" data-testid="apps-page-loading">
@@ -127,7 +118,7 @@ export const AllApps = ({
             <>
               {showCreatorBanner ? <CreatorBanner /> : undefined}
               {displayAppsRestricted.map(xApp => (
-                <UnendorsedAppCard key={xApp.id} appId={xApp.id} isNewApp={xApp.isNew} layout={layout} />
+                <UnendorsedAppCard key={xApp.id} appId={xApp.id} isNewApp={xApp.isNew} />
               ))}
             </>
           )}
@@ -142,17 +133,7 @@ export const AllApps = ({
         )}
       </VStack>
     )
-  }, [
-    displayAppsRestricted,
-    isXAppsLoading,
-    isSortingLoading,
-    isUserNodesLoading,
-    showCreatorBanner,
-    hasMore,
-    loadMore,
-    t,
-    layout,
-  ])
+  }, [displayAppsRestricted, isXAppsLoading, isSortingLoading, showCreatorBanner, hasMore, loadMore, t])
 
   return (
     <VStack gap={8} w="full" data-testid="apps-page">

@@ -1,62 +1,35 @@
-import {
-  Card,
-  Separator,
-  Heading,
-  HStack,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-  Icon,
-  Avatar,
-  Tag,
-  LinkBox,
-  LinkOverlay,
-} from "@chakra-ui/react"
-import { UilAngleRight } from "@iconscout/react-unicons"
-import { compareAddresses } from "@repo/utils/AddressUtils"
+import { Card, HStack, Icon, Image, LinkBox, LinkOverlay, Skeleton, Tag, Text, VStack } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { LuCoins, LuUsers, LuWallet, LuZap } from "react-icons/lu"
 
+import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
+import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 import NewAppIcon from "@/components/Icons/svg/new-app.svg"
 
-import { useAppEndorsementStatus } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
-import { useMaxPointsPerApp } from "../../../api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
-import { useGetUserNodes, UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
 const notFoundImage = "/assets/images/image-not-found.webp"
-import { useXAppStatusConfig } from "../[appId]/hooks/useXAppStatusConfig"
+const compact = getCompactFormatter(1)
 
 type Props = {
   appId: string
   isNewApp: boolean
-  layout?: "endorser" | "default"
+  showStats?: boolean
 }
-export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props) => {
+export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) => {
   const { t } = useTranslation()
-  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
+  const { data: appOverview, isLoading: isOverviewLoading } = useAppActionOverview(appId, undefined, showStats)
+  const { data: earningsData, isLoading: isEarningsLoading } = useAppEarnings(appId, undefined, { enabled: showStats })
 
-  const {
-    score: endorsementScore,
-    status: endorsementStatus,
-    isLoading: isEndorsementStatusLoading,
-  } = useAppEndorsementStatus(appId)
-  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
-  const STATUS_CONFIG = useXAppStatusConfig()
-
-  const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
-  const nodeEndorsingApp = userNodes?.nodesManagedByUser?.find((node: UserNode) =>
-    node.activeEndorsements.some(e => compareAddresses(e.appId ?? "", appId ?? "")),
-  )
-  const isUserAppEndorser = useMemo(() => {
-    if (!appId || !nodeEndorsingApp) return false
-    //If there's a node endorsing the app, then the user is endorsing the app
-    return !!nodeEndorsingApp
-  }, [appId, nodeEndorsingApp])
+  const totalB3trReceived = useMemo(() => {
+    if (!earningsData || !Array.isArray(earningsData)) return 0
+    return earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
+  }, [earningsData])
 
   return (
     <LinkBox asChild>
@@ -64,113 +37,85 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
         <NextLink href={`/apps/${appId}`}>
           <Card.Root variant="subtle" w="full" maxW="full" minW={0} overflow="hidden">
             <Card.Body>
-              <Stack
-                direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
-                align="stretch"
-                w="full"
-                h="full">
-                <Stack
-                  direction="row"
-                  gap={4}
-                  align="center"
-                  flex={{ base: "initial", lg: "1" }}
-                  minW={0}
-                  overflow="hidden">
-                  <Avatar.Root shape="rounded" boxSize="3.5rem" borderRadius="0.75rem">
-                    <Avatar.Image
-                      src={logo?.image ?? notFoundImage}
-                      alt="logo"
-                      borderRadius="0.75rem"
-                      objectFit="contain"
-                    />
-                    <Avatar.Fallback name={appMetadata?.name} />
-                  </Avatar.Root>
+              <VStack align="stretch" gap={3} w="full">
+                <HStack gap={3} w="full" align="center">
+                  <Image
+                    src={logo?.image ?? notFoundImage}
+                    alt={appMetadata?.name ?? ""}
+                    w="11"
+                    h="11"
+                    rounded="lg"
+                    objectFit="contain"
+                    flexShrink={0}
+                  />
+                  <Skeleton loading={appMetadataLoading} flex={1} minW={0}>
+                    <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                      {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                    </Text>
+                  </Skeleton>
+                  {isNewApp && (
+                    <Tag.Root size="sm" variant="solid" colorPalette="green" fontWeight="semibold" flexShrink={0}>
+                      <Tag.StartElement>
+                        <Icon color="info.default" boxSize={3}>
+                          <NewAppIcon />
+                        </Icon>
+                      </Tag.StartElement>
+                      <Tag.Label>{t("New!")}</Tag.Label>
+                    </Tag.Root>
+                  )}
+                </HStack>
 
-                  <Stack flex="1" gap={0} align="stretch" justify="center" overflow="hidden">
-                    <Skeleton loading={appMetadataLoading}>
-                      <HStack gap={4} align="center">
-                        <Heading
-                          size="xl"
-                          lineClamp={1}
-                          maxW={{ base: "full", md: "150px", lg: "200px" }}
-                          overflow="hidden"
-                          textOverflow="ellipsis">
-                          {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                        </Heading>
-                        {isNewApp && (
-                          <Tag.Root size="sm" variant="solid" colorPalette="green" fontWeight="semibold">
-                            <Tag.StartElement>
-                              <Icon color="info.default" boxSize={3}>
-                                <NewAppIcon />
-                              </Icon>
-                            </Tag.StartElement>
-                            <Tag.Label>{t("New!")}</Tag.Label>
-                          </Tag.Root>
-                        )}
+                <Skeleton loading={appMetadataLoading}>
+                  <Text textStyle="sm" color="text.subtle" lineClamp={2} w="full" minW={0}>
+                    {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
+                  </Text>
+                </Skeleton>
+
+                {showStats && (
+                  <HStack gap={3} w="full" align="center" flexWrap="wrap">
+                    <Skeleton loading={isEarningsLoading}>
+                      <HStack gap={2} align="center">
+                        <Icon boxSize={4} color="text.subtle">
+                          <LuWallet />
+                        </Icon>
+                        <Text textStyle="sm" color="text.subtle">
+                          {compact.format(totalB3trReceived)} {"B3TR"}
+                        </Text>
                       </HStack>
                     </Skeleton>
-                    <Skeleton loading={appMetadataLoading}>
-                      <Text
-                        textStyle="sm"
-                        color="text.subtle"
-                        overflow="hidden"
-                        textOverflow="ellipsis"
-                        wordBreak="break-word"
-                        lineClamp={2}
-                        w="full"
-                        minW={0}>
-                        {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
-                      </Text>
-                    </Skeleton>
-                  </Stack>
-                </Stack>
-
-                <Separator orientation="vertical" h="100%" size="sm" px={2} borderColor="border.emphasized" />
-                <Separator orientation="horizontal" h="100%" size="sm" borderColor="border.emphasized" />
-
-                <Stack direction="row" align="center" justify="center">
-                  <Stack
-                    direction={layout === "endorser" ? "row" : { base: "row", lg: "column", md: "column" }}
-                    gap={3}
-                    align={{ base: "center", lg: "stretch", md: "stretch" }}
-                    justify={{ base: "space-between", md: "stretch" }}
-                    w="full">
-                    <VStack gap={0} alignItems="flex-start">
-                      <Skeleton loading={isEndorsementStatusLoading}>
-                        <HStack gap={1} align="flex-end">
-                          <Text textStyle="2xl" lineHeight={1} color={color}>
-                            {endorsementScore}
-                          </Text>
-                          <Text
-                            textStyle="sm"
-                            lineHeight={1}
-                            color={color}>{`/${maxPointsPerAppValue?.toString() ?? "110"}`}</Text>
-                        </HStack>
-                      </Skeleton>
-                      <Text textStyle="xs" color="text.subtle">
-                        {t("Total score")}
-                      </Text>
-                    </VStack>
-
-                    {isUserAppEndorser && (
-                      <VStack gap={0} alignItems="flex-start">
-                        <Skeleton loading={isUserNodesLoading}>
-                          <Text textStyle="2xl" color="#004CFC">
-                            {nodeEndorsingApp?.activeEndorsements
-                              .find(e => compareAddresses(e.appId ?? "", appId ?? ""))
-                              ?.points?.toString() ?? "0"}
-                            {t("pts")}
-                          </Text>
-                        </Skeleton>
-                        <Text textStyle="xs" color="text.subtle">
-                          {t("Your endorsement")}
+                    <Skeleton loading={isOverviewLoading}>
+                      <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
+                        <Icon boxSize={4} color="text.subtle">
+                          <LuCoins />
+                        </Icon>
+                        <Text textStyle="sm" color="text.subtle">
+                          {compact.format(appOverview?.totalRewardAmount ?? 0)} {"B3TR distributed"}
                         </Text>
-                      </VStack>
-                    )}
-                  </Stack>
-                  <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color="icon.default" alignSelf={"center"} />
-                </Stack>
-              </Stack>
+                      </HStack>
+                    </Skeleton>
+                    <Skeleton loading={isOverviewLoading}>
+                      <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
+                        <Icon boxSize={4} color="text.subtle">
+                          <LuZap />
+                        </Icon>
+                        <Text textStyle="sm" color="text.subtle">
+                          {compact.format(appOverview?.actionsRewarded ?? 0)} {"actions"}
+                        </Text>
+                      </HStack>
+                    </Skeleton>
+                    <Skeleton loading={isOverviewLoading}>
+                      <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
+                        <Icon boxSize={4} color="text.subtle">
+                          <LuUsers />
+                        </Icon>
+                        <Text textStyle="sm" color="text.subtle">
+                          {compact.format(appOverview?.totalUniqueUserInteractions ?? 0)} {"users"}
+                        </Text>
+                      </HStack>
+                    </Skeleton>
+                  </HStack>
+                )}
+              </VStack>
             </Card.Body>
           </Card.Root>
         </NextLink>

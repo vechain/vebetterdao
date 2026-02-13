@@ -1,7 +1,8 @@
 "use client"
 
-import { Button, Heading, HStack, Icon, IconButton, Image, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, IconButton, Image, LinkBox, LinkOverlay, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import NextLink from "next/link"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCalendar, LuClock, LuPencil, LuUsers } from "react-icons/lu"
@@ -75,14 +76,19 @@ const EndorsedAppRow = ({
   return (
     <VStack bg="bg.subtle" p={4} rounded="xl" gap={3} w="full" align="stretch">
       <HStack gap={3} w="full" align="center">
-        <Image
-          src={convertUriToUrl(metadata?.logo ?? "")}
-          alt={metadata?.name ?? ""}
-          w="11"
-          h="11"
-          rounded="lg"
-          flexShrink={0}
-        />
+        <LinkBox flexShrink={0}>
+          <LinkOverlay asChild>
+            <NextLink href={`/apps/${appId}`} />
+          </LinkOverlay>
+          <Image
+            src={convertUriToUrl(metadata?.logo ?? "")}
+            alt={metadata?.name ?? ""}
+            w="11"
+            h="11"
+            rounded="lg"
+            cursor="pointer"
+          />
+        </LinkBox>
         <Text textStyle="md" fontWeight="semibold" lineClamp={1} flex={1} minW={0}>
           {metadata?.name ?? appId}
         </Text>
