@@ -20,6 +20,7 @@ import { useTranslation, Trans } from "react-i18next"
 
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
+import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
@@ -42,6 +43,7 @@ type Props = {
 export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { data: metadata } = useXAppMetadata(appId)
 
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
@@ -159,7 +161,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
       modalContentProps={{ pt: 5 }}>
       <VStack gap={6} align="flex-start" w="full">
         <HStack w="full" justify="space-between" align="center">
-          <Heading size={"2xl"}>{t("Endorsement details")}</Heading>
+          <Heading size={"2xl"}>
+            {metadata?.name ?? appId} {t("Endorsement History")}
+          </Heading>
           <EndorsementStatusCallout
             endorsementStatus={endorsementStatus}
             showDescription={false}

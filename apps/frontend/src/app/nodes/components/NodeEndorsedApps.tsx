@@ -14,6 +14,7 @@ import { useAppEndorsers } from "@/api/contracts/xApps/hooks/endorsement/useAppE
 import { useCooldownPeriod } from "@/api/contracts/xApps/hooks/endorsement/useCooldownPeriod"
 import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
+import { AppEndorsementInfoCardModal } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/AppEndorsementInfoCardModal"
 import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { XAppStatus } from "@/types/appDetails"
@@ -41,6 +42,7 @@ const EndorsedAppRow = ({
 }) => {
   const { t } = useTranslation()
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const { data: metadata } = useXAppMetadata(appId)
   const { status: endorsementStatus, score } = useAppEndorsementStatus(appId)
   const { data: rawEndorsers } = useAppEndorsers(appId)
@@ -141,11 +143,20 @@ const EndorsedAppRow = ({
               <LuClock />
             </Icon>
             <Text textStyle="sm" color="fg.warning">
-              {t("Points in cooldown")}
+              {t("In cooldown")}
             </Text>
           </HStack>
         )}
+        <Button variant="ghost" size="xs" ml="auto" onClick={() => setIsDetailsOpen(true)}>
+          {t("Details")}
+        </Button>
       </HStack>
+      <AppEndorsementInfoCardModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        appId={appId}
+        userNode={node}
+      />
       <EditEndorsementModal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}

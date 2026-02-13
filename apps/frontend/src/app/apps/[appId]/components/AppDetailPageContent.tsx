@@ -14,6 +14,7 @@ import { AppBalanceCard } from "./AppBalanceCard/AppBalanceCard"
 import { AppCreationSteps } from "./AppCreationSteps/AppCreationSteps"
 import { AppDetailOverview } from "./AppDetailOverview/AppDetailOverview"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
+import { AppRewardStatsCard } from "./AppRewardStatsCard"
 import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets/AppTweets"
 import { ProofValidationAlert } from "./ProofValidationAlert/ProofValidationAlert"
@@ -65,6 +66,7 @@ export const AppDetailPageContent = () => {
       <GridItem w="full" colSpan={1} order={[1, 1, 2]}>
         <Stack direction="column" gap={8}>
           {shouldRenderBalance && <AppBalanceCard />}
+          <AppRewardStatsCard />
           <AppEndorsementInfoCard
             endorsementScore={endorsementScore}
             endorsementStatus={endorsementStatus}
