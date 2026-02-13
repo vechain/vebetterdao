@@ -106,7 +106,9 @@ export const GalaxyLevelsCard = () => {
                 </ToggleTip>
               </HStack>
               <Text textStyle="sm" color="text.subtle">
-                {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}
+                {t(
+                  "The higher your GM level, the greater your share of the GM Rewards Pool (5% of weekly B3TR emissions). Upgrade by burning B3TR or by attaching a VeChain Node for a free boost.",
+                )}
               </Text>
             </VStack>
             {(showShortened ? gmNftsShortened : gmNfts.slice(0, maxGMLevel)).map(gmNft => {
