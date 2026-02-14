@@ -31,7 +31,7 @@ function applyReductionRules(endorsements: EndorsementSnapshot[]): void {
     const totalReducible = reducible.reduce((a, b) => a + b, 0)
     if (totalReducible === 0) continue
     const share = reducible.map(r => r / totalReducible)
-    const reduction = share.map(s => Math.round(s * totalRefund))
+    const reduction = share.map(s => Math.floor(s * totalRefund))
     let totalReduction = reduction.reduce((a, b) => a + b, 0)
     let remainingReducible = reducible.map((r, i) => r - reduction[i])
     while (totalReduction < totalRefund) {

@@ -85,6 +85,7 @@ library EndorsementUtils {
   error InvalidEndorsementIndex(uint256 nodeId, bytes32 appId);
 
   // ------------------------------- Events -------------------------------
+  event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
   event AppEndorsed(bytes32 indexed appId, uint256 indexed nodeId, address endorser, uint256 points);
   event AppUnendorsed(bytes32 indexed appId, uint256 indexed nodeId, uint256 points);
   event EndorsementsPausedUpdated(bool paused);
@@ -937,6 +938,10 @@ library EndorsementUtils {
       appsStorage._apps[appId].createdAtTimestamp = block.timestamp;
       appsStorage._appIds.push(appId);
       $._veBetterPassport.setAppSecurity(appId, PassportTypes.APP_SECURITY.LOW);
+
+      X2EarnAppsStorageTypes.AdministrationStorage storage adminStorage = X2EarnAppsStorageTypes
+        ._getAdministrationStorage();
+      emit AppAdded(appId, adminStorage._teamWalletAddress[appId], appsStorage._apps[appId].name, true);
     } else if (!isEligibleNow) {
       $._veBetterPassport.setAppSecurity(appId, $._appSecurity[appId]);
     }

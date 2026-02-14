@@ -31,6 +31,22 @@ export function loadMigrationData(): MigrationData {
   return JSON.parse(raw) as MigrationData
 }
 
+export function validateMigrationData(data: MigrationData): void {
+  const config = getMigrationConfig()
+
+  if (data.network !== config.network.name) {
+    console.error(`Network mismatch: JSON="${data.network}", running on="${config.network.name}"`)
+    process.exit(1)
+  }
+
+  if (data.x2EarnAppsAddress.toLowerCase() !== config.x2EarnAppsContractAddress.toLowerCase()) {
+    console.error(
+      `Contract address mismatch: JSON="${data.x2EarnAppsAddress}", config="${config.x2EarnAppsContractAddress}"`,
+    )
+    process.exit(1)
+  }
+}
+
 export function saveMigrationData(data: MigrationData): void {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true })
