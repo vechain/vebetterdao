@@ -3,6 +3,7 @@ import { describe, it } from "mocha"
 
 import { getOrDeployContractInstances, startNewAllocationRound, waitForCurrentRoundToEnd } from "../helpers"
 import { createNodeHolder } from "../helpers/xnodes"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("EndorsementUtils Coverage - @shard15g", function () {
   describe("Getter functions", function () {
@@ -141,8 +142,12 @@ describe("EndorsementUtils Coverage - @shard15g", function () {
     })
 
     it("getNodePointsInfo lockedPoints is 0 after cooldown expires", async function () {
+      const config = createLocalConfig()
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 0
+      config.GM_NFT_MAX_LEVEL = 1
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       // Cooldown is 0 in local config, so endorsement is not locked
