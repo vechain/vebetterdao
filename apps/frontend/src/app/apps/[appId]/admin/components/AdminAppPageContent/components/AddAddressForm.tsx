@@ -2,7 +2,7 @@ import { Button, Field, HStack, Text, VStack } from "@chakra-ui/react"
 import { UilPlus } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
@@ -34,14 +34,24 @@ export const AddAddressForm = ({
   const { data: vnsData } = useVechainDomain(resolvedAddress)
   const domain = vnsData?.domain
 
+  const [inputKey, setInputKey] = useState(0)
+  const prevAddressCount = useRef(existingAddresses.length)
+
+  useEffect(() => {
+    if (existingAddresses.length !== prevAddressCount.current) {
+      prevAddressCount.current = existingAddresses.length
+      setResolvedAddress("")
+      reset()
+      setInputKey(k => k + 1)
+    }
+  }, [existingAddresses.length, reset])
+
   const isMaxReached = maxCount !== undefined && existingAddresses.length >= maxCount
 
   const handleAdd = useCallback(() => {
     if (!resolvedAddress) return
     onAdd(resolvedAddress)
-    setResolvedAddress("")
-    reset()
-  }, [resolvedAddress, onAdd, reset])
+  }, [resolvedAddress, onAdd])
 
   if (isMaxReached) {
     return (
@@ -64,6 +74,7 @@ export const AddAddressForm = ({
       </HStack>
       <Field.Root required invalid={!isValid}>
         <WalletAddressInput
+          key={inputKey}
           onAddressResolved={(address: string | undefined) => setResolvedAddress(address ?? "")}
           customValidation={({ address }: { address?: string }) => {
             if (!address) return "Invalid address"
