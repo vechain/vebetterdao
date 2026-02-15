@@ -179,11 +179,13 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         <VStack align={"flex-start"} w="full">
           <HStack>
             <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
-              {t("Withdraw from your balance")}
+              {t("Withdraw B3TR")}
             </Text>
           </HStack>
-          <Text textStyle={{ base: "sm", md: "md" }} opacity={0.7}>
-            {t("Send your app’s funds received from allocations to your team wallet address.")}
+          <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
+            {t(
+              "Transfer B3TR from your app's available balance to your team wallet. Select a reason for transparency.",
+            )}
           </Text>
 
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
@@ -195,8 +197,8 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
               </Skeleton>
             </HStack>
 
-            <Text textStyle="md" opacity={0.7}>
-              {t("Current B3TR Balance")}
+            <Text textStyle="md" color="text.subtle">
+              {t("Available to withdraw")}
             </Text>
           </VStack>
 
@@ -226,7 +228,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text textStyle="sm">{t("You'll withdraw")}</Text>
+                      <Text textStyle="sm">{t("Amount to withdraw")}</Text>
                     </HStack>
                     <HStack w="full">
                       <B3TRIcon boxSize={"30px"} />

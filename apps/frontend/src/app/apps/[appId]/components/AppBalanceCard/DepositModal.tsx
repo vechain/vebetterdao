@@ -4,7 +4,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
 import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -130,11 +130,14 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         <VStack align={"flex-start"} w="full">
           <HStack>
             <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
-              <Trans i18nKey={"Deposit B3TR to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
+              {t("Deposit B3TR")}
             </Text>
           </HStack>
-          <Text textStyle={{ base: "sm", md: "md" }} opacity={0.7}>
-            {t("Send B3TR tokens from the connected account to the app, and use them for rewards distribution.")}
+          <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
+            {t(
+              "Send B3TR from your connected wallet to {{name}}'s balance. These funds can then be moved to the rewards pool or withdrawn later.",
+              { name: app?.name ?? "" },
+            )}
           </Text>
 
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
@@ -146,8 +149,8 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
               </Skeleton>
             </HStack>
 
-            <Text textStyle="xs" opacity={0.7}>
-              {t("App current B3TR Balance")}
+            <Text textStyle="xs" color="text.subtle">
+              {t("Current app balance")}
             </Text>
           </VStack>
 
@@ -164,7 +167,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text textStyle="sm">{t("You'll deposit")}</Text>
+                      <Text textStyle="sm">{t("Amount to deposit")}</Text>
                     </HStack>
                     <HStack w="full">
                       <B3TRIcon boxSize={"30px"} />
