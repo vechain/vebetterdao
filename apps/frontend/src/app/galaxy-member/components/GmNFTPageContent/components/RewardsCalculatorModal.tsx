@@ -34,11 +34,11 @@ export const RewardsCalculatorModal = ({ isOpen, onClose }: Props) => {
   const { data: currentRound } = useCurrentAllocationsRoundId()
   let round = currentRound
   const { data: emissionAmountCurrent } = useAllocationAmount(round ?? "")
-  if (emissionAmountCurrent?.gm == "0.0") {
+  if (Number(emissionAmountCurrent?.gm) === 0) {
     round = (Number(currentRound) + 1).toString()
   }
   const { data: emissionAmountNext } = useAllocationAmount(round ?? "")
-  const emissionAmount = emissionAmountCurrent?.gm == "0.0" ? emissionAmountNext : emissionAmountCurrent
+  const emissionAmount = Number(emissionAmountCurrent?.gm) === 0 ? emissionAmountNext : emissionAmountCurrent
   const { data: hasVoted } = useParticipatedInGovernance(account?.address ?? "")
   const emissionAmount_gmRewards = Number(emissionAmount?.gm) || 0
   const { potentialRewards, currentRewards } = usePotentialRewardsFromIndexer(

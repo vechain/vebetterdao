@@ -22,11 +22,11 @@ export const GmPoolAmountCard = () => {
 
   let round = currentRoundId
   const { data: emissionAmountCurrent } = useAllocationAmount(round ?? "")
-  if (emissionAmountCurrent?.gm == "0.0") {
+  if (Number(emissionAmountCurrent?.gm) === 0) {
     round = (Number(currentRoundId) + 1).toString()
   }
   const { data: emissionAmountNext } = useAllocationAmount(round ?? "")
-  const emissionAmount = emissionAmountCurrent?.gm == "0.0" ? emissionAmountNext : emissionAmountCurrent
+  const emissionAmount = Number(emissionAmountCurrent?.gm) === 0 ? emissionAmountNext : emissionAmountCurrent
   const emissionAmountGmRewards = Number(emissionAmount?.gm) || 0
 
   const { currentRewards } = usePotentialRewardsFromIndexer(
