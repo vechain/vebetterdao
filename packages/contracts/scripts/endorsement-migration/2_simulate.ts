@@ -80,6 +80,17 @@ async function main() {
   } catch {
     console.warn("Skipping per-node validation and all-apps list (contract not reachable)")
   }
+
+  const blacklistedApps = new Set<string>()
+  if (x2EarnApps && typeof x2EarnApps.isBlacklisted === "function") {
+    for (const appId of new Set(endorsements.map(e => e.appId))) {
+      try {
+        if (await x2EarnApps.isBlacklisted(appId)) blacklistedApps.add(appId)
+      } catch {
+        // skip
+      }
+    }
+  }
   if (x2EarnApps) {
     const nodeIds = [...new Set(endorsements.map(e => e.nodeId))]
     const nodeViolations: string[] = []
@@ -120,6 +131,17 @@ async function main() {
     }
   }
 
+  if (x2EarnApps && typeof x2EarnApps.isBlacklisted === "function") {
+    for (const appId of appIds) {
+      if (blacklistedApps.has(appId)) continue
+      try {
+        if (await x2EarnApps.isBlacklisted(appId)) blacklistedApps.add(appId)
+      } catch {
+        // skip
+      }
+    }
+  }
+
   const onChainScore = new Map<string, number>()
   if (x2EarnApps && typeof x2EarnApps.getScore === "function") {
     for (const appId of appIds) {
@@ -145,19 +167,20 @@ async function main() {
       )
     }
     const postPoints = appPostSum.get(appId) ?? 0
+    const isBlacklisted = blacklistedApps.has(appId)
     rowsCurrent.push({
       appId,
       appName: name,
       points: curPoints,
       endorsers,
-      status: curPoints >= THRESHOLD ? "endorsed" : "not endorsed",
+      status: isBlacklisted ? "blacklisted" : curPoints >= THRESHOLD ? "endorsed" : "not endorsed",
     })
     rowsPost.push({
       appId,
       appName: name,
       points: postPoints,
       endorsers,
-      status: postPoints >= THRESHOLD ? "endorsed" : "not endorsed",
+      status: isBlacklisted ? "blacklisted" : postPoints >= THRESHOLD ? "endorsed" : "not endorsed",
     })
   }
   rowsCurrent.sort((a, b) => b.points - a.points)
@@ -172,7 +195,9 @@ async function main() {
   const wStatus = 14
 
   const currentEndorsed = rowsCurrent.filter(r => r.status === "endorsed").length
+  const currentBlacklisted = rowsCurrent.filter(r => r.status === "blacklisted").length
   const postEndorsed = rowsPost.filter(r => r.status === "endorsed").length
+  const postBlacklisted = rowsPost.filter(r => r.status === "blacklisted").length
 
   const mdTable = (rows: typeof rowsCurrent) =>
     [
@@ -203,8 +228,8 @@ async function main() {
     `- Unique apps: ${appIds.length}`,
     `- maxPointsPerApp: ${maxPointsPerApp}`,
     `- Threshold: ${THRESHOLD}`,
-    `- Current: ${currentEndorsed} apps endorsed, ${rowsCurrent.length - currentEndorsed} not endorsed`,
-    `- Post-migration: ${postEndorsed} apps endorsed, ${rowsPost.length - postEndorsed} not endorsed`,
+    `- Current: ${currentEndorsed} apps endorsed, ${rowsCurrent.length - currentEndorsed - currentBlacklisted} not endorsed, ${currentBlacklisted} blacklisted`,
+    `- Post-migration: ${postEndorsed} apps endorsed, ${rowsPost.length - postEndorsed - postBlacklisted} not endorsed, ${postBlacklisted} blacklisted`,
     "",
   ].join("\n")
 
@@ -260,8 +285,12 @@ async function main() {
   console.log("Unique apps:", appIds.length)
   console.log("maxPointsPerApp:", maxPointsPerApp)
   console.log(`Threshold: ${THRESHOLD}`)
-  console.log(`Current: ${currentEndorsed} apps endorsed, ${rowsCurrent.length - currentEndorsed} not endorsed`)
-  console.log(`Post-migration: ${postEndorsed} apps endorsed, ${rowsPost.length - postEndorsed} not endorsed`)
+  console.log(
+    `Current: ${currentEndorsed} apps endorsed, ${rowsCurrent.length - currentEndorsed - currentBlacklisted} not endorsed, ${currentBlacklisted} blacklisted`,
+  )
+  console.log(
+    `Post-migration: ${postEndorsed} apps endorsed, ${rowsPost.length - postEndorsed - postBlacklisted} not endorsed, ${postBlacklisted} blacklisted`,
+  )
 }
 
 main()

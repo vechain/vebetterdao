@@ -51,7 +51,8 @@ export const GmNFTAndNodeCard = () => {
       p="6"
       color="white"
       position="relative"
-      overflow={"hidden"}>
+      overflow={"hidden"}
+      border="0">
       <Flex direction={{ base: "column-reverse", md: "row" }} gap="8">
         <Stack flex={1} gap="4">
           <Heading textStyle="xl" color="white" fontWeight="bold">
@@ -96,9 +97,13 @@ export const GmNFTAndNodeCard = () => {
 
               {userNodesInfo?.nodesManagedByUser && userNodesInfo?.nodesManagedByUser?.length > 0 ? (
                 <GmCard
-                  title={`${userNodesInfo?.nodesManagedByUser?.[0]?.metadata?.name ?? ""} #${userNodesInfo?.nodesManagedByUser?.[0]?.id?.toString() || ""}`}
+                  title={
+                    userNodesInfo?.nodesManagedByUser?.length === 1
+                      ? `${userNodesInfo.nodesManagedByUser[0]?.metadata?.name ?? ""} #${userNodesInfo.nodesManagedByUser[0]?.id?.toString() || ""}`
+                      : `${userNodesInfo?.nodesManagedByUser?.length} Nodes`
+                  }
                   subtitle={"Nodes"}
-                  footer={`Total: ${totalPoints} points`}
+                  footer={`${totalPoints} endorsement points`}
                   images={userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => node?.metadata?.image)}
                   href="/nodes"
                 />

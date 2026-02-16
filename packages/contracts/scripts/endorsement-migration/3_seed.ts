@@ -27,11 +27,26 @@ async function main() {
     process.exit(1)
   }
 
-  const total = data.endorsements.length
+  const blacklistedApps = new Set<string>()
+  if (typeof x2EarnApps.isBlacklisted === "function") {
+    for (const appId of new Set(data.endorsements.map(e => e.appId))) {
+      try {
+        if (await x2EarnApps.isBlacklisted(appId)) blacklistedApps.add(appId)
+      } catch {
+        // skip
+      }
+    }
+    if (blacklistedApps.size > 0) {
+      console.log(`Skipping ${blacklistedApps.size} blacklisted app(s)`)
+    }
+  }
+
+  const endorsements = data.endorsements.filter(e => !blacklistedApps.has(e.appId))
+  const total = endorsements.length
   let seeded = 0
   let skipped = 0
   for (let i = 0; i < total; i++) {
-    const e = data.endorsements[i]
+    const e = endorsements[i]
     const onChainPoints = Number(await x2EarnApps.getNodePointsForApp(BigInt(e.nodeId), e.appId))
     if (onChainPoints === e.points) {
       skipped++
