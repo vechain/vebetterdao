@@ -1555,12 +1555,8 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
     })
 
     it("A node holder can remove endorsement if a XAPP is blacklisted", async function () {
-      const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 0
-      config.GM_NFT_MAX_LEVEL = 1
       const { x2EarnApps, otherAccounts, owner, otherAccount, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config,
       })
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
@@ -1604,12 +1600,8 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
     })
 
     it("A node holder can unendorse one XAPP and reendorse another", async function () {
-      const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 0
-      config.GM_NFT_MAX_LEVEL = 1
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config,
       })
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
@@ -1790,8 +1782,6 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
     it("An XAPPs security should be set to NONE when they lose there endorsement", async function () {
       const config = createLocalConfig()
       config.XAPP_GRACE_PERIOD = 0
-      config.GM_NFT_MAX_LEVEL = 1
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 0
       const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1823,8 +1813,6 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
     it("An XAPPs security should be reset when an XAPP that once was endorsed gets re-endorsed", async function () {
       const config = createLocalConfig()
       config.XAPP_GRACE_PERIOD = 0
-      config.GM_NFT_MAX_LEVEL = 1
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 0
       const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -2222,12 +2210,8 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
     })
 
     it("If a user recieves an XNode that is endorsing an XAPP they can remove endorsement and endorse another XAPP", async function () {
-      const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 0
-      config.GM_NFT_MAX_LEVEL = 1
       const { x2EarnApps, otherAccounts, owner, stargateMock, stargateNftMock } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config,
       })
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
