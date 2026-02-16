@@ -378,7 +378,7 @@ export const getOrDeployContractInstances = async ({
     [[config.CREATOR_NFT_URI, owner.address], [true]],
     {
       versions: [undefined, 2],
-      logOutput: true,
+      logOutput: false,
     },
   )) as X2EarnCreator
 
