@@ -166,10 +166,9 @@ const EndorsementStep = ({
     nodeId,
     points,
     userAddress: account?.address ?? "",
-    onSuccess,
     transactionModalCustomUI: {
       waitingConfirmation: { title: t("Endorsement in progress...") },
-      success: { title: t("Endorsement successful") },
+      success: { title: t("Endorsement successful"), onSuccess },
       error: { title: t("Error endorsing app") },
     },
   })
@@ -344,7 +343,11 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
   }, [onClose])
 
   return (
-    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={handleClose}
+      showCloseButton
+      modalProps={{ unmountOnExit: false }}>
       {step === 1 || !selectedApp ? (
         <VStack gap={5} align="flex-start" w="full">
           <Heading size="xl" fontWeight="bold">
