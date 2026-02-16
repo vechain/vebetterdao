@@ -7,12 +7,12 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiAlertCircle, FiArrowDownLeft, FiArrowUpRight, FiExternalLink } from "react-icons/fi"
 
-import { Transaction } from "@/api/indexer/transactions/useTransactions"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
-import { useTreasuryTransfers } from "../hooks/useTreasuryTransfers"
+import { GMUpgradeMap, useGMUpgradeInfo } from "../hooks/useGMUpgradeInfo"
+import { TreasuryTransfer, useTreasuryTransfers } from "../hooks/useTreasuryTransfers"
 
 const config = getConfig()
 const treasuryAddress = config.treasuryContractAddress.toLowerCase()
@@ -32,14 +32,15 @@ const KNOWN_ADDRESSES: Record<string, string> = {
   [xAllocationPoolAddress]: "X-Allocation Pool",
 }
 
-type FilterCategory = "all" | "in" | "out" | "emission" | "surplus" | "other"
+type FilterCategory = "all" | "in" | "out" | "emission" | "surplus" | "gm" | "other"
 
 const FILTER_OPTIONS: { value: FilterCategory; label: string }[] = [
   { value: "all", label: "All" },
   { value: "in", label: "In" },
   { value: "out", label: "Out" },
   { value: "emission", label: "Emissions" },
-  { value: "surplus", label: "Surplus" },
+  { value: "surplus", label: "App voting surplus" },
+  { value: "gm", label: "GM Upgrades" },
   { value: "other", label: "Other" },
 ]
 
@@ -48,16 +49,17 @@ const resolveKnownName = (address?: string): string | null => {
   return KNOWN_ADDRESSES[address.toLowerCase()] ?? null
 }
 
-const isFromMint = (tx: Transaction): boolean => tx.from?.toLowerCase() === ZERO_ADDRESS
+const isFromMint = (tx: TreasuryTransfer): boolean => tx.from.toLowerCase() === ZERO_ADDRESS
 
-const resolveDirection = (tx: Transaction): "in" | "out" => {
-  if (tx.from?.toLowerCase() === treasuryAddress) return "out"
+const resolveDirection = (tx: TreasuryTransfer): "in" | "out" => {
+  if (tx.from.toLowerCase() === treasuryAddress) return "out"
   return "in"
 }
 
-const resolveCategory = (tx: Transaction): FilterCategory => {
-  const fromName = resolveKnownName(tx.from) ?? resolveKnownName(tx.origin)
+const resolveCategory = (tx: TreasuryTransfer, gmUpgrades: GMUpgradeMap): FilterCategory => {
+  if (gmUpgrades[tx.txId]) return "gm"
 
+  const fromName = resolveKnownName(tx.from)
   if (isFromMint(tx) || fromName === "Emissions") return "emission"
   if (fromName === "X-Allocation Pool") return "surplus"
 
@@ -71,8 +73,11 @@ const resolveCategory = (tx: Transaction): FilterCategory => {
   return direction
 }
 
-const resolveLabel = (tx: Transaction, direction: "in" | "out"): string => {
-  const fromName = resolveKnownName(tx.from) ?? resolveKnownName(tx.origin)
+const resolveLabel = (tx: TreasuryTransfer, direction: "in" | "out", gmUpgrades: GMUpgradeMap): string => {
+  const gmLevel = gmUpgrades[tx.txId]
+  if (gmLevel) return `GM upgrade to ${gmLevel}`
+
+  const fromName = resolveKnownName(tx.from)
   const toName = resolveKnownName(tx.to)
 
   if (isFromMint(tx) || fromName === "Emissions") return "Weekly emission"
@@ -82,22 +87,27 @@ const resolveLabel = (tx: Transaction, direction: "in" | "out"): string => {
   return direction === "out" ? "B3TR Sent" : "B3TR Received"
 }
 
-const getCounterpartyAddress = (tx: Transaction, direction: "in" | "out"): string | undefined => {
+const getCounterpartyAddress = (tx: TreasuryTransfer, direction: "in" | "out"): string | undefined => {
   if (isFromMint(tx)) return undefined
   return direction === "out" ? tx.to : tx.from
 }
 
-const formatCounterparty = (tx: Transaction, direction: "in" | "out", domainMap: Record<string, string>): string => {
+const formatCounterparty = (
+  tx: TreasuryTransfer,
+  direction: "in" | "out",
+  domainMap: Record<string, string>,
+): string => {
   if (isFromMint(tx)) return "Emissions"
   const rawAddress = getCounterpartyAddress(tx, direction)
   if (!rawAddress) return ""
   return resolveKnownName(rawAddress) ?? domainMap[rawAddress.toLowerCase()] ?? humanAddress(rawAddress, 6, 4)
 }
 
-const matchesFilter = (tx: Transaction, filter: FilterCategory): boolean => {
+const matchesFilter = (tx: TreasuryTransfer, filter: FilterCategory, gmUpgrades: GMUpgradeMap): boolean => {
   if (filter === "all") return true
-  const category = resolveCategory(tx)
-  if (filter === "in") return category === "in" || category === "emission" || category === "surplus"
+  const category = resolveCategory(tx, gmUpgrades)
+  if (filter === "in")
+    return category === "in" || category === "emission" || category === "surplus" || category === "gm"
   if (filter === "out") return category === "out"
   return category === filter
 }
@@ -111,9 +121,20 @@ export const TreasuryTransfersList = () => {
     return data?.pages.flatMap(page => page.data) ?? []
   }, [data])
 
+  const candidateTxIds = useMemo(() => {
+    return transactions
+      .filter(tx => {
+        const direction = resolveDirection(tx)
+        return direction === "in" && !isFromMint(tx) && !resolveKnownName(tx.from)
+      })
+      .map(tx => tx.txId)
+  }, [transactions])
+
+  const { data: gmUpgrades = {} } = useGMUpgradeInfo(candidateTxIds)
+
   const filtered = useMemo(() => {
-    return transactions.filter(tx => matchesFilter(tx, filter))
-  }, [transactions, filter])
+    return transactions.filter(tx => matchesFilter(tx, filter, gmUpgrades))
+  }, [transactions, filter, gmUpgrades])
 
   const unknownAddresses = useMemo(() => {
     const set = new Set<string>()
@@ -131,7 +152,8 @@ export const TreasuryTransfersList = () => {
     const map: Record<string, string> = {}
     for (let i = 0; i < unknownAddresses.length; i++) {
       const domain = vetDomains[i]
-      if (domain) map[unknownAddresses[i].toLowerCase()] = domain
+      const addr = unknownAddresses[i]
+      if (domain && addr) map[addr.toLowerCase()] = domain
     }
     return map
   }, [vetDomains, unknownAddresses])
@@ -151,7 +173,7 @@ export const TreasuryTransfersList = () => {
                 size="xs"
                 variant={filter === opt.value ? "solid" : "outline"}
                 onClick={() => setFilter(opt.value)}>
-                {t(opt.label)}
+                {t(opt.label as "All")}
               </Button>
             ))}
           </Wrap>
@@ -160,7 +182,12 @@ export const TreasuryTransfersList = () => {
             {filtered.length > 0 ? (
               <VStack gap={3} align="stretch">
                 {filtered.map(transaction => (
-                  <TreasuryTransferCard key={transaction.id} transaction={transaction} domainMap={domainMap} />
+                  <TreasuryTransferCard
+                    key={transaction.id}
+                    transaction={transaction}
+                    domainMap={domainMap}
+                    gmUpgrades={gmUpgrades}
+                  />
                 ))}
                 {hasNextPage && (
                   <Button variant="outline" onClick={() => fetchNextPage()} loading={isFetchingNextPage} mx="auto">
@@ -181,9 +208,11 @@ export const TreasuryTransfersList = () => {
 const TreasuryTransferCard = ({
   transaction,
   domainMap,
+  gmUpgrades,
 }: {
-  transaction: Transaction
+  transaction: TreasuryTransfer
   domainMap: Record<string, string>
+  gmUpgrades: GMUpgradeMap
 }) => {
   const direction = resolveDirection(transaction)
   const isOutgoing = direction === "out"
@@ -194,7 +223,7 @@ const TreasuryTransferCard = ({
     day: "numeric",
     year: "numeric",
   })
-  const label = resolveLabel(transaction, direction)
+  const label = resolveLabel(transaction, direction, gmUpgrades)
   const explorerLink = getExplorerTxLink(transaction.txId)
 
   return (

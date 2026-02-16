@@ -1,15 +1,16 @@
 "use client"
 import { Chart, useChart } from "@chakra-ui/charts"
-import { Card, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { Card, Heading, HStack, SegmentGroup, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
 
-import { useTreasuryBalanceHistory } from "../hooks/useTreasuryBalanceHistory"
+import { BalancePeriod, useTreasuryBalanceHistory } from "../hooks/useTreasuryBalanceHistory"
 
 export const TreasuryBalanceChart = () => {
   const { t } = useTranslation()
-  const { chartData, isLoading } = useTreasuryBalanceHistory()
+  const [period, setPeriod] = useState<BalancePeriod>("3M")
+  const { chartData, isLoading, isFetching } = useTreasuryBalanceHistory(period)
 
   const displayData = useMemo(() => {
     if (!chartData.length) return []
@@ -28,16 +29,22 @@ export const TreasuryBalanceChart = () => {
     <Card.Root w="full">
       <Card.Body>
         <VStack align="stretch" gap={4}>
-          <VStack align="start" gap={0}>
-            <Heading size="lg" fontWeight="bold">
-              {t("Treasury Balance")}
-            </Heading>
-            <Text textStyle="sm" color="text.muted">
-              {t("B3TR balance over time")}
-            </Text>
-          </VStack>
+          <HStack justify="space-between" align="start" flexWrap="wrap" gap={3}>
+            <VStack align="start" gap={0}>
+              <Heading size="lg" fontWeight="bold">
+                {t("Treasury Balance")}
+              </Heading>
+              <Text textStyle="sm" color="text.muted">
+                {t("B3TR balance over time")}
+              </Text>
+            </VStack>
+            <SegmentGroup.Root size="sm" value={period} onValueChange={e => setPeriod(e.value as BalancePeriod)}>
+              <SegmentGroup.Indicator />
+              <SegmentGroup.Items items={["1M", "3M", "1Y", "All"]} />
+            </SegmentGroup.Root>
+          </HStack>
 
-          <Skeleton loading={isLoading} minH="300px" rounded="md">
+          <Skeleton loading={isLoading || isFetching} minH="300px" rounded="md">
             {hasData ? (
               <Chart.Root maxH="sm" chart={chart}>
                 <AreaChart data={displayData}>
