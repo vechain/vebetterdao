@@ -1,21 +1,6 @@
-import {
-  VStack,
-  Heading,
-  Box,
-  Text,
-  Button,
-  Skeleton,
-  Card,
-  Image,
-  HStack,
-  NumberInput,
-  IconButton,
-  Alert,
-  Icon,
-  Circle,
-} from "@chakra-ui/react"
+import { VStack, Heading, Text, Button, Skeleton, Card, Image, HStack, Alert, Icon, Circle } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { ClockSolid, Minus, Plus } from "iconoir-react"
+import { ClockSolid } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -27,6 +12,7 @@ import { useEndorsementScoreThreshold } from "@/api/contracts/xApps/hooks/useEnd
 import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
+import { PointsSelector } from "@/components/PointsSelector/PointsSelector"
 import { useUnendorseApp } from "@/hooks/xApp/useUnendorseApp"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -141,14 +127,6 @@ export const UnendorseAppModal = ({ appId: appIdProp, appName, isOpen, onClose }
   const handleUnendorsement = useCallback(() => {
     unendorseAppMutation.sendTransaction()
   }, [unendorseAppMutation])
-
-  const handleMaxPoints = useCallback(() => {
-    setPoints(currentPointsForApp.toString())
-  }, [currentPointsForApp])
-
-  const handlePointsChange = useCallback((details: { value: string; valueAsNumber: number }) => {
-    setPoints(details.value || "0")
-  }, [])
 
   const isUnendorseDisabled = Number(points) <= 0
 
@@ -312,72 +290,7 @@ export const UnendorseAppModal = ({ appId: appIdProp, appName, isOpen, onClose }
                 <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
                   {t("Remove points")}
                 </Text>
-
-                <NumberInput.Root
-                  value={points}
-                  onValueChange={handlePointsChange}
-                  min={0}
-                  max={Number(currentPointsForApp)}
-                  step={1}
-                  clampValueOnBlur>
-                  <HStack gap={3}>
-                    <NumberInput.DecrementTrigger asChild>
-                      <IconButton
-                        aria-label={t("Decrease points")}
-                        rounded="full"
-                        color="actions.secondary.text"
-                        bg="actions.secondary.default"
-                        _hover={{ bg: "actions.secondary.hover" }}
-                        size="xs"
-                        boxSize={9}
-                        p={1}
-                        flexShrink={0}>
-                        <Minus strokeWidth={2} />
-                      </IconButton>
-                    </NumberInput.DecrementTrigger>
-                    <Box flex={12} position="relative">
-                      <NumberInput.Input
-                        placeholder="0"
-                        textAlign="center"
-                        borderRadius="xl"
-                        h={9}
-                        bg="bg.primary"
-                        borderColor="border.primary"
-                        borderWidth="1px"
-                        pl={3}
-                        pr={10}
-                      />
-                      <Box position="absolute" right={2.5} top="50%" transform="translateY(-50%)" pointerEvents="none">
-                        <Text color="text.default" textStyle="md">
-                          {t("pts")}
-                        </Text>
-                      </Box>
-                    </Box>
-                    <NumberInput.IncrementTrigger asChild>
-                      <IconButton
-                        aria-label={t("Increase points")}
-                        rounded="full"
-                        bg="actions.secondary.default"
-                        _hover={{ bg: "actions.secondary.hover" }}
-                        size="xs"
-                        boxSize={9}
-                        p={1}
-                        flexShrink={0}>
-                        <Plus strokeWidth={2} />
-                      </IconButton>
-                    </NumberInput.IncrementTrigger>
-                    <Button
-                      color="actions.secondary.text"
-                      bg="actions.secondary.default"
-                      _hover={{ bg: "actions.secondary.hover" }}
-                      boxSize={9}
-                      p={1}
-                      onClick={handleMaxPoints}
-                      mx="auto">
-                      {t("Max")}
-                    </Button>
-                  </HStack>
-                </NumberInput.Root>
+                <PointsSelector value={points} onChange={setPoints} max={Number(currentPointsForApp)} />
               </VStack>
             </VStack>
           </Card.Root>
