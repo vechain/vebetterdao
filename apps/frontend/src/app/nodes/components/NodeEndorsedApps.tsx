@@ -1,22 +1,17 @@
 "use client"
 
 import { Button, Heading, HStack, Icon, IconButton, Image, LinkBox, LinkOverlay, Text, VStack } from "@chakra-ui/react"
-import dayjs from "dayjs"
 import NextLink from "next/link"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCalendar, LuClock, LuPencil, LuUsers } from "react-icons/lu"
+import { LuClock, LuPencil } from "react-icons/lu"
 
-import { useAllocationsRoundsEvents } from "@/api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
-import { useAppEndorsers } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsers"
 import { useCooldownPeriod } from "@/api/contracts/xApps/hooks/endorsement/useCooldownPeriod"
-import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
 import { AppEndorsementInfoCardModal } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/AppEndorsementInfoCardModal"
 import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { XAppStatus } from "@/types/appDetails"
 import { convertUriToUrl } from "@/utils/uri"
 
@@ -44,10 +39,7 @@ const EndorsedAppRow = ({
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const { data: metadata } = useXAppMetadata(appId)
-  const { status: endorsementStatus, score } = useAppEndorsementStatus(appId)
-  const { data: rawEndorsers } = useAppEndorsers(appId)
-  const { data: maxPointsPerApp } = useMaxPointsPerApp()
-  const { data: roundsEvents } = useAllocationsRoundsEvents()
+  const { status: endorsementStatus } = useAppEndorsementStatus(appId)
   const { data: cooldownPeriodData } = useCooldownPeriod()
   const { data: currentRoundStr } = useCurrentAllocationsRoundId()
 
@@ -60,20 +52,6 @@ const EndorsedAppRow = ({
   }, [endorsedAtRound, cooldownPeriodData, currentRoundStr])
 
   const isInCooldown = cooldownRemainingRounds > BigInt(0)
-
-  const uniqueEndorsersCount = useMemo(() => {
-    if (!rawEndorsers) return 0
-    return new Set(rawEndorsers.map(a => a.toLowerCase())).size
-  }, [rawEndorsers])
-
-  const endorsedBlockNumber = useMemo(() => {
-    if (!roundsEvents?.created || !endorsedAtRound) return undefined
-    const round = roundsEvents.created.find(r => r.roundId === endorsedAtRound.toString())
-    return round ? Number(round.voteStart) : undefined
-  }, [roundsEvents, endorsedAtRound])
-
-  const endorsedTimestamp = useEstimateBlockTimestamp({ blockNumber: endorsedBlockNumber })
-  const endorsedDateLabel = endorsedTimestamp ? dayjs(endorsedTimestamp).format("MMM D") : null
 
   return (
     <VStack bg="bg.subtle" p={4} rounded="xl" gap={3} w="full" align="stretch">
@@ -112,25 +90,6 @@ const EndorsedAppRow = ({
           flex="0"
           whiteSpace="nowrap"
         />
-        {endorsedDateLabel && (
-          <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-            <Icon as={LuCalendar} boxSize={4} color="text.subtle" />
-            <Text textStyle="sm" color="text.subtle">
-              {endorsedDateLabel}
-            </Text>
-          </HStack>
-        )}
-        <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-          <Icon as={LuUsers} boxSize={4} color="text.subtle" />
-          <Text textStyle="sm" color="text.subtle">
-            {uniqueEndorsersCount}
-          </Text>
-        </HStack>
-        <HStack borderLeftWidth="1px" borderColor="border" pl={3}>
-          <Text textStyle="sm" color="text.subtle">
-            {score ?? "0"} {" / "} {maxPointsPerApp?.toString() ?? "0"} {t("pts")}
-          </Text>
-        </HStack>
         {isInCooldown && (
           <HStack gap={1} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
             <Icon as={LuClock} boxSize={4} color="fg.warning" />
