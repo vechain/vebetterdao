@@ -431,7 +431,7 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
 
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
-      {step === 1 ? (
+      {step === 1 || !selectedApp ? (
         <VStack gap={5} align="flex-start" w="full">
           <Heading size="xl" fontWeight="bold">
             {t("Endorse app")}
@@ -529,8 +529,8 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
       ) : (
         <EndorsementStep
           node={node}
-          appId={selectedApp!.id}
-          appName={selectedApp!.name}
+          appId={selectedApp.id}
+          appName={selectedApp.name}
           onBack={handleBack}
           onSuccess={handleSuccess}
         />
