@@ -132,119 +132,107 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
       let nodeVetAmountStakedArray: bigint[] = []
       let nodePointsInCooldownArray: bigint[] = []
       if (nodeIds?.length > 0) {
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodePointsArray = await executeMultipleClausesCall({
+        nodePointsArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "getNodeEndorsementScore",
+            functionName: "getNodeEndorsementScore" as const,
             args: [BigInt(nodeId)],
           })),
-        })
+        })) as bigint[]
 
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        const rawNodeMetadata = await executeMultipleClausesCall({
+        const rawNodeMetadata = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: stargateNFTAbi,
             address: stargateNFTContractAddress,
-            functionName: "tokenURI",
+            functionName: "tokenURI" as const,
             args: [BigInt(nodeId)],
           })),
-        })
+        })) as string[]
 
         nodeMetadataArray = await Promise.all(
-          (rawNodeMetadata as unknown as string[])?.map(async metadataUri => {
-            return await getIpfsMetadata<StargateNFTMetadata>(metadataUri)
-          }),
+          rawNodeMetadata.map(metadataUri => getIpfsMetadata<StargateNFTMetadata>(metadataUri)),
         )
 
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeIsXArray = await executeMultipleClausesCall({
+        nodeIsXArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: stargateNFTAbi,
             address: stargateNFTContractAddress,
-            functionName: "isXToken",
+            functionName: "isXToken" as const,
             args: [BigInt(nodeId)],
           })),
-        })
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeActiveEndorsementsArray = await executeMultipleClausesCall({
+        })) as boolean[]
+
+        nodeActiveEndorsementsArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "getNodeActiveEndorsements",
+            functionName: "getNodeActiveEndorsements" as const,
             args: [BigInt(nodeId)],
           })),
-        })
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeAvailablePointsArray = await executeMultipleClausesCall({
+        })) as { appId: string; points: bigint; endorsedAtRound: bigint }[][]
+
+        nodeAvailablePointsArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "getNodeAvailablePoints",
+            functionName: "getNodeAvailablePoints" as const,
             args: [BigInt(nodeId)],
           })),
-        })
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeGmAttachedTokenIdArray = await executeMultipleClausesCall({
+        })) as bigint[]
+
+        nodeGmAttachedTokenIdArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: galaxyMemberAbi,
             address: galaxyMemberContractAddress,
-            functionName: "getIdAttachedToNode",
+            functionName: "getIdAttachedToNode" as const,
             args: [BigInt(nodeId)],
           })),
-        })
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        const rawGetTokenResults = await executeMultipleClausesCall({
+        })) as bigint[]
+
+        const rawGetTokenResults = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: stargateNFTAbi,
             address: stargateNFTContractAddress,
-            functionName: "getToken",
+            functionName: "getToken" as const,
             args: [BigInt(nodeId)],
           })),
+        })) as { vetAmountStaked?: bigint }[]
+        nodeVetAmountStakedArray = rawGetTokenResults.map(t => {
+          const raw =
+            typeof t === "object" && t !== null && "vetAmountStaked" in t
+              ? t.vetAmountStaked
+              : Array.isArray(t)
+                ? (t as unknown as bigint[])[3]
+                : undefined
+          return raw !== undefined ? BigInt(raw) : BigInt(0)
         })
-        nodeVetAmountStakedArray =
-          (rawGetTokenResults as ({ vetAmountStaked?: bigint } | bigint[])[] | undefined)?.map(
-            (t: { vetAmountStaked?: bigint } | bigint[]) => {
-              const raw =
-                typeof t === "object" && t !== null && "vetAmountStaked" in t
-                  ? (t as { vetAmountStaked?: bigint }).vetAmountStaked
-                  : Array.isArray(t)
-                    ? t[3]
-                    : undefined
-              return raw !== undefined ? BigInt(raw) : BigInt(0)
-            },
-          ) ?? []
 
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        const rawNodePointsInfoArray = await executeMultipleClausesCall({
+        const rawNodePointsInfoArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "getNodePointsInfo",
+            functionName: "getNodePointsInfo" as const,
             args: [BigInt(nodeId)],
           })),
+        })) as { lockedPoints?: bigint }[]
+        nodePointsInCooldownArray = rawNodePointsInfoArray.map(info => {
+          const raw =
+            typeof info === "object" && info !== null && "lockedPoints" in info
+              ? info.lockedPoints
+              : Array.isArray(info)
+                ? (info as unknown as bigint[])[3]
+                : undefined
+          return raw !== undefined ? BigInt(raw) : BigInt(0)
         })
-        nodePointsInCooldownArray =
-          (rawNodePointsInfoArray as ({ lockedPoints?: bigint } | bigint[])[] | undefined)?.map(
-            (info: { lockedPoints?: bigint } | bigint[]) => {
-              const raw =
-                typeof info === "object" && info !== null && "lockedPoints" in info
-                  ? (info as { lockedPoints?: bigint }).lockedPoints
-                  : Array.isArray(info)
-                    ? info[3]
-                    : undefined
-              return raw !== undefined ? BigInt(raw) : BigInt(0)
-            },
-          ) ?? []
       }
 
       const nodesWithPoints = tokensOverview?.map((node, index) => {

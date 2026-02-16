@@ -1,22 +1,7 @@
 "use client"
 
-import {
-  Box,
-  Button,
-  Card,
-  HStack,
-  Heading,
-  Icon,
-  IconButton,
-  Image,
-  Input,
-  NativeSelect,
-  NumberInput,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Heading, Icon, Image, Input, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { Minus, Plus } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuSearch, LuUsers } from "react-icons/lu"
@@ -29,6 +14,7 @@ import { useMaxPointsPerNodePerApp } from "@/api/contracts/xApps/hooks/endorseme
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
+import { PointsSelector } from "@/components/PointsSelector/PointsSelector"
 import { useDebounce } from "@/hooks/useDebounce"
 import { useEndorseApp } from "@/hooks/xApp/useEndorseApp"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -180,21 +166,12 @@ const EndorsementStep = ({
     nodeId,
     points,
     userAddress: account?.address ?? "",
-    onSuccess,
     transactionModalCustomUI: {
       waitingConfirmation: { title: t("Endorsement in progress...") },
-      success: { title: t("Endorsement successful") },
+      success: { title: t("Endorsement successful"), onSuccess },
       error: { title: t("Error endorsing app") },
     },
   })
-
-  const handlePointsChange = useCallback((details: { value: string; valueAsNumber: number }) => {
-    setPoints(details.value || "0")
-  }, [])
-
-  const handleMaxPoints = useCallback(() => {
-    setPoints(maxEndorsePoints.toString())
-  }, [maxEndorsePoints])
 
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.sendTransaction()
@@ -273,71 +250,7 @@ const EndorsementStep = ({
             <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
               {t("Add points")}
             </Text>
-            <NumberInput.Root
-              value={points}
-              onValueChange={handlePointsChange}
-              min={0}
-              max={Number(maxEndorsePoints)}
-              step={1}
-              clampValueOnBlur>
-              <HStack gap={3}>
-                <NumberInput.DecrementTrigger asChild>
-                  <IconButton
-                    aria-label={t("Decrease points")}
-                    rounded="full"
-                    color="actions.secondary.text"
-                    bg="actions.secondary.default"
-                    _hover={{ bg: "actions.secondary.hover" }}
-                    size="xs"
-                    boxSize={9}
-                    p={1}
-                    flexShrink={0}>
-                    <Minus strokeWidth={2} />
-                  </IconButton>
-                </NumberInput.DecrementTrigger>
-                <Box flex={12} position="relative">
-                  <NumberInput.Input
-                    placeholder="0"
-                    textAlign="center"
-                    borderRadius="xl"
-                    h={9}
-                    bg="bg.primary"
-                    borderColor="border.primary"
-                    borderWidth="1px"
-                    pl={3}
-                    pr={10}
-                  />
-                  <Box position="absolute" right={2.5} top="50%" transform="translateY(-50%)" pointerEvents="none">
-                    <Text color="text.default" textStyle="md">
-                      {t("pts")}
-                    </Text>
-                  </Box>
-                </Box>
-                <NumberInput.IncrementTrigger asChild>
-                  <IconButton
-                    aria-label={t("Increase points")}
-                    rounded="full"
-                    bg="actions.secondary.default"
-                    _hover={{ bg: "actions.secondary.hover" }}
-                    size="xs"
-                    boxSize={9}
-                    p={1}
-                    flexShrink={0}>
-                    <Plus strokeWidth={2} />
-                  </IconButton>
-                </NumberInput.IncrementTrigger>
-                <Button
-                  color="actions.secondary.text"
-                  bg="actions.secondary.default"
-                  _hover={{ bg: "actions.secondary.hover" }}
-                  boxSize={9}
-                  p={1}
-                  onClick={handleMaxPoints}
-                  mx="auto">
-                  {t("Max")}
-                </Button>
-              </HStack>
-            </NumberInput.Root>
+            <PointsSelector value={points} onChange={setPoints} max={Number(maxEndorsePoints)} />
           </VStack>
         </VStack>
       </Card.Root>
@@ -430,8 +343,12 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
   }, [onClose])
 
   return (
-    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
-      {step === 1 ? (
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={handleClose}
+      showCloseButton
+      modalProps={{ unmountOnExit: false }}>
+      {step === 1 || !selectedApp ? (
         <VStack gap={5} align="flex-start" w="full">
           <Heading size="xl" fontWeight="bold">
             {t("Endorse app")}
@@ -529,8 +446,8 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
       ) : (
         <EndorsementStep
           node={node}
-          appId={selectedApp!.id}
-          appName={selectedApp!.name}
+          appId={selectedApp.id}
+          appName={selectedApp.name}
           onBack={handleBack}
           onSuccess={handleSuccess}
         />

@@ -2,7 +2,6 @@ import { Alert, Box, Button, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { v4 as uuid } from "uuid"
 
 import { BaseModal } from "@/components/BaseModal"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
@@ -101,7 +100,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
           <VStack align="stretch" gap={3}>
             {steps.map((step, index) => (
               <VStack
-                key={`step-${uuid()}`}
+                key={index}
                 flex={1}
                 bg="bg.subtle"
                 p={{ base: 3, md: 6 }}

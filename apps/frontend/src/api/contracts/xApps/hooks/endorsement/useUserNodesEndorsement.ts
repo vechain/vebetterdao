@@ -79,7 +79,7 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
 
   return nodeToApps
     .map(({ nodeIndex, appId }) => ({
-      nodeId: nodeIndex,
+      nodeId: nodeIds[nodeIndex],
       endorsedApp: appMap.get(appId)!,
     }))
     .filter(item => !!item.endorsedApp)
