@@ -14,7 +14,7 @@ export const EndorsementBanner = () => {
 
   return (
     <GenericBanner
-      title={t("New Endorsement system is here!")}
+      title={t("New endorsement system is live!")}
       description={t("Node holders can now endorse multiple apps at once, with a new points system.")}
       illustration="/assets/icons/hands-shaking.png"
       storageKey={BannerStorageKey.SHOW_ENDORSEMENT}
