@@ -34,6 +34,7 @@ interface AllocationTabsContextType {
   onToggleApp: (appId: string) => void
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
+  isCanVoteLoading: boolean
   onVoteClick: () => void
   isAutoVotingEnabled: boolean
   isAutoVotingEnabledInCurrentRound: boolean
@@ -66,7 +67,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
-  const { hasVotesAtSnapshot } = useCanUserVote(account?.address, delegateeAddress)
+  const { hasVotesAtSnapshot, isLoading: isCanVoteLoading } = useCanUserVote(account?.address, delegateeAddress)
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const { onClose: closeTxModal } = useTransactionModal()
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(
@@ -245,6 +246,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
+        isCanVoteLoading,
         onVoteClick: handleVoteClick,
         isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
         isAutoVotingEnabledInCurrentRound: isAutoVotingEnabledInCurrentRound ?? false,

@@ -109,7 +109,7 @@ const MobileAccordionWithSubRoutes = ({
   const [isOpen, setIsOpen] = useState(selected)
 
   return (
-    <VStack w="full" align="stretch" p={0}>
+    <VStack w="full" align="stretch" p={0} ml="-5px">
       <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
         <Collapsible.Trigger asChild>
           <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
@@ -223,7 +223,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
       {isLargerThan1200 ? (
         routesToRender.map(renderRoute)
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" gap="2" pt={5} w="full">
+        <MotionVStack initial={"hidden"} animate="visible" gap="6" pt={5} w="full">
           {routesToRender.map(renderRoute)}
         </MotionVStack>
       )}

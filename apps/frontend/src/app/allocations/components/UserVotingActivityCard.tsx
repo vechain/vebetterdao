@@ -76,9 +76,11 @@ const AppVoteItem = ({ app, voteWeight }: AppVoteItemProps) => (
         <Heading size={{ base: "sm", md: "md" }} color="text.default" fontWeight="semibold" lineClamp={1}>
           {app?.name || "-"}
         </Heading>
-        <Badge variant="neutral" size="sm" rounded="sm">
-          {APP_CATEGORIES.find(category => category.id === app?.metadata?.categories[0])?.name || "-"}
-        </Badge>
+        {app?.metadata?.categories?.[0] && (
+          <Badge variant="neutral" size="sm" rounded="sm">
+            {APP_CATEGORIES.find(category => category.id === app?.metadata?.categories[0])?.name}
+          </Badge>
+        )}
       </VStack>
 
       <Text textStyle="md" fontWeight="semibold">

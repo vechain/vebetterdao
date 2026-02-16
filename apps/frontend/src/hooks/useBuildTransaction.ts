@@ -45,10 +45,12 @@ export const useBuildTransaction = <ClausesParams = void>({
    */
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache && refetchQueryKeys?.length) {
-      refetchQueryKeys?.forEach(async queryKey => {
-        await queryClient.cancelQueries({ queryKey })
-        await queryClient.refetchQueries({ queryKey })
-      })
+      await Promise.all(
+        refetchQueryKeys.map(async queryKey => {
+          await queryClient.cancelQueries({ queryKey })
+          await queryClient.resetQueries({ queryKey })
+        }),
+      )
     }
 
     onSuccess?.()
@@ -102,6 +104,7 @@ export const useBuildTransaction = <ClausesParams = void>({
    */
   const sendTransaction = useCallback(
     async (props?: ClausesParams, customUI?: TransactionCustomUI) => {
+      result.resetStatus()
       const uiToUse = customUI ?? transactionModalCustomUI
       setupModal(async () => result.sendTransaction(clauseBuilder(props as any)), uiToUse)
       return result.sendTransaction(clauseBuilder(props as any))

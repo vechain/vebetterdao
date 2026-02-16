@@ -211,7 +211,7 @@ export function AppCategoryTabs({
                     appLogo={app.metadata?.logo}
                     appName={app.name}
                     appVoters={app.voters}
-                    appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
+                    appCategory={APP_CATEGORIES.find(category => app.metadata?.categories?.[0] === category.id)}
                     allocationSharePercentage={appSharesMap.get(app.id)}
                     checked={selectedAppIds?.has(app.id)}
                     onCheckedChange={() => onToggleApp?.(app.id)}
@@ -252,7 +252,7 @@ export function AppCategoryTabs({
                     appLogo={app.metadata?.logo}
                     appName={app.name}
                     appVoters={app.voters}
-                    appCategory={APP_CATEGORIES.find(category => app.metadata?.categories[0] === category.id)}
+                    appCategory={APP_CATEGORIES.find(category => app.metadata?.categories?.[0] === category.id)}
                     allocationSharePercentage={appSharesMap.get(app.id)}
                     checked={selectedAppIds?.has(app.id)}
                     onCheckedChange={() => onToggleApp?.(app.id)}

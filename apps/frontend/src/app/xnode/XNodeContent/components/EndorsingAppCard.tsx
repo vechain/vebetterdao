@@ -38,8 +38,8 @@ import { GenericAlert } from "../../../components/Alert/GenericAlert"
 export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const isEndorsingApp = node?.isEndorsingApp
-  const endorsedAppId = node?.endorsedAppId
+  const isEndorsingApp = node?.activeEndorsements?.length > 0
+  const endorsedAppId = node?.activeEndorsements?.[0]?.appId
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedAppId ?? "")
   // get app status and score
@@ -64,8 +64,8 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    return node?.isOnCooldown || !node?.currentUserIsManager
-  }, [node?.currentUserIsManager, node?.isOnCooldown])
+    return !node?.currentUserIsManager
+  }, [node?.currentUserIsManager])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
     return account?.address && !node?.currentUserIsManager
@@ -90,20 +90,14 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
           </VStack>
           {shouldDisplayCooldownAlert ? (
             <GenericAlert
-              type={node?.isOnCooldown ? "warning" : "error"}
+              type="error"
               isLoading={roundInfoLoading}
-              message={
-                node?.isOnCooldown
-                  ? t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
-                      roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-                    })
-                  : t(
-                      "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
-                      {
-                        roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-                      },
-                    )
-              }
+              message={t(
+                "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+                {
+                  roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                },
+              )}
             />
           ) : null}
           {isEndorsingApp ? (
@@ -160,7 +154,7 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
                   w="full">
                   <Flex>
                     <EndorsementDetails
-                      appId={endorsedAppId}
+                      appId={endorsedAppId ?? ""}
                       endorsementScore={endorsementScore}
                       endorsementStatus={endorsementStatus}
                       endorsementThreshold={endorsementThreshold}
@@ -205,7 +199,8 @@ export const EndorsingAppCard = ({ node }: { node: UserNode }) => {
         </VStack>
       </Card.Body>
       <UnendorseAppModal
-        xNodeId={node.id.toString()}
+        appId={endorsedAppId ?? ""}
+        appName={appMetadata?.name ?? ""}
         isOpen={unendorseAppModal.open}
         onClose={unendorseAppModal.onClose}
       />

@@ -20,7 +20,7 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: roundSnapshot, isLoading: roundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
-  const { data: roundInfo } = useAllocationsRound(roundId)
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? "",
@@ -35,9 +35,22 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
     delegateeAddress ?? parsedAccount,
     roundSnapshot,
   )
+
+  // When round data hasn't resolved yet (e.g., events still refetching after a new round),
+  // voteStart is undefined which disables useTotalVotesOnBlock (isLoading: false despite no data).
+  // Treat this as loading to prevent premature "not enough voting power" alerts.
+  const isRoundDataPending = !!roundId && !roundInfo.voteStart
+
   return {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,
-    isLoading: hasVotedLoading || stateLoading || votesAtSnapshotLoading || isPersonLoading || roundSnapshotLoading,
+    isLoading:
+      isRoundDataPending ||
+      roundInfoLoading ||
+      hasVotedLoading ||
+      stateLoading ||
+      votesAtSnapshotLoading ||
+      isPersonLoading ||
+      roundSnapshotLoading,
     hasVotesAtSnapshot,
     snapshotBlock: Number(roundInfo.voteStart),
     isPerson,

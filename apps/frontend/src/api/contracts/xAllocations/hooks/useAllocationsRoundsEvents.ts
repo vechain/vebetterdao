@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 
-import { useEvents } from "../../../../hooks/useEvents"
+import { getEventsKey, useEvents } from "../../../../hooks/useEvents"
 
 const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress
@@ -44,4 +44,5 @@ export const useAllocationsRoundsEvents = () => {
     error: rawAllocationCreatedEvents.error,
   }
 }
-export const getAllocationsRoundsEventsQueryKey = () => ["allocationRoundsEvents"]
+export const getAllocationsRoundsEventsQueryKey = () =>
+  getEventsKey({ eventName: "RoundCreated", queryOptions: { order: "asc" } })

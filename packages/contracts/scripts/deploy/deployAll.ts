@@ -1303,19 +1303,38 @@ export async function deployAll(config: ContractsConfig) {
     .then(async tx => await tx.wait())
   console.log("B3TRGovernor address set in XAllocationVoting contract")
 
+  // Set the max level for GM NFTs to 5
+  await galaxyMember
+    .connect(deployer)
+    .setMaxLevel(5)
+    .then(async tx => await tx.wait())
+  console.log("Max level for GM NFTs set to 5")
+
+  // Set the cooldown period for X2Earn nodes to 1 round
+  await x2EarnApps
+    .connect(deployer)
+    .setNodeCooldownPeriod(1)
+    .then(async tx => await tx.wait())
+  console.log("Cooldown period for X2Earn nodes set to 1 round")
+
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
-  await setupEnvironment(
-    config.NEXT_PUBLIC_APP_ENV,
-    emissions,
-    treasury,
-    x2EarnApps,
-    governor,
-    xAllocationVoting,
-    b3tr,
-    vot3,
-    stargateMock,
-  )
+  // Wrapped in try-catch so setup failures don't prevent config from being written
+  try {
+    await setupEnvironment(
+      config.NEXT_PUBLIC_APP_ENV,
+      emissions,
+      treasury,
+      x2EarnApps,
+      governor,
+      xAllocationVoting,
+      b3tr,
+      vot3,
+      stargateMock,
+    )
+  } catch (e) {
+    console.error("Setup environment failed (contracts are deployed, setup can be re-run):", e)
+  }
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time

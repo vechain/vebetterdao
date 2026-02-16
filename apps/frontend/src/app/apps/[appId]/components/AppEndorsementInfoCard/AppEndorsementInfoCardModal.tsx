@@ -9,11 +9,9 @@ import {
   Separator,
   Button,
   useDisclosure,
-  Flex,
   Card,
 } from "@chakra-ui/react"
 import { UilTrash } from "@iconscout/react-unicons"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { normalize } from "@repo/utils/HexUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -21,6 +19,8 @@ import { useMemo, useState } from "react"
 import { useTranslation, Trans } from "react-i18next"
 
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
+import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
@@ -31,7 +31,7 @@ import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
-import { EndorsersItem } from "./EndorsersItem"
+import { EndorserGroupData, EndorsersItem } from "./EndorsersItem"
 import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
 
 type Props = {
@@ -43,62 +43,108 @@ type Props = {
 export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  // App endorsement data
+  const { data: metadata } = useXAppMetadata(appId)
+
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
   const {
     score: endorsementScore,
     status: endorsementStatus,
-    threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(appId)
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
 
-  // User roles data
   const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account?.address ?? "")
 
   const isUserAppEndorser = useMemo(() => {
-    if (!appId) return false
-    return compareAddresses(userNode?.endorsedAppId, appId)
+    if (!appId || !userNode) return false
+    return userNode.activeEndorsements.some(e => e.appId === appId)
   }, [appId, userNode])
 
-  // Get currently endorsed nodes by tracking the latest state for each node
-  const currentlyEndorsedEvents = useMemo(() => {
+  const uniqueEndorsers = useMemo(() => {
+    if (!appEndorsers) return []
+    return [...new Set(appEndorsers.map(a => a.toLowerCase()))].map(
+      lower => appEndorsers.find(a => a.toLowerCase() === lower) ?? lower,
+    )
+  }, [appEndorsers])
+
+  const groupedEndorsers = useMemo<EndorserGroupData[]>(() => {
     if (!endorsementEvents) return []
 
-    // Create a map to track the latest endorsement event for each nodeId
-    const latestEventByNode = new Map<string, (typeof endorsementEvents)[0]>()
+    const nodePoints = new Map<string, bigint>()
+    const nodeEndorser = new Map<string, string>()
+    const nodeLatestBlock = new Map<string, number>()
 
-    // Process events from oldest to newest to get latest event per node
-    const sortedEvents = [...endorsementEvents]
-      .filter(event => event.appId === appId)
-      .sort((a, b) => a.blockNumber - b.blockNumber)
+    for (const event of endorsementEvents) {
+      if (event.appId !== appId) continue
 
-    sortedEvents.forEach(event => {
-      latestEventByNode.set(event.nodeId, event)
-    })
+      const current = nodePoints.get(event.nodeId) ?? BigInt(0)
+      const pts = BigInt(event.points)
 
-    // Return only nodes that are currently endorsed (latest event has endorsed:true)
-    return Array.from(latestEventByNode.values()).filter(event => event.endorsed)
+      if (event.endorsed) {
+        nodePoints.set(event.nodeId, current + pts)
+        nodeEndorser.set(event.nodeId, event.endorser)
+      } else {
+        nodePoints.set(event.nodeId, current - pts)
+      }
+
+      const existingBlock = nodeLatestBlock.get(event.nodeId) ?? 0
+      if (event.blockNumber > existingBlock) {
+        nodeLatestBlock.set(event.nodeId, event.blockNumber)
+      }
+    }
+
+    const endorserNodes = new Map<string, EndorserGroupData["nodes"]>()
+    for (const [nodeId, points] of nodePoints) {
+      if (points <= BigInt(0)) continue
+
+      const endorser = nodeEndorser.get(nodeId) ?? ""
+      const key = endorser.toLowerCase()
+      if (!endorserNodes.has(key)) endorserNodes.set(key, [])
+      endorserNodes.get(key)!.push({
+        nodeId,
+        points,
+        latestBlockNumber: nodeLatestBlock.get(nodeId) ?? 0,
+      })
+    }
+
+    return Array.from(endorserNodes.entries()).map(([key, nodes]) => ({
+      endorserAddress: nodeEndorser.get(nodes[0]?.nodeId ?? "") ?? key,
+      totalPoints: nodes.reduce((sum, n) => sum + n.points, BigInt(0)),
+      nodes,
+    }))
   }, [endorsementEvents, appId])
-  // Confirm unendorsement, unendorsement modal controls
+
+  // Admin unendorsement state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [selectedEndorserAddress, setSelectedEndorserAddress] = useState("")
   const [selectedEndorserNodeId, setSelectedEndorserNodeId] = useState("")
   const [selectedEndorserNodePoints, setSelectedEndorserNodePoints] = useState("")
+
   const resetSelectedEndorser = () => {
     setSelectedEndorserAddress("")
     setSelectedEndorserNodeId("")
     setSelectedEndorserNodePoints("")
   }
+
+  const handleRemoveNode = (nodeId: string, endorserAddress: string, points: string) => {
+    setSelectedEndorserNodeId(nodeId)
+    setSelectedEndorserAddress(endorserAddress)
+    setSelectedEndorserNodePoints(points)
+    setIsConfirmOpen(true)
+  }
+
   const handleCancelClick = () => {
     setIsConfirmOpen(false)
     resetSelectedEndorser()
   }
+
   const {
     open: isUnendorsementModalOpen,
     onOpen: onOpenUnendorsementModal,
     onClose: onCloseUnendorsementModal,
   } = useDisclosure()
+
   const handleUnendorsementSuccess = () => {
     onCloseUnendorsementModal()
     setIsConfirmOpen(false)
@@ -114,14 +160,16 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
       modalProps={{ size: "5xl" }}
       modalContentProps={{ pt: 5 }}>
       <VStack gap={6} align="flex-start" w="full">
-        <HStack w="full" justify="space-between">
-          <Heading size={"2xl"}>{t("Endorsement history")}</Heading>
-          <Flex>
-            <EndorsementStatusCallout
-              endorsementStatus={endorsementStatus}
-              showDescription={false}
-              padding={2}></EndorsementStatusCallout>
-          </Flex>
+        <HStack w="full" justify="space-between" align="center">
+          <Heading size={"2xl"}>
+            {metadata?.name ?? appId} {t("Endorsement History")}
+          </Heading>
+          <EndorsementStatusCallout
+            endorsementStatus={endorsementStatus}
+            showDescription={false}
+            padding={2}
+            flex="none"
+          />
         </HStack>
 
         <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} gap={5}>
@@ -135,11 +183,12 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                 appId={appId}
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
-                endorsementThreshold={endorsementThreshold}
+                endorsementThreshold={maxPointsPerAppValue?.toString()}
                 isEndorsementStatusLoading={isEndorsementStatusLoading}
                 isUserAppEndorser={isUserAppEndorser ?? false}
-                endorsers={appEndorsers || []}
-                isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
+                endorsers={uniqueEndorsers}
+                isAppEndorsersLoading={isAppEndorsersLoading}
+              />
             </Stack>
             <Separator hideFrom="md" w="full" />
             <Card.Root variant="primary" p="4" gap={4} w={"full"} height={["auto", "auto", "40vh"]} overflowY="auto">
@@ -150,7 +199,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               </Card.Header>
 
               <Card.Body p={0}>
-                {currentlyEndorsedEvents.length ? (
+                {groupedEndorsers.length ? (
                   <VStack flex={1} w="full" overflowY="auto" h="full" gap={2}>
                     {isAppAdmin && isConfirmOpen && (
                       <VStack
@@ -192,15 +241,12 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                       </VStack>
                     )}
 
-                    {currentlyEndorsedEvents.map(event => (
+                    {groupedEndorsers.map(group => (
                       <EndorsersItem
-                        key={`${event.nodeId}-${event.txOrigin}-${event.blockNumber}`}
+                        key={group.endorserAddress}
+                        group={group}
                         isAppAdmin={isAppAdmin || false}
-                        event={event}
-                        setIsConfirmOpen={setIsConfirmOpen}
-                        setSelectedEndorserAddress={setSelectedEndorserAddress}
-                        setSelectedEndorserNodeId={setSelectedEndorserNodeId}
-                        setSelectedEndorserNodePoints={setSelectedEndorserNodePoints}
+                        onRemoveNode={handleRemoveNode}
                       />
                     ))}
                   </VStack>
