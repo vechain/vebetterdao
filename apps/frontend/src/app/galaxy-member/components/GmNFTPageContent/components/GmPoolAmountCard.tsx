@@ -1,5 +1,6 @@
 import { Card, Heading, HStack, Text, VStack, Flex } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useGetUserGMs } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
@@ -20,12 +21,9 @@ export const GmPoolAmountCard = () => {
   const usersGM = userGms?.find(gm => gm.isSelected)
   const { data: gmLevelOverview } = useGMLevelsOverview()
 
-  let round = currentRoundId
-  const { data: emissionAmountCurrent } = useAllocationAmount(round ?? "")
-  if (Number(emissionAmountCurrent?.gm) === 0) {
-    round = (Number(currentRoundId) + 1).toString()
-  }
-  const { data: emissionAmountNext } = useAllocationAmount(round ?? "")
+  const nextRoundId = useMemo(() => (Number(currentRoundId) + 1).toString(), [currentRoundId])
+  const { data: emissionAmountCurrent } = useAllocationAmount(currentRoundId ?? "")
+  const { data: emissionAmountNext } = useAllocationAmount(nextRoundId)
   const emissionAmount = Number(emissionAmountCurrent?.gm) === 0 ? emissionAmountNext : emissionAmountCurrent
   const emissionAmountGmRewards = Number(emissionAmount?.gm) || 0
 
