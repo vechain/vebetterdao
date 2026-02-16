@@ -73,6 +73,12 @@ export const NodeCard = ({ node }: NodeCardProps) => {
                   {": "}
                   {compactFormatter.format(Number(formatEther(node.vetAmountStaked)))}
                   {" VET"}
+                  {node.currentUserIsManager && !node.currentUserIsOwner && (
+                    <>
+                      {" • "}
+                      {t("Managed")}
+                    </>
+                  )}
                 </Text>
               </VStack>
             </HStack>

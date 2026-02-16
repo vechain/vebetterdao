@@ -1,18 +1,6 @@
 "use client"
 
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  HStack,
-  Heading,
-  Icon,
-  IconButton,
-  NumberInput,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Alert, Button, Card, HStack, Heading, Icon, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { ClockSolid, Minus, Plus } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
@@ -27,6 +15,7 @@ import { useMaxPointsPerNodePerApp } from "@/api/contracts/xApps/hooks/endorseme
 import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
+import { PointsSelector } from "@/components/PointsSelector/PointsSelector"
 import { useEndorseApp } from "@/hooks/xApp/useEndorseApp"
 import { useUnendorseApp } from "@/hooks/xApp/useUnendorseApp"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -133,14 +122,6 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
     [isInCooldown],
   )
 
-  const handlePointsChange = useCallback((details: { value: string; valueAsNumber: number }) => {
-    setPoints(details.value || "0")
-  }, [])
-
-  const handleMaxPoints = useCallback(() => {
-    setPoints(maxForCurrentMode.toString())
-  }, [maxForCurrentMode])
-
   const handleSubmit = useCallback(() => {
     if (mode === "add") {
       endorseAppMutation.sendTransaction()
@@ -246,71 +227,7 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
               </HStack>
             )}
 
-            <NumberInput.Root
-              value={points}
-              onValueChange={handlePointsChange}
-              min={0}
-              max={maxForCurrentMode}
-              step={1}
-              clampValueOnBlur>
-              <HStack gap={3}>
-                <NumberInput.DecrementTrigger asChild>
-                  <IconButton
-                    aria-label={t("Decrease points")}
-                    rounded="full"
-                    color="actions.secondary.text"
-                    bg="actions.secondary.default"
-                    _hover={{ bg: "actions.secondary.hover" }}
-                    size="xs"
-                    boxSize={9}
-                    p={1}
-                    flexShrink={0}>
-                    <Minus strokeWidth={2} />
-                  </IconButton>
-                </NumberInput.DecrementTrigger>
-                <Box flex={12} position="relative">
-                  <NumberInput.Input
-                    placeholder="0"
-                    textAlign="center"
-                    borderRadius="xl"
-                    h={9}
-                    bg="bg.primary"
-                    borderColor="border.primary"
-                    borderWidth="1px"
-                    pl={3}
-                    pr={10}
-                  />
-                  <Box position="absolute" right={2.5} top="50%" transform="translateY(-50%)" pointerEvents="none">
-                    <Text color="text.default" textStyle="md">
-                      {t("pts")}
-                    </Text>
-                  </Box>
-                </Box>
-                <NumberInput.IncrementTrigger asChild>
-                  <IconButton
-                    aria-label={t("Increase points")}
-                    rounded="full"
-                    bg="actions.secondary.default"
-                    _hover={{ bg: "actions.secondary.hover" }}
-                    size="xs"
-                    boxSize={9}
-                    p={1}
-                    flexShrink={0}>
-                    <Plus strokeWidth={2} />
-                  </IconButton>
-                </NumberInput.IncrementTrigger>
-                <Button
-                  color="actions.secondary.text"
-                  bg="actions.secondary.default"
-                  _hover={{ bg: "actions.secondary.hover" }}
-                  boxSize={9}
-                  p={1}
-                  onClick={handleMaxPoints}
-                  mx="auto">
-                  {t("Max")}
-                </Button>
-              </HStack>
-            </NumberInput.Root>
+            <PointsSelector value={points} onChange={setPoints} max={maxForCurrentMode} />
           </VStack>
         </Card.Root>
 

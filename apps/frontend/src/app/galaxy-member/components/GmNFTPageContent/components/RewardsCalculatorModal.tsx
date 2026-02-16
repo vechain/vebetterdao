@@ -32,13 +32,12 @@ export const RewardsCalculatorModal = ({ isOpen, onClose }: Props) => {
   const { data: gmLevelOverview } = useGMLevelsOverview()
   const [selectedGMLevel, setSelectedGMLevel] = useState<string>()
   const { data: currentRound } = useCurrentAllocationsRoundId()
-  let round = currentRound
-  const { data: emissionAmountCurrent } = useAllocationAmount(round ?? "")
-  if (emissionAmountCurrent?.gm == "0.0") {
-    round = (Number(currentRound) + 1).toString()
-  }
-  const { data: emissionAmountNext } = useAllocationAmount(round ?? "")
-  const emissionAmount = emissionAmountCurrent?.gm == "0.0" ? emissionAmountNext : emissionAmountCurrent
+  const nextRound = useMemo(() => (Number(currentRound) + 1).toString(), [currentRound])
+  const { data: emissionAmountCurrent } = useAllocationAmount(currentRound ?? "")
+  const { data: emissionAmountNext } = useAllocationAmount(nextRound)
+  const isCurrentRoundEmpty = Number(emissionAmountCurrent?.gm) === 0
+  const emissionAmount = isCurrentRoundEmpty ? emissionAmountNext : emissionAmountCurrent
+  const effectiveRound = isCurrentRoundEmpty ? nextRound : currentRound
   const { data: hasVoted } = useParticipatedInGovernance(account?.address ?? "")
   const emissionAmount_gmRewards = Number(emissionAmount?.gm) || 0
   const { potentialRewards, currentRewards } = usePotentialRewardsFromIndexer(
@@ -80,7 +79,7 @@ export const RewardsCalculatorModal = ({ isOpen, onClose }: Props) => {
               <Text textStyle="sm" color="text.subtle">
                 {t(
                   "What you could earn if you upgraded to this GM level. Estimates are based on round {{round}} data.",
-                  { round: round },
+                  { round: effectiveRound },
                 )}
               </Text>
             </Card.Body>
