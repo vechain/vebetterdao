@@ -1,13 +1,16 @@
-import { Card, Heading, HStack, Text, VStack, Flex } from "@chakra-ui/react"
+import { Card, Heading, HStack, Text, VStack, Flex, Icon } from "@chakra-ui/react"
+import { UilArrowCircleUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useGetUserGMs } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { usePotentialRewardsFromIndexer } from "../../../../../api/contracts/rewards/hooks/usePotentialRewardsFromIndexer"
 import { useAllocationAmount } from "../../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
 import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useGMLevelsOverview } from "../../../../../api/indexer/gm/useGMLevelsOverview"
+import { gmNfts } from "../../../../../constants/gmNfts"
 import { useGMPoolAmount } from "../../../../../hooks/galaxyMember/useGMPoolAmount"
 
 const compactFormatter = getCompactFormatter(2)
@@ -20,6 +23,12 @@ export const GmPoolAmountCard = () => {
   const { data: userGms } = useGetUserGMs()
   const usersGM = userGms?.find(gm => gm.isSelected)
   const { data: gmLevelOverview } = useGMLevelsOverview()
+  const { data: maxGMLevel } = useGMMaxLevel()
+
+  const currentLevelNum = Number(usersGM?.tokenLevel ?? 0)
+  const isMaxLevel = currentLevelNum >= (maxGMLevel ?? 0)
+  const nextLevelStr = (currentLevelNum + 1).toString()
+  const nextLevelNft = gmNfts.find(nft => nft.level === nextLevelStr)
 
   const nextRoundId = useMemo(() => (Number(currentRoundId) + 1).toString(), [currentRoundId])
   const { data: emissionAmountCurrent } = useAllocationAmount(currentRoundId ?? "")
@@ -33,6 +42,15 @@ export const GmPoolAmountCard = () => {
     usersGM?.tokenLevel ?? "",
     usersGM?.tokenLevel,
   )
+
+  const { potentialRewards: nextLevelRewards } = usePotentialRewardsFromIndexer(
+    gmLevelOverview || [],
+    emissionAmountGmRewards,
+    nextLevelStr,
+    usersGM?.tokenLevel,
+  )
+
+  const rewardIncrease = nextLevelRewards - currentRewards
 
   return (
     <Card.Root variant="primary" border="sm" borderColor="border.active">
@@ -52,6 +70,20 @@ export const GmPoolAmountCard = () => {
               {t("Your estimated rewards:")} {compactFormatter.format(currentRewards)} {"B3TR"}
             </Text>
           </HStack>
+
+          {!isMaxLevel && nextLevelNft && rewardIncrease > 0 && (
+            <VStack align="stretch" gap={3} pt={2} borderTopWidth="1px" borderColor="border.primary">
+              <HStack gap={2}>
+                <Icon as={UilArrowCircleUp} boxSize="18px" color="brand.secondary" />
+                <Text textStyle="sm" color="brand.secondary" fontWeight="semibold">
+                  {t("Upgrade to {{name}} to earn ~{{amount}} more B3TR per round", {
+                    name: nextLevelNft.name,
+                    amount: compactFormatter.format(rewardIncrease),
+                  })}
+                </Text>
+              </HStack>
+            </VStack>
+          )}
         </VStack>
       </Card.Body>
     </Card.Root>
