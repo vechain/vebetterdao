@@ -1,4 +1,18 @@
-import { Card, HStack, Icon, Image, LinkBox, LinkOverlay, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Card,
+  Flex,
+  HStack,
+  Icon,
+  Image,
+  LinkBox,
+  LinkOverlay,
+  Separator,
+  SimpleGrid,
+  Skeleton,
+  Tag,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 import { useMemo } from "react"
@@ -35,6 +49,9 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
     return earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
   }, [earningsData])
 
+  const showEndorsementStatus =
+    endorsementStatus !== XAppStatus.UNKNOWN && endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE
+
   return (
     <LinkBox asChild>
       <LinkOverlay asChild>
@@ -52,25 +69,33 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                     objectFit="contain"
                     flexShrink={0}
                   />
-                  <Skeleton loading={appMetadataLoading} flex={1} minW={0}>
-                    <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
-                      {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                    </Text>
-                  </Skeleton>
-                  {isNewApp && (
-                    <HStack p={1} px={2} borderRadius="8px" backgroundColor="status.positive.primary" flexShrink={0}>
-                      <Icon color="status.positive.subtle" boxSize={4}>
-                        <NewAppIcon />
-                      </Icon>
-                      <Text textStyle="sm" fontWeight="semibold" color="status.positive.subtle">
-                        {t("New!")}
-                      </Text>
+                  <Flex
+                    direction="row"
+                    align="center"
+                    justify="space-between"
+                    gap={2}
+                    flex={1}
+                    minW={0}
+                    flexWrap="wrap">
+                    <HStack gap={2} minW={0}>
+                      <Skeleton loading={appMetadataLoading} minW={0}>
+                        <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                          {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                        </Text>
+                      </Skeleton>
+                      {isNewApp && (
+                        <Tag.Root size="sm" variant="solid" colorPalette="green" fontWeight="semibold" flexShrink={0}>
+                          <Tag.StartElement>
+                            <Icon color="info.default" boxSize={3}>
+                              <NewAppIcon />
+                            </Icon>
+                          </Tag.StartElement>
+                          <Tag.Label>{t("New!")}</Tag.Label>
+                        </Tag.Root>
+                      )}
                     </HStack>
-                  )}
-
-                  {endorsementStatus !== XAppStatus.UNKNOWN &&
-                    endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && (
-                      <Skeleton loading={isEndorsementStatusLoading}>
+                    {showEndorsementStatus && (
+                      <Skeleton loading={isEndorsementStatusLoading} flexShrink={0}>
                         <EndorsementStatusCallout
                           endorsementStatus={endorsementStatus}
                           appId={appId}
@@ -78,9 +103,11 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                           padding={1}
                           boxSize={4}
                           textStyle="sm"
+                          flex="initial"
                         />
                       </Skeleton>
                     )}
+                  </Flex>
                 </HStack>
 
                 <Skeleton loading={appMetadataLoading}>
@@ -89,41 +116,42 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                   </Text>
                 </Skeleton>
 
+                <Separator />
                 {showStats && (
-                  <HStack gap={3} w="full" align="center" flexWrap="wrap">
+                  <SimpleGrid columns={{ base: 2, md: 4 }} gap={2} w="full">
                     <Skeleton loading={isEarningsLoading}>
                       <HStack gap={2} align="center">
-                        <Icon as={LuWallet} boxSize={4} color="text.subtle" />
-                        <Text textStyle="sm" color="text.subtle">
+                        <Icon as={LuWallet} boxSize={4} color="text.subtle" flexShrink={0} />
+                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
                           {compact.format(totalB3trReceived)} {"B3TR"}
                         </Text>
                       </HStack>
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
-                      <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-                        <Icon as={LuCoins} boxSize={4} color="text.subtle" />
-                        <Text textStyle="sm" color="text.subtle">
-                          {compact.format(appOverview?.totalRewardAmount ?? 0)} {"B3TR distributed"}
+                      <HStack gap={2} align="center">
+                        <Icon as={LuCoins} boxSize={4} color="text.subtle" flexShrink={0} />
+                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
+                          {compact.format(appOverview?.totalRewardAmount ?? 0)} {"distributed"}
                         </Text>
                       </HStack>
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
-                      <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-                        <Icon as={LuZap} boxSize={4} color="text.subtle" />
-                        <Text textStyle="sm" color="text.subtle">
+                      <HStack gap={2} align="center">
+                        <Icon as={LuZap} boxSize={4} color="text.subtle" flexShrink={0} />
+                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
                           {compact.format(appOverview?.actionsRewarded ?? 0)} {"actions"}
                         </Text>
                       </HStack>
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
-                      <HStack gap={2} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-                        <Icon as={LuUsers} boxSize={4} color="text.subtle" />
-                        <Text textStyle="sm" color="text.subtle">
+                      <HStack gap={2} align="center">
+                        <Icon as={LuUsers} boxSize={4} color="text.subtle" flexShrink={0} />
+                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
                           {compact.format(appOverview?.totalUniqueUserInteractions ?? 0)} {"users"}
                         </Text>
                       </HStack>
                     </Skeleton>
-                  </HStack>
+                  </SimpleGrid>
                 )}
               </VStack>
             </Card.Body>
