@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, HStack, IconButton, NumberInput, Text } from "@chakra-ui/react"
+import { Box, HStack, IconButton, NumberInput, Text } from "@chakra-ui/react"
 import { Minus, Plus } from "iconoir-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -21,68 +21,54 @@ export const PointsSelector = ({ value, onChange, max }: PointsSelectorProps) =>
     [onChange],
   )
 
-  const handleMax = useCallback(() => {
-    onChange(max.toString())
-  }, [onChange, max])
-
   return (
     <NumberInput.Root value={value} onValueChange={handleChange} min={0} max={max} step={1} clampValueOnBlur>
       <HStack gap={3}>
-        <NumberInput.DecrementTrigger asChild>
-          <IconButton
-            aria-label={t("Decrease points")}
-            rounded="full"
-            color="actions.secondary.text"
-            bg="actions.secondary.default"
-            _hover={{ bg: "actions.secondary.hover" }}
-            size="xs"
-            boxSize={9}
-            p={1}
-            flexShrink={0}>
-            <Minus strokeWidth={2} />
-          </IconButton>
-        </NumberInput.DecrementTrigger>
-        <Box flex={12} position="relative">
-          <NumberInput.Input
-            placeholder="0"
-            textAlign="center"
-            borderRadius="xl"
-            h={9}
-            bg="bg.primary"
-            borderColor="border.primary"
-            borderWidth="1px"
-            pl={3}
-            pr={10}
-          />
-          <Box position="absolute" right={2.5} top="50%" transform="translateY(-50%)" pointerEvents="none">
-            <Text color="text.default" textStyle="md">
-              {t("pts")}
-            </Text>
+        <HStack gap={0} flex={1} borderWidth="1px" borderColor="border" rounded="xl" overflow="hidden" bg="bg.panel">
+          <NumberInput.DecrementTrigger asChild>
+            <IconButton
+              aria-label={t("Decrease points")}
+              variant="ghost"
+              rounded="none"
+              minW="44px"
+              h="44px"
+              color="fg"
+              _hover={{ bg: "bg.muted" }}
+              flexShrink={0}>
+              <Minus strokeWidth={2} />
+            </IconButton>
+          </NumberInput.DecrementTrigger>
+          <Box flex={5} position="relative" borderInlineWidth="1px" borderColor="border">
+            <NumberInput.Input
+              placeholder="0"
+              textAlign="center"
+              border="none"
+              h="44px"
+              bg="transparent"
+              pl={3}
+              pr={10}
+              _focus={{ outline: "none", boxShadow: "none" }}
+            />
+            <Box position="absolute" right={3} top="50%" transform="translateY(-50%)" pointerEvents="none">
+              <Text color="fg.muted" textStyle="sm">
+                {t("pts")}
+              </Text>
+            </Box>
           </Box>
-        </Box>
-        <NumberInput.IncrementTrigger asChild>
-          <IconButton
-            aria-label={t("Increase points")}
-            rounded="full"
-            bg="actions.secondary.default"
-            _hover={{ bg: "actions.secondary.hover" }}
-            size="xs"
-            boxSize={9}
-            p={1}
-            flexShrink={0}>
-            <Plus strokeWidth={2} />
-          </IconButton>
-        </NumberInput.IncrementTrigger>
-        <Button
-          color="actions.secondary.text"
-          bg="actions.secondary.default"
-          _hover={{ bg: "actions.secondary.hover" }}
-          boxSize={9}
-          p={1}
-          onClick={handleMax}
-          mx="auto">
-          {t("Max")}
-        </Button>
+          <NumberInput.IncrementTrigger asChild>
+            <IconButton
+              aria-label={t("Increase points")}
+              variant="ghost"
+              rounded="none"
+              minW="44px"
+              h="44px"
+              color="fg"
+              _hover={{ bg: "bg.muted" }}
+              flexShrink={0}>
+              <Plus strokeWidth={2} />
+            </IconButton>
+          </NumberInput.IncrementTrigger>
+        </HStack>
       </HStack>
     </NumberInput.Root>
   )
