@@ -86,6 +86,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                     <NodeRow
                       key={node.id.toString()}
                       node={node}
+                      gmId={gm.tokenId}
                       currentGMLevel={gm.tokenLevel}
                       isAttachedToCurrentGM={attachedNode?.id === node.id}
                       isAttachedToOtherGM={nodeIdsAttachedToOtherGMs.has(node.id.toString())}

@@ -1,6 +1,7 @@
 import { Badge, Button, Card, Image, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
+import { useGetLevelAfterAttachingNode } from "@/app/apps/hooks/useGetLevelAfterAttachingNode"
 import { Tooltip } from "@/components/ui/tooltip"
 import { gmNfts } from "@/constants/gmNfts"
 
@@ -9,6 +10,7 @@ import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
 
 type Props = {
   node: UserNode
+  gmId: string
   currentGMLevel: string
   isAttachedToCurrentGM: boolean
   isAttachedToOtherGM: boolean
@@ -19,6 +21,7 @@ type Props = {
 
 export const NodeRow = ({
   node,
+  gmId,
   currentGMLevel,
   isAttachedToCurrentGM,
   isAttachedToOtherGM,
@@ -28,11 +31,14 @@ export const NodeRow = ({
 }: Props) => {
   const { t } = useTranslation()
   const { data: freeLevel } = useGetNodeToFreeLevel(node.levelId)
+  const { data: levelAfterAttaching } = useGetLevelAfterAttachingNode({
+    tokenId: gmId,
+    nodeTokenId: node.id.toString(),
+  })
 
-  const freeLevelNum = Number(freeLevel ?? "0")
-  const currentLevelNum = Number(currentGMLevel)
-  const canUpgrade = freeLevelNum > currentLevelNum
+  const canUpgrade = currentGMLevel !== levelAfterAttaching
   const freeLevelName = gmNfts.find(nft => nft.level === freeLevel)?.name
+  const freeLevelNum = Number(freeLevel ?? "0")
 
   return (
     <Card.Root variant="subtle" alignItems="center" flexDirection="row" gap={3} p="4" rounded="xl">
@@ -84,14 +90,20 @@ export const NodeRow = ({
           </span>
         </Tooltip>
       ) : (
-        <Tooltip disabled={!hasAttachedNode} content={t("Only one node can be attached to a GM")}>
+        <Tooltip
+          disabled={!hasAttachedNode && canUpgrade}
+          content={
+            hasAttachedNode
+              ? t("Only one node can be attached to a GM")
+              : t("This node does not provide a free upgrade for your current GM level.")
+          }>
           <span>
             <Button
-              disabled={hasAttachedNode}
+              disabled={hasAttachedNode || !canUpgrade}
               variant={canUpgrade ? "primary" : "secondary"}
               size="sm"
               onClick={onAttach}>
-              {canUpgrade ? t("Attach") : t("Attach")}
+              {t("Attach")}
             </Button>
           </span>
         </Tooltip>

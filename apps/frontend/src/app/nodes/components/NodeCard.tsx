@@ -73,6 +73,7 @@ const CompactNodeCard = ({ node }: NodeCardProps) => {
               "This node level does not provide endorsement power or GM NFT benefits. Upgrade to at least a Strength node to unlock these features.",
             )}
           </Text>
+          <NodeGMSection node={node} />
         </VStack>
       </CardBody>
     </CardRoot>
