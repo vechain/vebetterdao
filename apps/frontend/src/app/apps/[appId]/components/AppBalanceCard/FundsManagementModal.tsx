@@ -287,7 +287,8 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                       {t("Current {{value}}: ", {
                         value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "App Balance",
                       })}
-                      {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}
+                      {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}{" "}
+                      {"B3TR"}
                     </Text>
                   </VStack>
                 </VStack>
