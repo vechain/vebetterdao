@@ -33,12 +33,61 @@ type NodeCardProps = {
   node: UserNode
 }
 
+const NodeHeader = ({ node }: { node: UserNode }) => {
+  const { t } = useTranslation()
+  return (
+    <HStack gap={4} align="start" minW={0}>
+      <Image src={node?.metadata?.image} alt={node?.metadata?.name ?? ""} w="16" h="16" rounded="lg" flexShrink={0} />
+      <VStack align="start" gap={2} minW={0}>
+        <Heading textStyle="xl" fontWeight="bold">
+          {node?.metadata?.name ?? ""} {" #" + node?.id?.toString()}
+        </Heading>
+        <Text textStyle="sm" color="text.subtle">
+          {node?.type}
+          {" • "}
+          {t("Cost")}
+          {": "}
+          {compactFormatter.format(Number(formatEther(node.vetAmountStaked)))}
+          {" VET"}
+          {node.currentUserIsManager && !node.currentUserIsOwner && (
+            <>
+              {" • "}
+              {t("Managed")}
+            </>
+          )}
+        </Text>
+      </VStack>
+    </HStack>
+  )
+}
+
+const CompactNodeCard = ({ node }: NodeCardProps) => {
+  const { t } = useTranslation()
+  return (
+    <CardRoot variant="primary" w="full" opacity={0.7}>
+      <CardBody>
+        <VStack align="stretch" gap={3}>
+          <NodeHeader node={node} />
+          <Text textStyle="sm" color="text.subtle">
+            {t(
+              "This node level does not provide endorsement power or GM NFT benefits. Upgrade to at least a Strength node to unlock these features.",
+            )}
+          </Text>
+        </VStack>
+      </CardBody>
+    </CardRoot>
+  )
+}
+
 export const NodeCard = ({ node }: NodeCardProps) => {
   const { t } = useTranslation()
   const historyModal = useDisclosure()
   const endorseModal = useDisclosure()
 
   const hasEndorsementPower = node.endorsementScore > 0n
+
+  if (!hasEndorsementPower) return <CompactNodeCard node={node} />
+
   const usedPoints = node.activeEndorsements.reduce((sum, e) => sum + e.points, 0n)
   const totalPoints = Number(node.endorsementScore)
   const usedPercent = totalPoints > 0 ? (Number(usedPoints) / totalPoints) * 100 : 0
@@ -53,71 +102,39 @@ export const NodeCard = ({ node }: NodeCardProps) => {
             align={{ base: "stretch", md: "flex-end" }}
             justify={{ md: "space-between" }}
             w="full">
-            <HStack gap={4} align="start" minW={0}>
-              <Image
-                src={node?.metadata?.image}
-                alt={node?.metadata?.name ?? ""}
-                w="16"
-                h="16"
-                rounded="lg"
-                flexShrink={0}
-              />
-              <VStack align="start" gap={2} minW={0}>
-                <Heading textStyle="xl" fontWeight="bold">
-                  {node?.metadata?.name ?? ""} {" #" + node?.id?.toString()}
-                </Heading>
-                <Text textStyle="sm" color="text.subtle">
-                  {node?.type}
-                  {" • "}
-                  {t("Cost")}
-                  {": "}
-                  {compactFormatter.format(Number(formatEther(node.vetAmountStaked)))}
-                  {" VET"}
-                  {node.currentUserIsManager && !node.currentUserIsOwner && (
-                    <>
-                      {" • "}
-                      {t("Managed")}
-                    </>
-                  )}
-                </Text>
-              </VStack>
-            </HStack>
-            {hasEndorsementPower && (
-              <VStack gap={2} align={{ base: "stretch", md: "end" }} minW={{ md: "240px" }}>
-                <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold" flexWrap="wrap" gap={2}>
-                  <HStack gap={1}>
-                    <Text color="text.subtle">
-                      {t("Used")}
-                      {": "}
-                    </Text>
-                    <Text>
-                      {usedPoints.toString()} {t("pts")}
-                    </Text>
-                  </HStack>
-                  <HStack gap={1}>
-                    <Text color="text.subtle">
-                      {t("Available")}
-                      {": "}
-                    </Text>
-                    <Text>
-                      {node.availablePoints.toString()} {t("pts")}
-                    </Text>
-                  </HStack>
+            <NodeHeader node={node} />
+            <VStack gap={2} align={{ base: "stretch", md: "end" }} minW={{ md: "240px" }}>
+              <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold" flexWrap="wrap" gap={2}>
+                <HStack gap={1}>
+                  <Text color="text.subtle">
+                    {t("Used")}
+                    {": "}
+                  </Text>
+                  <Text>
+                    {usedPoints.toString()} {t("pts")}
+                  </Text>
                 </HStack>
-                <Flex
-                  w="full"
-                  h="2"
-                  borderRadius="full"
-                  overflow="hidden"
-                  bg="bg.muted"
-                  borderWidth="1px"
-                  borderColor="border.primary">
-                  {usedPercent > 0 && (
-                    <Box w={`${usedPercent}%`} h="full" bg="status.positive.primary" flexShrink={0} />
-                  )}
-                </Flex>
-              </VStack>
-            )}
+                <HStack gap={1}>
+                  <Text color="text.subtle">
+                    {t("Available")}
+                    {": "}
+                  </Text>
+                  <Text>
+                    {node.availablePoints.toString()} {t("pts")}
+                  </Text>
+                </HStack>
+              </HStack>
+              <Flex
+                w="full"
+                h="2"
+                borderRadius="full"
+                overflow="hidden"
+                bg="bg.muted"
+                borderWidth="1px"
+                borderColor="border.primary">
+                {usedPercent > 0 && <Box w={`${usedPercent}%`} h="full" bg="status.positive.primary" flexShrink={0} />}
+              </Flex>
+            </VStack>
           </Flex>
 
           <NodeGMSection node={node} />
@@ -126,7 +143,7 @@ export const NodeCard = ({ node }: NodeCardProps) => {
 
           <NodeEndorsedApps node={node} />
 
-          {hasEndorsementPower && node.activeEndorsements.length > 0 && (
+          {node.activeEndorsements.length > 0 && (
             <HStack justify="space-between" w="full" pt={2}>
               <Button variant="link" size="sm" onClick={historyModal.onOpen}>
                 {t("View history")}

@@ -1,6 +1,7 @@
 "use client"
 
-import { Box, Heading, VStack } from "@chakra-ui/react"
+import { Box, Heading, HStack, Tag, VStack } from "@chakra-ui/react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
@@ -17,9 +18,16 @@ export const NodesPageContent = () => {
   const { data: userNodesInfo, isLoading: isNodesLoading } = useGetUserNodes()
   const { data: xApps } = useXApps()
 
+  const nodes = useMemo(
+    () =>
+      [...(userNodesInfo?.nodesManagedByUser ?? [])].sort((a, b) =>
+        a.endorsementScore > b.endorsementScore ? -1 : a.endorsementScore < b.endorsementScore ? 1 : 0,
+      ),
+    [userNodesInfo?.nodesManagedByUser],
+  )
+
   if (isNodesLoading) return null
 
-  const nodes = userNodesInfo?.nodesManagedByUser ?? []
   const hasNodes = nodes.length > 0
 
   if (!hasNodes) {
@@ -35,9 +43,16 @@ export const NodesPageContent = () => {
       <NodesHeroStats userNodesInfo={userNodesInfo!} />
       <Box display="grid" gridTemplateColumns={{ base: "1fr", lg: "1fr 415px" }} gap={8} mt={8} alignItems="start">
         <VStack align="stretch" gap={6}>
-          <Heading textStyle="xl" size="xl">
-            {t("Your active nodes")}
-          </Heading>
+          <HStack justify="space-between" align="center">
+            <Heading textStyle="xl" size="xl">
+              {t("Your active nodes")}
+            </Heading>
+            <Tag.Root size="sm" variant="subtle">
+              <Tag.Label>
+                {nodes.length} {nodes.length === 1 ? t("node") : t("nodes")}
+              </Tag.Label>
+            </Tag.Root>
+          </HStack>
           {nodes.map(node => (
             <NodeCard key={node.id.toString()} node={node} />
           ))}
