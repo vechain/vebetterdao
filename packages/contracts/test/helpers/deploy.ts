@@ -195,7 +195,17 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV7,
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
-    // V8 (latest)
+    // V8
+    GovernorClockLogicLibV8,
+    GovernorConfiguratorLibV8,
+    GovernorDepositLogicLibV8,
+    GovernorFunctionRestrictionsLogicLibV8,
+    GovernorProposalLogicLibV8,
+    GovernorQuorumLogicLibV8,
+    GovernorStateLogicLibV8,
+    GovernorVotesLogicLibV8,
+    GovernorGovernanceLogicLibV8,
+    // (latest)
     GovernorClockLogicLib,
     GovernorConfiguratorLib,
     GovernorDepositLogicLib,
@@ -823,6 +833,7 @@ export const getOrDeployContractInstances = async ({
       "B3TRGovernorV5",
       "B3TRGovernorV6",
       "B3TRGovernorV7",
+      "B3TRGovernorV8",
       "B3TRGovernor",
     ],
     [
@@ -866,9 +877,10 @@ export const getOrDeployContractInstances = async ({
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
       [], // Reserved for future configuration parameters; currently no values required
+      [], // v9
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -939,6 +951,16 @@ export const getOrDeployContractInstances = async ({
           GovernorQuorumLogicV7: await GovernorQuorumLogicLibV7.getAddress(),
           GovernorStateLogicV7: await GovernorStateLogicLibV7.getAddress(),
           GovernorVotesLogicV7: await GovernorVotesLogicLibV7.getAddress(),
+        },
+        {
+          GovernorClockLogicV8: await GovernorClockLogicLibV8.getAddress(),
+          GovernorConfiguratorV8: await GovernorConfiguratorLibV8.getAddress(),
+          GovernorDepositLogicV8: await GovernorDepositLogicLibV8.getAddress(),
+          GovernorFunctionRestrictionsLogicV8: await GovernorFunctionRestrictionsLogicLibV8.getAddress(),
+          GovernorProposalLogicV8: await GovernorProposalLogicLibV8.getAddress(),
+          GovernorQuorumLogicV8: await GovernorQuorumLogicLibV8.getAddress(),
+          GovernorStateLogicV8: await GovernorStateLogicLibV8.getAddress(),
+          GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -1250,6 +1272,15 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV7: GovernorQuorumLogicLibV7,
     governorStateLogicLibV7: GovernorStateLogicLibV7,
     governorVotesLogicLibV7: GovernorVotesLogicLibV7,
+    governorClockLogicLibV8: GovernorClockLogicLibV8,
+    governorConfiguratorLibV8: GovernorConfiguratorLibV8,
+    governorDepositLogicLibV8: GovernorDepositLogicLibV8,
+    governorFunctionRestrictionsLogicLibV8: GovernorFunctionRestrictionsLogicLibV8,
+    governorGovernanceLogicLibV8: GovernorGovernanceLogicLibV8,
+    governorProposalLogicLibV8: GovernorProposalLogicLibV8,
+    governorQuorumLogicLibV8: GovernorQuorumLogicLibV8,
+    governorStateLogicLibV8: GovernorStateLogicLibV8,
+    governorVotesLogicLibV8: GovernorVotesLogicLibV8,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,

@@ -1,5 +1,5 @@
-import { Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
-import { useCallback } from "react"
+import { Button, Heading, HStack, Text, Textarea, VStack } from "@chakra-ui/react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { BaseModal } from "@/components/BaseModal"
@@ -17,13 +17,14 @@ export const ProposalCancelModal = ({
   onClose: () => void
 }) => {
   const { t } = useTranslation()
+  const [reason, setReason] = useState("")
   const cancelProposalMutation = useCancelProposal({
     proposalId,
   })
   const handleCancelProposal = useCallback(() => {
     onClose()
-    cancelProposalMutation.sendTransaction()
-  }, [cancelProposalMutation, onClose])
+    cancelProposalMutation.sendTransaction({ reason })
+  }, [cancelProposalMutation, onClose, reason])
   return (
     <BaseModal
       isOpen={isOpen}
@@ -41,11 +42,27 @@ export const ProposalCancelModal = ({
         {/* Info Message */}
         <Text>
           {t(
-            "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.",
+            "If you cancel now, your grant will be removed and won't appear in the next voting round. Once the round begins, cancellation will no longer be possible.",
           )}
         </Text>
 
-        {/* Support Button */}
+        {/* Reason Section */}
+        <VStack align="stretch" gap={2}>
+          <Text>{t("Reason")}</Text>
+          <Text textStyle="sm" color="gray.500">
+            {t("Optional")}
+          </Text>
+          <Textarea
+            placeholder={t("Please provide a reason for cancelling this proposal")}
+            value={reason}
+            onChange={e => setReason(e.target.value)}
+            resize="none"
+            rows={4}
+            fontSize={"16px"}
+          />
+        </VStack>
+
+        {/* Cancel Button */}
         <Button
           colorPalette="red"
           w={{ base: "full", md: "160px" }}
