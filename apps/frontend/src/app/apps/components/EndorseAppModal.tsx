@@ -1,4 +1,16 @@
-import { VStack, Heading, Text, Button, Skeleton, Card, Image, HStack, Progress, Circle } from "@chakra-ui/react"
+import {
+  VStack,
+  Heading,
+  Text,
+  Button,
+  Skeleton,
+  Card,
+  Image,
+  HStack,
+  Progress,
+  Circle,
+  SimpleGrid,
+} from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -142,7 +154,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
           <VStack w="full" alignItems="stretch" gap={3}>
             <Skeleton loading={isUserNodesLoading}>
-              <VStack w="full" gap={3} alignItems="stretch">
+              <VStack w="full" gap={3} alignItems="stretch" maxH="400px" overflowY="auto">
                 {allManagedNodes?.map((node: UserNode) => {
                   const nodeId = node.id.toString()
                   const isSelected = selectedNodeId === nodeId
@@ -263,8 +275,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             {t("Endorse {{appName}}", { appName: xApp?.name })}
           </Heading>
 
-          <HStack gap={3} w="full" align="stretch">
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
+          <SimpleGrid columns={{ base: 1, md: currentPointsForApp > BigInt(0) ? 3 : 2 }} gap={3} w="full">
+            <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Node")}
               </Text>
@@ -275,7 +287,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 </Text>
               </HStack>
             </VStack>
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
+            <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Available points")}
               </Text>
@@ -284,7 +296,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
               </Text>
             </VStack>
             {currentPointsForApp > BigInt(0) && (
-              <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
+              <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
                 <Text textStyle="md" color="text.subtle">
                   {t("Current endorsement")}
                 </Text>
@@ -293,7 +305,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 </Text>
               </VStack>
             )}
-          </HStack>
+          </SimpleGrid>
 
           <Card.Root variant="outline" w="full" p={6} rounded="xl">
             <VStack gap={2} align="stretch">
@@ -326,7 +338,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 </VStack>
               </HStack>
 
-              <VStack gap={2} align="stretch" mt={4}>
+              <VStack gap={2} align="stretch" mt={6}>
                 <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
                   {t("Add points")}
                 </Text>

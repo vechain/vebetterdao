@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, HStack, IconButton, NumberInput, Text } from "@chakra-ui/react"
+import { Box, Button, HStack, IconButton, NumberInput, Text } from "@chakra-ui/react"
 import { Minus, Plus } from "iconoir-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -9,9 +9,10 @@ type PointsSelectorProps = {
   value: string
   onChange: (value: string) => void
   max: number
+  min?: number
 }
 
-export const PointsSelector = ({ value, onChange, max }: PointsSelectorProps) => {
+export const PointsSelector = ({ value, onChange, max, min = 0 }: PointsSelectorProps) => {
   const { t } = useTranslation()
 
   const handleChange = useCallback(
@@ -21,9 +22,13 @@ export const PointsSelector = ({ value, onChange, max }: PointsSelectorProps) =>
     [onChange],
   )
 
+  const handleMax = useCallback(() => {
+    onChange(String(max))
+  }, [onChange, max])
+
   return (
-    <NumberInput.Root value={value} onValueChange={handleChange} min={0} max={max} step={1} clampValueOnBlur>
-      <HStack gap={3}>
+    <NumberInput.Root value={value} onValueChange={handleChange} min={min} max={max} step={1} clampValueOnBlur>
+      <HStack gap={3} py={2}>
         <HStack gap={0} flex={1} borderWidth="1px" borderColor="border" rounded="xl" overflow="hidden" bg="bg.panel">
           <NumberInput.DecrementTrigger asChild>
             <IconButton
@@ -32,13 +37,12 @@ export const PointsSelector = ({ value, onChange, max }: PointsSelectorProps) =>
               rounded="none"
               minW="44px"
               h="44px"
-              color="fg"
               _hover={{ bg: "bg.muted" }}
               flexShrink={0}>
               <Minus strokeWidth={2} />
             </IconButton>
           </NumberInput.DecrementTrigger>
-          <Box flex={5} position="relative" borderInlineWidth="1px" borderColor="border">
+          <Box flex={2} position="relative" borderInlineWidth="1px" borderColor="border">
             <NumberInput.Input
               placeholder="0"
               textAlign="center"
@@ -62,13 +66,15 @@ export const PointsSelector = ({ value, onChange, max }: PointsSelectorProps) =>
               rounded="none"
               minW="44px"
               h="44px"
-              color="fg"
               _hover={{ bg: "bg.muted" }}
               flexShrink={0}>
               <Plus strokeWidth={2} />
             </IconButton>
           </NumberInput.IncrementTrigger>
         </HStack>
+        <Button variant="ghost" rounded="xl" h="44px" px={4} onClick={handleMax} flexShrink={0}>
+          {t("Max")}
+        </Button>
       </HStack>
     </NumberInput.Root>
   )

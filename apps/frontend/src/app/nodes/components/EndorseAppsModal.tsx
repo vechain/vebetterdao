@@ -87,7 +87,7 @@ const SelectableAppRow = ({
           </Text>
         </HStack>
         <HStack gap={2} align="center" justify="space-between">
-          <HStack gap={2} align="center">
+          <VStack gap={2} align="center">
             <EndorsementStatusCallout
               endorsementStatus={endorsementStatus as XAppStatus}
               appId={app.id}
@@ -103,7 +103,7 @@ const SelectableAppRow = ({
                 {reason}
               </Text>
             )}
-          </HStack>
+          </VStack>
 
           <HStack gap={2} align="center">
             <HStack gap={2} flexShrink={0} borderLeftWidth="1px" borderColor="border" pl={3}>
@@ -246,7 +246,7 @@ const EndorsementStep = ({
             </VStack>
           </HStack>
 
-          <VStack gap={2} align="stretch" mt={4}>
+          <VStack gap={2} align="stretch" mt={6}>
             <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
               {t("Add points")}
             </Text>
@@ -355,29 +355,31 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
           </Heading>
 
           <HStack gap={3} w="full" align="stretch">
-            <HStack flex={1} bg="bg.subtle" p={3} rounded="xl" gap={2} align="center">
+            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" gap={2} align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Node")}
               </Text>
-              <Image
-                src={node.metadata?.image}
-                alt={node.metadata?.name}
-                boxSize="24px"
-                rounded="sm"
-                objectFit="cover"
-              />
-              <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
-                {node.metadata?.name}
-              </Text>
-            </HStack>
-            <HStack flex={1} bg="bg.subtle" p={3} rounded="xl" gap={2} align="center" justify="space-between">
+              <HStack gap={2} align="center">
+                <Image
+                  src={node.metadata?.image}
+                  alt={node.metadata?.name}
+                  boxSize="24px"
+                  rounded="sm"
+                  objectFit="cover"
+                />
+                <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                  {node.metadata?.name}
+                </Text>
+              </HStack>
+            </VStack>
+            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" gap={2} align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Available points")}
               </Text>
               <Text textStyle="md" fontWeight="bold">
                 {node.availablePoints.toString()} {t("pts")}
               </Text>
-            </HStack>
+            </VStack>
           </HStack>
 
           <HStack w="full" justify="space-between" align="center">

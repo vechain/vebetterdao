@@ -1,9 +1,9 @@
 "use client"
 
-import { Alert, Button, Card, HStack, Heading, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Heading, Icon, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { ClockSolid, Minus, Plus } from "iconoir-react"
-import { useCallback, useMemo, useState } from "react"
+import { ClockSolid } from "iconoir-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
@@ -23,8 +23,6 @@ import { XAppStatus } from "@/types/appDetails"
 
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { EndorsementStatusCallout } from "../../apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
-
-type Mode = "add" | "remove"
 
 type Props = {
   isOpen: boolean
@@ -47,8 +45,11 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
   const { data: cooldownPeriodData } = useCooldownPeriod()
   const { data: currentRoundStr } = useCurrentAllocationsRoundId()
 
-  const [mode, setMode] = useState<Mode>("add")
   const [points, setPoints] = useState<string>("0")
+
+  useEffect(() => {
+    if (isOpen) setPoints(currentPoints.toString())
+  }, [isOpen, currentPoints])
 
   const nodeId = node.id.toString()
   const appScore = Number(endorsementScore ?? 0)
@@ -73,18 +74,19 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
     return nodeMax < appRemainingPoints ? nodeMax : appRemainingPoints
   }, [maxPointsPerNode, currentPoints, node.availablePoints, appRemainingPoints])
 
-  const maxForCurrentMode = mode === "add" ? Number(maxEndorsePoints) : Number(currentPoints)
+  const minPoints = isInCooldown ? Number(currentPoints) : 0
+  const maxPoints = Number(currentPoints) + Number(maxEndorsePoints)
+  const pointsDelta = Math.abs(Number(points) - Number(currentPoints)).toString()
+  const isRemoving = Number(points) < Number(currentPoints)
 
   const handleSuccess = useCallback(() => {
-    setMode("add")
-    setPoints("0")
     onClose()
   }, [onClose])
 
   const endorseAppMutation = useEndorseApp({
     appId,
     nodeId,
-    points,
+    points: pointsDelta,
     userAddress: account?.address ?? "",
     onSuccess: handleSuccess,
     transactionModalCustomUI: {
@@ -97,7 +99,7 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
   const unendorseAppMutation = useUnendorseApp({
     appId,
     nodeId,
-    points,
+    points: pointsDelta,
     userAddress: account?.address ?? "",
     onSuccess: handleSuccess,
     transactionModalCustomUI: {
@@ -108,29 +110,18 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
   })
 
   const handleClose = useCallback(() => {
-    setMode("add")
-    setPoints("0")
     onClose()
   }, [onClose])
 
-  const handleModeChange = useCallback(
-    (newMode: Mode) => {
-      if (newMode === "remove" && isInCooldown) return
-      setMode(newMode)
-      setPoints("0")
-    },
-    [isInCooldown],
-  )
-
   const handleSubmit = useCallback(() => {
-    if (mode === "add") {
-      endorseAppMutation.sendTransaction()
-    } else {
+    if (isRemoving) {
       unendorseAppMutation.sendTransaction()
+    } else {
+      endorseAppMutation.sendTransaction()
     }
-  }, [mode, endorseAppMutation, unendorseAppMutation])
+  }, [isRemoving, endorseAppMutation, unendorseAppMutation])
 
-  const isSubmitDisabled = Number(points) <= 0
+  const isSubmitDisabled = points === currentPoints.toString()
 
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
@@ -195,28 +186,7 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
               </VStack>
             </HStack>
 
-            <HStack gap={2}>
-              <Button
-                flex={1}
-                size="sm"
-                variant={mode === "add" ? "primary" : "outline"}
-                onClick={() => handleModeChange("add")}>
-                <Plus strokeWidth={2} />
-                {t("Add points")}
-              </Button>
-              <Button
-                flex={1}
-                size="sm"
-                variant={mode === "remove" ? "primary" : "outline"}
-                colorPalette={mode === "remove" ? "red" : undefined}
-                onClick={() => handleModeChange("remove")}
-                disabled={isInCooldown}>
-                <Minus strokeWidth={2} />
-                {t("Remove points")}
-              </Button>
-            </HStack>
-
-            {isInCooldown && mode === "add" && (
+            {isInCooldown && (
               <HStack gap={1} textStyle="xs" color="fg.warning">
                 <Icon as={ClockSolid} boxSize={3} />
                 <Text>
@@ -227,28 +197,19 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
               </HStack>
             )}
 
-            <PointsSelector value={points} onChange={setPoints} max={maxForCurrentMode} />
+            <Box mt={2}>
+              <PointsSelector value={points} onChange={setPoints} min={minPoints} max={maxPoints} />
+            </Box>
           </VStack>
         </Card.Root>
 
-        {mode === "remove" && (
-          <Alert.Root status="warning" borderRadius="lg">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title>
-                {t("Removing endorsement may cause this app to lose its eligibility for allocation rounds.")}
-              </Alert.Title>
-            </Alert.Content>
-          </Alert.Root>
-        )}
-
         <Button
-          variant={mode === "add" ? "primary" : undefined}
-          colorPalette={mode === "remove" ? "red" : undefined}
+          variant={isRemoving ? undefined : "primary"}
+          colorPalette={isRemoving ? "red" : undefined}
           w="full"
           onClick={handleSubmit}
           disabled={isSubmitDisabled}>
-          {mode === "add" ? t("Endorse now") : t("Remove endorsement")}
+          {isRemoving ? t("Remove endorsement") : t("Endorse now")}
         </Button>
       </VStack>
     </BaseModal>

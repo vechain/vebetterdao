@@ -77,7 +77,7 @@ export const GmPoolAmountCard = () => {
                 <Icon as={UilArrowCircleUp} boxSize="18px" color="brand.secondary" />
                 <Text textStyle="sm" color="brand.secondary" fontWeight="semibold">
                   {t(
-                    "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight",
+                    "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight",
                     {
                       name: nextLevelNft.name,
                       amount: compactFormatter.format(rewardIncrease),
