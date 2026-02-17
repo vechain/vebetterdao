@@ -4,14 +4,13 @@ import { EnvConfig } from "@repo/config/contracts"
 import { DBAPool } from "../../../../typechain-types"
 import { ethers } from "hardhat"
 
-const VBD_TREASURY_ADDRESS = "0xD5903BCc66e439c753e525F8AF2FeC7be2429593"
-
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
     throw new Error("Missing NEXT_PUBLIC_APP_ENV")
   }
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+  const treasuryAddress = config.treasuryContractAddress
 
   console.log(
     `Upgrading DBAPool contract at address: ${config.dbaPoolContractAddress} on network: ${config.network.name}`,
@@ -26,7 +25,7 @@ async function main() {
   }
 
   console.log("\n=== Upgrading Contract ===")
-  const dbaPool = (await upgradeProxy("DBAPoolV2", "DBAPool", config.dbaPoolContractAddress, [VBD_TREASURY_ADDRESS], {
+  const dbaPool = (await upgradeProxy("DBAPoolV2", "DBAPool", config.dbaPoolContractAddress, [treasuryAddress], {
     version: 3,
   })) as DBAPool
 
@@ -42,8 +41,8 @@ async function main() {
   const treasuryAddr = await dbaPool.treasuryAddress()
   console.log(`Treasury address set to: ${treasuryAddr}`)
 
-  if (treasuryAddr.toLowerCase() !== VBD_TREASURY_ADDRESS.toLowerCase()) {
-    throw new Error(`Treasury address mismatch: expected ${VBD_TREASURY_ADDRESS}, got ${treasuryAddr}`)
+  if (treasuryAddr.toLowerCase() !== treasuryAddress.toLowerCase()) {
+    throw new Error(`Treasury address mismatch: expected ${treasuryAddress}, got ${treasuryAddr}`)
   }
 
   console.log("\n=== Upgrade Completed Successfully ===")
