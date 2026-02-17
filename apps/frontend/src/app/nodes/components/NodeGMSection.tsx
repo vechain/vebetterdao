@@ -41,9 +41,12 @@ export const NodeGMSection = ({ node }: NodeGMSectionProps) => {
   )
 
   const firstAvailableGM = availableGMs[0]
+  const tokenId = firstAvailableGM?.tokenId
+  const nodeTokenId = firstAvailableGM ? node.id.toString() : undefined
   const { data: levelAfterAttaching } = useGetLevelAfterAttachingNode({
-    tokenId: firstAvailableGM?.tokenId ?? "0",
-    nodeTokenId: firstAvailableGM ? node.id.toString() : "0",
+    tokenId: tokenId ?? "0",
+    nodeTokenId: nodeTokenId ?? "0",
+    enabled: !!tokenId && tokenId !== "0" && !!nodeTokenId && nodeTokenId !== "0",
   })
   const canUpgrade = firstAvailableGM ? String(firstAvailableGM.tokenLevel) !== levelAfterAttaching : false
 

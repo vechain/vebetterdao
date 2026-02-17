@@ -215,16 +215,14 @@ export const GalaxyLevelsCard = () => {
 
         <Card.Footer flexDir="column" gap={3}>
           {hasHiddenLevels && (
-            <HStack
-              justify="center"
+            <Button
+              variant="ghost"
               w="full"
-              cursor="pointer"
               onClick={handleToggle}
               py={1}
               color="text.subtle"
               _hover={{ color: "text.default" }}
               transition="color 0.2s"
-              role="button"
               aria-expanded={isExpanded}>
               <Icon
                 as={FaChevronDown}
@@ -233,7 +231,7 @@ export const GalaxyLevelsCard = () => {
                 transform={isExpanded ? "rotate(180deg)" : undefined}
               />
               <Text textStyle="sm">{isExpanded ? t("Show less") : t("See all levels")}</Text>
-            </HStack>
+            </Button>
           )}
           <Button onClick={onCalcOpen} variant="secondary" w="full">
             <Icon as={UilCalculatorAlt} />
