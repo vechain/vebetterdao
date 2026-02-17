@@ -1,5 +1,4 @@
 import { Button, Box, Dialog, Heading, Text, VStack, HStack, Card, Alert, CloseButton } from "@chakra-ui/react"
-import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -37,13 +36,10 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     onClose()
   }, [onClose])
 
-  // Get the next level GM NFT image
   const { nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useNextLevelImage(Number(gmLevel))
 
   const levelAfterUpgrade = useMemo(() => {
-    const currentLevel = Number(gmLevel ?? 1) - 1 // gmNfts start from 1
-    const nextLevel = currentLevel + 1 // GMNFTs lists start from 0
-    return nextLevel
+    return Number(gmLevel ?? 1)
   }, [gmLevel])
 
   const nextLevelGM = useMemo(() => {
@@ -63,31 +59,29 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
           <CloseButton />
         </Dialog.CloseTrigger>
         <Dialog.Header>
-          <VStack gap={4} align="flex-start">
-            <UilArrowCircleUp cursor="pointer" size="50px" color="#004CFC" />
-            <Heading textStyle="xl">{t("Upgrade GM NFT")}</Heading>
-          </VStack>
+          <Heading textStyle="xl">{t("Upgrade GM NFT")}</Heading>
         </Dialog.Header>
         <Dialog.Body gap={[0, 4]} pt={0}>
-          <Text textStyle="md" color="text.subtle">
+          <Text textStyle="sm" color="text.subtle">
             {t(
-              "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
+              "Burn B3TR to upgrade your GM NFT level. A higher level increases your reward weight, earning you a bigger share of the GM Rewards Pool each time you vote.",
             )}
           </Text>
           <VStack align="stretch" w="full" py={[2, 5]}>
-            <Text color="text.subtle" textStyle="md">
+            <Text color="text.subtle" textStyle="sm">
               {t("You'll donate")}
             </Text>
             <HStack>
               <B3TRIcon boxSize={7} />
-              <Heading size="xl">{compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}</Heading>
+              <Heading size="xl">
+                {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))} {"B3TR"}
+              </Heading>
             </HStack>
           </VStack>
           <VStack align="stretch" py={[2, 5]}>
-            <Text color="text.subtle" textStyle={"md"}>
-              {t("You’re upgrading to")}
+            <Text color="text.subtle" textStyle="sm">
+              {t("You're upgrading to")}
             </Text>
-            {/*GM CARD */}
             <Card.Root position="relative">
               <GMNFTCard
                 imageUrl={nextLevelGMImage}
@@ -98,20 +92,22 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                 size={"medium"}
               />
             </Card.Root>
-            {/*END GM CARD */}
+            {nextLevelGM && (
+              <Text textStyle="sm" color="text.subtle" pt={2}>
+                {t("Your reward weight will increase to {{multiplier}}x", { multiplier: nextLevelGM.multiplier })}
+              </Text>
+            )}
           </VStack>
-          <VStack align="stretch" w="full" py={[2, 5]}>
-            <Alert.Root bg={"rgb(255, 250, 235)"} borderRadius="2xl">
-              <UilInfoCircle color={"rgb(217, 119, 6)"} size={"50px"} />
-              <Box lineHeight="1.20rem">
-                <Text px={3} color={"rgb(217, 119, 6)"} textStyle={["xs", "md"]}>
-                  {t(
-                    "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
-                  )}
-                </Text>
-              </Box>
-            </Alert.Root>
-          </VStack>
+          <Alert.Root status="warning" borderRadius="2xl">
+            <Alert.Indicator w={5} h={5} />
+            <Box textStyle="sm">
+              <Alert.Description as="span">
+                {t(
+                  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
+                )}
+              </Alert.Description>
+            </Box>
+          </Alert.Root>
         </Dialog.Body>
 
         <Dialog.Footer w="full" px={4} pt={1}>

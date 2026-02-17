@@ -314,6 +314,54 @@
     "estimate-voting-gas:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:fetch:local": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:fetch:testnet-staging": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:fetch:mainnet": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:simulate:local": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:simulate:testnet-staging": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:simulate:mainnet": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:seed:local": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:seed:testnet-staging": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:seed:mainnet": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:verify:local": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:verify:testnet-staging": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "endorsement-migration:verify:mainnet": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     }
   }
 }

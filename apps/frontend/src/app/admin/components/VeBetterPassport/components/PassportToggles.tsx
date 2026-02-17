@@ -18,7 +18,7 @@ export const PassportToggles = () => {
         <Heading size="3xl">{"Passport checks enabled"}</Heading>
       </Card.Header>
       <Card.Body>
-        <Field.Root as={SimpleGrid} gap={3}>
+        <SimpleGrid gap={3}>
           <PassportCheck
             name={"Whitelist Check"}
             isEnabled={isWhiteListCheckEnabled === true}
@@ -44,7 +44,7 @@ export const PassportToggles = () => {
             isEnabled={isGMOwnershipCheckEnabled === true}
             checkToToggle={TogglePassportCheck.GmOwnershipCheck}
           />
-        </Field.Root>
+        </SimpleGrid>
       </Card.Body>
     </Card.Root>
   )
@@ -61,27 +61,23 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
     checkToToggle,
   })
 
-  // const handleToggle = useCallback(
-  //   (event?: { preventDefault: () => void }) => {
-  //     if (event) event.preventDefault()
-
-  //     sendTransaction()
-  //   },
-  //   [sendTransaction],
-  // )
-
   return (
-    <VStack>
-      <HStack w={"full"} justifyContent={"space-between"}>
-        <Field.Label>{name}</Field.Label>
-        <Switch.Root
-          checked={isEnabled}
-          onCheckedChange={() => sendTransaction()}
-          disabled={isTransactionPending || status === "pending"}>
-          <Switch.Control />
-        </Switch.Root>
-      </HStack>
-      <Separator />
-    </VStack>
+    <Field.Root>
+      <VStack>
+        <HStack w={"full"} justifyContent={"space-between"}>
+          <Field.Label>{name}</Field.Label>
+          <Switch.Root
+            checked={isEnabled}
+            onCheckedChange={() => sendTransaction()}
+            disabled={isTransactionPending || status === "pending"}>
+            <Switch.HiddenInput />
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Root>
+        </HStack>
+        <Separator />
+      </VStack>
+    </Field.Root>
   )
 }

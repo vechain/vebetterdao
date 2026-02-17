@@ -1,22 +1,8 @@
 const notFoundImage = "/assets/images/image-not-found.webp"
-import {
-  Button,
-  Card,
-  Separator,
-  Flex,
-  HStack,
-  Heading,
-  Image,
-  Link,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
-import { UilArrowUpRight, UilExternalLinkAlt } from "@iconscout/react-unicons"
+import { Button, Card, Separator, Flex, HStack, Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { UilExternalLinkAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
@@ -31,7 +17,6 @@ import { AdminAppPageButton } from "./components/AdminAppPageButton"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
-import { DistributionStrategyModal } from "./components/DistributionStrategyModal"
 import { EditAppPageButton } from "./components/EditAppPageButton"
 export const AppDetailOverview = ({
   endorsementStatus,
@@ -45,11 +30,6 @@ export const AppDetailOverview = ({
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
-  const {
-    open: isDistributionStrategyModalOpen,
-    onOpen: onDistributionStrategyModalOpen,
-    onClose: onDistributionStrategyModalClose,
-  } = useDisclosure()
   const { isMobile } = useBreakpoints()
 
   const goToWebsite = useCallback(() => {
@@ -58,16 +38,9 @@ export const AppDetailOverview = ({
     }
   }, [appMetadata?.external_url])
 
-  const showEndorsementStatusCallout = useMemo(() => {
-    return endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && endorsementStatus !== XAppStatus.BLACKLISTED
-  }, [endorsementStatus])
-
   return (
     <>
       <VStack gap={4} align="stretch">
-        {showEndorsementStatusCallout && !isEndorsementStatusLoading && (
-          <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
-        )}
         <Card.Root variant="primary">
           <Card.Body>
             <VStack align="stretch" gap={4}>
@@ -139,21 +112,6 @@ export const AppDetailOverview = ({
                           </Text>
                         </VStack>
                       )}
-                      {appMetadata?.distribution_strategy ? (
-                        <VStack align="flex-start" justify={"flex-start"}>
-                          <Text textStyle={"sm"} color="text.subtle">
-                            {t("Distribution Strategy")}
-                          </Text>
-                          <Link
-                            textStyle="md"
-                            fontWeight="semibold"
-                            color="actions.secondary.text-lighter"
-                            onClick={onDistributionStrategyModalOpen}>
-                            {t("View Details")}
-                            <UilArrowUpRight />
-                          </Link>
-                        </VStack>
-                      ) : null}
                     </Stack>
                     <HStack
                       justifyContent={{ base: "space-between", md: "flex-end" }}
@@ -184,12 +142,6 @@ export const AppDetailOverview = ({
           </Card.Body>
         </Card.Root>
       </VStack>
-      <DistributionStrategyModal
-        isOpen={isDistributionStrategyModalOpen}
-        onClose={onDistributionStrategyModalClose}
-        // TODO: migration add distribution_strategy to XAppMetadata in vechain-kit
-        distributionStrategy={appMetadata?.distribution_strategy ?? ""}
-      />
     </>
   )
 }

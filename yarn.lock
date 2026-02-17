@@ -1585,6 +1585,11 @@
   resolved "https://registry.npmjs.org/@chakra-ui/anatomy/-/anatomy-2.3.6.tgz#6913b95f1c65e234477ce924718aa191e69f4e46"
   integrity sha512-TjmjyQouIZzha/l8JxdBZN1pKZTj7sLpJ0YkFnQFyqHcbfWggW9jKWzY1E0VBnhtFz/xF3KC6UAVuZVSJx+y0g==
 
+"@chakra-ui/charts@^3.33.0":
+  version "3.33.0"
+  resolved "https://registry.yarnpkg.com/@chakra-ui/charts/-/charts-3.33.0.tgz#2c3e695c663b68de96972370d13f35b4a104cbec"
+  integrity sha512-Ns/hZRdHx2xLr7B9wAESDFv4lloTRr69CFgfpAPf9YUd1ECg8551zAFPRplUBLDfAdNIrZyjTHEli7oIrYxODA==
+
 "@chakra-ui/cli@^3.5.0":
   version "3.30.0"
   resolved "https://registry.npmjs.org/@chakra-ui/cli/-/cli-3.30.0.tgz#4984ce22d28bcc3a641dfc8de29bc893b73fd6bf"
@@ -4311,10 +4316,10 @@
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@privy-io/api-base@1.6.1":
-  version "1.6.1"
-  resolved "https://registry.npmjs.org/@privy-io/api-base/-/api-base-1.6.1.tgz#49467abfa28785a5199890c8b896fdf1d63478e7"
-  integrity sha512-GUGpW8FlwL+oTlKRNcuDRc5rfz2fPhfcqx2lHT58T4D3F54VxoXnX+NI8vsowogCddNq640d/p5FSKzBQJViZg==
+"@privy-io/api-base@1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/api-base/-/api-base-1.7.0.tgz#83467ddc240800e3195f211540b9e264d41d4748"
+  integrity sha512-ji6ARQAAuW/FzRTgft9NCjRuouWX9t+J7JMmvLPsnXQJDFEV9mqh4sWXZhQ8ddTq/iDZ4z/yz1ORJqN8bYAi4Q==
   dependencies:
     zod "^3.24.3"
 
@@ -4338,10 +4343,10 @@
   resolved "https://registry.npmjs.org/@privy-io/ethereum/-/ethereum-0.0.2.tgz#1b6eddf48e5e0c3aa13adb8ca61f62496f744677"
   integrity sha512-FnJ1dzgg/tij4jLeKHLlZM9uNk4WN+iIOkc8CG0FZKUQxqXH60Fs/dMF6Xbndd5CQkUO8LUU7FLom/405VKXpQ==
 
-"@privy-io/js-sdk-core@0.54.2":
-  version "0.54.2"
-  resolved "https://registry.npmjs.org/@privy-io/js-sdk-core/-/js-sdk-core-0.54.2.tgz#5bc606a7628c76a8b0b77c5763c77747c6e62485"
-  integrity sha512-EDg10NFnbRd+pUbKbg7Cbg9qUq31hKg4trEq4CDhFbixfno0uOO924Dj1vbFzdVBOkFudHsoAmmgfSZ8shXGyQ==
+"@privy-io/js-sdk-core@0.55.0":
+  version "0.55.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.55.0.tgz#c6b4aa6bfb7073e4bd56e20fb1a0213d3b61b572"
+  integrity sha512-halUc0CS0fKQY5fX7YOBpL1piBz5eg140rL+tjyL7yeBCjNkgf5DX6J4BWzRdr5AplRdMWRBUb1/6+g+pcm4Iw==
   dependencies:
     "@ethersproject/abstract-signer" "^5.7.0"
     "@ethersproject/bignumber" "^5.7.0"
@@ -4349,9 +4354,9 @@
     "@ethersproject/providers" "^5.7.2"
     "@ethersproject/transactions" "^5.7.0"
     "@ethersproject/units" "^5.7.0"
-    "@privy-io/api-base" "1.6.1"
+    "@privy-io/api-base" "1.7.0"
     "@privy-io/chains" "0.0.2"
-    "@privy-io/public-api" "2.44.2"
+    "@privy-io/public-api" "2.45.0"
     canonicalize "^2.0.0"
     eventemitter3 "^5.0.1"
     fetch-retry "^6.0.0"
@@ -4361,21 +4366,21 @@
     set-cookie-parser "^2.6.0"
     uuid ">=8 <10"
 
-"@privy-io/public-api@2.44.2":
-  version "2.44.2"
-  resolved "https://registry.npmjs.org/@privy-io/public-api/-/public-api-2.44.2.tgz#bf7ff5ed5123e0de3e5e6d3e85fa85d5353c2d17"
-  integrity sha512-w+IpGmHIbCHyPka4fmcsIOO8IOaWRV8la/LRAZ1pDhkeKxMNR8zVVJu8jlLFbxu45tAhREvChpz0OGyDu40hmA==
+"@privy-io/public-api@2.45.0":
+  version "2.45.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-2.45.0.tgz#3a09bc710ac61f383b16a57d684151a268e96e2a"
+  integrity sha512-gEYclrdjirGqKrJBn1ZXkTuZTL/gK9FjPppoxDJ8/dX1JD4/vXahdt0AdgUfNUf70ZfMdVKYhyos1RkvSLFGYQ==
   dependencies:
-    "@privy-io/api-base" "1.6.1"
+    "@privy-io/api-base" "1.7.0"
     bs58 "^5.0.0"
     libphonenumber-js "^1.10.31"
     viem "^2"
     zod "^3.24.3"
 
-"@privy-io/react-auth@2.24.0":
-  version "2.24.0"
-  resolved "https://registry.npmjs.org/@privy-io/react-auth/-/react-auth-2.24.0.tgz#ada898e264c0b837beefc4adbc9febe0b2134238"
-  integrity sha512-ujG/4LZEBSXLZPzlcsiRx+mq3l6fUAGccHWtNbFMJK072uys2tQDrwDO2RPwlgWPMnQmu8XH7uaW80MG2TxivQ==
+"@privy-io/react-auth@2.25.0":
+  version "2.25.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/react-auth/-/react-auth-2.25.0.tgz#4e403705d59aab9450e8c63e6a83279b4d4a5fa9"
+  integrity sha512-lcILJaXi2wYgxFsxbvSrIM1Cz8FAumMy90YS4R6wcBNWg79U6S6YTHKMa0U8xJPhJUoKrugAi/LTSifYdTCZjg==
   dependencies:
     "@base-org/account" "^1.1.0"
     "@coinbase/wallet-sdk" "4.3.2"
@@ -4384,11 +4389,11 @@
     "@heroicons/react" "^2.1.1"
     "@marsidev/react-turnstile" "^0.4.1"
     "@metamask/eth-sig-util" "^6.0.0"
-    "@privy-io/api-base" "1.6.1"
+    "@privy-io/api-base" "1.7.0"
     "@privy-io/chains" "0.0.2"
     "@privy-io/ethereum" "0.0.2"
-    "@privy-io/js-sdk-core" "0.54.2"
-    "@privy-io/public-api" "2.44.2"
+    "@privy-io/js-sdk-core" "0.55.0"
+    "@privy-io/public-api" "2.45.0"
     "@reown/appkit" "^1.7.11"
     "@scure/base" "^1.2.5"
     "@simplewebauthn/browser" "^9.0.1"
@@ -6265,6 +6270,13 @@
   dependencies:
     unplugin "^2.3.5"
 
+"@storybook/csf@^0.1.11":
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/@storybook/csf/-/csf-0.1.13.tgz#c8a9bea2ae518a3d9700546748fa30a8b07f7f80"
+  integrity sha512-7xOOwCLGB3ebM87eemep89MYRFTko+D8qE7EdAAq74lgdqRR5cOUtYWJLjO2dLtP94nqoOdHJo6MdLLKzg412Q==
+  dependencies:
+    type-fest "^2.19.0"
+
 "@storybook/global@^5.0.0":
   version "5.0.0"
   resolved "https://registry.npmjs.org/@storybook/global/-/global-5.0.0.tgz#b793d34b94f572c1d7d9e0f44fac4e0dbc9572ed"
@@ -7842,16 +7854,16 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.4.5":
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.4.5.tgz#03ebc7d3d226806fc57720f060d5dd1a91358278"
-  integrity sha512-Iimc077ggC7SnpailnmowwxXXY6LX9jrW2pHrPDtoT/BvyqUa1quTpygq87mCExBDStQXsg2UygvWN4XQKf6Sw==
+"@vechain/vechain-kit@2.5.1":
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.5.1.tgz#d96963455a9e37182042f27c1e62d05f566c269b"
+  integrity sha512-fpHjJCRWtcdD04eEv2xZoh6oEeJYUDl4mA6dFQ+8B/5kB5P8/OZkQzpegoWRI1VB7vWPzlebstLehmTPjuRyCw==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
     "@emotion/styled" "^11.14.1"
     "@privy-io/cross-app-connect" "0.2.2"
-    "@privy-io/react-auth" "2.24.0"
+    "@privy-io/react-auth" "2.25.0"
     "@solana/web3.js" "^1.98.0"
     "@tanstack/react-query" "^5.64.2"
     "@tanstack/react-query-devtools" "^5.64.1"
@@ -12374,12 +12386,14 @@ eslint-plugin-react@^7.33.2:
     string.prototype.matchall "^4.0.12"
     string.prototype.repeat "^1.0.0"
 
-eslint-plugin-storybook@^10.0.1:
-  version "10.1.11"
-  resolved "https://registry.npmjs.org/eslint-plugin-storybook/-/eslint-plugin-storybook-10.1.11.tgz#80ea073c30ff6948fe34f728ff1c05333eb8579f"
-  integrity sha512-mbq2r2kK5+AcLl0XDJ3to91JOgzCbHOqj+J3n+FRw6drk+M1boRqMShSoMMm0HdzXPLmlr7iur+qJ5ZuhH6ayQ==
+eslint-plugin-storybook@0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-storybook/-/eslint-plugin-storybook-0.12.0.tgz#09ae667a7c569787d961b6f83337b2deee9daea8"
+  integrity sha512-Lg5I0+npTgiYgZ4KSvGWGDFZi3eOCNJPaWX0c9rTEEXC5wvooOClsP9ZtbI4hhFKyKgYR877KiJxbRTSJq9gWA==
   dependencies:
+    "@storybook/csf" "^0.1.11"
     "@typescript-eslint/utils" "^8.8.1"
+    ts-dedent "^2.2.0"
 
 eslint-plugin-testing-library@^6.0.1:
   version "6.5.0"
@@ -14093,9 +14107,9 @@ hoist-non-react-statics@^3.3.1:
     react-is "^16.7.0"
 
 hono@^4.10.2, hono@^4.10.3:
-  version "4.11.7"
-  resolved "https://registry.yarnpkg.com/hono/-/hono-4.11.7.tgz#f5b8d0b0b503ef0d913a246012dda52ea23dbe53"
-  integrity sha512-l7qMiNee7t82bH3SeyUCt9UF15EVmaBvsppY2zQtrbIhl/yzBTny+YUxsVjSjQ6gaqaeVtZmGocom8TzBlA4Yw==
+  version "4.11.9"
+  resolved "https://registry.yarnpkg.com/hono/-/hono-4.11.9.tgz#4e0dec5309a8f05216c777cbd93131a41cf28eb9"
+  integrity sha512-Eaw2YTGM6WOxA6CXbckaEvslr2Ne4NFsKrvc0v97JD5awbmeBLO5w9Ho9L9kmKonrwF9RJlW6BxT1PVv/agBHQ==
 
 hosted-git-info@^2.1.4:
   version "2.8.9"
@@ -17574,7 +17588,7 @@ parse-cache-control@^1.0.1:
 
 parse-duration@^2.1.3:
   version "2.1.5"
-  resolved "https://registry.npmjs.org/parse-duration/-/parse-duration-2.1.5.tgz#968d15cce6931051568cb40445389299ecf00133"
+  resolved "https://registry.yarnpkg.com/parse-duration/-/parse-duration-2.1.5.tgz#968d15cce6931051568cb40445389299ecf00133"
   integrity sha512-/IX1KRw6zHDOOJrgIz++gvFASbFl7nc8GEXaLdD7d1t1x/GnrK6hh5Fgk8G3RLpkIEi4tsGj9pupGLWNg0EiJA==
 
 parse-entities@^4.0.0:
@@ -18257,16 +18271,9 @@ react-docgen@^8.0.0, react-docgen@^8.0.2:
     resolve "^1.22.1"
     strip-indent "^4.0.0"
 
-"react-dom@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
-  version "19.2.3"
-  resolved "https://registry.npmjs.org/react-dom/-/react-dom-19.2.3.tgz#f0b61d7e5c4a86773889fcc1853af3ed5f215b17"
-  integrity sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==
-  dependencies:
-    scheduler "^0.27.0"
-
-react-dom@^18:
+react-dom@18.3.1, "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react-dom@^18:
   version "18.3.1"
-  resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz#c2265d79511b57d479b3dd3fdfa51536494c5cb4"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.3.1.tgz#c2265d79511b57d479b3dd3fdfa51536494c5cb4"
   integrity sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==
   dependencies:
     loose-envify "^1.1.0"
@@ -18426,14 +18433,9 @@ react-tweet@^3.2.1:
     clsx "^2.0.0"
     swr "^2.2.4"
 
-"react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
-  version "19.2.3"
-  resolved "https://registry.npmjs.org/react/-/react-19.2.3.tgz#d83e5e8e7a258cf6b4fe28640515f99b87cd19b8"
-  integrity sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==
-
-react@^18, react@^18.2.0:
+react@18.3.1, "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react@^18, react@^18.2.0:
   version "18.3.1"
-  resolved "https://registry.npmjs.org/react/-/react-18.3.1.tgz#49ab892009c53933625bd16b2533fc754cab2891"
+  resolved "https://registry.yarnpkg.com/react/-/react-18.3.1.tgz#49ab892009c53933625bd16b2533fc754cab2891"
   integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
   dependencies:
     loose-envify "^1.1.0"
@@ -19218,11 +19220,6 @@ scheduler@^0.23.2:
   integrity sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==
   dependencies:
     loose-envify "^1.1.0"
-
-scheduler@^0.27.0:
-  version "0.27.0"
-  resolved "https://registry.npmjs.org/scheduler/-/scheduler-0.27.0.tgz#0c4ef82d67d1e5c1e359e8fc76d3a87f045fe5bd"
-  integrity sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==
 
 scrypt-js@2.0.4:
   version "2.0.4"
@@ -20734,6 +20731,11 @@ type-fest@^0.8.0, type-fest@^0.8.1:
   version "0.8.1"
   resolved "https://registry.npmjs.org/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
+
+type-fest@^2.19.0:
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
+  integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
 
 type-fest@^4.39.1, type-fest@^4.41.0:
   version "4.41.0"

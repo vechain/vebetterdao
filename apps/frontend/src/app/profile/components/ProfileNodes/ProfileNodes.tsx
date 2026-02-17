@@ -27,7 +27,7 @@ export const ProfileNodes = ({ address }: { address: string }) => {
         </Card.Header>
         <Card.Body>
           <Skeleton loading={isUserNodesLoading} w="full" h="full" minH="400px" borderRadius="md">
-            {userNodes?.allNodes?.length === 0 ? (
+            {!userNodes?.allNodes?.length ? (
               <EmptyStateCard
                 icon={
                   <Icon boxSize={36}>

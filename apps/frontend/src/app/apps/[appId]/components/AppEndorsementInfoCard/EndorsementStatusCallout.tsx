@@ -12,14 +12,31 @@ import { useXAppStatusConfig } from "../../hooks/useXAppStatusConfig"
 
 type Props = {
   endorsementStatus: XAppStatus
+  appId?: string
   showDescription?: boolean
   padding?: number
+  boxSize?: number
+  textStyle?: string
+  flex?: string
+  whiteSpace?: string
 }
-export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = true, padding = 4 }: Props) => {
+export const EndorsementStatusCallout = ({
+  endorsementStatus,
+  appId: appIdProp,
+  showDescription = true,
+  padding = 4,
+  boxSize = 6,
+  textStyle = "md",
+  flex = "1",
+  whiteSpace,
+}: Props) => {
   const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
   const { app, isAppInfoLoading } = useCurrentAppInfo()
-  const { data: gracePeriodEvent, isLoading: isGracePeriodEventLoading } = useGracePeriodEvent(app?.id)
+  const resolvedAppId = appIdProp ?? app?.id
+  const { data: gracePeriodEvent, isLoading: isGracePeriodEventLoading } = useGracePeriodEvent(
+    showDescription ? resolvedAppId : undefined,
+  )
   const gracePeriodEndBlockNumber = Number(gracePeriodEvent?.endBlock) || 0
   const gracePeriodEndTimestamp = useEstimateBlockTimestamp({ blockNumber: gracePeriodEndBlockNumber })
   const gracePeriodEndDate =
@@ -32,10 +49,10 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
     icon: UilExclamationCircle,
   }
   return (
-    <VStack flex="1" p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
+    <VStack flex={flex} p={padding} borderRadius="8px" backgroundColor={backgroundColor} whiteSpace={whiteSpace}>
       <HStack w="full">
-        <Icon as={icon} boxSize={6} color={color} />
-        <Text textStyle="md" fontWeight="semibold" color={color}>
+        <Icon as={icon} boxSize={boxSize} color={color} />
+        <Text textStyle={textStyle} fontWeight="semibold" color={color}>
           {title}
         </Text>
       </HStack>

@@ -136,7 +136,7 @@ jobs:
           provenance: false
           sbom: false
           # Use GitHub Actions cache only (ECR registry cache was too slow)
-          cache-from: type=gha
+          cache-from: type=gha,scope=v2
           cache-to: type=gha,mode=max
           build-args: |
             APP_BUILD_ENV=${{ vars.APP_BUILD_ENV || ''}}

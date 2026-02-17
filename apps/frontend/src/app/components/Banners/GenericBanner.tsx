@@ -14,6 +14,7 @@ export enum BannerStorageKey {
   SHOW_USER_SIGNALED = "SHOW_USER_SIGNALED",
   SHOW_DELEGATING = "SHOW_DELEGATING",
   SHOW_DO_ACTION = "SHOW_DO_ACTION",
+  SHOW_ENDORSEMENT = "SHOW_ENDORSEMENT",
 }
 
 type BannerVariant = "default" | "b3mo"

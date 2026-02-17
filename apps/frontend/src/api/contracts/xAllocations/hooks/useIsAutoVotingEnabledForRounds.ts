@@ -23,7 +23,7 @@ export const getIsAutoVotingEnabledForRoundsQueryKey = (userAddress: string, rou
  * This checks the auto-voting status at the start of each round (snapshot).
  *
  * @param roundIds Array of round IDs to check
- * @returns Map of roundId to boolean indicating if auto-voting was active for that round
+ * @returns Record of roundId to boolean indicating if auto-voting was active for that round
  */
 export const useIsAutoVotingEnabledForRounds = (roundIds: string[]) => {
   const { account } = useWallet()
@@ -47,19 +47,19 @@ export const useIsAutoVotingEnabledForRounds = (roundIds: string[]) => {
           ),
         })
 
-        // Create a map of roundId -> isActive
-        const activeMap = new Map<string, boolean>()
+        // Create a record of roundId -> isActive
+        const activeMap: Record<string, boolean> = {}
         results.forEach((isActive, index) => {
           const roundId = roundIds[index]
           if (roundId) {
-            activeMap.set(roundId, Boolean(isActive))
+            activeMap[roundId] = Boolean(isActive)
           }
         })
 
         return activeMap
       } catch (error) {
         console.error("Error fetching auto-voting status for rounds:", error)
-        return new Map<string, boolean>()
+        return {} as Record<string, boolean>
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

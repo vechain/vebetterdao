@@ -42,7 +42,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
           <CountdownVoting onOpen={onOpenSnapshot} />
         </GridItem>
 
-        <Card.Root bg="transparency.200">
+        <Card.Root bg="transparency.200" border="0">
           <Card.Body>
             <Stat.Root>
               <Stat.Label color="actions.primary.text" textStyle="sm">
@@ -60,7 +60,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
           </Card.Body>
         </Card.Root>
 
-        <Card.Root bg="transparency.200">
+        <Card.Root bg="transparency.200" border="0">
           <Card.Body>
             <Stat.Root>
               <Stat.Label color="actions.primary.text" textStyle="sm">
