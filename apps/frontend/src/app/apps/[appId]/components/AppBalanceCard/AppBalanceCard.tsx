@@ -25,6 +25,7 @@ import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewards
 import { useIsDistributionPaused } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsDistributionPaused"
 import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
 import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
+import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
 import { GenericAlert } from "../../../../components/Alert/GenericAlert"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
@@ -98,7 +99,10 @@ export const AppBalanceCard = () => {
           </VStack>
           <HStack justifyContent="space-between" alignItems="center" w={"full"}>
             <Skeleton loading={isBalanceLoading}>
-              <Heading size={{ base: "2xl", md: "4xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
+              <HStack gap={2} alignItems="center">
+                <B3TRIcon boxSize={{ base: "24px", md: "30px" }} />
+                <Heading size={{ base: "2xl", md: "4xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
+              </HStack>
             </Skeleton>
             <HStack gap={2}>
               <IconButton
@@ -147,9 +151,12 @@ export const AppBalanceCard = () => {
             </VStack>
             <HStack justifyContent="space-between" alignItems="center" w="full" mt={4}>
               <Skeleton loading={isRewardsBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "4xl" }} color={rewardsPoolColor}>
-                  {compactFormatter.format(Number(rewardsBalance?.scaled || 0))}
-                </Heading>
+                <HStack gap={2} alignItems="center">
+                  <B3TRIcon boxSize={{ base: "24px", md: "30px" }} />
+                  <Heading size={{ base: "2xl", md: "4xl" }} color={rewardsPoolColor}>
+                    {compactFormatter.format(Number(rewardsBalance?.scaled || 0))}
+                  </Heading>
+                </HStack>
               </Skeleton>
               <HStack gap={2}>
                 <Button
