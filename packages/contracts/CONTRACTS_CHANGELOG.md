@@ -6,7 +6,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                                                                   | Summary                                                                                                                                      |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 3 December 2025     | `GalaxyMember` version `6` and `X2EarnApps` version `7`                                                                       | Replace Node Management Contract with Stargate NFT
+| 3 December 2025     | `GalaxyMember` version `6` and `X2EarnApps` version `7`                                                                       | Replace Node Management Contract with Stargate NFT                                                                                           |
 | 27 October 2025     | `B3TRGovernor` version `8` and `GrantsManager` version `2`                                                                    | Give ability to mark proposals as in development/completed                                                                                   |
 | 27 October 2025     | `DBAPool` version `2`                                                                                                         | Add tracking of DBA rewards per app per round and seed function for historical data                                                          |
 | 21 October 2025     | `XAllocationVoting` version `8`, `VoterRewards` version `6`, `RelayerRewardsPool` version `1`                                 | Added auto-voting functionality with relayer rewards system and early access period                                                          |
@@ -44,30 +44,28 @@ Migrates GalaxyMember from legacy VeChain nodes infrastructure to Stargate NFT e
 
 ### Changes 🚀
 
-* **Upgraded Contract(s):**
-  * `GalaxyMember.sol` to version `6`
+- **Upgraded Contract(s):**
+  - `GalaxyMember.sol` to version `6`
 
 ---
 
 ### Storage Changes 📦
 
-* **`GalaxyMember`**:
+- **`GalaxyMember`**:
 
   **➕ Added (V6)**
-
-  * `stargateNFT` (IStargateNFT) → Reference to the Stargate NFT contract for node management
+  - `stargateNFT` (IStargateNFT) → Reference to the Stargate NFT contract for node management
 
   **⚠️ Deprecated (Retained for Backward Compatibility)**
-
-  * `vechainNodes` (ITokenAuction) → Legacy VeChain nodes contract (no longer actively used but kept in storage)
-  * `nodeManagement` (INodeManagementV3) → Legacy node management contract (no longer actively used but kept in storage)
+  - `vechainNodes` (ITokenAuction) → Legacy VeChain nodes contract (no longer actively used but kept in storage)
+  - `nodeManagement` (INodeManagementV3) → Legacy node management contract (no longer actively used but kept in storage)
 
 ---
 
 ### Migration Requirements ⚠️
 
-* **Node Holders**: Users with nodes attached to Galaxy Member NFTs must migrate their nodes from the legacy TokenAuction contract to Stargate before upgrading to V6
-* **Impact if Not Migrated**:
+- **Node Holders**: Users with nodes attached to Galaxy Member NFTs must migrate their nodes from the legacy TokenAuction contract to Stargate before upgrading to V6
+- **Impact if Not Migrated**:
   - Node attachments will be automatically reset/cleared
   - Galaxy Member NFTs will revert to base level (level determined by B3TR donated only)
   - Users can re-attach their nodes after migration
@@ -76,7 +74,7 @@ Migrates GalaxyMember from legacy VeChain nodes infrastructure to Stargate NFT e
 
 ### New Features 🚀
 
-* **`GalaxyMember`**:
+- **`GalaxyMember`**:
 
   #### Stargate NFT Integration:
 
@@ -96,6 +94,7 @@ Migrates GalaxyMember from legacy VeChain nodes infrastructure to Stargate NFT e
   - `stargateNFT()` - View function to retrieve the current StargateNFT contract address
 
   #### API Mapping Changes:
+
   ```
   Legacy (V5)                           → Stargate (V6)
   ────────────────────────────────────────────────────────────────
@@ -109,17 +108,17 @@ Migrates GalaxyMember from legacy VeChain nodes infrastructure to Stargate NFT e
 
 ### Events 📣
 
-* **New Events:**
+- **New Events:**
   - `StargateNFTAddressUpdated(address indexed newAddress, address indexed oldAddress)` - Emitted when the StargateNFT contract address is updated
 
 ---
 
 ### Backward Compatibility ♻️
 
-* All existing Galaxy Member NFTs and their properties (token IDs, levels, B3TR donated) are preserved
-* Existing storage mappings (`_nodeToTokenId`, `_tokenIdToNode`, `_nodeToFreeUpgradeLevel`) remain intact
-* Token selection checkpoints maintained across upgrade
-* Node attachment storage preserved (for migrated nodes)
+- All existing Galaxy Member NFTs and their properties (token IDs, levels, B3TR donated) are preserved
+- Existing storage mappings (`_nodeToTokenId`, `_tokenIdToNode`, `_nodeToFreeUpgradeLevel`) remain intact
+- Token selection checkpoints maintained across upgrade
+- Node attachment storage preserved (for migrated nodes)
 
 ---
 
@@ -131,49 +130,45 @@ Migrates X2EarnApps endorsement system from legacy NodeManagement infrastructure
 
 ### Changes 🚀
 
-* **Upgraded Contract(s):**
-  * `X2EarnApps.sol` to version `7`
+- **Upgraded Contract(s):**
+  - `X2EarnApps.sol` to version `7`
 
-* **Updated Modules:**
-  * `EndorsementUpgradeable.sol` - Stargate NFT integration
-  * `EndorsementUtils.sol` - Replaced NodeManagement calls with StargateNFT calls
+- **Updated Modules:**
+  - `EndorsementUpgradeable.sol` - Stargate NFT integration
+  - `EndorsementUtils.sol` - Replaced NodeManagement calls with StargateNFT calls
 
 ---
 
 ### Storage Changes 📦
 
-* **`EndorsementUpgradeable` (X2EarnApps Module)**:
+- **`EndorsementUpgradeable` (X2EarnApps Module)**:
 
   **➕ Added (V7)**
-
-  * `_stargateNFT` (IStargateNFT) → Reference to the Stargate NFT contract for node management and endorsement validation
+  - `_stargateNFT` (IStargateNFT) → Reference to the Stargate NFT contract for node management and endorsement validation
 
   **⚠️ Deprecated (Retained for Backward Compatibility)**
-
-  * `_nodeManagementContract` (INodeManagementV3) → Legacy node management contract (no longer actively used but kept in storage)
+  - `_nodeManagementContract` (INodeManagementV3) → Legacy node management contract (no longer actively used but kept in storage)
 
 ---
 
 ### Library Changes 📚
 
-* **`EndorsementUtils`**:
+- **`EndorsementUtils`**:
 
   **➕ Added Data Types (V7)**
-
-  * `NodeStrengthLevel` enum → Local definition of node strength levels (replaces `VechainNodesDataTypes.NodeStrengthLevel`)
-  * `NodeStrengthScores` struct → Local definition of node strength scores (replaces `VechainNodesDataTypes.NodeStrengthScores`)
-  * `NodeSource` enum → Source identifier for nodes (None, VeChainNodes, StargateNFT)
+  - `NodeStrengthLevel` enum → Local definition of node strength levels (replaces `VechainNodesDataTypes.NodeStrengthLevel`)
+  - `NodeStrengthScores` struct → Local definition of node strength scores (replaces `VechainNodesDataTypes.NodeStrengthScores`)
+  - `NodeSource` enum → Source identifier for nodes (None, VeChainNodes, StargateNFT)
 
   **🔄 Removed Dependencies**
-
-  * Removed import of `VechainNodesDataTypes` from NodeManagement
-  * Now self-contained with its own data type definitions
+  - Removed import of `VechainNodesDataTypes` from NodeManagement
+  - Now self-contained with its own data type definitions
 
 ---
 
 ### New Features 🚀
 
-* **`X2EarnApps`**:
+- **`X2EarnApps`**:
 
   #### Stargate NFT Integration:
 
@@ -190,10 +185,9 @@ Migrates X2EarnApps endorsement system from legacy NodeManagement infrastructure
 
 ---
 
-* **`EndorsementUpgradeable` Module**:
+- **`EndorsementUpgradeable` Module**:
 
   #### Updated Core Functions:
-
   - `endorseApp()` - Now validates node management using `stargateNFT.isTokenManager()`
   - `unendorseApp()` - Now validates node management using `stargateNFT.isTokenManager()`
   - `getNodeEndorsementScore()` - Now retrieves node levels via `stargateNFT.getTokenLevel()`
@@ -202,9 +196,10 @@ Migrates X2EarnApps endorsement system from legacy NodeManagement infrastructure
 
 ---
 
-* **`EndorsementUtils` Library**:
+- **`EndorsementUtils` Library**:
 
   #### API Mapping Changes:
+
   ```
   Legacy (V6)                                  → Stargate (V7)
   ────────────────────────────────────────────────────────────────────────────

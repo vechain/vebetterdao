@@ -24,6 +24,7 @@ import {
   Stargate,
   NodeManagementV3,
   TokenAuction,
+  X2EarnAppsV7,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -248,6 +249,7 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtils,
     EndorsementUtils,
     VoteEligibilityUtils,
+    AppStorageUtils,
     // V2
     AdministrationUtilsV2,
     EndorsementUtilsV2,
@@ -268,6 +270,10 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
+    // V7
+    AdministrationUtilsV7,
+    EndorsementUtilsV7,
+    VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: true, latestVersionOnly: false })
 
   console.log("Deploying AutoVoting Libraries")
@@ -289,7 +295,10 @@ export async function deployAll(config: ContractsConfig) {
   if (!AdministrationUtilsV6 || !EndorsementUtilsV6 || !VoteEligibilityUtilsV6) {
     throw new Error("Failed to deploy X2Earn V6 libraries")
   }
-  if (!AdministrationUtils || !EndorsementUtils || !VoteEligibilityUtils) {
+  if (!AdministrationUtilsV7 || !EndorsementUtilsV7 || !VoteEligibilityUtilsV7) {
+    throw new Error("Failed to deploy X2Earn V7 libraries")
+  }
+  if (!AdministrationUtils || !EndorsementUtils || !VoteEligibilityUtils || !AppStorageUtils) {
     throw new Error("Failed to deploy X2Earn latest libraries")
   }
 
@@ -406,8 +415,8 @@ export async function deployAll(config: ContractsConfig) {
   // Set XAllocationVoting to temp address
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
-  const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
+  const x2EarnAppsV7 = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnAppsV7"],
     [
       [
         config.XAPP_BASE_URI,
@@ -457,14 +466,18 @@ export async function deployAll(config: ContractsConfig) {
           VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6.getAddress(),
         },
         {
-          AdministrationUtils: await AdministrationUtils.getAddress(),
-          EndorsementUtils: await EndorsementUtils.getAddress(),
-          VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+          AdministrationUtilsV7: await AdministrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await EndorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await VoteEligibilityUtilsV7.getAddress(),
         },
       ],
       logOutput: true,
     },
-  )) as X2EarnApps
+  )) as X2EarnAppsV7
+
+  // IMPORTANT: We will upgrade X2EarnAppsV7 to X2EarnAppsV8 in next steps since
+  // we will first need to initialize it with some contracts addresses (xAllocationVoting, x2EarnRewardsPool)
+  // It cannot be done here because in versions > 7 the setters have been removed.
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     [
@@ -481,7 +494,7 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN, // contracts address manager
         TEMP_ADMIN, // upgrader
         await b3tr.getAddress(),
-        await x2EarnApps.getAddress(),
+        await x2EarnAppsV7.getAddress(),
       ],
       [
         config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
@@ -515,7 +528,7 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN, // contractsAddressManager
         await b3tr.getAddress(),
         await treasury.getAddress(),
-        await x2EarnApps.getAddress(),
+        await x2EarnAppsV7.getAddress(),
         await x2EarnRewardsPool.getAddress(),
       ],
       [],
@@ -670,7 +683,7 @@ export async function deployAll(config: ContractsConfig) {
           admins: [await timelock.getAddress(), TEMP_ADMIN],
           upgrader: TEMP_ADMIN,
           contractsAddressManager: TEMP_ADMIN,
-          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          x2EarnAppsAddress: await x2EarnAppsV7.getAddress(),
           baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
           appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
@@ -715,7 +728,7 @@ export async function deployAll(config: ContractsConfig) {
     "VeBetterPassportV1",
     [
       {
-        x2EarnApps: await x2EarnApps.getAddress(),
+        x2EarnApps: await x2EarnAppsV7.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
         galaxyMember: await galaxyMember.getAddress(),
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
@@ -1000,7 +1013,7 @@ export async function deployAll(config: ContractsConfig) {
   const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
     {
       admin: TEMP_ADMIN, // admin
-      x2EarnApps: await x2EarnApps.getAddress(),
+      x2EarnApps: await x2EarnAppsV7.getAddress(),
       xAllocationPool: await xAllocationPool.getAddress(),
       x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
       b3tr: await b3tr.getAddress(),
@@ -1028,6 +1041,35 @@ export async function deployAll(config: ContractsConfig) {
   )) as DBAPool
 
   console.log("DBAPool deployed and upgraded to V2")
+
+  console.log("Setting X2EarnApps addresses and upgrading to X2EarnAppsV8...")
+  // Setup X2EarnApps addresses
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
+    .then(async tx => await tx.wait())
+  await x2EarnAppsV7
+    .connect(deployer)
+    .setVeBetterPassportContract(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+
+  // This is done here because in versions > 7 the setters have been removed.
+  // V8 flexible endorsement caps: 49 per node per app, 110 total per app
+  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [49, 110], {
+    version: 8,
+    libraries: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
+    },
+  })) as X2EarnApps
+
+  console.log("X2EarnApps addresses set and upgraded to X2EarnAppsV8")
 
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
@@ -1083,6 +1125,7 @@ export async function deployAll(config: ContractsConfig) {
       AdministrationUtils: await AdministrationUtils.getAddress(),
       EndorsementUtils: await EndorsementUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
     },
     XAllocationVoting: {
       AutoVotingLogic: await AutoVotingLogic.getAddress(),
@@ -1193,16 +1236,6 @@ export async function deployAll(config: ContractsConfig) {
     .then(async tx => await tx.wait())
   console.log("XAllocationsGovernor and Vote2Earn address set in Emissions contract")
 
-  // Setup X2EarnApps addresses
-  await x2EarnApps
-    .connect(deployer)
-    .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
-    .then(async tx => await tx.wait())
-  await x2EarnApps
-    .connect(deployer)
-    .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
-    .then(async tx => await tx.wait())
-
   // Setup XAllocationPool addresses
   await xAllocationPool
     .connect(deployer)
@@ -1291,19 +1324,38 @@ export async function deployAll(config: ContractsConfig) {
     .then(async tx => await tx.wait())
   console.log("B3TRGovernor address set in XAllocationVoting contract")
 
+  // Set the max level for GM NFTs to 5
+  await galaxyMember
+    .connect(deployer)
+    .setMaxLevel(5)
+    .then(async tx => await tx.wait())
+  console.log("Max level for GM NFTs set to 5")
+
+  // Set the cooldown period for X2Earn nodes to 1 round
+  await x2EarnApps
+    .connect(deployer)
+    .updateCooldownPeriod(1)
+    .then(async tx => await tx.wait())
+  console.log("Cooldown period for X2Earn nodes set to 1 round")
+
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
-  await setupEnvironment(
-    config.NEXT_PUBLIC_APP_ENV,
-    emissions,
-    treasury,
-    x2EarnApps,
-    governor,
-    xAllocationVoting,
-    b3tr,
-    vot3,
-    stargateMock,
-  )
+  // Wrapped in try-catch so setup failures don't prevent config from being written
+  try {
+    await setupEnvironment(
+      config.NEXT_PUBLIC_APP_ENV,
+      emissions,
+      treasury,
+      x2EarnApps,
+      governor,
+      xAllocationVoting,
+      b3tr,
+      vot3,
+      stargateMock,
+    )
+  } catch (e) {
+    console.error("Setup environment failed (contracts are deployed, setup can be re-run):", e)
+  }
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time

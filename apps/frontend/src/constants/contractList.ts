@@ -127,7 +127,7 @@ export const CONTRACT_LIST = [
     ],
   },
   {
-    name: "Stargate",
+    name: "StargateNFT",
     contractAddress: config.stargateNFTContractAddress,
     roles: [
       "DEFAULT_ADMIN_ROLE",

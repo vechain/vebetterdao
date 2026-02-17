@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/X2EarnApps__factory"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/x-2-earn-apps/X2EarnApps__factory"
 import { EnhancedClause } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 

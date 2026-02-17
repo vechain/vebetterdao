@@ -14,6 +14,8 @@ import { getNFTMetadataUriQueryKey } from "../../api/contracts/galaxyMember/hook
 import { getUserNodesQueryKey } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useBuildTransaction } from "../useBuildTransaction"
 
+import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
+
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type Props = {
   xNodeId: string
@@ -57,15 +59,16 @@ export const useDetachGMFromXNode = ({ xNodeId, onSuccess }: Props) => {
 
   const refetchQueryKeys = useMemo(
     () => [
-      getSelectedTokenIdQueryKey(account?.address),
+      getSelectedTokenIdQueryKey(account?.address ?? ""),
       getLevelOfTokenQueryKey(attachedGMTokenId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(attachedGMTokenId),
       getNFTMetadataUriQueryKey(attachedGMTokenId ?? ""),
+      getB3trToUpgradeQueryKey(attachedGMTokenId),
       getUserNodesQueryKey(account?.address ?? ""),
       getUserGMsQueryKey(account?.address ?? ""),
     ],
-    [account, attachedGMTokenId, xNodeId],
+    [account?.address, attachedGMTokenId, xNodeId],
   )
 
   return useBuildTransaction({

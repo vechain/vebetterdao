@@ -24,6 +24,7 @@
     "generate:schema": "openapi-typescript https://indexer.mainnet.vechain.org/api-docs -o ./src/api/indexer/schema.d.ts"
   },
   "dependencies": {
+    "@chakra-ui/charts": "^3.33.0",
     "@chakra-ui/react": "^3.26.0",
     "@emotion/react": "^11.14.0",
     "@iconscout/react-unicons": "^2.0.2",
@@ -43,7 +44,7 @@
     "@vechain/connex-framework": "^2.1.0",
     "@vechain/picasso": "^2.1.1",
     "@vechain/vebetterdao-contracts": "*",
-    "@vechain/vechain-kit": "2.4.3",
+    "@vechain/vechain-kit": "2.5.1",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
     "i18next": "^23.11.4",
@@ -94,7 +95,7 @@
     "@types/uuid": "^9.0.8",
     "eslint": "^8",
     "eslint-config-next": "14.2.25",
-    "eslint-plugin-storybook": "^10.0.1",
+    "eslint-plugin-storybook": "0.12.0",
     "msw": "^2.11.6",
     "msw-storybook-addon": "^2.0.6",
     "openapi-typescript": "^7.9.1",

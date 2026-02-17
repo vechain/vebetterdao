@@ -1,5 +1,4 @@
 import { Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
-import { ethers } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -11,15 +10,15 @@ export const EndorsementPointsBanner = () => {
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const requiredPoints = useEndorsementScoreThreshold()
   const isLoading = isUserNodesLoading
-  const nodesNotEndorsingApp = useMemo(
-    () => userNodesInfo?.nodesManagedByUser?.filter((node: UserNode) => node.endorsedAppId === ethers.ZeroHash),
+  const nodesWithAvailablePoints = useMemo(
+    () => userNodesInfo?.nodesManagedByUser?.filter((node: UserNode) => node.availablePoints > BigInt(0)),
     [userNodesInfo?.nodesManagedByUser],
   )
   const availablePoints = useMemo(() => {
-    return nodesNotEndorsingApp?.reduce((acc, node) => acc + Number(node?.endorsementScore ?? 0), 0) ?? 0
-  }, [nodesNotEndorsingApp])
+    return nodesWithAvailablePoints?.reduce((acc, node) => acc + Number(node.availablePoints), 0) ?? 0
+  }, [nodesWithAvailablePoints])
 
-  const firstAvailableNode = useMemo(() => nodesNotEndorsingApp?.[0], [nodesNotEndorsingApp])
+  const firstAvailableNode = useMemo(() => nodesWithAvailablePoints?.[0], [nodesWithAvailablePoints])
 
   if (!availablePoints) return null
   return (

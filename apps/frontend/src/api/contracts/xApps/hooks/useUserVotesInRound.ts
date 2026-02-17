@@ -46,11 +46,11 @@ export const useUserVotesInRound = (roundId: string, userAddress?: string) => {
         options: { limit: 1 },
       })
 
-      if (!eventLog) return undefined
+      if (!eventLog) return null
 
       const event = decodeEventLog(eventLog, abi)
 
-      if (event.decodedData.eventName !== eventName) return undefined
+      if (event.decodedData.eventName !== eventName) return null
 
       return {
         voter: event.decodedData.args.voter,

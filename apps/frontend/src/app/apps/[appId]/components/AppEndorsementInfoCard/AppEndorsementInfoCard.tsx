@@ -1,16 +1,28 @@
-import { Button, Card, Heading, HStack, Link, Skeleton, Stack, VStack, useDisclosure } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Link,
+  Skeleton,
+  Stack,
+  VStack,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
+import { HelpCircle } from "iconoir-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAppEndorsementScore } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
+import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 
-import { useAllocationsRound } from "../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
-import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
 import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
 import { useIsAppModerator } from "../../../../../api/contracts/xApps/hooks/useIsAppModerator"
@@ -18,11 +30,11 @@ import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../
 import { DISCORD_URL } from "../../../../../constants/links"
 import { XAppStatus } from "../../../../../types/appDetails"
 import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { GenericAlert } from "../../../../components/Alert/GenericAlert"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { EndorsementDetails } from "./EndorsementDetails"
+import { EndorsementExplanationModal } from "./EndorsementExplanationModal"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 
 type Props = {
@@ -40,11 +52,15 @@ export const AppEndorsementInfoCard = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
-  // App endorsement data
-  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
-  // User roles data
+  const { data: rawAppEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
+  const { data: appScoreStr } = useAppEndorsementScore(app?.id ?? "")
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
+  const appEndorsers = useMemo(() => {
+    if (!rawAppEndorsers) return []
+    return [...new Set(rawAppEndorsers.map(a => a.toLowerCase()))].map(
+      lower => rawAppEndorsers.find(a => a.toLowerCase() === lower) ?? lower,
+    )
+  }, [rawAppEndorsers])
   const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(
     app?.id ?? "",
     account?.address ?? "",
@@ -53,35 +69,41 @@ export const AppEndorsementInfoCard = ({
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
-  const nodeEndorsingApp = userNodesInfo?.nodesManagedByUser?.find((node: UserNode) => node.endorsedAppId === app?.id)
-  const userNodesHasPoints = userNodesInfo?.nodesManagedByUser?.some((node: UserNode) => node.endorsementScore > 0)
-  const totalXNodePoints = Math.max(
-    ...(userNodesInfo?.nodesManagedByUser?.map((node: UserNode) => Number(node.endorsementScore)) ?? []),
+  const nodesEndorsingApp = useMemo(
+    () =>
+      userNodesInfo?.nodesManagedByUser?.filter((node: UserNode) =>
+        node.activeEndorsements.some(e => e.appId === app?.id),
+      ) ?? [],
+    [userNodesInfo, app?.id],
+  )
+  const firstNodeEndorsing = nodesEndorsingApp[0]
+
+  const userNodesHasPoints = userNodesInfo?.nodesManagedByUser?.some(
+    (node: UserNode) => node.availablePoints > BigInt(0),
   )
 
-  // Call to actions
   const appUnendorsedStatus =
     endorsementStatus === XAppStatus.LOOKING_FOR_ENDORSEMENT ||
     endorsementStatus === XAppStatus.UNENDORSED_AND_ELIGIBLE ||
     endorsementStatus === XAppStatus.UNENDORSED_NOT_ELIGIBLE
 
+  const appBelowMaxCap = useMemo(() => {
+    const score = Number(appScoreStr ?? 0)
+    const max = Number(maxPointsPerAppValue ?? 110)
+    return score < max
+  }, [appScoreStr, maxPointsPerAppValue])
+
+  const canReceiveEndorsements =
+    appUnendorsedStatus || (endorsementStatus === XAppStatus.ENDORSED_AND_ELIGIBLE && appBelowMaxCap)
+
   const shouldRenderEndorseButton = useMemo(() => {
-    return userNodesHasPoints && !nodeEndorsingApp && appUnendorsedStatus
-  }, [userNodesHasPoints, nodeEndorsingApp, appUnendorsedStatus])
+    return userNodesHasPoints && canReceiveEndorsements
+  }, [userNodesHasPoints, canReceiveEndorsements])
 
   const shouldRenderLookForEndorsersButton = useMemo(() => {
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
 
-  const shouldDisableEndorsementButton = useMemo(() => {
-    return nodeEndorsingApp?.isOnCooldown
-  }, [nodeEndorsingApp])
-
-  const shouldDisplayCooldownAlert = useMemo(() => {
-    return nodeEndorsingApp?.isOnCooldown
-  }, [nodeEndorsingApp])
-
-  // // Modals
   const {
     open: isEndorsementModalOpen,
     onOpen: onOpenEndorsementModal,
@@ -97,31 +119,15 @@ export const AppEndorsementInfoCard = ({
     onOpen: onOpenEndorsementInfoModal,
     onClose: onCloseEndorsementInfoModal,
   } = useDisclosure()
+  const { open: isExplanationOpen, onOpen: onOpenExplanation, onClose: onCloseExplanation } = useDisclosure()
 
   const actionButtons = useMemo(() => {
     const buttonComponents = []
 
-    if (shouldDisplayCooldownAlert) {
-      buttonComponents.push(
-        <GenericAlert
-          type="error"
-          isLoading={roundInfoLoading}
-          message={t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
-            roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-          })}
-        />,
-      )
-    }
-
     if (shouldRenderEndorseButton) {
       buttonComponents.push(
-        <Button
-          key="endorseButton"
-          variant="primary"
-          onClick={onOpenEndorsementModal}
-          disabled={shouldDisableEndorsementButton}
-          w="full">
-          {t("Endorse with your {{value}} points", { value: totalXNodePoints })}
+        <Button key="endorseButton" variant="primary" onClick={onOpenEndorsementModal} w="full">
+          {t("Endorse {{appName}}", { appName: app?.name ?? "" })}
         </Button>,
       )
     }
@@ -144,7 +150,7 @@ export const AppEndorsementInfoCard = ({
       )
     }
 
-    if (nodeEndorsingApp) {
+    if (firstNodeEndorsing) {
       buttonComponents.push(
         <Button
           key="removeEndorsementButton"
@@ -155,8 +161,7 @@ export const AppEndorsementInfoCard = ({
           textStyle="md"
           fontWeight="semibold"
           onClick={onOpenUnendorsementModal}
-          w="full"
-          disabled={shouldDisableEndorsementButton}>
+          w="full">
           {t("Remove endorsement")}
         </Button>,
       )
@@ -164,25 +169,26 @@ export const AppEndorsementInfoCard = ({
 
     return buttonComponents
   }, [
-    shouldDisplayCooldownAlert,
     shouldRenderEndorseButton,
     shouldRenderLookForEndorsersButton,
-    nodeEndorsingApp,
-    roundInfoLoading,
+    firstNodeEndorsing,
     t,
-    roundInfo?.voteEndTimestamp,
     onOpenEndorsementModal,
-    shouldDisableEndorsementButton,
-    totalXNodePoints,
     onOpenUnendorsementModal,
+    app?.name,
   ])
 
   return (
     <>
-      <Card.Root w={"full"} variant="primary" gap={4}>
+      <Card.Root w={"full"} variant="primary" gap={8}>
         <Card.Header>
           <HStack justifyContent="space-between" alignItems="center" w="full">
-            <Heading size="xl">{t("Endorsement")}</Heading>
+            <HStack gap={1}>
+              <Heading size="xl">{t("Endorsement")}</Heading>
+              <IconButton variant="ghost" size="xs" aria-label="Endorsement info" onClick={onOpenExplanation}>
+                <Icon as={HelpCircle} boxSize="4" color="icon.default" />
+              </IconButton>
+            </HStack>
             <Link
               textStyle="md"
               fontWeight="semibold"
@@ -195,9 +201,9 @@ export const AppEndorsementInfoCard = ({
         </Card.Header>
 
         <Card.Body>
-          <Stack gap={4} w="full">
+          <Stack gap={6} w="full">
             <Skeleton loading={isEndorsementStatusLoading}>
-              <EndorsementStatusCallout endorsementStatus={endorsementStatus}></EndorsementStatusCallout>
+              <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
             </Skeleton>
 
             <Stack direction="column" gap={4} w="full" justify="space-between" alignItems="center">
@@ -207,7 +213,7 @@ export const AppEndorsementInfoCard = ({
                 endorsementStatus={endorsementStatus}
                 endorsementThreshold={endorsementThreshold}
                 isEndorsementStatusLoading={isEndorsementStatusLoading}
-                isUserAppEndorser={!!nodeEndorsingApp}
+                isUserAppEndorser={nodesEndorsingApp.length > 0}
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
@@ -226,16 +232,18 @@ export const AppEndorsementInfoCard = ({
 
       <EndorseAppModal xApp={app} isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} />
       <UnendorseAppModal
-        xNodeId={nodeEndorsingApp?.id?.toString() ?? ""}
+        appId={app?.id ?? ""}
+        appName={app?.name ?? ""}
         isOpen={isUnendorsementModalOpen}
         onClose={onCloseUnendorsementModal}
       />
       <AppEndorsementInfoCardModal
         isOpen={isEndorsementInfoOpen}
         onClose={onCloseEndorsementInfoModal}
-        userNode={nodeEndorsingApp}
+        userNode={firstNodeEndorsing}
         appId={app?.id ?? ""}
       />
+      <EndorsementExplanationModal isOpen={isExplanationOpen} onClose={onCloseExplanation} />
     </>
   )
 }
