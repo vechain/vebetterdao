@@ -6,14 +6,18 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                                                                   | Summary                                                                                                                                      |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 3 December 2025     | `GalaxyMember` version `6` and `X2EarnApps` version `7`                                                                       | Replace Node Management Contract with Stargate NFT                                                                                           |
+| 17 February 2026    | `X2EarnApps` version `8`                                                                                                      | Flexible endorsement: partial points, multiple apps per node, configurable caps, migration support                                           |
+| 17 February 2026    | `B3TRGovernor` version `9`                                                                                                    | Added reason parameter to cancel function                                                                                                    |
+| 16 February 2026    | `XAllocationPool` version `7` (patch)                                                                                         | Fix allocations with zero votes                                                                                                              |
+| 30 January 2026     | `X2EarnCreator` version `2`                                                                                                   | Added self-minting functionality                                                                                                             |
+| 3 December 2025     | `GalaxyMember` version `6`, `X2EarnApps` version `7`                                                                          | Replace Node Management Contract with Stargate NFT                                                                                           |
 | 27 October 2025     | `B3TRGovernor` version `8` and `GrantsManager` version `2`                                                                    | Give ability to mark proposals as in development/completed                                                                                   |
 | 27 October 2025     | `DBAPool` version `2`                                                                                                         | Add tracking of DBA rewards per app per round and seed function for historical data                                                          |
 | 21 October 2025     | `XAllocationVoting` version `8`, `VoterRewards` version `6`, `RelayerRewardsPool` version `1`                                 | Added auto-voting functionality with relayer rewards system and early access period                                                          |
 | 23 October 2025     | `XAllocationPool` version `7`, `DBAPool` version `1`                                                                          | Store unallocated funds for each round and deployed new contract                                                                             |
 | 6 August 2025       | `B3TRGovernor` version `7`, `XAllocationVoting` version `7`                                                                   | Added grant proposal type with separate thresholds, added deposit threshold cap, and enabled deposit-based voting power in allocation voting |
-| 1 July 2025         | `GalaxyMember` version `5`, `NodeManagement` version `3`                                                                      | Use NodeManagementV3, avoid calls to legacy VeChain Nodes contract                                                                           |
-| 9 May 2025          | `Emissions` version `3`, `GalaxyMember` version `4`, `VoterRewards` version `5`                                               | Restoring the GM NFT System - Proposal Execution                                                                                             |
+| 1 July 2025         | `GalaxyMember` version `5`, `NodeManagement` version `3`, `X2EarnApps` version `6`                                            | Use NodeManagementV3, avoid calls to legacy VeChain Nodes contract                                                                           |
+| 9 May 2025          | `Emissions` version `3`, `GalaxyMember` version `4`, `VoterRewards` version `5`, `B3TRGovernor` version `6`, `XAllocationPool` version `6` | Restoring the GM NFT System - Proposal Execution                                                                                   |
 | 2 May 2025          | `X2EarnApps` version `5`                                                                                                      | Restricting to submit one app for each creator NFT received>                                                                                 |
 | 02 May 2025         | `VeBetterPassport` version `4`                                                                                                | Added RESET_SIGNALER_ROLE and fixed arithmetic underflow when resetting signals.                                                             |
 | 25 March 2025       | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5`                                      | Added optional dual-pool balance to manage rewards and app treasury separately                                                               |
@@ -33,6 +37,150 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 | 4th September 2024  | `X2EarnRewardsPool` version `2`                                                                                               | - Added impact key management and proof building                                                                                             |
 | 31st August 2024    | `VoterRewards` version `2`                                                                                                    | - Added quadratic rewarding features                                                                                                         |
 | 29th August 2024    | `B3TRGovernor` version `2`                                                                                                    | Updated access control modifiers                                                                                                             |
+
+---
+
+## Upgrade `X2EarnApps` to Version `8`
+
+Replaces the module-based architecture with libraries for contract size optimization. Introduces flexible endorsement where nodes can partially allocate points across multiple apps, with configurable per-node-per-app and per-app caps. Includes migration support via pause mechanism and seed function.
+
+---
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `X2EarnApps.sol` to version `8`
+
+- **Architecture Changes:**
+  - Replaced `EndorsementUpgradeable` and `VoteEligibilityUpgradeable` modules with `EndorsementUtils`, `AppStorageUtils`, `AdministrationUtils`, and `VoteEligibilityUtils` libraries
+  - Introduced `X2EarnAppsStorageTypes` library for centralized storage type definitions
+
+---
+
+### Storage Changes 📦
+
+- **`EndorsementStorage`**:
+
+  **➕ Added (V8)**
+  - `_activeEndorsements` (mapping nodeId => Endorsement[]) → All active endorsements by a node
+  - `_activeEndorsementsAppIndex` (mapping nodeId => appId => index) → O(1) index lookup for endorsements
+  - `_appEndorsementScore` (mapping appId => score) → Total endorsement score per app
+  - `_appEndorserNodes` (mapping appId => nodeId[]) → Reverse mapping of nodes endorsing each app
+  - `_appEndorserNodesIndex` (mapping appId => nodeId => index) → O(1) removal index
+  - `_maxPointsPerNodePerApp` (uint256) → Max points a single node can assign to one app (default 49)
+  - `_maxPointsPerApp` (uint256) → Max total points an app can receive (default 110)
+  - `_endorsementsPaused` (bool) → Pause endorsements during migration
+  - `_migrationCompleted` (bool) → One-time migration flag
+
+  **⚠️ Deprecated (Retained for Backward Compatibility)**
+  - `_appEndorsers` → Use `_appEndorserNodes` instead
+  - `_nodeToEndorsedApp` → Use `_activeEndorsements` instead
+  - `_appScores` → Use `_appEndorsementScore` instead
+  - `_endorsementRound` → Cooldown now tracked per-app in `Endorsement` struct
+
+- **New Data Types:**
+  - `Endorsement` struct → appId, points, endorsedAtRound
+  - `NodePointsInfo` struct → totalPoints, usedPoints, availablePoints, lockedPoints
+
+---
+
+### New Features 🚀
+
+- **Flexible Endorsement:**
+  - `endorseApp(appId, nodeId, points)` → Endorse an app with a specific number of points (replaces binary endorse)
+  - `unendorseApp(appId, nodeId, points)` → Partially or fully remove points from an app
+  - Nodes can endorse multiple apps simultaneously
+  - Per-app cooldown instead of per-node cooldown
+
+- **Configuration:**
+  - `setMaxPointsPerNodePerApp(maxPoints)` → Set per-node-per-app cap (GOVERNANCE_ROLE)
+  - `setMaxPointsPerApp(maxPoints)` → Set per-app total cap (GOVERNANCE_ROLE)
+  - `maxPointsPerNodePerApp()` / `maxPointsPerApp()` → View current caps
+
+- **Migration Support:**
+  - `seedEndorsement(appId, nodeId, points)` → Seed endorsement data during migration (MIGRATION_ROLE)
+  - `pauseEndorsements()` / `resumeEndorsements()` → Control endorsement operations during migration
+  - `completeMigration()` → Mark migration as done (one-time)
+
+- **Query Functions:**
+  - `getNodeAvailablePoints(nodeId)` → Get available endorsement points for a node
+  - `getNodePointsInfo(nodeId)` → Get full points breakdown (total, used, available, locked)
+  - `getActiveEndorsements(nodeId)` → Get all active endorsements for a node
+
+- **New Role:**
+  - `MIGRATION_ROLE` → Allows seeding endorsement data during migration
+
+---
+
+## Upgrade `B3TRGovernor` to Version `9`
+
+Adds a reason parameter to the cancel function, enabling proposers and admins to provide context when canceling governance proposals.
+
+---
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `B3TRGovernor.sol` to version `9`
+
+---
+
+### Storage Changes 📦
+
+- None.
+
+---
+
+### New Features 🚀
+
+- **`B3TRGovernor`**:
+  - `cancel()` now accepts a `string memory reason` parameter for providing cancellation rationale
+  - Added `ProposalCanceledWithReason(uint256 indexed proposalId, address indexed canceler, string reason)` event
+
+---
+
+## Patch `XAllocationPool` Version `7`
+
+Bug fix for allocation claims when an app receives zero votes.
+
+---
+
+### Bug Fixes 🐛
+
+- **`XAllocationPool`**:
+  - Removed `require(amountToClaim > 0)` check that prevented apps with zero votes from claiming, which blocked other apps from claiming unallocated funds
+
+---
+
+## Upgrade `X2EarnCreator` to Version `2`
+
+Adds self-minting functionality allowing users to mint their own Creator NFT when enabled by admin.
+
+---
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `X2EarnCreator.sol` to version `2`
+
+---
+
+### Storage Changes 📦
+
+- **`X2EarnCreator`**:
+
+  **➕ Added (V2)**
+  - `selfMintEnabled` (bool) → Whether self-minting is enabled
+
+---
+
+### New Features 🚀
+
+- **`X2EarnCreator`**:
+  - `selfMint()` → Allows users to mint a Creator NFT to themselves when self-minting is enabled
+  - `selfMintEnabled()` → View whether self-minting is enabled
+  - `initializeV2(bool _selfMintEnabled)` → V2 initializer to configure self-minting
+  - Added `SelfMintNotEnabled` error
 
 ---
 
