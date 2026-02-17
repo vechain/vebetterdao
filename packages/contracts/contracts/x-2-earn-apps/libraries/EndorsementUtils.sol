@@ -149,8 +149,6 @@ library EndorsementUtils {
     return X2EarnAppsStorageTypes._getEndorsementStorage()._appEndorserNodes[appId];
   }
 
-  // ------------------------------- Getter Functions -------------------------------
-
   /**
    * @notice Returns the total endorsement score a user has from all their managed nodes.
    * @param user The address of the user.
