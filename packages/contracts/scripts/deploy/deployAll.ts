@@ -142,6 +142,15 @@ export async function deployAll(config: ContractsConfig) {
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
     GovernorGovernanceLogicLibV7,
+    GovernorClockLogicLibV8,
+    GovernorConfiguratorLibV8,
+    GovernorDepositLogicLibV8,
+    GovernorFunctionRestrictionsLogicLibV8,
+    GovernorProposalLogicLibV8,
+    GovernorQuorumLogicLibV8,
+    GovernorStateLogicLibV8,
+    GovernorVotesLogicLibV8,
+    GovernorGovernanceLogicLibV8,
   } = await governanceLibraries({ logOutput: true, latestVersionOnly: false })
 
   console.log("Deploying VeBetter Passport Libraries")
@@ -817,6 +826,7 @@ export async function deployAll(config: ContractsConfig) {
       "B3TRGovernorV5",
       "B3TRGovernorV6",
       "B3TRGovernorV7",
+      "B3TRGovernorV8",
       "B3TRGovernor",
     ],
     [
@@ -860,9 +870,10 @@ export async function deployAll(config: ContractsConfig) {
         },
       ],
       [],
+      [], // v9
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -943,6 +954,16 @@ export async function deployAll(config: ContractsConfig) {
           GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
           GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+        },
+        {
+          GovernorClockLogicV8: await GovernorClockLogicLibV8.getAddress(),
+          GovernorConfiguratorV8: await GovernorConfiguratorLibV8.getAddress(),
+          GovernorDepositLogicV8: await GovernorDepositLogicLibV8.getAddress(),
+          GovernorFunctionRestrictionsLogicV8: await GovernorFunctionRestrictionsLogicLibV8.getAddress(),
+          GovernorProposalLogicV8: await GovernorProposalLogicLibV8.getAddress(),
+          GovernorQuorumLogicV8: await GovernorQuorumLogicLibV8.getAddress(),
+          GovernorStateLogicV8: await GovernorStateLogicLibV8.getAddress(),
+          GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
         },
       ],
       logOutput: true,
