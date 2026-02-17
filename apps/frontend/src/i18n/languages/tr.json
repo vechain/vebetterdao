@@ -1545,7 +1545,7 @@
   "Upgrade GM": "GM Yükselt",
   "Upgrade GM NFT": "GM NFT'yi Yükselt",
   "Upgrade NFT": "NFT'yi Yükselt",
-  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight": "{{name}} seviyesine yükselterek {{multiplier}} ödül ağırlığı ile tur başına ~{{amount}} daha fazla B3TR kazanın",
+  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight": "{{name}} seviyesine yükselterek x{{multiplier}} ödül ağırlığı ile tur başına ~{{amount}} daha fazla B3TR kazanın",
   "Upgrade your GM Level to apply": "Başvurmak için GM Seviyenizi yükseltin",
   "Upgrade your GM NFT for free with the help of your Node!": "Node'unuzun yardımıyla GM NFT'nizi ücretsiz yükseltin!",
   "Upgraded a": "Yükseltilen",

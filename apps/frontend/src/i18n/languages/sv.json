@@ -1545,7 +1545,7 @@
   "Upgrade GM": "Uppgradera GM",
   "Upgrade GM NFT": "Uppgradera GM NFT",
   "Upgrade NFT": "Uppgradera NFT",
-  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight": "Uppgradera till {{name}} för att tjäna ~{{amount}} mer B3TR per omgång med en {{multiplier}} belöningsvikt",
+  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight": "Uppgradera till {{name}} för att tjäna ~{{amount}} mer B3TR per omgång med en x{{multiplier}} belöningsvikt",
   "Upgrade your GM Level to apply": "Uppgradera din GM-nivå för att ansöka",
   "Upgrade your GM NFT for free with the help of your Node!": "Uppgradera din GM NFT gratis med hjälp av din Nod!",
   "Upgraded a": "Uppgraderade en",

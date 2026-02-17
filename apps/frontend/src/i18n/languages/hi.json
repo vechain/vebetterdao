@@ -1545,7 +1545,7 @@
   "Upgrade GM": "जीएम अपग्रेड करें",
   "Upgrade GM NFT": "जीएम एनएफटी अपग्रेड करें",
   "Upgrade NFT": "एनएफटी अपग्रेड करें",
-  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight": "{{name}} में अपग्रेड करें और {{multiplier}} रिवॉर्ड वेट के साथ प्रति राउंड ~{{amount}} अधिक B3TR कमाएं",
+  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight": "{{name}} में अपग्रेड करें और x{{multiplier}} रिवॉर्ड वेट के साथ प्रति राउंड ~{{amount}} अधिक B3TR कमाएं",
   "Upgrade your GM Level to apply": "आवेदन करने के लिए अपना जीएम स्तर बढ़ाएँ",
   "Upgrade your GM NFT for free with the help of your Node!": "अपने नोड की मदद से अपने GM NFT को मुफ्त में अपग्रेड करें!",
   "Upgraded a": "उन्नत किया",

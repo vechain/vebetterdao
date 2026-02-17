@@ -1545,7 +1545,7 @@
   "Upgrade GM": "升级GM",
   "Upgrade GM NFT": "升级GM NFT",
   "Upgrade NFT": "升级NFT",
-  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight": "升级至{{name}}，以{{multiplier}}奖励权重每轮赚取约{{amount}}更多B3TR",
+  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight": "升级至{{name}}，以x{{multiplier}}奖励权重每轮赚取约{{amount}}更多B3TR",
   "Upgrade your GM Level to apply": "升级您的GM等级以申请",
   "Upgrade your GM NFT for free with the help of your Node!": "借助您的节点免费升级您的 GM NFT！",
   "Upgraded a": "升级了一个",

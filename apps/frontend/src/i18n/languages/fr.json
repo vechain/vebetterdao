@@ -1545,7 +1545,7 @@
   "Upgrade GM": "Améliorer GM",
   "Upgrade GM NFT": "Améliorer le GM NFT",
   "Upgrade NFT": "Améliorer NFT",
-  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight": "Passez à {{name}} pour gagner ~{{amount}} B3TR de plus par tour avec un poids de récompense de {{multiplier}}",
+  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight": "Passez à {{name}} pour gagner ~{{amount}} B3TR de plus par tour avec un poids de récompense de x{{multiplier}}",
   "Upgrade your GM Level to apply": "Améliorez votre niveau GM pour postuler",
   "Upgrade your GM NFT for free with the help of your Node!": "Améliorez votre GM NFT gratuitement avec l'aide de votre nœud !",
   "Upgraded a": "Amélioré un",

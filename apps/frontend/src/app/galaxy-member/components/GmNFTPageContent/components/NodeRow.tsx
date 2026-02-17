@@ -65,11 +65,7 @@ export const NodeRow = ({
           {node.id.toString()}
         </Text>
 
-        {isAttachedToCurrentGM ? (
-          <Badge colorPalette="green" w="fit-content">
-            {t("Attached")}
-          </Badge>
-        ) : canUpgrade && freeLevelName ? (
+        {canUpgrade && freeLevelName ? (
           <Badge colorPalette="purple" w="fit-content">
             {t("Free upgrade to {{name}}", { name: freeLevelName })}
           </Badge>

@@ -1545,7 +1545,7 @@
   "Upgrade GM": "Nâng cấp GM",
   "Upgrade GM NFT": "Nâng cấp GM NFT",
   "Upgrade NFT": "Nâng cấp NFT",
-  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight": "Nâng cấp lên {{name}} để kiếm thêm ~{{amount}} B3TR mỗi vòng với trọng số phần thưởng {{multiplier}}",
+  "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight": "Nâng cấp lên {{name}} để kiếm thêm ~{{amount}} B3TR mỗi vòng với trọng số phần thưởng x{{multiplier}}",
   "Upgrade your GM Level to apply": "Nâng cấp cấp độ GM của bạn để áp dụng",
   "Upgrade your GM NFT for free with the help of your Node!": "Nâng cấp GM NFT của bạn miễn phí với sự trợ giúp của Nút của bạn!",
   "Upgraded a": "Đã nâng cấp một",
