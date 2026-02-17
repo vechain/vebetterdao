@@ -16,7 +16,7 @@ const ImageStack = ({ images }: { images: string[] }) => {
   const containerH = 56 + (totalItems - 1) * OFFSET_Y
 
   return (
-    <Box position="relative" w={`${containerW}px`} h={`${containerH}px`} flexShrink={0}>
+    <Box position="relative" isolation="isolate" w={`${containerW}px`} h={`${containerH}px`} flexShrink={0}>
       {visible.map((image, i) => (
         <Image
           key={image}
