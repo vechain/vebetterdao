@@ -367,7 +367,7 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
                   rounded="sm"
                   objectFit="cover"
                 />
-                <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                <Text textStyle="md" fontWeight="semibold">
                   {node.metadata?.name}
                 </Text>
               </HStack>

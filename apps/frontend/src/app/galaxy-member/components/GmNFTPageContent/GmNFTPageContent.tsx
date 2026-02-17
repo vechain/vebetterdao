@@ -1,4 +1,4 @@
-import { Button, Card, HStack, Stack, VStack, Text, Heading, useDisclosure, Spinner } from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Stack, Tag, VStack, Text, Heading, useDisclosure, Spinner } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -73,6 +73,8 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       return bLevel - aLevel
     })
 
+  const hasMoreNodes = userNodes.length > actionableNodes.length
+
   return (
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
@@ -84,21 +86,27 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
               <Card.Header>
                 <HStack justify="space-between" align="start">
                   <VStack align="stretch" gap={1} flex={1}>
-                    <Heading textStyle="lg">
-                      {t("Node upgrades")}
-                      {" ("}
-                      {actionableNodes.length}
-                      {")"}
-                    </Heading>
+                    <HStack gap={2}>
+                      <Heading textStyle="lg">{t("Node upgrades")}</Heading>
+                      <Tag.Root size="sm" variant="subtle">
+                        <Tag.Label>
+                          {actionableNodes.length} {actionableNodes.length === 1 ? t("node") : t("nodes")}
+                        </Tag.Label>
+                      </Tag.Root>
+                    </HStack>
                     <Text textStyle="sm" color="text.subtle">
                       {t(
                         "Attach a node to your GM NFT to get a free level upgrade. Higher-tier nodes unlock higher GM levels.",
                       )}
                     </Text>
                   </VStack>
-                  <Button variant="ghost" size="sm" asChild>
-                    <NextLink href="/nodes">{t("View all nodes")}</NextLink>
-                  </Button>
+                  {hasMoreNodes && (
+                    <Box hideBelow="md">
+                      <Button variant="ghost" size="sm" asChild>
+                        <NextLink href="/nodes">{t("View all nodes")}</NextLink>
+                      </Button>
+                    </Box>
+                  )}
                 </HStack>
               </Card.Header>
               <Card.Body>
@@ -122,6 +130,13 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                   <Text textStyle="sm" color="text.subtle">
                     {t("None of your nodes can upgrade this GM NFT further.")}
                   </Text>
+                )}
+                {hasMoreNodes && (
+                  <Box hideFrom="md">
+                    <Button variant="ghost" size="sm" asChild width="full">
+                      <NextLink href="/nodes">{t("View all nodes")}</NextLink>
+                    </Button>
+                  </Box>
                 )}
               </Card.Body>
             </Card.Root>

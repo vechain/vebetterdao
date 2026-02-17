@@ -4,7 +4,7 @@ import { Button, Heading, HStack, Icon, IconButton, Image, LinkBox, LinkOverlay,
 import NextLink from "next/link"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuClock, LuPencil } from "react-icons/lu"
+import { LuLock, LuPencil } from "react-icons/lu"
 
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
@@ -54,8 +54,8 @@ const EndorsedAppRow = ({
   const isInCooldown = cooldownRemainingRounds > BigInt(0)
 
   return (
-    <VStack bg="bg.subtle" p={4} rounded="xl" gap={3} w="full" align="stretch">
-      <HStack gap={3} w="full" align="center">
+    <VStack bg="bg.subtle" p={{ base: 3, md: 4 }} rounded="xl" gap={{ base: 2, md: 3 }} w="full" align="stretch">
+      <HStack gap={{ base: 2, md: 3 }} w="full" align="center">
         <LinkBox flexShrink={0}>
           <LinkOverlay asChild>
             <NextLink href={`/apps/${appId}`} />
@@ -63,8 +63,8 @@ const EndorsedAppRow = ({
           <Image
             src={convertUriToUrl(metadata?.logo ?? "")}
             alt={metadata?.name ?? ""}
-            w="11"
-            h="11"
+            w={{ base: "9", md: "11" }}
+            h={{ base: "9", md: "11" }}
             rounded="lg"
             cursor="pointer"
           />
@@ -72,14 +72,35 @@ const EndorsedAppRow = ({
         <Text textStyle="md" fontWeight="semibold" lineClamp={1} flex={1} minW={0}>
           {metadata?.name ?? appId}
         </Text>
-        <Text textStyle="md" fontWeight="semibold" flexShrink={0}>
+        <Text textStyle="md" fontWeight="semibold" flexShrink={0} display={{ base: "none", md: "block" }}>
           {points.toString()} {t("pts")}
         </Text>
-        <IconButton aria-label={t("Edit endorsement")} variant="ghost" size="xs" onClick={() => setIsEditOpen(true)}>
+        <IconButton
+          aria-label={t("Edit endorsement")}
+          variant="ghost"
+          size="xs"
+          onClick={() => setIsEditOpen(true)}
+          display={{ base: "none", md: "flex" }}>
           <Icon as={LuPencil} boxSize={4} color="text.subtle" />
         </IconButton>
       </HStack>
-      <HStack gap={3} w="full" align="center" flexWrap="wrap">
+      <HStack gap={2} w="full" align="center" display={{ base: "flex", md: "none" }}>
+        <Text textStyle="sm" color="text.subtle" flex={1}>
+          {t("Your endorsement")}
+        </Text>
+        <Text textStyle="sm" fontWeight="semibold" flexShrink={0}>
+          {points.toString()} {t("pts")}
+        </Text>
+        <IconButton
+          aria-label={t("Edit endorsement")}
+          variant="ghost"
+          size="xs"
+          flexShrink={0}
+          onClick={() => setIsEditOpen(true)}>
+          <Icon as={LuPencil} boxSize={4} color="text.subtle" />
+        </IconButton>
+      </HStack>
+      <HStack gap={2} w="full" align="center" flexWrap="wrap">
         <EndorsementStatusCallout
           endorsementStatus={endorsementStatus as XAppStatus}
           appId={appId}
@@ -91,8 +112,8 @@ const EndorsedAppRow = ({
           whiteSpace="nowrap"
         />
         {isInCooldown && (
-          <HStack gap={1} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-            <Icon as={LuClock} boxSize={4} color="fg.warning" />
+          <HStack gap={1} align="center">
+            <Icon as={LuLock} boxSize={3} color="fg.warning" />
             <Text textStyle="sm" color="fg.warning">
               {t("Points locked")}
             </Text>
