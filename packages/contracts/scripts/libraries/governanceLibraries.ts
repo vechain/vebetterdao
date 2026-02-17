@@ -765,6 +765,7 @@ export async function governanceLibraries<T extends DeployGovernanceLibrariesArg
   const GovernorVotesLogicV8 = await ethers.getContractFactory("GovernorVotesLogicV8", {
     libraries: {
       GovernorClockLogicV8: await GovernorClockLogicLibV8.getAddress(),
+      GovernorProposalLogicV7: await GovernorProposalLogicLibV7.getAddress(),
     },
   })
   const GovernorVotesLogicLibV8 = (await GovernorVotesLogicV8.deploy()) as GovernorVotesLogicV8
