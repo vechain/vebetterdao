@@ -3,7 +3,6 @@ import { ABIContract, Revision } from "@vechain/sdk-core"
 import {
   X2EarnApps__factory as X2EarnApps,
   XAllocationVoting__factory as XAllocationVoting,
-  XAllocationPool__factory as XAllocationPool,
   X2EarnRewardsPool__factory as X2EarnRewardsPool,
 } from "@vechain/vebetterdao-contracts"
 import { AppConfig } from "@repo/config"
@@ -162,8 +161,7 @@ async function hasRewardedActions(
  * Eligibility criteria:
  * 1. App was eligible for voting in the round
  * 2. App rewarded at least 1 action with proofs during the round
- * 3. App received less than 7.5% of votes (750 in scaled format)
- * 4. App should NOT get DBA only if it started the round unendorsed AND ended the round unendorsed
+ * 3. App should NOT get DBA only if it started the round unendorsed AND ended the round unendorsed
  *
  * @param thor - The ThorClient instance
  * @param config - The application configuration
@@ -206,29 +204,6 @@ export async function filterEligibleAppsForDBA(
     const hasRewarded = await hasRewardedActions(thor, config, roundId, appId)
     if (!hasRewarded) {
       console.log(`  - App ${appId} did not reward any actions, skipping`)
-      continue
-    }
-
-    // Check app's vote share
-    const sharesRes = await thor.contracts.executeCall(
-      config.xAllocationPoolContractAddress,
-      ABIContract.ofAbi(XAllocationPool.abi as any).getFunction("getAppShares"),
-      [roundId, appId],
-    )
-
-    if (!sharesRes.success) {
-      console.log(`  - Failed to get shares for app ${appId}, skipping`)
-      continue
-    }
-
-    const appShare = Number(sharesRes.result?.array?.[0] ?? 0)
-    const unallocatedShare = Number(sharesRes.result?.array?.[1] ?? 0)
-
-    console.log(`  - App ${appId} has share: ${appShare}, unallocated: ${unallocatedShare}`)
-
-    // Exclude apps with >= 7.5% votes (750 in scaled format where 100 = 1%)
-    if (appShare >= 750) {
-      console.log(`  - App ${appId} received >= 7.5% votes (${appShare / 100}%), skipping`)
       continue
     }
 
