@@ -6,7 +6,7 @@ import { FaChevronRight } from "react-icons/fa"
 const IMG_SIZE = "56px"
 const OFFSET_X = 10
 const OFFSET_Y = 4
-const MAX_VISIBLE = 3
+const MAX_VISIBLE = 2
 
 const ImageStack = ({ images }: { images: string[] }) => {
   const visible = images.slice(0, MAX_VISIBLE)
@@ -73,7 +73,7 @@ export const GmCard = ({
 
   return (
     <LinkBox flex={1}>
-      <Card.Root bg="transparency.200" gap="2" p="4" border="0">
+      <Card.Root bg="transparency.200" gap="2" p="4" border="0" h="full">
         <Card.Title asChild>
           <HStack w="full" justifyContent="space-between">
             <Text display="block" textStyle="sm" color="white" fontWeight="semibold">
