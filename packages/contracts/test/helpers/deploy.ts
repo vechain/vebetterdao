@@ -43,8 +43,7 @@ import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgrad
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import type { GovernanceLibraries } from "../../scripts/libraries/governanceLibraries"
 import type { PassportLibraries } from "../../scripts/libraries/passportLibraries"
-import { setWhitelistedFunctions } from "../../scripts/deploy/deployLatest"
-
+import { setWhitelistedFunctions } from "./whitelistGovernance"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"

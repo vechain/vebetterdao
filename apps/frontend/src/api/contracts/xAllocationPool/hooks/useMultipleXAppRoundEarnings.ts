@@ -5,8 +5,6 @@ import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/factori
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
-import { useRoundXApps } from "@/api/contracts/xApps/hooks/useRoundXApps"
-
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
 const method = "roundEarnings" as const
@@ -25,30 +23,29 @@ export const getMultipleXAppRoundEarningsQueryKey = (roundId: string, xAppIds: s
  */
 export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[]) => {
   const thor = useThor()
-  const { data: xAppsInRound = [] } = useRoundXApps(roundId)
   return useQuery({
     queryKey: getMultipleXAppRoundEarningsQueryKey(roundId, xAppIds),
     queryFn: async () => {
       const res = await executeMultipleClausesCall({
         thor,
-        calls: xAppsInRound.map(
-          app =>
+        calls: xAppIds.map(
+          appId =>
             ({
               abi,
               functionName: method,
               address,
-              args: [BigInt(roundId), app.id as `0x${string}`],
+              args: [BigInt(roundId), appId as `0x${string}`],
             }) as const,
         ),
       })
       const decoded = res.map((earnings, index) => {
         const parsedAmount = formatEther(earnings[0] || 0n)
-        const appId = xAppsInRound[index]?.id as string
+        const appId = xAppIds[index] as string
         return { amount: parsedAmount, appId }
       })
 
       return decoded
     },
-    enabled: !!thor && !!roundId && !!xAppIds.length && !!xAppsInRound.length,
+    enabled: !!thor && !!roundId && !!xAppIds.length,
   })
 }

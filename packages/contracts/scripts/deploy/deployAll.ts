@@ -1313,7 +1313,7 @@ export async function deployAll(config: ContractsConfig) {
   // Set the cooldown period for X2Earn nodes to 1 round
   await x2EarnApps
     .connect(deployer)
-    .setNodeCooldownPeriod(1)
+    .updateCooldownPeriod(1)
     .then(async tx => await tx.wait())
   console.log("Cooldown period for X2Earn nodes set to 1 round")
 

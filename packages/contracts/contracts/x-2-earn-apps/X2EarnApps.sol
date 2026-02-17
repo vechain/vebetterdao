@@ -109,8 +109,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     _disableInitializers();
   }
 
-  // ---------- Initializers ---------- //
-
   // ---------- Modifiers ---------- //
 
   /**

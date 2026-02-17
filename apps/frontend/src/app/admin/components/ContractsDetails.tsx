@@ -157,7 +157,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
   }))
 
   return (
-    <Card.Root variant="elevated" w="full" borderRadius={"2xl"}>
+    <Card.Root variant="outline" w="full" borderRadius={"2xl"}>
       <Card.Header>
         <Heading size={"md"}>{title}</Heading>
       </Card.Header>
