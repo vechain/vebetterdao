@@ -178,13 +178,13 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
       }}>
       <VStack gap={6} w="full">
         <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"flex-start"}>
-          {t("Refill Pools")}
+          {t("Re-balance Funds")}
         </Text>
         <VStack gap={4} w="full">
           <Box borderRadius="16px" p={"6px"} mb={"25px"}>
             <Text textStyle="sm" color="text.subtle">
               {t(
-                "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
+                "Move B3TR between your app balance and the rewards distribution pool. Add funds to the pool to enable reward payouts, or move them back to your balance when needed.",
               )}
             </Text>
           </Box>
@@ -208,7 +208,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                     pl={"20px"}
                     w={"full"}>
                     <Text fontWeight="semibold">
-                      {t(activeTab === "balance-to-rewards" ? "From Balance" : "From Rewards Pool")}
+                      {t(activeTab === "balance-to-rewards" ? "From App Balance" : "From Rewards Pool")}
                     </Text>
                     <HStack>
                       {isLoading ? (
@@ -273,7 +273,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                     w={"full"}>
                     <VStack w={"full"} alignItems={"flex-start"} borderBottomWidth={2} borderColor="border.secondary">
                       <Text fontWeight="semibold">
-                        {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
+                        {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To App Balance")}
                       </Text>
                       <Input
                         placeholder="0"
@@ -285,9 +285,10 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                     </VStack>
                     <Text textStyle="sm">
                       {t("Current {{value}}: ", {
-                        value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "Balance",
+                        value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "App Balance",
                       })}
-                      {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}
+                      {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}{" "}
+                      {"B3TR"}
                     </Text>
                   </VStack>
                 </VStack>
@@ -301,7 +302,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
             variant={"primary"}
             borderRadius={"full"}
             w={"full"}>
-            {t("Transfer token")}
+            {t(activeTab === "balance-to-rewards" ? "Move to rewards pool" : "Move to balance")}
           </Button>
         </VStack>
       </VStack>
