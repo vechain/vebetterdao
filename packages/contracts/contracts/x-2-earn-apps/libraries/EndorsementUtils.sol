@@ -83,6 +83,8 @@ library EndorsementUtils {
   error InvalidPointsAmount();
   error MigrationAlreadyCompleted();
   error InvalidEndorsementIndex(uint256 nodeId, bytes32 appId);
+  error MaxPointsPerAppBelowThreshold(uint256 maxPoints, uint256 threshold);
+  error ThresholdExceedsMaxPointsPerApp(uint256 threshold, uint256 maxPointsPerApp);
 
   // ------------------------------- Events -------------------------------
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
@@ -426,10 +428,14 @@ library EndorsementUtils {
 
   /**
    * @notice Updates the minimum endorsement score required for app eligibility.
+   * @dev Reverts if scoreThreshold > maxPointsPerApp (would make threshold unreachable).
    * @param scoreThreshold The new endorsement score threshold.
    */
   function updateEndorsementScoreThreshold(uint256 scoreThreshold) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+    if (scoreThreshold > $._maxPointsPerApp) {
+      revert ThresholdExceedsMaxPointsPerApp(scoreThreshold, $._maxPointsPerApp);
+    }
     emit EndorsementScoreThresholdUpdated($._endorsementScoreThreshold, scoreThreshold);
     $._endorsementScoreThreshold = scoreThreshold;
   }
@@ -458,10 +464,14 @@ library EndorsementUtils {
   /**
    * @notice Sets the maximum total points an app can receive from all endorsers.
    * @dev Provides a buffer above the threshold to prevent over-endorsement.
+   *      Reverts if maxPoints < endorsementScoreThreshold (would make threshold unreachable).
    * @param maxPoints The new max points per app (default 110).
    */
   function setMaxPointsPerApp(uint256 maxPoints) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+    if (maxPoints < $._endorsementScoreThreshold) {
+      revert MaxPointsPerAppBelowThreshold(maxPoints, $._endorsementScoreThreshold);
+    }
     emit MaxPointsPerAppUpdated($._maxPointsPerApp, maxPoints);
     $._maxPointsPerApp = maxPoints;
   }

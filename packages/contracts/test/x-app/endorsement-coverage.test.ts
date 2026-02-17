@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { describe, it } from "mocha"
 
+import { EndorsementUtils } from "../../typechain-types"
 import { getOrDeployContractInstances, startNewAllocationRound, waitForCurrentRoundToEnd } from "../helpers"
 import { createNodeHolder } from "../helpers/xnodes"
 
@@ -273,6 +274,28 @@ describe("EndorsementUtils Coverage - @shard15g", function () {
 
       await x2EarnApps.connect(owner).setMaxPointsPerApp(200)
       expect(await x2EarnApps.maxPointsPerApp()).to.equal(200)
+    })
+
+    it("setMaxPointsPerApp reverts when below endorsementScoreThreshold", async function () {
+      const { x2EarnApps, endorsementUtils, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      expect(await x2EarnApps.endorsementScoreThreshold()).to.equal(100)
+      await expect(x2EarnApps.connect(owner).setMaxPointsPerApp(99)).to.be.revertedWithCustomError(
+        endorsementUtils as EndorsementUtils,
+        "MaxPointsPerAppBelowThreshold",
+      )
+    })
+
+    it("updateEndorsementScoreThreshold reverts when above maxPointsPerApp", async function () {
+      const { x2EarnApps, endorsementUtils, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      expect(await x2EarnApps.maxPointsPerApp()).to.equal(110)
+      await expect(x2EarnApps.connect(owner).updateEndorsementScoreThreshold(111)).to.be.revertedWithCustomError(
+        endorsementUtils as EndorsementUtils,
+        "ThresholdExceedsMaxPointsPerApp",
+      )
     })
   })
 
