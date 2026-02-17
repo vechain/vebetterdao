@@ -1,16 +1,19 @@
-import { Card, HStack, Icon, Image, LinkBox, LinkOverlay, Skeleton, Tag, Text, VStack } from "@chakra-ui/react"
+import { Card, HStack, Icon, Image, LinkBox, LinkOverlay, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCoins, LuUsers, LuWallet, LuZap } from "react-icons/lu"
 
+import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
 import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 import NewAppIcon from "@/components/Icons/svg/new-app.svg"
+import { XAppStatus } from "@/types/appDetails"
 
 import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+import { EndorsementStatusCallout } from "../[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 const notFoundImage = "/assets/images/image-not-found.webp"
 const compact = getCompactFormatter(1)
 
@@ -25,6 +28,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
   const { data: logo } = useIpfsImage(appMetadata?.logo)
   const { data: appOverview, isLoading: isOverviewLoading } = useAppActionOverview(appId, undefined, showStats)
   const { data: earningsData, isLoading: isEarningsLoading } = useAppEarnings(appId, undefined, { enabled: showStats })
+  const { status: endorsementStatus, isLoading: isEndorsementStatusLoading } = useAppEndorsementStatus(appId)
 
   const totalB3trReceived = useMemo(() => {
     if (!earningsData || !Array.isArray(earningsData)) return 0
@@ -54,15 +58,29 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                     </Text>
                   </Skeleton>
                   {isNewApp && (
-                    <Tag.Root size="sm" variant="solid" colorPalette="green" fontWeight="semibold" flexShrink={0}>
-                      <Tag.StartElement>
-                        <Icon color="info.default" boxSize={3}>
-                          <NewAppIcon />
-                        </Icon>
-                      </Tag.StartElement>
-                      <Tag.Label>{t("New!")}</Tag.Label>
-                    </Tag.Root>
+                    <HStack p={1} px={2} borderRadius="8px" backgroundColor="status.positive.primary" flexShrink={0}>
+                      <Icon color="status.positive.subtle" boxSize={4}>
+                        <NewAppIcon />
+                      </Icon>
+                      <Text textStyle="sm" fontWeight="semibold" color="status.positive.subtle">
+                        {t("New!")}
+                      </Text>
+                    </HStack>
                   )}
+
+                  {endorsementStatus !== XAppStatus.UNKNOWN &&
+                    endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && (
+                      <Skeleton loading={isEndorsementStatusLoading}>
+                        <EndorsementStatusCallout
+                          endorsementStatus={endorsementStatus}
+                          appId={appId}
+                          showDescription={false}
+                          padding={1}
+                          boxSize={4}
+                          textStyle="sm"
+                        />
+                      </Skeleton>
+                    )}
                 </HStack>
 
                 <Skeleton loading={appMetadataLoading}>
