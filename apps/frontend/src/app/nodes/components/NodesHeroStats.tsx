@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react"
-import { Star, StarDashed, StarSolid } from "iconoir-react"
+import { ThreeStars, StarSolid } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 import { PiSquaresFour } from "react-icons/pi"
 
@@ -16,7 +16,6 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
   const nodes = userNodesInfo.nodesManagedByUser ?? []
   const availablePoints = nodes.reduce((sum, n) => sum + n.availablePoints, 0n)
   const totalOwned = userNodesInfo.totalEndorsementScore ?? 0n
-  const pointsInCooldown = nodes.reduce((sum, n) => sum + (n.pointsInCooldown ?? 0n), 0n)
   const endorsedAppsCount = nodes.reduce((count, n) => count + (n.activeEndorsements?.length ?? 0), 0)
 
   const stats = [
@@ -24,26 +23,17 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
       label: t("Total owned"),
       value: totalOwned.toString(),
       suffix: t("points"),
-      icon: StarSolid,
+      icon: ThreeStars,
       bg: "status.info.subtle",
       color: "status.info.primary",
     },
     {
-      label: t("Available to endorse"),
+      label: t("Available"),
       value: availablePoints.toString(),
       suffix: t("points"),
-      icon: Star,
+      icon: StarSolid,
       bg: "status.positive.subtle",
       color: "status.positive.primary",
-    },
-
-    {
-      label: t("In cooldown"),
-      value: pointsInCooldown.toString(),
-      suffix: t("points"),
-      icon: StarDashed,
-      bg: "status.negative.subtle",
-      color: "status.negative.primary",
     },
     {
       label: t("Endorsed apps"),
@@ -56,23 +46,31 @@ export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
   ]
 
   return (
-    <SimpleGrid columns={{ base: 2, md: 2, lg: 4 }} gap={4}>
+    <SimpleGrid columns={3} gap={{ base: 2, md: 4 }}>
       {stats.map(({ label, value, suffix, icon: IconComponent, bg, color }) => (
-        <Card.Root key={String(label)} variant="outline" p={4}>
+        <Card.Root key={String(label)} variant="outline" p={{ base: 2, md: 4 }}>
           <Card.Body>
-            <Text textStyle="sm" color="text.subtle" mb={2}>
+            <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={2}>
               {String(label)}
             </Text>
-            <HStack gap={3}>
-              <HStack justify="center" align="center" w="10" h="10" rounded="full" bg={bg} color={color}>
-                <Icon as={IconComponent} boxSize={5} />
+            <HStack gap={{ base: 2, md: 3 }}>
+              <HStack
+                justify="center"
+                align="center"
+                w={{ base: "7", md: "10" }}
+                h={{ base: "7", md: "10" }}
+                rounded="full"
+                bg={bg}
+                color={color}
+                flexShrink={0}>
+                <Icon as={IconComponent} boxSize={{ base: 4, md: 5 }} />
               </HStack>
               <HStack align="baseline" gap={1} flexWrap="wrap">
-                <Text textStyle="xl" fontWeight="bold">
+                <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
                   {value}
                 </Text>
                 {suffix && (
-                  <Text textStyle="sm" color="text.subtle">
+                  <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
                     {suffix}
                   </Text>
                 )}

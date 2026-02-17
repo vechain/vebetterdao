@@ -94,7 +94,7 @@ const EndorsedAppRow = ({
           <HStack gap={1} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
             <Icon as={LuClock} boxSize={4} color="fg.warning" />
             <Text textStyle="sm" color="fg.warning">
-              {t("In cooldown")}
+              {t("Points locked")}
             </Text>
           </HStack>
         )}
