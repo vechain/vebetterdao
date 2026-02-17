@@ -76,10 +76,14 @@ export const GmPoolAmountCard = () => {
               <HStack gap={2}>
                 <Icon as={UilArrowCircleUp} boxSize="18px" color="brand.secondary" />
                 <Text textStyle="sm" color="brand.secondary" fontWeight="semibold">
-                  {t("Upgrade to {{name}} to earn ~{{amount}} more B3TR per round", {
-                    name: nextLevelNft.name,
-                    amount: compactFormatter.format(rewardIncrease),
-                  })}
+                  {t(
+                    "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a {{multiplier}} reward weight",
+                    {
+                      name: nextLevelNft.name,
+                      amount: compactFormatter.format(rewardIncrease),
+                      multiplier: nextLevelNft.multiplier,
+                    },
+                  )}
                 </Text>
               </HStack>
             </VStack>
