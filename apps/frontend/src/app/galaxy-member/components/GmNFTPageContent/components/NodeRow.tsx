@@ -41,7 +41,14 @@ export const NodeRow = ({
   const freeLevelNum = Number(freeLevel ?? "0")
 
   return (
-    <Card.Root variant="subtle" alignItems="center" flexDirection="row" gap={3} p="4" rounded="xl">
+    <Card.Root
+      variant="subtle"
+      alignItems="center"
+      flexDirection="row"
+      gap={3}
+      p="4"
+      rounded="xl"
+      _hover={{ bg: "card.subtle" }}>
       <Image
         src={node?.metadata?.image ?? ""}
         alt={node?.metadata?.name}
