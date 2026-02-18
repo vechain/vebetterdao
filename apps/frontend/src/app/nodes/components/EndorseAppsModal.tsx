@@ -256,56 +256,64 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
       showCloseButton
       modalProps={{ unmountOnExit: false }}>
       {step === 1 || !selectedApp ? (
-        <VStack gap={5} align="flex-start" w="full">
-          <Heading size="xl" fontWeight="bold">
-            {t("Endorse app")}
-          </Heading>
+        <VStack gap={0} align="flex-start" w="full" maxH="70vh">
+          <VStack gap={5} align="flex-start" w="full" flex={1} overflow="auto" pb={4}>
+            <Heading size="xl" fontWeight="bold">
+              {t("Endorse app")}
+            </Heading>
 
-          <NodeAppEndorsementInfo node={node} currentPoints={BigInt(0)} />
+            <NodeAppEndorsementInfo node={node} currentPoints={BigInt(0)} />
 
-          <HStack w="full" justify="space-between" align="center">
-            <Text textStyle="lg" fontWeight="semibold">
-              {t("Apps")}
-            </Text>
-            <Text textStyle="sm" color="text.subtle">
-              {filteredApps.length} {t("apps")}
-            </Text>
-          </HStack>
-
-          <HStack gap={3} w="full">
-            <Box flex={1} position="relative">
-              <Box position="absolute" left={3} top="50%" transform="translateY(-50%)" zIndex={1} pointerEvents="none">
-                <Icon as={LuSearch} boxSize={4} color="text.subtle" />
-              </Box>
-              <Input
-                placeholder={t("Search by app name")}
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                pl={10}
-                borderRadius="xl"
-                size="md"
-              />
-            </Box>
-          </HStack>
-
-          <VStack w="full" gap={3} align="stretch">
-            {filteredApps.map(app => (
-              <SelectableAppRow
-                key={app.id}
-                app={app}
-                node={node}
-                isSelected={selectedAppId === app.id}
-                onSelect={() => setSelectedAppId(app.id)}
-              />
-            ))}
-            {filteredApps.length === 0 && (
-              <Text textStyle="sm" color="text.subtle" textAlign="center" py={6}>
-                {t("No apps found")}
+            <HStack w="full" justify="space-between" align="center">
+              <Text textStyle="lg" fontWeight="semibold">
+                {t("Apps")}
               </Text>
-            )}
+              <Text textStyle="sm" color="text.subtle">
+                {filteredApps.length} {t("apps")}
+              </Text>
+            </HStack>
+
+            <HStack gap={3} w="full">
+              <Box flex={1} position="relative">
+                <Box
+                  position="absolute"
+                  left={3}
+                  top="50%"
+                  transform="translateY(-50%)"
+                  zIndex={1}
+                  pointerEvents="none">
+                  <Icon as={LuSearch} boxSize={4} color="text.subtle" />
+                </Box>
+                <Input
+                  placeholder={t("Search by app name")}
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  pl={10}
+                  borderRadius="xl"
+                  size="md"
+                />
+              </Box>
+            </HStack>
+
+            <VStack w="full" gap={3} align="stretch">
+              {filteredApps.map(app => (
+                <SelectableAppRow
+                  key={app.id}
+                  app={app}
+                  node={node}
+                  isSelected={selectedAppId === app.id}
+                  onSelect={() => setSelectedAppId(app.id)}
+                />
+              ))}
+              {filteredApps.length === 0 && (
+                <Text textStyle="sm" color="text.subtle" textAlign="center" py={6}>
+                  {t("No apps found")}
+                </Text>
+              )}
+            </VStack>
           </VStack>
 
-          <HStack gap={4} justify="stretch" w="full" align="center" p={0}>
+          <HStack gap={4} justify="stretch" w="full" align="center" pt={4} borderTopWidth="1px" borderColor="border">
             <Button variant="secondary" flex={1} onClick={handleClose}>
               {t("Cancel")}
             </Button>

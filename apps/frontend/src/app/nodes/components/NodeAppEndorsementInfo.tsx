@@ -14,7 +14,7 @@ export const NodeAppEndorsementInfo = ({ node, currentPoints }: Props) => {
   if (!node) return null
 
   return (
-    <SimpleGrid columns={{ base: 1, md: currentPoints > BigInt(0) ? 3 : 1 }} gap={3} w="full">
+    <SimpleGrid columns={{ base: 1, md: currentPoints > BigInt(0) ? 3 : 2 }} gap={3} w="full">
       <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
         <Text textStyle="md" color="text.subtle">
           {t("Node")}
