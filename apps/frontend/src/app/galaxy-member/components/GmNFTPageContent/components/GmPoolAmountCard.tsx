@@ -74,7 +74,11 @@ export const GmPoolAmountCard = () => {
           {!isMaxLevel && nextLevelNft && rewardIncrease > 0 && (
             <VStack align="stretch" gap={3} pt={2} borderTopWidth="1px" borderColor="border.primary">
               <HStack gap={2}>
-                <Icon as={UilArrowCircleUp} boxSize="18px" color="brand.secondary-strong" />
+                <Icon
+                  as={UilArrowCircleUp}
+                  boxSize="18px"
+                  color={{ base: "brand.secondary-strong", _dark: "brand.secondary" }}
+                />
                 <Text textStyle="sm" color="brand.secondary-strong" fontWeight="semibold">
                   {t(
                     "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight",
