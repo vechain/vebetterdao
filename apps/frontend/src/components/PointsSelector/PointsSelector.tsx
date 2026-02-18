@@ -51,6 +51,8 @@ export const PointsSelector = ({ value, onChange, max, min = 0 }: PointsSelector
               bg="transparent"
               pl={3}
               pr={10}
+              autoFocus={false}
+              tabIndex={-1}
               _focus={{ outline: "none", boxShadow: "none" }}
             />
             <Box position="absolute" right={3} top="50%" transform="translateY(-50%)" pointerEvents="none">
