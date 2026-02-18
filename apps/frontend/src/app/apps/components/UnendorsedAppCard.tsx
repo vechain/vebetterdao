@@ -15,13 +15,11 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
-import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCoins, LuUsers, LuWallet, LuZap } from "react-icons/lu"
+import { LuCoins, LuUsers, LuZap } from "react-icons/lu"
 
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
-import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 import NewAppIcon from "@/components/Icons/svg/new-app.svg"
 import { XAppStatus } from "@/types/appDetails"
 
@@ -41,13 +39,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
   const { data: appOverview, isLoading: isOverviewLoading } = useAppActionOverview(appId, undefined, showStats)
-  const { data: earningsData, isLoading: isEarningsLoading } = useAppEarnings(appId, undefined, { enabled: showStats })
   const { status: endorsementStatus, isLoading: isEndorsementStatusLoading } = useAppEndorsementStatus(appId)
-
-  const totalB3trReceived = useMemo(() => {
-    if (!earningsData || !Array.isArray(earningsData)) return 0
-    return earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
-  }, [earningsData])
 
   const showEndorsementStatus =
     endorsementStatus !== XAppStatus.UNKNOWN && endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE
@@ -118,15 +110,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
 
                 <Separator />
                 {showStats && (
-                  <SimpleGrid columns={{ base: 2, md: 4 }} gap={2} w="full">
-                    <Skeleton loading={isEarningsLoading}>
-                      <HStack gap={2} align="center">
-                        <Icon as={LuWallet} boxSize={4} color="text.subtle" flexShrink={0} />
-                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
-                          {compact.format(totalB3trReceived)} {"B3TR"}
-                        </Text>
-                      </HStack>
-                    </Skeleton>
+                  <SimpleGrid columns={{ base: 2, md: 3 }} gap={2} w="full">
                     <Skeleton loading={isOverviewLoading}>
                       <HStack gap={2} align="center">
                         <Icon as={LuCoins} boxSize={4} color="text.subtle" flexShrink={0} />
