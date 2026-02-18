@@ -72,31 +72,10 @@ const EndorsedAppRow = ({
         <Text textStyle="md" fontWeight="semibold" lineClamp={1} flex={1} minW={0}>
           {metadata?.name ?? appId}
         </Text>
-        <Text textStyle="md" fontWeight="semibold" flexShrink={0} display={{ base: "none", md: "block" }}>
+        <Text textStyle="md" fontWeight="semibold" flexShrink={0}>
           {points.toString()} {t("pts")}
         </Text>
-        <IconButton
-          aria-label={t("Edit endorsement")}
-          variant="ghost"
-          size="xs"
-          onClick={() => setIsEditOpen(true)}
-          display={{ base: "none", md: "flex" }}>
-          <Icon as={LuPencil} boxSize={4} color="text.subtle" />
-        </IconButton>
-      </HStack>
-      <HStack gap={2} w="full" align="center" display={{ base: "flex", md: "none" }}>
-        <Text textStyle="sm" color="text.subtle" flex={1}>
-          {t("Your endorsement")}
-        </Text>
-        <Text textStyle="sm" fontWeight="semibold" flexShrink={0}>
-          {points.toString()} {t("pts")}
-        </Text>
-        <IconButton
-          aria-label={t("Edit endorsement")}
-          variant="ghost"
-          size="xs"
-          flexShrink={0}
-          onClick={() => setIsEditOpen(true)}>
+        <IconButton aria-label={t("Edit endorsement")} variant="ghost" size="xs" onClick={() => setIsEditOpen(true)}>
           <Icon as={LuPencil} boxSize={4} color="text.subtle" />
         </IconButton>
       </HStack>

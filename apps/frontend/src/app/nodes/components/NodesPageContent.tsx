@@ -39,7 +39,7 @@ export const NodesPageContent = () => {
   }
 
   return (
-    <Box maxW="breakpoint-xl" mx="auto" w="full" px={{ base: 4, md: 6 }}>
+    <Box maxW="breakpoint-xl" mx="auto" w="full" px={{ base: 0, md: 6 }}>
       <NodesHeroStats userNodesInfo={userNodesInfo!} />
       <Box display="grid" gridTemplateColumns={{ base: "1fr", lg: "1fr 415px" }} gap={8} mt={8} alignItems="start">
         <VStack align="stretch" gap={6}>
