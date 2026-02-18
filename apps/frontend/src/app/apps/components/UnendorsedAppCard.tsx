@@ -79,7 +79,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                     flexWrap="wrap">
                     <HStack gap={2} minW={0}>
                       <Skeleton loading={appMetadataLoading} minW={0}>
-                        <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                        <Text textStyle="md" fontWeight="semibold">
                           {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                         </Text>
                       </Skeleton>
@@ -111,7 +111,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                 </HStack>
 
                 <Skeleton loading={appMetadataLoading}>
-                  <Text textStyle="sm" color="text.subtle" lineClamp={2} w="full" minW={0}>
+                  <Text textStyle="sm" color="text.subtle" lineClamp={4} w="full" minW={0}>
                     {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                   </Text>
                 </Skeleton>
