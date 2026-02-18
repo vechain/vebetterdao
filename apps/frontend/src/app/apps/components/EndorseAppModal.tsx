@@ -1,16 +1,4 @@
-import {
-  VStack,
-  Heading,
-  Text,
-  Button,
-  Skeleton,
-  Card,
-  Image,
-  HStack,
-  Progress,
-  Circle,
-  SimpleGrid,
-} from "@chakra-ui/react"
+import { VStack, Heading, Text, Button, Skeleton, Card, Image, HStack, Progress, Circle } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -20,6 +8,7 @@ import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement
 import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useMaxPointsPerNodePerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerNodePerApp"
 import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
+import { NodeAppEndorsementInfo } from "@/app/nodes/components/NodeAppEndorsementInfo"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
 import { PointsSelector } from "@/components/PointsSelector/PointsSelector"
@@ -275,37 +264,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             {t("Endorse {{appName}}", { appName: xApp?.name })}
           </Heading>
 
-          <SimpleGrid columns={{ base: 1, md: currentPointsForApp > BigInt(0) ? 3 : 2 }} gap={3} w="full">
-            <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Node")}
-              </Text>
-              <HStack gap={2}>
-                <Text textStyle="md" fontWeight="semibold">
-                  {selectedNode?.metadata?.name}
-                  {" #" + selectedNode?.id.toString()}
-                </Text>
-              </HStack>
-            </VStack>
-            <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Available points")}
-              </Text>
-              <Text textStyle="md" fontWeight="semibold">
-                {selectedNode?.availablePoints.toString()} {t("pts")}
-              </Text>
-            </VStack>
-            {currentPointsForApp > BigInt(0) && (
-              <VStack bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-                <Text textStyle="md" color="text.subtle">
-                  {t("Current endorsement")}
-                </Text>
-                <Text textStyle="md" fontWeight="semibold">
-                  {currentPointsForApp.toString()} {t("pts")}
-                </Text>
-              </VStack>
-            )}
-          </SimpleGrid>
+          <NodeAppEndorsementInfo node={selectedNode} currentPoints={currentPointsForApp} />
 
           <Card.Root variant="outline" w="full" p={6} rounded="xl">
             <VStack gap={2} align="stretch">

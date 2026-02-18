@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, Card, HStack, Heading, Icon, Image, Input, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Heading, Icon, Input, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -23,6 +23,8 @@ import { XAppStatus } from "@/types/appDetails"
 import { AllApps } from "../../../api/contracts/xApps/getXApps"
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { EndorsementStatusCallout } from "../../apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
+
+import { NodeAppEndorsementInfo } from "./NodeAppEndorsementInfo"
 
 type EndorseStatusFilter = "all" | XAppStatus
 
@@ -259,33 +261,7 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
             {t("Endorse app")}
           </Heading>
 
-          <HStack gap={3} w="full" align="stretch">
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" gap={2} align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Node")}
-              </Text>
-              <HStack gap={2} align="center">
-                <Image
-                  src={node.metadata?.image}
-                  alt={node.metadata?.name}
-                  boxSize="24px"
-                  rounded="sm"
-                  objectFit="cover"
-                />
-                <Text textStyle="md" fontWeight="semibold">
-                  {node.metadata?.name}
-                </Text>
-              </HStack>
-            </VStack>
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" gap={2} align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Available points")}
-              </Text>
-              <Text textStyle="md" fontWeight="bold">
-                {node.availablePoints.toString()} {t("pts")}
-              </Text>
-            </VStack>
-          </HStack>
+          <NodeAppEndorsementInfo node={node} currentPoints={BigInt(0)} />
 
           <HStack w="full" justify="space-between" align="center">
             <Text textStyle="lg" fontWeight="semibold">
@@ -344,44 +320,7 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
             {t("Endorse {{appName}}", { appName: selectedApp.name })}
           </Heading>
 
-          <HStack gap={3} w="full" align="stretch">
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Node")}
-              </Text>
-              <HStack gap={2}>
-                <Image
-                  src={node.metadata?.image}
-                  alt={node.metadata?.name}
-                  boxSize="24px"
-                  rounded="sm"
-                  objectFit="cover"
-                />
-                <Text textStyle="md" fontWeight="semibold">
-                  {node.metadata?.name} {" #"}
-                  {nodeId}
-                </Text>
-              </HStack>
-            </VStack>
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Available points")}
-              </Text>
-              <Text textStyle="md" fontWeight="semibold">
-                {node.availablePoints.toString()} {t("pts")}
-              </Text>
-            </VStack>
-            {currentPointsForApp > BigInt(0) && (
-              <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-                <Text textStyle="md" color="text.subtle">
-                  {t("Current endorsement")}
-                </Text>
-                <Text textStyle="md" fontWeight="semibold">
-                  {currentPointsForApp.toString()} {t("pts")}
-                </Text>
-              </VStack>
-            )}
-          </HStack>
+          <NodeAppEndorsementInfo node={node} currentPoints={currentPointsForApp} />
 
           <Card.Root variant="outline" w="full" p={6} rounded="xl">
             <VStack gap={2} align="stretch">

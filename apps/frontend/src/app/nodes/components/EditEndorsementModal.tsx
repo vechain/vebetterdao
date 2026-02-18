@@ -24,6 +24,8 @@ import { XAppStatus } from "@/types/appDetails"
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { EndorsementStatusCallout } from "../../apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 
+import { NodeAppEndorsementInfo } from "./NodeAppEndorsementInfo"
+
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -130,33 +132,7 @@ export const EditEndorsementModal = ({ isOpen, onClose, node, appId, currentPoin
           {t("Edit endorsement")}
         </Heading>
 
-        <HStack gap={3} w="full" align="stretch">
-          <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-            <Text textStyle="md" color="text.subtle">
-              {t("Node")}
-            </Text>
-            <Text textStyle="md" fontWeight="semibold">
-              {node.metadata?.name} {" #"}
-              {nodeId}
-            </Text>
-          </VStack>
-          <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-            <Text textStyle="md" color="text.subtle">
-              {t("Available points")}
-            </Text>
-            <Text textStyle="md" fontWeight="semibold">
-              {node.availablePoints.toString()} {t("pts")}
-            </Text>
-          </VStack>
-          <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-            <Text textStyle="md" color="text.subtle">
-              {t("Current endorsement")}
-            </Text>
-            <Text textStyle="md" fontWeight="semibold">
-              {currentPoints.toString()} {t("pts")}
-            </Text>
-          </VStack>
-        </HStack>
+        <NodeAppEndorsementInfo node={node} currentPoints={currentPoints} />
 
         <Card.Root variant="outline" w="full" p={6} rounded="xl">
           <VStack gap={4} align="stretch">
