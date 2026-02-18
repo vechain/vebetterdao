@@ -419,7 +419,7 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
             </NativeSelect.Root>
           </HStack>
 
-          <VStack w="full" gap={3} align="stretch" maxH="400px" overflowY="auto">
+          <VStack w="full" gap={3} align="stretch">
             {filteredApps.map(app => (
               <SelectableAppRow
                 key={app.id}
