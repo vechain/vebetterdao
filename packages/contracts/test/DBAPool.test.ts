@@ -1737,8 +1737,9 @@ describe("DBA Pool - @shard7b", async function () {
       expect(await dbaPoolV3.x2EarnApps()).to.equal(v2X2EarnApps)
       expect(await dbaPoolV3.distributionStartRound()).to.equal(v2DistributionStartRound)
 
-      // Verify new V3 treasury address was set
+      // Verify new V3 storage was set
       expect(await dbaPoolV3.treasuryAddress()).to.equal(treasuryAddr)
+      expect(await dbaPoolV3.meritCapMultiplier()).to.equal(meritCapMultiplier)
     })
   })
 

@@ -22,9 +22,9 @@ import { IDynamicBaseAllocationPool } from "./interfaces/IDynamicBaseAllocationP
  * - Add seed function to seed historical rewards
  *
  * --------- Version 3 ---------
- * - Merit-capped flat distribution: each app gets min(flatShare, 2x voteAllocation)
+ * - Merit-capped flat distribution: each app gets min(flatShare, meritCapMultiplier * voteAllocation)
  * - Overflow from merit cap + integer remainder sent to VBD Treasury
- * - Treasury address stored on-chain
+ * - Treasury address and meritCapMultiplier stored on-chain
  */
 contract DBAPool is
   AccessControlUpgradeable,
@@ -51,6 +51,7 @@ contract DBAPool is
     mapping(uint256 roundId => mapping(bytes32 appId => uint256 amount)) dbaRoundRewardsForApp; // Tracks the reward amount an app has received from the DBA
     // V3
     address treasuryAddress; // The address to which overflow from the merit cap is routed
+    uint256 meritCapMultiplier; // Multiplier for the merit cap (e.g. 2 = 2x vote allocation)
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.DBAPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -107,6 +108,7 @@ contract DBAPool is
     require(_treasuryAddress != address(0), "DBAPool: treasury is the zero address");
     DBAPoolStorage storage $ = _getDBAPoolStorage();
     $.treasuryAddress = _treasuryAddress;
+    $.meritCapMultiplier = 2;
   }
 
   // ---------- Authorizers ---------- //
@@ -170,8 +172,8 @@ contract DBAPool is
       // Read vote allocation from on-chain source
       (uint256 voteAllocation, , , ) = $.xAllocationPool.roundEarnings(_roundId, appId);
 
-      // Merit cap: 2x the app's vote allocation
-      uint256 meritCap = 2 * voteAllocation;
+      // Merit cap: meritCapMultiplier * vote allocation
+      uint256 meritCap = $.meritCapMultiplier * voteAllocation;
 
       // Reward is the lesser of flat share and merit cap
       uint256 appReward = flatSharePerApp < meritCap ? flatSharePerApp : meritCap;
@@ -297,6 +299,15 @@ contract DBAPool is
   }
 
   /**
+   * @notice Gets the merit cap multiplier
+   * @return The merit cap multiplier
+   */
+  function meritCapMultiplier() external view returns (uint256) {
+    DBAPoolStorage storage $ = _getDBAPoolStorage();
+    return $.meritCapMultiplier;
+  }
+
+  /**
    * @notice Gets the X2EarnApps contract
    * @return The contract interface
    */
@@ -404,6 +415,16 @@ contract DBAPool is
     require(_treasuryAddress != address(0), "DBAPool: zero address");
     DBAPoolStorage storage $ = _getDBAPoolStorage();
     $.treasuryAddress = _treasuryAddress;
+  }
+
+  /**
+   * @notice Updates the merit cap multiplier
+   * @param _meritCapMultiplier The new multiplier (e.g. 2 = 2x vote allocation)
+   */
+  function setMeritCapMultiplier(uint256 _meritCapMultiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_meritCapMultiplier > 0, "DBAPool: merit cap multiplier is zero");
+    DBAPoolStorage storage $ = _getDBAPoolStorage();
+    $.meritCapMultiplier = _meritCapMultiplier;
   }
 
   /**
