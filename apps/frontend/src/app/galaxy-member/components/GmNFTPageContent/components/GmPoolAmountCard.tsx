@@ -79,7 +79,10 @@ export const GmPoolAmountCard = () => {
                   boxSize="18px"
                   color={{ base: "brand.secondary-strong", _dark: "brand.secondary" }}
                 />
-                <Text textStyle="sm" color="brand.secondary-strong" fontWeight="semibold">
+                <Text
+                  textStyle="sm"
+                  color={{ base: "brand.secondary-strong", _dark: "brand.secondary" }}
+                  fontWeight="semibold">
                   {t(
                     "Upgrade to {{name}} to earn ~{{amount}} more B3TR per round with a x{{multiplier}} reward weight",
                     {

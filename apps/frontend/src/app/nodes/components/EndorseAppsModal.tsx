@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, Card, HStack, Heading, Icon, Image, Input, NativeSelect, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Heading, Icon, Image, Input, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -310,18 +310,6 @@ export const EndorseAppsModal = ({ isOpen, onClose, node }: Props) => {
                 size="md"
               />
             </Box>
-            <NativeSelect.Root w="auto" minW="140px">
-              <NativeSelect.Field
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value as EndorseStatusFilter)}
-                borderRadius="xl">
-                <option value="all">{t("All statuses")}</option>
-                <option value={XAppStatus.LOOKING_FOR_ENDORSEMENT}>{t("Looking for endorsement")}</option>
-                <option value={XAppStatus.UNENDORSED_AND_ELIGIBLE}>{t("In grace period")}</option>
-                <option value={XAppStatus.UNENDORSED_NOT_ELIGIBLE}>{t("Endorsement lost")}</option>
-              </NativeSelect.Field>
-              <NativeSelect.Indicator />
-            </NativeSelect.Root>
           </HStack>
 
           <VStack w="full" gap={3} align="stretch">

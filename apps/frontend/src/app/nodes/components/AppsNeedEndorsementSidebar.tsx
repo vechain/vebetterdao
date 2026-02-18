@@ -1,20 +1,20 @@
 "use client"
 
-import { Card, Heading, HStack, Image, Link, Text, VStack } from "@chakra-ui/react"
+import { Card, Heading, HStack, Icon, Image, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
 import { useAppEndorsementScore } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
+import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useXAppMetadata } from "@/api/contracts/xApps/hooks/useXAppMetadata"
 import { convertUriToUrl } from "@/utils/uri"
 
-import type { UnendorsedApp } from "../../../api/contracts/xApps/getXApps"
+import type { AllApps } from "../../../api/contracts/xApps/getXApps"
+import { useXAppStatusConfig } from "../../apps/[appId]/hooks/useXAppStatusConfig"
 
 type AppsNeedEndorsementSidebarProps = {
-  gracePeriodApps: UnendorsedApp[]
-  endorsementLostApps: UnendorsedApp[]
-  newLookingForEndorsement: UnendorsedApp[]
+  apps: AllApps[]
 }
 
 const AppSidebarItem = ({ appId }: { appId: string }) => {
@@ -22,8 +22,18 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
   const { data: metadata } = useXAppMetadata(appId)
   const { data: score } = useAppEndorsementScore(appId)
   const { data: maxPoints } = useMaxPointsPerApp()
+  const { status, isLoading: isStatusLoading } = useAppEndorsementStatus(appId)
+  const STATUS_CONFIG = useXAppStatusConfig()
+
+  const numericScore = Number(score ?? 0)
+  const numericMax = Number(maxPoints ?? 0)
+  const isFullyEndorsed = numericMax > 0 && numericScore >= numericMax
+
+  if (isFullyEndorsed) return null
+
   const scoreStr = score ?? "0"
   const maxStr = maxPoints?.toString() ?? "110"
+  const statusConfig = STATUS_CONFIG[status]
 
   return (
     <Link asChild variant="plain" textDecoration="none" _hover={{ textDecoration: "none" }}>
@@ -31,9 +41,21 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
         <HStack gap={3} p={2} rounded="md" _hover={{ bg: "bg.subtle" }} w="full" justify="space-between">
           <HStack gap={2} minW={0} flex={1}>
             <Image src={convertUriToUrl(metadata?.logo ?? "")} alt={metadata?.name ?? ""} w="8" h="8" rounded="md" />
-            <Text textStyle="sm" fontWeight="medium" lineClamp={1}>
-              {metadata?.name ?? appId}
-            </Text>
+            <VStack gap={0} minW={0} align="start">
+              <Text textStyle="sm" fontWeight="medium" lineClamp={1}>
+                {metadata?.name ?? appId}
+              </Text>
+              <Skeleton loading={isStatusLoading} minH="18px">
+                {statusConfig && (
+                  <HStack gap={1}>
+                    <Icon as={statusConfig.icon} boxSize={3} color={statusConfig.color} />
+                    <Text textStyle="xs" color={statusConfig.color} fontWeight="semibold">
+                      {statusConfig.title}
+                    </Text>
+                  </HStack>
+                )}
+              </Skeleton>
+            </VStack>
           </HStack>
           <VStack gap={0} alignItems="flex-end" flexShrink={0}>
             <HStack gap={1} alignItems="flex-end">
@@ -52,27 +74,8 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
   )
 }
 
-const AppListSection = ({ title, apps }: { title: string; apps: UnendorsedApp[] }) => {
-  if (!apps.length) return null
-  return (
-    <VStack align="stretch" gap={2}>
-      <Text textStyle="md" fontWeight="bold" color="text.subtle">
-        {title}
-      </Text>
-      {apps.map(app => (
-        <AppSidebarItem key={app.id} appId={app.id} />
-      ))}
-    </VStack>
-  )
-}
-
-export const AppsNeedEndorsementSidebar = ({
-  gracePeriodApps,
-  endorsementLostApps,
-  newLookingForEndorsement,
-}: AppsNeedEndorsementSidebarProps) => {
+export const AppsNeedEndorsementSidebar = ({ apps }: AppsNeedEndorsementSidebarProps) => {
   const { t } = useTranslation()
-  const hasAny = gracePeriodApps.length > 0 || endorsementLostApps.length > 0 || newLookingForEndorsement.length > 0
 
   return (
     <VStack align="stretch" gap={6}>
@@ -82,12 +85,8 @@ export const AppsNeedEndorsementSidebar = ({
       <Card.Root variant="outline" w="full">
         <Card.Body>
           <VStack align="stretch" gap={4}>
-            {hasAny ? (
-              <VStack align="stretch" gap={4}>
-                <AppListSection title={t("New apps")} apps={newLookingForEndorsement} />
-                <AppListSection title={t("In grace period")} apps={gracePeriodApps} />
-                <AppListSection title={t("Endorsement lost")} apps={endorsementLostApps} />
-              </VStack>
+            {apps.length > 0 ? (
+              apps.map(app => <AppSidebarItem key={app.id} appId={app.id} />)
             ) : (
               <Text textStyle="sm" color="text.subtle">
                 {t("No apps looking for endorsement right now.")}

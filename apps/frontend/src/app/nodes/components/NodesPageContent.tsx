@@ -16,7 +16,7 @@ import { NoNodesEmptyState } from "./NoNodesEmptyState"
 export const NodesPageContent = () => {
   const { t } = useTranslation()
   const { data: userNodesInfo, isLoading: isNodesLoading } = useGetUserNodes()
-  const { data: xApps } = useXApps()
+  const { data: xApps } = useXApps({ filterBlacklisted: true })
 
   const nodes = useMemo(
     () =>
@@ -59,11 +59,7 @@ export const NodesPageContent = () => {
         </VStack>
 
         <VStack align="stretch" gap={6}>
-          <AppsNeedEndorsementSidebar
-            gracePeriodApps={xApps?.gracePeriod ?? []}
-            endorsementLostApps={xApps?.endorsementLost ?? []}
-            newLookingForEndorsement={xApps?.newLookingForEndorsement ?? []}
-          />
+          <AppsNeedEndorsementSidebar apps={xApps?.allApps ?? []} />
           <EndorsementFaqCard />
         </VStack>
       </Box>
