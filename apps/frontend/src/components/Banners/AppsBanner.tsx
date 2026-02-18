@@ -12,8 +12,7 @@ export const AppsBanner = () => {
       pr={{ base: "130px", md: "200px" }}
       color="white"
       position="relative"
-      overflow="visible"
-      objectFit="contain"
+      overflow="hidden"
       bgImage={"/assets/backgrounds/cloud-background.webp"}
       bgSize="cover"
       backgroundPosition="center"

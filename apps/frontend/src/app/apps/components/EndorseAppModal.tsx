@@ -8,6 +8,7 @@ import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement
 import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
 import { useMaxPointsPerNodePerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerNodePerApp"
 import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
+import { NodeAppEndorsementInfo } from "@/app/nodes/components/NodeAppEndorsementInfo"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
 import { PointsSelector } from "@/components/PointsSelector/PointsSelector"
@@ -142,7 +143,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
           <VStack w="full" alignItems="stretch" gap={3}>
             <Skeleton loading={isUserNodesLoading}>
-              <VStack w="full" gap={3} alignItems="stretch">
+              <VStack w="full" gap={3} alignItems="stretch" maxH="400px" overflowY="auto">
                 {allManagedNodes?.map((node: UserNode) => {
                   const nodeId = node.id.toString()
                   const isSelected = selectedNodeId === nodeId
@@ -263,37 +264,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             {t("Endorse {{appName}}", { appName: xApp?.name })}
           </Heading>
 
-          <HStack gap={3} w="full" align="stretch">
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Node")}
-              </Text>
-              <HStack gap={2}>
-                <Text textStyle="md" fontWeight="semibold">
-                  {selectedNode?.metadata?.name}
-                  {" #" + selectedNode?.id.toString()}
-                </Text>
-              </HStack>
-            </VStack>
-            <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-              <Text textStyle="md" color="text.subtle">
-                {t("Available points")}
-              </Text>
-              <Text textStyle="md" fontWeight="semibold">
-                {selectedNode?.availablePoints.toString()} {t("pts")}
-              </Text>
-            </VStack>
-            {currentPointsForApp > BigInt(0) && (
-              <VStack flex={1} bg="bg.subtle" p={3} rounded="xl" justify="start" align="start">
-                <Text textStyle="md" color="text.subtle">
-                  {t("Current endorsement")}
-                </Text>
-                <Text textStyle="md" fontWeight="semibold">
-                  {currentPointsForApp.toString()} {t("pts")}
-                </Text>
-              </VStack>
-            )}
-          </HStack>
+          <NodeAppEndorsementInfo node={selectedNode} currentPoints={currentPointsForApp} />
 
           <Card.Root variant="outline" w="full" p={6} rounded="xl">
             <VStack gap={2} align="stretch">
@@ -326,7 +297,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 </VStack>
               </HStack>
 
-              <VStack gap={2} align="stretch" mt={4}>
+              <VStack gap={2} align="stretch" mt={6}>
                 <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
                   {t("Add points")}
                 </Text>

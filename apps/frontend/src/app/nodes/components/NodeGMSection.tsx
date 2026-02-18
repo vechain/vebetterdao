@@ -18,6 +18,7 @@ import { TbPaperclip } from "react-icons/tb"
 
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { useGetLevelAfterAttachingNode } from "@/app/apps/hooks/useGetLevelAfterAttachingNode"
 
 import { useGetUserGMs, UserGM } from "../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
@@ -39,9 +40,20 @@ export const NodeGMSection = ({ node }: NodeGMSectionProps) => {
     (gm: UserGM) => !gm.nodeIdAttached || gm.nodeIdAttached === "0" || gm.nodeIdAttached === node.id.toString(),
   )
 
+  const firstAvailableGM = availableGMs[0]
+  const tokenId = firstAvailableGM?.tokenId
+  const nodeTokenId = firstAvailableGM ? node.id.toString() : undefined
+  const { data: levelAfterAttaching } = useGetLevelAfterAttachingNode({
+    tokenId: tokenId ?? "0",
+    nodeTokenId: nodeTokenId ?? "0",
+    enabled: !!tokenId && tokenId !== "0" && !!nodeTokenId && nodeTokenId !== "0",
+  })
+  const canUpgrade = firstAvailableGM ? String(firstAvailableGM.tokenLevel) !== levelAfterAttaching : false
+
+  const hasNoGMs = !isAttached && (userGms ?? []).length === 0
   const gmAttachedToOtherNode = !isAttached && availableGMs.length === 0 && (userGms ?? []).length > 0
 
-  if (gmAttachedToOtherNode) return null
+  if (hasNoGMs || gmAttachedToOtherNode || (!isAttached && !canUpgrade)) return null
 
   return (
     <>
@@ -84,13 +96,15 @@ export const NodeGMSection = ({ node }: NodeGMSectionProps) => {
         ) : (
           <HStack justify="space-between" w="full">
             <Text textStyle="sm" color="text.subtle">
-              {t("NFTs provide reward multipliers. You can attach one GM NFT to this node.")}
+              {canUpgrade
+                ? t("NFTs provide reward multipliers. You can attach one GM NFT to this node.")
+                : t("This node does not provide a free upgrade for your current GM level.")}
             </Text>
             <Button
               size="sm"
               variant="primary"
               onClick={attachModal.onOpen}
-              disabled={isNodeDelegator || availableGMs.length === 0}>
+              disabled={isNodeDelegator || availableGMs.length === 0 || !canUpgrade}>
               <TbPaperclip /> {t("Attach")}
             </Button>
           </HStack>

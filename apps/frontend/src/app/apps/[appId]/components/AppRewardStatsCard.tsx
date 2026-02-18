@@ -8,8 +8,9 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCoins, LuUsers, LuWallet, LuZap } from "react-icons/lu"
 
+import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useAppRewardsBalance } from "@/api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
 import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
-import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 
 import { useXAppMetadata } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"
 
@@ -21,16 +22,17 @@ export const AppRewardStatsCard = () => {
   const { appId } = useParams<{ appId: string }>()
   const { t } = useTranslation()
   const { data: appOverview, isLoading: isOverviewLoading } = useAppActionOverview(appId ?? "")
-  const { data: earningsData, isLoading: isEarningsLoading } = useAppEarnings(appId ?? "")
+  const { data: availableFunds, isLoading: isAvailableFundsLoading } = useAppAvailableFunds(appId ?? "")
+  const { data: rewardsBalance, isLoading: isRewardsBalanceLoading } = useAppRewardsBalance(appId ?? "")
   const { data: appMetadata } = useXAppMetadata(appId ?? "")
   const { open: isModalOpen, onOpen: onOpenModal, onClose: onCloseModal } = useDisclosure()
 
-  const totalB3trReceived = useMemo(() => {
-    if (!earningsData || !Array.isArray(earningsData)) return 0
-    return earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
-  }, [earningsData])
+  const totalAppBalance = useMemo(() => {
+    return Number(availableFunds?.scaled ?? 0) + Number(rewardsBalance?.scaled ?? 0)
+  }, [availableFunds, rewardsBalance])
 
-  const isLoading = isOverviewLoading || isEarningsLoading
+  const isLoading = isOverviewLoading
+  const isBalanceLoading = isAvailableFundsLoading || isRewardsBalanceLoading
 
   return (
     <>
@@ -50,9 +52,9 @@ export const AppRewardStatsCard = () => {
             <HStack gap={3} w="full" flexWrap="wrap">
               <StatItem
                 icon={<LuWallet />}
-                label={t("B3TR Received")}
-                value={compact.format(totalB3trReceived)}
-                isLoading={isLoading}
+                label={t("B3TR Balance")}
+                value={compact.format(totalAppBalance)}
+                isLoading={isBalanceLoading}
               />
               <StatItem
                 icon={<LuCoins />}

@@ -27,7 +27,7 @@ export const GmActionButton = ({
   buttonProps: ButtonProps
 }) => {
   const { t } = useTranslation()
-  const { resetModal: resetTransactionModal, onClose: closeTransactionModal } = useTransactionModal()
+  const { resetModal: resetTransactionModal } = useTransactionModal()
   // Wallet and user data
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
@@ -48,23 +48,22 @@ export const GmActionButton = ({
     onClose: onCloseGetFreeNFTModal,
   } = useDisclosure()
 
-  // Mint NFT handlers
-  const handleMintSuccess = useCallback(() => {
-    onOpenMintNftModal()
-    onCloseGetFreeNFTModal()
-    closeTransactionModal()
-  }, [onOpenMintNftModal, onCloseGetFreeNFTModal, closeTransactionModal])
-
   const { sendTransaction: freeMint, resetStatus: resetFreeMintStatus } = useMintNFT({
     transactionModalCustomUI: {
       waitingConfirmation: {
         title: t("Minting your GM NFT..."),
       },
+      success: {
+        title: t("GM NFT Minted!"),
+        description: t("Your Galaxy Member NFT has been successfully minted. Welcome to the club!"),
+        socialDescriptionEncoded:
+          "As%20a%20Voter%20in%20VeBetter%2C%20I%E2%80%99ve%20just%20minted%20my%20GM%20Earth%20NFT.%20%F0%9F%8C%8D%0A%0AGet%20yours%20here%20%F0%9F%91%89%20%20https%3A%2F%2Fgovernance.vebetterdao.org%2F%0A%0A%23GalaxyMember%20%23VeBetter",
+        onSuccess: onOpenMintNftModal,
+      },
     },
     onFailure: () => {
       resetFreeMintStatus()
     },
-    onSuccess: handleMintSuccess,
   })
 
   const handleMintSuccessClose = useCallback(() => {
@@ -73,8 +72,9 @@ export const GmActionButton = ({
   }, [resetFreeMintStatus, onCloseMintNftModal])
 
   const handleMintGM = useCallback(() => {
+    onCloseGetFreeNFTModal()
     freeMint()
-  }, [freeMint])
+  }, [freeMint, onCloseGetFreeNFTModal])
 
   //Handle Upgrade GM
   const { sendTransaction: upgradeGM } = useUpgradeGM({
