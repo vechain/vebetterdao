@@ -80,7 +80,7 @@ export const GmCard = ({
               {subtitle}
             </Text>
             {hasMultiple && (
-              <HStack gap={1} textStyle="md" fontWeight="semibold">
+              <HStack gap={1} textStyle="sm" fontWeight="semibold">
                 <Text color="white" fontWeight="semibold">
                   {t("See all")}
                 </Text>
@@ -92,7 +92,7 @@ export const GmCard = ({
         <Card.Body>
           <LinkOverlay asChild>
             <NextLink href={href ?? ""}>
-              <HStack alignItems="center">
+              <HStack alignItems="start">
                 {images && images.length === 1 ? (
                   <Image
                     src={images[0]}
