@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import { ethers } from "hardhat"
 import { describe, it } from "mocha"
 
 import { EndorsementUtils } from "../../typechain-types"
@@ -416,6 +417,129 @@ describe("EndorsementUtils Coverage - @shard15g", function () {
       // Verify endorser addresses (L858-860)
       const endorsers = await x2EarnApps.getEndorsers(app1Id)
       expect(endorsers.length).to.equal(2)
+    })
+  })
+
+  describe("getScoreAtTimepoint", function () {
+    it("Returns the endorsement score at the start and end of an allocation round", async function () {
+      const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1])
+      const nodeId2 = await createNodeHolder(7, otherAccounts[2])
+
+      // Endorse before any round starts
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 30)
+      expect(await x2EarnApps.getScore(app1Id)).to.equal(30)
+
+      // Start round 1 — snapshot is taken at this block
+      const roundId = await startNewAllocationRound()
+      const roundSnapshot = await xAllocationVoting.roundSnapshot(roundId)
+
+      // Score at round start should be 30
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, roundSnapshot)).to.equal(30)
+
+      // Endorse more during the round
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 20)
+      expect(await x2EarnApps.getScore(app1Id)).to.equal(50)
+
+      // End the round
+      await waitForCurrentRoundToEnd()
+      const roundDeadline = await xAllocationVoting.roundDeadline(roundId)
+
+      // Score at round end should be 50
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, roundDeadline)).to.equal(50)
+
+      // Score at round start should still be 30
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, roundSnapshot)).to.equal(30)
+    })
+
+    it("Returns 0 for timepoints before any endorsement", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const blockBefore = await ethers.provider.getBlockNumber()
+
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1])
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 10)
+
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, blockBefore)).to.equal(0)
+      expect(await x2EarnApps.getScore(app1Id)).to.equal(10)
+    })
+
+    it("Reverts when querying a future timepoint", async function () {
+      const { x2EarnApps, endorsementUtils, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const futureBlock = (await ethers.provider.getBlockNumber()) + 1000
+      await expect(x2EarnApps.getScoreAtTimepoint(app1Id, futureBlock)).to.be.revertedWithCustomError(
+        endorsementUtils as EndorsementUtils,
+        "FutureLookup",
+      )
+    })
+
+    it("Tracks score changes across multiple rounds", async function () {
+      const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const nodeId1 = await createNodeHolder(7, otherAccounts[1])
+      const nodeId2 = await createNodeHolder(7, otherAccounts[2])
+      const nodeId3 = await createNodeHolder(7, otherAccounts[3])
+
+      // Round 1: endorse with 49 points
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, nodeId1, 49)
+      const round1Id = await startNewAllocationRound()
+      const round1Snapshot = await xAllocationVoting.roundSnapshot(round1Id)
+
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, round1Snapshot)).to.equal(49)
+
+      // Add more endorsements during round 1
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, nodeId2, 49)
+      await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, nodeId3, 2)
+
+      // End round 1, start round 2
+      await waitForCurrentRoundToEnd()
+      const round2Id = await startNewAllocationRound()
+      const round2Snapshot = await xAllocationVoting.roundSnapshot(round2Id)
+
+      // At round 1 start: 49, at round 2 start: 100
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, round1Snapshot)).to.equal(49)
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, round2Snapshot)).to.equal(100)
+
+      // Unendorse during round 2
+      await x2EarnApps.connect(otherAccounts[3]).unendorseApp(app1Id, nodeId3, 2)
+
+      await waitForCurrentRoundToEnd()
+      const round2Deadline = await xAllocationVoting.roundDeadline(round2Id)
+
+      // At round 2 end: 98
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, round2Deadline)).to.equal(98)
+      // Round 1 start still 49
+      expect(await x2EarnApps.getScoreAtTimepoint(app1Id, round1Snapshot)).to.equal(49)
     })
   })
 
