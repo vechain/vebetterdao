@@ -1,5 +1,4 @@
 import { Button } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -9,12 +8,9 @@ import { BannerStorageKey, GenericBanner } from "../../Banners/GenericBanner"
 export const EndorsementBanner = () => {
   const { t } = useTranslation()
   const router = useRouter()
-  const { account } = useWallet()
   const handleClick = useCallback(() => {
     router.push("/nodes")
   }, [router])
-
-  if (!account?.address) return null
 
   return (
     <GenericBanner
