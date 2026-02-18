@@ -111,7 +111,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
                 </HStack>
 
                 <Skeleton loading={appMetadataLoading}>
-                  <Text textStyle="sm" color="text.subtle" lineClamp={4} w="full" minW={0}>
+                  <Text textStyle="sm" color="text.subtle" lineClamp={3} w="full" minW={0}>
                     {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                   </Text>
                 </Skeleton>
