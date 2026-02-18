@@ -15,9 +15,12 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCoins, LuUsers, LuZap } from "react-icons/lu"
+import { LuCoins, LuUsers, LuWallet, LuZap } from "react-icons/lu"
 
+import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useAppRewardsBalance } from "@/api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
 import NewAppIcon from "@/components/Icons/svg/new-app.svg"
@@ -39,7 +42,13 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
   const { data: appOverview, isLoading: isOverviewLoading } = useAppActionOverview(appId, undefined, showStats)
+  const { data: availableFunds, isLoading: isAvailableFundsLoading } = useAppAvailableFunds(appId)
+  const { data: rewardsBalance, isLoading: isRewardsBalanceLoading } = useAppRewardsBalance(appId)
   const { status: endorsementStatus, isLoading: isEndorsementStatusLoading } = useAppEndorsementStatus(appId)
+
+  const totalAppBalance = useMemo(() => {
+    return Number(availableFunds?.scaled ?? 0) + Number(rewardsBalance?.scaled ?? 0)
+  }, [availableFunds, rewardsBalance])
 
   const showEndorsementStatus =
     endorsementStatus !== XAppStatus.UNKNOWN && endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE
@@ -110,7 +119,15 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
 
                 <Separator />
                 {showStats && (
-                  <SimpleGrid columns={{ base: 2, md: 3 }} gap={2} w="full">
+                  <SimpleGrid columns={{ base: 2, md: 4 }} gap={2} w="full">
+                    <Skeleton loading={isAvailableFundsLoading || isRewardsBalanceLoading}>
+                      <HStack gap={2} align="center">
+                        <Icon as={LuWallet} boxSize={4} color="text.subtle" flexShrink={0} />
+                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
+                          {compact.format(totalAppBalance)} {"B3TR"}
+                        </Text>
+                      </HStack>
+                    </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
                       <HStack gap={2} align="center">
                         <Icon as={LuCoins} boxSize={4} color="text.subtle" flexShrink={0} />
