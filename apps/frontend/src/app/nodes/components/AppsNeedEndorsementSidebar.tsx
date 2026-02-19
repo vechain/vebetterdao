@@ -1,6 +1,19 @@
 "use client"
 
-import { Button, Card, Collapsible, Heading, HStack, Icon, Image, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  Collapsible,
+  Heading,
+  HStack,
+  Icon,
+  Image,
+  Link,
+  Skeleton,
+  Tag,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -84,18 +97,27 @@ export const AppsNeedEndorsementSidebar = ({ apps }: AppsNeedEndorsementSidebarP
   const [isExpanded, setIsExpanded] = useState(false)
   const handleToggle = useCallback(() => setIsExpanded(prev => !prev), [])
 
-  const { visibleApps, hiddenApps, hasHidden } = useMemo(() => {
+  const { uniqueApps, visibleApps, hiddenApps, hasHidden } = useMemo(() => {
     const unique = apps.filter((app, i, arr) => arr.findIndex(a => a.id === app.id) === i)
     const visible = unique.slice(0, VISIBLE_COUNT)
     const hidden = unique.slice(VISIBLE_COUNT)
-    return { visibleApps: visible, hiddenApps: hidden, hasHidden: hidden.length > 0 }
+    return { uniqueApps: unique, visibleApps: visible, hiddenApps: hidden, hasHidden: hidden.length > 0 }
   }, [apps])
 
   return (
     <VStack align="stretch" gap={6}>
-      <Heading textStyle="xl" size="xl">
-        {t("Apps looking for endorsement")}
-      </Heading>
+      <HStack justify="space-between" align="center">
+        <Heading textStyle="xl" size="xl">
+          {t("Apps looking for endorsement")}
+        </Heading>
+        {uniqueApps.length > 0 && (
+          <Tag.Root size="sm" variant="subtle">
+            <Tag.Label>
+              {uniqueApps.length} {uniqueApps.length === 1 ? t("app") : t("apps")}
+            </Tag.Label>
+          </Tag.Root>
+        )}
+      </HStack>
       <Card.Root variant="outline" w="full">
         <Card.Body>
           <VStack align="stretch" gap={4}>
