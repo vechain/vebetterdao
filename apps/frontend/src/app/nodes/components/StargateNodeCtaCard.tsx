@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 
 import { STARGATE_URL } from "@/constants/links"
 
-export const NoNodesCtaCard = () => {
+export const StargateNodeCtaCard = () => {
   const { t } = useTranslation()
 
   return (

@@ -11,7 +11,7 @@ import { AppsNeedEndorsementSidebar } from "./AppsNeedEndorsementSidebar"
 import { EndorsementFaqCard } from "./EndorsementFaqCard"
 import { NodeCard } from "./NodeCard"
 import { NodesHeroStats } from "./NodesHeroStats"
-import { NoNodesCtaCard } from "./NoNodesEmptyState"
+import { StargateNodeCtaCard } from "./StargateNodeCtaCard"
 
 export const NodesPageContent = () => {
   const { t } = useTranslation()
@@ -25,9 +25,6 @@ export const NodesPageContent = () => {
       ),
     [userNodesInfo?.nodesManagedByUser],
   )
-
-  const hasAnyEndorsementPower = nodes.some(n => n.endorsementScore > 0n)
-  const showCtaCard = nodes.length === 0 || !hasAnyEndorsementPower
 
   if (isNodesLoading) return null
 
@@ -49,7 +46,7 @@ export const NodesPageContent = () => {
           {nodes.map(node => (
             <NodeCard key={node.id.toString()} node={node} />
           ))}
-          {showCtaCard && <NoNodesCtaCard />}
+          <StargateNodeCtaCard />
         </VStack>
 
         <VStack align="stretch" gap={6}>
