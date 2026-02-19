@@ -572,6 +572,14 @@ interface IX2EarnApps {
   function getScore(bytes32 appId) external returns (uint256);
 
   /**
+   * @notice Returns the endorsement score for an app at a specific block number.
+   * @param appId The unique identifier of the app.
+   * @param timepoint The block number to query.
+   * @return The endorsement score at the given timepoint.
+   */
+  function getScoreAtTimepoint(bytes32 appId, uint256 timepoint) external view returns (uint256);
+
+  /**
    * @dev Get the endorsers of an app.
    *
    * @param appId the id of the app
