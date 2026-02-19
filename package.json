@@ -96,7 +96,8 @@
     "contracts:endorsement-migration:seed:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:seed:mainnet --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:verify:local --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:verify:testnet-staging --filter=@vechain/vebetterdao-contracts",
-    "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts"
+    "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts",
+    "simulation:run": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- turbo run simulate --filter=@repo/simulation"
   },
   "dependencies": {
     "dotenv-cli": "latest",

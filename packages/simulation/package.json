@@ -1,0 +1,19 @@
+{
+  "name": "@repo/simulation",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "simulate": "npx hardhat run src/index.ts --network vechain_solo"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@repo/config": "*",
+    "@repo/utils": "*",
+    "@vechain/sdk-core": "1.2.0-rc.2",
+    "@vechain/sdk-hardhat-plugin": "1.2.0-rc.2",
+    "@vechain/sdk-network": "1.2.0-rc.2",
+    "@vechain/vebetterdao-contracts": "*",
+    "ethers": "^6.9.0",
+    "hardhat": "2.19.1"
+  }
+}

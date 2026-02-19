@@ -71,7 +71,11 @@ const signAndSendTx = async (thorClient: ThorClient, body: TransactionBody, pk: 
     throw new Error("Transaction failed")
   }
   if (txReceipt.reverted) {
-    throw new Error("Transaction reverted")
+    const revertReason =
+      txReceipt.outputs
+        ?.flatMap((o: { revertReason?: string }) => (o.revertReason ? [o.revertReason] : []))
+        .join(", ") || "unknown"
+    throw new Error(`Transaction reverted: ${revertReason}`)
   }
 }
 

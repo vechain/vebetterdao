@@ -362,6 +362,10 @@
     "endorsement-migration:verify:mainnet": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "@repo/simulation#simulate": {
+      "cache": false,
+      "dependsOn": ["@vechain/vebetterdao-contracts#check-contracts-deployment"]
     }
   }
 }
