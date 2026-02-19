@@ -1,8 +1,9 @@
-import { Button, Heading, HStack, Icon, Skeleton, Text, VStack, Card } from "@chakra-ui/react"
+import { Box, Button, Heading, HStack, Icon, Skeleton, Text, VStack, Card } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 
+import { ActivityFeed } from "@/components/Activities"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
@@ -103,6 +104,12 @@ export const DashboardAllocationRounds = () => {
             <NoActiveProposalCard />
           )}
         </VStack>
+        <Box display={{ base: "none", md: "block" }} w="full">
+          <VStack gap={4} w="full">
+            <Heading size="2xl">{t("Activity")}</Heading>
+            <ActivityFeed roundId={selectedRoundId} />
+          </VStack>
+        </Box>
       </Card.Body>
     </Card.Root>
   )
