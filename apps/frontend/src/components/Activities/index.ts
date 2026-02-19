@@ -1,3 +1,6 @@
 export { ActivityCard } from "./ActivityCard"
-export { ProposalActivityCard } from "./ProposalActivityCard"
+export { AppActivityCard } from "./AppActivityCard"
+export { EmissionsActivityCard } from "./EmissionsActivityCard"
 export { GrantActivityCard } from "./GrantActivityCard"
+export { ProposalActivityCard } from "./ProposalActivityCard"
+export { RoundActivityCard } from "./RoundActivityCard"
