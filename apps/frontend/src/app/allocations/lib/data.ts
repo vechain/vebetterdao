@@ -156,7 +156,8 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
   const currentRoundId = await getCurrentRoundId()
   const roundId = round ?? Number(currentRoundId)
   const roundDetails = await getRoundDetails(BigInt(roundId))
-  const rounds = await getRounds({ roundId: round, pageSize: 6 })
+  const surroundingStartId = Math.min(roundId + 1, currentRoundId)
+  const rounds = await getRounds({ roundId: surroundingStartId, pageSize: 7 })
   const res = await getRoundResults(roundId)
 
   if (!res.data) throw Error("There is an error getting the data. Please try again.")
