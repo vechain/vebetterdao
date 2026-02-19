@@ -7,3 +7,4 @@ export type {
   EmissionsActivityMeta,
   GrantActivityMeta,
 } from "./types"
+export { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalActivities"
