@@ -12,3 +12,4 @@ export { useCurrentRoundProposalActivities } from "./useCurrentRoundProposalActi
 export { useGrantActivities } from "./useGrantActivities"
 export { useAppActivities } from "./useAppActivities"
 export { useRoundActivities } from "./useRoundActivities"
+export { useEmissionsActivities } from "./useEmissionsActivities"
