@@ -25,7 +25,9 @@ import { BaseModal } from "@/components/BaseModal"
 import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
 import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
 
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
@@ -51,6 +53,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(appId)
   const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
+
+  const { data: appMetadata } = useXAppMetadata(appId ?? "")
+  const { data: logo } = useIpfsImage(appMetadata?.logo)
 
   const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account?.address ?? "")
 
@@ -159,7 +164,10 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
       modalContentProps={{ pt: 5 }}>
       <VStack gap={6} align="flex-start" w="full">
         <HStack w="full" justify="space-between" align="center">
-          <Heading size={"2xl"}>{t("Endorsement history")}</Heading>
+          <HStack gap={3}>
+            {logo?.image && <Image src={logo.image} alt={appMetadata?.name ?? ""} boxSize="40px" borderRadius="12px" />}
+            <Heading size={"2xl"}>{t("Endorsement history")}</Heading>
+          </HStack>
           <EndorsementStatusCallout
             endorsementStatus={endorsementStatus}
             showDescription={false}
