@@ -53,4 +53,10 @@ After any change, verify:
 
 ## Fixed Words
 
-Some words should NOT be translated. See `apps/frontend/src/i18n/fixedWords.json` for the list grouped by language. `"all"` group applies to every language.
+See `apps/frontend/src/i18n/fixedWords.json` — grouped by language code (`"all"` = every language).
+
+Two use cases:
+1. **Untranslated** — value = English word (keep as-is in that language)
+2. **Fixed translation** — value = the mandatory translation (use consistently in every sentence)
+
+ALWAYS check this file before translating. If a word has a fixed translation, use it.

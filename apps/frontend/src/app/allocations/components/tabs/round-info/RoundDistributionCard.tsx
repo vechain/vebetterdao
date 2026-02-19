@@ -89,6 +89,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
                   p={{ base: "0", md: "4" }}
                   bg={{ base: "transparent", md: "card.subtle" }}
                   gap="1"
+                  border="none"
                   mx={{ base: "auto", md: "unset" }}>
                   <HStack gap="2">
                     <Icon as={icon} boxSize={{ base: "4", md: "5" }} color="icon.subtle" />

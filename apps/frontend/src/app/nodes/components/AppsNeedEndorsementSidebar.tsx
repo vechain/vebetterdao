@@ -1,8 +1,23 @@
 "use client"
 
-import { Card, Heading, HStack, Icon, Image, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  Collapsible,
+  Heading,
+  HStack,
+  Icon,
+  Image,
+  Link,
+  Skeleton,
+  Tag,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import NextLink from "next/link"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { FaChevronDown } from "react-icons/fa6"
 
 import { useAppEndorsementScore } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
@@ -12,6 +27,9 @@ import { convertUriToUrl } from "@/utils/uri"
 
 import type { AllApps } from "../../../api/contracts/xApps/getXApps"
 import { useXAppStatusConfig } from "../../apps/[appId]/hooks/useXAppStatusConfig"
+
+const VISIBLE_COUNT = 8
+const TRANSITION_DURATION = "0.5s"
 
 type AppsNeedEndorsementSidebarProps = {
   apps: AllApps[]
@@ -76,17 +94,50 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
 
 export const AppsNeedEndorsementSidebar = ({ apps }: AppsNeedEndorsementSidebarProps) => {
   const { t } = useTranslation()
+  const [isExpanded, setIsExpanded] = useState(false)
+  const handleToggle = useCallback(() => setIsExpanded(prev => !prev), [])
+
+  const { uniqueApps, visibleApps, hiddenApps, hasHidden } = useMemo(() => {
+    const unique = apps.filter((app, i, arr) => arr.findIndex(a => a.id === app.id) === i)
+    const visible = unique.slice(0, VISIBLE_COUNT)
+    const hidden = unique.slice(VISIBLE_COUNT)
+    return { uniqueApps: unique, visibleApps: visible, hiddenApps: hidden, hasHidden: hidden.length > 0 }
+  }, [apps])
 
   return (
     <VStack align="stretch" gap={6}>
-      <Heading textStyle="xl" size="xl">
-        {t("Apps looking for endorsement")}
-      </Heading>
+      <HStack justify="space-between" align="center">
+        <Heading textStyle="xl" size="xl">
+          {t("Apps looking for endorsement")}
+        </Heading>
+        {uniqueApps.length > 0 && (
+          <Tag.Root size="sm" variant="subtle">
+            <Tag.Label>
+              {uniqueApps.length} {uniqueApps.length === 1 ? t("app") : t("apps")}
+            </Tag.Label>
+          </Tag.Root>
+        )}
+      </HStack>
       <Card.Root variant="outline" w="full">
         <Card.Body>
           <VStack align="stretch" gap={4}>
-            {apps.length > 0 ? (
-              apps.map(app => <AppSidebarItem key={app.id} appId={app.id} />)
+            {visibleApps.length > 0 ? (
+              <>
+                {visibleApps.map(app => (
+                  <AppSidebarItem key={app.id} appId={app.id} />
+                ))}
+                {hasHidden && (
+                  <Collapsible.Root open={isExpanded}>
+                    <Collapsible.Content css={{ transition: `height ${TRANSITION_DURATION} ease` }}>
+                      <VStack align="stretch" gap={4}>
+                        {hiddenApps.map(app => (
+                          <AppSidebarItem key={app.id} appId={app.id} />
+                        ))}
+                      </VStack>
+                    </Collapsible.Content>
+                  </Collapsible.Root>
+                )}
+              </>
             ) : (
               <Text textStyle="sm" color="text.subtle">
                 {t("No apps looking for endorsement right now.")}
@@ -94,6 +145,27 @@ export const AppsNeedEndorsementSidebar = ({ apps }: AppsNeedEndorsementSidebarP
             )}
           </VStack>
         </Card.Body>
+        {hasHidden && (
+          <Card.Footer>
+            <Button
+              variant="ghost"
+              w="full"
+              onClick={handleToggle}
+              py={1}
+              color="text.subtle"
+              _hover={{ color: "text.default" }}
+              transition="color 0.2s"
+              aria-expanded={isExpanded}>
+              <Icon
+                as={FaChevronDown}
+                boxSize={3}
+                transition="transform 0.3s ease"
+                transform={isExpanded ? "rotate(180deg)" : undefined}
+              />
+              <Text textStyle="sm">{isExpanded ? t("Show less") : t("View more")}</Text>
+            </Button>
+          </Card.Footer>
+        )}
       </Card.Root>
     </VStack>
   )
