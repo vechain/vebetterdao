@@ -6,6 +6,7 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
+import { ActivityFeed } from "@/components/Activities"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import { ProposalState } from "@/hooks/proposals/grants/types"
@@ -198,6 +199,10 @@ export const RoundInfoBottomSheet = () => {
             ) : (
               <NoActiveProposalCard />
             )}
+          </VStack>
+          <VStack gap={4} w="full" align="flex-start">
+            <Heading size="lg">{t("Activity")}</Heading>
+            <ActivityFeed />
           </VStack>
         </VStack>
       </BaseBottomSheet>
