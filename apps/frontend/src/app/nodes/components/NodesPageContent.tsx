@@ -11,7 +11,7 @@ import { AppsNeedEndorsementSidebar } from "./AppsNeedEndorsementSidebar"
 import { EndorsementFaqCard } from "./EndorsementFaqCard"
 import { NodeCard } from "./NodeCard"
 import { NodesHeroStats } from "./NodesHeroStats"
-import { NoNodesEmptyState } from "./NoNodesEmptyState"
+import { NoNodesCtaCard } from "./NoNodesEmptyState"
 
 export const NodesPageContent = () => {
   const { t } = useTranslation()
@@ -26,21 +26,14 @@ export const NodesPageContent = () => {
     [userNodesInfo?.nodesManagedByUser],
   )
 
+  const hasAnyEndorsementPower = nodes.some(n => n.endorsementScore > 0n)
+  const showCtaCard = nodes.length === 0 || !hasAnyEndorsementPower
+
   if (isNodesLoading) return null
-
-  const hasNodes = nodes.length > 0
-
-  if (!hasNodes) {
-    return (
-      <Box maxW="breakpoint-xl" mx="auto" w="full">
-        <NoNodesEmptyState />
-      </Box>
-    )
-  }
 
   return (
     <Box maxW="breakpoint-xl" mx="auto" w="full">
-      <NodesHeroStats userNodesInfo={userNodesInfo!} />
+      <NodesHeroStats userNodesInfo={userNodesInfo} />
       <Box display="grid" gridTemplateColumns={{ base: "1fr", lg: "1fr 415px" }} gap={8} mt={8} alignItems="start">
         <VStack align="stretch" gap={6}>
           <HStack justify="space-between" align="center">
@@ -56,6 +49,7 @@ export const NodesPageContent = () => {
           {nodes.map(node => (
             <NodeCard key={node.id.toString()} node={node} />
           ))}
+          {showCtaCard && <NoNodesCtaCard />}
         </VStack>
 
         <VStack align="stretch" gap={6}>

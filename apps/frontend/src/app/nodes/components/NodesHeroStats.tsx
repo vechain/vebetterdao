@@ -8,14 +8,14 @@ import { PiSquaresFour } from "react-icons/pi"
 import { UserNodesInfo } from "../../../api/contracts/xNodes/useGetUserNodes"
 
 type NodesHeroStatsProps = {
-  userNodesInfo: UserNodesInfo
+  userNodesInfo?: UserNodesInfo
 }
 
 export const NodesHeroStats = ({ userNodesInfo }: NodesHeroStatsProps) => {
   const { t } = useTranslation()
-  const nodes = userNodesInfo.nodesManagedByUser ?? []
+  const nodes = userNodesInfo?.nodesManagedByUser ?? []
   const availablePoints = nodes.reduce((sum, n) => sum + n.availablePoints, 0n)
-  const totalOwned = userNodesInfo.totalEndorsementScore ?? 0n
+  const totalOwned = userNodesInfo?.totalEndorsementScore ?? 0n
   const endorsedAppsCount = nodes.reduce((count, n) => count + (n.activeEndorsements?.length ?? 0), 0)
 
   const stats = [
