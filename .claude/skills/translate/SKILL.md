@@ -65,18 +65,10 @@ After any translation change, verify:
 
 ## Fixed Words
 
-Some words should NOT be translated (kept as-is). See `apps/frontend/src/i18n/fixedWords.json` for the list. The list is grouped by language and then by word.
-example:
+See `apps/frontend/src/i18n/fixedWords.json`. Grouped by language code (`"all"` applies to every language).
 
-```json
-{
-  "all": {
-    "B3TR": "B3TR",
-    "VOT3": "VOT3",
-    "B3MO": "B3MO"
-  },
-  "it": {
-    "round": "round"
-  }
-}
-```
+Two use cases:
+1. **Untranslated words** — value equals the English word (e.g. `"round": "round"` keeps "round" in English for Italian)
+2. **Fixed translations** — value is the mandatory translation for that concept (e.g. `"endorsement": "supporto"` means always use "supporto" for endorsement in Italian)
+
+When translating, ALWAYS check this file first. If a word has a fixed translation for the target language, use it consistently in every sentence.
