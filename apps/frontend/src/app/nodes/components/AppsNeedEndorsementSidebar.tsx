@@ -63,7 +63,7 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
               <Image src={convertUriToUrl(metadata?.logo ?? "")} alt={metadata?.name ?? ""} w="8" h="8" rounded="md" />
             </Skeleton>
             <VStack gap={0} minW={0} align="start">
-              <Skeleton loading={isLoading} minH="20px" minW="80px">
+              <Skeleton loading={isLoading} minH="20px" w={isLoading ? "100px" : undefined}>
                 <Text textStyle="sm" fontWeight="medium" lineClamp={1}>
                   {metadata?.name ?? appId}
                 </Text>
