@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { StargateNodeCtaCard } from "@/app/nodes/components/StargateNodeCtaCard"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
@@ -81,66 +82,67 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
         <VStack flex={3} align="stretch" gap="4">
           <GmPoolAmountCard />
-          {userNodes.length > 0 && (
-            <Card.Root variant="primary" maxH={"fit-content"}>
-              <Card.Header>
-                <HStack justify="space-between" align="start">
-                  <VStack align="stretch" gap={1} flex={1}>
-                    <HStack gap={2}>
-                      <Heading textStyle="lg">{t("Node upgrades")}</Heading>
-                      <Tag.Root size="sm" variant="subtle">
-                        <Tag.Label>
-                          {actionableNodes.length} {actionableNodes.length === 1 ? t("node") : t("nodes")}
-                        </Tag.Label>
-                      </Tag.Root>
-                    </HStack>
-                    <Text textStyle="sm" color="text.subtle">
-                      {t(
-                        "Attach a node to your GM NFT to get a free level upgrade. Higher-tier nodes unlock higher GM levels.",
-                      )}
-                    </Text>
-                  </VStack>
-                  {hasMoreNodes && (
-                    <Box hideBelow="md">
-                      <Button variant="ghost" size="sm" asChild>
-                        <NextLink href="/nodes">{t("View all nodes")}</NextLink>
-                      </Button>
-                    </Box>
-                  )}
-                </HStack>
-              </Card.Header>
-              <Card.Body>
-                {actionableNodes.length > 0 ? (
-                  <VStack align={"stretch"} gap="3">
-                    {actionableNodes.map((node: UserNode) => (
-                      <NodeRow
-                        key={node.id.toString()}
-                        node={node}
-                        gmId={gm.tokenId}
-                        currentGMLevel={gm.tokenLevel}
-                        isAttachedToCurrentGM={attachedNode?.id === node.id}
-                        isAttachedToOtherGM={nodeIdsAttachedToOtherGMs.has(node.id.toString())}
-                        hasAttachedNode={!!attachedNode}
-                        onAttach={() => handleAttachClick(node)}
-                        onDetach={onDetachGMToXNodeModalOpen}
-                      />
-                    ))}
-                  </VStack>
-                ) : (
+
+          <Card.Root variant="primary" maxH={"fit-content"}>
+            <Card.Header>
+              <HStack justify="space-between" align="start">
+                <VStack align="stretch" gap={1} flex={1}>
+                  <HStack gap={2}>
+                    <Heading textStyle="lg">{t("Node upgrades")}</Heading>
+                    <Tag.Root size="sm" variant="subtle">
+                      <Tag.Label>
+                        {actionableNodes.length} {actionableNodes.length === 1 ? t("node") : t("nodes")}
+                      </Tag.Label>
+                    </Tag.Root>
+                  </HStack>
                   <Text textStyle="sm" color="text.subtle">
-                    {t("None of your nodes can upgrade this GM NFT further.")}
+                    {t(
+                      "Attach a node to your GM NFT to get a free level upgrade. Higher-tier nodes unlock higher GM levels.",
+                    )}
                   </Text>
-                )}
+                </VStack>
                 {hasMoreNodes && (
-                  <Box hideFrom="md">
-                    <Button variant="ghost" size="sm" asChild width="full">
+                  <Box hideBelow="md">
+                    <Button variant="ghost" size="sm" asChild>
                       <NextLink href="/nodes">{t("View all nodes")}</NextLink>
                     </Button>
                   </Box>
                 )}
-              </Card.Body>
-            </Card.Root>
-          )}
+              </HStack>
+            </Card.Header>
+            <Card.Body>
+              {actionableNodes.length > 0 ? (
+                <VStack align={"stretch"} gap="3">
+                  {actionableNodes.map((node: UserNode) => (
+                    <NodeRow
+                      key={node.id.toString()}
+                      node={node}
+                      gmId={gm.tokenId}
+                      currentGMLevel={gm.tokenLevel}
+                      isAttachedToCurrentGM={attachedNode?.id === node.id}
+                      isAttachedToOtherGM={nodeIdsAttachedToOtherGMs.has(node.id.toString())}
+                      hasAttachedNode={!!attachedNode}
+                      onAttach={() => handleAttachClick(node)}
+                      onDetach={onDetachGMToXNodeModalOpen}
+                    />
+                  ))}
+                </VStack>
+              ) : (
+                <Text textStyle="sm" color="text.subtle">
+                  {t("None of your nodes can upgrade this GM NFT further.")}
+                </Text>
+              )}
+              {hasMoreNodes && (
+                <Box hideFrom="md">
+                  <Button variant="ghost" size="sm" asChild width="full">
+                    <NextLink href="/nodes">{t("View all nodes")}</NextLink>
+                  </Button>
+                </Box>
+              )}
+            </Card.Body>
+          </Card.Root>
+
+          <StargateNodeCtaCard />
         </VStack>
         <VStack flex={1.5} align={"stretch"}>
           <GalaxyLevelsCard />
