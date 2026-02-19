@@ -8,3 +8,4 @@ export type {
   GrantActivityMeta,
 } from "./types"
 export { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalActivities"
+export { useCurrentRoundProposalActivities } from "./useCurrentRoundProposalActivities"
