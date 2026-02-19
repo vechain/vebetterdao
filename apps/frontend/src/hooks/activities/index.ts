@@ -11,3 +11,4 @@ export { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalAc
 export { useCurrentRoundProposalActivities } from "./useCurrentRoundProposalActivities"
 export { useGrantActivities } from "./useGrantActivities"
 export { useAppActivities } from "./useAppActivities"
+export { useRoundActivities } from "./useRoundActivities"
