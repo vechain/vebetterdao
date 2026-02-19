@@ -37,7 +37,7 @@ type AppsNeedEndorsementSidebarProps = {
 
 const AppSidebarItem = ({ appId }: { appId: string }) => {
   const { t } = useTranslation()
-  const { data: metadata } = useXAppMetadata(appId)
+  const { data: metadata, isLoading: isMetadataLoading } = useXAppMetadata(appId)
   const { data: score } = useAppEndorsementScore(appId)
   const { data: maxPoints } = useMaxPointsPerApp()
   const { status, isLoading: isStatusLoading } = useAppEndorsementStatus(appId)
@@ -52,18 +52,23 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
   const scoreStr = score ?? "0"
   const maxStr = maxPoints?.toString() ?? "110"
   const statusConfig = STATUS_CONFIG[status]
+  const isLoading = isMetadataLoading || isStatusLoading
 
   return (
     <Link asChild variant="plain" textDecoration="none" _hover={{ textDecoration: "none" }}>
       <NextLink href={`/apps/${appId}`}>
         <HStack gap={3} p={2} rounded="md" _hover={{ bg: "bg.subtle" }} w="full" justify="space-between">
           <HStack gap={2} minW={0} flex={1}>
-            <Image src={convertUriToUrl(metadata?.logo ?? "")} alt={metadata?.name ?? ""} w="8" h="8" rounded="md" />
+            <Skeleton loading={isLoading} rounded="md" w="8" h="8">
+              <Image src={convertUriToUrl(metadata?.logo ?? "")} alt={metadata?.name ?? ""} w="8" h="8" rounded="md" />
+            </Skeleton>
             <VStack gap={0} minW={0} align="start">
-              <Text textStyle="sm" fontWeight="medium" lineClamp={1}>
-                {metadata?.name ?? appId}
-              </Text>
-              <Skeleton loading={isStatusLoading} minH="18px">
+              <Skeleton loading={isLoading} minH="20px" minW="80px">
+                <Text textStyle="sm" fontWeight="medium" lineClamp={1}>
+                  {metadata?.name ?? appId}
+                </Text>
+              </Skeleton>
+              <Skeleton loading={isLoading} minH="18px" minW="60px">
                 {statusConfig && (
                   <HStack gap={1}>
                     <Icon as={statusConfig.icon} boxSize={3} color={statusConfig.color} />
