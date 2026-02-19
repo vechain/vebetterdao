@@ -125,12 +125,12 @@ export const ActiveAppDetailModal = ({
         {
           label: t("Voting"),
           value: `${getCompactFormatter(2).format(totalAmount - dynamicBaseAllocationAmount)}`,
-          dotColor: "#B3CCFF",
+          dotColor: "#004CFC",
         },
         {
           label: t("Dynamic base"),
           value: `${getCompactFormatter(2).format(dynamicBaseAllocationAmount)}`,
-          dotColor: "#004CFC",
+          dotColor: "#B3CCFF",
         },
       ],
       chartData: [
@@ -151,12 +151,12 @@ export const ActiveAppDetailModal = ({
               {
                 label: t("To users"),
                 value: `${rewardsToUserPercentage}%`,
-                dotColor: "#99E0B1",
+                dotColor: "#047229",
               },
               {
                 label: t("Retained by app"),
                 value: `${100 - rewardsToUserPercentage}%`,
-                dotColor: "#047229",
+                dotColor: "#99E0B1",
               },
             ],
             chartData: [
