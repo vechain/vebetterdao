@@ -9,3 +9,4 @@ export type {
 } from "./types"
 export { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalActivities"
 export { useCurrentRoundProposalActivities } from "./useCurrentRoundProposalActivities"
+export { useGrantActivities } from "./useGrantActivities"
