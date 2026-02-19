@@ -7,7 +7,7 @@ import {
   LinkBox,
   LinkOverlay,
   Separator,
-  SimpleGrid,
+  Grid,
   Skeleton,
   Tag,
   Text,
@@ -119,40 +119,44 @@ export const UnendorsedAppCard = ({ appId, isNewApp, showStats = true }: Props) 
 
                 <Separator />
                 {showStats && (
-                  <SimpleGrid columns={{ base: 2, md: 4 }} gap={2} w="full">
+                  <Grid
+                    templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, auto)" }}
+                    justifyContent={{ md: "space-between" }}
+                    gap={2}
+                    w="full">
                     <Skeleton loading={isAvailableFundsLoading || isRewardsBalanceLoading}>
-                      <HStack gap={2} align="center">
+                      <HStack gap={1.5} align="center">
                         <Icon as={LuWallet} boxSize={4} color="text.subtle" flexShrink={0} />
-                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
+                        <Text textStyle="sm" color="text.subtle" whiteSpace="nowrap">
                           {compact.format(totalAppBalance)} {"B3TR"}
                         </Text>
                       </HStack>
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
-                      <HStack gap={2} align="center">
+                      <HStack gap={1.5} align="center">
                         <Icon as={LuCoins} boxSize={4} color="text.subtle" flexShrink={0} />
-                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
+                        <Text textStyle="sm" color="text.subtle" whiteSpace="nowrap">
                           {compact.format(appOverview?.totalRewardAmount ?? 0)} {"distributed"}
                         </Text>
                       </HStack>
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
-                      <HStack gap={2} align="center">
+                      <HStack gap={1.5} align="center">
                         <Icon as={LuZap} boxSize={4} color="text.subtle" flexShrink={0} />
-                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
+                        <Text textStyle="sm" color="text.subtle" whiteSpace="nowrap">
                           {compact.format(appOverview?.actionsRewarded ?? 0)} {"actions"}
                         </Text>
                       </HStack>
                     </Skeleton>
                     <Skeleton loading={isOverviewLoading}>
-                      <HStack gap={2} align="center">
+                      <HStack gap={1.5} align="center">
                         <Icon as={LuUsers} boxSize={4} color="text.subtle" flexShrink={0} />
-                        <Text textStyle="sm" color="text.subtle" lineClamp={1}>
+                        <Text textStyle="sm" color="text.subtle" whiteSpace="nowrap">
                           {compact.format(appOverview?.totalUniqueUserInteractions ?? 0)} {"users"}
                         </Text>
                       </HStack>
                     </Skeleton>
-                  </SimpleGrid>
+                  </Grid>
                 )}
               </VStack>
             </Card.Body>
