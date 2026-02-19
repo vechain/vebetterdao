@@ -848,27 +848,6 @@ library EndorsementUtils {
     return validScore;
   }
 
-  /**
-   * @notice Seeds an endorsement during migration (bypasses validation).
-   * @dev Only callable before migrationCompleted is set to true. Requires MIGRATION_ROLE.
-   *      Guards against duplicates: if (nodeId, appId) already exists, updates points instead of pushing.
-   *      Emits standard AppEndorsed event for indexer compatibility.
-   * @param appId The unique identifier of the app to endorse.
-   * @param nodeId The unique identifier of the endorsing node.
-   * @param points The number of points to endorse with.
-   */
-  /// @notice Migrates scores from deprecated _appEndorsementScore into checkpoints.
-  /// @dev Temporary function for testnet migration. Remove before mainnet deploy.
-  function seedScoreCheckpoints(bytes32[] calldata appIds) external {
-    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
-    for (uint256 i; i < appIds.length; i++) {
-      uint256 score = $._appEndorsementScore_DEPRECATED[appIds[i]];
-      if (score > 0) {
-        _setScore($, appIds[i], score);
-      }
-    }
-  }
-
   function seedEndorsement(bytes32 appId, uint256 nodeId, uint256 points) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
 

@@ -770,11 +770,6 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
     EndorsementUtils.setMigrationCompleted(true);
   }
 
-  /// @notice Migrate scores from deprecated storage into checkpoints. Testnet only — remove before mainnet.
-  function seedScoreCheckpoints(bytes32[] calldata appIds) external onlyRole(MIGRATION_ROLE) {
-    EndorsementUtils.seedScoreCheckpoints(appIds);
-  }
-
   /**
    * @notice Seed endorsement data during migration. Governance only.
    * @param appId The app being endorsed.
