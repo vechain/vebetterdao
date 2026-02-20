@@ -162,6 +162,9 @@ contract DBAPool is
     // Mark round as distributed
     $.dbaRewardsDistributed[_roundId] = true;
 
+    // Cache base allocation (same for all apps in the round)
+    uint256 baseAllocation = $.xAllocationPool.baseAllocationAmount(_roundId);
+
     // Distribute to each app
     for (uint256 i = 0; i < eligibleCount; i++) {
       bytes32 appId = _appIds[i];
@@ -169,14 +172,19 @@ contract DBAPool is
       // Validate app exists
       require($.x2EarnApps.appExists(appId), "DBAPool: app does not exist");
 
-      // Read vote allocation from on-chain source
-      (uint256 voteAllocation, , , ) = $.xAllocationPool.roundEarnings(_roundId, appId);
-
-      // Merit cap: meritCapMultiplier * vote allocation
-      uint256 meritCap = $.meritCapMultiplier * voteAllocation;
-
-      // Reward is the lesser of flat share and merit cap
-      uint256 appReward = flatSharePerApp < meritCap ? flatSharePerApp : meritCap;
+      // Cap each app's DBA reward relative to a multiple of its vote-based XAllocation earnings 
+      // (excluding the base amount all apps receive equally)
+      //
+      // * Example 1: if the multiplier is 2, and the app vote earnings are 200, the merit cap is 400
+      //       if the DBA share for the app is 1000, the app will receive 400.
+      // * Example 2: if the multiplier is 2, and the app vote earnings are 1000, the merit cap is 2000
+      //       if the DBA share for the app is 1000, the app will receive 1000.
+      uint256 appReward;
+      {
+        (uint256 totalEarnings, , , ) = $.xAllocationPool.roundEarnings(_roundId, appId);
+        uint256 meritCap = $.meritCapMultiplier * (totalEarnings - baseAllocation);
+        appReward = flatSharePerApp < meritCap ? flatSharePerApp : meritCap;
+      }
 
       // Accumulate overflow from merit cap capping
       totalOverflow += (flatSharePerApp - appReward);
