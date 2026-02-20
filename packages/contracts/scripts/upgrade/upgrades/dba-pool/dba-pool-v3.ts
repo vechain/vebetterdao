@@ -16,6 +16,14 @@ async function main() {
     `Upgrading DBAPool contract at address: ${config.dbaPoolContractAddress} on network: ${config.network.name}`,
   )
 
+  const dbaPoolBefore = (await ethers.getContractAt("DBAPoolV2", config.dbaPoolContractAddress)) as any
+  const versionBefore = await dbaPoolBefore.version()
+  console.log(`Current DBAPool version: ${versionBefore}`)
+
+  if (parseInt(versionBefore) !== 2) {
+    throw new Error(`Expected DBAPool version 2, got: ${versionBefore}`)
+  }
+
   console.log("\n=== Upgrading Contract ===")
   const dbaPool = (await upgradeProxy("DBAPoolV2", "DBAPool", config.dbaPoolContractAddress, [treasuryAddress], {
     version: 3,
