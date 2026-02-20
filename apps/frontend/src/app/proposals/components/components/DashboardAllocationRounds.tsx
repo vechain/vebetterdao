@@ -3,7 +3,6 @@ import {
   Box,
   Card,
   Flex,
-  Grid,
   Heading,
   HStack,
   Icon,
@@ -28,8 +27,6 @@ import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hook
 import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { ProposalCompactCard } from "../../../../components/ProposalCompactCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
-
-import { NoActiveProposalCard } from "./NoActiveProposalCard"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()
@@ -75,8 +72,8 @@ export const DashboardAllocationRounds = () => {
   return (
     <Card.Root variant="primary">
       <Card.Body gap="8">
-        <HStack justifyContent="space-between" w="full">
-          <Grid gridTemplateColumns="repeat(3,max-content)" divideX="1px" divideColor="border.secondary" columnGap="6">
+        <Flex justifyContent="space-between" w="full" flexWrap="wrap" gap="2">
+          <HStack divideX="1px" divideColor="border.secondary" gap="6">
             <VStack gap="1" align="start">
               <Text textStyle="md" color="text.subtle">
                 {t("Round")}
@@ -108,8 +105,8 @@ export const DashboardAllocationRounds = () => {
                 </Flex>
               )}
             </VStack>
-          </Grid>
-          <Flex columnGap="4">
+          </HStack>
+          <Flex columnGap="4" alignSelf="center">
             <IconButton
               variant="outline"
               boxSize="44px"
@@ -127,10 +124,10 @@ export const DashboardAllocationRounds = () => {
               <NavArrowRight />
             </IconButton>
           </Flex>
-        </HStack>
+        </Flex>
 
-        <HStack gap="3" w="full" justifyContent="space-between" alignItems="stretch">
-          <VStack alignItems="stretch" gap="3">
+        <Flex gap="3" w="full" justifyContent="space-between" alignItems="stretch" flexWrap="wrap">
+          <VStack alignItems="stretch" gap="3" minW="0">
             <HStack justifyContent="space-between" w="full">
               <HStack gap="2">
                 <Icon as={Gift} boxSize="5" color="text.subtle" />
@@ -151,30 +148,28 @@ export const DashboardAllocationRounds = () => {
             </Skeleton>
           </VStack>
           <Button variant="primary" size="sm" alignSelf="center">
-            {t("View details")}
+            {t("View")}
           </Button>
-        </HStack>
+        </Flex>
 
         {/* {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />} */}
-        <VStack gap="3" w="full" justifyContent="flex-start" alignItems="stretch">
-          <HStack gap="2">
-            <Icon as={LiaBalanceScaleSolid} boxSize="6" color="text.subtle" />
-            <Text textStyle="md" color="text.subtle">
-              {t("Governance")}
-            </Text>
-          </HStack>
+        {!!sortedProposals.length && (
+          <VStack gap="3" w="full" justifyContent="flex-start" alignItems="stretch">
+            <HStack gap="2">
+              <Icon as={LiaBalanceScaleSolid} boxSize="6" color="text.subtle" />
+              <Text textStyle="md" color="text.subtle">
+                {t("Governance")}
+              </Text>
+            </HStack>
 
-          {!!sortedProposals.length ? (
             <VStack gap="3" w="full" justifyContent="flex-start">
               {sortedProposals.map(proposal => (
                 <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
               ))}
             </VStack>
-          ) : (
-            <NoActiveProposalCard />
-          )}
-        </VStack>
-        <Box display={{ base: "none", md: "block" }} w="full">
+          </VStack>
+        )}
+        <Box w="full">
           <VStack gap="3" w="full" alignItems="stretch">
             <HStack gap="2">
               <Icon as={Activity} boxSize="5" color="text.subtle" />

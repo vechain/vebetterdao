@@ -13,6 +13,10 @@ type PreviousRoundActivityType =
 
 const stateToActivityType: Partial<Record<ProposalState, PreviousRoundActivityType>> = {
   [ProposalState.Succeeded]: ActivityType.PROPOSAL_VOTED_FOR,
+  [ProposalState.Queued]: ActivityType.PROPOSAL_VOTED_FOR,
+  [ProposalState.InDevelopment]: ActivityType.PROPOSAL_VOTED_FOR,
+  [ProposalState.Executed]: ActivityType.PROPOSAL_VOTED_FOR,
+  [ProposalState.Completed]: ActivityType.PROPOSAL_VOTED_FOR,
   [ProposalState.Defeated]: ActivityType.PROPOSAL_VOTED_AGAINST,
   [ProposalState.DepositNotMet]: ActivityType.PROPOSAL_SUPPORT_NOT_REACHED,
 }

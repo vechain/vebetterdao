@@ -19,6 +19,9 @@ export const MockLeaderboard = [
   { position: 4, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 70 },
   { position: 5, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 60 },
 ]
+
+const LEADERBOARD_SIZE = 3
+
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -61,7 +64,7 @@ export const Leaderboard = () => {
       leaderboardQuery.data?.pages
         .map(page => page.data)
         .flat()
-        .slice(0, 5) ?? [],
+        .slice(0, LEADERBOARD_SIZE) ?? [],
     [leaderboardQuery.data],
   )
   const rankings = flatLeaderboard.map((entry, index) => ({
@@ -120,7 +123,7 @@ export const Leaderboard = () => {
     ))
   }, [leaderboardQuery, account, rankings, t])
 
-  const isRankingInTop5 = rankings.some(ranking =>
+  const isRankingInTop = rankings.some(ranking =>
     AddressUtils.compareAddresses(ranking.address, account?.address ?? ""),
   )
   return (
@@ -165,7 +168,7 @@ export const Leaderboard = () => {
           </VStack>
           <VStack gap={4} align="stretch" w="full" h="full">
             {renderRankings}
-            {!isRankingInTop5 && yourRanking && (
+            {!isRankingInTop && yourRanking && (
               <>
                 <Separator w="full" h={1} color="border.secondary" />
                 {yourRanking && <LeaderboardRankingComponent ranking={yourRanking} isYourRanking />}

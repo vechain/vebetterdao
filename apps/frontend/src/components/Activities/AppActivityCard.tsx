@@ -4,7 +4,7 @@ import NextLink from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { FaRegCircleXmark, FaStar } from "react-icons/fa6"
-import { LuShieldCheck } from "react-icons/lu"
+import { LuChevronRight, LuShieldCheck } from "react-icons/lu"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
@@ -22,12 +22,12 @@ type Props = {
 const getIcon = (type: Props["activity"]["type"]) => {
   switch (type) {
     case ActivityType.APP_NEW:
-      return { icon: FaStar, color: "blue.500" }
+      return { icon: FaStar, color: "status.info.strong" }
     case ActivityType.APP_ENDORSEMENT_REACHED:
-      return { icon: LuShieldCheck, color: "green.500" }
+      return { icon: LuShieldCheck, color: "status.positive.strong" }
     case ActivityType.APP_ENDORSEMENT_LOST:
     case ActivityType.APP_BANNED:
-      return { icon: FaRegCircleXmark, color: "red.500" }
+      return { icon: FaRegCircleXmark, color: "status.negative.strong" }
   }
 }
 
@@ -66,9 +66,12 @@ export const AppActivityCard: React.FC<Props> = ({ activity }) => {
               {activity.metadata.appName}
             </Text>
           </VStack>
-          <Text textStyle="xs" color="text.subtle" flexShrink={0}>
-            {dayjs.unix(activity.date).fromNow()}
-          </Text>
+          <HStack gap="1" flexShrink={0}>
+            <Text textStyle="xs" color="text.subtle">
+              {dayjs.unix(activity.date).fromNow()}
+            </Text>
+            <Icon as={LuChevronRight} boxSize="4" color="text.subtle" />
+          </HStack>
         </HStack>
       </Card.Body>
     </LinkBox>

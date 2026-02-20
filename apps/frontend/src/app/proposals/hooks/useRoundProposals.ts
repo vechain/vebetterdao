@@ -12,7 +12,7 @@ export const useRoundProposals = (roundId: string) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const currentRoundIdProposals = useFilteredProposals(
-    [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport],
+    [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport, ProposalFilter.UpcomingVoting],
     enrichedProposals,
   )
   const otherProposals = useMemo(() => {

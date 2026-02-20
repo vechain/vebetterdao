@@ -23,7 +23,7 @@ export const EmissionsActivityCard: React.FC<Props> = ({ activity }) => {
       <Card.Body p="0">
         <VStack gap="3" align="flex-start" w="full">
           <HStack gap="3" align="flex-start" w="full">
-            <Icon as={LuTrendingDown} color="green.500" boxSize="5" mt="0.5" flexShrink={0} />
+            <Icon as={LuTrendingDown} color="status.positive.strong" boxSize="5" mt="0.5" flexShrink={0} />
             <VStack gap="1" align="flex-start" flex="1" minW="0">
               <Text textStyle="sm" fontWeight="bold">
                 {t("Emissions decreased")}
@@ -55,8 +55,8 @@ export const EmissionsActivityCard: React.FC<Props> = ({ activity }) => {
               </Text>
             </Text>
             <HStack gap="1">
-              <Icon as={LuTrendingDown} color="green.500" boxSize="4" />
-              <Text textStyle="sm" color="green.500" fontWeight="semibold">
+              <Icon as={LuTrendingDown} color="status.positive.strong" boxSize="4" />
+              <Text textStyle="sm" color="status.positive.strong" fontWeight="semibold">
                 {Math.abs(percentageChange).toFixed(1)}
                 {"%"}
               </Text>
