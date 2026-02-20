@@ -2059,11 +2059,14 @@ describe("DBA Pool - @shard7b", async function () {
       const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
 
+      // Raise multiplier so merit cap does not bind
+      await dynamicBaseAllocationPool.connect(owner).setMeritCapMultiplier(10)
+
       const [app2TotalEarnings] = await xAllocationPool.roundEarnings(round1, app2Id)
       const baseAllocation = await xAllocationPool.baseAllocationAmount(round1)
-      const meritCap = (app2TotalEarnings - baseAllocation) * 2n
+      const meritCap = (app2TotalEarnings - baseAllocation) * 10n
 
-      // Merit cap should NOT bind - flat share should be less than 2x vote-only allocation
+      // Merit cap should NOT bind
       expect(flatSharePerApp).to.be.lte(meritCap)
 
       const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
