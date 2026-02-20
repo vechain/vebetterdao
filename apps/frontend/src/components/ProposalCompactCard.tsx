@@ -14,7 +14,7 @@ type Props = {
 }
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   // const { account } = useWallet()
-  // const { id: proposalId, title: proposalTitle } = proposal
+  const { id: proposalId, title: proposalTitle } = proposal
   // const { supportEndDate } = useProposalInteractionDates(proposalId)
   const { t } = useTranslation()
 
