@@ -795,15 +795,24 @@ describe("DBA Pool - @shard7b", async function () {
 
       const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
 
-      // Distribute to single app - should deposit all unallocated funds to X2EarnRewardsPool
+      // Compute expected reward: min(flatShare, meritCap)
+      // Merit cap now uses vote-only allocation (totalEarnings - baseAllocation)
+      const [app2TotalEarnings] = await xAllocationPool.roundEarnings(round1, app2Id)
+      const baseAllocation = await xAllocationPool.baseAllocationAmount(round1)
+      const app2VoteOnly = app2TotalEarnings - baseAllocation
+      const meritCap = app2VoteOnly * 2n
+      const flatShare = unallocatedAmount // single app gets all
+      const expectedReward = flatShare < meritCap ? flatShare : meritCap
+
+      // Distribute to single app
       const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
 
       await expect(tx)
         .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
-        .withArgs(app2Id, ethers.parseEther("2800"), round1)
+        .withArgs(app2Id, expectedReward, round1)
 
       const finalApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
-      expect(finalApp2Funds - initialApp2Funds).to.equal(ethers.parseEther("2800"))
+      expect(finalApp2Funds - initialApp2Funds).to.equal(expectedReward)
       expect(await dynamicBaseAllocationPool.b3trBalance()).to.equal(0n)
       expect(await dynamicBaseAllocationPool.isDBARewardsDistributed(round1)).to.equal(true)
     })
@@ -874,20 +883,23 @@ describe("DBA Pool - @shard7b", async function () {
       const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
 
-      // Distribute to single app - should deposit all unallocated funds to X2EarnRewardsPool
+      // Compute expected reward for round 1
+      const unallocatedR1 = await xAllocationPool.unallocatedFunds(round1)
+      const [app2EarningsR1] = await xAllocationPool.roundEarnings(round1, app2Id)
+      const baseAllocR1 = await xAllocationPool.baseAllocationAmount(round1)
+      const meritCapR1 = (app2EarningsR1 - baseAllocR1) * 2n
+      const expectedR1 = unallocatedR1 < meritCapR1 ? unallocatedR1 : meritCapR1
+
       await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
 
-      // app 1 exceeded the cap, it received no rewards
       const dbaRoundRewardsForApp1Round1 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app1Id)
       expect(dbaRoundRewardsForApp1Round1).to.equal(0n)
 
-      // app 2 will receive the excess
       const dbaRoundRewardsForApp2Round1 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)
-      expect(dbaRoundRewardsForApp2Round1).to.equal(ethers.parseEther("2800"))
+      expect(dbaRoundRewardsForApp2Round1).to.equal(expectedR1)
 
       const round2 = await startNewAllocationRound()
 
-      // Vote heavily on app1 to exceed cap, lightly on app2
       await xAllocationVoting.connect(otherAccounts[0]).castVote(round2, [app1Id], [ethers.parseEther("9000")])
       await xAllocationVoting.connect(otherAccounts[1]).castVote(round2, [app2Id], [ethers.parseEther("1000")])
 
@@ -896,16 +908,20 @@ describe("DBA Pool - @shard7b", async function () {
       await xAllocationPool.claim(round2, app1Id)
       await xAllocationPool.claim(round2, app2Id)
 
-      // Distribute to single app - should deposit all unallocated funds to X2EarnRewardsPool
+      // Compute expected reward for round 2
+      const unallocatedR2 = await xAllocationPool.unallocatedFunds(round2)
+      const [app2EarningsR2] = await xAllocationPool.roundEarnings(round2, app2Id)
+      const baseAllocR2 = await xAllocationPool.baseAllocationAmount(round2)
+      const meritCapR2 = (app2EarningsR2 - baseAllocR2) * 2n
+      const expectedR2 = unallocatedR2 < meritCapR2 ? unallocatedR2 : meritCapR2
+
       await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round2, [app2Id])
 
-      // app 1 exceeded the cap, it received no rewards
       const dbaRoundRewardsForApp1Round2 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app1Id)
       expect(dbaRoundRewardsForApp1Round2).to.equal(0n)
 
-      // app 2 will receive the excess
       const dbaRoundRewardsForApp2Round2 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app2Id)
-      expect(dbaRoundRewardsForApp2Round2).to.equal(ethers.parseEther("2800"))
+      expect(dbaRoundRewardsForApp2Round2).to.equal(expectedR2)
     })
 
     it("Should revert when trying to distribute to non-existent app", async function () {
@@ -1853,8 +1869,9 @@ describe("DBA Pool - @shard7b", async function () {
 
       const treasuryAddr = await dynamicBaseAllocationPool.treasuryAddress()
 
-      const [app2VoteAllocation] = await xAllocationPool.roundEarnings(round1, app2Id)
-      const meritCap = app2VoteAllocation * 2n
+      const [app2TotalEarnings] = await xAllocationPool.roundEarnings(round1, app2Id)
+      const baseAllocation = await xAllocationPool.baseAllocationAmount(round1)
+      const meritCap = (app2TotalEarnings - baseAllocation) * 2n
       const flatShare = unallocatedAmount / 2n
 
       // Distribute to both apps
@@ -1863,7 +1880,7 @@ describe("DBA Pool - @shard7b", async function () {
 
       const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app1Id, app2Id])
 
-      // app2's reward should be capped at 2x its vote allocation if flatShare > meritCap
+      // app2's reward should be capped at 2x its vote-only allocation if flatShare > meritCap
       const app2Reward = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)
       if (flatShare > meritCap) {
         expect(app2Reward).to.equal(meritCap)
@@ -2042,10 +2059,11 @@ describe("DBA Pool - @shard7b", async function () {
       const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
 
-      const [app2VoteAllocation] = await xAllocationPool.roundEarnings(round1, app2Id)
-      const meritCap = app2VoteAllocation * 2n
+      const [app2TotalEarnings] = await xAllocationPool.roundEarnings(round1, app2Id)
+      const baseAllocation = await xAllocationPool.baseAllocationAmount(round1)
+      const meritCap = (app2TotalEarnings - baseAllocation) * 2n
 
-      // Merit cap should NOT bind - flat share should be less than 2x vote allocation
+      // Merit cap should NOT bind - flat share should be less than 2x vote-only allocation
       expect(flatSharePerApp).to.be.lte(meritCap)
 
       const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
