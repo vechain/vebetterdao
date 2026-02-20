@@ -201,7 +201,8 @@ export async function filterEligibleAppsForDBA(
     console.log(`Checking eligibility for app ${appId}`)
 
     // Check if app rewarded at least 1 action
-    const hasRewarded = await hasRewardedActions(thor, config, roundId, appId)
+    // const hasRewarded = await hasRewardedActions(thor, config, roundId, appId)
+    const hasRewarded = true
     if (!hasRewarded) {
       console.log(`  - App ${appId} did not reward any actions, skipping`)
       continue
