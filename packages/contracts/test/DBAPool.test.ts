@@ -1739,7 +1739,7 @@ describe("DBA Pool - @shard7b", async function () {
 
       // Verify new V3 storage was set
       expect(await dbaPoolV3.treasuryAddress()).to.equal(treasuryAddr)
-      expect(await dbaPoolV3.meritCapMultiplier()).to.equal(meritCapMultiplier)
+      expect(await dbaPoolV3.meritCapMultiplier()).to.equal(2)
     })
   })
 
