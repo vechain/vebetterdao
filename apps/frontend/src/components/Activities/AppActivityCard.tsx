@@ -1,9 +1,10 @@
 import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { Prohibition } from "iconoir-react"
 import NextLink from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { FaRegCircleXmark, FaStar } from "react-icons/fa6"
+import { FaStar } from "react-icons/fa6"
 import { LuChevronRight, LuShieldCheck } from "react-icons/lu"
 
 import { AppImage } from "@/components/AppImage/AppImage"
@@ -27,7 +28,7 @@ const getIcon = (type: Props["activity"]["type"]) => {
       return { icon: LuShieldCheck, color: "status.positive.strong" }
     case ActivityType.APP_ENDORSEMENT_LOST:
     case ActivityType.APP_BANNED:
-      return { icon: FaRegCircleXmark, color: "status.negative.strong" }
+      return { icon: Prohibition, color: "status.negative.strong" }
   }
 }
 

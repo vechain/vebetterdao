@@ -38,10 +38,14 @@ export type RoundActivityMeta = {
 }
 
 export type EmissionsActivityMeta = {
-  currentAmount: string
-  previousAmount: string
+  currentTotal: string
+  previousTotal: string
+  appsAmount: string
+  treasuryAmount: string
+  votersAmount: string
   percentageChange: number
   nextDecreaseRound: string
+  nextDecreasePercentage: number
 }
 
 export type GrantActivityMeta = {

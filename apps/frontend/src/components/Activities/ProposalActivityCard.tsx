@@ -1,14 +1,16 @@
 import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { Prohibition } from "iconoir-react"
 import NextLink from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { FaRegCircleCheck, FaRegCircleXmark } from "react-icons/fa6"
-import { GoRocket } from "react-icons/go"
-import { LuSearch } from "react-icons/lu"
+import { FaRegCircleCheck } from "react-icons/fa6"
+import { IoIosCode } from "react-icons/io"
 
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
 import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
 
@@ -38,18 +40,20 @@ const VOTING_OUTCOME_TYPES = new Set<ActivityType>([
 const getIcon = (type: Props["activity"]["type"]) => {
   switch (type) {
     case ActivityType.PROPOSAL_VOTED_FOR:
+      return { icon: ThumbsUpSolidIcon, color: "status.positive.strong" }
     case ActivityType.PROPOSAL_SUPPORTED:
-      return { icon: FaRegCircleCheck, color: "status.positive.strong" }
+      return { icon: HeartIcon, color: "status.positive.strong" }
     case ActivityType.PROPOSAL_EXECUTED:
+      return { icon: FaRegCircleCheck, color: "status.neutral.strong" }
     case ActivityType.PROPOSAL_IN_DEVELOPMENT:
-      return { icon: GoRocket, color: "status.info.strong" }
+      return { icon: IoIosCode, color: "status.info.strong" }
     case ActivityType.PROPOSAL_VOTED_AGAINST:
     case ActivityType.PROPOSAL_CANCELLED:
     case ActivityType.PROPOSAL_QUORUM_NOT_REACHED:
     case ActivityType.PROPOSAL_SUPPORT_NOT_REACHED:
-      return { icon: FaRegCircleXmark, color: "status.negative.strong" }
+      return { icon: Prohibition, color: "status.negative.strong" }
     case ActivityType.PROPOSAL_LOOKING_FOR_SUPPORT:
-      return { icon: LuSearch, color: "status.warning.strong" }
+      return { icon: HeartIcon, color: "status.warning.strong" }
   }
 }
 

@@ -532,6 +532,8 @@
   "Email": "Correo Electrónico",
   "Emissions and Rounds": "Emisiones y Rondas",
   "Emissions have propably not started yet": "Probablemente las emisiones aún no han comenzado",
+  "emissions_decreased_description": "Las emisiones disminuyeron un <bold>{{percentage}}%</bold> de un total de <bold>{{previous}} B3TR</bold> a un total de <bold>{{current}} B3TR</bold>, con <bold>{{apps}}</bold> reservados para apps, <bold>{{treasury}}</bold> para el Tesoro y <bold>{{voters}}</bold> para los votantes.",
+  "emissions_next_decrease": "La próxima disminución ocurrirá en la ronda #{{round}}, reduciendo las emisiones en otro {{percentage}}%.",
   "Enable": "Activar",
   "Enable auto-vote": "Habilitar voto automático",
   "Enable Rewards Pool": "Activar Fondo de Recompensas",

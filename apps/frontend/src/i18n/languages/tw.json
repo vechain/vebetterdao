@@ -532,6 +532,8 @@
   "Email": "電子郵件",
   "Emissions and Rounds": "排放和回合",
   "Emissions have propably not started yet": "排放可能尚未開始",
+  "emissions_decreased_description": "排放量減少了 <bold>{{percentage}}%</bold>，從總計 <bold>{{previous}} B3TR</bold> 降至總計 <bold>{{current}} B3TR</bold>，其中 <bold>{{apps}}</bold> 保留給應用程式，<bold>{{treasury}}</bold> 給國庫，<bold>{{voters}}</bold> 給投票者。",
+  "emissions_next_decrease": "下一次減少將在第 #{{round}} 回合進行，將再減少 {{percentage}}% 的排放量。",
   "Enable": "啟用",
   "Enable auto-vote": "啟用自動投票",
   "Enable Rewards Pool": "啟用獎勵池",

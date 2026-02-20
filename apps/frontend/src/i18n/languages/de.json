@@ -532,6 +532,8 @@
   "Email": "E-Mail",
   "Emissions and Rounds": "Emissionen und Runden",
   "Emissions have propably not started yet": "Emissionen haben wahrscheinlich noch nicht begonnen",
+  "emissions_decreased_description": "Emissionen wurden um <bold>{{percentage}}%</bold> von insgesamt <bold>{{previous}} B3TR</bold> auf insgesamt <bold>{{current}} B3TR</bold> reduziert, mit <bold>{{apps}}</bold> für Apps, <bold>{{treasury}}</bold> für die Treasury und <bold>{{voters}}</bold> für Wähler reserviert.",
+  "emissions_next_decrease": "Die nächste Reduzierung erfolgt in Runde #{{round}} und reduziert die Emissionen um weitere {{percentage}}%.",
   "Enable": "Aktivieren",
   "Enable auto-vote": "Automatische Abstimmung aktivieren",
   "Enable Rewards Pool": "Prämienpool aktivieren",

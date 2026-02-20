@@ -28,7 +28,11 @@ import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocat
 import { ProposalCompactCard } from "../../../../components/ProposalCompactCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
 
-export const DashboardAllocationRounds = () => {
+type Props = {
+  isBottomSheet?: boolean
+}
+
+export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = false }) => {
   const { t } = useTranslation()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
@@ -70,17 +74,27 @@ export const DashboardAllocationRounds = () => {
     })
   }, [proposalsToRender])
   return (
-    <Card.Root variant="primary">
+    <Card.Root variant={"primary"} px={isBottomSheet ? 0 : undefined} borderWidth={isBottomSheet ? 0 : undefined}>
       <Card.Body gap="8">
-        <Flex justifyContent="space-between" w="full" flexWrap="wrap" gap="2">
+        <Flex justifyContent="space-between" w="full" alignItems="center" gap="2">
+          <IconButton
+            variant="outline"
+            boxSize="44px"
+            display={{ base: "flex", md: "none" }}
+            disabled={allocationRound.isFirstRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
+            aria-label={t("Previous round")}>
+            <NavArrowLeft />
+          </IconButton>
+
           <HStack divideX="1px" divideColor="border.secondary" gap="6">
-            <VStack gap="1" align="start">
+            <VStack gap="1" align={{ base: "center", md: "start" }}>
               <Text textStyle="md" color="text.subtle">
                 {t("Round")}
               </Text>
               <Heading size="5xl">{selectedRoundId}</Heading>
             </VStack>
-            <VStack gap="1" pl="6" align="start">
+            <VStack gap="1" pl="6" align={{ base: "center", md: "start" }}>
               <Text textStyle="md" color="text.subtle">
                 {t("Round dates")}
               </Text>
@@ -91,6 +105,7 @@ export const DashboardAllocationRounds = () => {
                   {roundInfo.voteEndTimestamp?.format("MMM D")}
                 </Heading>
               </Skeleton>
+
               {selectedRoundId === currentRoundId ? (
                 <Flex h="full" alignItems="flex-start">
                   <Badge size="sm" variant="positive">
@@ -106,7 +121,18 @@ export const DashboardAllocationRounds = () => {
               )}
             </VStack>
           </HStack>
-          <Flex columnGap="4" alignSelf="center">
+
+          <IconButton
+            variant="outline"
+            boxSize="44px"
+            display={{ base: "flex", md: "none" }}
+            disabled={allocationRound.isLastRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
+            aria-label={t("Next round")}>
+            <NavArrowRight />
+          </IconButton>
+
+          <Flex columnGap="4" alignSelf="center" display={{ base: "none", md: "flex" }}>
             <IconButton
               variant="outline"
               boxSize="44px"
@@ -147,8 +173,8 @@ export const DashboardAllocationRounds = () => {
               </HStack>
             </Skeleton>
           </VStack>
-          <Button variant="primary" size="sm" alignSelf="center">
-            {t("View")}
+          <Button variant="primary" size="sm" alignSelf="end">
+            {t("View round")}
           </Button>
         </Flex>
 
@@ -174,7 +200,7 @@ export const DashboardAllocationRounds = () => {
             <HStack gap="2">
               <Icon as={Activity} boxSize="5" color="text.subtle" />
               <Text textStyle="md" color="text.subtle">
-                {t("Latest activity")}
+                {t("Activity")}
               </Text>
             </HStack>
             <ActivityFeed roundId={selectedRoundId} />

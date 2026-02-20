@@ -532,6 +532,8 @@
   "Email": "ईमेल",
   "Emissions and Rounds": "उत्सर्जन और चरण",
   "Emissions have propably not started yet": "उत्सर्जन शायद अभी तक शुरू नहीं हुआ है",
+  "emissions_decreased_description": "उत्सर्जन <bold>{{percentage}}%</bold> से घटकर कुल <bold>{{previous}} B3TR</bold> से <bold>{{current}} B3TR</bold> हो गया, जिसमें <bold>{{apps}}</bold> ऐप्स के लिए, <bold>{{treasury}}</bold> खजाने के लिए और <bold>{{voters}}</bold> मतदाताओं के लिए आरक्षित है।",
+  "emissions_next_decrease": "अगली कमी राउंड #{{round}} में होगी, उत्सर्जन में और {{percentage}}% की कमी करेगी।",
   "Enable": "सक्षम करें",
   "Enable auto-vote": "स्वचालित वोट सक्षम करें",
   "Enable Rewards Pool": "इनाम पूल सक्षम करें",

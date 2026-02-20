@@ -532,6 +532,8 @@
   "Email": "E-mail",
   "Emissions and Rounds": "Émissions et Tours",
   "Emissions have propably not started yet": "Les émissions n'ont probablement pas encore commencé",
+  "emissions_decreased_description": "Les émissions ont diminué de <bold>{{percentage}}%</bold> d'un total de <bold>{{previous}} B3TR</bold> à un total de <bold>{{current}} B3TR</bold>, avec <bold>{{apps}}</bold> réservés aux apps, <bold>{{treasury}}</bold> au Trésor et <bold>{{voters}}</bold> aux votants.",
+  "emissions_next_decrease": "La prochaine diminution aura lieu au tour #{{round}}, réduisant les émissions de {{percentage}}% supplémentaires.",
   "Enable": "Activer",
   "Enable auto-vote": "Activer le vote automatique",
   "Enable Rewards Pool": "Activer le pool de récompenses",

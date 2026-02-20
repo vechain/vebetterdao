@@ -1,4 +1,4 @@
-import { Text, Card, VStack, HStack, IconButton, LinkBox, LinkOverlay, Badge } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import NextLink from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -67,14 +67,11 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                   <VStack w="full" gap="1" align={"flex-start"}>
                     <VStack alignItems="flex-start" gap="4">
                       <Text textStyle={"sm"} fontWeight="semibold">
+                        {proposal.type === ProposalType.Grant ? t("Grant") : t("Proposal")}
+                        {": "}
                         {proposalTitle}
                       </Text>
-                      <HStack>
-                        <Badge variant="neutral" rounded="full">
-                          {proposal.type === ProposalType.Grant ? t("Grant") : t("Proposal")}
-                        </Badge>
-                        <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
-                      </HStack>
+                      <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
                       {/* {proposalExtraInfo} */}
                     </VStack>
                   </VStack>

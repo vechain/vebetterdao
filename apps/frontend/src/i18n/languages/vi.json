@@ -532,6 +532,8 @@
   "Email": "Email",
   "Emissions and Rounds": "Phân phối và Vòng",
   "Emissions have propably not started yet": "Phát thải có thể chưa bắt đầu",
+  "emissions_decreased_description": "Phát thải đã giảm <bold>{{percentage}}%</bold> từ tổng cộng <bold>{{previous}} B3TR</bold> xuống còn tổng cộng <bold>{{current}} B3TR</bold>, với <bold>{{apps}}</bold> dành cho ứng dụng, <bold>{{treasury}}</bold> cho Kho bạc và <bold>{{voters}}</bold> cho cử tri.",
+  "emissions_next_decrease": "Lần giảm tiếp theo sẽ diễn ra ở vòng #{{round}}, giảm thêm {{percentage}}% phát thải.",
   "Enable": "Kích hoạt",
   "Enable auto-vote": "Bật bỏ phiếu tự động",
   "Enable Rewards Pool": "Kích hoạt Quỹ Phần thưởng",

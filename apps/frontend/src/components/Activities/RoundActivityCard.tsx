@@ -2,13 +2,18 @@ import { Card, HStack, Icon, LinkBox, LinkOverlay, Text, VStack } from "@chakra-
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import NextLink from "next/link"
-import React from "react"
-import { useTranslation } from "react-i18next"
+import React, { useMemo } from "react"
+import { Trans, useTranslation } from "react-i18next"
 import { FaRegCalendar } from "react-icons/fa6"
-import { LuUsers } from "react-icons/lu"
 
-import { AppImage } from "@/components/AppImage/AppImage"
+import { useMultipleXAppRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppRoundEarnings"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
+
+const Bold: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <Text as="span" fontWeight="bold" color="text">
+    {children}
+  </Text>
+)
 
 type Props = {
   activity: ActivityItem & { type: ActivityType.ROUND_ENDED }
@@ -19,6 +24,15 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
   const { votersCount, vot3Total, topApps } = activity.metadata
   const formatter = getCompactFormatter(1)
   const formattedVot3 = formatter.format(Number(vot3Total || "0"))
+
+  const topAppIds = useMemo(() => topApps.map(a => a.appId), [topApps])
+  const { data: topAppsEarnings } = useMultipleXAppRoundEarnings(activity.roundId, topAppIds)
+
+  const formattedTopAppsEarnings = useMemo(() => {
+    if (!topAppsEarnings?.length) return undefined
+    const total = topAppsEarnings.reduce((sum, e) => sum + Number(e.amount), 0)
+    return formatter.format(total)
+  }, [topAppsEarnings, formatter])
 
   return (
     <LinkBox asChild>
@@ -31,13 +45,10 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
                 <LinkOverlay asChild>
                   <NextLink href={`/allocations?round=${activity.roundId}`}>
                     <Text textStyle="sm" fontWeight="bold">
-                      {t("Allocation round ended")}
+                      {t("Allocation round #{{roundId}} completed", { roundId: activity.roundId })}
                     </Text>
                   </NextLink>
                 </LinkOverlay>
-                <Text textStyle="sm" color="text.subtle">
-                  {t("Round #{{roundId}} completed", { roundId: activity.roundId })}
-                </Text>
               </VStack>
 
               <Text textStyle="xs" color="text.subtle">
@@ -45,32 +56,37 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
               </Text>
             </HStack>
 
-            <HStack gap="4" pl="8">
-              <HStack gap="1">
-                <Icon as={LuUsers} boxSize="4" color="text.subtle" />
-                <Text textStyle="sm" color="text.subtle">
-                  {votersCount.toLocaleString()} {t("voters")}
-                </Text>
-              </HStack>
-              <Text textStyle="sm" fontWeight="bold">
-                {formattedVot3}
-                {" VOT3 "}
-                {t("total")}
+            <VStack gap="2" pl="8" align="flex-start">
+              <Text textStyle="sm" color="text.subtle">
+                <Trans
+                  i18nKey="roundSummary"
+                  values={{ voters: votersCount.toLocaleString(), vot3: formattedVot3 }}
+                  components={{ bold: <Bold /> }}
+                />
               </Text>
-            </HStack>
 
-            {topApps.length > 0 && (
-              <HStack gap="2" pl="8">
-                <Text textStyle="xs" color="text.subtle">
-                  {t("Most voted apps")}
-                </Text>
-                <HStack gap="-2">
-                  {topApps.map(app => (
-                    <AppImage key={app.appId} appId={app.appId} boxSize="24px" borderRadius="full" />
+              {topApps.length > 0 && (
+                <Text textStyle="sm" color="text.subtle">
+                  {topApps.map((app, i) => (
+                    <React.Fragment key={app.appId}>
+                      <Bold>{app.appName}</Bold>
+                      {i < topApps.length - 2 && ", "}
+                      {i === topApps.length - 2 && ` ${t("and")} `}
+                    </React.Fragment>
                   ))}
-                </HStack>
-              </HStack>
-            )}
+                  {topApps.length === 1
+                    ? ` ${t("was the most voted app")}`
+                    : ` ${t("were the {{count}} most voted apps", { count: topApps.length })}`}
+                  {formattedTopAppsEarnings && (
+                    <>
+                      {`, ${t("receiving a total of")} `}
+                      <Bold>{`${formattedTopAppsEarnings} B3TR`}</Bold>
+                    </>
+                  )}
+                  {"."}
+                </Text>
+              )}
+            </VStack>
           </VStack>
         </Card.Body>
       </Card.Root>

@@ -1,11 +1,15 @@
 import { useMemo } from "react"
 
 import { useNextEmissionsCycle } from "@/api/contracts/emissions/hooks/useNextEmissionsCycle"
+import { useXAllocationsDecay } from "@/api/contracts/emissions/hooks/useXAllocationsDecay"
 import { useXAllocationsDecayPeriod } from "@/api/contracts/emissions/hooks/useXAllocationsDecayPeriod"
 import { useAllocationAmount } from "@/api/contracts/xAllocations/hooks/useAllocationAmount"
 import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 
 import { ActivityItem, ActivityType } from "./types"
+
+const sumAllocations = (a: { treasury: string; voteX2Earn: string; voteXAllocations: string; gm: string }) =>
+  parseFloat(a.treasury) + parseFloat(a.voteX2Earn) + parseFloat(a.voteXAllocations) + parseFloat(a.gm)
 
 export const useEmissionsActivities = (
   currentRoundId?: string,
@@ -16,20 +20,19 @@ export const useEmissionsActivities = (
   const { data: round, isLoading: isRoundLoading } = useAllocationsRound(currentRoundId)
   const { data: decayPeriod, isLoading: isDecayPeriodLoading } = useXAllocationsDecayPeriod()
   const { data: nextCycle, isLoading: isNextCycleLoading } = useNextEmissionsCycle()
+  const { data: decayRate, isLoading: isDecayLoading } = useXAllocationsDecay()
 
   const data = useMemo((): ActivityItem[] => {
     if (!currentRoundId || currentRoundId === "0") return []
     if (!previousRoundId || previousRoundId === "0") return []
     if (!currentAmount || !previousAmount) return []
 
-    const current = currentAmount.voteXAllocations
-    const previous = previousAmount.voteXAllocations
+    const currentTotal = sumAllocations(currentAmount)
+    const previousTotal = sumAllocations(previousAmount)
 
-    if (current === previous) return []
+    if (currentTotal === previousTotal) return []
 
-    const currentNum = parseFloat(current)
-    const previousNum = parseFloat(previous)
-    const percentageChange = previousNum !== 0 ? ((currentNum - previousNum) / previousNum) * 100 : 0
+    const percentageChange = previousTotal !== 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0
 
     const roundNum = Number(currentRoundId)
     const period = Number(decayPeriod ?? 0)
@@ -50,10 +53,14 @@ export const useEmissionsActivities = (
         roundId: currentRoundId,
         title: "Emissions decreased",
         metadata: {
-          currentAmount: current,
-          previousAmount: previous,
+          currentTotal: String(currentTotal),
+          previousTotal: String(previousTotal),
+          appsAmount: currentAmount.voteXAllocations,
+          treasuryAmount: currentAmount.treasury,
+          votersAmount: currentAmount.voteX2Earn,
           percentageChange: Math.round(percentageChange * 100) / 100,
           nextDecreaseRound,
+          nextDecreasePercentage: Number(decayRate ?? 0),
         },
       },
     ]
@@ -64,11 +71,18 @@ export const useEmissionsActivities = (
     previousAmount,
     round?.voteStartTimestamp,
     decayPeriod,
+    decayRate,
     nextCycle,
   ])
 
   return {
     data,
-    isLoading: isCurrentLoading || isPreviousLoading || isRoundLoading || isDecayPeriodLoading || isNextCycleLoading,
+    isLoading:
+      isCurrentLoading ||
+      isPreviousLoading ||
+      isRoundLoading ||
+      isDecayPeriodLoading ||
+      isNextCycleLoading ||
+      isDecayLoading,
   }
 }

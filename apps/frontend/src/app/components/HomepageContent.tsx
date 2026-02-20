@@ -1,4 +1,4 @@
-import { Grid, GridItem, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, VStack, useMediaQuery } from "@chakra-ui/react"
 
 import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
 import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
@@ -6,11 +6,14 @@ import { DashboardAllocationRounds } from "../proposals/components/components/Da
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
+import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 
 export const HomePageContent = () => {
+  const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
+
   return (
     <>
-      {/* {!isAboveMd && <RoundInfoBottomSheet />} */}
+      {!isAboveMd && <RoundInfoBottomSheet />}
       <Grid
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap="32px"
@@ -26,12 +29,12 @@ export const HomePageContent = () => {
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[1, 1, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
-            {/* {isAboveMd && (
-              <> */}
-            <CantVoteCard />
-            <DashboardAllocationRounds />
-            {/* </>
-            )} */}
+            {isAboveMd && (
+              <>
+                <CantVoteCard />
+                <DashboardAllocationRounds />
+              </>
+            )}
           </VStack>
         </GridItem>
         <GridItem colSpan={1} order={[2, 2, 2]}>
