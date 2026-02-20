@@ -44,7 +44,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
       return (
         <>
           <HStack>
-            <Icon as={UilTimesCircle} boxSize={isAbove800 ? "24px" : "16px"} color="brand.secondary" />
+            <Icon as={UilTimesCircle} boxSize={isAbove800 ? "24px" : "16px"} color="brand.secondary-strong" />
             <HStack gap={0} alignItems={"baseline"}>
               <Text color="text.default" textStyle={isAbove800 ? "md" : "xs"}>
                 {t("You reached the max GM NFT level")}
@@ -60,10 +60,17 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
     return (
       <>
         <HStack>
-          <Icon as={UilArrowCircleUp} boxSize={isAbove800 ? "24px" : "16px"} color="brand.secondary" />
+          <Icon
+            as={UilArrowCircleUp}
+            boxSize={isAbove800 ? "24px" : "16px"}
+            color={{ base: "brand.secondary-strong", _dark: "brand.secondary" }}
+          />
           <HStack gap={0} alignItems={"baseline"}>
             <Skeleton loading={isB3trBalanceLoading}>
-              <Text color="brand.secondary" textStyle="lg" fontWeight="bold">
+              <Text
+                color={{ base: "brand.secondary-strong", _dark: "brand.secondary" }}
+                textStyle="lg"
+                fontWeight="bold">
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
             </Skeleton>
@@ -78,7 +85,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           {t("B3TR needed to upgrade your GM level")}
         </Text>
         {b3trLeftover > 0 && (
-          <Text color="brand.secondary" textStyle={isAbove800 ? "sm" : "xs"} fontWeight="semibold">
+          <Text color="brand.secondary-strong" textStyle={isAbove800 ? "sm" : "xs"} fontWeight="semibold">
             {t("You have {{amount}} B3TR leftover from a previous upgrade", {
               amount: compactFormatter.format(Number(b3trLeftover)),
             })}

@@ -56,6 +56,8 @@ export const useEndorseApp = ({ appId, nodeId, points, userAddress, onSuccess, t
       getIsBlacklistedQueryKey(appId),
       getAppExistsQueryKey(appId),
       getAppEndorsedEventsQueryKey({ appId }),
+      getAppEndorsedEventsQueryKey({ nodeId }),
+      getAppEndorsedEventsQueryKey({ appId, nodeId }),
     ],
     [appId, nodeId, userAddress],
   )

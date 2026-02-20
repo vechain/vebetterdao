@@ -28,7 +28,7 @@ const galaxyMemberAbi = GalaxyMember__factory.abi
 
 enum NodeType {
   X = "XNode",
-  ECONOMIC = "Economic Node",
+  ECONOMIC = "Eco Node",
 }
 
 type StargateNFTMetadata = {

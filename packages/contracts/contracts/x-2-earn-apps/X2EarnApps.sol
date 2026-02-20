@@ -433,6 +433,16 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   }
 
   /**
+   * @notice Returns the endorsement score for an app at a specific block number.
+   * @param appId The unique identifier of the app.
+   * @param timepoint The block number to query.
+   * @return The endorsement score at the given timepoint.
+   */
+  function getScoreAtTimepoint(bytes32 appId, uint256 timepoint) external view returns (uint256) {
+    return EndorsementUtils.getScoreAtTimepoint(appId, timepoint);
+  }
+
+  /**
    * @dev See {IX2EarnApps-getEndorsers}.
    */
   function getEndorsers(bytes32 appId) external view returns (address[] memory) {
@@ -635,10 +645,7 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
   function endorseApp(bytes32 appId, uint256 nodeId, uint256 points) external {
     EndorsementUtils.endorseApp(appId, nodeId, points, isBlacklisted(appId), appExists(appId), isEligibleNow(appId));
 
-    // Check if we need to set voting eligibility after endorsement
-    X2EarnAppsStorageTypes.EndorsementStorage storage endorsementStorage = X2EarnAppsStorageTypes
-      ._getEndorsementStorage();
-    if (endorsementStorage._appEndorsementScore[appId] >= endorsementStorage._endorsementScoreThreshold) {
+    if (EndorsementUtils.getScore(appId) >= EndorsementUtils.endorsementScoreThreshold()) {
       if (!isEligibleNow(appId)) {
         _setVotingEligibility(appId, true);
       }

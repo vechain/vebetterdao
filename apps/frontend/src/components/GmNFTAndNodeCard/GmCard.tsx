@@ -6,7 +6,7 @@ import { FaChevronRight } from "react-icons/fa"
 const IMG_SIZE = "56px"
 const OFFSET_X = 10
 const OFFSET_Y = 4
-const MAX_VISIBLE = 3
+const MAX_VISIBLE = 2
 
 const ImageStack = ({ images }: { images: string[] }) => {
   const visible = images.slice(0, MAX_VISIBLE)
@@ -16,7 +16,7 @@ const ImageStack = ({ images }: { images: string[] }) => {
   const containerH = 56 + (totalItems - 1) * OFFSET_Y
 
   return (
-    <Box position="relative" w={`${containerW}px`} h={`${containerH}px`} flexShrink={0}>
+    <Box position="relative" isolation="isolate" w={`${containerW}px`} h={`${containerH}px`} flexShrink={0}>
       {visible.map((image, i) => (
         <Image
           key={image}
@@ -73,14 +73,14 @@ export const GmCard = ({
 
   return (
     <LinkBox flex={1}>
-      <Card.Root bg="transparency.200" gap="2" p="4" border="0">
+      <Card.Root bg="transparency.200" gap="2" p="4" border="0" h="full">
         <Card.Title asChild>
           <HStack w="full" justifyContent="space-between">
             <Text display="block" textStyle="sm" color="white" fontWeight="semibold">
               {subtitle}
             </Text>
             {hasMultiple && (
-              <HStack gap={1} textStyle="md" fontWeight="semibold">
+              <HStack gap={1} textStyle="sm" fontWeight="semibold">
                 <Text color="white" fontWeight="semibold">
                   {t("See all")}
                 </Text>
@@ -92,7 +92,7 @@ export const GmCard = ({
         <Card.Body>
           <LinkOverlay asChild>
             <NextLink href={href ?? ""}>
-              <HStack alignItems="center">
+              <HStack alignItems="start">
                 {images && images.length === 1 ? (
                   <Image
                     src={images[0]}

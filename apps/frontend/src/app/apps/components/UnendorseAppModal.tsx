@@ -1,4 +1,4 @@
-import { VStack, Heading, Text, Button, Skeleton, Card, Image, HStack, Alert, Icon, Circle } from "@chakra-ui/react"
+import { VStack, Heading, Text, Button, Skeleton, Card, Image, HStack, Icon, Circle } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { ClockSolid } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
@@ -286,7 +286,7 @@ export const UnendorseAppModal = ({ appId: appIdProp, appName, isOpen, onClose }
                 </VStack>
               </HStack>
 
-              <VStack gap={2} align="stretch" mt={4}>
+              <VStack gap={2} align="stretch" mt={6}>
                 <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
                   {t("Remove points")}
                 </Text>
@@ -294,15 +294,6 @@ export const UnendorseAppModal = ({ appId: appIdProp, appName, isOpen, onClose }
               </VStack>
             </VStack>
           </Card.Root>
-
-          <Alert.Root status="warning" borderRadius="lg">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title>
-                {t("Removing endorsement may cause this app to lose its eligibility for allocation rounds.")}
-              </Alert.Title>
-            </Alert.Content>
-          </Alert.Root>
 
           <HStack gap={4} justify="stretch" w="full" align="center" p={0}>
             <Button variant="secondary" flex={1} onClick={handleBack}>

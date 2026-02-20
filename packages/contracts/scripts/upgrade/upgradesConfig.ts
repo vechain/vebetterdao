@@ -71,7 +71,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Restricting one app per creator holding a creator NFT",
       v6: "Use NodeManagementV3",
       v7: "Replace NodeManagement with StargateNFT",
-      v8: "Refactor endorsement logic for size optimizations (no functional changes)",
+      v8: "Refactor for new endorsement system",
     },
   },
   "X2Earn Rewards Pool": {

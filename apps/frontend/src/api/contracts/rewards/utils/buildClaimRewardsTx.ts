@@ -14,19 +14,19 @@ export interface RoundReward {
  *
  * @param {RoundReward[]} roundRewards - An array of RoundReward objects representing the rewards for each round.
  * @param {string} address - The address of the voter.
- * @param {Map<string, boolean>} autoVotingActiveMap - Optional map of roundId to boolean indicating if auto-voting was active for that round. Rounds with auto-voting active will be excluded.
+ * @param {Record<string, boolean>} autoVotingActiveMap - Optional record of roundId to boolean indicating if auto-voting was active for that round. Rounds with auto-voting active will be excluded.
  * @returns {EnhancedClause[]} An array of EnhancedClause objects representing the transaction.
  */
 export const buildClaimRewardsTx = (
   roundRewards: RoundReward[],
   address: string,
-  autoVotingActiveMap?: Map<string, boolean>,
+  autoVotingActiveMap?: Record<string, boolean>,
 ) => {
   const clauses = []
 
   for (const round of roundRewards) {
     if (!round.rewards || Number(round.rewards) <= 0) continue
-    if (autoVotingActiveMap?.get(round.roundId) === true) continue
+    if (autoVotingActiveMap?.[round.roundId] === true) continue
     const clause: EnhancedClause = buildClaimRoundReward(round.roundId, address)
     clauses.push(clause)
   }

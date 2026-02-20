@@ -141,7 +141,7 @@ export const ActionBanner = () => {
   const newApps = (xApps?.newApps ?? []).length > 0
 
   // Endorsement banner logic
-  const showEndorsementBanner = preferences?.[BannerStorageKey.SHOW_ENDORSEMENT] ?? true
+  const showEndorsementBanner = !!account?.address && (preferences?.[BannerStorageKey.SHOW_ENDORSEMENT] ?? true)
 
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled

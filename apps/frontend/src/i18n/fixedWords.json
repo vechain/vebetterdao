@@ -6,6 +6,88 @@
   },
   "it": {
     "round": "round",
-    "screenshot": "screenshot"
+    "screenshot": "screenshot",
+    "endorse": "supportare",
+    "endorsement": "supporto",
+    "endorsed": "supportata/supportato",
+    "endorsers": "sostenitori"
+  },
+  "de": {
+    "endorse": "unterstützen",
+    "endorsement": "Unterstützung",
+    "endorsed": "unterstützt",
+    "endorsers": "Unterstützer"
+  },
+  "es": {
+    "endorse": "respaldar",
+    "endorsement": "respaldo",
+    "endorsed": "respaldada/respaldado",
+    "endorsers": "respaldadores"
+  },
+  "fr": {
+    "endorse": "soutenir",
+    "endorsement": "soutien",
+    "endorsed": "soutenue/soutenu",
+    "endorsers": "soutiens"
+  },
+  "hi": {
+    "endorse": "समर्थन करें",
+    "endorsement": "समर्थन",
+    "endorsed": "समर्थित",
+    "endorsers": "समर्थक"
+  },
+  "ja": {
+    "endorse": "支持する",
+    "endorsement": "支持",
+    "endorsed": "支持済み",
+    "endorsers": "支持者"
+  },
+  "ko": {
+    "endorse": "지지하다",
+    "endorsement": "지지",
+    "endorsed": "지지된",
+    "endorsers": "지지자"
+  },
+  "nl": {
+    "endorse": "ondersteunen",
+    "endorsement": "ondersteuning",
+    "endorsed": "ondersteund",
+    "endorsers": "ondersteuners"
+  },
+  "pt": {
+    "endorse": "endossar",
+    "endorsement": "endosso",
+    "endorsed": "endossado",
+    "endorsers": "endossadores"
+  },
+  "sv": {
+    "endorse": "stödja",
+    "endorsement": "stöd",
+    "endorsed": "stödd",
+    "endorsers": "stödjare"
+  },
+  "tr": {
+    "endorse": "onaylamak",
+    "endorsement": "onay",
+    "endorsed": "onaylanan",
+    "endorsers": "onaylayıcılar"
+  },
+  "tw": {
+    "endorse": "背書",
+    "endorsement": "背書",
+    "endorsed": "已背書",
+    "endorsers": "背書者"
+  },
+  "vi": {
+    "endorse": "ủng hộ",
+    "endorsement": "sự ủng hộ",
+    "endorsed": "đã ủng hộ",
+    "endorsers": "người ủng hộ"
+  },
+  "zh": {
+    "endorse": "背书",
+    "endorsement": "背书",
+    "endorsed": "已背书",
+    "endorsers": "背书者"
   }
 }
