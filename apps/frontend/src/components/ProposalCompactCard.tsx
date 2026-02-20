@@ -1,4 +1,4 @@
-import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay, Badge } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import NextLink from "next/link"
@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
 
 import { useProposalInteractionDates } from "../api/contracts/governance/hooks/useProposalInteractionDates"
-import { ProposalEnriched, ProposalState } from "../hooks/proposals/grants/types"
+import { ProposalEnriched, ProposalState, ProposalType } from "../hooks/proposals/grants/types"
 
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
@@ -68,7 +68,12 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
             <Card.Body p="0">
               <HStack justifyContent={"space-between"} w="full">
                 <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
-                  <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
+                  <HStack>
+                    <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
+                    <Badge variant="neutral" rounded="full">
+                      {proposal.type === ProposalType.Grant ? t("Grant") : t("Proposal")}
+                    </Badge>
+                  </HStack>
                   <VStack w="full" gap="1" align={"flex-start"}>
                     <VStack alignItems="flex-start">
                       <Text textStyle={"sm"} fontWeight="semibold">

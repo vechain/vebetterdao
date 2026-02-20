@@ -1,7 +1,10 @@
-import { Text, Card, VStack, Badge, BadgeProps, HStack } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import NextLink from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { FaRegCircleXmark, FaStar } from "react-icons/fa6"
+import { LuShieldCheck } from "react-icons/lu"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
@@ -16,48 +19,58 @@ type Props = {
   }
 }
 
-const getBadgeVariant = (type: Props["activity"]["type"]): BadgeProps["variant"] => {
+const getIcon = (type: Props["activity"]["type"]) => {
   switch (type) {
-    case ActivityType.APP_ENDORSEMENT_REACHED:
     case ActivityType.APP_NEW:
-      return "positive"
+      return { icon: FaStar, color: "blue.500" }
+    case ActivityType.APP_ENDORSEMENT_REACHED:
+      return { icon: LuShieldCheck, color: "green.500" }
     case ActivityType.APP_ENDORSEMENT_LOST:
     case ActivityType.APP_BANNED:
-      return "negative"
+      return { icon: FaRegCircleXmark, color: "red.500" }
+  }
+}
+
+const getTitle = (type: Props["activity"]["type"], t: (key: string) => string) => {
+  switch (type) {
+    case ActivityType.APP_NEW:
+      return t("New app registered")
+    case ActivityType.APP_ENDORSEMENT_REACHED:
+      return t("App reached endorsement threshold")
+    case ActivityType.APP_ENDORSEMENT_LOST:
+      return t("App lost endorsement")
+    case ActivityType.APP_BANNED:
+      return t("App banned")
   }
 }
 
 export const AppActivityCard: React.FC<Props> = ({ activity }) => {
   const { t } = useTranslation()
-  const variant = getBadgeVariant(activity.type)
-
-  const badgeText = {
-    [ActivityType.APP_ENDORSEMENT_LOST]: t("Endorsement lost"),
-    [ActivityType.APP_ENDORSEMENT_REACHED]: t("Endorsement reached"),
-    [ActivityType.APP_NEW]: t("New app"),
-    [ActivityType.APP_BANNED]: t("App banned"),
-  }[activity.type]
+  const { icon, color } = getIcon(activity.type)
 
   return (
-    <Card.Root variant="subtle" rounded="lg" w="full" p="4">
+    <LinkBox as={Card.Root} variant="subtle" rounded="lg" w="full" p="4" cursor="pointer">
       <Card.Body p="0">
-        <VStack gap="3" align="flex-start">
-          <Badge variant={variant} rounded="full">
-            {badgeText}
-          </Badge>
-          <HStack gap="3">
-            <AppImage appId={activity.metadata.appId} boxSize="40px" borderRadius="10px" />
-            <VStack gap="1" align="flex-start">
-              <Text textStyle="sm" fontWeight="semibold">
-                {activity.metadata.appName}
-              </Text>
-              <Text textStyle="xs" color="text.subtle">
-                {dayjs.unix(activity.date).fromNow()}
-              </Text>
-            </VStack>
-          </HStack>
-        </VStack>
+        <HStack gap="3" align="flex-start" w="full">
+          <Icon as={icon} color={color} boxSize="5" mt="0.5" flexShrink={0} />
+          <AppImage appId={activity.metadata.appId} boxSize="40px" borderRadius="10px" flexShrink={0} />
+          <VStack gap="1" align="flex-start" flex="1" minW="0">
+            <LinkOverlay asChild>
+              <NextLink href={`/apps/${activity.metadata.appId}`}>
+                <Text textStyle="sm" fontWeight="bold">
+                  {getTitle(activity.type, t)}
+                </Text>
+              </NextLink>
+            </LinkOverlay>
+            <Text textStyle="sm" color="text.subtle">
+              {activity.metadata.appName}
+            </Text>
+          </VStack>
+          <Text textStyle="xs" color="text.subtle" flexShrink={0}>
+            {dayjs.unix(activity.date).fromNow()}
+          </Text>
+        </HStack>
       </Card.Body>
-    </Card.Root>
+    </LinkBox>
   )
 }

@@ -23,6 +23,7 @@ export const useRoundActivities = (previousRoundId?: string): { data: ActivityIt
     const topApps = mostVotedApps.slice(0, 3).map(a => ({
       appId: a.id,
       appName: a.app?.name ?? "",
+      percentage: a.percentage,
     }))
 
     return [

@@ -1,9 +1,9 @@
-import { Text, Card, VStack, Badge, HStack } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { formatEther } from "viem"
+import { LuTrendingDown } from "react-icons/lu"
 
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
 
@@ -13,34 +13,59 @@ type Props = {
 
 export const EmissionsActivityCard: React.FC<Props> = ({ activity }) => {
   const { t } = useTranslation()
-  const { currentAmount, percentageChange, nextDecreaseRound } = activity.metadata
+  const { currentAmount, previousAmount, percentageChange, nextDecreaseRound } = activity.metadata
   const formatter = getCompactFormatter(1)
-  const formattedAmount = formatter.format(Number(formatEther(BigInt(currentAmount || "0"))))
+  const formattedCurrent = formatter.format(Number(currentAmount || "0"))
+  const formattedPrevious = formatter.format(Number(previousAmount || "0"))
 
   return (
     <Card.Root variant="subtle" rounded="lg" w="full" p="4">
       <Card.Body p="0">
-        <VStack gap="3" align="flex-start">
-          <Badge variant="warning" rounded="full">
-            {t("Emissions decreased")}
-          </Badge>
-          <VStack gap="1" align="flex-start">
-            <Text textStyle="sm" fontWeight="semibold">
-              {percentageChange.toFixed(1)}
-              {"%"}
-            </Text>
-            <HStack gap="4">
-              <Text textStyle="xs" color="text.subtle">
-                {formattedAmount} {t("B3TR")}
+        <VStack gap="3" align="flex-start" w="full">
+          <HStack gap="3" align="flex-start" w="full">
+            <Icon as={LuTrendingDown} color="green.500" boxSize="5" mt="0.5" flexShrink={0} />
+            <VStack gap="1" align="flex-start" flex="1" minW="0">
+              <Text textStyle="sm" fontWeight="bold">
+                {t("Emissions decreased")}
               </Text>
-              <Text textStyle="xs" color="text.subtle">
-                {t("Next decrease round {{round}}", { round: nextDecreaseRound })}
+              <Text textStyle="sm" color="text.subtle">
+                {t("B3TR emissions reduced by {{percentage}}%", {
+                  percentage: Math.abs(percentageChange).toFixed(1),
+                })}
+              </Text>
+            </VStack>
+            <Text textStyle="xs" color="text.subtle" flexShrink={0}>
+              {dayjs.unix(activity.date).format("MMM D, YYYY")}
+            </Text>
+          </HStack>
+
+          <HStack gap="4" pl="8" flexWrap="wrap">
+            <Text textStyle="sm" color="text.subtle">
+              {t("Previous:")}{" "}
+              <Text as="span" fontWeight="bold">
+                {formattedPrevious}
+                {" B3TR"}
+              </Text>
+            </Text>
+            <Text textStyle="sm" color="text.subtle">
+              {t("Current:")}{" "}
+              <Text as="span" fontWeight="bold">
+                {formattedCurrent}
+                {" B3TR"}
+              </Text>
+            </Text>
+            <HStack gap="1">
+              <Icon as={LuTrendingDown} color="green.500" boxSize="4" />
+              <Text textStyle="sm" color="green.500" fontWeight="semibold">
+                {Math.abs(percentageChange).toFixed(1)}
+                {"%"}
               </Text>
             </HStack>
-            <Text textStyle="xs" color="text.subtle">
-              {dayjs.unix(activity.date).fromNow()}
-            </Text>
-          </VStack>
+          </HStack>
+
+          <Text textStyle="xs" color="text.subtle" pl="8">
+            {t("Next decrease in round #{{round}}", { round: nextDecreaseRound })}
+          </Text>
         </VStack>
       </Card.Body>
     </Card.Root>

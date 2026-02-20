@@ -34,7 +34,7 @@ export type AppActivityMeta = {
 export type RoundActivityMeta = {
   votersCount: number
   vot3Total: string
-  topApps: { appId: string; appName: string }[]
+  topApps: { appId: string; appName: string; percentage: number }[]
 }
 
 export type EmissionsActivityMeta = {

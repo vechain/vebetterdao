@@ -6,7 +6,6 @@ import { DashboardAllocationRounds } from "../proposals/components/components/Da
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
-import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 
 export const HomePageContent = () => {
@@ -29,13 +28,12 @@ export const HomePageContent = () => {
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
-            {isAboveMd && (
-              <>
-                <CantVoteCard />
-                <DashboardAllocationRounds />
-              </>
-            )}
-            <DashboardXApps />
+            {/* {isAboveMd && (
+              <> */}
+            <CantVoteCard />
+            <DashboardAllocationRounds />
+            {/* </>
+            )} */}
           </VStack>
         </GridItem>
         <GridItem colSpan={1} order={[1, 1, 2]}>
