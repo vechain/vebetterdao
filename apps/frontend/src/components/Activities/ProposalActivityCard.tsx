@@ -1,7 +1,7 @@
 import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { Prohibition } from "iconoir-react"
-import NextLink from "next/link"
+import NextLink, { type LinkProps } from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { FaRegCircleCheck } from "react-icons/fa6"
@@ -13,6 +13,8 @@ import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
+
+const TypedNextLink = NextLink as React.FC<React.PropsWithChildren<LinkProps>>
 
 import { useProposalVotes } from "../../api/indexer/proposals/useProposalVotes"
 
@@ -120,12 +122,10 @@ export const ProposalActivityCard: React.FC<Props> = ({ activity }) => {
             <HStack gap="3" align="flex-start" w="full">
               <Icon as={icon} color={color} boxSize="5" mt="0.5" flexShrink={0} />
               <VStack gap="1" align="flex-start" flex="1" minW="0">
-                <LinkOverlay asChild>
-                  <NextLink href={`/proposals/${activity.metadata.proposalId}`}>
-                    <Text textStyle="sm" fontWeight="bold">
-                      {getTitle(activity.type, t)}
-                    </Text>
-                  </NextLink>
+                <LinkOverlay textStyle="sm" fontWeight="bold" asChild>
+                  <TypedNextLink href={`/proposals/${activity.metadata.proposalId}`}>
+                    {getTitle(activity.type, t)}
+                  </TypedNextLink>
                 </LinkOverlay>
                 <Text textStyle="sm" color="text.subtle">
                   {activity.metadata.proposalTitle}

@@ -27,7 +27,7 @@ export const HomePageContent = () => {
         <GridItem colSpan={[1, 1, 3]}>
           <GmNFTAndNodeCard />
         </GridItem>
-        <GridItem colSpan={[1, 1, 2]} order={[1, 1, 1]}>
+        <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
             {isAboveMd && (
               <>
@@ -37,7 +37,7 @@ export const HomePageContent = () => {
             )}
           </VStack>
         </GridItem>
-        <GridItem colSpan={1} order={[2, 2, 2]}>
+        <GridItem colSpan={1} order={[1, 1, 2]}>
           <DashboardSideBar />
         </GridItem>
       </Grid>
