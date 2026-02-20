@@ -9,7 +9,7 @@ import { ActivityCard } from "./ActivityCard"
 const getActivityKey = (activity: ActivityItem): string => {
   const base = `${activity.type}-${activity.roundId}-${activity.date}`
   if ("proposalId" in activity.metadata) return `${base}-${activity.metadata.proposalId}`
-  if ("appId" in activity.metadata) return `${base}-${activity.metadata.appId}`
+  if ("apps" in activity.metadata) return `${base}-${activity.metadata.apps.map(a => a.appId).join("-")}`
   return base
 }
 

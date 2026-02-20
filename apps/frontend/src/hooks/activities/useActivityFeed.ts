@@ -19,7 +19,7 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
   const { data: prevProposals, isLoading: isPrevProposalsLoading } = usePreviousRoundProposalActivities(previousRoundId)
   const { data: currProposals, isLoading: isCurrProposalsLoading } = useCurrentRoundProposalActivities(currentRoundId)
   const { data: grants, isLoading: isGrantsLoading } = useGrantActivities(currentRoundId)
-  const { data: apps, isLoading: isAppsLoading } = useAppActivities()
+  const { data: apps, isLoading: isAppsLoading } = useAppActivities(currentRoundId)
   const { data: rounds, isLoading: isRoundsLoading } = useRoundActivities(previousRoundId)
   const { data: emissions, isLoading: isEmissionsLoading } = useEmissionsActivities(currentRoundId, previousRoundId)
 

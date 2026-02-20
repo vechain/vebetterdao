@@ -27,8 +27,7 @@ export type ProposalActivityMeta = {
 }
 
 export type AppActivityMeta = {
-  appId: string
-  appName: string
+  apps: { appId: string; appName: string }[]
 }
 
 export type RoundActivityMeta = {
