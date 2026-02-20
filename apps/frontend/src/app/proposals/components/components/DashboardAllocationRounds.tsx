@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Gift, NavArrowLeft, NavArrowRight, Activity } from "iconoir-react"
+import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LiaBalanceScaleSolid } from "react-icons/lia"
@@ -173,8 +174,8 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
               </HStack>
             </Skeleton>
           </VStack>
-          <Button variant="primary" size="sm" alignSelf="end">
-            {t("View round")}
+          <Button asChild variant="primary" size="sm" alignSelf="end">
+            <NextLink href={`/allocations/round?round=${selectedRoundId}`}>{t("View round")}</NextLink>
           </Button>
         </Flex>
 

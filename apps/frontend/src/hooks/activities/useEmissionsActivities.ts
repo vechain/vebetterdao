@@ -30,7 +30,7 @@ export const useEmissionsActivities = (
     const currentTotal = sumAllocations(currentAmount)
     const previousTotal = sumAllocations(previousAmount)
 
-    if (currentTotal === previousTotal) return []
+    if (currentTotal >= previousTotal) return []
 
     const percentageChange = previousTotal !== 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0
 

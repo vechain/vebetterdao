@@ -13,42 +13,8 @@ type Props = {
   proposalState?: ProposalState
 }
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
-  // const { account } = useWallet()
   const { id: proposalId, title: proposalTitle } = proposal
-  // const { supportEndDate } = useProposalInteractionDates(proposalId)
   const { t } = useTranslation()
-
-  // const proposalExtraInfo = useMemo(() => {
-  //   if (proposal.state === ProposalState.Pending) {
-  //     return (
-  //       <Skeleton loading={!supportEndDate}>
-  //         <Text textStyle="sm" color={"gray.500"}>
-  //           {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
-  //         </Text>
-  //       </Skeleton>
-  //     )
-  //   }
-  //   if (proposal.state === ProposalState.DepositNotMet) {
-  //     return (
-  //       <Text textStyle="sm" color={"gray.500"}>
-  //         {t("Vote didn't start")}
-  //       </Text>
-  //     )
-  //   }
-  //   if (
-  //     !!account?.address &&
-  //     [ProposalState.Active, ProposalState.Executed, ProposalState.Queued].includes(proposal.state as ProposalState)
-  //   ) {
-  //     return (
-  //       <ProposalYourVote
-  //         proposalId={proposalId}
-  //         proposalState={proposal.state}
-  //         renderTitle={false}
-  //         textProps={{ color: "gray.500", fontSize: "14px" }}
-  //       />
-  //     )
-  //   }
-  // }, [proposal.state, account?.address, supportEndDate, t, proposalId])
 
   return (
     <LinkBox asChild>
@@ -72,7 +38,6 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                         {proposalTitle}
                       </Text>
                       <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
-                      {/* {proposalExtraInfo} */}
                     </VStack>
                   </VStack>
                 </VStack>
