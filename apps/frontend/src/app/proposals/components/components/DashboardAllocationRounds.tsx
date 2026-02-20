@@ -93,7 +93,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
               <Text textStyle="md" color="text.subtle">
                 {t("Round")}
               </Text>
-              <Heading size="5xl">{selectedRoundId}</Heading>
+              <Heading size="6xl">{selectedRoundId}</Heading>
             </VStack>
             <VStack gap="1" pl="6" align={{ base: "center", md: "start" }}>
               <Text textStyle="md" color="text.subtle">
@@ -109,13 +109,13 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
 
               {selectedRoundId === currentRoundId ? (
                 <Flex h="full" alignItems="flex-start">
-                  <Badge size="sm" variant="positive">
+                  <Badge size="md" variant="positive">
                     {t("Active")}
                   </Badge>
                 </Flex>
               ) : (
                 <Flex h="full" alignItems="flex-start">
-                  <Badge size="sm" variant="neutral">
+                  <Badge size="md" variant="neutral">
                     {t("Concluded")}
                   </Badge>
                 </Flex>

@@ -11,8 +11,10 @@ import { useProposalStateChangeMaps } from "./useProposalStateChangeMaps"
 export const useCurrentRoundProposalActivities = (
   currentRoundId?: string,
 ): { data: ActivityItem[]; isLoading: boolean } => {
-  const { data: { enrichedProposals } = { enrichedProposals: [] }, isLoading: isProposalsLoading } =
-    useProposalEnriched()
+  const {
+    data: { enrichedStandardProposals: enrichedProposals } = { enrichedStandardProposals: [] },
+    isLoading: isProposalsLoading,
+  } = useProposalEnriched()
 
   const {
     canceledMap,

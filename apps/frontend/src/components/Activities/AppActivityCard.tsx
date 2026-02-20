@@ -1,6 +1,7 @@
 import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import NextLink from "next/link"
+import { TFunction } from "i18next"
+import NextLink, { type LinkProps } from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { FaStar, FaStarHalfStroke } from "react-icons/fa6"
@@ -9,6 +10,8 @@ import { LuBan } from "react-icons/lu"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
+
+const TypedNextLink = NextLink as React.FC<React.PropsWithChildren<LinkProps>>
 
 type Props = {
   activity: ActivityItem & {
@@ -33,7 +36,7 @@ const getIcon = (type: Props["activity"]["type"]) => {
   }
 }
 
-const getTitle = (type: Props["activity"]["type"], t: (key: string) => string) => {
+const getTitle = (type: Props["activity"]["type"], t: TFunction) => {
   switch (type) {
     case ActivityType.APP_NEW:
       return t("New app registered")
@@ -46,17 +49,13 @@ const getTitle = (type: Props["activity"]["type"], t: (key: string) => string) =
   }
 }
 
-const formatNames = (apps: { appName: string }[], t: (key: string, opts?: Record<string, unknown>) => string) => {
+const formatNames = (apps: { appName: string }[], t: TFunction) => {
   if (apps.length === 1) return apps[0]?.appName ?? ""
   if (apps.length === 2) return `${apps[0]?.appName} ${t("and")} ${apps[1]?.appName}`
   return `${apps[0]?.appName}, ${apps[1]?.appName} ${t("and")} ${t("{{count}} more", { count: apps.length - 2 })}`
 }
 
-const getDescription = (
-  type: Props["activity"]["type"],
-  apps: { appName: string }[],
-  t: (key: string, opts?: Record<string, unknown>) => string,
-) => {
+const getDescription = (type: Props["activity"]["type"], apps: { appName: string }[], t: TFunction) => {
   const names = formatNames(apps, t)
   switch (type) {
     case ActivityType.APP_NEW:
@@ -81,33 +80,31 @@ export const AppActivityCard: React.FC<Props> = ({ activity }) => {
     <LinkBox asChild>
       <Card.Root variant="subtle" rounded="lg" w="full" p="4" cursor="pointer">
         <Card.Body p="0">
-          <HStack gap="3" align="flex-start" w="full">
-            <Icon as={icon} color={color} boxSize="5" mt="0.5" flexShrink={0} />
-
-            <VStack gap="4" align="flex-start" flex="1" minW="0">
-              <LinkOverlay asChild>
-                <NextLink href={href}>
-                  <Text textStyle="sm" fontWeight="bold">
-                    {getTitle(activity.type, t)}
-                  </Text>
-                </NextLink>
-              </LinkOverlay>
-
-              <HStack gap="2">
-                {isSingle && !!apps[0]?.appId && (
-                  <AppImage appId={apps[0].appId} boxSize="28px" borderRadius="10px" flexShrink={0} />
-                )}
-                {!isSingle && <OverlappedAppsImages appsIds={apps.map(a => a.appId)} maxAppsToShow={3} iconSize={28} />}
-                <Text textStyle="sm" color="text.subtle" truncate lineClamp={1}>
+          <VStack gap="3" align="flex-start" w="full">
+            <HStack gap="3" align="flex-start" w="full">
+              <Icon as={icon} color={color} boxSize="5" mt="0.5" flexShrink={0} />
+              <VStack gap="1" align="flex-start" flex="1" minW="0">
+                <LinkOverlay textStyle="sm" fontWeight="bold" asChild>
+                  <TypedNextLink href={href}>{getTitle(activity.type, t)}</TypedNextLink>
+                </LinkOverlay>
+                <Text textStyle="sm" color="text.subtle">
                   {getDescription(activity.type, apps, t)}
                 </Text>
-              </HStack>
-            </VStack>
+              </VStack>
 
-            <Text textStyle="xs" color="text.subtle">
-              {dayjs.unix(activity.date).fromNow()}
-            </Text>
-          </HStack>
+              <Text textStyle="xs" color="text.subtle">
+                {dayjs.unix(activity.date).fromNow()}
+              </Text>
+            </HStack>
+
+            <HStack gap="2" pl="8">
+              {isSingle && !!apps[0]?.appId ? (
+                <AppImage appId={apps[0].appId} boxSize="28px" borderRadius="10px" flexShrink={0} />
+              ) : (
+                <OverlappedAppsImages appsIds={apps.map(a => a.appId)} maxAppsToShow={4} iconSize={28} />
+              )}
+            </HStack>
+          </VStack>
         </Card.Body>
       </Card.Root>
     </LinkBox>

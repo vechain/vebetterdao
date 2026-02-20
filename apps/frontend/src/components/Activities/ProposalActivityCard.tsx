@@ -1,5 +1,6 @@
 import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { TFunction } from "i18next"
 import { Prohibition } from "iconoir-react"
 import NextLink, { type LinkProps } from "next/link"
 import React from "react"
@@ -59,7 +60,7 @@ const getIcon = (type: Props["activity"]["type"]) => {
   }
 }
 
-const getTitle = (type: Props["activity"]["type"], t: (key: string) => string) => {
+const getTitle = (type: Props["activity"]["type"], t: TFunction) => {
   switch (type) {
     case ActivityType.PROPOSAL_VOTED_FOR:
       return t("Proposal passed")
