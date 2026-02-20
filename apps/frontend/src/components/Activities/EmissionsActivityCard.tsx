@@ -32,7 +32,7 @@ export const EmissionsActivityCard: React.FC<Props> = ({ activity }) => {
   const fmtVoters = formatter.format(Number(votersAmount || "0"))
 
   return (
-    <Card.Root variant="subtle" rounded="lg" w="full" p="4">
+    <Card.Root variant="outline" rounded="lg" w="full" p="4">
       <Card.Body p="0">
         <VStack gap="3" align="flex-start" w="full">
           <HStack gap="3" align="flex-start" w="full">

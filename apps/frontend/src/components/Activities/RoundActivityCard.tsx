@@ -43,7 +43,7 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
               <Icon as={FaRegCalendar} color="status.info.strong" boxSize="5" mt="0.5" flexShrink={0} />
               <VStack gap="1" align="flex-start" flex="1" minW="0">
                 <LinkOverlay asChild>
-                  <NextLink href={`/allocations?round=${activity.roundId}`}>
+                  <NextLink href={`/allocations/round?roundId=${activity.roundId}`}>
                     <Text textStyle="sm" fontWeight="bold">
                       {t("Allocation round #{{roundId}} completed", { roundId: activity.roundId })}
                     </Text>
