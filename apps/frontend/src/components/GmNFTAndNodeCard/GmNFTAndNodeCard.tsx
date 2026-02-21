@@ -78,7 +78,7 @@ export const GmNFTAndNodeCard = () => {
                   title={selectedGM?.metadata?.name || "name"}
                   footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
                   images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
-                  href={`/galaxy-member/${selectedGM?.tokenId}`}
+                  href="/galaxy-member"
                 />
               ) : (
                 <GmEmptyStateCard

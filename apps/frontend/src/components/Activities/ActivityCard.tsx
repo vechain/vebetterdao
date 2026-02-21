@@ -4,6 +4,7 @@ import { ActivityItem, ActivityType } from "@/hooks/activities/types"
 
 import { AppActivityCard } from "./AppActivityCard"
 import { EmissionsActivityCard } from "./EmissionsActivityCard"
+import { GmUpgradeActivityCard } from "./GmUpgradeActivityCard"
 import { GrantActivityCard } from "./GrantActivityCard"
 import { ProposalActivityCard } from "./ProposalActivityCard"
 import { RoundActivityCard } from "./RoundActivityCard"
@@ -34,6 +35,8 @@ export const ActivityCard: React.FC<Props> = ({ activity }) => {
       return <AppActivityCard activity={activity} />
     case ActivityType.ROUND_ENDED:
       return <RoundActivityCard activity={activity} />
+    case ActivityType.GM_UPGRADED:
+      return <GmUpgradeActivityCard activity={activity} />
     case ActivityType.EMISSIONS_DECREASED:
       return <EmissionsActivityCard activity={activity} />
   }

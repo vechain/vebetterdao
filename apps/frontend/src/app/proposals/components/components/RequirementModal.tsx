@@ -46,11 +46,11 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
     if (!userHasAnyGm) {
       router.push("/allocations/round")
     } else if (!hasNft) {
-      router.push(`/galaxy-member/${userHighestGm?.tokenId}`)
+      router.push("/galaxy-member")
     } else {
       router.push("/proposals/new")
     }
-  }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId])
+  }, [hasNft, router, userHasAnyGm, userHighestGm])
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton={true} modalProps={{ size: "md" }}>

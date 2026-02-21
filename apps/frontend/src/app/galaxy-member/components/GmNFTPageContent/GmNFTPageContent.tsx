@@ -5,18 +5,21 @@ import { useTranslation } from "react-i18next"
 
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { StargateNodeCtaCard } from "@/app/nodes/components/StargateNodeCtaCard"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 
-import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGetUserGMs, UserGM } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
+import { GmUpgradesActivityList } from "./components/GmUpgradesActivityList"
 import { NodeRow } from "./components/NodeRow"
 
-export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
+const getActiveGM = (userGMs: UserGM[] | undefined): UserGM | undefined =>
+  userGMs?.find(g => g.isSelected) ?? userGMs?.[0]
+
+export const GmNFTPageContent = () => {
   const { t } = useTranslation()
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
@@ -46,7 +49,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       </VStack>
     )
 
-  const gm = userGMs?.find(gm => gm.tokenId === gmId)
+  const gm = getActiveGM(userGMs)
   if (!gm) return null
 
   const userNodes = userNodesInfo?.nodesManagedByUser ?? []
@@ -79,10 +82,13 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   return (
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
-      <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
-        <VStack flex={3} align="stretch" gap="4">
+      <Stack direction={["column", "column", "column", "row"]} gap="4" align="stretch">
+        <VStack flex={{ base: "none", md: 3 }} align="stretch" gap="4" minW="0">
           <GmPoolAmountCard />
 
+          <GmUpgradesActivityList />
+        </VStack>
+        <VStack flex={{ base: "none", md: 1.5 }} align="stretch" gap="4" minW="0">
           <Card.Root variant="primary" maxH={"fit-content"}>
             <Card.Header>
               <HStack justify="space-between" align="start">
@@ -141,10 +147,6 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
               )}
             </Card.Body>
           </Card.Root>
-
-          <StargateNodeCtaCard />
-        </VStack>
-        <VStack flex={1.5} align={"stretch"}>
           <GalaxyLevelsCard />
         </VStack>
       </Stack>

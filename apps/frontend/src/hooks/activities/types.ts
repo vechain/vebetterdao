@@ -18,6 +18,7 @@ export enum ActivityType {
   APP_BANNED = "APP_BANNED",
   ROUND_ENDED = "ROUND_ENDED",
   EMISSIONS_DECREASED = "EMISSIONS_DECREASED",
+  GM_UPGRADED = "GM_UPGRADED",
 }
 
 export type ProposalActivityMeta = {
@@ -50,6 +51,18 @@ export type EmissionsActivityMeta = {
 export type GrantActivityMeta = {
   proposalId: string
   proposalTitle: string
+}
+
+export type GmUpgradeEntry = {
+  userAddress: string
+  tokenId: string
+  oldLevel: number
+  newLevel: number
+  timestamp: number
+}
+
+export type GmUpgradeActivityMeta = {
+  upgrades: GmUpgradeEntry[]
 }
 
 export type ActivityItem =
@@ -105,4 +118,12 @@ export type ActivityItem =
       title: string
       description?: string
       metadata: EmissionsActivityMeta
+    }
+  | {
+      type: ActivityType.GM_UPGRADED
+      date: number
+      roundId: string
+      title: string
+      description?: string
+      metadata: GmUpgradeActivityMeta
     }
