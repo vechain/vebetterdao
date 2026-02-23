@@ -12,6 +12,7 @@ import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useG
 
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
+import { GmNoNFTEmptyState } from "./components/GmNoNFTEmptyState"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
 import { GmUpgradesActivityList } from "./components/GmUpgradesActivityList"
 import { NodeRow } from "./components/NodeRow"
@@ -50,7 +51,7 @@ export const GmNFTPageContent = () => {
     )
 
   const gm = getActiveGM(userGMs)
-  if (!gm) return null
+  if (!gm) return <GmNoNFTEmptyState />
 
   const userNodes = userNodesInfo?.nodesManagedByUser ?? []
   const nodesAttachedToGMs = userNodes.filter(node => node.isGmAttached)
