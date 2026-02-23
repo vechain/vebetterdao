@@ -159,7 +159,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
               <HStack gap="2">
                 <Icon as={Gift} boxSize="5" color="text.subtle" />
                 <Text textStyle="md" color="text.subtle">
-                  {isCurrentRound ? t("Total rewards to distribute") : t("Total rewards distributed")}
+                  {isCurrentRound ? t("Total to distribute") : t("Total distributed")}
                 </Text>
               </HStack>
             </HStack>
@@ -175,7 +175,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             </Skeleton>
           </VStack>
           <Button asChild variant="primary" size="sm" alignSelf="end">
-            <NextLink href={`/allocations/round?round=${selectedRoundId}`}>{t("View round")}</NextLink>
+            <NextLink href={`/allocations/round?round=${selectedRoundId}`}>{t("View round details")}</NextLink>
           </Button>
         </Flex>
 
