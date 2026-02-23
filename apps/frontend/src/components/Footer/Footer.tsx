@@ -51,8 +51,14 @@ const FooterLink: React.FC<{ href?: string; onClick?: () => void; children: Reac
     )
   }
 
+  const isExternal = href.startsWith("http")
+
   return (
-    <Link href={href} onClick={onClick} target="_blank" rel="noopener noreferrer" cursor="pointer">
+    <Link
+      href={href}
+      onClick={onClick}
+      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      cursor="pointer">
       <Text textStyle="sm" fontWeight="bold" color="text.subtle">
         {children}
       </Text>
