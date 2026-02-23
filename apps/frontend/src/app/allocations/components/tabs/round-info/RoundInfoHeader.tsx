@@ -58,16 +58,51 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
         {t("Allocation")}
       </Heading>
       {/* Mobile header */}
-      <VStack mt="2" hideFrom="md" alignItems="stretch" gap="2" w="full">
+      <VStack mt="2" hideFrom="md" alignItems="stretch" gap="2" w="full" pb={4}>
         <HStack gap="2">
           <Text textStyle="md" fontWeight="semibold">
             {t("Round")} {roundDetails.id}
           </Text>
           {isCurrentRound && <Badge variant="positive">{t("Active")}</Badge>}
         </HStack>
-        <Text textStyle="sm" color="text.subtle">
-          {dayjs(roundDetails.roundStart).format(DATE_FORMAT) + "-" + dayjs(roundDetails.roundEnd).format(DATE_FORMAT)}
-        </Text>
+        <HStack>
+          <Text textStyle="sm" color="text.subtle">
+            {dayjs(roundDetails.roundStart).format(DATE_FORMAT) +
+              "-" +
+              dayjs(roundDetails.roundEnd).format(DATE_FORMAT)}
+          </Text>
+
+          {isCurrentRound && (
+            <HStack borderLeft={"1px solid"} borderColor={"border.secondary"} pl={2}>
+              <Text textStyle="sm" color="text.subtle">
+                {t("Time left")}
+                {": "}
+              </Text>
+              {deadlineBlock && (
+                <Countdown
+                  now={() => Date.now()}
+                  date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
+                  renderer={({ days, hours, minutes }) => (
+                    <Text textStyle={{ base: "sm", md: "xl" }}>
+                      <Mark variant="text" fontWeight="semibold">
+                        {days}
+                      </Mark>
+                      {"d "}
+                      <Mark variant="text" fontWeight="semibold">
+                        {hours}
+                      </Mark>
+                      {"h "}
+                      <Mark variant="text" fontWeight="semibold">
+                        {minutes}
+                      </Mark>
+                      {"m "}
+                    </Text>
+                  )}
+                />
+              )}
+            </HStack>
+          )}
+        </HStack>
       </VStack>
       {/* Desktop header */}
       <Card.Root
@@ -100,7 +135,7 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
               <Text textStyle="md" color="text.subtle">
                 {t("Time left")}
               </Text>
-              {deadlineBlock ? (
+              {deadlineBlock && (
                 <Countdown
                   now={() => Date.now()}
                   date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
@@ -121,8 +156,6 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
                     </Text>
                   )}
                 />
-              ) : (
-                ""
               )}
             </VStack>
           )}

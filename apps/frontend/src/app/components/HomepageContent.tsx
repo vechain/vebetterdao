@@ -1,4 +1,5 @@
 import { Grid, GridItem, VStack, useMediaQuery } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 
 import { AllocationLayoutHeader } from "../allocations/components/AllocationLayoutHeader"
 import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
@@ -10,6 +11,8 @@ import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
+
+  const { account } = useWallet()
 
   return (
     <>
@@ -24,7 +27,7 @@ export const HomePageContent = () => {
         <GridItem colSpan={[1, 1, 3]} overflow={{ base: "hidden", md: "unset" }}>
           <ActionBanner />
         </GridItem>
-        <GridItem colSpan={[1, 1, 3]}>
+        <GridItem colSpan={[1, 1, 3]} hidden={!account?.address}>
           <AllocationLayoutHeader />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
