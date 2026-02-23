@@ -37,7 +37,7 @@ export const CountdownBox = () => {
             now={() => Date.now()}
             date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
             renderer={({ days, hours, minutes, seconds }) => (
-              <Text textStyle={{ base: "sm", md: "2xl" }}>
+              <Text textStyle={{ base: "sm", md: "2xl" }} whiteSpace="nowrap">
                 <Mark variant="text" fontWeight="semibold">
                   {days}
                 </Mark>
