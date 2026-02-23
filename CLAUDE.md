@@ -168,7 +168,8 @@ MCP servers configured in `.mcp.json`:
 
 # Component Development
 
-- DO NOT use comments during development
+- DO NOT use comments during development on frontend but use them on contracts,
+  on frontend do not delete comments unless they are no longer needed
 
 ## Chakra UI v3
 
