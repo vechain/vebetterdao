@@ -88,6 +88,7 @@ i18next
   .use(resourcesToBackend((language: string) => import(`./languages/${language}.json`)))
   .use(initReactI18next)
   .init({
+    load: "languageOnly",
     fallbackLng: "en",
     debug: false,
     detection: {
