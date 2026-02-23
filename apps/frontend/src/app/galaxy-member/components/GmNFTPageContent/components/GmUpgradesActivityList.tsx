@@ -95,7 +95,7 @@ const UpgradeRow: React.FC<{ upgrade: GmUpgradeEntry }> = ({ upgrade }) => {
   return (
     <Flex w="full" direction="row" gap={5} align="center" p={3} rounded="lg">
       <VStack align="stretch" gap={4} flex="1" minW="0">
-        <HStack gap="2" align="flex-start" wrap="wrap">
+        <HStack gap="1" align="flex-start" wrap="wrap" alignItems="center">
           <LinkBox asChild display="flex" alignItems="center" flexShrink={0} _hover={{ opacity: 0.9 }}>
             <NextLink href="/galaxy-member">
               <HStack gap="2" align="center">
