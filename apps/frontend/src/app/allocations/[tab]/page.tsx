@@ -37,7 +37,7 @@ async function RoundInfoSection({ roundIdParam }: { roundIdParam?: string }) {
   const roundDetails = await getCachedRoundData(parseRoundId(roundIdParam))
 
   return (
-    <VStack w="full" gap="2">
+    <VStack w="full" gap="4">
       <RoundInfoHeader roundDetails={roundDetails} />
       <RoundDistributionCard roundDetails={roundDetails} />
     </VStack>

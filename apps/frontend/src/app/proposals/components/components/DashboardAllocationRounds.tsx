@@ -63,7 +63,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
-  const { allocationRound, proposalsToRender } = useRoundProposals(selectedRoundId ?? "1")
+  const { allocationRound, proposalsToRender, proposalsLoading } = useRoundProposals(selectedRoundId ?? "1")
   // First active, then looking for support (pending + deposit not met)
   const sortedProposals = useMemo(() => {
     return proposalsToRender.sort((a, b) => {
@@ -180,7 +180,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
         </Flex>
 
         {/* {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />} */}
-        {!!sortedProposals.length && (
+        {(proposalsLoading || !!sortedProposals.length) && (
           <VStack gap="3" w="full" justifyContent="flex-start" alignItems="stretch">
             <HStack gap="2">
               <Icon as={LiaBalanceScaleSolid} boxSize="6" color="text.subtle" />
@@ -190,9 +190,11 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             </HStack>
 
             <VStack gap="3" w="full" justifyContent="flex-start">
-              {sortedProposals.map(proposal => (
-                <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
-              ))}
+              {proposalsLoading
+                ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} height="80px" w="full" rounded="lg" />)
+                : sortedProposals.map(proposal => (
+                    <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
+                  ))}
             </VStack>
           </VStack>
         )}

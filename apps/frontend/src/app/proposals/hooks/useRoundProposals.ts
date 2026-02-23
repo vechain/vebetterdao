@@ -10,8 +10,9 @@ import { ProposalFilter } from "../../../store/useProposalFilters"
 
 export const useRoundProposals = (roundId: string) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
-  const currentRoundIdProposals = useFilteredProposals(
+  const { data: { enrichedProposals } = { enrichedProposals: [] }, isLoading: isProposalsLoading } =
+    useProposalEnriched()
+  const { isLoading: isFilteredLoading, ...currentRoundIdProposals } = useFilteredProposals(
     [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport, ProposalFilter.UpcomingVoting],
     enrichedProposals,
   )
@@ -41,5 +42,6 @@ export const useRoundProposals = (roundId: string) => {
     allocationRound,
     proposalsToRender,
     roundLoading: allocationRoundLoading,
+    proposalsLoading: isProposalsLoading || isFilteredLoading || allocationRoundLoading,
   }
 }
