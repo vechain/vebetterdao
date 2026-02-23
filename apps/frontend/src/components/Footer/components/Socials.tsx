@@ -36,10 +36,10 @@ const socialLinks = [
 ]
 export const Socials: React.FC = () => {
   return (
-    <HStack color={"white"} gap={4}>
+    <HStack color={"icon.subtle"} gap={4}>
       {socialLinks.map(({ href, icon }) => (
         <Link key={href} href={href} target="_blank" rel="noopener noreferrer">
-          <Icon as={icon} boxSize="22px" cursor={"pointer"} />
+          <Icon color={"icon.subtle"} as={icon} boxSize="20px" cursor={"pointer"} />
         </Link>
       ))}
     </HStack>
