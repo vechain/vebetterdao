@@ -24,6 +24,7 @@ import { gmNfts } from "@/constants/gmNfts"
 import { UserGM, useGetUserGMs } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGMMaxLevel } from "../../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
+import { useGMLevelsOverview } from "../../../../../api/indexer/gm/useGMLevelsOverview"
 
 import { RewardsCalculatorModal } from "./RewardsCalculatorModal"
 
@@ -36,58 +37,77 @@ const LevelRow = ({
   isCurrentLevel,
   levelText,
   tokenLevel,
+  holderCount,
 }: {
   gmNft: (typeof gmNfts)[number]
   isCurrentLevel: boolean
   levelText: string
   tokenLevel: string
-}) => (
-  <HStack justify="space-between" opacity={isCurrentLevel ? 1 : 0.6}>
-    <HStack gap="4">
-      <Flex position="relative" w="10" h="10" rounded="full" overflow="hidden">
-        <Image src={gmNft.image} alt={gmNft.name} w="10" h="10" position="absolute" />
-        <Flex w="full" h="full" align="center" justify="center" bg="rgba(0, 0, 0, 0.2)" zIndex={1}>
-          <Text textStyle="md" color="white">
-            {gmNft.level}
-          </Text>
+  holderCount?: number
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <HStack justify="space-between" opacity={isCurrentLevel ? 1 : 0.6}>
+      <HStack gap="4">
+        <Flex position="relative" w="10" h="10" rounded="full" overflow="hidden">
+          <Image src={gmNft.image} alt={gmNft.name} w="10" h="10" position="absolute" />
+          <Flex w="full" h="full" align="center" justify="center" bg="rgba(0, 0, 0, 0.2)" zIndex={1}>
+            <Text textStyle="md" color="white">
+              {gmNft.level}
+            </Text>
+          </Flex>
         </Flex>
-      </Flex>
-      <VStack align="stretch" gap={0}>
-        <Text textStyle="lg" fontWeight="semibold">
-          {gmNft.name}
-        </Text>
-        {levelText && (
-          <Text textStyle="sm" color="text.subtle">
-            {levelText}
+        <VStack align="stretch" gap={0}>
+          <Text textStyle="lg" fontWeight="semibold">
+            {gmNft.name}
           </Text>
-        )}
-      </VStack>
+          <HStack gap={2}>
+            {levelText && (
+              <Text textStyle="sm" color="text.subtle">
+                {levelText}
+              </Text>
+            )}
+            {holderCount !== undefined && (
+              <Text textStyle="sm" color="text.subtle">
+                {levelText ? "·" : ""} {compactFormatter.format(holderCount)} {t("holders")}
+              </Text>
+            )}
+          </HStack>
+        </VStack>
+      </HStack>
+      {isCurrentLevel ? (
+        <Heading
+          textStyle="2xl"
+          bg={getLevelGradient(Number(tokenLevel))}
+          style={{
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}>
+          {gmNft.multiplier}
+        </Heading>
+      ) : (
+        <Text textStyle="lg" color="text.subtle">
+          {gmNft.multiplier}
+        </Text>
+      )}
     </HStack>
-    {isCurrentLevel ? (
-      <Heading
-        textStyle="2xl"
-        bg={getLevelGradient(Number(tokenLevel))}
-        style={{
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}>
-        {gmNft.multiplier}
-      </Heading>
-    ) : (
-      <Text textStyle="lg" color="text.subtle">
-        {gmNft.multiplier}
-      </Text>
-    )}
-  </HStack>
-)
+  )
+}
 
 export const GalaxyLevelsCard = () => {
   const { data: userGms } = useGetUserGMs()
   const { data: maxGMLevel = 0 } = useGMMaxLevel()
+  const { data: levelsOverview } = useGMLevelsOverview()
   const { tokenLevel } = userGms?.find(gm => gm.isSelected) || ({ tokenLevel: "0" } as UserGM)
   const { t } = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
   const { open: isCalcOpen, onOpen: onCalcOpen, onClose: onCalcClose } = useDisclosure()
+
+  const holderCountByName = useMemo(() => {
+    if (!levelsOverview) return {}
+    return Object.fromEntries(levelsOverview.map(({ level, totalNFTs }) => [level.toLowerCase(), totalNFTs]))
+  }, [levelsOverview])
 
   const allLevels = useMemo(() => gmNfts.slice(0, maxGMLevel), [maxGMLevel])
 
@@ -132,6 +152,7 @@ export const GalaxyLevelsCard = () => {
       isCurrentLevel={gmNft.level === tokenLevel}
       levelText={getLevelText(Number(gmNft.level), maxGMLevel, Number(tokenLevel))}
       tokenLevel={tokenLevel}
+      holderCount={holderCountByName[gmNft.name.toLowerCase()]}
     />
   )
 
