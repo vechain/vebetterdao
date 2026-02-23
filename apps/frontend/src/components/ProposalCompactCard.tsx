@@ -1,58 +1,20 @@
-import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
+import { Text, Card, VStack, HStack, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import NextLink from "next/link"
-import React, { useMemo } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
 
-import { useProposalInteractionDates } from "../api/contracts/governance/hooks/useProposalInteractionDates"
-import { ProposalEnriched, ProposalState } from "../hooks/proposals/grants/types"
+import { ProposalEnriched, ProposalState, ProposalType } from "../hooks/proposals/grants/types"
 
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
-import { ProposalYourVote } from "./Proposal/ProposalYourVote"
 
 type Props = {
   proposal: ProposalEnriched
   proposalState?: ProposalState
 }
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
-  const { account } = useWallet()
   const { id: proposalId, title: proposalTitle } = proposal
-  const { supportEndDate } = useProposalInteractionDates(proposalId)
   const { t } = useTranslation()
-
-  const proposalExtraInfo = useMemo(() => {
-    if (proposal.state === ProposalState.Pending) {
-      return (
-        <Skeleton loading={!supportEndDate}>
-          <Text textStyle="sm" color={"gray.500"}>
-            {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
-          </Text>
-        </Skeleton>
-      )
-    }
-    if (proposal.state === ProposalState.DepositNotMet) {
-      return (
-        <Text textStyle="sm" color={"gray.500"}>
-          {t("Vote didn't start")}
-        </Text>
-      )
-    }
-    if (
-      !!account?.address &&
-      [ProposalState.Active, ProposalState.Executed, ProposalState.Queued].includes(proposal.state as ProposalState)
-    ) {
-      return (
-        <ProposalYourVote
-          proposalId={proposalId}
-          proposalState={proposal.state}
-          renderTitle={false}
-          textProps={{ color: "gray.500", fontSize: "14px" }}
-        />
-      )
-    }
-  }, [proposal.state, account?.address, supportEndDate, t, proposalId])
 
   return (
     <LinkBox asChild>
@@ -68,13 +30,14 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
             <Card.Body p="0">
               <HStack justifyContent={"space-between"} w="full">
                 <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
-                  <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
                   <VStack w="full" gap="1" align={"flex-start"}>
-                    <VStack alignItems="flex-start">
+                    <VStack alignItems="flex-start" gap="4">
                       <Text textStyle={"sm"} fontWeight="semibold">
+                        {proposal.type === ProposalType.Grant ? t("Grant") : t("Proposal")}
+                        {": "}
                         {proposalTitle}
                       </Text>
-                      {proposalExtraInfo}
+                      <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
                     </VStack>
                   </VStack>
                 </VStack>

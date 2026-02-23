@@ -65,7 +65,7 @@ export const NodeGMSection = ({ node }: NodeGMSectionProps) => {
           <HStack bg="bg.subtle" p={4} rounded="xl" gap={3} w="full" align="center">
             <LinkBox flexShrink={0}>
               <LinkOverlay asChild>
-                <NextLink href={`/galaxy-member/${attachedGM.tokenId}`} />
+                <NextLink href="/galaxy-member" />
               </LinkOverlay>
               <Image
                 src={attachedGM.metadata?.image}

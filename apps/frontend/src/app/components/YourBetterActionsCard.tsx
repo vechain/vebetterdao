@@ -23,6 +23,11 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
   const { data } = useUsersB3trActions(address, { direction: "DESC" })
   const lastActions = data?.pages.map(page => page.data).flat() ?? []
   const lastActionsData = lastActions.slice(0, maxActions)
+
+  if (!isConnectedUser) {
+    return null
+  }
+
   return (
     <Card.Root w={"full"} variant="primary">
       <Card.Body>
@@ -31,11 +36,10 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
             <VStack w="full" align={"flex-start"}>
               <Heading size="xl">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
             </VStack>
-            {isConnectedUser && (
-              <Text textStyle="sm" color="text.subtle">
-                {t("Use Apps to earn B3TR tokens through your Better Actions")}
-              </Text>
-            )}
+
+            <Text textStyle="sm" color="text.subtle">
+              {t("Use Apps to earn B3TR tokens through your Better Actions")}
+            </Text>
           </VStack>
           <VStack gap={6} align="stretch">
             {address && <UserSustainabilityOverviewStats address={address} />}

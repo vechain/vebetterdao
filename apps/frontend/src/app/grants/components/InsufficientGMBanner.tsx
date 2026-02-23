@@ -36,7 +36,7 @@ export const InsufficientGMBanner = () => {
 
   const handleUpgrade = useCallback(() => {
     if (userHighestGm) {
-      router.push(`/galaxy-member/${userHighestGm.tokenId}`)
+      router.push("/galaxy-member")
     } else {
       router.push("/allocations/round")
     }

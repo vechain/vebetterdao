@@ -1,22 +1,26 @@
-import { Box, Button, Card, HStack, Stack, Tag, VStack, Text, Heading, useDisclosure, Spinner } from "@chakra-ui/react"
+import { Button, Card, HStack, Stack, VStack, Text, Heading, useDisclosure, Spinner } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { StargateNodeCtaCard } from "@/app/nodes/components/StargateNodeCtaCard"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 
-import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGetUserGMs, UserGM } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
+import { GmNoNFTEmptyState } from "./components/GmNoNFTEmptyState"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
+import { GmUpgradesActivityList } from "./components/GmUpgradesActivityList"
 import { NodeRow } from "./components/NodeRow"
 
-export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
+const getActiveGM = (userGMs: UserGM[] | undefined): UserGM | undefined =>
+  userGMs?.find(g => g.isSelected) ?? userGMs?.[0]
+
+export const GmNFTPageContent = () => {
   const { t } = useTranslation()
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
@@ -46,8 +50,8 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       </VStack>
     )
 
-  const gm = userGMs?.find(gm => gm.tokenId === gmId)
-  if (!gm) return null
+  const gm = getActiveGM(userGMs)
+  if (!gm) return <GmNoNFTEmptyState />
 
   const userNodes = userNodesInfo?.nodesManagedByUser ?? []
   const nodesAttachedToGMs = userNodes.filter(node => node.isGmAttached)
@@ -79,35 +83,26 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   return (
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
-      <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
-        <VStack flex={3} align="stretch" gap="4">
+      <Stack direction={["column", "column", "column", "row"]} gap="4" align="stretch">
+        <VStack flex={{ base: "none", md: 3 }} align="stretch" gap="4" minW="0">
           <GmPoolAmountCard />
 
+          <GmUpgradesActivityList />
+        </VStack>
+        <VStack flex={{ base: "none", md: 1.5 }} align="stretch" gap="4" minW="0">
           <Card.Root variant="primary" maxH={"fit-content"}>
             <Card.Header>
               <HStack justify="space-between" align="start">
                 <VStack align="stretch" gap={1} flex={1}>
-                  <HStack gap={2}>
+                  <HStack gap={2} justify="space-between">
                     <Heading textStyle="lg">{t("Node upgrades")}</Heading>
-                    <Tag.Root size="sm" variant="subtle">
-                      <Tag.Label>
-                        {actionableNodes.length} {actionableNodes.length === 1 ? t("node") : t("nodes")}
-                      </Tag.Label>
-                    </Tag.Root>
                   </HStack>
-                  <Text textStyle="sm" color="text.subtle">
+                  <Text textStyle="xs" color="text.subtle">
                     {t(
                       "Attach a node to your GM NFT to get a free level upgrade. Higher-tier nodes unlock higher GM levels.",
                     )}
                   </Text>
                 </VStack>
-                {hasMoreNodes && (
-                  <Box hideBelow="md">
-                    <Button variant="ghost" size="sm" asChild>
-                      <NextLink href="/nodes">{t("View all nodes")}</NextLink>
-                    </Button>
-                  </Box>
-                )}
               </HStack>
             </Card.Header>
             <Card.Body>
@@ -132,19 +127,15 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                   {t("None of your nodes can upgrade this GM NFT further.")}
                 </Text>
               )}
-              {hasMoreNodes && (
-                <Box hideFrom="md">
-                  <Button variant="ghost" size="sm" asChild width="full">
-                    <NextLink href="/nodes">{t("View all nodes")}</NextLink>
-                  </Button>
-                </Box>
-              )}
             </Card.Body>
+            <Card.Footer>
+              {hasMoreNodes && (
+                <Button mt={4} variant="secondary" size="sm" asChild width="full">
+                  <NextLink href="/nodes">{t("View all nodes")}</NextLink>
+                </Button>
+              )}
+            </Card.Footer>
           </Card.Root>
-
-          <StargateNodeCtaCard />
-        </VStack>
-        <VStack flex={1.5} align={"stretch"}>
           <GalaxyLevelsCard />
         </VStack>
       </Stack>
