@@ -34,6 +34,7 @@ export enum ButtonClickProperties {
   JOIN_COMMUNITY = "Join Community",
   JOIN_DISCORD = "Join Discord",
   JOIN_TELEGRAM = "Join Telegram",
+  JOIN_DISCOURSE = "Join Discourse",
   HELP = "Help",
   //Profile
   EXPLORE_BALANCE_FROM_PROFILE = "Explore Balance From Profile",
