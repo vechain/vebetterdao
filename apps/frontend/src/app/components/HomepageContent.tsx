@@ -1,6 +1,6 @@
 import { Grid, GridItem, VStack, useMediaQuery } from "@chakra-ui/react"
 
-import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
+import { AllocationLayoutHeader } from "../allocations/components/AllocationLayoutHeader"
 import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
 
 import { ActionBanner } from "./ActionBanners/ActionBanner"
@@ -25,7 +25,7 @@ export const HomePageContent = () => {
           <ActionBanner />
         </GridItem>
         <GridItem colSpan={[1, 1, 3]}>
-          <GmNFTAndNodeCard />
+          <AllocationLayoutHeader />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">

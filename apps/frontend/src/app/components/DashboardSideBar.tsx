@@ -2,6 +2,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
 
+import { GmNFTAndNodeCard } from "@/components/GmNFTAndNodeCard/GmNFTAndNodeCard"
+
 import { ManagedAppsCard } from "../../components/ManagedAppsCard/ManagedAppsCard"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
 
@@ -23,6 +25,7 @@ export const DashboardSideBar = () => {
     <VStack gap={4}>
       {isMobile && <CantVoteCard />}
       <ManagedAppsCard />
+      <GmNFTAndNodeCard />
       <Leaderboard />
       <YourBetterActionsCard address={account?.address ?? ""} />
     </VStack>

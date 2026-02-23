@@ -50,6 +50,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
         )}>
         <Card.Root
           p="4"
+          w="full"
           variant="primary"
           flexDirection={{ base: "column", md: "row" }}
           justifyContent={{ base: "unset", md: "space-between" }}

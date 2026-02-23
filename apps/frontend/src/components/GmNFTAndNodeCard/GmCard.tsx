@@ -73,7 +73,7 @@ export const GmCard = ({
 
   return (
     <LinkBox flex={1}>
-      <Card.Root bg="transparency.200" gap="2" p="4" border="0" h="full">
+      <Card.Root variant="subtle" gap="2" p="4" border="0" h="full">
         <Card.Title asChild>
           <HStack w="full" justifyContent="space-between">
             <Text display="block" textStyle="sm" color="white" fontWeight="semibold">
