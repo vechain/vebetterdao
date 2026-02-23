@@ -59,11 +59,31 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
       </Heading>
       {/* Mobile header */}
       <VStack mt="2" hideFrom="md" alignItems="stretch" gap="2" w="full" pb={4}>
-        <HStack gap="2">
-          <Text textStyle="md" fontWeight="semibold">
-            {t("Round")} {roundDetails.id}
-          </Text>
-          {isCurrentRound && <Badge variant="positive">{t("Active")}</Badge>}
+        <HStack gap="2" justifyContent="space-between">
+          <HStack gap="2">
+            <Text textStyle="md" fontWeight="semibold">
+              {t("Round")} {roundDetails.id}
+            </Text>
+            {isCurrentRound && <Badge variant="positive">{t("Active")}</Badge>}
+          </HStack>
+          <HStack gap="2">
+            <IconButton
+              variant="outline"
+              size="lg"
+              onClick={() => handleRoundNavigation(roundDetails.id - 1)}
+              disabled={roundDetails.id <= 1}
+              aria-label={t("Previous round")}>
+              <NavArrowLeft />
+            </IconButton>
+            <IconButton
+              variant="outline"
+              size="lg"
+              disabled={isCurrentRound}
+              onClick={() => handleRoundNavigation(roundDetails.id + 1)}
+              aria-label={t("Next round")}>
+              <NavArrowRight />
+            </IconButton>
+          </HStack>
         </HStack>
         <HStack>
           <Text textStyle="sm" color="text.subtle">
