@@ -20,7 +20,7 @@ export const NotConnectedWallet = () => {
       bgRepeat="no-repeat">
       <Stack justify={"space-between"} direction={"column"} align="center" gap="24px" w="full">
         <Stack direction={"column"} gap="0" align="center">
-          <Image src="/assets/3d-illustrations/wallet.png" alt="Wallet not connected" />
+          <Image src="/assets/3d-illustrations/wallet-2.png" alt="Wallet not connected" />
           <Stack align="stretch">
             <Text textStyle="xl" fontWeight="semibold" textAlign={"center"}>
               {t("Wallet not connected")}
