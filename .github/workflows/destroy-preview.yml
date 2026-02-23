@@ -5,7 +5,6 @@ on:
     types: [closed]
     branches:
       - main
-      - dev-testnet
 
 permissions:
   id-token: write
@@ -16,10 +15,10 @@ env:
   AWS_REGION: eu-west-1
   TERRAFORM_VERSION: 1.6.0
   BASE_DOMAIN: governance.vebetterdao.org
-  
+
   # All possible preview flavors
   ALL_FLAVORS: "dev staging beta"
-  
+
   # Terraform Paths
   TERRAFORM_DIR: terraform/frontend/frontend-env-level
   TERRAFORM_ENV_DIR: terraform/frontend/environments/env
@@ -31,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       destroyed_flavors: ${{ steps.destroy.outputs.destroyed_flavors }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -58,11 +57,11 @@ jobs:
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           DESTROYED=""
-          
+
           # Initialize Terraform once
           cd ${{ env.TERRAFORM_DIR }}
           terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
-          
+
           for FLAVOR in ${{ env.ALL_FLAVORS }}; do
             WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
             
@@ -142,7 +141,7 @@ jobs:
               echo "No workspace found for: ${WORKSPACE_NAME}"
             fi
           done
-          
+
           echo "destroyed_flavors=${DESTROYED%,}" >> $GITHUB_OUTPUT
 
   # Update PR comment to show destroyed status
@@ -162,14 +161,14 @@ jobs:
             const destroyedFlavors = (process.env.DESTROYED_FLAVORS || '').split(',').filter(f => f);
             const baseDomain = process.env.BASE_DOMAIN;
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            
+
             let statusText;
             if (merged) {
               statusText = '🎉 **PR Merged** - Preview environments destroyed';
             } else {
               statusText = '🗑️ **PR Closed** - Preview environments destroyed';
             }
-            
+
             let flavorRows = '';
             if (destroyedFlavors.length > 0) {
               for (const flavor of destroyedFlavors) {
@@ -179,7 +178,7 @@ jobs:
             } else {
               flavorRows = '| - | No previews found | - | - |\n';
             }
-            
+
             const commentBody = [
               '## 🚀 Preview Environment Status',
               '',
@@ -197,12 +196,12 @@ jobs:
               repo: context.repo.repo,
               issue_number: prNumber,
             });
-            
+
             const existingComment = comments.find(c => 
               c.user.login === 'github-actions[bot]' && 
               c.body.includes('Preview Environment Status')
             );
-            
+
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,

@@ -1,10 +1,10 @@
-# Deploy to Dev when PR is merged to dev-testnet
+# Deploy to Dev when PR is merged to main
 name: Deploy Frontend - Dev
 
 on:
   push:
     branches:
-      - dev-testnet
+      - main
 
 jobs:
   prepare:
