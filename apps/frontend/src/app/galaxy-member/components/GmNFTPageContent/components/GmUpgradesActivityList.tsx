@@ -1,6 +1,19 @@
 "use client"
 
-import { Box, Button, Card, Flex, Heading, HStack, Image, LinkBox, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  LinkBox,
+  Separator,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
@@ -20,8 +33,8 @@ const getLevelName = (level: number): string => gmNfts.find(n => n.level === Str
 
 const getLevelImage = (level: number): string | undefined => gmNfts.find(n => n.level === String(level))?.image
 
-const LEVEL_IMG_SIZE_BASE = 36
-const LEVEL_IMG_SIZE_MD = 50
+const LEVEL_IMG_SIZE_BASE = 70
+const LEVEL_IMG_SIZE_MD = 60
 const LEVEL_OFFSET_X = 6
 const LEVEL_OFFSET_Y = 4
 
@@ -80,50 +93,29 @@ const UpgradeRow: React.FC<{ upgrade: GmUpgradeEntry }> = ({ upgrade }) => {
   })
 
   return (
-    <>
-      <Flex w="full" direction="row" gap={3} align="center" p={3} rounded="lg" display={{ base: "flex", md: "none" }}>
-        <VStack align="stretch" gap={0.5} flex="1" minW="0">
-          <HStack gap="2" align="flex-start" wrap="wrap">
-            <LinkBox asChild display="flex" alignItems="center" flexShrink={0} _hover={{ opacity: 0.9 }}>
-              <NextLink href="/galaxy-member">
-                <HStack gap="2" align="center">
-                  <AddressIcon address={userAddress} rounded="full" h="7" w="7" flexShrink={0} />
-                  <Text as="span" textStyle="sm" fontWeight="medium">
-                    {displayName}
-                  </Text>
-                </HStack>
-              </NextLink>
-            </LinkBox>
-            <Text textStyle="sm" color="text.subtle" lineClamp={2}>
-              {messageSuffix}
-            </Text>
-          </HStack>
-          <Text textStyle="xs" color="text.subtle">
-            {dayjs.unix(timestamp).fromNow()}
+    <Flex w="full" direction="row" gap={5} align="center" p={3} rounded="lg">
+      <VStack align="stretch" gap={4} flex="1" minW="0">
+        <HStack gap="2" align="flex-start" wrap="wrap">
+          <LinkBox asChild display="flex" alignItems="center" flexShrink={0} _hover={{ opacity: 0.9 }}>
+            <NextLink href="/galaxy-member">
+              <HStack gap="2" align="center">
+                <AddressIcon address={userAddress} rounded="full" h="8" w="8" flexShrink={0} />
+                <Text as="span" textStyle="sm" fontWeight="medium">
+                  {displayName}
+                </Text>
+              </HStack>
+            </NextLink>
+          </LinkBox>
+          <Text textStyle="sm" color="text.subtle" lineClamp={2}>
+            {messageSuffix}
           </Text>
-        </VStack>
-        <LevelStack oldLevel={oldLevel} newLevel={newLevel} />
-      </Flex>
-      <Flex w="full" direction="row" gap={3} align="center" p={3} rounded="lg" display={{ base: "none", md: "flex" }}>
-        <LevelStack oldLevel={oldLevel} newLevel={newLevel} />
-        <LinkBox asChild display="flex" alignItems="center" flexShrink={0} _hover={{ opacity: 0.9 }}>
-          <NextLink href="/galaxy-member">
-            <HStack gap="2" align="center">
-              <AddressIcon address={userAddress} rounded="full" h="8" w="8" flexShrink={0} />
-              <Text textStyle="sm" fontWeight="medium" lineClamp={1}>
-                {displayName}
-              </Text>
-            </HStack>
-          </NextLink>
-        </LinkBox>
-        <Text textStyle="sm" color="text.subtle" flex="1 1 0" minW="0" lineClamp={1}>
-          {messageSuffix}
-        </Text>
-        <Text textStyle="xs" color="text.subtle" flexShrink={0}>
+        </HStack>
+        <Text textStyle="xs" color="text.subtle">
           {dayjs.unix(timestamp).fromNow()}
         </Text>
-      </Flex>
-    </>
+      </VStack>
+      <LevelStack oldLevel={oldLevel} newLevel={newLevel} />
+    </Flex>
   )
 }
 
@@ -166,7 +158,10 @@ export const GmUpgradesActivityList: React.FC = () => {
       <Card.Body>
         <VStack align="stretch" gap="3">
           {upgrades.map(upgrade => (
-            <UpgradeRow key={`${upgrade.userAddress}-${upgrade.tokenId}-${upgrade.timestamp}`} upgrade={upgrade} />
+            <>
+              <UpgradeRow key={`${upgrade.userAddress}-${upgrade.tokenId}-${upgrade.timestamp}`} upgrade={upgrade} />
+              <Separator />
+            </>
           ))}
           {hasMore && (
             <Button variant="ghost" size="sm" onClick={loadMore} w="full">

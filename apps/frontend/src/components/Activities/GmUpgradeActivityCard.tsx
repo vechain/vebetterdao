@@ -33,7 +33,6 @@ const GmUpgradeLevelRow: React.FC<{ level: number; count: number }> = ({ level, 
 
   return (
     <HStack gap="2" align="center" w="full" py="1">
-      {/* <Icon as={LuSparkles} color="status.positive.strong" boxSize="4" flexShrink={0} /> */}
       <Text textStyle="sm" color="icon.subtle" flex="1" minW="0" display="flex" alignItems="center" gap="2">
         {rowText}
       </Text>
