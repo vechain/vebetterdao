@@ -1,9 +1,10 @@
 "use client"
 
 import { Badge, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname, redirect } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 import type { AllocationRoundDetails } from "../../../lib/data"
@@ -22,11 +23,16 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
   const searchParams = useSearchParams()
   const isCurrentRound = roundDetails.currentRoundId === roundDetails.id
 
+  const { account } = useWallet()
+  const pathname = usePathname()
+
   const handleRoundNavigation = (newRoundId: number) => {
     const params = new URLSearchParams(searchParams)
     params.set("roundId", newRoundId.toString())
     router.push(`/allocations/round/?${params.toString()}`)
   }
+
+  if (!account?.address && pathname === "/allocations") redirect("/allocations/round")
 
   return (
     <>

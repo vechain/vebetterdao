@@ -2,7 +2,6 @@
 
 import { VStack, Grid, GridItem } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { redirect, usePathname } from "next/navigation"
 
 import { CountdownBox } from "./CountdownBox"
 import { PotentialRewardBox } from "./PotentialRewardBox"
@@ -10,9 +9,8 @@ import { VotingPowerBox } from "./VotingPowerBox"
 
 export const AllocationLayoutHeader = () => {
   const { account } = useWallet()
-  const pathname = usePathname()
 
-  if (!account?.address && pathname === "/allocations") redirect("/allocations/round")
+  if (!account?.address) return null
 
   return (
     <VStack alignItems="stretch" gap="2" w="full">
