@@ -39,7 +39,8 @@ export enum ButtonClickProperties {
   EXPLORE_BALANCE_FROM_PROFILE = "Explore Balance From Profile",
   EXPLORE_BETTER_ACTIONS_FROM_PROFILE = "Explore Better Actions From Profile",
   EXPLORE_GOVERNANCE_FROM_PROFILE = "Explore Governance From Profile",
-
+  EXPLORE_GM_FROM_PROFILE = "Explore GM From Profile",
+  EXPLORE_NODES_FROM_PROFILE = "Explore Nodes From Profile",
   //GM
   UPGRADING_NOW = "Upgrading GM",
   UPGRADED_GM = "Upgraded GM",

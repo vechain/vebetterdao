@@ -97,7 +97,7 @@ const UpgradeRow: React.FC<{ upgrade: GmUpgradeEntry }> = ({ upgrade }) => {
       <VStack align="stretch" gap={4} flex="1" minW="0">
         <HStack gap="1" align="flex-start" wrap="wrap" alignItems="center">
           <LinkBox asChild display="flex" alignItems="center" flexShrink={0} _hover={{ opacity: 0.9 }}>
-            <NextLink href="/galaxy-member">
+            <NextLink href={`/profile/${userAddress}`}>
               <HStack gap="2" align="center">
                 <AddressIcon address={userAddress} rounded="full" h="8" w="8" flexShrink={0} />
                 <Text as="span" textStyle="sm" fontWeight="medium">
