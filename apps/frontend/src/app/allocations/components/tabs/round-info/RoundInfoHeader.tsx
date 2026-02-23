@@ -1,15 +1,24 @@
 "use client"
 
-import { Badge, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { Badge, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack, Mark } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { useWallet, useCallClause } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import { useRouter, useSearchParams, usePathname, redirect } from "next/navigation"
+import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
+
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
+import { blockNumberToDate } from "@/utils/date"
 
 import type { AllocationRoundDetails } from "../../../lib/data"
 
 import { ViewAllRoundsButton } from "./ViewAllRoundsButton"
+
+const xAllocationVotingAbi = XAllocationVoting__factory.abi
+const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 
 const DATE_FORMAT = "MMM D"
 
@@ -32,6 +41,15 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
     router.push(`/allocations/round/?${params.toString()}`)
   }
 
+  const { data: [deadlineBlock] = [] } = useCallClause({
+    abi: xAllocationVotingAbi,
+    address: xAllocationVotingAddress,
+    method: "currentRoundDeadline" as const,
+    args: [],
+  })
+
+  const { data: bestBlockCompressed } = useBestBlockCompressed()
+
   if (!account?.address && pathname === "/allocations") redirect("/allocations/round")
 
   return (
@@ -39,6 +57,7 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
       <Heading w="full" size={{ base: "xl", md: "3xl" }}>
         {t("Allocation")}
       </Heading>
+      {/* Mobile header */}
       <VStack mt="2" hideFrom="md" alignItems="stretch" gap="2" w="full">
         <HStack gap="2">
           <Text textStyle="md" fontWeight="semibold">
@@ -50,6 +69,7 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
           {dayjs(roundDetails.roundStart).format(DATE_FORMAT) + "-" + dayjs(roundDetails.roundEnd).format(DATE_FORMAT)}
         </Text>
       </VStack>
+      {/* Desktop header */}
       <Card.Root
         mt="2"
         hideBelow="md"
@@ -58,7 +78,7 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
         justifyContent="space-between"
         flexDirection="row"
         w="full">
-        <Grid gridTemplateColumns="repeat(3,max-content)" divideX="1px" divideColor="border.secondary" columnGap="6">
+        <Grid gridTemplateColumns="repeat(4,max-content)" divideX="1px" divideColor="border.secondary" columnGap="6">
           <VStack gap="1" align="start">
             <Text textStyle="md" color="text.subtle">
               {t("Round")}
@@ -76,7 +96,38 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
             </Heading>
           </VStack>
           {isCurrentRound && (
-            <Flex h="full" pl="6" alignItems="flex-start">
+            <VStack gap="1" pl="6" align="start">
+              <Text textStyle="md" color="text.subtle">
+                {t("Time left")}
+              </Text>
+              {deadlineBlock ? (
+                <Countdown
+                  now={() => Date.now()}
+                  date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
+                  renderer={({ days, hours, minutes }) => (
+                    <Text textStyle={{ base: "sm", md: "xl" }}>
+                      <Mark variant="text" fontWeight="semibold">
+                        {days}
+                      </Mark>
+                      {"d "}
+                      <Mark variant="text" fontWeight="semibold">
+                        {hours}
+                      </Mark>
+                      {"h "}
+                      <Mark variant="text" fontWeight="semibold">
+                        {minutes}
+                      </Mark>
+                      {"m "}
+                    </Text>
+                  )}
+                />
+              ) : (
+                ""
+              )}
+            </VStack>
+          )}
+          {isCurrentRound && (
+            <Flex pl={6} h="full" alignItems="flex-start" w="full">
               <Badge variant="positive">{t("Active")}</Badge>
             </Flex>
           )}
