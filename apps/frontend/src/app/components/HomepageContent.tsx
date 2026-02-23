@@ -1,6 +1,8 @@
 import { Grid, GridItem, VStack, useMediaQuery } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 
+import { Leaderboard } from "@/components/Leaderboard/Leaderboard"
+
 import { AllocationLayoutHeader } from "../allocations/components/AllocationLayoutHeader"
 import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
 
@@ -36,6 +38,7 @@ export const HomePageContent = () => {
               <>
                 <CantVoteCard />
                 <DashboardAllocationRounds />
+                <Leaderboard />
               </>
             )}
           </VStack>

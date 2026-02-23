@@ -26,8 +26,8 @@ export const DashboardSideBar = () => {
       {isMobile && <CantVoteCard />}
       <ManagedAppsCard />
       <GmNFTAndNodeCard />
-      <Leaderboard />
       <YourBetterActionsCard address={account?.address ?? ""} />
+      {isMobile && <Leaderboard />}
     </VStack>
   )
 }

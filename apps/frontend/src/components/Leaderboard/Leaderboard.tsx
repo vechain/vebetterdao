@@ -20,7 +20,7 @@ export const MockLeaderboard = [
   { position: 5, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 60 },
 ]
 
-const LEADERBOARD_SIZE = 3
+const LEADERBOARD_SIZE = 5
 
 export const Leaderboard = () => {
   const { t } = useTranslation()
