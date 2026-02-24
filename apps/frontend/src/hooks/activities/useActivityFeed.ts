@@ -10,6 +10,7 @@ import { useGmUpgradeActivities } from "./useGmUpgradeActivities"
 import { useGrantActivities } from "./useGrantActivities"
 import { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalActivities"
 import { useRoundActivities } from "./useRoundActivities"
+import { useUserVotingActivities } from "./useUserVotingActivities"
 
 export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[]; isLoading: boolean } => {
   const { data: fetchedRoundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
@@ -24,12 +25,20 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
   const { data: gmUpgrades, isLoading: isGmUpgradesLoading } = useGmUpgradeActivities(currentRoundId)
   const { data: rounds, isLoading: isRoundsLoading } = useRoundActivities(previousRoundId)
   const { data: emissions, isLoading: isEmissionsLoading } = useEmissionsActivities(currentRoundId, previousRoundId)
+  const { data: userVoting, isLoading: isUserVotingLoading } = useUserVotingActivities(currentRoundId)
 
   const data = useMemo(() => {
-    return [...prevProposals, ...currProposals, ...grants, ...apps, ...gmUpgrades, ...rounds, ...emissions].sort(
-      (a, b) => b.date - a.date,
-    )
-  }, [prevProposals, currProposals, grants, apps, gmUpgrades, rounds, emissions])
+    return [
+      ...prevProposals,
+      ...currProposals,
+      ...grants,
+      ...apps,
+      ...gmUpgrades,
+      ...rounds,
+      ...emissions,
+      ...userVoting,
+    ].sort((a, b) => b.date - a.date)
+  }, [prevProposals, currProposals, grants, apps, gmUpgrades, rounds, emissions, userVoting])
 
   const isLoading =
     isRoundIdLoading ||
@@ -39,7 +48,8 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
     isAppsLoading ||
     isGmUpgradesLoading ||
     isRoundsLoading ||
-    isEmissionsLoading
+    isEmissionsLoading ||
+    isUserVotingLoading
 
   return { data, isLoading }
 }
