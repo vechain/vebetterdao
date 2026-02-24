@@ -113,8 +113,6 @@ library EndorsementUtils {
     return uint256(X2EarnAppsStorageTypes._getEndorsementStorage()._appEndorsementScoreCheckpoints[appId].latest());
   }
 
-  // ------------------------------- Getter Functions -------------------------------
-
   /**
    * @notice Returns the endorsement score for an app at a specific block number.
    * @param appId The unique identifier of the app.
