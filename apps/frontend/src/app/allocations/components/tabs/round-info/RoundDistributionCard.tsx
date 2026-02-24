@@ -29,7 +29,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
 
   const distribution = useMemo(() => {
     const toApps = Number(roundDetails.xAllocationsAmount - dbaOverflow)
-    const toVoters = Number(roundDetails.vote2EarnAmount)
+    const toVoters = Number(roundDetails.vote2EarnAmount + roundDetails.gmAmount)
     const toTreasury = Number(roundDetails.treasuryAmount + dbaOverflow)
     const total = toApps + toVoters + toTreasury
 
@@ -43,7 +43,13 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
       votersPercent,
       treasuryPercent,
     }
-  }, [roundDetails.xAllocationsAmount, roundDetails.vote2EarnAmount, roundDetails.treasuryAmount, dbaOverflow])
+  }, [
+    roundDetails.xAllocationsAmount,
+    roundDetails.vote2EarnAmount,
+    roundDetails.gmAmount,
+    roundDetails.treasuryAmount,
+    dbaOverflow,
+  ])
 
   return (
     <>
