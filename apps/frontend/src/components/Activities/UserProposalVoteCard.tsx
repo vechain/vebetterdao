@@ -1,5 +1,6 @@
 import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { TFunction } from "i18next"
 import { DesignNibSolid } from "iconoir-react"
 import NextLink, { type LinkProps } from "next/link"
 import React from "react"
@@ -13,7 +14,7 @@ type Props = {
   activity: ActivityItem & { type: ActivityType.USER_PROPOSAL_VOTE_CAST }
 }
 
-const getVoteChoice = (support: number, t: ReturnType<typeof useTranslation>["t"]) => {
+const getVoteChoice = (support: number, t: TFunction) => {
   switch (support) {
     case 1:
       return t("for")
