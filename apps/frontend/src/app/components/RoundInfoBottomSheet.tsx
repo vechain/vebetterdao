@@ -19,7 +19,10 @@ export const RoundInfoBottomSheet = () => {
   const { data: amounts, isLoading: amountsLoading } = useAllocationAmount(currentRoundId)
 
   const totalAmount =
-    Number(amounts?.treasury ?? 0) + Number(amounts?.voteX2Earn ?? 0) + Number(amounts?.voteXAllocations ?? 0)
+    Number(amounts?.treasury ?? 0) +
+    Number(amounts?.voteX2Earn ?? 0) +
+    Number(amounts?.voteXAllocations ?? 0) +
+    Number(amounts?.gm ?? 0)
   const isCardLoading = roundLoading || currentRoundIdLoading
 
   return (
