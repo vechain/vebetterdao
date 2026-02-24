@@ -15,6 +15,7 @@
   "{{app}} settings": "{{app}} 設定",
   "{{apps}} apps": "{{apps}}アプリ",
   "{{b3trToUpgrade}} B3TR to upgrade": "アップグレードには{{b3trToUpgrade}} B3TRが必要",
+  "{{count}} app submissions available": "{{count}}件のアプリ提出可能",
   "{{count}} more": "他{{count}}件",
   "{{count}} node(s)": "{{count}} ノード",
   "{{count}} users upgraded their GM": "{{count}}ユーザーがGMをアップグレードしました",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>配信を再開</bold>して、アプリがユーザーへの報酬配布を再び開始できるようにしてください。報酬プールに資金があることを確認してください。",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>配布を再開</bold>して報酬を再配布し、報酬プールを設定します。",
   "=~ {{value}} votes": "=~ {{value}} 票",
+  "1 app submission available": "1件のアプリ提出可能",
   "1 user upgraded their GM": "1ユーザーがGMをアップグレードしました",
   "1. Submit Grant application": "1. 助成金申請を提出",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "ノードは旧式です。支持やギャラクシーメンバーの特典はもうアクティブではありません。機能を完全に回復させるためにStargateに移行してください。",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "ノードが解放され、別のGM NFTにアタッチできるようになります。後でいつでも再アタッチできます。",
   "Your Nodes": "あなたのノード",
+  "Your potential rewards": "獲得可能な報酬",
   "Your proposal": "あなたの提案",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "あなたの提案がアクティブになるためには、コミュニティからの支持が必要です。提案を気に入り、投票したいユーザーは、自分のVOT3トークンを使ってサポートすることができます。提案がアクティブになるためには、合計で",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "あなたの提案を有効にするには、コミュニティの支援が必要です。提案を気に入り、それに投票したいユーザーは、VOT3トークンで支援することができます。提案が有効になるためには合計{{amount}} VOT3が必要です。自分のVOT3でも貢献できます。",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "あなたの投票と報酬は毎週自動的に処理されます。続けるにはアクティブを維持してください。",
   "Your votes at snapshot": "スナップショットでのあなたの投票",
   "Your voting activity": "あなたの投票活動",
+  "Your voting power": "あなたの投票権",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "あなたの投票権は、あなたに代わって投票する<platform>veDelegate.vet</platform>に移管されました。<br/> ここで投票したい場合は、スナップショット前にveDelegateで委任を解除する必要があります。",
   "Your Voting Qualification": "あなたの投票資格"
 }

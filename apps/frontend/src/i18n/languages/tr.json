@@ -15,6 +15,7 @@
   "{{app}} settings": "{{app}} ayarları",
   "{{apps}} apps": "{{apps}} uygulama",
   "{{b3trToUpgrade}} B3TR to upgrade": "Yükseltmek için {{b3trToUpgrade}} B3TR",
+  "{{count}} app submissions available": "{{count}} uygulama gönderimi mevcut",
   "{{count}} more": "{{count}} daha",
   "{{count}} node(s)": "{{count}} düğüm",
   "{{count}} users upgraded their GM": "{{count}} kullanıcı GM'lerini yükseltti",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Dağıtımı devam ettirin</bold>, böylece uygulamanız kullanıcıları tekrar ödüllendirebilir. Ödül havuzunda yeterli fon olduğundan emin olun.",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>Dağıtımı sürdür</bold> ve ödülleri yeniden dağıtmak için bir ödül havuzu belirle.",
   "=~ {{value}} votes": "=~ {{value}} oy",
+  "1 app submission available": "1 uygulama gönderimi mevcut",
   "1 user upgraded their GM": "1 kullanıcı GM'lerini yükseltti",
   "1. Submit Grant application": "1. Hibe başvurusunu gönderin",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Node'unuz güncel değil. Onaylar ve Galaxy Member avantajları artık aktif değil. Tam işlevselliği geri yüklemek için Stargate'e geçin.",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "Node'unuz serbest kalacak ve başka bir GM NFT'ye eklenebilecek. Daha sonra her zaman tekrar ekleyebilirsiniz.",
   "Your Nodes": "Node'larınız",
+  "Your potential rewards": "Potansiyel ödülleriniz",
   "Your proposal": "Teklifiniz",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "Teklifinizin aktif hale gelmesi için topluluğun desteğine ihtiyacı olacak. Teklifinizi beğenen ve ona oy verebilmek isteyen kullanıcılar, desteklemek için VOT3 tokenları ile katkıda bulunabilirler. Teklifin toplamda ihtiyacı olan miktar:",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "Teklifinizin aktif hale gelmesi için topluluğun desteğine ihtiyacı olacak. Teklifinizi beğenen ve ona oy verebilmek isteyen kullanıcılar, VOT3 jetonlarıyla destek verebilirler. Teklifin aktif hale gelmesi için toplamda {{amount}} VOT3 gerekecek. Kendi VOT3'lerinizle de katkıda bulunabilirsiniz.",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "Oylarınız ve ödülleriniz haftalık olarak otomatik olarak yönetilecektir. Devam etmesi için aktif kalın.",
   "Your votes at snapshot": "Anlık görüntüdeki oylarınız",
   "Your voting activity": "Oylama etkinliğiniz",
+  "Your voting power": "Oy gücünüz",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Oylama gücünüz sizin adınıza oy veren <platform>veDelegate.vet</platform>'e aktarılmıştır. <br/> Burada oy kullanmak istiyorsanız, anlık görüntüleme öncesinde veDelegate üzerindeki devri iptal etmelisiniz.",
   "Your Voting Qualification": "Oylama Yeterliliğiniz"
 }

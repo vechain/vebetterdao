@@ -15,6 +15,7 @@
   "{{app}} settings": "{{app}} settings",
   "{{apps}} apps": "{{apps}} apps",
   "{{b3trToUpgrade}} B3TR to upgrade": "{{b3trToUpgrade}} B3TR to upgrade",
+  "{{count}} app submissions available": "{{count}} app submissions available",
   "{{count}} more": "{{count}} more",
   "{{count}} node(s)": "{{count}} node(s)",
   "{{count}} users upgraded their GM": "{{count}} users upgraded their GM",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.",
   "=~ {{value}} votes": "=~ {{value}} votes",
+  "1 app submission available": "1 app submission available",
   "1 user upgraded their GM": "1 user upgraded their GM",
   "1. Submit Grant application": "1. Submit Grant application",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.",
   "Your Nodes": "Your Nodes",
+  "Your potential rewards": "Your potential rewards",
   "Your proposal": "Your proposal",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.",
   "Your votes at snapshot": "Your votes at snapshot",
   "Your voting activity": "Your voting activity",
+  "Your voting power": "Your voting power",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
   "Your Voting Qualification": "Your Voting Qualification"
 }

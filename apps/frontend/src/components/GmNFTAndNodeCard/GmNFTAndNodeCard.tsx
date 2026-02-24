@@ -9,6 +9,9 @@ import { useTranslation } from "react-i18next"
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 import { useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useCreatorNftBalance } from "../../api/contracts/x2EarnCreator/useCreatorNftBalance"
+import { useHasCreatorNFT } from "../../api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useAppsCountFromCreator } from "../../api/contracts/xApps/hooks/useAppsCountFromCreator"
 import { useGetUserNodes, UserNode } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useRetrieveProfilIdentity } from "../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
@@ -27,10 +30,19 @@ export const GmNFTAndNodeCard = () => {
   const { viewMode } = useRetrieveProfilIdentity()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
   const { data: userNodesInfo, isLoading: isNodesLoading } = useGetUserNodes()
+  const { data: hasCreatorNFT } = useHasCreatorNFT(account?.address ?? "")
+  const { data: creatorNftBalance } = useCreatorNftBalance(account?.address ?? "")
+  const { data: appsCountFromCreator } = useAppsCountFromCreator(account?.address ?? "")
   const { isMobile } = useBreakpoints()
   const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
   const isLoading = isUserGMsLoading || isNodesLoading
-  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodesManagedByUser?.length === 0
+  const userHasNoNodeOrGm =
+    !isLoading && userGMs?.length === 0 && userNodesInfo?.nodesManagedByUser?.length === 0 && !hasCreatorNFT
+  const submissionsAvailable = Math.max(0, (creatorNftBalance ?? 0) - (appsCountFromCreator ?? 0))
+  const creatorNftFooter =
+    submissionsAvailable === 1
+      ? t("1 app submission available")
+      : t("{{count}} app submissions available", { count: submissionsAvailable })
 
   const totalPoints = userNodesInfo?.totalEndorsementScore?.toString() ?? "0"
 
@@ -108,6 +120,18 @@ export const GmNFTAndNodeCard = () => {
                   icon={<Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />}
                   text={t("You have no nodes yet.")}
                   onCardClick={() => router.push("/nodes")}
+                />
+              )}
+
+              {hasCreatorNFT && (
+                <GmCard
+                  subtitle={t("Creator NFT")}
+                  title={t("Creator NFT")}
+                  footer={creatorNftFooter}
+                  images={["/assets/images/creator-nft.webp"]}
+                  href="/apps/new/form"
+                  imageSize="62px"
+                  imageRounded="xl"
                 />
               )}
             </Stack>

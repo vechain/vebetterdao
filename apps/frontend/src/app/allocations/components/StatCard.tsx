@@ -24,7 +24,9 @@ export const StatCard = ({
 }: StatCardProps) => {
   return (
     <Card.Root
-      p={{ base: "4", md: "6" }}
+      p={{ base: showIcon ? "2" : "4", md: "6" }}
+      pt={{ base: "4", md: "6" }}
+      pb={{ base: "4", md: "6" }}
       variant="subtle"
       border="sm"
       borderColor="border.secondary"

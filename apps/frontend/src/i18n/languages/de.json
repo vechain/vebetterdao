@@ -15,6 +15,7 @@
   "{{app}} settings": "{{app}} Einstellungen",
   "{{apps}} apps": "{{apps}} Apps",
   "{{b3trToUpgrade}} B3TR to upgrade": "{{b3trToUpgrade}} B3TR zum Aufrüsten",
+  "{{count}} app submissions available": "{{count}} App-Einreichungen verfügbar",
   "{{count}} more": "{{count}} weitere",
   "{{count}} node(s)": "{{count}} Node(s)",
   "{{count}} users upgraded their GM": "{{count}} Nutzer haben ihren GM verbessert",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Verteilung fortsetzen</bold>, damit deine App wieder Nutzer belohnen kann. Stelle sicher, dass der Belohnungspool über ausreichend Guthaben verfügt.",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>Verteilung fortsetzen</bold>, um Belohnungen erneut zu verteilen und einen Belohnungspool festzulegen.",
   "=~ {{value}} votes": "=~ {{value}} Stimmen",
+  "1 app submission available": "1 App-Einreichung verfügbar",
   "1 user upgraded their GM": "1 Nutzer hat seinen GM verbessert",
   "1. Submit Grant application": "1. Zuschussantrag einreichen",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Ihr Node ist veraltet. Unterstützungen und Galaxy-Mitglieder-Vorteile sind nicht mehr aktiv. Migrieren Sie zu Stargate, um die volle Funktionalität wiederherzustellen.",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "Deine Node wird freigegeben und kann mit einem anderen GM NFT verbunden werden. Du kannst sie jederzeit wieder verbinden.",
   "Your Nodes": "Deine Nodes",
+  "Your potential rewards": "Deine potenziellen Belohnungen",
   "Your proposal": "Ihr Vorschlag",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "Ihr Vorschlag benötigt Unterstützung aus der Gemeinschaft, um aktiv zu werden. Benutzer, die Ihren Vorschlag mögen und darüber abstimmen möchten, können mit ihren VOT3-Token zur Unterstützung beitragen. Der Vorschlag benötigt insgesamt",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "Ihr Vorschlag benötigt Unterstützung aus der Gemeinschaft, um aktiv zu werden. Benutzer, die Ihren Vorschlag mögen und dafür stimmen möchten, können mit ihren VOT3-Token dazu beitragen, ihn zu unterstützen. Der Vorschlag benötigt insgesamt {{amount}} VOT3, um aktiv zu werden. Sie können auch mit Ihren eigenen VOT3 beitragen.",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "Ihre Stimmen und Belohnungen werden wöchentlich automatisch verwaltet. Bleiben Sie aktiv, um den Betrieb fortzusetzen.",
   "Your votes at snapshot": "Ihre Stimmen bei der Erfassung",
   "Your voting activity": "Ihre Abstimmaktivität",
+  "Your voting power": "Deine Stimmkraft",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Deine Stimmrechte wurden auf <platform>veDelegate.vet</platform> übertragen, das in deinem Namen abstimmt. <br/> Wenn du hier abstimmen möchtest, musst du die Delegation auf veDelegate vor dem Snapshot aufheben.",
   "Your Voting Qualification": "Ihre Abstimmungsberechtigung"
 }

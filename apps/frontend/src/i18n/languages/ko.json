@@ -15,6 +15,7 @@
   "{{app}} settings": "{{app}} 설정",
   "{{apps}} apps": "{{apps}}개의 앱",
   "{{b3trToUpgrade}} B3TR to upgrade": "업그레이드를 위해 {{b3trToUpgrade}} B3TR 필요",
+  "{{count}} app submissions available": "앱 제출 {{count}}건 가능",
   "{{count}} more": "{{count}}개 더",
   "{{count}} node(s)": "{{count}}개 노드",
   "{{count}} users upgraded their GM": "{{count}}명의 사용자가 GM을 업그레이드했습니다",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>배분을 재개</bold>하여 앱이 사용자에게 다시 보상을 지급할 수 있도록 하세요. 보상 풀에 자금이 있는지 확인하세요.",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>분배를 재개하여</bold> 보상을 다시 분배하고 보상 풀을 설정하세요.",
   "=~ {{value}} votes": "=~ {{value}} 표",
+  "1 app submission available": "앱 제출 1건 가능",
   "1 user upgraded their GM": "1명의 사용자가 GM을 업그레이드했습니다",
   "1. Submit Grant application": "1. 보조금 신청서 제출",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "노드가 오래되었습니다. 지지 및 갤럭시 멤버 혜택이 더 이상 활성화되어 있지 않습니다. 전체 기능을 복원하려면 Stargate로 마이그레이션하세요.",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "노드가 해제되어 다른 GM NFT에 연결할 수 있게 됩니다. 나중에 언제든지 다시 연결할 수 있습니다.",
   "Your Nodes": "내 노드",
+  "Your potential rewards": "예상 보상",
   "Your proposal": "당신의 제안",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "귀하의 제안이 활성화되려면 커뮤니티의 지원이 필요합니다. 귀하의 제안을 좋아하고 투표할 수 있기를 원하는 사용자는 VOT3 토큰으로 이를 지원할 수 있습니다. 제안은 총",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "귀하의 제안이 활성화되려면 커뮤니티의 지원이 필요합니다. 귀하의 제안을 좋아하고 투표할 수 있기를 원하는 사용자는 VOT3 토큰을 기부하여 지원할 수 있습니다. 제안이 활성화되려면 총 {{amount}} VOT3가 필요합니다. 자신의 VOT3를 기부할 수도 있습니다.",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "귀하의 투표와 리워드는 매주 자동으로 처리됩니다. 실행이 유지되도록 활성 상태를 유지하십시오.",
   "Your votes at snapshot": "스냅샷에서의 당신의 투표",
   "Your voting activity": "당신의 투표 활동",
+  "Your voting power": "당신의 투표권",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "귀하의 투표 권한은 <platform>veDelegate.vet</platform>으로 이전되어 대리 투표됩니다. <br/> 여기에서 투표하려면, 스냅샷 전에 veDelegate에서 위임을 제거해야 합니다.",
   "Your Voting Qualification": "당신의 투표 자격"
 }

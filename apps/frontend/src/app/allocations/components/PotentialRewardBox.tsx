@@ -121,7 +121,7 @@ export const PotentialRewardBox = () => {
   return (
     <StatCard
       variant="info"
-      title={t("Potential rewards")}
+      title={t("Your potential rewards")}
       icon={<B3TRIcon />}
       subtitle={
         <Skeleton asChild loading={isLoading}>

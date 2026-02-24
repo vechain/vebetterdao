@@ -8,12 +8,22 @@ const OFFSET_X = 10
 const OFFSET_Y = 4
 const MAX_VISIBLE = 2
 
-const ImageStack = ({ images }: { images: string[] }) => {
+const sizeNum = (size: string) => (size.endsWith("px") ? parseInt(size, 10) : 56)
+const ImageStack = ({
+  images,
+  imageSize = IMG_SIZE,
+  imageRounded = "lg",
+}: {
+  images: string[]
+  imageSize?: string
+  imageRounded?: string
+}) => {
   const visible = images.slice(0, MAX_VISIBLE)
   const plusCount = images.length - MAX_VISIBLE
   const totalItems = visible.length + (plusCount > 0 ? 1 : 0)
-  const containerW = 56 + (totalItems - 1) * OFFSET_X
-  const containerH = 56 + (totalItems - 1) * OFFSET_Y
+  const px = sizeNum(imageSize)
+  const containerW = px + (totalItems - 1) * OFFSET_X
+  const containerH = px + (totalItems - 1) * OFFSET_Y
 
   return (
     <Box position="relative" isolation="isolate" w={`${containerW}px`} h={`${containerH}px`} flexShrink={0}>
@@ -22,10 +32,10 @@ const ImageStack = ({ images }: { images: string[] }) => {
           key={image}
           src={image}
           alt=""
-          w={IMG_SIZE}
-          h={IMG_SIZE}
+          w={imageSize}
+          h={imageSize}
           objectFit="cover"
-          rounded="lg"
+          rounded={imageRounded}
           border="2px solid"
           borderColor="whiteAlpha.300"
           position="absolute"
@@ -40,9 +50,9 @@ const ImageStack = ({ images }: { images: string[] }) => {
           position="absolute"
           top={`${visible.length * OFFSET_Y}px`}
           left={`${visible.length * OFFSET_X}px`}
-          w={IMG_SIZE}
-          h={IMG_SIZE}
-          rounded="lg"
+          w={imageSize}
+          h={imageSize}
+          rounded={imageRounded}
           bg="status.info.primary"
           border="2px solid"
           borderColor="whiteAlpha.300"
@@ -61,12 +71,16 @@ export const GmCard = ({
   footer,
   images,
   href,
+  imageSize = IMG_SIZE,
+  imageRounded = "lg",
 }: {
   title?: string
   subtitle?: string
   images?: string[]
   footer?: string
   href?: string
+  imageSize?: string
+  imageRounded?: string
 }) => {
   const { t } = useTranslation()
   const hasMultiple = images && images.length > 1
@@ -97,14 +111,16 @@ export const GmCard = ({
                   <Image
                     src={images[0]}
                     alt=""
-                    w={IMG_SIZE}
-                    h={IMG_SIZE}
+                    w={imageSize}
+                    h={imageSize}
+                    minW={imageSize}
+                    minH={imageSize}
                     objectFit="cover"
-                    rounded="lg"
+                    rounded={imageRounded}
                     flexShrink={0}
                   />
                 ) : images && images.length > 1 ? (
-                  <ImageStack images={images} />
+                  <ImageStack images={images} imageSize={imageSize} imageRounded={imageRounded} />
                 ) : null}
 
                 <VStack flex="1" alignItems="start" gap="1">

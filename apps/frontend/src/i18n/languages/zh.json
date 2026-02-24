@@ -15,6 +15,7 @@
   "{{app}} settings": "{{app}} 设置",
   "{{apps}} apps": "{{apps}} 个应用",
   "{{b3trToUpgrade}} B3TR to upgrade": "升级需要 {{b3trToUpgrade}} B3TR",
+  "{{count}} app submissions available": "{{count}} 个应用提交名额",
   "{{count}} more": "还有{{count}}个",
   "{{count}} node(s)": "{{count}} 个节点",
   "{{count}} users upgraded their GM": "{{count}} 位用户已升级其 GM",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>恢复分发</bold>以便您的应用可以重新奖励用户。请确保奖励池中有可用资金。",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>恢复分发</bold>再次分发奖励并设置奖励池。",
   "=~ {{value}} votes": "=~ {{value}} 票",
+  "1 app submission available": "1 个应用提交名额",
   "1 user upgraded their GM": "1 位用户已升级其 GM",
   "1. Submit Grant application": "1. 提交资助申请",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "您的节点已经过时。背书和Galaxy Member权益不再活动。迁移到Stargate以恢复全部功能。",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "您的节点将被释放，可以附加到其他GM NFT。您可以随时重新附加。",
   "Your Nodes": "您的节点",
+  "Your potential rewards": "您的潜在奖励",
   "Your proposal": "您的提案",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "您的提案需要社区的支持才能激活。喜欢您的提案并希望为其投票的用户可以贡献他们的VOT3代币来支持它。提案需要的总量是",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "您的提案需要社区的支持才能生效。喜欢您提案的用户，如果想为其投票，可以用他们的 VOT3 代币来支持它。该提案需要总共 {{amount}} 个 VOT3 才能生效。您也可以用您自己的 VOT3 进行支持。",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "您的投票和奖励将每周自动处理。保持活跃以保持运行。",
   "Your votes at snapshot": "快照时的您的投票",
   "Your voting activity": "您的投票活动",
+  "Your voting power": "您的投票权",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票权已经转移到<platform>veDelegate.vet</platform>，该平台将代表您投票。<br/> 如果您想在此投票，必须在快照前在veDelegate上取消委托。",
   "Your Voting Qualification": "您的投票资格"
 }

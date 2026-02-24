@@ -15,6 +15,7 @@
   "{{app}} settings": "Cài đặt {{app}}",
   "{{apps}} apps": "{{apps}} ứng dụng",
   "{{b3trToUpgrade}} B3TR to upgrade": "{{b3trToUpgrade}} B3TR để nâng cấp",
+  "{{count}} app submissions available": "{{count}} lượt gửi ứng dụng",
   "{{count}} more": "{{count}} nữa",
   "{{count}} node(s)": "{{count}} nút",
   "{{count}} users upgraded their GM": "{{count}} người dùng đã nâng cấp GM",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Tiếp tục phân phối</bold> để ứng dụng của bạn có thể bắt đầu thưởng cho người dùng trở lại. Đảm bảo pool phần thưởng có đủ quỹ.",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>Tiếp tục phân phối</bold> để phân phối phần thưởng lại và thiết lập một quỹ phần thưởng.",
   "=~ {{value}} votes": "=~ {{value}} phiếu bầu",
+  "1 app submission available": "1 lượt gửi ứng dụng",
   "1 user upgraded their GM": "1 người dùng đã nâng cấp GM",
   "1. Submit Grant application": "1. Nộp đơn xin trợ cấp",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Node của bạn đã lỗi thời. Sự ủng hộ và quyền lợi Galaxy Member không còn hoạt động. Chuyển sang Stargate để khôi phục đầy đủ chức năng.",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "Node của bạn sẽ được giải phóng và có thể gắn vào GM NFT khác. Bạn luôn có thể gắn lại sau.",
   "Your Nodes": "Các Node của bạn",
+  "Your potential rewards": "Phần thưởng tiềm năng của bạn",
   "Your proposal": "Đề xuất của bạn",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "Đề xuất của bạn sẽ cần sự hỗ trợ từ cộng đồng để trở nên hoạt động. Người dùng thích đề xuất của bạn và muốn có thể bỏ phiếu cho nó có thể đóng góp bằng token VOT3 của họ để hỗ trợ. Đề xuất sẽ cần tổng cộng",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "Đề xuất của bạn sẽ cần sự hỗ trợ từ cộng đồng để trở thành hoạt động. Người dùng thích đề xuất của bạn và muốn có thể bỏ phiếu cho nó có thể đóng góp bằng các token VOT3 của họ để hỗ trợ nó. Đề xuất sẽ cần tổng cộng {{amount}} VOT3 để trở thành hoạt động. Bạn cũng có thể đóng góp bằng VOT3 của riêng mình.",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "Phiếu bầu và phần thưởng của bạn sẽ được xử lý tự động hàng tuần. Hãy duy trì hoạt động để tiếp tục.",
   "Your votes at snapshot": "Phiếu bầu của bạn tại snapshot",
   "Your voting activity": "Hoạt động bình chọn của bạn",
+  "Your voting power": "Quyền biểu quyết của bạn",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Quyền biểu quyết của bạn đã được chuyển đến <platform>veDelegate.vet</platform> nơi bỏ phiếu thay mặt bạn. <br/> Nếu bạn muốn bỏ phiếu tại đây, bạn phải gỡ bỏ ủy quyền trên veDelegate trước khi chụp nhanh.",
   "Your Voting Qualification": "Điều kiện Bỏ phiếu của bạn"
 }

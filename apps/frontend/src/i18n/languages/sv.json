@@ -15,6 +15,7 @@
   "{{app}} settings": "{{app}} inställningar",
   "{{apps}} apps": "{{apps}} appar",
   "{{b3trToUpgrade}} B3TR to upgrade": "{{b3trToUpgrade}} B3TR för att uppgradera",
+  "{{count}} app submissions available": "{{count}} appinlämningar tillgängliga",
   "{{count}} more": "{{count}} till",
   "{{count}} node(s)": "{{count}} nod(er)",
   "{{count}} users upgraded their GM": "{{count}} användare uppgraderade sin GM",
@@ -54,6 +55,7 @@
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Återuppta distributionen</bold> så att din app kan börja belöna användare igen. Se till att belöningspoolen har tillgängliga medel.",
   "<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool.": "<bold>Återuppta distributionen</bold> för att distribuera belöningar igen och ställa in en belöningspool.",
   "=~ {{value}} votes": "=~ {{value}} röster",
+  "1 app submission available": "1 appinlämning tillgänglig",
   "1 user upgraded their GM": "1 användare uppgraderade sin GM",
   "1. Submit Grant application": "1. Skicka in ansökan",
   "10%": "10%",
@@ -1948,6 +1950,7 @@
   "Your Node is outdated. Endorsements and Galaxy Member benefits are no longer active. Migrate to Stargate to restore full functionality.": "Din Nod är föråldrad. Stöd och Galaxy Member-förmåner är inte längre aktiva. Migrera till Stargate för att återställa full funktionalitet.",
   "Your Node will be freed and can be attached to another GM NFT. You can always re-attach it later.": "Din nod frigörs och kan kopplas till ett annat GM NFT. Du kan alltid koppla om den senare.",
   "Your Nodes": "Dina noder",
+  "Your potential rewards": "Dina potentiella belöningar",
   "Your proposal": "Ditt förslag",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of": "Ditt förslag behöver stöd från samhället för att bli aktivt. Användare som gillar ditt förslag och vill kunna rösta på det kan bidra med sina VOT3-token för att stödja det. Förslaget kommer att behöva totalt",
   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "Ditt förslag behöver stöd från gemenskapen för att bli aktivt. Användare som gillar ditt förslag och vill kunna rösta på det kan bidra med sina VOT3-tokens för att stödja det. Förslaget behöver totalt {{amount}} VOT3 för att bli aktivt. Du kan också bidra med dina egna VOT3.",
@@ -1963,6 +1966,7 @@
   "Your votes and rewards will be handled weekly automatically. Stay active to keep it running.": "Dina röster och belöningar hanteras automatiskt varje vecka. Håll dig aktiv för att fortsätta.",
   "Your votes at snapshot": "Dina röster vid ögonblicksbild",
   "Your voting activity": "Din röstningsaktivitet",
+  "Your voting power": "Din röstvikt",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Din röstmakt har överförts till <platform>veDelegate.vet</platform> som röstar på dina vägnar. <br/> Om du vill rösta här måste du ta bort delegation på veDelegate före snapshot.",
   "Your Voting Qualification": "Din röstkvalificering"
 }

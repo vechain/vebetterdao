@@ -32,7 +32,7 @@ export const VotingPowerBox = () => {
       gap={{ base: "0.5", md: "1" }}
       showIcon={!isMobile}
       variant="positive"
-      title={t("Voting power")}
+      title={t("Your voting power")}
       icon={<Flash />}
       subtitle={
         <Skeleton loading={isLoading || isCurrentVot3BalanceLoading}>
