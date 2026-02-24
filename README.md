@@ -137,7 +137,7 @@ The dev testnet environment is a testnet that is used for testing purposes by de
 It is not the "testnet" environment used the first time we deployed, but a new one that is used for testing purposes.
 This environment is more focused on developer ux and needs (eg: faster voting rounds, a B3TR faucet, all can see settings, priority is given to the developer's needs).
 
-To deploy changes to this environment, push your changes to the `dev-testnet` branch. This will automatically trigger a deployment to dev.testnet.governance.vebetterdao.org.
+To deploy changes to this environment, merge your PR to `main`. This will automatically trigger a deployment to dev.testnet.governance.vebetterdao.org.
 
 ## Frontend App Deployment
 
@@ -145,7 +145,7 @@ To deploy changes to this environment, push your changes to the `dev-testnet` br
 
 | Environment        | How to Deploy                                 |
 | ------------------ | --------------------------------------------- |
-| **Dev**            | Push to `dev-testnet` branch                  |
+| **Dev**            | Merge PR to `main` with version label         |
 | **Staging & Beta** | Merge PR to `main` with version label         |
 | **Production**     | Manual deploy from Github Actions (see below) |
 | **Preview**        | Automatic for every PR                        |
@@ -183,8 +183,7 @@ There is no need to manually create Releases or tags. Releases with changelogs w
 
 Preview environments are automatically created for every PR and posted as a comment. They are destroyed when the PR is closed.
 
-- **PRs to `main`** → staging + beta previews
-- **PRs to `dev-testnet`** → dev preview
+- **PRs to `main`** → dev + staging + beta previews
 
 ### Adding Environment Variables
 

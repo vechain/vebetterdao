@@ -19,6 +19,8 @@ export enum ActivityType {
   ROUND_ENDED = "ROUND_ENDED",
   EMISSIONS_DECREASED = "EMISSIONS_DECREASED",
   GM_UPGRADED = "GM_UPGRADED",
+  USER_ALLOCATION_VOTE_CAST = "USER_ALLOCATION_VOTE_CAST",
+  USER_PROPOSAL_VOTE_CAST = "USER_PROPOSAL_VOTE_CAST",
 }
 
 export type ProposalActivityMeta = {
@@ -63,6 +65,22 @@ export type GmUpgradeEntry = {
 
 export type GmUpgradeActivityMeta = {
   upgrades: GmUpgradeEntry[]
+}
+
+export type UserAllocationVoteEntry = {
+  appId: string
+  appName: string
+  voteWeight: string
+}
+
+export type UserAllocationVoteMeta = {
+  apps: UserAllocationVoteEntry[]
+}
+
+export type UserProposalVoteMeta = {
+  proposalId: string
+  proposalTitle: string
+  support: number
 }
 
 export type ActivityItem =
@@ -126,4 +144,20 @@ export type ActivityItem =
       title: string
       description?: string
       metadata: GmUpgradeActivityMeta
+    }
+  | {
+      type: ActivityType.USER_ALLOCATION_VOTE_CAST
+      date: number
+      roundId: string
+      title: string
+      description?: string
+      metadata: UserAllocationVoteMeta
+    }
+  | {
+      type: ActivityType.USER_PROPOSAL_VOTE_CAST
+      date: number
+      roundId: string
+      title: string
+      description?: string
+      metadata: UserProposalVoteMeta
     }

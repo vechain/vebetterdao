@@ -1,8 +1,9 @@
 import { Box, VStack, HStack, Card, Text, Heading, Dialog, CloseButton, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { formatEther } from "viem"
+import { formatEther, parseEther } from "viem"
 
+import { useEstimateDBAForActiveRound } from "@/api/contracts/dbaPool/hooks/useEstimateDBAForActiveRound"
 import { AllocationRoundDetails } from "@/app/allocations/lib/data"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { Modal } from "@/components/Modal"
@@ -53,19 +54,28 @@ export const TotalRewardsDistributionModal = ({
   const { apps, totalVoters, vote2EarnAmount, gmAmount, xAllocationsAmount, treasuryAmount, id, currentRoundId } =
     roundDetails
   const isCurrentRound = id === currentRoundId
+
+  // For the active round, estimate how much DBA overflow goes to treasury (merit cap leftovers)
+  const { data: dbaEstimate } = useEstimateDBAForActiveRound(id, isCurrentRound)
+  const dbaOverflow = dbaEstimate?.treasuryOverflow ? parseEther(dbaEstimate.treasuryOverflow) : 0n
+
+  // Adjust amounts: overflow moves from apps allocation to treasury
+  const adjustedXAllocationsAmount = xAllocationsAmount - dbaOverflow
+  const adjustedTreasuryAmount = treasuryAmount + dbaOverflow
+
   const votingRewardsTotal = vote2EarnAmount + gmAmount
   const rewardsTotal = votingRewardsTotal + xAllocationsAmount + treasuryAmount
   const percentages = {
-    apps: Number((xAllocationsAmount * 100n) / rewardsTotal),
-    voters: Number((votingRewardsTotal * 100n) / rewardsTotal),
-    treasury: Number((treasuryAmount * 100n) / rewardsTotal),
+    apps: rewardsTotal > 0n ? Number((adjustedXAllocationsAmount * 100n) / rewardsTotal) : 0,
+    voters: rewardsTotal > 0n ? Number((votingRewardsTotal * 100n) / rewardsTotal) : 0,
+    treasury: rewardsTotal > 0n ? Number((adjustedTreasuryAmount * 100n) / rewardsTotal) : 0,
   }
 
   const formattedVotingRewards = getCompactFormatter(2).format(Number(formatEther(vote2EarnAmount)))
   const formattedGmAmount = getCompactFormatter(2).format(Number(formatEther(gmAmount)))
-  const formattedXAllocations = getCompactFormatter(2).format(Number(formatEther(xAllocationsAmount)))
+  const formattedXAllocations = getCompactFormatter(2).format(Number(formatEther(adjustedXAllocationsAmount)))
   const formattedVotingRewardsTotal = getCompactFormatter(2).format(Number(formatEther(votingRewardsTotal)))
-  const formattedTreasuryAmount = getCompactFormatter(2).format(Number(formatEther(treasuryAmount)))
+  const formattedTreasuryAmount = getCompactFormatter(2).format(Number(formatEther(adjustedTreasuryAmount)))
 
   const dataList = [
     {

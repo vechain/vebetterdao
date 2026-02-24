@@ -29,7 +29,8 @@ const SelectValue = () => {
 }
 export const LanguageSelector: React.FC = () => {
   const { i18n } = useTranslation()
-  const currentLanguage = i18n.language || "en"
+  const detectedLang = i18n.language?.split("-")[0] || "en"
+  const currentLanguage = languageCollection.items.some(item => item.id === detectedLang) ? detectedLang : "en"
 
   return (
     <Select.Root

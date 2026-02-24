@@ -14,10 +14,9 @@ import { useXAppRoundEarningsWithDBA } from "./useXAppRoundEarningsWithDBA"
  *
  * @param roundId The round ID
  * @param xAppId The app ID
- * @param votePercentage The app's vote percentage (0-100)
  * @returns Combined earnings data with consistent interface
  */
-export const useTotalXAppEarnings = (roundId: string, xAppId: string, votePercentage: number) => {
+export const useTotalXAppEarnings = (roundId: string, xAppId: string) => {
   // Get round state to determine routing
   const { data: roundState, isLoading: isRoundStateLoading } = useAllocationsRoundState(roundId)
 
@@ -41,9 +40,8 @@ export const useTotalXAppEarnings = (roundId: string, xAppId: string, votePercen
   const { data: contractData, isLoading: isContractLoading } = useXAppRoundEarningsWithDBA(
     roundId,
     xAppId,
-    votePercentage,
     isRoundActive,
-    isRoundActive, // Only enabled when round is active
+    isRoundActive,
   )
 
   const result = useMemo(() => {

@@ -49,6 +49,18 @@ min_size: 1
 max_size: 1
 ```
 
+## Preview Deployments
+
+Preview environments are created automatically when a PR targets `main`.
+
+| Flavor | Trigger | Notes |
+|--------|---------|-------|
+| `staging` | Automatic on PR open/push | Always deployed |
+| `beta` | Automatic on PR open/push | Always deployed |
+| `dev` | Manual — add the `dev-preview` label | Only deployed when label is present |
+
+Once the `dev-preview` label is on the PR, subsequent pushes will also redeploy the dev preview. All preview environments are destroyed when the PR is closed.
+
 ## Manual Deployment
 
 ```bash

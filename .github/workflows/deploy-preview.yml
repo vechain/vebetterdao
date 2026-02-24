@@ -5,7 +5,6 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
-      - dev-testnet
 
 # Only allow one preview deployment per PR at a time
 # New commits cancel any in-progress runs for the same PR
@@ -50,16 +49,13 @@ jobs:
           PR_NUMBER="${{ github.event.pull_request.number }}"
           SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          
+
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
-          
-          if [ "${{ github.base_ref }}" == "dev-testnet" ]; then
-            echo 'flavors=["dev"]' >> $GITHUB_OUTPUT
-            echo "::notice::PR to dev-testnet - deploying dev preview"
-          elif [ "${{ github.base_ref }}" == "main" ]; then
-            echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
+
+          if [ "${{ github.base_ref }}" == "main" ]; then
+            echo 'flavors=["dev", "staging", "beta"]' >> $GITHUB_OUTPUT
             echo "::notice::PR to main - deploying staging + beta previews"
           else
             echo "::error::Unsupported base branch: ${{ github.base_ref }}"
@@ -88,12 +84,12 @@ jobs:
             const runUrl = process.env.RUN_URL;
             const projectName = process.env.PROJECT_NAME;
             const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
-            
+
             let rows = '';
             for (const flavor of flavors) {
               rows += `| **${flavor}** | 🔨 Building ([${shortSha}](${commitUrl})) | Building image... | [View Logs →](${runUrl}) |\n`;
             }
-            
+
             const commentBody = [
               `## ${projectName} – Preview`,
               '',
@@ -110,12 +106,12 @@ jobs:
               repo: context.repo.repo,
               issue_number: parseInt(prNumber),
             });
-            
+
             const existingComment = comments.find(c => 
               c.user.login === 'github-actions[bot]' && 
               c.body.includes(`${projectName} – Preview`)
             );
-            
+
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -198,14 +194,14 @@ jobs:
           PR_NUMBER="${{ needs.setup.outputs.pr_number }}"
           SHORT_SHA="${{ needs.setup.outputs.short_sha }}"
           FLAVOR="${{ matrix.flavor }}"
-          
+
           # Define paths
           WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
           IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}-${FLAVOR}"
           SOURCE_CONFIG="${{ env.TERRAFORM_ENV_DIR }}/${FLAVOR}/${FLAVOR}.yaml"
           TARGET_DIR="${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
           TARGET_FILE="${TARGET_DIR}/${WORKSPACE_NAME}.yaml"
-          
+
           # Extract route53_zone_name from source environment to construct correct domain
           if [ -f "${SOURCE_CONFIG}" ]; then
             ROUTE53_ZONE=$(yq eval '.route53_zone_name' "${SOURCE_CONFIG}")
@@ -215,7 +211,7 @@ jobs:
             echo "::error::Source config ${SOURCE_CONFIG} not found."
             exit 1
           fi
-          
+
           echo "=== Preview Config Generation ==="
           echo "PR Number: ${PR_NUMBER}"
           echo "Short SHA: ${SHORT_SHA}"
@@ -226,32 +222,32 @@ jobs:
           echo "Source Config: ${SOURCE_CONFIG}"
           echo "Target File: ${TARGET_FILE}"
           echo ""
-          
+
           # Step 1: Create workspace directory
           mkdir -p "${TARGET_DIR}"
-          
+
           # Step 2: Copy the preview template
           cp "${{ env.TERRAFORM_ENV_DIR }}/preview/preview.yaml.example" "${TARGET_FILE}"
-          
+
           # Step 3: Replace placeholders in the template
           sed -i "s/{PR_NUMBER}/${PR_NUMBER}-${FLAVOR}/g" "${TARGET_FILE}"
           sed -i "s/{COMMIT_SHA}/${SHORT_SHA}/g" "${TARGET_FILE}"
-          
+
           # Step 4: Override the domain with the correctly constructed one
           sed -i "s|^domain:.*|domain: ${PREVIEW_DOMAIN}|g" "${TARGET_FILE}"
-          
+
           # Step 5: Append flavor-specific config from source environment
           echo "" >> "${TARGET_FILE}"
           echo "# ============================================" >> "${TARGET_FILE}"
           echo "# Dynamic Config from ${FLAVOR} flavor" >> "${TARGET_FILE}"
           echo "# ============================================" >> "${TARGET_FILE}"
-          
+
           # Override image tag
           echo "image_tag: ${IMAGE_TAG}" >> "${TARGET_FILE}"
-          
+
           # Extract and append SSM config from source environment
           echo "Extracting config from ${SOURCE_CONFIG}..."
-          
+
           # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
           yq eval '{
             "ssm_parameter_prefix": .ssm_parameter_prefix,
@@ -259,7 +255,7 @@ jobs:
             "runtime_env_var_names": (.runtime_env_var_names // []),
             "runtime_env_secret_names": (.runtime_env_secret_names // [])
           } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
-          
+
           # Step 6: Show the generated config for debugging
           echo ""
           echo "=== Generated Preview Config ==="
@@ -334,7 +330,7 @@ jobs:
             const buildResult = process.env.BUILD_RESULT;
             const deployResult = process.env.DEPLOY_RESULT;
             const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
-            
+
             // Get URLs and status for each flavor
             const flavorData = {
               dev: {
@@ -353,11 +349,11 @@ jobs:
                 status: process.env.STATUS_BETA || ''
               }
             };
-            
+
             let rows = '';
             let hasFailure = false;
             let hasSuccess = false;
-            
+
             for (const flavor of flavors) {
               const data = flavorData[flavor] || { custom: '', service: '', status: '' };
               const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
@@ -389,16 +385,16 @@ jobs:
                 rows += `| **${flavor}** | ⚠️ Unknown ([${shortSha}](${commitUrl})) | [View Logs →](${runUrl}) | ${timestamp} |\n`;
               }
             }
-            
+
             let statusNote = '';
             if (hasSuccess) {
               statusNote = '\n\n> ⏱️ **Note:** Custom domains may take 5-10 minutes to activate on first deployment. Use Default URL in the meantime.';
             }
-            
+
             let footerNote = hasFailure 
               ? `<sub>Deployment failed for commit ${shortSha} • [Check logs](${runUrl}) for details</sub>`
               : `<sub>Built with commit ${shortSha} • Preview environments are automatically destroyed when PRs are closed</sub>`;
-            
+
             const commentBody = [
               `## ${projectName} – Preview`,
               '',
@@ -416,12 +412,12 @@ jobs:
               repo: context.repo.repo,
               issue_number: parseInt(prNumber),
             });
-            
+
             const existingComment = comments.find(c => 
               c.user.login === 'github-actions[bot]' && 
               c.body.includes(`${projectName} – Preview`)
             );
-            
+
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
