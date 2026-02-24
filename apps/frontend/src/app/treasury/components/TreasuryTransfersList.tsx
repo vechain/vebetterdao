@@ -11,136 +11,52 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
-import { GMUpgradeMap, useGMUpgradeInfo } from "../hooks/useGMUpgradeInfo"
-import { TreasuryTransfer, useTreasuryTransfers } from "../hooks/useTreasuryTransfers"
+import { useExecutedProposalsByTxId } from "../hooks/useProposalIdByTxIds"
+import { TreasuryTransfer, TreasuryTransferCategory, useTreasuryTransfers } from "../hooks/useTreasuryTransfers"
 
 const config = getConfig()
 const treasuryAddress = config.treasuryContractAddress.toLowerCase()
-const emissionsAddress = config.emissionsContractAddress.toLowerCase()
-const grantsManagerAddress = config.grantsManagerContractAddress.toLowerCase()
-const timelockAddress = config.timelockContractAddress.toLowerCase()
-const voterRewardsAddress = config.voterRewardsContractAddress.toLowerCase()
-const xAllocationPoolAddress = config.xAllocationPoolContractAddress.toLowerCase()
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-
-const KNOWN_ADDRESSES: Record<string, string> = {
-  [emissionsAddress]: "Emissions",
-  [grantsManagerAddress]: "Grants",
-  [timelockAddress]: "Governance Timelock",
-  [voterRewardsAddress]: "Voter Rewards",
-  [xAllocationPoolAddress]: "X-Allocation Pool",
-}
-
-type FilterCategory = "all" | "in" | "out" | "emission" | "surplus" | "gm" | "other"
-
-const FILTER_OPTIONS: { value: FilterCategory; label: string }[] = [
+const FILTER_OPTIONS: { value: TreasuryTransferCategory | "all"; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "in", label: "In" },
   { value: "out", label: "Out" },
   { value: "emission", label: "Emissions" },
   { value: "surplus", label: "App voting surplus" },
-  { value: "gm", label: "GM Upgrades" },
+  { value: "gm_upgrade", label: "GM Upgrades" },
+  { value: "grant", label: "Grant" },
   { value: "other", label: "Other" },
 ]
 
-const resolveKnownName = (address?: string): string | null => {
-  if (!address) return null
-  return KNOWN_ADDRESSES[address.toLowerCase()] ?? null
+const getCounterpartyAddress = (tx: TreasuryTransfer): string | undefined => {
+  if (tx.from.toLowerCase() === treasuryAddress) return tx.to
+  return tx.from
 }
 
-const isFromMint = (tx: TreasuryTransfer): boolean => tx.from.toLowerCase() === ZERO_ADDRESS
-
-const resolveDirection = (tx: TreasuryTransfer): "in" | "out" => {
-  if (tx.from.toLowerCase() === treasuryAddress) return "out"
-  return "in"
-}
-
-const resolveCategory = (tx: TreasuryTransfer, gmUpgrades: GMUpgradeMap): FilterCategory => {
-  if (gmUpgrades[tx.txId]) return "gm"
-
-  const fromName = resolveKnownName(tx.from)
-  if (isFromMint(tx) || fromName === "Emissions") return "emission"
-  if (fromName === "X-Allocation Pool") return "surplus"
-
-  const direction = resolveDirection(tx)
-  const toName = resolveKnownName(tx.to)
-
-  if (direction === "out" && toName) return "out"
-  if (direction === "out") return "other"
-  if (direction === "in" && !fromName) return "other"
-
-  return direction
-}
-
-const resolveLabel = (tx: TreasuryTransfer, direction: "in" | "out", gmUpgrades: GMUpgradeMap): string => {
-  const gmLevel = gmUpgrades[tx.txId]
-  if (gmLevel) return `GM upgrade to ${gmLevel}`
-
-  const fromName = resolveKnownName(tx.from)
-  const toName = resolveKnownName(tx.to)
-
-  if (isFromMint(tx) || fromName === "Emissions") return "Weekly emission"
-  if (fromName === "X-Allocation Pool") return "App voting surplus"
-  if (toName === "Grants") return "Grant funding"
-
-  return direction === "out" ? "B3TR Sent" : "B3TR Received"
-}
-
-const getCounterpartyAddress = (tx: TreasuryTransfer, direction: "in" | "out"): string | undefined => {
-  if (isFromMint(tx)) return undefined
-  return direction === "out" ? tx.to : tx.from
-}
-
-const formatCounterparty = (
-  tx: TreasuryTransfer,
-  direction: "in" | "out",
-  domainMap: Record<string, string>,
-): string => {
-  if (isFromMint(tx)) return "Emissions"
-  const rawAddress = getCounterpartyAddress(tx, direction)
-  if (!rawAddress) return ""
-  return resolveKnownName(rawAddress) ?? domainMap[rawAddress.toLowerCase()] ?? humanAddress(rawAddress, 6, 4)
-}
-
-const matchesFilter = (tx: TreasuryTransfer, filter: FilterCategory, gmUpgrades: GMUpgradeMap): boolean => {
-  if (filter === "all") return true
-  const category = resolveCategory(tx, gmUpgrades)
-  if (filter === "in")
-    return category === "in" || category === "emission" || category === "surplus" || category === "gm"
-  if (filter === "out") return category === "out"
-  return category === filter
+const shortenVedelegateDomain = (name: string): string => {
+  if (!name.includes(".vedelegate.vet")) return name
+  const dot = name.indexOf(".")
+  if (dot <= 6) return name
+  const firstSegment = name.slice(0, dot)
+  const rest = name.slice(dot)
+  return `${firstSegment.slice(0, 3)}...${firstSegment.slice(-3)}${rest}`
 }
 
 export const TreasuryTransfersList = () => {
   const { t } = useTranslation()
-  const [filter, setFilter] = useState<FilterCategory>("all")
-  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useTreasuryTransfers()
+  const [filter, setFilter] = useState<TreasuryTransferCategory | "all">("all")
+  const category: TreasuryTransferCategory | undefined = filter === "all" ? undefined : filter
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useTreasuryTransfers(category, 20)
 
-  const transactions = useMemo(() => {
-    return data?.pages.flatMap(page => page.data) ?? []
-  }, [data])
+  const transactions = useMemo(() => data?.pages.flatMap(page => page.data) ?? [], [data])
 
-  const candidateTxIds = useMemo(() => {
-    return transactions
-      .filter(tx => {
-        const direction = resolveDirection(tx)
-        return direction === "in" && !isFromMint(tx) && !resolveKnownName(tx.from)
-      })
-      .map(tx => tx.txId)
-  }, [transactions])
-
-  const { data: gmUpgrades = {} } = useGMUpgradeInfo(candidateTxIds)
-
-  const filtered = useMemo(() => {
-    return transactions.filter(tx => matchesFilter(tx, filter, gmUpgrades))
-  }, [transactions, filter, gmUpgrades])
+  const { data: proposalByTxId } = useExecutedProposalsByTxId()
 
   const unknownAddresses = useMemo(() => {
     const set = new Set<string>()
     for (const tx of transactions) {
-      const addr = getCounterpartyAddress(tx, resolveDirection(tx))
-      if (addr && !resolveKnownName(addr)) set.add(addr)
+      if (tx.counterpartyName) continue
+      const addr = getCounterpartyAddress(tx)
+      if (addr) set.add(addr)
     }
     return Array.from(set)
   }, [transactions])
@@ -179,14 +95,14 @@ export const TreasuryTransfersList = () => {
           </Wrap>
 
           <Skeleton loading={isLoading} rounded="md">
-            {filtered.length > 0 ? (
+            {transactions.length > 0 ? (
               <VStack gap={3} align="stretch">
-                {filtered.map(transaction => (
+                {transactions.map(transaction => (
                   <TreasuryTransferCard
                     key={transaction.id}
                     transaction={transaction}
                     domainMap={domainMap}
-                    gmUpgrades={gmUpgrades}
+                    proposal={proposalByTxId[transaction.txId.toLowerCase()]}
                   />
                 ))}
                 {hasNextPage && (
@@ -208,23 +124,26 @@ export const TreasuryTransfersList = () => {
 const TreasuryTransferCard = ({
   transaction,
   domainMap,
-  gmUpgrades,
+  proposal,
 }: {
   transaction: TreasuryTransfer
   domainMap: Record<string, string>
-  gmUpgrades: GMUpgradeMap
+  proposal?: { id: string; title: string; isGrant: boolean }
 }) => {
-  const direction = resolveDirection(transaction)
-  const isOutgoing = direction === "out"
-  const counterparty = formatCounterparty(transaction, direction, domainMap)
+  const isOutgoing = transaction.from.toLowerCase() === treasuryAddress
+  const counterpartyAddr = getCounterpartyAddress(transaction)
+  const rawCounterparty =
+    transaction.counterpartyName ??
+    (counterpartyAddr ? (domainMap[counterpartyAddr.toLowerCase()] ?? humanAddress(counterpartyAddr, 6, 4)) : "")
+  const counterparty = shortenVedelegateDomain(rawCounterparty)
   const amount = transaction.value ? humanNumber(formatEther(transaction.value)) : "0"
   const date = new Date(transaction.blockTimestamp * 1000).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   })
-  const label = resolveLabel(transaction, direction, gmUpgrades)
   const explorerLink = getExplorerTxLink(transaction.txId)
+  const primaryLabel = proposal?.title ?? transaction.label
 
   return (
     <Card.Root variant="outline" size="sm">
@@ -234,7 +153,15 @@ const TreasuryTransferCard = ({
             {isOutgoing ? <FiArrowUpRight color="red" /> : <FiArrowDownLeft color="green" />}
             <VStack align="start" gap={0} minW={0}>
               <Text fontWeight="semibold" textStyle="sm" lineClamp={1}>
-                {label}
+                {proposal ? (
+                  <Link
+                    href={proposal.isGrant ? `/grants/${proposal.id}` : `/proposals/${proposal.id}`}
+                    variant="underline">
+                    {primaryLabel}
+                  </Link>
+                ) : (
+                  primaryLabel
+                )}
               </Text>
               <Text textStyle="xs" color="text.muted" lineClamp={1}>
                 {counterparty}

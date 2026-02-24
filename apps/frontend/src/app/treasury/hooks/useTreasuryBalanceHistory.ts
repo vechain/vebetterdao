@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query"
 import BigNumber from "bignumber.js"
 import { useMemo } from "react"
 
+import type { TreasuryTransfer } from "../api/types"
+
 import { useTreasuryB3trBalance } from "./useTreasuryBalances"
 
 const config = getConfig()
@@ -18,34 +20,23 @@ const PERIOD_SECONDS: Record<BalancePeriod, number> = {
   ALL: 0,
 }
 
-type Transfer = {
-  from: string
-  to: string
-  value: string
-  blockTimestamp: number
-}
-
-const fetchAllTransfers = async (after: number): Promise<Transfer[]> => {
-  const all: Transfer[] = []
+const fetchAllTreasuryTransfers = async (after: number): Promise<TreasuryTransfer[]> => {
+  const all: TreasuryTransfer[] = []
   let page = 0
   let hasNext = true
 
   while (hasNext) {
-    const params = new URLSearchParams({
-      address: config.treasuryContractAddress,
-      tokenAddress: config.b3trContractAddress,
-      eventType: "FUNGIBLE_TOKEN",
-      direction: "DESC",
-      size: "150",
-      page: String(page),
-      after: String(after),
-    })
+    const params = new URLSearchParams()
+    params.set("after", String(after))
+    params.set("direction", "DESC")
+    params.set("size", "150")
+    params.set("page", String(page))
 
-    const res = await fetch(`${baseUrl}/api/v1/transfers?${params}`)
+    const res = await fetch(`${baseUrl}/api/v1/b3tr/treasury/transfers?${params}`)
     if (!res.ok) break
 
     const json = await res.json()
-    const transfers: Transfer[] = json.data ?? []
+    const transfers: TreasuryTransfer[] = json.data ?? []
     all.push(...transfers)
 
     hasNext = json.pagination?.hasNext === true
@@ -72,7 +63,7 @@ export const useTreasuryBalanceHistory = (period: BalancePeriod) => {
     isFetching,
   } = useQuery({
     queryKey: ["treasury-balance-history", period, after],
-    queryFn: () => fetchAllTransfers(after),
+    queryFn: () => fetchAllTreasuryTransfers(after),
     staleTime: 5 * 60 * 1000,
   })
 
