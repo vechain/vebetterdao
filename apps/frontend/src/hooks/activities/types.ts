@@ -74,7 +74,6 @@ export type UserAllocationVoteEntry = {
 }
 
 export type UserAllocationVoteMeta = {
-  roundId: string
   apps: UserAllocationVoteEntry[]
 }
 
@@ -82,7 +81,6 @@ export type UserProposalVoteMeta = {
   proposalId: string
   proposalTitle: string
   support: number
-  proposalType: "proposal" | "grant"
 }
 
 export type ActivityItem =

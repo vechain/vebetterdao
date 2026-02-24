@@ -8,7 +8,7 @@ import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useEvents } from "@/hooks/useEvents"
 
-import { ActivityItem, ActivityType } from "./types"
+import { ActivityItem, ActivityType, UserProposalVoteMeta } from "./types"
 
 const xAllocationAbi = XAllocationVoting__factory.abi
 const xAllocationAddress = getConfig().xAllocationVotingContractAddress
@@ -72,23 +72,9 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
     const appNameMap = new Map<string, string>()
     xApps?.allApps?.forEach(app => appNameMap.set(app.id, app.name ?? ""))
 
-    const proposalInfoMap = new Map<
-      string,
-      { title: string; votingRoundId: string; proposalType: "proposal" | "grant" }
-    >()
-    enrichedStandardProposals.forEach(p => {
-      proposalInfoMap.set(p.id, {
-        title: p.title,
-        votingRoundId: p.votingRoundId,
-        proposalType: "proposal",
-      })
-    })
-    enrichedGrantProposals.forEach(p => {
-      proposalInfoMap.set(p.id, {
-        title: p.title,
-        votingRoundId: p.votingRoundId,
-        proposalType: "grant",
-      })
+    const proposalInfoMap = new Map<string, { title: string; votingRoundId: string }>()
+    ;[...enrichedStandardProposals, ...enrichedGrantProposals].forEach(p => {
+      proposalInfoMap.set(p.id, { title: p.title, votingRoundId: p.votingRoundId })
     })
 
     const allAllocationEvents = [...(allocationVoteEvents.data ?? []), ...(allocationAutoVoteEvents.data ?? [])]
@@ -105,7 +91,6 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
               roundId: latestByRound.roundId,
               title: `You voted in round ${latestByRound.roundId}`,
               metadata: {
-                roundId: latestByRound.roundId,
                 apps: latestByRound.appsIds.map((appId, i) => ({
                   appId,
                   appName: appNameMap.get(appId) ?? "",
@@ -135,11 +120,13 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
             proposalId: e.proposalId,
             proposalTitle: title,
             support: e.support,
-            proposalType: info.proposalType,
           },
         }
       })
-      .filter((item): item is ActivityItem => item !== null)
+      .filter(
+        (item): item is ActivityItem & { type: ActivityType.USER_PROPOSAL_VOTE_CAST; metadata: UserProposalVoteMeta } =>
+          item !== null,
+      )
 
     return [...allocationItems, ...proposalItems].sort((a, b) => b.date - a.date)
   }, [

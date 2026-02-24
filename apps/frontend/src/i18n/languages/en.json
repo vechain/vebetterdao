@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "You voted \"{{voteChoice}}\" in the {{title}} {{type}}",
   "You voted a {{type}}": "You voted a {{type}}",
   "You voted in round {{roundId}}": "You voted in round {{roundId}}",
+  "You voted on a proposal": "You voted on a proposal",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "You voted \"{{voteChoice}}\" in the {{title}} proposal",
   "You voted with": "You voted with",
   "You will be able to vote using delegator's Voting Qualification": "You will be able to vote using delegator's Voting Qualification",
   "You will not able to use the actions performed in this address.": "You will not able to use the actions performed in this address.",

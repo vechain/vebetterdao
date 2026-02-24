@@ -27,7 +27,7 @@ const getVoteChoice = (support: number, t: TFunction) => {
 
 export const UserProposalVoteCard: React.FC<Props> = ({ activity }) => {
   const { t } = useTranslation()
-  const { proposalId, proposalTitle, support, proposalType } = activity.metadata
+  const { proposalId, proposalTitle, support } = activity.metadata
 
   return (
     <LinkBox asChild>
@@ -37,15 +37,12 @@ export const UserProposalVoteCard: React.FC<Props> = ({ activity }) => {
             <Icon as={DesignNibSolid} color="status.neutral.strong" boxSize="5" mt="0.5" flexShrink={0} />
             <VStack gap="1" align="flex-start" flex="1" minW="0">
               <LinkOverlay textStyle="sm" fontWeight="bold" asChild>
-                <TypedNextLink href={`/governance/${proposalId}`}>
-                  {t("You voted a {{type}}", { type: t(proposalType) })}
-                </TypedNextLink>
+                <TypedNextLink href={`/governance/${proposalId}`}>{t("You voted on a proposal")}</TypedNextLink>
               </LinkOverlay>
               <Text textStyle="sm" color="text.subtle" lineClamp={2}>
-                {t('You voted "{{voteChoice}}" in the {{title}} {{type}}', {
+                {t('You voted "{{voteChoice}}" in the {{title}} proposal', {
                   voteChoice: getVoteChoice(support, t),
                   title: proposalTitle,
-                  type: t(proposalType),
                 })}
               </Text>
             </VStack>
