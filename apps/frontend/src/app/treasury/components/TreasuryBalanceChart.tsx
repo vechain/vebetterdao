@@ -5,7 +5,7 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
 
-import { BalancePeriod, useTreasuryBalanceHistory } from "../hooks/useTreasuryBalanceHistory"
+import { BalancePeriod, useTreasuryBalanceHistory } from "../../../api/contracts/treasury/useTreasuryBalanceHistory"
 
 export const TreasuryBalanceChart = () => {
   const { t } = useTranslation()

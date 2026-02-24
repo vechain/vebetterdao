@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import BigNumber from "bignumber.js"
 import { useMemo } from "react"
 
-import type { TreasuryTransfer } from "../api/types"
-
+import type { TreasuryTransfer } from "./types"
 import { useTreasuryB3trBalance } from "./useTreasuryBalances"
 
 const config = getConfig()

@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query"
 
-import type { TreasuryTransfer, TreasuryTransfersResponse } from "../api/types"
+import type { TreasuryTransfer, TreasuryTransfersResponse } from "./types"
 
 const config = getConfig()
 const baseUrl = config.indexerUrl?.replace("/api/v1", "") ?? ""

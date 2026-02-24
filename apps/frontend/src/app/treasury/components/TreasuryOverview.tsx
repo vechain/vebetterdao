@@ -29,7 +29,7 @@ import {
   useTreasuryVetBalance,
   useTreasuryVot3Balance,
   useTreasuryVthoBalance,
-} from "../hooks/useTreasuryBalances"
+} from "../../../api/contracts/treasury/useTreasuryBalances"
 
 const treasuryAddress = getConfig().treasuryContractAddress
 

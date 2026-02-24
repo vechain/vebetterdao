@@ -11,8 +11,12 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
-import { useExecutedProposalsByTxId } from "../hooks/useProposalIdByTxIds"
-import { TreasuryTransfer, TreasuryTransferCategory, useTreasuryTransfers } from "../hooks/useTreasuryTransfers"
+import { useExecutedProposalsByTxId } from "../../../api/contracts/treasury/useProposalIdByTxIds"
+import {
+  TreasuryTransfer,
+  TreasuryTransferCategory,
+  useTreasuryTransfers,
+} from "../../../api/contracts/treasury/useTreasuryTransfers"
 
 const config = getConfig()
 const treasuryAddress = config.treasuryContractAddress.toLowerCase()
