@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "Je stemde \"{{voteChoice}}\" in de {{type}} \"{{title}}\"",
   "You voted a {{type}}": "Je hebt op een {{type}} gestemd",
   "You voted in round {{roundId}}": "Je hebt gestemd in ronde {{roundId}}",
+  "You voted on a proposal": "Je hebt op een voorstel gestemd",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "Je hebt \"{{voteChoice}}\" gestemd in het voorstel {{title}}",
   "You voted with": "U stemde met",
   "You will be able to vote using delegator's Voting Qualification": "U zult kunnen stemmen met behulp van de Stemkwalificatie van de delegerende partij",
   "You will not able to use the actions performed in this address.": "U zult de acties uitgevoerd op dit adres niet kunnen gebruiken.",

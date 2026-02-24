@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "आपने {{type}} \"{{title}}\" में \"{{voteChoice}}\" मतदान किया",
   "You voted a {{type}}": "आपने एक {{type}} के लिए मतदान किया",
   "You voted in round {{roundId}}": "आपने राउंड {{roundId}} में मतदान किया",
+  "You voted on a proposal": "आपने एक प्रस्ताव पर मतदान किया",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "आपने {{title}} प्रस्ताव में \"{{voteChoice}}\" मतदान किया",
   "You voted with": "आपने इसके साथ वोट किया",
   "You will be able to vote using delegator's Voting Qualification": "आप प्रतिनिधियों के मतदान योग्यता का उपयोग करके मतदान करने में सक्षम होंगे",
   "You will not able to use the actions performed in this address.": "आप इस पते पर किए गए कार्यों का उपयोग नहीं कर पाएंगे।",

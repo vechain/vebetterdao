@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "「{{title}}」{{type}}에서 \"{{voteChoice}}\"에 투표했습니다",
   "You voted a {{type}}": "{{type}}에 투표했습니다",
   "You voted in round {{roundId}}": "라운드 {{roundId}}에서 투표했습니다",
+  "You voted on a proposal": "제안에 투표했습니다",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "{{title}} 제안에서 \"{{voteChoice}}\"에 투표했습니다",
   "You voted with": "다음으로 투표했습니다",
   "You will be able to vote using delegator's Voting Qualification": "위임자의 투표 자격을 사용하여 투표할 수 있습니다",
   "You will not able to use the actions performed in this address.": "귀하는 이 주소에서 수행된 활동을 사용할 수 없습니다.",

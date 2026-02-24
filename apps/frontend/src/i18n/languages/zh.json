@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "您在「{{title}}」{{type}}中投票「{{voteChoice}}」",
   "You voted a {{type}}": "您对一项{{type}}进行了投票",
   "You voted in round {{roundId}}": "您在第 {{roundId}} 轮投票",
+  "You voted on a proposal": "您已对一项提案投票",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "您在提案《{{title}}》中投了「{{voteChoice}}」",
   "You voted with": "你的投票是",
   "You will be able to vote using delegator's Voting Qualification": "您将能够使用委托人的投票资格进行投票",
   "You will not able to use the actions performed in this address.": "您将无法使用在此地址执行的操作。",

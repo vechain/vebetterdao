@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "Du röstade \"{{voteChoice}}\" i {{type}} \"{{title}}\"",
   "You voted a {{type}}": "Du röstade på en {{type}}",
   "You voted in round {{roundId}}": "Du röstade i runda {{roundId}}",
+  "You voted on a proposal": "Du röstade på ett förslag",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "Du röstade \"{{voteChoice}}\" i förslaget {{title}}",
   "You voted with": "Du röstade med",
   "You will be able to vote using delegator's Voting Qualification": "Du kommer att kunna rösta med delegatörens röstningskvalifikation",
   "You will not able to use the actions performed in this address.": "Du kommer inte att kunna använda åtgärderna som utförts på denna adress.",

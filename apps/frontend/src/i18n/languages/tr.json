@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "\"{{title}}\" {{type}} için \"{{voteChoice}}\" oyu verdiniz",
   "You voted a {{type}}": "Bir {{type}} için oy verdiniz",
   "You voted in round {{roundId}}": "{{roundId}}. turda oy verdiniz",
+  "You voted on a proposal": "Bir öneriye oy verdiniz",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "{{title}} önerisinde \"{{voteChoice}}\" oyu verdiniz",
   "You voted with": "Oy verdiniz",
   "You will be able to vote using delegator's Voting Qualification": "Delegatörün Oy Yetkisini kullanarak oy verebileceksiniz",
   "You will not able to use the actions performed in this address.": "Bu adreste gerçekleştirilen eylemleri kullanamayacaksınız.",

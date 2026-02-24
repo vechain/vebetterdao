@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "Bạn đã bỏ phiếu \"{{voteChoice}}\" trong {{type}} \"{{title}}\"",
   "You voted a {{type}}": "Bạn đã bỏ phiếu cho một {{type}}",
   "You voted in round {{roundId}}": "Bạn đã bỏ phiếu ở vòng {{roundId}}",
+  "You voted on a proposal": "Bạn đã bỏ phiếu cho một đề xuất",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "Bạn đã bỏ phiếu \"{{voteChoice}}\" trong đề xuất {{title}}",
   "You voted with": "Bạn đã bỏ phiếu với",
   "You will be able to vote using delegator's Voting Qualification": "Bạn sẽ có thể bỏ phiếu bằng Tiêu chuẩn Bỏ phiếu của người ủy quyền",
   "You will not able to use the actions performed in this address.": "Bạn sẽ không thể sử dụng các hành động thực hiện tại địa chỉ này.",

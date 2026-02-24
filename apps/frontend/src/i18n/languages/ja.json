@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "「{{title}}」{{type}}で「{{voteChoice}}」に投票しました",
   "You voted a {{type}}": "{{type}}に投票しました",
   "You voted in round {{roundId}}": "ラウンド{{roundId}}で投票しました",
+  "You voted on a proposal": "提案に投票しました",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "「{{title}}」の提案で「{{voteChoice}}」に投票しました",
   "You voted with": "あなたはこれで投票しました",
   "You will be able to vote using delegator's Voting Qualification": "委任者の投票資格を使用して投票することができます",
   "You will not able to use the actions performed in this address.": "このアドレスで実行されたアクションを使用できません。",

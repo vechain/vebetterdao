@@ -1866,6 +1866,8 @@
   "You voted \"{{voteChoice}}\" in the {{title}} {{type}}": "Você votou \"{{voteChoice}}\" na {{type}} \"{{title}}\"",
   "You voted a {{type}}": "Você votou em uma {{type}}",
   "You voted in round {{roundId}}": "Você votou na rodada {{roundId}}",
+  "You voted on a proposal": "Você votou em uma proposta",
+  "You voted \"{{voteChoice}}\" in the {{title}} proposal": "Você votou \"{{voteChoice}}\" na proposta {{title}}",
   "You voted with": "Você votou com",
   "You will be able to vote using delegator's Voting Qualification": "Você poderá votar usando a Qualificação de Voto do delegador",
   "You will not able to use the actions performed in this address.": "Você não poderá usar as ações realizadas neste endereço.",
