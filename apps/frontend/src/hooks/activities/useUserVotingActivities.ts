@@ -70,7 +70,9 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
     if (!account?.address || !selectedRoundId) return []
 
     const appNameMap = new Map<string, string>()
-    xApps?.allApps?.forEach(app => appNameMap.set(app.id, app.name ?? ""))
+    for (const app of xApps?.allApps ?? []) {
+      appNameMap.set(app.id, app.name ?? "")
+    }
 
     const proposalInfoMap = new Map<string, { title: string; votingRoundId: string }>()
     ;[...enrichedStandardProposals, ...enrichedGrantProposals].forEach(p => {
