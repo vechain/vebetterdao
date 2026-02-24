@@ -48,9 +48,14 @@ const LevelRow = ({
   const { t } = useTranslation()
 
   return (
-    <HStack justify="space-between" opacity={isCurrentLevel ? 1 : 0.6}>
-      <HStack gap="4">
-        <Flex position="relative" w="10" h="10" rounded="full" overflow="hidden">
+    <Flex
+      justify="space-between"
+      align="flex-start"
+      gap={{ base: 2, md: 4 }}
+      opacity={isCurrentLevel ? 1 : 0.6}
+      wrap="nowrap">
+      <HStack gap="4" minW={0} flex={1}>
+        <Flex position="relative" w="10" h="10" shrink={0} rounded="full" overflow="hidden">
           <Image src={gmNft.image} alt={gmNft.name} w="10" h="10" position="absolute" />
           <Flex w="full" h="full" align="center" justify="center" bg="rgba(0, 0, 0, 0.2)" zIndex={1}>
             <Text textStyle="md" color="white">
@@ -58,11 +63,11 @@ const LevelRow = ({
             </Text>
           </Flex>
         </Flex>
-        <VStack align="stretch" gap={0}>
-          <Text textStyle="lg" fontWeight="semibold">
+        <VStack align="stretch" gap={0} minW={0} overflow="hidden">
+          <Text textStyle="lg" fontWeight="semibold" lineClamp={1}>
             {gmNft.name}
           </Text>
-          <HStack gap={2}>
+          <Flex gap={2} wrap="wrap" rowGap={0}>
             {levelText && (
               <Text textStyle="sm" color="text.subtle">
                 {levelText}
@@ -73,25 +78,27 @@ const LevelRow = ({
                 {levelText ? "·" : ""} {compactFormatter.format(holderCount)} {t("holders")}
               </Text>
             )}
-          </HStack>
+          </Flex>
         </VStack>
       </HStack>
-      {isCurrentLevel ? (
-        <Heading
-          textStyle="2xl"
-          bg={getLevelGradient(Number(tokenLevel))}
-          style={{
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}>
-          {gmNft.multiplier}
-        </Heading>
-      ) : (
-        <Text textStyle="lg" color="text.subtle">
-          {gmNft.multiplier}
-        </Text>
-      )}
-    </HStack>
+      <Flex shrink={0} align="center">
+        {isCurrentLevel ? (
+          <Heading
+            textStyle="2xl"
+            bg={getLevelGradient(Number(tokenLevel))}
+            style={{
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}>
+            {gmNft.multiplier}
+          </Heading>
+        ) : (
+          <Text textStyle="lg" color="text.subtle">
+            {gmNft.multiplier}
+          </Text>
+        )}
+      </Flex>
+    </Flex>
   )
 }
 
