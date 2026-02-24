@@ -66,9 +66,9 @@ export const TotalRewardsDistributionModal = ({
   const votingRewardsTotal = vote2EarnAmount + gmAmount
   const rewardsTotal = votingRewardsTotal + xAllocationsAmount + treasuryAmount
   const percentages = {
-    apps: Number((adjustedXAllocationsAmount * 100n) / rewardsTotal),
-    voters: Number((votingRewardsTotal * 100n) / rewardsTotal),
-    treasury: Number((adjustedTreasuryAmount * 100n) / rewardsTotal),
+    apps: rewardsTotal > 0n ? Number((adjustedXAllocationsAmount * 100n) / rewardsTotal) : 0,
+    voters: rewardsTotal > 0n ? Number((votingRewardsTotal * 100n) / rewardsTotal) : 0,
+    treasury: rewardsTotal > 0n ? Number((adjustedTreasuryAmount * 100n) / rewardsTotal) : 0,
   }
 
   const formattedVotingRewards = getCompactFormatter(2).format(Number(formatEther(vote2EarnAmount)))
