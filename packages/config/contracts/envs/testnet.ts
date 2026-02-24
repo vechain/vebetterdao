@@ -3,12 +3,11 @@ import { defineConfig } from "../defineConfig"
 export function createTestnetConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "testnet",
-    MIGRATION_ADDRESS: "0x000000000000000000000000000000000000dEaD",
-    MIGRATION_AMOUNT: BigInt("0"),
+
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     TIMELOCK_MIN_DELAY: 30, // time to wait before you can execute a queued proposal, 0 for immediate execution
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
-    B3TR_GOVERNOR_MIN_VOTING_DELAY: 25920, // 3 days
+    B3TR_GOVERNOR_MIN_VOTING_DELAY: 60, // 10 minutes
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     //Grants proposal types
     B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
@@ -16,8 +15,8 @@ export function createTestnetConfig() {
     B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE: 2, // 2 -> Need 2% of voters to pass
 
     //Deposit threshold cap for grants and standard proposals
-    B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP: BigInt("3500000000000000000000000"), // 3.5M B3TR
-    B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP: BigInt("5000000000000000000000000"), // 5M B3TR
+    B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP: BigInt("15000000000000000000000"), // 15K B3TR
+    B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP: BigInt("25000000000000000000000"), // 25K B3TR
 
     // GM weight requirements for proposal types
     B3TR_GOVERNOR_STANDARD_GM_WEIGHT: 2, // Requires GM level 2 (Moon) for standard proposals
@@ -27,27 +26,64 @@ export function createTestnetConfig() {
       e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
     */
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
+      B3TR: ["tokenDetails"],
+      B3TRGovernorV1: [
+        "setProposalThreshold",
+        "setMinVotingDelay",
+        "setWhitelistFunction",
+        "setIsFunctionRestrictionEnabled",
+        "updateQuorumNumeratorByType",
+        "updateDelay",
+        "setProposalTypeDepositThresholdPercentage",
+        "setProposalTypeVotingThreshold",
+        "upgradeToAndCall",
+      ],
       Treasury: ["transferB3TR"],
-      B3TRGovernor: ["upgradeToAndCall"],
+      XAllocationVoting: [
+        "updateQuorumNumerator",
+        "setBaseAllocationPercentage",
+        "setAppSharesCap",
+        "setVotingThreshold",
+      ],
+      X2EarnAppsV1: ["addApp", "setVotingEligibility"],
+      X2EarnApps: ["setVotingEligibility"],
     },
-    EMISSIONS_CYCLE_DURATION: 60480, // blocks - 60480 blocks - 1 week.
-    EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
-    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every cycle
-    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_TREASURY_PERCENTAGE: 8750, // 87.5% of the emissions go to the treasury during pilot show
+    EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
+    EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every x-allocation decay period
+    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every vote 2 earn decay period
+    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 12, // every 12 cycles
+    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 50, // every 50 cycles
+    EMISSIONS_TREASURY_PERCENTAGE: 2500, // 25% of the emissions go to the treasury
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
     EMISSIONS_IS_NOT_ALIGNED: true,
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
-    CONTRACTS_ADMIN_ADDRESS: "0x66e9709bc01b8c0afc99a7dc513f501821306e85",
-    VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //temporarily pointing to trasury, then updated in the deploy script to point to the voterReward contract
-    INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
-    GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
+
+    CONTRACTS_ADMIN_ADDRESS: "0x66E9709bc01B8c0AfC99a7dC513f501821306E85", //1st account from mnemonic of testnet staging wallet
+    VOTE_2_EARN_POOL_ADDRESS: "0xeaE35dfE902C5D1a44e6b4080224a6621319A671", //2nd account from mnemonic of testnet staging wallet
+
+    INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
+
+    GM_NFT_BASE_URI: "ipfs://bafybeicz4jdfmdksq537a3cumwprvaprfuy2unc34havamwdrl7dcnnami/metadata/", // IPFS base URI for the GM NFT
+
+    /*
+      Vechain Node => Free Upgrade Level
+      None => 1
+      Strength => 2
+      Thunder => 4
+      Mjolnir => 6
+      VeThorX => 2
+      StrengthX => 4
+      ThunderX => 6
+      MjolnirX => 7
+    */
+    GM_NFT_NODE_TO_FREE_LEVEL: [1, 2, 4, 6, 2, 4, 6, 7],
+
     /*
       Level => B3TR Required
+
       2 (Moon) => 10,000 B3TR
       3 (Mercury) => 25,000 B3TR
       4 (Venus) => 50,000 B3TR
@@ -70,24 +106,13 @@ export function createTestnetConfig() {
       25000000000000000000000000n,
     ],
 
-    /*
-      Vechain Node => Free Upgrade Level
-      None => 1
-      Strength => 2
-      Thunder => 4
-      Mjolnir => 6
-      VeThorX => 2
-      StrengthX => 4
-      ThunderX => 6
-      MjolnirX => 7
-    */
-    GM_NFT_NODE_TO_FREE_LEVEL: [1, 2, 4, 6, 2, 4, 6, 7],
-
     GM_NFT_MAX_LEVEL: 1,
 
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+
     /*
       Level => Percentage Multiplier
+
       2 (Moon) => 10% (1.1x)
       3 (Mercury) => 20% (1.2x)
       4 (Venus) => 50% (1.5x)
@@ -99,19 +124,24 @@ export function createTestnetConfig() {
       10 (Galaxy) => 2400% (25x)
     */
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
+
     XAPP_BASE_URI: "ipfs://",
 
     /*
       Token transfer limits. These values are not final and are for testing purposes only.
     */
-    TREASURY_TRANSFER_LIMIT_VET: BigInt("0"),
-    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("0"),
-    TREASURY_TRANSFER_LIMIT_VTHO: BigInt("0"),
-    TREASURY_TRANSFER_LIMIT_VOT3: BigInt("0"),
+    TREASURY_TRANSFER_LIMIT_VET: BigInt("200000000000000000000000"), // 200,000 VET
+    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("200000000000000000000000"), // 200,000 B3TR
+    TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
+    TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
+
+    // Migration
+    MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
+    MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
 
     // Endorsement
     VECHAIN_NODES_CONTRACT_ADDRESS: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c", // The contract address of the VeChainNodes contract on testnet
-    XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds (blocks)
+    XAPP_GRACE_PERIOD: 17280, // 2 days -> max time in blocks to be unendorsed by node before being removed from the XAlloction voting rounds
     X_2_EARN_INITIAL_IMPACT_KEYS: [
       "carbon",
       "water",
@@ -135,7 +165,11 @@ export function createTestnetConfig() {
 
     X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
 
-    MULTI_SIG_SIGNERS: [],
+    MULTI_SIG_SIGNERS: [
+      "0x66E9709bc01B8c0AfC99a7dC513f501821306E85",
+      "0xeaE35dfE902C5D1a44e6b4080224a6621319A671",
+      "0x2ac2A050C45239159dBADab740A52e0A098a7ADD",
+    ],
 
     GM_PERCENTAGE_OF_TREASURY: 2500, // 25% of the treasury will be used for GM Holder Rewards
 
