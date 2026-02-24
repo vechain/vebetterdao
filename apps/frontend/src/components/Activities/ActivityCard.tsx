@@ -8,6 +8,8 @@ import { GmUpgradeActivityCard } from "./GmUpgradeActivityCard"
 import { GrantActivityCard } from "./GrantActivityCard"
 import { ProposalActivityCard } from "./ProposalActivityCard"
 import { RoundActivityCard } from "./RoundActivityCard"
+import { UserAllocationVoteCard } from "./UserAllocationVoteCard"
+import { UserProposalVoteCard } from "./UserProposalVoteCard"
 
 type Props = {
   activity: ActivityItem
@@ -39,5 +41,9 @@ export const ActivityCard: React.FC<Props> = ({ activity }) => {
       return <GmUpgradeActivityCard activity={activity} />
     case ActivityType.EMISSIONS_DECREASED:
       return <EmissionsActivityCard activity={activity} />
+    case ActivityType.USER_ALLOCATION_VOTE_CAST:
+      return <UserAllocationVoteCard activity={activity} />
+    case ActivityType.USER_PROPOSAL_VOTE_CAST:
+      return <UserProposalVoteCard activity={activity} />
   }
 }
