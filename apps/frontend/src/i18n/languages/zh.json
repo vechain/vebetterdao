@@ -229,6 +229,7 @@
   "As {{nodeType}} holder, you have {{value}} available points to endorse Apps": "作为{{nodeType}}持有者，您有{{value}}个可用点数来背书应用",
   "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem.": "作为节点持有者，您的独特NFT分数可以用于背书生态系统内您选择的单一应用。",
   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.": "作为节点的拥有者，您可以使用您的积分来背书应用，并帮助它们在分配轮次中获得投票。",
+  "Asset composition": "资产组成",
   "Assets": "资产",
   "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "资产不应包含标志、品牌、文字或与应用程序目的无关的对象/元素。",
   "Assign a manager to help operate this node.": "分配一名管理者协助运营此节点。",

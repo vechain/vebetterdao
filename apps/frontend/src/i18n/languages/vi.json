@@ -229,6 +229,7 @@
   "As {{nodeType}} holder, you have {{value}} available points to endorse Apps": "Là người giữ {{nodeType}}, bạn có {{value}} điểm có sẵn để ủng hộ Ứng dụng",
   "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem.": "Là một người nắm giữ Node, điểm số NFT độc nhất của bạn có thể được dùng để ủng hộ cho một ứng dụng duy nhất mà bạn chọn trong hệ sinh thái.",
   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.": "Là chủ sở hữu của một Node, bạn có thể sử dụng điểm của mình để ủng hộ ứng dụng và giúp chúng được bình chọn trong các vòng phân bổ.",
+  "Asset composition": "Cấu trúc tài sản",
   "Assets": "Tài sản",
   "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Tài sản không nên chứa logo, thương hiệu, văn bản hoặc bất kỳ đối tượng/phần tử nào không liên quan đến mục đích của ứng dụng.",
   "Assign a manager to help operate this node.": "Chỉ định người quản lý để giúp vận hành nút này.",

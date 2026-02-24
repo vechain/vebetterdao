@@ -229,6 +229,7 @@
   "As {{nodeType}} holder, you have {{value}} available points to endorse Apps": "{{nodeType}}ホルダーとして、アプリを支持するために{{value}}の利用可能なポイントがあります",
   "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem.": "ノード保有者として、あなたのユニークなNFTスコアは、エコシステム内で選択した一つのアプリを支持するために使用できます。",
   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.": "ノードの所有者として、ポイントを使用してアプリを支持し、アロケーションラウンドでの投票を支援できます。",
+  "Asset composition": "資産構成",
   "Assets": "資産",
   "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "アセットには、ロゴ、ブランド、テキスト、およびアプリの目的に関連しないオブジェクト/要素を含めないでください。",
   "Assign a manager to help operate this node.": "このノードの運用を助けるためにマネージャーを割り当ててください。",

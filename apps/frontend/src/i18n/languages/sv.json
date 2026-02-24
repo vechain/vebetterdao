@@ -229,6 +229,7 @@
   "As {{nodeType}} holder, you have {{value}} available points to endorse Apps": "Som {{nodeType}} innehavare har du {{value}} tillgängliga poäng för att stödja Appar",
   "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem.": "Som Node-innehavare kan din unika NFT-poäng användas för att stödja en enda app av ditt val inom ekosystemet.",
   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.": "Som ägare av en Nod kan du använda dina poäng för att stödja appar och hjälpa dem att bli röstade i allokeringsrundor.",
+  "Asset composition": "Tillgångssammansättning",
   "Assets": "Tillgångar",
   "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Tillgångar bör inte innehålla logotyper, varumärken, text, eller några orelaterade objekt/element till appens syfte.",
   "Assign a manager to help operate this node.": "Tilldela en chef för att hjälpa till att driva denna nod.",

@@ -229,6 +229,7 @@
   "As {{nodeType}} holder, you have {{value}} available points to endorse Apps": "{{nodeType}} sahibi olarak, Uygulamaları onaylamak için {{value}} kullanılabilir puanınız var",
   "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem.": "Bir Node sahibi olarak, benzersiz NFT puanınızı ekosistem içerisindeki bir uygulamayı onaylamak için kullanabilirsiniz.",
   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.": "Bir Node'un sahibi olarak, puanlarınızı kullanarak uygulamaları onaylayabilir ve tahsis turlarında oy alınmasına yardımcı olabilirsiniz.",
+  "Asset composition": "Varlık bileşimi",
   "Assets": "Varlıklar",
   "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Varlıklar, uygulamanın amacıyla ilgisiz logolar, markalar, metin veya diğer nesne/öğeler içermemelidir.",
   "Assign a manager to help operate this node.": "Bu düğümün işletilmesine yardımcı olacak bir yönetici atayın.",
