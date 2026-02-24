@@ -11,13 +11,13 @@ const config = getConfig()
 const treasuryAddress = config.treasuryContractAddress.toLowerCase()
 const baseUrl = config.indexerUrl?.replace("/api/v1", "") ?? ""
 
-export type BalancePeriod = "1M" | "3M" | "1Y" | "ALL"
+export type BalancePeriod = "1M" | "3M" | "1Y" | "All"
 
 const PERIOD_SECONDS: Record<BalancePeriod, number> = {
   "1M": 30 * 24 * 60 * 60,
   "3M": 90 * 24 * 60 * 60,
   "1Y": 365 * 24 * 60 * 60,
-  ALL: 0,
+  All: 0,
 }
 
 const fetchAllTreasuryTransfers = async (after: number): Promise<TreasuryTransfer[]> => {
