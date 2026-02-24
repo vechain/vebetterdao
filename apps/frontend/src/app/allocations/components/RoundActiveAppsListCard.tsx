@@ -38,7 +38,6 @@ const RoundActiveAppCard = ({
   votesReceived,
   earnings,
   roundId,
-  percentage,
   onClick,
   isCurrentRound = false,
 }: Pick<AppWithVotes, "id" | "name" | "votesReceived" | "earnings"> & {
@@ -49,7 +48,7 @@ const RoundActiveAppCard = ({
   percentage?: number
 }) => {
   const { t } = useTranslation()
-  const { data } = useTotalXAppEarnings(roundId.toString(), id, percentage ?? 0)
+  const { data } = useTotalXAppEarnings(roundId.toString(), id)
   return (
     <Button unstyled focusVisibleRing="none" _focusWithin={{ bg: "card.hover" }} asChild onClick={() => onClick(id)}>
       <Card.Root

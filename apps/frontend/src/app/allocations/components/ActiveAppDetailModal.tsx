@@ -61,7 +61,6 @@ export const ActiveAppDetailModal = ({
   app,
   isOpen,
   onClose,
-  percentage,
 }: {
   roundId: number
   currentRoundId: number
@@ -87,18 +86,18 @@ export const ActiveAppDetailModal = ({
   } = app?.earnings || {}
   const {
     data: { dbaEarnings, totalEarnings },
-  } = useTotalXAppEarnings(roundId.toString(), app.id, percentage ?? 0)
+  } = useTotalXAppEarnings(roundId.toString(), app.id)
   const rewardsToUserPercentage =
     data?.totalRewardAmount && totalAmount ? Math.round((data?.totalRewardAmount * 100) / totalAmount) : 0
 
   let dynamicBaseAllocationAmount = totalAmount - (unallocatedAmount + teamAllocationAmount + rewardsAllocationAmount)
   dynamicBaseAllocationAmount = dynamicBaseAllocationAmount > 0 ? dynamicBaseAllocationAmount : 0
-  let dynamicBaseAllocationPercentage = (dynamicBaseAllocationAmount * 100) / totalAmount
+  let dynamicBaseAllocationPercentage = totalAmount > 0 ? (dynamicBaseAllocationAmount * 100) / totalAmount : 0
 
   if (isCurrentRound) {
     totalAmount = Number(totalEarnings)
     dynamicBaseAllocationAmount = Number(dbaEarnings)
-    dynamicBaseAllocationPercentage = (dynamicBaseAllocationAmount * 100) / totalAmount
+    dynamicBaseAllocationPercentage = totalAmount > 0 ? (dynamicBaseAllocationAmount * 100) / totalAmount : 0
   }
 
   const dataList: SectionData[] = [
