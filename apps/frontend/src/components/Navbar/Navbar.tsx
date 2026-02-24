@@ -6,7 +6,6 @@ import { useMemo } from "react"
 
 import { useAccountPermissions } from "../../api/contracts/account/hooks/useAccountPermissions"
 import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
-import { useGetUserNodes } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useHideOnScroll } from "../../hooks/useHideOnScroll"
 
 import { DesktopNavBar } from "./DesktopNavbar"
@@ -18,9 +17,7 @@ export const Navbar: React.FC = () => {
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
-  const { data: userNodesInfo } = useGetUserNodes()
   const isNavbarVisible = useHideOnScroll()
-  const hasNodes = (userNodesInfo?.nodesManagedByUser?.length ?? 0) > 0
   const routesToRender = useMemo(
     () =>
       Routes.filter(route => {
@@ -32,10 +29,11 @@ export const Navbar: React.FC = () => {
             : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true) &&
-          (route.name === "Nodes" ? !!account?.address && hasNodes : true)
+          (route.name === "Nodes" ? !!account?.address : true) &&
+          (route.name === "GM" ? !!account?.address : true)
         )
       }),
-    [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200, hasNodes],
+    [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
   )
   const parsedRoutesToRender = useMemo(() => {
     if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []

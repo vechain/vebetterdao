@@ -13,7 +13,6 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
-import { HelpCircle } from "iconoir-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 

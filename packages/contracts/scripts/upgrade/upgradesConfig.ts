@@ -20,7 +20,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Give ability to contract admins to call governance only functions",
@@ -30,6 +30,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards)",
       v7: "Proposal Execution + Grants Feature: Add extra voting power based on support tokens + deposit threshold cap + proposal type concept",
       v8: "Give ability to mark proposals as in development/completed",
+      v9: "Give ability to provide a reason for proposal cancellation",
     },
   },
   XAllocationVoting: {
@@ -70,7 +71,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Restricting one app per creator holding a creator NFT",
       v6: "Use NodeManagementV3",
       v7: "Replace NodeManagement with StargateNFT",
-      v8: "Refactor endorsement logic for size optimizations (no functional changes)",
+      v8: "Refactor for new endorsement system",
     },
   },
   "X2Earn Rewards Pool": {
@@ -128,9 +129,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "DBA Pool": {
     name: "dba-pool",
     configAddressField: "dbaPoolContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Add tracking of DBA rewards per app per round and seed function for historical data",
+      v3: "Merit-capped flat distribution with treasury overflow routing",
     },
   },
   "Grants Manager": {

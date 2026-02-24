@@ -12,10 +12,12 @@ import { useIsDepositReached } from "../../../../api/contracts/governance/hooks/
 import { useProposalInteractionDates } from "../../../../api/contracts/governance/hooks/useProposalInteractionDates"
 import { useProposalUserDeposit } from "../../../../api/contracts/governance/hooks/useProposalUserDeposit"
 import { useUserSingleProposalVoteEvent } from "../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useProposalCanceledEvent } from "../../../../hooks/proposals/common/useProposalCanceledEvent"
 import { useProposalEnrichedById } from "../../../../hooks/proposals/common/useProposalEnrichedById"
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 import { PageBreadcrumb } from "../../../components/PageBreadcrumb/PageBreadcrumb"
 
+import { ProposalCanceledAlert } from "./ProposalCanceledAlert/ProposalCanceledAlert"
 import { ProposalInteractionCard } from "./ProposalInteractionCard/ProposalInteractionCard"
 import { ProposalOverview } from "./ProposalOverview/ProposalOverview"
 import { ProposalOverviewHeader } from "./ProposalOverviewHeader/ProposalOverviewHeader"
@@ -38,6 +40,9 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
   const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
   const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
+  const isCanceled = proposal?.state === ProposalState.Canceled
+  const { data: canceledEvents } = useProposalCanceledEvent(isCanceled ? proposalId : "")
+  const cancelReason = canceledEvents?.[0]?.reason
   const { isMobile } = useBreakpoints()
   const { t } = useTranslation()
   const router = useRouter()
@@ -159,6 +164,8 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
             <Icon as={UilShareAlt} color="icon.subtle" />
           </IconButton>
         </HStack>
+
+        {isCanceled && <ProposalCanceledAlert reason={cancelReason} />}
 
         {/* Main Content Grid */}
         <Grid templateColumns="repeat(3, 1fr)" gap={"40px"} w="full">

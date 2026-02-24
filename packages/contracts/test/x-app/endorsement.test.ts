@@ -1307,10 +1307,10 @@ describe("X-Apps - Metadata and Endorsement - @shard15c", function () {
       // Should revert as not admin
       await catchRevert(x2EarnApps.connect(otherAccounts[3]).updateEndorsementScoreThreshold(1000))
 
-      // Update endorsement score threshold
+      // Threshold cannot exceed maxPointsPerApp; set max first
+      await x2EarnApps.connect(owner).setMaxPointsPerApp(1000)
       await x2EarnApps.connect(owner).updateEndorsementScoreThreshold(1000)
 
-      // Check updated endorsement score threshold
       expect(await x2EarnApps.endorsementScoreThreshold()).to.eql(BigInt(1000n))
     })
 

@@ -14,7 +14,7 @@ import { STARGATE_APP_URL } from "@/constants/links"
 
 import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
-export const NodeCard = ({ node, isClickable }: { node: UserNode; isClickable: boolean }) => {
+export const ProfileNodeCard = ({ node, isClickable }: { node: UserNode; isClickable: boolean }) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const { data: vnsData } = useVechainDomain(node?.manager)

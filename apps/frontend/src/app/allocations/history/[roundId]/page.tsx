@@ -1,10 +1,11 @@
-import { Heading, VStack, Text } from "@chakra-ui/react"
+import { Heading, VStack, Text, Separator } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
 import { RoundActiveAppsListCard } from "../../components/RoundActiveAppsListCard"
 import { RoundDistributionCard } from "../../components/tabs/round-info/RoundDistributionCard"
+import { RoundHistoryCard } from "../../components/tabs/round-info/RoundHistoryCard"
 import { UserVotingActivityCard } from "../../components/UserVotingActivityCard"
 import { AllocationRoundDetails, getHistoricalRoundData } from "../../lib/data"
 import { HistoryDetailSkeleton } from "../components/HistoryDetailSkeleton"
@@ -23,6 +24,7 @@ async function HistoryDetailContent({ roundIdParam }: { roundIdParam: string }) 
   }
 
   const roundDetails: AllocationRoundDetails = await getHistoricalRoundData(roundId)
+  const otherRounds = roundDetails.previous3RoundsEarnings.filter(r => r.roundId !== roundId)
 
   return (
     <VStack alignItems="stretch" w="full" gap={{ base: "3", md: "4" }}>
@@ -41,6 +43,17 @@ async function HistoryDetailContent({ roundIdParam }: { roundIdParam: string }) 
           roundId={roundDetails.id}
           apps={roundDetails.apps}
         />
+        {otherRounds.length > 0 && (
+          <>
+            <Separator />
+            <VStack alignItems="stretch" gap="3">
+              <Heading size="sm">{"Other rounds"}</Heading>
+              {otherRounds.map(round => (
+                <RoundHistoryCard key={round.roundId} round={round} />
+              ))}
+            </VStack>
+          </>
+        )}
       </VStack>
     </VStack>
   )

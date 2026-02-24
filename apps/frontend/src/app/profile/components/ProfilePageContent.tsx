@@ -12,13 +12,17 @@ import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 import { ProfileBalance } from "./ProfileBalance/ProfileBalance"
 import { ProfileBetterActions } from "./ProfileBetterActions/ProfileBetterActions"
+import { ProfileGMLevel } from "./ProfileGM/ProfileGMLevel"
 import { ProfileGovernance } from "./ProfileGovernance/ProfileGovernance"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts/ProfileLinkedAcounts"
+import { ProfileNodes } from "./ProfileNodes/ProfileNodes"
 
 enum Tab {
   Balance = "balance",
   BetterActions = "better-actions",
+  GM = "gm",
+  Nodes = "nodes",
   Governance = "governance",
   LinkedAccounts = "linked-accounts",
 }
@@ -48,13 +52,16 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   }, [searchParams])
 
   const tabs = useMemo(
-    () => [
-      { tab: Tab.Balance, label: t("Balance") },
-      { tab: Tab.BetterActions, label: t("Better Actions") },
-      { tab: Tab.Governance, label: t("Governance") },
-      { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
-    ],
-    [t],
+    () =>
+      [
+        { tab: Tab.Balance, label: t("Balance") },
+        { tab: Tab.BetterActions, label: t("Better Actions") },
+        !isConnectedUser && { tab: Tab.GM, label: t("GM") },
+        !isConnectedUser && { tab: Tab.Nodes, label: t("Nodes") },
+        { tab: Tab.Governance, label: t("Governance") },
+        { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
+      ].filter((t): t is { tab: Tab; label: string } => Boolean(t)),
+    [t, isConnectedUser],
   )
 
   const trackTabChange = (tab: Tab) => {
@@ -67,6 +74,12 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
           buttonClicked,
           buttonClickActions(ButtonClickProperties.EXPLORE_BETTER_ACTIONS_FROM_PROFILE),
         )
+        break
+      case Tab.GM:
+        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.EXPLORE_GM_FROM_PROFILE))
+        break
+      case Tab.Nodes:
+        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.EXPLORE_NODES_FROM_PROFILE))
         break
       case Tab.Governance:
         AnalyticsUtils.trackEvent(
@@ -137,6 +150,12 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         </Tabs.Content>
         <Tabs.Content value={Tab.BetterActions}>
           <ProfileBetterActions address={parsedAddress} />
+        </Tabs.Content>
+        <Tabs.Content value={Tab.GM}>
+          <ProfileGMLevel address={parsedAddress} />
+        </Tabs.Content>
+        <Tabs.Content value={Tab.Nodes}>
+          <ProfileNodes address={parsedAddress} />
         </Tabs.Content>
         <Tabs.Content value={Tab.Governance}>
           <ProfileGovernance address={parsedAddress} />

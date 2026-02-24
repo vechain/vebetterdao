@@ -33,6 +33,7 @@ import {
   AutoVotingLogic,
   DBAPool,
   DBAPoolV1,
+  DBAPoolV2,
   Stargate,
   AdministrationUtilsV6,
   EndorsementUtilsV6,
@@ -43,8 +44,7 @@ import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgrad
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import type { GovernanceLibraries } from "../../scripts/libraries/governanceLibraries"
 import type { PassportLibraries } from "../../scripts/libraries/passportLibraries"
-import { setWhitelistedFunctions } from "../../scripts/deploy/deployLatest"
-
+import { setWhitelistedFunctions } from "./whitelistGovernance"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
@@ -196,7 +196,17 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV7,
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
-    // V8 (latest)
+    // V8
+    GovernorClockLogicLibV8,
+    GovernorConfiguratorLibV8,
+    GovernorDepositLogicLibV8,
+    GovernorFunctionRestrictionsLogicLibV8,
+    GovernorProposalLogicLibV8,
+    GovernorQuorumLogicLibV8,
+    GovernorStateLogicLibV8,
+    GovernorVotesLogicLibV8,
+    GovernorGovernanceLogicLibV8,
+    // (latest)
     GovernorClockLogicLib,
     GovernorConfiguratorLib,
     GovernorDepositLogicLib,
@@ -824,6 +834,7 @@ export const getOrDeployContractInstances = async ({
       "B3TRGovernorV5",
       "B3TRGovernorV6",
       "B3TRGovernorV7",
+      "B3TRGovernorV8",
       "B3TRGovernor",
     ],
     [
@@ -867,9 +878,10 @@ export const getOrDeployContractInstances = async ({
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
       [], // Reserved for future configuration parameters; currently no values required
+      [], // v9
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -942,6 +954,16 @@ export const getOrDeployContractInstances = async ({
           GovernorVotesLogicV7: await GovernorVotesLogicLibV7.getAddress(),
         },
         {
+          GovernorClockLogicV8: await GovernorClockLogicLibV8.getAddress(),
+          GovernorConfiguratorV8: await GovernorConfiguratorLibV8.getAddress(),
+          GovernorDepositLogicV8: await GovernorDepositLogicLibV8.getAddress(),
+          GovernorFunctionRestrictionsLogicV8: await GovernorFunctionRestrictionsLogicLibV8.getAddress(),
+          GovernorProposalLogicV8: await GovernorProposalLogicLibV8.getAddress(),
+          GovernorQuorumLogicV8: await GovernorQuorumLogicLibV8.getAddress(),
+          GovernorStateLogicV8: await GovernorStateLogicLibV8.getAddress(),
+          GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
+        },
+        {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
           GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
           GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
@@ -990,13 +1012,19 @@ export const getOrDeployContractInstances = async ({
   await grantRoleTx.wait()
 
   // Upgrade to V2
+  const dbaPoolV2 = (await upgradeProxy("DBAPoolV1", "DBAPoolV2", await dbaPoolV1.getAddress(), [], {
+    version: 2,
+    logOutput: false,
+  })) as DBAPoolV2
+
+  // Upgrade to V3
   const dynamicBaseAllocationPool = (await upgradeProxy(
-    "DBAPoolV1",
+    "DBAPoolV2",
     "DBAPool",
-    await dbaPoolV1.getAddress(),
-    [], // No initialization args for V2
+    await dbaPoolV2.getAddress(),
+    [owner.address], // treasuryAddress
     {
-      version: 2,
+      version: 3,
       logOutput: false,
     },
   )) as DBAPool
@@ -1251,6 +1279,15 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV7: GovernorQuorumLogicLibV7,
     governorStateLogicLibV7: GovernorStateLogicLibV7,
     governorVotesLogicLibV7: GovernorVotesLogicLibV7,
+    governorClockLogicLibV8: GovernorClockLogicLibV8,
+    governorConfiguratorLibV8: GovernorConfiguratorLibV8,
+    governorDepositLogicLibV8: GovernorDepositLogicLibV8,
+    governorFunctionRestrictionsLogicLibV8: GovernorFunctionRestrictionsLogicLibV8,
+    governorGovernanceLogicLibV8: GovernorGovernanceLogicLibV8,
+    governorProposalLogicLibV8: GovernorProposalLogicLibV8,
+    governorQuorumLogicLibV8: GovernorQuorumLogicLibV8,
+    governorStateLogicLibV8: GovernorStateLogicLibV8,
+    governorVotesLogicLibV8: GovernorVotesLogicLibV8,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,

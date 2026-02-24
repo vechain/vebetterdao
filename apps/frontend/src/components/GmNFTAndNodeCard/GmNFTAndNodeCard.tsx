@@ -71,18 +71,14 @@ export const GmNFTAndNodeCard = () => {
               )}
             />
           ) : (
-            <Stack
-              gap="4"
-              direction={{ base: "column", md: "row" }}
-              align={{ base: "stretch", md: "center" }}
-              justify="center">
+            <Stack gap="4" direction={{ base: "column", md: "row" }} align="stretch" justify="center">
               {userGMs && userGMs?.length > 0 ? (
                 <GmCard
                   subtitle={t("Galaxy Member")}
                   title={selectedGM?.metadata?.name || "name"}
                   footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
                   images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
-                  href={`/galaxy-member/${selectedGM?.tokenId}`}
+                  href="/galaxy-member"
                 />
               ) : (
                 <GmEmptyStateCard

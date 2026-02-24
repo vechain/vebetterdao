@@ -1,10 +1,23 @@
 "use client"
 
-import { Button, Heading, HStack, Icon, IconButton, Image, LinkBox, LinkOverlay, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Image,
+  LinkBox,
+  LinkOverlay,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuClock, LuPencil } from "react-icons/lu"
+import { LuLock, LuPencil } from "react-icons/lu"
 
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
@@ -22,6 +35,7 @@ import { EndorseAppsModal } from "./EndorseAppsModal"
 
 type NodeEndorsedAppsProps = {
   node: UserNode
+  readOnly?: boolean
 }
 
 const EndorsedAppRow = ({
@@ -29,16 +43,18 @@ const EndorsedAppRow = ({
   appId,
   points,
   endorsedAtRound,
+  readOnly,
 }: {
   node: UserNode
   appId: string
   points: bigint
   endorsedAtRound: bigint
+  readOnly?: boolean
 }) => {
   const { t } = useTranslation()
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const { data: metadata } = useXAppMetadata(appId)
+  const { data: metadata, isPending: isMetadataLoading } = useXAppMetadata(appId)
   const { status: endorsementStatus } = useAppEndorsementStatus(appId)
   const { data: cooldownPeriodData } = useCooldownPeriod()
   const { data: currentRoundStr } = useCurrentAllocationsRoundId()
@@ -54,32 +70,42 @@ const EndorsedAppRow = ({
   const isInCooldown = cooldownRemainingRounds > BigInt(0)
 
   return (
-    <VStack bg="bg.subtle" p={4} rounded="xl" gap={3} w="full" align="stretch">
-      <HStack gap={3} w="full" align="center">
+    <VStack bg="bg.subtle" p={{ base: 3, md: 3 }} rounded="xl" gap={{ base: 2, md: 3 }} w="full" align="stretch">
+      <HStack gap={{ base: 2, md: 3 }} w="full" align="center">
         <LinkBox flexShrink={0}>
           <LinkOverlay asChild>
             <NextLink href={`/apps/${appId}`} />
           </LinkOverlay>
-          <Image
-            src={convertUriToUrl(metadata?.logo ?? "")}
-            alt={metadata?.name ?? ""}
-            w="11"
-            h="11"
-            rounded="lg"
-            cursor="pointer"
-          />
+          <Skeleton loading={isMetadataLoading} w={{ base: "9", md: "11" }} h={{ base: "9", md: "11" }} rounded="lg">
+            <Image
+              src={convertUriToUrl(metadata?.logo ?? "")}
+              alt={metadata?.name ?? ""}
+              w={{ base: "9", md: "11" }}
+              h={{ base: "9", md: "11" }}
+              rounded="lg"
+              cursor="pointer"
+            />
+          </Skeleton>
         </LinkBox>
-        <Text textStyle="md" fontWeight="semibold" lineClamp={1} flex={1} minW={0}>
-          {metadata?.name ?? appId}
-        </Text>
-        <Text textStyle="md" fontWeight="semibold" flexShrink={0}>
+        {isMetadataLoading ? (
+          <Box flex={1} minW={0}>
+            <Skeleton loading={isMetadataLoading} height="5" width="100px"></Skeleton>
+          </Box>
+        ) : (
+          <Text textStyle="md" fontWeight="semibold" lineClamp={1} flex={1} minW={0}>
+            {metadata?.name ?? appId}
+          </Text>
+        )}
+        <Text textStyle="md" fontWeight="semibold" flexShrink={0} flex={1} minW={0}>
           {points.toString()} {t("pts")}
         </Text>
-        <IconButton aria-label={t("Edit endorsement")} variant="ghost" size="xs" onClick={() => setIsEditOpen(true)}>
-          <Icon as={LuPencil} boxSize={4} color="text.subtle" />
-        </IconButton>
+        {!readOnly && (
+          <IconButton aria-label={t("Edit endorsement")} variant="ghost" size="xs" onClick={() => setIsEditOpen(true)}>
+            <Icon as={LuPencil} boxSize={4} color="text.subtle" />
+          </IconButton>
+        )}
       </HStack>
-      <HStack gap={3} w="full" align="center" flexWrap="wrap">
+      <HStack gap={2} w="full" align="center" flexWrap="wrap">
         <EndorsementStatusCallout
           endorsementStatus={endorsementStatus as XAppStatus}
           appId={appId}
@@ -91,10 +117,10 @@ const EndorsedAppRow = ({
           whiteSpace="nowrap"
         />
         {isInCooldown && (
-          <HStack gap={1} borderLeftWidth="1px" borderColor="border" pl={3} align="center">
-            <Icon as={LuClock} boxSize={4} color="fg.warning" />
+          <HStack gap={1} align="center">
+            <Icon as={LuLock} boxSize={3} color="fg.warning" />
             <Text textStyle="sm" color="fg.warning">
-              {t("In cooldown")}
+              {t("Points locked")}
             </Text>
           </HStack>
         )}
@@ -108,19 +134,21 @@ const EndorsedAppRow = ({
         appId={appId}
         userNode={node}
       />
-      <EditEndorsementModal
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        node={node}
-        appId={appId}
-        currentPoints={points}
-        endorsedAtRound={endorsedAtRound}
-      />
+      {!readOnly && (
+        <EditEndorsementModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          node={node}
+          appId={appId}
+          currentPoints={points}
+          endorsedAtRound={endorsedAtRound}
+        />
+      )}
     </VStack>
   )
 }
 
-export const NodeEndorsedApps = ({ node }: NodeEndorsedAppsProps) => {
+export const NodeEndorsedApps = ({ node, readOnly }: NodeEndorsedAppsProps) => {
   const { t } = useTranslation()
   const [isEndorseOpen, setIsEndorseOpen] = useState(false)
   const endorsements = node?.activeEndorsements ?? []
@@ -146,9 +174,14 @@ export const NodeEndorsedApps = ({ node }: NodeEndorsedAppsProps) => {
                 appId={e.appId}
                 points={e.points}
                 endorsedAtRound={e.endorsedAtRound}
+                readOnly={readOnly}
               />
             ))}
           </VStack>
+        ) : readOnly ? (
+          <Text textStyle="sm" color="text.subtle">
+            {t("No endorsement events")}
+          </Text>
         ) : (
           <HStack justify="space-between" w="full">
             <Text textStyle="sm" color="text.subtle">
@@ -160,7 +193,7 @@ export const NodeEndorsedApps = ({ node }: NodeEndorsedAppsProps) => {
           </HStack>
         )}
       </VStack>
-      <EndorseAppsModal isOpen={isEndorseOpen} onClose={() => setIsEndorseOpen(false)} node={node} />
+      {!readOnly && <EndorseAppsModal isOpen={isEndorseOpen} onClose={() => setIsEndorseOpen(false)} node={node} />}
     </>
   )
 }

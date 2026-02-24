@@ -29,6 +29,7 @@ import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingG
 import { IStargateNFT } from "../../mocks/Stargate/interfaces/IStargateNFT.sol";
 import { DataTypes } from "../../mocks/Stargate/StargateNFT/libraries/DataTypes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { X2EarnAppsStorageTypes } from "./X2EarnAppsStorageTypes.sol";
 
 /**
@@ -83,6 +84,9 @@ library EndorsementUtils {
   error InvalidPointsAmount();
   error MigrationAlreadyCompleted();
   error InvalidEndorsementIndex(uint256 nodeId, bytes32 appId);
+  error MaxPointsPerAppBelowThreshold(uint256 maxPoints, uint256 threshold);
+  error ThresholdExceedsMaxPointsPerApp(uint256 threshold, uint256 maxPointsPerApp);
+  error FutureLookup(uint256 timepoint, uint256 currentBlock);
 
   // ------------------------------- Events -------------------------------
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
@@ -106,7 +110,23 @@ library EndorsementUtils {
    * @return The total endorsement points the app has received.
    */
   function getScore(bytes32 appId) external view returns (uint256) {
-    return X2EarnAppsStorageTypes._getEndorsementStorage()._appEndorsementScore[appId];
+    return uint256(X2EarnAppsStorageTypes._getEndorsementStorage()._appEndorsementScoreCheckpoints[appId].latest());
+  }
+
+  // ------------------------------- Getter Functions -------------------------------
+
+  /**
+   * @notice Returns the endorsement score for an app at a specific block number.
+   * @param appId The unique identifier of the app.
+   * @param timepoint The block number to query.
+   * @return The endorsement score at the given timepoint.
+   */
+  function getScoreAtTimepoint(bytes32 appId, uint256 timepoint) external view returns (uint256) {
+    X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+    if (timepoint > block.number) {
+      revert FutureLookup(timepoint, block.number);
+    }
+    return uint256($._appEndorsementScoreCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)));
   }
 
   /**
@@ -426,10 +446,14 @@ library EndorsementUtils {
 
   /**
    * @notice Updates the minimum endorsement score required for app eligibility.
+   * @dev Reverts if scoreThreshold > maxPointsPerApp (would make threshold unreachable).
    * @param scoreThreshold The new endorsement score threshold.
    */
   function updateEndorsementScoreThreshold(uint256 scoreThreshold) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+    if (scoreThreshold > $._maxPointsPerApp) {
+      revert ThresholdExceedsMaxPointsPerApp(scoreThreshold, $._maxPointsPerApp);
+    }
     emit EndorsementScoreThresholdUpdated($._endorsementScoreThreshold, scoreThreshold);
     $._endorsementScoreThreshold = scoreThreshold;
   }
@@ -458,10 +482,14 @@ library EndorsementUtils {
   /**
    * @notice Sets the maximum total points an app can receive from all endorsers.
    * @dev Provides a buffer above the threshold to prevent over-endorsement.
+   *      Reverts if maxPoints < endorsementScoreThreshold (would make threshold unreachable).
    * @param maxPoints The new max points per app (default 110).
    */
   function setMaxPointsPerApp(uint256 maxPoints) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
+    if (maxPoints < $._endorsementScoreThreshold) {
+      revert MaxPointsPerAppBelowThreshold(maxPoints, $._endorsementScoreThreshold);
+    }
     emit MaxPointsPerAppUpdated($._maxPointsPerApp, maxPoints);
     $._maxPointsPerApp = maxPoints;
   }
@@ -515,9 +543,10 @@ library EndorsementUtils {
 
     uint256 currentAppPoints = _getNodePointsForAppInternal($, nodeId, appId);
     _updateEndorsement($, nodeId, appId, points, currentAppPoints, $._xAllocationVotingGovernor.currentRoundId());
-    $._appEndorsementScore[appId] += points;
+    uint256 newScore = _getScore($, appId) + points;
+    _setScore($, appId, newScore);
 
-    if ($._appEndorsementScore[appId] >= $._endorsementScoreThreshold) {
+    if (newScore >= $._endorsementScoreThreshold) {
       _updateStatusIfThresholdMet($, appsStorage, appId, appExists, isEligibleNow, isBlacklisted);
     }
 
@@ -553,8 +582,9 @@ library EndorsementUtils {
     if (currentAppPoints + points > $._maxPointsPerNodePerApp) {
       revert ExceedsMaxPointsPerNode(nodeId, appId, $._maxPointsPerNodePerApp);
     }
-    if ($._appEndorsementScore[appId] + points > $._maxPointsPerApp) {
-      revert ExceedsMaxPointsPerApp(appId, $._appEndorsementScore[appId], $._maxPointsPerApp);
+    uint256 currentScore = _getScore($, appId);
+    if (currentScore + points > $._maxPointsPerApp) {
+      revert ExceedsMaxPointsPerApp(appId, currentScore, $._maxPointsPerApp);
     }
   }
 
@@ -603,55 +633,52 @@ library EndorsementUtils {
     uint48 clock
   ) external returns (bool stillEligible) {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
-    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
 
-    if ($._endorsementsPaused) revert EndorsementsPaused();
-    if (appsStorage._apps[appId].id == bytes32(0)) revert X2EarnNonexistentApp(appId);
+    {
+      X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
+      if ($._endorsementsPaused) revert EndorsementsPaused();
+      if (appsStorage._apps[appId].id == bytes32(0)) revert X2EarnNonexistentApp(appId);
+    }
+
     if (!$._stargateNFT.tokenExists(nodeId) || !$._stargateNFT.isTokenManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
 
-    // Get current endorsement
-    X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
-    if (endorsements.length == 0) revert X2EarnNonEndorser();
+    uint256 pointsToRemove;
+    {
+      X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
+      if (endorsements.length == 0) revert X2EarnNonEndorser();
 
-    uint256 index = $._activeEndorsementsAppIndex[nodeId][appId];
-    if (index >= endorsements.length || endorsements[index].appId != appId) {
-      revert X2EarnNonEndorser();
+      uint256 index = $._activeEndorsementsAppIndex[nodeId][appId];
+      if (index >= endorsements.length || endorsements[index].appId != appId) {
+        revert X2EarnNonEndorser();
+      }
+
+      if ($._xAllocationVotingGovernor.currentRoundId() < endorsements[index].endorsedAtRound + $._cooldownPeriod) {
+        revert CooldownNotExpired(nodeId, appId);
+      }
+
+      uint256 currentPoints = endorsements[index].points;
+      pointsToRemove = points == 0 ? currentPoints : points;
+      if (pointsToRemove > currentPoints) revert InvalidPointsAmount();
+
+      if (pointsToRemove == currentPoints) {
+        _removeEndorsement($, nodeId, appId, index);
+      } else {
+        endorsements[index].points -= pointsToRemove;
+      }
     }
 
-    // Check cooldown (per-app, measured in rounds)
-    if ($._xAllocationVotingGovernor.currentRoundId() < endorsements[index].endorsedAtRound + $._cooldownPeriod) {
-      revert CooldownNotExpired(nodeId, appId);
-    }
-
-    uint256 currentPoints = endorsements[index].points;
-    uint256 pointsToRemove = points == 0 ? currentPoints : points;
-
-    if (pointsToRemove > currentPoints) {
-      revert InvalidPointsAmount();
-    }
-
-    // Update or remove endorsement
-    if (pointsToRemove == currentPoints) {
-      // Remove entire endorsement (swap and pop)
-      _removeEndorsement($, nodeId, appId, index);
-    } else {
-      // Partial unendorse
-      endorsements[index].points -= pointsToRemove;
-    }
-
-    // Update app score
-    $._appEndorsementScore[appId] -= pointsToRemove;
+    uint256 newScore = _getScore($, appId) - pointsToRemove;
+    _setScore($, appId, newScore);
 
     emit AppUnendorsed(appId, nodeId, pointsToRemove);
 
-    // Check if still eligible
     if (!isEligibleNow || isBlacklisted) {
       return isEligibleNow;
     }
 
-    if ($._appEndorsementScore[appId] < $._endorsementScoreThreshold) {
+    if (newScore < $._endorsementScoreThreshold) {
       return _updateStatusIfThresholdNotMetWithVote($, appId, isBlacklisted, isEligibleNow, clock);
     }
 
@@ -676,21 +703,28 @@ library EndorsementUtils {
     uint48 clock
   ) public returns (bool stillEligible) {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
-    X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
 
-    if (appsStorage._apps[appId].id == bytes32(0)) revert X2EarnNonexistentApp(appId);
-
-    X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
-    if (endorsements.length == 0) revert X2EarnNonEndorser();
-
-    uint256 index = $._activeEndorsementsAppIndex[nodeId][appId];
-    if (index >= endorsements.length || endorsements[index].appId != appId) {
-      revert X2EarnNonEndorser();
+    {
+      X2EarnAppsStorageTypes.AppsStorageStorage storage appsStorage = X2EarnAppsStorageTypes._getAppsStorageStorage();
+      if (appsStorage._apps[appId].id == bytes32(0)) revert X2EarnNonexistentApp(appId);
     }
 
-    uint256 pointsToRemove = endorsements[index].points;
-    _removeEndorsement($, nodeId, appId, index);
-    $._appEndorsementScore[appId] -= pointsToRemove;
+    uint256 pointsToRemove;
+    {
+      X2EarnAppsStorageTypes.Endorsement[] storage endorsements = $._activeEndorsements[nodeId];
+      if (endorsements.length == 0) revert X2EarnNonEndorser();
+
+      uint256 index = $._activeEndorsementsAppIndex[nodeId][appId];
+      if (index >= endorsements.length || endorsements[index].appId != appId) {
+        revert X2EarnNonEndorser();
+      }
+
+      pointsToRemove = endorsements[index].points;
+      _removeEndorsement($, nodeId, appId, index);
+    }
+
+    uint256 newScore = _getScore($, appId) - pointsToRemove;
+    _setScore($, appId, newScore);
 
     emit AppUnendorsed(appId, nodeId, pointsToRemove);
 
@@ -698,7 +732,7 @@ library EndorsementUtils {
       return isEligibleNow;
     }
 
-    if ($._appEndorsementScore[appId] < $._endorsementScoreThreshold) {
+    if (newScore < $._endorsementScoreThreshold) {
       return _updateStatusIfThresholdNotMetWithVote($, appId, isBlacklisted, isEligibleNow, clock);
     }
 
@@ -812,19 +846,10 @@ library EndorsementUtils {
     }
 
     // Update stored score
-    $._appEndorsementScore[appId] = validScore;
+    _setScore($, appId, validScore);
     return validScore;
   }
 
-  /**
-   * @notice Seeds an endorsement during migration (bypasses validation).
-   * @dev Only callable before migrationCompleted is set to true. Requires MIGRATION_ROLE.
-   *      Guards against duplicates: if (nodeId, appId) already exists, updates points instead of pushing.
-   *      Emits standard AppEndorsed event for indexer compatibility.
-   * @param appId The unique identifier of the app to endorse.
-   * @param nodeId The unique identifier of the endorsing node.
-   * @param points The number of points to endorse with.
-   */
   function seedEndorsement(bytes32 appId, uint256 nodeId, uint256 points) external {
     X2EarnAppsStorageTypes.EndorsementStorage storage $ = X2EarnAppsStorageTypes._getEndorsementStorage();
 
@@ -846,7 +871,7 @@ library EndorsementUtils {
       endorsements[existingIndex].endorsedAtRound = currentRound;
 
       // Adjust app score: remove old, add new
-      $._appEndorsementScore[appId] = $._appEndorsementScore[appId] - oldPoints + points;
+      _setScore($, appId, _getScore($, appId) - oldPoints + points);
     } else {
       // Create new endorsement
       endorsements.push(
@@ -858,7 +883,7 @@ library EndorsementUtils {
       $._appEndorserNodes[appId].push(nodeId);
       $._appEndorserNodesIndex[appId][nodeId] = $._appEndorserNodes[appId].length - 1;
 
-      $._appEndorsementScore[appId] += points;
+      _setScore($, appId, _getScore($, appId) + points);
     }
 
     // Get endorser address from node manager
@@ -952,6 +977,17 @@ library EndorsementUtils {
     }
 
     $._appGracePeriodStart[appId] = 0;
+  }
+
+  function _getScore(
+    X2EarnAppsStorageTypes.EndorsementStorage storage $,
+    bytes32 appId
+  ) private view returns (uint256) {
+    return uint256($._appEndorsementScoreCheckpoints[appId].latest());
+  }
+
+  function _setScore(X2EarnAppsStorageTypes.EndorsementStorage storage $, bytes32 appId, uint256 newScore) private {
+    $._appEndorsementScoreCheckpoints[appId].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newScore));
   }
 
   function _updateStatusIfThresholdNotMetWithVote(

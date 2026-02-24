@@ -67,7 +67,7 @@ export const RewardsCalculatorModal = ({ isOpen, onClose }: Props) => {
         <GalaxyCarrousel setSelectedGMLevel={setSelectedGMLevel} usersGM={usersGM} />
 
         <VStack gap={4} w="full" align="stretch">
-          <Card.Root variant="subtle">
+          <Card.Root variant="subtle" css={{ _hover: { bg: "card.subtle" } }}>
             <Card.Body gap={3}>
               <Heading size="xl">{t("Potential Rewards with {{name}}", { name: selectedGMName })}</Heading>
               <HStack alignItems="center" borderLeft="4px" borderColor="brand.secondary" pl={4}>
@@ -85,7 +85,7 @@ export const RewardsCalculatorModal = ({ isOpen, onClose }: Props) => {
             </Card.Body>
           </Card.Root>
 
-          <Card.Root variant="subtle">
+          <Card.Root variant="subtle" css={{ _hover: { bg: "card.subtle" } }}>
             <Card.Body gap={3}>
               <Heading size="xl">{t("Estimated Rewards with your current GM level")}</Heading>
               <HStack alignItems="center" borderLeft="4px" borderColor="brand.secondary" pl={4}>

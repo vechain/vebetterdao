@@ -25,7 +25,6 @@ import {
 } from "../helpers/common"
 import { GRANT_PROPOSAL_TYPE, setupProposer, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
 
-// Skipped: v8-upgrade.test.ts covers the full V1→V8 upgrade path which includes V7
 describe.skip("Governance - V7 Upgrade - @shard4f", function () {
   it("Should preserve proposal data through version upgrades and add proposal type support", async () => {
     const config = createLocalConfig()

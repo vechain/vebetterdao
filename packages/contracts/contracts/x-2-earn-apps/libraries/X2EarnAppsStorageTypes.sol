@@ -81,7 +81,7 @@ library X2EarnAppsStorageTypes {
     mapping(uint256 => bytes32) _nodeToEndorsedApp_DEPRECATED; // DEPRECATED V8: Use _activeEndorsements instead
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in BLOCKS
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
-    mapping(bytes32 => uint256) _appScores_DEPRECATED; // DEPRECATED V8: Use _appEndorsementScore instead
+    mapping(bytes32 => uint256) _appScores_DEPRECATED; // DEPRECATED V8: Use _appEndorsementScoreCheckpoints instead
     mapping(bytes32 => PassportTypes.APP_SECURITY) _appSecurity; // The security score of each app
     INodeManagementV3 _nodeManagementContract; // The token auction contract
     IVeBetterPassport _veBetterPassport; // The VeBetterPassport contract
@@ -94,13 +94,14 @@ library X2EarnAppsStorageTypes {
     // Notice: _activeEndorsements, _appEndorserNodes, _appEndorserNodesIndex need to be updated together, otherwise the mapping will be corrupted.
     mapping(uint256 nodeId => Endorsement[]) _activeEndorsements; // All active endorsements by a node
     mapping(uint256 nodeId => mapping(bytes32 appId => uint256 index)) _activeEndorsementsAppIndex; // Index lookup for O(1) access
-    mapping(bytes32 appId => uint256 score) _appEndorsementScore; // Total endorsement score per app
+    mapping(bytes32 appId => uint256 score) _appEndorsementScore_DEPRECATED; // DEPRECATED V8: Use _appEndorsementScoreCheckpoints instead
     mapping(bytes32 appId => uint256[]) _appEndorserNodes; // Reverse mapping: nodes endorsing each app
     mapping(bytes32 appId => mapping(uint256 nodeId => uint256 index)) _appEndorserNodesIndex; // Index for O(1) removal
     uint256 _maxPointsPerNodePerApp; // Max points a single node can assign to one app (default 49)
     uint256 _maxPointsPerApp; // Max total points an app can receive (default 110)
     bool _endorsementsPaused; // Pause endorsements during migration
     bool _migrationCompleted; // One-time migration flag
+    mapping(bytes32 appId => Checkpoints.Trace208) _appEndorsementScoreCheckpoints; // Checkpointed endorsement scores for historical lookups
   }
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Settings

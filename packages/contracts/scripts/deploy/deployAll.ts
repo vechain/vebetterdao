@@ -20,6 +20,7 @@ import {
   GrantsManagerV1,
   DBAPool,
   DBAPoolV1,
+  DBAPoolV2,
   StargateNFT,
   Stargate,
   NodeManagementV3,
@@ -143,6 +144,15 @@ export async function deployAll(config: ContractsConfig) {
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
     GovernorGovernanceLogicLibV7,
+    GovernorClockLogicLibV8,
+    GovernorConfiguratorLibV8,
+    GovernorDepositLogicLibV8,
+    GovernorFunctionRestrictionsLogicLibV8,
+    GovernorProposalLogicLibV8,
+    GovernorQuorumLogicLibV8,
+    GovernorStateLogicLibV8,
+    GovernorVotesLogicLibV8,
+    GovernorGovernanceLogicLibV8,
   } = await governanceLibraries({ logOutput: true, latestVersionOnly: false })
 
   console.log("Deploying VeBetter Passport Libraries")
@@ -830,6 +840,7 @@ export async function deployAll(config: ContractsConfig) {
       "B3TRGovernorV5",
       "B3TRGovernorV6",
       "B3TRGovernorV7",
+      "B3TRGovernorV8",
       "B3TRGovernor",
     ],
     [
@@ -873,9 +884,10 @@ export async function deployAll(config: ContractsConfig) {
         },
       ],
       [],
+      [], // v9
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -948,6 +960,16 @@ export async function deployAll(config: ContractsConfig) {
           GovernorVotesLogicV7: await GovernorVotesLogicLibV7.getAddress(),
         },
         {
+          GovernorClockLogicV8: await GovernorClockLogicLibV8.getAddress(),
+          GovernorConfiguratorV8: await GovernorConfiguratorLibV8.getAddress(),
+          GovernorDepositLogicV8: await GovernorDepositLogicLibV8.getAddress(),
+          GovernorFunctionRestrictionsLogicV8: await GovernorFunctionRestrictionsLogicLibV8.getAddress(),
+          GovernorProposalLogicV8: await GovernorProposalLogicLibV8.getAddress(),
+          GovernorQuorumLogicV8: await GovernorQuorumLogicLibV8.getAddress(),
+          GovernorStateLogicV8: await GovernorStateLogicLibV8.getAddress(),
+          GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
+        },
+        {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
           GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
           GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
@@ -1008,18 +1030,25 @@ export async function deployAll(config: ContractsConfig) {
 
   // Upgrade to V2
   console.log("Upgrading DBAPool to V2...")
+  const dbaPoolV2 = (await upgradeProxy("DBAPoolV1", "DBAPoolV2", await dbaPoolV1.getAddress(), [], {
+    version: 2,
+    logOutput: true,
+  })) as DBAPoolV2
+
+  // Upgrade to V3
+  console.log("Upgrading DBAPool to V3...")
   const dynamicBaseAllocationPool = (await upgradeProxy(
-    "DBAPoolV1",
+    "DBAPoolV2",
     "DBAPool",
-    await dbaPoolV1.getAddress(),
-    [], // No initialization args for V2
+    await dbaPoolV2.getAddress(),
+    [await treasury.getAddress()],
     {
-      version: 2,
+      version: 3,
       logOutput: true,
     },
   )) as DBAPool
 
-  console.log("DBAPool deployed and upgraded to V2")
+  console.log("DBAPool deployed and upgraded to V3")
 
   console.log("Setting X2EarnApps addresses and upgrading to X2EarnAppsV8...")
   // Setup X2EarnApps addresses
@@ -1313,7 +1342,7 @@ export async function deployAll(config: ContractsConfig) {
   // Set the cooldown period for X2Earn nodes to 1 round
   await x2EarnApps
     .connect(deployer)
-    .setNodeCooldownPeriod(1)
+    .updateCooldownPeriod(1)
     .then(async tx => await tx.wait())
   console.log("Cooldown period for X2Earn nodes set to 1 round")
 

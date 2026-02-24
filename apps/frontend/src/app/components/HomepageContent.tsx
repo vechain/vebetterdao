@@ -1,4 +1,4 @@
-import { Grid, GridItem, useMediaQuery, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, VStack, useMediaQuery } from "@chakra-ui/react"
 
 import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
 import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
@@ -6,11 +6,11 @@ import { DashboardAllocationRounds } from "../proposals/components/components/Da
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
-import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
+
   return (
     <>
       {!isAboveMd && <RoundInfoBottomSheet />}
@@ -35,7 +35,6 @@ export const HomePageContent = () => {
                 <DashboardAllocationRounds />
               </>
             )}
-            <DashboardXApps />
           </VStack>
         </GridItem>
         <GridItem colSpan={1} order={[1, 1, 2]}>

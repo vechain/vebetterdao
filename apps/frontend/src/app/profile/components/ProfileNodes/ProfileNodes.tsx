@@ -10,7 +10,7 @@ import { STARGATE_URL } from "@/constants/links"
 
 import { useGetUserNodes, UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
-import { NodeCard } from "./NodeCard"
+import { ProfileNodeCard } from "./ProfileNodeCard"
 
 export const ProfileNodes = ({ address }: { address: string }) => {
   const { t } = useTranslation()
@@ -48,11 +48,7 @@ export const ProfileNodes = ({ address }: { address: string }) => {
             ) : (
               <VStack gap="4" align="stretch">
                 {userNodes?.allNodes?.map((node: UserNode) => (
-                  <NodeCard
-                    key={node.id.toString()}
-                    node={node}
-                    isClickable={isCurrentUser && node.currentUserIsManager}
-                  />
+                  <ProfileNodeCard key={node.id.toString()} node={node} isClickable={true} />
                 ))}
               </VStack>
             )}
