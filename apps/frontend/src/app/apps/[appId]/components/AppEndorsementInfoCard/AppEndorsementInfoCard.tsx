@@ -1,16 +1,4 @@
-import {
-  Button,
-  Card,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Link,
-  Skeleton,
-  Stack,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Link, Skeleton, Stack, VStack, useDisclosure } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -33,7 +21,6 @@ import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { EndorsementDetails } from "./EndorsementDetails"
-import { EndorsementExplanationModal } from "./EndorsementExplanationModal"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 
 type Props = {
@@ -118,7 +105,6 @@ export const AppEndorsementInfoCard = ({
     onOpen: onOpenEndorsementInfoModal,
     onClose: onCloseEndorsementInfoModal,
   } = useDisclosure()
-  const { open: isExplanationOpen, onOpen: onOpenExplanation, onClose: onCloseExplanation } = useDisclosure()
 
   const actionButtons = useMemo(() => {
     const buttonComponents = []
@@ -182,12 +168,7 @@ export const AppEndorsementInfoCard = ({
       <Card.Root w={"full"} variant="primary" gap={8}>
         <Card.Header>
           <HStack justifyContent="space-between" alignItems="center" w="full">
-            <HStack gap={1}>
-              <Heading size="xl">{t("Endorsement")}</Heading>
-              <IconButton variant="ghost" size="xs" aria-label="Endorsement info" onClick={onOpenExplanation}>
-                <Icon as={HelpCircle} boxSize="4" color="icon.default" />
-              </IconButton>
-            </HStack>
+            <Heading size="xl">{t("Endorsement")}</Heading>
             <Link
               textStyle="md"
               fontWeight="semibold"
@@ -242,7 +223,6 @@ export const AppEndorsementInfoCard = ({
         userNode={firstNodeEndorsing}
         appId={app?.id ?? ""}
       />
-      <EndorsementExplanationModal isOpen={isExplanationOpen} onClose={onCloseExplanation} />
     </>
   )
 }

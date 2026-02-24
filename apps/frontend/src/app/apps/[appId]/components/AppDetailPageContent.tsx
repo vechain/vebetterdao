@@ -66,7 +66,6 @@ export const AppDetailPageContent = () => {
       <GridItem w="full" colSpan={1} order={[1, 1, 2]}>
         <Stack direction="column" gap={8}>
           {shouldRenderBalance && <AppBalanceCard />}
-          <AppRewardStatsCard />
           <AppEndorsementInfoCard
             endorsementScore={endorsementScore}
             endorsementStatus={endorsementStatus}
