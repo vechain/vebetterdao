@@ -45,7 +45,10 @@ export const TreasuryTransfersList = () => {
   const { t } = useTranslation()
   const [filter, setFilter] = useState<TreasuryTransferCategory | "all">("all")
   const category: TreasuryTransferCategory | undefined = filter === "all" ? undefined : filter
-  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useTreasuryTransfers(category, 20)
+  const { data, isLoading, isFetching, hasNextPage, fetchNextPage, isFetchingNextPage } = useTreasuryTransfers(
+    category,
+    5,
+  )
 
   const transactions = useMemo(() => data?.pages.flatMap(page => page.data) ?? [], [data])
 
@@ -96,7 +99,11 @@ export const TreasuryTransfersList = () => {
 
           <Skeleton loading={isLoading} rounded="md">
             {transactions.length > 0 ? (
-              <VStack gap={3} align="stretch">
+              <VStack
+                gap={3}
+                align="stretch"
+                opacity={isFetching && !isFetchingNextPage ? 0.5 : 1}
+                transition="opacity 0.15s">
                 {transactions.map(transaction => (
                   <TreasuryTransferCard
                     key={transaction.id}
@@ -147,7 +154,7 @@ const TreasuryTransferCard = ({
 
   return (
     <Card.Root variant="outline" size="sm">
-      <Card.Body py={3} px={4}>
+      <Card.Body>
         <HStack justify="space-between" gap={3}>
           <HStack gap={3} flex={1} minW={0}>
             {isOutgoing ? <FiArrowUpRight color="red" /> : <FiArrowDownLeft color="green" />}

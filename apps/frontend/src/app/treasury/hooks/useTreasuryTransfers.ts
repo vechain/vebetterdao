@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query"
 
 import type { TreasuryTransfer, TreasuryTransfersResponse } from "../api/types"
 
@@ -33,5 +33,6 @@ export const useTreasuryTransfers = (category: TreasuryTransferCategory | undefi
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) =>
       lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined,
+    placeholderData: keepPreviousData,
   })
 }

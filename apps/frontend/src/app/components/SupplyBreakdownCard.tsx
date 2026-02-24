@@ -69,11 +69,11 @@ export const SupplyBreakdownCard = () => {
       </Card.Header>
       <Card.Body>
         <VStack gap={4} align="flex-start">
-          <SimpleGrid templateColumns={{ base: "repeat(1, 2fr)", lg: "repeat(3, 1fr)" }} w="full" gap={4}>
+          <SimpleGrid templateColumns={{ base: "repeat(1, 2fr)", lg: "repeat(1, 1fr)" }} w="full" gap={4}>
             <VStack gap={1} align="flex-start">
               <Text textStyle="md">{t("B3TR in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={{ base: "2xl", lg: "xl" }} color="brand.primary">
+                <Heading size={{ base: "2xl", lg: "xl" }} color="actions.primary.default">
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>

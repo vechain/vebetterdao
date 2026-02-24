@@ -1,10 +1,24 @@
 "use client"
-import { Button, Card, Heading, HStack, Link, Separator, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Stack,
+  Card,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Link,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  useClipboard,
+  VStack,
+} from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { FaCheck, FaCopy } from "react-icons/fa6"
 import { FiExternalLink } from "react-icons/fi"
 
 import { AddressButton } from "@/components/AddressButton"
@@ -50,59 +64,81 @@ export const TreasuryOverview = () => {
   return (
     <Card.Root w="full">
       <Card.Body>
-        <VStack align="stretch" gap={6}>
+        <VStack align="stretch" gap={8}>
           <HStack justify="space-between" align="start" flexWrap="wrap" gap={4}>
             <VStack align="start" gap={1}>
-              <Heading size={{ base: "xl", md: "2xl" }} fontWeight="bold">
-                {t("Treasury")}
+              <Heading size={{ base: "lg", md: "xl" }} fontWeight="bold">
+                {t("Asset composition")}
               </Heading>
-              <Text textStyle="sm" color="text.muted">
-                {t("VeBetterDAO community treasury")}
-              </Text>
             </VStack>
             <HStack gap={2}>
-              <AddressButton address={treasuryAddress} size={"sm"} showAddressIcon={false} />
-              <Button asChild variant="outline" size="sm">
+              <AddressButton
+                address={treasuryAddress}
+                size={"sm"}
+                showAddressIcon={false}
+                display={{ base: "none", md: "inline-flex" }}
+              />
+              <CopyAddressIconButton address={treasuryAddress} />
+              <IconButton asChild aria-label="View on explorer" variant="outline" size="sm">
                 <Link href={getExplorerAddressLink(treasuryAddress)} target="_blank" rel="noopener noreferrer">
                   <FiExternalLink />
                 </Link>
-              </Button>
+              </IconButton>
             </HStack>
           </HStack>
 
-          <Skeleton loading={isLoading}>
-            {formattedUsd && (
-              <VStack align="start" gap={0}>
-                <Text textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
-                  {"~$"}
-                  {formattedUsd}
-                  {" USD"}
-                </Text>
-                <Text textStyle="xs" color="text.muted">
-                  {t("Total estimated value")}
-                </Text>
-              </VStack>
-            )}
-          </Skeleton>
-
-          <Separator />
-
-          <Skeleton loading={isLoading} rounded="md">
-            <SimpleGrid columns={{ base: 2, md: 4 }} gap={4}>
-              {assets.map(asset => (
-                <VStack key={asset.symbol} gap={0} align="start" py={2}>
-                  <Text textStyle="xs" color="text.muted" fontWeight="semibold">
-                    {asset.symbol}
+          <Stack w="full" direction={{ base: "column", md: "row" }} justify="space-between" gap={4}>
+            <Skeleton loading={isLoading} rounded="md">
+              <SimpleGrid columns={{ base: 1, md: 3 }} gap={8}>
+                {assets.map(asset => (
+                  <VStack key={asset.symbol} gap={0} align="start" justify="space-between">
+                    <Text textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+                      {asset.balance}
+                    </Text>
+                    <Text textStyle="xs" color="text.muted">
+                      {asset.symbol}
+                    </Text>
+                  </VStack>
+                ))}
+              </SimpleGrid>
+            </Skeleton>
+            <Skeleton loading={isLoading}>
+              {formattedUsd && (
+                <VStack
+                  pt={{ base: 4, md: 0 }}
+                  borderTop={{ base: "1px solid", md: "none" }}
+                  borderColor="border.secondary"
+                  align={{ base: "start", md: "end" }}
+                  gap={0}>
+                  <Text textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+                    {"~$"}
+                    {formattedUsd}
+                    {" USD"}
                   </Text>
-                  <Text textStyle="lg" fontWeight="bold">
-                    {asset.balance}
+                  <Text textStyle="xs" color="text.muted">
+                    {t("Total estimated value")}
                   </Text>
                 </VStack>
-              ))}
-            </SimpleGrid>
-          </Skeleton>
+              )}
+            </Skeleton>
+          </Stack>
         </VStack>
       </Card.Body>
     </Card.Root>
+  )
+}
+
+const CopyAddressIconButton = ({ address }: { address: string }) => {
+  const { copy, copied } = useClipboard({ value: address })
+
+  return (
+    <IconButton
+      aria-label="Copy address"
+      variant="outline"
+      size="sm"
+      onClick={copy}
+      display={{ base: "inline-flex", md: "none" }}>
+      <Icon as={copied ? FaCheck : FaCopy} boxSize={3} />
+    </IconButton>
   )
 }
