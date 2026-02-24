@@ -2,7 +2,7 @@ name: Deploy Preview Environment
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
     branches:
       - main
 
@@ -54,18 +54,38 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
 
-          if [ "${{ github.base_ref }}" == "main" ]; then
-            echo 'flavors=["dev", "staging", "beta"]' >> $GITHUB_OUTPUT
-            echo "::notice::PR to main - deploying dev + staging + beta previews"
-          else
+          if [ "${{ github.base_ref }}" != "main" ]; then
             echo "::error::Unsupported base branch: ${{ github.base_ref }}"
             exit 1
+          fi
+
+          # When triggered by adding the "dev-preview" label, only deploy dev
+          if [ "${{ github.event.action }}" == "labeled" ]; then
+            if [ "${{ github.event.label.name }}" == "dev-preview" ]; then
+              echo 'flavors=["dev"]' >> $GITHUB_OUTPUT
+              echo "::notice::dev-preview label added - deploying dev preview only"
+            else
+              echo "::notice::Ignoring non-dev-preview label"
+              echo 'flavors=[]' >> $GITHUB_OUTPUT
+            fi
+          else
+            # For opened/synchronize/reopened: always deploy staging + beta
+            # Include dev only if "dev-preview" label is present
+            HAS_DEV_LABEL="${{ contains(github.event.pull_request.labels.*.name, 'dev-preview') }}"
+            if [ "$HAS_DEV_LABEL" == "true" ]; then
+              echo 'flavors=["dev", "staging", "beta"]' >> $GITHUB_OUTPUT
+              echo "::notice::PR to main with dev-preview label - deploying dev + staging + beta previews"
+            else
+              echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
+              echo "::notice::PR to main - deploying staging + beta previews"
+            fi
           fi
 
   # Post initial "deploying" comment
   comment-deploying:
     name: Post Deploying Comment
     needs: setup
+    if: needs.setup.outputs.flavors != '[]'
     runs-on: ubuntu-latest
     steps:
       - name: Update PR comment - Deploying
@@ -132,6 +152,7 @@ jobs:
   build-and-push:
     name: Build (${{ matrix.flavor }})
     needs: [setup, comment-deploying]
+    if: needs.setup.outputs.flavors != '[]'
     strategy:
       matrix:
         flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
@@ -149,7 +170,7 @@ jobs:
   deploy:
     name: Deploy Preview (${{ matrix.flavor }})
     needs: [setup, build-and-push]
-    if: always() && needs.build-and-push.result == 'success'
+    if: always() && needs.setup.outputs.flavors != '[]' && needs.build-and-push.result == 'success'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -297,7 +318,7 @@ jobs:
     name: Update PR Comment
     needs: [setup, build-and-push, deploy]
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && needs.setup.outputs.flavors != '[]'
     steps:
       - name: Update PR comment - Results
         uses: actions/github-script@v7
