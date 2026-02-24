@@ -5,7 +5,6 @@ import { SupplyBreakdownCard } from "../components/SupplyBreakdownCard"
 
 import { CreateProposalCTA } from "./components/CreateProposalCTA"
 import { TreasuryBalanceChart } from "./components/TreasuryBalanceChart"
-import { TreasuryExecutedProposals } from "./components/TreasuryExecutedProposals"
 import { TreasuryOverview } from "./components/TreasuryOverview"
 import { TreasuryTransfersList } from "./components/TreasuryTransfersList"
 
@@ -22,7 +21,6 @@ export const TreasuryPageContent = () => {
 
         <VStack gap={8} align="stretch" position={{ base: "static", lg: "static" }} top={24} alignSelf="start">
           <SupplyBreakdownCard />
-          <TreasuryExecutedProposals />
           <CreateProposalCTA />
         </VStack>
       </Grid>
