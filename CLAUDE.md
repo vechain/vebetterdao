@@ -168,8 +168,10 @@ MCP servers configured in `.mcp.json`:
 
 # Component Development
 
-- DO NOT use comments during development on frontend but use them on contracts,
-  on frontend do not delete comments unless they are no longer needed
+- **NEVER delete or remove existing comments** in frontend code unless they are factually wrong or reference deleted code.
+  Existing comments carry domain knowledge and intent that may not be obvious from the code alone (e.g. why a contract call is made, what a field means, business rules).
+  When rewriting or refactoring a section, preserve all existing comments — move them to the appropriate new location if the code moves.
+- Avoid adding new narrating comments on frontend; on contracts, comments are encouraged.
 
 ## Chakra UI v3
 
