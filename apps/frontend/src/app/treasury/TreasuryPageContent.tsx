@@ -13,7 +13,7 @@ export const TreasuryPageContent = () => {
     <VStack w="full" gap={8} pb={8} data-testid="treasury-page">
       <TreasuryOverview />
 
-      <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={8} w="full">
+      <Grid templateColumns={{ base: "minmax(0, 1fr)", lg: "minmax(0, 2fr) minmax(0, 1fr)" }} gap={8} w="full">
         <VStack gap={8} align="stretch">
           <TreasuryBalanceChart />
           <TreasuryTransfersList />

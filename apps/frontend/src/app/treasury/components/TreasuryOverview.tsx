@@ -61,7 +61,7 @@ export const TreasuryOverview = () => {
               </Text>
             </VStack>
             <HStack gap={2}>
-              <AddressButton address={treasuryAddress} addressIconProps={{ boxSize: "8", rounded: "full" }} />
+              <AddressButton address={treasuryAddress} size={"sm"} showAddressIcon={false} />
               <Button asChild variant="outline" size="sm">
                 <Link href={getExplorerAddressLink(treasuryAddress)} target="_blank" rel="noopener noreferrer">
                   <FiExternalLink />

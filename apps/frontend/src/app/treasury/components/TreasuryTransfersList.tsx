@@ -171,7 +171,7 @@ const TreasuryTransferCard = ({
             </VStack>
           </HStack>
           <HStack gap={2} flexShrink={0}>
-            <Text fontWeight="semibold" textStyle="sm" color={isOutgoing ? "red.500" : "green.500"}>
+            <Text fontWeight="semibold" textStyle="sm" color={isOutgoing ? "red.500" : "green.500"} truncate>
               {isOutgoing ? "-" : "+"}
               {amount}
               {" B3TR"}

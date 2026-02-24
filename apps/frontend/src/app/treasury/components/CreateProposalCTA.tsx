@@ -59,7 +59,7 @@ const TreasuryInfoDialog = () => {
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content>
+          <Dialog.Content gap={4}>
             <Dialog.Header>
               <Dialog.Title>{t("About the Treasury")}</Dialog.Title>
             </Dialog.Header>
@@ -87,6 +87,11 @@ const TreasuryInfoDialog = () => {
                         {t("Surplus from app voting allocation rounds")}
                       </Text>
                     </List.Item>
+                    <List.Item>
+                      <Text textStyle="sm" color="text.muted">
+                        {t("Users upgrading their Galaxy Membership NFTs")}
+                      </Text>
+                    </List.Item>
                   </List.Root>
                 </VStack>
 
@@ -100,11 +105,7 @@ const TreasuryInfoDialog = () => {
                 </VStack>
               </VStack>
             </Dialog.Body>
-            <Dialog.Footer>
-              <Dialog.ActionTrigger asChild>
-                <Button variant="outline">{t("Close")}</Button>
-              </Dialog.ActionTrigger>
-            </Dialog.Footer>
+            <Dialog.Footer></Dialog.Footer>
             <Dialog.CloseTrigger asChild>
               <CloseButton size="sm" />
             </Dialog.CloseTrigger>
