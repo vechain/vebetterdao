@@ -59,20 +59,15 @@ jobs:
             exit 1
           fi
 
-          # Skip non-dev-preview label events
-          if [ "${{ github.event.action }}" == "labeled" ] && [ "${{ github.event.label.name }}" != "dev-preview" ]; then
-            echo "::notice::Ignoring non-dev-preview label"
-            echo 'flavors=[]' >> $GITHUB_OUTPUT
+
+          # Include dev only if "dev-preview" label is present
+          HAS_DEV_LABEL="${{ contains(github.event.pull_request.labels.*.name, 'dev-preview') }}"
+          if [ "$HAS_DEV_LABEL" == "true" ]; then
+            echo 'flavors=["dev", "staging", "beta"]' >> $GITHUB_OUTPUT
+            echo "::notice::Deploying dev + staging + beta previews"
           else
-            # Include dev only if "dev-preview" label is present
-            HAS_DEV_LABEL="${{ contains(github.event.pull_request.labels.*.name, 'dev-preview') }}"
-            if [ "$HAS_DEV_LABEL" == "true" ]; then
-              echo 'flavors=["dev", "staging", "beta"]' >> $GITHUB_OUTPUT
-              echo "::notice::Deploying dev + staging + beta previews"
-            else
-              echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
-              echo "::notice::Deploying staging + beta previews"
-            fi
+            echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
+            echo "::notice::Deploying staging + beta previews"
           fi
 
   # Post initial "deploying" comment
