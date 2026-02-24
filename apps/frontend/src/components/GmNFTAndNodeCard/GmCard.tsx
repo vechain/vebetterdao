@@ -37,7 +37,7 @@ const ImageStack = ({
           objectFit="cover"
           rounded={imageRounded}
           border="2px solid"
-          borderColor="whiteAlpha.300"
+          borderColor="border.secondary"
           position="absolute"
           top={`${i * OFFSET_Y}px`}
           left={`${i * OFFSET_X}px`}
@@ -55,7 +55,7 @@ const ImageStack = ({
           rounded={imageRounded}
           bg="status.info.primary"
           border="2px solid"
-          borderColor="whiteAlpha.300"
+          borderColor="border.secondary"
           zIndex={0}
           shadow="md">
           <Text color="white" textStyle="xs" fontWeight="bold">{`+${plusCount}`}</Text>
@@ -90,15 +90,15 @@ export const GmCard = ({
       <Card.Root variant="subtle" gap="2" p="4" border="0" h="full">
         <Card.Title asChild>
           <HStack w="full" justifyContent="space-between">
-            <Text display="block" textStyle="sm" color="white" fontWeight="semibold">
+            <Text display="block" textStyle="sm" color="text.default" fontWeight="semibold">
               {subtitle}
             </Text>
             {hasMultiple && (
               <HStack gap={1} textStyle="sm" fontWeight="semibold">
-                <Text color="white" fontWeight="semibold">
+                <Text color="text.default" fontWeight="semibold">
                   {t("See all")}
                 </Text>
-                <Icon as={FaChevronRight} color="white" boxSize="4" />
+                <Icon as={FaChevronRight} color="text.default" boxSize="4" />
               </HStack>
             )}
           </HStack>
@@ -125,12 +125,12 @@ export const GmCard = ({
 
                 <VStack flex="1" alignItems="start" gap="1">
                   {title && (
-                    <Text textStyle="md" color="white" fontWeight="bold" lineClamp={1}>
+                    <Text textStyle="md" color="text.default" fontWeight="bold" lineClamp={1}>
                       {title}
                     </Text>
                   )}
-                  <HStack bg="#FFFFFF4A" rounded="lg" px="2" py="1" gap="1">
-                    <Text textStyle="xs" color="white" fontWeight="semibold" lineClamp={1}>
+                  <HStack bg={{ base: "gray.100", _dark: "transparency.300" }} rounded="lg" px="2" py="1" gap="1">
+                    <Text textStyle="xs" color="text.default" fontWeight="semibold" lineClamp={1}>
                       {footer}
                     </Text>
                   </HStack>

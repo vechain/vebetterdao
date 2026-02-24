@@ -61,20 +61,20 @@ export const GmNFTAndNodeCard = () => {
       rounded="xl"
       p="6"
       w="full"
-      color="white"
+      color="text.default"
       position="relative"
       overflow={"hidden"}
       border="0">
       <Flex direction={{ base: "column-reverse", md: "column-reverse" }} gap="8">
         <Stack flex={1} gap="4">
-          <Heading textStyle="xl" color="white" fontWeight="bold">
+          <Heading textStyle="xl" color="text.default" fontWeight="bold">
             {t("Your NFTs")}
           </Heading>
 
           {userHasNoNodeOrGm ? (
             <GmEmptyStateCard
               icon={
-                <Icon boxSize="60px" color="white">
+                <Icon boxSize="60px" color="icon.default">
                   <NFTEarthIcon />
                 </Icon>
               }
@@ -95,7 +95,7 @@ export const GmNFTAndNodeCard = () => {
               ) : (
                 <GmEmptyStateCard
                   icon={
-                    <Icon boxSize="60px" color="white">
+                    <Icon boxSize="60px" color="icon.default">
                       <NFTEarthIcon />
                     </Icon>
                   }
