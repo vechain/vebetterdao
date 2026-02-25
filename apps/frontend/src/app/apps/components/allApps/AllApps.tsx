@@ -22,7 +22,7 @@ import { useDebounce } from "../../../../hooks/useDebounce"
 import { usePagination } from "../../../../hooks/usePagination"
 import { useFilteredApps } from "../../hooks/useFilteredApps"
 import { AppsEmptyState } from "../AppsEmptyState"
-import { CreatorBanner } from "../CreatorBanner"
+import { CreatorApplyNow } from "../creatorBanners/CreatorApplyNow"
 import { UnendorsedAppCard } from "../UnendorsedAppCard"
 
 import { FilteringMenu } from "./FilteringMenu"
@@ -109,14 +109,14 @@ export const AllApps = ({
       </VStack>
     ) : (
       <VStack w="full" gap={4}>
-        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full" alignItems="center">
+        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full" alignItems="stretch">
           {isEmpty ? (
             <GridItem colSpan={2}>
               <AppsEmptyState />
             </GridItem>
           ) : (
             <>
-              {showCreatorBanner ? <CreatorBanner /> : undefined}
+              {showCreatorBanner ? <CreatorApplyNow /> : undefined}
               {displayAppsRestricted.map(xApp => (
                 <UnendorsedAppCard key={xApp.id} appId={xApp.id} isNewApp={xApp.isNew} />
               ))}

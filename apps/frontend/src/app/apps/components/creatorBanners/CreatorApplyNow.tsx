@@ -20,9 +20,10 @@ export const CreatorApplyNow = () => {
       <Card.Root
         variant="primary"
         w="full"
+        h="full"
         rounded="20px"
         p={0}
-        borderColor="rgba(154, 225, 77, 0.1)"
+        border="none"
         backgroundImage={`url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239AE14DFF' stroke-width='4' stroke-dasharray='16%2c 18%2c 13%2c 24' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e")`}>
         <Card.Body position="relative">
           <Stack direction={{ base: "row", lg: "row" }} align="stretch" gap={0}>
@@ -31,9 +32,10 @@ export const CreatorApplyNow = () => {
               <Image
                 src="/assets/mascot/mascot-welcoming@2x.webp"
                 alt="mascot-welcoming"
-                w={{ base: "full", md: "300px", lg: "200px" }}
+                w={{ base: "full", md: "300px", lg: "165px" }}
                 objectFit="cover"
-                borderRadius="9px"
+                objectPosition="right"
+                borderRadius="20px"
               />
             </Box>
             {/* Right Section: Content */}
