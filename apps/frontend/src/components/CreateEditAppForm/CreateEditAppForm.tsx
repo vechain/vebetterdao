@@ -438,7 +438,7 @@ export const CreateEditAppForm = ({
           />
         </VStack>
       </Card.Body>
-      <Card.Footer display={"flex"} flexDir={"column"} w="full">
+      <Card.Footer display={"flex"} flexDir={"column"} w="full" mt={4}>
         <Button colorPalette="blue" type="submit" size="lg" alignSelf={"flex-end"} borderRadius={"full"}>
           {isEdit ? "Save" : "Submit"}
         </Button>
