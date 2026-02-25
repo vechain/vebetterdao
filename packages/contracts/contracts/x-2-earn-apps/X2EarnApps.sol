@@ -283,6 +283,10 @@ contract X2EarnApps is Initializable, IX2EarnApps, AccessControlUpgradeable, UUP
       revert X2EarnAppBlacklisted(_appId);
     }
 
+    if (isAppUnendorsed(_appId)) {
+      EndorsementUtils.updateUnendorsedApps(_appId, true);
+    }
+
     _setVotingEligibility(_appId, false);
     _revokeAppCreators(_appId);
     _setBlacklist(_appId, true);
