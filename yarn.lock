@@ -7854,10 +7854,10 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.5.1":
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.5.1.tgz#d96963455a9e37182042f27c1e62d05f566c269b"
-  integrity sha512-fpHjJCRWtcdD04eEv2xZoh6oEeJYUDl4mA6dFQ+8B/5kB5P8/OZkQzpegoWRI1VB7vWPzlebstLehmTPjuRyCw==
+"@vechain/vechain-kit@2.6.1":
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.6.1.tgz#b93c6b7dc88c37c438b63a5cdeb286f24a45e926"
+  integrity sha512-RUZPJhr+4Vv3DOr04y2R2hYrzjB2aQZ/1khhRkGLr6iALRdFz9eyhISK1hNitQPVKP/z/O/vulqqUt7WToeEXQ==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
@@ -7879,6 +7879,7 @@
     framer-motion "^11.15.0"
     i18next "^24.2.1"
     i18next-browser-languagedetector "^8.0.2"
+    i18next-resources-to-backend "^1.2.1"
     net "^1.0.2"
     process "^0.11.10"
     react "^18.2.0"
