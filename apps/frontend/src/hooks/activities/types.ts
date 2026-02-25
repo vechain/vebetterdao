@@ -81,6 +81,7 @@ export type UserProposalVoteMeta = {
   proposalId: string
   proposalTitle: string
   support: number
+  proposalType: "grant" | "proposal"
 }
 
 export type ActivityItem =
