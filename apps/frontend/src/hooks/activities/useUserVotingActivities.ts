@@ -74,9 +74,15 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
       appNameMap.set(app.id, app.name ?? "")
     }
 
-    const proposalInfoMap = new Map<string, { title: string; votingRoundId: string }>()
-    ;[...enrichedStandardProposals, ...enrichedGrantProposals].forEach(p => {
-      proposalInfoMap.set(p.id, { title: p.title, votingRoundId: p.votingRoundId })
+    const proposalInfoMap = new Map<
+      string,
+      { title: string; votingRoundId: string; proposalType: "grant" | "proposal" }
+    >()
+    enrichedStandardProposals.forEach(p => {
+      proposalInfoMap.set(p.id, { title: p.title, votingRoundId: p.votingRoundId, proposalType: "proposal" })
+    })
+    enrichedGrantProposals.forEach(p => {
+      proposalInfoMap.set(p.id, { title: p.title, votingRoundId: p.votingRoundId, proposalType: "grant" })
     })
 
     const allAllocationEvents = [...(allocationVoteEvents.data ?? []), ...(allocationAutoVoteEvents.data ?? [])]
@@ -122,6 +128,7 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
             proposalId: e.proposalId,
             proposalTitle: title,
             support: e.support,
+            proposalType: info.proposalType,
           },
         }
       })
