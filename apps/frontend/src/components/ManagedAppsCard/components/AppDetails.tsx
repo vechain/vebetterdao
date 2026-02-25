@@ -9,6 +9,7 @@ import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetad
 import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
 
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
+import { LatestAllocationVotingDetails } from "./LatestAllocationVotingDetails"
 
 type Props = {
   appId: string
@@ -64,6 +65,7 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
       </HStack>
 
       <LatestAllocationDetails appId={appId} />
+      <LatestAllocationVotingDetails appId={appId} />
 
       {showSeparator && <Separator w={"full"} />}
     </VStack>

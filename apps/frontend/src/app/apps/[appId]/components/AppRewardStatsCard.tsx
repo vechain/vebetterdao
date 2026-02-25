@@ -14,7 +14,7 @@ import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview
 
 import { useXAppMetadata } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"
 
-import { DistributionStrategyModal } from "./AppDetailOverview/components/DistributionStrategyModal"
+import { RewardDetailsModal } from "./AppDetailOverview/components/RewardDetailsModal"
 
 const compact = getCompactFormatter(1)
 
@@ -83,7 +83,7 @@ export const AppRewardStatsCard = () => {
         </Card.Body>
       </Card.Root>
 
-      <DistributionStrategyModal
+      <RewardDetailsModal
         isOpen={isModalOpen}
         onClose={onCloseModal}
         distributionStrategy={appMetadata?.distribution_strategy ?? ""}
