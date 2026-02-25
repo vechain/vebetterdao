@@ -2,25 +2,32 @@ import { HStack, Heading, Image, Skeleton, Stat } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { formatEther } from "viem"
 
-import { useAllocationPoolEvents } from "@/api/contracts/xAllocationPool/hooks/useAllocationPoolEvents"
+import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
   const { t } = useTranslation()
-  const { data: appAllocations = [], isLoading } = useAllocationPoolEvents({ appId, limit: 3 })
-  const lastRoundAllocationReceived = Number(formatEther(appAllocations?.[0]?.totalAmount ?? 0n)) || 0
-  const secondLastRoundAllocationReceived = Number(formatEther(appAllocations?.[1]?.totalAmount ?? 0n)) || 0
+  const { data: earningsData, isLoading } = useAppEarnings(appId)
+
+  const { lastRound, secondLastRound } = useMemo(() => {
+    if (!earningsData || !Array.isArray(earningsData) || earningsData.length === 0) {
+      return { lastRound: 0, secondLastRound: 0 }
+    }
+    return {
+      lastRound: earningsData[earningsData.length - 1]?.totalAmount || 0,
+      secondLastRound: earningsData.length > 1 ? earningsData[earningsData.length - 2]?.totalAmount || 0 : 0,
+    }
+  }, [earningsData])
+
   const percentageChange = useMemo(
     () =>
       // cannot divide by 0
-      secondLastRoundAllocationReceived === 0
-        ? 0
-        : ((lastRoundAllocationReceived - secondLastRoundAllocationReceived) / secondLastRoundAllocationReceived) * 100,
-    [lastRoundAllocationReceived, secondLastRoundAllocationReceived],
+      secondLastRound === 0 ? 0 : ((lastRound - secondLastRound) / secondLastRound) * 100,
+    [lastRound, secondLastRound],
   )
+
   return (
     <Skeleton loading={isLoading} w={"full"}>
       <Stat.Root>
@@ -30,7 +37,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
             <HStack>
               <Image aspectRatio="square" w="6" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
               <Heading size="2xl" color="text.default">
-                {compactFormatter.format(lastRoundAllocationReceived)}
+                {compactFormatter.format(lastRound)}
               </Heading>
             </HStack>
           </Stat.ValueText>
