@@ -38,7 +38,12 @@ export const AppDetailAllocationInfo = () => {
     }
   }, [earningsData])
   return (
-    <Card.Root bg="card.subtle" h={"full"} rounded="8px" flex={1.5}>
+    <Card.Root
+      bg="card.subtle"
+      h={"full"}
+      rounded="8px"
+      w={{ base: "full", md: "fit-content" }}
+      flex={{ base: undefined, md: "none" }}>
       <Card.Body gap={6}>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
