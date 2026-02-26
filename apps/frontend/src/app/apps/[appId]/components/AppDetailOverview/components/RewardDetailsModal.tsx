@@ -124,7 +124,7 @@ export const RewardDetailsModal = ({
         <Card.Root variant="primary" p={4} gap={4} w="full">
           <Card.Header p={0}>
             <Heading size="xl" alignSelf="flex-start">
-              {t("Details")}
+              {t("Strategy")}
             </Heading>
           </Card.Header>
 
@@ -138,7 +138,7 @@ export const RewardDetailsModal = ({
         <Card.Root variant="primary" p={4} gap={4} w="full">
           <Card.Header p={0}>
             <Heading size="xl" alignSelf="flex-start">
-              {t("Statistics")}
+              {t("All time statistics")}
             </Heading>
           </Card.Header>
 

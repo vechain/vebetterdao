@@ -4,23 +4,27 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useAppRewardsBalance } from "@/api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
 import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
-import { useAppRoundOverviews } from "@/api/indexer/actions/useAppRoundOverviews"
 import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 
-import { RewardHistoryChart } from "./RewardHistoryChart"
-
 const compact = getCompactFormatter(2)
 
-const StatItem = ({ label, value }: { label: string; value: string }) => (
+const StatItem = ({ label, value, postfix }: { label: string; value: string; postfix?: string }) => (
   <VStack align="flex-start" gap={1}>
     <Text textStyle="sm" color="text.subtle">
       {label}
     </Text>
-    <Heading size="md" color="brand.primary">
+    <Heading size="md" color="brand.primary" display="flex" gap={1}>
       {value}
+      {postfix && (
+        <Text textStyle="md" color="text.subtle">
+          {postfix}
+        </Text>
+      )}
     </Heading>
   </VStack>
 )
@@ -42,13 +46,15 @@ export const RewardStatisticsSection = () => {
   const appId = app?.id ?? ""
 
   const { data: allTimeOverview, isLoading: allTimeLoading } = useAppActionOverview(appId)
-  const { data: earningsData, isLoading: earningsLoading } = useAppEarnings(appId)
+  const { data: earningsData } = useAppEarnings(appId)
+  const { data: availableFunds, isLoading: isAvailableFundsLoading } = useAppAvailableFunds(appId)
+  const { data: rewardsBalance, isLoading: isRewardsBalanceLoading } = useAppRewardsBalance(appId)
 
-  const roundIds = useMemo(
-    () => (earningsData && Array.isArray(earningsData) ? earningsData.map(e => e.roundId) : []),
-    [earningsData],
-  )
-  const { data: overviewData, isLoading: overviewLoading } = useAppRoundOverviews(appId, roundIds)
+  const totalAppBalance = useMemo(() => {
+    return Number(availableFunds?.scaled ?? 0) + Number(rewardsBalance?.scaled ?? 0)
+  }, [availableFunds, rewardsBalance])
+
+  const isBalanceLoading = isAvailableFundsLoading || isRewardsBalanceLoading
 
   const allTimeStats = useMemo(() => {
     if (!allTimeOverview) return null
@@ -64,17 +70,19 @@ export const RewardStatisticsSection = () => {
     return earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
   }, [earningsData])
 
-  const isChartLoading = earningsLoading || (roundIds.length > 0 && overviewLoading)
-
   return (
     <VStack gap={6} align="stretch" w="full">
-      <Heading size="lg">{t("All Time")}</Heading>
-      {allTimeLoading ? (
-        <StatsSkeleton count={4} />
+      {allTimeLoading && isBalanceLoading ? (
+        <StatsSkeleton count={5} />
       ) : allTimeStats ? (
-        <SimpleGrid columns={[2, 2, 4]} gap={4} w="full">
-          <StatItem label={t("B3TR from Allocations")} value={compact.format(allocationTotal)} />
-          <StatItem label={t("B3TR Distributed")} value={allTimeStats.totalRewards} />
+        <SimpleGrid columns={[2, 3, 3]} gap={4} w="full">
+          <StatItem label={t("Balance")} value={compact.format(totalAppBalance)} postfix={t("B3TR")} />
+          <StatItem
+            label={t("Received from allocations")}
+            value={compact.format(allocationTotal)}
+            postfix={t("B3TR")}
+          />
+          <StatItem label={t("Distributed")} value={allTimeStats.totalRewards} postfix={t("B3TR")} />
           <StatItem label={t("Actions Rewarded")} value={allTimeStats.actionsRewarded} />
           <StatItem label={t("Unique Users")} value={allTimeStats.uniqueUsers} />
         </SimpleGrid>
@@ -85,9 +93,6 @@ export const RewardStatisticsSection = () => {
           </Text>
         </Center>
       )}
-
-      <Heading size="lg">{t("Round History")}</Heading>
-      <RewardHistoryChart earningsData={earningsData} overviewData={overviewData} isLoading={isChartLoading} />
     </VStack>
   )
 }

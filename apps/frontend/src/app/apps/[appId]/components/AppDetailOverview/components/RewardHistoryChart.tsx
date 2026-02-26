@@ -145,7 +145,7 @@ export const RewardHistoryChart = ({
   return (
     <VStack w="full" align="stretch" gap={3}>
       <HStack justify="space-between" align="center">
-        <NativeSelect.Root size="sm" w="auto" minW="180px">
+        <NativeSelect.Root size="sm" w="auto" minW={{ base: "full", md: "180px" }}>
           <NativeSelect.Field
             value={metric}
             onChange={e => setMetric(e.target.value as ChartMetric)}
@@ -165,7 +165,7 @@ export const RewardHistoryChart = ({
       <Box w="full" h="220px">
         <ResponsiveContainer width="100%" height="100%">
           {metric === "allocations" ? (
-            <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="gradRewards" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={colorMap["green.500"]} stopOpacity={0.3} />

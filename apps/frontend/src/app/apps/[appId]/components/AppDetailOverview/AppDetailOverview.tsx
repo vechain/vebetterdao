@@ -14,10 +14,10 @@ import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
 import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
-import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
+
 export const AppDetailOverview = ({
   endorsementStatus,
   isEndorsementStatusLoading,
@@ -136,7 +136,6 @@ export const AppDetailOverview = ({
                     </HStack>
                   </Stack>
                 </VStack>
-                <AppDetailAllocationInfo />
               </Flex>
             </VStack>
           </Card.Body>
