@@ -174,9 +174,19 @@ export const RewardHistoryChart = ({
           <NativeSelect.Indicator />
         </NativeSelect.Root>
 
-        <SegmentGroup.Root size="sm" value={period} onValueChange={e => setPeriod(e.value as Period)}>
-          <SegmentGroup.Indicator />
-          <SegmentGroup.Items items={["3M", "6M", "1Y", "All"]} />
+        <SegmentGroup.Root
+          w={{ base: "full", md: "auto" }}
+          size={{ base: "sm" }}
+          borderRadius="lg"
+          value={period}
+          onValueChange={e => setPeriod(e.value as Period)}>
+          <SegmentGroup.Indicator borderRadius="lg" />
+          {["3M", "6M", "1Y", "All"].map(item => (
+            <SegmentGroup.Item key={item} value={item} flex={{ base: "1", md: "initial" }}>
+              <SegmentGroup.ItemText>{item}</SegmentGroup.ItemText>
+              <SegmentGroup.ItemHiddenInput />
+            </SegmentGroup.Item>
+          ))}
         </SegmentGroup.Root>
       </HStack>
 
@@ -231,7 +241,7 @@ export const RewardHistoryChart = ({
               />
             </AreaChart>
           ) : (
-            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
               <XAxis
                 dataKey="round"
