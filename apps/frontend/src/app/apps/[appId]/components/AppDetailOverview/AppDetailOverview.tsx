@@ -2,8 +2,10 @@ const notFoundImage = "/assets/images/image-not-found.webp"
 import { Button, Card, Flex, HStack, Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { UilExternalLinkAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 
 import { XAppStatus } from "../../../../../types/appDetails"
 import { useCurrentAppBanner } from "../../hooks/useCurrentAppBanner"
@@ -28,6 +30,11 @@ export const AppDetailOverview = ({
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
+  const { data: earningsData } = useAppEarnings(app?.id ?? "")
+  const firstRoundId = useMemo(() => {
+    if (!earningsData || !Array.isArray(earningsData) || earningsData.length === 0) return undefined
+    return Math.min(...earningsData.map(e => e.roundId))
+  }, [earningsData])
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -104,9 +111,18 @@ export const AppDetailOverview = ({
                           <Text textStyle={"sm"} color="text.subtle">
                             {t("Member since")}
                           </Text>
-                          <Text textStyle={"md"}>
-                            {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
-                          </Text>
+                          <HStack>
+                            <Text textStyle={"md"}>
+                              {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
+                            </Text>
+                            {firstRoundId != null && (
+                              <Text textStyle={"md"}>
+                                {"("}
+                                {t("Round #{{round}}", { round: firstRoundId.toString() })}
+                                {")"}
+                              </Text>
+                            )}
+                          </HStack>
                         </VStack>
                       )}
                     </Stack>
