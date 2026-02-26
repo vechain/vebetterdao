@@ -18,14 +18,15 @@ import { ManageDistributorsModal } from "./components/ManageDistributorsModal"
 import { ManageModeratorsModal } from "./components/ManageModeratorsModal"
 import { ManageSignalersModal } from "./components/ManageSignalersModal"
 import { ManageTreasuryModal } from "./components/ManageTreasuryModal"
+import { SelfBlacklistModal } from "./components/SelfBlacklistModal"
 
 export const AdminAppPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address || "")
-  const { admin } = useCurrentAppAdmin()
-  const { app } = useCurrentAppInfo()
+  const { admin, isLoading: isAdminLoading } = useCurrentAppAdmin()
+  const { app, isAppInfoLoading } = useCurrentAppInfo()
   const { appMetadata } = useCurrentAppMetadata()
 
   const creatorsModal = useDisclosure()
@@ -34,6 +35,7 @@ export const AdminAppPageContent = () => {
   const distributorsModal = useDisclosure()
   const treasuryModal = useDisclosure()
   const adminModal = useDisclosure()
+  const blacklistModal = useDisclosure()
 
   const allowedToEditAdminInfo = useMemo(
     () => compareAddresses(account?.address || "", admin) || permissions?.isAdminOfX2EarnApps,
@@ -44,13 +46,15 @@ export const AdminAppPageContent = () => {
     router.push(`/apps/${app?.id}`)
   }, [app?.id, router])
 
+  const isLoading = isAdminLoading || isAppInfoLoading
+
   useEffect(() => {
-    if (!allowedToEditAdminInfo) {
+    if (!isLoading && !allowedToEditAdminInfo) {
       router.push(`/apps/${app?.id}`)
     }
-  }, [allowedToEditAdminInfo, app?.id, router])
+  }, [isLoading, allowedToEditAdminInfo, app?.id, router])
 
-  if (!allowedToEditAdminInfo) return null
+  if (isLoading || !allowedToEditAdminInfo) return null
 
   return (
     <Card.Root variant="primary" w="full">
@@ -101,6 +105,12 @@ export const AdminAppPageContent = () => {
               description={t("Transfer app ownership to another address. This action is irreversible.")}
               onManage={adminModal.onOpen}
             />
+            <AdminSettingSection
+              title={t("Blacklist app")}
+              description={t("Remove your app from VeBetterDAO. This action is irreversible.")}
+              onManage={blacklistModal.onOpen}
+              customButtonTitle={t("Blacklist app")}
+            />
           </DangerZoneCard>
         </VStack>
 
@@ -110,6 +120,7 @@ export const AdminAppPageContent = () => {
         <ManageDistributorsModal isOpen={distributorsModal.open} onClose={distributorsModal.onClose} />
         <ManageTreasuryModal isOpen={treasuryModal.open} onClose={treasuryModal.onClose} />
         <ManageAdminModal isOpen={adminModal.open} onClose={adminModal.onClose} />
+        <SelfBlacklistModal isOpen={blacklistModal.open} onClose={blacklistModal.onClose} />
       </Card.Body>
     </Card.Root>
   )

@@ -110,6 +110,21 @@ const VoteStats: React.FC<{ proposalId: string }> = ({ proposalId }) => {
   )
 }
 
+const getBody = (activity: Props["activity"], t: TFunction): string => {
+  if (activity.type === ActivityType.PROPOSAL_CANCELLED) {
+    const title = activity.metadata.proposalTitle
+    const reason = activity.metadata.cancelReason
+
+    if (reason) {
+      return t("The proposal '{{title}}' was cancelled with the following reason: {{reason}}", { title, reason })
+    }
+
+    return t("The proposal '{{title}}' was cancelled", { title })
+  }
+
+  return activity.metadata.proposalTitle
+}
+
 export const ProposalActivityCard: React.FC<Props> = ({ activity }) => {
   const { t } = useTranslation()
   const { icon, color } = getIcon(activity.type)
@@ -129,7 +144,7 @@ export const ProposalActivityCard: React.FC<Props> = ({ activity }) => {
                   </TypedNextLink>
                 </LinkOverlay>
                 <Text textStyle="sm" color="text.subtle">
-                  {activity.metadata.proposalTitle}
+                  {getBody(activity, t)}
                 </Text>
               </VStack>
 

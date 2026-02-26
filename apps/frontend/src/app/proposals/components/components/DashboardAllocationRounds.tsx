@@ -44,7 +44,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
   const distribution = useMemo(() => {
     if (!roundAmount) return { total: 0, appsPercent: 0, votersPercent: 0, treasuryPercent: 0 }
     const toApps = Number(roundAmount.voteXAllocations)
-    const toVoters = Number(roundAmount.voteX2Earn)
+    const toVoters = Number(roundAmount.voteX2Earn) + Number(roundAmount.gm)
     const toTreasury = Number(roundAmount.treasury)
     const total = toApps + toVoters + toTreasury
     if (total === 0) return { total: 0, appsPercent: 0, votersPercent: 0, treasuryPercent: 0 }

@@ -39,7 +39,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             </Text>
             <Icon
               as={UilArrowUpRight}
-              bg={"rgba(224, 233, 254, 1)"}
+              bg={"status.info.secondary"}
               borderRadius={"full"}
               color="icon.default"
               boxSize={[6, 8]}
@@ -50,7 +50,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             w={"full"}
             px={[2, 6]}
             py={[1, 4]}
-            bg={"rgba(248, 248, 248, 1)"}
+            bg={"bg.tertiary"}
             borderRadius={16}
             mt={6}
             justifyContent={"space-between"}>
@@ -66,7 +66,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             <VStack alignItems={"flex-start"}>
               <Text textStyle={["xxs", "sm"]}>{t("Member since")}</Text>
               <HStack alignItems={"flex-end"}>
-                <Text color={"#1E1E1E"} textStyle={["xs", "xl"]} fontWeight="semibold">
+                <Text color={"text.default"} textStyle={["xs", "xl"]} fontWeight="semibold">
                   {t("today")}
                   {" ✨"}
                 </Text>

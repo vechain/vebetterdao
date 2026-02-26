@@ -168,8 +168,16 @@ MCP servers configured in `.mcp.json`:
 
 # Component Development
 
-- DO NOT use comments during development on frontend but use them on contracts,
-  on frontend do not delete comments unless they are no longer needed
+- **NEVER delete or remove existing comments** in frontend code unless they are factually wrong or reference deleted code.
+  Existing comments carry domain knowledge and intent that may not be obvious from the code alone (e.g. why a contract call is made, what a field means, business rules).
+  When rewriting or refactoring a section, preserve all existing comments — move them to the appropriate new location if the code moves.
+- Avoid adding new narrating comments on frontend; on contracts, comments are encouraged.
+
+## Mobile-first
+
+- **~90% of users are on mobile.** Always design and build frontend components mobile-first.
+- Implement and verify layout/UX for small viewports first; then add `md`/`lg` breakpoints for larger screens.
+- When in doubt, prioritize touch targets, readable text, and no horizontal overflow on narrow widths.
 
 ## Chakra UI v3
 
@@ -220,7 +228,7 @@ MobileDarkMode.globals = { theme: "dark", viewport: { value: "mobile2" } }
 - fontWeight: only "normal" (400), "semibold" (600), "bold" (700)
 - Icons: prefer react-icons, else add SVG to `@/components/Icons/svg` and wrap with Chakra `<Icon/>`
 - Links: use Chakra `Link` (variants: underline, plain, ghost); for card links use `LinkBox`/`LinkOverlay`
-- Mobile-first: use `base` for mobile, `md`/`lg` for larger screens
+- Mobile-first (see above): use `base` for mobile, `md`/`lg` for larger screens
 - Layouts: prefer `SimpleGrid`/`Grid` over nested Stack/Flex
 
 ## Figma to Code

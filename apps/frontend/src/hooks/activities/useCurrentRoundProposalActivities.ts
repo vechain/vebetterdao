@@ -18,6 +18,7 @@ export const useCurrentRoundProposalActivities = (
 
   const {
     canceledMap,
+    canceledReasonMap,
     inDevelopmentMap,
     completedMap,
     executedMap,
@@ -81,12 +82,14 @@ export const useCurrentRoundProposalActivities = (
         if (!activityType || date === undefined) return null
         if (!isInRound(date)) return null
 
+        const cancelReason = activityType === ActivityType.PROPOSAL_CANCELLED ? canceledReasonMap.get(p.id) : undefined
+
         return {
           type: activityType,
           date,
           roundId: currentRoundId,
           title: p.title,
-          metadata: { proposalId: p.id, proposalTitle: p.title, state: p.state },
+          metadata: { proposalId: p.id, proposalTitle: p.title, state: p.state, cancelReason },
         }
       })
       .filter((item): item is ActivityItem => item !== null)
@@ -98,6 +101,7 @@ export const useCurrentRoundProposalActivities = (
     enrichedProposals,
     depositsReached,
     canceledMap,
+    canceledReasonMap,
     inDevelopmentMap,
     completedMap,
     executedMap,

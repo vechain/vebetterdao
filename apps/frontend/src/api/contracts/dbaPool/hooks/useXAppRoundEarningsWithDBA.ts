@@ -1,31 +1,17 @@
 import { useMemo } from "react"
 
 import { useXAppRoundEarnings } from "../../xAllocationPool/hooks/useXAppRoundEarnings"
-import { DBA_ELIGIBILITY_THRESHOLD_PERCENTAGE } from "../constants"
 
 import { useDBADistributionStartRound } from "./useDBADistributionStartRound"
 import { useEstimateDBAForActiveRound } from "./useEstimateDBAForActiveRound"
 
 /**
- * Hook that returns earnings for an app in an ACTIVE round with DBA estimation
- * Performs full eligibility validation and estimates DBA rewards
- *
- * Validates eligibility criteria:
- * - Vote percentage < 7.5%
- * - App is currently endorsed
- * - App has rewarded at least 1 action in the round
- *
- * @param roundId The round ID
- * @param xAppId The app ID
- * @param votePercentage The app's vote percentage (0-100)
- * @param isRoundActive Whether the round is active
- * @param enabled Whether to fetch data (optional, defaults to true)
- * @returns Combined earnings data with estimated DBA
+ * Hook that returns earnings for an app in an ACTIVE round with DBA estimation.
+ * Eligibility is determined inside useEstimateDBAForActiveRound (endorsed + rewarded actions).
  */
 export const useXAppRoundEarningsWithDBA = (
   roundId: string,
   xAppId: string,
-  votePercentage: number,
   isRoundActive: boolean,
   enabled: boolean = true,
 ) => {
@@ -37,12 +23,7 @@ export const useXAppRoundEarningsWithDBA = (
 
   // Check if round is eligible for DBA (basic check for active rounds)
   const roundIdNum = Number(roundId)
-  const shouldFetchDBAEstimate =
-    enabled &&
-    isRoundActive &&
-    dbaStartRound !== undefined &&
-    roundIdNum >= dbaStartRound &&
-    votePercentage < DBA_ELIGIBILITY_THRESHOLD_PERCENTAGE
+  const shouldFetchDBAEstimate = enabled && isRoundActive && dbaStartRound !== undefined && roundIdNum >= dbaStartRound
 
   // For active rounds: estimate DBA rewards (with full eligibility checks inside)
   const { data: activeRoundEstimate } = useEstimateDBAForActiveRound(roundId, shouldFetchDBAEstimate)
@@ -52,13 +33,9 @@ export const useXAppRoundEarningsWithDBA = (
     let dbaAmount = "0"
     let hasDBARewards = false
 
-    // For active rounds: use estimated DBA if app is in eligible list
-    if (isRoundActive && activeRoundEstimate) {
-      const eligibleAppIds = (activeRoundEstimate.eligibleAppIds as string[] | undefined) ?? []
-      if (eligibleAppIds.includes(xAppId)) {
-        dbaAmount = activeRoundEstimate.estimatedAmount ?? "0"
-        hasDBARewards = parseFloat(dbaAmount) > 0
-      }
+    if (isRoundActive && activeRoundEstimate?.appEstimates?.[xAppId]) {
+      dbaAmount = activeRoundEstimate.appEstimates[xAppId]
+      hasDBARewards = parseFloat(dbaAmount) > 0
     }
 
     const totalAmount = (parseFloat(baseAmount) + parseFloat(dbaAmount)).toString()

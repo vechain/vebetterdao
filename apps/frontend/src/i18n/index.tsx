@@ -81,6 +81,16 @@ export const languages = [
     code: "pt",
     flag: "🇧🇷",
   },
+  {
+    name: "Russian",
+    code: "ru",
+    flag: "🇷🇺",
+  },
+  {
+    name: "Romanian",
+    code: "ro",
+    flag: "🇷🇴",
+  },
 ]
 
 i18next
