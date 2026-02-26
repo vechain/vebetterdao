@@ -72,7 +72,7 @@ export const RewardStatisticsSection = () => {
 
   return (
     <VStack gap={6} align="stretch" w="full">
-      {allTimeLoading && isBalanceLoading ? (
+      {allTimeLoading || isBalanceLoading ? (
         <StatsSkeleton count={5} />
       ) : allTimeStats ? (
         <SimpleGrid columns={[2, 3, 3]} gap={4} w="full">
