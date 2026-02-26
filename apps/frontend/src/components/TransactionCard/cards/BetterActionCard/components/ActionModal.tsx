@@ -1,12 +1,13 @@
 /* eslint-disable react/jsx-no-literals */
-import { VStack, HStack, Text, Card, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
+import { VStack, HStack, Text, Card, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { EmbeddedTweet, useTweet } from "react-tweet"
+import { useTweet } from "react-tweet"
 
+import { ThemedTweet } from "@/app/apps/[appId]/components/AppTweets/components/ThemedTweet"
 import { BaseModal } from "@/components/BaseModal"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
@@ -58,11 +59,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
 
   const renderProof = useMemo(() => {
     if (isTweet && tweet) {
-      return (
-        <Box>
-          <EmbeddedTweet key={tweet?.id_str} tweet={tweet} />
-        </Box>
-      )
+      return <ThemedTweet tweet={tweet} />
     }
     if (proof?.proof?.image)
       return (
