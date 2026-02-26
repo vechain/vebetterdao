@@ -8,6 +8,7 @@ import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { getExplorerAddressLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
+import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
 
 import { RewardStatisticsSection } from "./RewardStatisticsSection"
@@ -65,6 +66,7 @@ export const RewardDetailsModal = ({
   distributionStrategy: string
 }) => {
   const { t } = useTranslation()
+  const { app } = useCurrentAppInfo()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
 
   return (
@@ -97,6 +99,22 @@ export const RewardDetailsModal = ({
             <RewardStatisticsSection />
           </Card.Body>
         </Card.Root>
+
+        {app?.teamWalletAddress && (
+          <Card.Root variant="primary" p={4} gap={4} w="full">
+            <Card.Header p={0}>
+              <Heading size="xl" alignSelf="flex-start">
+                {t("Treasury address")}
+              </Heading>
+            </Card.Header>
+
+            <Card.Body p={0}>
+              <Card.Root borderWidth={1} w="full" borderRadius="xl" p={3} bg="bg.surface">
+                <DistributorItem distributor={app.teamWalletAddress} />
+              </Card.Root>
+            </Card.Body>
+          </Card.Root>
+        )}
 
         <Card.Root variant="primary" p={4} gap={4} w="full">
           <Card.Header p={0}>

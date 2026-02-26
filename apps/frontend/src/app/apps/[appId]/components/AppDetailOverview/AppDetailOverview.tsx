@@ -1,5 +1,5 @@
 const notFoundImage = "/assets/images/image-not-found.webp"
-import { Button, Card, Separator, Flex, HStack, Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Flex, HStack, Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { UilExternalLinkAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback } from "react"
@@ -15,7 +15,6 @@ import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementS
 
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
 import { AppDetailSocials } from "./components/AppDetailSocials"
-import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
 
 export const AppDetailOverview = ({
@@ -98,10 +97,6 @@ export const AppDetailOverview = ({
                       gap={[4, 4, 10]}
                       w={{ base: "full", md: "auto" }}
                       justifyContent={{ base: "space-between", md: "flex-start" }}>
-                      <AppReceiverAddress />
-
-                      <Separator hideFrom="md" />
-
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
                           <Text textStyle={"sm"} color="text.subtle">
