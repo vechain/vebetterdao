@@ -27,6 +27,7 @@ export type ProposalActivityMeta = {
   proposalId: string
   proposalTitle: string
   state: ProposalState
+  cancelReason?: string
 }
 
 export type AppActivityMeta = {

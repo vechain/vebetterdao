@@ -1435,6 +1435,8 @@
   "The name of your app.": "आपके ऐप का नाम।",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "पूल खाली शुरू होगा। रिवॉर्ड वितरित करने से पहले अपने ऐप बैलेंस से पूल में B3TR ट्रांसफर करने के लिए री-बैलेंस का उपयोग करें।",
   "The previous round has ended. Start a new round to continue voting.": "पिछला दौर समाप्त हो गया है। मतदान जारी रखने के लिए नया दौर शुरू करें।",
+  "The proposal '{{title}}' was cancelled": "प्रस्ताव '{{title}}' रद्द कर दिया गया",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "प्रस्ताव '{{title}}' निम्नलिखित कारण से रद्द कर दिया गया: {{reason}}",
   "The proposal was": "प्रस्ताव था",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "इनामों का अनुमान राउंड {{round}} के मापदंडों के आधार पर लगाया गया है (GM स्तर, B3TR आवंटित, VOT3 उपयोगी, कुल वोटर्स)। सटीक इनाम केवल तभी ज्ञात होंगे जब राउंड समाप्त हो जाएगा और सभी प्रतिभागियों ने अपने वोट डाल दिए होंगे।",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "इनाम वितरण रुका हुआ है। आप अभी भी इनाम पूल से अपने ऐप बैलेन्स में धन स्थानांतरित कर सकते हैं, या अपने ऐप बैलेन्स को निकाल सकते हैं।",

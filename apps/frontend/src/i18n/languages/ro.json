@@ -1426,6 +1426,8 @@
   "The name of your app.": "Numele aplicației tale.",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "Pool-ul va porni gol. Folosește Re-echilibrare pentru a muta B3TR din balanța aplicației în pool înainte de a distribui recompense.",
   "The previous round has ended. Start a new round to continue voting.": "Runda anterioară s-a încheiat. Începe o rundă nouă pentru a continua votarea.",
+  "The proposal '{{title}}' was cancelled": "Propunerea '{{title}}' a fost anulată",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "Propunerea '{{title}}' a fost anulată din următorul motiv: {{reason}}",
   "The proposal was": "Propunerea a fost",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "Recompensele sunt estimate pe baza parametrilor rundei {{round}} (nivel GM, B3TR alocat, VOT3 folosit, total votanți). Recompensele exacte vor fi cunoscute doar când runda se termină și toți participanții și-au exprimat voturile.",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "Distribuția recompenselor este pe pauză. Poți în continuare transfera fonduri din pool-ul de recompense în balanța aplicației sau retrage balanța aplicației.",

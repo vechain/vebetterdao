@@ -1435,6 +1435,8 @@
   "The name of your app.": "Tên ứng dụng của bạn.",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "Pool sẽ bắt đầu trống. Sử dụng Cân bằng lại để chuyển B3TR từ số dư ứng dụng vào pool trước khi phân phối phần thưởng.",
   "The previous round has ended. Start a new round to continue voting.": "Vòng trước đã kết thúc. Bắt đầu vòng mới để tiếp tục bỏ phiếu.",
+  "The proposal '{{title}}' was cancelled": "Đề xuất '{{title}}' đã bị hủy",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "Đề xuất '{{title}}' đã bị hủy với lý do: {{reason}}",
   "The proposal was": "Đề xuất này là",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "Phần thưởng được ước tính dựa trên các tham số của vòng {{round}} (mức GM, B3TR phân bổ, VOT3 sử dụng, tổng số người bỏ phiếu). Phần thưởng chính xác sẽ chỉ được biết khi vòng kết thúc và tất cả người tham gia đã bỏ phiếu.",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "Việc phân phối phần thưởng đã tạm dừng. Bạn vẫn có thể chuyển tiền từ quỹ phần thưởng sang số dư ứng dụng, hoặc rút số dư ứng dụng của mình.",

@@ -42,6 +42,7 @@ export const useProposalStateChangeMaps = () => {
       events.map(e => ({
         id: e.decodedData.args.proposalId.toString(),
         timestamp: e.meta.blockTimestamp,
+        reason: e.decodedData.args.reason,
       })),
   })
 
@@ -84,6 +85,14 @@ export const useProposalStateChangeMaps = () => {
     return map
   }, [canceledEvents.data])
 
+  const canceledReasonMap = useMemo((): Map<string, string> => {
+    const map = new Map<string, string>()
+    canceledEvents.data?.forEach(e => {
+      if (e.reason) map.set(e.id, e.reason)
+    })
+    return map
+  }, [canceledEvents.data])
+
   const inDevelopmentMap = useMemo((): TimestampMap => {
     const map = new Map<string, number>()
     inDevelopmentEvents.data?.forEach(e => map.set(e.id, e.timestamp))
@@ -104,6 +113,7 @@ export const useProposalStateChangeMaps = () => {
 
   return {
     canceledMap,
+    canceledReasonMap,
     inDevelopmentMap,
     completedMap,
     executedMap,

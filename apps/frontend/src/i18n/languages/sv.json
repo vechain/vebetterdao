@@ -1435,6 +1435,8 @@
   "The name of your app.": "Namnet på din app.",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "Poolen startar tom. Använd Re-balance för att flytta B3TR från ditt app-saldo till poolen innan du distribuerar belöningar.",
   "The previous round has ended. Start a new round to continue voting.": "Den tidigare rundan har avslutats. Starta en ny runda för att fortsätta rösta.",
+  "The proposal '{{title}}' was cancelled": "Förslaget '{{title}}' har avbrutits",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "Förslaget '{{title}}' har avbrutits med följande anledning: {{reason}}",
   "The proposal was": "Förslaget var",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "Belöningarna uppskattas baserat på parametrarna för omgång {{round}} (GM-nivå, B3TR tilldelat, VOT3 använt, total väljare). De exakta belöningarna kommer endast att vara kända när omgången är slut och alla deltagare har röstat.",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "Belöningsutdelningen är pausad. Du kan fortfarande överföra medel från belöningspoolen till ditt appens saldo, eller ta ut ditt appens saldo.",
