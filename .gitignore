@@ -154,6 +154,8 @@ packages/contracts/metadata/xApps/output/
 
 packages/contracts/deploy_output/
 
+packages/contracts/mongo-keyfile
+
 
 
 # vitest

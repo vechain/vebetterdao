@@ -1,0 +1,92 @@
+services:
+  mongo-node1:
+    image: mongo:8
+    container_name: mongo-node1
+    hostname: mongo-node1
+    command: mongod --replSet rs0 --bind_ip_all --port 27017
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok } catch(e) { 0 }
+        " | grep -q 1
+      interval: 5s
+      retries: 30
+    networks:
+      - vechain-thor
+
+  mongo-setup:
+    image: mongo:8
+    container_name: mongo-setup
+    depends_on:
+      mongo-node1:
+        condition: service_started
+    entrypoint:
+      - bash
+      - -c
+      - |
+        sleep 3
+        mongosh --host mongo-node1:27017 --quiet --eval '
+          rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongo-node1:27017" }] });
+        ' || true
+        sleep 2
+        mongosh --host mongo-node1:27017 --quiet --eval '
+          while (!rs.isMaster().ismaster) { sleep(1000); }
+          print("mongo-setup done");
+        '
+    restart: "no"
+    networks:
+      - vechain-thor
+
+  vechain-indexer:
+    image: ghcr.io/vechain/vechain-indexer/indexer:latest
+    container_name: vechain-indexer
+    depends_on:
+      mongo-setup:
+        condition: service_completed_successfully
+    environment:
+      SPRING_DATA_MONGODB_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
+      SPRING_PROFILES_ACTIVE: "indexer,b3tr,explorer,accounts,transactions,transfers"
+      BLOCKCHAIN_NETWORK: SOLO
+      BLOCKCHAIN_THOR_URL: "http://thor-solo:8669"
+      B3TR_CONTRACT: "${B3TR_CONTRACT}"
+      VOT3_CONTRACT: "${VOT3_CONTRACT}"
+      EMISSIONS_CONTRACT: "${EMISSIONS_CONTRACT}"
+      B3TR_GOVERNOR_CONTRACT: "${B3TR_GOVERNOR_CONTRACT}"
+      B3TR_DBA_POOL_CONTRACT: "${B3TR_DBA_POOL_CONTRACT}"
+      GM_NFT_CONTRACT: "${GM_NFT_CONTRACT}"
+      X_ALLOC_VOTING_CONTRACT: "${X_ALLOC_VOTING_CONTRACT}"
+      X_ALLOC_POOL_CONTRACT: "${X_ALLOC_POOL_CONTRACT}"
+      X2EARN_REWARDS_POOL_CONTRACT: "${X2EARN_REWARDS_POOL_CONTRACT}"
+      VOTER_REWARDS_CONTRACT: "${VOTER_REWARDS_CONTRACT}"
+      TREASURY_CONTRACT: "${TREASURY_CONTRACT}"
+    ports:
+      - "8090:8080"
+    networks:
+      - vechain-thor
+
+  vechain-indexer-api:
+    image: ghcr.io/vechain/vechain-indexer/api:latest
+    container_name: vechain-indexer-api
+    depends_on:
+      mongo-setup:
+        condition: service_completed_successfully
+    environment:
+      SPRING_DATA_MONGODB_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
+      SPRING_PROFILES_ACTIVE: "api"
+    ports:
+      - "8089:8080"
+    networks:
+      - vechain-thor
+
+networks:
+  vechain-thor:
+    external: true
+
+volumes:
+  mongo-data:
+    driver: local
+    name: mongo-data
