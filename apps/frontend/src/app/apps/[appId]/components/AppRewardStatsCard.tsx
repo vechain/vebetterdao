@@ -3,7 +3,7 @@
 import { Card, Heading, HStack, Link, useDisclosure } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useParams } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useAppRoundOverviews } from "@/api/indexer/actions/useAppRoundOverviews"
@@ -12,13 +12,14 @@ import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 import { useXAppMetadata } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"
 
 import { RewardDetailsModal } from "./AppDetailOverview/components/RewardDetailsModal"
-import { RewardHistoryChart } from "./AppDetailOverview/components/RewardHistoryChart"
+import { type Period, PERIOD_ROUND_LIMITS, RewardHistoryChart } from "./AppDetailOverview/components/RewardHistoryChart"
 
 export const AppRewardStatsCard = () => {
   const { appId } = useParams<{ appId: string }>()
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(appId ?? "")
   const { open: isModalOpen, onOpen: onOpenModal, onClose: onCloseModal } = useDisclosure()
+  const [period, setPeriod] = useState<Period>("6M")
 
   const { data: earningsData, isLoading: earningsLoading } = useAppEarnings(appId)
 
@@ -26,9 +27,16 @@ export const AppRewardStatsCard = () => {
     () => (earningsData && Array.isArray(earningsData) ? earningsData.map(e => e.roundId) : []),
     [earningsData],
   )
-  const { data: overviewData, isLoading: overviewLoading } = useAppRoundOverviews(appId, roundIds)
 
-  const isChartLoading = earningsLoading || (roundIds.length > 0 && overviewLoading)
+  const limitedRoundIds = useMemo(() => {
+    const limit = PERIOD_ROUND_LIMITS[period]
+    if (limit == null) return roundIds
+    return roundIds.slice(-limit)
+  }, [roundIds, period])
+
+  const { data: overviewData, isLoading: overviewLoading } = useAppRoundOverviews(appId, limitedRoundIds)
+
+  const isChartLoading = earningsLoading || (limitedRoundIds.length > 0 && overviewLoading)
 
   return (
     <>
@@ -44,7 +52,13 @@ export const AppRewardStatsCard = () => {
         </Card.Header>
 
         <Card.Body>
-          <RewardHistoryChart earningsData={earningsData} overviewData={overviewData} isLoading={isChartLoading} />
+          <RewardHistoryChart
+            earningsData={earningsData}
+            overviewData={overviewData}
+            isLoading={isChartLoading}
+            period={period}
+            onPeriodChange={setPeriod}
+          />
         </Card.Body>
       </Card.Root>
 

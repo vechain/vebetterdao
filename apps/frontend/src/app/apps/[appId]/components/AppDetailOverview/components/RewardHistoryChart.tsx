@@ -11,10 +11,10 @@ import type { AppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 const compact = getCompactFormatter(1)
 
 type ChartMetric = "allocations" | "rewards" | "actions" | "users"
-type Period = "3M" | "6M" | "1Y" | "All"
+export type Period = "3M" | "6M" | "1Y" | "All"
 
 // Rounds are ~weekly; map periods to approximate round counts
-const PERIOD_ROUND_LIMITS: Record<Period, number | null> = {
+export const PERIOD_ROUND_LIMITS: Record<Period, number | null> = {
   "3M": 13,
   "6M": 26,
   "1Y": 52,
@@ -93,14 +93,17 @@ export const RewardHistoryChart = ({
   earningsData,
   overviewData,
   isLoading,
+  period,
+  onPeriodChange,
 }: {
   earningsData: AppEarnings | undefined
   overviewData: RoundOverview[] | undefined
   isLoading: boolean
+  period: Period
+  onPeriodChange: (period: Period) => void
 }) => {
   const { t } = useTranslation()
   const [metric, setMetric] = useState<ChartMetric>("rewards")
-  const [period, setPeriod] = useState<Period>("6M")
 
   const allColorKeys = [...new Set(Object.values(METRIC_CONFIG).flatMap(c => c.colorKeys))]
   const tokenColors = useToken("colors", allColorKeys)
@@ -179,7 +182,7 @@ export const RewardHistoryChart = ({
           size={{ base: "sm" }}
           borderRadius="lg"
           value={period}
-          onValueChange={e => setPeriod(e.value as Period)}>
+          onValueChange={e => onPeriodChange(e.value as Period)}>
           <SegmentGroup.Indicator borderRadius="lg" />
           {["3M", "6M", "1Y", "All"].map(item => (
             <SegmentGroup.Item key={item} value={item} flex={{ base: "1", md: "initial" }}>
