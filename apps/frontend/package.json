@@ -101,7 +101,7 @@
     "openapi-typescript": "^7.9.1",
     "resize-observer-polyfill": "^1.5.1",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "storybook": "^10.0.1",
+    "storybook": "^10.2.10",
     "ts-node": "^10.9.2",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
