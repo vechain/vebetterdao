@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Center, HStack, NativeSelect, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { Box, Center, HStack, NativeSelect, SegmentGroup, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,15 @@ import type { AppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 const compact = getCompactFormatter(1)
 
 type ChartMetric = "allocations" | "rewards" | "actions" | "users"
+export type Period = "3M" | "6M" | "1Y" | "All"
+
+// Rounds are ~weekly; map periods to approximate round counts
+export const PERIOD_ROUND_LIMITS: Record<Period, number | null> = {
+  "3M": 13,
+  "6M": 26,
+  "1Y": 52,
+  All: null,
+}
 
 type RoundOverview = {
   roundId: number
@@ -84,13 +93,17 @@ export const RewardHistoryChart = ({
   earningsData,
   overviewData,
   isLoading,
+  period,
+  onPeriodChange,
 }: {
   earningsData: AppEarnings | undefined
   overviewData: RoundOverview[] | undefined
   isLoading: boolean
+  period: Period
+  onPeriodChange: (period: Period) => void
 }) => {
   const { t } = useTranslation()
-  const [metric, setMetric] = useState<ChartMetric>("allocations")
+  const [metric, setMetric] = useState<ChartMetric>("rewards")
 
   const allColorKeys = [...new Set(Object.values(METRIC_CONFIG).flatMap(c => c.colorKeys))]
   const tokenColors = useToken("colors", allColorKeys)
@@ -117,9 +130,12 @@ export const RewardHistoryChart = ({
         }
       })
 
-    if (metric === "allocations") return allData
-    return allData.filter(d => overviewRoundIds.has(d.round))
-  }, [earningsData, overviewData, metric, overviewRoundIds])
+    const filtered = metric === "allocations" ? allData : allData.filter(d => overviewRoundIds.has(d.round))
+
+    const limit = PERIOD_ROUND_LIMITS[period]
+    if (limit == null) return filtered
+    return filtered.slice(-limit)
+  }, [earningsData, overviewData, metric, overviewRoundIds, period])
 
   const metricOptions: { value: ChartMetric; label: string }[] = [
     { value: "allocations", label: t("Allocation Earnings") },
@@ -144,8 +160,8 @@ export const RewardHistoryChart = ({
 
   return (
     <VStack w="full" align="stretch" gap={3}>
-      <HStack justify="space-between" align="center">
-        <NativeSelect.Root size="sm" w="auto" minW="180px">
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
+        <NativeSelect.Root size="sm" w="auto" minW={{ base: "full", md: "180px" }}>
           <NativeSelect.Field
             value={metric}
             onChange={e => setMetric(e.target.value as ChartMetric)}
@@ -160,12 +176,27 @@ export const RewardHistoryChart = ({
           </NativeSelect.Field>
           <NativeSelect.Indicator />
         </NativeSelect.Root>
+
+        <SegmentGroup.Root
+          w={{ base: "full", md: "auto" }}
+          size={{ base: "sm" }}
+          borderRadius="lg"
+          value={period}
+          onValueChange={e => onPeriodChange(e.value as Period)}>
+          <SegmentGroup.Indicator borderRadius="lg" />
+          {["3M", "6M", "1Y", "All"].map(item => (
+            <SegmentGroup.Item key={item} value={item} flex={{ base: "1", md: "initial" }}>
+              <SegmentGroup.ItemText>{item}</SegmentGroup.ItemText>
+              <SegmentGroup.ItemHiddenInput />
+            </SegmentGroup.Item>
+          ))}
+        </SegmentGroup.Root>
       </HStack>
 
       <Box w="full" h="220px">
         <ResponsiveContainer width="100%" height="100%">
           {metric === "allocations" ? (
-            <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="gradRewards" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={colorMap["green.500"]} stopOpacity={0.3} />
@@ -213,7 +244,7 @@ export const RewardHistoryChart = ({
               />
             </AreaChart>
           ) : (
-            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
               <XAxis
                 dataKey="round"

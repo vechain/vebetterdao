@@ -1,37 +1,22 @@
-import {
-  Card,
-  Heading,
-  Skeleton,
-  Text,
-  VStack,
-  Center,
-  HStack,
-  IconButton,
-  Link,
-  Popover,
-  Portal,
-  useClipboard,
-} from "@chakra-ui/react"
+import { Card, Heading, Skeleton, Text, VStack, Center, HStack, IconButton, useClipboard } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaCopy, FaExternalLinkAlt, FaCheck } from "react-icons/fa"
-import { HiDotsVertical } from "react-icons/hi"
 
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { getExplorerAddressLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
+import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
 
 import { RewardStatisticsSection } from "./RewardStatisticsSection"
 
-const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
+const DistributorItem = ({ distributor }: { distributor: string }) => {
   const { t } = useTranslation()
   const { data: vnsData } = useVechainDomain(distributor)
   const domain = vnsData?.domain
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const { copy, copied: isCopied } = useClipboard({
     value: distributor,
     timeout: 1000,
@@ -47,59 +32,26 @@ const DistributorItemWithMenu = ({ distributor }: { distributor: string }) => {
               {domain}
             </Text>
           )}
-          <Text textStyle="sm" color="text.subtle">
-            {humanAddress(distributor, 10, 6)}
-          </Text>
+          <HStack gap={1}>
+            <Text textStyle="sm" color="text.subtle">
+              {humanAddress(distributor, 10, 6)}
+            </Text>
+            <IconButton
+              variant="ghost"
+              size="2xs"
+              color="text.subtle"
+              aria-label={isCopied ? t("Address copied") : t("Copy address")}
+              onClick={() => copy()}>
+              {isCopied ? <FaCheck /> : <FaCopy />}
+            </IconButton>
+          </HStack>
         </VStack>
       </HStack>
-      <Popover.Root
-        positioning={{
-          placement: "bottom-end",
-        }}
-        open={isPopoverOpen}
-        onOpenChange={details => setIsPopoverOpen(details.open)}>
-        <Popover.Trigger asChild>
-          <IconButton
-            variant="ghost"
-            size="sm"
-            aria-label={t("Options")}
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-            <HiDotsVertical />
-          </IconButton>
-        </Popover.Trigger>
-        <Portal>
-          <Popover.Positioner>
-            <Popover.Content width="auto" boxShadow="md" border="1px solid #EFEFEF">
-              <Popover.Body p={2}>
-                <VStack alignItems="stretch" gap={3}>
-                  <HStack onClick={() => copy()} cursor="pointer">
-                    {isCopied ? <FaCheck /> : <FaCopy />}
-                    <Text whiteSpace="nowrap" textStyle={["sm", "md"]}>
-                      {isCopied ? t("Address copied") : t("Copy address")}
-                    </Text>
-                  </HStack>
-                  <Link
-                    href={getExplorerAddressLink(distributor)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    display="flex"
-                    alignItems="center"
-                    gap={2}
-                    textStyle={["sm", "md"]}
-                    fontWeight="normal"
-                    color="inherit"
-                    _hover={{ textDecoration: "none" }}
-                    _focus={{ boxShadow: "none", outline: "none" }}
-                    _active={{ boxShadow: "none" }}>
-                    <FaExternalLinkAlt />
-                    {t("View on explorer")}
-                  </Link>
-                </VStack>
-              </Popover.Body>
-            </Popover.Content>
-          </Popover.Positioner>
-        </Portal>
-      </Popover.Root>
+      <IconButton color="text.subtle" variant="ghost" size="sm" aria-label={t("View on explorer")} asChild>
+        <a href={getExplorerAddressLink(distributor)} target="_blank" rel="noopener noreferrer">
+          <FaExternalLinkAlt />
+        </a>
+      </IconButton>
     </HStack>
   )
 }
@@ -114,6 +66,7 @@ export const RewardDetailsModal = ({
   distributionStrategy: string
 }) => {
   const { t } = useTranslation()
+  const { app } = useCurrentAppInfo()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
 
   return (
@@ -124,7 +77,7 @@ export const RewardDetailsModal = ({
         <Card.Root variant="primary" p={4} gap={4} w="full">
           <Card.Header p={0}>
             <Heading size="xl" alignSelf="flex-start">
-              {t("Details")}
+              {t("Strategy")}
             </Heading>
           </Card.Header>
 
@@ -138,7 +91,7 @@ export const RewardDetailsModal = ({
         <Card.Root variant="primary" p={4} gap={4} w="full">
           <Card.Header p={0}>
             <Heading size="xl" alignSelf="flex-start">
-              {t("Statistics")}
+              {t("All time statistics")}
             </Heading>
           </Card.Header>
 
@@ -146,6 +99,22 @@ export const RewardDetailsModal = ({
             <RewardStatisticsSection />
           </Card.Body>
         </Card.Root>
+
+        {app?.teamWalletAddress && (
+          <Card.Root variant="primary" p={4} gap={4} w="full">
+            <Card.Header p={0}>
+              <Heading size="xl" alignSelf="flex-start">
+                {t("Treasury address")}
+              </Heading>
+            </Card.Header>
+
+            <Card.Body p={0}>
+              <Card.Root borderWidth={1} w="full" borderRadius="xl" p={3} bg="bg.surface">
+                <DistributorItem distributor={app.teamWalletAddress} />
+              </Card.Root>
+            </Card.Body>
+          </Card.Root>
+        )}
 
         <Card.Root variant="primary" p={4} gap={4} w="full">
           <Card.Header p={0}>
@@ -159,15 +128,8 @@ export const RewardDetailsModal = ({
               {distributors && distributors.length > 0 ? (
                 <VStack align="stretch" w="full" gap={2}>
                   {distributors.map((distributor: string) => (
-                    <Card.Root
-                      key={distributor}
-                      borderWidth={1}
-                      borderColor="gray.200"
-                      w="full"
-                      borderRadius="xl"
-                      p={3}
-                      bg="bg.surface">
-                      <DistributorItemWithMenu distributor={distributor} />
+                    <Card.Root key={distributor} borderWidth={1} w="full" borderRadius="xl" p={3} bg="bg.surface">
+                      <DistributorItem distributor={distributor} />
                     </Card.Root>
                   ))}
                 </VStack>
