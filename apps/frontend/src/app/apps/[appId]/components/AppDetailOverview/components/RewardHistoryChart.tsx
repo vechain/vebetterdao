@@ -29,7 +29,7 @@ type ChartDataPoint = {
 }
 
 const METRIC_CONFIG: Record<ChartMetric, { colorKeys: string[]; unit: string }> = {
-  allocations: { colorKeys: ["blue.500", "green.400"], unit: "B3TR" },
+  allocations: { colorKeys: ["green.500", "green.300"], unit: "B3TR" },
   rewards: { colorKeys: ["purple.500"], unit: "B3TR" },
   actions: { colorKeys: ["orange.400"], unit: "" },
   users: { colorKeys: ["teal.400"], unit: "" },
@@ -168,12 +168,12 @@ export const RewardHistoryChart = ({
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="gradRewards" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={colorMap["blue.500"]} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={colorMap["blue.500"]} stopOpacity={0} />
+                  <stop offset="5%" stopColor={colorMap["green.500"]} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={colorMap["green.500"]} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gradTeam" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={colorMap["green.400"]} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={colorMap["green.400"]} stopOpacity={0} />
+                  <stop offset="5%" stopColor={colorMap["green.300"]} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={colorMap["green.300"]} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
@@ -197,7 +197,7 @@ export const RewardHistoryChart = ({
                 type="monotone"
                 dataKey="rewards"
                 stackId="1"
-                stroke={colorMap["blue.500"]}
+                stroke={colorMap["green.500"]}
                 fill="url(#gradRewards)"
                 strokeWidth={2}
                 name={t("Rewards")}
@@ -206,7 +206,7 @@ export const RewardHistoryChart = ({
                 type="monotone"
                 dataKey="team"
                 stackId="1"
-                stroke={colorMap["green.400"]}
+                stroke={colorMap["green.300"]}
                 fill="url(#gradTeam)"
                 strokeWidth={2}
                 name={t("Team")}
