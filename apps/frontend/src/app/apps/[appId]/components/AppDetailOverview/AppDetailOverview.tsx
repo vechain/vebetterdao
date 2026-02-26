@@ -5,7 +5,6 @@ import dayjs from "dayjs"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
 import { XAppStatus } from "../../../../../types/appDetails"
 import { useCurrentAppBanner } from "../../hooks/useCurrentAppBanner"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
@@ -29,7 +28,6 @@ export const AppDetailOverview = ({
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
-  const { isMobile } = useBreakpoints()
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -72,6 +70,10 @@ export const AppDetailOverview = ({
                             {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                           </Heading>
                         </Skeleton>
+                        <HStack gap={2}>
+                          <EditAppPageButton />
+                          <AdminAppPageButton />
+                        </HStack>
                       </HStack>
                       <Skeleton loading={isEndorsementStatusLoading} alignSelf={["flex-start", "flex-start", "center"]}>
                         <EndorsementStatusCallout
@@ -108,27 +110,14 @@ export const AppDetailOverview = ({
                         </VStack>
                       )}
                     </Stack>
-                    <HStack
-                      justifyContent={{ base: "space-between", md: "flex-end" }}
+                    <Button
+                      variant={"primary"}
+                      onClick={goToWebsite}
                       w={{ base: "full", md: "auto" }}
                       mt={{ base: 4, md: 0 }}>
-                      {!isMobile && (
-                        <>
-                          <EditAppPageButton />
-                          <AdminAppPageButton />
-                        </>
-                      )}
-                      <Button flex={1} variant={"primary"} onClick={goToWebsite}>
-                        {t("Go to Website")}
-                        <UilExternalLinkAlt color="white" size={"16px"} />
-                      </Button>
-                      {isMobile && (
-                        <>
-                          <EditAppPageButton />
-                          <AdminAppPageButton />
-                        </>
-                      )}
-                    </HStack>
+                      {t("Go to Website")}
+                      <UilExternalLinkAlt color="white" size={"16px"} />
+                    </Button>
                   </Stack>
                 </VStack>
               </Flex>
