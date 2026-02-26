@@ -6,10 +6,11 @@ type Props = {
   title: string
   description: string
   onManage: () => void
+  customButtonTitle?: string
   icon?: ReactNode
 }
 
-export const AdminSettingSection = ({ title, description, onManage, icon }: Props) => {
+export const AdminSettingSection = ({ title, description, onManage, icon, customButtonTitle }: Props) => {
   const { t } = useTranslation()
 
   return (
@@ -24,7 +25,7 @@ export const AdminSettingSection = ({ title, description, onManage, icon }: Prop
         </VStack>
       </HStack>
       <Button variant="outline" size="sm" onClick={onManage} flexShrink={0}>
-        {t("Manage")}
+        {customButtonTitle || t("Manage")}
       </Button>
     </HStack>
   )

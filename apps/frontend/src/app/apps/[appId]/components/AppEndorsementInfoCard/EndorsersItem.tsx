@@ -107,14 +107,6 @@ export const EndorsersItem = ({ group, isAppAdmin, onRemoveNode }: Props) => {
           </VStack>
         </HStack>
         <HStack alignItems={"center"} gap={4}>
-          <Text textStyle={"md"} fontWeight="semibold">
-            <Trans
-              i18nKey="{{value}} pts."
-              values={{ value: group.totalPoints.toString() }}
-              components={{ Text: <Text as="span" /> }}
-            />
-          </Text>
-
           <Popover.Root
             positioning={{ placement: "bottom-end" }}
             open={isPopoverOpen}

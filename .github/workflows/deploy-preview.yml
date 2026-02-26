@@ -55,7 +55,7 @@ jobs:
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
 
           if [ "${{ github.base_ref }}" == "main" ]; then
-            echo 'flavors=["dev", "staging", "beta"]' >> $GITHUB_OUTPUT
+            echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
             echo "::notice::PR to main - deploying staging + beta previews"
           else
             echo "::error::Unsupported base branch: ${{ github.base_ref }}"
@@ -157,9 +157,6 @@ jobs:
       fail-fast: false
     outputs:
       # Store URLs and status for each flavor using dynamic keys
-      custom_url_dev: ${{ steps.save-urls.outputs.custom_url_dev }}
-      service_url_dev: ${{ steps.save-urls.outputs.service_url_dev }}
-      status_dev: ${{ steps.save-urls.outputs.status_dev }}
       custom_url_staging: ${{ steps.save-urls.outputs.custom_url_staging }}
       service_url_staging: ${{ steps.save-urls.outputs.service_url_staging }}
       status_staging: ${{ steps.save-urls.outputs.status_staging }}
@@ -308,9 +305,6 @@ jobs:
           RUN_URL: ${{ needs.setup.outputs.run_url }}
           PROJECT_NAME: ${{ env.PROJECT_NAME }}
           # Pass all possible URL and status outputs
-          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
-          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
-          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
           CUSTOM_URL_STAGING: ${{ needs.deploy.outputs.custom_url_staging }}
           SERVICE_URL_STAGING: ${{ needs.deploy.outputs.service_url_staging }}
           STATUS_STAGING: ${{ needs.deploy.outputs.status_staging }}
@@ -333,11 +327,6 @@ jobs:
 
             // Get URLs and status for each flavor
             const flavorData = {
-              dev: {
-                custom: process.env.CUSTOM_URL_DEV || '',
-                service: process.env.SERVICE_URL_DEV || '',
-                status: process.env.STATUS_DEV || ''
-              },
               staging: {
                 custom: process.env.CUSTOM_URL_STAGING || '',
                 service: process.env.SERVICE_URL_STAGING || '',
@@ -438,9 +427,6 @@ jobs:
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
-          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
-          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
-          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
           CUSTOM_URL_STAGING: ${{ needs.deploy.outputs.custom_url_staging }}
           SERVICE_URL_STAGING: ${{ needs.deploy.outputs.service_url_staging }}
           STATUS_STAGING: ${{ needs.deploy.outputs.status_staging }}

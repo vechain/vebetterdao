@@ -2,8 +2,10 @@ import { HStack, VStack } from "@chakra-ui/react"
 import { UilArrowDown, UilArrowUp, UilTopArrowToTop, UilTrash } from "@iconscout/react-unicons"
 import { UseQueryResult } from "@tanstack/react-query"
 import { Dispatch, ReactNode, SetStateAction, useCallback } from "react"
-import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
+import { TweetSkeleton } from "react-tweet"
 import { Tweet } from "react-tweet/api"
+
+import { ThemedTweet } from "../../ThemedTweet"
 
 type Props = {
   tweetQuery: UseQueryResult<Tweet, Error>
@@ -53,22 +55,22 @@ export const TweetCard = ({ tweetQuery, editMode, index, tweets, setTweets }: Pr
   const EditContainer = useCallback(
     ({ children }: { children: ReactNode }) => {
       return editMode ? (
-        <HStack bg="#E0E9FE" rounded="10px" p={4} align={"stretch"}>
-          <VStack py={"16px"} px={"8px"} gap={4}>
+        <HStack bg="card.subtle" rounded="xl" p={4} align={"stretch"} border="sm" borderColor="border.secondary">
+          <VStack py={4} px={2} gap={4}>
             {index !== 0 && (
               <>
                 {index !== 1 && (
                   <UilTopArrowToTop
                     cursor="pointer"
                     size="24px"
-                    color="#004CFC"
+                    color="var(--vbd-colors-icon-default)"
                     onClick={() => tweet?.id_str && moveTweetOnTop(tweet.id_str)}
                   />
                 )}
                 <UilArrowUp
                   cursor="pointer"
                   size="24px"
-                  color="#004CFC"
+                  color="var(--vbd-colors-icon-default)"
                   onClick={() => tweet?.id_str && moveTweetUp(tweet.id_str)}
                 />
               </>
@@ -77,14 +79,14 @@ export const TweetCard = ({ tweetQuery, editMode, index, tweets, setTweets }: Pr
               <UilArrowDown
                 cursor="pointer"
                 size="24px"
-                color="#004CFC"
+                color="var(--vbd-colors-icon-default)"
                 onClick={() => tweet?.id_str && moveTweetDown(tweet.id_str)}
               />
             )}
             <UilTrash
               cursor="pointer"
               size="24px"
-              color="#004CFC"
+              color="var(--vbd-colors-red-solid)"
               onClick={() => tweet?.id_str && removeTweet(tweet.id_str)}
             />
           </VStack>
@@ -104,8 +106,8 @@ export const TweetCard = ({ tweetQuery, editMode, index, tweets, setTweets }: Pr
   }
   return (
     <EditContainer>
-      <VStack align="stretch" mt={"-8px"}>
-        {tweet && !isTweetLoading ? <EmbeddedTweet key={tweet.id_str} tweet={tweet} /> : <TweetSkeleton />}
+      <VStack align="stretch" mt={-2}>
+        {tweet && !isTweetLoading ? <ThemedTweet tweet={tweet} /> : <TweetSkeleton />}
       </VStack>
     </EditContainer>
   )

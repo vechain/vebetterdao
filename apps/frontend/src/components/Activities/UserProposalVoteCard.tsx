@@ -1,4 +1,4 @@
-import { Text, Card, VStack, HStack, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { Card, HStack, Icon, LinkBox, LinkOverlay, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { TFunction } from "i18next"
 import { DesignNibSolid } from "iconoir-react"
@@ -27,7 +27,8 @@ const getVoteChoice = (support: number, t: TFunction) => {
 
 export const UserProposalVoteCard: React.FC<Props> = ({ activity }) => {
   const { t } = useTranslation()
-  const { proposalId, proposalTitle, support } = activity.metadata
+  const { proposalId, proposalTitle, support, proposalType } = activity.metadata
+  const href = proposalType === "grant" ? `/grants/${proposalId}` : `/proposals/${proposalId}`
 
   return (
     <LinkBox asChild>
@@ -37,7 +38,7 @@ export const UserProposalVoteCard: React.FC<Props> = ({ activity }) => {
             <Icon as={DesignNibSolid} color="status.neutral.strong" boxSize="5" mt="0.5" flexShrink={0} />
             <VStack gap="1" align="flex-start" flex="1" minW="0">
               <LinkOverlay textStyle="sm" fontWeight="bold" asChild>
-                <TypedNextLink href={`/governance/${proposalId}`}>{t("You voted on a proposal")}</TypedNextLink>
+                <TypedNextLink href={href}>{t("You voted on a proposal")}</TypedNextLink>
               </LinkOverlay>
               <Text textStyle="sm" color="text.subtle" lineClamp={2}>
                 {t('You voted "{{voteChoice}}" in the {{title}} proposal', {

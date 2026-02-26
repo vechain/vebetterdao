@@ -27,6 +27,7 @@ export type ProposalActivityMeta = {
   proposalId: string
   proposalTitle: string
   state: ProposalState
+  cancelReason?: string
 }
 
 export type AppActivityMeta = {
@@ -81,6 +82,7 @@ export type UserProposalVoteMeta = {
   proposalId: string
   proposalTitle: string
   support: number
+  proposalType: "grant" | "proposal"
 }
 
 export type ActivityItem =

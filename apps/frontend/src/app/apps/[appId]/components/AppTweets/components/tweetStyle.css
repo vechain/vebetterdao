@@ -1,5 +1,8 @@
-.react-tweet-theme[class*="tweet-container-module__"][class$="__root"] {
-  max-width: none;
-  margin: 0;
-  margin-top: 8px;
+.themed-tweet {
+  --tweet-font-color: var(--vbd-colors-text-default);
+  --tweet-font-color-secondary: var(--vbd-colors-text-subtle);
+  --tweet-color-blue-secondary: var(--vbd-colors-blue-solid);
+  --tweet-border: 1px solid var(--vbd-colors-border-secondary);
+  --tweet-bg-color-hover: var(--vbd-colors-card-hover);
+  --tweet-quoted-bg-color-hover: var(--vbd-colors-card-hover);
 }

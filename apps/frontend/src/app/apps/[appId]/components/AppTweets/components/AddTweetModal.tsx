@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiTwitterXFill } from "react-icons/ri"
 import Lottie from "react-lottie"
-import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
+import { TweetSkeleton } from "react-tweet"
 
 import { useTweet } from "@/api/twitter/hooks/useTweets"
 import { StepModal } from "@/components/StepModal/StepModal"
@@ -14,6 +14,8 @@ import { UseUploadAppMetadataReturnValue } from "@/hooks/xApp/useUploadAppMetada
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 
 import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
+
+import { ThemedTweet } from "./ThemedTweet"
 
 import "./tweetStyle.css"
 
@@ -109,7 +111,7 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
       {tweetId && !errors.tweetUrl && !tweetError && (
         <VStack align="stretch">
           <Heading size="xl">{t("Preview")}</Heading>
-          {tweet && !isTweetLoading ? <EmbeddedTweet key={tweet.id_str} tweet={tweet} /> : <TweetSkeleton />}
+          {tweet && !isTweetLoading ? <ThemedTweet tweet={tweet} /> : <TweetSkeleton />}
         </VStack>
       )}
       <VStack align={"stretch"}>

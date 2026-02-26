@@ -89,5 +89,17 @@
     "endorsement": "背书",
     "endorsed": "已背书",
     "endorsers": "背书者"
+  },
+  "ru": {
+    "endorse": "поддержать",
+    "endorsement": "поддержка",
+    "endorsed": "поддержанный",
+    "endorsers": "сторонники"
+  },
+  "ro": {
+    "endorse": "a susține",
+    "endorsement": "susținere",
+    "endorsed": "susținut/susținută",
+    "endorsers": "susținători"
   }
 }

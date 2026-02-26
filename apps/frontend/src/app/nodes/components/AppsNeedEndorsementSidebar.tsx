@@ -15,7 +15,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import NextLink from "next/link"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronDown } from "react-icons/fa6"
 
@@ -35,7 +35,12 @@ type AppsNeedEndorsementSidebarProps = {
   apps: AllApps[]
 }
 
-const AppSidebarItem = ({ appId }: { appId: string }) => {
+type AppSidebarItemProps = {
+  appId: string
+  onScoreLoaded?: (appId: string, score: number) => void
+}
+
+const AppSidebarItem = ({ appId, onScoreLoaded }: AppSidebarItemProps) => {
   const { t } = useTranslation()
   const { data: metadata, isLoading: isMetadataLoading } = useXAppMetadata(appId)
   const { data: score } = useAppEndorsementScore(appId)
@@ -46,6 +51,10 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
   const numericScore = Number(score ?? 0)
   const numericMax = Number(maxPoints ?? 0)
   const isFullyEndorsed = numericMax > 0 && numericScore >= numericMax
+
+  useEffect(() => {
+    if (score !== undefined) onScoreLoaded?.(appId, numericScore)
+  }, [appId, score, numericScore, onScoreLoaded])
 
   if (isFullyEndorsed) return null
 
@@ -100,14 +109,20 @@ const AppSidebarItem = ({ appId }: { appId: string }) => {
 export const AppsNeedEndorsementSidebar = ({ apps }: AppsNeedEndorsementSidebarProps) => {
   const { t } = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
+  const [scores, setScores] = useState<Record<string, number>>({})
   const handleToggle = useCallback(() => setIsExpanded(prev => !prev), [])
+
+  const handleScoreLoaded = useCallback((appId: string, score: number) => {
+    setScores(prev => (prev[appId] === score ? prev : { ...prev, [appId]: score }))
+  }, [])
 
   const { uniqueApps, visibleApps, hiddenApps, hasHidden } = useMemo(() => {
     const unique = apps.filter((app, i, arr) => arr.findIndex(a => a.id === app.id) === i)
-    const visible = unique.slice(0, VISIBLE_COUNT)
-    const hidden = unique.slice(VISIBLE_COUNT)
+    const sorted = [...unique].sort((a, b) => (scores[a.id] ?? 0) - (scores[b.id] ?? 0))
+    const visible = sorted.slice(0, VISIBLE_COUNT)
+    const hidden = sorted.slice(VISIBLE_COUNT)
     return { uniqueApps: unique, visibleApps: visible, hiddenApps: hidden, hasHidden: hidden.length > 0 }
-  }, [apps])
+  }, [apps, scores])
 
   return (
     <VStack align="stretch" gap={6}>
@@ -129,14 +144,14 @@ export const AppsNeedEndorsementSidebar = ({ apps }: AppsNeedEndorsementSidebarP
             {visibleApps.length > 0 ? (
               <>
                 {visibleApps.map(app => (
-                  <AppSidebarItem key={app.id} appId={app.id} />
+                  <AppSidebarItem key={app.id} appId={app.id} onScoreLoaded={handleScoreLoaded} />
                 ))}
                 {hasHidden && (
                   <Collapsible.Root open={isExpanded}>
                     <Collapsible.Content css={{ transition: `height ${TRANSITION_DURATION} ease` }}>
                       <VStack align="stretch" gap={4}>
                         {hiddenApps.map(app => (
-                          <AppSidebarItem key={app.id} appId={app.id} />
+                          <AppSidebarItem key={app.id} appId={app.id} onScoreLoaded={handleScoreLoaded} />
                         ))}
                       </VStack>
                     </Collapsible.Content>
