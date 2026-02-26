@@ -1432,6 +1432,8 @@
   "The name of your app.": "Le nom de votre application.",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "Le pool commencera vide. Utilisez Rééquilibrer pour déplacer des B3TR de votre solde d'app vers le pool avant de distribuer des récompenses.",
   "The previous round has ended. Start a new round to continue voting.": "Le tour précédent est terminé. Commencez un nouveau tour pour continuer à voter.",
+  "The proposal '{{title}}' was cancelled": "La proposition '{{title}}' a été annulée",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "La proposition '{{title}}' a été annulée pour la raison suivante : {{reason}}",
   "The proposal was": "La proposition était",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "Les récompenses sont estimées en fonction des paramètres de la ronde {{round}} (niveau GM, B3TR alloué, VOT3 utilisé, total des votants). Les récompenses exactes ne seront connues qu'une fois la ronde terminée et que tous les participants auront voté.",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "La distribution des récompenses est en pause. Vous pouvez toujours transférer des fonds du fonds de récompenses à votre solde d'app, ou retirer votre solde d'app.",

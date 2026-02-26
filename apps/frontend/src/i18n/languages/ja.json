@@ -1432,6 +1432,8 @@
   "The name of your app.": "あなたのアプリの名前。",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "プールは空の状態で開始されます。報酬を配布する前に、リバランスを使用してアプリ残高からプールにB3TRを移動してください。",
   "The previous round has ended. Start a new round to continue voting.": "前のラウンドが終了しました。投票を続けるには新しいラウンドを開始してください。",
+  "The proposal '{{title}}' was cancelled": "提案「{{title}}」はキャンセルされました",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "提案「{{title}}」は次の理由でキャンセルされました：{{reason}}",
   "The proposal was": "提案は",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "報酬はラウンド{{round}}のパラメーター（GMレベル、B3TR配布、VOT3使用済、投票者数）に基づいて推定されます。正確な報酬はラウンド終了後、全参加者が投票を終えた時点でのみ知られます。",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "報酬の配布は一時停止しています。それでも報酬プールからアプリの残高に資金を転送したり、アプリの残高を引き出したりできます。",

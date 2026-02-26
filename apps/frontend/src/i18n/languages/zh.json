@@ -1432,6 +1432,8 @@
   "The name of your app.": "您的应用程序名称。",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "池将以空状态启动。在分发奖励前，使用重新平衡将B3TR从应用余额转入池中。",
   "The previous round has ended. Start a new round to continue voting.": "上一轮已结束。开始新一轮以继续投票。",
+  "The proposal '{{title}}' was cancelled": "提案「{{title}}」已被取消",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "提案「{{title}}」因以下原因被取消：{{reason}}",
   "The proposal was": "提案是",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "奖励是基于第 {{round}} 轮的参数（GM 级别、分配的 B3TR、使用的 VOT3、总投票者）估算的。确切的奖励只有在本轮结束并且所有参与者都投票后才能知道。",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "奖励分配暂停。您仍然可以将资金从奖励池转移到您的应用余额，或提现您的应用余额。",

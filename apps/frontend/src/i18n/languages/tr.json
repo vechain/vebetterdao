@@ -1432,6 +1432,8 @@
   "The name of your app.": "Uygulamanızın adı.",
   "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.": "Havuz boş başlayacaktır. Ödül dağıtmadan önce uygulama bakiyenizden havuza B3TR aktarmak için Yeniden Dağıt'ı kullanın.",
   "The previous round has ended. Start a new round to continue voting.": "Önceki tur sona erdi. Oy vermeye devam etmek için yeni bir tur başlatın.",
+  "The proposal '{{title}}' was cancelled": "Teklif '{{title}}' iptal edildi",
+  "The proposal '{{title}}' was cancelled with the following reason: {{reason}}": "Teklif '{{title}}' şu nedenle iptal edildi: {{reason}}",
   "The proposal was": "Öneri",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "Ödüller, {{round}} turunun parametrelerine göre tahmin edilmektedir (GM seviyesi, B3TR tahsis edilmiştir, VOT3 kullanılmıştır, toplam seçmenler). Kesin ödüller, tur sona erdikten ve tüm katılımcılar oy kullandıktan sonra bilinecektir.",
   "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "Ödül dağıtımı duraklatılmıştır. Hâlâ ödül havuzundan uygulama bakiyenize para aktarabilir veya uygulama bakiyenizi çekebilirsiniz.",
