@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Center, HStack, NativeSelect, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { Box, Center, HStack, NativeSelect, SegmentGroup, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,15 @@ import type { AppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 const compact = getCompactFormatter(1)
 
 type ChartMetric = "allocations" | "rewards" | "actions" | "users"
+type Period = "3M" | "6M" | "1Y" | "All"
+
+// Rounds are ~weekly; map periods to approximate round counts
+const PERIOD_ROUND_LIMITS: Record<Period, number | null> = {
+  "3M": 13,
+  "6M": 26,
+  "1Y": 52,
+  All: null,
+}
 
 type RoundOverview = {
   roundId: number
@@ -90,7 +99,8 @@ export const RewardHistoryChart = ({
   isLoading: boolean
 }) => {
   const { t } = useTranslation()
-  const [metric, setMetric] = useState<ChartMetric>("allocations")
+  const [metric, setMetric] = useState<ChartMetric>("rewards")
+  const [period, setPeriod] = useState<Period>("6M")
 
   const allColorKeys = [...new Set(Object.values(METRIC_CONFIG).flatMap(c => c.colorKeys))]
   const tokenColors = useToken("colors", allColorKeys)
@@ -117,9 +127,12 @@ export const RewardHistoryChart = ({
         }
       })
 
-    if (metric === "allocations") return allData
-    return allData.filter(d => overviewRoundIds.has(d.round))
-  }, [earningsData, overviewData, metric, overviewRoundIds])
+    const filtered = metric === "allocations" ? allData : allData.filter(d => overviewRoundIds.has(d.round))
+
+    const limit = PERIOD_ROUND_LIMITS[period]
+    if (limit == null) return filtered
+    return filtered.slice(-limit)
+  }, [earningsData, overviewData, metric, overviewRoundIds, period])
 
   const metricOptions: { value: ChartMetric; label: string }[] = [
     { value: "allocations", label: t("Allocation Earnings") },
@@ -144,7 +157,7 @@ export const RewardHistoryChart = ({
 
   return (
     <VStack w="full" align="stretch" gap={3}>
-      <HStack justify="space-between" align="center">
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
         <NativeSelect.Root size="sm" w="auto" minW={{ base: "full", md: "180px" }}>
           <NativeSelect.Field
             value={metric}
@@ -160,6 +173,11 @@ export const RewardHistoryChart = ({
           </NativeSelect.Field>
           <NativeSelect.Indicator />
         </NativeSelect.Root>
+
+        <SegmentGroup.Root size="sm" value={period} onValueChange={e => setPeriod(e.value as Period)}>
+          <SegmentGroup.Indicator />
+          <SegmentGroup.Items items={["3M", "6M", "1Y", "All"]} />
+        </SegmentGroup.Root>
       </HStack>
 
       <Box w="full" h="220px">
