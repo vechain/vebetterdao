@@ -4,11 +4,13 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { usePreviousAllocationRoundId } from "@/api/contracts/xAllocations/hooks/usePreviousAllocationRoundId"
 import { useAppActionOverview } from "@/api/indexer/actions/useAppActionOverview"
+import { useAppRoundOverviews } from "@/api/indexer/actions/useAppRoundOverviews"
 import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
 
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
+
+import { RewardHistoryChart } from "./RewardHistoryChart"
 
 const compact = getCompactFormatter(2)
 
@@ -39,20 +41,14 @@ export const RewardStatisticsSection = () => {
   const { app } = useCurrentAppInfo()
   const appId = app?.id ?? ""
 
-  const { data: previousRoundId } = usePreviousAllocationRoundId()
-
-  // All-time overview
   const { data: allTimeOverview, isLoading: allTimeLoading } = useAppActionOverview(appId)
+  const { data: earningsData, isLoading: earningsLoading } = useAppEarnings(appId)
 
-  // Previous round overview
-  const { data: prevRoundOverview, isLoading: prevRoundLoading } = useAppActionOverview(
-    appId,
-    { roundId: previousRoundId ? Number(previousRoundId) : undefined },
-    !!previousRoundId,
+  const roundIds = useMemo(
+    () => (earningsData && Array.isArray(earningsData) ? earningsData.map(e => e.roundId) : []),
+    [earningsData],
   )
-
-  // Allocation earnings (all rounds)
-  const { data: earningsData } = useAppEarnings(appId)
+  const { data: overviewData, isLoading: overviewLoading } = useAppRoundOverviews(appId, roundIds)
 
   const allTimeStats = useMemo(() => {
     if (!allTimeOverview) return null
@@ -63,35 +59,21 @@ export const RewardStatisticsSection = () => {
     }
   }, [allTimeOverview])
 
-  const allocationStats = useMemo(() => {
-    if (!earningsData || !Array.isArray(earningsData)) {
-      return { total: 0, lastRound: 0 }
-    }
-    const total = earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
-    const lastRound = earningsData[earningsData.length - 1]?.totalAmount || 0
-    return { total, lastRound }
+  const allocationTotal = useMemo(() => {
+    if (!earningsData || !Array.isArray(earningsData)) return 0
+    return earningsData.reduce((sum, earning) => sum + (earning.totalAmount || 0), 0)
   }, [earningsData])
 
-  const prevRoundStats = useMemo(() => {
-    if (!prevRoundOverview) return null
-    return {
-      rewardsDistributed: FormattingUtils.humanNumber(prevRoundOverview.totalRewardAmount ?? 0),
-      actions: FormattingUtils.humanNumber(prevRoundOverview.actionsRewarded ?? 0),
-      uniqueUsers: FormattingUtils.humanNumber(prevRoundOverview.totalUniqueUserInteractions ?? 0),
-    }
-  }, [prevRoundOverview])
-
-  const isPrevRoundLoading = prevRoundLoading
+  const isChartLoading = earningsLoading || (roundIds.length > 0 && overviewLoading)
 
   return (
-    <VStack gap={4} align="stretch" w="full">
-      {/* All Time Stats */}
+    <VStack gap={6} align="stretch" w="full">
       <Heading size="lg">{t("All Time")}</Heading>
       {allTimeLoading ? (
-        <StatsSkeleton count={5} />
+        <StatsSkeleton count={4} />
       ) : allTimeStats ? (
         <SimpleGrid columns={[2, 2, 4]} gap={4} w="full">
-          <StatItem label={t("B3TR from Allocations")} value={compact.format(allocationStats.total)} />
+          <StatItem label={t("B3TR from Allocations")} value={compact.format(allocationTotal)} />
           <StatItem label={t("B3TR Distributed")} value={allTimeStats.totalRewards} />
           <StatItem label={t("Actions Rewarded")} value={allTimeStats.actionsRewarded} />
           <StatItem label={t("Unique Users")} value={allTimeStats.uniqueUsers} />
@@ -104,26 +86,8 @@ export const RewardStatisticsSection = () => {
         </Center>
       )}
 
-      {/* Previous Round Stats */}
-      <Heading size="lg">
-        {t("Previous Round")} {previousRoundId && `(#${previousRoundId})`}
-      </Heading>
-      {isPrevRoundLoading ? (
-        <StatsSkeleton count={6} />
-      ) : prevRoundStats ? (
-        <SimpleGrid columns={[2, 2, 4]} gap={4} w="full">
-          <StatItem label={t("B3TR from Allocations")} value={compact.format(allocationStats.lastRound)} />
-          <StatItem label={t("B3TR Distributed")} value={prevRoundStats.rewardsDistributed} />
-          <StatItem label={t("Actions Rewarded")} value={prevRoundStats.actions} />
-          <StatItem label={t("Unique Users")} value={prevRoundStats.uniqueUsers} />
-        </SimpleGrid>
-      ) : (
-        <Center w="full" py={4}>
-          <Text textStyle="sm" color="text.subtle">
-            {t("No statistics available")}
-          </Text>
-        </Center>
-      )}
+      <Heading size="lg">{t("Round History")}</Heading>
+      <RewardHistoryChart earningsData={earningsData} overviewData={overviewData} isLoading={isChartLoading} />
     </VStack>
   )
 }
