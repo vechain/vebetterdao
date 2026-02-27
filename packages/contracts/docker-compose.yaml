@@ -46,15 +46,13 @@ services:
       - vechain-thor
 
   block-explorer:
-    build:
-      context: ../../../block-explorer
-      args:
-        NEXT_PUBLIC_IS_SOLO: "true"
-        NEXT_PUBLIC_SOLO_NODE_URL: "http://localhost:8669"
-        NEXT_PUBLIC_VEWORLD_INDEXER_SOLO_URL: "http://localhost:8089"
+    image: ghcr.io/vechain/block-explorer:latest
     container_name: block-explorer
     hostname: block-explorer
     environment:
+      - NEXT_PUBLIC_IS_SOLO=true
+      - NEXT_PUBLIC_SOLO_NODE_URL=http://localhost:8669
+      - NEXT_PUBLIC_VEWORLD_INDEXER_SOLO_URL=http://localhost:8089
       - B32_URL=https://b32.vecha.in
     ports:
       - "8088:3000"

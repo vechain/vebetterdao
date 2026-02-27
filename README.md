@@ -102,21 +102,21 @@ The local setup includes a block explorer and indexer running against the solo n
 
 #### Workflow
 
-1. `make solo-up` — starts Thor solo, insight, inspector, and block explorer (first block-explorer build takes ~2-3 min)
+1. `make solo-up` — starts Thor solo, insight, inspector, and block explorer
 2. `yarn dev` — deploys contracts, generates `packages/config/local.ts`
 3. `make indexer-up` — reads contract addresses from `local.ts`, starts MongoDB + indexer + API
 
 #### Port Map
 
-| Service | Port | Command |
-|---------|------|---------|
-| Thor solo node | 8669 | `make solo-up` |
-| Insight | 8086 | `make solo-up` |
-| Inspector | 8087 | `make solo-up` |
-| Block explorer | 8088 | `make solo-up` |
-| MongoDB | 27017 | `make indexer-up` |
-| Indexer | 8090 | `make indexer-up` |
-| Indexer API | 8089 | `make indexer-up` |
+| Service        | Port  | Command           |
+| -------------- | ----- | ----------------- |
+| Thor solo node | 8669  | `make solo-up`    |
+| Insight        | 8086  | `make solo-up`    |
+| Inspector      | 8087  | `make solo-up`    |
+| Block explorer | 8088  | `make solo-up`    |
+| MongoDB        | 27017 | `make indexer-up` |
+| Indexer        | 8090  | `make indexer-up` |
+| Indexer API    | 8089  | `make indexer-up` |
 
 #### URLs
 
@@ -135,11 +135,11 @@ make indexer-clean   # Stop + remove indexer volumes
 
 #### Key Files
 
-| File | Purpose |
-|------|---------|
-| `packages/contracts/docker-compose.yaml` | Solo node + block explorer |
-| `packages/contracts/docker-compose.indexer.yaml` | MongoDB + indexer services |
-| `scripts/extract-local-config.sh` | Extracts contract addresses from `local.ts` as env vars |
+| File                                             | Purpose                                                 |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| `packages/contracts/docker-compose.yaml`         | Solo node + block explorer                              |
+| `packages/contracts/docker-compose.indexer.yaml` | MongoDB + indexer services                              |
+| `scripts/extract-local-config.sh`                | Extracts contract addresses from `local.ts` as env vars |
 
 #### Notes
 
