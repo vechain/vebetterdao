@@ -96,6 +96,57 @@ make solo-clean
 make solo-up
 ```
 
+### Block Explorer & Indexer (Local)
+
+The local setup includes a block explorer and indexer running against the solo network.
+
+#### Workflow
+
+1. `make solo-up` — starts Thor solo, insight, inspector, and block explorer
+2. `yarn dev` — deploys contracts, generates `packages/config/local.ts`
+3. `make indexer-up` — reads contract addresses from `local.ts`, starts MongoDB + indexer + API
+
+#### Port Map
+
+| Service        | Port  | Command           |
+| -------------- | ----- | ----------------- |
+| Thor solo node | 8669  | `make solo-up`    |
+| Insight        | 8086  | `make solo-up`    |
+| Inspector      | 8087  | `make solo-up`    |
+| Block explorer | 8088  | `make solo-up`    |
+| MongoDB        | 27017 | `make indexer-up` |
+| Indexer        | 8090  | `make indexer-up` |
+| Indexer API    | 8089  | `make indexer-up` |
+
+#### URLs
+
+- Block explorer: http://localhost:8088
+- Insight: http://localhost:8086
+- Inspector: http://localhost:8087
+- Indexer API health: http://localhost:8089/actuator/health
+
+#### Indexer Commands
+
+```bash
+make indexer-up      # Start indexer (requires deployed contracts)
+make indexer-down    # Stop indexer services
+make indexer-clean   # Stop + remove indexer volumes
+```
+
+#### Key Files
+
+| File                                             | Purpose                                                 |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| `packages/contracts/docker-compose.yaml`         | Solo node + block explorer                              |
+| `packages/contracts/docker-compose.indexer.yaml` | MongoDB + indexer services                              |
+| `scripts/extract-local-config.sh`                | Extracts contract addresses from `local.ts` as env vars |
+
+#### Notes
+
+- Block explorer is built from `~/apps/block-explorer` source via Docker build context
+- The indexer compose file uses the `vechain-thor` network (created by the main compose) so the indexer can reach `thor-solo:8669`
+- MongoDB runs without auth (local dev only)
+
 ### Spin up the project pointing to the staging environment
 
 ```
