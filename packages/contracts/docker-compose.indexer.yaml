@@ -47,11 +47,13 @@ services:
     depends_on:
       mongo-setup:
         condition: service_completed_successfully
+    volumes:
+      - ./genesis-vet-balances-solo.json:/usr/app/genesis-solo.json:ro
     environment:
-      SPRING_DATA_MONGODB_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
+      MONGO_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
       SPRING_PROFILES_ACTIVE: "indexer,b3tr,explorer,accounts,transactions,transfers"
-      BLOCKCHAIN_NETWORK: SOLO
-      BLOCKCHAIN_THOR_URL: "http://thor-solo:8669"
+      THOR_URL: "http://thor-solo:8669"
+      INDEXER_GENESIS_VET_BALANCES_RESOURCE: "file:/usr/app/genesis-solo.json"
       B3TR_CONTRACT: "${B3TR_CONTRACT}"
       VOT3_CONTRACT: "${VOT3_CONTRACT}"
       EMISSIONS_CONTRACT: "${EMISSIONS_CONTRACT}"
@@ -87,8 +89,9 @@ services:
       mongo-setup:
         condition: service_completed_successfully
     environment:
-      SPRING_DATA_MONGODB_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
+      MONGO_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
       SPRING_PROFILES_ACTIVE: "api"
+      THOR_URL: "http://thor-solo:8669"
     ports:
       - "8089:8080"
     networks:

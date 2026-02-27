@@ -18,7 +18,7 @@ indexer-up: #@ Start indexer (requires deployed contracts)
 indexer-down: #@ Stop indexer
 	docker compose -f packages/contracts/docker-compose.indexer.yaml down
 indexer-clean: #@ Clean indexer (removes volumes)
-	docker compose -f packages/contracts/docker-compose.indexer.yaml down -v --remove-orphans
+	docker compose -f packages/contracts/docker-compose.indexer.yaml down -v
 
 NAV_CONTRACTS=cd packages/contracts
 
