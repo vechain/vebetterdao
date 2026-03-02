@@ -12,10 +12,6 @@
       "command": "npx",
       "args": ["@playwright/mcp@latest"]
     },
-    "storybook-mcp": {
-      "type": "http",
-      "url": "http://localhost:6006/mcp"
-    },
     "chakra-ui": {
       "command": "npx",
       "args": ["-y", "@chakra-ui/react-mcp"]
