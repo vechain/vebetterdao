@@ -97,14 +97,6 @@ Stop: `make solo-down` | Reset: `make solo-clean && make solo-up`
 - `yarn playwright:e2e`: Run Playwright e2e tests
 - `yarn contracts:test`: Run contract tests (Hardhat)
 
-## Storybook
-
-- `yarn storybook`: Start Storybook dev server (port 6006)
-- `yarn build-storybook`: Build static Storybook to public/storybook
-- Stories located in `apps/frontend/src/**/*.stories.@(js|jsx|mjs|ts|tsx)`
-- Storybook configured with: Docs, A11y, Vitest, Themes, MCP addons
-- Uses Next.js Vite framework for optimal integration
-
 ## Contracts
 
 - `yarn contracts:compile`: Compile smart contracts
@@ -158,14 +150,6 @@ MCP servers configured in `.mcp.json`:
 - Take screenshots, handle dialogs, file uploads
 - Network monitoring, multi-tab management
 
-## Storybook MCP
-
-- HTTP server at `http://localhost:6006/mcp`
-- Requires `yarn storybook` running
-- Interact with component stories programmatically
-- Test component states and variations
-- Integrated with Storybook dev server via `@storybook/addon-mcp`
-
 # Component Development
 
 - **NEVER delete or remove existing comments** in frontend code unless they are factually wrong or reference deleted code.
@@ -187,39 +171,6 @@ MCP servers configured in `.mcp.json`:
 - Component recipes: `apps/frontend/src/app/theme/` (button.ts, card.ts, etc.)
 - Run `yarn chakra:typegen` after theme changes
 - Run `yarn chakra:typegen:watch` for auto-typegen during dev
-
-## Storybook Workflow
-
-1. Start Storybook: `yarn storybook`
-2. Create story files in `apps/frontend/src` alongside components
-3. **ALWAYS use Chakra's `For` component for rendering multiple story variants** (in `apps/frontend/src/stories/`)
-4. Use Storybook MCP for automated component testing
-5. Use Figma MCP to sync designs with components
-6. Build static docs: `yarn build-storybook`
-
-### Story Variations Pattern
-
-For all component stories, create 4 variations:
-
-1. `{Name}LightMode` - main component (default)
-2. `{Name}DarkMode` - cloneElement with dark theme
-3. `{Name}MobileLightMode` - cloneElement with mobile viewport
-4. `{Name}MobileDarkMode` - cloneElement with dark theme + mobile viewport
-
-Example:
-
-```tsx
-export const LightMode = () => <YourComponent />
-
-export const DarkMode = () => cloneElement(<LightMode />)
-DarkMode.globals = { theme: "dark", viewport: { value: "desktop" } }
-
-export const MobileLightMode = () => cloneElement(<LightMode />)
-MobileLightMode.globals = { theme: "light", viewport: { value: "mobile2" } }
-
-export const MobileDarkMode = () => cloneElement(<LightMode />)
-MobileDarkMode.globals = { theme: "dark", viewport: { value: "mobile2" } }
-```
 
 ## Design Tokens
 
