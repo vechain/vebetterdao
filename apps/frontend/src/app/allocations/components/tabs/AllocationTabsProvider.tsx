@@ -114,6 +114,9 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     openModal()
   }, [openModal])
 
+  // Valid app IDs for the current round - used to filter stale preferences/votes
+  const currentRoundAppIds = useMemo(() => new Set(roundDetails.apps.map(app => app.id)), [roundDetails.apps])
+
   const handleEnableAutoVoting = useCallback(() => {
     if (castVotesEvent?.appsIds) {
       const votedApps = new Set(castVotesEvent.appsIds.filter(id => currentRoundAppIds.has(id)))
@@ -179,9 +182,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
   }, [roundDetails.apps, selectedAppIds])
-
-  // Valid app IDs for the current round - used to filter stale preferences/votes
-  const currentRoundAppIds = useMemo(() => new Set(roundDetails.apps.map(app => app.id)), [roundDetails.apps])
 
   const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
 
