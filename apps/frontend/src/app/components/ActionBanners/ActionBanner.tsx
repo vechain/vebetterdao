@@ -37,10 +37,10 @@ import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/
 import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
 import { DoActionBanner } from "./components/DoActionBanner/DoActionBanner"
-import { EndorsementBanner } from "./components/EndorsementBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
+import { TreasuryLiveBanner } from "./components/TreasuryLiveBanner"
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 import { NodeUpgradeModal } from "./modals/NodeUpgradeModal"
 
@@ -140,8 +140,8 @@ export const ActionBanner = () => {
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
-  // Endorsement banner logic
-  const showEndorsementBanner = !!account?.address && (preferences?.[BannerStorageKey.SHOW_ENDORSEMENT] ?? true)
+  // Treasury live banner logic
+  const showTreasuryLiveBanner = preferences?.[BannerStorageKey.SHOW_TREASURY_LIVE] ?? true
 
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled
@@ -221,6 +221,7 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
+    if (showTreasuryLiveBanner) bannerComponents.push(<TreasuryLiveBanner key="treasury-live" />)
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(
@@ -235,12 +236,12 @@ export const ActionBanner = () => {
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
-    if (showEndorsementBanner) bannerComponents.push(<EndorsementBanner key="endorsement" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
     return bannerComponents
   }, [
+    showTreasuryLiveBanner,
     showCantVoteBanners,
     CantVoteBanner,
     showClaimB3trBanner,
@@ -250,7 +251,6 @@ export const ActionBanner = () => {
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
-    showEndorsementBanner,
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
