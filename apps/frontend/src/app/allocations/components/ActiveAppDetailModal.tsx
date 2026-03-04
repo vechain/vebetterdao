@@ -1,9 +1,10 @@
 "use client"
 
 /* eslint-disable react/no-array-index-key */
-import { VStack, Card, HStack, Icon, Heading, Text, Box, Badge, CloseButton } from "@chakra-ui/react"
+import { VStack, Card, HStack, Icon, Heading, Text, Box, Badge, CloseButton, Button } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Flash, Activity } from "iconoir-react"
+import { useRouter } from "next/navigation"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
@@ -71,6 +72,7 @@ export const ActiveAppDetailModal = ({
   percentage: number
 }) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const { data } = indexerQueryClient.useQuery("get", "/api/v1/b3tr/actions/apps/{appId}/overview", {
     params: { path: { appId: app.id }, query: { roundId } },
   })
@@ -198,14 +200,19 @@ export const ActiveAppDetailModal = ({
           )}
         </HStack>
 
-        <HStack align="center" gap="4">
-          <AppImage appId={app.id} />
-          <VStack align="start" gap="1">
-            <Heading size="lg">{app.name}</Heading>
-            <Badge size="sm" variant="neutral" rounded="sm">
-              {APP_CATEGORIES.find(category => category.id === app.metadata?.categories[0])?.name}
-            </Badge>
-          </VStack>
+        <HStack align="center" gap="4" justifyContent="space-between" w="full">
+          <HStack gap="4">
+            <AppImage appId={app.id} />
+            <VStack align="start" gap="1">
+              <Heading size="lg">{app.name}</Heading>
+              <Badge size="sm" variant="neutral" rounded="sm">
+                {APP_CATEGORIES.find(category => category.id === app.metadata?.categories[0])?.name}
+              </Badge>
+            </VStack>
+          </HStack>
+          <Button variant="primary" size="sm" onClick={() => router.push(`/apps/${app.id}`)}>
+            {t("Go to app")}
+          </Button>
         </HStack>
       </VStack>
 
