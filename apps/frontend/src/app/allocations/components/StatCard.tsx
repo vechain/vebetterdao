@@ -2,7 +2,7 @@ import { Card, Icon, Text, Skeleton, Square, VStack, type CardRootProps } from "
 import { ReactNode } from "react"
 
 interface StatCardProps extends Omit<CardRootProps, "variant"> {
-  variant: "info" | "warning" | "positive"
+  variant: "info" | "warning" | "positive" | "neutral"
   title: string
   subtitle: string | ReactNode
   showIcon?: boolean

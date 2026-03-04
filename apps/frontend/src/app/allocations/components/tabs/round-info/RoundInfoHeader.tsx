@@ -138,7 +138,7 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
             <Text textStyle="md" color="text.subtle">
               {t("Round")}
             </Text>
-            <Heading size="4xl">{roundDetails.id}</Heading>
+            <Heading size="lg">{roundDetails.id}</Heading>
           </VStack>
           <VStack gap="1" pl="6" align="start">
             <Text textStyle="md" color="text.subtle">
@@ -160,7 +160,7 @@ export function RoundInfoHeader({ roundDetails }: RoundInfoHeaderProps) {
                   now={() => Date.now()}
                   date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
                   renderer={({ days, hours, minutes }) => (
-                    <Text textStyle={{ base: "sm", md: "xl" }}>
+                    <Text textStyle={{ base: "sm", md: "lg" }}>
                       <Mark variant="text" fontWeight="semibold">
                         {days}
                       </Mark>

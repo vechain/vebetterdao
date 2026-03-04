@@ -13,12 +13,15 @@ import {
   Button,
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { Gift, NavArrowLeft, NavArrowRight, Activity } from "iconoir-react"
 import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LiaBalanceScaleSolid } from "react-icons/lia"
 
+import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
+import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { ActivityFeed } from "@/components/Activities"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
@@ -35,6 +38,7 @@ type Props = {
 
 export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = false }) => {
   const { t } = useTranslation()
+  const { account } = useWallet()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(selectedRoundId)
@@ -74,6 +78,24 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
       return getPriority(a) - getPriority(b)
     })
   }, [proposalsToRender])
+
+  const { data: hasVotedInRound } = useHasVotedInRound(currentRoundId, account?.address)
+
+  const activeProposalIds = useMemo(
+    () => sortedProposals.filter(p => p.state === ProposalState.Active).map(p => p.id),
+    [sortedProposals],
+  )
+  const { data: proposalVotes } = useHasVotedInProposals(activeProposalIds, account?.address)
+
+  const hasVotedInAllProposals = useMemo(() => {
+    if (!activeProposalIds.length) return true
+    if (!proposalVotes) return false
+    return activeProposalIds.every(id => proposalVotes[id])
+  }, [activeProposalIds, proposalVotes])
+
+  const allVotesCompleted = !!hasVotedInRound && hasVotedInAllProposals
+  const hasAnyVotingAction = isCurrentRound && account?.address && (activeProposalIds.length > 0 || !!currentRoundId)
+
   return (
     <Card.Root variant={"primary"} px={isBottomSheet ? 0 : undefined} borderWidth={isBottomSheet ? 0 : undefined}>
       <Card.Body gap="8">
@@ -88,12 +110,12 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             <NavArrowLeft />
           </IconButton>
 
-          <HStack divideX="1px" divideColor="border.secondary" gap="6">
+          <HStack divideX="1px" divideColor="border.secondary" gap="6" flexWrap={{ base: "wrap", md: "nowrap" }}>
             <VStack gap="1" align={{ base: "center", md: "start" }}>
               <Text textStyle="md" color="text.subtle">
                 {t("Round")}
               </Text>
-              <Heading size="6xl">{selectedRoundId}</Heading>
+              <Heading size="lg">{selectedRoundId}</Heading>
             </VStack>
             <VStack gap="1" pl="6" align={{ base: "center", md: "start" }}>
               <Text textStyle="md" color="text.subtle">
@@ -106,21 +128,31 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
                   {roundInfo.voteEndTimestamp?.format("MMM D")}
                 </Heading>
               </Skeleton>
-
-              {selectedRoundId === currentRoundId ? (
-                <Flex h="full" alignItems="flex-start">
-                  <Badge size="md" variant="positive">
-                    {t("Active")}
-                  </Badge>
-                </Flex>
-              ) : (
-                <Flex h="full" alignItems="flex-start">
-                  <Badge size="md" variant="neutral">
-                    {t("Concluded")}
-                  </Badge>
-                </Flex>
-              )}
             </VStack>
+
+            {selectedRoundId === currentRoundId ? (
+              <VStack gap="1" pl="6" align={{ base: "center", md: "start" }} w={{ base: "full", md: "auto" }}>
+                <Badge size="md" variant="positive">
+                  {t("Active")}
+                </Badge>
+                {hasAnyVotingAction &&
+                  (allVotesCompleted ? (
+                    <Badge size="md" variant="positive">
+                      {t("Voted")}
+                    </Badge>
+                  ) : (
+                    <Badge size="md" variant="warning">
+                      {t("Need to vote")}
+                    </Badge>
+                  ))}
+              </VStack>
+            ) : (
+              <VStack gap="1" pl="6" align={{ base: "center", md: "start" }} w={{ base: "full", md: "auto" }}>
+                <Badge size="md" variant="neutral">
+                  {t("Concluded")}
+                </Badge>
+              </VStack>
+            )}
           </HStack>
 
           <IconButton
