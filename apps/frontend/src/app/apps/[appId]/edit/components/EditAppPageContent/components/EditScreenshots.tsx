@@ -118,13 +118,11 @@ export const EditScreenshots = ({ form }: Props) => {
   )
 }
 const DraggableScreenshot = ({
-  key,
   screenshot,
   index,
   screenshots,
   form,
 }: {
-  key: string
   screenshot: string
   index: number
   screenshots: string[]
@@ -134,7 +132,6 @@ const DraggableScreenshot = ({
 
   return (
     <Reorder.Item
-      key={key}
       value={screenshot}
       as="div"
       style={{

@@ -59,12 +59,10 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
           mediaFolder.file(path, blob)
         }
 
-        for (let i = 0; i < metadata.screenshots.length; i++) {
-          const screenshot = metadata.screenshots[i]
-          if (screenshot) {
-            const { blob, path } = processImage(screenshot, "screenshot", `screenshot${i + 1}`)
-            mediaFolder.file(path, blob)
-          }
+        const validScreenshots = metadata.screenshots.filter(Boolean)
+        for (let i = 0; i < validScreenshots.length; i++) {
+          const { blob, path } = processImage(validScreenshots[i]!, "screenshot", `screenshot${i + 1}`)
+          mediaFolder.file(path, blob)
         }
 
         // Generate zip Blob
@@ -80,7 +78,7 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
           banner: metadata.banner
             ? `ipfs://${imagesCid}/media/banner.${IMAGE_REQUIREMENTS.banner.extension}`
             : metadata.banner,
-          screenshots: metadata.screenshots.map(
+          screenshots: validScreenshots.map(
             (_, index) => `ipfs://${imagesCid}/media/screenshot${index + 1}.${IMAGE_REQUIREMENTS.screenshot.extension}`,
           ),
           ve_world: {

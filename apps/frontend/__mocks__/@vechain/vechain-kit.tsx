@@ -1,6 +1,6 @@
 import React, { createContext, useContext, type ReactNode } from "react"
 
-import { getMockAddress } from "../../.storybook/mockAddressState"
+const getMockAddress = (): string | null => null
 
 // Mock types matching @vechain/vechain-kit
 interface MockAccount {
