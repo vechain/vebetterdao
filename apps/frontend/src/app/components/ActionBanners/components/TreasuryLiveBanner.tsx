@@ -16,11 +16,12 @@ export const TreasuryLiveBanner = () => {
     <GenericBanner
       title={t("The Treasury page is now live!")}
       description={t("Track community treasury balance and transfers in real time.")}
-      variant="b3mo"
-      illustration="/assets/mascot/mascot-data.png"
+      variant="default"
+      illustration="/assets/3d-illustrations/chart.png"
       storageKey={BannerStorageKey.SHOW_TREASURY_LIVE}
+      illustrationDimensions={{ width: "200px", height: "200px" }}
       cta={
-        <Button size={{ base: "sm", md: "md" }} variant="secondary" onClick={handleClick}>
+        <Button size={{ base: "sm", md: "md" }} variant="primary" onClick={handleClick}>
           {t("View Treasury")}
         </Button>
       }
