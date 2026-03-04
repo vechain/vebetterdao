@@ -55,11 +55,6 @@ export const waitForNextBlock = async () => {
 }
 
 export const moveBlocks = async (blocks: number) => {
-  // if we are on hardhat, we can use the mine function to move blocks
-  if (network.name === "hardhat") {
-    await mine(blocks)
-    return
-  }
   for (let i = 0; i < blocks; i++) {
     await waitForNextBlock()
   }
