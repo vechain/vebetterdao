@@ -116,12 +116,11 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
   const handleEnableAutoVoting = useCallback(() => {
     if (castVotesEvent?.appsIds) {
-      // Set maintains insertion order from appsIds array
-      const votedApps = new Set(castVotesEvent.appsIds)
+      const votedApps = new Set(castVotesEvent.appsIds.filter(id => currentRoundAppIds.has(id)))
       setSelectedAppIds(votedApps)
     }
     handleOpenModalWithAutoVote()
-  }, [handleOpenModalWithAutoVote, castVotesEvent?.appsIds])
+  }, [handleOpenModalWithAutoVote, castVotesEvent?.appsIds, currentRoundAppIds])
 
   // Auto-vote edit mode
   const {
@@ -162,15 +161,15 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
   // Handler for editing auto-vote preferences
   const handleEditAutoVotePreferences = useCallback(() => {
-    // Load stored preferences (priority) or voted apps
+    // Load stored preferences (priority) or voted apps, filtering out apps not in current round
     if (storedPreferences.length > 0) {
-      setSelectedAppIds(new Set(storedPreferences))
+      setSelectedAppIds(new Set(storedPreferences.filter(id => currentRoundAppIds.has(id))))
     } else if (castVotesEvent?.appsIds) {
-      setSelectedAppIds(new Set(castVotesEvent.appsIds))
+      setSelectedAppIds(new Set(castVotesEvent.appsIds.filter(id => currentRoundAppIds.has(id))))
     }
     enterEditMode() // Mark as editing so sync effect doesn't override
     handleOpenModalWithAutoVote()
-  }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote, enterEditMode])
+  }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote, enterEditMode, currentRoundAppIds])
 
   const handleCloseAutoVoteModal = useCallback(() => {
     closeAutoVoteModal()
@@ -180,6 +179,9 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
   }, [roundDetails.apps, selectedAppIds])
+
+  // Valid app IDs for the current round - used to filter stale preferences/votes
+  const currentRoundAppIds = useMemo(() => new Set(roundDetails.apps.map(app => app.id)), [roundDetails.apps])
 
   const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
 
@@ -223,11 +225,10 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
     // After modal closes, sync to read-only state based on vote status
     if (hasVoted && castVotesEvent?.appsIds) {
-      // User has voted - show their voted apps
-      const votedAppIds = new Set(castVotesEvent.appsIds)
+      const votedAppIds = new Set(castVotesEvent.appsIds.filter(id => currentRoundAppIds.has(id)))
       setSelectedAppIds(votedAppIds)
     }
-  }, [hasVoted, castVotesEvent?.appsIds, isModalOpen, isEditingAutoVote, isCastVotesLoading])
+  }, [hasVoted, castVotesEvent?.appsIds, isModalOpen, isEditingAutoVote, isCastVotesLoading, currentRoundAppIds])
 
   // Show when user has voted OR has auto-voting enabled (current status OR in current round)
   const showAutoVoteUI =
