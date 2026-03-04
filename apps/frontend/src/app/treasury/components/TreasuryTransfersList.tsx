@@ -1,5 +1,5 @@
 "use client"
-import { Button, Card, Heading, HStack, Link, Skeleton, Text, VStack, Wrap } from "@chakra-ui/react"
+import { Box, Button, Card, Grid, Heading, HStack, Link, Skeleton, Text, VStack, Wrap } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { formatEther } from "ethers"
@@ -159,29 +159,29 @@ const TreasuryTransferCard = ({
   return (
     <Card.Root variant="outline" size="sm">
       <Card.Body>
-        <HStack justify="space-between" gap={3}>
-          <HStack gap={3} flex={1} minW={0}>
-            {isOutgoing ? <FiArrowUpRight color="red" /> : <FiArrowDownLeft color="green" />}
-            <VStack align="start" gap={0} minW={0}>
-              <Text fontWeight="semibold" textStyle="sm" lineClamp={1}>
-                {proposal ? (
-                  <Link
-                    href={proposal.isGrant ? `/grants/${proposal.id}` : `/proposals/${proposal.id}`}
-                    variant="underline">
-                    {primaryLabel}
-                  </Link>
-                ) : (
-                  primaryLabel
-                )}
-              </Text>
-              <Text textStyle="xs" color="text.muted" lineClamp={1}>
-                {counterparty}
-                {" · "}
-                {date}
-              </Text>
-            </VStack>
-          </HStack>
-          <HStack gap={2} flexShrink={0}>
+        <Grid templateColumns={{ base: "auto 1fr", md: "auto 1fr auto" }} gap={3} alignItems="center">
+          <Box>{isOutgoing ? <FiArrowUpRight color="red" /> : <FiArrowDownLeft color="green" />}</Box>
+
+          <VStack align="start" gap={0} minW={0}>
+            <Text fontWeight="semibold" textStyle="sm" lineClamp={1}>
+              {proposal ? (
+                <Link
+                  href={proposal.isGrant ? `/grants/${proposal.id}` : `/proposals/${proposal.id}`}
+                  variant="underline">
+                  {primaryLabel}
+                </Link>
+              ) : (
+                primaryLabel
+              )}
+            </Text>
+            <Text textStyle="xs" color="text.muted" lineClamp={1}>
+              {counterparty}
+              {" · "}
+              {date}
+            </Text>
+          </VStack>
+
+          <HStack gap={2} gridColumn={{ base: "2", md: "auto" }}>
             <Text fontWeight="semibold" textStyle="sm" color={isOutgoing ? "red.500" : "green.500"} truncate>
               {isOutgoing ? "-" : "+"}
               {amount}
@@ -196,7 +196,7 @@ const TreasuryTransferCard = ({
               <FiExternalLink />
             </Link>
           </HStack>
-        </HStack>
+        </Grid>
       </Card.Body>
     </Card.Root>
   )
