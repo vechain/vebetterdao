@@ -145,7 +145,32 @@ export const EditAppPageContent = () => {
   const uploadMetadata = useCallback(
     async (data: EditAppForm) => {
       // #region agent log
-      fetch('http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fe4e0c'},body:JSON.stringify({sessionId:'fe4e0c',location:'EditAppPageContent.tsx:uploadMetadata',message:'Form data at submit time',data:{screenshotCount:data.screenshots?.length??0,screenshotValues:(data.screenshots??[]).map((s,i)=>({index:i,length:s?.length??0,prefix:s?.substring(0,80),isTruthy:!!s,isDataUrl:s?.startsWith('data:')??false,isIpfsUri:s?.startsWith('ipfs://')??false})),logoLength:data.logoImage?.length??0,logoPrefix:data.logoImage?.substring(0,80),bannerLength:data.bannerImage?.length??0,bannerPrefix:data.bannerImage?.substring(0,80)},timestamp:Date.now(),hypothesisId:'H1,H2'})}).catch(()=>{});
+      fetch("http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "fe4e0c" },
+        body: JSON.stringify({
+          sessionId: "fe4e0c",
+          location: "EditAppPageContent.tsx:uploadMetadata",
+          message: "Form data at submit time",
+          data: {
+            screenshotCount: data.screenshots?.length ?? 0,
+            screenshotValues: (data.screenshots ?? []).map((s, i) => ({
+              index: i,
+              length: s?.length ?? 0,
+              prefix: s?.substring(0, 80),
+              isTruthy: !!s,
+              isDataUrl: s?.startsWith("data:") ?? false,
+              isIpfsUri: s?.startsWith("ipfs://") ?? false,
+            })),
+            logoLength: data.logoImage?.length ?? 0,
+            logoPrefix: data.logoImage?.substring(0, 80),
+            bannerLength: data.bannerImage?.length ?? 0,
+            bannerPrefix: data.bannerImage?.substring(0, 80),
+          },
+          timestamp: Date.now(),
+          hypothesisId: "H1,H2",
+        }),
+      }).catch(() => {})
       // #endregion
       const metadataUri = await uploadMetadataMutation.onMetadataUpload({
         name: data.name,
@@ -184,11 +209,13 @@ export const EditAppPageContent = () => {
     [updateAppDetailsMutation, onOpen, uploadMetadata, onTxModalClose],
   )
 
-  // #region agent log
+  // Sync async-loaded screenshots into the form (only when first available and form is still empty)
+  const screenshotsKey = screenshots.filter(Boolean).length
   useEffect(() => {
-    fetch('http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fe4e0c'},body:JSON.stringify({sessionId:'fe4e0c',location:'EditAppPageContent.tsx:mount-state',message:'Hook screenshot state changed',data:{hookScreenshotCount:screenshots?.length??0,hookScreenshotValues:(screenshots??[]).map((s:string,i:number)=>({index:i,length:s?.length??0,isTruthy:!!s,isDataUrl:s?.startsWith('data:')??false})),formScreenshotCount:form.getValues('screenshots')?.length??0,formScreenshotValues:(form.getValues('screenshots')??[]).map((s:string,i:number)=>({index:i,length:s?.length??0,isTruthy:!!s,isDataUrl:s?.startsWith('data:')??false})),logoFromHook:!!logo,bannerFromHook:!!banner},timestamp:Date.now(),hypothesisId:'H2,H4'})}).catch(()=>{});
-  }, [screenshots, logo, banner, form])
-  // #endregion
+    if (screenshotsKey > 0 && form.getValues("screenshots").filter(Boolean).length === 0) {
+      form.setValue("screenshots", screenshots.filter(Boolean))
+    }
+  }, [screenshotsKey, form, screenshots])
 
   // Update the form values when the app fetches the data from blockchain
   useEffect(() => {

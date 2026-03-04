@@ -1,15 +1,15 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/x-2-earn-apps/X2EarnApps__factory"
-import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { EnhancedClause, UseSendTransactionReturnValue, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
-
-import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 
 import { getXAppMetadataQueryKey } from "../../api/contracts/xApps/hooks/useXAppMetadata"
 import { getXAppsQueryKey } from "../../api/contracts/xApps/hooks/useXApps"
 import { useBuildTransaction } from "../useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
+const x2EarnAppsAbi = X2EarnApps__factory.abi
+const x2EarnAppsAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
 type useUpdateAppDetailsProps = {
   appId: string
   onSuccess?: () => void
@@ -32,7 +32,6 @@ export const useUpdateAppDetails = ({
   onSuccess,
   onFailure,
 }: useUpdateAppDetailsProps): useUpdateAppMetadataReturnValue => {
-  const { app } = useCurrentAppInfo()
   const buildClauses = useCallback(
     ({ metadataUri }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = [
@@ -50,8 +49,17 @@ export const useUpdateAppDetails = ({
     [appId],
   )
   const refetchQueryKeys = useMemo(
-    () => [getXAppsQueryKey(), getXAppMetadataQueryKey(app?.metadataURI)],
-    [app?.metadataURI],
+    () => [
+      getXAppsQueryKey(),
+      getXAppMetadataQueryKey(appId),
+      getCallClauseQueryKey<typeof x2EarnAppsAbi>({
+        abi: x2EarnAppsAbi,
+        address: x2EarnAppsAddress,
+        method: "app",
+        args: [appId as `0x${string}`],
+      }),
+    ],
+    [appId],
   )
 
   return useBuildTransaction({

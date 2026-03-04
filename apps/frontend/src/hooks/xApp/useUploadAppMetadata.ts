@@ -60,16 +60,8 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
         }
 
         const validScreenshots = metadata.screenshots.filter(Boolean)
-
-        // #region agent log
-        fetch('http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fe4e0c'},body:JSON.stringify({sessionId:'fe4e0c',location:'useUploadAppMetadata.ts:screenshots-input',message:'Screenshots input to upload',data:{rawCount:metadata.screenshots.length,validCount:validScreenshots.length,filtered:metadata.screenshots.length-validScreenshots.length,values:validScreenshots.map((s,i)=>({index:i,length:s?.length??0,prefix:s?.substring(0,80),isDataUrl:s?.startsWith('data:')??false}))},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
-        // #endregion
-
         for (let i = 0; i < validScreenshots.length; i++) {
           const { blob, path } = processImage(validScreenshots[i]!, "screenshot", `screenshot${i + 1}`)
-          // #region agent log
-          fetch('http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fe4e0c'},body:JSON.stringify({sessionId:'fe4e0c',location:'useUploadAppMetadata.ts:screenshot-blob',message:'Screenshot blob created',data:{index:i,blobSize:blob.size,blobType:blob.type,path},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
-          // #endregion
           mediaFolder.file(path, blob)
         }
 
@@ -100,7 +92,18 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
         }
 
         // #region agent log
-        fetch('http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fe4e0c'},body:JSON.stringify({sessionId:'fe4e0c',location:'useUploadAppMetadata.ts:metadata-output',message:'Final metadata screenshots',data:{screenshotUris:updatedMetadata.screenshots,imagesCid,validCount:validScreenshots.length},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
+        fetch("http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "fe4e0c" },
+          body: JSON.stringify({
+            sessionId: "fe4e0c",
+            location: "useUploadAppMetadata.ts:metadata-output",
+            message: "Final metadata screenshots",
+            data: { screenshotUris: updatedMetadata.screenshots, imagesCid, validCount: validScreenshots.length },
+            timestamp: Date.now(),
+            runId: "post-fix",
+          }),
+        }).catch(() => {})
         // #endregion
 
         // Generate metadata Blob
