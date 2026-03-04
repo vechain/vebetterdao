@@ -91,21 +91,6 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
           },
         }
 
-        // #region agent log
-        fetch("http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "fe4e0c" },
-          body: JSON.stringify({
-            sessionId: "fe4e0c",
-            location: "useUploadAppMetadata.ts:metadata-output",
-            message: "Final metadata screenshots",
-            data: { screenshotUris: updatedMetadata.screenshots, imagesCid, validCount: validScreenshots.length },
-            timestamp: Date.now(),
-            runId: "post-fix",
-          }),
-        }).catch(() => {})
-        // #endregion
-
         // Generate metadata Blob
         const metadataBlob = new Blob([JSON.stringify(updatedMetadata)], { type: "application/json" })
         return await uploadBlobToIPFS(metadataBlob, "metadata.json")

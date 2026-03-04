@@ -144,34 +144,6 @@ export const EditAppPageContent = () => {
 
   const uploadMetadata = useCallback(
     async (data: EditAppForm) => {
-      // #region agent log
-      fetch("http://127.0.0.1:7406/ingest/48d2fcf8-766a-47f1-bc2b-cd0c79ca61f3", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "fe4e0c" },
-        body: JSON.stringify({
-          sessionId: "fe4e0c",
-          location: "EditAppPageContent.tsx:uploadMetadata",
-          message: "Form data at submit time",
-          data: {
-            screenshotCount: data.screenshots?.length ?? 0,
-            screenshotValues: (data.screenshots ?? []).map((s, i) => ({
-              index: i,
-              length: s?.length ?? 0,
-              prefix: s?.substring(0, 80),
-              isTruthy: !!s,
-              isDataUrl: s?.startsWith("data:") ?? false,
-              isIpfsUri: s?.startsWith("ipfs://") ?? false,
-            })),
-            logoLength: data.logoImage?.length ?? 0,
-            logoPrefix: data.logoImage?.substring(0, 80),
-            bannerLength: data.bannerImage?.length ?? 0,
-            bannerPrefix: data.bannerImage?.substring(0, 80),
-          },
-          timestamp: Date.now(),
-          hypothesisId: "H1,H2",
-        }),
-      }).catch(() => {})
-      // #endregion
       const metadataUri = await uploadMetadataMutation.onMetadataUpload({
         name: data.name,
         description: data.description,
