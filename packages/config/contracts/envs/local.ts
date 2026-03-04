@@ -116,7 +116,7 @@ export function createLocalConfig() {
     */
     GM_NFT_NODE_TO_FREE_LEVEL: [1, 2, 4, 6, 2, 4, 6, 7],
 
-    GM_NFT_MAX_LEVEL: 1,
+    GM_NFT_MAX_LEVEL: 1, // 1 -> No max level BUT this value is updated to 5 in the deployAll script
 
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
@@ -176,7 +176,7 @@ export function createLocalConfig() {
 
     //WARNING: Cooldown depends on the current round. If the current round is 1, the cooldown cannot be greater than 1. Otherwise the endorsement will fail.
     //Check `EndorsementUtils.sol` `checkCooldown` method for more details.
-    X2EARN_NODE_COOLDOWN_PERIOD: 0, // 0 cycles
+    X2EARN_NODE_COOLDOWN_PERIOD: 0, // 0 rounds -> UPDATED to 1 in the deployAll script
 
     MULTI_SIG_SIGNERS: [
       "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",

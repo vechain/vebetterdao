@@ -1,5 +1,4 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
@@ -13,7 +12,12 @@ import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useP
 import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
 import { useBuildTransaction } from "./useBuildTransaction"
 
-const GovernorInterface = B3TRGovernor__factory.createInterface()
+const GovernorInterface = new ethers.Interface([
+  "function cancel(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash, string reason) external returns (uint256)",
+])
+type ClausesProps = {
+  reason: string
+}
 type Props = { proposalId: string; onSuccess?: () => void }
 export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
   const { account } = useWallet()
@@ -23,22 +27,26 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     return Array(proposal?.targets.length).fill("0")
   }, [proposal?.targets])
   const values = Array.isArray(proposalValues) ? proposalValues : grantValues
-  const clauseBuilder = useCallback(() => {
-    return [
-      buildClause({
-        to: getConfig().b3trGovernorAddress,
-        contractInterface: GovernorInterface,
-        method: "cancel",
-        args: [
-          proposal?.targets,
-          values,
-          proposal?.calldatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
-        ],
-        comment: "cancel proposal",
-      }),
-    ]
-  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, values])
+  const clauseBuilder = useCallback(
+    ({ reason = "" }: ClausesProps) => {
+      return [
+        buildClause({
+          to: getConfig().b3trGovernorAddress,
+          contractInterface: GovernorInterface,
+          method: "cancel",
+          args: [
+            proposal?.targets,
+            values,
+            proposal?.calldatas,
+            ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
+            reason,
+          ],
+          comment: "cancel proposal",
+        }),
+      ]
+    },
+    [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, values],
+  )
   const refetchQueryKeys = useMemo(
     () => [
       getProposalStateQueryKey(proposalId),
@@ -48,7 +56,7 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     [proposalId, account?.address],
   )
 
-  return useBuildTransaction({
+  return useBuildTransaction<ClausesProps>({
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,

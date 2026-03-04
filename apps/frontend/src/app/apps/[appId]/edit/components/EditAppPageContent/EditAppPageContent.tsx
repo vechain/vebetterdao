@@ -181,6 +181,14 @@ export const EditAppPageContent = () => {
     [updateAppDetailsMutation, onOpen, uploadMetadata, onTxModalClose],
   )
 
+  // Sync async-loaded screenshots into the form (only when first available and form is still empty)
+  const screenshotsKey = screenshots.filter(Boolean).length
+  useEffect(() => {
+    if (screenshotsKey > 0 && form.getValues("screenshots").filter(Boolean).length === 0) {
+      form.setValue("screenshots", screenshots.filter(Boolean))
+    }
+  }, [screenshotsKey, form, screenshots])
+
   // Update the form values when the app fetches the data from blockchain
   useEffect(() => {
     if (veWorldBanner) {

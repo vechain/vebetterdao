@@ -118,7 +118,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
       const hasRewards = round.rewards && Number(round.rewards) > 0
       const gmRewards = roundsRewardsWithGm[index]?.rewards ?? 0n
       const hasGmRewards = gmRewards && Number(gmRewards) > 0
-      const isAutoVotingRound = autoVotingActiveMap.get(round.roundId) === true
+      const isAutoVotingRound = autoVotingActiveMap[round.roundId] === true
 
       if ((hasRewards || hasGmRewards) && !isAutoVotingRound) {
         // Include both regular rewards and GM rewards

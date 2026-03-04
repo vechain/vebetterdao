@@ -11,7 +11,7 @@ const env = config.environment
 if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 
 const isSoloNetwork = network.name === "vechain_solo"
-const isStagingEnv = process.env.NEXT_PUBLIC_APP_ENV === AppEnv.TESTNET_STAGING
+const isTestnetEnv = process.env.NEXT_PUBLIC_APP_ENV === AppEnv.TESTNET
 
 async function main() {
   console.log(`Checking contracts deployment on ${network.name} (${config.network.urls[0]})...`)
@@ -26,7 +26,7 @@ export async function checkContractsDeployment() {
     const code = config.b3trContractAddress === "" ? "0x" : await ethers.provider.getCode(config.b3trContractAddress)
     if (code === "0x") {
       console.log(`B3tr contract not deployed at address ${config.b3trContractAddress}`)
-      if (isSoloNetwork || isStagingEnv) {
+      if (isSoloNetwork || isTestnetEnv) {
         // deploy the contracts and override the config file
         const newAddresses = await deployAll(getContractsConfig(env))
 
@@ -38,7 +38,7 @@ export async function checkContractsDeployment() {
   }
 }
 
-async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType<typeof deployAll>>) {
+export async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType<typeof deployAll>>) {
   const newConfig: AppConfig = {
     ...config,
     b3trContractAddress: await contracts.b3tr.getAddress(),
@@ -60,6 +60,8 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     dbaPoolContractAddress: await contracts.dynamicBaseAllocationPool.getAddress(),
     stargateContractAddress: await contracts.stargate.getAddress(),
     stargateNFTContractAddress: await contracts.stargateNFT.getAddress(),
+    tokenAuctionContractAddress: await contracts.vechainNodesMock.getAddress(),
+    relayerRewardsPoolContractAddress: await contracts.relayerRewardsPool.getAddress(),
     b3trGovernorLibraries: {
       governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
       governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),

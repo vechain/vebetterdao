@@ -2,6 +2,7 @@ import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
 import { ABIContract, Revision } from "@vechain/sdk-core"
 import {
+  DBAPool__factory,
   X2EarnApps__factory,
   X2EarnRewardsPool__factory,
   XAllocationPool__factory,
@@ -10,29 +11,22 @@ import {
 import { useThor } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
-import { DBA_ELIGIBILITY_THRESHOLD_SCALED } from "../constants"
-
 const xAllocationPoolAddress = getConfig().xAllocationPoolContractAddress as `0x${string}`
 const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 const x2EarnAppsAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const x2EarnRewardsPoolAddress = getConfig().x2EarnRewardsPoolContractAddress as `0x${string}`
+const dbaPoolAddress = getConfig().dbaPoolContractAddress as `0x${string}`
 
 /**
- * Hook to estimate DBA rewards for an app in an active round
+ * Hook to estimate DBA rewards for apps in an active round using merit-capped flat distribution.
  *
- * Calculation method:
- * 1. Get all apps in the round
- * 2. For each app, call roundEarnings() to get unallocatedAmount
- * 3. Sum all unallocatedAmount values = total DBA pool for the round
- * 4. Count eligible apps based on ALL criteria:
- *    - App has < 7.5% votes (< 750 in scaled format)
- *    - App has rewarded at least 1 action in the round (RewardDistributed event)
- *    - App should NOT get DBA only if it started the round unendorsed AND is currently still unendorsed
- * 5. DBA per eligible app = total DBA pool / eligible apps count
+ * Mirrors the contract logic (DBAPool V3):
+ * 1. flatShare = totalUnallocated / eligibleAppsCount
+ * 2. meritCap = meritCapMultiplier * (totalEarnings - baseAllocation)
+ * 3. appReward = min(flatShare, meritCap)
+ * 4. Overflow from merit cap + integer remainder → treasury
  *
- * @param roundId The round ID
- * @param isEligible Whether the app is potentially eligible for DBA (pre-filtered by vote %)
- * @returns Estimated DBA rewards amount
+ * Returns per-app estimated amounts in `appEstimates` map.
  */
 export const useEstimateDBAForActiveRound = (roundId: string | number, isEligible: boolean) => {
   const thor = useThor()
@@ -40,67 +34,66 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
   return useQuery({
     queryKey: ["estimateDBAActiveRound", roundId, isEligible],
     queryFn: async () => {
-      if (!isEligible || !thor) {
-        return {
-          estimatedAmount: "0",
-          isSimulation: true,
-          totalAppsCount: 0,
-          eligibleAppsCount: 0,
-          totalUnallocated: "0",
-          eligibleAppIds: [],
-        }
+      const emptyResult = {
+        appEstimates: {} as Record<string, string>,
+        isSimulation: true,
+        totalAppsCount: 0,
+        eligibleAppsCount: 0,
+        totalUnallocated: "0",
+        treasuryOverflow: "0",
+        eligibleAppIds: [] as string[],
       }
 
+      if (!isEligible || !thor) return emptyResult
+
       try {
-        // 1. Get all apps in the round
         const appsRes = await thor.contracts.executeCall(
           xAllocationVotingAddress,
           ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("getAppIdsOfRound"),
           [BigInt(roundId)],
         )
 
-        if (!appsRes.success) {
-          throw new Error("Failed to get apps for round")
-        }
+        if (!appsRes.success) throw new Error("Failed to get apps for round")
 
         const appsInRound = (appsRes.result?.array?.[0] as string[]) || []
+        if (appsInRound.length === 0) return emptyResult
 
-        if (appsInRound.length === 0) {
-          return {
-            estimatedAmount: "0",
-            isSimulation: true,
-            totalAppsCount: 0,
-            eligibleAppsCount: 0,
-            totalUnallocated: "0",
-            eligibleAppIds: [],
-          }
-        }
+        // Fetch round snapshot, base allocation, and merit cap multiplier in parallel
+        const [roundSnapshotRes, baseAllocationRes, meritCapRes] = await Promise.all([
+          thor.contracts.executeCall(
+            xAllocationVotingAddress,
+            ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("roundSnapshot"),
+            [BigInt(roundId)],
+          ),
+          thor.contracts.executeCall(
+            xAllocationPoolAddress,
+            ABIContract.ofAbi(XAllocationPool__factory.abi).getFunction("baseAllocationAmount"),
+            [BigInt(roundId)],
+          ),
+          thor.contracts.executeCall(
+            dbaPoolAddress,
+            ABIContract.ofAbi(DBAPool__factory.abi).getFunction("meritCapMultiplier"),
+            [],
+          ),
+        ])
 
-        // Get round start block (snapshot) to check historical endorsement status
-        const roundSnapshotRes = await thor.contracts.executeCall(
-          xAllocationVotingAddress,
-          ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("roundSnapshot"),
-          [BigInt(roundId)],
-        )
-
-        if (!roundSnapshotRes.success) {
-          throw new Error("Failed to get round snapshot")
-        }
+        if (!roundSnapshotRes.success) throw new Error("Failed to get round snapshot")
 
         const roundStartBlock = Number(roundSnapshotRes.result?.array?.[0] ?? 0)
         const roundStartBlockStr = String(roundStartBlock)
+        const baseAllocation = (baseAllocationRes.result?.array?.[0] as bigint) ?? 0n
+        const meritCapMultiplier = (meritCapRes.result?.array?.[0] as bigint) ?? 2n
 
-        // 2. For each app, check full eligibility criteria
         const appsData = await Promise.all(
           appsInRound.map(async appId => {
-            // Get earnings (includes unallocatedAmount)
+            // Get earnings (includes totalEarnings and unallocatedAmount)
             const earningsRes = await thor.contracts.executeCall(
               xAllocationPoolAddress,
               ABIContract.ofAbi(XAllocationPool__factory.abi).getFunction("roundEarnings"),
               [BigInt(roundId), appId],
             )
 
-            // Get app shares to check vote percentage
+            // Get app shares to check vote participation
             const sharesRes = await thor.contracts.executeCall(
               xAllocationPoolAddress,
               ABIContract.ofAbi(XAllocationPool__factory.abi).getFunction("getAppShares"),
@@ -139,13 +132,11 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
                   eventAbi: rewardEventAbi,
                 },
               ],
-              options: {
-                offset: 0,
-                limit: 1, // We only need to know if at least 1 exists
-              },
+              options: { offset: 0, limit: 1 }, // We only need to know if at least 1 exists
               order: "desc",
             })
 
+            const totalEarnings = (earningsRes.result?.array?.[0] as bigint) ?? 0n
             const unallocatedAmount = (earningsRes.result?.array?.[1] as bigint) ?? 0n
             const appShare = Number(sharesRes.result?.array?.[0] ?? 0)
             const wasUnendorsedAtStart = (unendorsedAtStartRes.result?.array?.[0] as boolean) ?? false
@@ -155,54 +146,57 @@ export const useEstimateDBAForActiveRound = (roundId: string | number, isEligibl
             // App should NOT get DBA only if it started the round unendorsed AND is currently still unendorsed
             const shouldExcludeFromDBA = wasUnendorsedAtStart && isCurrentlyUnendorsed
 
-            // Full eligibility check
-            const isEligible =
-              appShare < DBA_ELIGIBILITY_THRESHOLD_SCALED && // < 7.5% votes (750 in scaled format)
-              appShare > 0 && // Participated in voting
-              !shouldExcludeFromDBA && // Not excluded due to endorsement status
-              hasRewardedActions // Has rewarded at least 1 action
+            const isEligible = appShare > 0 && !shouldExcludeFromDBA && hasRewardedActions
 
             return {
               appId,
+              totalEarnings,
               unallocatedAmount,
               appShare,
-              wasUnendorsedAtStart,
-              isCurrentlyUnendorsed,
-              hasRewardedActions,
               isEligible,
             }
           }),
         )
 
-        // 3. Sum all unallocated amounts
         const totalUnallocated = appsData.reduce((sum: bigint, app) => sum + app.unallocatedAmount, 0n)
+        const eligibleApps = appsData.filter(app => app.isEligible)
+        const eligibleAppsCount = eligibleApps.length
 
-        // 4. Count eligible apps (all criteria met)
-        const eligibleAppsCount = appsData.filter(app => app.isEligible).length
+        // Merit-capped flat distribution (mirrors DBAPool.distributeDBARewards)
+        const appEstimates: Record<string, string> = {}
+        let overflow = 0n
 
-        // 5. Calculate DBA per eligible app
-        let dbaPerEligibleApp = 0n
         if (eligibleAppsCount > 0 && totalUnallocated > 0n) {
-          dbaPerEligibleApp = totalUnallocated / BigInt(eligibleAppsCount)
+          const flatSharePerApp = totalUnallocated / BigInt(eligibleAppsCount)
+          overflow = totalUnallocated % BigInt(eligibleAppsCount)
+
+          for (const app of eligibleApps) {
+            const voteEarnings = app.totalEarnings > baseAllocation ? app.totalEarnings - baseAllocation : 0n
+            const meritCap = meritCapMultiplier * voteEarnings
+            const appReward = flatSharePerApp < meritCap ? flatSharePerApp : meritCap
+            overflow += flatSharePerApp - appReward
+            appEstimates[app.appId] = formatEther(appReward)
+          }
         }
 
         return {
-          estimatedAmount: formatEther(dbaPerEligibleApp),
+          appEstimates,
           isSimulation: true,
           totalAppsCount: appsInRound.length,
-          eligibleAppsCount: eligibleAppsCount,
+          eligibleAppsCount,
           totalUnallocated: formatEther(totalUnallocated),
-          appsWithUnallocated: appsData.filter(app => app.unallocatedAmount > 0n).length,
-          eligibleAppIds: appsData.filter(app => app.isEligible).map(app => app.appId), // List of eligible app IDs
+          treasuryOverflow: formatEther(overflow),
+          eligibleAppIds: eligibleApps.map(app => app.appId),
         }
       } catch (error) {
         console.error("Error estimating DBA for active round:", error)
         return {
-          estimatedAmount: "0",
+          appEstimates: {} as Record<string, string>,
           isSimulation: true,
           totalAppsCount: 0,
           eligibleAppsCount: 0,
           totalUnallocated: "0",
+          treasuryOverflow: "0",
           eligibleAppIds: [],
           error: error instanceof Error ? error.message : "Unknown error",
         }

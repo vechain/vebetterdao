@@ -40,7 +40,8 @@ export const generateMockLocalConfig = () => {
     "stargateContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "grantsManagerContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "relayerRewardsPoolContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
-    "indexerUrl": "https://indexer.testnet.vechain.org/api/v1",
+    "b3trMultiSigAddress": "0x0000000000000000000000000000000000000000",
+    "indexerUrl": "http://localhost:8089",
     "nodeUrl": "http://localhost:8669",
     "network": {
       "id": "solo",
@@ -50,7 +51,7 @@ export const generateMockLocalConfig = () => {
       "urls": [
         "http://localhost:8669"
       ],
-      "explorerUrl": "https://explore-testnet.vechain.org",
+      "explorerUrl": "http://localhost:8088",
       "blockTime": 1000 * 10,
       "genesis": {
         "number": 0,

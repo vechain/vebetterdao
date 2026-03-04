@@ -14,9 +14,3 @@ jobs:
     secrets:
       INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
       GIT_VECHAINCI_SSH_KEY: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
-  sonar-scan:
-    uses: vechain/github-actions/.github/workflows/sonar-scan.yaml@ceb183bdac66f0a97f51bd1318a17c027b2bfa07 # v.1.7.0
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    with:
-      download-coverage-report: false

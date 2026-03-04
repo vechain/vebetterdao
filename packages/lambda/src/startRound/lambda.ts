@@ -82,6 +82,32 @@ const getSecretsConfig = (): SecretsConfig => {
   }
 }
 
+// DBA distribution uses a separate key with DISTRIBUTOR_ROLE on the DBAPool contract
+const getDBASecretsConfig = (): SecretsConfig => {
+  // eslint-disable-next-line turbo/no-undeclared-env-vars
+  const environment = process.env.LAMBDA_ENV
+
+  switch (environment) {
+    case AppEnv.MAINNET:
+      return {
+        secretId: "dba_distributor_pk",
+        privateKeyId: "dba-distributor-pk",
+      }
+
+    case AppEnv.TESTNET_STAGING:
+      return {
+        secretId: "dba_distributor_pk",
+        privateKeyId: "dba-distributor-pk",
+      }
+
+    default:
+      return {
+        secretId: "dba_distributor_pk",
+        privateKeyId: "dba-distributor-pk",
+      }
+  }
+}
+
 const getSlackConfig = (): SlackConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
@@ -311,6 +337,7 @@ export async function distributeXAllocations(thor: ThorClient) {
 /**
  * Distributes DBA rewards to eligible apps for the previous round.
  * This should be called after emissions are distributed and x-allocations are claimed.
+ * Uses a separate private key (dba_distributor_pk) that has DISTRIBUTOR_ROLE on DBAPool.
  *
  * @param thor - The ThorClient instance
  * @returns the transaction receipt of the DBA distribution if successful
@@ -334,7 +361,9 @@ async function distributeDBARewards(thor: ThorClient) {
 
   console.log(`Current round: ${currentRound}, distributing DBA for previous round: ${roundId}`)
 
-  const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
+  // Use DBA-specific secrets (different key with DISTRIBUTOR_ROLE on DBAPool)
+  const { secretId: dbaSecretId, privateKeyId: dbaPrivateKeyId } = getDBASecretsConfig()
+  const privateKey = Buffer.from(await getSecret(client, dbaSecretId, dbaPrivateKeyId), "hex")
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
 
   // Check if we can distribute for this round

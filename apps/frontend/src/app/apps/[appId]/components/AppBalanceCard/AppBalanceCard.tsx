@@ -3,8 +3,8 @@ import {
   Card,
   Separator,
   HStack,
-  Stack,
   Heading,
+  IconButton,
   Skeleton,
   Text,
   Icon,
@@ -18,22 +18,22 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { FiInfo } from "react-icons/fi"
-
-import { Tooltip } from "@/components/ui/tooltip"
+import { LuArrowDownToLine, LuArrowUpFromLine, LuRefreshCw, LuSettings } from "react-icons/lu"
 
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
 import { useIsDistributionPaused } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsDistributionPaused"
 import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
 import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
-// Modal components
+import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
 import { GenericAlert } from "../../../../components/Alert/GenericAlert"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
+import { DepositModal } from "./DepositModal"
+import { FundsManagementModal } from "./FundsManagementModal"
 import { ManagementCenterModal } from "./ManagementCenterModal"
-import { TransferAppFundsModal } from "./TransferAppFundsModal"
+import { WithdrawModal } from "./WithdrawModal"
 
 const compactFormatter = getCompactFormatter(2)
 export const AppBalanceCard = () => {
@@ -44,12 +44,9 @@ export const AppBalanceCard = () => {
     onOpen: onOpenRewardsPoolAccess,
     onClose: onCloseRewardsPoolAccess,
   } = useDisclosure()
-  const {
-    open: isOpenDepositOrWithdraw,
-    onOpen: onOpenDepositOrWithdraw,
-    onClose: onCloseDepositOrWithdraw,
-  } = useDisclosure()
-
+  const { open: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
+  const { open: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
+  const { open: isOpenRebalance, onOpen: onOpenRebalance, onClose: onCloseRebalance } = useDisclosure()
   const {
     open: isOpenManagementCenter,
     onOpen: onOpenManagementCenter,
@@ -74,82 +71,116 @@ export const AppBalanceCard = () => {
     <>
       <Card.Root
         w={"full"}
-        colorPalette="Red"
+        variant="primary"
         border="sm"
         borderColor={isPaused ? "status.negative.primary" : "border.primary"}>
-        <Card.Body pt={3} pb={2}>
-          <HStack justify={"space-between"} w={"full"}>
-            <VStack alignItems={"start"} gap={0}>
-              <HStack>
-                <Text textStyle="md">{t("Balance")}</Text>
-                <Tooltip
-                  content={t(
-                    "Amount of B3TR tokens that the app has available for withdrawal, and that can be used to distribute rewards if the rewards pool is enabled.",
-                  )}>
-                  <Icon as={FiInfo} color="icon.default" position={"relative"} />
-                </Tooltip>
-              </HStack>
-              <Skeleton loading={isBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "4xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
-              </Skeleton>
-            </VStack>
-
-            <VStack gap={2}>
-              <Button
-                mt={1}
-                disabled={!isAppAdminOrTreasuryAddress}
-                onClick={onOpenDepositOrWithdraw}
-                variant={"primary"}
-                borderRadius={"full"}
-                w={"full"}>
-                {t("Transfer")}
-              </Button>
-            </VStack>
+        <Card.Header>
+          <HStack justifyContent="space-between" alignItems="center" w="full">
+            <Heading size="xl">{t("App Funds")}</Heading>
+            <Link
+              textStyle="md"
+              fontWeight="semibold"
+              color="actions.secondary.text-lighter"
+              onClick={onOpenRewardsPoolAccess}>
+              {t("History")}
+              <UilArrowUpRight />
+            </Link>
           </HStack>
-          {/* Manage App Funds Section*/}
-          <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
+        </Card.Header>
+
+        <Card.Body gap={6}>
+          <VStack alignItems="start" gap={1} w="full">
+            <Text textStyle="md" fontWeight="semibold">
+              {t("Available Balance")}
+            </Text>
+            <Text textStyle="xs" color="text.subtle">
+              {t("B3TR received from allocations. Deposit to add funds, withdraw to send to your team wallet.")}
+            </Text>
+          </VStack>
+          <HStack justifyContent="space-between" alignItems="center" w={"full"}>
+            <Skeleton loading={isBalanceLoading}>
+              <HStack gap={2} alignItems="center">
+                <B3TRIcon boxSize={{ base: "24px", md: "30px" }} />
+                <Heading size={{ base: "2xl", md: "4xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
+              </HStack>
+            </Skeleton>
+            <HStack gap={2}>
+              <IconButton
+                size="sm"
+                aria-label={t("Deposit")}
+                disabled={!isAppAdminOrTreasuryAddress}
+                onClick={onOpenDeposit}
+                variant="primary"
+                borderRadius="full">
+                <Icon as={LuArrowDownToLine} />
+              </IconButton>
+              <IconButton
+                size="sm"
+                aria-label={t("Withdraw")}
+                disabled={!isAppAdminOrTreasuryAddress}
+                onClick={onOpenWithdraw}
+                variant="primary"
+                borderRadius="full">
+                <Icon as={LuArrowUpFromLine} />
+              </IconButton>
+            </HStack>
+          </HStack>
+
+          <Box position="relative" mx="-24px" width="calc(100% + 48px)">
             <Separator borderColor="border.primary" />
           </Box>
 
-          <Stack direction="row" w="full" justifyContent={"space-between"} alignItems="center" pt={2}>
-            <VStack alignItems={"start"} gap={0}>
+          <VStack alignItems={"start"} gap={2} w="full">
+            <VStack alignItems="start" gap={1} w="full">
               <HStack alignItems="center">
-                <Text textStyle="md">{t("Rewards Pool")}</Text>
-                <Tooltip content={t("Amount of B3TR available for rewards distribution")}>
-                  <Icon as={FiInfo} color="icon.default" position={"relative"} />
-                </Tooltip>
+                <Text textStyle="md" fontWeight="semibold">
+                  {t("Rewards Distribution Pool")}
+                </Text>
+                <IconButton
+                  variant="ghost"
+                  size="xs"
+                  aria-label="Pool settings"
+                  disabled={!isAppAdmin}
+                  onClick={onOpenManagementCenter}>
+                  <Icon as={LuSettings} boxSize="4" color="icon.default" />
+                </IconButton>
               </HStack>
+              <Text textStyle="xs" color="text.subtle">
+                {t("Funds reserved for rewarding users. Move B3TR here from your balance to distribute rewards.")}
+              </Text>
+            </VStack>
+            <HStack justifyContent="space-between" alignItems="center" w="full" mt={4}>
               <Skeleton loading={isRewardsBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "4xl" }} color={rewardsPoolColor}>
-                  {compactFormatter.format(Number(rewardsBalance?.scaled || 0))}
-                </Heading>
+                <HStack gap={2} alignItems="center">
+                  <B3TRIcon boxSize={{ base: "24px", md: "30px" }} />
+                  <Heading size={{ base: "2xl", md: "4xl" }} color={rewardsPoolColor}>
+                    {compactFormatter.format(Number(rewardsBalance?.scaled || 0))}
+                  </Heading>
+                </HStack>
               </Skeleton>
-            </VStack>
-            <VStack alignItems={"flex-end"} gap={0}>
-              <Button
-                mt={1}
-                colorPalette={isPaused ? "red" : undefined}
-                disabled={!isAppAdmin}
-                onClick={onOpenManagementCenter}
-                variant={isPaused ? "solid" : "primary"}
-                w={"full"}>
-                {isPaused ? t("Resume") : t("Manage")}
-              </Button>
-            </VStack>
-          </Stack>
-          <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
-            <Separator borderColor="border.primary" />
-          </Box>
-          <Link
-            textStyle="md"
-            mt={2}
-            fontWeight="semibold"
-            color="actions.secondary.text-lighter"
-            onClick={onOpenRewardsPoolAccess}
-            alignSelf={"start"}>
-            {t("History")}
-            <UilArrowUpRight />
-          </Link>
+              <HStack gap={2}>
+                <Button
+                  size="sm"
+                  disabled={!isAppAdmin}
+                  onClick={onOpenRebalance}
+                  variant="primary"
+                  borderRadius="full">
+                  <Icon as={LuRefreshCw} />
+                  {t("Re-balance")}
+                </Button>
+                {isPaused && (
+                  <Button
+                    size="sm"
+                    colorPalette="red"
+                    disabled={!isAppAdmin}
+                    onClick={onOpenManagementCenter}
+                    borderRadius="full">
+                    {t("Resume")}
+                  </Button>
+                )}
+              </HStack>
+            </HStack>
+          </VStack>
           {!isAppAdmin && (
             <GenericAlert
               title={t("Access restricted")}
@@ -164,13 +195,19 @@ export const AppBalanceCard = () => {
       {app && (
         <>
           <AppBalanceTxsHistory appId={app.id} isOpen={isOpenRewardsPoolAccess} onClose={onCloseRewardsPoolAccess} />
-          <TransferAppFundsModal
-            app={app}
-            isOpen={isOpenDepositOrWithdraw}
-            onClose={onCloseDepositOrWithdraw}
+          <DepositModal appId={app.id} isOpen={isOpenDeposit} onClose={onCloseDeposit} />
+          <WithdrawModal
+            appId={app.id}
+            teamWalletAddress={app.teamWalletAddress ?? ""}
+            isOpen={isOpenWithdraw}
+            onClose={onCloseWithdraw}
+          />
+          <FundsManagementModal
+            appId={app.id}
+            isOpen={isOpenRebalance}
+            onClose={onCloseRebalance}
             isEnablingRewardsPool={!isRewardsPoolEnabled}
-            isPaused={isPaused}
-            isAppAdmin={isAppAdmin}
+            isRefillingPools={true}
           />
           <ManagementCenterModal
             appId={app.id}

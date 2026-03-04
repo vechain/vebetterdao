@@ -1,5 +1,6 @@
 "use client"
 import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
@@ -17,16 +18,19 @@ export const Navbar: React.FC = () => {
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
   const isNavbarVisible = useHideOnScroll()
-  // Filter routes based on user's role and if there are any allocation rounds
   const routesToRender = useMemo(
     () =>
       Routes.filter(route => {
         return (
           route.isVisible &&
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Admin" ? permissions?.isAdmin : true) &&
+          (route.name === "Admin"
+            ? (getConfig().environment === "testnet-staging" || permissions?.isAdmin) && !!account?.address
+            : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true)
+          (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true) &&
+          (route.name === "Nodes" ? !!account?.address : true) &&
+          (route.name === "GM" ? !!account?.address : true)
         )
       }),
     [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],

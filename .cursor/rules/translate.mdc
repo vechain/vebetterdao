@@ -1,0 +1,62 @@
+---
+description: Translation file management for i18n in apps/frontend/src/i18n/languages/
+globs: apps/frontend/src/i18n/languages/*.json
+alwaysApply: false
+---
+
+# Translation Management
+
+- 15 languages: en (source), de, es, fr, hi, it, ja, ko, nl, pt, sv, tr, tw, vi, zh
+- Format: flat JSON key-value pairs (keys = English phrases)
+- Interpolation: `{{variableName}}`
+- Library: `react-i18next` configured in `apps/frontend/src/i18n/index.tsx`
+
+## Adding Keys
+
+1. Add key to `en.json` with English value
+2. Add same key to ALL other 14 language files with correct translation
+3. Sort ALL files alphabetically by key (case-insensitive)
+
+## Removing Keys
+
+1. Remove key from ALL 15 language files
+2. Files must remain sorted after removal
+
+## Sorting
+
+All JSON files MUST have keys sorted alphabetically (case-insensitive). After any modification, sort with:
+
+```bash
+node -e "
+const fs = require('fs');
+const glob = require('glob');
+const files = glob.sync('apps/frontend/src/i18n/languages/*.json');
+files.forEach(f => {
+  const obj = JSON.parse(fs.readFileSync(f, 'utf8'));
+  const sorted = Object.keys(obj)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+    .reduce((acc, key) => { acc[key] = obj[key]; return acc; }, {});
+  fs.writeFileSync(f, JSON.stringify(sorted, null, 2) + '\n');
+});
+"
+```
+
+## Sync Check
+
+After any change, verify:
+
+- `en.json` has all keys used in code (`t("...")` usage)
+- All non-English files have the EXACT same keys as `en.json`
+- Missing keys get correct translation for that language
+- Extra keys not in `en.json` are removed
+- All files sorted alphabetically
+
+## Fixed Words
+
+See `apps/frontend/src/i18n/fixedWords.json` — grouped by language code (`"all"` = every language).
+
+Two use cases:
+1. **Untranslated** — value = English word (keep as-is in that language)
+2. **Fixed translation** — value = the mandatory translation (use consistently in every sentence)
+
+ALWAYS check this file before translating. If a word has a fixed translation, use it.

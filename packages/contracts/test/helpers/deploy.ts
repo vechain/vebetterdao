@@ -33,29 +33,21 @@ import {
   AutoVotingLogic,
   DBAPool,
   DBAPoolV1,
+  DBAPoolV2,
   Stargate,
   AdministrationUtilsV6,
   EndorsementUtilsV6,
   VoteEligibilityUtilsV6,
+  X2EarnAppsV7,
 } from "../../typechain-types"
-import {
-  deployAndUpgrade,
-  deployProxy,
-  deployProxyOnly,
-  deployStargateProxyWithoutInitialization,
-  initializeProxy,
-  upgradeProxy,
-} from "../../scripts/helpers"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import type { GovernanceLibraries } from "../../scripts/libraries/governanceLibraries"
 import type { PassportLibraries } from "../../scripts/libraries/passportLibraries"
-import { setWhitelistedFunctions } from "../../scripts/deploy/deployLatest"
-
+import { setWhitelistedFunctions } from "./whitelistGovernance"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
-import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
-import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
 import { autoVotingLibraries } from "../../scripts/libraries"
 import { deployStargateMock } from "../../scripts/deploy/mocks/deployStargate"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
@@ -66,9 +58,7 @@ type ToCamelCaseKeys<T> = {
 }
 
 export interface DeployInstance
-  extends ToCamelCaseKeys<GovernanceLibraries>,
-    ToCamelCaseKeys<PassportLibraries>,
-    ToCamelCaseKeys<X2EarnLibraries> {
+  extends ToCamelCaseKeys<GovernanceLibraries>, ToCamelCaseKeys<PassportLibraries>, ToCamelCaseKeys<X2EarnLibraries> {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3
@@ -206,7 +196,17 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV7,
     GovernorStateLogicLibV7,
     GovernorVotesLogicLibV7,
-    // V8 (latest)
+    // V8
+    GovernorClockLogicLibV8,
+    GovernorConfiguratorLibV8,
+    GovernorDepositLogicLibV8,
+    GovernorFunctionRestrictionsLogicLibV8,
+    GovernorProposalLogicLibV8,
+    GovernorQuorumLogicLibV8,
+    GovernorStateLogicLibV8,
+    GovernorVotesLogicLibV8,
+    GovernorGovernanceLogicLibV8,
+    // (latest)
     GovernorClockLogicLib,
     GovernorConfiguratorLib,
     GovernorDepositLogicLib,
@@ -264,6 +264,7 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtils,
     EndorsementUtils,
     VoteEligibilityUtils,
+    AppStorageUtils,
     // V2
     AdministrationUtilsV2,
     EndorsementUtilsV2,
@@ -284,6 +285,10 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV6,
     EndorsementUtilsV6,
     VoteEligibilityUtilsV6,
+    // V7
+    AdministrationUtilsV7,
+    EndorsementUtilsV7,
+    VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: false, latestVersionOnly: false })
 
   // Deploy AutoVoting Libraries
@@ -378,7 +383,14 @@ export const getOrDeployContractInstances = async ({
     config.TREASURY_TRANSFER_LIMIT_VTHO,
   ])) as Treasury
 
-  const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
+  const x2EarnCreator = (await deployAndUpgrade(
+    ["X2EarnCreatorV1", "X2EarnCreator"],
+    [[config.CREATOR_NFT_URI, owner.address], [true]],
+    {
+      versions: [undefined, 2],
+      logOutput: false,
+    },
+  )) as X2EarnCreator
 
   // Deploy NodeManagement - deprecating...
   // const nodeManagementV1 = (await deployProxy("NodeManagementV1", [
@@ -450,8 +462,9 @@ export const getOrDeployContractInstances = async ({
   // Set a temporary address for the x2EarnRewardsPool to then set the correct address in x2EarnApps
   const x2EarnRewardsPoolAddress = otherAccounts[11].address
 
-  const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnApps"],
+  // Deploy up to V7
+  const x2EarnAppsV7 = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnAppsV6", "X2EarnAppsV7"],
     [
       ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
       [
@@ -496,13 +509,13 @@ export const getOrDeployContractInstances = async ({
           VoteEligibilityUtilsV6: await VoteEligibilityUtilsV6.getAddress(),
         },
         {
-          AdministrationUtils: await AdministrationUtils.getAddress(),
-          EndorsementUtils: await EndorsementUtils.getAddress(),
-          VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+          AdministrationUtilsV7: await AdministrationUtilsV7.getAddress(),
+          EndorsementUtilsV7: await EndorsementUtilsV7.getAddress(),
+          VoteEligibilityUtilsV7: await VoteEligibilityUtilsV7.getAddress(),
         },
       ],
     },
-  )) as X2EarnApps
+  )) as X2EarnAppsV7
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     [
@@ -515,7 +528,7 @@ export const getOrDeployContractInstances = async ({
       "X2EarnRewardsPool",
     ],
     [
-      [owner.address, owner.address, owner.address, await b3tr.getAddress(), await x2EarnApps.getAddress()],
+      [owner.address, owner.address, owner.address, await b3tr.getAddress(), await x2EarnAppsV7.getAddress()],
       [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
       [veBetterPassportContractAddress],
       [],
@@ -545,7 +558,7 @@ export const getOrDeployContractInstances = async ({
         owner.address,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-        await x2EarnApps.getAddress(),
+        await x2EarnAppsV7.getAddress(),
         await x2EarnRewardsPool.getAddress(),
       ],
       [],
@@ -653,7 +666,7 @@ export const getOrDeployContractInstances = async ({
           admins: [await timeLock.getAddress(), owner.address],
           upgrader: owner.address,
           contractsAddressManager: owner.address,
-          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          x2EarnAppsAddress: await x2EarnAppsV7.getAddress(),
           baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
           appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
@@ -688,7 +701,7 @@ export const getOrDeployContractInstances = async ({
     "VeBetterPassportV1",
     [
       {
-        x2EarnApps: await x2EarnApps.getAddress(),
+        x2EarnApps: await x2EarnAppsV7.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
         galaxyMember: await galaxyMember.getAddress(),
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
@@ -821,6 +834,7 @@ export const getOrDeployContractInstances = async ({
       "B3TRGovernorV5",
       "B3TRGovernorV6",
       "B3TRGovernorV7",
+      "B3TRGovernorV8",
       "B3TRGovernor",
     ],
     [
@@ -864,9 +878,10 @@ export const getOrDeployContractInstances = async ({
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
       [], // Reserved for future configuration parameters; currently no values required
+      [], // v9
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -939,6 +954,16 @@ export const getOrDeployContractInstances = async ({
           GovernorVotesLogicV7: await GovernorVotesLogicLibV7.getAddress(),
         },
         {
+          GovernorClockLogicV8: await GovernorClockLogicLibV8.getAddress(),
+          GovernorConfiguratorV8: await GovernorConfiguratorLibV8.getAddress(),
+          GovernorDepositLogicV8: await GovernorDepositLogicLibV8.getAddress(),
+          GovernorFunctionRestrictionsLogicV8: await GovernorFunctionRestrictionsLogicLibV8.getAddress(),
+          GovernorProposalLogicV8: await GovernorProposalLogicLibV8.getAddress(),
+          GovernorQuorumLogicV8: await GovernorQuorumLogicLibV8.getAddress(),
+          GovernorStateLogicV8: await GovernorStateLogicLibV8.getAddress(),
+          GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
+        },
+        {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
           GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
           GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
@@ -973,7 +998,7 @@ export const getOrDeployContractInstances = async ({
   const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
     {
       admin: owner.address,
-      x2EarnApps: await x2EarnApps.getAddress(),
+      x2EarnApps: await x2EarnAppsV7.getAddress(),
       xAllocationPool: await xAllocationPool.getAddress(),
       x2earnRewardsPool: await x2EarnRewardsPool.getAddress(),
       b3tr: await b3tr.getAddress(),
@@ -987,16 +1012,44 @@ export const getOrDeployContractInstances = async ({
   await grantRoleTx.wait()
 
   // Upgrade to V2
+  const dbaPoolV2 = (await upgradeProxy("DBAPoolV1", "DBAPoolV2", await dbaPoolV1.getAddress(), [], {
+    version: 2,
+    logOutput: false,
+  })) as DBAPoolV2
+
+  // Upgrade to V3
   const dynamicBaseAllocationPool = (await upgradeProxy(
-    "DBAPoolV1",
+    "DBAPoolV2",
     "DBAPool",
-    await dbaPoolV1.getAddress(),
-    [], // No initialization args for V2
+    await dbaPoolV2.getAddress(),
+    [owner.address], // treasuryAddress
     {
-      version: 2,
+      version: 3,
       logOutput: false,
     },
   )) as DBAPool
+
+  // Upgrade to X2EarnAppsV8
+  // This is done here because in versions > 7 the setters have been removed.
+  // Setup the X2EarnApps XAllocationVote address
+  await x2EarnAppsV7.connect(owner).setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+  // Set up the X2EarnRewardsPool contract in x2EarnApps
+  await x2EarnAppsV7.connect(owner).setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
+  await x2EarnAppsV7
+    .connect(owner)
+    .setVeBetterPassportContract(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+
+  // V8 flexible endorsement caps: 49 per node per app, 110 total per app
+  const x2EarnApps = (await upgradeProxy("X2EarnAppsV7", "X2EarnApps", await x2EarnAppsV7.getAddress(), [49, 110], {
+    version: 8,
+    libraries: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
+    },
+  })) as X2EarnApps
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -1030,6 +1083,7 @@ export const getOrDeployContractInstances = async ({
       EndorsementUtils: await EndorsementUtils.getAddress(),
       AdministrationUtils: await AdministrationUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      AppStorageUtils: await AppStorageUtils.getAddress(),
     },
     XAllocationVoting: {
       AutoVotingLogic: await AutoVotingLogic.getAddress(),
@@ -1075,11 +1129,6 @@ export const getOrDeployContractInstances = async ({
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
-
-  // Setup the X2EarnApps XAllocationVote address
-  await x2EarnApps.connect(owner).setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
-  // Set up the X2EarnRewardsPool contract in x2EarnApps
-  await x2EarnApps.connect(owner).setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
 
   // Set up veBetterPassport
   await veBetterPassport
@@ -1230,6 +1279,15 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV7: GovernorQuorumLogicLibV7,
     governorStateLogicLibV7: GovernorStateLogicLibV7,
     governorVotesLogicLibV7: GovernorVotesLogicLibV7,
+    governorClockLogicLibV8: GovernorClockLogicLibV8,
+    governorConfiguratorLibV8: GovernorConfiguratorLibV8,
+    governorDepositLogicLibV8: GovernorDepositLogicLibV8,
+    governorFunctionRestrictionsLogicLibV8: GovernorFunctionRestrictionsLogicLibV8,
+    governorGovernanceLogicLibV8: GovernorGovernanceLogicLibV8,
+    governorProposalLogicLibV8: GovernorProposalLogicLibV8,
+    governorQuorumLogicLibV8: GovernorQuorumLogicLibV8,
+    governorStateLogicLibV8: GovernorStateLogicLibV8,
+    governorVotesLogicLibV8: GovernorVotesLogicLibV8,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,
@@ -1265,6 +1323,7 @@ export const getOrDeployContractInstances = async ({
     administrationUtils: AdministrationUtils,
     endorsementUtils: EndorsementUtils,
     voteEligibilityUtils: VoteEligibilityUtils,
+    appStorageUtils: AppStorageUtils,
     administrationUtilsV2: AdministrationUtilsV2,
     endorsementUtilsV2: EndorsementUtilsV2,
     voteEligibilityUtilsV2: VoteEligibilityUtilsV2,
@@ -1280,6 +1339,9 @@ export const getOrDeployContractInstances = async ({
     administrationUtilsV6: AdministrationUtilsV6,
     endorsementUtilsV6: EndorsementUtilsV6,
     voteEligibilityUtilsV6: VoteEligibilityUtilsV6,
+    administrationUtilsV7: AdministrationUtilsV7,
+    endorsementUtilsV7: EndorsementUtilsV7,
+    voteEligibilityUtilsV7: VoteEligibilityUtilsV7,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vthoTokenMock,

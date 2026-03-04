@@ -110,18 +110,16 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
     switch (actionToConfirm) {
       case "enable":
         return t(
-          "When you enable the rewards pool, it starts empty. You'll need to transfer B3TR to it before you can distribute rewards.",
+          "The pool will start empty. Use Re-balance to move B3TR from your app balance into the pool before distributing rewards.",
         )
       case "disable":
         return t(
-          "This will automatically move your rewards pool to your app balance. You can enable back the rewards pool at any time.",
+          "All funds in the rewards pool will be moved back to your app balance. You can re-enable the pool at any time.",
         )
       case "pause":
-        return t("This will temporarily stop rewards distribution for your app until you resume it.")
+        return t("Rewards distribution will stop until you resume it. Your pool funds will remain untouched.")
       case "resume":
-        return t(
-          "Your distributor will have access back to the rewards pool if you enabled it, and users will start receiving rewards for their actions again.",
-        )
+        return t("Your distributor will be able to send rewards again. Make sure the rewards pool has enough funds.")
     }
   }, [actionToConfirm, t])
 
@@ -145,14 +143,14 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                     }
                   />
                   <Text textStyle="lg" fontWeight="semibold">
-                    {t("Rewards Pool")}
+                    {isEnabled ? t("Rewards Pool Active") : t("Rewards Pool Inactive")}
                   </Text>
                 </HStack>
                 {!isEnabled ? (
                   <>
                     <Text textStyle="sm">
                       <Trans
-                        i18nKey="The rewards pool holds B3TR used to reward user actions. When you enable it, <bold>the pool starts empty</bold>, remember to <bold>fill it with funds</bold> to distribute rewards."
+                        i18nKey="The rewards pool is where B3TR is held for distributing rewards to users. When enabled, <bold>it starts empty</bold> — you'll need to <bold>move funds from your balance</bold> using Re-balance."
                         components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                       />
                     </Text>
@@ -168,7 +166,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                   <>
                     <Text textStyle="sm">
                       <Trans
-                        i18nKey="When you disabled rewards pool, <bold>the funds will move to app balance</bold>, you can enable it back at any time. The distributor will <bold>stop distributing rewards</bold> from the app balance pool."
+                        i18nKey="Disabling the pool will <bold>move all remaining funds back to your app balance</bold>. Your distributor will <bold>no longer be able to send rewards</bold>. You can re-enable it at any time."
                         components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                       />
                     </Text>
@@ -212,7 +210,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 <>
                   <Text textStyle="sm">
                     <Trans
-                      i18nKey="<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool."
+                      i18nKey="<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available."
                       components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                     />
                   </Text>
@@ -228,7 +226,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 <>
                   <Text textStyle="sm">
                     <Trans
-                      i18nKey="You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools."
+                      i18nKey="Temporarily <bold>stop your app from distributing rewards</bold>. Your funds stay in the pool and you can resume at any time."
                       components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                     />
                   </Text>
@@ -280,7 +278,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
       {
         key: ManagementStep.MANAGEMENT_OPTIONS,
         content: ManagementOptionsContent,
-        title: t("Manage distribution"),
+        title: t("Distribution Settings"),
       },
       {
         key: ManagementStep.CONFIRMATION,

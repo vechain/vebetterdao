@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useTotalXAppEarnings } from "@/api/contracts/dbaPool/hooks/useTotalXAppEarnings"
+import { useAppDBARewardsByRoundId } from "@/api/contracts/governance/hooks/useAppDBARewardsByRoundId"
 import { indexerQueryClient } from "@/api/indexer/api"
 import { AppImage } from "@/components/AppImage/AppImage"
 import B3TR from "@/components/Icons/svg/b3tr.svg"
@@ -61,7 +62,6 @@ export const ActiveAppDetailModal = ({
   app,
   isOpen,
   onClose,
-  percentage,
 }: {
   roundId: number
   currentRoundId: number
@@ -79,27 +79,22 @@ export const ActiveAppDetailModal = ({
   const votersCount = app?.voters || 0
   const isCurrentRound = currentRoundId === roundId
 
-  let {
-    rewardsAllocationAmount = 0,
-    unallocatedAmount = 0,
-    teamAllocationAmount = 0,
-    totalAmount = 0,
-  } = app?.earnings || {}
+  let { totalAmount = 0 } = app?.earnings || {}
   const {
     data: { dbaEarnings, totalEarnings },
-  } = useTotalXAppEarnings(roundId.toString(), app.id, percentage ?? 0)
+  } = useTotalXAppEarnings(roundId.toString(), app.id)
+  const { data: dbaRewardsMap } = useAppDBARewardsByRoundId(app.id, [roundId])
   const rewardsToUserPercentage =
     data?.totalRewardAmount && totalAmount ? Math.round((data?.totalRewardAmount * 100) / totalAmount) : 0
 
-  let dynamicBaseAllocationAmount = totalAmount - (unallocatedAmount + teamAllocationAmount + rewardsAllocationAmount)
-  dynamicBaseAllocationAmount = dynamicBaseAllocationAmount > 0 ? dynamicBaseAllocationAmount : 0
-  let dynamicBaseAllocationPercentage = (dynamicBaseAllocationAmount * 100) / totalAmount
-
+  let dynamicBaseAllocationAmount: number
   if (isCurrentRound) {
     totalAmount = Number(totalEarnings)
     dynamicBaseAllocationAmount = Number(dbaEarnings)
-    dynamicBaseAllocationPercentage = (dynamicBaseAllocationAmount * 100) / totalAmount
+  } else {
+    dynamicBaseAllocationAmount = dbaRewardsMap?.get(roundId) ?? 0
   }
+  const dynamicBaseAllocationPercentage = totalAmount > 0 ? (dynamicBaseAllocationAmount * 100) / totalAmount : 0
 
   const dataList: SectionData[] = [
     {
@@ -125,12 +120,12 @@ export const ActiveAppDetailModal = ({
         {
           label: t("Voting"),
           value: `${getCompactFormatter(2).format(totalAmount - dynamicBaseAllocationAmount)}`,
-          dotColor: "#B3CCFF",
+          dotColor: "#004CFC",
         },
         {
           label: t("Dynamic base"),
           value: `${getCompactFormatter(2).format(dynamicBaseAllocationAmount)}`,
-          dotColor: "#004CFC",
+          dotColor: "#B3CCFF",
         },
       ],
       chartData: [
@@ -151,12 +146,12 @@ export const ActiveAppDetailModal = ({
               {
                 label: t("To users"),
                 value: `${rewardsToUserPercentage}%`,
-                dotColor: "#99E0B1",
+                dotColor: "#047229",
               },
               {
                 label: t("Retained by app"),
                 value: `${100 - rewardsToUserPercentage}%`,
-                dotColor: "#047229",
+                dotColor: "#99E0B1",
               },
             ],
             chartData: [

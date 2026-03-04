@@ -5,8 +5,9 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Gift, NavArrowRight, SmartphoneDevice, Group, Flash, List } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { formatEther } from "viem"
+import { formatEther, parseEther } from "viem"
 
+import { useEstimateDBAForActiveRound } from "@/api/contracts/dbaPool/hooks/useEstimateDBAForActiveRound"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
@@ -21,10 +22,15 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const isCurrentRound = roundDetails.id === roundDetails.currentRoundId
+
+  // For the active round, estimate how much DBA overflow goes to treasury (merit cap leftovers)
+  const { data: dbaEstimate } = useEstimateDBAForActiveRound(roundDetails.id, isCurrentRound)
+  const dbaOverflow = dbaEstimate?.treasuryOverflow ? parseEther(dbaEstimate.treasuryOverflow) : 0n
+
   const distribution = useMemo(() => {
-    const toApps = Number(roundDetails.xAllocationsAmount)
-    const toVoters = Number(roundDetails.vote2EarnAmount)
-    const toTreasury = Number(roundDetails.treasuryAmount)
+    const toApps = Number(roundDetails.xAllocationsAmount - dbaOverflow)
+    const toVoters = Number(roundDetails.vote2EarnAmount + roundDetails.gmAmount)
+    const toTreasury = Number(roundDetails.treasuryAmount + dbaOverflow)
     const total = toApps + toVoters + toTreasury
 
     const appsPercent = (toApps / total) * 100
@@ -37,7 +43,13 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
       votersPercent,
       treasuryPercent,
     }
-  }, [roundDetails.xAllocationsAmount, roundDetails.vote2EarnAmount, roundDetails.treasuryAmount])
+  }, [
+    roundDetails.xAllocationsAmount,
+    roundDetails.vote2EarnAmount,
+    roundDetails.gmAmount,
+    roundDetails.treasuryAmount,
+    dbaOverflow,
+  ])
 
   return (
     <>
@@ -89,6 +101,7 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
                   p={{ base: "0", md: "4" }}
                   bg={{ base: "transparent", md: "card.subtle" }}
                   gap="1"
+                  border="none"
                   mx={{ base: "auto", md: "unset" }}>
                   <HStack gap="2">
                     <Icon as={icon} boxSize={{ base: "4", md: "5" }} color="icon.subtle" />

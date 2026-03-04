@@ -9,7 +9,6 @@ import {
   X2EarnApps__factory,
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
-import { ethers } from "ethers"
 
 import { notFoundImage } from "@/constants"
 import { convertUriToUrl } from "@/utils/uri"
@@ -29,7 +28,7 @@ const galaxyMemberAbi = GalaxyMember__factory.abi
 
 enum NodeType {
   X = "XNode",
-  ECONOMIC = "Economic Node",
+  ECONOMIC = "Eco Node",
 }
 
 type StargateNFTMetadata = {
@@ -51,13 +50,20 @@ type TokenOverview = {
   levelId: number // Converted from bigint to number at runtime
 }
 
+export type ActiveEndorsement = {
+  appId: string
+  points: bigint
+  endorsedAtRound: bigint
+}
+
 export type UserNode = TokenOverview & {
   endorsementScore: bigint
   metadata: StargateNFTMetadata
   type: NodeType
-  endorsedAppId: string
-  isEndorsingApp: boolean
-  isOnCooldown: boolean
+  activeEndorsements: ActiveEndorsement[]
+  availablePoints: bigint
+  pointsInCooldown: bigint
+  vetAmountStaked: bigint
   currentUserIsManager: boolean
   currentUserIsOwner: boolean
   gmAttachedTokenId: bigint
@@ -120,113 +126,143 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodesInfo> =>
       let nodePointsArray: bigint[] = []
       let nodeMetadataArray: StargateNFTMetadata[] = []
       let nodeIsXArray: boolean[] = []
-      let nodeToEndorsedAppArray: string[] = []
-      let nodeCooldownArray: boolean[] = []
+      let nodeActiveEndorsementsArray: { appId: string; points: bigint; endorsedAtRound: bigint }[][] = []
+      let nodeAvailablePointsArray: bigint[] = []
       let nodeGmAttachedTokenIdArray: bigint[] = []
+      let nodeVetAmountStakedArray: bigint[] = []
+      let nodePointsInCooldownArray: bigint[] = []
       if (nodeIds?.length > 0) {
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodePointsArray = await executeMultipleClausesCall({
+        nodePointsArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "getNodeEndorsementScore",
+            functionName: "getNodeEndorsementScore" as const,
             args: [BigInt(nodeId)],
           })),
-        })
+        })) as bigint[]
 
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        const rawNodeMetadata = await executeMultipleClausesCall({
+        const rawNodeMetadata = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: stargateNFTAbi,
             address: stargateNFTContractAddress,
-            functionName: "tokenURI",
+            functionName: "tokenURI" as const,
             args: [BigInt(nodeId)],
           })),
-        })
+        })) as string[]
 
-        // Fetch metadata in order
         nodeMetadataArray = await Promise.all(
-          (rawNodeMetadata as unknown as string[])?.map(async metadataUri => {
-            return await getIpfsMetadata<StargateNFTMetadata>(metadataUri)
-          }),
+          rawNodeMetadata.map(metadataUri => getIpfsMetadata<StargateNFTMetadata>(metadataUri)),
         )
 
-        //Get node level info
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeIsXArray = await executeMultipleClausesCall({
+        nodeIsXArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: stargateNFTAbi,
             address: stargateNFTContractAddress,
-            functionName: "isXToken",
+            functionName: "isXToken" as const,
             args: [BigInt(nodeId)],
           })),
-        })
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeToEndorsedAppArray = await executeMultipleClausesCall({
+        })) as boolean[]
+
+        nodeActiveEndorsementsArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "nodeToEndorsedApp",
+            functionName: "getNodeActiveEndorsements" as const,
             args: [BigInt(nodeId)],
           })),
-        })
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeCooldownArray = await executeMultipleClausesCall({
+        })) as { appId: string; points: bigint; endorsedAtRound: bigint }[][]
+
+        nodeAvailablePointsArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: x2EarnAppsAbi,
             address: x2EarnAppsContractAddress,
-            functionName: "checkCooldown",
+            functionName: "getNodeAvailablePoints" as const,
             args: [BigInt(nodeId)],
           })),
-        })
-        // @ts-expect-error - TypeScript has issues with deep type inference on dynamic arrays
-        nodeGmAttachedTokenIdArray = await executeMultipleClausesCall({
+        })) as bigint[]
+
+        nodeGmAttachedTokenIdArray = (await executeMultipleClausesCall({
           thor,
           calls: nodeIds.map(nodeId => ({
             abi: galaxyMemberAbi,
             address: galaxyMemberContractAddress,
-            functionName: "getIdAttachedToNode",
+            functionName: "getIdAttachedToNode" as const,
             args: [BigInt(nodeId)],
           })),
+        })) as bigint[]
+
+        const rawGetTokenResults = (await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: stargateNFTAbi,
+            address: stargateNFTContractAddress,
+            functionName: "getToken" as const,
+            args: [BigInt(nodeId)],
+          })),
+        })) as { vetAmountStaked?: bigint }[]
+        nodeVetAmountStakedArray = rawGetTokenResults.map(t => {
+          const raw =
+            typeof t === "object" && t !== null && "vetAmountStaked" in t
+              ? t.vetAmountStaked
+              : Array.isArray(t)
+                ? (t as unknown as bigint[])[3]
+                : undefined
+          return raw !== undefined ? BigInt(raw) : BigInt(0)
+        })
+
+        const rawNodePointsInfoArray = (await executeMultipleClausesCall({
+          thor,
+          calls: nodeIds.map(nodeId => ({
+            abi: x2EarnAppsAbi,
+            address: x2EarnAppsContractAddress,
+            functionName: "getNodePointsInfo" as const,
+            args: [BigInt(nodeId)],
+          })),
+        })) as { lockedPoints?: bigint }[]
+        nodePointsInCooldownArray = rawNodePointsInfoArray.map(info => {
+          const raw =
+            typeof info === "object" && info !== null && "lockedPoints" in info
+              ? info.lockedPoints
+              : Array.isArray(info)
+                ? (info as unknown as bigint[])[3]
+                : undefined
+          return raw !== undefined ? BigInt(raw) : BigInt(0)
         })
       }
 
       const nodesWithPoints = tokensOverview?.map((node, index) => {
         const rawMetadata = nodeMetadataArray[index]
-        const endorsedAppId = nodeToEndorsedAppArray[index] ?? ethers.ZeroHash
         const gmTokenId = nodeGmAttachedTokenIdArray[index] ?? BigInt(0)
+        const rawEndorsements = nodeActiveEndorsementsArray[index]
+        const activeEndorsements: ActiveEndorsement[] = Array.isArray(rawEndorsements)
+          ? rawEndorsements.map((e: any) => ({
+              appId: e.appId ?? e[0],
+              points: BigInt(e.points ?? e[1] ?? 0),
+              endorsedAtRound: BigInt(e.endorsedAtRound ?? e[2] ?? 0),
+            }))
+          : []
 
         return {
-          // Base node properties (id, owner, manager, levelId)
           ...node,
-
-          // Node classification
           type: nodeIsXArray[index] ? NodeType.X : NodeType.ECONOMIC,
-
-          // Endorsement properties
           endorsementScore: nodePointsArray[index] ?? BigInt(0),
-          endorsedAppId,
-          isEndorsingApp: !endorsedAppId || endorsedAppId !== ethers.ZeroHash,
-          isOnCooldown: nodeCooldownArray?.[index] ?? false,
-
-          // Metadata
+          activeEndorsements,
+          availablePoints: nodeAvailablePointsArray[index] ?? BigInt(0),
+          pointsInCooldown: nodePointsInCooldownArray[index] ?? BigInt(0),
+          vetAmountStaked: nodeVetAmountStakedArray[index] ?? BigInt(0),
           metadata: {
             name: rawMetadata?.name ?? "",
             description: rawMetadata?.description ?? "",
             attributes: rawMetadata?.attributes ?? [],
             image: rawMetadata?.image ? convertUriToUrl(rawMetadata.image) : notFoundImage,
           },
-
-          // User permissions
           currentUserIsManager: compareAddresses(account?.address ?? "", node.manager),
           currentUserIsOwner: compareAddresses(account?.address ?? "", node.owner),
-
-          // Galaxy Member attachment
           gmAttachedTokenId: gmTokenId,
           isGmAttached: gmTokenId > BigInt(0),
         }

@@ -81,6 +81,16 @@ export const languages = [
     code: "pt",
     flag: "🇧🇷",
   },
+  {
+    name: "Russian",
+    code: "ru",
+    flag: "🇷🇺",
+  },
+  {
+    name: "Romanian",
+    code: "ro",
+    flag: "🇷🇴",
+  },
 ]
 
 i18next
@@ -88,6 +98,7 @@ i18next
   .use(resourcesToBackend((language: string) => import(`./languages/${language}.json`)))
   .use(initReactI18next)
   .init({
+    load: "languageOnly",
     fallbackLng: "en",
     debug: false,
     detection: {

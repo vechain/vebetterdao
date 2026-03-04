@@ -37,6 +37,7 @@ import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/
 import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
 import { DoActionBanner } from "./components/DoActionBanner/DoActionBanner"
+import { EndorsementBanner } from "./components/EndorsementBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
@@ -139,6 +140,9 @@ export const ActionBanner = () => {
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
+  // Endorsement banner logic
+  const showEndorsementBanner = !!account?.address && (preferences?.[BannerStorageKey.SHOW_ENDORSEMENT] ?? true)
+
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled
   const showLowVthoBanner =
@@ -231,6 +235,7 @@ export const ActionBanner = () => {
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
+    if (showEndorsementBanner) bannerComponents.push(<EndorsementBanner key="endorsement" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
@@ -245,6 +250,7 @@ export const ActionBanner = () => {
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
+    showEndorsementBanner,
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,

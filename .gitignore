@@ -2,8 +2,6 @@
 
 build/**
 
-# AI
-.claude
 #codex
 AGENTS.md
 
@@ -156,6 +154,8 @@ packages/contracts/metadata/xApps/output/
 
 packages/contracts/deploy_output/
 
+packages/contracts/mongo-keyfile
+
 
 
 # vitest
@@ -169,3 +169,8 @@ coverage
 
 packages/contracts/temp-verify-*
 .env*.local
+
+# Ralph autonomous agent
+prd.json
+progress.txt
+tasks/

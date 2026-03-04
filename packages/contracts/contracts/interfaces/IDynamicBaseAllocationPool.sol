@@ -11,6 +11,8 @@ interface IDynamicBaseAllocationPool {
    */
   event FundsDistributedToApp(bytes32 indexed appId, uint256 amount, uint256 indexed roundId);
 
+  event FundsDistributedToTreasury(uint256 amount, uint256 indexed roundId);
+
   function canDistributeDBARewards(uint256 _roundId) external view returns (bool);
 
   function distributeDBARewards(uint256 _roundId, bytes32[] memory _appIds) external;

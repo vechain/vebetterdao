@@ -41,6 +41,13 @@ export const cardSlotRecipe = defineSlotRecipe({
           borderColor: "border.secondary",
         },
       },
+      outline: {
+        root: {
+          bg: "bg.primary",
+          border: "sm",
+          borderColor: "border.secondary",
+        },
+      },
     },
   },
 })

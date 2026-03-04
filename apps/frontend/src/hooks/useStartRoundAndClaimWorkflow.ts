@@ -11,15 +11,19 @@ import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/gover
 import { getHasXAppClaimedQueryKey } from "../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
 import { useHaveXAppsClaimed } from "../api/contracts/xAllocationPool/hooks/useHaveXAppsClaimed"
 import { getAllocationAmountQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { getAllocationsRoundStateQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { getAllocationsRoundsEventsQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { getCurrentAllocationsRoundDeadlineQueryKey } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import {
   getCurrentAllocationsRoundIdQueryKey,
   useCurrentAllocationsRoundId,
 } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { getCurrentRoundSnapshotQueryKey } from "../api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { getRoundXAppsQueryKey, useRoundXApps } from "../api/contracts/xApps/hooks/useRoundXApps"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
+import { getRoundsDatesQueryKey } from "./useGetRoundsDates"
 
 const EmissionsInterface = Emissions__factory.createInterface()
 const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
@@ -71,6 +75,10 @@ export const useStartRoundAndClaimWorkflow = ({ roundId, onSuccess }: UseStartRo
     const baseQueryKeys = [
       getCurrentAllocationsRoundIdQueryKey(),
       getAllocationsRoundsEventsQueryKey(),
+      getCurrentAllocationsRoundDeadlineQueryKey(),
+      getCurrentRoundSnapshotQueryKey(),
+      getAllocationsRoundStateQueryKey(Number(roundId)),
+      getRoundsDatesQueryKey(),
       currentBlockQueryKey(),
       getRoundXAppsQueryKey(currentRoundId ?? "0"),
       getAllocationAmountQueryKey(currentRoundId ?? "0"),

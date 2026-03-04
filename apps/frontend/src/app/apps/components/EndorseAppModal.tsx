@@ -1,165 +1,321 @@
-import { VStack, Heading, Box, Text, Button, Skeleton, Card, Image, RadioGroup } from "@chakra-ui/react"
+import { VStack, Heading, Text, Button, Skeleton, Card, Image, HStack, Progress, Circle } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
-import { ethers } from "ethers"
-import { t } from "i18next"
 import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
+import { useAppEndorsementScore } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
+import { useAppEndorsementStatus } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useMaxPointsPerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"
+import { useMaxPointsPerNodePerApp } from "@/api/contracts/xApps/hooks/endorsement/useMaxPointsPerNodePerApp"
+import { useGetUserNodes, UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
+import { NodeAppEndorsementInfo } from "@/app/nodes/components/NodeAppEndorsementInfo"
+import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
+import { PointsSelector } from "@/components/PointsSelector/PointsSelector"
+import { useEndorseApp } from "@/hooks/xApp/useEndorseApp"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
-import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
-import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
-import { useAppEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { useEndorseApp } from "../../../hooks/xApp/useEndorseApp"
-import { GenericAlert } from "../../components/Alert/GenericAlert"
+import { EndorsementStatusCallout } from "../[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   xApp: XApp | UnendorsedApp | undefined
 }
+
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
-  const { data: endorsementScore } = useAppEndorsementScore(xApp?.id ?? "")
   const { data: userNodesInfo, isLoading: isUserNodesLoading } = useGetUserNodes()
-  const nodesNotEndorsingApp = useMemo(() => {
-    return userNodesInfo?.nodesManagedByUser
-      .filter(node => node.endorsementScore > 0 && node.endorsedAppId === ethers.ZeroHash)
-      .sort((a, b) => Number(b.endorsementScore) - Number(a.endorsementScore))
-  }, [userNodesInfo])
+  const { data: endorsementScore } = useAppEndorsementScore(xApp?.id ?? "")
+  const { data: maxPointsPerNode } = useMaxPointsPerNodePerApp()
+  const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
+  const { status: endorsementStatus } = useAppEndorsementStatus(xApp?.id ?? "")
+
+  const [step, setStep] = useState<1 | 2>(1)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
+  const [points, setPoints] = useState<string>("0")
+
+  const appScore = Number(endorsementScore ?? 0)
+  const maxAppPoints = Number(maxPointsPerAppValue ?? 110)
+  const appRemainingPoints = BigInt(Math.max(0, maxAppPoints - appScore))
+
+  const allManagedNodes = useMemo(() => {
+    return userNodesInfo?.nodesManagedByUser?.sort((a, b) => Number(b.availablePoints) - Number(a.availablePoints))
+  }, [userNodesInfo])
+
+  const selectedNode = useMemo(() => {
+    if (!selectedNodeId || !allManagedNodes) return null
+    return allManagedNodes.find(node => node.id.toString() === selectedNodeId) ?? null
+  }, [selectedNodeId, allManagedNodes])
+
+  const getNodeRemainingPoints = useCallback(
+    (node: UserNode) => {
+      const cap = maxPointsPerNode ?? BigInt(49)
+      const currentForApp = node.activeEndorsements.find(e => e.appId === xApp?.id)?.points ?? BigInt(0)
+      const remainingNodeCap = cap - currentForApp
+      const available = node.availablePoints
+      const nodeMax = remainingNodeCap < available ? remainingNodeCap : available
+      return nodeMax < appRemainingPoints ? nodeMax : appRemainingPoints
+    },
+    [maxPointsPerNode, xApp?.id, appRemainingPoints],
+  )
+
+  const currentPointsForApp = useMemo(() => {
+    if (!selectedNode || !xApp?.id) return BigInt(0)
+    return selectedNode.activeEndorsements.find(e => e.appId === xApp.id)?.points ?? BigInt(0)
+  }, [selectedNode, xApp?.id])
+
+  const maxEndorsePoints = useMemo(() => {
+    if (!selectedNode) return BigInt(0)
+    const cap = maxPointsPerNode ?? BigInt(49)
+    const remainingNodeCap = cap - currentPointsForApp
+    const available = selectedNode.availablePoints
+    const nodeMax = remainingNodeCap < available ? remainingNodeCap : available
+    return nodeMax < appRemainingPoints ? nodeMax : appRemainingPoints
+  }, [selectedNode, maxPointsPerNode, currentPointsForApp, appRemainingPoints])
+
   const handleSuccess = useCallback(() => {
+    setStep(1)
+    setSelectedNodeId(null)
+    setPoints("0")
     onClose()
   }, [onClose])
+
   const endorseAppMutation = useEndorseApp({
     appId: xApp?.id ?? "",
     nodeId: selectedNodeId ?? "",
+    points,
     userAddress: account?.address ?? "",
     onSuccess: handleSuccess,
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Endorsement in progress..."),
+      },
+      success: {
+        title: t("Endorsement successful"),
+      },
+      error: {
+        title: t("Error endorsing app"),
+      },
+    },
   })
 
-  const appScore = useMemo(() => Number(endorsementScore ?? 0), [endorsementScore])
+  const handleClose = useCallback(() => {
+    setStep(1)
+    setSelectedNodeId(null)
+    setPoints("0")
+    onClose()
+  }, [onClose])
 
-  const selectedNode = useMemo(() => {
-    if (!selectedNodeId || !nodesNotEndorsingApp) return null
-    return nodesNotEndorsingApp.find(node => node.id.toString() === selectedNodeId)
-  }, [selectedNodeId, nodesNotEndorsingApp])
+  const handleNodeSelect = useCallback((value: string | null) => {
+    setSelectedNodeId(value)
+  }, [])
 
-  const selectedNodeScore = useMemo(() => {
-    return Number(selectedNode?.endorsementScore ?? 0)
-  }, [selectedNode])
+  const handleNextStep = useCallback(() => {
+    if (selectedNodeId) setStep(2)
+  }, [selectedNodeId])
 
-  const newScore = appScore + selectedNodeScore
+  const handleBack = useCallback(() => {
+    setStep(1)
+    setPoints("0")
+  }, [])
 
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.sendTransaction()
   }, [endorseAppMutation])
 
-  const shouldDisplayCooldownAlert = useMemo(() => {
-    const selectedNode = nodesNotEndorsingApp?.find(node => node.id.toString() === selectedNodeId)
-    return account?.address && selectedNode && !selectedNode?.isOnCooldown
-  }, [account, selectedNodeId, nodesNotEndorsingApp])
+  const isEndorseDisabled = Number(points) <= 0
 
   return (
-    <BaseModal
-      isOpen={isOpen && !isTxModalOpen}
-      onClose={() => {
-        setSelectedNodeId(null)
-        onClose()
-      }}>
-      <VStack gap={6} align="flex-start" w="full">
-        <Heading size="xl" fontWeight="bold">
-          {t("Endorse {{appName}} app", { appName: xApp?.name })}
-        </Heading>
+    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
+      {step === 1 ? (
+        <VStack gap={6} align="flex-start" w="full">
+          <Heading size="xl" fontWeight="bold" lineClamp={1}>
+            {t("Endorse {{appName}}", { appName: xApp?.name })}
+          </Heading>
 
-        <Text
-          as="span"
-          textTransform="none"
-          fontWeight="normal"
-          whiteSpace="normal"
-          wordBreak="break-word"
-          flexWrap="wrap"
-          textStyle="sm">
-          {t("Select your node")}
-        </Text>
-
-        <VStack w="full" alignItems="stretch" gap={4}>
-          <RadioGroup.Root onValueChange={details => setSelectedNodeId(details.value)} value={selectedNodeId}>
-            <VStack w="full" gap={4} alignItems="stretch">
-              {nodesNotEndorsingApp?.map((node: any) => (
-                <Card.Root
-                  key={node.nodeId}
-                  variant="outline"
-                  alignItems="flex-start"
-                  flexDirection="row"
-                  gap="8px"
-                  p="16px"
-                  rounded="8px">
-                  <Card.Header p="0">
-                    <Image src={node?.metadata?.image} alt={node?.metadata?.name} boxSize="62px" rounded="8px" />
-                  </Card.Header>
-
-                  <RadioGroup.Item
-                    value={node.id.toString()}
-                    flex={1}
-                    justifyContent="space-between"
-                    alignItems="center"
-                    flexDirection="row">
-                    <Card.Body p="0" gap="0">
-                      <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-                        {t("Node")}
-                      </Text>
-                      <Text lineHeight={1.6} lineClamp={1}>
-                        {`${node.metadata?.name} #${node.id}`}
-                      </Text>
-                      <Box w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                        <Text textStyle="xs" _dark={{ color: "#FFFFFFB2" }}>
-                          {t("{{value}} points", { value: node.endorsementScore.toString() })}
-                        </Text>
-                      </Box>
-                    </Card.Body>
-                    <Card.Footer p="0">
-                      <RadioGroup.ItemHiddenInput />
-                      <RadioGroup.ItemIndicator />
-                    </Card.Footer>
-                  </RadioGroup.Item>
-                </Card.Root>
-              ))}
-            </VStack>
-          </RadioGroup.Root>
-
-          <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
-            {t("Current app score: {{score}}", { score: appScore })}
-            <br />
-            {t("App score after endorsement: {{score}}", { score: newScore })}
+          <Text textStyle="lg" fontWeight="semibold">
+            {t("Select node")}
           </Text>
-        </VStack>
 
-        {shouldDisplayCooldownAlert ? (
-          <GenericAlert
-            type="warning"
-            isLoading={roundInfoLoading}
-            message={t(
-              "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
-              {
-                roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-              },
-            )}
-          />
-        ) : null}
+          <VStack w="full" alignItems="stretch" gap={3}>
+            <Skeleton loading={isUserNodesLoading}>
+              <VStack w="full" gap={3} alignItems="stretch" maxH="400px" overflowY="auto">
+                {allManagedNodes?.map((node: UserNode) => {
+                  const nodeId = node.id.toString()
+                  const isSelected = selectedNodeId === nodeId
+                  const remaining = getNodeRemainingPoints(node)
+                  const appAtMaxCapacity = appRemainingPoints <= BigInt(0)
+                  const disabled = remaining <= BigInt(0) || appAtMaxCapacity
+                  const noAvailablePoints = node.availablePoints <= BigInt(0)
+                  const usedPoints = node.endorsementScore - node.availablePoints
+                  const totalPoints = node.endorsementScore
+                  const progressPercent = totalPoints > 0 ? Number((usedPoints * BigInt(100)) / totalPoints) : 0
 
-        <Skeleton w="full" loading={isUserNodesLoading}>
-          <Button variant={"primary"} w={"full"} onClick={handleEndorsement} disabled={!selectedNodeId}>
-            {t("Endorse now")}
+                  return (
+                    <Card.Root
+                      key={nodeId}
+                      variant="outline"
+                      p={4}
+                      rounded="xl"
+                      cursor={disabled ? "not-allowed" : "pointer"}
+                      opacity={disabled ? 0.5 : 1}
+                      borderColor={isSelected ? "actions.primary.default" : undefined}
+                      onClick={() => !disabled && handleNodeSelect(nodeId)}>
+                      <VStack w="full" gap={3}>
+                        <HStack w="full" justifyContent="space-between" alignItems="center" gap={4}>
+                          <HStack gap={3} flex={1}>
+                            <Circle
+                              size={5}
+                              borderWidth={2}
+                              borderColor={isSelected ? "actions.primary.default" : "border.primary"}
+                              bg={isSelected ? "actions.primary.default" : "transparent"}
+                              flexShrink={0}
+                            />
+                            <Image
+                              src={node.metadata?.image}
+                              alt={node.metadata?.name}
+                              boxSize="44px"
+                              rounded="lg"
+                              objectFit="cover"
+                            />
+                            <VStack gap={1} align="start">
+                              <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                                {node.metadata?.name}
+                              </Text>
+                              <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
+                                {node.type}
+                                {" #"}
+                                {nodeId}
+                              </Text>
+                            </VStack>
+                          </HStack>
+                          <VStack gap={2} align="end" minW="270px" display={{ base: "none", md: "flex" }}>
+                            <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold">
+                              <HStack gap={1}>
+                                <Text color="text.subtle">{t("Used points:")}</Text>
+                                <Text>{usedPoints.toString()}</Text>
+                              </HStack>
+                              <HStack gap={1}>
+                                <Text color="text.subtle">{t("Available points:")}</Text>
+                                <Text>{node.availablePoints.toString()}</Text>
+                              </HStack>
+                            </HStack>
+                            <Progress.Root value={progressPercent} w="full" size="xs" colorPalette="green">
+                              <Progress.Track borderRadius="full">
+                                <Progress.Range borderRadius="full" />
+                              </Progress.Track>
+                            </Progress.Root>
+                            {disabled && (
+                              <Text textStyle="xs" color="fg.error">
+                                {appAtMaxCapacity
+                                  ? t("App has reached maximum endorsement points")
+                                  : noAvailablePoints
+                                    ? t("No available points")
+                                    : t("Max points reached for this app")}
+                              </Text>
+                            )}
+                          </VStack>
+                        </HStack>
+                        <VStack gap={2} align="stretch" w="full" display={{ base: "flex", md: "none" }}>
+                          <HStack w="full" justify="space-between" textStyle="sm" fontWeight="semibold">
+                            <HStack gap={1}>
+                              <Text color="text.subtle">{t("Used points:")}</Text>
+                              <Text>{usedPoints.toString()}</Text>
+                            </HStack>
+                            <HStack gap={1}>
+                              <Text color="text.subtle">{t("Available points:")}</Text>
+                              <Text>{node.availablePoints.toString()}</Text>
+                            </HStack>
+                          </HStack>
+                          <Progress.Root value={progressPercent} w="full" size="xs" colorPalette="green">
+                            <Progress.Track borderRadius="full">
+                              <Progress.Range borderRadius="full" />
+                            </Progress.Track>
+                          </Progress.Root>
+                          {disabled && (
+                            <Text textStyle="xs" color="fg.error">
+                              {appAtMaxCapacity
+                                ? t("App has reached maximum endorsement points")
+                                : noAvailablePoints
+                                  ? t("No available points")
+                                  : t("Max points reached for this app")}
+                            </Text>
+                          )}
+                        </VStack>
+                      </VStack>
+                    </Card.Root>
+                  )
+                })}
+              </VStack>
+            </Skeleton>
+          </VStack>
+
+          <Button variant="primary" w="full" onClick={handleNextStep} disabled={!selectedNodeId}>
+            {t("Continue")}
           </Button>
-        </Skeleton>
-      </VStack>
+        </VStack>
+      ) : (
+        <VStack gap={6} align="flex-start" w="full">
+          <Heading size="xl" fontWeight="bold" lineClamp={1}>
+            {t("Endorse {{appName}}", { appName: xApp?.name })}
+          </Heading>
+
+          <NodeAppEndorsementInfo node={selectedNode} currentPoints={currentPointsForApp} />
+
+          <Card.Root variant="outline" w="full" p={6} rounded="xl">
+            <VStack gap={2} align="stretch">
+              <HStack justify="space-between" align="center">
+                <HStack gap={3}>
+                  <AppImage appId={xApp?.id ?? ""} boxSize="44px" borderRadius="lg" />
+                  <VStack gap={0.5} align="start">
+                    <Text textStyle="md" fontWeight="semibold" lineClamp={1}>
+                      {xApp?.name}
+                    </Text>
+                    <HStack gap={2}>
+                      <EndorsementStatusCallout
+                        endorsementStatus={endorsementStatus}
+                        showDescription={false}
+                        padding={1}
+                        boxSize={4}
+                        textStyle="xs"
+                      />
+                    </HStack>
+                  </VStack>
+                </HStack>
+
+                <VStack gap={0.5} align="end">
+                  <Text textStyle="md" color="text.subtle">
+                    {t("Score")}
+                  </Text>
+                  <Text textStyle="md" fontWeight="semibold">
+                    {appScore} {" / "} {maxAppPoints} {t("pts")}
+                  </Text>
+                </VStack>
+              </HStack>
+
+              <VStack gap={2} align="stretch" mt={6}>
+                <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
+                  {t("Add points")}
+                </Text>
+                <PointsSelector value={points} onChange={setPoints} max={Number(maxEndorsePoints)} />
+              </VStack>
+            </VStack>
+          </Card.Root>
+
+          <HStack gap={4} justify="stretch" w="full" align="center" p={0}>
+            <Button variant="secondary" flex={1} onClick={handleBack}>
+              {t("Back")}
+            </Button>
+            <Button variant="primary" flex={1} onClick={handleEndorsement} disabled={isEndorseDisabled}>
+              {t("Endorse now")}
+            </Button>
+          </HStack>
+        </VStack>
+      )}
     </BaseModal>
   )
 }

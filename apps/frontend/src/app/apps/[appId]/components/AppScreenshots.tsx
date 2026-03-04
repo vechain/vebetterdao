@@ -17,7 +17,7 @@ export const AppScreenshots = () => {
     <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={4}>
-          <Heading size="2xl">{t("Screenshots")}</Heading>
+          <Heading size="xl">{t("Screenshots")}</Heading>
           <Box overflowX="auto" gap={4} whiteSpace={"nowrap"} onClick={onOpen} cursor={"pointer"}>
             {screenshots.map((screenshot, index) => (
               <Box

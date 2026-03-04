@@ -1351,6 +1351,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Retrieve account overview with VTHO earnings
+         * @description Retrieves the account overview including VTHO earned from three sources:
+         *                 - Block rewards (pre-Hayabusa authority nodes + post-Hayabusa validators)
+         *                 - Passive VTHO generation from VET holdings (genesis to Hayabusa only)
+         *                 - Stargate VTHO claimed (delegation rewards)
+         *
+         *                 The response includes individual breakdowns and a computed total.
+         */
         get: operations["getOverview"];
         put?: never;
         post?: never;
@@ -1592,16 +1601,6 @@ export interface components {
             data: components["schemas"]["HistoricProposals"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
-        Decimal128: {
-            /** Format: int64 */
-            high?: number;
-            /** Format: int64 */
-            low?: number;
-            infinite?: boolean;
-            finite?: boolean;
-            naN?: boolean;
-            negative?: boolean;
-        };
         PaginatedResponseValidator: {
             data: components["schemas"]["Validator"][];
             pagination: components["schemas"]["PaginationDetail"];
@@ -1617,34 +1616,34 @@ export interface components {
             beneficiary?: string;
             /** @enum {string} */
             status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
-            vetStaked?: components["schemas"]["Decimal128"];
-            validatorVetStaked?: components["schemas"]["Decimal128"];
-            delegatorVetStaked?: components["schemas"]["Decimal128"];
-            queuedVetStaked?: components["schemas"]["Decimal128"];
-            validatorQueuedVetStaked?: components["schemas"]["Decimal128"];
-            delegatorQueuedVetStaked?: components["schemas"]["Decimal128"];
-            validatorExitingVetStaked?: components["schemas"]["Decimal128"];
-            delegatorExitingVetStaked?: components["schemas"]["Decimal128"];
-            exitingVetStaked?: components["schemas"]["Decimal128"];
+            vetStaked?: number;
+            validatorVetStaked?: number;
+            delegatorVetStaked?: number;
+            queuedVetStaked?: number;
+            validatorQueuedVetStaked?: number;
+            delegatorQueuedVetStaked?: number;
+            validatorExitingVetStaked?: number;
+            delegatorExitingVetStaked?: number;
+            exitingVetStaked?: number;
             /** Format: int64 */
             cycleEndBlock?: number;
-            totalRewards?: components["schemas"]["Decimal128"];
-            blockProbability?: components["schemas"]["Decimal128"];
-            blocksPerEpoch?: components["schemas"]["Decimal128"];
-            totalTvl?: components["schemas"]["Decimal128"];
-            validatorTvl?: components["schemas"]["Decimal128"];
-            delegatorTvl?: components["schemas"]["Decimal128"];
-            validatorTvlPercentage?: components["schemas"]["Decimal128"];
-            tvlBasedYield?: components["schemas"]["Decimal128"];
-            validatorYield?: components["schemas"]["Decimal128"];
-            avgDelegatorYield?: components["schemas"]["Decimal128"];
-            nextCycleTvlBasedYield?: components["schemas"]["Decimal128"];
-            nextCycleValidatorYield?: components["schemas"]["Decimal128"];
-            nextCycleAvgDelegatorYield?: components["schemas"]["Decimal128"];
+            totalRewards?: number;
+            blockProbability?: number;
+            blocksPerEpoch?: number;
+            totalTvl?: number;
+            validatorTvl?: number;
+            delegatorTvl?: number;
+            validatorTvlPercentage?: number;
+            tvlBasedYield?: number;
+            validatorYield?: number;
+            avgDelegatorYield?: number;
+            nextCycleTvlBasedYield?: number;
+            nextCycleValidatorYield?: number;
+            nextCycleAvgDelegatorYield?: number;
             nftYieldsNextCycle?: {
-                [key: string]: components["schemas"]["Decimal128"];
+                [key: string]: number;
             };
-            totalWeight?: components["schemas"]["Decimal128"];
+            totalWeight?: number;
             online?: boolean;
             /** Format: int64 */
             completedPeriods?: number;
@@ -1652,8 +1651,8 @@ export interface components {
             startBlock?: number;
             /** Format: int64 */
             cyclePeriodLength?: number;
-            blocksPerYear?: components["schemas"]["Decimal128"];
-            percentageOffline?: components["schemas"]["Decimal128"];
+            blocksPerYear?: number;
+            percentageOffline?: number;
             /** Format: int64 */
             offlineBlocks?: number;
             /** Format: int64 */
@@ -2253,7 +2252,7 @@ export interface components {
             /** Format: int64 */
             year?: number;
         };
-        AccountOverview: {
+        AccountOverviewResponse: {
             address: string;
             /** Format: int64 */
             firstSeen: number;
@@ -2268,6 +2267,11 @@ export interface components {
             gasUsed: number;
             vetSent: number;
             vetReceived: number;
+            vetBalance: number;
+            vthoBlockRewards: number;
+            vthoPassiveGeneration: number;
+            vthoClaimedStargate: number;
+            vthoEarnedTotal: number;
         };
         VetBalance: {
             /** Format: int64 */
@@ -3208,6 +3212,18 @@ export interface operations {
             query?: {
                 address?: string;
                 tokenAddress?: string;
+                /** @description Filter by transfer event type(s) */
+                eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -3283,6 +3299,18 @@ export interface operations {
             query: {
                 address: string;
                 tokenAddress?: string;
+                /** @description Filter by transfer event type(s) */
+                eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -3441,6 +3469,18 @@ export interface operations {
             query: {
                 address: string;
                 tokenAddress?: string;
+                /** @description Filter by transfer event type(s) */
+                eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -7025,7 +7065,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AccountOverview"];
+                    "*/*": components["schemas"]["AccountOverviewResponse"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */

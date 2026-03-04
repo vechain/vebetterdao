@@ -1,25 +1,12 @@
 const notFoundImage = "/assets/images/image-not-found.webp"
-import {
-  Button,
-  Card,
-  Separator,
-  Flex,
-  HStack,
-  Heading,
-  Image,
-  Link,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
-import { UilArrowUpRight, UilExternalLinkAlt } from "@iconscout/react-unicons"
+import { Button, Card, Flex, HStack, Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { UilExternalLinkAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+import { useAppEarnings } from "@/api/indexer/xallocations/useAppEarnings"
+
 import { XAppStatus } from "../../../../../types/appDetails"
 import { useCurrentAppBanner } from "../../hooks/useCurrentAppBanner"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
@@ -28,11 +15,9 @@ import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
 import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
-import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { AppDetailSocials } from "./components/AppDetailSocials"
-import { AppReceiverAddress } from "./components/AppReceiverAddress"
-import { DistributionStrategyModal } from "./components/DistributionStrategyModal"
 import { EditAppPageButton } from "./components/EditAppPageButton"
+
 export const AppDetailOverview = ({
   endorsementStatus,
   isEndorsementStatusLoading,
@@ -45,12 +30,11 @@ export const AppDetailOverview = ({
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
-  const {
-    open: isDistributionStrategyModalOpen,
-    onOpen: onDistributionStrategyModalOpen,
-    onClose: onDistributionStrategyModalClose,
-  } = useDisclosure()
-  const { isMobile } = useBreakpoints()
+  const { data: earningsData } = useAppEarnings(app?.id ?? "")
+  const firstRoundId = useMemo(() => {
+    if (!earningsData || !Array.isArray(earningsData) || earningsData.length === 0) return undefined
+    return Math.min(...earningsData.map(e => e.roundId))
+  }, [earningsData])
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -58,16 +42,9 @@ export const AppDetailOverview = ({
     }
   }, [appMetadata?.external_url])
 
-  const showEndorsementStatusCallout = useMemo(() => {
-    return endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && endorsementStatus !== XAppStatus.BLACKLISTED
-  }, [endorsementStatus])
-
   return (
     <>
       <VStack gap={4} align="stretch">
-        {showEndorsementStatusCallout && !isEndorsementStatusLoading && (
-          <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
-        )}
         <Card.Root variant="primary">
           <Card.Body>
             <VStack align="stretch" gap={4}>
@@ -100,6 +77,10 @@ export const AppDetailOverview = ({
                             {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                           </Heading>
                         </Skeleton>
+                        <HStack gap={2}>
+                          <EditAppPageButton />
+                          <AdminAppPageButton />
+                        </HStack>
                       </HStack>
                       <Skeleton loading={isEndorsementStatusLoading} alignSelf={["flex-start", "flex-start", "center"]}>
                         <EndorsementStatusCallout
@@ -125,71 +106,41 @@ export const AppDetailOverview = ({
                       gap={[4, 4, 10]}
                       w={{ base: "full", md: "auto" }}
                       justifyContent={{ base: "space-between", md: "flex-start" }}>
-                      <AppReceiverAddress />
-
-                      <Separator hideFrom="md" />
-
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
                           <Text textStyle={"sm"} color="text.subtle">
                             {t("Member since")}
                           </Text>
-                          <Text textStyle={"md"}>
-                            {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
-                          </Text>
+                          <HStack>
+                            <Text textStyle={"md"}>
+                              {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
+                            </Text>
+                            {firstRoundId != null && (
+                              <Text textStyle={"md"}>
+                                {"("}
+                                {t("Round #{{round}}", { round: firstRoundId.toString() })}
+                                {")"}
+                              </Text>
+                            )}
+                          </HStack>
                         </VStack>
                       )}
-                      {appMetadata?.distribution_strategy ? (
-                        <VStack align="flex-start" justify={"flex-start"}>
-                          <Text textStyle={"sm"} color="text.subtle">
-                            {t("Distribution Strategy")}
-                          </Text>
-                          <Link
-                            textStyle="md"
-                            fontWeight="semibold"
-                            color="actions.secondary.text-lighter"
-                            onClick={onDistributionStrategyModalOpen}>
-                            {t("View Details")}
-                            <UilArrowUpRight />
-                          </Link>
-                        </VStack>
-                      ) : null}
                     </Stack>
-                    <HStack
-                      justifyContent={{ base: "space-between", md: "flex-end" }}
+                    <Button
+                      variant={"primary"}
+                      onClick={goToWebsite}
                       w={{ base: "full", md: "auto" }}
                       mt={{ base: 4, md: 0 }}>
-                      {!isMobile && (
-                        <>
-                          <EditAppPageButton />
-                          <AdminAppPageButton />
-                        </>
-                      )}
-                      <Button flex={1} variant={"primary"} onClick={goToWebsite}>
-                        {t("Go to Website")}
-                        <UilExternalLinkAlt color="white" size={"16px"} />
-                      </Button>
-                      {isMobile && (
-                        <>
-                          <EditAppPageButton />
-                          <AdminAppPageButton />
-                        </>
-                      )}
-                    </HStack>
+                      {t("Go to Website")}
+                      <UilExternalLinkAlt color="white" size={"16px"} />
+                    </Button>
                   </Stack>
                 </VStack>
-                <AppDetailAllocationInfo />
               </Flex>
             </VStack>
           </Card.Body>
         </Card.Root>
       </VStack>
-      <DistributionStrategyModal
-        isOpen={isDistributionStrategyModalOpen}
-        onClose={onDistributionStrategyModalClose}
-        // TODO: migration add distribution_strategy to XAppMetadata in vechain-kit
-        distributionStrategy={appMetadata?.distribution_strategy ?? ""}
-      />
     </>
   )
 }

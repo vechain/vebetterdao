@@ -3,11 +3,14 @@ import { UilPlus } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
+import { useIsSelfMintEnabled } from "@/api/contracts/x2EarnCreator/useIsSelfMintEnabled"
+
 import { SubmitCreatorFormModal } from "../SubmitCreatorFormModal"
 
 export const CreatorApplyNow = () => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { data: isSelfMintEnabled } = useIsSelfMintEnabled()
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
   }
@@ -17,9 +20,10 @@ export const CreatorApplyNow = () => {
       <Card.Root
         variant="primary"
         w="full"
+        h="full"
         rounded="20px"
         p={0}
-        borderColor="rgba(154, 225, 77, 0.1)"
+        border="none"
         backgroundImage={`url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239AE14DFF' stroke-width='4' stroke-dasharray='16%2c 18%2c 13%2c 24' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e")`}>
         <Card.Body position="relative">
           <Stack direction={{ base: "row", lg: "row" }} align="stretch" gap={0}>
@@ -28,9 +32,10 @@ export const CreatorApplyNow = () => {
               <Image
                 src="/assets/mascot/mascot-welcoming@2x.webp"
                 alt="mascot-welcoming"
-                w={{ base: "full", md: "300px", lg: "200px" }}
+                w={{ base: "full", md: "300px", lg: "165px" }}
                 objectFit="cover"
-                borderRadius="9px"
+                objectPosition="right"
+                borderRadius="20px"
               />
             </Box>
             {/* Right Section: Content */}
@@ -51,7 +56,7 @@ export const CreatorApplyNow = () => {
                 textStyle="md"
                 fontWeight="semibold"
                 borderRadius="full"
-                onClick={onOpen}
+                onClick={isSelfMintEnabled ? () => router.push("/apps/new") : onOpen}
                 flexShrink={0}
                 w={{ base: "full", lg: "auto" }}>
                 <UilPlus />

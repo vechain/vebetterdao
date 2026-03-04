@@ -1,4 +1,4 @@
-import { VStack, Heading, Text, Box, HStack, useMediaQuery, Card } from "@chakra-ui/react"
+import { VStack, Heading, Box, HStack, useMediaQuery, Card } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
@@ -16,7 +16,6 @@ import { AllApps } from "./allApps/AllApps"
 import { AppsDisclaimer } from "./AppsDisclaimer"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
-import { UnendorsedAppCard } from "./UnendorsedAppCard"
 
 export type XAppInformations = {
   key?: string
@@ -62,27 +61,6 @@ export const AppsPageContent = () => {
   return (
     <VStack alignItems={"flex-start"} position={"relative"} gap={8} w="full">
       <AppsBanner />
-
-      {!isXNodeLoading && isEndorsingApp && (
-        <Card.Root variant="primary" gap="4">
-          <VStack alignItems={"flex-start"}>
-            <Heading size="2xl">{t("Your endorsed apps")}</Heading>
-            <Text color="text.subtle">
-              {t("With your Node, you endorse apps to allow them to participate in governance")}
-            </Text>
-          </VStack>
-          <VStack gap={4} alignItems="stretch">
-            {endorsedApps?.map(endorsedApp => (
-              <UnendorsedAppCard
-                key={endorsedApp.endorsedApp.id}
-                appId={endorsedApp.endorsedApp.id}
-                isNewApp={endorsedApp.endorsedApp.isNew}
-                layout="endorser"
-              />
-            ))}
-          </VStack>
-        </Card.Root>
-      )}
 
       {hasLookingForEndorsementApps && <AppsLookingForEndorsement filteredApps={newLookingForEndorsementApps} />}
 

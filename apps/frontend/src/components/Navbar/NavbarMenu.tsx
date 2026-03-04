@@ -3,6 +3,7 @@ import { Button, Icon, HoverCard, Portal, Text, useMediaQuery, VStack, Collapsib
 import { motion } from "framer-motion"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FaChevronDown } from "react-icons/fa6"
 
 import { Route } from "./Routes"
@@ -35,6 +36,7 @@ const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () 
   onMenuClick?.()
 }
 const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: boolean }) => {
+  const { t } = useTranslation()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   return (
@@ -47,7 +49,8 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
       <HoverCard.Trigger asChild>
         <Button w={{ base: "full", md: "auto" }} variant={selected ? "subtle" : "ghost"} rounded="full">
           <Text textStyle="sm" fontWeight={selected ? "bold" : "normal"}>
-            {route.name}
+            {/* @ts-expect-error dynamic translation key */}
+            {t(route.name)}
           </Text>
           <Icon
             size="xs"
@@ -83,8 +86,10 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
                       handleClick(subRoute, router)()
                       setIsOpen(false)
                     }}>
-                    <Text textStyle={"md"}>{subRoute.name}</Text>
-                    <Text textStyle={"sm"}>{subRoute.description}</Text>
+                    {/* @ts-expect-error dynamic translation key */}
+                    <Text textStyle={"md"}>{t(subRoute.name)}</Text>
+                    {/* @ts-expect-error dynamic translation key */}
+                    <Text textStyle={"sm"}>{subRoute.description && t(subRoute.description)}</Text>
                   </VStack>
                 )
               })}
@@ -105,17 +110,19 @@ const MobileAccordionWithSubRoutes = ({
   selected: boolean
   onMenuClick?: () => void
 }) => {
+  const { t } = useTranslation()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(selected)
 
   return (
-    <VStack w="full" align="stretch" p={0}>
+    <VStack w="full" align="stretch" p={0} ml="-5px">
       <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
         <Collapsible.Trigger asChild>
           <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
             <HStack w="full" gap={3}>
               <Icon as={route.icon} color="text.subtle" size={"2xl"} />
-              <Text textStyle="lg">{route.name}</Text>
+              {/* @ts-expect-error dynamic translation key */}
+              <Text textStyle="lg">{t(route.name)}</Text>
             </HStack>
             <Icon
               size="xs"
@@ -143,7 +150,8 @@ const MobileAccordionWithSubRoutes = ({
                   flexDirection="column"
                   textAlign="left"
                   onClick={handleClick(subRoute, router, onMenuClick)}>
-                  <Text textStyle="sm">{subRoute.name}</Text>
+                  {/* @ts-expect-error dynamic translation key */}
+                  <Text textStyle="sm">{t(subRoute.name)}</Text>
                 </Button>
               )
             })}
@@ -155,6 +163,7 @@ const MobileAccordionWithSubRoutes = ({
 }
 
 export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
+  const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
@@ -186,7 +195,8 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           data-testid={selected ? "current-section" : ""}
           px="4"
           py="2">
-          {route.name}
+          {/* @ts-expect-error dynamic translation key */}
+          {t(route.name)}
         </Button>
       )
     }
@@ -212,7 +222,8 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         gap={4}>
         <Icon as={route.icon} color="text.subtle" size={"xl"} />
         <Text textAlign="left" textStyle="lg">
-          {route.name}
+          {/* @ts-expect-error dynamic translation key */}
+          {t(route.name)}
         </Text>
       </Button>
     )
@@ -223,7 +234,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
       {isLargerThan1200 ? (
         routesToRender.map(renderRoute)
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" gap="2" pt={5} w="full">
+        <MotionVStack initial={"hidden"} animate="visible" gap="6" pt={5} w="full">
           {routesToRender.map(renderRoute)}
         </MotionVStack>
       )}

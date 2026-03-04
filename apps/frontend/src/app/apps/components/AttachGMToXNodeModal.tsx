@@ -1,14 +1,14 @@
-import { Alert, Box, Button, Flex, Heading, Stack, Text, useBreakpointValue, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { v4 as uuid } from "uuid"
 
 import { BaseModal } from "@/components/BaseModal"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
 import { Tooltip } from "@/components/ui/tooltip"
+import { gmNfts } from "@/constants/gmNfts"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
@@ -39,6 +39,8 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
   const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
   const isNoAffectAttachment = !hasValidNode || (gm ? String(gm?.tokenLevel) === levelAfterAttaching : true)
+  const levelAfterName = gmNfts.find(nft => nft.level === levelAfterAttaching)?.name
+  const levelAfterMultiplier = gmNfts.find(nft => nft.level === levelAfterAttaching)?.multiplier
 
   const handleClose = useCallback(() => {
     onClose()
@@ -55,23 +57,26 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
     attachGMToXNodeMutation.sendTransaction()
   }, [attachGMToXNodeMutation])
 
-  const iconSize = useBreakpointValue({ base: "48px", md: "108px" })
-
   const steps = [
     {
       Icon: ThreeTokensIcon,
-      title: t("Attach"),
-      description: t("Combine your GM NFT with your Node."),
+      title: t("Attach your Node"),
+      description: t("Link your VeChain Node to your GM NFT to unlock a free level upgrade."),
     },
     {
       Icon: CurveArrowIcon,
-      title: t("Free upgrade"),
-      description: t("Your GM NFT will be level {{value}} after attaching.", { value: levelAfterAttaching }),
+      title: t("Free upgrade to {{name}}", { name: levelAfterName }),
+      description: t("Your GM NFT will jump to level {{level}} ({{name}}) — no B3TR required.", {
+        level: levelAfterAttaching,
+        name: levelAfterName,
+      }),
     },
     {
       Icon: ThreeSparklesIcon,
-      title: t("Earn more rewards!"),
-      description: t("You’ll have the reward multiplier of the level you upgrade to!"),
+      title: t("Earn {{multiplier}}x rewards", { multiplier: levelAfterMultiplier }),
+      description: t(
+        "A higher level means a bigger share of the GM Rewards Pool, which distributes 5% of weekly B3TR emissions to voters.",
+      ),
     },
   ]
 
@@ -79,46 +84,44 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
     <BaseModal
       isOpen={isOpen && !isTxModalOpen}
       onClose={handleClose}
-      ariaTitle={t("Attaching Node to GM NFT")}
+      ariaTitle={t("Attach Node to GM NFT")}
       showCloseButton={true}
-      modalProps={{ size: "xl" }}
+      modalProps={{ size: "md" }}
       modalBodyProps={{ p: { base: 3, md: 5 } }}>
       <VStack align="stretch" gap={6}>
-        <Heading textStyle="lg">{t("Attaching Node to GM NFT")}</Heading>
+        <Heading textStyle="lg">{t("Attach Node to GM NFT")}</Heading>
 
         <VStack align="stretch" gap={4}>
-          <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
-          <Stack align="stretch" direction={["column", "column", "row"]}>
+          <Text textStyle="sm" color="text.subtle">
+            {t(
+              "VeChain Node holders can upgrade their GM NFT for free. Higher GM levels increase your reward weight, meaning you earn more B3TR when you vote.",
+            )}
+          </Text>
+          <VStack align="stretch" gap={3}>
             {steps.map((step, index) => (
               <VStack
-                key={`step-${uuid()}`}
+                key={index}
                 flex={1}
-                bg="#FAFAFA"
-                p={[3, 3, 6]}
-                borderRadius={["xl", "xl", "3xl"]}
+                bg="bg.subtle"
+                p={{ base: 3, md: 6 }}
+                borderRadius={{ base: "xl", md: "3xl" }}
                 align="stretch">
-                <Stack align="stretch" direction={["row", "row", "column"]}>
-                  <Flex flexBasis={["48px", "48px", "108px"]}>
-                    <step.Icon size={iconSize} />
-                  </Flex>
-                  <VStack align="flex-start" gap={[0, 0, 2]}>
-                    <Text textStyle="xs" color="text.subtle">
-                      {t("STEP {{value}}", { value: index + 1 })}
-                    </Text>
-                    <Text textStyle="xl" color="#1E1E1E">
-                      {step.title}
-                    </Text>
-                    <Text hideBelow="md" textStyle="sm" color="text.subtle">
-                      {step.description}
-                    </Text>
-                  </VStack>
-                </Stack>
+                <VStack align="flex-start" gap={{ base: 0, md: 2 }}>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("STEP {{value}}", { value: index + 1 })}
+                  </Text>
+                  <Text textStyle="xl">{step.title}</Text>
+                  <Text hideBelow="md" textStyle="sm" color="text.subtle">
+                    {step.description}
+                  </Text>
+                </VStack>
+
                 <Text hideFrom="md" textStyle="sm" color="text.subtle">
                   {step.description}
                 </Text>
               </VStack>
             ))}
-          </Stack>
+          </VStack>
         </VStack>
 
         <VStack align="stretch" w="full">
@@ -126,14 +129,16 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
             <Alert.Indicator w={5} h={5} />
             <Box textStyle="sm">
               <Alert.Description as="span">
-                {t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}
+                {t(
+                  "Once attached, the GM NFT becomes non-transferable. You can detach it later, but your GM level may decrease.",
+                )}
               </Alert.Description>
             </Box>
           </Alert.Root>
 
           <Tooltip
             disabled={!isNoAffectAttachment}
-            content={<Text>{t("This feature is available only to nodes that provide free upgrade to GM NFTs.")}</Text>}>
+            content={t("This node does not provide a free upgrade for your current GM level.")}>
             <span>
               <Button
                 loading={isLoadingUserGMs}
@@ -142,7 +147,6 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
                 w={"full"}
                 onClick={handleAttachment}>
                 <UilLink />
-
                 {t("Attach now!")}
               </Button>
             </span>

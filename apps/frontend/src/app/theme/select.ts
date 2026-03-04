@@ -5,6 +5,29 @@ export const selectSlotRecipe = defineSlotRecipe({
   slots: selectAnatomy.keys(),
   variants: {
     variant: {
+      ghost: {
+        trigger: {
+          color: "text.subtle",
+          bg: "transparent",
+          border: "none",
+          _hover: { bg: "card.hover" },
+        },
+        indicatorGroup: {
+          color: "gray.400",
+          _dark: {
+            color: "gray.300",
+          },
+        },
+        item: {
+          _hover: {
+            bg: "bg.secondary",
+          },
+          _selected: {
+            bg: "bg.secondary",
+          },
+          borderRadius: "lg",
+        },
+      },
       filled: {
         trigger: {
           color: "text.subtle",
