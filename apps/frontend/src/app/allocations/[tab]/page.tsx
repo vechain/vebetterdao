@@ -65,6 +65,16 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
 
   if (tab !== "" && tab !== "vote" && tab !== "round") return redirect("/allocations")
 
+  const roundDetails = await getCachedRoundData(parseRoundId(roundIdParam))
+  const isCurrentRound = roundDetails.currentRoundId === roundDetails.id
+
+  // Past rounds only show round info — redirect vote tab to round tab
+  if (!isCurrentRound && tab === "vote") {
+    const params = new URLSearchParams()
+    if (roundIdParam) params.set("roundId", roundIdParam)
+    return redirect(`/allocations/round?${params.toString()}`)
+  }
+
   const tabFallback =
     tab === "round" ? (
       <Tabs.Content value="round">
@@ -81,7 +91,7 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
       <Suspense key={roundIdParam ?? "current"} fallback={<RoundInfoSectionSkeleton />}>
         <RoundInfoSection roundIdParam={roundIdParam} />
       </Suspense>
-      <TabNavigation currentTab={tab}>
+      <TabNavigation currentTab={tab} isCurrentRound={isCurrentRound}>
         <Suspense key={roundIdParam ?? "current"} fallback={tabFallback}>
           <AllocationContent roundIdParam={roundIdParam} />
         </Suspense>

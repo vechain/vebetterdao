@@ -12,9 +12,10 @@ import { useStickyState } from "@/hooks/useStickyState"
 interface TabNavigationProps {
   children: React.ReactNode
   currentTab: string
+  isCurrentRound: boolean
 }
 
-export function TabNavigation({ children, currentTab }: TabNavigationProps) {
+export function TabNavigation({ children, currentTab, isCurrentRound }: TabNavigationProps) {
   const { account } = useWallet()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isStuck = useStickyState(sentinelRef)
@@ -39,11 +40,13 @@ export function TabNavigation({ children, currentTab }: TabNavigationProps) {
           inlineStart={{ base: "4", md: "0" }}
           inlineEnd={{ base: "4", md: "0" }}>
           <Tabs.List pt={isStuck ? "3" : undefined} px={{ base: "4", md: "0" }} bg={isStuck ? "bg.primary" : undefined}>
-            <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote" asChild truncate>
-              <NextLink href={isMobile ? "/allocations/vote#allocation-tabs" : "/allocations/vote"}>
-                {account?.address ? t("Vote for apps") : t("Round apps")}
-              </NextLink>
-            </Tabs.Trigger>
+            {isCurrentRound && (
+              <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="vote" asChild truncate>
+                <NextLink href={isMobile ? "/allocations/vote#allocation-tabs" : "/allocations/vote"}>
+                  {account?.address ? t("Vote for apps") : t("Round apps")}
+                </NextLink>
+              </Tabs.Trigger>
+            )}
             <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round" asChild truncate>
               <NextLink href={isMobile ? "/allocations/round#allocation-tabs" : "/allocations/round"}>
                 {t("Round info")}
