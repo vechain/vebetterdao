@@ -40,10 +40,6 @@
         "packages/contracts/dist/**"
       ]
     },
-    "build-storybook": {
-      "cache": true,
-      "outputs": ["storybook-static/**"]
-    },
     "build": {
       "cache": true,
       "dependsOn": ["prepare-contracts"],
