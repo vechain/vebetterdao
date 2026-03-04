@@ -2,11 +2,11 @@
 
 import { VStack, Grid, GridItem } from "@chakra-ui/react"
 
-import { CountdownBox } from "./CountdownBox"
+import { B3trBalanceBox } from "./B3trBalanceBox"
 import { PotentialRewardBox } from "./PotentialRewardBox"
 import { VotingPowerBox } from "./VotingPowerBox"
 
-export const AllocationLayoutHeader = () => {
+export const AssetsOverview = () => {
   return (
     <VStack alignItems="stretch" gap="2" w="full">
       <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }} gap={{ base: "2", md: "6" }}>
@@ -14,10 +14,10 @@ export const AllocationLayoutHeader = () => {
           <VotingPowerBox />
         </GridItem>
         <GridItem asChild>
-          <PotentialRewardBox />
+          <B3trBalanceBox />
         </GridItem>
         <GridItem asChild>
-          <CountdownBox />
+          <PotentialRewardBox />
         </GridItem>
       </Grid>
     </VStack>

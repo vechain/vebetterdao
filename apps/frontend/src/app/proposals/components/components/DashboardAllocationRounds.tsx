@@ -11,20 +11,24 @@ import {
   Text,
   VStack,
   Button,
+  Mark,
 } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/vechain-kit"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { useCallClause } from "@vechain/vechain-kit"
 import { Gift, NavArrowLeft, NavArrowRight, Activity } from "iconoir-react"
 import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { LiaBalanceScaleSolid } from "react-icons/lia"
 
-import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
-import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { ActivityFeed } from "@/components/Activities"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
+import { blockNumberToDate } from "@/utils/date"
 
 import { useAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
 import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
@@ -32,13 +36,15 @@ import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocat
 import { ProposalCompactCard } from "../../../../components/ProposalCompactCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
 
+const xAllocationVotingAbi = XAllocationVoting__factory.abi
+const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
+
 type Props = {
   isBottomSheet?: boolean
 }
 
 export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = false }) => {
   const { t } = useTranslation()
-  const { account } = useWallet()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(selectedRoundId)
@@ -79,22 +85,14 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
     })
   }, [proposalsToRender])
 
-  const { data: hasVotedInRound } = useHasVotedInRound(currentRoundId, account?.address)
+  const { data: [deadlineBlock] = [] } = useCallClause({
+    abi: xAllocationVotingAbi,
+    address: xAllocationVotingAddress,
+    method: "currentRoundDeadline" as const,
+    args: [],
+  })
 
-  const activeProposalIds = useMemo(
-    () => sortedProposals.filter(p => p.state === ProposalState.Active).map(p => p.id),
-    [sortedProposals],
-  )
-  const { data: proposalVotes } = useHasVotedInProposals(activeProposalIds, account?.address)
-
-  const hasVotedInAllProposals = useMemo(() => {
-    if (!activeProposalIds.length) return true
-    if (!proposalVotes) return false
-    return activeProposalIds.every(id => proposalVotes[id])
-  }, [activeProposalIds, proposalVotes])
-
-  const allVotesCompleted = !!hasVotedInRound && hasVotedInAllProposals
-  const hasAnyVotingAction = isCurrentRound && account?.address && (activeProposalIds.length > 0 || !!currentRoundId)
+  const { data: bestBlockCompressed } = useBestBlockCompressed()
 
   return (
     <Card.Root variant={"primary"} px={isBottomSheet ? 0 : undefined} borderWidth={isBottomSheet ? 0 : undefined}>
@@ -110,50 +108,78 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             <NavArrowLeft />
           </IconButton>
 
-          <HStack divideX="1px" divideColor="border.secondary" gap="6" flexWrap={{ base: "wrap", md: "nowrap" }}>
-            <VStack gap="1" align={{ base: "center", md: "start" }}>
-              <Text textStyle="md" color="text.subtle">
-                {t("Round")}
-              </Text>
-              <Heading size="lg">{selectedRoundId}</Heading>
-            </VStack>
-            <VStack gap="1" pl="6" align={{ base: "center", md: "start" }}>
-              <Text textStyle="md" color="text.subtle">
-                {t("Round dates")}
-              </Text>
-              <Skeleton loading={roundInfoLoading}>
-                <Heading size="lg">
-                  {roundInfo.voteStartTimestamp?.format("MMM D")}
-                  {"-"}
-                  {roundInfo.voteEndTimestamp?.format("MMM D")}
-                </Heading>
-              </Skeleton>
-            </VStack>
+          <VStack gap="3" align={{ base: "center", md: "start" }} w={{ base: "full", md: "auto" }}>
+            <HStack divideX="1px" divideColor="border.secondary" gap="6">
+              <VStack gap="1" align={{ base: "center", md: "start" }}>
+                <Text textStyle="md" color="text.subtle">
+                  {t("Round")}
+                </Text>
+                <Heading size="lg">{selectedRoundId}</Heading>
+              </VStack>
+              <VStack gap="1" pl="6" align={{ base: "center", md: "start" }}>
+                <Text textStyle="md" color="text.subtle">
+                  {t("Round dates")}
+                </Text>
+                <Skeleton loading={roundInfoLoading}>
+                  <Heading size="lg">
+                    {roundInfo.voteStartTimestamp?.format("MMM D")}
+                    {"-"}
+                    {roundInfo.voteEndTimestamp?.format("MMM D")}
+                  </Heading>
+                </Skeleton>
+              </VStack>
+              {isCurrentRound && (
+                <VStack gap="1" pl="6" align="start" display={{ base: "none", md: "flex" }}>
+                  <Text textStyle="md" color="text.subtle">
+                    {t("Time left")}
+                  </Text>
+                  {deadlineBlock && (
+                    <Countdown
+                      now={() => Date.now()}
+                      date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
+                      renderer={({ days, hours, minutes }) => (
+                        <Text textStyle="lg">
+                          <Mark variant="text" fontWeight="semibold">
+                            {days}
+                          </Mark>
+                          {"d "}
+                          <Mark variant="text" fontWeight="semibold">
+                            {hours}
+                          </Mark>
+                          {"h "}
+                          <Mark variant="text" fontWeight="semibold">
+                            {minutes}
+                          </Mark>
+                          {"m "}
+                        </Text>
+                      )}
+                    />
+                  )}
+                </VStack>
+              )}
+            </HStack>
 
-            {selectedRoundId === currentRoundId ? (
-              <VStack gap="1" pl="6" align={{ base: "center", md: "start" }} w={{ base: "full", md: "auto" }}>
-                <Badge size="md" variant="positive">
-                  {t("Active")}
-                </Badge>
-                {hasAnyVotingAction &&
-                  (allVotesCompleted ? (
-                    <Badge size="md" variant="positive">
-                      {t("Voted")}
+            <HStack gap="2" w="full" justifyContent="center" display={{ base: "flex", md: "none" }}>
+              {isCurrentRound && deadlineBlock && (
+                <Countdown
+                  now={() => Date.now()}
+                  date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
+                  renderer={({ days, hours, minutes }) => (
+                    <Badge size="md" variant="neutral">
+                      {t("Time left")}
+                      {": "}
+                      {days}
+                      {"d "}
+                      {hours}
+                      {"h "}
+                      {minutes}
+                      {"m"}
                     </Badge>
-                  ) : (
-                    <Badge size="md" variant="warning">
-                      {t("Need to vote")}
-                    </Badge>
-                  ))}
-              </VStack>
-            ) : (
-              <VStack gap="1" pl="6" align={{ base: "center", md: "start" }} w={{ base: "full", md: "auto" }}>
-                <Badge size="md" variant="neutral">
-                  {t("Concluded")}
-                </Badge>
-              </VStack>
-            )}
-          </HStack>
+                  )}
+                />
+              )}
+            </HStack>
+          </VStack>
 
           <IconButton
             variant="outline"

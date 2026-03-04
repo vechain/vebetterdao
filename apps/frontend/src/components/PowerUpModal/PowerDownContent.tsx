@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Field, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, Field, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { WarningTriangle } from "iconoir-react"
@@ -13,7 +13,6 @@ import { useConvertVot3 } from "@/hooks/useConvertVot3"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import { PowerDownB3trSummary } from "./PowerDownB3trSummary"
-import { PowerUpSummary } from "./PowerUpSummary"
 import { handleAmountInput } from "./utils"
 
 const compactFormatter = getCompactFormatter(4)
@@ -59,14 +58,9 @@ export const PowerDownContent = ({ onClose }: Props) => {
 
   return (
     <VStack gap={5} w="full">
-      <VStack gap={2} justify={"center"} w="full">
-        <Text textStyle="lg" fontWeight="semibold" textAlign="center">
-          {t("Reduce your Voting Power")}
-        </Text>
-        <Text textStyle="md" color="text.subtle" textAlign="center">
-          {t("Redeem your B3TR tokens anytime.")}
-        </Text>
-      </VStack>
+      <Heading size="xl" textAlign="center" fontWeight="bold" data-testid={"tx-modal-title"}>
+        {t("Reduce your Voting Power")}
+      </Heading>
 
       <VStack
         bg="card.default"
@@ -74,6 +68,7 @@ export const PowerDownContent = ({ onClose }: Props) => {
         borderColor="border.secondary"
         borderRadius="2xl"
         p={4}
+        mt={2}
         gap={2}
         align="start"
         w="full">

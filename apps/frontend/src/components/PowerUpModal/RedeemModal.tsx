@@ -3,14 +3,14 @@
 import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
-import { PowerUpContent } from "./PowerUpContent"
+import { PowerDownContent } from "./PowerDownContent"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
 }
 
-export const PowerUpModal = ({ isOpen, onClose }: Props) => {
+export const RedeemModal = ({ isOpen, onClose }: Props) => {
   const { isTxModalOpen } = useTransactionModal()
 
   return (
@@ -19,7 +19,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
       onClose={onClose}
       modalProps={{ closeOnInteractOutside: true }}
       modalContentProps={{ maxW: "500px" }}>
-      <PowerUpContent onClose={onClose} />
+      <PowerDownContent onClose={onClose} />
     </BaseModal>
   )
 }

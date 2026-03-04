@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, Icon, Text, Button, Skeleton, VStack, Badge, HStack, Square } from "@chakra-ui/react"
+import { Card, Icon, Text, Button, Skeleton, VStack, Badge, HStack, Square, Flex } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
@@ -9,11 +9,12 @@ import { Trans, useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
-import { PowerUpModal } from "@/components/PowerUpModal"
+import { PowerUpModal, RedeemModal } from "@/components/PowerUpModal"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 export const VotingPowerBox = () => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isPowerUpOpen, setIsPowerUpOpen] = useState(false)
+  const [isRedeemOpen, setIsRedeemOpen] = useState(false)
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -25,17 +26,17 @@ export const VotingPowerBox = () => {
 
   return (
     <Card.Root
-      p={{ base: "4", md: "6" }}
+      p={{ base: "2", md: "4" }}
       variant="subtle"
       border="sm"
       borderColor="border.secondary"
       bgColor="status.positive.subtle"
-      flexDirection={{ base: "column", md: "row" }}
+      flexDirection={{ base: "row", md: "row" }}
       alignItems={{ base: "stretch", md: "center" }}
       justifyContent="space-between"
       gap={{ base: "3", md: "4" }}>
       <HStack gap="3" alignItems="center" flex={1}>
-        <Square rounded="12px" bg="status.positive.secondary" aspectRatio={1} height={{ base: "56px", md: "60px" }}>
+        <Square rounded="12px" bg="status.positive.secondary" aspectRatio={1} height={{ base: "46px", md: "60px" }}>
           <Icon boxSize={{ base: "8", md: "9" }} color="status.positive.strong">
             <Flash />
           </Icon>
@@ -82,12 +83,17 @@ export const VotingPowerBox = () => {
 
       {!!account?.address && (
         <>
-          <Button variant="primary" width={{ base: "full", md: "auto" }} onClick={() => setIsOpen(true)}>
-            <Icon as={Flash} boxSize="4" />
-            {t("Power up")}
-          </Button>
-
-          <PowerUpModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+          <Flex pt={4} direction={{ base: "column", md: "column" }} gap="1">
+            <Button flex={1} variant="primary" size="xs" onClick={() => setIsPowerUpOpen(true)}>
+              <Icon as={Flash} boxSize="4" />
+              {t("Power up")}
+            </Button>
+            <Button flex={1} variant="link" size="xs" onClick={() => setIsRedeemOpen(true)}>
+              {t("Reduce")}
+            </Button>
+          </Flex>
+          <PowerUpModal isOpen={isPowerUpOpen} onClose={() => setIsPowerUpOpen(false)} />
+          <RedeemModal isOpen={isRedeemOpen} onClose={() => setIsRedeemOpen(false)} />
         </>
       )}
     </Card.Root>

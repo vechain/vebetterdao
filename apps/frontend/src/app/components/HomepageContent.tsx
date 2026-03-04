@@ -1,13 +1,15 @@
 import { Grid, GridItem, VStack, useMediaQuery } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 
-import { AllocationLayoutHeader } from "../allocations/components/AllocationLayoutHeader"
+import { AssetsOverview } from "@/components/AssetsOverview"
+
 import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
 
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
+import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
@@ -28,7 +30,7 @@ export const HomePageContent = () => {
           <ActionBanner />
         </GridItem>
         <GridItem colSpan={[1, 1, 3]} hidden={!account?.address}>
-          <AllocationLayoutHeader />
+          <AssetsOverview />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
@@ -36,6 +38,7 @@ export const HomePageContent = () => {
               <>
                 <CantVoteCard />
                 <DashboardAllocationRounds />
+                <SupplyBreakdownCard />
               </>
             )}
           </VStack>
