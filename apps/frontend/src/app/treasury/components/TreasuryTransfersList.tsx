@@ -51,7 +51,7 @@ export const TreasuryTransfersList = () => {
   const category: TreasuryTransferCategory | undefined = filter === "all" ? undefined : filter
   const { data, isLoading, isFetching, hasNextPage, fetchNextPage, isFetchingNextPage } = useTreasuryTransfers(
     category,
-    5,
+    10,
   )
 
   const transactions = useMemo(() => data?.pages.flatMap(page => page.data) ?? [], [data])

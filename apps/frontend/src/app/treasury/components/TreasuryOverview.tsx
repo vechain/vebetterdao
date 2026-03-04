@@ -87,12 +87,12 @@ export const TreasuryOverview = () => {
             </HStack>
           </HStack>
 
-          <Stack w="full" direction={{ base: "column", md: "row" }} justify="space-between" gap={4}>
+          <Stack w="full" direction={"column"} justify="space-between" gap={4}>
             <Skeleton loading={isLoading} rounded="md">
-              <SimpleGrid columns={{ base: 1, md: 3 }} gap={8}>
+              <SimpleGrid columns={1} gap={8}>
                 {assets.map(asset => (
                   <VStack key={asset.symbol} gap={0} align="start" justify="space-between">
-                    <Text textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+                    <Text textStyle={"2xl"} fontWeight="bold">
                       {asset.balance}
                     </Text>
                     <Text textStyle="xs" color="text.muted">
@@ -104,13 +104,8 @@ export const TreasuryOverview = () => {
             </Skeleton>
             <Skeleton loading={isLoading}>
               {formattedUsd && (
-                <VStack
-                  pt={{ base: 4, md: 0 }}
-                  borderTop={{ base: "1px solid", md: "none" }}
-                  borderColor="border.secondary"
-                  align={{ base: "start", md: "end" }}
-                  gap={0}>
-                  <Text textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+                <VStack pt={4} borderTop="1px solid" borderColor="border.secondary" align={"start"} gap={0}>
+                  <Text textStyle="2xl" fontWeight="bold">
                     {"~$"}
                     {formattedUsd}
                     {" USD"}

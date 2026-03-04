@@ -19,18 +19,14 @@ export const TreasuryPageContent = () => {
           <Heading size={{ base: "xl", md: "3xl" }}>{t("Treasury")}</Heading>
           <TreasuryInfoDialog isMobile={isMobile} />
         </HStack>
-        <TreasuryOverview />
+
+        <Grid templateColumns={{ base: "minmax(0, 1fr)", lg: "minmax(0, 1fr) minmax(0, 1fr)" }} gap={8} w="full">
+          <TreasuryOverview />
+          <TreasuryBalanceChart />
+        </Grid>
       </VStack>
 
-      <Grid templateColumns={{ base: "minmax(0, 1fr)", lg: "minmax(0, 2fr) minmax(0, 1fr)" }} gap={8} w="full">
-        <VStack gap={8} align="stretch">
-          <TreasuryBalanceChart />
-        </VStack>
-
-        <VStack gap={8} align="stretch" position={{ base: "static", lg: "static" }} top={24} alignSelf="start">
-          <TreasuryTransfersList />
-        </VStack>
-      </Grid>
+      <TreasuryTransfersList />
     </VStack>
   )
 }

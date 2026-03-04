@@ -1,16 +1,51 @@
 "use client"
-import { Chart, useChart } from "@chakra-ui/charts"
-import { Card, Heading, HStack, SegmentGroup, Skeleton, Text, VStack } from "@chakra-ui/react"
+
+import { Box, Card, Center, Heading, HStack, SegmentGroup, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { BalancePeriod, useTreasuryBalanceHistory } from "../../../api/contracts/treasury/useTreasuryBalanceHistory"
+
+const compact = getCompactFormatter(1)
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean
+  payload?: { value: number }[]
+  label?: string
+}) => {
+  if (!active || !payload?.length) return null
+
+  return (
+    <Box
+      bg="white"
+      _dark={{ bg: "gray.800" }}
+      border="1px solid"
+      borderColor="border"
+      borderRadius="lg"
+      p={3}
+      boxShadow="lg">
+      <Text textStyle="xs" fontWeight="semibold" mb={1}>
+        {label}
+      </Text>
+      <Text textStyle="xs" color="text.subtle">
+        {compact.format(payload[0]?.value ?? 0)} {"B3TR"}
+      </Text>
+    </Box>
+  )
+}
 
 export const TreasuryBalanceChart = () => {
   const { t } = useTranslation()
   const [period, setPeriod] = useState<BalancePeriod>("3M")
   const { chartData, isLoading, isFetching } = useTreasuryBalanceHistory(period)
+
+  const [purpleColor] = useToken("colors", ["purple.500"])
 
   const displayData = useMemo(() => {
     if (!chartData.length) return []
@@ -18,12 +53,29 @@ export const TreasuryBalanceChart = () => {
     return chartData.filter((_, i) => i % step === 0 || i === chartData.length - 1)
   }, [chartData])
 
-  const chart = useChart({
-    data: displayData,
-    series: [{ name: "b3tr", color: "purple.solid" }],
-  })
+  if (isLoading || isFetching) {
+    return (
+      <Card.Root w="full">
+        <Card.Body>
+          <Skeleton w="full" h="340px" borderRadius="xl" />
+        </Card.Body>
+      </Card.Root>
+    )
+  }
 
-  const hasData = displayData.length > 0
+  if (!displayData.length) {
+    return (
+      <Card.Root w="full">
+        <Card.Body>
+          <Center w="full" py={6}>
+            <Text textStyle="sm" color="text.subtle">
+              {t("No balance data available")}
+            </Text>
+          </Center>
+        </Card.Body>
+      </Card.Root>
+    )
+  }
 
   return (
     <Card.Root w="full">
@@ -44,43 +96,36 @@ export const TreasuryBalanceChart = () => {
             </SegmentGroup.Root>
           </HStack>
 
-          <Skeleton loading={isLoading || isFetching} minH="300px" rounded="md">
-            {hasData ? (
-              <Chart.Root maxH="sm" chart={chart}>
-                <AreaChart data={displayData}>
-                  <CartesianGrid stroke={chart.color("border.muted")} vertical={false} />
-                  <XAxis axisLine={false} tickLine={false} dataKey="date" tickFormatter={(value: string) => value} />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={chart.formatNumber({ notation: "compact" })}
-                  />
-                  <Tooltip cursor={false} animationDuration={100} content={<Chart.Tooltip />} />
-                  <defs>
-                    <Chart.Gradient
-                      id="b3tr-gradient"
-                      stops={[
-                        { offset: "0%", color: "purple.solid", opacity: 0.3 },
-                        { offset: "100%", color: "purple.solid", opacity: 0.05 },
-                      ]}
-                    />
-                  </defs>
-                  <Area
-                    type="monotone"
-                    isAnimationActive={false}
-                    dataKey="b3tr"
-                    fill="url(#b3tr-gradient)"
-                    stroke={chart.color("purple.solid")}
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </Chart.Root>
-            ) : (
-              <VStack h="300px" justify="center">
-                <Text color="text.muted">{t("No balance data available")}</Text>
-              </VStack>
-            )}
-          </Skeleton>
+          <Box w="full" h="260px">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={displayData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradB3tr" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={purpleColor} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={purpleColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#a0aec0" axisLine={false} tickLine={false} />
+                <YAxis
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={v => compact.format(v as number)}
+                  stroke="#a0aec0"
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  isAnimationActive={false}
+                  dataKey="b3tr"
+                  fill="url(#gradB3tr)"
+                  stroke={purpleColor}
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Box>
         </VStack>
       </Card.Body>
     </Card.Root>
