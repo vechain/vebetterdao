@@ -23,6 +23,20 @@ import * as path from "path"
 
 import mainnetConfig from "@repo/config/mainnet"
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delayMs = 1000): Promise<T> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      if (attempt === retries) throw error
+      await sleep(delayMs * Math.pow(2, attempt))
+    }
+  }
+  throw new Error("unreachable")
+}
+
 // First round with auto-voting enabled on mainnet
 const FIRST_AUTO_VOTING_ROUND = 69
 
@@ -353,19 +367,18 @@ async function estimateRelayerRewards(
   const voterRewardsContract = ABIContract.ofAbi(VoterRewards__factory.abi)
   let totalEstimatedFees = BigInt(0)
 
-  // Process in batches to avoid overloading
   const userArray = Array.from(votedUsers)
   const BATCH_SIZE = 50
 
   for (let i = 0; i < userArray.length; i += BATCH_SIZE) {
     const batch = userArray.slice(i, i + BATCH_SIZE)
 
-    // Call getRelayerFee for each user in parallel
     const feePromises = batch.map(async user => {
-      const result = await thor.contracts.executeCall(
-        voterRewardsAddress,
-        voterRewardsContract.getFunction("getRelayerFee"),
-        [roundId, user],
+      const result = await withRetry(() =>
+        thor.contracts.executeCall(voterRewardsAddress, voterRewardsContract.getFunction("getRelayerFee"), [
+          roundId,
+          user,
+        ]),
       )
       if (result.success && result.result?.array?.[0]) {
         return BigInt(String(result.result.array[0]))
@@ -376,6 +389,10 @@ async function estimateRelayerRewards(
     const fees = await Promise.all(feePromises)
     for (const fee of fees) {
       totalEstimatedFees += fee
+    }
+
+    if (i + BATCH_SIZE < userArray.length) {
+      await sleep(300)
     }
   }
 
