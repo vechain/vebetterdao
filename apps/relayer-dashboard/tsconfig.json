@@ -1,0 +1,20 @@
+{
+  "extends": "@repo/typescript-config/nextjs.json",
+  "skipLibCheck": true,
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noUncheckedIndexedAccess": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "strictNullChecks": true
+  },
+  "include": ["next-env.d.ts", "next.config.js", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": [".next", "node_modules"]
+}

@@ -1,0 +1,57 @@
+name: Deploy Relayer Dashboard
+
+on:
+  push:
+    branches:
+      - main
+      - feat/relayers-dashboard
+    paths:
+      - "apps/relayer-dashboard/**"
+      - "packages/config/**"
+      - "packages/contracts/**"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-relayer-dashboard
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build relayer-dashboard
+        run: yarn workspace relayer-dashboard build
+        env:
+          NEXT_PUBLIC_APP_ENV: mainnet
+          NEXT_PUBLIC_BASE_PATH: /b3tr
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/relayer-dashboard/out
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

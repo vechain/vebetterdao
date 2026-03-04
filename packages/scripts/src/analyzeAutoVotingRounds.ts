@@ -1,13 +1,17 @@
 /**
  * Auto-Voting Round Analytics Script
  *
- * Analyzes auto-voting activity per round since the feature went live (Round 65).
+ * Analyzes auto-voting activity per round since the feature went live (Round 69).
  * Outputs data to console and saves to JSON file.
  *
  * Usage:
  *   cd packages/scripts
- *   yarn install
  *   yarn analyze-auto-voting
+ *   yarn analyze-auto-voting --checkpoint <path> --output <path>
+ *
+ * Options:
+ *   --checkpoint <path>  If file exists, load it and only analyze new/incomplete rounds.
+ *   --output <path>      Write report to this path (e.g. apps/relayer-dashboard/public/data/report.json).
  */
 
 import { ThorClient, MAINNET_URL } from "@vechain/sdk-network"
@@ -970,54 +974,133 @@ function printTable(rounds: RoundAnalytics[]): void {
 }
 
 /**
- * Save report to JSON file
+ * Parse CLI args for --checkpoint and --output
  */
-function saveReport(report: AnalyticsReport): string {
+function parseArgs(): { checkpointPath: string | null; outputPath: string | null } {
+  const argv = process.argv.slice(2)
+  let checkpointPath: string | null = null
+  let outputPath: string | null = null
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--checkpoint" && argv[i + 1]) {
+      checkpointPath = argv[i + 1]
+      i++
+    } else if (argv[i]?.startsWith("--checkpoint=")) {
+      checkpointPath = argv[i].slice("--checkpoint=".length)
+    } else if (argv[i] === "--output" && argv[i + 1]) {
+      outputPath = argv[i + 1]
+      i++
+    } else if (argv[i]?.startsWith("--output=")) {
+      outputPath = argv[i].slice("--output=".length)
+    }
+  }
+  return { checkpointPath, outputPath }
+}
+
+/**
+ * Load existing report from checkpoint path. Returns null if file missing or invalid.
+ */
+function loadCheckpoint(filepath: string): AnalyticsReport | null {
+  try {
+    if (!fs.existsSync(filepath)) return null
+    const raw = fs.readFileSync(filepath, "utf-8")
+    const data = JSON.parse(raw) as AnalyticsReport
+    if (!data?.rounds || !Array.isArray(data.rounds)) return null
+    return data
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Save report to JSON file. If outputPath is provided, also write there.
+ * Returns the primary path written (outputPath if set, else timestamped path).
+ */
+function saveReport(report: AnalyticsReport, outputPath: string | null): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
   const filename = `auto-voting-report-${timestamp}.json`
-  const filepath = path.join(__dirname, "..", "output", filename)
+  const defaultDir = path.join(__dirname, "..", "output")
+  const defaultFilepath = path.join(defaultDir, filename)
 
-  // Ensure output directory exists
-  const outputDir = path.dirname(filepath)
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true })
+  const writeTo = (filepath: string) => {
+    const dir = path.dirname(filepath)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(filepath, JSON.stringify(report, null, 2))
   }
 
-  fs.writeFileSync(filepath, JSON.stringify(report, null, 2))
-  return filepath
+  writeTo(defaultFilepath)
+  if (outputPath) {
+    const resolved = path.isAbsolute(outputPath) ? outputPath : path.resolve(process.cwd(), outputPath)
+    writeTo(resolved)
+    return resolved
+  }
+  return defaultFilepath
 }
 
 // ============ Main ============
 
 async function main(): Promise<void> {
+  const { checkpointPath, outputPath } = parseArgs()
+
   console.log("Auto-Voting Round Analytics")
   console.log("===========================")
   console.log(`Network: Mainnet`)
   console.log(`Starting from round: ${FIRST_AUTO_VOTING_ROUND}`)
+  if (checkpointPath) console.log(`Checkpoint: ${checkpointPath}`)
+  if (outputPath) console.log(`Output: ${outputPath}`)
 
   const thor = ThorClient.at(MAINNET_URL, { isPollingEnabled: false })
 
-  // Get current round
   const currentRoundId = await getCurrentRoundId(thor, CONFIG.xAllocationVotingContractAddress)
   console.log(`Current round: ${currentRoundId}`)
 
-  const rounds: RoundAnalytics[] = []
+  const checkpoint = checkpointPath ? loadCheckpoint(checkpointPath) : null
+  const completedFromCheckpoint = checkpoint?.rounds?.filter(r => r.isRoundEnded) ?? []
+  const incompleteFromCheckpoint = checkpoint?.rounds?.filter(r => !r.isRoundEnded) ?? []
 
-  // Analyze each round from first auto-voting round to current
-  for (let roundId = FIRST_AUTO_VOTING_ROUND; roundId <= currentRoundId; roundId++) {
+  const startRoundId =
+    incompleteFromCheckpoint.length > 0
+      ? Math.min(...incompleteFromCheckpoint.map(r => r.roundId))
+      : completedFromCheckpoint.length > 0
+        ? Math.max(...completedFromCheckpoint.map(r => r.roundId)) + 1
+        : FIRST_AUTO_VOTING_ROUND
+
+  if (startRoundId > currentRoundId && checkpoint) {
+    console.log("Checkpoint is up to date; no new rounds to analyze.")
+    const report: AnalyticsReport = {
+      generatedAt: new Date().toISOString(),
+      network: "mainnet",
+      firstRound: checkpoint.firstRound,
+      currentRound: currentRoundId,
+      rounds: checkpoint.rounds.sort((a, b) => a.roundId - b.roundId),
+    }
+    const filepath = saveReport(report, outputPath)
+    console.log(`Report saved to: ${filepath}`)
+    return
+  }
+
+  const newRounds: RoundAnalytics[] = []
+  for (let roundId = startRoundId; roundId <= currentRoundId; roundId++) {
     try {
       const roundAnalytics = await analyzeRound(thor, roundId)
-      rounds.push(roundAnalytics)
+      newRounds.push(roundAnalytics)
     } catch (error) {
       console.error(`  Error analyzing round ${roundId}:`, error)
-      // Continue with next round
     }
   }
 
-  // Print table
+  const byRoundId = new Map<number, RoundAnalytics>()
+  for (const r of completedFromCheckpoint) {
+    byRoundId.set(r.roundId, r)
+  }
+  for (const r of newRounds) {
+    byRoundId.set(r.roundId, r)
+  }
+  const rounds = Array.from(byRoundId.values()).sort((a, b) => a.roundId - b.roundId)
+
   printTable(rounds)
 
-  // Save to JSON
   const report: AnalyticsReport = {
     generatedAt: new Date().toISOString(),
     network: "mainnet",
@@ -1026,7 +1109,7 @@ async function main(): Promise<void> {
     rounds,
   }
 
-  const filepath = saveReport(report)
+  const filepath = saveReport(report, outputPath)
   console.log(`\nReport saved to: ${filepath}`)
 }
 
