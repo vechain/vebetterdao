@@ -29,7 +29,7 @@ export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIRE
         return
       }
       // Allow for small rounding differences in ratio
-      const ratioTolerance = 0.5
+      const ratioTolerance = 0.15
       if (Math.abs(ratio - requirements.dimensions.ratio) > ratioTolerance) {
         resolve({
           isValid: false,
