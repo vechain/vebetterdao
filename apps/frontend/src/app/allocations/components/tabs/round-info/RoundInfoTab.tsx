@@ -38,11 +38,14 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
   return (
     <VStack alignItems="stretch" gap="5" w="full" mt="2">
       {isMobile && (
-        <RoundActiveAppsListCard
-          currentRoundId={roundDetails.currentRoundId}
-          roundId={roundDetails.id}
-          apps={roundDetails.apps}
-        />
+        <>
+          {!!account?.address && <UserVotingActivityCard roundDetails={roundDetails} />}
+          <RoundActiveAppsListCard
+            currentRoundId={roundDetails.currentRoundId}
+            roundId={roundDetails.id}
+            apps={roundDetails.apps}
+          />
+        </>
       )}
       <VStack hideFrom="md" gap="3" alignItems="stretch">
         <HStack justifyContent="space-between" w="full">

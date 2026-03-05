@@ -205,6 +205,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               p={{ base: 0, md: "4" }}
               bg={{ base: "transparent", md: "card.subtle" }}
               gap="1"
+              border="none"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {t("Total votes used")}
@@ -218,6 +219,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               p={{ base: 0, md: "4" }}
               bg={{ base: "transparent", md: "card.subtle" }}
               gap="1"
+              border="none"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {t("Rewards earned")}

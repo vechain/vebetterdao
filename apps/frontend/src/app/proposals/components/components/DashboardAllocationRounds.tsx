@@ -233,7 +233,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             </Skeleton>
           </VStack>
           <Button asChild variant="primary" size="sm" alignSelf="end">
-            <NextLink href={`/allocations/round?round=${selectedRoundId}`}>{t("View round details")}</NextLink>
+            <NextLink href={`/allocations/round?roundId=${selectedRoundId}`}>{t("View round details")}</NextLink>
           </Button>
         </Flex>
 
