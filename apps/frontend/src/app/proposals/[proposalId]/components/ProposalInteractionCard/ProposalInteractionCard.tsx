@@ -172,7 +172,7 @@ export const ProposalInteractionCard = ({
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
     if (proposal?.state === undefined || !CANCELLABLE_STATES.includes(proposal.state)) return false
-    const isAdmin = true
+    const isAdmin = permissions?.isAdminOfB3TRGovernor
     return isProposer || isAdmin
   }, [isProposer, permissions?.isAdminOfB3TRGovernor, proposal?.state])
 
