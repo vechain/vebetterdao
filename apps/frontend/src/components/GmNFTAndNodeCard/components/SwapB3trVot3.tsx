@@ -4,7 +4,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
-import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
+import { SnapshotExplanationModal } from "@/app/components/Countdown/SnapshotExplanationModal"
 
 import { ConvertB3trAndVot3Modal } from "../../../app/components/ConvertB3trAndVot3Modal"
 import { CountdownVoting } from "../../../app/components/Countdown/CountdownVoting"
@@ -99,7 +99,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
           )}
         </GridItem>
       </Grid>
-      <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
+      <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
       <ConvertB3trAndVot3Modal isOpen={isOpen} onClose={onClose} />
     </>
   )

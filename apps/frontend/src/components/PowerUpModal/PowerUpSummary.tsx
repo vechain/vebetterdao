@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, HStack, Skeleton, Text, VStack, useDisclosure, Button } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import Countdown from "react-countdown"
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 
 import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { SnapshotExplanationModal } from "@/app/components/Countdown/SnapshotExplanationModal"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 type Props = {
@@ -22,7 +23,7 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: vot3Balance, isLoading: isVot3Loading } = useGetVot3Balance(account?.address ?? undefined)
-
+  const { open: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: allocationRound, isLoading: isRoundLoading } = useAllocationsRound(currentRoundId)
 
@@ -82,6 +83,12 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
                 )}
               />
             )}
+          </HStack>
+          <HStack>
+            <Button p="0" variant="link" onClick={onOpenSnapshot}>
+              {t("Learn more")}
+            </Button>
+            <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
           </HStack>
         </Skeleton>
       </VStack>
