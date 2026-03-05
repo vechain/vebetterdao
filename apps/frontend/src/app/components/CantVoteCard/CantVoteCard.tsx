@@ -14,31 +14,41 @@ import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUs
 import { useUserScore } from "../../../api/indexer/sustainability/useUserScore"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 
-type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions"
+type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions" | "signaled" | "blacklisted"
 type CantVoteReasonText = {
   title: string
   description: ReactNode
   onLearnMoreClick?: () => void
 }
-export const VotingRequirementsList = () => {
+
+/**
+ * Uses isPerson from the contract (checked at snapshot) as source of truth for the actions check.
+ * missingActions from the indexer is only used as guidance for how many more actions are needed.
+ */
+export const VotingRequirementsList = ({ isPerson }: { isPerson?: boolean }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { missingActions, isLoading: isLoadingMissingActions } = useUserScore()
   const { data: voteBalance, isLoading: isLoadingVoteBalance } = useGetVot3Balance(account?.address)
+
+  // Contract isPerson (at snapshot) is the source of truth.
+  // If isPerson is explicitly false, the user does NOT have enough actions regardless of indexer data.
+  const hasEnoughActions = isPerson ?? missingActions <= 0
+
   return (
     <Skeleton loading={isLoadingMissingActions || isLoadingVoteBalance}>
       <List.Root variant="plain">
         <List.Item>
           <List.Indicator asChild color="inherit">
-            {missingActions <= 0 ? <LuCircleCheck /> : <LuCircleDashed />}
+            {hasEnoughActions ? <LuCircleCheck /> : <LuCircleDashed />}
           </List.Indicator>
-          {t("Complete at least 3 sustainable actions")}
+          {t("Complete {{count}} more Better Actions in our apps", { count: Math.max(missingActions, 1) })}
         </List.Item>
         <List.Item>
           <List.Indicator asChild color="inherit">
             {!!voteBalance?.original && Number(voteBalance.original) > 0 ? <LuCircleCheck /> : <LuCircleDashed />}
           </List.Indicator>
-          {t("Swap your B3TR for VOT3 this round before the snapshot")}
+          {t("Convert your B3TR to VOT3 to gain voting power in the next round")}
         </List.Item>
       </List.Root>
     </Skeleton>
@@ -53,7 +63,7 @@ export const CantVoteCard = () => {
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
   const doActionModal = useDisclosure()
 
-  const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson } = useCanUserVote()
+  const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson, personReason } = useCanUserVote()
 
   const handleGoToLinking = useCallback(() => {
     router.push("/profile?tab=linked-accounts")
@@ -72,7 +82,11 @@ export const CantVoteCard = () => {
     if (isEntity) return "secondary"
     if (isDelegator) return "delegator"
     if (!hasVotesAtSnapshot) return "no-votes"
-    if (!isPerson) return "no-actions"
+    if (!isPerson) {
+      if (personReason.includes("signaled")) return "signaled"
+      if (personReason.includes("blacklisted")) return "blacklisted"
+      return "no-actions"
+    }
     return null
   }, [
     account?.address,
@@ -83,36 +97,47 @@ export const CantVoteCard = () => {
     canVoteLoading,
     hasVotesAtSnapshot,
     isPerson,
+    personReason,
   ])
 
   const cantVoteReasonText = useMemo<CantVoteReasonText | null>(() => {
     switch (cantVoteReason) {
       case "delegator":
         return {
-          title: t("You can’t vote because this is a delegated account."),
+          title: t("You can't vote because this is a delegated account."),
           description: t("Go to your profile to learn more about delegated accounts."),
           onLearnMoreClick: handleGoToGovernance,
         }
       case "secondary":
         return {
-          title: t("You can’t vote because this is a secondary account."),
+          title: t("You can't vote because this is a secondary account."),
           description: t(
             "Switch to your main account to vote or go to your profile to learn more about linked accounts.",
           ),
           onLearnMoreClick: handleGoToLinking,
         }
+      case "signaled":
+        return {
+          title: t("You can't vote because you've been signaled as suspicious."),
+          description: t("If you believe this is unfair, reach out to the app that signaled you to resolve the issue."),
+        }
+      case "blacklisted":
+        return {
+          title: t("You can't vote because your account has been blacklisted."),
+          description: t("Contact VeBetterDAO support for more information."),
+        }
       case "no-votes":
       case "no-actions":
         return {
           title: t("You're not eligible to vote yet. To vote in next round:"),
-          description: <VotingRequirementsList />,
+          description: <VotingRequirementsList isPerson={isPerson} />,
           onLearnMoreClick: handleOpenDoActionModal,
         }
 
       default:
         return null
     }
-  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking, handleOpenDoActionModal])
+  }, [cantVoteReason, t, isPerson, handleGoToGovernance, handleGoToLinking, handleOpenDoActionModal])
 
   if (!cantVoteReasonText) return null
 
