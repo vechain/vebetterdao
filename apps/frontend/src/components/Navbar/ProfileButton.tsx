@@ -47,12 +47,12 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
             </Flex>
             <VStack align="stretch">
               <Text textStyle="md" color="text.default" fontWeight="semibold">
-                {t("Connect your wallet to see your profile")}
+                {t("Login to track your progress, earn rewards, and collect unique digital items.")}
               </Text>
             </VStack>
           </HStack>
           <Button variant="primary" onClick={handleConnectWallet}>
-            {t("Connect Wallet")}
+            {t("Login or sign up")}
           </Button>
         </VStack>
       </Flex>
