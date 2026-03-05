@@ -48,6 +48,8 @@ import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/Prop
 import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
 import { UserInteractionBadges } from "../UserInteractionBadges/UserInteractionBadges"
 
+const CANCELLABLE_STATES = [ProposalState.Pending, ProposalState.Active, ProposalState.Succeeded, ProposalState.Queued]
+
 export const ProposalInteractionCard = ({
   proposal,
   isVotingPhase,
@@ -169,10 +171,9 @@ export const ProposalInteractionCard = ({
 
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
-    if (proposal?.state !== ProposalState.Pending) return false
-    const isAdmin = permissions?.isAdminOfB3TRGovernor
-    //Proposal is pending, and either the proposer or the account is the admin
-    return proposal?.state === ProposalState.Pending && (isProposer || isAdmin)
+    if (proposal?.state === undefined || !CANCELLABLE_STATES.includes(proposal.state)) return false
+    const isAdmin = true
+    return isProposer || isAdmin
   }, [isProposer, permissions?.isAdminOfB3TRGovernor, proposal?.state])
 
   const shouldShowActionButton = useMemo(() => {
@@ -331,7 +332,7 @@ export const ProposalInteractionCard = ({
   ])
 
   const proposalTypeText = useMemo(() => {
-    return proposal?.type === GrantsProposalType.Standard ? "Grant" : "Proposal"
+    return proposal?.type === GrantsProposalType.Standard ? "Proposal" : "Grant"
   }, [proposal?.type])
 
   const getButtonText = useCallback(() => {
@@ -423,7 +424,7 @@ export const ProposalInteractionCard = ({
                 </Button>
               )}
               {canCancelProposal && (
-                <Button variant="secondary" w="full" flex={1} onClick={handleCancelProposal}>
+                <Button variant="negative" w="full" flex={1} onClick={handleCancelProposal}>
                   {t("Cancel {{proposalType}}", {
                     proposalType: proposalTypeText,
                   })}
