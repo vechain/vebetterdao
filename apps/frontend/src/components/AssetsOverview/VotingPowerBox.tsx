@@ -4,17 +4,20 @@ import { Card, Icon, Text, Button, Skeleton, VStack, Badge, HStack, Square, Flex
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
-import { PowerUpModal, RedeemModal } from "@/components/PowerUpModal"
+import Vot3Icon from "@/components/Icons/svg/vot3-icon.svg"
+import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 export const VotingPowerBox = () => {
   const [isPowerUpOpen, setIsPowerUpOpen] = useState(false)
   const [isRedeemOpen, setIsRedeemOpen] = useState(false)
+  const closePowerUp = useCallback(() => setIsPowerUpOpen(false), [])
+  const closeRedeem = useCallback(() => setIsRedeemOpen(false), [])
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -37,9 +40,7 @@ export const VotingPowerBox = () => {
       gap={{ base: "3", md: "4" }}>
       <HStack gap="3" alignItems="center" flex={1}>
         <Square rounded="12px" bg="status.positive.secondary" aspectRatio={1} height={{ base: "46px", md: "60px" }}>
-          <Icon boxSize={{ base: "8", md: "9" }} color="status.positive.strong">
-            <Flash />
-          </Icon>
+          <Icon as={Vot3Icon} boxSize={{ base: "8", md: "9" }} color="status.positive.strong"></Icon>
         </Square>
 
         <Skeleton loading={isLoading || isCurrentVot3BalanceLoading}>
@@ -60,7 +61,7 @@ export const VotingPowerBox = () => {
                   size="sm"
                   rounded="md">
                   <Trans
-                    i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> votes in next round"
+                    i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round"
                     values={{
                       sign: votingPowerNextRound > 0n ? "+" : "",
                       votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
@@ -92,8 +93,8 @@ export const VotingPowerBox = () => {
               {t("Reduce")}
             </Button>
           </Flex>
-          <PowerUpModal isOpen={isPowerUpOpen} onClose={() => setIsPowerUpOpen(false)} />
-          <RedeemModal isOpen={isRedeemOpen} onClose={() => setIsRedeemOpen(false)} />
+          <PowerUpModal isOpen={isPowerUpOpen} onClose={closePowerUp} />
+          <PowerDownModal isOpen={isRedeemOpen} onClose={closeRedeem} />
         </>
       )}
     </Card.Root>

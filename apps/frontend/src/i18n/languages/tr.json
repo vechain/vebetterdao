@@ -51,6 +51,7 @@
   "+ {{count}} more": "+ {{count}} more",
   "+{{value}}": "+{{value}}",
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>İpucu</b>: 12 aylık bir hibe için, aşamaları aylık veya üç aylık olarak bölmek en iyisidir",
+  "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 bir sonraki turda",
   "<bold>{{sign}}{{votingPowerNextRound}}</bold> votes in next round": "Sonraki turda <bold>{{sign}}{{votingPowerNextRound}}</bold> oy",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement": "<bold>Emin misiniz?</bold> Eğer {{endorsedAddress}} onayını kaldırırsanız, {{value}} puan kaybedeceksiniz ve uygulamanız onayını kaybedebilir",
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Dağıtımı devam ettirin</bold>, böylece uygulamanız kullanıcıları tekrar ödüllendirebilir. Ödül havuzunda yeterli fon olduğundan emin olun.",

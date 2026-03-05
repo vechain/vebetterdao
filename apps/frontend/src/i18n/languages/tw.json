@@ -51,6 +51,7 @@
   "+ {{count}} more": "+ {{count}} more",
   "+{{value}}": "+{{value}}",
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>提示</b>：對於12個月的資助，最好按月或季度分解里程碑",
+  "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round": "下一輪 <bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3",
   "<bold>{{sign}}{{votingPowerNextRound}}</bold> votes in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> 下一輪的投票",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement": "<bold>您確定嗎？</bold> 如果您移除對{{endorsedAddress}}的背書，您將失去{{value}}分，並且您的應用可能會失去其背書。",
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>恢復分發</bold>以便您的應用可以重新獎勵用戶。請確保獎勵池中有可用資金。",

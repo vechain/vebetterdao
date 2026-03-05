@@ -51,6 +51,7 @@
   "+ {{count}} more": "+ {{count}} more",
   "+{{value}}": "+{{value}}",
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>Mẹo</b>: Đối với khoản tài trợ 12 tháng, tốt nhất là chia nhỏ các cột mốc theo tháng hoặc quý",
+  "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 trong vòng tiếp theo",
   "<bold>{{sign}}{{votingPowerNextRound}}</bold> votes in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> phiếu bầu trong vòng tiếp theo",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement": "<bold>Bạn có chắc không?</bold> Nếu bạn xoá sự ủng hộ của {{endorsedAddress}}, bạn sẽ mất {{value}} điểm và ứng dụng của bạn có thể mất sự ủng hộ",
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Tiếp tục phân phối</bold> để ứng dụng của bạn có thể bắt đầu thưởng cho người dùng trở lại. Đảm bảo pool phần thưởng có đủ quỹ.",

@@ -51,6 +51,7 @@
   "+ {{count}} more": "+ {{count}} more",
   "+{{value}}": "+{{value}}",
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>Consejo</b>: Para una subvención de 12 meses, es mejor desglosar los hitos mensual o trimestralmente",
+  "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 en la próxima ronda",
   "<bold>{{sign}}{{votingPowerNextRound}}</bold> votes in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> votos en la próxima ronda",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement": "<bold>¿Estás seguro?</bold> Si eliminas el respaldo de {{endorsedAddress}} perderás {{value}} pts y tu aplicación puede perder su respaldo",
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>Reanudar distribución</bold> para que tu app pueda volver a recompensar usuarios. Asegúrate de que el pool de recompensas tenga fondos disponibles.",

@@ -1,21 +1,20 @@
 "use client"
 
-import { Button, Card, Field, Heading, HStack, Icon, Link, NumberInput, Text, VStack } from "@chakra-ui/react"
+import { Button, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
-import { Clock, NavArrowRight, WarningTriangle } from "iconoir-react"
-import NextLink from "next/link"
+import { useWallet } from "@vechain/vechain-kit"
+import { WarningTriangle } from "iconoir-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
 import { BaseModal } from "@/components/BaseModal"
-import { B3TRIcon } from "@/components/Icons/B3TRIcon"
-import { useConvertB3tr } from "@/hooks/useConvertB3tr"
-import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
-import { useSmartAccountUpgradeRequired } from "@/hooks/vechainKitHooks/useSmartAccountUpgradeRequired"
+import { VOT3Icon } from "@/components/Icons/VOT3Icon"
+import { useConvertVot3 } from "@/hooks/useConvertVot3"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
-import { PowerUpSummary } from "./PowerUpSummary"
+import { PowerDownB3trSummary } from "./PowerDownB3trSummary"
 import { handleAmountInput } from "./utils"
 
 const compactFormatter = getCompactFormatter(4)
@@ -25,7 +24,7 @@ type Props = {
   onClose: () => void
 }
 
-export const PowerUpModal = ({ isOpen, onClose }: Props) => {
+export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
@@ -35,22 +34,29 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
     if (isOpen) setAmount("")
   }, [isOpen])
 
-  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
-  const availableBalance = b3trBalance?.scaled ?? "0"
+  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
 
-  const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
-  const { open: openUpgradeModal } = useUpgradeSmartAccountModal({ accentColor: "#004CFC" })
+  // It can happen that a user converts B3TR to VOT3 then transfers VOT3 to another account.
+  // In this case, the available balance is less then the "convertedB3trOf", so using swappableVot3Balance would revert the transaction.
+  // There are also cases where a user receives VOT3 from another account, so the available balance is more than the "convertedB3trOf",
+  // so using vot3Balance would revert the transaction.
+  const availableBalance =
+    vot3Balance?.scaled > swappableVot3Balance?.scaled ? swappableVot3Balance?.scaled : (vot3Balance?.scaled ?? "0")
+
+  const showTransferredVOT3Warning =
+    BigInt(vot3Balance?.original || "0") > BigInt(swappableVot3Balance?.original || "0")
 
   const handleSuccess = useCallback(() => {
     onClose()
   }, [onClose])
 
-  const convertB3trMutation = useConvertB3tr({
+  const convertVot3Mutation = useConvertVot3({
     amount,
     transactionModalCustomUI: {
-      waitingConfirmation: { title: t("Powering up...") },
-      success: { title: t("Power up complete!") },
-      error: { title: t("Power up failed") },
+      waitingConfirmation: { title: t("Powering down...") },
+      success: { title: t("Power down complete!") },
+      error: { title: t("Power down failed") },
     },
     onSuccess: handleSuccess,
   })
@@ -59,9 +65,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
 
   const handleConfirm = () => {
     if (invalidAmount) return
-    if (isSmartAccountUpgradeRequired) return openUpgradeModal()
-    convertB3trMutation.resetStatus()
-    convertB3trMutation.sendTransaction()
+    convertVot3Mutation.resetStatus()
+    convertVot3Mutation.sendTransaction()
   }
 
   return (
@@ -72,12 +77,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
       modalContentProps={{ maxW: "500px" }}>
       <VStack gap={5} w="full">
         <Heading size="xl" textAlign="center" fontWeight="bold" data-testid={"tx-modal-title"}>
-          {t("Increase your Voting Power")}
+          {t("Reduce your Voting Power")}
         </Heading>
-
-        <Text mt={2} textStyle="xs" color="text.subtle" textAlign="center">
-          {t("1 B3TR = 1 Voting Power. You can redeem your B3TR back at any time.")}
-        </Text>
 
         <VStack
           bg="card.default"
@@ -92,7 +93,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           <Field.Root gap={2} required invalid={!!amount && Number(amount) > Number(availableBalance)}>
             <Field.Label w="full" alignItems="center" justifyContent="space-between">
               <Text textStyle="sm" color="text.subtle">
-                {t("Use available B3TR")}
+                {t("Use available Voting Power")}
               </Text>
               <Button
                 variant="link"
@@ -122,15 +123,15 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                 </NumberInput.Root>
                 <Field.ErrorText>
                   <Icon as={WarningTriangle} boxSize="4" />
-                  {t("Not enough B3TR")}
+                  {t("Not enough Voting Power")}
                 </Field.ErrorText>
               </VStack>
 
               <VStack align="end" gap={2} flexShrink={0}>
                 <HStack gap={2}>
-                  <B3TRIcon boxSize="24px" />
+                  <VOT3Icon boxSize="24px" />
                   <Text textStyle="lg" fontWeight="semibold">
-                    {"B3TR"}
+                    {"VOT3"}
                   </Text>
                 </HStack>
                 <Text textStyle="xs" color="text.subtle">
@@ -141,35 +142,14 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           </Field.Root>
         </VStack>
 
-        <PowerUpSummary mode="power-up" amount={amount} isHighlighted />
+        <PowerDownB3trSummary amount={amount} isHighlighted />
 
-        {Number(availableBalance) < 2 && (
-          <Card.Root
-            w="full"
-            mt={2}
-            p={3}
-            bg="card.default"
-            border="1px solid"
-            borderColor="border.secondary"
-            rounded="xl">
-            <HStack gap={3}>
-              <Icon as={Clock} boxSize="5" color="text.subtle" flexShrink={0} />
-              <VStack align="start" gap={0.5} flex={1}>
-                <HStack gap={1}>
-                  <Text textStyle="sm">
-                    {t("To increase it you need")}{" "}
-                    <Text as="span" fontWeight="semibold">
-                      {"B3TR"}
-                    </Text>
-                  </Text>
-                  <Icon as={NavArrowRight} boxSize="4" />
-                </HStack>
-                <Link asChild variant="underline" textStyle="sm" color="actions.primary.default">
-                  <NextLink href="/apps">{t("Use the apps to earn B3TR tokens")}</NextLink>
-                </Link>
-              </VStack>
-            </HStack>
-          </Card.Root>
+        {/* <PowerUpSummary mode="power-down" amount={amount} /> */}
+
+        {showTransferredVOT3Warning && (
+          <Text textStyle="xs" color="text.subtle">
+            {t("You can only convert Voting Power that you powered up yourself.")}
+          </Text>
         )}
 
         <VStack gap={2} mt={2} w="full">

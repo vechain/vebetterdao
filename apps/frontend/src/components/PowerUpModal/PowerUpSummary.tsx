@@ -47,6 +47,7 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
         <Text textStyle="3xl" fontWeight="bold" color={changeColor}>
           {sign}
           {formatter.format(numericAmount)}
+          {" VOT3"}
         </Text>
 
         <Skeleton loading={isVot3Loading}>
@@ -55,7 +56,7 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
               {t("Current Voting Power:")}
             </Text>
             <Text textStyle="sm" fontWeight="semibold">
-              {formatter.format(currentVotingPower)}
+              {formatter.format(currentVotingPower)} {"VOT3"}
             </Text>
           </HStack>
         </Skeleton>
@@ -71,7 +72,12 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
                 now={() => Date.now()}
                 renderer={({ days, hours, minutes }) => (
                   <Text textStyle="sm" fontWeight="semibold">
-                    {days}d {hours}h {minutes}m
+                    {days}
+                    {"d "}
+                    {hours}
+                    {"h "}
+                    {minutes}
+                    {"m"}
                   </Text>
                 )}
               />

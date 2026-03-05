@@ -51,6 +51,7 @@
   "+ {{count}} more": "+ {{count}} more",
   "+{{value}}": "+{{value}}",
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>ヒント</b>: 12か月の助成金では、マイルストーンを月次または四半期ごとに分割するのが最適です",
+  "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round": "次のラウンドで <bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3",
   "<bold>{{sign}}{{votingPowerNextRound}}</bold> votes in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold>次のラウンドでの投票数",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement": "<bold>本当にいいですか？</bold> {{endorsedAddress}}の支持を削除すると、{{value}}ポイントを失い、アプリが支持を失う可能性があります",
   "<bold>Resume distribution</bold> so your app can start rewarding users again. Make sure the rewards pool has funds available.": "<bold>配信を再開</bold>して、アプリがユーザーへの報酬配布を再び開始できるようにしてください。報酬プールに資金があることを確認してください。",

@@ -1,2 +1,2 @@
 export { PowerUpModal } from "./PowerUpModal"
-export { RedeemModal } from "./RedeemModal"
+export { PowerDownModal } from "./PowerDownModal"

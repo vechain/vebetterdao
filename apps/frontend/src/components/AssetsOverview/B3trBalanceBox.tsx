@@ -1,6 +1,6 @@
 "use client"
 
-import { Text, Skeleton } from "@chakra-ui/react"
+import { Text, Skeleton, Mark } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
@@ -17,12 +17,15 @@ export const B3trBalanceBox = () => {
   return (
     <StatCard
       variant="info"
-      title={t("Your B3TR balance")}
+      title={t("Your balance")}
       icon={<B3TRIcon />}
       subtitle={
         <Skeleton asChild loading={isLoading}>
-          <Text textStyle={{ base: "sm", md: "2xl" }} fontWeight="semibold">
-            {b3trBalance?.formatted ?? "-"}
+          <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>
+            <Mark variant="text" fontWeight="semibold">
+              {b3trBalance?.formatted ?? "-"}
+            </Mark>
+            {" B3TR"}
           </Text>
         </Skeleton>
       }
