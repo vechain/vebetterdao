@@ -64,7 +64,7 @@ export const ProposalShareModal = ({
           transactionModalState?.status !== "waitingConfirmation" && transactionModalState?.status !== "pending"
         }
         placement="center"
-        size={"xl"}>
+        size={"xs"}>
         <CustomModalContent>
           <ModalAnimation>
             <Dialog.CloseTrigger asChild top={4} right={4}>
