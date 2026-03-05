@@ -28,7 +28,13 @@ export const PowerDownContent = ({ onClose }: Props) => {
 
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
-  const availableBalance = swappableVot3Balance?.scaled ?? "0"
+
+  // It can happen that a user converts B3TR to VOT3 then transfers VOT3 to another account.
+  // In this case, the available balance is less then the "convertedB3trOf", so using swappableVot3Balance would revert the transaction.
+  // There are also cases where a user receives VOT3 from another account, so the available balance is more than the "convertedB3trOf",
+  // so using vot3Balance would revert the transaction.
+  const availableBalance =
+    vot3Balance?.scaled > swappableVot3Balance?.scaled ? swappableVot3Balance?.scaled : (vot3Balance?.scaled ?? "0")
 
   const showTransferredVOT3Warning =
     BigInt(vot3Balance?.original || "0") > BigInt(swappableVot3Balance?.original || "0")
