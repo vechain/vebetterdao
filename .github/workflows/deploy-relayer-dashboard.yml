@@ -34,7 +34,7 @@ jobs:
       - name: Build relayer-dashboard
         run: yarn relayer:build:mainnet
         env:
-          NEXT_PUBLIC_BASE_PATH: /b3tr
+          NEXT_PUBLIC_BASE_PATH: ""
           NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Upload Pages artifact
