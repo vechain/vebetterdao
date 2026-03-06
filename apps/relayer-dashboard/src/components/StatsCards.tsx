@@ -3,12 +3,11 @@
 import { Card, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
-import { useCurrentRoundId } from "@/hooks/useCurrentRoundId"
 import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers"
 import { useReportData } from "@/hooks/useReportData"
-import { useRoundRewardStatus } from "@/hooks/useRoundRewardStatus"
 import { useTotalAutoVotingUsers } from "@/hooks/useTotalAutoVotingUsers"
-import { computeAggregateROI } from "@/lib/roi"
+import { formatNumber, formatToken } from "@/lib/format"
+import { computeAverageROI } from "@/lib/roi"
 
 interface StatItemProps {
   label: string
@@ -42,12 +41,18 @@ function StatItem({ label, value, sublabel, isLoading }: StatItemProps) {
   )
 }
 
+function computeTotalRewardsRaw(rounds: { totalRelayerRewardsRaw: string }[]): string {
+  let total = BigInt(0)
+  for (const r of rounds) {
+    total += BigInt(r.totalRelayerRewardsRaw)
+  }
+  return total.toString()
+}
+
 export function StatsCards() {
   const { data: report, isLoading, error } = useReportData()
   const { totalUsers: onChainUsers, isLoading: usersLoading } = useTotalAutoVotingUsers()
   const { count: relayerCount, isLoading: relayersLoading } = useRegisteredRelayers()
-  const { data: currentRoundId } = useCurrentRoundId()
-  const previousRoundReward = useRoundRewardStatus(currentRoundId != null ? currentRoundId - 1 : undefined)
   const b3trToVtho = useB3trToVthoRate()
 
   if (error) {
@@ -59,15 +64,18 @@ export function StatsCards() {
   }
 
   const rounds = report?.rounds ?? []
-  const roi = computeAggregateROI(rounds, b3trToVtho)
+  const concludedRounds = rounds.filter(r => r.isRoundEnded && r.totalRelayerRewardsRaw !== "0")
+  const roi = computeAverageROI(concludedRounds, b3trToVtho)
+  const totalRewards = computeTotalRewardsRaw(rounds)
 
-  const roiSublabel = b3trToVtho != null ? `1 B3TR = ${Math.round(b3trToVtho)} VTHO` : "1 B3TR = … VTHO"
+  const roiSublabel =
+    b3trToVtho != null ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO` : "1 B3TR = \u2026 VTHO"
 
   return (
     <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap="4">
       <StatItem
         label="Auto-voting users"
-        value={usersLoading ? "..." : onChainUsers != null ? onChainUsers.toLocaleString() : "\u2014"}
+        value={usersLoading ? "..." : onChainUsers != null ? formatNumber(onChainUsers) : "\u2014"}
         sublabel="current total"
         isLoading={usersLoading}
       />
@@ -78,14 +86,14 @@ export function StatsCards() {
         isLoading={relayersLoading}
       />
       <StatItem
-        label="Reward pool"
-        value={previousRoundReward.totalRewardsFormatted ?? "\u2014"}
-        sublabel={"Previous round"}
-        isLoading={previousRoundReward.isLoading}
+        label="Total rewards"
+        value={isLoading ? "..." : `${formatToken(totalRewards)} B3TR`}
+        sublabel="all rounds"
+        isLoading={isLoading}
       />
       <StatItem
         label="Average ROI"
-        value={isLoading ? "..." : roi != null ? `${Math.round(roi)}%` : "\u2014"}
+        value={isLoading ? "..." : roi != null ? `${formatNumber(Math.round(roi))}%` : "\u2014"}
         sublabel={roiSublabel}
         isLoading={isLoading}
       />

@@ -5,7 +5,7 @@ import NextLink from "next/link"
 import type { ReactNode } from "react"
 import { FaAngleRight } from "react-icons/fa6"
 
-import { formatToken } from "@/lib/format"
+import { formatNumber, formatToken } from "@/lib/format"
 import type { RoundAnalytics } from "@/lib/types"
 
 interface RoundCardProps {
@@ -86,7 +86,7 @@ export function RoundCard({ round, roi, expectedRoi }: RoundCardProps) {
                   </HStack>
                 }
               />
-              <StatPill label="Users" value={round.autoVotingUsersCount.toLocaleString()} />
+              <StatPill label="Users" value={formatNumber(round.autoVotingUsersCount)} />
               <StatPill label="Relayers" value={round.numRelayers} />
               <StatPill label="Status" value={round.actionStatus} valueColor={statusColor(round)} />
               <StatPill label="VTHO spent" value={formatToken(round.vthoSpentTotalRaw)} unit="VTHO" />
@@ -97,7 +97,7 @@ export function RoundCard({ round, roi, expectedRoi }: RoundCardProps) {
               />
               <StatPill
                 label={roiLabel}
-                value={displayRoi != null ? `${Math.round(displayRoi).toLocaleString()}%` : "-"}
+                value={displayRoi != null ? `${formatNumber(Math.round(displayRoi))}%` : "-"}
                 valueColor={displayRoi != null ? "status.positive.primary" : undefined}
               />
             </SimpleGrid>

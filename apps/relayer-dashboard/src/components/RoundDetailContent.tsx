@@ -1,11 +1,13 @@
 "use client"
 
-import { Card, Grid, HStack, Icon, Progress, Separator, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Grid, HStack, Icon, Progress, Separator, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { CURRENCY_SYMBOLS, useCurrentCurrency, useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import type { ReactNode } from "react"
-import { LuMonitor, LuUsers } from "react-icons/lu"
+import { LuWallet, LuUsers } from "react-icons/lu"
+import { formatEther } from "viem"
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
-import { formatToken } from "@/lib/format"
+import { formatNumber, formatToken } from "@/lib/format"
 import { computeROI } from "@/lib/roi"
 import type { RoundAnalytics } from "@/lib/types"
 
@@ -88,12 +90,14 @@ function FinancialCell({
   label,
   value,
   unit,
+  usdValue,
   highlighted,
   valueColor,
 }: {
   label: string
   value: string
   unit?: string
+  usdValue?: string
   highlighted?: boolean
   valueColor?: string
 }) {
@@ -102,16 +106,23 @@ function FinancialCell({
       <Text textStyle="sm" color="text.subtle">
         {label}
       </Text>
-      <HStack gap="1">
-        <Text textStyle="sm" fontWeight="semibold" color={valueColor}>
-          {value}
-        </Text>
-        {unit && (
-          <Text textStyle="xs" color="text.subtle">
-            {unit}
+      <VStack gap="0" align="end">
+        <HStack gap="1">
+          <Text textStyle="sm" fontWeight="semibold" color={valueColor}>
+            {value}
+          </Text>
+          {unit && (
+            <Text textStyle="xs" color="text.subtle">
+              {unit}
+            </Text>
+          )}
+        </HStack>
+        {usdValue && (
+          <Text textStyle="xxs" color="text.subtle">
+            {usdValue}
           </Text>
         )}
-      </HStack>
+      </VStack>
     </HStack>
   )
 }
@@ -124,7 +135,7 @@ function MiniStatCard({ label, value }: { label: string; value: string | number 
           {label}
         </Text>
         <Text textStyle={{ base: "xl", md: "2xl" }} fontWeight="bold">
-          {typeof value === "number" ? value.toLocaleString() : value}
+          {typeof value === "number" ? formatNumber(value) : value}
         </Text>
       </VStack>
     </Card.Root>
@@ -136,8 +147,29 @@ interface RoundDetailContentProps {
   generatedAt?: string
 }
 
+function rawToFiat(
+  rawValue: string,
+  tokenUsdPrice: number | undefined,
+  currencyRate: number,
+  symbol: string,
+): string | undefined {
+  if (tokenUsdPrice == null) return undefined
+  const amount = Number(formatEther(BigInt(rawValue)))
+  if (amount === 0) return `${symbol}0.00`
+  const fiat = (amount * tokenUsdPrice) / currencyRate
+  return `${symbol}${fiat.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
 export function RoundDetailContent({ round, generatedAt }: RoundDetailContentProps) {
   const b3trToVtho = useB3trToVthoRate()
+  const { data: b3trUsd } = useGetTokenUsdPrice("B3TR")
+  const { data: vthoUsd } = useGetTokenUsdPrice("VTHO")
+  const { data: eurRate } = useGetTokenUsdPrice("EUR")
+  const { data: gbpRate } = useGetTokenUsdPrice("GBP")
+  const { currentCurrency } = useCurrentCurrency()
+
+  const currencySymbol = CURRENCY_SYMBOLS[currentCurrency]
+  const currencyRate = currentCurrency === "eur" ? (eurRate ?? 1) : currentCurrency === "gbp" ? (gbpRate ?? 1) : 1
 
   const completionPct =
     round.expectedActions > 0 ? Math.round((round.completedActions / round.expectedActions) * 100) : 0
@@ -169,7 +201,7 @@ export function RoundDetailContent({ round, generatedAt }: RoundDetailContentPro
                 <SectionHeader title="Round Summary" />
                 <VStack gap="2" align="stretch">
                   <SummaryRow label="Current Status" value={round.actionStatus} valueColor={statusColor} />
-                  <SummaryRow label="Total Users" value={round.autoVotingUsersCount.toLocaleString()} />
+                  <SummaryRow label="Total Users" value={formatNumber(round.autoVotingUsersCount)} />
                   <SummaryRow label="Active Relayers" value={round.numRelayers} />
                 </VStack>
                 <Separator />
@@ -215,12 +247,12 @@ export function RoundDetailContent({ round, generatedAt }: RoundDetailContentPro
                   <MetricCell
                     label="Expected Actions"
                     sublabel="Projected based on users"
-                    value={round.expectedActions.toLocaleString()}
+                    value={formatNumber(round.expectedActions)}
                   />
                   <MetricCell
                     label="Completed Actions"
                     sublabel="Successfully executed"
-                    value={round.completedActions.toLocaleString()}
+                    value={formatNumber(round.completedActions)}
                     valueColor="status.positive.primary"
                   />
                   <MetricCell label="Auto-vote Participation" value={participation} />
@@ -233,33 +265,44 @@ export function RoundDetailContent({ round, generatedAt }: RoundDetailContentPro
           <Card.Root variant="primary">
             <Card.Body>
               <VStack gap="3" align="stretch">
-                <SectionHeader title="Financials & Performance" icon={<LuMonitor />} />
+                <SectionHeader title="Financials & Performance" icon={<LuWallet />} />
                 <SimpleGrid columns={{ base: 1, md: 2 }} gap="2">
-                  <FinancialCell label="VTHO (Voting)" value={formatToken(round.vthoSpentOnVotingRaw)} unit="VTHO" />
                   <FinancialCell
-                    label="Accrued Rewards"
-                    value={formatToken(round.totalRelayerRewardsRaw)}
+                    label="VTHO (Voting)"
+                    value={formatToken(round.vthoSpentOnVotingRaw)}
+                    unit="VTHO"
+                    usdValue={rawToFiat(round.vthoSpentOnVotingRaw, vthoUsd, currencyRate, currencySymbol)}
+                  />
+                  <FinancialCell
+                    label={round.isRoundEnded ? "Accrued Rewards" : "Projected Rewards"}
+                    value={formatToken(
+                      round.isRoundEnded ? round.totalRelayerRewardsRaw : round.estimatedRelayerRewardsRaw,
+                    )}
                     unit="B3TR"
+                    usdValue={rawToFiat(
+                      round.isRoundEnded ? round.totalRelayerRewardsRaw : round.estimatedRelayerRewardsRaw,
+                      b3trUsd,
+                      currencyRate,
+                      currencySymbol,
+                    )}
                   />
                   <FinancialCell
                     label="VTHO (Claiming)"
                     value={formatToken(round.vthoSpentOnClaimingRaw)}
                     unit="VTHO"
+                    usdValue={rawToFiat(round.vthoSpentOnClaimingRaw, vthoUsd, currencyRate, currencySymbol)}
                   />
-                  <FinancialCell
-                    label="Projected Rewards"
-                    value={formatToken(round.estimatedRelayerRewardsRaw)}
-                    unit="B3TR"
-                  />
+                  <Box />
                   <FinancialCell
                     label="Total VTHO Spent"
                     value={formatToken(round.vthoSpentTotalRaw)}
                     unit="VTHO"
+                    usdValue={rawToFiat(round.vthoSpentTotalRaw, vthoUsd, currencyRate, currencySymbol)}
                     highlighted
                   />
                   <FinancialCell
                     label={roiLabel}
-                    value={roi != null ? `${Math.round(roi).toLocaleString()}%` : "\u2014"}
+                    value={roi != null ? `${formatNumber(Math.round(roi))}%` : "\u2014"}
                     highlighted
                     valueColor="status.positive.primary"
                   />
