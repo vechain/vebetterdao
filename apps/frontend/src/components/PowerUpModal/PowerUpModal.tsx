@@ -7,6 +7,7 @@ import { Clock, NavArrowRight, WarningTriangle } from "iconoir-react"
 import NextLink from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { parseEther } from "viem"
 
 import { BaseModal } from "@/components/BaseModal"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
@@ -55,7 +56,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
     onSuccess: handleSuccess,
   })
 
-  const invalidAmount = !amount || amount === "." || Number(amount) === 0 || Number(amount) > Number(availableBalance)
+  const invalidAmount =
+    !amount || amount === "." || Number(amount) === 0 || parseEther(amount) > BigInt(b3trBalance?.original ?? "0")
 
   const handleConfirm = () => {
     if (invalidAmount) return
@@ -89,7 +91,10 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           gap={2}
           align="start"
           w="full">
-          <Field.Root gap={2} required invalid={!!amount && Number(amount) > Number(availableBalance)}>
+          <Field.Root
+            gap={2}
+            required
+            invalid={!!amount && amount !== "." && parseEther(amount) > BigInt(b3trBalance?.original ?? "0")}>
             <Field.Label w="full" alignItems="center" justifyContent="space-between">
               <Text textStyle="sm" color="text.subtle">
                 {t("Use available B3TR")}

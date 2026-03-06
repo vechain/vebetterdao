@@ -6,6 +6,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { WarningTriangle } from "iconoir-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { parseEther } from "viem"
 
 import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
 import { BaseModal } from "@/components/BaseModal"
@@ -41,11 +42,14 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   // In this case, the available balance is less then the "convertedB3trOf", so using swappableVot3Balance would revert the transaction.
   // There are also cases where a user receives VOT3 from another account, so the available balance is more than the "convertedB3trOf",
   // so using vot3Balance would revert the transaction.
+  const vot3Original = BigInt(vot3Balance?.original || "0")
+  const swappableOriginal = BigInt(swappableVot3Balance?.original || "0")
+  const availableBalanceOriginal = vot3Original > swappableOriginal ? swappableOriginal : vot3Original
+
   const availableBalance =
     vot3Balance?.scaled > swappableVot3Balance?.scaled ? swappableVot3Balance?.scaled : (vot3Balance?.scaled ?? "0")
 
-  const showTransferredVOT3Warning =
-    BigInt(vot3Balance?.original || "0") > BigInt(swappableVot3Balance?.original || "0")
+  const showTransferredVOT3Warning = vot3Original > swappableOriginal
 
   const handleSuccess = useCallback(() => {
     onClose()
@@ -61,7 +65,8 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
     onSuccess: handleSuccess,
   })
 
-  const invalidAmount = !amount || amount === "." || Number(amount) === 0 || Number(amount) > Number(availableBalance)
+  const invalidAmount =
+    !amount || amount === "." || Number(amount) === 0 || parseEther(amount) > availableBalanceOriginal
 
   const handleConfirm = () => {
     if (invalidAmount) return
@@ -90,7 +95,10 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
           gap={2}
           align="start"
           w="full">
-          <Field.Root gap={2} required invalid={!!amount && Number(amount) > Number(availableBalance)}>
+          <Field.Root
+            gap={2}
+            required
+            invalid={!!amount && amount !== "." && parseEther(amount) > availableBalanceOriginal}>
             <Field.Label w="full" alignItems="center" justifyContent="space-between">
               <Text textStyle="sm" color="text.subtle">
                 {t("Use available Voting Power")}
