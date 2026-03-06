@@ -361,23 +361,23 @@
     },
     "relayer-dashboard#build": {
       "cache": true,
-      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "dependsOn": ["@vechain/vebetterdao-contracts#build", "@repo/config#check-or-generate-local-config"],
       "outputs": ["out/**", ".next/**", "!.next/cache/**"]
     },
     "relayer-dashboard#dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+      "dependsOn": ["@vechain/vebetterdao-contracts#build", "@repo/config#check-or-generate-local-config"]
     },
     "relayer-dashboard#dev:staging": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+      "dependsOn": ["@vechain/vebetterdao-contracts#build", "@repo/config#check-or-generate-local-config"]
     },
     "relayer-dashboard#dev:mainnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+      "dependsOn": ["@vechain/vebetterdao-contracts#build", "@repo/config#check-or-generate-local-config"]
     }
   }
 }
