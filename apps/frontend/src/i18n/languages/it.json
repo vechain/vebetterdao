@@ -1290,7 +1290,7 @@
   "Round {{roundId}}": "Round {{roundId}}",
   "Round #{{round}}": "Round #{{round}}",
   "Round #{{roundId}}: {{dateString}}": "Giro #{{roundId}}: {{dateString}}",
-  "Round apps": "App arrotondate",
+  "Round apps": "App del round",
   "Round dates": "Date dei round",
   "Round details": "Dettagli del turno",
   "Round ended": "Round terminato",

@@ -1290,7 +1290,7 @@
   "Round {{roundId}}": "輪次 {{roundId}}",
   "Round #{{round}}": "回合 #{{round}}",
   "Round #{{roundId}}: {{dateString}}": "回合#{{roundId}}：{{dateString}}",
-  "Round apps": "環形應用",
+  "Round apps": "回合應用",
   "Round dates": "回合日期",
   "Round details": "回合詳情",
   "Round ended": "輪次結束",
