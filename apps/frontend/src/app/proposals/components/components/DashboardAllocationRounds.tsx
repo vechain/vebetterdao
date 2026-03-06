@@ -11,23 +11,33 @@ import {
   Text,
   VStack,
   Button,
+  Mark,
 } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { useCallClause } from "@vechain/vechain-kit"
 import { Gift, NavArrowLeft, NavArrowRight, Activity } from "iconoir-react"
 import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { LiaBalanceScaleSolid } from "react-icons/lia"
 
 import { ActivityFeed } from "@/components/Activities"
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
+import { blockNumberToDate } from "@/utils/date"
 
 import { useAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
 import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { ProposalCompactCard } from "../../../../components/ProposalCompactCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
+
+const xAllocationVotingAbi = XAllocationVoting__factory.abi
+const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 
 type Props = {
   isBottomSheet?: boolean
@@ -63,7 +73,7 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
-  const { allocationRound, proposalsToRender } = useRoundProposals(selectedRoundId ?? "1")
+  const { allocationRound, proposalsToRender, proposalsLoading } = useRoundProposals(selectedRoundId ?? "1")
   // First active, then looking for support (pending + deposit not met)
   const sortedProposals = useMemo(() => {
     return proposalsToRender.sort((a, b) => {
@@ -74,6 +84,16 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
       return getPriority(a) - getPriority(b)
     })
   }, [proposalsToRender])
+
+  const { data: [deadlineBlock] = [] } = useCallClause({
+    abi: xAllocationVotingAbi,
+    address: xAllocationVotingAddress,
+    method: "currentRoundDeadline" as const,
+    args: [],
+  })
+
+  const { data: bestBlockCompressed } = useBestBlockCompressed()
+
   return (
     <Card.Root variant={"primary"} px={isBottomSheet ? 0 : undefined} borderWidth={isBottomSheet ? 0 : undefined}>
       <Card.Body gap="8">
@@ -88,40 +108,78 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             <NavArrowLeft />
           </IconButton>
 
-          <HStack divideX="1px" divideColor="border.secondary" gap="6">
-            <VStack gap="1" align={{ base: "center", md: "start" }}>
-              <Text textStyle="md" color="text.subtle">
-                {t("Round")}
-              </Text>
-              <Heading size="6xl">{selectedRoundId}</Heading>
-            </VStack>
-            <VStack gap="1" pl="6" align={{ base: "center", md: "start" }}>
-              <Text textStyle="md" color="text.subtle">
-                {t("Round dates")}
-              </Text>
-              <Skeleton loading={roundInfoLoading}>
-                <Heading size="lg">
-                  {roundInfo.voteStartTimestamp?.format("MMM D")}
-                  {"-"}
-                  {roundInfo.voteEndTimestamp?.format("MMM D")}
-                </Heading>
-              </Skeleton>
-
-              {selectedRoundId === currentRoundId ? (
-                <Flex h="full" alignItems="flex-start">
-                  <Badge size="md" variant="positive">
-                    {t("Active")}
-                  </Badge>
-                </Flex>
-              ) : (
-                <Flex h="full" alignItems="flex-start">
-                  <Badge size="md" variant="neutral">
-                    {t("Concluded")}
-                  </Badge>
-                </Flex>
+          <VStack gap="3" align={{ base: "center", md: "start" }} w={{ base: "full", md: "auto" }}>
+            <HStack divideX="1px" divideColor="border.secondary" gap="6">
+              <VStack gap="1" align={{ base: "center", md: "start" }}>
+                <Text textStyle="md" color="text.subtle">
+                  {t("Round")}
+                </Text>
+                <Heading size="lg">{selectedRoundId}</Heading>
+              </VStack>
+              <VStack gap="1" pl="6" align={{ base: "center", md: "start" }}>
+                <Text textStyle="md" color="text.subtle">
+                  {t("Round dates")}
+                </Text>
+                <Skeleton loading={roundInfoLoading}>
+                  <Heading size="lg">
+                    {roundInfo.voteStartTimestamp?.format("MMM D")}
+                    {"-"}
+                    {roundInfo.voteEndTimestamp?.format("MMM D")}
+                  </Heading>
+                </Skeleton>
+              </VStack>
+              {isCurrentRound && (
+                <VStack gap="1" pl="6" align="start" display={{ base: "none", md: "flex" }}>
+                  <Text textStyle="md" color="text.subtle">
+                    {t("Time left")}
+                  </Text>
+                  {deadlineBlock && (
+                    <Countdown
+                      now={() => Date.now()}
+                      date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
+                      renderer={({ days, hours, minutes }) => (
+                        <Text textStyle="lg">
+                          <Mark variant="text" fontWeight="semibold">
+                            {days}
+                          </Mark>
+                          {"d "}
+                          <Mark variant="text" fontWeight="semibold">
+                            {hours}
+                          </Mark>
+                          {"h "}
+                          <Mark variant="text" fontWeight="semibold">
+                            {minutes}
+                          </Mark>
+                          {"m "}
+                        </Text>
+                      )}
+                    />
+                  )}
+                </VStack>
               )}
-            </VStack>
-          </HStack>
+            </HStack>
+
+            <HStack gap="2" w="full" justifyContent="center" display={{ base: "flex", md: "none" }}>
+              {isCurrentRound && deadlineBlock && (
+                <Countdown
+                  now={() => Date.now()}
+                  date={blockNumberToDate(deadlineBlock, bestBlockCompressed)}
+                  renderer={({ days, hours, minutes }) => (
+                    <Badge size="md" variant="neutral">
+                      {t("Time left")}
+                      {": "}
+                      {days}
+                      {"d "}
+                      {hours}
+                      {"h "}
+                      {minutes}
+                      {"m"}
+                    </Badge>
+                  )}
+                />
+              )}
+            </HStack>
+          </VStack>
 
           <IconButton
             variant="outline"
@@ -175,12 +233,12 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             </Skeleton>
           </VStack>
           <Button asChild variant="primary" size="sm" alignSelf="end">
-            <NextLink href={`/allocations/round?round=${selectedRoundId}`}>{t("View round details")}</NextLink>
+            <NextLink href={`/allocations/round?roundId=${selectedRoundId}`}>{t("View round details")}</NextLink>
           </Button>
         </Flex>
 
         {/* {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />} */}
-        {!!sortedProposals.length && (
+        {(proposalsLoading || !!sortedProposals.length) && (
           <VStack gap="3" w="full" justifyContent="flex-start" alignItems="stretch">
             <HStack gap="2">
               <Icon as={LiaBalanceScaleSolid} boxSize="6" color="text.subtle" />
@@ -190,9 +248,11 @@ export const DashboardAllocationRounds: React.FC<Props> = ({ isBottomSheet = fal
             </HStack>
 
             <VStack gap="3" w="full" justifyContent="flex-start">
-              {sortedProposals.map(proposal => (
-                <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
-              ))}
+              {proposalsLoading
+                ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} height="80px" w="full" rounded="lg" />)
+                : sortedProposals.map(proposal => (
+                    <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
+                  ))}
             </VStack>
           </VStack>
         )}

@@ -17,7 +17,6 @@ import { useUpgradeGM } from "../hooks/galaxyMember/useUpgradeGM"
 
 import { GetFreeNFTModal } from "./GmNFTAndNodeCard/GetFreeNFTModal"
 import { MintNFTModal } from "./MintNFTModal"
-import { Tooltip } from "./ui/tooltip"
 
 export const GmActionButton = ({
   b3trBalanceScaled,
@@ -98,7 +97,7 @@ export const GmActionButton = ({
     // Case 1: User hasn't voted and doesn't own GM NFT
     if (!hasUserVoted && !isGMOwned) {
       return (
-        <Button {...buttonProps} asChild>
+        <Button w="full" {...buttonProps} asChild>
           <NextLink href="/allocations/vote">{t("Vote now")}</NextLink>
         </Button>
       )
@@ -107,31 +106,25 @@ export const GmActionButton = ({
     // Case 2: User doesn't own GM NFT
     if (!isGMOwned) {
       return (
-        <Button {...buttonProps} onClick={onOpenGetFreeNFTModal}>
+        <Button w="full" {...buttonProps} onClick={onOpenGetFreeNFTModal}>
           {t("Get free NFT")}
         </Button>
       )
     }
 
+    if (isMaxGmLevelReached) {
+      return null
+    }
+
+    if (!isEnoughBalanceToUpgradeGM) {
+      return null
+    }
+
     // Default case: Upgrade GM
     return (
-      <Tooltip
-        positioning={{ placement: "bottom" }}
-        disabled={!isMaxGmLevelReached && !!isEnoughBalanceToUpgradeGM}
-        content={
-          isMaxGmLevelReached
-            ? t("You have reached the maximum GM NFT level.")
-            : t("Not enough balance to upgrade your GM NFT to the next level.")
-        }>
-        <span>
-          <Button
-            {...buttonProps}
-            disabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-            onClick={handleOnUpgrade}>
-            {t("Upgrade NFT")}
-          </Button>
-        </span>
-      </Tooltip>
+      <Button w="full" {...buttonProps} onClick={handleOnUpgrade}>
+        {t("Upgrade NFT")}
+      </Button>
     )
   }, [
     buttonProps,

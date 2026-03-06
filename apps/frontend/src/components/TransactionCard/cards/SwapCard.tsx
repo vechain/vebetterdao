@@ -2,8 +2,8 @@ import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/reac
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
-import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
+import { formatEther } from "viem"
 
 import { Transaction } from "../../../api/indexer/transactions/useTransactions"
 import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
@@ -20,7 +20,7 @@ export const SwapCard = ({ transaction, vot3ToB3tr }: Props) => {
   const actionModal = useDisclosure()
   const { isConnectedUser } = useRetrieveProfilIdentity()
   return (
-    <Card.Root size="sm" variant={"primary"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
+    <Card.Root size="sm" variant="subtle" px={3} py={2} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>
         <HStack gap={3} w="full" justify="space-between">
           <HStack gap={4}>
@@ -52,15 +52,11 @@ export const SwapCard = ({ transaction, vot3ToB3tr }: Props) => {
             <HStack gap={2}>
               <Text fontWeight="semibold">
                 {"+"}
-                {compactFormatter.format(Number(ethers.formatEther(transaction?.outputValue ?? 0)))}
+                {transaction?.outputValue
+                  ? compactFormatter.format(Number(formatEther(BigInt(transaction.outputValue))))
+                  : "0"}
               </Text>
               <Text textStyle="sm">{vot3ToB3tr ? "B3TR" : "VOT3"}</Text>
-            </HStack>
-            <HStack gap={2} textStyle={"xs"} color={"#6A6A6A"}>
-              <Text fontWeight="semibold">
-                {compactFormatter.format(Number(ethers.formatEther(transaction?.inputValue ?? 0)))}
-              </Text>
-              <Text>{vot3ToB3tr ? "VOT3" : "B3TR"}</Text>
             </HStack>
           </VStack>
         </HStack>

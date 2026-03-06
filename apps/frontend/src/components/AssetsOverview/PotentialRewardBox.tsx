@@ -7,11 +7,11 @@ import { RelayerRewardsPool__factory } from "@vechain/vebetterdao-contracts/fact
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { useCallClause, useMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
+import { Gift } from "iconoir-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
-import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
 
 import { StatCard } from "./StatCard"
@@ -120,9 +120,9 @@ export const PotentialRewardBox = () => {
 
   return (
     <StatCard
-      variant="info"
-      title={t("Potential rewards")}
-      icon={<B3TRIcon />}
+      variant="warning"
+      title={t("Your potential rewards")}
+      icon={<Gift />}
       subtitle={
         <Skeleton asChild loading={isLoading}>
           <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>

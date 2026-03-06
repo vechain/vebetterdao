@@ -33,7 +33,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
     hasExistingPreferences,
     hasAutoVoteChanges,
     selectedAppIds,
-    hasEnoughVotesAtSnapshot,
+    isEligibleToVote,
     onVoteClick,
     onEditAutoVote,
     onCancelEditAutoVote,
@@ -80,7 +80,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
       return {
         type: "vote" as const,
         primaryText: text,
-        primaryDisabled: !hasEnoughVotesAtSnapshot || count === 0,
+        primaryDisabled: !isEligibleToVote || count === 0,
         primaryOnClick: onVoteClick,
       }
     }
@@ -100,7 +100,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
     hasExistingPreferences,
     hasAutoVoteChanges,
     selectedAppIds.size,
-    hasEnoughVotesAtSnapshot,
+    isEligibleToVote,
     onVoteClick,
     onEditAutoVote,
     onCancelEditAutoVote,

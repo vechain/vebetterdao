@@ -9,6 +9,9 @@ import { useTranslation } from "react-i18next"
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 import { useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useCreatorNftBalance } from "../../api/contracts/x2EarnCreator/useCreatorNftBalance"
+import { useHasCreatorNFT } from "../../api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useAppsCountFromCreator } from "../../api/contracts/xApps/hooks/useAppsCountFromCreator"
 import { useGetUserNodes, UserNode } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useRetrieveProfilIdentity } from "../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
@@ -16,7 +19,6 @@ import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
 import { GmActionButton } from "../GmActionButton"
 
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
-import { SwapB3trVot3 } from "./components/SwapB3trVot3"
 import { GmCard } from "./GmCard"
 import { GmEmptyStateCard } from "./GmEmptyStateCard"
 
@@ -25,13 +27,22 @@ export const GmNFTAndNodeCard = () => {
   const router = useRouter()
   const { t } = useTranslation()
   const { data: b3trBalance } = useGetB3trBalance(account?.address)
-  const { isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
+  const { viewMode } = useRetrieveProfilIdentity()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
   const { data: userNodesInfo, isLoading: isNodesLoading } = useGetUserNodes()
+  const { data: hasCreatorNFT } = useHasCreatorNFT(account?.address ?? "")
+  const { data: creatorNftBalance } = useCreatorNftBalance(account?.address ?? "")
+  const { data: appsCountFromCreator } = useAppsCountFromCreator(account?.address ?? "")
   const { isMobile } = useBreakpoints()
   const selectedGM = useMemo(() => userGMs?.find(gm => gm.isSelected), [userGMs])
   const isLoading = isUserGMsLoading || isNodesLoading
-  const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && userNodesInfo?.nodesManagedByUser?.length === 0
+  const userHasNoNodeOrGm =
+    !isLoading && userGMs?.length === 0 && userNodesInfo?.nodesManagedByUser?.length === 0 && !hasCreatorNFT
+  const submissionsAvailable = Math.max(0, (creatorNftBalance ?? 0) - (appsCountFromCreator ?? 0))
+  const creatorNftFooter =
+    submissionsAvailable === 1
+      ? t("1 app submission available")
+      : t("{{count}} app submissions available", { count: submissionsAvailable })
 
   const totalPoints = userNodesInfo?.totalEndorsementScore?.toString() ?? "0"
 
@@ -46,23 +57,24 @@ export const GmNFTAndNodeCard = () => {
   return (
     <Card.Root
       asChild
-      bg="banner.dashboard-tokens"
+      variant="outline"
       rounded="xl"
       p="6"
-      color="white"
+      w="full"
+      color="text.default"
       position="relative"
       overflow={"hidden"}
       border="0">
-      <Flex direction={{ base: "column-reverse", md: "row" }} gap="8">
+      <Flex direction={{ base: "column-reverse", md: "column-reverse" }} gap="8">
         <Stack flex={1} gap="4">
-          <Heading textStyle="xl" color="white" fontWeight="bold">
+          <Heading textStyle="xl" color="text.default" fontWeight="bold">
             {t("Your NFTs")}
           </Heading>
 
           {userHasNoNodeOrGm ? (
             <GmEmptyStateCard
               icon={
-                <Icon boxSize="60px" color="white">
+                <Icon boxSize="60px" color="icon.default">
                   <NFTEarthIcon />
                 </Icon>
               }
@@ -71,7 +83,7 @@ export const GmNFTAndNodeCard = () => {
               )}
             />
           ) : (
-            <Stack gap="4" direction={{ base: "column", md: "row" }} align="stretch" justify="center">
+            <Stack gap="4" direction={{ base: "column", md: "column" }} align="stretch" justify="center">
               {userGMs && userGMs?.length > 0 ? (
                 <GmCard
                   subtitle={t("Galaxy Member")}
@@ -83,7 +95,7 @@ export const GmNFTAndNodeCard = () => {
               ) : (
                 <GmEmptyStateCard
                   icon={
-                    <Icon boxSize="60px" color="white">
+                    <Icon boxSize="60px" color="icon.default">
                       <NFTEarthIcon />
                     </Icon>
                   }
@@ -110,6 +122,18 @@ export const GmNFTAndNodeCard = () => {
                   onCardClick={() => router.push("/nodes")}
                 />
               )}
+
+              {hasCreatorNFT && (
+                <GmCard
+                  subtitle={t("Creator NFT")}
+                  title={t("Creator NFT")}
+                  footer={creatorNftFooter}
+                  images={["/assets/images/creator-nft.webp"]}
+                  href="/apps/new/form"
+                  imageSize="62px"
+                  imageRounded="xl"
+                />
+              )}
             </Stack>
           )}
 
@@ -123,8 +147,6 @@ export const GmNFTAndNodeCard = () => {
             />
           </Box>
         </Stack>
-
-        {account?.address && !isOnProfilePage && <SwapB3trVot3 address={account?.address} />}
       </Flex>
     </Card.Root>
   )

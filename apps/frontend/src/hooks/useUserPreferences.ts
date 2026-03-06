@@ -17,21 +17,17 @@ export type UseUserPreferencesReturn = {
   setDefaults: (defaults: UserPreferences) => void
 }
 
+const ANONYMOUS_STORE_KEY = "anonymous"
+
 /**
  * Hook for getting and managing user preferences based on connected wallet address
- * Automatically creates/retrieves isolated store for current wallet
- * Subscribes to store changes for instant UI updates
- * Returns wallet-specific preferences if stored, otherwise returns default preferences
- * Returns null when no wallet is connected and no defaults set
+ * When logged out, uses an anonymous store so dismissable banners (e.g. NewAppBanner) can still be closed.
  */
 export const useUserPreferences = (): UseUserPreferencesReturn => {
   const { account } = useWallet()
-  const walletAddress = account?.address
+  const walletAddress = account?.address ?? ANONYMOUS_STORE_KEY
 
-  const store = useMemo(() => {
-    if (!walletAddress) return null
-    return createUserPreferencesStore(walletAddress)
-  }, [walletAddress])
+  const store = useMemo(() => createUserPreferencesStore(walletAddress), [walletAddress])
 
   const [storeState, setStoreState] = useState<UserPreferencesStoreState | null>(() => {
     if (!store) return null
@@ -53,7 +49,7 @@ export const useUserPreferences = (): UseUserPreferencesReturn => {
     return unsubscribe
   }, [store])
 
-  if (!walletAddress || !storeState) {
+  if (!storeState) {
     return {
       preferences: null,
       setPreferences: () => {},
@@ -64,7 +60,7 @@ export const useUserPreferences = (): UseUserPreferencesReturn => {
   }
 
   return {
-    preferences: storeState.getData(),
+    preferences: storeState.getData() ?? {},
     setPreferences: (preferences: UserPreferences) => storeState.setData(preferences),
     updatePreferences: (updates: Partial<UserPreferences>) => storeState.updateData(updates),
     clearPreferences: () => storeState.clearData(),

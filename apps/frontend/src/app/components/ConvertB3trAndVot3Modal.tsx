@@ -53,7 +53,7 @@ enum PowerUpStep {
 
 const compactFormatter = getCompactFormatter(4)
 
-export const PowerUpModal = ({ title = "Convert tokens", isOpen, onClose }: Props) => {
+export const ConvertB3trAndVot3Modal = ({ title = "Convert tokens", isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)

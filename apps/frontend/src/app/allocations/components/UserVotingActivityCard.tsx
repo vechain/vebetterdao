@@ -112,7 +112,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     enabled: !!account?.address,
   })
 
-  const { data: [rewardClaimed] = [], isLoading: isRewardClaimedLoading } = useEvents({
+  const { data: [rewardClaimedV2] = [], isLoading: isV2Loading } = useEvents({
     abi: voterRewardsAbi,
     contractAddress: voterRewardsAddress,
     eventName: "RewardClaimedV2",
@@ -123,6 +123,22 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
     select: events => events.map(({ decodedData }) => decodedData.args.reward + decodedData.args.gmReward),
     enabled: !!account?.address,
   })
+
+  // Early rounds only emitted "RewardClaimed" (no gmReward)
+  const { data: [rewardClaimedV1] = [], isLoading: isV1Loading } = useEvents({
+    abi: voterRewardsAbi,
+    contractAddress: voterRewardsAddress,
+    eventName: "RewardClaimed",
+    filterParams: {
+      cycle: BigInt(roundId),
+      voter: (account?.address ?? "") as `0x${string}`,
+    },
+    select: events => events.map(({ decodedData }) => decodedData.args.reward),
+    enabled: !!account?.address,
+  })
+
+  const rewardClaimed = rewardClaimedV2 ?? rewardClaimedV1
+  const isRewardClaimedLoading = isV2Loading || isV1Loading
 
   const [appsVotedInRound] = voteCastEvents || []
 
@@ -189,6 +205,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               p={{ base: 0, md: "4" }}
               bg={{ base: "transparent", md: "card.subtle" }}
               gap="1"
+              border="none"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {t("Total votes used")}
@@ -202,6 +219,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
               p={{ base: 0, md: "4" }}
               bg={{ base: "transparent", md: "card.subtle" }}
               gap="1"
+              border="none"
               height="max-content">
               <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
                 {t("Rewards earned")}

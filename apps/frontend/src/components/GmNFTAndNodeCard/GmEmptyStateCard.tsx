@@ -1,4 +1,4 @@
-import { chakra, HStack, Text } from "@chakra-ui/react"
+import { Box, HStack, Text } from "@chakra-ui/react"
 
 export const GmEmptyStateCard = ({
   icon,
@@ -23,22 +23,17 @@ export const GmEmptyStateCard = ({
       onClick={onCardClick}
       border="none"
       textAlign="left">
-      <chakra.svg width="100%" height="100%" position="absolute" top={0} left={0} right={0} bottom={0}>
-        <rect
-          width="100%"
-          height="100%"
-          fill="none"
-          rx="12"
-          ry="12"
-          stroke="#FFFFFF80"
-          strokeWidth="1"
-          strokeDasharray="12,12"
-          strokeDashoffset="2"
-          strokeLinecap="square"
-        />
-      </chakra.svg>
+      <Box
+        position="absolute"
+        inset={0}
+        rounded="xl"
+        borderWidth="1px"
+        borderStyle="dashed"
+        borderColor="border.primary"
+        pointerEvents="none"
+      />
       {icon}
-      <Text color="transparency.800">{text}</Text>
+      <Text color="text.subtle">{text}</Text>
     </HStack>
   )
 }

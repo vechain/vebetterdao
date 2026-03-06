@@ -1,10 +1,11 @@
-import { Text, Card, VStack, HStack, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, IconButton, LinkBox, LinkOverlay, Badge } from "@chakra-ui/react"
 import NextLink from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
 
-import { ProposalEnriched, ProposalState, ProposalType } from "../hooks/proposals/grants/types"
+import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 
@@ -15,6 +16,10 @@ type Props = {
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { id: proposalId, title: proposalTitle } = proposal
   const { t } = useTranslation()
+
+  const isActive = proposalState === ProposalState.Active
+  const { data: voteEvent } = useUserSingleProposalVoteEvent(isActive ? proposalId : undefined)
+  const hasVoted = !!voteEvent?.hasVoted
 
   return (
     <LinkBox asChild>
@@ -37,7 +42,19 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                         {": "}
                         {proposalTitle}
                       </Text>
-                      <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
+                      <HStack gap="2" flexWrap="wrap">
+                        <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} />
+                        {isActive &&
+                          (hasVoted ? (
+                            <Badge size="sm" variant="positive">
+                              {t("Voted")}
+                            </Badge>
+                          ) : (
+                            <Badge size="sm" variant="warning">
+                              {t("Vote required")}
+                            </Badge>
+                          ))}
+                      </HStack>
                     </VStack>
                   </VStack>
                 </VStack>

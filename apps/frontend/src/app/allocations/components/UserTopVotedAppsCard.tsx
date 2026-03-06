@@ -80,7 +80,7 @@ export const UserTopVotedAppsCard = ({ apps }: { apps: AppWithVotes[] }) => {
   }
 
   return (
-    <Skeleton loading={isLoading}>
+    <Skeleton loading={isLoading} w="full">
       <Card.Root variant="primary" p="8">
         <Card.Body gap="8">
           <Text textStyle="sm" color="text.subtle">

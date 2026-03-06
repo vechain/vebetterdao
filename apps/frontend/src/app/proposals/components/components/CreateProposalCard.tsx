@@ -1,9 +1,7 @@
-import { Text, Button, useDisclosure, Icon, Card } from "@chakra-ui/react"
+import { Text, Button, useDisclosure, Card, Image } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-
-import ProposalIcon from "@/components/Icons/svg/proposal.svg"
 
 import { useMetProposalCriteria } from "../../../../api/contracts/governance/hooks/useMetProposalCriteria"
 import { ButtonClickProperties, buttonClicked, buttonClickActions } from "../../../../constants/AnalyticsEvents"
@@ -27,12 +25,9 @@ export const CreateProposalCard = () => {
   }, [account?.address, open, openRequirementModal])
   return (
     <>
-      <Card.Root variant="primary">
-        <Icon as={ProposalIcon} boxSize={24} color="actions.primary.default" />
-        <Text textStyle="2xl" fontWeight="bold" mt={4}>
-          {t("Create a proposal")}
-        </Text>
-        <Text textStyle="md" mt={2} color={"#6A6A6A"}>
+      <Card.Root variant="primary" justifyContent="center" alignItems="center">
+        <Image w={"300px"} src="/assets/mascot/mascot-proposal.png" alt="Proposal" />
+        <Text textStyle="md" mt={2} color={"text.subtle"}>
           {t(
             "Have an idea for something that could improve the experience in VeBetter? Create a proposal and let the community vote to make it happen!",
           )}

@@ -38,6 +38,7 @@ import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBann
 import { DelegatingBanner } from "./components/DelegatingBanner"
 import { DoActionBanner } from "./components/DoActionBanner/DoActionBanner"
 import { EndorsementBanner } from "./components/EndorsementBanner"
+import { EntityBanner } from "./components/EntityBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
@@ -138,7 +139,7 @@ export const ActionBanner = () => {
   const { data: hasCreatorNFT } = useHasCreatorNFT(account?.address ?? "") // No loading state
   const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
-  const newApps = (xApps?.newApps ?? []).length > 0
+  const newApps = (xApps?.newApps ?? []).length > 0 && (preferences?.[BannerStorageKey.SHOW_NEW_APP] ?? true)
 
   // Endorsement banner logic
   const showEndorsementBanner = !!account?.address && (preferences?.[BannerStorageKey.SHOW_ENDORSEMENT] ?? true)
@@ -159,6 +160,7 @@ export const ActionBanner = () => {
     !isDelegateeLoading &&
     (preferences?.[BannerStorageKey.SHOW_DO_ACTION] ?? true)
   const showDelegatingBanner = !!account?.address && isVeDelegated && !isDelegateeLoading
+  const showEntityBanner = !!account?.address && isEntity && !isLoadingAccountLinking
 
   const showCastVoteBanner = !!account?.address && !isLoading && canUserVote
 
@@ -168,11 +170,21 @@ export const ActionBanner = () => {
     Number(votingRewardsQuery.data.claimableTotal) !== 0
 
   // Creator NFT banners logic
+  const showCreatorNftBannerPreference = preferences?.[BannerStorageKey.SHOW_CREATOR_NFT] ?? true
   const showCreatorRejectedBanner =
-    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT && !hasAlreadySubmitted
+    !!account?.address &&
+    showCreatorNftBannerPreference &&
+    !hasCreatorNFT &&
+    !submissionsLoading &&
+    isLatestSubmissionRejected
+  const showCreatorApprovedBanner =
+    !!account?.address && showCreatorNftBannerPreference && hasCreatorNFT && !hasAlreadySubmitted
   const showCreatorUnderReviewBanner =
-    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
+    !!account?.address &&
+    showCreatorNftBannerPreference &&
+    !hasCreatorNFT &&
+    !submissionsLoading &&
+    isLatestSubmissionOngoing
 
   const showCastVoteInProposalBanners = !!account?.address && hasProposals && userCanVoteInProposals
 
@@ -181,14 +193,18 @@ export const ActionBanner = () => {
   // The order of the banners is as follows:
   // 1 - User is signaled
   // 2 - User has low VTHO
-  // 3 - User has to do some action
-  const showCantVoteBanners = showSignaledBanner || showLowVthoBanner || showDoActionBanner || showDelegatingBanner
+  // 3 - User is an entity (linked account)
+  // 4 - User is delegating
+  // 5 - User has to do some action
+  const showCantVoteBanners =
+    showSignaledBanner || showLowVthoBanner || showEntityBanner || showDoActionBanner || showDelegatingBanner
   const CantVoteBanner = useMemo(() => {
     if (showSignaledBanner) return <UserSignaledBanner key="user-signaled" />
     if (showLowVthoBanner) return <LowVthoBanner key="low-vtho" />
+    if (showEntityBanner) return <EntityBanner key="entity" />
     if (showDelegatingBanner) return <DelegatingBanner key="delegating" />
     if (showDoActionBanner) return <DoActionBanner key="do-action" />
-  }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner, showDelegatingBanner])
+  }, [showSignaledBanner, showLowVthoBanner, showEntityBanner, showDoActionBanner, showDelegatingBanner])
 
   //Show one of the banners for creator NFTs
   // Only one of the following banners can be shown at a time
