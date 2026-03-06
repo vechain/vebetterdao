@@ -50,6 +50,7 @@
   "+ {{count}} more": "+ încă {{count}}",
   "+{{value}}": "+{{value}}",
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>Sfat</b>: Pentru un grant de 12 luni, cel mai bine este să împarți obiectivele lunar sau trimestrial",
+  "<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> în runda următoare",
   "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 în runda următoare",
   "<bold>{{sign}}{{votingPowerNextRound}}</bold> votes in next round": "<bold>{{sign}}{{votingPowerNextRound}}</bold> voturi în runda următoare",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement": "<bold>Ești sigur?</bold> Dacă elimini susținerea pentru {{endorsedAddress}} vei pierde {{value}} pct. și aplicația ta poate pierde susținerea",

@@ -60,7 +60,7 @@ export const VotingPowerBox = () => {
                   size="sm"
                   rounded="md">
                   <Trans
-                    i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> VOT3 in next round"
+                    i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
                     values={{
                       sign: votingPowerNextRound > 0n ? "+" : "",
                       votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
