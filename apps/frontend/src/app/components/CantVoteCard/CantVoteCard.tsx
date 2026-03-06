@@ -1,10 +1,9 @@
-import { VStack, Button, useDisclosure, Card, Text, Stack, HStack, List, Skeleton } from "@chakra-ui/react"
-import { UilInfoCircle } from "@iconscout/react-unicons"
+import { VStack, Button, useDisclosure, Card, Text, Stack, HStack, Icon, List, Skeleton } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCircleCheck, LuCircleDashed } from "react-icons/lu"
+import { LuCircleAlert, LuCircleCheck, LuCircleDashed } from "react-icons/lu"
 
 import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
 
@@ -142,13 +141,22 @@ export const CantVoteCard = () => {
   if (!cantVoteReasonText) return null
 
   return (
-    <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"} p="4">
+    <Card.Root
+      bg="status.warning.subtle"
+      border="1px solid"
+      borderColor="status.warning.primary"
+      rounded="xl"
+      w="full"
+      h="full"
+      p="4">
       <Card.Body position="relative" overflow="hidden" borderRadius="xl" p="0">
         <VStack gap={0} w="full" align="flex-start">
           <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
-            <UilInfoCircle size={36} color="#AF5F00" />
+            <Icon asChild color="status.warning.strong" boxSize="9" flexShrink={0}>
+              <LuCircleAlert />
+            </Icon>
             <VStack gap={0} w="full" align="flex-start">
-              <Text fontWeight="bold" color="#AF5F00" as="span">
+              <Text fontWeight="bold" color="status.warning.strong" as="span">
                 {cantVoteReasonText?.title}
               </Text>
               <Stack
@@ -158,7 +166,7 @@ export const CantVoteCard = () => {
                 justify="space-between"
                 alignItems={{ base: "flex-end", md: "flex-start" }}
                 w="full">
-                <Text color="#AF5F00">{cantVoteReasonText?.description}</Text>
+                <Text color="status.warning.strong">{cantVoteReasonText?.description}</Text>
 
                 {!!cantVoteReasonText?.onLearnMoreClick && (
                   <Button
@@ -166,7 +174,7 @@ export const CantVoteCard = () => {
                     alignItems="flex-end"
                     variant="plain"
                     _hover={{ textDecoration: "underline" }}
-                    color="#AF5F00"
+                    color="status.warning.strong"
                     onClick={cantVoteReasonText.onLearnMoreClick}>
                     {t("Learn more")}
                   </Button>
