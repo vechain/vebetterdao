@@ -3,7 +3,9 @@
 import { Button, Heading, Skeleton, Stack, VStack } from "@chakra-ui/react"
 import { useState } from "react"
 
+import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
 import { useReportData } from "@/hooks/useReportData"
+import { computeROI } from "@/lib/roi"
 
 import { RoundCard } from "./RoundCard"
 
@@ -12,6 +14,7 @@ const PAGE_SIZE = 10
 export function RoundsList() {
   const { data: report, isLoading, error } = useReportData()
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const b3trToVtho = useB3trToVthoRate()
 
   if (error) {
     return null
@@ -35,13 +38,17 @@ export function RoundsList() {
     <VStack gap="4" align="stretch">
       <Heading size="lg">{"Rounds"}</Heading>
       <Stack gap="3">
-        {visible.map(round => (
-          <RoundCard
-            key={round.roundId}
-            round={round}
-            previousRounds={rounds.filter(r => r.roundId !== round.roundId)}
-          />
-        ))}
+        {visible.map(round => {
+          const rewardsRaw = round.isRoundEnded ? round.totalRelayerRewardsRaw : round.estimatedRelayerRewardsRaw
+          return (
+            <RoundCard
+              key={round.roundId}
+              round={round}
+              roi={computeROI(round.totalRelayerRewardsRaw, round.vthoSpentTotalRaw, b3trToVtho)}
+              expectedRoi={computeROI(rewardsRaw, round.vthoSpentTotalRaw, b3trToVtho)}
+            />
+          )
+        })}
       </Stack>
       {hasMore && (
         <Button

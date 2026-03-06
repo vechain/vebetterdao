@@ -16,6 +16,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { WalletButton } from "@vechain/vechain-kit"
+import { usePathname, useRouter } from "next/navigation"
 import { LuHouse, LuInfo, LuMenu, LuRadar } from "react-icons/lu"
 
 import { useNavigation } from "@/hooks/useNavigation"
@@ -32,6 +33,15 @@ export function DashboardHeader() {
   const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
   const { open, onClose, onOpen } = useDisclosure()
   const { activePage, setActivePage } = useNavigation()
+  const router = useRouter()
+  const pathname = usePathname()
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+
+  const handleNav = (page: NavPage) => {
+    setActivePage(page)
+    const isHome = pathname === "/" || pathname === basePath || pathname === `${basePath}/`
+    if (!isHome) router.push("/")
+  }
 
   return (
     <Box bg="bg.secondary" px={0} position="sticky" top={0} zIndex={3} w="full">
@@ -58,7 +68,7 @@ export function DashboardHeader() {
                   border="none"
                   rounded="full"
                   variant={activePage === route.value ? "subtle" : "ghost"}
-                  onClick={() => setActivePage(route.value)}
+                  onClick={() => handleNav(route.value)}
                   size="sm"
                   fontWeight={activePage === route.value ? "bold" : "normal"}
                   textStyle="sm"
@@ -123,7 +133,7 @@ export function DashboardHeader() {
                         gap={4}
                         fontWeight={activePage === route.value ? "bold" : "normal"}
                         onClick={() => {
-                          setActivePage(route.value)
+                          handleNav(route.value)
                           onClose()
                         }}>
                         <Icon color="text.subtle" boxSize={5}>

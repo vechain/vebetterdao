@@ -51,6 +51,12 @@ export const buttonRecipe = defineRecipe({
         },
         _focus: { bg: "actions.tertiary.pressed" },
       },
+      subtle: {
+        bg: "card.subtle",
+        _hover: { bg: "card.hover" },
+        _disabled: { bg: "actions.disabled.disabled" },
+        transition: "background 0.2s ease-in-out",
+      },
       ghost: {
         bg: "transparent",
         _hover: { bg: "card.hover" },

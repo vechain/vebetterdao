@@ -1,32 +1,16 @@
 "use client"
 
 import { Card, Grid, HStack, Icon, Progress, Separator, SimpleGrid, Text, VStack } from "@chakra-ui/react"
-import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import type { ReactNode } from "react"
 import { LuMonitor, LuUsers } from "react-icons/lu"
-import { formatEther } from "viem"
 
+import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
+import { formatToken } from "@/lib/format"
+import { computeROI } from "@/lib/roi"
 import type { RoundAnalytics } from "@/lib/types"
 
-function useB3trToVthoRate() {
-  const { data: b3trUsd } = useGetTokenUsdPrice("B3TR")
-  const { data: vthoUsd } = useGetTokenUsdPrice("VTHO")
-  if (b3trUsd == null || vthoUsd == null || vthoUsd <= 0) return undefined
-  return b3trUsd / vthoUsd
-}
-
-function computeROI(rewardsRaw: string, vthoSpentRaw: string, b3trToVtho: number | undefined): number | null {
-  if (b3trToVtho == null || b3trToVtho <= 0) return null
-  const b3tr = Number(formatEther(BigInt(rewardsRaw)))
-  const vtho = Number(formatEther(BigInt(vthoSpentRaw)))
-  if (vtho === 0) return null
-  return ((b3tr * b3trToVtho) / vtho) * 100
-}
-
-function formatToken(rawValue: string, decimals = 2): string {
-  const value = Number(formatEther(BigInt(rawValue)))
-  return value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
-}
+import { AppsAsRelayers } from "./AppsAsRelayers"
+import { BecomeRelayer } from "./BecomeRelayer"
 
 function pct(numerator: number, denominator: number): string {
   if (denominator === 0) return "\u2014"
@@ -285,6 +269,11 @@ export function RoundDetailContent({ round, generatedAt }: RoundDetailContentPro
           </Card.Root>
         </VStack>
       </Grid>
+
+      <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
+        <BecomeRelayer />
+        <AppsAsRelayers />
+      </SimpleGrid>
     </VStack>
   )
 }

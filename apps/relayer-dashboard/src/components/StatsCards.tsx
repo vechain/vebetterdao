@@ -1,39 +1,14 @@
 "use client"
 
 import { Card, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 
+import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
 import { useCurrentRoundId } from "@/hooks/useCurrentRoundId"
 import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers"
 import { useReportData } from "@/hooks/useReportData"
 import { useRoundRewardStatus } from "@/hooks/useRoundRewardStatus"
 import { useTotalAutoVotingUsers } from "@/hooks/useTotalAutoVotingUsers"
-
-function parseROI(
-  rounds: { totalRelayerRewards: string; vthoSpentTotal: string }[],
-  b3trToVtho: number | undefined,
-): number | null {
-  if (rounds.length === 0 || b3trToVtho == null || b3trToVtho <= 0) return null
-  let totalRewardB3TR = 0
-  let totalVtho = 0
-  for (const r of rounds) {
-    const b3trMatch = r.totalRelayerRewards.match(/^([\d.]+)/)
-    const vthoMatch = r.vthoSpentTotal.match(/^([\d.]+)/)
-    if (b3trMatch) totalRewardB3TR += Number(b3trMatch[1])
-    if (vthoMatch) totalVtho += Number(vthoMatch[1])
-  }
-  if (totalVtho === 0) return null
-  const rewardAsVtho = totalRewardB3TR * b3trToVtho
-  return (rewardAsVtho / totalVtho) * 100
-}
-
-/** B3TR to VTHO rate from VeChain oracle (1 B3TR = X VTHO). */
-function useB3trToVthoRate() {
-  const { data: b3trUsd } = useGetTokenUsdPrice("B3TR")
-  const { data: vthoUsd } = useGetTokenUsdPrice("VTHO")
-  if (b3trUsd == null || vthoUsd == null || vthoUsd <= 0) return undefined
-  return b3trUsd / vthoUsd
-}
+import { computeAggregateROI } from "@/lib/roi"
 
 interface StatItemProps {
   label: string
@@ -84,7 +59,7 @@ export function StatsCards() {
   }
 
   const rounds = report?.rounds ?? []
-  const roi = parseROI(rounds, b3trToVtho)
+  const roi = computeAggregateROI(rounds, b3trToVtho)
 
   const roiSublabel = b3trToVtho != null ? `1 B3TR = ${Math.round(b3trToVtho)} VTHO` : "1 B3TR = … VTHO"
 
