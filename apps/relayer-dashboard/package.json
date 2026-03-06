@@ -16,18 +16,19 @@
   "dependencies": {
     "@chakra-ui/react": "^3.26.0",
     "@emotion/react": "^11.14.0",
+    "@iconscout/react-unicons": "^2.0.2",
     "@repo/config": "*",
+    "@tanstack/query-sync-storage-persister": "^5.28.12",
     "@tanstack/react-query": "^5.64.2",
     "@tanstack/react-query-persist-client": "^5.28.12",
-    "@tanstack/query-sync-storage-persister": "^5.28.12",
     "@vechain/vebetterdao-contracts": "*",
     "@vechain/vechain-kit": "2.6.1",
     "next": "14.2.35",
     "next-themes": "^0.4.6",
-    "react-icons": "^5.5.0",
     "react": "^18",
     "react-dom": "^18",
-    "@iconscout/react-unicons": "^2.0.2"
+    "react-icons": "^5.5.0",
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@chakra-ui/cli": "^3.5.0",

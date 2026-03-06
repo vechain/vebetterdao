@@ -72,7 +72,7 @@ export function StatsCards() {
     b3trToVtho != null ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO` : "1 B3TR = \u2026 VTHO"
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap="4">
+    <SimpleGrid w="full" columns={{ base: 2, md: 2, lg: 2 }} gap="4">
       <StatItem
         label="Auto-voting users"
         value={usersLoading ? "..." : onChainUsers != null ? formatNumber(onChainUsers) : "\u2014"}

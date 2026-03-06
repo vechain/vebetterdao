@@ -9,7 +9,7 @@ import { computeROI } from "@/lib/roi"
 
 import { RoundCard } from "./RoundCard"
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 5
 
 export function RoundsList() {
   const { data: report, isLoading, error } = useReportData()
