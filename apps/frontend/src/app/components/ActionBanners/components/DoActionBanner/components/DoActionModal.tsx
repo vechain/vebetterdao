@@ -5,6 +5,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 
+import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { VotingRequirementsList } from "@/app/components/CantVoteCard/CantVoteCard"
 import { BaseModal } from "@/components/BaseModal"
 
@@ -15,6 +16,7 @@ type Props = {
 export const DoActionModal = ({ doActionModal }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { isPerson } = useCanUserVote()
   const goToApps = useCallback(() => {
     router.push("/apps")
   }, [router])
@@ -24,9 +26,9 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <Heading size={"2xl"} fontWeight="bold">
           {t("You're not eligible to vote yet.")}
         </Heading>
-        <Text textStyle="xl">{t("To be able to vote on the next round’s allocations and proposals")}</Text>
+        <Text textStyle="xl">{t("To be able to vote on the next round's allocations and proposals")}</Text>
         <Flex textStyle="lg">
-          <VotingRequirementsList />
+          <VotingRequirementsList isPerson={isPerson} />
         </Flex>
         <SimpleGrid columns={{ base: 1, md: 2 }} gap="4" mt="4">
           <Button w="full" variant="primary" onClick={goToApps}>

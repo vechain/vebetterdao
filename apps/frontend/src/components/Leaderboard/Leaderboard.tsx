@@ -1,10 +1,10 @@
-import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Button } from "@chakra-ui/react"
+import { Card, Separator, Heading, HStack, IconButton, Skeleton, Text, VStack, Button } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
+import { NavArrowLeft, NavArrowRight } from "iconoir-react"
 import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 
 import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
@@ -16,8 +16,6 @@ export const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
   { position: 2, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 90 },
   { position: 3, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 80 },
-  { position: 4, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 70 },
-  { position: 5, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 60 },
 ]
 
 const LEADERBOARD_SIZE = 3
@@ -133,14 +131,12 @@ export const Leaderboard = () => {
           <VStack gap={2} align="stretch">
             <HStack justify={"space-between"} w="full">
               <IconButton
-                minW={0}
-                boxSize={6}
-                aria-label="Next round"
-                variant="ghost"
-                color="actions.secondary.text-lighter"
+                variant="outline"
+                boxSize="44px"
+                aria-label="Previous round"
                 disabled={isFirstRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
-                <Icon as={FaAngleLeft} boxSize={5} />
+                <NavArrowLeft />
               </IconButton>
               <Skeleton loading={roundIdLoading}>
                 <Heading size={{ base: "md", lg: "xl" }}>
@@ -150,14 +146,12 @@ export const Leaderboard = () => {
                 </Heading>
               </Skeleton>
               <IconButton
-                minW={0}
-                boxSize={6}
+                variant="outline"
+                boxSize="44px"
                 aria-label="Next round"
-                variant="ghost"
-                color="actions.secondary.text-lighter"
                 disabled={isLastRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
-                <Icon as={FaAngleRight} boxSize={5} />
+                <NavArrowRight />
               </IconButton>
             </HStack>
             <Text textStyle="sm" color="text.subtle">

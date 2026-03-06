@@ -1,6 +1,6 @@
 import { useWallet } from "@vechain/vechain-kit"
 
-import { useIsPersonAtTimepoint } from "../../vePassport/hooks/useIsPersonAtTimepoint"
+import { useIsPersonAtTimepointWithReason } from "../../vePassport/hooks/useIsPersonAtTimepointWithReason"
 import { useAllocationRoundSnapshot } from "../../xAllocations/hooks/useAllocationRoundSnapshot"
 import { useAllocationsRound } from "../../xAllocations/hooks/useAllocationsRound"
 import { useAllocationsRoundState } from "../../xAllocations/hooks/useAllocationsRoundState"
@@ -31,10 +31,12 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const hasVotesAtSnapshot = Number(votesAtSnapshot) >= (Number(threshold) ?? 0)
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, parsedAccount ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
-  const { data: isPerson = false, isLoading: isPersonLoading } = useIsPersonAtTimepoint(
+  const { data: personData, isLoading: isPersonLoading } = useIsPersonAtTimepointWithReason(
     delegateeAddress ?? parsedAccount,
     roundSnapshot,
   )
+  const isPerson = personData?.isPerson ?? false
+  const personReason = personData?.reason ?? ""
 
   // When round data hasn't resolved yet (e.g., events still refetching after a new round),
   // voteStart is undefined which disables useTotalVotesOnBlock (isLoading: false despite no data).
@@ -54,5 +56,6 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
     hasVotesAtSnapshot,
     snapshotBlock: Number(roundInfo.voteStart),
     isPerson,
+    personReason,
   }
 }

@@ -26,27 +26,27 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
         text: "🥇",
         borderColor: "#FFD700",
         fontSize: "3xl",
-        boxShadow: "0px 0px 5px 0px rgba(255, 215, 0, 0.4)",
+        boxShadow: "none",
       }
     if (ranking.position === 2)
       return {
         text: "🥈",
         borderColor: "#C0C0C0",
         fontSize: "3xl",
-        boxShadow: "0px 0px 5px 0px rgba(192, 192, 192, 0.4)",
+        boxShadow: "none",
       }
     if (ranking.position === 3)
       return {
         text: "🥉",
         borderColor: "#CD7F32",
         fontSize: "3xl",
-        boxShadow: "0px 0px 5px 0px rgba(205, 127, 50, 0.4)",
+        boxShadow: "none",
       }
     return {
       text: `#${ranking.position}`,
-      borderColor: "#EFEFEF",
+      borderColor: "border.secondary",
       fontSize: "xl",
-      boxShadow: "0px 0px 5px 0px rgba(0, 0, 0, 0.1)",
+      boxShadow: "none",
     }
   }, [ranking.position])
 

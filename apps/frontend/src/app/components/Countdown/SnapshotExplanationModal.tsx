@@ -5,7 +5,7 @@ interface Props {
   isOpen: boolean
   onClose: () => void
 }
-export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
+export const SnapshotExplanationModal = ({ isOpen, onClose }: Props) => {
   const steps = [
     {
       title: t("Convert your B3TR to VOT3"),
@@ -30,17 +30,19 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
               <CloseButton size="sm" />
             </Dialog.CloseTrigger>
             <Dialog.Header pt={0}>
-              <Heading size={["2xl", "4xl"]}>{t("What is a snapshot ?")}</Heading>
+              <Heading size="xl">{t("What is a snapshot?")}</Heading>
             </Dialog.Header>
             <Dialog.Body alignItems={"center"}>
-              <VStack alignItems={"center"} gap={8}>
-                <Text textStyle={["sm", "lg"]}>
+              <VStack alignItems={"center"} gap={5} mt={5}>
+                <Text textStyle="sm">
                   {t(
-                    "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
+                    "A snapshot is a record of all VOT3 balances taken at the start of each voting round to determine your voting power.",
                   )}
                 </Text>
-                <Text textStyle={["sm", "lg"]}>
-                  {t("Swap your B3TR for VOT3 before the snapshot to increase your voting power.")}
+                <Text textStyle="sm">
+                  {t(
+                    "Convert your B3TR to VOT3 before the snapshot to increase your voting power. You can redeem your B3TR back at any time.",
+                  )}
                 </Text>
                 <VStack
                   w={"full"}
@@ -61,7 +63,7 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                         <Image boxSize={["70px", "100px"]} src={step.image} alt={step.title} />
                       </Box>
                       <VStack gap={0} alignItems={"start"} p={1}>
-                        <Text textStyle="xs" color={"#6A6A6A"}>
+                        <Text textStyle="xs" color={"text.subtle"}>
                           {t("STEP {{value}}", { value: index + 1 })}
                         </Text>
 

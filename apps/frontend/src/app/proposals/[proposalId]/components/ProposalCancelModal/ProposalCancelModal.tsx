@@ -48,10 +48,12 @@ export const ProposalCancelModal = ({
 
         {/* Reason Section */}
         <VStack align="stretch" gap={2}>
-          <Text>{t("Reason")}</Text>
-          <Text textStyle="sm" color="gray.500">
-            {t("Optional")}
-          </Text>
+          <HStack>
+            <Text>{t("Reason")}</Text>
+            <Text textStyle="sm" color="gray.500" fontStyle={"italic"}>
+              {t("Optional")}
+            </Text>
+          </HStack>
           <Textarea
             placeholder={t("Please provide a reason for cancelling this proposal")}
             value={reason}
@@ -63,11 +65,7 @@ export const ProposalCancelModal = ({
         </VStack>
 
         {/* Cancel Button */}
-        <Button
-          colorPalette="red"
-          w={{ base: "full", md: "160px" }}
-          alignSelf="flex-end"
-          onClick={handleCancelProposal}>
+        <Button colorPalette="red" w={{ base: "full", md: "full" }} alignSelf="flex-end" onClick={handleCancelProposal}>
           {t("Cancel {{proposalType}}", { proposalType: proposalTypeText })}
         </Button>
       </VStack>

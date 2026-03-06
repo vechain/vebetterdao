@@ -4,9 +4,9 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
-import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
-import { PowerUpModal } from "@/app/components/PowerUpModal"
+import { SnapshotExplanationModal } from "@/app/components/Countdown/SnapshotExplanationModal"
 
+import { ConvertB3trAndVot3Modal } from "../../../app/components/ConvertB3trAndVot3Modal"
 import { CountdownVoting } from "../../../app/components/Countdown/CountdownVoting"
 import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { useDomainOrAddress } from "../../../hooks/useDomainOrAddress"
@@ -99,8 +99,8 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
           )}
         </GridItem>
       </Grid>
-      <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
-      <PowerUpModal isOpen={isOpen} onClose={onClose} />
+      <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
+      <ConvertB3trAndVot3Modal isOpen={isOpen} onClose={onClose} />
     </>
   )
 }

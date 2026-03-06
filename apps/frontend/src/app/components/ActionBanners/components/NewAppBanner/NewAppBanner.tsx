@@ -3,7 +3,7 @@ import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { BannerStorageKey, GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
 
@@ -45,6 +45,7 @@ export const NewAppBanner = () => {
       title={t("New app available")}
       description={description}
       illustration="/assets/icons/new-app-gold.svg"
+      storageKey={BannerStorageKey.SHOW_NEW_APP}
       cta={
         <Button size={{ base: "sm", md: "md" }} onClick={GOTOAPPS} variant="primary">
           {t("Explore")}
