@@ -35,6 +35,7 @@ jobs:
         run: yarn relayer:build:mainnet
         env:
           NEXT_PUBLIC_BASE_PATH: /b3tr
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
