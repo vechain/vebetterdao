@@ -16,14 +16,14 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { WalletButton } from "@vechain/vechain-kit"
-import { LuHome, LuInfo, LuMenu, LuRadar } from "react-icons/lu"
+import { LuHouse, LuInfo, LuMenu, LuRadar } from "react-icons/lu"
 
 import { useNavigation } from "@/hooks/useNavigation"
 
 export type NavPage = "home" | "relayer" | "info"
 
-const ROUTES: { value: NavPage; label: string; icon: typeof LuHome }[] = [
-  { value: "home", label: "Home", icon: LuHome },
+const ROUTES: { value: NavPage; label: string; icon: typeof LuHouse }[] = [
+  { value: "home", label: "Home", icon: LuHouse },
   { value: "relayer", label: "My Relayer", icon: LuRadar },
   { value: "info", label: "Info", icon: LuInfo },
 ]
