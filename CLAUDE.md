@@ -23,6 +23,7 @@ When I say "PR" (uppercase):
 Turborepo monorepo with:
 
 - `apps/frontend`: Next.js frontend app
+- `apps/relayer-dashboard`: Next.js static app for auto-voting relayer analytics (GitHub Pages)
 - `packages/contracts`: VeChain VeBetterDAO smart contracts
 - `packages/*`: Shared config, utils, constants, lambda functions
 
@@ -35,6 +36,22 @@ Turborepo monorepo with:
 - State: React Query for server state, Zustand for client state
 - VeChain integration: `@vechain/vechain-kit` with `useThor` hook (not deprecated `useConnex`)
 - Contract types from `@vechain/vebetterdao-contracts/typechain-types`
+
+## Relayer Dashboard (`apps/relayer-dashboard`)
+
+Dashboard for VeBetterDAO's auto-voting relayer system. Users can enable auto-voting on `XAllocationVoting`, and relayers (off-chain services) execute votes + claim rewards on their behalf, earning fees from `RelayerRewardsPool`. The dashboard shows relayer analytics, reward pool stats, and per-relayer info.
+
+- Contracts: `XAllocationVoting.sol` (auto-voting toggle, user counts, rounds), `RelayerRewardsPool.sol` (relayer registration, rewards, fee config)
+- Data script: `packages/scripts/src/analyzeAutoVotingRounds.ts` (generates `report.json`)
+- Next.js 14 App Router with `output: "export"` for static GitHub Pages deployment
+- Runs on port 3001 locally; deployed to GitHub Pages under `/b3tr` base path
+- Data: static `report.json` (updated hourly by GH Action) + on-chain reads via `useCallClause`
+- Shared contract config (addresses, ABIs) in `src/hooks/contracts.ts`
+- Navigation: state-based (no file routing), managed via `NavigationProvider` context
+- All browser-dependent code (vechain-kit) loaded client-only via `dynamic(() => ..., { ssr: false })`
+- Theme copied from `apps/frontend/src/app/theme/` — run `yarn workspace relayer-dashboard chakra:typegen` after changes
+- Commands: `yarn relayer:dev:staging`, `yarn relayer:dev:mainnet`, `yarn relayer:build:staging`, `yarn relayer:build:mainnet`
+- GH Actions: `update-relayer-data.yml` (hourly cron), `deploy-relayer-dashboard.yml` (on push to main)
 
 ## Contract Hooks Pattern
 
@@ -88,6 +105,8 @@ Stop: `make solo-down` | Reset: `make solo-clean && make solo-up`
 - `yarn build`: Build for local
 - `yarn build:<env>`: Build for specific environment (staging/testnet/mainnet)
 - `yarn build:lambda`: Build lambda functions
+- `yarn relayer:build:staging`: Build relayer-dashboard for staging
+- `yarn relayer:build:mainnet`: Build relayer-dashboard for mainnet
 
 ## Testing
 
