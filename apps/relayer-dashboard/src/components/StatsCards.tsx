@@ -1,18 +1,19 @@
 "use client"
 
 import { Card, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 
+import { useCurrentRoundId } from "@/hooks/useCurrentRoundId"
+import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers"
 import { useReportData } from "@/hooks/useReportData"
+import { useRoundRewardStatus } from "@/hooks/useRoundRewardStatus"
+import { useTotalAutoVotingUsers } from "@/hooks/useTotalAutoVotingUsers"
 
-function computeStats(rounds: { autoVotingUsersCount: number; numRelayers: number }[]) {
-  const totalUsers = rounds.reduce((sum, r) => sum + r.autoVotingUsersCount, 0)
-  const maxRelayers = rounds.length > 0 ? Math.max(...rounds.map(r => r.numRelayers)) : 0
-  return { totalUsers, maxRelayers, roundCount: rounds.length }
-}
-
-function parseROI(rounds: { totalRelayerRewards: string; vthoSpentTotal: string }[]): number | null {
-  if (rounds.length === 0) return null
-  const B3TR_TO_VTHO = 19
+function parseROI(
+  rounds: { totalRelayerRewards: string; vthoSpentTotal: string }[],
+  b3trToVtho: number | undefined,
+): number | null {
+  if (rounds.length === 0 || b3trToVtho == null || b3trToVtho <= 0) return null
   let totalRewardB3TR = 0
   let totalVtho = 0
   for (const r of rounds) {
@@ -22,26 +23,30 @@ function parseROI(rounds: { totalRelayerRewards: string; vthoSpentTotal: string 
     if (vthoMatch) totalVtho += Number(vthoMatch[1])
   }
   if (totalVtho === 0) return null
-  const rewardAsVtho = totalRewardB3TR * B3TR_TO_VTHO
+  const rewardAsVtho = totalRewardB3TR * b3trToVtho
   return (rewardAsVtho / totalVtho) * 100
 }
 
+/** B3TR to VTHO rate from VeChain oracle (1 B3TR = X VTHO). */
+function useB3trToVthoRate() {
+  const { data: b3trUsd } = useGetTokenUsdPrice("B3TR")
+  const { data: vthoUsd } = useGetTokenUsdPrice("VTHO")
+  if (b3trUsd == null || vthoUsd == null || vthoUsd <= 0) return undefined
+  return b3trUsd / vthoUsd
+}
+
 interface StatItemProps {
-  variant: "info" | "positive" | "warning"
   label: string
   value: string
   sublabel: string
   isLoading?: boolean
 }
 
-function StatItem({ variant, label, value, sublabel, isLoading }: StatItemProps) {
+function StatItem({ label, value, sublabel, isLoading }: StatItemProps) {
   return (
     <Card.Root
       p={{ base: "4", md: "6" }}
-      variant="subtle"
-      border="sm"
-      borderColor="border.secondary"
-      bgColor={`status.${variant}.subtle`}
+      variant="outline"
       flexDirection="row"
       alignItems="center"
       gap={{ base: "2", md: "4" }}>
@@ -64,6 +69,11 @@ function StatItem({ variant, label, value, sublabel, isLoading }: StatItemProps)
 
 export function StatsCards() {
   const { data: report, isLoading, error } = useReportData()
+  const { totalUsers: onChainUsers, isLoading: usersLoading } = useTotalAutoVotingUsers()
+  const { count: relayerCount, isLoading: relayersLoading } = useRegisteredRelayers()
+  const { data: currentRoundId } = useCurrentRoundId()
+  const previousRoundReward = useRoundRewardStatus(currentRoundId != null ? currentRoundId - 1 : undefined)
+  const b3trToVtho = useB3trToVthoRate()
 
   if (error) {
     return (
@@ -74,30 +84,34 @@ export function StatsCards() {
   }
 
   const rounds = report?.rounds ?? []
-  const { totalUsers, maxRelayers, roundCount } = computeStats(rounds)
-  const roi = parseROI(rounds)
+  const roi = parseROI(rounds, b3trToVtho)
+
+  const roiSublabel = b3trToVtho != null ? `1 B3TR = ${Math.round(b3trToVtho)} VTHO` : "1 B3TR = … VTHO"
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 3 }} gap="4">
+    <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap="4">
       <StatItem
-        variant="info"
-        label="Total users (auto-voting)"
-        value={isLoading ? "..." : totalUsers.toLocaleString()}
-        sublabel={`across ${roundCount} rounds`}
-        isLoading={isLoading}
+        label="Auto-voting users"
+        value={usersLoading ? "..." : onChainUsers != null ? onChainUsers.toLocaleString() : "\u2014"}
+        sublabel="current total"
+        isLoading={usersLoading}
       />
       <StatItem
-        variant="positive"
-        label="Relayers"
-        value={isLoading ? "..." : String(maxRelayers)}
-        sublabel="max in a round"
-        isLoading={isLoading}
+        label="Registered relayers"
+        value={relayersLoading ? "..." : String(relayerCount)}
+        sublabel="on-chain"
+        isLoading={relayersLoading}
       />
       <StatItem
-        variant="warning"
-        label="Avg ROI"
+        label="Reward pool"
+        value={previousRoundReward.totalRewardsFormatted ?? "\u2014"}
+        sublabel={"Previous round"}
+        isLoading={previousRoundReward.isLoading}
+      />
+      <StatItem
+        label="Average ROI"
         value={isLoading ? "..." : roi != null ? `${Math.round(roi)}%` : "\u2014"}
-        sublabel="1 B3TR = 19 VTHO"
+        sublabel={roiSublabel}
         isLoading={isLoading}
       />
     </SimpleGrid>
