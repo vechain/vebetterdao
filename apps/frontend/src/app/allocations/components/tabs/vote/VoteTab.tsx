@@ -1,10 +1,12 @@
 "use client"
 
 import { Bleed } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useContext, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { SearchField } from "@/components/SearchField/SearchField"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
@@ -16,6 +18,7 @@ import { AppCategoryTabs } from "./AppCategoryTabs"
 export function VoteTab() {
   const { isMobile } = useBreakpoints()
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   const context = useContext(AllocationTabsContext)
   if (!context) throw new Error("VoteTab must be used within AllocationTabsProvider")
@@ -29,6 +32,8 @@ export function VoteTab() {
     hasVoted,
     hasVotedLoading,
     hasEnoughVotesAtSnapshot,
+    isEligibleToVote,
+    isCanVoteLoading,
     isVoteDataLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
@@ -41,6 +46,11 @@ export function VoteTab() {
   const shouldShowInsufficientPowerAlert = useMemo(
     () => !hasVotedLoading && !hasVoted && !hasEnoughVotesAtSnapshot,
     [hasVotedLoading, hasVoted, hasEnoughVotesAtSnapshot],
+  )
+
+  const shouldShowCantVoteCard = useMemo(
+    () => !!account?.address && !isCanVoteLoading && !hasVoted && !isEligibleToVote,
+    [account?.address, isCanVoteLoading, hasVoted, isEligibleToVote],
   )
 
   const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get("search") || "")
@@ -70,6 +80,7 @@ export function VoteTab() {
   return (
     <>
       {isMobile && <VotingAlerts />}
+      {shouldShowCantVoteCard && <CantVoteCard />}
       <SearchField
         placeholder={t("Search app")}
         value={localSearchQuery}
@@ -78,7 +89,7 @@ export function VoteTab() {
       />
       <Bleed inlineStart="4" inlineEnd="4">
         <AppCategoryTabs
-          disabled={shouldShowInsufficientPowerAlert}
+          disabled={shouldShowInsufficientPowerAlert || shouldShowCantVoteCard}
           apps={sortedApps}
           selectedAppIds={selectedAppIds}
           onToggleApp={onToggleApp}

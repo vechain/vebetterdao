@@ -34,6 +34,7 @@ interface AllocationTabsContextType {
   onToggleApp: (appId: string) => void
   isStuck: boolean
   hasEnoughVotesAtSnapshot: boolean
+  isEligibleToVote: boolean
   isCanVoteLoading: boolean
   onVoteClick: () => void
   isAutoVotingEnabled: boolean
@@ -67,7 +68,12 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
   const { account } = useWallet()
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
-  const { hasVotesAtSnapshot, isLoading: isCanVoteLoading } = useCanUserVote(account?.address, delegateeAddress)
+  const {
+    hasVotesAtSnapshot,
+    isPerson,
+    isLoading: isCanVoteLoading,
+  } = useCanUserVote(account?.address, delegateeAddress)
+  const isEligibleToVote = hasVotesAtSnapshot && isPerson
   const { open: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const { onClose: closeTxModal } = useTransactionModal()
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(
@@ -247,6 +253,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onToggleApp: toggleApp,
         isStuck,
         hasEnoughVotesAtSnapshot: hasVotesAtSnapshot,
+        isEligibleToVote,
         isCanVoteLoading,
         onVoteClick: handleVoteClick,
         isAutoVotingEnabled: isAutoVotingEnabledOnChain ?? false,
@@ -270,7 +277,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
       <Presence
         hideFrom="md"
-        present={isVoteTab && (selectedAppIds.size > 0 || showAutoVoteUI)}
+        present={isVoteTab && (isEligibleToVote || hasVoted) && (selectedAppIds.size > 0 || showAutoVoteUI)}
         animationName={{
           _open: "slide-from-bottom",
           _closed: "slide-to-bottom, fade-out",
