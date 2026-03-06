@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import type { EnvConfig } from "@repo/config/contracts"
-import { RelayerRewardsPool__factory, XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { RelayerRewardsPool__factory } from "@vechain/vebetterdao-contracts/factories/RelayerRewardsPool__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 
 const env = (process.env.NEXT_PUBLIC_APP_ENV ?? "mainnet") as EnvConfig
 const config = getConfig(env)
