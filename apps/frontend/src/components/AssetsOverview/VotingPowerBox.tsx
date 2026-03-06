@@ -9,7 +9,6 @@ import { Trans, useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
-import Vot3Icon from "@/components/Icons/svg/vot3-icon.svg"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
@@ -40,7 +39,7 @@ export const VotingPowerBox = () => {
       gap={{ base: "3", md: "4" }}>
       <HStack gap="3" alignItems="center" flex={1}>
         <Square rounded="12px" bg="status.positive.secondary" aspectRatio={1} height={{ base: "46px", md: "60px" }}>
-          <Icon as={Vot3Icon} boxSize={{ base: "8", md: "9" }} color="status.positive.strong"></Icon>
+          <Icon as={Flash} boxSize={{ base: "8", md: "9" }} color="status.positive.strong"></Icon>
         </Square>
 
         <Skeleton loading={isLoading || isCurrentVot3BalanceLoading}>
