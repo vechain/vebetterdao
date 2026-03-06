@@ -46,7 +46,7 @@ function StatItem({ label, value, sublabel, isLoading }: StatItemProps) {
   return (
     <Card.Root
       p={{ base: "4", md: "6" }}
-      variant="outline"
+      variant="action"
       flexDirection="row"
       alignItems="center"
       gap={{ base: "2", md: "4" }}>

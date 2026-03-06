@@ -1,96 +1,112 @@
 "use client"
 
-import { Badge, Box, Card, Collapsible, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react"
-import { useState } from "react"
+import { Badge, Card, HStack, IconButton, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
+import NextLink from "next/link"
+import { FaAngleRight } from "react-icons/fa6"
+import { formatEther } from "viem"
 
 import type { RoundAnalytics } from "@/lib/types"
 
 interface RoundCardProps {
   round: RoundAnalytics
-  defaultOpen?: boolean
+  previousRounds?: RoundAnalytics[]
 }
 
-function DetailRow({ label, value }: { label: string; value: string | number }) {
+function useB3trToVthoRate() {
+  const { data: b3trUsd } = useGetTokenUsdPrice("B3TR")
+  const { data: vthoUsd } = useGetTokenUsdPrice("VTHO")
+  if (b3trUsd == null || vthoUsd == null || vthoUsd <= 0) return undefined
+  return b3trUsd / vthoUsd
+}
+
+function parseRoundROI(
+  round: { totalRelayerRewardsRaw: string; vthoSpentTotalRaw: string },
+  b3trToVtho: number | undefined,
+): number | null {
+  if (b3trToVtho == null || b3trToVtho <= 0) return null
+  const b3tr = Number(formatEther(BigInt(round.totalRelayerRewardsRaw)))
+  const vtho = Number(formatEther(BigInt(round.vthoSpentTotalRaw)))
+  if (vtho === 0) return null
+  return ((b3tr * b3trToVtho) / vtho) * 100
+}
+
+function StatPill({ label, value }: { label: string; value: string | number }) {
   return (
-    <HStack justify="space-between">
-      <Text textStyle="sm" color="text.subtle">
+    <VStack gap="0" align="start" minW="0">
+      <Text textStyle="xxs" color="text.subtle" lineClamp={1}>
         {label}
       </Text>
-      <Text textStyle="sm" fontWeight="semibold">
+      <Text textStyle="sm" fontWeight="semibold" lineClamp={1}>
         {value}
       </Text>
-    </HStack>
+    </VStack>
   )
 }
 
-export function RoundCard({ round, defaultOpen = false }: RoundCardProps) {
-  const [open, setOpen] = useState(defaultOpen)
+function getAverageRoi(rounds: RoundAnalytics[], b3trToVtho: number | undefined): number | null {
+  if (b3trToVtho == null) return null
+  const rois = rounds.map(r => parseRoundROI(r, b3trToVtho)).filter((r): r is number => r != null)
+  if (rois.length === 0) return null
+  return rois.reduce((a, b) => a + b, 0) / rois.length
+}
+
+export function RoundCard({ round, previousRounds = [] }: RoundCardProps) {
+  const b3trToVtho = useB3trToVthoRate()
+  const roi = parseRoundROI(round, b3trToVtho)
+  const rewardsUnknown = !round.isRoundEnded
+  const concludedWithRoi = previousRounds.filter(r => r.isRoundEnded && r.allActionsOk && r.vthoSpentTotalRaw !== "0")
+  const potentialRoi = getAverageRoi(concludedWithRoi, b3trToVtho)
 
   return (
-    <Card.Root variant="primary">
-      <Collapsible.Root open={open} onOpenChange={d => setOpen(d.open)}>
-        <Collapsible.Trigger asChild>
-          <Card.Body cursor="pointer" _hover={{ bg: "card.hover" }} transition="background 0.15s">
-            <HStack justify="space-between" w="full" flexWrap="wrap" gap="2">
-              <HStack gap="3" flexWrap="wrap">
-                <Text fontWeight="bold" textStyle={{ base: "md", md: "lg" }}>
-                  {"#"}
-                  {round.roundId}
-                </Text>
-                {round.isRoundEnded ? (
-                  <Badge size="sm" variant="subtle" colorPalette="gray">
-                    {"Concluded"}
-                  </Badge>
-                ) : (
-                  <Badge size="sm" variant="solid" colorPalette="blue">
-                    {"Active"}
-                  </Badge>
-                )}
+    <NextLink href={`/round?roundId=${round.roundId}`} style={{ textDecoration: "none", color: "inherit" }}>
+      <Card.Root variant="action">
+        <Card.Body>
+          <HStack justify="space-between" w="full" gap="2">
+            <VStack align="stretch" gap="3" w="full">
+              <HStack justify="space-between" w="full" flexWrap="wrap" gap="2">
+                <HStack gap="3" flexWrap="wrap">
+                  <Text fontWeight="bold" textStyle={{ base: "md", md: "lg" }}>
+                    {"#"}
+                    {round.roundId}
+                  </Text>
+                  {round.isRoundEnded ? (
+                    <Badge size="sm" variant="subtle" colorPalette="gray">
+                      {"Concluded"}
+                    </Badge>
+                  ) : (
+                    <Badge size="sm" variant="solid" colorPalette="blue">
+                      {"Active"}
+                    </Badge>
+                  )}
+                </HStack>
               </HStack>
-              <HStack gap={{ base: "3", md: "6" }} flexWrap="wrap">
-                <VStack gap="0" align="end">
-                  <Text textStyle="xs" color="text.subtle">
-                    {"VTHO spent"}
-                  </Text>
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {round.vthoSpentTotal}
-                  </Text>
-                </VStack>
-                <VStack gap="0" align="end">
-                  <Text textStyle="xs" color="text.subtle">
-                    {"Rewards"}
-                  </Text>
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {round.totalRelayerRewards}
-                  </Text>
-                </VStack>
-                <Text color="text.subtle" textStyle="sm" alignSelf="center">
-                  {open ? "\u25BE" : "\u25B8"}
-                </Text>
-              </HStack>
-            </HStack>
-          </Card.Body>
-        </Collapsible.Trigger>
-        <Collapsible.Content>
-          <Box px="6" pb="4" pt="2" borderTopWidth="1px" borderColor="border.secondary">
-            <SimpleGrid columns={{ base: 1, md: 2 }} gap="3">
-              <VStack gap="2" align="stretch">
-                <DetailRow label="Auto-vote users" value={round.autoVotingUsersCount} />
-                <DetailRow label="Voted for" value={round.votedForCount} />
-                <DetailRow label="Rewards claimed" value={round.rewardsClaimedCount} />
-                <DetailRow label="Relayers" value={round.numRelayers} />
-              </VStack>
-              <VStack gap="2" align="stretch">
-                <DetailRow label="Expected actions" value={round.expectedActions} />
-                <DetailRow label="Completed" value={round.completedActions} />
-                <DetailRow label="Status" value={round.actionStatus} />
-                <DetailRow label="VTHO (voting)" value={round.vthoSpentOnVoting} />
-                <DetailRow label="VTHO (claiming)" value={round.vthoSpentOnClaiming} />
-              </VStack>
-            </SimpleGrid>
-          </Box>
-        </Collapsible.Content>
-      </Collapsible.Root>
-    </Card.Root>
+              <SimpleGrid columns={{ base: 2, sm: 3, md: 6 }} gap={{ base: 2, md: 4 }}>
+                <StatPill label="Users" value={round.autoVotingUsersCount} />
+                <StatPill label="Active relayers" value={round.numRelayers} />
+                <StatPill label="Status" value={round.actionStatus} />
+                <StatPill label="VTHO spent" value={round.vthoSpentTotal} />
+                <StatPill label="Rewards" value={rewardsUnknown ? "-" : round.totalRelayerRewards} />
+                <StatPill
+                  label={rewardsUnknown ? "Potential ROI" : "ROI"}
+                  value={
+                    rewardsUnknown
+                      ? potentialRoi != null
+                        ? `~${Math.round(potentialRoi)}%`
+                        : "-"
+                      : roi != null
+                        ? `${Math.round(roi)}%`
+                        : "-"
+                  }
+                />
+              </SimpleGrid>
+            </VStack>
+            <IconButton aria-label="Go to round" variant="ghost">
+              <FaAngleRight />
+            </IconButton>
+          </HStack>
+        </Card.Body>
+      </Card.Root>
+    </NextLink>
   )
 }

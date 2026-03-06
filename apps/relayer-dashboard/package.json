@@ -26,7 +26,8 @@
     "next-themes": "^0.4.6",
     "react-icons": "^5.5.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "@iconscout/react-unicons": "^2.0.2"
   },
   "devDependencies": {
     "@chakra-ui/cli": "^3.5.0",

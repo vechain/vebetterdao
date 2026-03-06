@@ -35,8 +35,12 @@ export function RoundsList() {
     <VStack gap="4" align="stretch">
       <Heading size="lg">{"Rounds"}</Heading>
       <Stack gap="3">
-        {visible.map((round, i) => (
-          <RoundCard key={round.roundId} round={round} defaultOpen={i === 0} />
+        {visible.map(round => (
+          <RoundCard
+            key={round.roundId}
+            round={round}
+            previousRounds={rounds.filter(r => r.roundId !== round.roundId)}
+          />
         ))}
       </Stack>
       {hasMore && (
