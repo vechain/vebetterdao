@@ -8,7 +8,6 @@ import { cache, Suspense } from "react"
 import { getPageMetadata } from "@/utils/metadata"
 
 import { AllocationTabsProvider } from "../components/tabs/AllocationTabsProvider"
-import { RoundDistributionCard } from "../components/tabs/round-info/RoundDistributionCard"
 import { RoundInfoHeader } from "../components/tabs/round-info/RoundInfoHeader"
 import { RoundInfoTab } from "../components/tabs/round-info/RoundInfoTab"
 import { RoundInfoSectionSkeleton } from "../components/tabs/RoundInfoSectionSkeleton"
@@ -39,7 +38,6 @@ async function RoundInfoSection({ roundIdParam }: { roundIdParam?: string }) {
   return (
     <VStack w="full" gap="4">
       <RoundInfoHeader roundDetails={roundDetails} />
-      <RoundDistributionCard roundDetails={roundDetails} />
     </VStack>
   )
 }
@@ -65,16 +63,6 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
 
   if (tab !== "" && tab !== "vote" && tab !== "round") return redirect("/allocations")
 
-  const roundDetails = await getCachedRoundData(parseRoundId(roundIdParam))
-  const isCurrentRound = roundDetails.currentRoundId === roundDetails.id
-
-  // Past rounds only show round info — redirect vote tab to round tab
-  if (!isCurrentRound && tab === "vote") {
-    const params = new URLSearchParams()
-    if (roundIdParam) params.set("roundId", roundIdParam)
-    return redirect(`/allocations/round?${params.toString()}`)
-  }
-
   const tabFallback =
     tab === "round" ? (
       <Tabs.Content value="round">
@@ -91,7 +79,7 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
       <Suspense key={roundIdParam ?? "current"} fallback={<RoundInfoSectionSkeleton />}>
         <RoundInfoSection roundIdParam={roundIdParam} />
       </Suspense>
-      <TabNavigation currentTab={tab} isCurrentRound={isCurrentRound}>
+      <TabNavigation currentTab={tab}>
         <Suspense key={roundIdParam ?? "current"} fallback={tabFallback}>
           <AllocationContent roundIdParam={roundIdParam} />
         </Suspense>

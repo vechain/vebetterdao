@@ -1,6 +1,18 @@
 "use client"
 
-import { Card, Grid, Heading, HStack, Icon, Skeleton, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  GridItem,
+  Grid,
+  Heading,
+  HStack,
+  Icon,
+  Separator,
+  SimpleGrid,
+  Skeleton,
+  VStack,
+} from "@chakra-ui/react"
 import { Activity, SmartphoneDevice } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 
@@ -8,6 +20,78 @@ export function RoundInfoTabSkeleton() {
   const { t } = useTranslation()
   return (
     <VStack alignItems="stretch" gap="5" w="full" mt="2">
+      {/* Distribution card skeleton */}
+      <Card.Root
+        p="4"
+        w="full"
+        variant="outline"
+        border="sm"
+        borderColor="border.secondary"
+        flexDirection={{ base: "column", md: "row" }}
+        justifyContent={{ base: "unset", md: "space-between" }}
+        gap={{ base: "unset", md: "12" }}>
+        <SimpleGrid flex={1} columns={3} rowGap="2" columnGap={{ base: "unset", md: "3" }}>
+          <GridItem hideBelow="md" display="flex" alignItems="center" gridColumn="1 / span 3">
+            <HStack gap="2">
+              <Skeleton height="5" width="5" rounded="md" />
+              <Skeleton height="6" width="20" rounded="md" />
+            </HStack>
+          </GridItem>
+          {["left", "center", "right"].map(position => (
+            <GridItem key={position}>
+              <Card.Root
+                p={{ base: "0", md: "4" }}
+                bg={{ base: "transparent", md: "card.subtle" }}
+                gap="1"
+                border="none"
+                mx={{ base: "auto", md: "unset" }}>
+                <HStack gap="2">
+                  <Skeleton height={{ base: "4", md: "5" }} width={{ base: "4", md: "5" }} rounded="sm" />
+                  <Skeleton height={{ base: "4", md: "5" }} width={{ base: "14", md: "20" }} rounded="sm" />
+                </HStack>
+                <Skeleton height="5" width="10" rounded="md" />
+              </Card.Root>
+            </GridItem>
+          ))}
+        </SimpleGrid>
+        <Separator hideFrom="md" my="5" borderColor="border.secondary" />
+        <VStack flex={1} alignItems="stretch" gap="3">
+          <HStack justifyContent="space-between" w="full">
+            <HStack gap="2">
+              <Skeleton height={{ base: "4", md: "5" }} width={{ base: "4", md: "5" }} rounded="sm" />
+              <Skeleton height={{ base: "4", md: "6" }} width={{ base: "36", md: "44" }} rounded="md" />
+            </HStack>
+            <Skeleton hideFrom="md" height="4" width="4" rounded="sm" />
+            <Skeleton hideBelow="md" height="5" width="12" rounded="sm" />
+          </HStack>
+          <HStack gap="2">
+            <Skeleton boxSize={{ base: "5", md: "6" }} rounded="full" />
+            <Skeleton height={{ base: "5", md: "7" }} width="28" rounded="md" />
+          </HStack>
+          <VStack alignItems="stretch" gap="1">
+            <Skeleton height={{ base: "1.5", md: "2" }} w="full" rounded="full" />
+            <HStack gap="8" pt="1">
+              {["To apps", "To voters", "To treasury"].map((label, i) => (
+                <HStack
+                  key={label}
+                  gap="1"
+                  flex={i < 2 ? 1 : undefined}
+                  borderRight={i < 2 ? "1px" : undefined}
+                  borderColor="border.secondary"
+                  pr={i < 2 ? "5" : undefined}>
+                  <Box
+                    boxSize="1.5"
+                    bg={i === 0 ? "status.positive.primary" : i === 1 ? "status.info.strong" : "status.warning.primary"}
+                    rounded="full"
+                  />
+                  <Skeleton height={{ base: "3", md: "3.5" }} width="12" rounded="sm" />
+                </HStack>
+              ))}
+            </HStack>
+          </VStack>
+        </VStack>
+      </Card.Root>
+
       {/* Mobile */}
       <VStack hideFrom="md" gap="3" alignItems="stretch">
         <HStack justifyContent="space-between" w="full">

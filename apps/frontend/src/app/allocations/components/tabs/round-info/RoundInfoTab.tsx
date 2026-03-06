@@ -14,6 +14,7 @@ import { RoundActiveAppsListCard } from "../../RoundActiveAppsListCard"
 import { UserVotingActivityCard } from "../../UserVotingActivityCard"
 import { AllocationTabsContext } from "../AllocationTabsProvider"
 
+import { RoundDistributionCard } from "./RoundDistributionCard"
 import { RoundHistoryCard } from "./RoundHistoryCard"
 
 interface RoundInfoTabProps {
@@ -37,6 +38,7 @@ export function RoundInfoTab({ roundDetails: propRoundDetails }: RoundInfoTabPro
 
   return (
     <VStack alignItems="stretch" gap="5" w="full" mt="2">
+      <RoundDistributionCard roundDetails={roundDetails} />
       {isMobile && (
         <>
           {!!account?.address && <UserVotingActivityCard roundDetails={roundDetails} />}
