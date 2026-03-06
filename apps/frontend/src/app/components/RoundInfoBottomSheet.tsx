@@ -43,7 +43,7 @@ export const RoundInfoBottomSheet = () => {
           borderTopRadius="20px"
           boxShadow="0px -5px 16px 0px #0000000F"
           cursor="pointer"
-          zIndex={2}>
+          zIndex={10}>
           <Box>
             <Skeleton loading={isCardLoading}>
               <Heading size={"xl"} color="black" fontWeight="normal">
@@ -79,6 +79,7 @@ export const RoundInfoBottomSheet = () => {
       <BaseBottomSheet
         isOpen={isOpen}
         onClose={onClose}
+        minHeight="85dvh"
         ariaTitle={t("Round #{{round}}", { round: allocationRound.roundId })}
         ariaDescription={t("Round #{{round}}", { round: allocationRound.roundId })}>
         <DashboardAllocationRounds isBottomSheet />

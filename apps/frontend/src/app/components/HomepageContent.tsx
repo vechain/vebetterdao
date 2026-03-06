@@ -1,15 +1,20 @@
 import { Grid, GridItem, VStack, useMediaQuery } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 
-import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
+import { AssetsOverview } from "@/components/AssetsOverview"
+
 import { DashboardAllocationRounds } from "../proposals/components/components/DashboardAllocationRounds"
 
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
+import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
+
+  const { account } = useWallet()
 
   return (
     <>
@@ -24,8 +29,8 @@ export const HomePageContent = () => {
         <GridItem colSpan={[1, 1, 3]} overflow={{ base: "hidden", md: "unset" }}>
           <ActionBanner />
         </GridItem>
-        <GridItem colSpan={[1, 1, 3]}>
-          <GmNFTAndNodeCard />
+        <GridItem colSpan={[1, 1, 3]} hidden={!account?.address}>
+          <AssetsOverview />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
@@ -33,6 +38,7 @@ export const HomePageContent = () => {
               <>
                 <CantVoteCard />
                 <DashboardAllocationRounds />
+                <SupplyBreakdownCard />
               </>
             )}
           </VStack>

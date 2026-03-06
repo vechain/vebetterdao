@@ -191,13 +191,23 @@ export const EditAppPageContent = () => {
 
   // Update the form values when the app fetches the data from blockchain
   useEffect(() => {
+    if (logo) {
+      form.setValue("logoImage", logo)
+    }
+    if (banner) {
+      form.setValue("bannerImage", banner)
+    }
+    const validScreenshots = screenshots.filter(Boolean)
+    if (validScreenshots.length > 0 && form.getValues("screenshots").length === 0) {
+      form.setValue("screenshots", validScreenshots)
+    }
     if (veWorldBanner) {
       form.setValue("ve_world_bannerImage", veWorldBanner)
     }
     if (veWorldFeaturedImage) {
       form.setValue("ve_world_featured_image", veWorldFeaturedImage)
     }
-  }, [veWorldBanner, veWorldFeaturedImage, form])
+  }, [logo, banner, screenshots, veWorldBanner, veWorldFeaturedImage, form])
 
   if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
     return null

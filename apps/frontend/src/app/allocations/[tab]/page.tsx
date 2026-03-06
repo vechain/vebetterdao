@@ -1,14 +1,16 @@
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
-import { Tabs } from "@chakra-ui/react"
+import { Stack, Tabs, VStack } from "@chakra-ui/react"
 import { redirect } from "next/navigation"
-import { Suspense } from "react"
+import { cache, Suspense } from "react"
 
 import { getPageMetadata } from "@/utils/metadata"
 
 import { AllocationTabsProvider } from "../components/tabs/AllocationTabsProvider"
+import { RoundInfoHeader } from "../components/tabs/round-info/RoundInfoHeader"
 import { RoundInfoTab } from "../components/tabs/round-info/RoundInfoTab"
+import { RoundInfoSectionSkeleton } from "../components/tabs/RoundInfoSectionSkeleton"
 import { RoundInfoTabSkeleton } from "../components/tabs/RoundInfoTabSkeleton"
 import { TabNavigation } from "../components/tabs/TabNavigation"
 import { VoteTab } from "../components/tabs/vote/VoteTab"
@@ -17,24 +19,31 @@ import { getHistoricalRoundData } from "../lib/data"
 
 export const metadata = getPageMetadata("allocations")
 
+const getCachedRoundData = cache((roundId?: number) => getHistoricalRoundData(roundId))
+
+function parseRoundId(roundIdParam?: string) {
+  if (!roundIdParam) return undefined
+  const parsed = parseInt(roundIdParam, 10)
+  return isNaN(parsed) ? undefined : parsed
+}
+
 interface TabsPageProps {
   params: Promise<{ tab: string }>
   searchParams: Promise<{ roundId?: string }>
 }
 
-async function AllocationContent({ roundIdParam }: { roundIdParam?: string }) {
-  let roundDetails
+async function RoundInfoSection({ roundIdParam }: { roundIdParam?: string }) {
+  const roundDetails = await getCachedRoundData(parseRoundId(roundIdParam))
 
-  if (roundIdParam) {
-    const roundId = parseInt(roundIdParam, 10)
-    if (!isNaN(roundId)) {
-      roundDetails = await getHistoricalRoundData(roundId)
-    } else {
-      roundDetails = await getHistoricalRoundData()
-    }
-  } else {
-    roundDetails = await getHistoricalRoundData()
-  }
+  return (
+    <VStack w="full" gap="4">
+      <RoundInfoHeader roundDetails={roundDetails} />
+    </VStack>
+  )
+}
+
+async function AllocationContent({ roundIdParam }: { roundIdParam?: string }) {
+  const roundDetails = await getCachedRoundData(parseRoundId(roundIdParam))
 
   return (
     <AllocationTabsProvider roundDetails={roundDetails}>
@@ -54,7 +63,7 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
 
   if (tab !== "" && tab !== "vote" && tab !== "round") return redirect("/allocations")
 
-  const fallback =
+  const tabFallback =
     tab === "round" ? (
       <Tabs.Content value="round">
         <RoundInfoTabSkeleton />
@@ -66,10 +75,15 @@ export default async function TabsPage({ params, searchParams }: TabsPageProps) 
     )
 
   return (
-    <TabNavigation currentTab={tab}>
-      <Suspense key={roundIdParam ?? "current"} fallback={fallback}>
-        <AllocationContent roundIdParam={roundIdParam} />
+    <Stack w="full" gap="4">
+      <Suspense key={roundIdParam ?? "current"} fallback={<RoundInfoSectionSkeleton />}>
+        <RoundInfoSection roundIdParam={roundIdParam} />
       </Suspense>
-    </TabNavigation>
+      <TabNavigation currentTab={tab}>
+        <Suspense key={roundIdParam ?? "current"} fallback={tabFallback}>
+          <AllocationContent roundIdParam={roundIdParam} />
+        </Suspense>
+      </TabNavigation>
+    </Stack>
   )
 }

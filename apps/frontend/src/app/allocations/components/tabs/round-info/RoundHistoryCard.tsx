@@ -21,7 +21,7 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
   const { t } = useTranslation()
   const { roundId, vote2EarnAmount: totalReward, roundStart, roundEnd } = round
   const { account } = useWallet()
-  const { data: rewardClaimed, isLoading: isRewardClaimedLoading } = useEvents({
+  const { data: rewardClaimedV2, isLoading: isV2Loading } = useEvents({
     abi,
     contractAddress,
     eventName: "RewardClaimedV2",
@@ -36,6 +36,26 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
       }),
     enabled: !!account?.address,
   })
+
+  // Early rounds only emitted "RewardClaimed" (no gmReward)
+  const { data: rewardClaimedV1, isLoading: isV1Loading } = useEvents({
+    abi,
+    contractAddress,
+    eventName: "RewardClaimed",
+    filterParams: {
+      cycle: BigInt(round.roundId),
+      voter: (account?.address ?? "") as `0x${string}`,
+    },
+    select: events =>
+      events.map(({ decodedData }) => {
+        const reward = decodedData.args.reward
+        return (reward > 0n ? "+" : "") + getCompactFormatter(2).format(Number(formatEther(reward)))
+      }),
+    enabled: !!account?.address,
+  })
+
+  const rewardClaimed = rewardClaimedV2 ?? rewardClaimedV1
+  const isRewardClaimedLoading = isV2Loading || isV1Loading
 
   const total = getCompactFormatter(2).format(Number(formatEther(totalReward)))
 

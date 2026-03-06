@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next"
 import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
 import { ProposalsBanners } from "@/app/components/Banners/proposals/ProposalsBanners"
-import { PowerUpModal } from "@/app/components/PowerUpModal"
+import { ConvertB3trAndVot3Modal } from "@/app/components/ConvertB3trAndVot3Modal"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
 
@@ -377,7 +377,7 @@ export const GrantsPageContent = () => {
       </VStack>
 
       {/* Convert/Swap Modal */}
-      <PowerUpModal isOpen={isOpenConvertModal} onClose={onCloseConvertModal} />
+      <ConvertB3trAndVot3Modal isOpen={isOpenConvertModal} onClose={onCloseConvertModal} />
     </>
   )
 }

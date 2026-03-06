@@ -1,4 +1,4 @@
-import { Button, Card, Grid, GridItem, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
 import { TFunction } from "i18next"
 import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useState } from "react"
@@ -62,42 +62,33 @@ export const NewProposalTypePageContent = () => {
   if (!pageGuardResult.isVisitAuthorized) return null
 
   return (
-    <Grid
-      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
-      gap={6}
-      w="full"
-      data-testid="new-proposal-type-page">
-      <GridItem colSpan={2}>
-        <Card.Root variant="primary">
-          <Card.Body py={8}>
-            <VStack gap={8} align="flex-start">
-              <Heading size={["xl", "2xl"]}>{t("Select proposal type")}</Heading>
-              <Stack direction={["column", "column", "row"]} w="full" gap={4}>
-                {Steps(t).map(step => (
-                  <CheckableCard
-                    {...step}
-                    cardProps={{
-                      flex: 1,
-                    }}
-                    key={`proposal-step-${step.inputType}-${uuid()}`}
-                    onChange={onChange(step.route)}
-                    checked={selectedRoute === step.route}
-                  />
-                ))}
-              </Stack>
-              <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-                <Button data-testid="go-back" variant="link" onClick={router.back}>
-                  {t("Go back")}
-                </Button>
-                <Button data-testid="continue" variant="primary" onClick={onContinue}>
-                  {t("Continue")}
-                </Button>
-              </HStack>
-            </VStack>
-          </Card.Body>
-        </Card.Root>
-      </GridItem>
-      <GridItem colSpan={1}></GridItem>
-    </Grid>
+    <Card.Root variant="primary">
+      <Card.Body py={8}>
+        <VStack gap={8} align="flex-start">
+          <Heading size={["xl", "2xl"]}>{t("Select proposal type")}</Heading>
+          <Stack direction={["column", "column", "row"]} w="full" gap={4}>
+            {Steps(t).map(step => (
+              <CheckableCard
+                {...step}
+                cardProps={{
+                  flex: 1,
+                }}
+                key={`proposal-step-${step.inputType}-${uuid()}`}
+                onChange={onChange(step.route)}
+                checked={selectedRoute === step.route}
+              />
+            ))}
+          </Stack>
+          <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
+            <Button data-testid="go-back" variant="link" onClick={router.back}>
+              {t("Go back")}
+            </Button>
+            <Button data-testid="continue" variant="primary" onClick={onContinue}>
+              {t("Continue")}
+            </Button>
+          </HStack>
+        </VStack>
+      </Card.Body>
+    </Card.Root>
   )
 }

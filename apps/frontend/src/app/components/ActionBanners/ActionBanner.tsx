@@ -139,7 +139,7 @@ export const ActionBanner = () => {
   const { data: hasCreatorNFT } = useHasCreatorNFT(account?.address ?? "") // No loading state
   const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
-  const newApps = (xApps?.newApps ?? []).length > 0
+  const newApps = (xApps?.newApps ?? []).length > 0 && (preferences?.[BannerStorageKey.SHOW_NEW_APP] ?? true)
 
   // Endorsement banner logic
   const showEndorsementBanner = !!account?.address && (preferences?.[BannerStorageKey.SHOW_ENDORSEMENT] ?? true)
@@ -170,11 +170,21 @@ export const ActionBanner = () => {
     Number(votingRewardsQuery.data.claimableTotal) !== 0
 
   // Creator NFT banners logic
+  const showCreatorNftBannerPreference = preferences?.[BannerStorageKey.SHOW_CREATOR_NFT] ?? true
   const showCreatorRejectedBanner =
-    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT && !hasAlreadySubmitted
+    !!account?.address &&
+    showCreatorNftBannerPreference &&
+    !hasCreatorNFT &&
+    !submissionsLoading &&
+    isLatestSubmissionRejected
+  const showCreatorApprovedBanner =
+    !!account?.address && showCreatorNftBannerPreference && hasCreatorNFT && !hasAlreadySubmitted
   const showCreatorUnderReviewBanner =
-    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
+    !!account?.address &&
+    showCreatorNftBannerPreference &&
+    !hasCreatorNFT &&
+    !submissionsLoading &&
+    isLatestSubmissionOngoing
 
   const showCastVoteInProposalBanners = !!account?.address && hasProposals && userCanVoteInProposals
 

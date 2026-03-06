@@ -44,6 +44,7 @@ export function TabNavigation({ children, currentTab }: TabNavigationProps) {
                 {account?.address ? t("Vote for apps") : t("Round apps")}
               </NextLink>
             </Tabs.Trigger>
+
             <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="round" asChild truncate>
               <NextLink href={isMobile ? "/allocations/round#allocation-tabs" : "/allocations/round"}>
                 {t("Round info")}
