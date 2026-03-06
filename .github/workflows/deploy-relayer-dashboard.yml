@@ -32,9 +32,8 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build relayer-dashboard
-        run: yarn workspace relayer-dashboard build
+        run: yarn relayer:build:mainnet
         env:
-          NEXT_PUBLIC_APP_ENV: mainnet
           NEXT_PUBLIC_BASE_PATH: /b3tr
 
       - name: Upload Pages artifact

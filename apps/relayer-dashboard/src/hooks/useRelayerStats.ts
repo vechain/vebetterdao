@@ -1,11 +1,13 @@
 "use client"
 
 import { getConfig } from "@repo/config"
+import type { EnvConfig } from "@repo/config/contracts"
 import { RelayerRewardsPool__factory, XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useCallClause, useWallet } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
-const config = getConfig("mainnet")
+const env = (process.env.NEXT_PUBLIC_APP_ENV ?? "mainnet") as EnvConfig
+const config = getConfig(env)
 const relayerPoolAddress = config.relayerRewardsPoolContractAddress as `0x${string}`
 const xAllocationAddress = config.xAllocationVotingContractAddress as `0x${string}`
 const relayerPoolAbi = RelayerRewardsPool__factory.abi

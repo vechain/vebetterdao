@@ -1,10 +1,11 @@
 {
   "extends": "@repo/typescript-config/nextjs.json",
-  "skipLibCheck": true,
   "compilerOptions": {
+    "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUncheckedIndexedAccess": true,
+    "types": ["node", "react", "react-dom"],
     "plugins": [
       {
         "name": "next"
