@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Container, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/vechain-kit"
 import NextLink from "next/link"
@@ -80,20 +80,22 @@ export function Footer() {
   return (
     <Box as="footer" borderTop="sm" borderColor="border.secondary" bg="bg.primary" mt={8}>
       <Container maxW="breakpoint-xl" px={4} py={{ base: 8, md: 10 }}>
-        <VStack w="full" align="start" gap={6}>
-          <HStack gap={2}>
-            <Icon color="blue.solid" boxSize={5}>
-              <LuRadar />
-            </Icon>
-            <Text fontWeight="bold" textStyle="sm">
-              {"Relayer Dashboard"}
+        <Flex w="full" direction={{ base: "column", md: "row" }} justify="space-between" gap={{ base: 8, md: 6 }}>
+          <VStack align="start" gap={2} flexShrink={0}>
+            <HStack gap={2}>
+              <Icon color="blue.solid" boxSize={5}>
+                <LuRadar />
+              </Icon>
+              <Text fontWeight="bold" textStyle="sm">
+                {"Relayer Dashboard"}
+              </Text>
+            </HStack>
+            <Text textStyle="xs" color="text.subtle">
+              {"The central hub for managing and monitoring relayers."}
             </Text>
-          </HStack>
-          <Text textStyle="xs" color="text.subtle" mt={-4}>
-            {"The central hub for managing and monitoring relayers."}
-          </Text>
+          </VStack>
 
-          <SimpleGrid w="full" columns={{ base: 2, md: 3 }} gap={{ base: 8, md: 6 }}>
+          <SimpleGrid columns={{ base: 2, md: 3 }} gap={{ base: 8, md: 6 }}>
             <VStack align="start" gap={2}>
               <Text fontWeight="bold" textStyle="sm">
                 {"RESOURCES"}
@@ -121,11 +123,11 @@ export function Footer() {
               <SyncingBlock />
             </VStack>
           </SimpleGrid>
+        </Flex>
 
-          <Text w="full" textStyle="xs" color="text.subtle" textAlign="center" pt={4}>
-            {`© ${new Date().getFullYear()} VeBetterDAO Relayer Ecosystem. All rights reserved.`}
-          </Text>
-        </VStack>
+        <Text w="full" textStyle="xs" color="text.subtle" textAlign="center" pt={8}>
+          {`© ${new Date().getFullYear()} VeBetterDAO Relayer Ecosystem. All rights reserved.`}
+        </Text>
       </Container>
     </Box>
   )
