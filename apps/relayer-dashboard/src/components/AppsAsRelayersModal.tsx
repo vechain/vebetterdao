@@ -22,7 +22,7 @@ export function AppsAsRelayersModal({ isOpen, onClose }: AppsAsRelayersModalProp
         <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
           <Card.Root variant="subtle" p={5}>
             <VStack align="start" gap={3}>
-              <Icon color="actions.primary.default" boxSize={6}>
+              <Icon color="blue.solid" boxSize={6}>
                 <LuLayoutGrid />
               </Icon>
               <Text fontWeight="semibold">{"For X2Earn Apps"}</Text>
@@ -32,7 +32,7 @@ export function AppsAsRelayersModal({ isOpen, onClose }: AppsAsRelayersModalProp
                 }
               </Text>
 
-              <Button variant="secondary" size="sm" rounded="full">
+              <Button variant="solid" size="sm" rounded="full">
                 {"Documentation"}
                 <Icon ml="1">
                   <LuExternalLink />
@@ -43,7 +43,7 @@ export function AppsAsRelayersModal({ isOpen, onClose }: AppsAsRelayersModalProp
 
           <Card.Root variant="subtle" p={5}>
             <VStack align="stretch" gap={3} justify="space-between" h="full">
-              <Icon color="actions.primary.default" boxSize={6}>
+              <Icon color="blue.solid" boxSize={6}>
                 <LuUsers />
               </Icon>
               <Text fontWeight="semibold">{"For Community Navigators"}</Text>
@@ -66,7 +66,7 @@ export function AppsAsRelayersModal({ isOpen, onClose }: AppsAsRelayersModalProp
 
         <VStack align="start" gap={3}>
           <HStack gap={2}>
-            <Icon color="actions.primary.default" boxSize={5}>
+            <Icon color="blue.solid" boxSize={5}>
               <LuShieldCheck />
             </Icon>
             <Text fontWeight="semibold">{"Why Would an App Want to Do This?"}</Text>

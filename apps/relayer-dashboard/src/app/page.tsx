@@ -1,13 +1,14 @@
 "use client"
 
+import { Flex, Spinner } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
 const DashboardContent = dynamic(() => import("./DashboardContent"), {
   ssr: false,
   loading: () => (
-    <div style={{ minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      {"Loading\u2026"}
-    </div>
+    <Flex minH="100vh" align="center" justify="center">
+      <Spinner size="lg" color="blue.solid" />
+    </Flex>
   ),
 })
 

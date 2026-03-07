@@ -7,7 +7,7 @@ import { NavigationProvider } from "@/hooks/useNavigation"
 
 import { Providers } from "./providers"
 
-const DashboardHeader = dynamic(() => import("@/components/DashboardHeader").then(mod => mod.DashboardHeader), {
+const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), {
   ssr: false,
 })
 
@@ -16,7 +16,7 @@ export function ClientApp({ children }: { children: React.ReactNode }) {
     <Providers>
       <NavigationProvider>
         <VStack minH="100vh" gap={0} align="stretch">
-          <DashboardHeader />
+          <Navbar />
           <Flex flex={1}>
             <Container
               flex={1}

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState } from "react"
 
-import type { NavPage } from "@/components/DashboardHeader"
+import type { NavPage } from "@/components/Navbar"
 
 interface NavigationContextValue {
   activePage: NavPage

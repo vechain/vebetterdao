@@ -64,7 +64,7 @@ export const buttonRecipe = defineRecipe({
         _focus: { bg: "actions.negative.pressed" },
       },
       link: {
-        color: "actions.primary.default",
+        color: "blue.solid",
         bgColor: "transparent",
         _hover: { textDecoration: "underline" },
         _disabled: {

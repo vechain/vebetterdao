@@ -30,7 +30,7 @@ const ROUTES: { value: NavPage; label: string; icon: typeof LuHouse }[] = [
   { value: "info", label: "Info", icon: LuInfo },
 ]
 
-export function DashboardHeader() {
+export function Navbar() {
   const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
   const { open, onClose, onOpen } = useDisclosure()
   const { activePage, setActivePage } = useNavigation()
@@ -53,6 +53,7 @@ export function DashboardHeader() {
           <Heading size="lg" fontWeight="bold">
             {"VeBetter Relayers"}
           </Heading>
+          <ColorModeButton mt="1" rounded="full" />
         </HStack>
 
         {isDesktop && (
@@ -102,7 +103,6 @@ export function DashboardHeader() {
             }}
             connectionVariant="popover"
           />
-          <ColorModeButton rounded="full" />
 
           {!isDesktop && (
             <IconButton onClick={onOpen} variant="ghost" rounded="6px" aria-label="Open menu">
