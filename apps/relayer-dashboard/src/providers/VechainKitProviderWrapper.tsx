@@ -62,8 +62,8 @@ export function VechainKitProviderWrapper({ children }: Props) {
           ? {
               projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
               metadata: {
-                name: "Relayer Dashboard",
-                description: "VeBetterDAO Auto-Voting Relayer Dashboard",
+                name: "VeBetter Relayers",
+                description: "VeBetterDAO Auto-Voting VeBetter Relayers",
                 url: typeof window !== "undefined" ? window.location.origin : "",
                 icons: [],
               },

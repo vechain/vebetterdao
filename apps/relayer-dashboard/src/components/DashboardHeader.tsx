@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { WalletButton } from "@vechain/vechain-kit"
 import { usePathname, useRouter } from "next/navigation"
-import { LuHouse, LuInfo, LuMenu, LuRadar } from "react-icons/lu"
+import { LuHouse, LuInfo, LuMenu, LuRadar, LuRocket } from "react-icons/lu"
 
 import { useNavigation } from "@/hooks/useNavigation"
 
@@ -48,7 +48,7 @@ export function DashboardHeader() {
       <HStack justify="space-between" p={isDesktop ? "16px 48px" : "8px 20px"}>
         <HStack flex="1" justifyContent="start">
           <Heading size="lg" fontWeight="bold">
-            {"Relayer Dashboard"}
+            {"VeBetter Relayers"}
           </Heading>
         </HStack>
 
@@ -82,12 +82,18 @@ export function DashboardHeader() {
         )}
 
         <HStack flex="1" gap={2} justifyContent="end" alignItems="center">
+          <Button variant="primary" size="md" rounded="full" onClick={() => handleNav("relayer")}>
+            <Icon>
+              <LuRocket />
+            </Icon>
+            {"Become a Relayer"}
+          </Button>
           <WalletButton
             buttonStyle={{
-              variant: "primaryAction",
+              variant: "outline",
               size: "md",
               borderRadius: "full",
-              bg: "#004CFC",
+              // bg: "solid.secondary",
               textColor: "white",
             }}
             connectionVariant="popover"
@@ -115,7 +121,7 @@ export function DashboardHeader() {
 
                 <Drawer.Header>
                   <Heading size="lg" fontWeight="bold">
-                    {"Relayer Dashboard"}
+                    {"VeBetter Relayers"}
                   </Heading>
                 </Drawer.Header>
 

@@ -39,6 +39,8 @@ export const buttonRecipe = defineRecipe({
       },
       tertiary: {
         color: "text.default",
+        // TODO: tertiary button needs to be updated acc. to DS
+        // color: "actions.tertiary.text",
         bgColor: "transparent",
         borderWidth: "1px",
         borderStyle: "solid",
@@ -50,6 +52,24 @@ export const buttonRecipe = defineRecipe({
           borderColor: "borders.secondary",
         },
         _focus: { bg: "actions.tertiary.pressed" },
+      },
+      negative: {
+        color: "actions.negative.text",
+        bgColor: "actions.negative.default",
+        _hover: { bg: "actions.negative.hover" },
+        _disabled: {
+          bg: "actions.disabled.disabled",
+          color: "actions.disabled.text",
+        },
+        _focus: { bg: "actions.negative.pressed" },
+      },
+      link: {
+        color: "actions.primary.default",
+        bgColor: "transparent",
+        _hover: { textDecoration: "underline" },
+        _disabled: {
+          color: "actions.disabled.text",
+        },
       },
       subtle: {
         bg: "card.subtle",

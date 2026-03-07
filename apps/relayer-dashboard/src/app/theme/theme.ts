@@ -204,7 +204,7 @@ const config = defineConfig({
         },
         actions: {
           primary: {
-            default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
+            default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.600}" } },
             hover: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.500}" } },
             pressed: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.500}" } },
             disabled: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.700}" } },

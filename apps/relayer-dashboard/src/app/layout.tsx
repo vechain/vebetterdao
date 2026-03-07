@@ -11,7 +11,7 @@ const ClientApp = dynamic(() => import("./ClientApp").then(mod => mod.ClientApp)
 })
 
 export const metadata: Metadata = {
-  title: "Relayer Dashboard | VeBetterDAO Auto-Voting",
+  title: "VeBetter Relayers | VeBetterDAO Auto-Voting",
   description: "Auto-voting and relayer analytics for VeBetterDAO governance.",
 }
 
