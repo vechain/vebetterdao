@@ -38,7 +38,7 @@ export function BecomeRelayer() {
             {"Become a relayer"}
           </Text>
           <Text textStyle="lg" color="whiteAlpha.800">
-            {"Run a node, serve voters, earn B3TR."}
+            {"Run a relayer node, serve voters, earn B3TR."}
           </Text>
           <HStack gap="2" mt="1" flexWrap="wrap">
             <NextLink href="/new-relayer">

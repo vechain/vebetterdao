@@ -11,6 +11,10 @@ const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navba
   ssr: false,
 })
 
+const Footer = dynamic(() => import("@/components/Footer").then(mod => mod.Footer), {
+  ssr: false,
+})
+
 export function ClientApp({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
@@ -30,6 +34,7 @@ export function ClientApp({ children }: { children: React.ReactNode }) {
               {children}
             </Container>
           </Flex>
+          <Footer />
         </VStack>
       </NavigationProvider>
     </Providers>
