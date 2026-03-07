@@ -1,11 +1,12 @@
 "use client"
 
-import { SimpleGrid, VStack } from "@chakra-ui/react"
+import { Box, SimpleGrid, VStack } from "@chakra-ui/react"
 
 import { AiSkillBanner } from "@/components/AiSkillBanner"
 import { AppsAsRelayers } from "@/components/AppsAsRelayers"
 import { BecomeRelayer } from "@/components/BecomeRelayer"
 import { ConnectedWallet } from "@/components/ConnectedWallet"
+import { FeelLostBanner } from "@/components/FeelLostBanner"
 import { RoundsChart } from "@/components/RoundsChart"
 import { RoundsList } from "@/components/RoundsList"
 import { StatsCards } from "@/components/StatsCards"
@@ -30,7 +31,12 @@ export default function DashboardContent() {
 
           <RoundsList />
 
-          <AiSkillBanner />
+          <SimpleGrid columns={{ base: 1, md: 3 }} gap="4">
+            <FeelLostBanner />
+            <Box gridColumn={{ md: "span 2" }}>
+              <AiSkillBanner />
+            </Box>
+          </SimpleGrid>
         </>
       )}
 

@@ -1,7 +1,8 @@
 "use client"
 
-import { Button, Heading, Skeleton, Stack, VStack } from "@chakra-ui/react"
+import { Button, Heading, Icon, Skeleton, Stack, VStack } from "@chakra-ui/react"
 import { useState } from "react"
+import { LuChevronsDown } from "react-icons/lu"
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
 import { useReportData } from "@/hooks/useReportData"
@@ -36,7 +37,7 @@ export function RoundsList() {
 
   return (
     <VStack gap="4" align="stretch">
-      <Heading size="lg">{"Rounds"}</Heading>
+      <Heading size="lg">{"Voting rounds"}</Heading>
       <Stack gap="3">
         {visible.map(round => {
           const rewardsRaw = round.isRoundEnded ? round.totalRelayerRewardsRaw : round.estimatedRelayerRewardsRaw
@@ -51,12 +52,14 @@ export function RoundsList() {
         })}
       </Stack>
       {hasMore && (
-        <Button
-          variant="outline"
-          size="sm"
-          alignSelf="center"
-          onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}>
+        <Button variant="ghost" size="sm" alignSelf="center" onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}>
+          <Icon color="text.subtle" boxSize={3}>
+            <LuChevronsDown size={"xs"} />
+          </Icon>
           {"Load more rounds"}
+          <Icon color="text.subtle" boxSize={3}>
+            <LuChevronsDown size={"xs"} />
+          </Icon>
         </Button>
       )}
     </VStack>

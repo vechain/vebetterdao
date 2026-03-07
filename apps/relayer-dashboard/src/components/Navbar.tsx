@@ -16,6 +16,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { WalletButton } from "@vechain/vechain-kit"
+import NextLink from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LuHouse, LuInfo, LuMenu, LuRadar, LuRocket } from "react-icons/lu"
 
@@ -53,7 +54,7 @@ export function Navbar() {
           <Heading size="lg" fontWeight="bold">
             {"VeBetter Relayers"}
           </Heading>
-          <ColorModeButton mt="1" rounded="full" />
+          {isDesktop && <ColorModeButton mt="1" rounded="full" />}
         </HStack>
 
         {isDesktop && (
@@ -86,27 +87,33 @@ export function Navbar() {
         )}
 
         <HStack flex="1" gap={2} justifyContent="end" alignItems="center">
-          <Button variant="primary" size="md" rounded="full" onClick={() => handleNav("relayer")}>
-            <Icon>
-              <LuRocket />
-            </Icon>
-            {"Become a Relayer"}
-          </Button>
+          <NextLink href="/new-relayer">
+            <Button variant="primary" size={isDesktop ? "md" : "sm"} rounded="full">
+              <Icon>
+                <LuRocket />
+              </Icon>
+              {isDesktop ? "Become a Relayer" : "Relayer"}
+            </Button>
+          </NextLink>
 
-          <WalletButton
-            buttonStyle={{
-              variant: "outline",
-              size: "md",
-              borderRadius: "full",
-              textColor: walletTextColor,
-              _hover: { bg: walletHoverBg },
-            }}
-            connectionVariant="popover"
-          />
+          {isDesktop && (
+            <>
+              <WalletButton
+                buttonStyle={{
+                  variant: "outline",
+                  size: "md",
+                  borderRadius: "full",
+                  textColor: walletTextColor,
+                  _hover: { bg: walletHoverBg },
+                }}
+                connectionVariant="popover"
+              />
+            </>
+          )}
 
           {!isDesktop && (
-            <IconButton onClick={onOpen} variant="ghost" rounded="6px" aria-label="Open menu">
-              <Icon boxSize={6} color="icon.default">
+            <IconButton onClick={onOpen} variant="ghost" rounded="6px" size="lg" aria-label="Open menu">
+              <Icon boxSize={7} color="icon.default">
                 <LuMenu />
               </Icon>
             </IconButton>
@@ -130,8 +137,21 @@ export function Navbar() {
                   </Heading>
                 </Drawer.Header>
 
-                <Drawer.Body px={5}>
+                <Drawer.Body px={5} display="flex" flexDirection="column" justifyContent="space-between">
                   <VStack gap={0} w="full" align="stretch">
+                    <Box py={3}>
+                      <WalletButton
+                        buttonStyle={{
+                          variant: "outline",
+                          size: "md",
+                          borderRadius: "full",
+                          width: "100%",
+                          textColor: walletTextColor,
+                          _hover: { bg: walletHoverBg },
+                        }}
+                        connectionVariant="popover"
+                      />
+                    </Box>
                     <Separator my={2} />
                     {ROUTES.map(route => (
                       <Button
@@ -142,6 +162,7 @@ export function Navbar() {
                         justifyContent="flex-start"
                         alignItems="center"
                         gap={4}
+                        size="lg"
                         fontWeight={activePage === route.value ? "bold" : "normal"}
                         onClick={() => {
                           handleNav(route.value)
@@ -153,9 +174,11 @@ export function Navbar() {
                         {route.label}
                       </Button>
                     ))}
-                    <Separator my={2} />
-                    <ColorModeButton withText w="full" display="flex" justifyContent="flex-start" gap={4} />
                   </VStack>
+                  <Box pb={6}>
+                    <Separator mb={4} />
+                    <ColorModeButton withText w="full" display="flex" justifyContent="flex-start" size="lg" gap={4} />
+                  </Box>
                 </Drawer.Body>
               </Drawer.Content>
             </Drawer.Positioner>
