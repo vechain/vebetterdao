@@ -19,6 +19,7 @@ import { WalletButton } from "@vechain/vechain-kit"
 import { usePathname, useRouter } from "next/navigation"
 import { LuHouse, LuInfo, LuMenu, LuRadar, LuRocket } from "react-icons/lu"
 
+import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
 import { useNavigation } from "@/hooks/useNavigation"
 
 export type NavPage = "home" | "relayer" | "info"
@@ -36,6 +37,8 @@ export function DashboardHeader() {
   const router = useRouter()
   const pathname = usePathname()
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+  const walletTextColor = useColorModeValue("#1A1A1A", "#E4E4E4")
+  const walletHoverBg = useColorModeValue("#f8f8f8", "#2D2D2F")
 
   const handleNav = (page: NavPage) => {
     setActivePage(page)
@@ -88,16 +91,18 @@ export function DashboardHeader() {
             </Icon>
             {"Become a Relayer"}
           </Button>
+
           <WalletButton
             buttonStyle={{
               variant: "outline",
               size: "md",
               borderRadius: "full",
-              // bg: "solid.secondary",
-              textColor: "white",
+              textColor: walletTextColor,
+              _hover: { bg: walletHoverBg },
             }}
             connectionVariant="popover"
           />
+          <ColorModeButton rounded="full" />
 
           {!isDesktop && (
             <IconButton onClick={onOpen} variant="ghost" rounded="6px" aria-label="Open menu">
@@ -148,6 +153,8 @@ export function DashboardHeader() {
                         {route.label}
                       </Button>
                     ))}
+                    <Separator my={2} />
+                    <ColorModeButton withText w="full" display="flex" justifyContent="flex-start" gap={4} />
                   </VStack>
                 </Drawer.Body>
               </Drawer.Content>
