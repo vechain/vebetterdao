@@ -23,12 +23,12 @@ import { LuHouse, LuInfo, LuMenu, LuRadar, LuRocket } from "react-icons/lu"
 import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
 import { useNavigation } from "@/hooks/useNavigation"
 
-export type NavPage = "home" | "relayer" | "info"
+export type NavPage = "home" | "relayer" | "learn"
 
 const ROUTES: { value: NavPage; label: string; icon: typeof LuHouse }[] = [
   { value: "home", label: "Home", icon: LuHouse },
   { value: "relayer", label: "My Relayer", icon: LuRadar },
-  { value: "info", label: "Info", icon: LuInfo },
+  { value: "learn", label: "Learn", icon: LuInfo },
 ]
 
 export function Navbar() {

@@ -7,6 +7,7 @@ import { AppsAsRelayers } from "@/components/AppsAsRelayers"
 import { BecomeRelayer } from "@/components/BecomeRelayer"
 import { ConnectedWallet } from "@/components/ConnectedWallet"
 import { FeelLostBanner } from "@/components/FeelLostBanner"
+import { InfoContent } from "@/components/InfoContent"
 import { RoundsChart } from "@/components/RoundsChart"
 import { RoundsList } from "@/components/RoundsList"
 import { StatsCards } from "@/components/StatsCards"
@@ -42,12 +43,7 @@ export default function DashboardContent() {
 
       {activePage === "relayer" && <ConnectedWallet />}
 
-      {activePage === "info" && (
-        <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-          <BecomeRelayer />
-          <AppsAsRelayers />
-        </SimpleGrid>
-      )}
+      {activePage === "learn" && <InfoContent />}
     </VStack>
   )
 }

@@ -14,11 +14,17 @@ const RESOURCES = [
   { label: "Governance App", href: "https://governance.vebetterdao.org" },
 ]
 
+const GITHUB_REPOS = [
+  { label: "Skills", href: "https://github.com/vechain/vebetterdao-skills" },
+  { label: "Relayer Node", href: "https://github.com/vechain/vebetterdao-relayer-node" },
+  { label: "Contracts", href: "https://github.com/vechain/vebetterdao-contracts" },
+]
+
 const NAVIGATION = [
   { label: "Home", page: "home" as const },
   { label: "My Relayer", page: "relayer" as const },
   { label: "Become a Relayer", href: "/new-relayer" },
-  { label: "Info", page: "info" as const },
+  { label: "Learn", page: "learn" as const },
 ]
 
 function SyncingBlock() {
@@ -95,12 +101,30 @@ export function Footer() {
             </Text>
           </VStack>
 
-          <SimpleGrid columns={{ base: 2, md: 3 }} gap={{ base: 8, md: 6 }}>
+          <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: 8, md: 6 }}>
             <VStack align="start" gap={2}>
               <Text fontWeight="bold" textStyle="sm">
                 {"RESOURCES"}
               </Text>
               {RESOURCES.map(link => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  textStyle="xs"
+                  color="text.subtle"
+                  _hover={{ color: "text.default" }}>
+                  {link.label}
+                </Link>
+              ))}
+            </VStack>
+
+            <VStack align="start" gap={2}>
+              <Text fontWeight="bold" textStyle="sm">
+                {"GITHUB"}
+              </Text>
+              {GITHUB_REPOS.map(link => (
                 <Link
                   key={link.label}
                   href={link.href}
