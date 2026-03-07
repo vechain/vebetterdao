@@ -18,13 +18,13 @@ export function AppsAsRelayers() {
       <Card.Root p={{ base: "5", md: "8" }} variant="primary" overflow="hidden" position="relative" w="full">
         <CloseButton position="absolute" top="3" right="3" size="sm" zIndex={2} onClick={dismiss} />
         <VStack align="start" gap="3" position="relative" zIndex={1}>
-          <Text textStyle={{ base: "xl", md: "3xl" }} fontWeight="bold">
+          <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold">
             {"Autovoting as a Service"}
           </Text>
-          <Text textStyle="lg" color="text.subtle">
+          <Text textStyle="md" color="text.subtle">
             {"Stop paying for votes. Start getting paid to handle them."}
           </Text>
-          <VStack gap="2" mt="1" flexWrap="wrap">
+          <VStack gap="2" mt="4" flexWrap="wrap">
             <Button variant="link" size="sm" rounded="full" onClick={onOpen}>
               {"How It Works"}
               <LuArrowUpRight />

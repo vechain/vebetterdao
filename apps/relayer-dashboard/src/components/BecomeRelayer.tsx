@@ -34,13 +34,13 @@ export function BecomeRelayer() {
           onClick={dismiss}
         />
         <VStack align="start" gap="3" position="relative" zIndex={1}>
-          <Text textStyle={{ base: "xl", md: "3xl" }} fontWeight="bold" color="white">
+          <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold" color="white">
             {"Become a relayer"}
           </Text>
-          <Text textStyle="lg" color="whiteAlpha.800">
+          <Text textStyle="md" color="whiteAlpha.800">
             {"Run a relayer node, serve voters, earn B3TR."}
           </Text>
-          <HStack gap="2" mt="1" flexWrap="wrap">
+          <HStack gap="2" mt="4" flexWrap="wrap">
             <NextLink href="/new-relayer">
               <Button
                 variant="outline"
