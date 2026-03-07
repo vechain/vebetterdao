@@ -6,7 +6,6 @@ import { AiSkillBanner } from "@/components/AiSkillBanner"
 import { AppsAsRelayers } from "@/components/AppsAsRelayers"
 import { BecomeRelayer } from "@/components/BecomeRelayer"
 import { ConnectedWallet } from "@/components/ConnectedWallet"
-import { RelayerInfoBanner } from "@/components/RelayerInfoBanner"
 import { RoundsChart } from "@/components/RoundsChart"
 import { RoundsList } from "@/components/RoundsList"
 import { StatsCards } from "@/components/StatsCards"
@@ -19,8 +18,6 @@ export default function DashboardContent() {
     <VStack w="full" gap={{ base: 4, md: 14 }} align="stretch">
       {activePage === "home" && (
         <>
-          <RelayerInfoBanner />
-
           <SimpleGrid w="full" columns={{ base: 1, md: 2, lg: 2 }} gap="4">
             <StatsCards />
             <RoundsChart />

@@ -1,29 +1,74 @@
 "use client"
 
-import { Card, Link, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CloseButton, HStack, Icon, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import NextLink from "next/link"
+import { LuArrowUpRight, LuRadar, LuRocket } from "react-icons/lu"
+
+import { useDismissedBanner } from "@/hooks/useDismissedBanners"
+
+import { RelayerInfoModal } from "./RelayerInfoModal"
 
 export function BecomeRelayer() {
+  const { open, onOpen, onClose } = useDisclosure()
+  const { isDismissed, dismiss } = useDismissedBanner("become-relayer")
+
+  if (isDismissed) return null
+
   return (
-    <Card.Root variant="primary" p={{ base: "4", md: "6" }}>
-      <VStack align="start" gap="3">
-        <Text textStyle={{ base: "md", md: "lg" }} fontWeight="bold">
-          {"Become a relayer"}
-        </Text>
-        <Text textStyle="sm" color="text.subtle">
-          {
-            "Relayers run off-chain services that execute auto-votes and claim rewards on behalf of users who enabled auto-voting. In return, relayers earn fees from the RelayerRewardsPool."
-          }
-        </Text>
-        <Link
-          href="https://docs.vebetterdao.org"
-          target="_blank"
-          rel="noopener noreferrer"
-          color="actions.primary.default"
-          textStyle="sm"
-          fontWeight="semibold">
-          {"Documentation and setup guide \u2192"}
-        </Link>
-      </VStack>
-    </Card.Root>
+    <>
+      <Card.Root
+        p={{ base: "5", md: "8" }}
+        bg="actions.primary.default"
+        border="none"
+        overflow="hidden"
+        position="relative"
+        w="full">
+        <CloseButton
+          position="absolute"
+          top="3"
+          right="3"
+          size="sm"
+          color="whiteAlpha.700"
+          _hover={{ color: "white", bg: "whiteAlpha.200" }}
+          zIndex={2}
+          onClick={dismiss}
+        />
+        <VStack align="start" gap="3" position="relative" zIndex={1}>
+          <Text textStyle={{ base: "xl", md: "3xl" }} fontWeight="bold" color="white">
+            {"Become a relayer"}
+          </Text>
+          <Text textStyle="lg" color="whiteAlpha.800">
+            {"Run a node, serve voters, earn B3TR."}
+          </Text>
+          <HStack gap="2" mt="1" flexWrap="wrap">
+            <NextLink href="/new-relayer">
+              <Button
+                variant="outline"
+                size="sm"
+                rounded="full"
+                color="white"
+                borderColor="whiteAlpha.500"
+                _hover={{ bg: "whiteAlpha.200" }}>
+                {"Become a Relayer"}
+                <Icon ml="1">
+                  <LuRocket />
+                </Icon>
+              </Button>
+            </NextLink>
+            <Button variant="link" size="sm" rounded="full" color="white" onClick={onOpen}>
+              {"Learn"}
+              <LuArrowUpRight />
+            </Button>
+          </HStack>
+        </VStack>
+        <Box position="absolute" right="-2" bottom="-2" opacity={0.15}>
+          <Icon color="white" boxSize={{ base: "24", md: "32" }}>
+            <LuRadar />
+          </Icon>
+        </Box>
+      </Card.Root>
+
+      <RelayerInfoModal isOpen={open} onClose={onClose} />
+    </>
   )
 }

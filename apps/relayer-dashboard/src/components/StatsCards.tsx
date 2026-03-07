@@ -1,6 +1,8 @@
 "use client"
 
-import { Card, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, HStack, Icon, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import type { IconType } from "react-icons"
+import { LuChartLine, LuCoins, LuRadar, LuUsers } from "react-icons/lu"
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
 import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers"
@@ -13,21 +15,22 @@ interface StatItemProps {
   label: string
   value: string
   sublabel: string
+  icon: IconType
   isLoading?: boolean
 }
 
-function StatItem({ label, value, sublabel, isLoading }: StatItemProps) {
+function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
   return (
-    <Card.Root
-      p={{ base: "4", md: "6" }}
-      variant="action"
-      flexDirection="row"
-      alignItems="center"
-      gap={{ base: "2", md: "4" }}>
+    <Card.Root p={{ base: "4", md: "6" }} variant="action">
       <VStack flex={1} alignItems="start" gap="1">
-        <Text textStyle={{ base: "xs", md: "md" }} color="text.subtle" lineClamp={1}>
-          {label}
-        </Text>
+        <HStack w="full" justifyContent="space-between" alignItems="center">
+          <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" lineClamp={1}>
+            {label}
+          </Text>
+          <Icon color="text.subtle" boxSize={{ base: "4", md: "5" }}>
+            <>{icon({})}</>
+          </Icon>
+        </HStack>
         <Skeleton loading={!!isLoading}>
           <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="semibold">
             {value}
@@ -77,24 +80,28 @@ export function StatsCards() {
         label="Auto-voting users"
         value={usersLoading ? "..." : onChainUsers != null ? formatNumber(onChainUsers) : "\u2014"}
         sublabel="current total"
+        icon={LuUsers}
         isLoading={usersLoading}
       />
       <StatItem
         label="Registered relayers"
         value={relayersLoading ? "..." : String(relayerCount)}
         sublabel="on-chain"
+        icon={LuRadar}
         isLoading={relayersLoading}
       />
       <StatItem
         label="Total rewards"
         value={isLoading ? "..." : `${formatToken(totalRewards)} B3TR`}
         sublabel="all rounds"
+        icon={LuCoins}
         isLoading={isLoading}
       />
       <StatItem
         label="Average ROI"
         value={isLoading ? "..." : roi != null ? `${formatNumber(Math.round(roi))}%` : "\u2014"}
         sublabel={roiSublabel}
+        icon={LuChartLine}
         isLoading={isLoading}
       />
     </SimpleGrid>
