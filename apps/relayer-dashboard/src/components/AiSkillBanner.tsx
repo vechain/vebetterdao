@@ -1,7 +1,8 @@
 "use client"
 
-import { Box, Button, Heading, HStack, Icon, Link, Text, VStack } from "@chakra-ui/react"
-import { LuBrain, LuChevronRight } from "react-icons/lu"
+import { Box, Heading, HStack, Icon, Link, Text, VStack } from "@chakra-ui/react"
+import { LuExternalLink } from "react-icons/lu"
+import { RiRobot3Line } from "react-icons/ri"
 
 const SKILL_URL = "https://github.com/vechain/vechain-ai-skills"
 
@@ -18,7 +19,7 @@ export function AiSkillBanner() {
         <HStack justify="space-between" align="center">
           <HStack gap={4} align="center">
             <Icon color="text.default" boxSize={6} flexShrink={0}>
-              <LuBrain />
+              <RiRobot3Line />
             </Icon>
             <VStack align="start" gap={1}>
               <Heading size="md" fontWeight="bold">
@@ -32,7 +33,7 @@ export function AiSkillBanner() {
             </VStack>
           </HStack>
           <Icon color="text.subtle" flexShrink={0}>
-            <LuChevronRight />
+            <LuExternalLink />
           </Icon>
         </HStack>
       </Box>
