@@ -1,4 +1,4 @@
-import { RelayerSummary, CycleResult } from "@/relayer/types"
+import { RelayerSummary, CycleResult } from "@vechain/vebetterdao-relayer-node/dist/types"
 
 // ANSI color helpers for xterm
 const c = {

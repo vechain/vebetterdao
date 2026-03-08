@@ -1,16 +1,15 @@
 "use client"
 
 import { Box, Button, Card, Code, Heading, HStack, Icon, Input, SimpleGrid, Text, VStack } from "@chakra-ui/react"
-import { Address, HDKey, Transaction } from "@vechain/sdk-core"
+import { Address, HDKey } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
+import { getNetworkConfig } from "@vechain/vebetterdao-relayer-node/dist/config"
+import { fetchSummary } from "@vechain/vebetterdao-relayer-node/dist/contracts"
+import { runCastVoteCycle, runClaimRewardCycle } from "@vechain/vebetterdao-relayer-node/dist/relayer"
 import { useState, useRef, useCallback, useEffect } from "react"
 import { LuClipboard, LuContainer, LuGlobe, LuPackage, LuPlay, LuSquare } from "react-icons/lu"
 
 import { RelayerTerminal } from "@/components/RelayerTerminal"
-import { getNetworkConfig } from "@/relayer/config"
-import { fetchSummary } from "@/relayer/contracts"
-import { runCastVoteCycle, runClaimRewardCycle } from "@/relayer/relayer"
-import type { SendTransaction } from "@/relayer/types"
 
 import { renderSummaryText, renderCycleResultText, ts } from "./format"
 
@@ -27,16 +26,6 @@ function deriveWallet(mnemonic: string): { walletAddress: string; privateKey: st
     }
   } catch {
     return null
-  }
-}
-
-function createSender(thor: ThorClient, privateKey: string): SendTransaction {
-  return async (clauses, gas) => {
-    const body = await thor.transactions.buildTransactionBody(clauses, gas)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const signed = Transaction.of(body).sign(Buffer.from(privateKey, "hex")) as any
-    const sent = await thor.transactions.sendTransaction(signed)
-    return sent.id
   }
 }
 
@@ -153,9 +142,9 @@ export function RunRelayer() {
     setRunning(true)
     setStarted(true)
 
-    const config = getNetworkConfig()
+    const network = process.env.NEXT_PUBLIC_APP_ENV || "mainnet"
+    const config = getNetworkConfig(network)
     const thor = ThorClient.at(config.nodeUrl, { isPollingEnabled: false })
-    const sendTx = createSender(thor, wallet.privateKey)
 
     log(`\x1b[36mVeBetterDAO Relayer Node\x1b[0m`)
     log(`Network: \x1b[1m${config.name}\x1b[0m`)
@@ -177,7 +166,15 @@ export function RunRelayer() {
         // Cast votes
         if (summary.isRoundActive) {
           log("Starting cast-vote cycle...")
-          const voteResult = await runCastVoteCycle(thor, config, wallet.walletAddress, sendTx, 50, false, log)
+          const voteResult = await runCastVoteCycle(
+            thor,
+            config,
+            wallet.walletAddress,
+            wallet.privateKey,
+            50,
+            false,
+            log,
+          )
           if (abortRef.current) break
           renderCycleResultText(voteResult).forEach(log)
         } else {
@@ -188,7 +185,15 @@ export function RunRelayer() {
 
         // Claim rewards
         log("Starting claim cycle...")
-        const claimResult = await runClaimRewardCycle(thor, config, wallet.walletAddress, sendTx, 50, false, log)
+        const claimResult = await runClaimRewardCycle(
+          thor,
+          config,
+          wallet.walletAddress,
+          wallet.privateKey,
+          50,
+          false,
+          log,
+        )
         if (abortRef.current) break
         renderCycleResultText(claimResult).forEach(log)
 
