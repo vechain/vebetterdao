@@ -18,15 +18,16 @@ import {
 import { WalletButton } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { usePathname } from "next/navigation"
-import { LuHouse, LuInfo, LuMenu, LuRadar, LuRocket } from "react-icons/lu"
+import { LuHouse, LuInfo, LuMenu, LuPlay, LuRadar, LuRocket } from "react-icons/lu"
 
 import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
 
-type NavPage = "home" | "relayer" | "learn"
+type NavPage = "home" | "relayer" | "run" | "learn"
 
 const ROUTES: { value: NavPage; label: string; href: string; icon: typeof LuHouse }[] = [
   { value: "home", label: "Home", href: "/", icon: LuHouse },
   { value: "relayer", label: "My Relayer", href: "/relayer", icon: LuRadar },
+  { value: "run", label: "Run", href: "/run", icon: LuPlay },
   { value: "learn", label: "Learn", href: "/learn", icon: LuInfo },
 ]
 
