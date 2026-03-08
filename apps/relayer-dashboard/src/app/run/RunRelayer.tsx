@@ -16,6 +16,7 @@ import {
   LuPackage,
   LuPlay,
   LuSquare,
+  LuCircleX,
 } from "react-icons/lu"
 
 import { RelayerTerminal } from "@/components/RelayerTerminal"
@@ -120,6 +121,9 @@ export function RunRelayer() {
   const clearRef = useRef<(() => void) | null>(null)
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [stopRequested, setStopRequested] = useState(false)
+  const forceExitResolveRef = useRef<(() => void) | null>(null)
+  const suppressLogRef = useRef(false)
 
   // Clear mnemonic when leaving the page
   useEffect(() => {
@@ -149,6 +153,7 @@ export function RunRelayer() {
   }, [])
 
   const log = useCallback((msg: string) => {
+    if (suppressLogRef.current) return
     writelnRef.current?.(`${ts()} ${msg}`)
   }, [])
 
@@ -165,8 +170,15 @@ export function RunRelayer() {
     }
 
     abortRef.current = false
+    suppressLogRef.current = false
+    setStopRequested(false)
     setRunning(true)
     setStarted(true)
+
+    const forceExitPromise = new Promise<"force">(r => {
+      forceExitResolveRef.current = () => r("force")
+    })
+    const raceForceExit = <T,>(p: Promise<T>): Promise<T | null> => Promise.race([p, forceExitPromise.then(() => null)])
 
     const network = process.env.NEXT_PUBLIC_APP_ENV || "mainnet"
     const config = getNetworkConfig(network)
@@ -180,7 +192,8 @@ export function RunRelayer() {
     while (!abortRef.current) {
       try {
         log("Fetching on-chain state...")
-        const summary = await fetchSummary(thor, config, wallet.walletAddress)
+        const summary = await raceForceExit(fetchSummary(thor, config, wallet.walletAddress))
+        if (summary === null) break
 
         clearRef.current?.()
         const summaryLines = renderSummaryText(summary)
@@ -192,15 +205,10 @@ export function RunRelayer() {
         // Cast votes
         if (summary.isRoundActive) {
           log("Starting cast-vote cycle...")
-          const voteResult = await runCastVoteCycle(
-            thor,
-            config,
-            wallet.walletAddress,
-            wallet.privateKey,
-            50,
-            false,
-            log,
+          const voteResult = await raceForceExit(
+            runCastVoteCycle(thor, config, wallet.walletAddress, wallet.privateKey, 50, false, log),
           )
+          if (voteResult === null) break
           if (abortRef.current) break
           renderCycleResultText(voteResult).forEach(log)
         } else {
@@ -211,21 +219,17 @@ export function RunRelayer() {
 
         // Claim rewards
         log("Starting claim cycle...")
-        const claimResult = await runClaimRewardCycle(
-          thor,
-          config,
-          wallet.walletAddress,
-          wallet.privateKey,
-          50,
-          false,
-          log,
+        const claimResult = await raceForceExit(
+          runClaimRewardCycle(thor, config, wallet.walletAddress, wallet.privateKey, 50, false, log),
         )
+        if (claimResult === null) break
         if (abortRef.current) break
         renderCycleResultText(claimResult).forEach(log)
 
         // Re-fetch summary
         log("Refreshing state...")
-        const updated = await fetchSummary(thor, config, wallet.walletAddress)
+        const updated = await raceForceExit(fetchSummary(thor, config, wallet.walletAddress))
+        if (updated === null) break
         clearRef.current?.()
         renderSummaryText(updated).forEach(line => writelnRef.current?.(line))
         writelnRef.current?.("")
@@ -233,28 +237,50 @@ export function RunRelayer() {
         if (abortRef.current) break
 
         log(`Next cycle in 5m...`)
-        // Sleep 5 min, checking abort every second
+        // Sleep 5 min, checking abort every second (force exit breaks immediately)
         for (let i = 0; i < 300 && !abortRef.current; i++) {
-          await new Promise(r => setTimeout(r, 1000))
+          const r = await Promise.race([
+            new Promise<"tick">(r => setTimeout(() => r("tick"), 1000)),
+            forceExitPromise.then(() => "force" as const),
+          ])
+          if (r === "force") break
         }
       } catch (err) {
         log(`\x1b[31mCycle error: ${err instanceof Error ? err.message : String(err)}\x1b[0m`)
         if (abortRef.current) break
-        // Wait 30s before retry
+        // Wait 30s before retry (force exit breaks immediately)
         for (let i = 0; i < 30 && !abortRef.current; i++) {
-          await new Promise(r => setTimeout(r, 1000))
+          const r = await Promise.race([
+            new Promise<"tick">(r => setTimeout(() => r("tick"), 1000)),
+            forceExitPromise.then(() => "force" as const),
+          ])
+          if (r === "force") break
         }
       }
     }
 
-    log("\x1b[33mStopped.\x1b[0m")
+    if (suppressLogRef.current) {
+      writelnRef.current?.(`${ts()} \x1b[33mStopped.\x1b[0m`)
+    } else {
+      log("\x1b[33mStopped.\x1b[0m")
+    }
     setRunning(false)
+    setStopRequested(false)
   }, [mnemonic, log])
 
   const handleStop = useCallback(() => {
+    setStopRequested(true)
     abortRef.current = true
     log("\x1b[33mStopping after current operation...\x1b[0m")
   }, [log])
+
+  const handleForceExit = useCallback(() => {
+    abortRef.current = true
+    suppressLogRef.current = true
+    forceExitResolveRef.current?.()
+    forceExitResolveRef.current = null
+    writelnRef.current?.(`${ts()} \x1b[33mForce exiting...\x1b[0m`)
+  }, [])
 
   return (
     <VStack gap={6} align="stretch" w="full">
@@ -322,10 +348,17 @@ export function RunRelayer() {
         <Box>
           <HStack mb={3} justify="end" gap={2}>
             {running ? (
-              <Button onClick={handleStop} colorPalette="red" variant="outline" rounded="full" size="sm">
-                <LuSquare />
-                {"Stop"}
-              </Button>
+              stopRequested ? (
+                <Button onClick={handleForceExit} colorPalette="red" variant="outline" rounded="full" size="sm">
+                  <LuCircleX />
+                  {"Force exit"}
+                </Button>
+              ) : (
+                <Button onClick={handleStop} colorPalette="red" variant="outline" rounded="full" size="sm">
+                  <LuSquare />
+                  {"Stop"}
+                </Button>
+              )
             ) : (
               <Button onClick={handleStart} variant="solid" rounded="full" size="sm">
                 <LuPlay />
