@@ -1,0 +1,19 @@
+"use client"
+
+import { useCallClause } from "@vechain/vechain-kit"
+
+import { relayerPoolAbi, relayerPoolAddress } from "./contracts"
+
+/** Check if an address is a registered relayer. */
+export function useRelayerRegistration(address: string | undefined) {
+  return useCallClause({
+    abi: relayerPoolAbi,
+    address: relayerPoolAddress,
+    method: "isRegisteredRelayer",
+    args: [address ?? "0x0000000000000000000000000000000000000000"],
+    queryOptions: {
+      enabled: !!address,
+      select: (data: readonly unknown[]) => data[0] as boolean,
+    },
+  })
+}
