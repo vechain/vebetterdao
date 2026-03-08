@@ -7593,10 +7593,10 @@
     ethers "^6.14.0"
     viem "^2.21.54"
 
-"@vechain/vebetterdao-relayer-node@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-relayer-node/-/vebetterdao-relayer-node-0.0.1.tgz#6e22809dc314771a6374ca9fa68df5ba51b3ea5b"
-  integrity sha512-PPhHPUIIsTkcaAgUyFSI4W5nIrgvREhNyO6kdWG6OVf95BRZTbAFrkEFws9vvcHRI2Ph3gjSe9GaeRIEL71oRQ==
+"@vechain/vebetterdao-relayer-node@*":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-relayer-node/-/vebetterdao-relayer-node-0.0.2.tgz#f02f041da51e495246516ead7b0a2d92e77c1baa"
+  integrity sha512-Ev2kTV9k82uMlZOw9pVsqODTy2EVYTBJT4oya7LJ+SXTKpNUec6VDa/GB2X9YSgRew5/DQpg2HyBuOc1N4dmmw==
   dependencies:
     "@vechain/sdk-core" "2.0.7"
     "@vechain/sdk-network" "2.0.7"
