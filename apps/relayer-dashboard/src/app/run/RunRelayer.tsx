@@ -285,9 +285,11 @@ export function RunRelayer() {
   return (
     <VStack gap={6} align="stretch" w="full">
       <VStack align="start" gap={1}>
-        <Heading size="lg">{"Run Relayer"}</Heading>
+        <Heading size="lg">{started ? "Relayer output" : "Run Relayer"}</Heading>
         <Text textStyle="sm" color="text.subtle">
-          {"Choose how to run your relayer node. All options use the same core logic."}
+          {started
+            ? "Live log from your relayer running in this browser. Stop or force exit above; close the tab to end the session."
+            : "Choose how to run your relayer node. All options use the same core logic."}
         </Text>
       </VStack>
 
@@ -346,21 +348,51 @@ export function RunRelayer() {
 
       {started && (
         <Box>
-          <HStack mb={3} justify="end" gap={2}>
+          <HStack
+            mb={3}
+            justify="end"
+            gap={2}
+            position="relative"
+            zIndex={10}
+            minH="44px"
+            py={1}
+            css={{ touchAction: "manipulation" }}>
             {running ? (
               stopRequested ? (
-                <Button onClick={handleForceExit} colorPalette="red" variant="outline" rounded="full" size="sm">
+                <Button
+                  onClick={handleForceExit}
+                  colorPalette="red"
+                  variant="outline"
+                  rounded="full"
+                  size="sm"
+                  minH="44px"
+                  minW="44px"
+                  css={{ touchAction: "manipulation" }}>
                   <LuCircleX />
                   {"Force exit"}
                 </Button>
               ) : (
-                <Button onClick={handleStop} colorPalette="red" variant="outline" rounded="full" size="sm">
+                <Button
+                  onClick={handleStop}
+                  colorPalette="red"
+                  variant="outline"
+                  rounded="full"
+                  size="sm"
+                  minH="44px"
+                  minW="44px"
+                  css={{ touchAction: "manipulation" }}>
                   <LuSquare />
                   {"Stop"}
                 </Button>
               )
             ) : (
-              <Button onClick={handleStart} variant="solid" rounded="full" size="sm">
+              <Button
+                onClick={handleStart}
+                variant="solid"
+                rounded="full"
+                size="sm"
+                minH="44px"
+                css={{ touchAction: "manipulation" }}>
                 <LuPlay />
                 {"Restart"}
               </Button>
@@ -370,13 +402,17 @@ export function RunRelayer() {
               variant="outline"
               rounded="full"
               size="sm"
-              title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}>
+              minH="44px"
+              minW="44px"
+              title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+              css={{ touchAction: "manipulation" }}>
               <Icon>{isFullscreen ? <LuMinimize2 /> : <LuMaximize2 />}</Icon>
             </Button>
           </HStack>
           <Box
             ref={fullscreenRef}
             position="relative"
+            zIndex={1}
             bg="#1a1a2e"
             borderRadius="12px"
             css={{
