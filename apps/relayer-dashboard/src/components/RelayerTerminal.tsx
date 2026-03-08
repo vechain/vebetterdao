@@ -99,7 +99,7 @@ export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
       borderColor="border.secondary"
       bg="#1a1a2e"
       p={2}
-      sx={{
+      css={{
         // Allow touch scrolling of terminal viewport on mobile (xterm's scrollable area)
         "& .xterm-viewport": {
           overflow: "auto !important",

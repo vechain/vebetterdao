@@ -346,7 +346,7 @@ export function RunRelayer() {
             position="relative"
             bg="#1a1a2e"
             borderRadius="12px"
-            sx={{
+            css={{
               "&:fullscreen": { borderRadius: 0, display: "flex", flexDirection: "column" },
               "&::-webkit-full-screen": { borderRadius: 0, display: "flex", flexDirection: "column" },
             }}>
