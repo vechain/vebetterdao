@@ -7,7 +7,16 @@ import { getNetworkConfig } from "@vechain/vebetterdao-relayer-node/dist/config"
 import { fetchSummary } from "@vechain/vebetterdao-relayer-node/dist/contracts"
 import { runCastVoteCycle, runClaimRewardCycle } from "@vechain/vebetterdao-relayer-node/dist/relayer"
 import { useState, useRef, useCallback, useEffect } from "react"
-import { LuClipboard, LuContainer, LuGlobe, LuPackage, LuPlay, LuSquare } from "react-icons/lu"
+import {
+  LuClipboard,
+  LuContainer,
+  LuGlobe,
+  LuMaximize2,
+  LuMinimize2,
+  LuPackage,
+  LuPlay,
+  LuSquare,
+} from "react-icons/lu"
 
 import { RelayerTerminal } from "@/components/RelayerTerminal"
 
@@ -109,6 +118,8 @@ export function RunRelayer() {
   const abortRef = useRef(false)
   const writelnRef = useRef<((msg: string) => void) | null>(null)
   const clearRef = useRef<(() => void) | null>(null)
+  const fullscreenRef = useRef<HTMLDivElement>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Clear mnemonic when leaving the page
   useEffect(() => {
@@ -119,6 +130,21 @@ export function RunRelayer() {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload)
       setMnemonic("")
+    }
+  }, [])
+
+  useEffect(() => {
+    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener("fullscreenchange", onFullscreenChange)
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = useCallback(() => {
+    if (!fullscreenRef.current) return
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+    } else {
+      fullscreenRef.current.requestFullscreen()
     }
   }, [])
 
@@ -294,7 +320,7 @@ export function RunRelayer() {
 
       {started && (
         <Box>
-          <HStack mb={3} justify="end">
+          <HStack mb={3} justify="end" gap={2}>
             {running ? (
               <Button onClick={handleStop} colorPalette="red" variant="outline" rounded="full" size="sm">
                 <LuSquare />
@@ -306,8 +332,42 @@ export function RunRelayer() {
                 {"Restart"}
               </Button>
             )}
+            <Button
+              onClick={toggleFullscreen}
+              variant="outline"
+              rounded="full"
+              size="sm"
+              title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}>
+              <Icon>{isFullscreen ? <LuMinimize2 /> : <LuMaximize2 />}</Icon>
+            </Button>
           </HStack>
-          <RelayerTerminal onReady={handleTerminalReady} />
+          <Box
+            ref={fullscreenRef}
+            position="relative"
+            bg="#1a1a2e"
+            borderRadius="12px"
+            sx={{
+              "&:fullscreen": { borderRadius: 0, display: "flex", flexDirection: "column" },
+              "&::-webkit-full-screen": { borderRadius: 0, display: "flex", flexDirection: "column" },
+            }}>
+            {isFullscreen && (
+              <Button
+                position="absolute"
+                top={2}
+                right={2}
+                zIndex={10}
+                size="sm"
+                variant="outline"
+                rounded="full"
+                onClick={toggleFullscreen}
+                bg="bg.panel"
+                _hover={{ bg: "bg.tertiary" }}>
+                <LuMinimize2 />
+                {"Exit fullscreen"}
+              </Button>
+            )}
+            <RelayerTerminal onReady={handleTerminalReady} fullscreen={isFullscreen} />
+          </Box>
         </Box>
       )}
     </VStack>

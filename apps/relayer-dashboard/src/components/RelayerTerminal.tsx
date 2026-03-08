@@ -8,9 +8,10 @@ import "@xterm/xterm/css/xterm.css"
 
 interface RelayerTerminalProps {
   onReady: (writeln: (msg: string) => void, clear: () => void) => void
+  fullscreen?: boolean
 }
 
-export function RelayerTerminal({ onReady }: RelayerTerminalProps) {
+export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const terminalRef = useRef<Terminal | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
@@ -81,17 +82,31 @@ export function RelayerTerminal({ onReady }: RelayerTerminalProps) {
     }
   }, [initTerminal])
 
+  useEffect(() => {
+    if (fullscreen) fitAddonRef.current?.fit()
+  }, [fullscreen])
+
   return (
     <Box
       ref={containerRef}
       w="full"
-      h={{ base: "400px", md: "500px" }}
+      h={fullscreen ? "100%" : { base: "400px", md: "500px" }}
+      minH={fullscreen ? "100%" : { base: "400px", md: "500px" }}
+      flex={fullscreen ? 1 : undefined}
       borderRadius="12px"
       overflow="hidden"
       border="1px solid"
       borderColor="border.secondary"
       bg="#1a1a2e"
       p={2}
+      sx={{
+        // Allow touch scrolling of terminal viewport on mobile (xterm's scrollable area)
+        "& .xterm-viewport": {
+          overflow: "auto !important",
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-y",
+        },
+      }}
     />
   )
 }
