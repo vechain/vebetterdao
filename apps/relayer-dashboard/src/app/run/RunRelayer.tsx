@@ -253,7 +253,7 @@ export function RunRelayer() {
               IconComponent={LuPackage}
               title="Run with npm"
               description="One command, no clone needed. Requires Node.js 20+."
-              command='MNEMONIC="..." npx @vebetterdao/relayer-node'
+              command='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node'
             />
           </SimpleGrid>
 
