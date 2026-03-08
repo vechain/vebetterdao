@@ -6,8 +6,6 @@ import { useThor } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { LuRadar } from "react-icons/lu"
 
-import { useNavigation } from "@/hooks/useNavigation"
-
 const RESOURCES = [
   { label: "Network Status", href: "https://vechainstats.com" },
   { label: "API Documentation", href: "https://docs.vechain.org" },
@@ -21,10 +19,10 @@ const GITHUB_REPOS = [
 ]
 
 const NAVIGATION = [
-  { label: "Home", page: "home" as const },
-  { label: "My Relayer", page: "relayer" as const },
+  { label: "Home", href: "/" },
+  { label: "My Relayer", href: "/relayer" },
   { label: "Become a Relayer", href: "/new-relayer" },
-  { label: "Learn", page: "learn" as const },
+  { label: "Learn", href: "/learn" },
 ]
 
 function SyncingBlock() {
@@ -54,30 +52,16 @@ function SyncingBlock() {
 }
 
 function NavigationLinks() {
-  const { setActivePage } = useNavigation()
-
   return (
     <VStack align="start" gap={2}>
       <Text fontWeight="bold" textStyle="sm">
         {"NAVIGATION"}
       </Text>
-      {NAVIGATION.map(item =>
-        "href" in item ? (
-          <Link key={item.label} asChild textStyle="xs" color="text.subtle" _hover={{ color: "text.default" }}>
-            <NextLink href={item.href!}>{item.label}</NextLink>
-          </Link>
-        ) : (
-          <Link
-            key={item.label}
-            as="button"
-            onClick={() => setActivePage(item.page)}
-            textStyle="xs"
-            color="text.subtle"
-            _hover={{ color: "text.default" }}>
-            {item.label}
-          </Link>
-        ),
-      )}
+      {NAVIGATION.map(item => (
+        <Link key={item.label} asChild textStyle="xs" color="text.subtle" _hover={{ color: "text.default" }}>
+          <NextLink href={item.href}>{item.label}</NextLink>
+        </Link>
+      ))}
     </VStack>
   )
 }

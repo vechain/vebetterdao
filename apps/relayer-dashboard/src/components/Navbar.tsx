@@ -17,35 +17,28 @@ import {
 } from "@chakra-ui/react"
 import { WalletButton } from "@vechain/vechain-kit"
 import NextLink from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { LuHouse, LuInfo, LuMenu, LuRadar, LuRocket } from "react-icons/lu"
 
 import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
-import { useNavigation } from "@/hooks/useNavigation"
 
-export type NavPage = "home" | "relayer" | "learn"
+type NavPage = "home" | "relayer" | "learn"
 
-const ROUTES: { value: NavPage; label: string; icon: typeof LuHouse }[] = [
-  { value: "home", label: "Home", icon: LuHouse },
-  { value: "relayer", label: "My Relayer", icon: LuRadar },
-  { value: "learn", label: "Learn", icon: LuInfo },
+const ROUTES: { value: NavPage; label: string; href: string; icon: typeof LuHouse }[] = [
+  { value: "home", label: "Home", href: "/", icon: LuHouse },
+  { value: "relayer", label: "My Relayer", href: "/relayer", icon: LuRadar },
+  { value: "learn", label: "Learn", href: "/learn", icon: LuInfo },
 ]
 
 export function Navbar() {
   const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
   const { open, onClose, onOpen } = useDisclosure()
-  const { activePage, setActivePage } = useNavigation()
-  const router = useRouter()
   const pathname = usePathname()
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
   const walletTextColor = useColorModeValue("#1A1A1A", "#E4E4E4")
   const walletHoverBg = useColorModeValue("#f8f8f8", "#2D2D2F")
 
-  const handleNav = (page: NavPage) => {
-    setActivePage(page)
-    const isHome = pathname === "/" || pathname === basePath || pathname === `${basePath}/`
-    if (!isHome) router.push("/")
-  }
+  const isActive = (route: (typeof ROUTES)[number]) =>
+    pathname === route.href || (route.value === "home" && (pathname === "" || pathname === "/"))
 
   return (
     <Box bg="bg.secondary" px={0} position="sticky" top={0} zIndex={3} w="full">
@@ -68,19 +61,19 @@ export function Navbar() {
               bg="bg.primary"
               p={2}>
               {ROUTES.map(route => (
-                <Button
-                  key={route.value}
-                  border="none"
-                  rounded="full"
-                  variant={activePage === route.value ? "subtle" : "ghost"}
-                  onClick={() => handleNav(route.value)}
-                  size="sm"
-                  fontWeight={activePage === route.value ? "bold" : "normal"}
-                  textStyle="sm"
-                  px="4"
-                  py="2">
-                  {route.label}
-                </Button>
+                <NextLink key={route.value} href={route.href}>
+                  <Button
+                    border="none"
+                    rounded="full"
+                    variant={isActive(route) ? "subtle" : "ghost"}
+                    size="sm"
+                    fontWeight={isActive(route) ? "bold" : "normal"}
+                    textStyle="sm"
+                    px="4"
+                    py="2">
+                    {route.label}
+                  </Button>
+                </NextLink>
               ))}
             </HStack>
           </Box>
@@ -154,25 +147,22 @@ export function Navbar() {
                     </Box>
                     <Separator my={2} />
                     {ROUTES.map(route => (
-                      <Button
-                        key={route.value}
-                        variant="ghost"
-                        w="full"
-                        display="flex"
-                        justifyContent="flex-start"
-                        alignItems="center"
-                        gap={4}
-                        size="lg"
-                        fontWeight={activePage === route.value ? "bold" : "normal"}
-                        onClick={() => {
-                          handleNav(route.value)
-                          onClose()
-                        }}>
-                        <Icon color="text.subtle" boxSize={5}>
-                          <route.icon />
-                        </Icon>
-                        {route.label}
-                      </Button>
+                      <NextLink key={route.value} href={route.href} onClick={onClose}>
+                        <Button
+                          variant="ghost"
+                          w="full"
+                          display="flex"
+                          justifyContent="flex-start"
+                          alignItems="center"
+                          gap={4}
+                          size="lg"
+                          fontWeight={isActive(route) ? "bold" : "normal"}>
+                          <Icon color="text.subtle" boxSize={5}>
+                            <route.icon />
+                          </Icon>
+                          {route.label}
+                        </Button>
+                      </NextLink>
                     ))}
                   </VStack>
                   <Box pb={6}>
