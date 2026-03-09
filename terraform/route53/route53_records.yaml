@@ -126,6 +126,13 @@ records:
       - "wl244435s3.domainkey.freshemail.io"
     routing_policy: simple
   
+  - name: "relayers.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "vechain.github.io"
+    routing_policy: simple
+
   - name: fwdkim1.vebetterdao.org
     type: CNAME
     ttl: 300
