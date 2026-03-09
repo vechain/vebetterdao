@@ -5,10 +5,12 @@ import {
   Box,
   Button,
   Card,
+  Clipboard,
   Code,
   Heading,
   HStack,
   Icon,
+  IconButton,
   Input,
   SimpleGrid,
   Text,
@@ -22,7 +24,6 @@ import { runCastVoteCycle, runClaimRewardCycle } from "@vechain/vebetterdao-rela
 import { useState, useRef, useCallback, useEffect } from "react"
 import { FaAndroid, FaApple } from "react-icons/fa"
 import {
-  LuClipboard,
   LuContainer,
   LuGlobe,
   LuMaximize2,
@@ -55,17 +56,14 @@ function deriveWallet(mnemonic: string): { walletAddress: string; privateKey: st
 }
 
 function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
   return (
-    <Button onClick={handleCopy} variant="ghost" size="xs" rounded="full" opacity={0.7} _hover={{ opacity: 1 }}>
-      <LuClipboard />
-      {copied ? "Copied" : "Copy"}
-    </Button>
+    <Clipboard.Root value={text}>
+      <Clipboard.Trigger asChild>
+        <IconButton variant="ghost" size="xs" rounded="full" opacity={0.7} _hover={{ opacity: 1 }}>
+          <Clipboard.Indicator />
+        </IconButton>
+      </Clipboard.Trigger>
+    </Clipboard.Root>
   )
 }
 
@@ -78,6 +76,7 @@ export function RunRelayer() {
   const clearRef = useRef<(() => void) | null>(null)
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [walletAddress, setWalletAddress] = useState("")
   const [stopRequested, setStopRequested] = useState(false)
   const forceExitResolveRef = useRef<(() => void) | null>(null)
   const suppressLogRef = useRef(false)
@@ -94,19 +93,8 @@ export function RunRelayer() {
     }
   }, [])
 
-  useEffect(() => {
-    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
-    document.addEventListener("fullscreenchange", onFullscreenChange)
-    return () => document.removeEventListener("fullscreenchange", onFullscreenChange)
-  }, [])
-
   const toggleFullscreen = useCallback(() => {
-    if (!fullscreenRef.current) return
-    if (document.fullscreenElement) {
-      document.exitFullscreen()
-    } else {
-      fullscreenRef.current.requestFullscreen()
-    }
+    setIsFullscreen(prev => !prev)
   }, [])
 
   const log = useCallback((msg: string) => {
@@ -131,6 +119,7 @@ export function RunRelayer() {
     setStopRequested(false)
     setRunning(true)
     setStarted(true)
+    setWalletAddress(wallet.walletAddress)
 
     const forceExitPromise = new Promise<"force">(r => {
       forceExitResolveRef.current = () => r("force")
@@ -394,75 +383,91 @@ export function RunRelayer() {
         <Box>
           <HStack
             mb={3}
-            justify="end"
+            justify="space-between"
             gap={2}
             position="relative"
             zIndex={10}
             minH="44px"
             py={1}
             css={{ touchAction: "manipulation" }}>
-            {running ? (
-              stopRequested ? (
-                <Button
-                  onClick={handleForceExit}
-                  colorPalette="red"
-                  variant="outline"
-                  rounded="full"
-                  size="sm"
-                  minH="44px"
-                  minW="44px"
-                  css={{ touchAction: "manipulation" }}>
-                  <LuCircleX />
-                  {"Force exit"}
-                </Button>
+            <HStack gap={2}>
+              <Box
+                w={2}
+                h={2}
+                borderRadius="full"
+                bg={running && !stopRequested ? "green.400" : stopRequested ? "orange.400" : "red.400"}
+              />
+              <Text textStyle="sm" fontFamily="mono" color="text.subtle" truncate>
+                {running && !stopRequested ? "Running" : stopRequested ? "Stopping" : "Stopped"}
+                {walletAddress && ` · ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
+              </Text>
+              {walletAddress && <CopyButton text={walletAddress} />}
+            </HStack>
+
+            <HStack gap={2}>
+              {running ? (
+                stopRequested ? (
+                  <Button
+                    onClick={handleForceExit}
+                    colorPalette="red"
+                    variant="outline"
+                    rounded="full"
+                    size="sm"
+                    minH="44px"
+                    minW="44px"
+                    css={{ touchAction: "manipulation" }}>
+                    <LuCircleX />
+                    {"Force exit"}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleStop}
+                    colorPalette="red"
+                    variant="outline"
+                    rounded="full"
+                    size="sm"
+                    minH="44px"
+                    minW="44px"
+                    css={{ touchAction: "manipulation" }}>
+                    <LuSquare />
+                    {"Stop"}
+                  </Button>
+                )
               ) : (
                 <Button
-                  onClick={handleStop}
-                  colorPalette="red"
-                  variant="outline"
+                  onClick={handleStart}
+                  variant="solid"
                   rounded="full"
                   size="sm"
                   minH="44px"
-                  minW="44px"
                   css={{ touchAction: "manipulation" }}>
-                  <LuSquare />
-                  {"Stop"}
+                  <LuPlay />
+                  {"Restart"}
                 </Button>
-              )
-            ) : (
+              )}
               <Button
-                onClick={handleStart}
-                variant="solid"
+                onClick={toggleFullscreen}
+                variant="outline"
                 rounded="full"
                 size="sm"
                 minH="44px"
+                minW="44px"
+                title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 css={{ touchAction: "manipulation" }}>
-                <LuPlay />
-                {"Restart"}
+                <Icon>{isFullscreen ? <LuMinimize2 /> : <LuMaximize2 />}</Icon>
               </Button>
-            )}
-            <Button
-              onClick={toggleFullscreen}
-              variant="outline"
-              rounded="full"
-              size="sm"
-              minH="44px"
-              minW="44px"
-              title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-              css={{ touchAction: "manipulation" }}>
-              <Icon>{isFullscreen ? <LuMinimize2 /> : <LuMaximize2 />}</Icon>
-            </Button>
+            </HStack>
           </HStack>
+
           <Box
             ref={fullscreenRef}
-            position="relative"
-            zIndex={1}
+            position={isFullscreen ? "fixed" : "relative"}
+            inset={isFullscreen ? 0 : undefined}
+            zIndex={isFullscreen ? 9999 : 1}
             bg="#1a1a2e"
-            borderRadius="12px"
-            css={{
-              "&:fullscreen": { borderRadius: 0, display: "flex", flexDirection: "column" },
-              "&::-webkit-full-screen": { borderRadius: 0, display: "flex", flexDirection: "column" },
-            }}>
+            borderRadius={isFullscreen ? 0 : "12px"}
+            display={isFullscreen ? "flex" : undefined}
+            flexDirection={isFullscreen ? "column" : undefined}>
             {isFullscreen && (
               <Button
                 position="absolute"
