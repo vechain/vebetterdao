@@ -1,12 +1,26 @@
 "use client"
 
-import { Box, Button, Card, Code, Heading, HStack, Icon, Input, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Code,
+  Heading,
+  HStack,
+  Icon,
+  Input,
+  SimpleGrid,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { Address, HDKey } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
 import { getNetworkConfig } from "@vechain/vebetterdao-relayer-node/dist/config"
 import { fetchSummary } from "@vechain/vebetterdao-relayer-node/dist/contracts"
 import { runCastVoteCycle, runClaimRewardCycle } from "@vechain/vebetterdao-relayer-node/dist/relayer"
 import { useState, useRef, useCallback, useEffect } from "react"
+import { FaAndroid, FaApple } from "react-icons/fa"
 import {
   LuClipboard,
   LuContainer,
@@ -15,6 +29,7 @@ import {
   LuMinimize2,
   LuPackage,
   LuPlay,
+  LuSmartphone,
   LuSquare,
   LuCircleX,
 } from "react-icons/lu"
@@ -51,64 +66,6 @@ function CopyButton({ text }: { text: string }) {
       <LuClipboard />
       {copied ? "Copied" : "Copy"}
     </Button>
-  )
-}
-
-function OptionBanner({
-  IconComponent,
-  title,
-  description,
-  command,
-  active,
-  onClick,
-}: {
-  IconComponent: typeof LuGlobe
-  title: string
-  description: string
-  command?: string
-  active?: boolean
-  onClick?: () => void
-}) {
-  return (
-    <Card.Root
-      cursor={onClick ? "pointer" : undefined}
-      onClick={onClick}
-      borderWidth="2px"
-      borderColor={active ? "actions.primary.default" : "border.secondary"}
-      _hover={onClick ? { borderColor: "actions.primary.default", transform: "translateY(-2px)" } : undefined}
-      transition="all 0.2s">
-      <Card.Body gap={3}>
-        <HStack gap={3}>
-          <Box p={2} borderRadius="lg" bg="bg.tertiary">
-            <Icon boxSize={5} color="text.default">
-              <IconComponent />
-            </Icon>
-          </Box>
-          <VStack align="start" gap={0}>
-            <Text fontWeight="bold" textStyle="md">
-              {title}
-            </Text>
-            <Text textStyle="sm" color="text.subtle">
-              {description}
-            </Text>
-          </VStack>
-        </HStack>
-        {command && (
-          <HStack
-            bg="bg.tertiary"
-            borderRadius="md"
-            px={3}
-            py={2}
-            justify="space-between"
-            onClick={e => e.stopPropagation()}>
-            <Code bg="transparent" textStyle="xs" fontFamily="mono" wordBreak="break-all">
-              {command}
-            </Code>
-            <CopyButton text={command} />
-          </HStack>
-        )}
-      </Card.Body>
-    </Card.Root>
   )
 }
 
@@ -295,51 +252,138 @@ export function RunRelayer() {
 
       {!started && (
         <>
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
-            <OptionBanner
-              IconComponent={LuGlobe}
-              title="Run in Browser"
-              description="Paste your mnemonic and run directly here. No install needed."
-              active
-            />
-            <OptionBanner
-              IconComponent={LuContainer}
-              title="Run with Docker"
-              description="Run on a server or locally. Persistent, headless, auto-restarts."
-              command='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node'
-            />
-            <OptionBanner
-              IconComponent={LuPackage}
-              title="Run with npm"
-              description="One command, no clone needed. Requires Node.js 20+."
-              command='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node'
-            />
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+            {/* Run in Browser */}
+            <Card.Root borderWidth="2px" borderColor="actions.primary.default">
+              <Card.Body gap={8}>
+                <HStack gap={3}>
+                  <Box p={2} borderRadius="lg" bg="bg.tertiary">
+                    <Icon boxSize={5} color="text.default">
+                      <LuGlobe />
+                    </Icon>
+                  </Box>
+                  <VStack align="start" gap={0}>
+                    <Text fontWeight="bold" textStyle="md">
+                      {"Run in Browser"}
+                    </Text>
+                    <Text textStyle="sm" color="text.subtle">
+                      {"Paste your mnemonic and run directly here. No install needed."}
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                <VStack align="start" gap={5}>
+                  <Input
+                    type="password"
+                    placeholder="Enter your 12 or 24 word mnemonic..."
+                    value={mnemonic}
+                    onChange={e => setMnemonic(e.target.value)}
+                    fontFamily="mono"
+                    size="lg"
+                  />
+                  <Text textStyle="xs" color="text.subtle">
+                    {"Stays in memory only — cleared when you leave."}
+                  </Text>
+                  <HStack>
+                    <Button
+                      onClick={handleStart}
+                      disabled={mnemonic.trim().split(/\s+/).length < 12}
+                      variant="solid"
+                      rounded="full">
+                      <LuPlay />
+                      {"Start Relayer"}
+                    </Button>
+                  </HStack>
+                </VStack>
+              </Card.Body>
+            </Card.Root>
+
+            {/* Docker + npm */}
+            <Card.Root borderWidth="2px" borderColor="border.secondary">
+              <Card.Body gap={8}>
+                <VStack gap={4}>
+                  <HStack gap={3} w="full" justify={"start"}>
+                    <Box p={2} borderRadius="lg" bg="bg.tertiary">
+                      <Icon boxSize={5} color="text.default">
+                        <LuContainer />
+                      </Icon>
+                    </Box>
+                    <VStack align="start" gap={0}>
+                      <Text fontWeight="bold" textStyle="md">
+                        {"Run with Docker"}
+                      </Text>
+                      <Text textStyle="sm" color="text.subtle">
+                        {"Persistent, headless, auto-restarts."}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  <HStack bg="bg.tertiary" borderRadius="md" px={3} py={2} justify="space-between">
+                    <Code bg="transparent" textStyle="xs" fontFamily="mono" wordBreak="break-all">
+                      {'docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node'}
+                    </Code>
+                    <CopyButton text='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node' />
+                  </HStack>
+                </VStack>
+
+                <VStack gap={4}>
+                  <HStack gap={3} w="full" justify={"start"}>
+                    <Box p={2} borderRadius="lg" bg="bg.tertiary">
+                      <Icon boxSize={5} color="text.default">
+                        <LuPackage />
+                      </Icon>
+                    </Box>
+                    <VStack align="start" gap={0}>
+                      <Text fontWeight="bold" textStyle="md">
+                        {"Run with npm"}
+                      </Text>
+                      <Text textStyle="sm" color="text.subtle">
+                        {"One command, requires Node.js 20+."}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  <HStack bg="bg.tertiary" borderRadius="md" px={3} py={2} justify="space-between" w="full">
+                    <Code bg="transparent" textStyle="xs" fontFamily="mono" wordBreak="break-all">
+                      {'MNEMONIC="..." npx @vechain/vebetterdao-relayer-node'}
+                    </Code>
+                    <CopyButton text='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node' />
+                  </HStack>
+                </VStack>
+              </Card.Body>
+            </Card.Root>
           </SimpleGrid>
 
-          <Card.Root>
-            <Card.Body gap={4}>
-              <Text textStyle="sm" color="text.subtle">
-                {
-                  "Enter your mnemonic to start the relayer in your browser. It stays in memory only and is cleared when you leave this page."
-                }
-              </Text>
-              <Input
-                type="password"
-                placeholder="Enter your 12 or 24 word mnemonic..."
-                value={mnemonic}
-                onChange={e => setMnemonic(e.target.value)}
-                fontFamily="mono"
-                size="lg"
-              />
-              <HStack>
-                <Button
-                  onClick={handleStart}
-                  disabled={mnemonic.trim().split(/\s+/).length < 12}
-                  variant="solid"
-                  rounded="full">
-                  <LuPlay />
-                  {"Start Relayer"}
-                </Button>
+          {/* Run on Phone — coming soon */}
+          <Card.Root borderWidth="2px" borderColor="border.secondary" opacity={0.6}>
+            <Card.Body gap={3}>
+              <HStack gap={3} justify="space-between">
+                <HStack>
+                  <Box p={2} borderRadius="lg" bg="bg.tertiary">
+                    <Icon boxSize={5} color="text.default">
+                      <LuSmartphone />
+                    </Icon>
+                  </Box>
+                  <VStack align="start" gap={0}>
+                    <HStack gap={2}>
+                      <Text fontWeight="bold" textStyle="md">
+                        {"Run on Phone"}
+                      </Text>
+                      <Badge variant="subtle" size="sm">
+                        {"Coming soon"}
+                      </Badge>
+                    </HStack>
+                    <Text textStyle="sm" color="text.subtle">
+                      {"Run your relayer from your mobile device."}
+                    </Text>
+                  </VStack>
+                </HStack>
+                <HStack gap={4} justify="center" py={4}>
+                  <Icon boxSize={8} color="text.subtle">
+                    <FaAndroid />
+                  </Icon>
+                  <Icon boxSize={8} color="text.subtle">
+                    <FaApple />
+                  </Icon>
+                </HStack>
               </HStack>
             </Card.Body>
           </Card.Root>
