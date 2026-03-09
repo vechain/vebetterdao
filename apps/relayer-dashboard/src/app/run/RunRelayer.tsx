@@ -264,7 +264,7 @@ export function RunRelayer() {
                 <VStack align="start" gap={5}>
                   <Input
                     type="password"
-                    placeholder="Enter your 12 or 24 word mnemonic..."
+                    placeholder="Enter your mnemonic..."
                     value={mnemonic}
                     onChange={e => setMnemonic(e.target.value)}
                     fontFamily="mono"
