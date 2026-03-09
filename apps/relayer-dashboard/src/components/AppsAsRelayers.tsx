@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, Card, CloseButton, Icon, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CloseButton, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { LuArrowUpRight, LuSmartphone } from "react-icons/lu"
 
 import { useDismissedBanner } from "@/hooks/useDismissedBanners"
@@ -26,15 +26,19 @@ export function AppsAsRelayers() {
           </Text>
           <VStack gap="2" mt="4" flexWrap="wrap">
             <Button variant="link" size="sm" rounded="full" onClick={onOpen}>
-              {"How It Works"}
+              {"Learn"}
               <LuArrowUpRight />
             </Button>
           </VStack>
         </VStack>
-        <Box position="absolute" right="-1" bottom="-1" opacity={0.08}>
-          <Icon color="text.subtle" boxSize={{ base: "24", md: "32" }}>
-            <LuSmartphone />
-          </Icon>
+        <Box
+          position="absolute"
+          right="-1"
+          bottom="-1"
+          opacity={0.08}
+          color="text.subtle"
+          fontSize={{ base: "96px", md: "128px" }}>
+          <LuSmartphone />
         </Box>
       </Card.Root>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Card, Heading, HStack, Icon, Separator, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, Heading, HStack, Separator, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { LuExternalLink, LuLayoutGrid, LuShieldCheck, LuUsers } from "react-icons/lu"
 
@@ -22,9 +22,9 @@ export function AppsAsRelayersModal({ isOpen, onClose }: AppsAsRelayersModalProp
         <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
           <Card.Root variant="subtle" p={5}>
             <VStack align="start" gap={3}>
-              <Icon color="blue.solid" boxSize={6}>
+              <Box as="span" color="blue.solid" fontSize="24px" lineHeight="1">
                 <LuLayoutGrid />
-              </Icon>
+              </Box>
               <Text fontWeight="semibold">{"For X2Earn Apps"}</Text>
               <Text textStyle="sm" color="text.subtle">
                 {
@@ -34,18 +34,16 @@ export function AppsAsRelayersModal({ isOpen, onClose }: AppsAsRelayersModalProp
 
               <Button variant="solid" size="sm" rounded="full">
                 {"Documentation"}
-                <Icon ml="1">
-                  <LuExternalLink />
-                </Icon>
+                <LuExternalLink />
               </Button>
             </VStack>
           </Card.Root>
 
           <Card.Root variant="subtle" p={5}>
             <VStack align="stretch" gap={3} justify="space-between" h="full">
-              <Icon color="blue.solid" boxSize={6}>
+              <Box as="span" color="blue.solid" fontSize="24px" lineHeight="1">
                 <LuUsers />
-              </Icon>
+              </Box>
               <Text fontWeight="semibold">{"For Community Navigators"}</Text>
               <Text textStyle="sm" color="text.subtle">
                 {
@@ -66,9 +64,9 @@ export function AppsAsRelayersModal({ isOpen, onClose }: AppsAsRelayersModalProp
 
         <VStack align="start" gap={3}>
           <HStack gap={2}>
-            <Icon color="blue.solid" boxSize={5}>
+            <Box as="span" color="blue.solid" fontSize="20px" lineHeight="1">
               <LuShieldCheck />
-            </Icon>
+            </Box>
             <Text fontWeight="semibold">{"Why Would an App Want to Do This?"}</Text>
           </HStack>
           <Text textStyle="sm" color="text.subtle">

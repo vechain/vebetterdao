@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Heading, HStack, Icon, Link, Text, VStack } from "@chakra-ui/react"
+import { Box, Heading, HStack, Link, Text, VStack } from "@chakra-ui/react"
 import { LuExternalLink } from "react-icons/lu"
 import { RiRobot3Line } from "react-icons/ri"
 
@@ -23,9 +23,9 @@ export function AiSkillBanner() {
         _hover={{ opacity: 0.96, transform: "translateY(-1px)", boxShadow: "md" }}>
         <HStack justify="space-between" align="center">
           <HStack gap={4} align="center">
-            <Icon color="purple.fg" boxSize={6} flexShrink={0}>
+            <Box as="span" color="purple.fg" fontSize="24px" lineHeight="1" flexShrink={0}>
               <RiRobot3Line />
-            </Icon>
+            </Box>
             <VStack align="start" gap={1}>
               <Heading size="md" fontWeight="bold">
                 {"Build with the AI Skill"}
@@ -37,9 +37,9 @@ export function AiSkillBanner() {
               </Text>
             </VStack>
           </HStack>
-          <Icon color="text.subtle" flexShrink={0}>
+          <Box as="span" color="text.subtle" flexShrink={0}>
             <LuExternalLink />
-          </Icon>
+          </Box>
         </HStack>
       </Box>
     </Link>

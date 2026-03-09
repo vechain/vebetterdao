@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, Card, CloseButton, HStack, Icon, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CloseButton, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { LuArrowUpRight, LuRadar, LuRocket } from "react-icons/lu"
 
@@ -50,9 +50,7 @@ export function BecomeRelayer() {
                 borderColor="whiteAlpha.500"
                 _hover={{ bg: "whiteAlpha.200" }}>
                 {"Become a Relayer"}
-                <Icon ml="1">
-                  <LuRocket />
-                </Icon>
+                <LuRocket />
               </Button>
             </NextLink>
             <Button variant="link" size="sm" rounded="full" color="white" onClick={onOpen}>
@@ -61,10 +59,14 @@ export function BecomeRelayer() {
             </Button>
           </HStack>
         </VStack>
-        <Box position="absolute" right="-2" bottom="-2" opacity={0.15}>
-          <Icon color="white" boxSize={{ base: "24", md: "32" }}>
-            <LuRadar />
-          </Icon>
+        <Box
+          position="absolute"
+          right="-2"
+          bottom="-2"
+          opacity={0.15}
+          color="white"
+          fontSize={{ base: "96px", md: "128px" }}>
+          <LuRadar />
         </Box>
       </Card.Root>
 

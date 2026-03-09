@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { LuChevronRight, LuCircleHelp } from "react-icons/lu"
 
@@ -16,9 +16,9 @@ export function FeelLostBanner() {
         _hover={{ opacity: 0.9 }}>
         <HStack justify="space-between" align="center">
           <HStack gap={4} align="center">
-            <Icon color="text.default" boxSize={6} flexShrink={0}>
+            <Box as="span" color="text.default" fontSize="24px" lineHeight="1" flexShrink={0}>
               <LuCircleHelp />
-            </Icon>
+            </Box>
             <VStack align="start" gap={1}>
               <Heading size="md" fontWeight="bold">
                 {"Feel lost?"}
@@ -28,9 +28,9 @@ export function FeelLostBanner() {
               </Text>
             </VStack>
           </HStack>
-          <Icon color="text.subtle" flexShrink={0}>
+          <Box as="span" color="text.subtle" flexShrink={0}>
             <LuChevronRight />
-          </Icon>
+          </Box>
         </HStack>
       </Box>
     </NextLink>

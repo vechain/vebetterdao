@@ -1,6 +1,6 @@
 "use client"
 
-import { Heading, HStack, Icon, Link, Separator, Tabs, Text, VStack } from "@chakra-ui/react"
+import { Heading, HStack, Link, Separator, Tabs, Text, VStack } from "@chakra-ui/react"
 import { LuCode, LuRadar } from "react-icons/lu"
 
 function B3trIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -364,25 +364,19 @@ export function InfoContent() {
         <Tabs.List>
           <Tabs.Trigger value="vebetter">
             <HStack gap={1.5}>
-              <Icon boxSize={4}>
-                <B3trIcon />
-              </Icon>
+              <B3trIcon width={16} height={16} />
               {"VeBetter"}
             </HStack>
           </Tabs.Trigger>
           <Tabs.Trigger value="relayers">
             <HStack gap={1.5}>
-              <Icon boxSize={4}>
-                <LuRadar />
-              </Icon>
+              <LuRadar size={16} />
               {"Relayers"}
             </HStack>
           </Tabs.Trigger>
           <Tabs.Trigger value="devs">
             <HStack gap={1.5}>
-              <Icon boxSize={4}>
-                <LuCode />
-              </Icon>
+              <LuCode size={16} />
               {"Devs"}
             </HStack>
           </Tabs.Trigger>

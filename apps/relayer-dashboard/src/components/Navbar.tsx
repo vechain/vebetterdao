@@ -7,7 +7,6 @@ import {
   Drawer,
   Heading,
   HStack,
-  Icon,
   IconButton,
   Link,
   Portal,
@@ -90,11 +89,9 @@ export function Navbar() {
         )}
 
         <HStack flex="1" gap={2} justifyContent="end" alignItems="center">
-          <NextLink href="/new-relayer">
+          <NextLink href="/run">
             <Button variant="primary" size={isDesktop ? "md" : "sm"} rounded="full">
-              <Icon>
-                <LuPlay />
-              </Icon>
+              <LuPlay />
               {"Run"}
             </Button>
           </NextLink>
@@ -116,9 +113,7 @@ export function Navbar() {
 
           {!isDesktop && (
             <IconButton onClick={onOpen} variant="ghost" rounded="6px" size="lg" aria-label="Open menu">
-              <Icon boxSize={7} color="icon.default">
-                <LuMenu />
-              </Icon>
+              <LuMenu size={28} />
             </IconButton>
           )}
         </HStack>
@@ -167,9 +162,7 @@ export function Navbar() {
                           gap={4}
                           size="lg"
                           fontWeight={isActive(route) ? "bold" : "normal"}>
-                          <Icon color="text.subtle" boxSize={5}>
-                            <route.icon />
-                          </Icon>
+                          <route.icon size={20} />
                           {route.label}
                         </Button>
                       </NextLink>

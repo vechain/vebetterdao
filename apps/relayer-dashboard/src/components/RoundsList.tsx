@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Heading, Icon, Skeleton, Stack, VStack } from "@chakra-ui/react"
+import { Button, Heading, Skeleton, Stack, VStack } from "@chakra-ui/react"
 import { useState } from "react"
 import { LuChevronsDown } from "react-icons/lu"
 
@@ -53,13 +53,9 @@ export function RoundsList() {
       </Stack>
       {hasMore && (
         <Button variant="ghost" size="sm" alignSelf="center" onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}>
-          <Icon color="text.subtle" boxSize={3}>
-            <LuChevronsDown size={"xs"} />
-          </Icon>
+          <LuChevronsDown size={12} />
           {"Load more rounds"}
-          <Icon color="text.subtle" boxSize={3}>
-            <LuChevronsDown size={"xs"} />
-          </Icon>
+          <LuChevronsDown size={12} />
         </Button>
       )}
     </VStack>

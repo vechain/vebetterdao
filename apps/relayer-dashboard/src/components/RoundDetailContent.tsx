@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Card, Grid, HStack, Icon, Progress, Separator, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Grid, HStack, Progress, Separator, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { CURRENCY_SYMBOLS, useCurrentCurrency, useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import type { ReactNode } from "react"
 import { LuWallet, LuUsers } from "react-icons/lu"
@@ -37,9 +37,9 @@ function SectionHeader({ title, icon }: { title: string; icon?: ReactNode }) {
         {title}
       </Text>
       {icon && (
-        <Icon color="text.subtle" boxSize="5">
+        <Box as="span" color="text.subtle" fontSize="20px" lineHeight="1">
           {icon}
-        </Icon>
+        </Box>
       )}
     </HStack>
   )
@@ -191,7 +191,7 @@ export function RoundDetailContent({ round, generatedAt }: RoundDetailContentPro
         : undefined
 
   return (
-    <VStack gap="4" align="stretch">
+    <VStack gap="14" align="stretch">
       <Grid templateColumns={{ base: "1fr", lg: "2fr 3fr" }} gap="4" alignItems="start">
         {/* Left Column */}
         <VStack gap="4" align="stretch">

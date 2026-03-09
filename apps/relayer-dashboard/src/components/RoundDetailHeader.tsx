@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge, Heading, HStack, Icon, IconButton, Link, VStack } from "@chakra-ui/react"
+import { Badge, Heading, HStack, IconButton, Link, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { LuArrowLeft, LuArrowRight } from "react-icons/lu"
@@ -57,7 +57,7 @@ export function RoundDetailHeader({ round, firstRound, currentRound }: RoundDeta
             onClick={() => handleRoundNavigation(roundId - 1)}
             disabled={!canGoPrev}
             aria-label="Previous round">
-            <Icon as={LuArrowLeft} />
+            <LuArrowLeft />
           </IconButton>
           <IconButton
             variant="outline"
@@ -65,7 +65,7 @@ export function RoundDetailHeader({ round, firstRound, currentRound }: RoundDeta
             disabled={!canGoNext}
             onClick={() => handleRoundNavigation(roundId + 1)}
             aria-label="Next round">
-            <Icon as={LuArrowRight} />
+            <LuArrowRight />
           </IconButton>
         </HStack>
       </HStack>

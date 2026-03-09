@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { LuCoins, LuScale, LuServer, LuZap } from "react-icons/lu"
 
@@ -27,9 +27,9 @@ export function RelayerInfoModal({ isOpen, onClose }: RelayerInfoModalProps) {
         </VStack>
 
         <HStack gap={4} align="start">
-          <Icon color="text.subtle" mt={1} flexShrink={0}>
+          <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
             <LuZap />
-          </Icon>
+          </Box>
           <VStack gap={1} align="start">
             <Text fontWeight="semibold">{"What You Do"}</Text>
             <Text textStyle="sm" color="text.subtle">
@@ -41,9 +41,9 @@ export function RelayerInfoModal({ isOpen, onClose }: RelayerInfoModalProps) {
         </HStack>
 
         <HStack gap={4} align="start">
-          <Icon color="text.subtle" mt={1} flexShrink={0}>
+          <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
             <LuCoins />
-          </Icon>
+          </Box>
           <VStack gap={1} align="start">
             <Text fontWeight="semibold">{"How You Earn"}</Text>
             <Text textStyle="sm" color="text.subtle">
@@ -55,9 +55,9 @@ export function RelayerInfoModal({ isOpen, onClose }: RelayerInfoModalProps) {
         </HStack>
 
         <HStack gap={4} align="start">
-          <Icon color="text.subtle" mt={1} flexShrink={0}>
+          <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
             <LuServer />
-          </Icon>
+          </Box>
           <VStack gap={1} align="start">
             <Text fontWeight="semibold">{"What You Need"}</Text>
             <Text textStyle="sm" color="text.subtle">
@@ -69,9 +69,9 @@ export function RelayerInfoModal({ isOpen, onClose }: RelayerInfoModalProps) {
         </HStack>
 
         <HStack gap={4} align="start">
-          <Icon color="text.subtle" mt={1} flexShrink={0}>
+          <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
             <LuScale />
-          </Icon>
+          </Box>
           <VStack gap={1} align="start">
             <Text fontWeight="semibold">{"The Rules"}</Text>
             <Text textStyle="sm" color="text.subtle">

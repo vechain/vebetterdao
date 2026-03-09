@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, HStack, Icon, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, HStack, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
 import type { IconType } from "react-icons"
 import { LuChartLine, LuCoins, LuRadar, LuUsers } from "react-icons/lu"
 
@@ -27,9 +27,9 @@ function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
           <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" lineClamp={1}>
             {label}
           </Text>
-          <Icon color="text.subtle" boxSize={{ base: "4", md: "5" }}>
-            <>{icon({})}</>
-          </Icon>
+          <Box as="span" color="text.subtle" fontSize={{ base: "16px", md: "20px" }} lineHeight="1">
+            {icon({})}
+          </Box>
         </HStack>
         <Skeleton loading={!!isLoading}>
           <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="semibold">

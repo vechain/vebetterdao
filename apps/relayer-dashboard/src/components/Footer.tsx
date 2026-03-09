@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Container, Flex, HStack, Icon, Link, SimpleGrid, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, HStack, Link, SimpleGrid, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/vechain-kit"
 import NextLink from "next/link"
@@ -77,9 +77,9 @@ export function Footer() {
         <Flex w="full" direction={{ base: "column", md: "row" }} justify="space-between" gap={{ base: 8, md: 6 }}>
           <VStack align="start" gap={2} flexShrink={0}>
             <HStack gap={2}>
-              <Icon color="blue.solid" boxSize={5}>
+              <Box as="span" color="blue.solid" fontSize="20px" lineHeight="1">
                 <LuRadar />
-              </Icon>
+              </Box>
               <Text fontWeight="bold" textStyle="sm">
                 {"VeBetter Relayers"}
               </Text>

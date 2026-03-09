@@ -9,7 +9,6 @@ import {
   Code,
   Heading,
   HStack,
-  Icon,
   IconButton,
   Input,
   SimpleGrid,
@@ -247,9 +246,7 @@ export function RunRelayer() {
               <Card.Body gap={8}>
                 <HStack gap={3}>
                   <Box p={2} borderRadius="lg" bg="bg.tertiary">
-                    <Icon boxSize={5} color="text.default">
-                      <LuGlobe />
-                    </Icon>
+                    <LuGlobe size={20} />
                   </Box>
                   <VStack align="start" gap={0}>
                     <Text fontWeight="bold" textStyle="md">
@@ -293,9 +290,7 @@ export function RunRelayer() {
                 <VStack gap={4}>
                   <HStack gap={3} w="full" justify={"start"}>
                     <Box p={2} borderRadius="lg" bg="bg.tertiary">
-                      <Icon boxSize={5} color="text.default">
-                        <LuContainer />
-                      </Icon>
+                      <LuContainer size={20} />
                     </Box>
                     <VStack align="start" gap={0}>
                       <Text fontWeight="bold" textStyle="md">
@@ -317,9 +312,7 @@ export function RunRelayer() {
                 <VStack gap={4}>
                   <HStack gap={3} w="full" justify={"start"}>
                     <Box p={2} borderRadius="lg" bg="bg.tertiary">
-                      <Icon boxSize={5} color="text.default">
-                        <LuPackage />
-                      </Icon>
+                      <LuPackage size={20} />
                     </Box>
                     <VStack align="start" gap={0}>
                       <Text fontWeight="bold" textStyle="md">
@@ -347,9 +340,7 @@ export function RunRelayer() {
               <HStack gap={3} justify="space-between">
                 <HStack>
                   <Box p={2} borderRadius="lg" bg="bg.tertiary">
-                    <Icon boxSize={5} color="text.default">
-                      <LuSmartphone />
-                    </Icon>
+                    <LuSmartphone size={20} />
                   </Box>
                   <VStack align="start" gap={0}>
                     <HStack gap={2}>
@@ -366,12 +357,8 @@ export function RunRelayer() {
                   </VStack>
                 </HStack>
                 <HStack gap={4} justify="center" py={4}>
-                  <Icon boxSize={8} color="text.subtle">
-                    <FaAndroid />
-                  </Icon>
-                  <Icon boxSize={8} color="text.subtle">
-                    <FaApple />
-                  </Icon>
+                  <FaAndroid size={32} />
+                  <FaApple size={32} />
                 </HStack>
               </HStack>
             </Card.Body>
@@ -454,7 +441,7 @@ export function RunRelayer() {
                 minW="44px"
                 title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 css={{ touchAction: "manipulation" }}>
-                <Icon>{isFullscreen ? <LuMinimize2 /> : <LuMaximize2 />}</Icon>
+                {isFullscreen ? <LuMinimize2 /> : <LuMaximize2 />}
               </Button>
             </HStack>
           </HStack>

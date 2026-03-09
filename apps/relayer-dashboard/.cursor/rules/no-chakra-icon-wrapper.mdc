@@ -1,0 +1,41 @@
+---
+description: Never wrap react-icons inside Chakra UI Icon component
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# No Chakra `<Icon>` wrapper for react-icons
+
+`react-icons` don't support `forwardRef`. Chakra v3's `<Icon>` (`chakra(svg)`) passes refs, causing console warnings.
+
+## Rules
+
+- Never wrap react-icons inside `<Icon>`: use them directly
+- For sizing, pass `size` prop: `<LuPlay size={20} />`
+- For color/responsive sizing, wrap in `<Box as="span">` with `fontSize` and `color`
+- `<Icon asChild>` with raw `<svg>` elements is fine (they accept refs)
+
+```tsx
+// BAD
+<Icon boxSize={5} color="text.subtle">
+  <LuRadar />
+</Icon>
+
+// GOOD - direct usage
+<LuRadar size={20} />
+
+// GOOD - with Chakra styling
+<Box as="span" color="text.subtle" fontSize="20px" lineHeight="1">
+  <LuRadar />
+</Box>
+
+// GOOD - responsive sizing
+<Box as="span" color="text.subtle" fontSize={{ base: "16px", md: "20px" }}>
+  <LuRadar />
+</Box>
+
+// OK - raw SVG (not react-icons)
+<Icon asChild boxSize="18px">
+  <svg>...</svg>
+</Icon>
+```

@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge, Box, Card, HStack, Icon, IconButton, Input, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Badge, Box, Card, HStack, IconButton, Input, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useState } from "react"
 import { LuSearch, LuX } from "react-icons/lu"
 
@@ -33,13 +33,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-function AddressInput({
-  onSubmit,
-  initialValue,
-}: {
-  onSubmit: (address: string) => void
-  initialValue: string
-}) {
+function AddressInput({ onSubmit, initialValue }: { onSubmit: (address: string) => void; initialValue: string }) {
   const [value, setValue] = useState(initialValue)
   const isValid = /^0x[a-fA-F0-9]{40}$/.test(value.trim())
 
@@ -72,9 +66,7 @@ function AddressInput({
             rounded="md"
             disabled={!isValid}
             onClick={handleSubmit}>
-            <Icon>
-              <LuSearch />
-            </Icon>
+            <LuSearch />
           </IconButton>
         </HStack>
       </VStack>
@@ -121,8 +113,16 @@ function ActivitySection({ address, currentRoundId }: { address: string; current
           <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
             {`Round ${currentRoundId} (current)`}
           </Text>
-          <DetailRow label="Actions" value={currentData.actions != null ? String(currentData.actions) : "\u2014"} isLoading={currentData.isLoading} />
-          <DetailRow label="Weighted actions" value={currentData.weightedActions != null ? String(currentData.weightedActions) : "\u2014"} isLoading={currentData.isLoading} />
+          <DetailRow
+            label="Actions"
+            value={currentData.actions != null ? String(currentData.actions) : "\u2014"}
+            isLoading={currentData.isLoading}
+          />
+          <DetailRow
+            label="Weighted actions"
+            value={currentData.weightedActions != null ? String(currentData.weightedActions) : "\u2014"}
+            isLoading={currentData.isLoading}
+          />
         </>
       )}
       {prevRoundId != null && prevRoundId > 0 && (
@@ -131,8 +131,16 @@ function ActivitySection({ address, currentRoundId }: { address: string; current
           <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
             {`Round ${prevRoundId} (previous)`}
           </Text>
-          <DetailRow label="Actions" value={prevData.actions != null ? String(prevData.actions) : "\u2014"} isLoading={prevData.isLoading} />
-          <DetailRow label="Weighted actions" value={prevData.weightedActions != null ? String(prevData.weightedActions) : "\u2014"} isLoading={prevData.isLoading} />
+          <DetailRow
+            label="Actions"
+            value={prevData.actions != null ? String(prevData.actions) : "\u2014"}
+            isLoading={prevData.isLoading}
+          />
+          <DetailRow
+            label="Weighted actions"
+            value={prevData.weightedActions != null ? String(prevData.weightedActions) : "\u2014"}
+            isLoading={prevData.isLoading}
+          />
         </>
       )}
     </VStack>
@@ -235,9 +243,7 @@ export function ConnectedWallet() {
           </Text>
           <HStack gap="1">
             <IconButton aria-label="Change address" variant="ghost" size="xs" rounded="full" onClick={() => clear()}>
-              <Icon boxSize={4}>
-                <LuX />
-              </Icon>
+              <LuX size={16} />
             </IconButton>
           </HStack>
         </HStack>

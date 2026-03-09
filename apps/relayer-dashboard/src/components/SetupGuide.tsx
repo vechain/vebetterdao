@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Card, Code, Heading, HStack, Icon, Link, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, Code, Heading, HStack, Link, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { LuArrowLeft, LuCoins, LuExternalLink, LuScale, LuServer, LuZap } from "react-icons/lu"
 
@@ -48,9 +48,7 @@ export function SetupGuide() {
       <HStack gap="3" align="center">
         <NextLink href="/">
           <Button variant="ghost" size="sm" rounded="full">
-            <Icon>
-              <LuArrowLeft />
-            </Icon>
+            <LuArrowLeft />
             {"Back"}
           </Button>
         </NextLink>
@@ -79,9 +77,9 @@ export function SetupGuide() {
           </VStack>
 
           <HStack gap={4} align="start">
-            <Icon color="text.subtle" mt={1} flexShrink={0}>
+            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
               <LuZap />
-            </Icon>
+            </Box>
             <VStack gap={1} align="start">
               <Text fontWeight="semibold">{"What You Do"}</Text>
               <Text textStyle="sm" color="text.subtle">
@@ -93,9 +91,9 @@ export function SetupGuide() {
           </HStack>
 
           <HStack gap={4} align="start">
-            <Icon color="text.subtle" mt={1} flexShrink={0}>
+            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
               <LuCoins />
-            </Icon>
+            </Box>
             <VStack gap={1} align="start">
               <Text fontWeight="semibold">{"How You Earn"}</Text>
               <Text textStyle="sm" color="text.subtle">
@@ -107,9 +105,9 @@ export function SetupGuide() {
           </HStack>
 
           <HStack gap={4} align="start">
-            <Icon color="text.subtle" mt={1} flexShrink={0}>
+            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
               <LuServer />
-            </Icon>
+            </Box>
             <VStack gap={1} align="start">
               <Text fontWeight="semibold">{"What You Need"}</Text>
               <Text textStyle="sm" color="text.subtle">
@@ -121,9 +119,9 @@ export function SetupGuide() {
           </HStack>
 
           <HStack gap={4} align="start">
-            <Icon color="text.subtle" mt={1} flexShrink={0}>
+            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
               <LuScale />
-            </Icon>
+            </Box>
             <VStack gap={1} align="start">
               <Text fontWeight="semibold">{"The Rules"}</Text>
               <Text textStyle="sm" color="text.subtle">
@@ -209,9 +207,7 @@ export function SetupGuide() {
           <Link href="https://docs.vebetterdao.org/vebetter/automation" target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" rounded="full">
               {"Full Documentation"}
-              <Icon>
-                <LuExternalLink />
-              </Icon>
+              <LuExternalLink />
             </Button>
           </Link>
         </HStack>

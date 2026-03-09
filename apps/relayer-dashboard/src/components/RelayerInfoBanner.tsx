@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Heading, HStack, Icon, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { LuChevronRight } from "react-icons/lu"
 
 import { RelayerInfoModal } from "./RelayerInfoModal"
@@ -29,9 +29,9 @@ export function RelayerInfoBanner() {
               }
             </Text>
           </VStack>
-          <Icon color="text.subtle" flexShrink={0}>
+          <Box as="span" color="text.subtle" flexShrink={0}>
             <LuChevronRight />
-          </Icon>
+          </Box>
         </HStack>
       </Box>
 
