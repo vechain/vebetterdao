@@ -46,6 +46,10 @@ const ClientApp = dynamic(() => import("./ClientApp").then(mod => mod.ClientApp)
 export const metadata: Metadata = {
   title: "VeBetter Relayers | VeBetterDAO Auto-Voting",
   description: "Auto-voting and relayer analytics for VeBetterDAO governance.",
+  icons: {
+    icon: "/assets/favicon/web-app-manifest-192x192.png",
+    apple: "/assets/favicon/web-app-manifest-192x192.png",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

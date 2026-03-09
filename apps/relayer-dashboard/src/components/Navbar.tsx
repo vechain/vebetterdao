@@ -9,6 +9,7 @@ import {
   HStack,
   Icon,
   IconButton,
+  Link,
   Portal,
   Separator,
   useDisclosure,
@@ -16,9 +17,10 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { WalletButton } from "@vechain/vechain-kit"
+import Image from "next/image"
 import NextLink from "next/link"
 import { usePathname } from "next/navigation"
-import { LuHouse, LuInfo, LuMenu, LuPlay, LuRadar, LuRocket } from "react-icons/lu"
+import { LuHouse, LuInfo, LuMenu, LuPlay, LuRadar } from "react-icons/lu"
 
 import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
 
@@ -35,6 +37,7 @@ export function Navbar() {
   const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
   const { open, onClose, onOpen } = useDisclosure()
   const pathname = usePathname()
+  const logoFilter = useColorModeValue("none", "brightness(0) invert(1)")
   const walletTextColor = useColorModeValue("#1A1A1A", "#E4E4E4")
   const walletHoverBg = useColorModeValue("#f8f8f8", "#2D2D2F")
 
@@ -45,10 +48,16 @@ export function Navbar() {
     <Box bg="bg.secondary" px={0} position="sticky" top={0} zIndex={3} w="full">
       <HStack justify="space-between" p={isDesktop ? "16px 48px" : "8px 20px"}>
         <HStack flex="1" justifyContent="start">
-          <Heading size="lg" fontWeight="bold">
-            {"VeBetter Relayers"}
-          </Heading>
-          {isDesktop && <ColorModeButton mt="1" rounded="full" />}
+          <Link asChild>
+            <NextLink href={"/"}>
+              <HStack gap={2} align="flex-start" w="full">
+                <Image src="/assets/vb.svg" alt="VeBetterDAO" width={28} height={28} style={{ filter: logoFilter }} />
+                <Heading size="lg" fontWeight="bold">
+                  {"Relayers"}
+                </Heading>
+              </HStack>
+            </NextLink>
+          </Link>
         </HStack>
 
         {isDesktop && (
@@ -84,9 +93,9 @@ export function Navbar() {
           <NextLink href="/new-relayer">
             <Button variant="primary" size={isDesktop ? "md" : "sm"} rounded="full">
               <Icon>
-                <LuRocket />
+                <LuPlay />
               </Icon>
-              {isDesktop ? "Become a Relayer" : "Relayer"}
+              {"Run"}
             </Button>
           </NextLink>
 

@@ -1,10 +1,12 @@
 "use client"
 
-import { Box, Container, Flex, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, HStack, Icon, Link, SimpleGrid, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { LuRadar } from "react-icons/lu"
+
+import { ColorModeToggle } from "./ui/color-mode"
 
 const RESOURCES = [
   { label: "Network Status", href: "https://vechainstats.com" },
@@ -67,6 +69,8 @@ function NavigationLinks() {
 }
 
 export function Footer() {
+  const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
+
   return (
     <Box as="footer" borderTop="sm" borderColor="border.secondary" bg="bg.primary" mt={8}>
       <Container maxW="breakpoint-xl" px={4} py={{ base: 8, md: 10 }}>
@@ -77,12 +81,13 @@ export function Footer() {
                 <LuRadar />
               </Icon>
               <Text fontWeight="bold" textStyle="sm">
-                {"Relayer Dashboard"}
+                {"VeBetter Relayers"}
               </Text>
             </HStack>
             <Text textStyle="xs" color="text.subtle">
               {"The central hub for managing and monitoring relayers."}
             </Text>
+            {isDesktop && <ColorModeToggle mt="2" />}
           </VStack>
 
           <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: 8, md: 6 }}>

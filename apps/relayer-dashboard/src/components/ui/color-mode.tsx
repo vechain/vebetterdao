@@ -1,6 +1,14 @@
 "use client"
 
-import { Button, ClientOnly, Skeleton, type IconButtonProps } from "@chakra-ui/react"
+import {
+  Button,
+  ClientOnly,
+  Icon,
+  Skeleton,
+  Switch,
+  type IconButtonProps,
+  type SwitchRootProps,
+} from "@chakra-ui/react"
 import { ThemeProvider, useTheme, type ThemeProviderProps } from "next-themes"
 import * as React from "react"
 import { FaMoon, FaSun } from "react-icons/fa"
@@ -75,3 +83,40 @@ export const ColorModeButton = React.forwardRef<HTMLButtonElement, ColorModeButt
     </ClientOnly>
   )
 })
+
+interface ColorModeToggleProps extends Omit<SwitchRootProps, "checked" | "onCheckedChange"> {}
+
+export function ColorModeToggle(props: ColorModeToggleProps) {
+  const { colorMode, toggleColorMode } = useColorMode()
+
+  return (
+    <ClientOnly fallback={<Skeleton w="60px" h="32px" borderRadius="full" />}>
+      <Switch.Root
+        checked={colorMode === "dark"}
+        onCheckedChange={toggleColorMode}
+        colorPalette="blue"
+        size="lg"
+        css={{
+          "& .chakra-switch__control": {
+            w: "60px",
+            h: "32px",
+            p: "2px",
+          },
+          "& .chakra-switch__thumb": {
+            w: "28px",
+            h: "28px",
+          },
+        }}
+        {...props}>
+        <Switch.HiddenInput />
+        <Switch.Control>
+          <Switch.Thumb>
+            <Switch.ThumbIndicator fallback={<Icon as={FaSun} color="orange.400" boxSize="5" />}>
+              <Icon as={FaMoon} color="blue.300" boxSize="5" />
+            </Switch.ThumbIndicator>
+          </Switch.Thumb>
+        </Switch.Control>
+      </Switch.Root>
+    </ClientOnly>
+  )
+}
