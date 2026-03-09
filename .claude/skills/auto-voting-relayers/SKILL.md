@@ -168,7 +168,7 @@ relayerShare = (relayerWeightedActions / completedWeightedActions) * totalReward
 
 **Registration (open to anyone):**
 - `registerRelayer()` — self-registration, callable by anyone
-- `unregisterRelayer(address)` — admin only (POOL_ADMIN_ROLE)
+- `unregisterRelayer(address)` — callable by admin or the relayer itself
 - `setTotalActionsForRound(roundId, userCount)` - sets expected = userCount * 2 actions, userCount * 4 weighted
 - `reduceExpectedActionsForRound(roundId, userCount)` - for ineligible users
 - `registerRelayerAction(relayer, voter, roundId, action)` - record work
