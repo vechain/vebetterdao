@@ -10,7 +10,7 @@ export function useRelayerRegistration(address: string | undefined) {
     abi: relayerPoolAbi,
     address: relayerPoolAddress,
     method: "isRegisteredRelayer",
-    args: [address ?? "0x0000000000000000000000000000000000000000"],
+    args: [(address ?? "0x0000000000000000000000000000000000000000") as `0x${string}`],
     queryOptions: {
       enabled: !!address,
       select: (data: readonly unknown[]) => data[0] as boolean,
