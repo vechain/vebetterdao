@@ -138,11 +138,11 @@ export function SetupGuide() {
         <Step number={1} title="Prerequisites">
           <Text textStyle="sm" color="text.subtle">
             {
-              "You need a VeChain wallet with some VTHO for gas fees. The relayer node requires Node.js 18+ and a registered relayer address (currently admin-registered during MVP)."
+              "You need a VeChain wallet with some VTHO for gas fees. The relayer node requires Node.js 18+ and a registered relayer address."
             }
           </Text>
           <Text textStyle="sm" color="text.subtle">
-            {"Contact the VeBetterDAO team to get your address registered as a relayer."}
+            {"Anyone can register as a relayer by calling registerRelayer() on RelayerRewardsPool."}
           </Text>
         </Step>
 

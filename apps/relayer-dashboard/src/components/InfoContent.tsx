@@ -255,7 +255,7 @@ function DevsTab() {
         </Text>
         <BulletList
           items={[
-            "Get registered (currently admin-only via POOL_ADMIN_ROLE)",
+            "Register as a relayer by calling registerRelayer() on RelayerRewardsPool",
             "Read getTotalAutoVotingUsersAtRoundStart() to know how many users to serve",
             "Call castVoteOnBehalfOf() during early access window",
             "Call reward claims after round ends",

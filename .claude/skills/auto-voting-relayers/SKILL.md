@@ -61,7 +61,7 @@ Relayer Dashboard (monitoring/analytics)
 
 ### For Relayers
 
-1. Get registered on-chain (POOL_ADMIN_ROLE during MVP)
+1. Register on-chain by calling registerRelayer() on RelayerRewardsPool (open to anyone)
 2. Run relayer-node with wallet (MNEMONIC or RELAYER_PRIVATE_KEY)
 3. Node auto-discovers users, batches votes + claims
 4. Earn weighted points: vote = 3 pts, claim = 1 pt
@@ -166,8 +166,9 @@ relayerShare = (relayerWeightedActions / completedWeightedActions) * totalReward
 - Round ended (`emissions.isCycleEnded(roundId)`)
 - All work done (`completedWeightedActions >= totalWeightedActions`)
 
-**Key admin functions (POOL_ADMIN_ROLE):**
-- `registerRelayer(address)` / `unregisterRelayer(address)`
+**Registration (open to anyone):**
+- `registerRelayer()` — self-registration, callable by anyone
+- `unregisterRelayer(address)` — admin only (POOL_ADMIN_ROLE)
 - `setTotalActionsForRound(roundId, userCount)` - sets expected = userCount * 2 actions, userCount * 4 weighted
 - `reduceExpectedActionsForRound(roundId, userCount)` - for ineligible users
 - `registerRelayerAction(relayer, voter, roundId, action)` - record work
