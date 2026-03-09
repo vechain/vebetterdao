@@ -368,20 +368,13 @@ export function RunRelayer() {
 
       {started && (
         <Box>
-          <HStack
-            mb={3}
-            justify="space-between"
-            gap={2}
-            position="relative"
-            zIndex={10}
-            minH="44px"
-            py={1}
-            css={{ touchAction: "manipulation" }}>
-            <HStack gap={2}>
+          <HStack mb={3} gap={2} align="center" py={1} flexWrap="wrap" justify="space-between">
+            <HStack gap={2} minW={0}>
               <Box
                 w={2}
                 h={2}
                 borderRadius="full"
+                flexShrink={0}
                 bg={running && !stopRequested ? "green.400" : stopRequested ? "orange.400" : "red.400"}
               />
               <Text textStyle="sm" fontFamily="mono" color="text.subtle" truncate>
@@ -391,7 +384,7 @@ export function RunRelayer() {
               {walletAddress && <CopyButton text={walletAddress} />}
             </HStack>
 
-            <HStack gap={2}>
+            <HStack gap={2} flexShrink={0} css={{ touchAction: "manipulation" }}>
               {running ? (
                 stopRequested ? (
                   <Button
@@ -442,6 +435,7 @@ export function RunRelayer() {
                 title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 css={{ touchAction: "manipulation" }}>
                 {isFullscreen ? <LuMinimize2 /> : <LuMaximize2 />}
+                {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
               </Button>
             </HStack>
           </HStack>
