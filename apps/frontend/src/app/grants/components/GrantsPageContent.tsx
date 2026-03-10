@@ -20,7 +20,7 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import BigNumber from "bignumber.js"
 import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
@@ -157,6 +157,10 @@ export const GrantsPageContent = () => {
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const visibleProposal = filteredProposals?.slice(startRange, endRange)
+
+  useEffect(() => {
+    setPage(1)
+  }, [selectedFilter, debouncedSearchTerm])
 
   // COMPUTED VALUES
   const totalGrantsApproved = useMemo(() => {
