@@ -305,18 +305,19 @@ describe("RelayerRewardsPool - @shard18", function () {
       expect(updatedRelayers).to.not.include(relayer1.address)
     })
 
-    it("should not allow non-admin to register another address as relayer", async function () {
-      await expect(relayerRewardsPool.connect(user1).registerRelayer(relayer1.address)).to.be.revertedWith(
-        "RelayerRewardsPool: caller must be relayer (self-register) or have admin or pool admin role",
-      )
+    it("should allow anyone to register any address as relayer", async function () {
+      await expect(relayerRewardsPool.connect(user1).registerRelayer(relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerRegistered")
+        .withArgs(relayer1.address)
+      expect(await relayerRewardsPool.isRegisteredRelayer(relayer1.address)).to.be.true
     })
 
     it("should not allow non-admin to unregister another relayer", async function () {
       await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
 
-      await expect(relayerRewardsPool.connect(user1).unregisterRelayer(relayer1.address)).to.be.revertedWith(
-        "RelayerRewardsPool: caller must be relayer (self-unregister) or have admin or pool admin role",
-      )
+      await expect(relayerRewardsPool.connect(user1).unregisterRelayer(relayer1.address))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "UnauthorizedUnregister")
+        .withArgs(user1.address, relayer1.address)
     })
 
     it("should allow anyone to self-register as relayer", async function () {

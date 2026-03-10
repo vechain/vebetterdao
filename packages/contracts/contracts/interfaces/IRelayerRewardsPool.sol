@@ -185,6 +185,9 @@ interface IRelayerRewardsPool {
   /// @notice Custom error for when relayer is not registered
   error RelayerNotRegistered(address relayer);
 
+  /// @notice Custom error for when caller is not the relayer (self-unregister) nor admin
+  error UnauthorizedUnregister(address caller, address relayer);
+
   /// @notice Custom error for when a round has not ended yet
   error RoundNotEnded(uint256 roundId);
 

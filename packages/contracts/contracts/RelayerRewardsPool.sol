@@ -743,16 +743,11 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Register a relayer for early access to auto-voting actions.
-   *         Anyone can register themselves (relayer == msg.sender); pool admin can register any address.
-   * @param relayer The address of the relayer to register (must be msg.sender for self-registration)
+   * @notice Register a relayer for early access to auto-voting actions. Open to anyone.
+   * @param relayer The address of the relayer to register
    */
   function registerRelayer(address relayer) external {
     if (relayer == address(0)) revert InvalidParameter("relayer");
-    require(
-      relayer == msg.sender || hasRole(POOL_ADMIN_ROLE, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
-      "RelayerRewardsPool: caller must be relayer (self-register) or have admin or pool admin role"
-    );
 
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
@@ -772,10 +767,11 @@ contract RelayerRewardsPool is
    * @param relayer The address of the relayer to unregister
    */
   function unregisterRelayer(address relayer) external {
-    require(
-      relayer == msg.sender || hasRole(POOL_ADMIN_ROLE, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
-      "RelayerRewardsPool: caller must be relayer (self-unregister) or have admin or pool admin role"
-    );
+    if (
+      relayer != msg.sender && !hasRole(POOL_ADMIN_ROLE, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)
+    ) {
+      revert UnauthorizedUnregister(msg.sender, relayer);
+    }
 
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
