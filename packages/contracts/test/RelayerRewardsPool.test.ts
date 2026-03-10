@@ -305,17 +305,41 @@ describe("RelayerRewardsPool - @shard18", function () {
       expect(updatedRelayers).to.not.include(relayer1.address)
     })
 
-    it("should not allow non-admin to register/unregister relayers", async function () {
+    it("should not allow non-admin to register another address as relayer", async function () {
       await expect(relayerRewardsPool.connect(user1).registerRelayer(relayer1.address)).to.be.revertedWith(
-        "RelayerRewardsPool: caller must have admin or pool admin role",
+        "RelayerRewardsPool: caller must be relayer (self-register) or have admin or pool admin role",
       )
+    })
 
-      // Register first
+    it("should not allow non-admin to unregister another relayer", async function () {
       await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
 
       await expect(relayerRewardsPool.connect(user1).unregisterRelayer(relayer1.address)).to.be.revertedWith(
-        "RelayerRewardsPool: caller must have admin or pool admin role",
+        "RelayerRewardsPool: caller must be relayer (self-unregister) or have admin or pool admin role",
       )
+    })
+
+    it("should allow anyone to self-register as relayer", async function () {
+      await expect(relayerRewardsPool.connect(user1).registerRelayer(user1.address))
+        .to.emit(relayerRewardsPool, "RelayerRegistered")
+        .withArgs(user1.address)
+
+      expect(await relayerRewardsPool.isRegisteredRelayer(user1.address)).to.be.true
+      const registeredRelayers = await relayerRewardsPool.getRegisteredRelayers()
+      expect(registeredRelayers).to.include(user1.address)
+    })
+
+    it("should allow relayer to unregister themselves", async function () {
+      await relayerRewardsPool.connect(relayer1).registerRelayer(relayer1.address)
+      expect(await relayerRewardsPool.isRegisteredRelayer(relayer1.address)).to.be.true
+
+      await expect(relayerRewardsPool.connect(relayer1).unregisterRelayer(relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerUnregistered")
+        .withArgs(relayer1.address)
+
+      expect(await relayerRewardsPool.isRegisteredRelayer(relayer1.address)).to.be.false
+      const registeredRelayers = await relayerRewardsPool.getRegisteredRelayers()
+      expect(registeredRelayers).to.not.include(relayer1.address)
     })
   })
 
