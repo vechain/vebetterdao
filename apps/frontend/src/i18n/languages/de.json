@@ -1299,7 +1299,7 @@
   "Round info": "Runde Informationen",
   "rounds": "Runden",
   "Rounds history": "Rundenverlauf",
-  "roundSummary": "Die vorherige Allocation-Runde wurde mit <bold>{{voters}}</bold> Wählern abgeschlossen, mit einer gesamten Stimmkraft von <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "Die vorherige Allocation-Runde wurde mit <bold>{{voters}} Wählern</bold> abgeschlossen, mit einer gesamten Stimmkraft von <bold>{{vot3}} VOT3</bold>.",
   "Save": "Speichern",
   "Save all changes": "Alle Änderungen speichern",
   "Save and show on feed": "Speichern und im Feed anzeigen",

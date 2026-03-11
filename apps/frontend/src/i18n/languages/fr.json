@@ -1299,7 +1299,7 @@
   "Round info": "Informations de la ronde",
   "rounds": "tours",
   "Rounds history": "Historique des tours",
-  "roundSummary": "Le tour d'allocation précédent s'est terminé avec <bold>{{voters}}</bold> votants, utilisant un pouvoir de vote total de <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "Le tour d'allocation précédent s'est terminé avec <bold>{{voters}} votants</bold>, utilisant un pouvoir de vote total de <bold>{{vot3}} VOT3</bold>.",
   "Save": "Enregistrer",
   "Save all changes": "Enregistrer toutes les modifications",
   "Save and show on feed": "Enregistrer et afficher dans le fil",

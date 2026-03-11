@@ -1299,7 +1299,7 @@
   "Round info": "Información de la ronda",
   "rounds": "rondas",
   "Rounds history": "Historial de rondas",
-  "roundSummary": "La ronda de asignación anterior se completó con <bold>{{voters}}</bold> votantes, usando un poder de voto total de <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "La ronda de asignación anterior se completó con <bold>{{voters}} votantes</bold>, usando un poder de voto total de <bold>{{vot3}} VOT3</bold>.",
   "Save": "Guardar",
   "Save all changes": "Guardar todos los cambios",
   "Save and show on feed": "Guardar y mostrar en el feed",

@@ -1299,7 +1299,7 @@
   "Round info": "Informações da rodada",
   "rounds": "rodadas",
   "Rounds history": "Histórico de Rodadas",
-  "roundSummary": "A rodada de alocação anterior foi concluída com <bold>{{voters}}</bold> votantes, usando um poder de voto total de <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "A rodada de alocação anterior foi concluída com <bold>{{voters}} votantes</bold>, usando um poder de voto total de <bold>{{vot3}} VOT3</bold>.",
   "Save": "Salvar",
   "Save all changes": "Salvar todas as alterações",
   "Save and show on feed": "Salvar e mostrar no feed",

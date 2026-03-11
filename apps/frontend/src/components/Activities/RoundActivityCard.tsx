@@ -5,9 +5,25 @@ import NextLink from "next/link"
 import React, { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaRegCalendar } from "react-icons/fa6"
+import { LuLeaf, LuStar, LuTrophy } from "react-icons/lu"
 
 import { useMultipleXAppRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppRoundEarnings"
+import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
+import { useGlobalActionOverview } from "@/api/indexer/actions/useGlobalActionOverview"
+import { useTopAppsByActions } from "@/api/indexer/actions/useTopAppsByActions"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
+
+const IMPACT_METRICS = [
+  { key: "carbon", label: "tonnes of CO2 saved", divisor: 1000 },
+  { key: "water", label: "litres of water saved", divisor: 1 },
+  { key: "trees_planted", label: "trees planted", divisor: 1 },
+  { key: "plastic", label: "kg of plastic saved", divisor: 1 },
+  { key: "waste_mass", label: "kg of waste collected", divisor: 1 },
+  { key: "clean_energy_production_wh", label: "Wh of clean energy produced", divisor: 1 },
+  { key: "energy", label: "kWh of energy saved", divisor: 1 },
+] as const
+
+const MAX_IMPACTS = 3
 
 const Bold: React.FC<React.PropsWithChildren> = ({ children }) => (
   <Text as="span" fontWeight="bold" color="text">
@@ -34,6 +50,31 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
     return formatter.format(total)
   }, [topAppsEarnings, formatter])
 
+  const roundIdNum = Number(activity.roundId)
+  const { data: globalOverview } = useGlobalActionOverview(roundIdNum)
+  const { data: topActionApps } = useTopAppsByActions(roundIdNum)
+  const { data: allApps } = useXApps()
+
+  const topImpacts = useMemo(() => {
+    const impact = globalOverview?.totalImpact
+    if (!impact) return []
+    return IMPACT_METRICS.map(({ key, label, divisor }) => {
+      const raw = impact[key as keyof typeof impact] ?? 0
+      return { label, value: raw / divisor }
+    })
+      .filter(i => i.value >= 100)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, MAX_IMPACTS)
+  }, [globalOverview])
+
+  const topAppsByActions = useMemo(() => {
+    if (!topActionApps?.length || !allApps) return []
+    return topActionApps.map(app => ({
+      name: allApps.allApps.find(a => a.id === app.appId)?.name ?? app.appId,
+      actions: app.actionsRewarded,
+    }))
+  }, [topActionApps, allApps])
+
   return (
     <LinkBox asChild>
       <Card.Root variant="subtle" rounded="lg" w="full" p="4" cursor="pointer">
@@ -45,7 +86,7 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
                 <LinkOverlay asChild>
                   <NextLink href={`/allocations/round?roundId=${activity.roundId}`}>
                     <Text textStyle="sm" fontWeight="bold">
-                      {t("Allocation round #{{roundId}} completed", { roundId: activity.roundId })}
+                      {t("Round #{{roundId}} completed", { roundId: activity.roundId })}
                     </Text>
                   </NextLink>
                 </LinkOverlay>
@@ -66,25 +107,65 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
               </Text>
 
               {topApps.length > 0 && (
-                <Text textStyle="sm" color="text.subtle">
-                  {topApps.map((app, i) => (
-                    <React.Fragment key={app.appId}>
-                      <Bold>{app.appName}</Bold>
-                      {i < topApps.length - 2 && ", "}
-                      {i === topApps.length - 2 && ` ${t("and")} `}
-                    </React.Fragment>
-                  ))}
-                  {topApps.length === 1
-                    ? ` ${t("was the most voted app")}`
-                    : ` ${t("were the {{count}} most voted apps", { count: topApps.length })}`}
-                  {formattedTopAppsEarnings && (
-                    <>
-                      {`, ${t("receiving a total of")} `}
-                      <Bold>{`${formattedTopAppsEarnings} B3TR`}</Bold>
-                    </>
-                  )}
-                  {"."}
-                </Text>
+                <HStack gap="2" align="flex-start">
+                  <Icon as={LuStar} color="status.info.strong" boxSize="4" mt="0.5" flexShrink={0} />
+                  <Text textStyle="sm" color="text.subtle">
+                    {topApps.map((app, i) => (
+                      <React.Fragment key={app.appId}>
+                        {app.appName}
+                        {i < topApps.length - 2 && ", "}
+                        {i === topApps.length - 2 && ` ${t("and")} `}
+                      </React.Fragment>
+                    ))}
+                    {topApps.length === 1
+                      ? ` ${t("was the most voted app")}`
+                      : ` ${t("were the {{count}} most voted apps", { count: topApps.length })}`}
+                    {formattedTopAppsEarnings && `, ${t("receiving a total of")} ${formattedTopAppsEarnings} B3TR`}
+                    {"."}
+                  </Text>
+                </HStack>
+              )}
+
+              {globalOverview && (
+                <HStack gap="2" align="flex-start">
+                  <Icon as={LuLeaf} color="status.positive.strong" boxSize="4" mt="0.5" flexShrink={0} />
+                  <Text textStyle="sm" color="text.subtle">
+                    {formatter.format(globalOverview.totalUniqueUserInteractions)}
+                    {" unique wallets performed "}
+                    {formatter.format(globalOverview.actionsRewarded)}
+                    {" sustainability actions"}
+                    {topImpacts.length > 0 && (
+                      <>
+                        {", including "}
+                        {topImpacts.map((impact, i) => (
+                          <React.Fragment key={impact.label}>
+                            {`${formatter.format(impact.value)} ${impact.label}`}
+                            {i < topImpacts.length - 2 && ", "}
+                            {i === topImpacts.length - 2 && ` ${t("and")} `}
+                          </React.Fragment>
+                        ))}
+                      </>
+                    )}
+                    {"."}
+                  </Text>
+                </HStack>
+              )}
+
+              {topAppsByActions.length > 0 && (
+                <HStack gap="2" align="flex-start">
+                  <Icon as={LuTrophy} color="status.warning.strong" boxSize="4" mt="0.5" flexShrink={0} />
+                  <Text textStyle="sm" color="text.subtle">
+                    {"Biggest by actions: "}
+                    {topAppsByActions.map((app, i) => (
+                      <React.Fragment key={app.name}>
+                        {app.name}
+                        {` ${formatter.format(app.actions)} actions`}
+                        {i < topAppsByActions.length - 1 && ", "}
+                      </React.Fragment>
+                    ))}
+                    {"."}
+                  </Text>
+                </HStack>
               )}
             </VStack>
           </VStack>

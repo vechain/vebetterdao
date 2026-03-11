@@ -1299,7 +1299,7 @@
   "Round info": "Ronde informatie",
   "rounds": "rondes",
   "Rounds history": "Geschiedenis van rondes",
-  "roundSummary": "De vorige allocatieronde is voltooid met <bold>{{voters}}</bold> stemmers, met een totale stemkracht van <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "De vorige allocatieronde is voltooid met <bold>{{voters}} stemmers</bold>, met een totale stemkracht van <bold>{{vot3}} VOT3</bold>.",
   "Save": "Opslaan",
   "Save all changes": "Sla alle wijzigingen op",
   "Save and show on feed": "Opslaan en tonen in feed",

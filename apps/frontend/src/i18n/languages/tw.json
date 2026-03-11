@@ -1299,7 +1299,7 @@
   "Round info": "環形信息",
   "rounds": "輪次",
   "Rounds history": "回合歷史",
-  "roundSummary": "上一輪分配輪次以 <bold>{{voters}}</bold> 位投票者完成，總投票力為 <bold>{{vot3}} VOT3</bold>。",
+  "roundSummary": "上一輪分配輪次以 <bold>{{voters}} 位投票者</bold>完成，總投票力為 <bold>{{vot3}} VOT3</bold>。",
   "Save": "儲存",
   "Save all changes": "保存所有更改",
   "Save and show on feed": "保存並顯示在訊息流中",

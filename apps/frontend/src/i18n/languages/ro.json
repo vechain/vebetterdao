@@ -1280,7 +1280,7 @@
   "Round info": "Informații rundă",
   "rounds": "runde",
   "Rounds history": "Istoric runde",
-  "roundSummary": "Runda de alocare anterioară s-a încheiat cu <bold>{{voters}}</bold> votanți, folosind o putere totală de vot de <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "Runda de alocare anterioară s-a încheiat cu <bold>{{voters}} votanți</bold>, folosind o putere totală de vot de <bold>{{vot3}} VOT3</bold>.",
   "Save": "Salvează",
   "Save all changes": "Salvează toate modificările",
   "Save and show on feed": "Salvează și afișează în flux",
