@@ -12,7 +12,6 @@ function isCompleteSubmitCreatorFormData(data: Partial<SubmitCreatorFormData>): 
     "adminWalletAddress",
     "adminEmail",
     "githubUsername",
-    "twitterUsername",
     "distributionStrategy",
     "testnetProjectUrl",
     "testnetAppId",
@@ -47,7 +46,6 @@ export const humanizeSummary = ({
   adminEmail,
   projectUrl,
   githubUsername,
-  twitterUsername,
   distributionStrategy,
   testnetProjectUrl,
   testnetAppId,
@@ -66,8 +64,7 @@ export const humanizeSummary = ({
 <strong>Name:</strong> ${adminName || "N/A"}<br>
 <strong>Email:</strong> ${adminEmail || "N/A"}<br>
 <strong>Wallet Address:</strong> ${adminWalletAddress ? adminWalletAddress.toLowerCase() : "N/A"}<br>
-${githubUsername ? `<strong>GitHub:</strong> <a href="https://github.com/${githubUsername}" target="_blank">@${githubUsername}</a><br>` : ""}
-${twitterUsername ? `<strong>Twitter:</strong> <a href="https://twitter.com/${twitterUsername}" target="_blank">@${twitterUsername}</a><br>` : ""}<br>
+${githubUsername ? `<strong>GitHub:</strong> <a href="https://github.com/${githubUsername}" target="_blank">@${githubUsername}</a><br>` : ""}<br>
 
 <h2>🌐 Project URLs</h2>
 ${projectUrl ? `<strong>Mainnet Project URL:</strong> <a href="${projectUrl}" target="_blank">${projectUrl}</a><br>` : "N/A"}
