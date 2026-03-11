@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: deploy-fe-dev
+  cancel-in-progress: true
+
 jobs:
   prepare:
     name: Prepare
