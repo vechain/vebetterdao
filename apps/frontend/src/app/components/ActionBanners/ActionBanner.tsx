@@ -13,6 +13,7 @@ import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 
 import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
 import { useHasVotedInProposals } from "../../../api/contracts/governance/hooks/useHasVotedInProposals"
+import { useProposalClaimableUserDeposits } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { useGMRewards } from "../../../api/contracts/rewards/hooks/useGMRewards"
 import { useVotingRewards } from "../../../api/contracts/rewards/hooks/useVotingRewards"
 import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
@@ -31,6 +32,7 @@ import { BannerStorageKey } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
+import { ClaimDepositsBanner } from "./components/ClaimDepositsBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
 import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
@@ -141,6 +143,11 @@ export const ActionBanner = () => {
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0 && (preferences?.[BannerStorageKey.SHOW_NEW_APP] ?? true)
 
+  // Claim tokens (VOT3 deposits) banner logic
+  const { data: { totalClaimableDeposits, claimableDeposits } = { totalClaimableDeposits: 0, claimableDeposits: [] } } =
+    useProposalClaimableUserDeposits(account?.address ?? "")
+  const showClaimTokensBanner = totalClaimableDeposits > 0 && claimableDeposits.length > 0 && !!account?.address
+
   // Endorsement banner logic
   const showEndorsementBanner = !!account?.address && (preferences?.[BannerStorageKey.SHOW_ENDORSEMENT] ?? true)
 
@@ -247,6 +254,7 @@ export const ActionBanner = () => {
           key="claim-b3tr"
         />,
       )
+    if (showClaimTokensBanner) bannerComponents.push(<ClaimDepositsBanner key="claim-deposits" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
@@ -263,6 +271,7 @@ export const ActionBanner = () => {
     votingRewardsQuery.data?.roundsRewards,
     votingRewardsQuery.data?.claimableTotalFormatted,
     gmRewards,
+    showClaimTokensBanner,
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
