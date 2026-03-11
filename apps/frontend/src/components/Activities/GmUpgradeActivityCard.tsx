@@ -5,39 +5,18 @@ import NextLink from "next/link"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuSparkles } from "react-icons/lu"
-import { formatUnits } from "viem"
 
-import { useGetB3TRtoUpgradeToLevel } from "@/api/contracts/galaxyMember/hooks/useGetB3TRtoUpgradeToLevel"
 import { useGetUserGMs } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { gmNfts } from "@/constants/gmNfts"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
-
-const GM_UPGRADE_LEVEL_ROW_KEY = "{{count}} users upgraded to {{level}} donating {{amount}} B3TR"
 
 const getLevelLabel = (level: number): string => {
   const entry = gmNfts.find(n => n.level === String(level))
   return entry ? `${entry.name} (lv. ${level})` : `Level ${level}`
 }
 
-const GmUpgradeLevelRow: React.FC<{ level: number; count: number }> = ({ level, count }) => {
-  const { t } = useTranslation()
-  const { data: b3trRaw, isLoading } = useGetB3TRtoUpgradeToLevel(level)
-  const totalRaw = b3trRaw != null ? BigInt(count) * b3trRaw : null
-  const totalDisplay = isLoading ? "..." : totalRaw != null ? Number(formatUnits(totalRaw, 18)).toLocaleString() : ""
-
-  const rowText = t(GM_UPGRADE_LEVEL_ROW_KEY, {
-    count,
-    level: getLevelLabel(level),
-    amount: totalDisplay,
-  })
-
-  return (
-    <HStack gap="2" align="center" w="full" py="1">
-      <Text textStyle="sm" color="icon.subtle" flex="1" minW="0" display="flex" alignItems="center" gap="2">
-        {rowText}
-      </Text>
-    </HStack>
-  )
+const getB3TRForLevel = (level: number): number => {
+  return gmNfts.find(n => n.level === String(level))?.b3trToUpgrade ?? 0
 }
 
 type Props = {
@@ -66,6 +45,17 @@ export const GmUpgradeActivityCard: React.FC<Props> = ({ activity }) => {
 
   const latestTimestamp = useMemo(() => (upgrades.length ? Math.max(...upgrades.map(u => u.timestamp)) : 0), [upgrades])
 
+  const { upgradeText, totalText } = useMemo(() => {
+    const parts = byLevel.map(
+      ({ level, count }) => `${count} ${count === 1 ? "user" : "users"} upgraded to ${getLevelLabel(level)}`,
+    )
+    const totalB3TR = byLevel.reduce((sum, { level, count }) => sum + getB3TRForLevel(level) * count, 0)
+    return {
+      upgradeText: parts.join(", ") + " ",
+      totalText: `donating a total of ${totalB3TR.toLocaleString()} B3TR`,
+    }
+  }, [byLevel])
+
   const activeGM = userGMs?.find(g => g.isSelected) ?? userGMs?.[0]
   const href = account?.address && activeGM ? "/galaxy-member" : undefined
 
@@ -84,11 +74,12 @@ export const GmUpgradeActivityCard: React.FC<Props> = ({ activity }) => {
               </Text>
             )}
           </HStack>
-          <VStack gap="0" align="flex-start" w="full" pl="8">
-            {byLevel.map(({ level, count }) => (
-              <GmUpgradeLevelRow key={level} level={level} count={count} />
-            ))}
-          </VStack>
+          <Text textStyle="sm" color="icon.subtle" pl="8">
+            {upgradeText}
+            <Text as="span" fontWeight="bold">
+              {totalText}
+            </Text>
+          </Text>
         </VStack>
       </Card.Body>
     </Card.Root>
