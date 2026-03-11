@@ -1,18 +1,14 @@
 import {
   Button,
-  ButtonGroup,
   createListCollection,
   Grid,
   GridItem,
   Heading,
   HStack,
   Icon,
-  IconButton,
   Link,
-  Pagination,
   Skeleton,
   Stack,
-  Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
@@ -22,7 +18,7 @@ import BigNumber from "bignumber.js"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
+import { LuFileText } from "react-icons/lu"
 
 import { ProposalsBanners } from "@/app/components/Banners/proposals/ProposalsBanners"
 import { ConvertB3trAndVot3Modal } from "@/app/components/ConvertB3trAndVot3Modal"
@@ -40,6 +36,8 @@ import { GrantProposalEnriched, ProposalState } from "../../../hooks/proposals/g
 import { useMilestoneClaimedEvents } from "../../../hooks/proposals/grants/useMilestoneClaimedEvents"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { useDebounce } from "../../../hooks/useDebounce"
+import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll"
+import { usePagination } from "../../../hooks/usePagination"
 import { ProposalType } from "../../../types/proposals"
 import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
 
@@ -133,10 +131,6 @@ export const GrantsPageContent = () => {
   const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
   const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
   const { open: isOpenConvertModal, onClose: onCloseConvertModal, onOpen: onOpenConvertModal } = useDisclosure()
-  const [page, setPage] = useState(1)
-
-  const startRange = (page - 1) * pageSize
-  const endRange = startRange + pageSize
 
   // LOGIC HOOKS
   const [searchTerm, setSearchTerm] = useState("")
@@ -156,11 +150,18 @@ export const GrantsPageContent = () => {
   )
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
-  const visibleProposal = filteredProposals?.slice(startRange, endRange)
+  const {
+    currentItems: visibleProposal,
+    hasMore,
+    loadMore,
+    loading: loadingMore,
+    reset: resetPagination,
+  } = usePagination(filteredProposals ?? [], pageSize)
+  useInfiniteScroll({ loading: loadingMore, hasMore, onLoadMore: loadMore })
 
   useEffect(() => {
-    setPage(1)
-  }, [selectedFilter, debouncedSearchTerm])
+    resetPagination()
+  }, [selectedFilter, debouncedSearchTerm, resetPagination])
 
   // COMPUTED VALUES
   const totalGrantsApproved = useMemo(() => {
@@ -321,52 +322,14 @@ export const GrantsPageContent = () => {
                   filteredProposals.length > 0 &&
                   renderProposals()}
 
-                {filteredProposals && filteredProposals.length > 0 && (
-                  <Pagination.Root
-                    mx={{ base: "auto", md: "unset" }}
-                    defaultPage={1}
-                    count={filteredProposals.length}
-                    pageSize={pageSize}
-                    page={page}
-                    onPageChange={e => setPage(e.page)}
-                    display="flex"
-                    alignItems="center"
-                    gap="4">
-                    {!isMobile && (
-                      <HStack gap="1">
-                        <Text textStyle="sm">{t("Showing")}</Text>
-
-                        <Pagination.PageText format="long" />
-                      </HStack>
-                    )}
-
-                    <ButtonGroup variant="ghost" size="xs">
-                      <Pagination.PrevTrigger asChild>
-                        <IconButton>
-                          <LuChevronLeft />
-                        </IconButton>
-                      </Pagination.PrevTrigger>
-
-                      {isMobile ? (
-                        <Pagination.PageText format="long" />
-                      ) : (
-                        <Pagination.Items
-                          render={page => (
-                            <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
-                              {page.value}
-                            </IconButton>
-                          )}
-                        />
-                      )}
-
-                      <Pagination.NextTrigger asChild>
-                        <IconButton>
-                          <LuChevronRight />
-                        </IconButton>
-                      </Pagination.NextTrigger>
-                    </ButtonGroup>
-                  </Pagination.Root>
+                {hasMore && (
+                  <GridItem>
+                    <Button variant="outline" size="sm" onClick={loadMore} loading={loadingMore} w="full">
+                      {t("Load more")}
+                    </Button>
+                  </GridItem>
                 )}
+                <div id="infinite-scroll-sentinel" style={{ height: 1 }} />
 
                 {!isLoadingEnrichedGrantProposals &&
                   (!filteredProposals || filteredProposals.length === 0) &&
