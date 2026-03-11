@@ -3,67 +3,95 @@ import { useQuery } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-
-import { useProposalEnriched } from "../../../../hooks/proposals/common/useProposalEnriched"
-import { ProposalFilter, StateFilter } from "../../../../store/useProposalFilters"
+import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useEvents } from "@/hooks/useEvents"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
-// Filters for proposals that have claimable deposits
-const CLAIMABLE_STATES = [
-  ProposalFilter.InThisRound, // Active
-  StateFilter.Canceled,
-  StateFilter.Defeated,
-  StateFilter.Succeeded,
-  StateFilter.Queued,
-  StateFilter.Executed,
-  StateFilter.DepositNotMet,
-]
+
 export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) => ["allClaimableDeposits", userAddress]
+
 /**
- * Custom React hook that fetches and monitors claimable user deposits for each proposal.
+ * Fetches claimable VOT3 deposits for a user across all proposals.
  *
- * This hook utilizes the `useQueries` function from `@tanstack/react-query` to manage a series
- * of concurrent queries. Each query corresponds to a single proposal and fetches the deposit
- * details that are claimable by the specified user. Deposits can only be claimed if the proposal
- * state is not pending.
- *
- * @param userAddress - The address of the user whose deposits are to be fetched.
- * @returns An array of results from the `useQueries` function, each corresponding to a proposal's deposit data.
+ * Approach:
+ * 1. Fetch ProposalDeposit events filtered by depositor (indexed param) — only this user's deposits
+ * 2. Get unique proposal IDs from those events
+ * 3. Batch call getUserDeposit for each — filter to deposits > 0 (not yet withdrawn)
+ * 4. Batch call state for remaining proposals — filter out Pending (can't withdraw yet)
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const thor = useThor()
-  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
-  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(
-    CLAIMABLE_STATES,
-    enrichedProposals,
-  )
+
+  // Step 1: Fetch only this user's deposit events (depositor is indexed)
+  const { data: depositEvents, isLoading: eventsLoading } = useEvents({
+    abi,
+    contractAddress: GOVERNOR_CONTRACT,
+    eventName: "ProposalDeposit",
+    filterParams: { depositor: userAddress as `0x${string}` },
+    select: events => {
+      // Step 2: Extract unique proposal IDs
+      const ids = new Set<string>()
+      for (const event of events) {
+        ids.add(event.decodedData.args.proposalId.toString())
+      }
+      return [...ids]
+    },
+    enabled: !!userAddress,
+  })
+
+  const proposalIds = depositEvents ?? []
+
+  // Steps 3 & 4: Batch check deposits and states
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),
-    enabled: !!thor && !!userAddress && !filteredProposalsLoading,
+    enabled: !!thor && !!userAddress && !eventsLoading && proposalIds.length > 0,
     queryFn: async () => {
-      const res = await executeMultipleClausesCall({
+      // Step 3: Batch getUserDeposit for all proposals
+      const deposits = await executeMultipleClausesCall({
         thor,
-        calls: filteredProposals.map(
-          proposal =>
+        calls: proposalIds.map(
+          proposalId =>
             ({
               abi,
               address: GOVERNOR_CONTRACT,
               functionName: "getUserDeposit",
-              args: [BigInt(proposal.id || 0), userAddress],
+              args: [BigInt(proposalId), userAddress],
             }) as const,
         ),
       })
 
-      const claimableDeposits = res
-        .map((deposit, index) => {
-          return {
-            proposalId: filteredProposals[index]?.id as string,
-            deposit: deposit.toString(),
-          }
-        })
+      // Filter to proposals with active deposits (not yet withdrawn)
+      const activeDeposits = proposalIds
+        .map((proposalId, index) => ({
+          proposalId,
+          deposit: (deposits[index] as bigint).toString(),
+        }))
         .filter(({ deposit }) => deposit !== "0")
+
+      if (activeDeposits.length === 0) {
+        return { claimableDeposits: [], totalClaimableDeposits: BigInt(0) }
+      }
+
+      // Step 4: Batch check proposal states for those with active deposits
+      const states = await executeMultipleClausesCall({
+        thor,
+        calls: activeDeposits.map(
+          ({ proposalId }) =>
+            ({
+              abi,
+              address: GOVERNOR_CONTRACT,
+              functionName: "state",
+              args: [BigInt(proposalId)],
+            }) as const,
+        ),
+      })
+
+      // Withdrawable = all states except Pending
+      const claimableDeposits = activeDeposits.filter((_, index) => {
+        const state = states[index] as number
+        return state !== ProposalState.Pending
+      })
 
       return {
         claimableDeposits,
