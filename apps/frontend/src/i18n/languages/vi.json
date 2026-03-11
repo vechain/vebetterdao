@@ -2045,5 +2045,19 @@
   "Your voting activity": "Hoạt động bình chọn của bạn",
   "Your voting power": "Quyền biểu quyết của bạn",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Quyền biểu quyết của bạn đã được chuyển đến <platform>veDelegate.vet</platform> nơi bỏ phiếu thay mặt bạn. <br/> Nếu bạn muốn bỏ phiếu tại đây, bạn phải gỡ bỏ ủy quyền trên veDelegate trước khi chụp nhanh.",
-  "Your Voting Qualification": "Điều kiện Bỏ phiếu của bạn"
+  "Your Voting Qualification": "Điều kiện Bỏ phiếu của bạn",
+  "{{count}} user upgraded to {{level}}": "{{count}} người dùng đã nâng cấp lên {{level}}",
+  "{{count}} users upgraded to {{level}}": "{{count}} người dùng đã nâng cấp lên {{level}}",
+  "donating a total of {{amount}} B3TR": "quyên góp tổng cộng {{amount}} B3TR",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}} ví duy nhất đã thực hiện {{actions}} hành động bền vững",
+  "including {{impacts}}": ", bao gồm {{impacts}}",
+  "tonnes of CO2 saved": "tấn CO2 tiết kiệm",
+  "litres of water saved": "lít nước tiết kiệm",
+  "trees planted": "cây được trồng",
+  "kg of plastic saved": "kg nhựa tiết kiệm",
+  "kg of waste collected": "kg rác thu gom",
+  "Wh of clean energy produced": "Wh năng lượng sạch sản xuất",
+  "kWh of energy saved": "kWh năng lượng tiết kiệm",
+  "Biggest by actions": "Nhiều hành động nhất",
+  "{{actions}} actions": "{{actions}} hành động"
 }

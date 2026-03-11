@@ -14,13 +14,13 @@ import { useTopAppsByActions } from "@/api/indexer/actions/useTopAppsByActions"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
 
 const IMPACT_METRICS = [
-  { key: "carbon", label: "tonnes of CO2 saved", divisor: 1000 },
-  { key: "water", label: "litres of water saved", divisor: 1 },
-  { key: "trees_planted", label: "trees planted", divisor: 1 },
-  { key: "plastic", label: "kg of plastic saved", divisor: 1 },
-  { key: "waste_mass", label: "kg of waste collected", divisor: 1 },
-  { key: "clean_energy_production_wh", label: "Wh of clean energy produced", divisor: 1 },
-  { key: "energy", label: "kWh of energy saved", divisor: 1 },
+  { key: "carbon", labelKey: "tonnes of CO2 saved", divisor: 1000 },
+  { key: "water", labelKey: "litres of water saved", divisor: 1 },
+  { key: "trees_planted", labelKey: "trees planted", divisor: 1 },
+  { key: "plastic", labelKey: "kg of plastic saved", divisor: 1 },
+  { key: "waste_mass", labelKey: "kg of waste collected", divisor: 1 },
+  { key: "clean_energy_production_wh", labelKey: "Wh of clean energy produced", divisor: 1 },
+  { key: "energy", labelKey: "kWh of energy saved", divisor: 1 },
 ] as const
 
 const MAX_IMPACTS = 3
@@ -58,9 +58,9 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
   const topImpacts = useMemo(() => {
     const impact = globalOverview?.totalImpact
     if (!impact) return []
-    return IMPACT_METRICS.map(({ key, label, divisor }) => {
+    return IMPACT_METRICS.map(({ key, labelKey, divisor }) => {
       const raw = impact[key as keyof typeof impact] ?? 0
-      return { label, value: raw / divisor }
+      return { labelKey, value: raw / divisor }
     })
       .filter(i => i.value >= 100)
       .sort((a, b) => b.value - a.value)
@@ -130,20 +130,22 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
                 <HStack gap="2" align="flex-start">
                   <Icon as={LuLeaf} color="status.positive.strong" boxSize="4" mt="0.5" flexShrink={0} />
                   <Text textStyle="sm" color="text.subtle">
-                    {formatter.format(globalOverview.totalUniqueUserInteractions)}
-                    {" unique wallets performed "}
-                    {formatter.format(globalOverview.actionsRewarded)}
-                    {" sustainability actions"}
+                    {t("{{wallets}} unique wallets performed {{actions}} sustainability actions", {
+                      wallets: formatter.format(globalOverview.totalUniqueUserInteractions),
+                      actions: formatter.format(globalOverview.actionsRewarded),
+                    })}
                     {topImpacts.length > 0 && (
                       <>
-                        {", including "}
-                        {topImpacts.map((impact, i) => (
-                          <React.Fragment key={impact.label}>
-                            {`${formatter.format(impact.value)} ${impact.label}`}
-                            {i < topImpacts.length - 2 && ", "}
-                            {i === topImpacts.length - 2 && ` ${t("and")} `}
-                          </React.Fragment>
-                        ))}
+                        {t("including {{impacts}}", {
+                          impacts: topImpacts
+                            .map((impact, i) => {
+                              const formatted = `${formatter.format(impact.value)} ${t(impact.labelKey)}`
+                              if (i < topImpacts.length - 2) return `${formatted}, `
+                              if (i === topImpacts.length - 2) return `${formatted} ${t("and")} `
+                              return formatted
+                            })
+                            .join(""),
+                        })}
                       </>
                     )}
                     {"."}
@@ -155,11 +157,11 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
                 <HStack gap="2" align="flex-start">
                   <Icon as={LuTrophy} color="status.warning.strong" boxSize="4" mt="0.5" flexShrink={0} />
                   <Text textStyle="sm" color="text.subtle">
-                    {"Biggest by actions: "}
+                    {t("Biggest by actions")}
+                    {": "}
                     {topAppsByActions.map((app, i) => (
                       <React.Fragment key={app.name}>
-                        {app.name}
-                        {` ${formatter.format(app.actions)} actions`}
+                        {app.name} {t("{{actions}} actions", { actions: formatter.format(app.actions) })}
                         {i < topAppsByActions.length - 1 && ", "}
                       </React.Fragment>
                     ))}

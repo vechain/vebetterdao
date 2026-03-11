@@ -2045,5 +2045,19 @@
   "Your voting activity": "Din röstningsaktivitet",
   "Your voting power": "Din röstvikt",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Din röstmakt har överförts till <platform>veDelegate.vet</platform> som röstar på dina vägnar. <br/> Om du vill rösta här måste du ta bort delegation på veDelegate före snapshot.",
-  "Your Voting Qualification": "Din röstkvalificering"
+  "Your Voting Qualification": "Din röstkvalificering",
+  "{{count}} user upgraded to {{level}}": "{{count}} användare uppgraderade till {{level}}",
+  "{{count}} users upgraded to {{level}}": "{{count}} användare uppgraderade till {{level}}",
+  "donating a total of {{amount}} B3TR": "och donerade totalt {{amount}} B3TR",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}} unika plånböcker utförde {{actions}} hållbarhetsåtgärder",
+  "including {{impacts}}": ", inklusive {{impacts}}",
+  "tonnes of CO2 saved": "ton CO2 sparade",
+  "litres of water saved": "liter vatten sparade",
+  "trees planted": "träd planterade",
+  "kg of plastic saved": "kg plast sparade",
+  "kg of waste collected": "kg avfall insamlat",
+  "Wh of clean energy produced": "Wh ren energi producerad",
+  "kWh of energy saved": "kWh energi sparad",
+  "Biggest by actions": "Flest åtgärder",
+  "{{actions}} actions": "{{actions}} åtgärder"
 }

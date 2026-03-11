@@ -2045,5 +2045,19 @@
   "Your voting activity": "Votre activité de vote",
   "Your voting power": "Votre pouvoir de vote",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Votre pouvoir de vote a été transféré à <platform>veDelegate.vet</platform> qui vote en votre nom. <br/> Si vous voulez voter ici, vous devez retirer la délégation sur veDelegate avant le snapshot.",
-  "Your Voting Qualification": "Votre Qualification de Vote"
+  "Your Voting Qualification": "Votre Qualification de Vote",
+  "{{count}} user upgraded to {{level}}": "{{count}} utilisateur a évolué vers {{level}}",
+  "{{count}} users upgraded to {{level}}": "{{count}} utilisateurs ont évolué vers {{level}}",
+  "donating a total of {{amount}} B3TR": "en faisant don d un total de {{amount}} B3TR",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}} portefeuilles uniques ont effectué {{actions}} actions de durabilité",
+  "including {{impacts}}": ", dont {{impacts}}",
+  "tonnes of CO2 saved": "tonnes de CO2 économisées",
+  "litres of water saved": "litres d eau économisés",
+  "trees planted": "arbres plantés",
+  "kg of plastic saved": "kg de plastique économisés",
+  "kg of waste collected": "kg de déchets collectés",
+  "Wh of clean energy produced": "Wh d énergie propre produite",
+  "kWh of energy saved": "kWh d énergie économisés",
+  "Biggest by actions": "Plus grand par actions",
+  "{{actions}} actions": "{{actions}} actions"
 }

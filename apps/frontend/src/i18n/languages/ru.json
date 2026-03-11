@@ -2045,5 +2045,19 @@
   "You can't vote because you've been signaled as suspicious.": "Вы не можете голосовать, так как вы были отмечены как подозрительный.",
   "You can't vote because your account has been blacklisted.": "Вы не можете голосовать, так как ваш аккаунт был заблокирован.",
   "Your potential rewards": "Ваши потенциальные награды",
-  "Your voting power": "Ваша сила голоса"
+  "Your voting power": "Ваша сила голоса",
+  "{{count}} user upgraded to {{level}}": "{{count}} пользователь повысил уровень до {{level}}",
+  "{{count}} users upgraded to {{level}}": "{{count}} пользователей повысили уровень до {{level}}",
+  "donating a total of {{amount}} B3TR": "пожертвовав в общей сложности {{amount}} B3TR",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}} уникальных кошельков выполнили {{actions}} действий по устойчивому развитию",
+  "including {{impacts}}": ", включая {{impacts}}",
+  "tonnes of CO2 saved": "тонн CO2 сэкономлено",
+  "litres of water saved": "литров воды сэкономлено",
+  "trees planted": "деревьев посажено",
+  "kg of plastic saved": "кг пластика сэкономлено",
+  "kg of waste collected": "кг отходов собрано",
+  "Wh of clean energy produced": "Вт·ч чистой энергии произведено",
+  "kWh of energy saved": "кВт·ч энергии сэкономлено",
+  "Biggest by actions": "Больше всего действий",
+  "{{actions}} actions": "{{actions}} действий"
 }

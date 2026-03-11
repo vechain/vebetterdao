@@ -2045,5 +2045,19 @@
   "Your voting activity": "Je stemactiviteit",
   "Your voting power": "Je stemkracht",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Uw stemkracht is overgedragen aan <platform>veDelegate.vet</platform> die namens u stemt. <br/> Als je hier wilt stemmen, moet je de delegatie bij veDelegate verwijderen voordat de snapshot plaatsvindt.",
-  "Your Voting Qualification": "Je stemkwalificatie"
+  "Your Voting Qualification": "Je stemkwalificatie",
+  "{{count}} user upgraded to {{level}}": "{{count}} gebruiker heeft geüpgraded naar {{level}}",
+  "{{count}} users upgraded to {{level}}": "{{count}} gebruikers hebben geüpgraded naar {{level}}",
+  "donating a total of {{amount}} B3TR": "met een totale donatie van {{amount}} B3TR",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}} unieke wallets hebben {{actions}} duurzaamheidsacties uitgevoerd",
+  "including {{impacts}}": ", waaronder {{impacts}}",
+  "tonnes of CO2 saved": "ton CO2 bespaard",
+  "litres of water saved": "liter water bespaard",
+  "trees planted": "bomen geplant",
+  "kg of plastic saved": "kg plastic bespaard",
+  "kg of waste collected": "kg afval verzameld",
+  "Wh of clean energy produced": "Wh schone energie geproduceerd",
+  "kWh of energy saved": "kWh energie bespaard",
+  "Biggest by actions": "Meeste acties",
+  "{{actions}} actions": "{{actions}} acties"
 }

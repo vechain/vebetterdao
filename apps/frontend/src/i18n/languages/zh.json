@@ -2045,5 +2045,19 @@
   "Your voting activity": "您的投票活动",
   "Your voting power": "您的投票权",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票权已经转移到<platform>veDelegate.vet</platform>，该平台将代表您投票。<br/> 如果您想在此投票，必须在快照前在veDelegate上取消委托。",
-  "Your Voting Qualification": "您的投票资格"
+  "Your Voting Qualification": "您的投票资格",
+  "{{count}} user upgraded to {{level}}": "{{count}}位用户升级至{{level}}",
+  "{{count}} users upgraded to {{level}}": "{{count}}位用户升级至{{level}}",
+  "donating a total of {{amount}} B3TR": "共捐赠{{amount}} B3TR",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}}个独立钱包执行了{{actions}}次可持续行动",
+  "including {{impacts}}": "，包括{{impacts}}",
+  "tonnes of CO2 saved": "吨二氧化碳减排",
+  "litres of water saved": "升水节省",
+  "trees planted": "棵树种植",
+  "kg of plastic saved": "公斤塑料减少",
+  "kg of waste collected": "公斤废弃物收集",
+  "Wh of clean energy produced": "Wh清洁能源产生",
+  "kWh of energy saved": "kWh能源节省",
+  "Biggest by actions": "最多行动",
+  "{{actions}} actions": "{{actions}}次行动"
 }

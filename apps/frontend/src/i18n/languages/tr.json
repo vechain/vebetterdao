@@ -2045,5 +2045,19 @@
   "Your voting activity": "Oylama etkinliğiniz",
   "Your voting power": "Oy gücünüz",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Oylama gücünüz sizin adınıza oy veren <platform>veDelegate.vet</platform>'e aktarılmıştır. <br/> Burada oy kullanmak istiyorsanız, anlık görüntüleme öncesinde veDelegate üzerindeki devri iptal etmelisiniz.",
-  "Your Voting Qualification": "Oylama Yeterliliğiniz"
+  "Your Voting Qualification": "Oylama Yeterliliğiniz",
+  "{{count}} user upgraded to {{level}}": "{{count}} kullanıcı {{level}} seviyesine yükseltti",
+  "{{count}} users upgraded to {{level}}": "{{count}} kullanıcı {{level}} seviyesine yükseltti",
+  "donating a total of {{amount}} B3TR": "toplam {{amount}} B3TR bağışlayarak",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}} benzersiz cüzdan {{actions}} sürdürülebilirlik eylemi gerçekleştirdi",
+  "including {{impacts}}": ", {{impacts}} dahil",
+  "tonnes of CO2 saved": "ton CO2 tasarrufu",
+  "litres of water saved": "litre su tasarrufu",
+  "trees planted": "ağaç dikildi",
+  "kg of plastic saved": "kg plastik tasarrufu",
+  "kg of waste collected": "kg atık toplandı",
+  "Wh of clean energy produced": "Wh temiz enerji üretildi",
+  "kWh of energy saved": "kWh enerji tasarrufu",
+  "Biggest by actions": "En çok eylem",
+  "{{actions}} actions": "{{actions}} eylem"
 }

@@ -46,15 +46,17 @@ export const GmUpgradeActivityCard: React.FC<Props> = ({ activity }) => {
   const latestTimestamp = useMemo(() => (upgrades.length ? Math.max(...upgrades.map(u => u.timestamp)) : 0), [upgrades])
 
   const { upgradeText, totalText } = useMemo(() => {
-    const parts = byLevel.map(
-      ({ level, count }) => `${count} ${count === 1 ? "user" : "users"} upgraded to ${getLevelLabel(level)}`,
+    const parts = byLevel.map(({ level, count }) =>
+      count === 1
+        ? t("{{count}} user upgraded to {{level}}", { count, level: getLevelLabel(level) })
+        : t("{{count}} users upgraded to {{level}}", { count, level: getLevelLabel(level) }),
     )
     const totalB3TR = byLevel.reduce((sum, { level, count }) => sum + getB3TRForLevel(level) * count, 0)
     return {
       upgradeText: parts.join(", ") + " ",
-      totalText: `donating a total of ${totalB3TR.toLocaleString()} B3TR`,
+      totalText: t("donating a total of {{amount}} B3TR", { amount: totalB3TR.toLocaleString() }),
     }
-  }, [byLevel])
+  }, [byLevel, t])
 
   const activeGM = userGMs?.find(g => g.isSelected) ?? userGMs?.[0]
   const href = account?.address && activeGM ? "/galaxy-member" : undefined

@@ -2045,5 +2045,19 @@
   "Your voting activity": "あなたの投票活動",
   "Your voting power": "あなたの投票権",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "あなたの投票権は、あなたに代わって投票する<platform>veDelegate.vet</platform>に移管されました。<br/> ここで投票したい場合は、スナップショット前にveDelegateで委任を解除する必要があります。",
-  "Your Voting Qualification": "あなたの投票資格"
+  "Your Voting Qualification": "あなたの投票資格",
+  "{{count}} user upgraded to {{level}}": "{{count}}人のユーザーが{{level}}にアップグレード",
+  "{{count}} users upgraded to {{level}}": "{{count}}人のユーザーが{{level}}にアップグレード",
+  "donating a total of {{amount}} B3TR": "合計{{amount}} B3TRを寄付",
+  "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}}のユニークウォレットが{{actions}}のサステナビリティアクションを実行",
+  "including {{impacts}}": "、{{impacts}}を含む",
+  "tonnes of CO2 saved": "トンのCO2を削減",
+  "litres of water saved": "リットルの水を節約",
+  "trees planted": "本の木を植樹",
+  "kg of plastic saved": "kgのプラスチックを削減",
+  "kg of waste collected": "kgの廃棄物を回収",
+  "Wh of clean energy produced": "Whのクリーンエネルギーを生産",
+  "kWh of energy saved": "kWhのエネルギーを節約",
+  "Biggest by actions": "アクション数トップ",
+  "{{actions}} actions": "{{actions}}アクション"
 }
