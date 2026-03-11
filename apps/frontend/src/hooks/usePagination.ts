@@ -1,5 +1,5 @@
 // hooks/usePagination.ts
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 /**
  * Hook to paginate items with infinite scroll support
  * @param items - The items to paginate
@@ -27,5 +27,6 @@ export function usePagination<T>(items: T[], itemsPerPage: number) {
       setCurrentPage(1)
     }
   }, [items.length, currentPage, itemsPerPage])
-  return { currentItems, hasMore, loadMore, loading }
+  const reset = useCallback(() => setCurrentPage(1), [])
+  return { currentItems, hasMore, loadMore, loading, reset }
 }

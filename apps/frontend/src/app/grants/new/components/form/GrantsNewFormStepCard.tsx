@@ -146,8 +146,7 @@ export const GrantsNewFormStepCard = () => {
 
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(() => {
     // Initialize step based on stored step and session data at mount time
-    const hasSessionSocial =
-      session?.user && (session.user.githubUsername || session.user.twitterUsername || session.user.discordUsername)
+    const hasSessionSocial = session?.user && session.user.githubUsername
 
     // If user has social accounts and stored step is before About Grant, go to About Grant
     if (hasSessionSocial && storedStep < STEP_INDICES.ABOUT_GRANT) {

@@ -1,12 +1,9 @@
 import {
   Button,
-  ButtonGroup,
   Card,
   createListCollection,
   Grid,
   HStack,
-  IconButton,
-  Pagination,
   Spinner,
   Text,
   useDisclosure,
@@ -15,7 +12,6 @@ import {
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
 import { ProposalsBanners } from "@/app/components/Banners/proposals/ProposalsBanners"
 import { ProposalEnriched } from "@/hooks/proposals/grants/types"
@@ -29,6 +25,8 @@ import { useProposalEnriched } from "../../../hooks/proposals/common/useProposal
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { useDebounce } from "../../../hooks/useDebounce"
+import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll"
+import { usePagination } from "../../../hooks/usePagination"
 import { ProposalFilter, StateFilter, useProposalFilters } from "../../../store/useProposalFilters"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { GrantsProposalCard } from "../../grants/components/GrantsProposalCard"
@@ -52,16 +50,19 @@ export const ProposalsPageContent = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)
   const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalEnriched[])
-  const [page, setPage] = useState(1)
   const { isMobile } = useBreakpoints()
-
-  const startRange = (page - 1) * pageSize
-  const endRange = startRange + pageSize
-  const visibleProposals = filteredProposals.slice(startRange, endRange)
+  const {
+    currentItems: visibleProposals,
+    hasMore,
+    loadMore,
+    loading: loadingMore,
+    reset: resetPagination,
+  } = usePagination(filteredProposals, pageSize)
+  useInfiniteScroll({ loading: loadingMore, hasMore, onLoadMore: loadMore })
 
   useEffect(() => {
-    setPage(1)
-  }, [selectedFilter, debouncedSearchTerm])
+    resetPagination()
+  }, [selectedFilter, debouncedSearchTerm, resetPagination])
 
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -159,51 +160,12 @@ export const ProposalsPageContent = () => {
                   />
                 ))}
 
-                {filteredProposals.length > 0 && (
-                  <Pagination.Root
-                    mx={{ base: "auto", md: "unset" }}
-                    defaultPage={1}
-                    count={filteredProposals.length}
-                    pageSize={pageSize}
-                    page={page}
-                    onPageChange={e => setPage(e.page)}
-                    display="flex"
-                    alignItems="center"
-                    gap="4">
-                    {!isMobile && (
-                      <HStack gap="1">
-                        <Text textStyle="sm">{t("Showing")}</Text>
-                        <Pagination.PageText format="long" />
-                      </HStack>
-                    )}
-
-                    <ButtonGroup variant="ghost" size="xs">
-                      <Pagination.PrevTrigger asChild>
-                        <IconButton>
-                          <LuChevronLeft />
-                        </IconButton>
-                      </Pagination.PrevTrigger>
-
-                      {isMobile ? (
-                        <Pagination.PageText format="long" />
-                      ) : (
-                        <Pagination.Items
-                          render={page => (
-                            <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
-                              {page.value}
-                            </IconButton>
-                          )}
-                        />
-                      )}
-
-                      <Pagination.NextTrigger asChild>
-                        <IconButton>
-                          <LuChevronRight />
-                        </IconButton>
-                      </Pagination.NextTrigger>
-                    </ButtonGroup>
-                  </Pagination.Root>
+                {hasMore && (
+                  <Button variant="outline" size="sm" onClick={loadMore} loading={loadingMore} w="full">
+                    {t("Load more")}
+                  </Button>
                 )}
+                <div id="infinite-scroll-sentinel" style={{ height: 1 }} />
 
                 {filteredProposals.length === 0 && !isLoading && (
                   <NoProposalsCard

@@ -13,7 +13,6 @@ import {
   UseFormWatch,
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { FaXTwitter } from "react-icons/fa6"
 import { LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
 
@@ -64,15 +63,9 @@ export const AboutGrant = ({
 
   // Set linked social media usernames if available in session
   useEffect(() => {
-    if (session?.user?.githubUsername || session?.user?.twitterUsername) {
-      if (session.user.githubUsername) {
-        setValue("githubUsername", session.user.githubUsername)
-        setData({ githubUsername: session.user.githubUsername })
-      }
-      if (session.user.twitterUsername) {
-        setValue("twitterUsername", session.user.twitterUsername)
-        setData({ twitterUsername: session.user.twitterUsername })
-      }
+    if (session?.user?.githubUsername) {
+      setValue("githubUsername", session.user.githubUsername)
+      setData({ githubUsername: session.user.githubUsername })
     }
   }, [session?.user, setValue, setData])
 
@@ -178,7 +171,7 @@ export const AboutGrant = ({
     [getValues, setValue, setData, clearErrors, setError],
   )
 
-  const [twitterUsername, githubUsername] = [watch("twitterUsername"), watch("githubUsername")]
+  const githubUsername = watch("githubUsername")
 
   //Get all text areas values from storage
   const textAreasDefaultValues = useMemo(() => {
@@ -393,17 +386,6 @@ export const AboutGrant = ({
                   </VStack>
 
                   <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6} px="1">
-                    <GridItem w="full">
-                      <FormSocialConnectButton
-                        label={twitterUsername ? twitterUsername : t("Connect X")}
-                        register={register("twitterUsername")}
-                        error={errors.twitterUsername?.message}
-                        handleAuth={() => handleAuth("twitter")}
-                        leftIcon={<FaXTwitter size={20} />}
-                        value={twitterUsername}
-                        onBlur={() => onBlur("twitterUsername")}
-                      />
-                    </GridItem>
                     <GridItem w="full">
                       <FormSocialConnectButton
                         label={githubUsername ? githubUsername : t("Connect GitHub")}
