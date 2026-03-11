@@ -39,6 +39,9 @@ env:
 jobs:
   build-and-push-image:
     name: Build and Push Image
+    concurrency:
+      group: build-fe-${{ inputs.environment }}
+      cancel-in-progress: true
     uses: ./.github/workflows/build-push-ecr.yml
     with:
       ecr_repository: governance-frontend
@@ -50,6 +53,9 @@ jobs:
 
   deploy:
     name: Deploy to ${{ inputs.environment }}
+    concurrency:
+      group: deploy-fe-${{ inputs.environment }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     needs: [build-and-push-image]
     # Run if either build job succeeded (the other will be skipped)
