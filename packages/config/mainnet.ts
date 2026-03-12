@@ -17,7 +17,9 @@ const config: AppConfig = {
   x2EarnAppsContractAddress: "0x8392B7CCc763dB03b47afcD8E8f5e24F9cf0554D",
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
   x2EarnCreatorContractAddress: "0xe8e96a768ffd00417d4bd985bec9EcfC6F732a7f",
-  indexerUrl: "https://mainnet.dead.prod.veworld.vechain.org/api/v1",
+  indexerUrl: "https://indexer.mainnet.vechain.org/api/v1",
+  // dead env url
+  // indexerUrl: "https://mainnet.dead.prod.veworld.vechain.org/api/v1",
   tokenAuctionContractAddress: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302",
   nodeManagementContractAddress: "0xB0EF9D89C6b49CbA6BBF86Bf2FDf0Eee4968c6AB",
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",

@@ -25,7 +25,6 @@ import { useProposalEnriched } from "../../../hooks/proposals/common/useProposal
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { useDebounce } from "../../../hooks/useDebounce"
-import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll"
 import { usePagination } from "../../../hooks/usePagination"
 import { ProposalFilter, StateFilter, useProposalFilters } from "../../../store/useProposalFilters"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
@@ -58,7 +57,6 @@ export const ProposalsPageContent = () => {
     loading: loadingMore,
     reset: resetPagination,
   } = usePagination(filteredProposals, pageSize)
-  useInfiniteScroll({ loading: loadingMore, hasMore, onLoadMore: loadMore })
 
   useEffect(() => {
     resetPagination()
@@ -165,7 +163,6 @@ export const ProposalsPageContent = () => {
                     {t("Load more")}
                   </Button>
                 )}
-                <div id="infinite-scroll-sentinel" style={{ height: 1 }} />
 
                 {filteredProposals.length === 0 && !isLoading && (
                   <NoProposalsCard
