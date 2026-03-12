@@ -15,6 +15,7 @@ export enum BannerStorageKey {
   SHOW_DELEGATING = "SHOW_DELEGATING",
   SHOW_DO_ACTION = "SHOW_DO_ACTION",
   SHOW_ENDORSEMENT = "SHOW_ENDORSEMENT",
+  SHOW_TREASURY_LIVE = "SHOW_TREASURY_LIVE",
 }
 
 type BannerVariant = "default" | "b3mo"
@@ -48,6 +49,7 @@ type B3MOIllustration =
   | "/assets/mascot/mascot-holding-tokens.webp"
   | "/assets/mascot/mascot-welcoming.webp"
   | "/assets/images/b3mo-stargate-greet.webp"
+  | "/assets/mascot/mascot-data.png"
 type GenericBannerProps = {
   title: string
   description: ReactNode

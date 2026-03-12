@@ -36,7 +36,8 @@ export const PowerDownB3trSummary = ({ amount, isHighlighted = false }: Props) =
         </Text>
 
         <Text textStyle="3xl" fontWeight="bold" color="status.positive.strong">
-          +{formatter.format(numericAmount)}
+          {"+"}
+          {formatter.format(numericAmount)}
           {" B3TR"}
         </Text>
 

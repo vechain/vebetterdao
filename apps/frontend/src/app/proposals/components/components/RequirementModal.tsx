@@ -26,12 +26,6 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
     return !!userGMs?.length
   }, [userGMs])
 
-  const userHighestGm = useMemo(() => {
-    if (!userHasAnyGm) return null
-    if (userGMs?.length === 1) return userGMs[0]
-    return userGMs?.sort((a, b) => Number(a.tokenLevel) - Number(b.tokenLevel))[0]
-  }, [userGMs, userHasAnyGm])
-
   const getNftOrApplyButtonText = useMemo(() => {
     if (hasNft) {
       return t("Apply")
@@ -50,7 +44,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
     } else {
       router.push("/proposals/new")
     }
-  }, [hasNft, router, userHasAnyGm, userHighestGm])
+  }, [hasNft, router, userHasAnyGm])
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton={true} modalProps={{ size: "md" }}>

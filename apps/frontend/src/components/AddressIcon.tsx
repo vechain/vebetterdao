@@ -24,6 +24,8 @@ const Picasso: React.FC<IPicasso> = ({ address, ...props }) => {
       objectFit={"cover"}
       src={avatar && !isLoadingAvatar ? avatar : getPicassoImgSrc(address ?? "")}
       h={"100%"}
+      aspectRatio="1"
+      overflow="hidden"
       {...props}
     />
   )

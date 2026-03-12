@@ -51,6 +51,11 @@ export const Routes: Route[] = [
         description: "Need funding? Apply for a grant and get support",
         onClick: "/grants",
       },
+      {
+        name: "Treasury",
+        description: "View community treasury balances and transfers",
+        onClick: "/treasury",
+      },
     ],
   },
   { name: "Profile", onClick: "/profile", isVisible: true, icon: FaUser },

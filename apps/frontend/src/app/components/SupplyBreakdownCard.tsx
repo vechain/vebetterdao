@@ -1,4 +1,4 @@
-import { Box, Card, HStack, Heading, Icon, Skeleton, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, HStack, Heading, Skeleton, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
@@ -55,31 +55,33 @@ export const SupplyBreakdownCard = () => {
   return (
     <Card.Root variant="primary" w="full">
       <Card.Header>
-        <HStack w="full" justify={"space-between"}>
+        <HStack w="full" justify="space-between">
           <Heading size="xl">{t("Supply breakdown")}</Heading>
           <Tooltip
             content={t(
               `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
             )}>
-            <Icon as={FiInfo} color="actions.primary.default" position={"relative"} />
+            <Box cursor="pointer">
+              <FiInfo color="var(--chakra-colors-actions-primary-default)" />
+            </Box>
           </Tooltip>
         </HStack>
       </Card.Header>
       <Card.Body>
         <VStack gap={4} align="flex-start">
-          <SimpleGrid templateColumns={["repeat(1, 2fr)", "repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
+          <SimpleGrid templateColumns={{ base: "repeat(1, 2fr)", lg: "repeat(2, 1fr)" }} w="full" gap={4}>
             <VStack gap={1} align="flex-start">
               <Text textStyle="md">{t("B3TR in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} color="brand.primary">
+                <Heading size={{ base: "2xl", lg: "xl" }} color="actions.primary.default">
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
-            <VStack gap={1} align="flex-start">
+            <VStack gap={1} align={{ base: "flex-start", lg: "flex-end" }}>
               <Text textStyle="md">{t("VOT3 in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} color={"brand.secondary"}>
+                <Heading size={{ base: "2xl", lg: "xl" }} color="brand.secondary">
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>
@@ -92,16 +94,16 @@ export const SupplyBreakdownCard = () => {
               <Box
                 zIndex={2}
                 w={`${data.b3trCirculatingSupply.percentage}%`}
-                h={"full"}
-                bg={" linear-gradient(to bottom, #004CFC , #447CFF)"}
-                borderRadius={"md"}
+                h="full"
+                bg="actions.primary.default"
+                borderRadius="md"
               />
               <Box
                 zIndex={1}
                 w={`${data.vot3CirculatingSupply.percentage}%`}
-                h={"full"}
-                bg={" linear-gradient(to bottom, #84E718 , #A0F04A)"}
-                borderRadius={"md"}
+                h="full"
+                bg="brand.secondary"
+                borderRadius="md"
               />
             </HStack>
           )}
