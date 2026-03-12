@@ -743,10 +743,10 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Register a relayer for early access to auto-voting actions
+   * @notice Register a relayer for early access to auto-voting actions. Open to anyone.
    * @param relayer The address of the relayer to register
    */
-  function registerRelayer(address relayer) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+  function registerRelayer(address relayer) external {
     if (relayer == address(0)) revert InvalidParameter("relayer");
 
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
@@ -762,10 +762,17 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Unregister a relayer from early access
+   * @notice Unregister a relayer from early access.
+   *         A relayer can unregister themselves; pool admin can unregister any relayer.
    * @param relayer The address of the relayer to unregister
    */
-  function unregisterRelayer(address relayer) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+  function unregisterRelayer(address relayer) external {
+    if (
+      relayer != msg.sender && !hasRole(POOL_ADMIN_ROLE, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)
+    ) {
+      revert UnauthorizedUnregister(msg.sender, relayer);
+    }
+
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
     if (!$.registeredRelayers[relayer]) {

@@ -10,7 +10,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ProposalsBanners } from "@/app/components/Banners/proposals/ProposalsBanners"
@@ -25,6 +25,8 @@ import { useProposalEnriched } from "../../../hooks/proposals/common/useProposal
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { useDebounce } from "../../../hooks/useDebounce"
+import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll"
+import { usePagination } from "../../../hooks/usePagination"
 import { ProposalFilter, StateFilter, useProposalFilters } from "../../../store/useProposalFilters"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { GrantsProposalCard } from "../../grants/components/GrantsProposalCard"
@@ -33,6 +35,8 @@ import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { CreateProposalCard } from "./components/CreateProposalCard"
 import { NoProposalsCard } from "./components/NoProposalsCard"
 import { RequirementModal } from "./components/RequirementModal"
+
+const pageSize = 10
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -46,6 +50,19 @@ export const ProposalsPageContent = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)
   const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalEnriched[])
+  const { isMobile } = useBreakpoints()
+  const {
+    currentItems: visibleProposals,
+    hasMore,
+    loadMore,
+    loading: loadingMore,
+    reset: resetPagination,
+  } = usePagination(filteredProposals, pageSize)
+  useInfiniteScroll({ loading: loadingMore, hasMore, onLoadMore: loadMore })
+
+  useEffect(() => {
+    resetPagination()
+  }, [selectedFilter, debouncedSearchTerm, resetPagination])
 
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -58,8 +75,6 @@ export const ProposalsPageContent = () => {
       ],
     })
   }, [t])
-
-  const { isMobile } = useBreakpoints()
 
   const onNewClick = useCallback(() => {
     if (!account?.address) {
@@ -137,13 +152,20 @@ export const ProposalsPageContent = () => {
                   )}
                 </HStack>
 
-                {filteredProposals.map(proposal => (
+                {visibleProposals.map(proposal => (
                   <GrantsProposalCard
                     key={proposal.id}
                     variant="proposal"
                     proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
                   />
                 ))}
+
+                {hasMore && (
+                  <Button variant="outline" size="sm" onClick={loadMore} loading={loadingMore} w="full">
+                    {t("Load more")}
+                  </Button>
+                )}
+                <div id="infinite-scroll-sentinel" style={{ height: 1 }} />
 
                 {filteredProposals.length === 0 && !isLoading && (
                   <NoProposalsCard
