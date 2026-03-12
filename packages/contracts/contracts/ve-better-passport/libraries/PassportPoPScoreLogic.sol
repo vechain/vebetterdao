@@ -102,6 +102,17 @@ library PassportPoPScoreLogic {
     return self.userAppRoundScore[user][round][appId];
   }
 
+  /// @notice Gets the number of actions distributed by an app in a round
+  /// @param appId - the app id
+  /// @param round - the round
+  function appRoundActionCount(
+    PassportStorageTypes.PassportStorage storage self,
+    bytes32 appId,
+    uint256 round
+  ) internal view returns (uint256) {
+    return self.appRoundActionCount[appId][round];
+  }
+
   /// @notice Gets the number of distinct apps a user has interacted with in a round
   /// @param user - the user address
   /// @param round - the round
@@ -221,6 +232,9 @@ library PassportPoPScoreLogic {
       self.userRoundUniqueAppInteraction[passport][round][appId] = true;
       self.userRoundAppCount[passport][round]++;
     }
+
+    // Track app action count per round
+    self.appRoundActionCount[appId][round]++;
 
     // Update the user's score for the round
     self.userRoundScore[passport][round] += totalScore;
@@ -361,6 +375,9 @@ library PassportPoPScoreLogic {
       self.userRoundUniqueAppInteraction[passport][round][appId] = true;
       self.userRoundAppCount[passport][round]++;
     }
+
+    // Track app action count per round
+    self.appRoundActionCount[appId][round]++;
 
     // Calculate the action score, can be min 0, max 6
     uint256 actionScore = self.securityMultiplier[self.appSecurity[appId]];

@@ -33,6 +33,7 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
  *
  * -------------------- Version 5 --------------------
  * - Added per-round distinct app count tracking (userRoundAppCount)
+ * - Added per-app per-round action count tracking (appRoundActionCount)
  */
 contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -212,6 +213,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function userTotalScore(address user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userTotalScore($, user);
+  }
+
+  /// @notice Gets the number of actions distributed by an app in a round
+  /// @param appId - the app id
+  /// @param round - the round
+  function appRoundActionCount(bytes32 appId, uint256 round) external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.appRoundActionCount($, appId, round);
   }
 
   /// @notice Gets the number of distinct apps a user has interacted with in a round

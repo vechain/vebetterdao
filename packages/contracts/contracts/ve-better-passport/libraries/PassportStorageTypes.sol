@@ -134,5 +134,7 @@ library PassportStorageTypes {
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => bool))) userRoundUniqueAppInteraction;
     // Number of distinct apps a user has interacted with in a specific round
     mapping(address user => mapping(uint256 round => uint256 count)) userRoundAppCount;
+    // Number of actions distributed by an app in a specific round
+    mapping(bytes32 appId => mapping(uint256 round => uint256 count)) appRoundActionCount;
   }
 }
