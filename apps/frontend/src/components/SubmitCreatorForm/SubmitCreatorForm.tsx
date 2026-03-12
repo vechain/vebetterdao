@@ -13,7 +13,6 @@ import {
   UseFormWatch,
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { FaXTwitter } from "react-icons/fa6"
 
 import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
 import { useCreatorSubmissionFormStore } from "../../store/useCreatorSubmissionFormStore"
@@ -28,7 +27,6 @@ export type SubmitCreatorFormData = {
   adminEmail: string
   projectUrl: string
   githubUsername: string
-  twitterUsername: string
   distributionStrategy: string
   testnetProjectUrl: string
   testnetAppId: string
@@ -96,7 +94,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
     adminEmail,
     projectUrl,
     githubUsername,
-    twitterUsername,
     distributionStrategy,
     testnetProjectUrl,
     testnetAppId,
@@ -117,7 +114,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
       adminEmail,
       projectUrl,
       githubUsername,
-      twitterUsername,
       distributionStrategy,
       testnetProjectUrl,
       testnetAppId,
@@ -140,7 +136,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
     adminEmail,
     projectUrl,
     githubUsername,
-    twitterUsername,
     distributionStrategy,
     testnetProjectUrl,
     testnetAppId,
@@ -155,25 +150,18 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
 
   // Set linked social media usernames if available in session
   useEffect(() => {
-    if (session?.user?.githubUsername || session?.user?.twitterUsername) {
-      if (session.user.githubUsername) {
-        setValue("githubUsername", session.user.githubUsername)
-        setData({ githubUsername: session.user.githubUsername })
-      }
-      if (session.user.twitterUsername) {
-        setValue("twitterUsername", session.user.twitterUsername)
-        setData({ twitterUsername: session.user.twitterUsername })
-      }
+    if (session?.user?.githubUsername) {
+      setValue("githubUsername", session.user.githubUsername)
+      setData({ githubUsername: session.user.githubUsername })
     }
   }, [session?.user, setValue, setData])
 
   // Handle social media auth
-  const handleAuth = (platform: "github" | "twitter") => {
-    const usernameField = platform === "github" ? "githubUsername" : "twitterUsername"
-    const isSignedIn = !!watch(usernameField as keyof SubmitCreatorFormData)
+  const handleAuth = (platform: "github") => {
+    const isSignedIn = !!watch("githubUsername")
     if (isSignedIn) {
       signOut({ redirect: false })
-      setValue(usernameField as keyof SubmitCreatorFormData, "")
+      setValue("githubUsername", "")
     } else {
       signIn(platform)
     }
@@ -316,20 +304,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, 
                 <Field.ErrorText>{errors.githubUsername?.message}</Field.ErrorText>
               </Field.Root>
 
-              <Field.Root invalid={!!errors.twitterUsername}>
-                <Field.Label textStyle="md">{t("X Username")}</Field.Label>
-                <Button
-                  backgroundColor={"black"}
-                  color={"white"}
-                  onClick={() => handleAuth("twitter")}
-                  size="xl"
-                  borderRadius="full">
-                  <FaXTwitter size={30} />
-                  {watch("twitterUsername") || t("Connect X")}
-                </Button>
-                <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
-                <Field.ErrorText>{errors.twitterUsername?.message}</Field.ErrorText>
-              </Field.Root>
               <FormItem
                 label={t("Email")}
                 placeholder={"Eg. admin@myapp.vet"}
