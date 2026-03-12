@@ -208,13 +208,6 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPoPScoreLogic.userRoundScore($, user, round);
   }
 
-  /// @notice Gets the total score of a user
-  /// @param user - the user address
-  function userTotalScore(address user) external view returns (uint256) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportPoPScoreLogic.userTotalScore($, user);
-  }
-
   /// @notice Gets the number of actions distributed by an app in a round
   /// @param appId - the app id
   /// @param round - the round
@@ -238,14 +231,6 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function userRoundScoreApp(address user, uint256 round, bytes32 appId) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userRoundScoreApp($, user, round, appId);
-  }
-
-  /// @notice Gets the total score of a user for an app
-  /// @param user - the user address
-  /// @param appId - the app id
-  function userAppTotalScore(address user, bytes32 appId) external view returns (uint256) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportPoPScoreLogic.userAppTotalScore($, user, appId);
   }
 
   /// @notice Checks if a user has ever interacted with a specific app

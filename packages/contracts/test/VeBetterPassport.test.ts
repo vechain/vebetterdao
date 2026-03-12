@@ -2350,21 +2350,6 @@ describe("VeBetterPassport Entities - @shard8e", function () {
       */
       expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(0)
 
-      // The entitys score for APP1 should not be the same as the passport score (interactions with app1 happended in round 1 and 2)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app1Id)).to.not.equal(
-        await veBetterPassport.userAppTotalScore(passport, app1Id),
-      )
-
-      // The entitys score for APP2 should not be the same as the passport score (interactions with app2 happended in round 3 and 4)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.not.equal(
-        await veBetterPassport.userAppTotalScore(passport, app2Id),
-      )
-
-      // The entitys score for APP3 should not be the same as the passport score (interactions with app3 happended in round 5)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.not.equal(
-        await veBetterPassport.userAppTotalScore(passport, app3Id),
-      )
-
       // If we move to the next round and the entity earns more points, the passport score should increase and not the entity score
       await moveToCycle(7)
 
@@ -2463,28 +2448,11 @@ describe("VeBetterPassport Entities - @shard8e", function () {
         round 5 = 400 + (475 * 0.8) = 780
       */
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
-      expect(await veBetterPassport.userTotalScore(otherAccount)).to.equal(1000)
 
       /*
         The passports score should not take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
       */
       expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(0)
-      expect(await veBetterPassport.userTotalScore(passport)).to.equal(0)
-
-      // The entitys score for APP1 should not be the same as the passport score (interactions with app1 happended in round 1 and 2)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app1Id)).to.not.equal(
-        await veBetterPassport.userAppTotalScore(passport, app1Id),
-      )
-
-      // The entitys score for APP2 should not be the same as the passport score (interactions with app2 happended in round 3 and 4)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.not.equal(
-        await veBetterPassport.userAppTotalScore(passport, app2Id),
-      )
-
-      // The entitys score for APP3 should not be the same as the passport score (interactions with app3 happended in round 5)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.not.equal(
-        await veBetterPassport.userAppTotalScore(passport, app3Id),
-      )
 
       // If we move to the next round and the entity earns more points, the passport score should increase and not the entity score
       await moveToCycle(7)
@@ -2525,7 +2493,6 @@ describe("VeBetterPassport Entities - @shard8e", function () {
         round 6 = 0
       */
 
-      expect(await veBetterPassport.userTotalScore(otherAccount)).to.equal(1000)
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 6)).to.equal(591) // Entities cumulative score should be decyaed by 0.8
 
       /*
@@ -2535,7 +2502,6 @@ describe("VeBetterPassport Entities - @shard8e", function () {
         round 6 = 400
       */
       expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 6)).to.equal(400)
-      expect(await veBetterPassport.userTotalScore(passport)).to.equal(400) // Score earned by the entity in the last round
     })
 
     it("Should assign an enities signals correctly", async function () {
@@ -2803,10 +2769,6 @@ describe("VeBetterPassport Entities - @shard8e", function () {
 
       // Move through 1 round
       await moveToCycle(2)
-
-      // Entity 1 should have a score of 300
-      expect(await veBetterPassport.userTotalScore(enity1)).to.equal(300)
-      expect(await veBetterPassport.userTotalScore(enity2)).to.equal(300)
 
       // Cumulative score for entity 1 should be 300
       expect(await veBetterPassport.getCumulativeScoreWithDecay(enity1, 1)).to.equal(300)
@@ -4356,10 +4318,6 @@ describe("VeBetterPassport Delegation - @shard8f", function () {
 
       // Move through 1 round
       await moveToCycle(2)
-
-      // Entity 1 should have a score of 300
-      expect(await veBetterPassport.userTotalScore(enity1)).to.equal(300)
-      expect(await veBetterPassport.userTotalScore(enity2)).to.equal(300)
 
       // Cumulative score for entity 1 should be 300
       expect(await veBetterPassport.getCumulativeScoreWithDecay(enity1, 1)).to.equal(300)

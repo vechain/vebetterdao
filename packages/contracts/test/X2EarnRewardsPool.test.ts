@@ -2833,9 +2833,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
     expect(registeredActionEvent?.args[4]).to.equal(multiplier)
 
     // check that the user score is correct
-    expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(multiplier)
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
-    expect(await veBetterPassport.userTotalScore(user.address)).to.equal(multiplier)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
 
     // start round
@@ -2884,8 +2882,6 @@ describe("X2EarnRewardsPool - @shard12", function () {
     expect(registeredActionEvent2?.args[4]).to.equal(multiplier)
 
     // check that the user score is correct
-    expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(supposedScore)
-    expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
 
@@ -2927,7 +2923,6 @@ describe("X2EarnRewardsPool - @shard12", function () {
 
     // check that the user score is correct
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
-    expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore2)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
   })
 
