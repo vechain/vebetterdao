@@ -269,6 +269,12 @@ interface IVeBetterPassport {
   /// @return The total score of the user for the app
   function userAppTotalScore(address user, bytes32 appId) external view returns (uint256);
 
+  /// @notice Checks if a user has ever interacted with a specific app
+  function userUniqueAppInteraction(address user, bytes32 appId) external view returns (bool);
+
+  /// @notice Gets the list of apps a user has interacted with
+  function userInteractedApps(address user) external view returns (bytes32[] memory);
+
   /// @notice Gets the threshold score for a user to be considered a person
   /// @return The threshold participation score
   function thresholdPoPScore() external view returns (uint256);

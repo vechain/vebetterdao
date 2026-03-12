@@ -124,6 +124,26 @@ library PassportPoPScoreLogic {
     return self.userRoundAppCount[user][round];
   }
 
+  /// @notice Checks if a user has ever interacted with a specific app
+  /// @param user - the user address
+  /// @param appId - the app id
+  function userUniqueAppInteraction(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    bytes32 appId
+  ) internal view returns (bool) {
+    return self.userUniqueAppInteraction[user][appId];
+  }
+
+  /// @notice Gets the list of apps a user has interacted with
+  /// @param user - the user address
+  function userInteractedApps(
+    PassportStorageTypes.PassportStorage storage self,
+    address user
+  ) internal view returns (bytes32[] memory) {
+    return self.userInteractedApps[user];
+  }
+
   /// @notice Gets the total score of a user for an app
   /// @param user - the user address
   /// @param appId - the app id

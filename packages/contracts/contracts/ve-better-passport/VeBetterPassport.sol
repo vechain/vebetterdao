@@ -248,6 +248,21 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPoPScoreLogic.userAppTotalScore($, user, appId);
   }
 
+  /// @notice Checks if a user has ever interacted with a specific app
+  /// @param user - the user address
+  /// @param appId - the app id
+  function userUniqueAppInteraction(address user, bytes32 appId) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.userUniqueAppInteraction($, user, appId);
+  }
+
+  /// @notice Gets the list of apps a user has interacted with
+  /// @param user - the user address
+  function userInteractedApps(address user) external view returns (bytes32[] memory) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.userInteractedApps($, user);
+  }
+
   /// @notice Gets the threshold for a user to be considered a person
   function thresholdPoPScore() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
