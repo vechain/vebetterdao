@@ -143,10 +143,10 @@ library PassportEntityLogic {
    * @return The address of the linked passport.
    */
   function getPassportForEntity(
-    PassportStorageTypes.PassportStorage storage self,
     address entity
   ) external view returns (address) {
-    return _getPassportForEntity(self, entity);
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    return _getPassportForEntity(entity);
   }
 
   /**
@@ -156,10 +156,10 @@ library PassportEntityLogic {
    * @return The address of the passport linked at the specified timepoint.
    */
   function getPassportForEntityAtTimepoint(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     uint256 timepoint
   ) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return _addressFromUint160(self.entityToPassport[entity].upperLookupRecent(SafeCast.toUint48(timepoint)));
   }
 
@@ -169,9 +169,9 @@ library PassportEntityLogic {
    * @return An array of addresses representing the entities currently linked to the passport.
    */
   function getEntitiesLinkedToPassport(
-    PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (address[] memory) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.passportToEntities[passport];
   }
 
@@ -180,7 +180,8 @@ library PassportEntityLogic {
    * @param entity The address of the entity being checked.
    * @return True if the entity is linked to a passport, false otherwise.
    */
-  function isEntity(PassportStorageTypes.PassportStorage storage self, address entity) internal view returns (bool) {
+  function isEntity(address entity) internal view returns (bool) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.entityToPassport[entity].latest() != 0;
   }
 
@@ -188,31 +189,28 @@ library PassportEntityLogic {
    * @notice Checks if an entity was linked to a passport at a specific timepoint.
    * @dev This function allows historical queries to determine if an entity was linked to a passport at a particular time.
    * The function uses a checkpointing mechanism to retrieve the state at the given timepoint.
-   * @param self The storage reference for PassportStorage.
    * @param entity The address of the entity.
    * @param timepoint The timepoint (block number) at which to check the linkage.
    * @return True if the entity was linked to the passport at the specified timepoint, false otherwise.
    */
   function isEntityInTimepoint(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     uint256 timepoint
   ) external view returns (bool) {
-    return _isEntityInTimepoint(self, entity, timepoint);
+    return _isEntityInTimepoint(entity, timepoint);
   }
 
   /**
    * @notice Checks if the given address is a passport, i.e., not linked to an entity.
    * @dev A passport is defined as an account that is not an entity for another passport, i.e., it is not linked to any passport.
    * This function checks whether the given address is not an entity by checking it does not exist in the `passportEntitiesIndexes` mapping.
-   * @param self The storage reference for PassportStorage.
    * @param passport The address to be checked.
    * @return True if the address is a passport, false otherwise.
    */
   function isPassport(
-    PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.passportEntitiesIndexes[passport] == 0;
   }
 
@@ -223,16 +221,15 @@ library PassportEntityLogic {
    * not linked to any other passport.
    *
    * It uses the `Checkpoints.Trace160` mechanism to perform an upper bound lookup to retrieve the state at the given timepoint.
-   * @param self The storage reference for PassportStorage.
    * @param passport The address to be checked.
    * @param timepoint The timepoint (block number) at which to check if the address was a passport.
    * @return True if the address was a passport (i.e., not linked to any entity) at the specified timepoint, false otherwise.
    */
   function isPassportInTimepoint(
-    PassportStorageTypes.PassportStorage storage self,
     address passport,
     uint256 timepoint
   ) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.entityToPassport[passport].upperLookupRecent(SafeCast.toUint48(timepoint)) == 0;
   }
 
@@ -243,18 +240,17 @@ library PassportEntityLogic {
    * @return outgoing The address that the user wants to link to.
    */
   function getPendingLinkings(
-    PassportStorageTypes.PassportStorage storage self,
     address user
   ) internal view returns (address[] memory incoming, address outgoing) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return (self.pendingLinksPassportToEntities[user], self.pendingLinksEntityToPassport[user]);
   }
 
   /**
    * @notice Returns the maximum number of entities that can be linked to a passport.
    */
-  function getMaxEntitiesPerPassport(
-    PassportStorageTypes.PassportStorage storage self
-  ) internal view returns (uint256) {
+  function getMaxEntitiesPerPassport() internal view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.maxEntitiesPerPassport;
   }
 
@@ -267,11 +263,11 @@ library PassportEntityLogic {
    * @param signature The signature authorizing the link.
    */
   function linkEntityToPassportWithSignature(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     uint256 deadline,
     bytes memory signature
   ) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     if (block.timestamp > deadline) {
       revert SignatureExpired();
     }
@@ -286,7 +282,7 @@ library PassportEntityLogic {
     }
 
     // Check if the entity is ok to link
-    _checkLink(self, msg.sender, entity);
+    _checkLink(msg.sender, entity);
 
     // Check if the passport has reached the maximum number of entities, if so, revert
     if (self.passportToEntities[msg.sender].length >= self.maxEntitiesPerPassport) {
@@ -294,15 +290,16 @@ library PassportEntityLogic {
     }
 
     // Add the entity to the list of links for the passport
-    _linkEntity(self, entity, msg.sender);
+    _linkEntity(entity, msg.sender);
   }
 
   /**
    * @notice Links an entity to a passport.
    * @param passport The address of the passport to which the entity is being linked.
    */
-  function linkEntityToPassport(PassportStorageTypes.PassportStorage storage self, address passport) external {
-    _checkLink(self, passport, msg.sender);
+  function linkEntityToPassport(address passport) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    _checkLink(passport, msg.sender);
 
     // Add the entity to the list of pending links for the passport
     uint256 length = self.pendingLinksPassportToEntities[passport].length;
@@ -318,7 +315,8 @@ library PassportEntityLogic {
    * @dev The entity must have been previously linked in a pending state.
    * @param entity The address of the entity to link to the passport.
    */
-  function acceptEntityLink(PassportStorageTypes.PassportStorage storage self, address entity) external {
+  function acceptEntityLink(address entity) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     address passport = self.pendingLinksEntityToPassport[entity];
 
     // Ensure the entity is in a pending link state
@@ -337,10 +335,10 @@ library PassportEntityLogic {
     }
 
     // Remove the pending link
-    _removePendingEntityLink(self, entity, msg.sender);
+    _removePendingEntityLink(entity, msg.sender);
 
     // Link the entity to the passport
-    _linkEntity(self, entity, msg.sender);
+    _linkEntity(entity, msg.sender);
   }
 
   /**
@@ -348,9 +346,10 @@ library PassportEntityLogic {
    * @dev Only the passport or the entity itself can remove the link.
    * @param entity The address of the entity to be unlinked.
    */
-  function removeEntityLink(PassportStorageTypes.PassportStorage storage self, address entity) external {
+  function removeEntityLink(address entity) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Get the passport linked to the entity
-    address passport = _getPassportForEntity(self, entity);
+    address passport = _getPassportForEntity(entity);
 
     // Revert if the entity is not linked to any passport
     if (passport == entity) {
@@ -366,7 +365,7 @@ library PassportEntityLogic {
     _pushCheckpoint(self.entityToPassport[entity], address(0));
 
     // Remove the entity link from the passport
-    _removeEntityLink(self, entity, passport);
+    _removeEntityLink(entity, passport);
 
     emit LinkRemoved(entity, passport);
   }
@@ -376,7 +375,8 @@ library PassportEntityLogic {
    * @dev Only the passport can deny an incoming pending link.
    * @param entity The address of the entity with a pending link to the passport.
    */
-  function denyIncomingPendingEntityLink(PassportStorageTypes.PassportStorage storage self, address entity) external {
+  function denyIncomingPendingEntityLink(address entity) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     address passport = self.pendingLinksEntityToPassport[entity];
     if (passport == address(0)) {
       revert NotLinked(entity);
@@ -387,7 +387,7 @@ library PassportEntityLogic {
       revert UnauthorizedUser(msg.sender);
     }
 
-    _removePendingEntityLink(self, entity, passport);
+    _removePendingEntityLink(entity, passport);
 
     emit LinkRemoved(entity, passport);
   }
@@ -395,13 +395,14 @@ library PassportEntityLogic {
   /**
    * @notice Cancel an outgoing pending entity link from the sender.
    */
-  function cancelOutgoingPendingEntityLink(PassportStorageTypes.PassportStorage storage self) external {
+  function cancelOutgoingPendingEntityLink() external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     address passport = self.pendingLinksEntityToPassport[msg.sender];
     if (passport == address(0)) {
       revert NotLinked(msg.sender);
     }
 
-    _removePendingEntityLink(self, msg.sender, passport);
+    _removePendingEntityLink(msg.sender, passport);
 
     emit LinkRemoved(msg.sender, passport);
   }
@@ -410,7 +411,8 @@ library PassportEntityLogic {
    * @notice Sets the maximum number of entities that can be linked to a passport.
    * @param maxEntities The maximum number of entities that can be linked to a passport.
    */
-  function setMaxEntitiesPerPassport(PassportStorageTypes.PassportStorage storage self, uint256 maxEntities) external {
+  function setMaxEntitiesPerPassport(uint256 maxEntities) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     self.maxEntitiesPerPassport = maxEntities;
   }
 
@@ -427,16 +429,15 @@ library PassportEntityLogic {
 
   /**
    * @notice Internal function to remove a pending entity link between an entity and a passport.
-   * @param self The storage reference for PassportStorage.
    * @param entity The address of the entity being unlinked from the passport.
    * @param passport The address of the passport.
    */
 
   function _removePendingEntityLink(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     address passport
   ) private {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Get the index of the entity in the pending links array
     uint256 index = self.pendingLinksIndexes[entity];
 
@@ -463,15 +464,14 @@ library PassportEntityLogic {
 
   /**
    * @notice Removes an entity linked to a passport, preserving the snapshot history.
-   * @param self The storage reference for PassportStorage.
    * @param entity The address of the entity to be removed from the passport.
    * @param passport The address of the passport from which the entity is being removed.
    */
   function _removeEntityLink(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     address passport
   ) private {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Get the index of the entity in the passport's entities array
     uint256 index = self.passportEntitiesIndexes[entity];
 
@@ -496,17 +496,17 @@ library PassportEntityLogic {
     delete self.passportToEntities[entity];
 
     // Remove signals, and black/white lists from the passport
-    PassportSignalingLogic.removeEntitySignalsFromPassport(self, entity, passport);
-    PassportWhitelistAndBlacklistLogic.removeEntitiesBlackAndWhiteListsFromPassport(self, entity, passport);
+    PassportSignalingLogic.removeEntitySignalsFromPassport(entity, passport);
+    PassportWhitelistAndBlacklistLogic.removeEntitiesBlackAndWhiteListsFromPassport(entity, passport);
   }
 
   /**
    * @notice Links an entity to a passport and creates a snapshot at the current timepoint.
-   * @param self The storage reference for PassportStorage.
    * @param entity The address of the entity to be linked to the passport.
    * @param passport The address of the passport to which the entity is being linked.
    */
-  function _linkEntity(PassportStorageTypes.PassportStorage storage self, address entity, address passport) private {
+  function _linkEntity(address entity, address passport) private {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Push a checkpoint to mark the entity as linked to the passport
     _pushCheckpoint(self.entityToPassport[entity], passport);
 
@@ -518,8 +518,8 @@ library PassportEntityLogic {
     self.passportToEntities[passport].push(entity);
 
     // Assign the signals, and black/white lists to the passport
-    PassportSignalingLogic.attachEntitySignalsToPassport(self, entity, passport);
-    PassportWhitelistAndBlacklistLogic.attachEntitiesBlackAndWhiteListsToPassport(self, entity, passport);
+    PassportSignalingLogic.attachEntitySignalsToPassport(entity, passport);
+    PassportWhitelistAndBlacklistLogic.attachEntitiesBlackAndWhiteListsToPassport(entity, passport);
 
     emit LinkCreated(entity, passport);
   }
@@ -534,9 +534,9 @@ library PassportEntityLogic {
    * @return The address of the linked passport.
    */
   function _getPassportForEntity(
-    PassportStorageTypes.PassportStorage storage self,
     address entity
   ) internal view returns (address) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     address passport = _addressFromUint160(self.entityToPassport[entity].latest());
     // If the entity is not linked to a passport, return the entity itself
     if (passport == address(0)) {
@@ -552,10 +552,10 @@ library PassportEntityLogic {
    * @return True if the entity is linked to a passport, false otherwise.
    */
   function _isEntityInTimepoint(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     uint256 timepoint
   ) internal view returns (bool) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.entityToPassport[entity].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
   }
 
@@ -565,10 +565,10 @@ library PassportEntityLogic {
    * @param entity The address of the entity being checked.
    */
   function _checkLink(
-    PassportStorageTypes.PassportStorage storage self,
     address passport,
     address entity
   ) private view {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Check if the entity is already an entity or pending entity, if so revert
     if (self.entityToPassport[entity].latest() != 0 || self.pendingLinksIndexes[entity] != 0) {
       revert AlreadyLinked(entity);
@@ -586,14 +586,14 @@ library PassportEntityLogic {
 
     // Check if entity has delegated to another passport or has a pending delegation, if so revert
     if (
-      PassportDelegationLogic.isDelegator(self, entity) ||
+      PassportDelegationLogic.isDelegator(entity) ||
       self.pendingDelegationsDelegatorToDelegatee[entity] != address(0)
     ) {
       revert DelegatedEntity(entity);
     }
 
     // Check if the entity is a delegatee or pending delegatee, if so revert
-    if (PassportDelegationLogic.isDelegatee(self, entity) || self.pendingDelegationsDelegateeToDelegators[entity].length != 0) {
+    if (PassportDelegationLogic.isDelegatee(entity) || self.pendingDelegationsDelegateeToDelegators[entity].length != 0) {
       revert DelegatedEntity(entity);
     }
 

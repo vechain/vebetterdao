@@ -138,4 +138,13 @@ library PassportStorageTypes {
     // Number of actions distributed by an app in a specific round
     mapping(bytes32 appId => mapping(uint256 round => uint256 count)) appRoundActionCount;
   }
+
+  // keccak256(abi.encode(uint256(keccak256("PassportStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant PassportStorageLocation = 0x273c9387b78d9b22e6f3371bb3aa3a918f53507e8cacc54e4831933cbb844100;
+
+  function getPassportStorage() internal pure returns (PassportStorage storage $) {
+    assembly {
+      $.slot := PassportStorageLocation
+    }
+  }
 }

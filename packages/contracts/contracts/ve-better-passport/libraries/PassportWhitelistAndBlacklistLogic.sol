@@ -56,22 +56,26 @@ library PassportWhitelistAndBlacklistLogic {
   // ---------- Getters ---------- //
 
   /// @notice Returns if a user is whitelisted
-  function isWhitelisted(PassportStorageTypes.PassportStorage storage self, address user) internal view returns (bool) {
+  function isWhitelisted(address user) internal view returns (bool) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.whitelisted[user];
   }
 
   /// @notice Returns if a user is blacklisted
-  function isBlacklisted(PassportStorageTypes.PassportStorage storage self, address user) internal view returns (bool) {
+  function isBlacklisted(address user) internal view returns (bool) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.blacklisted[user];
   }
 
   /// @notice return the blacklist threshold
-  function blacklistThreshold(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+  function blacklistThreshold() internal view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.blacklistThreshold;
   }
 
   /// @notice return the whitelist threshold
-  function whitelistThreshold(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+  function whitelistThreshold() internal view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.whitelistThreshold;
   }
 
@@ -81,15 +85,13 @@ library PassportWhitelistAndBlacklistLogic {
    * linked to the passport exceeds the given threshold percentage of the total entities linked to the passport.
    * It first checks if the passport is directly whitelisted. If not, it calculates the percentage of whitelisted
    * entities linked to the passport and compares it to the threshold.
-   * @param self The storage reference for PassportStorage.
    * @param passport The address of the passport being checked.
    * @return True if the passport is whitelisted based on the threshold, otherwise false.
    */
   function isPassportWhitelisted(
-    PassportStorageTypes.PassportStorage storage self,
     address passport
   ) external view returns (bool) {
-    return _isPassportWhitelisted(self, passport);
+    return _isPassportWhitelisted(passport);
   }
 
   /**
@@ -98,73 +100,77 @@ library PassportWhitelistAndBlacklistLogic {
    * linked to the passport exceeds the given threshold percentage of the total entities linked to the passport.
    * It first checks if the passport is directly blacklisted. If not, it calculates the percentage of blacklisted
    * entities linked to the passport and compares it to the specified threshold.
-   * @param self The storage reference for PassportStorage.
    * @param passport The address of the passport being checked.
    * @return True if the passport is blacklisted based on the threshold, otherwise false.
    */
   function isPassportBlacklisted(
-    PassportStorageTypes.PassportStorage storage self,
     address passport
   ) external view returns (bool) {
-    return _isPassportBlacklisted(self, passport);
+    return _isPassportBlacklisted(passport);
   }
 
   // ---------- Setters ---------- //
 
   /// @notice user can be whitelisted but the counter will not be reset
-  function whitelist(PassportStorageTypes.PassportStorage storage self, address user) external {
+  function whitelist(address user) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Check if the user is blacklisted and remove them from the blacklist
-    if (isBlacklisted(self, user)) removeFromBlacklist(self, user);
+    if (isBlacklisted(user)) removeFromBlacklist(user);
 
     // Whitelist the user
     self.whitelisted[user] = true;
 
     // Check if the user has a passport and update the whitelist counter
-    _updatePassportWhitelistCounter(self, user, true);
+    _updatePassportWhitelistCounter(user, true);
 
     emit UserWhitelisted(user, msg.sender);
   }
 
   /// @notice Removes a user from the whitelist
-  function removeFromWhitelist(PassportStorageTypes.PassportStorage storage self, address user) public {
+  function removeFromWhitelist(address user) public {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     self.whitelisted[user] = false;
 
     // Check if the user has a passport and update the whitelist counter
-    _updatePassportWhitelistCounter(self, user, false);
+    _updatePassportWhitelistCounter(user, false);
 
     emit RemovedUserFromWhitelist(user, msg.sender);
   }
 
   /// @notice user can be blacklisted but the counter will not be reset
-  function blacklist(PassportStorageTypes.PassportStorage storage self, address user) external {
+  function blacklist(address user) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Check if the user is whitelisted and remove them from the whitelist
-    if (isWhitelisted(self, user)) removeFromWhitelist(self, user);
+    if (isWhitelisted(user)) removeFromWhitelist(user);
 
     self.blacklisted[user] = true;
 
     // Check if the user has a passport and update the blacklist counter
-    _updatePassportBlacklistCounter(self, user, true);
+    _updatePassportBlacklistCounter(user, true);
 
     emit UserBlacklisted(user, msg.sender);
   }
 
   /// @notice Removes a user from the blacklist
-  function removeFromBlacklist(PassportStorageTypes.PassportStorage storage self, address user) public {
+  function removeFromBlacklist(address user) public {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     self.blacklisted[user] = false;
 
     // Check if the user has a passport and update the blacklist counter
-    _updatePassportBlacklistCounter(self, user, false);
+    _updatePassportBlacklistCounter(user, false);
 
     emit RemovedUserFromBlacklist(user, msg.sender);
   }
 
   /// @notice Sets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
-  function setWhitelistThreshold(PassportStorageTypes.PassportStorage storage self, uint256 threshold) external {
+  function setWhitelistThreshold(uint256 threshold) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     self.whitelistThreshold = threshold;
   }
 
   /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
-  function setBlacklistThreshold(PassportStorageTypes.PassportStorage storage self, uint256 threshold) external {
+  function setBlacklistThreshold(uint256 threshold) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     self.blacklistThreshold = threshold;
   }
 
@@ -173,17 +179,16 @@ library PassportWhitelistAndBlacklistLogic {
    * @notice Assigns an entity's whitelist and blacklist status to a passport when an entity is added to a passport.
    * @dev This function checks whether the entity is whitelisted or blacklisted and updates the corresponding counters on the passport.
    * If the entity is whitelisted, the passport's whitelist counter is incremented. Similarly, if the entity is blacklisted, the blacklist counter is incremented.
-   * @param self The storage reference for PassportStorage.
    * @param entity The address of the entity whose whitelist/blacklist status is being assigned.
    * @param passport The address of the passport to which the entity's whitelist/blacklist status is being assigned.
    */
   function attachEntitiesBlackAndWhiteListsToPassport(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     address passport
   ) internal {
-    uint256 _whitelist = isWhitelisted(self, entity) ? 1 : 0;
-    uint256 _blacklist = isBlacklisted(self, entity) ? 1 : 0;
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    uint256 _whitelist = isWhitelisted(entity) ? 1 : 0;
+    uint256 _blacklist = isBlacklisted(entity) ? 1 : 0;
 
     self.whitelistedEntitiesCounter[passport] += _whitelist;
     self.blacklistedEntitiesCounter[passport] += _blacklist;
@@ -193,17 +198,16 @@ library PassportWhitelistAndBlacklistLogic {
    * @notice Removes an entity's whitelist and blacklist status from a passport when an entity is removed from a passport.
    * @dev This function checks whether the entity is whitelisted or blacklisted and decrements the corresponding counters on the passport.
    * If the entity is whitelisted, the passport's whitelist counter is decremented. Similarly, if the entity is blacklisted, the blacklist counter is decremented.
-   * @param self The storage reference for PassportStorage.
    * @param entity The address of the entity whose whitelist/blacklist status is being removed.
    * @param passport The address of the passport from which the entity's whitelist/blacklist status is being removed.
    */
   function removeEntitiesBlackAndWhiteListsFromPassport(
-    PassportStorageTypes.PassportStorage storage self,
     address entity,
     address passport
   ) internal {
-    uint256 _whitelist = isWhitelisted(self, entity) ? 1 : 0;
-    uint256 _blacklist = isBlacklisted(self, entity) ? 1 : 0;
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    uint256 _whitelist = isWhitelisted(entity) ? 1 : 0;
+    uint256 _blacklist = isBlacklisted(entity) ? 1 : 0;
 
     self.whitelistedEntitiesCounter[passport] -= _whitelist;
     self.blacklistedEntitiesCounter[passport] -= _blacklist;
@@ -213,16 +217,15 @@ library PassportWhitelistAndBlacklistLogic {
    * @notice Updates the blacklist counter for a passport based on the increment flag.
    * @dev This private function adjusts the blacklist counter of the passport by either incrementing or decrementing it.
    * The function checks whether the user is different from the passport before updating the counter.
-   * @param self The storage reference for PassportStorage.
    * @param user The address of the user whose blacklisy status is being checked.
    * @param increment A boolean flag indicating whether to increment (true) or decrement (false) the blacklist counter.
    */
   function _updatePassportBlacklistCounter(
-    PassportStorageTypes.PassportStorage storage self,
     address user,
     bool increment
   ) private {
-    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    address passport = PassportEntityLogic._getPassportForEntity(user);
 
     // If the user is the passport, no need to update the counter
     if (passport == user) {
@@ -238,16 +241,15 @@ library PassportWhitelistAndBlacklistLogic {
    * @notice Updates the whitelist counter for a passport based on the increment flag.
    * @dev This private function adjusts the whitelist counter of the passport by either incrementing or decrementing it.
    * The function checks whether the user is different from the passport before updating the counter.
-   * @param self The storage reference for PassportStorage.
    * @param user The address of the user whose whitelist status is being checked.
    * @param increment A boolean flag indicating whether to increment (true) or decrement (false) the whitelist counter.
    */
   function _updatePassportWhitelistCounter(
-    PassportStorageTypes.PassportStorage storage self,
     address user,
     bool increment
   ) private {
-    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    address passport = PassportEntityLogic._getPassportForEntity(user);
 
     // If the user is the passport, no need to update the counter
     if (passport == user) {
@@ -265,23 +267,22 @@ library PassportWhitelistAndBlacklistLogic {
    * linked to the passport exceeds the given threshold percentage of the total entities linked to the passport.
    * It first checks if the passport is directly whitelisted. If not, it calculates the percentage of whitelisted
    * entities linked to the passport and compares it to the threshold.
-   * @param self The storage reference for PassportStorage.
    * @param passport The address of the passport being checked.
    * @return True if the passport is whitelisted based on the threshold, otherwise false.
    */
   function _isPassportWhitelisted(
-    PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
-    passport = PassportEntityLogic._getPassportForEntity(self, passport);
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    passport = PassportEntityLogic._getPassportForEntity(passport);
 
     // Check if the passport itself is whitelisted
-    if (isWhitelisted(self, passport)) {
+    if (isWhitelisted(passport)) {
       return true;
     }
 
     // Get the number of entities the passport has attached
-    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(self, passport).length;
+    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(passport).length;
 
     // If there are no entities, the passport can't be considered whitelisted based on app interactions
     if (totalEntities == 0) {
@@ -304,23 +305,22 @@ library PassportWhitelistAndBlacklistLogic {
    * linked to the passport exceeds the given threshold percentage of the total entities linked to the passport.
    * It first checks if the passport is directly blacklisted. If not, it calculates the percentage of blacklisted
    * entities linked to the passport and compares it to the specified threshold.
-   * @param self The storage reference for PassportStorage.
    * @param passport The address of the passport being checked.
    * @return True if the passport is blacklisted based on the threshold, otherwise false.
    */
   function _isPassportBlacklisted(
-    PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
-    passport = PassportEntityLogic._getPassportForEntity(self, passport);
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    passport = PassportEntityLogic._getPassportForEntity(passport);
 
     // Check if the passport itself is blacklisted
-    if (isBlacklisted(self, passport)) {
+    if (isBlacklisted(passport)) {
       return true;
     }
 
     // Get the number of entities the passport has interacted with
-    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(self, passport).length;
+    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(passport).length;
     if (totalEntities == 0) {
       // If there are no entities, the passport can't be considered blacklisted based on app interactions
       return false;
