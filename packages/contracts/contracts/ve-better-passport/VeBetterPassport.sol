@@ -568,22 +568,6 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportPoPScoreLogic.registerActionForRound($, user, appId, round);
   }
 
-  /// @notice Function used to seed the passport with old actions by aggregating them
-  /// based on (user, appId, round) and summing up the total score offchain
-  /// @param user - the user that performed the actions
-  /// @param appId - the app id of the actions
-  /// @param round - the round id of the actions
-  /// @param totalScore - the total score of the actions
-  function registerAggregatedActionsForRound(
-    address user,
-    bytes32 appId,
-    uint256 round,
-    uint256 totalScore
-  ) external onlyRole(ACTION_REGISTRAR_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportPoPScoreLogic.registerAggregatedActionsForRound($, user, appId, round, totalScore);
-  }
-
   /// @notice Sets the threshold for a user to be considered a person
   /// @param threshold - the proof of participation score threshold
   function setThresholdPoPScore(uint208 threshold) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {

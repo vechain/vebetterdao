@@ -198,56 +198,6 @@ library PassportPoPScoreLogic {
     _registerAction(self, user, appId, round);
   }
 
-  /// @notice Function used to seed the passport with old actions by aggregating them
-  /// based on (user, appId, round) and summing up the total score offchain
-  /// @param user - the user that performed the actions
-  /// @param appId - the app id of the actions
-  /// @param round - the round id of the actions
-  /// @param totalScore - the total score of the actions
-  function registerAggregatedActionsForRound(
-    PassportStorageTypes.PassportStorage storage self,
-    address user,
-    bytes32 appId,
-    uint256 round,
-    uint256 totalScore
-  ) external {
-    require(user != address(0), "ProofOfParticipation: user is the zero address");
-    require(self.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
-
-    // Check if the user has attached their entity to a passport, if so, use the passport address, else use the users address (passport)
-    address passport = PassportEntityLogic._getPassportForEntity(self, user);
-
-    // Track unique apps core user has interacted with
-    if (!self.userUniqueAppInteraction[passport][appId]) {
-      updateUniqueAppInteractions(self, passport, appId);
-    }
-
-    // If the entity is linked to a passport and the entity has not interacted with the app track interaction
-    if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
-      updateUniqueAppInteractions(self, user, appId);
-    }
-
-    // Track unique apps per round
-    if (!self.userRoundUniqueAppInteraction[passport][round][appId]) {
-      self.userRoundUniqueAppInteraction[passport][round][appId] = true;
-      self.userRoundAppCount[passport][round]++;
-    }
-
-    // Track app action count per round
-    self.appRoundActionCount[appId][round]++;
-
-    // Update the user's score for the round
-    self.userRoundScore[passport][round] += totalScore;
-    // Update the user's total score
-    self.userTotalScore[passport] += totalScore;
-    // Update the user's score for the app in the round
-    self.userAppRoundScore[passport][round][appId] += totalScore;
-    // Update the user's total score for the app
-    self.userAppTotalScore[passport][appId] += totalScore;
-
-    emit RegisteredAction(user, passport, appId, round, totalScore);
-  }
-
   /// @notice Sets the threshold for a user to be considered a person
   /// @param threshold - the round threshold
   function setThresholdPoPScore(PassportStorageTypes.PassportStorage storage self, uint208 threshold) external {

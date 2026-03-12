@@ -439,14 +439,6 @@ interface IVeBetterPassport {
   /// @param round - the round id of the action
   function registerActionForRound(address user, bytes32 appId, uint256 round) external;
 
-  /// @notice Function used to seed the passport with old actions by aggregating them
-  /// based on (user, appId, round) and summing up the total score offchain
-  /// @param user - the user that performed the actions
-  /// @param appId - the app id of the actions
-  /// @param round - the round id of the actions
-  /// @param totalScore - the total score of the actions
-  function registerAggregatedActionsForRound(address user, bytes32 appId, uint256 round, uint256 totalScore) external;
-
   /// @notice Gets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
   function blacklistThreshold() external view returns (uint256);
 
