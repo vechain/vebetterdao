@@ -36,7 +36,6 @@ import { GrantProposalEnriched, ProposalState } from "../../../hooks/proposals/g
 import { useMilestoneClaimedEvents } from "../../../hooks/proposals/grants/useMilestoneClaimedEvents"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { useDebounce } from "../../../hooks/useDebounce"
-import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll"
 import { usePagination } from "../../../hooks/usePagination"
 import { ProposalType } from "../../../types/proposals"
 import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
@@ -157,7 +156,6 @@ export const GrantsPageContent = () => {
     loading: loadingMore,
     reset: resetPagination,
   } = usePagination(filteredProposals ?? [], pageSize)
-  useInfiniteScroll({ loading: loadingMore, hasMore, onLoadMore: loadMore })
 
   useEffect(() => {
     resetPagination()
@@ -329,7 +327,6 @@ export const GrantsPageContent = () => {
                     </Button>
                   </GridItem>
                 )}
-                <div id="infinite-scroll-sentinel" style={{ height: 1 }} />
 
                 {!isLoadingEnrichedGrantProposals &&
                   (!filteredProposals || filteredProposals.length === 0) &&
