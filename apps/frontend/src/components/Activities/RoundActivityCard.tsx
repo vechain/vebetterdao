@@ -14,13 +14,13 @@ import { useTopAppsByActions } from "@/api/indexer/actions/useTopAppsByActions"
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
 
 const IMPACT_METRICS = [
-  { key: "carbon", labelKey: "tonnes of CO2 saved", divisor: 1000 },
-  { key: "water", labelKey: "litres of water saved", divisor: 1 },
+  { key: "carbon", labelKey: "tonnes of CO2 saved", divisor: 1_000_000 },
+  { key: "water", labelKey: "litres of water saved", divisor: 1_000 },
   { key: "trees_planted", labelKey: "trees planted", divisor: 1 },
-  { key: "plastic", labelKey: "kg of plastic saved", divisor: 1 },
-  { key: "waste_mass", labelKey: "kg of waste collected", divisor: 1 },
+  { key: "plastic", labelKey: "kg of plastic saved", divisor: 1_000 },
+  { key: "waste_mass", labelKey: "kg of waste collected", divisor: 1_000 },
   { key: "clean_energy_production_wh", labelKey: "Wh of clean energy produced", divisor: 1 },
-  { key: "energy", labelKey: "kWh of energy saved", divisor: 1 },
+  { key: "energy", labelKey: "kWh of energy saved", divisor: 1_000 },
 ] as const
 
 const MAX_IMPACTS = 3
