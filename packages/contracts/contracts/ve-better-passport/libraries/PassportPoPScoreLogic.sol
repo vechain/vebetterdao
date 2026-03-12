@@ -102,6 +102,17 @@ library PassportPoPScoreLogic {
     return self.userAppRoundScore[user][round][appId];
   }
 
+  /// @notice Gets the number of distinct apps a user has interacted with in a round
+  /// @param user - the user address
+  /// @param round - the round
+  function userRoundAppCount(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    uint256 round
+  ) internal view returns (uint256) {
+    return self.userRoundAppCount[user][round];
+  }
+
   /// @notice Gets the total score of a user for an app
   /// @param user - the user address
   /// @param appId - the app id
@@ -203,6 +214,12 @@ library PassportPoPScoreLogic {
     // If the entity is linked to a passport and the entity has not interacted with the app track interaction
     if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
       updateUniqueAppInteractions(self, user, appId);
+    }
+
+    // Track unique apps per round
+    if (!self.userRoundUniqueAppInteraction[passport][round][appId]) {
+      self.userRoundUniqueAppInteraction[passport][round][appId] = true;
+      self.userRoundAppCount[passport][round]++;
     }
 
     // Update the user's score for the round
@@ -337,6 +354,12 @@ library PassportPoPScoreLogic {
     // If the entity is linked to a passport and the entity has not interacted with the app track interaction
     if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
       updateUniqueAppInteractions(self, user, appId);
+    }
+
+    // Track unique apps per round
+    if (!self.userRoundUniqueAppInteraction[passport][round][appId]) {
+      self.userRoundUniqueAppInteraction[passport][round][appId] = true;
+      self.userRoundAppCount[passport][round]++;
     }
 
     // Calculate the action score, can be min 0, max 6

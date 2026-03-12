@@ -130,5 +130,9 @@ library PassportStorageTypes {
     mapping(bytes32 app => mapping(address user => uint256)) appSignalsCounter;
     // Mapping of apps to total signals
     mapping(bytes32 app => uint256) appTotalSignalsCounter;
+    // Track which apps a user has interacted with in a specific round
+    mapping(address user => mapping(uint256 round => mapping(bytes32 appId => bool))) userRoundUniqueAppInteraction;
+    // Number of distinct apps a user has interacted with in a specific round
+    mapping(address user => mapping(uint256 round => uint256 count)) userRoundAppCount;
   }
 }

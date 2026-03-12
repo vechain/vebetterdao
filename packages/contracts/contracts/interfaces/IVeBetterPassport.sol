@@ -244,6 +244,12 @@ interface IVeBetterPassport {
   /// @return The total score of the user
   function userTotalScore(address user) external view returns (uint256);
 
+  /// @notice Gets the number of distinct apps a user has interacted with in a round
+  /// @param user The user address
+  /// @param round The round to check
+  /// @return The number of distinct apps
+  function userRoundAppCount(address user, uint256 round) external view returns (uint256);
+
   /// @notice Gets the score of a user for an app in a specific round
   /// @param user The user address
   /// @param round The round to check

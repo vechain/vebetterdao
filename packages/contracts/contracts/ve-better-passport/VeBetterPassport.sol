@@ -30,6 +30,9 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
  * - Restricted signalUser to DEFAULT_ADMIN_ROLE and signalUserWithReason to SIGNALER_ROLE
  * - Renamed resetUserSignalsByAppAdminWithReason to resetUserSignalsByAppWithReason to be used by SIGNALER_ROLE
  * - Fixed arithmetic underflow when resetting signals
+ *
+ * -------------------- Version 5 --------------------
+ * - Added per-round distinct app count tracking (userRoundAppCount)
  */
 contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -83,6 +86,11 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     require(_resetSignaler != address(0), "VeBetterPassport: reset signaler is the zero address");
 
     _grantRole(RESET_SIGNALER_ROLE, _resetSignaler);
+  }
+
+  /// @notice Initializes the contract for version 5
+  function initializeV5() external reinitializer(5) onlyRole(UPGRADER_ROLE) {
+    // No new state initialization needed - new storage mappings default to zero
   }
 
   // ---------- Modifiers ------------ //
@@ -204,6 +212,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function userTotalScore(address user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userTotalScore($, user);
+  }
+
+  /// @notice Gets the number of distinct apps a user has interacted with in a round
+  /// @param user - the user address
+  /// @param round - the round
+  function userRoundAppCount(address user, uint256 round) external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.userRoundAppCount($, user, round);
   }
 
   /// @notice Gets the score of a user for an app in a round
@@ -480,7 +496,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Returns the version of the contract
   function version() external pure returns (string memory) {
-    return "4";
+    return "5";
   }
 
   // ---------- Setters ---------- //
