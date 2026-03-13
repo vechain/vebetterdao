@@ -137,4 +137,43 @@ describe("VeBetterPassport Round Tracking - @shard8a", function () {
       expect(await veBetterPassport.appRoundActionCount(appId, 1)).to.equal(0)
     })
   })
+
+  describe("userUniqueAppInteraction", function () {
+    it("should return false for a user that never interacted with an app", async function () {
+      const { veBetterPassport, otherAccounts, appId } = await setupSignalingFixture()
+      expect(await veBetterPassport.userUniqueAppInteraction(otherAccounts[2].address, appId)).to.equal(false)
+    })
+
+    it("should return true after a user interacts with an app", async function () {
+      const { veBetterPassport, owner, otherAccounts, appId } = await setupSignalingFixture()
+      const user = otherAccounts[2]
+
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
+
+      expect(await veBetterPassport.userUniqueAppInteraction(user.address, appId)).to.equal(true)
+    })
+  })
+
+  describe("userInteractedApps", function () {
+    it("should return empty array for a user with no interactions", async function () {
+      const { veBetterPassport, otherAccounts } = await setupSignalingFixture()
+      expect(await veBetterPassport.userInteractedApps(otherAccounts[2].address)).to.deep.equal([])
+    })
+
+    it("should return all apps a user has interacted with", async function () {
+      const contracts = await setupSignalingFixture()
+      const { veBetterPassport, owner, otherAccounts, appId } = contracts
+      const user = otherAccounts[2]
+
+      const app2Id = await createSecondApp(contracts)
+
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, app2Id, 1)
+
+      const apps = await veBetterPassport.userInteractedApps(user.address)
+      expect(apps).to.have.lengthOf(2)
+      expect(apps).to.include(appId)
+      expect(apps).to.include(app2Id)
+    })
+  })
 })
