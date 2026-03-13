@@ -1,9 +1,8 @@
-import { HStack, useMediaQuery, Box } from "@chakra-ui/react"
+import { HStack, Box } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
 import { ColorModeButton } from "../ui/color-mode"
 
-import { NavbarBalance } from "./NavbarBalance"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import { Route } from "./Routes"
@@ -16,7 +15,6 @@ type Props = {
   routesToRender: Route[]
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
-  const [isLargerThan1800] = useMediaQuery(["(min-width: 1800px)"])
   return (
     <>
       <HStack flex="1" justifyContent={"start"}>
@@ -38,7 +36,6 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       )}
       <HStack flex="1" gap={4} justifyContent={"end"} alignItems={"center"}>
         <ColorModeButton />
-        {isLargerThan1800 && <NavbarBalance />}
         <Box as="span">
           <ConnectWalletButton
             buttonStyleProps={{
