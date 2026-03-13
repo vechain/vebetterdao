@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Card, Center, Heading, HStack, SegmentGroup, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { Box, Card, Center, HStack, SegmentGroup, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -42,10 +42,10 @@ const CustomTooltip = ({
 
 export const TreasuryBalanceChart = () => {
   const { t } = useTranslation()
-  const [period, setPeriod] = useState<BalancePeriod>("3M")
+  const [period, setPeriod] = useState<BalancePeriod>("1Y")
   const { chartData, isLoading, isFetching } = useTreasuryBalanceHistory(period)
 
-  const [purpleColor] = useToken("colors", ["purple.500"])
+  const [greenColor] = useToken("colors", ["green.400"])
 
   const displayData = useMemo(() => {
     if (!chartData.length) return []
@@ -83,11 +83,13 @@ export const TreasuryBalanceChart = () => {
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between" align="start" flexWrap="wrap" gap={3}>
             <VStack align="start" gap={0}>
-              <Heading size="lg" fontWeight="bold">
-                {t("Treasury Balance")}
-              </Heading>
-              <Text textStyle="sm" color="text.muted">
-                {t("B3TR balance over time")}
+              <Text
+                textStyle="xs"
+                color="text.subtle"
+                fontWeight="semibold"
+                textTransform="uppercase"
+                letterSpacing="wider">
+                {t("Portfolio Growth")}
               </Text>
             </VStack>
             <SegmentGroup.Root size="sm" value={period} onValueChange={e => setPeriod(e.value as BalancePeriod)}>
@@ -101,8 +103,8 @@ export const TreasuryBalanceChart = () => {
               <AreaChart data={displayData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradB3tr" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={purpleColor} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={purpleColor} stopOpacity={0} />
+                    <stop offset="5%" stopColor={greenColor} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={greenColor} stopOpacity={0} />
                   </linearGradient>
                 </defs>
 
@@ -120,7 +122,7 @@ export const TreasuryBalanceChart = () => {
                   isAnimationActive={false}
                   dataKey="b3tr"
                   fill="url(#gradB3tr)"
-                  stroke={purpleColor}
+                  stroke={greenColor}
                   strokeWidth={2}
                 />
               </AreaChart>

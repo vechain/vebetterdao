@@ -7,8 +7,8 @@ type Props = ImageProps & {
   colorVariant?: "light" | "dark"
 }
 const paths = {
-  light: "assets/logos/vtho_logo.webp",
-  dark: "assets/logos/vtho_logo.webp",
+  light: "/assets/logos/vtho-logo-light.png",
+  dark: "/assets/logos/vtho-logo-dark.png",
 }
 export const VTHOIcon: React.FC<Props> = ({ colorVariant, ...props }) => {
   const logo = useColorModeValue(paths.light, paths.dark)

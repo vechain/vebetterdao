@@ -1,5 +1,5 @@
 "use client"
-import { Box, Button, Card, Grid, Heading, HStack, Link, Skeleton, Text, VStack, Wrap } from "@chakra-ui/react"
+import { Box, Button, Card, Heading, HStack, Link, Separator, Skeleton, Text, VStack, Wrap } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { formatEther } from "ethers"
@@ -84,7 +84,7 @@ export const TreasuryTransfersList = () => {
   return (
     <Card.Root w="full">
       <Card.Body>
-        <VStack align="stretch" gap={4}>
+        <VStack align="stretch" gap={8}>
           <Heading size="lg" fontWeight="bold">
             {t("Recent Transfers")}
           </Heading>
@@ -104,17 +104,19 @@ export const TreasuryTransfersList = () => {
           <Skeleton loading={isLoading} rounded="md">
             {transactions.length > 0 ? (
               <VStack
-                gap={3}
+                gap={{ base: 0, md: 3 }}
                 align="stretch"
                 opacity={isFetching && !isFetchingNextPage ? 0.5 : 1}
                 transition="opacity 0.15s">
-                {transactions.map(transaction => (
-                  <TreasuryTransferCard
-                    key={transaction.id}
-                    transaction={transaction}
-                    domainMap={domainMap}
-                    proposal={proposalByTxId[transaction.txId.toLowerCase()]}
-                  />
+                {transactions.map((transaction, i) => (
+                  <Box key={transaction.id}>
+                    {i > 0 && <Separator />}
+                    <TreasuryTransferCard
+                      transaction={transaction}
+                      domainMap={domainMap}
+                      proposal={proposalByTxId[transaction.txId.toLowerCase()]}
+                    />
+                  </Box>
                 ))}
                 {hasNextPage && (
                   <Button variant="outline" onClick={() => fetchNextPage()} loading={isFetchingNextPage} mx="auto">
@@ -157,12 +159,12 @@ const TreasuryTransferCard = ({
   const primaryLabel = proposal?.title ?? transaction.label
 
   return (
-    <Card.Root variant="outline" size="sm">
+    <Card.Root variant="outline" size="sm" p={{ base: 0, md: 4 }} border={{ base: "none" }}>
       <Card.Body>
-        <Grid templateColumns={{ base: "auto 1fr", md: "auto 1fr auto" }} gap={3} alignItems="center">
-          <Box>{isOutgoing ? <FiArrowUpRight color="red" /> : <FiArrowDownLeft color="green" />}</Box>
+        <HStack gap={3} py={{ base: 3, md: 0 }}>
+          <Box flexShrink={0}>{isOutgoing ? <FiArrowUpRight color="red" /> : <FiArrowDownLeft color="green" />}</Box>
 
-          <VStack align="start" gap={0} minW={0}>
+          <VStack align="start" gap={0} flex={1} minW={0}>
             <Text fontWeight="semibold" textStyle="sm" lineClamp={1}>
               {proposal ? (
                 <Link
@@ -181,7 +183,7 @@ const TreasuryTransferCard = ({
             </Text>
           </VStack>
 
-          <HStack gap={2} gridColumn={{ base: "2", md: "auto" }}>
+          <HStack gap={2} flexShrink={0}>
             <Text fontWeight="semibold" textStyle="sm" color={isOutgoing ? "red.500" : "green.500"} truncate>
               {isOutgoing ? "-" : "+"}
               {amount}
@@ -196,7 +198,7 @@ const TreasuryTransferCard = ({
               <FiExternalLink />
             </Link>
           </HStack>
-        </Grid>
+        </HStack>
       </Card.Body>
     </Card.Root>
   )
