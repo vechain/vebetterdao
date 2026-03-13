@@ -264,7 +264,7 @@ const config = defineConfig({
         },
         bg: {
           primary: { value: { base: "white", _dark: "{colors.gray.900}" } },
-          secondary: { value: { base: "{colors.gray.50}", _dark: "{colors.red.900}" } },
+          secondary: { value: { base: "{colors.gray.50}", _dark: "{colors.orange.900}" } },
           tertiary: { value: { base: "#F5F5F5", _dark: "#262626" } },
           alt: { value: { base: "{colors.gray.900}", _dark: "{colors.gray.800}" } },
           "alt-subtle": { value: { base: "{colors.gray.400}", _dark: "{colors.gray.600}" } },
