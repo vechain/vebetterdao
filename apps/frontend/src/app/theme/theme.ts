@@ -152,6 +152,7 @@ const config = defineConfig({
           700: { value: "#7F1C1C" },
           800: { value: "#631616" },
           900: { value: "#400E0E" },
+          950: { value: "#2A0808" },
         },
         green: {
           DEFAULT: { value: "#3DBA67" },
@@ -263,8 +264,8 @@ const config = defineConfig({
           "alt-subtle": { value: { base: "{colors.transparency.700}", _dark: "{colors.opacity.700}" } },
         },
         bg: {
-          primary: { value: { base: "white", _dark: "{colors.gray.900}" } },
-          secondary: { value: { base: "{colors.gray.50}", _dark: "{colors.gray.950}" } },
+          primary: { value: { base: "white", _dark: "{colors.red.900}" } },
+          secondary: { value: { base: "{colors.gray.50}", _dark: "{colors.red.950}" } },
           tertiary: { value: { base: "#F5F5F5", _dark: "#262626" } },
           alt: { value: { base: "{colors.gray.900}", _dark: "{colors.gray.800}" } },
           "alt-subtle": { value: { base: "{colors.gray.400}", _dark: "{colors.gray.600}" } },
