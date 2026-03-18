@@ -51,46 +51,48 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
           {" VOT3"}
         </Text>
 
-        <Skeleton loading={isVot3Loading}>
-          <HStack gap={1}>
-            <Text textStyle="sm" color="text.subtle">
-              {t("Current Voting Power:")}
-            </Text>
-            <Text textStyle="sm" fontWeight="semibold">
-              {formatter.format(currentVotingPower)} {"VOT3"}
-            </Text>
-          </HStack>
-        </Skeleton>
+        <VStack gap={0} align="start">
+          <Skeleton loading={isVot3Loading}>
+            <HStack gap={1}>
+              <Text textStyle="sm" color="text.subtle">
+                {t("Current Voting Power:")}
+              </Text>
+              <Text textStyle="sm" fontWeight="semibold">
+                {formatter.format(currentVotingPower)} {"VOT3"}
+              </Text>
+            </HStack>
+          </Skeleton>
 
-        <Skeleton loading={isRoundLoading}>
-          <HStack gap={1}>
-            <Text textStyle="sm" color="text.subtle">
-              {t("Snapshot in:")}
-            </Text>
-            {allocationRound?.voteEndTimestamp && (
-              <Countdown
-                date={allocationRound.voteEndTimestamp.toDate()}
-                now={() => Date.now()}
-                renderer={({ days, hours, minutes }) => (
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {days}
-                    {"d "}
-                    {hours}
-                    {"h "}
-                    {minutes}
-                    {"m"}
-                  </Text>
-                )}
-              />
-            )}
-          </HStack>
-          <HStack>
-            <Button p="0" variant="link" onClick={onOpenSnapshot}>
-              {t("Learn more")}
-            </Button>
-            <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
-          </HStack>
-        </Skeleton>
+          <Skeleton loading={isRoundLoading}>
+            <HStack gap={1}>
+              <Text textStyle="sm" color="text.subtle">
+                {t("Snapshot in:")}
+              </Text>
+              {allocationRound?.voteEndTimestamp && (
+                <Countdown
+                  date={allocationRound.voteEndTimestamp.toDate()}
+                  now={() => Date.now()}
+                  renderer={({ days, hours, minutes }) => (
+                    <Text textStyle="sm" fontWeight="semibold">
+                      {days}
+                      {"d "}
+                      {hours}
+                      {"h "}
+                      {minutes}
+                      {"m"}
+                    </Text>
+                  )}
+                />
+              )}
+            </HStack>
+            <HStack>
+              <Button p="0" variant="link" onClick={onOpenSnapshot}>
+                {t("Learn more")}
+              </Button>
+              <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
+            </HStack>
+          </Skeleton>
+        </VStack>
       </VStack>
     </Card.Root>
   )

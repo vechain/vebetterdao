@@ -18,6 +18,7 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { PowerUpSummary } from "./PowerUpSummary"
 import { handleAmountInput } from "./utils"
+import { VoterRankBadge } from "./VoterRankBadge"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -147,6 +148,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
         </VStack>
 
         <PowerUpSummary mode="power-up" amount={amount} isHighlighted />
+
+        <VoterRankBadge />
 
         {Number(availableBalance) < 2 && (
           <Card.Root
