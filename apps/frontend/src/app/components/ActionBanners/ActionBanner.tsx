@@ -16,6 +16,7 @@ import { useHasVotedInProposals } from "../../../api/contracts/governance/hooks/
 import { useProposalClaimableUserDeposits } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { useGMRewards } from "../../../api/contracts/rewards/hooks/useGMRewards"
 import { useVotingRewards } from "../../../api/contracts/rewards/hooks/useVotingRewards"
+import { useVeDelegateAutoDeposit } from "../../../api/contracts/veDelegate/hooks/useVeDelegateAutoDeposit"
 import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
 import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetDelegatee"
 import { useUserBotSignals } from "../../../api/contracts/vePassport/hooks/useUserBotSignals"
@@ -61,6 +62,7 @@ export const ActionBanner = () => {
   const [showModal, setShowModal] = useState(isStargateModalHidden)
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
 
@@ -165,7 +167,7 @@ export const ActionBanner = () => {
     !isLoading &&
     !isDelegateeLoading &&
     (preferences?.[BannerStorageKey.SHOW_DO_ACTION] ?? true)
-  const showDelegatingBanner = !!account?.address && isVeDelegated && !isDelegateeLoading
+  const showDelegatingBanner = !!account?.address && (isVeDelegated || hasAutoDeposit) && !isDelegateeLoading
   const showEntityBanner = !!account?.address && isEntity && !isLoadingAccountLinking
 
   const showCastVoteBanner = !!account?.address && !isLoading && canUserVote
