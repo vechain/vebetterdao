@@ -3,7 +3,7 @@
 import { Button, Card, Field, Heading, HStack, Icon, Link, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
-import { Clock, NavArrowRight, WarningTriangle } from "iconoir-react"
+import { Clock, HelpCircle, NavArrowRight, WarningTriangle } from "iconoir-react"
 import NextLink from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,7 @@ import { parseEther } from "viem"
 
 import { BaseModal } from "@/components/BaseModal"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import { Tooltip } from "@/components/ui/tooltip"
 import { useConvertB3tr } from "@/hooks/useConvertB3tr"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 import { useSmartAccountUpgradeRequired } from "@/hooks/vechainKitHooks/useSmartAccountUpgradeRequired"
@@ -78,10 +79,6 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           {t("Increase your Voting Power")}
         </Heading>
 
-        <Text mt={2} textStyle="xs" color="text.subtle" textAlign="center">
-          {t("1 B3TR = 1 Voting Power. You can redeem your B3TR back at any time.")}
-        </Text>
-
         <VStack
           bg="card.default"
           border="1px solid"
@@ -97,9 +94,21 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
             required
             invalid={!!amount && amount !== "." && parseEther(amount) > BigInt(b3trBalance?.original ?? "0")}>
             <Field.Label w="full" alignItems="center" justifyContent="space-between">
-              <Text textStyle="sm" color="text.subtle">
-                {t("Use available B3TR")}
-              </Text>
+              <HStack gap={1} alignItems="center">
+                <Text textStyle="sm" color="text.subtle">
+                  {t("Use available B3TR")}
+                </Text>
+                <Tooltip
+                  positioning={{ placement: "bottom-start" }}
+                  contentProps={{ p: "3", rounded: "md" }}
+                  content={
+                    <Text textStyle="xs" color="text.alt">
+                      {t("1 B3TR = 1 Voting Power (VOT3). You can redeem your B3TR back at any time.")}
+                    </Text>
+                  }>
+                  <Icon as={HelpCircle} boxSize="3.5" color="text.subtle" cursor="pointer" />
+                </Tooltip>
+              </HStack>
               <Button
                 variant="link"
                 height="5"

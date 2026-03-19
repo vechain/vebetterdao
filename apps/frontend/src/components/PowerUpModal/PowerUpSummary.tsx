@@ -1,6 +1,7 @@
 "use client"
 
-import { Card, HStack, Skeleton, Text, VStack, useDisclosure, Button } from "@chakra-ui/react"
+import { Card, HStack, Skeleton, Text, VStack, useDisclosure, Button, Icon } from "@chakra-ui/react"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import Countdown from "react-countdown"
@@ -41,9 +42,14 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
       borderColor={isHighlighted ? "status.positive.strong" : "border.secondary"}
       rounded="2xl">
       <VStack align="start" gap={2}>
-        <Text textStyle="xs" color="text.subtle" fontStyle="italic">
-          {mode === "power-up" ? t("Voting Power added from next round") : t("Voting Power removed from next round")}
-        </Text>
+        <HStack w="full" justifyContent="space-between" alignItems="center">
+          <Text textStyle="xs" color="text.subtle" fontStyle="italic">
+            {mode === "power-up" ? t("Voting Power added from next round") : t("Voting Power removed from next round")}
+          </Text>
+          <Button p="0" variant="link" textStyle="xs" flexShrink={0} onClick={onOpenSnapshot}>
+            {t("Learn more")} <Icon as={UilArrowUpRight} />
+          </Button>
+        </HStack>
 
         <Text textStyle="3xl" fontWeight="bold" color={changeColor}>
           {sign}
@@ -85,12 +91,7 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
                 />
               )}
             </HStack>
-            <HStack>
-              <Button p="0" variant="link" onClick={onOpenSnapshot}>
-                {t("Learn more")}
-              </Button>
-              <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
-            </HStack>
+            <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
           </Skeleton>
         </VStack>
       </VStack>
