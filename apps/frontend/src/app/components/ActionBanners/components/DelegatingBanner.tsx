@@ -21,7 +21,7 @@ export const DelegatingBanner = () => {
   const description = hasAutoDeposit ? (
     <Text color="text.subtle" lineClamp="4">
       <Trans
-        i18nKey="delegating.autoDeposit"
+        i18nKey="You are using <platform>veDelegate.vet</platform> with the connected wallet and have auto-deposit enabled. This automatically transfers your B3TR to veDelegate. Visit veDelegate to disable this option."
         components={{
           platform: (
             <Link
