@@ -177,3 +177,4 @@ tasks/
 
 # roro workspace
 .roro/
+.claude/hooks/notify-app.sh
