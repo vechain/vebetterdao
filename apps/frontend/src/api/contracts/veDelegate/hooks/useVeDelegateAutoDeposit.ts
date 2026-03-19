@@ -32,7 +32,7 @@ export const useVeDelegateAutoDeposit = (userAddress?: string) => {
     },
   })
 
-  const recipient = result.data?.[0]?.[0] as string | undefined
+  const recipient = result.data?.[0] as string | undefined
 
   return {
     ...result,
