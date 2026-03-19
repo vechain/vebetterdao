@@ -10,10 +10,7 @@ const abi = [
       { name: "senderAddress", type: "address" },
     ],
     name: "tokenSenderConfiguration",
-    outputs: [
-      { name: "recipient", type: "address" },
-      { name: "ratio", type: "uint256" },
-    ],
+    outputs: [{ name: "recipient", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
