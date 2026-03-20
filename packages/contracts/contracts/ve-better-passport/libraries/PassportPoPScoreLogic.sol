@@ -80,6 +80,15 @@ library PassportPoPScoreLogic {
     return self.userRoundScore[user][round];
   }
 
+  /// @notice Gets the total score of a user
+  /// @param user - the user address
+  function userTotalScore(
+    PassportStorageTypes.PassportStorage storage self,
+    address user
+  ) internal view returns (uint256) {
+    return self.userTotalScore[user];
+  }
+
   /// @notice Gets the score of a user for an app in a round
   /// @param user - the user address
   /// @param round - the round
@@ -133,6 +142,17 @@ library PassportPoPScoreLogic {
   ) internal view returns (bytes32[] memory) {
     PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.userInteractedApps[user];
+  }
+
+  /// @notice Gets the total score of a user for an app
+  /// @param user - the user address
+  /// @param appId - the app id
+  function userAppTotalScore(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    bytes32 appId
+  ) internal view returns (uint256) {
+    return self.userAppTotalScore[user][appId];
   }
 
   /// @notice Gets the threshold for a user to be considered a person
@@ -340,8 +360,12 @@ library PassportPoPScoreLogic {
 
     // Update the user's score for the round
     self.userRoundScore[passport][round] += actionScore;
+    // Update the user's total score
+    self.userTotalScore[passport] += actionScore;
     // Update the user's score for the app in the round
     self.userAppRoundScore[passport][round][appId] += actionScore;
+    // Update the user's total score for the app
+    self.userAppTotalScore[passport][appId] += actionScore;
 
     emit RegisteredAction(user, passport, appId, round, actionScore);
   }
