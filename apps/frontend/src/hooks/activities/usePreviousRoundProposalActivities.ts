@@ -24,10 +24,8 @@ const stateToActivityType: Partial<Record<ProposalState, PreviousRoundActivityTy
 export const usePreviousRoundProposalActivities = (
   previousRoundId?: string,
 ): { data: ActivityItem[]; isLoading: boolean } => {
-  const {
-    data: { enrichedStandardProposals: enrichedProposals } = { enrichedStandardProposals: [] },
-    isLoading: isProposalsLoading,
-  } = useProposalEnriched()
+  const { data: { enrichedProposals } = { enrichedProposals: [] }, isLoading: isProposalsLoading } =
+    useProposalEnriched()
   const { data: round, isLoading: isRoundLoading } = useAllocationsRound(previousRoundId)
 
   const data = useMemo((): ActivityItem[] => {
