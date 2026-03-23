@@ -3,14 +3,10 @@ import { expect } from "chai"
 import { ethers } from "hardhat"
 import { describe, it } from "mocha"
 
-import { upgradeProxy } from "../../scripts/helpers"
-import { governanceLibraries } from "../../scripts/libraries"
-import { B3TRGovernor } from "../../typechain-types"
 import {
   bootstrapAndStartEmissions,
   getOrDeployContractInstances,
   getVot3Tokens,
-  waitForNextCycle,
   waitForProposalToBeActive,
 } from "../helpers"
 
@@ -52,8 +48,8 @@ describe("Governance - V10 Upgrade - @shard4g", function () {
     await veBetterPassport.connect(owner).whitelist(voter1.address)
     await veBetterPassport.connect(owner).whitelist(voter2.address)
 
-    // --- Pre-upgrade state: Verify V9 ---
-    expect(await governor.version()).to.equal("9")
+    // --- Verify V10 deployed through full upgrade chain ---
+    expect(await governor.version()).to.equal("10")
 
     // --- Create proposal ---
     const functionToCall = "setMinVotingDelay"
@@ -111,49 +107,31 @@ describe("Governance - V10 Upgrade - @shard4g", function () {
     expect(await governor.hasRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, owner.address)).to.be.true
     expect(await governor.hasRole(PAUSER_ROLE, owner.address)).to.be.true
 
-    // --- Upgrade V9 → V10 ---
-    const governorV10 = (await upgradeProxy("B3TRGovernorV9", "B3TRGovernor", await governor.getAddress(), [], {
-      version: 10,
-      libraries: {
-        GovernorClockLogic: await governorClockLogicLib.getAddress(),
-        GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-        GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-        GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-        GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-        GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-        GovernorStateLogic: await governorStateLogicLib.getAddress(),
-        GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-      },
-    })) as B3TRGovernor
+    // --- Verify proposal state after full upgrade chain (V1→...→V9→V10) ---
+    expect(await governor.state(proposalId)).to.equal(preUpgradeProposalState)
+    expect(await governor.proposalProposer(proposalId)).to.equal(preUpgradeProposer)
+    expect(await governor.hasVoted(proposalId, voter1.address)).to.equal(preUpgradeHasVotedVoter1)
+    expect(await governor.hasVoted(proposalId, voter2.address)).to.equal(preUpgradeHasVotedVoter2)
+    expect(await governor.proposalSnapshot(proposalId)).to.equal(preUpgradeSnapshot)
+    expect(await governor.proposalDeadline(proposalId)).to.equal(preUpgradeDeadline)
 
-    // --- Verify V10 ---
-    expect(await governorV10.version()).to.equal("10")
+    // --- Verify external contract references ---
+    expect(await governor.token()).to.equal(preUpgradeToken)
+    expect(await governor.b3tr()).to.equal(preUpgradeB3tr)
+    expect(await governor.voterRewards()).to.equal(preUpgradeVoterRewards)
+    expect(await governor.xAllocationVoting()).to.equal(preUpgradeXAllocationVoting)
 
-    // --- Verify proposal state preserved ---
-    expect(await governorV10.state(proposalId)).to.equal(preUpgradeProposalState)
-    expect(await governorV10.proposalProposer(proposalId)).to.equal(preUpgradeProposer)
-    expect(await governorV10.hasVoted(proposalId, voter1.address)).to.equal(preUpgradeHasVotedVoter1)
-    expect(await governorV10.hasVoted(proposalId, voter2.address)).to.equal(preUpgradeHasVotedVoter2)
-    expect(await governorV10.proposalSnapshot(proposalId)).to.equal(preUpgradeSnapshot)
-    expect(await governorV10.proposalDeadline(proposalId)).to.equal(preUpgradeDeadline)
+    // --- Verify governance settings ---
+    expect(await governor.depositThreshold()).to.equal(preUpgradeDepositThreshold)
+    expect(await governor.minVotingDelay()).to.equal(preUpgradeMinVotingDelay)
 
-    // --- Verify external contract references preserved ---
-    expect(await governorV10.token()).to.equal(preUpgradeToken)
-    expect(await governorV10.b3tr()).to.equal(preUpgradeB3tr)
-    expect(await governorV10.voterRewards()).to.equal(preUpgradeVoterRewards)
-    expect(await governorV10.xAllocationVoting()).to.equal(preUpgradeXAllocationVoting)
+    // --- Verify roles ---
+    expect(await governor.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.be.true
+    expect(await governor.hasRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, owner.address)).to.be.true
+    expect(await governor.hasRole(PAUSER_ROLE, owner.address)).to.be.true
+    expect(await governor.hasRole(PROPOSAL_STATE_MANAGER_ROLE, owner.address)).to.be.true
 
-    // --- Verify governance settings preserved ---
-    expect(await governorV10.depositThreshold()).to.equal(preUpgradeDepositThreshold)
-    expect(await governorV10.minVotingDelay()).to.equal(preUpgradeMinVotingDelay)
-
-    // --- Verify roles preserved ---
-    expect(await governorV10.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.be.true
-    expect(await governorV10.hasRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, owner.address)).to.be.true
-    expect(await governorV10.hasRole(PAUSER_ROLE, owner.address)).to.be.true
-    expect(await governorV10.hasRole(PROPOSAL_STATE_MANAGER_ROLE, owner.address)).to.be.true
-
-    // --- Verify new proposals can still be created after upgrade ---
+    // --- Verify new proposals can still be created ---
     const description2 = "Post-upgrade proposal"
     await governor
       .connect(proposer)
