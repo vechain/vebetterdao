@@ -89,6 +89,14 @@ library PassportPoPScoreLogic {
     return self.userAppRoundScore[user][round][appId];
   }
 
+  /// @notice Gets how many actions a user registered in a round (raw count, not score units)
+  /// @param user - the user address (passport; entity-linked scores accrue on the passport)
+  /// @param round - the round
+  function userRoundActionCount(address user, uint256 round) internal view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    return self.userRoundActionCount[user][round];
+  }
+
   /// @notice Gets how many actions a user registered for an app in a round (raw count, not score units)
   /// @param user - the user address (passport; entity-linked scores accrue on the passport)
   /// @param round - the round
@@ -315,6 +323,8 @@ library PassportPoPScoreLogic {
 
     // Update the user's score for the round
     self.userRoundScore[passport][round] += actionScore;
+    // Update total per-user per-round action count (one per successful registration)
+    self.userRoundActionCount[passport][round]++;
     // Update the user's total score
     self.userTotalScore[passport] += actionScore;
     // Update the user's score for the app in the round
