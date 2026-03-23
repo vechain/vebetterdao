@@ -137,6 +137,8 @@ library PassportStorageTypes {
     mapping(address user => mapping(uint256 round => uint256 count)) userRoundAppCount;
     // Number of actions distributed by an app in a specific round
     mapping(bytes32 appId => mapping(uint256 round => uint256 count)) appRoundActionCount;
+    // Number of actions registered per user (passport) per app per round
+    mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 count))) userAppRoundActionCount;
   }
 
   // keccak256(abi.encode(uint256(keccak256("PassportStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
