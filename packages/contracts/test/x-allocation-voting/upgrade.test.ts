@@ -479,13 +479,13 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
 
     const xAllocationVoting = (await upgradeProxy(
       "XAllocationVotingV7",
-      "XAllocationVoting",
+      "XAllocationVotingV8",
       await xAllocationVotingV7.getAddress(),
       [],
       {
         version: 8,
         libraries: {
-          AutoVotingLogic: await AutoVotingLogic.getAddress(),
+          AutoVotingLogicV8: await AutoVotingLogic.getAddress(),
         },
       },
     )) as XAllocationVoting

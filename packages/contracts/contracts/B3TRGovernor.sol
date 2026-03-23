@@ -542,7 +542,7 @@ contract B3TRGovernor is
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "9";
+    return "10";
   }
 
   /**

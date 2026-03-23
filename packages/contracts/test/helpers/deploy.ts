@@ -9,6 +9,7 @@ import {
   GalaxyMember,
   Emissions,
   XAllocationVoting,
+  XAllocationVotingV8,
   XAllocationPool,
   VoterRewards,
   Treasury,
@@ -19,6 +20,7 @@ import {
   MyERC1155,
   TokenAuction,
   B3TRGovernor,
+  B3TRGovernorV9,
   NodeManagementV3,
   VeBetterPassport,
   VeBetterPassportV1,
@@ -652,6 +654,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV5",
       "XAllocationVotingV6",
       "XAllocationVotingV7",
+      "XAllocationVotingV8",
       "XAllocationVoting",
     ],
     [
@@ -679,9 +682,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         undefined,
         undefined,
@@ -690,6 +694,7 @@ export const getOrDeployContractInstances = async ({
         undefined,
         undefined,
         undefined,
+        { AutoVotingLogicV8: await AutoVotingLogic.getAddress() },
         { AutoVotingLogic: await AutoVotingLogic.getAddress() },
       ],
       logOutput: false,
@@ -835,6 +840,7 @@ export const getOrDeployContractInstances = async ({
       "B3TRGovernorV6",
       "B3TRGovernorV7",
       "B3TRGovernorV8",
+      "B3TRGovernorV9",
       "B3TRGovernor",
     ],
     [
@@ -879,9 +885,10 @@ export const getOrDeployContractInstances = async ({
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
       [], // Reserved for future configuration parameters; currently no values required
       [], // v9
+      [], // v10
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -962,6 +969,16 @@ export const getOrDeployContractInstances = async ({
           GovernorQuorumLogicV8: await GovernorQuorumLogicLibV8.getAddress(),
           GovernorStateLogicV8: await GovernorStateLogicLibV8.getAddress(),
           GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
+        },
+        {
+          GovernorClockLogicV9: await GovernorClockLogicLib.getAddress(),
+          GovernorConfiguratorV9: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV9: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV9: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV9: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV9: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV9: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV9: await GovernorVotesLogicLib.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),

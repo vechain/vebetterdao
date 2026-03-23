@@ -671,6 +671,7 @@ export async function deployAll(config: ContractsConfig) {
       "XAllocationVotingV5",
       "XAllocationVotingV6",
       "XAllocationVotingV7",
+      "XAllocationVotingV8",
       "XAllocationVoting",
     ],
     [
@@ -698,9 +699,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         undefined,
         undefined,
@@ -709,6 +711,7 @@ export async function deployAll(config: ContractsConfig) {
         undefined,
         undefined,
         undefined,
+        { AutoVotingLogicV8: await AutoVotingLogic.getAddress() },
         { AutoVotingLogic: await AutoVotingLogic.getAddress() },
       ],
       logOutput: true,
@@ -842,6 +845,7 @@ export async function deployAll(config: ContractsConfig) {
       "B3TRGovernorV6",
       "B3TRGovernorV7",
       "B3TRGovernorV8",
+      "B3TRGovernorV9",
       "B3TRGovernor",
     ],
     [
@@ -886,9 +890,10 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [],
       [], // v9
+      [], // v10
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -969,6 +974,16 @@ export async function deployAll(config: ContractsConfig) {
           GovernorQuorumLogicV8: await GovernorQuorumLogicLibV8.getAddress(),
           GovernorStateLogicV8: await GovernorStateLogicLibV8.getAddress(),
           GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
+        },
+        {
+          GovernorClockLogicV9: await GovernorClockLogicLib.getAddress(),
+          GovernorConfiguratorV9: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV9: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV9: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV9: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV9: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV9: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV9: await GovernorVotesLogicLib.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
