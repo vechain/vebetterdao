@@ -215,6 +215,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPoPScoreLogic.userRoundScoreApp(user, round, appId);
   }
 
+  /// @notice Gets how many actions a user registered for an app in a round
+  /// @param user - the user address
+  /// @param round - the round
+  /// @param appId - the app id
+  function userRoundActionCountApp(address user, uint256 round, bytes32 appId) external view returns (uint256) {
+    return PassportPoPScoreLogic.userRoundActionCountApp(user, round, appId);
+  }
+
   /// @notice Gets the total score of a user for an app
   /// @param user - the user address
   /// @param appId - the app id

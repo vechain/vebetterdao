@@ -4889,6 +4889,120 @@ describe("VeBetterPassport - @shard16-pop", function () {
       )
     })
 
+    describe("userRoundActionCountApp", function () {
+      it("counts one per successful registration for same user, app, and round", async function () {
+        const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances(
+          {
+            forceDeploy: true,
+          },
+        )
+
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+        await x2EarnApps
+          .connect(owner)
+          .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+        await endorseApp(app1Id, otherAccounts[2])
+
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+        await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+
+        expect(await veBetterPassport.userRoundActionCountApp(otherAccount.address, 1, app1Id)).to.equal(3)
+        expect(await veBetterPassport.userRoundScoreApp(otherAccount.address, 1, app1Id)).to.equal(300)
+      })
+
+      it("tracks counts separately per app in the same round", async function () {
+        const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+        const creator1 = creators[0]
+
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+        await x2EarnApps
+          .connect(owner)
+          .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+        await endorseApp(app1Id, otherAccounts[2])
+
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+        await x2EarnApps
+          .connect(creator1)
+          .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+        await endorseApp(app2Id, otherAccounts[3])
+
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+        await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+        await veBetterPassport.connect(owner).setAppSecurity(app2Id, 1)
+
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 1)
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+
+        expect(await veBetterPassport.userRoundActionCountApp(otherAccount.address, 1, app1Id)).to.equal(2)
+        expect(await veBetterPassport.userRoundActionCountApp(otherAccount.address, 1, app2Id)).to.equal(1)
+      })
+
+      it("attributes entity registrations to the linked passport", async function () {
+        const { veBetterPassport, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const passport = otherAccounts[0]
+        const entity = otherAccounts[1]
+
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+        await x2EarnApps
+          .connect(owner)
+          .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+        await endorseApp(app1Id, otherAccounts[2])
+
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+        await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+        await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+
+        await veBetterPassport.connect(owner).registerActionForRound(entity, app1Id, 1)
+        await veBetterPassport.connect(owner).registerActionForRound(entity, app1Id, 1)
+
+        expect(await veBetterPassport.userRoundActionCountApp(passport.address, 1, app1Id)).to.equal(2)
+        expect(await veBetterPassport.userRoundActionCountApp(entity.address, 1, app1Id)).to.equal(0)
+      })
+
+      it("does not increment action count when user is blacklisted", async function () {
+        const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances(
+          {
+            forceDeploy: true,
+          },
+        )
+
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+        await x2EarnApps
+          .connect(owner)
+          .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+        await endorseApp(app1Id, otherAccounts[2])
+
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+        await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+        await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+        expect(await veBetterPassport.userRoundActionCountApp(otherAccount.address, 1, app1Id)).to.equal(1)
+
+        await veBetterPassport.connect(owner).blacklist(otherAccount.address)
+        await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 2)
+
+        expect(await veBetterPassport.userRoundActionCountApp(otherAccount.address, 1, app1Id)).to.equal(1)
+        expect(await veBetterPassport.userRoundActionCountApp(otherAccount.address, 2, app1Id)).to.equal(0)
+      })
+    })
+
     it("Should correctly calculate cumulative score", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
