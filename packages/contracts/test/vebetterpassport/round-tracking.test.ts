@@ -73,6 +73,50 @@ describe("VeBetterPassport Round Tracking - @shard8a", function () {
     })
   })
 
+  describe("userRoundActionCount", function () {
+    it("should return 0 for a user with no actions", async function () {
+      const { veBetterPassport, otherAccounts } = await setupSignalingFixture()
+      expect(await veBetterPassport.userRoundActionCount(otherAccounts[2].address, 1)).to.equal(0)
+    })
+
+    it("should increment for each action registered in the round", async function () {
+      const contracts = await setupSignalingFixture()
+      const { veBetterPassport, owner, otherAccounts, appId } = contracts
+      const user = otherAccounts[2]
+
+      const app2Id = await createSecondApp(contracts)
+
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, app2Id, 1)
+
+      expect(await veBetterPassport.userRoundActionCount(user.address, 1)).to.equal(3)
+    })
+
+    it("should track counts independently per round", async function () {
+      const { veBetterPassport, owner, otherAccounts, appId } = await setupSignalingFixture()
+      const user = otherAccounts[2]
+
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 2)
+
+      expect(await veBetterPassport.userRoundActionCount(user.address, 1)).to.equal(2)
+      expect(await veBetterPassport.userRoundActionCount(user.address, 2)).to.equal(1)
+      expect(await veBetterPassport.userRoundActionCount(user.address, 3)).to.equal(0)
+    })
+
+    it("should not count actions for blacklisted users", async function () {
+      const { veBetterPassport, owner, otherAccounts, appId } = await setupSignalingFixture()
+      const user = otherAccounts[2]
+
+      await veBetterPassport.connect(owner).blacklist(user.address)
+      await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
+
+      expect(await veBetterPassport.userRoundActionCount(user.address, 1)).to.equal(0)
+    })
+  })
+
   describe("appRoundActionCount", function () {
     it("should return 0 for an app with no actions", async function () {
       const { veBetterPassport, appId } = await setupSignalingFixture()
