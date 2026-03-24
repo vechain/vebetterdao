@@ -1,10 +1,8 @@
-import { getConfig } from "@repo/config"
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query"
 
-import type { TreasuryTransfer, TreasuryTransfersResponse } from "./types"
+import { indexerFetch } from "../../indexer/api"
 
-const config = getConfig()
-const baseUrl = config.indexerUrl?.replace("/api/v1", "") ?? ""
+import type { TreasuryTransfer, TreasuryTransfersResponse } from "./types"
 
 export type { TreasuryTransfer }
 
@@ -21,7 +19,7 @@ const fetchTreasuryTransfers = async (
   params.set("size", String(size))
   params.set("direction", "DESC")
 
-  const res = await fetch(`${baseUrl}/api/v1/b3tr/treasury/transfers?${params}`)
+  const res = await indexerFetch(`/api/v1/b3tr/treasury/transfers?${params}`)
   if (!res.ok) throw new Error("Failed to fetch treasury transfers")
   return res.json()
 }
