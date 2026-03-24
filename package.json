@@ -105,12 +105,12 @@
     "@datadog/browser-rum": "^5.23.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@vechain/picasso": "^2.1.1",
     "dotenv": "^16.4.5",
-    "hardhat": "2.19.1",
+    "hardhat": "3.0.0",
     "husky": "^8.0.0",
     "lint-staged": "12.5.0",
-    "prettier": "^3.3.0",
-    "@vechain/picasso": "^2.1.1"
+    "prettier": "^3.3.0"
   },
   "engines": {
     "node": "20.x.x"
