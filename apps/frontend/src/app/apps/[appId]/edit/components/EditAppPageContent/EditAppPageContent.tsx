@@ -14,7 +14,7 @@ import {
 import { UilCheck } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useParams, useRouter } from "next/navigation"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
@@ -181,33 +181,49 @@ export const EditAppPageContent = () => {
     [updateAppDetailsMutation, onOpen, uploadMetadata, onTxModalClose],
   )
 
-  // Sync async-loaded screenshots into the form (only when first available and form is still empty)
-  const screenshotsKey = screenshots.filter(Boolean).length
+  // Reset all form values once when metadata first loads from blockchain
+  const hasResetRef = useRef(false)
   useEffect(() => {
-    if (screenshotsKey > 0 && form.getValues("screenshots").filter(Boolean).length === 0) {
-      form.setValue("screenshots", screenshots.filter(Boolean))
+    if (appMetadata && !hasResetRef.current) {
+      hasResetRef.current = true
+      form.reset({
+        name: appMetadata.name ?? "",
+        external_url: appMetadata.external_url ?? "",
+        description: appMetadata.description ?? "",
+        distribution_strategy: appMetadata.distribution_strategy ?? "",
+        twitterUrl: findUrlByName(appMetadata.social_urls, "Twitter"),
+        discordUrl: findUrlByName(appMetadata.social_urls, "Discord"),
+        telegramUrl: findUrlByName(appMetadata.social_urls, "Telegram"),
+        youtubeUrl: findUrlByName(appMetadata.social_urls, "Youtube"),
+        mediumUrl: findUrlByName(appMetadata.social_urls, "Medium"),
+        logoImage: logo || "",
+        bannerImage: banner || "",
+        screenshots: screenshots.filter(Boolean),
+        ve_world_bannerImage: veWorldBanner || "",
+        ve_world_featured_image: veWorldFeaturedImage || "",
+        categories: (appMetadata.categories ?? []).filter(id => !DEPRECATED_IDS.includes(id)),
+      })
+    }
+  }, [appMetadata, logo, banner, screenshots, veWorldBanner, veWorldFeaturedImage, form])
+
+  // Update async-loaded images individually (they may arrive after metadata)
+  useEffect(() => {
+    if (!hasResetRef.current) return
+    if (logo) form.setValue("logoImage", logo)
+    if (banner) form.setValue("bannerImage", banner)
+    if (veWorldBanner) form.setValue("ve_world_bannerImage", veWorldBanner)
+    if (veWorldFeaturedImage) form.setValue("ve_world_featured_image", veWorldFeaturedImage)
+  }, [logo, banner, veWorldBanner, veWorldFeaturedImage, form])
+
+  // Sync screenshots separately to avoid new-array-reference triggering reset
+  const screenshotsKey = screenshots.filter(Boolean).join(",")
+  useEffect(() => {
+    if (!hasResetRef.current) return
+    const valid = screenshots.filter(Boolean)
+    if (valid.length > 0 && form.getValues("screenshots").filter(Boolean).length === 0) {
+      form.setValue("screenshots", valid)
     }
   }, [screenshotsKey, form, screenshots])
-
-  // Update the form values when the app fetches the data from blockchain
-  useEffect(() => {
-    if (logo) {
-      form.setValue("logoImage", logo)
-    }
-    if (banner) {
-      form.setValue("bannerImage", banner)
-    }
-    const validScreenshots = screenshots.filter(Boolean)
-    if (validScreenshots.length > 0 && form.getValues("screenshots").length === 0) {
-      form.setValue("screenshots", validScreenshots)
-    }
-    if (veWorldBanner) {
-      form.setValue("ve_world_bannerImage", veWorldBanner)
-    }
-    if (veWorldFeaturedImage) {
-      form.setValue("ve_world_featured_image", veWorldFeaturedImage)
-    }
-  }, [logo, banner, screenshots, veWorldBanner, veWorldFeaturedImage, form])
 
   if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
     return null
@@ -263,7 +279,6 @@ export const EditAppPageContent = () => {
                   required: { value: true, message: t("Name required") },
                   minLength: { value: 3, message: t("Name must be at least 3 characters") },
                 })}
-                defaultValue={appMetadata?.name ?? ""}
               />
               <Field.ErrorText textStyle="xs">{errors?.name?.message ?? ""}</Field.ErrorText>
             </Field.Root>
@@ -291,7 +306,6 @@ export const EditAppPageContent = () => {
               </Text>
               <Field.Root invalid={!!errors.external_url}>
                 <Input
-                  defaultValue={appMetadata?.external_url ?? ""}
                   {...register("external_url", {
                     required: { value: true, message: t("Project url required") },
                     pattern: {
@@ -314,7 +328,6 @@ export const EditAppPageContent = () => {
                     required: { value: true, message: t("Description required") },
                     minLength: { value: 20, message: t("Description must be at least 20 characters") },
                   })}
-                  defaultValue={appMetadata?.description ?? ""}
                   resize="none"
                   h="140px"
                 />
@@ -333,7 +346,6 @@ export const EditAppPageContent = () => {
                       message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
                     },
                   })}
-                  defaultValue={appMetadata?.distribution_strategy ?? ""}
                   placeholder={t("Eg. Our goal is to distribute at least X percent of the round allocation each week.")}
                   resize="none"
                   h="140px"
