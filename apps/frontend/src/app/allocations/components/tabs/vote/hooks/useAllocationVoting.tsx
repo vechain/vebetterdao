@@ -11,7 +11,6 @@ import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/use
 import { getAutoVotingState } from "@/hooks/useAutoVotingState"
 import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
-import { useSetPreferredRelayer } from "@/hooks/useSetPreferredRelayer"
 import { useUpdateVotingPreferences } from "@/hooks/useUpdateVotingPreferences"
 import {
   distributeVotingPowerEqually,
@@ -55,7 +54,6 @@ export const useAllocationVoting = ({
   })
   const manageAutoVotingAndVote = useEnableAutoVotingAndVote({ roundId })
   const updateVotingPreferences = useUpdateVotingPreferences({ roundId })
-  const setPreferredRelayerTx = useSetPreferredRelayer()
 
   const createVotingWeightDescription = useCallback(
     (formattedVotingWeight: string) => <VotingWeightDisplay formattedVotingWeight={formattedVotingWeight} />,
@@ -131,6 +129,10 @@ export const useAllocationVoting = ({
       // Create voting weight description
       const votingWeightDescription = createVotingWeightDescription(formattedWeight)
 
+      // Determine if relayer preference changed
+      const relayerChanged = selectedRelayer !== undefined && selectedRelayer !== (currentPreferredRelayer ?? "")
+      const preferredRelayerAddress = relayerChanged ? selectedRelayer : undefined
+
       // Calculate auto-voting state using centralized logic
       const { shouldEnable, shouldDisable, needsPreferenceUpdate, isStandardVote, preferencesChanged } =
         getAutoVotingState({
@@ -204,14 +206,15 @@ export const useAllocationVoting = ({
               shouldDisable,
               isAutoVotingEnabledInCurrentRound,
               needsPreferenceUpdate,
+              preferredRelayerAddress,
             },
             customUI,
           )
         }
       }
-      // Auto-voting already enabled (and not changing), check if preferences changed
+      // Auto-voting already enabled (and not changing), check if preferences or relayer changed
       else if (!isStandardVote) {
-        if (preferencesChanged) {
+        if (preferencesChanged || relayerChanged) {
           const customUI = {
             pending: {
               title: t("Waiting for confirmation..."),
@@ -231,7 +234,7 @@ export const useAllocationVoting = ({
             },
           }
 
-          updateVotingPreferences.sendTransaction({ appIds: filteredAppIds }, customUI)
+          updateVotingPreferences.sendTransaction({ appIds: filteredAppIds, preferredRelayerAddress }, customUI)
         }
       }
       // Default: No auto-voting involved, just manual vote
@@ -248,24 +251,6 @@ export const useAllocationVoting = ({
         )
 
         castAllocationVotes.sendTransaction(appVotes, customUI)
-      }
-
-      // If user changed their preferred relayer, send a separate transaction
-      const relayerChanged = selectedRelayer !== undefined && selectedRelayer !== (currentPreferredRelayer ?? "")
-      if (relayerChanged) {
-        const relayerCustomUI = {
-          pending: { title: t("Waiting for confirmation...") },
-          waitingConfirmation: { title: t("Setting preferred relayer...") },
-          success: {
-            title: t("Preferred relayer updated!"),
-            showSocialButtons: false,
-            showTransactionDetailsButton: false,
-            hideDoneButton: true,
-            onSuccess,
-          },
-          error: { title: t("Error setting preferred relayer") },
-        }
-        setPreferredRelayerTx.sendTransaction({ relayerAddress: selectedRelayer }, relayerCustomUI)
       }
     },
     [
@@ -284,7 +269,6 @@ export const useAllocationVoting = ({
       castAllocationVotes,
       manageAutoVotingAndVote,
       updateVotingPreferences,
-      setPreferredRelayerTx,
       onSuccess,
     ],
   )
@@ -297,8 +281,6 @@ export const useAllocationVoting = ({
       manageAutoVotingAndVote.status === "pending" ||
       manageAutoVotingAndVote.status === "waitingConfirmation" ||
       updateVotingPreferences.status === "pending" ||
-      updateVotingPreferences.status === "waitingConfirmation" ||
-      setPreferredRelayerTx.status === "pending" ||
-      setPreferredRelayerTx.status === "waitingConfirmation",
+      updateVotingPreferences.status === "waitingConfirmation",
   }
 }
