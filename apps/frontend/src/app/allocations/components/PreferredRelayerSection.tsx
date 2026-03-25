@@ -220,8 +220,8 @@ export const PreferredRelayerSection = ({ selectedRelayer, onSelectRelayer }: Pr
               )}
             </VStack>
 
-            {/* Remove preference button if one is currently set */}
-            {currentPreferred && (
+            {/* Remove preference button if a relayer is selected (on-chain or in UI) */}
+            {(currentPreferred || activeRelayer) && (
               <Button variant="ghost" size="sm" onClick={handleRemove} color="text.subtle" w="full">
                 <Icon as={Xmark} boxSize="4" />
                 {t("Remove preference")}
