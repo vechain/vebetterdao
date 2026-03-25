@@ -142,7 +142,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
               <NativeSelect.Indicator />
               <NativeSelect.Field
                 placeholder="Select value..."
-                value={field.value === true || field.value === 1 || field.value === "true" ? "true" : "false"}
+                value={field.value === true ? "true" : "false"}
                 onChange={e => field.onChange(e.target.value === "true")}>
                 <option value="true">{t("True")}</option>
                 <option value="false">{t("False")}</option>

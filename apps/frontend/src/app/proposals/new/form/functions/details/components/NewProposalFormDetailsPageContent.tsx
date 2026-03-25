@@ -44,7 +44,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
               action.abiDefinition,
               action.params.map(param => {
                 if (param.type === "bool") {
-                  return param.value === true || param.value === 1 || param.value === "true"
+                  return param.value === true
                 }
                 if (param.requiresEthParse) {
                   const value = ethers.parseEther(String(param.value))

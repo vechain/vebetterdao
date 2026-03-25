@@ -1,10 +1,9 @@
 import { ABIContract, Hex } from "@vechain/sdk-core"
+import type { AbiFunction, AbiParameter } from "viem"
 
-export type ContractAbiParameter = {
-  type: string
+export type ContractAbiParameter = AbiParameter & {
   name: string
-  indexed?: boolean
-  [key: string]: unknown
+  requiresEthParse?: boolean
 }
 
 export type ContractAbiDefinition = {
@@ -12,13 +11,11 @@ export type ContractAbiDefinition = {
   name?: string
   stateMutability?: string
   inputs?: ContractAbiParameter[]
-  outputs?: ContractAbiParameter[]
+  outputs?: AbiParameter[]
   [key: string]: unknown
 }
 
-export type ContractFunctionDefinition = Omit<ContractAbiDefinition, "type" | "name" | "inputs"> & {
-  type: "function"
-  name: string
+export type ContractFunctionDefinition = Omit<AbiFunction, "inputs"> & {
   inputs: ContractAbiParameter[]
 }
 
