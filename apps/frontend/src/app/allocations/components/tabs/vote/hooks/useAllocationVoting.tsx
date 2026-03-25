@@ -5,11 +5,13 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { usePreferredRelayer } from "@/api/contracts/relayerRewardsPool/hooks/usePreferredRelayer"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { getAutoVotingState } from "@/hooks/useAutoVotingState"
 import { useCastAllocationVotes } from "@/hooks/useCastAllocationVotes"
 import { useEnableAutoVotingAndVote } from "@/hooks/useEnableAutoVoting"
+import { useSetPreferredRelayer } from "@/hooks/useSetPreferredRelayer"
 import { useUpdateVotingPreferences } from "@/hooks/useUpdateVotingPreferences"
 import {
   distributeVotingPowerEqually,
@@ -47,11 +49,13 @@ export const useAllocationVoting = ({
   const { votesAtSnapshot } = useVotingPowerAtSnapshot()
   const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const { data: currentPreferences = [] } = useUserVotingPreferences(account?.address)
+  const { data: currentPreferredRelayer } = usePreferredRelayer()
   const castAllocationVotes = useCastAllocationVotes({
     roundId,
   })
   const manageAutoVotingAndVote = useEnableAutoVotingAndVote({ roundId })
   const updateVotingPreferences = useUpdateVotingPreferences({ roundId })
+  const setPreferredRelayerTx = useSetPreferredRelayer()
 
   const createVotingWeightDescription = useCallback(
     (formattedVotingWeight: string) => <VotingWeightDisplay formattedVotingWeight={formattedVotingWeight} />,
@@ -84,7 +88,7 @@ export const useAllocationVoting = ({
   )
 
   const handleConfirmVote = useCallback(
-    (allocations: Map<string, number>) => {
+    (allocations: Map<string, number>, selectedRelayer?: string) => {
       if (!votesAtSnapshot?.totalVotesWithDepositsWei) {
         throw new Error("Votes at snapshot not found")
       }
@@ -245,6 +249,24 @@ export const useAllocationVoting = ({
 
         castAllocationVotes.sendTransaction(appVotes, customUI)
       }
+
+      // If user changed their preferred relayer, send a separate transaction
+      const relayerChanged = selectedRelayer !== undefined && selectedRelayer !== (currentPreferredRelayer ?? "")
+      if (relayerChanged) {
+        const relayerCustomUI = {
+          pending: { title: t("Waiting for confirmation...") },
+          waitingConfirmation: { title: t("Setting preferred relayer...") },
+          success: {
+            title: t("Preferred relayer updated!"),
+            showSocialButtons: false,
+            showTransactionDetailsButton: false,
+            hideDoneButton: true,
+            onSuccess,
+          },
+          error: { title: t("Error setting preferred relayer") },
+        }
+        setPreferredRelayerTx.sendTransaction({ relayerAddress: selectedRelayer }, relayerCustomUI)
+      }
     },
     [
       t,
@@ -256,11 +278,13 @@ export const useAllocationVoting = ({
       roundId,
       hasVoted,
       currentPreferences,
+      currentPreferredRelayer,
       createVotingWeightDescription,
       createCustomUI,
       castAllocationVotes,
       manageAutoVotingAndVote,
       updateVotingPreferences,
+      setPreferredRelayerTx,
       onSuccess,
     ],
   )
@@ -273,6 +297,8 @@ export const useAllocationVoting = ({
       manageAutoVotingAndVote.status === "pending" ||
       manageAutoVotingAndVote.status === "waitingConfirmation" ||
       updateVotingPreferences.status === "pending" ||
-      updateVotingPreferences.status === "waitingConfirmation",
+      updateVotingPreferences.status === "waitingConfirmation" ||
+      setPreferredRelayerTx.status === "pending" ||
+      setPreferredRelayerTx.status === "waitingConfirmation",
   }
 }

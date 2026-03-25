@@ -10,6 +10,7 @@ import { Modal } from "@/components/Modal"
 import type { AppWithVotes } from "../../lib/data"
 import { AllocationAlertCard } from "../AllocationAlertCard"
 import { AutomationToggleCard } from "../AutomationToggleCard"
+import { PreferredRelayerSection } from "../PreferredRelayerSection"
 
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"
@@ -20,7 +21,7 @@ interface ConfirmVoteModalProps {
   isOpen: boolean
   onClose: () => void
   selectedApps: AppWithVotes[]
-  onConfirm: (allocations: Map<string, number>) => void
+  onConfirm: (allocations: Map<string, number>, selectedRelayer?: string) => void
   isAutoVotingEnabled: boolean
   isAutoVotingEnabledOnChain: boolean
   isAutoVotingEnabledInCurrentRound: boolean
@@ -45,6 +46,7 @@ export const ConfirmVoteModal = ({
 }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
+  const [selectedRelayer, setSelectedRelayer] = useState<string | undefined>(undefined)
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
 
   // Get user's voting power at snapshot
@@ -70,13 +72,15 @@ export const ConfirmVoteModal = ({
 
   const handleConfirm = useCallback(() => {
     // Always allow voting (validation checks total > 0 and <= 100)
-    onConfirm(allocations)
+    onConfirm(allocations, selectedRelayer)
     setIsCustomising(false)
+    setSelectedRelayer(undefined)
     onClose()
-  }, [onConfirm, allocations, onClose])
+  }, [onConfirm, allocations, selectedRelayer, onClose])
 
   const handleCloseModal = useCallback(() => {
     setIsCustomising(false)
+    setSelectedRelayer(undefined)
     onClose()
   }, [onClose])
 
@@ -182,6 +186,9 @@ export const ConfirmVoteModal = ({
           hasVoted={hasVoted}
           isActiveInCurrentRound={isAutoVotingEnabledInCurrentRound}
         />
+        {(isAutoVotingEnabled || isAutoVotingEnabledOnChain) && (
+          <PreferredRelayerSection selectedRelayer={selectedRelayer} onSelectRelayer={setSelectedRelayer} />
+        )}
       </VStack>
     </Modal>
   )
