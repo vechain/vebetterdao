@@ -1,5 +1,4 @@
-import { HexUtils } from "@repo/utils"
-import { address } from "thor-devkit"
+import { compareAddresses as compareRepoAddresses, isValid as isValidRepoAddress } from "@repo/utils/AddressUtils"
 
 /**
  * Checks if two addresses are equal. Returns true if both values are strings AND:
@@ -11,25 +10,13 @@ import { address } from "thor-devkit"
  */
 export const compareAddresses = (address1: unknown, address2: unknown): boolean => {
   if (typeof address1 !== "string" || typeof address2 !== "string") return false
-  if (address2 === address1) return true
-  try {
-    address1 = HexUtils.addPrefix(address1)
-    address2 = HexUtils.addPrefix(address2)
-    return address.toChecksumed(address1 as string) === address.toChecksumed(address2 as string)
-  } catch {
-    return false
-  }
+  return compareRepoAddresses(address1, address2)
 }
 export const regexPattern = () => {
   return /^0x[a-fA-F0-9]{40}$/
 }
 export const isValid = (addr: string): boolean => {
-  try {
-    address.toChecksumed(HexUtils.addPrefix(addr))
-    return true
-  } catch {
-    return false
-  }
+  return isValidRepoAddress(addr)
 }
 /**
  *  Parse the namespace from a WalletConnect session in order to extract chainId, genesisId, and address

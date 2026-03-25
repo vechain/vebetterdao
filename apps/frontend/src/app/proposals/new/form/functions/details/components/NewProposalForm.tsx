@@ -1,11 +1,11 @@
 import { VStack, Heading, Field, Input, Textarea } from "@chakra-ui/react"
+import { decodeFunctionCalldata, DecodedFunctionData, encodeFunctionCalldata } from "@repo/utils/ContractUtils"
 import MDEditor from "@uiw/react-md-editor"
 import { ethers } from "ethers"
 import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import rehypeSanitize from "rehype-sanitize"
-import { abi } from "thor-devkit"
 
 import { FunctionParamsField } from "../../../../../../../components/GenerateFunctionToCallParamsInput/GenerateFunctionToCallParamsInput"
 import { useProposalFormStore, ProposalFormStoreState } from "../../../../../../../store/useProposalFormStore"
@@ -73,10 +73,9 @@ export const NewProposalForm: React.FC<Props> = ({
   //parse actions from store and set them in the form, decoding calldata if available
   useEffect(() => {
     const formActions = actions.map(action => {
-      const _abi = new abi.Function(action.abiDefinition)
-      let decoded: abi.Decoded = {}
+      let decoded: DecodedFunctionData = {}
       try {
-        if (action.calldata) decoded = abi.decodeParameters(_abi.definition.inputs, `0x${action.calldata.slice(10)}`)
+        if (action.calldata) decoded = decodeFunctionCalldata(action.calldata, action.abiDefinition)
       } catch (e) {
         console.error("Error decoding call data", e)
       }
@@ -84,9 +83,10 @@ export const NewProposalForm: React.FC<Props> = ({
       return {
         ...action,
         params: action.abiDefinition.inputs.map(param => {
+          const requiresEthParse = param.requiresEthParse === true
           const parsedParam = (() => {
-            if (!decoded[param.name]) return undefined
-            if (param.requiresEthParse) return ethers.formatEther(decoded[param.name])
+            if (typeof decoded[param.name] === "undefined") return undefined
+            if (requiresEthParse) return ethers.formatEther(decoded[param.name] as ethers.BigNumberish)
             return decoded[param.name]
           })()
 
@@ -94,7 +94,7 @@ export const NewProposalForm: React.FC<Props> = ({
             name: param.name,
             type: param.type,
             value: parsedParam,
-            requiresEthParse: param.requiresEthParse,
+            requiresEthParse,
           }
         }),
       }
@@ -111,18 +111,22 @@ export const NewProposalForm: React.FC<Props> = ({
         title: data.title,
         shortDescription: data.description,
         actions: data.actions.map(action => {
-          const _abi = new abi.Function(action.abiDefinition)
           return {
             contractAddress: action.contractAddress,
             abiDefinition: action.abiDefinition,
             name: action.name,
             description: action.description,
-            calldata: _abi.encode(
-              ...action.params.map(param => {
+            calldata: encodeFunctionCalldata(
+              action.abiDefinition,
+              action.params.map(param => {
+                if (param.type === "bool") {
+                  return param.value === true || param.value === 1 || param.value === "true"
+                }
                 if (param.requiresEthParse) {
                   const value = ethers.parseEther(String(param.value))
                   return value.toString()
-                } else return param.value
+                }
+                return param.value
               }),
             ),
           }

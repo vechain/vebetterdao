@@ -1,10 +1,10 @@
 import { Button, Card, HStack, Heading, VStack } from "@chakra-ui/react"
+import { encodeFunctionCalldata } from "@repo/utils/ContractUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { abi } from "thor-devkit"
 
 import {
   buttonClicked,
@@ -35,18 +35,22 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
         shortDescription: data.description,
         markdownDescription,
         actions: data.actions.map(action => {
-          const _abi = new abi.Function(action.abiDefinition)
           return {
             contractAddress: action.contractAddress,
             abiDefinition: action.abiDefinition,
             name: action.name,
             description: action.description,
-            calldata: _abi.encode(
-              ...action.params.map(param => {
+            calldata: encodeFunctionCalldata(
+              action.abiDefinition,
+              action.params.map(param => {
+                if (param.type === "bool") {
+                  return param.value === true || param.value === 1 || param.value === "true"
+                }
                 if (param.requiresEthParse) {
                   const value = ethers.parseEther(String(param.value))
                   return value.toString()
-                } else return param.value
+                }
+                return param.value
               }),
             ),
           }

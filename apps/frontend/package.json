@@ -37,8 +37,6 @@
     "@transak/transak-sdk": "^3.1.1",
     "@uiw/react-md-editor": "^4.0.4",
     "@use-gesture/react": "^10.3.1",
-    "@vechain/connex-driver": "^2.1.0",
-    "@vechain/connex-framework": "^2.1.0",
     "@vechain/picasso": "^2.1.1",
     "@vechain/vebetterdao-contracts": "*",
     "@vechain/vechain-kit": "2.6.1",
@@ -69,7 +67,6 @@
     "recharts": "^3.2.1",
     "rehype-sanitize": "^6.0.0",
     "swiper": "^12.1.2",
-    "thor-devkit": "^2.0.9",
     "uuid": "^9.0.1",
     "zustand": "^4.5.2"
   },

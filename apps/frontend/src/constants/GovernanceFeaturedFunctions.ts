@@ -1,7 +1,12 @@
 import { getConfig, getContractsConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
+import {
+  ContractAbiParameter,
+  ContractFunctionDefinition,
+  JsonContractType,
+  resolveAbiFunctionFromCalldata,
+} from "@repo/utils/ContractUtils"
 import {
   B3TRGovernorJson,
   TimeLockContractJson,
@@ -9,7 +14,6 @@ import {
   TreasuryContractJson,
   X2EarnAppsJson,
 } from "@vechain/vebetterdao-contracts"
-import { abi } from "thor-devkit"
 
 import { ProposalFormAction } from "../store/useProposalFormStore"
 const config = getConfig()
@@ -27,7 +31,9 @@ export type ExecutorAvailableContracts = {
  * @returns  The function definition
  */
 export const getFunctionDefinitionFromAbi = (jsonContract: JsonContractType, functionName: string) => {
-  const abiDefinition = jsonContract.abi.find(f => f.name === functionName) as abi.Function.Definition | undefined
+  const abiDefinition = jsonContract.abi.find(f => f.type === "function" && f.name === functionName) as
+    | ContractFunctionDefinition
+    | undefined
   if (!abiDefinition) throw new Error(`${functionName} not found in contract ${jsonContract.contractName}`)
   return abiDefinition
 }
@@ -70,8 +76,8 @@ export type GovernanceFeaturedFunction = {
   name: string
   description: string
   icon?: string
-  abiDefinition: Omit<abi.Function.Definition, "inputs"> & {
-    inputs: (abi.Function.Parameter & {
+  abiDefinition: ContractFunctionDefinition & {
+    inputs: (ContractAbiParameter & {
       requiresEthParse?: boolean
     })[]
   }
