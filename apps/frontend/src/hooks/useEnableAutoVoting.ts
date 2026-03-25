@@ -131,6 +131,15 @@ export const useEnableAutoVotingAndVote = ({
       )
     }
 
+    // Clear preferred relayer when disabling auto-voting
+    if (shouldDisable) {
+      clauses.push(
+        relayerPoolContract.clause.setPreferredRelayer("0x0000000000000000000000000000000000000000", {
+          comment: "Clear preferred relayer",
+        }).clause,
+      )
+    }
+
     return clauses
   }
 
