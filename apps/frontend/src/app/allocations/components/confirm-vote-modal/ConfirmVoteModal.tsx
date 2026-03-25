@@ -186,7 +186,7 @@ export const ConfirmVoteModal = ({
           hasVoted={hasVoted}
           isActiveInCurrentRound={isAutoVotingEnabledInCurrentRound}
         />
-        {(isAutoVotingEnabled || isAutoVotingEnabledOnChain) && (
+        {isAutoVotingEnabled && (
           <PreferredRelayerSection selectedRelayer={selectedRelayer} onSelectRelayer={setSelectedRelayer} />
         )}
       </VStack>
