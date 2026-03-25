@@ -1420,33 +1420,33 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     // CRITICAL: Update emissions to distribute rewards to our upgraded VoterRewards V6
     await emissionsLatest.connect(owner).setVote2EarnAddress(await voterRewardsV6.getAddress())
 
-    await upgradeProxy("B3TRGovernorV6", "B3TRGovernorV7", await governor.getAddress(), [], {
-      version: 7,
+    await upgradeProxy("B3TRGovernorV6", "B3TRGovernor", await governor.getAddress(), [], {
+      version: 10,
       libraries: {
-        GovernorClockLogicV7: await governorClockLogicLibV7.getAddress(),
-        GovernorConfiguratorV7: await governorConfiguratorLibV7.getAddress(),
-        GovernorDepositLogicV7: await governorDepositLogicLibV7.getAddress(),
-        GovernorFunctionRestrictionsLogicV7: await governorFunctionRestrictionsLogicLibV7.getAddress(),
-        GovernorProposalLogicV7: await governorProposalLogicLibV7.getAddress(),
-        GovernorQuorumLogicV7: await governorQuorumLogicLibV7.getAddress(),
-        GovernorStateLogicV7: await governorStateLogicLibV7.getAddress(),
-        GovernorVotesLogicV7: await governorVotesLogicLibV7.getAddress(),
+        GovernorClockLogic: await governorClockLogicLib.getAddress(),
+        GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+        GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+        GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+        GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+        GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+        GovernorStateLogic: await governorStateLogicLib.getAddress(),
+        GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
       },
     })
 
     // Deploy AutoVotingLogic library
-    const AutoVotingLogic = await ethers.deployContract("AutoVotingLogicV8")
+    const AutoVotingLogic = await ethers.deployContract("AutoVotingLogic")
     await AutoVotingLogic.waitForDeployment()
 
-    // Upgrade XAllocationVoting to V8
+    // Upgrade XAllocationVoting to latest
     const xAllocationVotingV8 = (await upgradeProxy(
       "XAllocationVotingV6",
-      "XAllocationVotingV8",
+      "XAllocationVoting",
       await xAllocationVoting.getAddress(),
       [],
       {
-        version: 8,
-        libraries: { AutoVotingLogicV8: await AutoVotingLogic.getAddress() },
+        version: 9,
+        libraries: { AutoVotingLogic: await AutoVotingLogic.getAddress() },
       },
     )) as XAllocationVoting
 

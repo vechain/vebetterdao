@@ -38,6 +38,16 @@ import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
 library GovernorStorageTypes {
+  // keccak256(abi.encode(uint256(keccak256("GovernorStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant GovernorStorageLocation = 0xd09a0aaf4ab3087bae7fa25ef74ddd4e5a4950980903ce417e66228cf7dc7b00;
+
+  /// @dev Returns the governor storage slot.
+  function getGovernorStorage() internal pure returns (GovernorStorage storage $) {
+    assembly {
+      $.slot := GovernorStorageLocation
+    }
+  }
+
   struct GovernorStorage {
     // ------------------------------- Version 1 -------------------------------
 

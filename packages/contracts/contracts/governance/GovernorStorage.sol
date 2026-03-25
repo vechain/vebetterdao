@@ -143,7 +143,7 @@ contract GovernorStorage is Initializable {
 
     // Set quorum for GRANT - manually implement the logic from _updateQuorumNumeratorByType
     governorStorage.proposalTypeQuorum[GovernorTypes.ProposalType.Grant].push(
-      GovernorClockLogic.clock(governorStorage),
+      GovernorClockLogic.clock(),
       SafeCast.toUint208(initializationDataV7.grantQuorum)
     );
 
