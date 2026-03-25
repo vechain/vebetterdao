@@ -60,6 +60,7 @@ export type AppConfig = {
   tokenAuctionContractAddress: string
   nodeManagementContractAddress: string
   veBetterPassportContractAddress: string
+  challengesContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   passportLibraries: PassportLibraries
   xAllocationVotingLibraries: XAllocationVotingLibraries

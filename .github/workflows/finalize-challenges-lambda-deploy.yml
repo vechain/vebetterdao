@@ -1,0 +1,46 @@
+name: Finalize Challenges Lambda Deployment
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/finalize-challenges/**'
+      - 'packages/lambda/src/finalizeChallenges/**'
+      - '.github/workflows/finalize-challenges-lambda-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: 'Terraform workspace to use (dev, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  build:
+    name: Build Lambda
+    uses: ./.github/workflows/lambda-build.yml
+    with:
+      workspace: ${{ github.event.inputs.workspace || 'dev' }}
+    secrets:
+      TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+      MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+
+  deploy:
+    name: Deploy Infrastructure
+    needs: build
+    uses: ./.github/workflows/lambda-infrastructure-deploy.yml
+    with:
+      workspace: ${{ github.event.inputs.workspace || 'dev' }}
+      lambda_name: finalizeChallenges
+      terraform_dir: terraform/finalize-challenges
+    secrets:
+      AWS_ACCESS_ROLE: ${{ secrets.AWS_ACCESS_ROLE }}
+      DEV_AWS_ACC_ROLE: ${{ secrets.DEV_AWS_ACC_ROLE }}
+      VECHAINCI_SSH_PRIVATE_KEYS: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}

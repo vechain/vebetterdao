@@ -17,6 +17,7 @@ import {
   X2EarnCreator,
   GrantsManager,
   RelayerRewardsPool,
+  B3TRChallenges,
   GrantsManagerV1,
   DBAPool,
   DBAPoolV1,
@@ -61,6 +62,8 @@ import { deployLegacyNodesMock } from "./mocks/deployLegacyNodes"
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
+const CHALLENGES_MAX_DURATION = 4
+const CHALLENGES_MAX_SELECTED_APPS = 10
 
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
@@ -1122,6 +1125,29 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log("X2EarnApps addresses set and upgraded to X2EarnAppsV8")
 
+  const b3trChallenges = (await deployProxy(
+    "B3TRChallenges",
+    [
+      {
+        b3trAddress: await b3tr.getAddress(),
+        veBetterPassportAddress: await veBetterPassport.getAddress(),
+        xAllocationVotingAddress: await xAllocationVoting.getAddress(),
+        x2EarnAppsAddress: await x2EarnApps.getAddress(),
+        maxChallengeDuration: CHALLENGES_MAX_DURATION,
+        maxSelectedApps: CHALLENGES_MAX_SELECTED_APPS,
+      },
+      {
+        admin: config.CONTRACTS_ADMIN_ADDRESS,
+        upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+        contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
+        settingsManager: config.CONTRACTS_ADMIN_ADDRESS,
+      },
+    ],
+    {},
+    undefined,
+    true,
+  )) as B3TRChallenges
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -1140,6 +1166,7 @@ export async function deployAll(config: ContractsConfig) {
     XAllocationVoting: await xAllocationVoting.getAddress(),
     vechainNodesManagement: await nodeManagementMock.getAddress(),
     VeBetterPassport: await veBetterPassport.getAddress(),
+    B3TRChallenges: await b3trChallenges.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
     GrantsManager: await grantsManager.getAddress(),
     RelayerRewardsPool: await relayerRewardsPool.getAddress(),
@@ -1832,6 +1859,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodesMock: vechainNodesMock,
     vechainNodeManagement: nodeManagementMock,
     veBetterPassport: veBetterPassport,
+    b3trChallenges: b3trChallenges,
     x2EarnCreator: x2EarnCreator,
     grantsManager: grantsManager,
     relayerRewardsPool: relayerRewardsPool,

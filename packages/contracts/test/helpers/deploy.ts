@@ -23,6 +23,7 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
+  B3TRChallenges,
   VeBetterPassportV2,
   B3TRMultiSig,
   VeBetterPassportV3,
@@ -74,6 +75,7 @@ export interface DeployInstance
   treasury: Treasury
   nodeManagement: NodeManagementV3
   x2EarnCreator: X2EarnCreator
+  b3trChallenges: B3TRChallenges
   x2EarnRewardsPool: X2EarnRewardsPool
   veBetterPassport: VeBetterPassport
   veBetterPassportV1: VeBetterPassportV1
@@ -115,6 +117,8 @@ export interface DeployInstance
 export const NFT_NAME = "GalaxyMember"
 export const NFT_SYMBOL = "GM"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
+const CHALLENGES_MAX_DURATION = 4
+const CHALLENGES_MAX_SELECTED_APPS = 10
 
 // // Voter Rewards
 export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels
@@ -1083,6 +1087,23 @@ export const getOrDeployContractInstances = async ({
     },
   })) as X2EarnApps
 
+  const b3trChallenges = (await deployProxy("B3TRChallenges", [
+    {
+      b3trAddress: await b3tr.getAddress(),
+      veBetterPassportAddress: await veBetterPassport.getAddress(),
+      xAllocationVotingAddress: await xAllocationVoting.getAddress(),
+      x2EarnAppsAddress: await x2EarnApps.getAddress(),
+      maxChallengeDuration: CHALLENGES_MAX_DURATION,
+      maxSelectedApps: CHALLENGES_MAX_SELECTED_APPS,
+    },
+    {
+      admin: owner.address,
+      upgrader: owner.address,
+      contractsAddressManager: owner.address,
+      settingsManager: owner.address,
+    },
+  ])) as B3TRChallenges
+
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
@@ -1096,6 +1117,7 @@ export const getOrDeployContractInstances = async ({
     B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
     VeBetterPassport: veBetterPassportContractAddress,
+    B3TRChallenges: await b3trChallenges.getAddress(),
     StargateNFT: await stargateNftMock.getAddress(),
     DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
   }
@@ -1243,6 +1265,7 @@ export const getOrDeployContractInstances = async ({
     creators,
     treasury,
     x2EarnRewardsPool,
+    b3trChallenges,
     veBetterPassport,
     veBetterPassportV1,
     veBetterPassportV2,

@@ -103,6 +103,17 @@ Here's a list of the current lambda functions and their primary responsibilities
       - Returns transaction receipts with the number of successful and failed claims
     - **Note**: The lambda uses the same relayer wallet as `relayerCastVote` (stored in AWS Secrets Manager) to pay gas fees for claiming rewards on behalf of users. Relayer fees are deducted from user rewards as configured in the VoterRewards V6 contract
 
+9.  **`finalizeChallenges`**:
+    - **Purpose**: Automatically finalizes challenges that ended in the previous round.
+    - **Trigger**: Scheduled.
+    - **Key Operations**:
+      - Reads the current round from `XAllocationVoting`
+      - Finds challenges with `endRound == currentRound - 1` by filtering `ChallengeCreated` events
+      - Calls `finalizeChallengeBatch(challengeId, batchSize)` until each eligible challenge reaches `Finalized`
+      - Skips challenges already cancelled, invalid, or finalized
+      - Sends Slack notifications for successful runs and partial failures
+    - **Note**: The lambda reuses the existing distributor wallet because challenge finalization is permissionless and only requires gas sponsorship
+
 ## Development
 
 Follow these guidelines for developing and maintaining lambdas:

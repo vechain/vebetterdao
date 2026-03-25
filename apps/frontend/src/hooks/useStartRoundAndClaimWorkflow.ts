@@ -11,8 +11,8 @@ import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/gover
 import { getHasXAppClaimedQueryKey } from "../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
 import { useHaveXAppsClaimed } from "../api/contracts/xAllocationPool/hooks/useHaveXAppsClaimed"
 import { getAllocationAmountQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationAmount"
-import { getAllocationsRoundStateQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { getAllocationsRoundsEventsQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { getAllocationsRoundStateQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { getCurrentAllocationsRoundDeadlineQueryKey } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import {
   getCurrentAllocationsRoundIdQueryKey,
