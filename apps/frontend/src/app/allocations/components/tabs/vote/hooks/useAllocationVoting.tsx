@@ -5,6 +5,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { usePreferredRelayer } from "@/api/contracts/relayerRewardsPool/hooks/usePreferredRelayer"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { getAutoVotingState } from "@/hooks/useAutoVotingState"
@@ -47,6 +48,7 @@ export const useAllocationVoting = ({
   const { votesAtSnapshot } = useVotingPowerAtSnapshot()
   const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const { data: currentPreferences = [] } = useUserVotingPreferences(account?.address)
+  const { data: currentPreferredRelayer } = usePreferredRelayer()
   const castAllocationVotes = useCastAllocationVotes({
     roundId,
   })
@@ -84,7 +86,7 @@ export const useAllocationVoting = ({
   )
 
   const handleConfirmVote = useCallback(
-    (allocations: Map<string, number>) => {
+    (allocations: Map<string, number>, selectedRelayer?: string) => {
       if (!votesAtSnapshot?.totalVotesWithDepositsWei) {
         throw new Error("Votes at snapshot not found")
       }
@@ -126,6 +128,10 @@ export const useAllocationVoting = ({
 
       // Create voting weight description
       const votingWeightDescription = createVotingWeightDescription(formattedWeight)
+
+      // Determine if relayer preference changed
+      const relayerChanged = selectedRelayer !== undefined && selectedRelayer !== (currentPreferredRelayer ?? "")
+      const preferredRelayerAddress = relayerChanged ? selectedRelayer : undefined
 
       // Calculate auto-voting state using centralized logic
       const { shouldEnable, shouldDisable, needsPreferenceUpdate, isStandardVote, preferencesChanged } =
@@ -200,14 +206,15 @@ export const useAllocationVoting = ({
               shouldDisable,
               isAutoVotingEnabledInCurrentRound,
               needsPreferenceUpdate,
+              preferredRelayerAddress,
             },
             customUI,
           )
         }
       }
-      // Auto-voting already enabled (and not changing), check if preferences changed
+      // Auto-voting already enabled (and not changing), check if preferences or relayer changed
       else if (!isStandardVote) {
-        if (preferencesChanged) {
+        if (preferencesChanged || relayerChanged) {
           const customUI = {
             pending: {
               title: t("Waiting for confirmation..."),
@@ -227,7 +234,7 @@ export const useAllocationVoting = ({
             },
           }
 
-          updateVotingPreferences.sendTransaction({ appIds: filteredAppIds }, customUI)
+          updateVotingPreferences.sendTransaction({ appIds: filteredAppIds, preferredRelayerAddress }, customUI)
         }
       }
       // Default: No auto-voting involved, just manual vote
@@ -256,6 +263,7 @@ export const useAllocationVoting = ({
       roundId,
       hasVoted,
       currentPreferences,
+      currentPreferredRelayer,
       createVotingWeightDescription,
       createCustomUI,
       castAllocationVotes,
