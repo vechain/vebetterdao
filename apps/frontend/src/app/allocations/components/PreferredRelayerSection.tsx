@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 
 import { usePreferredRelayer } from "@/api/contracts/relayerRewardsPool/hooks/usePreferredRelayer"
 import { useRegisteredRelayers } from "@/api/contracts/relayerRewardsPool/hooks/useRegisteredRelayers"
+import { AddressIcon } from "@/components/AddressIcon"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 
 interface PreferredRelayerSectionProps {
@@ -80,17 +81,28 @@ export const PreferredRelayerSection = ({ selectedRelayer, onSelectRelayer }: Pr
         {/* Header */}
         <HStack justify="space-between" alignItems="center" gap="2">
           <HStack gap={{ base: "2", md: "3" }} flex={1} alignItems="center">
-            <Box
-              bg="status.neutral.subtle"
-              borderRadius="4px"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              w={{ base: "8", md: "8" }}
-              h={{ base: "8", md: "8" }}
-              flexShrink={0}>
-              <Icon as={Heart} boxSize={{ base: "4", md: "5" }} color="text.subtle" />
-            </Box>
+            {activeRelayer && activeRelayer !== "0x0000000000000000000000000000000000000000" ? (
+              <Box
+                w={{ base: "8", md: "8" }}
+                h={{ base: "8", md: "8" }}
+                flexShrink={0}
+                borderRadius="full"
+                overflow="hidden">
+                <AddressIcon address={activeRelayer} w="full" h="full" borderRadius="full" />
+              </Box>
+            ) : (
+              <Box
+                bg="status.neutral.subtle"
+                borderRadius="4px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                w={{ base: "8", md: "8" }}
+                h={{ base: "8", md: "8" }}
+                flexShrink={0}>
+                <Icon as={Heart} boxSize={{ base: "4", md: "5" }} color="text.subtle" />
+              </Box>
+            )}
             <VStack alignItems="flex-start" gap="0" flex={1} minW={0}>
               <Text textStyle="md" fontWeight="semibold" color="text.default">
                 {t("Preferred relayer")}
@@ -186,16 +198,21 @@ export const PreferredRelayerSection = ({ selectedRelayer, onSelectRelayer }: Pr
                       _hover={{ bg: isSelected ? "status.success.subtle" : "bg.secondary" }}
                       onClick={() => handleSelect(relayer.address)}
                       justify="space-between">
-                      <VStack alignItems="flex-start" gap="0" flex={1} minW={0}>
-                        <Text textStyle="sm" fontWeight={relayer.name ? "semibold" : "normal"} truncate>
-                          {relayer.name ?? `${relayer.address.slice(0, 10)}...${relayer.address.slice(-6)}`}
-                        </Text>
-                        {relayer.name && (
-                          <Text textStyle="xs" color="text.subtle" truncate>
-                            {`${relayer.address.slice(0, 10)}...${relayer.address.slice(-6)}`}
+                      <HStack gap="2" flex={1} minW={0}>
+                        <Box w="7" h="7" flexShrink={0} borderRadius="full" overflow="hidden">
+                          <AddressIcon address={relayer.address} w="full" h="full" borderRadius="full" />
+                        </Box>
+                        <VStack alignItems="flex-start" gap="0" flex={1} minW={0}>
+                          <Text textStyle="sm" fontWeight={relayer.name ? "semibold" : "normal"} truncate>
+                            {relayer.name ?? `${relayer.address.slice(0, 10)}...${relayer.address.slice(-6)}`}
                           </Text>
-                        )}
-                      </VStack>
+                          {relayer.name && (
+                            <Text textStyle="xs" color="text.subtle" truncate>
+                              {`${relayer.address.slice(0, 10)}...${relayer.address.slice(-6)}`}
+                            </Text>
+                          )}
+                        </VStack>
+                      </HStack>
                       {isSelected && <Icon as={Check} boxSize="4" color="status.success.default" />}
                     </HStack>
                   )
