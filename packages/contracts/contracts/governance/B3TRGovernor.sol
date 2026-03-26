@@ -34,7 +34,6 @@ import { GovernorFunctionRestrictionsLogic } from "./libraries/GovernorFunctionR
 import { GovernorGovernanceLogic } from "./libraries/GovernorGovernanceLogic.sol";
 import { GovernorConfigurator } from "./libraries/GovernorConfigurator.sol";
 import { GovernorTypes } from "./libraries/GovernorTypes.sol";
-import { GovernorStorage } from "./GovernorStorage.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IVOT3 } from "../interfaces/IVOT3.sol";
 import { IB3TR } from "../interfaces/IB3TR.sol";
@@ -92,7 +91,6 @@ import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
  */
 contract B3TRGovernor is
   IB3TRGovernor,
-  GovernorStorage,
   AccessControlUpgradeable,
   UUPSUpgradeable,
   PausableUpgradeable
@@ -262,7 +260,7 @@ contract B3TRGovernor is
    * @return uint256 The voting threshold
    */
   function votingThresholdByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.proposalTypeVotingThreshold[proposalTypeValue];
   }
 
@@ -309,7 +307,7 @@ contract B3TRGovernor is
    * @return IVOT3 The voting token
    */
   function token() external view returns (IVOT3) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.vot3;
   }
 
@@ -362,7 +360,7 @@ contract B3TRGovernor is
    * @return uint256 The minimum voting delay
    */
   function minVotingDelay() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.minVotingDelay;
   }
 
@@ -371,7 +369,7 @@ contract B3TRGovernor is
    * @return uint256 The voting period
    */
   function votingPeriod() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.xAllocationVoting.votingPeriod();
   }
 
@@ -399,7 +397,7 @@ contract B3TRGovernor is
    * @return uint256 The total votes for the proposal
    */
   function proposalTotalVotes(uint256 proposalId) external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.proposalTotalVotes[proposalId];
   }
 
@@ -486,7 +484,7 @@ contract B3TRGovernor is
    * @return string The name of the governor
    */
   function name() external view returns (string memory) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.name;
   }
 
@@ -554,7 +552,7 @@ contract B3TRGovernor is
    * @return IVoterRewardsV2 The voter rewards contract
    */
   function voterRewards() external view returns (IVoterRewards) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.voterRewards;
   }
 
@@ -563,7 +561,7 @@ contract B3TRGovernor is
    * @return IXAllocationVotingGovernor The XAllocationVotingGovernor contract
    */
   function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.xAllocationVoting;
   }
 
@@ -572,7 +570,7 @@ contract B3TRGovernor is
    * @return IB3TR The B3TR contract
    */
   function b3tr() external view returns (IB3TR) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.b3tr;
   }
 
@@ -581,7 +579,7 @@ contract B3TRGovernor is
    * @return address The address of the timelock
    */
   function timelock() external view virtual returns (address) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return address($.timelock);
   }
 
@@ -590,7 +588,7 @@ contract B3TRGovernor is
    * @return The current VeBetterPassport contract.
    */
   function veBetterPassport() external view returns (IVeBetterPassport) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.veBetterPassport;
   }
 
@@ -674,7 +672,7 @@ contract B3TRGovernor is
    * @return The current GalaxyMember contract
    */
   function getGalaxyMemberContract() external view returns (IGalaxyMember) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.galaxyMember;
   }
 
@@ -683,7 +681,7 @@ contract B3TRGovernor is
    * @return The current GrantsManager contract
    */
   function getGrantsManagerContract() external view returns (IGrantsManager) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.grantsManager;
   }
 
@@ -695,7 +693,7 @@ contract B3TRGovernor is
   function getRequiredGMLevelByProposalType(
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.requiredGMLevelByProposalType[proposalTypeValue];
   }
 
