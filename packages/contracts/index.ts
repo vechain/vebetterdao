@@ -3,7 +3,7 @@ import VoterRewardsContractJson from "./artifacts/contracts/VoterRewards.sol/Vot
 import B3trContractJson from "./artifacts/contracts/B3TR.sol/B3TR.json"
 import GalaxyMemberContractJson from "./artifacts/contracts/GalaxyMember.sol/GalaxyMember.json"
 import EmissionsContractJson from "./artifacts/contracts/Emissions.sol/Emissions.json"
-import B3TRGovernorJson from "./artifacts/contracts/B3TRGovernor.sol/B3TRGovernor.json"
+import B3TRGovernorJson from "./artifacts/contracts/governance/B3TRGovernor.sol/B3TRGovernor.json"
 import TimeLockContractJson from "./artifacts/contracts/TimeLock.sol/TimeLock.json"
 import XAllocationPoolJson from "./artifacts/contracts/XAllocationPool.sol/XAllocationPool.json"
 import XAllocationVotingJson from "./artifacts/contracts/x-allocation-voting-governance/XAllocationVoting.sol/XAllocationVoting.json"

@@ -23,23 +23,23 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
-import { GovernorStateLogic } from "./governance/libraries/GovernorStateLogic.sol";
-import { GovernorVotesLogic } from "./governance/libraries/GovernorVotesLogic.sol";
-import { GovernorQuorumLogic } from "./governance/libraries/GovernorQuorumLogic.sol";
-import { GovernorDepositLogic } from "./governance/libraries/GovernorDepositLogic.sol";
-import { GovernorStorageTypes } from "./governance/libraries/GovernorStorageTypes.sol";
-import { GovernorClockLogic } from "./governance/libraries/GovernorClockLogic.sol";
-import { GovernorFunctionRestrictionsLogic } from "./governance/libraries/GovernorFunctionRestrictionsLogic.sol";
-import { GovernorGovernanceLogic } from "./governance/libraries/GovernorGovernanceLogic.sol";
-import { GovernorConfigurator } from "./governance/libraries/GovernorConfigurator.sol";
-import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
-import { GovernorStorage } from "./governance/GovernorStorage.sol";
-import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
-import { IVOT3 } from "./interfaces/IVOT3.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { GovernorProposalLogic } from "./libraries/GovernorProposalLogic.sol";
+import { GovernorStateLogic } from "./libraries/GovernorStateLogic.sol";
+import { GovernorVotesLogic } from "./libraries/GovernorVotesLogic.sol";
+import { GovernorQuorumLogic } from "./libraries/GovernorQuorumLogic.sol";
+import { GovernorDepositLogic } from "./libraries/GovernorDepositLogic.sol";
+import { GovernorStorageTypes } from "./libraries/GovernorStorageTypes.sol";
+import { GovernorClockLogic } from "./libraries/GovernorClockLogic.sol";
+import { GovernorFunctionRestrictionsLogic } from "./libraries/GovernorFunctionRestrictionsLogic.sol";
+import { GovernorGovernanceLogic } from "./libraries/GovernorGovernanceLogic.sol";
+import { GovernorConfigurator } from "./libraries/GovernorConfigurator.sol";
+import { GovernorTypes } from "./libraries/GovernorTypes.sol";
+import { GovernorStorage } from "./GovernorStorage.sol";
+import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
+import { IVOT3 } from "../interfaces/IVOT3.sol";
+import { IB3TR } from "../interfaces/IB3TR.sol";
+import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
+import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
@@ -48,9 +48,9 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
-import { IGrantsManager } from "./interfaces/IGrantsManager.sol";
-import { IGalaxyMember } from "./interfaces/IGalaxyMember.sol";
+import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { IGrantsManager } from "../interfaces/IGrantsManager.sol";
+import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
 
 /**
  * @title B3TRGovernor
