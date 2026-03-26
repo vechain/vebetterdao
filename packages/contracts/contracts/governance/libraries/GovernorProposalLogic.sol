@@ -266,9 +266,9 @@ library GovernorProposalLogic {
    */
   function proposalType(
     uint256 proposalId
-  ) external view returns (GovernorTypes.ProposalType) {
+  ) external view returns (uint8) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.proposalType[proposalId];
+    return uint8($.proposalType[proposalId]);
   }
 
   /** ------------------ SETTERS ------------------ **/

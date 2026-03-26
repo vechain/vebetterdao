@@ -61,8 +61,8 @@ library GovernorStateLogic {
    */
   function state(
     uint256 proposalId
-  ) external view returns (GovernorTypes.ProposalState) {
-    return _state(proposalId);
+  ) external view returns (uint8) {
+    return uint8(_state(proposalId));
   }
 
   /** ------------------ INTERNAL FUNCTIONS ------------------ **/

@@ -89,9 +89,9 @@ library GovernorQuorumLogic {
   /// @return The quorum numerator at the given timepoint.
   function quorumNumeratorByProposalType(
     uint256 timepoint,
-    GovernorTypes.ProposalType proposalTypeValue
+    uint8 proposalTypeValue
   ) public view returns (uint256) {
-    return _quorumNumeratorByProposalType(timepoint, proposalTypeValue);
+    return _quorumNumeratorByProposalType(timepoint, GovernorTypes.ProposalType(proposalTypeValue));
   }
 
   /// @notice Retrieves the latest quorum numerator using the GovernorClockLogic library.
@@ -108,10 +108,10 @@ library GovernorQuorumLogic {
    * @return The latest quorum numerator for the proposal type.
    */
   function quorumNumeratorByProposalType(
-    GovernorTypes.ProposalType proposalTypeValue
+    uint8 proposalTypeValue
   ) public view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.proposalTypeQuorum[proposalTypeValue].latest();
+    return $.proposalTypeQuorum[GovernorTypes.ProposalType(proposalTypeValue)].latest();
   }
 
   /**
@@ -142,7 +142,7 @@ library GovernorQuorumLogic {
    */
   function quorumByProposalType(
     uint256 timepoint,
-    GovernorTypes.ProposalType proposalTypeValue
+    uint8 proposalTypeValue
   ) public view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return
@@ -191,7 +191,7 @@ library GovernorQuorumLogic {
     GovernorTypes.ProposalType proposalType = $.proposalType[proposalId];
 
     return
-      quorumByProposalType(GovernorProposalLogic._proposalSnapshot(proposalId), proposalType) <=
+      quorumByProposalType(GovernorProposalLogic._proposalSnapshot(proposalId), uint8(proposalType)) <=
       $.proposalTotalVotes[proposalId];
   }
   /**
@@ -231,7 +231,7 @@ library GovernorQuorumLogic {
   ) internal {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     uint256 denominator = quorumDenominator();
-    uint256 oldQuorumNumerator = quorumNumeratorByProposalType(proposalTypeValue);
+    uint256 oldQuorumNumerator = quorumNumeratorByProposalType(uint8(proposalTypeValue));
 
     if (newQuorumNumerator > denominator) {
       revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);

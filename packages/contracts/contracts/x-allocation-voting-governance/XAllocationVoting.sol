@@ -207,7 +207,7 @@ contract XAllocationVoting is
     }
 
     // Get eligible apps
-    bytes32[] memory eligibleApps = ExternalContractsUtils.x2EarnApps().allEligibleApps();
+    bytes32[] memory eligibleApps = XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps.allEligibleApps();
 
     // Create new round
     uint48 currentClock = VotesUtils.clock();
@@ -221,7 +221,7 @@ contract XAllocationVoting is
     RoundEarningsSettingsUtils.snapshotRoundEarningsCap(newRoundId);
 
     // Set expected auto-voting actions for relayer rewards
-    IRelayerRewardsPool pool = ExternalContractsUtils.relayerRewardsPool();
+    IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
     if (address(pool) != address(0)) {
       uint208 totalAutoVotingUsers = AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(currentClock);
       pool.setTotalActionsForRound(newRoundId, totalAutoVotingUsers);
@@ -259,7 +259,7 @@ contract XAllocationVoting is
 
     _checkEarlyAccessEligibility(roundId, voter);
 
-    (bool isPerson, ) = ExternalContractsUtils.veBetterPassport().isPersonAtTimepoint(
+    (bool isPerson, ) = XAllocationVotingStorageTypes._getExternalContractsStorage()._veBetterPassport.isPersonAtTimepoint(
       voter,
       SafeCast.toUint48(currentRoundSnapshot())
     );
@@ -277,7 +277,7 @@ contract XAllocationVoting is
       // Only toggle and reduce expected actions if autovoting is enabled
       if (AutoVotingLogic.isAutoVotingEnabled(voter)) {
         AutoVotingLogic.toggleAutoVoting(address(this), voter, VotesUtils.clock());
-        ExternalContractsUtils.relayerRewardsPool().reduceExpectedActionsForRound(roundId, 1);
+        XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.reduceExpectedActionsForRound(roundId, 1);
       }
       emit AutoVoteSkipped(voter, roundId, isPerson, finalAppIds.length, votingPower);
       return;
@@ -310,7 +310,7 @@ contract XAllocationVoting is
     RoundVotesCountingUtils.countVote(roundId, voter, appIds, voteWeights, voterTotalVotingPower, roundSnapshot(roundId));
 
     if (isAutoVote) {
-      ExternalContractsUtils.relayerRewardsPool().registerRelayerAction(
+      XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.registerRelayerAction(
         _msgSender(),
         voter,
         roundId,
@@ -334,7 +334,7 @@ contract XAllocationVoting is
    * @param voter The voter address
    */
   function validatePersonhoodForCurrentRound(address voter) public view returns (bool) {
-    (bool isPerson, string memory explanation) = ExternalContractsUtils.veBetterPassport().isPersonAtTimepoint(
+    (bool isPerson, string memory explanation) = XAllocationVotingStorageTypes._getExternalContractsStorage()._veBetterPassport.isPersonAtTimepoint(
       voter,
       SafeCast.toUint48(currentRoundSnapshot())
     );
@@ -357,7 +357,7 @@ contract XAllocationVoting is
    * @dev Check if the caller is eligible to perform relayer actions during early access period
    */
   function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
-    ExternalContractsUtils.relayerRewardsPool().validateVoteDuringEarlyAccess(roundId, voter, _msgSender());
+    XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.validateVoteDuringEarlyAccess(roundId, voter, _msgSender());
   }
 
   /**
@@ -390,7 +390,7 @@ contract XAllocationVoting is
    * @dev Set the voting preferences for the caller
    */
   function setUserVotingPreferences(bytes32[] memory appIds) public {
-    AutoVotingLogic.setUserVotingPreferences(address(ExternalContractsUtils.x2EarnApps()), _msgSender(), appIds);
+    AutoVotingLogic.setUserVotingPreferences(address(XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps), _msgSender(), appIds);
   }
 
   // ======================== Setters (role-gated) ======================== //
@@ -468,7 +468,7 @@ contract XAllocationVoting is
    * @dev Set the voting period for a round
    */
   function setVotingPeriod(uint32 newVotingPeriod) public onlyRole(GOVERNANCE_ROLE) {
-    VotingSettingsUtils.setVotingPeriod(newVotingPeriod, ExternalContractsUtils.emissions().cycleDuration());
+    VotingSettingsUtils.setVotingPeriod(newVotingPeriod, XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions.cycleDuration());
   }
 
   /**
@@ -553,14 +553,14 @@ contract XAllocationVoting is
    * @dev Checks if the given appId can be voted for in the given round.
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view returns (bool) {
-    return ExternalContractsUtils.x2EarnApps().isEligible(appId, roundSnapshot(roundId));
+    return XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps.isEligible(appId, roundSnapshot(roundId));
   }
 
   /**
    * @dev Returns the deposit voting power for a given account at a given timepoint.
    */
   function getDepositVotingPower(address account, uint256 timepoint) public view returns (uint256) {
-    return ExternalContractsUtils.b3trGovernor().getDepositVotingPower(account, timepoint);
+    return XAllocationVotingStorageTypes._getExternalContractsStorage()._b3trGovernor.getDepositVotingPower(account, timepoint);
   }
 
   // ======================== Voting Settings ======================== //
@@ -611,31 +611,31 @@ contract XAllocationVoting is
   /// @dev Returns all the apps eligible for voting in a round with details.
   /// @notice Could be inefficient with a large number of apps; use {getAppIdsOfRound} + {IX2EarnApps-app} instead.
   function getAppsOfRound(uint256 roundId) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
-    return RoundsStorageUtils.getAppsOfRound(roundId, ExternalContractsUtils.x2EarnApps());
+    return RoundsStorageUtils.getAppsOfRound(roundId);
   }
 
   // ======================== External Contracts ======================== //
 
   /// @dev Returns the X2EarnApps contract.
-  function x2EarnApps() public view returns (IX2EarnApps) { return ExternalContractsUtils.x2EarnApps(); }
+  function x2EarnApps() public view returns (IX2EarnApps) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps; }
 
   /// @dev Returns the Emissions contract.
-  function emissions() public view returns (IEmissions) { return ExternalContractsUtils.emissions(); }
+  function emissions() public view returns (IEmissions) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions; }
 
   /// @dev Returns the VoterRewards contract.
-  function voterRewards() public view returns (IVoterRewards) { return ExternalContractsUtils.voterRewards(); }
+  function voterRewards() public view returns (IVoterRewards) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._voterRewards; }
 
   /// @dev Returns the VeBetterPassport contract.
-  function veBetterPassport() public view returns (IVeBetterPassport) { return ExternalContractsUtils.veBetterPassport(); }
+  function veBetterPassport() public view returns (IVeBetterPassport) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._veBetterPassport; }
 
   /// @dev Returns the B3TRGovernor contract.
-  function b3trGovernor() public view returns (IB3TRGovernor) { return ExternalContractsUtils.b3trGovernor(); }
+  function b3trGovernor() public view returns (IB3TRGovernor) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._b3trGovernor; }
 
   /// @dev Returns the RelayerRewardsPool contract.
-  function relayerRewardsPool() public view returns (IRelayerRewardsPool) { return ExternalContractsUtils.relayerRewardsPool(); }
+  function relayerRewardsPool() public view returns (IRelayerRewardsPool) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool; }
 
   /// @dev The token that voting power is sourced from.
-  function token() public view returns (address) { return address(VotesUtils.token()); }
+  function token() public view returns (address) { return address(XAllocationVotingStorageTypes._getVotesStorage()._token); }
 
   // ======================== Earnings Settings ======================== //
 
@@ -720,7 +720,7 @@ contract XAllocationVoting is
    * @notice Status changes mid-cycle will only take effect in the next cycle
    */
   function isUserAutoVotingEnabledInCurrentRound(address account) public view returns (bool) {
-    uint256 lastEmissionBlock = ExternalContractsUtils.emissions().lastEmissionBlock();
+    uint256 lastEmissionBlock = XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions.lastEmissionBlock();
     return AutoVotingLogic.isAutoVotingEnabledAtTimepoint(account, uint48(lastEmissionBlock));
   }
 
@@ -752,7 +752,7 @@ contract XAllocationVoting is
    * @dev Get the total number of users who enabled auto-voting at the last emission block
    */
   function getTotalAutoVotingUsersAtRoundStart() public view returns (uint208) {
-    uint256 lastEmissionBlock = ExternalContractsUtils.emissions().lastEmissionBlock();
+    uint256 lastEmissionBlock = XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions.lastEmissionBlock();
     return AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(uint48(lastEmissionBlock));
   }
 

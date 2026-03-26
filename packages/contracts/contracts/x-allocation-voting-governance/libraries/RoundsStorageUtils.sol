@@ -145,12 +145,11 @@ library RoundsStorageUtils {
    * @notice This function could not be efficient with a large number of apps, in that case, use {getAppIdsOfRound}
    * and then call {IX2EarnApps-app} for each app id
    * @param roundId The round to query
-   * @param x2EarnAppsContract The X2EarnApps contract to fetch app details from
    */
   function getAppsOfRound(
-    uint256 roundId,
-    IX2EarnApps x2EarnAppsContract
+    uint256 roundId
   ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    IX2EarnApps x2EarnAppsContract = XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps;
     XAllocationVotingStorageTypes.RoundsStorageStorage storage $ = XAllocationVotingStorageTypes
       ._getRoundsStorageStorage();
 

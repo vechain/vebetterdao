@@ -241,7 +241,7 @@ library GovernorVotesLogic {
 
     uint256 weight = $.vot3.getPastVotes(voter, proposalSnapshot); // aka voting power without quadratic voting
     uint256 power = Math.sqrt(weight) * 1e9;
-    GovernorTypes.ProposalType proposalType = GovernorProposalLogic.proposalType(proposalId);
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(GovernorProposalLogic.proposalType(proposalId));
 
     _checkVotingThreshold(weight, proposalType);
 

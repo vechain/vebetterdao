@@ -215,13 +215,13 @@ library GovernorDepositLogic {
   }
   /**
    * @notice Returns the deposit threshold for a proposal type.
-   * @param proposalType The type of proposal.
+   * @param proposalTypeValue The type of proposal (uint8-encoded enum).
    * @return uint256 The deposit threshold for the proposal type.
    */
   function depositThresholdByProposalType(
-    GovernorTypes.ProposalType proposalType
+    uint8 proposalTypeValue
   ) external view returns (uint256) {
-    return _depositThresholdByProposalType(proposalType);
+    return _depositThresholdByProposalType(GovernorTypes.ProposalType(proposalTypeValue));
   }
 
   /**

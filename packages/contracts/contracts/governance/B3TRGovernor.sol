@@ -198,7 +198,7 @@ contract B3TRGovernor is
    * @return GovernorTypes.ProposalState The state of the proposal
    */
   function state(uint256 proposalId) external view returns (GovernorTypes.ProposalState) {
-    return GovernorStateLogic.state(proposalId);
+    return GovernorTypes.ProposalState(GovernorStateLogic.state(proposalId));
   }
 
   /**
@@ -600,10 +600,10 @@ contract B3TRGovernor is
    * @return GovernorTypes.ProposalType The proposal type
    */
   function proposalType(uint256 proposalId) external view returns (GovernorTypes.ProposalType) {
-    return GovernorProposalLogic.proposalType(proposalId);
+    return GovernorTypes.ProposalType(GovernorProposalLogic.proposalType(proposalId));
   }
 
-  /** GovernorStorageTypes.GovernorStorage storage self = $.governor.getGovernorStorage();
+  /**
    * @notice Returns the deposit threshold for a proposal type.
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold for the proposal type.
@@ -611,7 +611,7 @@ contract B3TRGovernor is
   function depositThresholdByProposalType(
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
-    return GovernorDepositLogic.depositThresholdByProposalType(proposalTypeValue);
+    return GovernorDepositLogic.depositThresholdByProposalType(uint8(proposalTypeValue));
   }
 
   /**
@@ -635,7 +635,7 @@ contract B3TRGovernor is
     uint256 blockNumber,
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
-    return GovernorQuorumLogic.quorumByProposalType(blockNumber, proposalTypeValue);
+    return GovernorQuorumLogic.quorumByProposalType(blockNumber, uint8(proposalTypeValue));
   }
 
   /**
@@ -644,7 +644,7 @@ contract B3TRGovernor is
    * @return uint256 The quorum numerator
    */
   function quorumNumeratorByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
-    return GovernorQuorumLogic.quorumNumeratorByProposalType(proposalTypeValue);
+    return GovernorQuorumLogic.quorumNumeratorByProposalType(uint8(proposalTypeValue));
   }
   /**
    * @notice Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
@@ -655,7 +655,7 @@ contract B3TRGovernor is
     uint256 timepoint,
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
-    return GovernorQuorumLogic.quorumNumeratorByProposalType(timepoint, proposalTypeValue);
+    return GovernorQuorumLogic.quorumNumeratorByProposalType(timepoint, uint8(proposalTypeValue));
   }
 
   /**

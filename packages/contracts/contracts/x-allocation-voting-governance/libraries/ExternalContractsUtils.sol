@@ -56,48 +56,6 @@ library ExternalContractsUtils {
 
   // ------- Getters ------- //
 
-  /// @notice Returns the X2EarnApps contract
-  function x2EarnApps() external view returns (IX2EarnApps) {
-    XAllocationVotingStorageTypes.ExternalContractsStorage storage $ = XAllocationVotingStorageTypes
-      ._getExternalContractsStorage();
-    return $._x2EarnApps;
-  }
-
-  /// @notice Returns the Emissions contract
-  function emissions() external view returns (IEmissions) {
-    XAllocationVotingStorageTypes.ExternalContractsStorage storage $ = XAllocationVotingStorageTypes
-      ._getExternalContractsStorage();
-    return $._emissions;
-  }
-
-  /// @notice Returns the VoterRewards contract
-  function voterRewards() external view returns (IVoterRewards) {
-    XAllocationVotingStorageTypes.ExternalContractsStorage storage $ = XAllocationVotingStorageTypes
-      ._getExternalContractsStorage();
-    return $._voterRewards;
-  }
-
-  /// @notice Returns the VeBetterPassport contract
-  function veBetterPassport() external view returns (IVeBetterPassport) {
-    XAllocationVotingStorageTypes.ExternalContractsStorage storage $ = XAllocationVotingStorageTypes
-      ._getExternalContractsStorage();
-    return $._veBetterPassport;
-  }
-
-  /// @notice Returns the B3TRGovernor contract
-  function b3trGovernor() external view returns (IB3TRGovernor) {
-    XAllocationVotingStorageTypes.ExternalContractsStorage storage $ = XAllocationVotingStorageTypes
-      ._getExternalContractsStorage();
-    return $._b3trGovernor;
-  }
-
-  /// @notice Returns the RelayerRewardsPool contract
-  function relayerRewardsPool() external view returns (IRelayerRewardsPool) {
-    XAllocationVotingStorageTypes.ExternalContractsStorage storage $ = XAllocationVotingStorageTypes
-      ._getExternalContractsStorage();
-    return $._relayerRewardsPool;
-  }
-
   // ------- Setters ------- //
 
   /// @notice Sets the Emissions contract

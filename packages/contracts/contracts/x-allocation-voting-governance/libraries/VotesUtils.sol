@@ -22,13 +22,7 @@ library VotesUtils {
   }
 
   /**
-   * @notice Returns the voting token
-   * @return The IERC5805 token used for voting power
    */
-  function token() external view returns (IERC5805) {
-    XAllocationVotingStorageTypes.VotesStorage storage $ = XAllocationVotingStorageTypes._getVotesStorage();
-    return $._token;
-  }
 
   /**
    * @notice Clock as specified in EIP-6372, matched to the token's clock.
