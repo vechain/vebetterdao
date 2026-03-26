@@ -51,6 +51,7 @@ import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
 import { autoVotingLibraries } from "../../scripts/libraries"
+import { xAllocationVotingLibraries } from "../../scripts/libraries/xAllocationVotingLibraries"
 import { deployStargateMock } from "../../scripts/deploy/mocks/deployStargate"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
@@ -295,6 +296,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy AutoVoting Libraries
   const { AutoVotingLogic } = await autoVotingLibraries()
+  const xAllocLibs = await xAllocationVotingLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
 
@@ -695,7 +697,17 @@ export const getOrDeployContractInstances = async ({
         undefined,
         undefined,
         { AutoVotingLogicV8: await AutoVotingLogic.getAddress() },
-        { AutoVotingLogic: await AutoVotingLogic.getAddress() },
+        {
+          AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+          ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+          VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+          VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+          VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+          RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+          RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+          RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+          RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
+        },
       ],
       logOutput: false,
     },
@@ -1104,7 +1116,15 @@ export const getOrDeployContractInstances = async ({
       AppStorageUtils: await AppStorageUtils.getAddress(),
     },
     XAllocationVoting: {
-      AutoVotingLogic: await AutoVotingLogic.getAddress(),
+      AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+      ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+      VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+      VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+      VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+      RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+      RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+      RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+      RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
     },
   }
 
