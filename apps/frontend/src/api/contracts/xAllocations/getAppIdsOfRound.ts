@@ -1,6 +1,6 @@
 // Getter for obtaining appIds of a given round
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVoting__factory.abi

@@ -1,9 +1,9 @@
 import { getConfig } from "@repo/config"
-import { XAllocationVotingGovernor__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVotingGovernor__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress as `0x${string}`
-const abi = XAllocationVotingGovernor__factory.abi
+const abi = XAllocationVoting__factory.abi
 const method = "currentRoundSnapshot" as const
 
 /**
@@ -13,7 +13,7 @@ const method = "currentRoundSnapshot" as const
 export const getCurrentRoundSnapshotQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
- * Hook to get the current round snapshot from the XAllocationVotingGovernor contract.
+ * Hook to get the current round snapshot from the XAllocationVoting contract.
  * This combines currentRoundId() and roundSnapshot() into a single call.
  * @returns The snapshot block number for the current allocation round.
  */

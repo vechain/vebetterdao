@@ -32,26 +32,26 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-import { IXAllocationVotingGovernor, IERC6372 } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IEmissions } from "./interfaces/IEmissions.sol";
-import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
-import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
-import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
-import { IRelayerRewardsPool, RelayerAction } from "./interfaces/IRelayerRewardsPool.sol";
-import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
+import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
+import { IEmissions } from "../interfaces/IEmissions.sol";
+import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
+import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
+import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
+import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 
 // Libraries
-import { XAllocationVotingStorageTypes } from "./x-allocation-voting-governance/libraries/XAllocationVotingStorageTypes.sol";
-import { ExternalContractsUtils } from "./x-allocation-voting-governance/libraries/ExternalContractsUtils.sol";
-import { VotingSettingsUtils } from "./x-allocation-voting-governance/libraries/VotingSettingsUtils.sol";
-import { VotesUtils } from "./x-allocation-voting-governance/libraries/VotesUtils.sol";
-import { VotesQuorumFractionUtils } from "./x-allocation-voting-governance/libraries/VotesQuorumFractionUtils.sol";
-import { RoundEarningsSettingsUtils } from "./x-allocation-voting-governance/libraries/RoundEarningsSettingsUtils.sol";
-import { RoundFinalizationUtils } from "./x-allocation-voting-governance/libraries/RoundFinalizationUtils.sol";
-import { RoundsStorageUtils } from "./x-allocation-voting-governance/libraries/RoundsStorageUtils.sol";
-import { RoundVotesCountingUtils } from "./x-allocation-voting-governance/libraries/RoundVotesCountingUtils.sol";
-import { AutoVotingLogic } from "./x-allocation-voting-governance/libraries/AutoVotingLogic.sol";
+import { XAllocationVotingStorageTypes } from "./libraries/XAllocationVotingStorageTypes.sol";
+import { ExternalContractsUtils } from "./libraries/ExternalContractsUtils.sol";
+import { VotingSettingsUtils } from "./libraries/VotingSettingsUtils.sol";
+import { VotesUtils } from "./libraries/VotesUtils.sol";
+import { VotesQuorumFractionUtils } from "./libraries/VotesQuorumFractionUtils.sol";
+import { RoundEarningsSettingsUtils } from "./libraries/RoundEarningsSettingsUtils.sol";
+import { RoundFinalizationUtils } from "./libraries/RoundFinalizationUtils.sol";
+import { RoundsStorageUtils } from "./libraries/RoundsStorageUtils.sol";
+import { RoundVotesCountingUtils } from "./libraries/RoundVotesCountingUtils.sol";
+import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
 
 /**
  * @title XAllocationVoting

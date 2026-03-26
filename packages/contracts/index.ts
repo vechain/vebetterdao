@@ -6,8 +6,7 @@ import EmissionsContractJson from "./artifacts/contracts/Emissions.sol/Emissions
 import B3TRGovernorJson from "./artifacts/contracts/B3TRGovernor.sol/B3TRGovernor.json"
 import TimeLockContractJson from "./artifacts/contracts/TimeLock.sol/TimeLock.json"
 import XAllocationPoolJson from "./artifacts/contracts/XAllocationPool.sol/XAllocationPool.json"
-import XAllocationVotingJson from "./artifacts/contracts/XAllocationVoting.sol/XAllocationVoting.json"
-import XAllocationVotingGovernorJson from "./artifacts/contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol/XAllocationVotingGovernor.json"
+import XAllocationVotingJson from "./artifacts/contracts/x-allocation-voting-governance/XAllocationVoting.sol/XAllocationVoting.json"
 import TreasuryContractJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
 import X2EarnAppsJson from "./artifacts/contracts/x-2-earn-apps/X2EarnApps.sol/X2EarnApps.json"
 import TreasuryJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
@@ -26,7 +25,6 @@ export {
   TimeLock__factory,
   XAllocationPool__factory,
   XAllocationVoting__factory,
-  XAllocationVotingGovernor__factory,
   X2EarnApps__factory,
   Treasury__factory,
   X2EarnRewardsPool__factory,
@@ -45,7 +43,6 @@ export {
   TimeLockContractJson,
   XAllocationPoolJson,
   XAllocationVotingJson,
-  XAllocationVotingGovernorJson,
   TreasuryContractJson,
   X2EarnAppsJson,
   TreasuryJson,
