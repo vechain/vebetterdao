@@ -7,6 +7,7 @@ import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { XAllocationVotingDataTypes } from "./XAllocationVotingDataTypes.sol";
 import { XAllocationVotingStorageTypes } from "./XAllocationVotingStorageTypes.sol";
+
 /**
  * @title AutoVotingLogic
  * @notice Library that handles user preferences for automatic voting in allocation rounds
@@ -45,12 +46,9 @@ library AutoVotingLogic {
    * Total Count:  101   ──────────────────────→ 100
    * User Prefs:   [app1, app2] ────────────────→ [] (deleted)
    */
-  function toggleAutoVoting(
-    address xAllocationVotingGovernorAddress,
-    address account,
-    uint48 clock
-  ) external {
-    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes._getAutoVotingStorage();
+  function toggleAutoVoting(address xAllocationVotingGovernorAddress, address account, uint48 clock) external {
+    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes
+      ._getAutoVotingStorage();
     bool currentStatus = autoVotingStorage._autoVotingEnabled[account].upperLookupRecent(clock) == 1;
     bool newStatus = !currentStatus;
 
@@ -59,12 +57,16 @@ library AutoVotingLogic {
     // If user is enabling autovoting (was disabled, now enabling), check eligibility
     if (!currentStatus) {
       xAllocationVotingGovernor.validatePersonhoodForCurrentRound(account);
-      (, bool isValid) = xAllocationVotingGovernor.getAndValidateVotingPower(
+      (, bool isValid) = _getAndValidateVotingPower(
+        xAllocationVotingGovernor,
         account,
         xAllocationVotingGovernor.currentRoundSnapshot()
       );
       require(isValid, "AutoVotingLogic: at least 1 VOT3 is required");
-      require(autoVotingStorage._userVotingPreferences[account].length > 0, "AutoVotingLogic: must select at least one app");
+      require(
+        autoVotingStorage._userVotingPreferences[account].length > 0,
+        "AutoVotingLogic: must select at least one app"
+      );
     }
 
     // If user is disabling autovoting (was enabled, now disabling), clear preferences
@@ -73,7 +75,10 @@ library AutoVotingLogic {
     }
 
     // Push new checkpoint with toggled status
-    autoVotingStorage._autoVotingEnabled[account].push(clock, newStatus ? SafeCast.toUint208(1) : SafeCast.toUint208(0));
+    autoVotingStorage._autoVotingEnabled[account].push(
+      clock,
+      newStatus ? SafeCast.toUint208(1) : SafeCast.toUint208(0)
+    );
 
     uint208 currentTotal = autoVotingStorage._totalAutoVotingUsers.upperLookupRecent(clock);
     uint208 newTotal = newStatus ? currentTotal + 1 : currentTotal - 1;
@@ -83,17 +88,27 @@ library AutoVotingLogic {
   }
 
   /**
+   * @dev Gets total voting power (voting power + deposit voting power) for an account and validates it meets the minimum threshold for auto-voting
+   */
+  function _getAndValidateVotingPower(
+    IXAllocationVotingGovernor xAllocationVotingGovernor,
+    address account,
+    uint256 timepoint
+  ) internal view returns (uint256, bool) {
+    uint256 voterAvailableVotes = xAllocationVotingGovernor.getTotalVotingPower(account, timepoint);
+    bool isValid = voterAvailableVotes >= 1 ether;
+    return (voterAvailableVotes, isValid);
+  }
+
+  /**
    * @dev Sets the voting preferences for an account
    * @param x2EarnAppsAddress The address of the X2EarnApps contract
    * @param account The address to set preferences for
    * @param apps The list of app IDs to vote for
    */
-  function setUserVotingPreferences(
-    address x2EarnAppsAddress,
-    address account,
-    bytes32[] memory apps
-  ) external {
-    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes._getAutoVotingStorage();
+  function setUserVotingPreferences(address x2EarnAppsAddress, address account, bytes32[] memory apps) external {
+    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes
+      ._getAutoVotingStorage();
     require(apps.length > 0, "AutoVotingLogic: no apps to vote for");
     require(apps.length <= 15, "AutoVotingLogic: must vote for less than 15 apps");
 
@@ -122,10 +137,9 @@ library AutoVotingLogic {
    * @param account The address to check
    * @return Whether autovoting is enabled for the account at the latest timepoint
    */
-  function isAutoVotingEnabled(
-    address account
-  ) external view returns (bool) {
-    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes._getAutoVotingStorage();
+  function isAutoVotingEnabled(address account) external view returns (bool) {
+    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes
+      ._getAutoVotingStorage();
     return autoVotingStorage._autoVotingEnabled[account].latest() == 1;
   }
 
@@ -135,11 +149,9 @@ library AutoVotingLogic {
    * @param timepoint The timepoint to check
    * @return Whether autovoting is enabled for the account at the specific timepoint
    */
-  function isAutoVotingEnabledAtTimepoint(
-    address account,
-    uint48 timepoint
-  ) external view returns (bool) {
-    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes._getAutoVotingStorage();
+  function isAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) external view returns (bool) {
+    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes
+      ._getAutoVotingStorage();
     return autoVotingStorage._autoVotingEnabled[account].upperLookupRecent(timepoint) == 1;
   }
 
@@ -148,10 +160,9 @@ library AutoVotingLogic {
    * @param account The address to get preferences for
    * @return The list of app IDs the account prefers to vote for
    */
-  function getUserVotingPreferences(
-    address account
-  ) external view returns (bytes32[] memory) {
-    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes._getAutoVotingStorage();
+  function getUserVotingPreferences(address account) external view returns (bytes32[] memory) {
+    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes
+      ._getAutoVotingStorage();
     return autoVotingStorage._userVotingPreferences[account];
   }
 
@@ -160,10 +171,9 @@ library AutoVotingLogic {
    * @param timepoint The timepoint to check
    * @return The total number of users who enabled autovoting at the specific timepoint
    */
-  function getTotalAutoVotingUsersAtTimepoint(
-    uint48 timepoint
-  ) external view returns (uint208) {
-    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes._getAutoVotingStorage();
+  function getTotalAutoVotingUsersAtTimepoint(uint48 timepoint) external view returns (uint208) {
+    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes
+      ._getAutoVotingStorage();
     return autoVotingStorage._totalAutoVotingUsers.upperLookupRecent(timepoint);
   }
 
@@ -172,10 +182,9 @@ library AutoVotingLogic {
    * @param clock The current timepoint
    * @return The total number of users who enabled autovoting at the current timepoint
    */
-  function getTotalAutoVotingUsers(
-    uint48 clock
-  ) external view returns (uint208) {
-    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes._getAutoVotingStorage();
+  function getTotalAutoVotingUsers(uint48 clock) external view returns (uint208) {
+    XAllocationVotingStorageTypes.AutoVotingStorage storage autoVotingStorage = XAllocationVotingStorageTypes
+      ._getAutoVotingStorage();
     return autoVotingStorage._totalAutoVotingUsers.upperLookupRecent(clock);
   }
 
@@ -201,7 +210,8 @@ library AutoVotingLogic {
   ) external view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights, uint256 votingPower) {
     IXAllocationVotingGovernor xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernorAddress);
 
-    (uint256 voterAvailableVotes, bool isValid) = xAllocationVotingGovernor.getAndValidateVotingPower(
+    (uint256 voterAvailableVotes, bool isValid) = _getAndValidateVotingPower(
+      xAllocationVotingGovernor,
       voter,
       xAllocationVotingGovernor.roundSnapshot(roundId)
     );

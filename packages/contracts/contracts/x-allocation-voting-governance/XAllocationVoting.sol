@@ -100,92 +100,20 @@ contract XAllocationVoting is
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
-
+  /// @dev Bitmask with every valid `RoundState` bit set: bit `i` is 1 for enum value `i` (same layout as
+  ///      `_encodeStateBitmap`). `2 ** (max + 1) - 1` sets bits `0` through `type(RoundState).max` inclusive.
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
-
-  /**
-   * @notice Data for initializing the contract
-   * @param vot3Token The address of the VOT3 token used for voting
-   * @param quorumPercentage quorum as a percentage of the total supply
-   * @param initialVotingPeriod The round duration
-   * @param timeLock Address of the timelock contract controlling governance actions
-   * @param voterRewards The address of the VoterRewards contract
-   * @param emissions The address of the Emissions contract
-   * @param admins The addresses of the admins
-   * @param upgrader The address of the upgrader
-   * @param contractsAddressManager The address of the contracts address manager.
-   * @param x2EarnAppsAddress The address of the X2EarnApps contract
-   * @param baseAllocationPercentage A percentage of the total amount of allocations that should be equaly distributed to all apps in a round
-   * @param appSharesCap Max amount of % of votes an app can get in a round
-   * @param votingThreshold Minimum amount of VOT3 balance to cast a vote
-   */
-  struct InitializationData {
-    IVotes vot3Token;
-    uint256 quorumPercentage;
-    uint32 initialVotingPeriod;
-    address timeLock;
-    IVoterRewards voterRewards;
-    IEmissions emissions;
-    address[] admins;
-    address upgrader;
-    address contractsAddressManager;
-    IX2EarnApps x2EarnAppsAddress;
-    uint256 baseAllocationPercentage;
-    uint256 appSharesCap;
-    uint256 votingThreshold;
-  }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
   }
 
-  /**
-   * @notice Initialize the contract
-   * @param data The initialization data
-   */
-  function initialize(InitializationData memory data) public initializer {
-    require(address(data.vot3Token) != address(0), "XAllocationVoting: invalid VOT3 token address");
-    require(address(data.voterRewards) != address(0), "XAllocationVoting: invalid VoterRewards address");
-    require(address(data.emissions) != address(0), "XAllocationVoting: invalid Emissions address");
+  // ======================== Authorizations ======================== //
 
-    // Set governor name
-    XAllocationVotingStorageTypes._getGovernorStorage()._name = "XAllocationVoting";
-
-    // Initialize external contract references
-    ExternalContractsUtils.initialize(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
-
-    // Initialize voting token
-    VotesUtils.initialize(data.vot3Token);
-
-    // Initialize voting settings (validate against emissions cycle duration)
-    VotingSettingsUtils.setVotingPeriod(data.initialVotingPeriod, data.emissions.cycleDuration());
-
-    // Initialize vote counting with threshold
-    RoundVotesCountingUtils.initialize(data.votingThreshold);
-
-    // Initialize quorum
-    VotesQuorumFractionUtils.initialize(data.quorumPercentage, VotesUtils.clock());
-
-    // Initialize earnings settings
-    RoundEarningsSettingsUtils.setBaseAllocationPercentage(data.baseAllocationPercentage);
-    RoundEarningsSettingsUtils.setAppSharesCap(data.appSharesCap);
-
-    __AccessControl_init();
-    __UUPSUpgradeable_init();
-
-    for (uint256 i; i < data.admins.length; i++) {
-      require(data.admins[i] != address(0), "XAllocationVoting: invalid admin address");
-      _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
-    }
-
-    _grantRole(UPGRADER_ROLE, data.upgrader);
-    _grantRole(GOVERNANCE_ROLE, data.timeLock);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
-  }
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ======================== Core Voting Logic ======================== //
-  // (absorbed from XAllocationVotingGovernor)
 
   /**
    * @dev Starts a new round of voting to allocate funds to x-2-earn applications.
@@ -207,7 +135,10 @@ contract XAllocationVoting is
     }
 
     // Get eligible apps
-    bytes32[] memory eligibleApps = XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps.allEligibleApps();
+    bytes32[] memory eligibleApps = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._x2EarnApps
+      .allEligibleApps();
 
     // Create new round
     uint48 currentClock = VotesUtils.clock();
@@ -259,10 +190,10 @@ contract XAllocationVoting is
 
     _checkEarlyAccessEligibility(roundId, voter);
 
-    (bool isPerson, ) = XAllocationVotingStorageTypes._getExternalContractsStorage()._veBetterPassport.isPersonAtTimepoint(
-      voter,
-      SafeCast.toUint48(currentRoundSnapshot())
-    );
+    (bool isPerson, ) = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._veBetterPassport
+      .isPersonAtTimepoint(voter, SafeCast.toUint48(currentRoundSnapshot()));
 
     bytes32[] memory appIds = AutoVotingLogic.getUserVotingPreferences(voter);
 
@@ -277,7 +208,10 @@ contract XAllocationVoting is
       // Only toggle and reduce expected actions if autovoting is enabled
       if (AutoVotingLogic.isAutoVotingEnabled(voter)) {
         AutoVotingLogic.toggleAutoVoting(address(this), voter, VotesUtils.clock());
-        XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.reduceExpectedActionsForRound(roundId, 1);
+        XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.reduceExpectedActionsForRound(
+          roundId,
+          1
+        );
       }
       emit AutoVoteSkipped(voter, roundId, isPerson, finalAppIds.length, votingPower);
       return;
@@ -307,7 +241,14 @@ contract XAllocationVoting is
     uint256 voterTotalVotingPower = getTotalVotingPower(voter, roundSnapshot(roundId));
 
     // Count the vote using the library
-    RoundVotesCountingUtils.countVote(roundId, voter, appIds, voteWeights, voterTotalVotingPower, roundSnapshot(roundId));
+    RoundVotesCountingUtils.countVote(
+      roundId,
+      voter,
+      appIds,
+      voteWeights,
+      voterTotalVotingPower,
+      roundSnapshot(roundId)
+    );
 
     if (isAutoVote) {
       XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.registerRelayerAction(
@@ -323,7 +264,7 @@ contract XAllocationVoting is
   /**
    * @dev Function to store the last succeeded round once a round ends.
    */
-  function finalizeRound(uint256 roundId) public virtual {
+  function finalizeRound(uint256 roundId) external {
     RoundFinalizationUtils.finalizeRound(roundId, uint8(state(roundId)), isActive(roundId));
   }
 
@@ -334,30 +275,14 @@ contract XAllocationVoting is
    * @param voter The voter address
    */
   function validatePersonhoodForCurrentRound(address voter) public view returns (bool) {
-    (bool isPerson, string memory explanation) = XAllocationVotingStorageTypes._getExternalContractsStorage()._veBetterPassport.isPersonAtTimepoint(
-      voter,
-      SafeCast.toUint48(currentRoundSnapshot())
-    );
+    (bool isPerson, string memory explanation) = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._veBetterPassport
+      .isPersonAtTimepoint(voter, SafeCast.toUint48(currentRoundSnapshot()));
     if (!isPerson) {
       revert GovernorPersonhoodVerificationFailed(voter, explanation);
     }
     return isPerson;
-  }
-
-  /**
-   * @dev Gets total voting power (voting power + deposit voting power) for an account and validates it meets the minimum threshold for auto-voting
-   */
-  function getAndValidateVotingPower(address account, uint256 timepoint) public view returns (uint256, bool) {
-    uint256 voterAvailableVotes = getTotalVotingPower(account, timepoint);
-    bool isValid = voterAvailableVotes >= 1 ether;
-    return (voterAvailableVotes, isValid);
-  }
-
-  /**
-   * @dev Check if the caller is eligible to perform relayer actions during early access period
-   */
-  function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
-    XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.validateVoteDuringEarlyAccess(roundId, voter, _msgSender());
   }
 
   /**
@@ -379,7 +304,7 @@ contract XAllocationVoting is
   /**
    * @dev Toggle autovoting for the caller
    */
-  function toggleAutoVoting(address user) public {
+  function toggleAutoVoting(address user) external {
     if (_msgSender() != user) {
       revert InvalidCaller(_msgSender());
     }
@@ -389,8 +314,23 @@ contract XAllocationVoting is
   /**
    * @dev Set the voting preferences for the caller
    */
-  function setUserVotingPreferences(bytes32[] memory appIds) public {
-    AutoVotingLogic.setUserVotingPreferences(address(XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps), _msgSender(), appIds);
+  function setUserVotingPreferences(bytes32[] memory appIds) external {
+    AutoVotingLogic.setUserVotingPreferences(
+      address(XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps),
+      _msgSender(),
+      appIds
+    );
+  }
+
+  /**
+   * @dev Check if the caller is eligible to perform relayer actions during early access period
+   */
+  function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
+    XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.validateVoteDuringEarlyAccess(
+      roundId,
+      voter,
+      _msgSender()
+    );
   }
 
   // ======================== Setters (role-gated) ======================== //
@@ -468,7 +408,10 @@ contract XAllocationVoting is
    * @dev Set the voting period for a round
    */
   function setVotingPeriod(uint32 newVotingPeriod) public onlyRole(GOVERNANCE_ROLE) {
-    VotingSettingsUtils.setVotingPeriod(newVotingPeriod, XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions.cycleDuration());
+    VotingSettingsUtils.setVotingPeriod(
+      newVotingPeriod,
+      XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions.cycleDuration()
+    );
   }
 
   /**
@@ -479,13 +422,6 @@ contract XAllocationVoting is
   }
 
   // ======================== Getters ======================== //
-
-  /**
-   * @dev Returns the name of the governor.
-   */
-  function name() public view returns (string memory) {
-    return XAllocationVotingStorageTypes._getGovernorStorage()._name;
-  }
 
   /**
    * @dev Returns the version of the governor.
@@ -553,55 +489,80 @@ contract XAllocationVoting is
    * @dev Checks if the given appId can be voted for in the given round.
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view returns (bool) {
-    return XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps.isEligible(appId, roundSnapshot(roundId));
+    return
+      XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps.isEligible(
+        appId,
+        roundSnapshot(roundId)
+      );
   }
 
   /**
    * @dev Returns the deposit voting power for a given account at a given timepoint.
    */
   function getDepositVotingPower(address account, uint256 timepoint) public view returns (uint256) {
-    return XAllocationVotingStorageTypes._getExternalContractsStorage()._b3trGovernor.getDepositVotingPower(account, timepoint);
+    return
+      XAllocationVotingStorageTypes._getExternalContractsStorage()._b3trGovernor.getDepositVotingPower(
+        account,
+        timepoint
+      );
   }
 
   // ======================== Voting Settings ======================== //
 
   /// @dev See {IXAllocationVotingGovernor-votingPeriod}.
-  function votingPeriod() public view returns (uint256) { return VotingSettingsUtils.votingPeriod(); }
+  function votingPeriod() public view returns (uint256) {
+    return VotingSettingsUtils.votingPeriod();
+  }
 
   /// @dev Returns the quorum for a given timepoint, based on token total supply.
-  function quorum(uint256 timepoint) public view returns (uint256) { return VotesQuorumFractionUtils.quorum(timepoint); }
+  function quorum(uint256 timepoint) public view returns (uint256) {
+    return VotesQuorumFractionUtils.quorum(timepoint);
+  }
 
   // ======================== Clock (EIP-6372) ======================== //
 
   /// @dev Clock used for flagging checkpoints, as specified in EIP-6372. Matched to the token's clock.
-  function clock() public view returns (uint48) { return VotesUtils.clock(); }
+  function clock() public view returns (uint48) {
+    return VotesUtils.clock();
+  }
 
   /// @dev Machine-readable description of the clock as specified in EIP-6372.
   // solhint-disable-next-line func-name-mixedcase
-  function CLOCK_MODE() public view returns (string memory) { return VotesUtils.CLOCK_MODE(); }
+  function CLOCK_MODE() public view returns (string memory) {
+    return VotesUtils.CLOCK_MODE();
+  }
 
   // ======================== Round Storage ======================== //
 
   /// @dev Returns the latest round id.
-  function currentRoundId() public view returns (uint256) { return RoundsStorageUtils.currentRoundId(); }
+  function currentRoundId() public view returns (uint256) {
+    return RoundsStorageUtils.currentRoundId();
+  }
 
   /// @dev Returns the block number at which the current round snapshot was taken.
-  function currentRoundSnapshot() public view returns (uint256) { return RoundsStorageUtils.currentRoundSnapshot(); }
+  function currentRoundSnapshot() public view returns (uint256) {
+    return RoundsStorageUtils.currentRoundSnapshot();
+  }
 
   /// @dev Returns the block number at which the current round ends.
-  function currentRoundDeadline() public view returns (uint256) { return RoundsStorageUtils.currentRoundDeadline(); }
+  function currentRoundDeadline() public view returns (uint256) {
+    return RoundsStorageUtils.currentRoundDeadline();
+  }
 
   /// @dev Returns the block number when the round starts (snapshot).
-  function roundSnapshot(uint256 roundId) public view returns (uint256) { return RoundsStorageUtils.roundSnapshot(roundId); }
+  function roundSnapshot(uint256 roundId) public view returns (uint256) {
+    return RoundsStorageUtils.roundSnapshot(roundId);
+  }
 
   /// @dev Returns the block number when the round ends.
-  function roundDeadline(uint256 roundId) public view returns (uint256) { return RoundsStorageUtils.roundDeadline(roundId); }
-
-  /// @dev Returns the proposer of a round.
-  function roundProposer(uint256 roundId) public view returns (address) { return RoundsStorageUtils.roundProposer(roundId); }
+  function roundDeadline(uint256 roundId) public view returns (uint256) {
+    return RoundsStorageUtils.roundDeadline(roundId);
+  }
 
   /// @dev Returns the ids of the apps eligible for voting in a round.
-  function getAppIdsOfRound(uint256 roundId) public view returns (bytes32[] memory) { return RoundsStorageUtils.getAppIdsOfRound(roundId); }
+  function getAppIdsOfRound(uint256 roundId) public view returns (bytes32[] memory) {
+    return RoundsStorageUtils.getAppIdsOfRound(roundId);
+  }
 
   /// @dev Returns the data of a round.
   function getRound(uint256 roundId) external view returns (XAllocationVotingStorageTypes.RoundCore memory) {
@@ -610,94 +571,109 @@ contract XAllocationVoting is
 
   /// @dev Returns all the apps eligible for voting in a round with details.
   /// @notice Could be inefficient with a large number of apps; use {getAppIdsOfRound} + {IX2EarnApps-app} instead.
-  function getAppsOfRound(uint256 roundId) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+  function getAppsOfRound(
+    uint256 roundId
+  ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     return RoundsStorageUtils.getAppsOfRound(roundId);
   }
-
-  // ======================== External Contracts ======================== //
-
-  /// @dev Returns the X2EarnApps contract.
-  function x2EarnApps() public view returns (IX2EarnApps) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._x2EarnApps; }
-
-  /// @dev Returns the Emissions contract.
-  function emissions() public view returns (IEmissions) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions; }
-
-  /// @dev Returns the VoterRewards contract.
-  function voterRewards() public view returns (IVoterRewards) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._voterRewards; }
-
-  /// @dev Returns the VeBetterPassport contract.
-  function veBetterPassport() public view returns (IVeBetterPassport) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._veBetterPassport; }
-
-  /// @dev Returns the B3TRGovernor contract.
-  function b3trGovernor() public view returns (IB3TRGovernor) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._b3trGovernor; }
-
-  /// @dev Returns the RelayerRewardsPool contract.
-  function relayerRewardsPool() public view returns (IRelayerRewardsPool) { return XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool; }
-
-  /// @dev The token that voting power is sourced from.
-  function token() public view returns (address) { return address(XAllocationVotingStorageTypes._getVotesStorage()._token); }
 
   // ======================== Earnings Settings ======================== //
 
   /// @dev Returns the current base allocation percentage for funds distribution.
-  function baseAllocationPercentage() public view returns (uint256) { return RoundEarningsSettingsUtils.baseAllocationPercentage(); }
+  function baseAllocationPercentage() public view returns (uint256) {
+    return RoundEarningsSettingsUtils.baseAllocationPercentage();
+  }
 
   /// @dev Returns the max percentage of votes an app can get in a round.
-  function appSharesCap() public view returns (uint256) { return RoundEarningsSettingsUtils.appSharesCap(); }
+  function appSharesCap() public view returns (uint256) {
+    return RoundEarningsSettingsUtils.appSharesCap();
+  }
 
   /// @dev Returns the base allocation percentage for a given round (snapshotted at round start).
-  function getRoundBaseAllocationPercentage(uint256 roundId) public view returns (uint256) { return RoundEarningsSettingsUtils.getRoundBaseAllocationPercentage(roundId); }
+  function getRoundBaseAllocationPercentage(uint256 roundId) public view returns (uint256) {
+    return RoundEarningsSettingsUtils.getRoundBaseAllocationPercentage(roundId);
+  }
 
   /// @dev Returns the app shares cap for a given round (snapshotted at round start).
-  function getRoundAppSharesCap(uint256 roundId) public view returns (uint256) { return RoundEarningsSettingsUtils.getRoundAppSharesCap(roundId); }
+  function getRoundAppSharesCap(uint256 roundId) public view returns (uint256) {
+    return RoundEarningsSettingsUtils.getRoundAppSharesCap(roundId);
+  }
 
   // ======================== Vote Counting ======================== //
 
   /// @dev Returns the total votes received by a specific app in a given round.
-  function getAppVotes(uint256 roundId, bytes32 app) public view returns (uint256) { return RoundVotesCountingUtils.getAppVotes(roundId, app); }
+  function getAppVotes(uint256 roundId, bytes32 app) public view returns (uint256) {
+    return RoundVotesCountingUtils.getAppVotes(roundId, app);
+  }
 
   /// @dev Returns the quadratic funding votes received by a specific app in a given round.
-  function getAppVotesQF(uint256 roundId, bytes32 app) public view returns (uint256) { return RoundVotesCountingUtils.getAppVotesQF(roundId, app); }
+  function getAppVotesQF(uint256 roundId, bytes32 app) public view returns (uint256) {
+    return RoundVotesCountingUtils.getAppVotesQF(roundId, app);
+  }
 
   /// @dev Returns the total votes cast in a given round.
-  function totalVotes(uint256 roundId) public view returns (uint256) { return RoundVotesCountingUtils.totalVotes(roundId); }
+  function totalVotes(uint256 roundId) public view returns (uint256) {
+    return RoundVotesCountingUtils.totalVotes(roundId);
+  }
 
   /// @dev Returns the total quadratic funding votes cast in a given round.
-  function totalVotesQF(uint256 roundId) public view returns (uint256) { return RoundVotesCountingUtils.totalVotesQF(roundId); }
+  function totalVotesQF(uint256 roundId) public view returns (uint256) {
+    return RoundVotesCountingUtils.totalVotesQF(roundId);
+  }
 
   /// @dev Returns the total number of voters in a given round.
-  function totalVoters(uint256 roundId) public view returns (uint256) { return RoundVotesCountingUtils.totalVoters(roundId); }
+  function totalVoters(uint256 roundId) public view returns (uint256) {
+    return RoundVotesCountingUtils.totalVoters(roundId);
+  }
 
   /// @dev Returns whether a user has voted in a given round.
-  function hasVoted(uint256 roundId, address user) public view returns (bool) { return RoundVotesCountingUtils.hasVoted(roundId, user); }
+  function hasVoted(uint256 roundId, address user) public view returns (bool) {
+    return RoundVotesCountingUtils.hasVoted(roundId, user);
+  }
 
   /// @dev Returns whether a user has voted at least once across all rounds.
-  function hasVotedOnce(address user) public view returns (bool) { return RoundVotesCountingUtils.hasVotedOnce(user); }
+  function hasVotedOnce(address user) public view returns (bool) {
+    return RoundVotesCountingUtils.hasVotedOnce(user);
+  }
 
   /// @dev Returns the minimum amount of tokens needed to cast a vote.
-  function votingThreshold() public view returns (uint256) { return RoundVotesCountingUtils.votingThreshold(); }
+  function votingThreshold() public view returns (uint256) {
+    return RoundVotesCountingUtils.votingThreshold();
+  }
 
   // ======================== Quorum ======================== //
 
   /// @dev Returns the current quorum numerator (latest checkpoint).
-  function quorumNumerator() public view returns (uint256) { return VotesQuorumFractionUtils.quorumNumerator(); }
+  function quorumNumerator() public view returns (uint256) {
+    return VotesQuorumFractionUtils.quorumNumerator();
+  }
 
   /// @dev Returns the quorum numerator at a specific timepoint.
-  function quorumNumerator(uint256 timepoint) public view returns (uint256) { return VotesQuorumFractionUtils.quorumNumerator(timepoint); }
+  function quorumNumerator(uint256 timepoint) public view returns (uint256) {
+    return VotesQuorumFractionUtils.quorumNumerator(timepoint);
+  }
 
   /// @dev Returns the quorum denominator (always 100).
-  function quorumDenominator() public view returns (uint256) { return VotesQuorumFractionUtils.quorumDenominator(); }
+  function quorumDenominator() public pure returns (uint256) {
+    return VotesQuorumFractionUtils.quorumDenominator();
+  }
 
   /// @dev Alias for quorumNumerator() — returns the quorum as a percentage.
-  function quorumPercentage() public view returns (uint256) { return VotesQuorumFractionUtils.quorumNumerator(); }
+  function quorumPercentage() public view returns (uint256) {
+    return VotesQuorumFractionUtils.quorumNumerator();
+  }
 
   // ======================== Round Finalization ======================== //
 
   /// @dev Returns the last succeeded round for the given round.
-  function latestSucceededRoundId(uint256 roundId) external view returns (uint256) { return RoundFinalizationUtils.latestSucceededRoundId(roundId); }
+  function latestSucceededRoundId(uint256 roundId) external view returns (uint256) {
+    return RoundFinalizationUtils.latestSucceededRoundId(roundId);
+  }
 
   /// @dev Returns whether a round has been finalized.
-  function isFinalized(uint256 roundId) external view returns (bool) { return RoundFinalizationUtils.isFinalized(roundId); }
+  function isFinalized(uint256 roundId) external view returns (bool) {
+    return RoundFinalizationUtils.isFinalized(roundId);
+  }
 
   /**
    * Returns the quorum for a given round
@@ -706,7 +682,7 @@ contract XAllocationVoting is
     return quorum(roundSnapshot(roundId));
   }
 
-  // -- Auto-voting getters --
+  // ======================== Auto-voting getters ======================== //
 
   /**
    * @dev Checks if auto-voting is enabled for an account
@@ -720,7 +696,10 @@ contract XAllocationVoting is
    * @notice Status changes mid-cycle will only take effect in the next cycle
    */
   function isUserAutoVotingEnabledInCurrentRound(address account) public view returns (bool) {
-    uint256 lastEmissionBlock = XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions.lastEmissionBlock();
+    uint256 lastEmissionBlock = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._emissions
+      .lastEmissionBlock();
     return AutoVotingLogic.isAutoVotingEnabledAtTimepoint(account, uint48(lastEmissionBlock));
   }
 
@@ -752,7 +731,10 @@ contract XAllocationVoting is
    * @dev Get the total number of users who enabled auto-voting at the last emission block
    */
   function getTotalAutoVotingUsersAtRoundStart() public view returns (uint208) {
-    uint256 lastEmissionBlock = XAllocationVotingStorageTypes._getExternalContractsStorage()._emissions.lastEmissionBlock();
+    uint256 lastEmissionBlock = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._emissions
+      .lastEmissionBlock();
     return AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(uint48(lastEmissionBlock));
   }
 
@@ -764,13 +746,6 @@ contract XAllocationVoting is
   }
 
   // ======================== Helpers ======================== //
-
-  /**
-   * @dev See {IXAllocationVotingGovernor-COUNTING_MODE}.
-   */
-  function COUNTING_MODE() public pure returns (string memory) {
-    return "support=x-allocations&quorum=auto";
-  }
 
   /**
    * @dev Encodes a `RoundState` into a `bytes32` representation where each bit enabled corresponds to
@@ -785,8 +760,4 @@ contract XAllocationVoting is
   ) public view override(AccessControlUpgradeable, IERC165, ERC165Upgradeable) returns (bool) {
     return interfaceId == type(IXAllocationVotingGovernor).interfaceId || super.supportsInterface(interfaceId);
   }
-
-  // ======================== Authorizations ======================== //
-
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }

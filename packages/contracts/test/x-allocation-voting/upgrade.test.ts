@@ -19,7 +19,6 @@ import {
 import { getVot3Tokens } from "../helpers"
 import { endorseApp } from "../helpers/xnodes"
 import { waitForBlock } from "../helpers"
-import { autoVotingLibraries } from "../../scripts/libraries"
 
 describe("XAllocationVoting Upgrade - @shard14a", function () {
   type XAllocationContract =
@@ -475,7 +474,8 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     // ========================================
     // UPGRADE V7 -> V8: Final upgrade with auto-voting features
     // ========================================
-    const { AutoVotingLogic } = await autoVotingLibraries()
+    const AutoVotingLogicV8Lib = await (await ethers.getContractFactory("AutoVotingLogicV8")).deploy()
+    await AutoVotingLogicV8Lib.waitForDeployment()
 
     const xAllocationVoting = (await upgradeProxy(
       "XAllocationVotingV7",
@@ -485,7 +485,7 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       {
         version: 8,
         libraries: {
-          AutoVotingLogicV8: await AutoVotingLogic.getAddress(),
+          AutoVotingLogicV8: await AutoVotingLogicV8Lib.getAddress(),
         },
       },
     )) as XAllocationVoting
@@ -536,12 +536,5 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     await xAllocationVoting.connect(user2).castVote(getRoundId4, [app2Id], [ethers.parseEther("150")])
     expect(await xAllocationVoting.getAppVotes(getRoundId4, app2Id)).to.equal(ethers.parseEther("150"))
     expect(await xAllocationVoting.hasVoted(getRoundId4, user2.address)).to.be.true
-
-    // ========================================
-    // FINAL VERIFICATION: Contract addresses and functionality
-    // ========================================
-    expect(await xAllocationVoting.emissions()).to.equal(await emissions.getAddress())
-    expect(await xAllocationVoting.voterRewards()).to.equal(await voterRewardsV2.getAddress())
-    expect(await xAllocationVoting.x2EarnApps()).to.equal(await x2EarnApps.getAddress())
   })
 })

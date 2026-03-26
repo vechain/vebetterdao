@@ -21,7 +21,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  * where shares should be calculated. Anyone can finalize the failed round,
  * but it will be automatically done when a new round starts.
  */
-interface IXAllocationVotingGovernor is IERC165, IERC6372 {
+interface IXAllocationVotingGovernorV8 is IERC165, IERC6372 {
   enum RoundState {
     Active,
     Failed,
@@ -150,9 +150,42 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:core
+   * @dev Name of the governor instance (used in building the ERC712 domain separator).
+   */
+  function name() external view returns (string memory);
+
+  /**
+   * @notice module:core
    * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
    */
   function version() external view returns (string memory);
+
+  /**
+   * @notice module:voting
+   * @dev A description of the possible `support` values for {castVote} and the way these votes are counted, meant to
+   * be consumed by UIs to show correct vote options and interpret the results. The string is a URL-encoded sequence of
+   * key-value pairs that each describe one aspect, for example `support=bravo&quorum=for,abstain`.
+   *
+   * There are 2 standard keys: `support` and `quorum`.
+   *
+   * - `support=bravo` refers to the vote options 0 = Against, 1 = For, 2 = Abstain, as in `GovernorBravo`.
+   * - `support=x-allocations` refers to the fractionalized vote for each x-application.
+   * - `quorum=bravo` means that only For votes are counted towards quorum.
+   * - `quorum=for,abstain` means that both For and Abstain votes are counted towards quorum.
+   * - `quorum=auto` means that the contract defines the logic for counting the quorum.
+   *
+   * If a counting module makes use of encoded `params`, it should  include this under a `params` key with a unique
+   * name that describes the behavior. For example:
+   *
+   * - `params=fractional` might refer to a scheme where votes are divided fractionally between for/against/abstain.
+   * - `params=erc721` might refer to a scheme where specific NFTs are delegated to vote.
+   *
+   * NOTE: The string can be decoded by the standard
+   * https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams[`URLSearchParams`]
+   * JavaScript class.
+   */
+  // solhint-disable-next-line func-name-mixedcase
+  function COUNTING_MODE() external view returns (string memory);
 
   /**
    * @notice module:core
@@ -174,6 +207,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * possible to cast a vote during this block.
    */
   function roundDeadline(uint256 roundId) external view returns (uint256);
+
+  /**
+   * @notice module:core
+   * @dev The account that created a round.
+   */
+  function roundProposer(uint256 roundId) external view returns (address);
 
   /**
    * @notice module:user-config
@@ -358,6 +397,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev Validates if an account is a person
    */
   function validatePersonhoodForCurrentRound(address account) external view returns (bool);
+
+  /**
+   * @dev Gets total voting power (voting power + deposit voting power) and validates it's greater than zero
+   */
+  function getAndValidateVotingPower(address account, uint256 timepoint) external view returns (uint256, bool);
 
   /**
    * @dev Get the total voting power (VOT3 tokens + deposits) for a voter at a given timepoint

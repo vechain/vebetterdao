@@ -1434,9 +1434,10 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
       },
     })
 
-    // Deploy AutoVotingLogic library
-    const AutoVotingLogic = await ethers.deployContract("AutoVotingLogic")
-    await AutoVotingLogic.waitForDeployment()
+    // Deploy XAllocationVoting libraries
+    const { xAllocationVotingLibraries: xAllocVotingLibraries } =
+      await import("../../scripts/libraries/xAllocationVotingLibraries")
+    const xAllocLibs = await xAllocVotingLibraries()
 
     // Upgrade XAllocationVoting to latest
     const xAllocationVotingV8 = (await upgradeProxy(
@@ -1446,7 +1447,17 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
       [],
       {
         version: 9,
-        libraries: { AutoVotingLogic: await AutoVotingLogic.getAddress() },
+        libraries: {
+          AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+          ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+          VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+          VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+          VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+          RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+          RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+          RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+          RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
+        },
       },
     )) as XAllocationVoting
 

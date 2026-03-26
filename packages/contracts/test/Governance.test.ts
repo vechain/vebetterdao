@@ -82,7 +82,7 @@ describe("Governor and TimeLock - @shard4a", function () {
 
       // check version
       const version = await governor.version()
-      expect(version).to.eql("9")
+      expect(version).to.eql("10")
 
       // STANDARD deposit threshold is set correctly
       const standardDepositThreshold = await governor.depositThresholdPercentageByProposalType(STANDARD_PROPOSAL_TYPE)
@@ -1094,8 +1094,6 @@ describe("Governor and TimeLock - @shard4a", function () {
       for (let i = 0; i < storageSlots.length; i++) {
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
-
-      expect(await governorV7.version()).to.equal("9")
     })
   })
 

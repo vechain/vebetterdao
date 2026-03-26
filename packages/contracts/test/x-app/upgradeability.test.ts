@@ -40,6 +40,7 @@ import {
 } from "../helpers"
 import { createLegacyNodeHolder } from "../helpers/xnodes"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { TransactionResponse } from "ethers"
 
 describe("Contract upgradeablity @shard15e", () => {
   // We prepare the environment for 4 creators
@@ -903,7 +904,7 @@ describe("Contract upgradeablity @shard15e", () => {
     // Grant the ACTION_SCORE_MANAGER_ROLE to X2Earn contract
     await veBetterPassport
       .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnAppsV2.getAddress())
-      .then(async tx => await tx.wait())
+      .then(async (tx: TransactionResponse) => await tx.wait())
 
     await x2EarnRewardsPool.setX2EarnApps(await x2EarnAppsV2.getAddress())
     await xAllocationPool.setX2EarnAppsAddress(await x2EarnAppsV2.getAddress())

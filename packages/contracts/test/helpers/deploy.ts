@@ -1,6 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { ContractFactory, ContractTransactionResponse } from "ethers"
+import { ContractFactory, ContractTransactionResponse, TransactionResponse } from "ethers"
 import { ethers } from "hardhat"
 import {
   B3TR,
@@ -50,7 +50,6 @@ import { setWhitelistedFunctions } from "./whitelistGovernance"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
-import { autoVotingLibraries } from "../../scripts/libraries"
 import { xAllocationVotingLibraries } from "../../scripts/libraries/xAllocationVotingLibraries"
 import { deployStargateMock } from "../../scripts/deploy/mocks/deployStargate"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
@@ -294,8 +293,9 @@ export const getOrDeployContractInstances = async ({
     VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: false, latestVersionOnly: false })
 
-  // Deploy AutoVoting Libraries
-  const { AutoVotingLogic } = await autoVotingLibraries()
+  // Deploy XAllocationVoting Libraries
+  const AutoVotingLogicV8Lib = await (await ethers.getContractFactory("AutoVotingLogicV8")).deploy()
+  await AutoVotingLogicV8Lib.waitForDeployment()
   const xAllocLibs = await xAllocationVotingLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
@@ -696,7 +696,7 @@ export const getOrDeployContractInstances = async ({
         undefined,
         undefined,
         undefined,
-        { AutoVotingLogicV8: await AutoVotingLogic.getAddress() },
+        { AutoVotingLogicV8: await AutoVotingLogicV8Lib.getAddress() },
         {
           AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
           ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
@@ -1178,11 +1178,11 @@ export const getOrDeployContractInstances = async ({
   await xAllocationVoting
     .connect(owner)
     .grantRole(roundStarterRole, await emissions.getAddress())
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
   await xAllocationVoting
     .connect(owner)
     .grantRole(roundStarterRole, owner.address)
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
 
   // Set up the X2EarnCreator contract
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
@@ -1192,15 +1192,15 @@ export const getOrDeployContractInstances = async ({
   await relayerRewardsPool
     .connect(owner)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await xAllocationVoting.getAddress())
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
   await relayerRewardsPool
     .connect(owner)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
   await xAllocationVoting
     .connect(owner)
     .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
   await xAllocationVoting.connect(owner).setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
   await voterRewards.connect(owner).setRelayerRewardsPool(await relayerRewardsPool.getAddress())
   await voterRewards.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
@@ -1387,7 +1387,7 @@ export const getOrDeployContractInstances = async ({
     stargateNftMock,
     stargateMock,
     relayerRewardsPool,
-    autoVotingLogic: AutoVotingLogic,
+    autoVotingLogic: xAllocLibs.AutoVotingLogic as unknown as AutoVotingLogic,
   }
   return cachedDeployInstance
 }

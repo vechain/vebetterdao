@@ -4,8 +4,9 @@ pragma solidity 0.8.20;
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IX2EarnApps } from "../../../../interfaces/IX2EarnApps.sol";
-import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationVotingGovernorV8 as IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernorV8.sol";
 import { XAllocationVotingDataTypesV8 } from "./XAllocationVotingDataTypesV8.sol";
+
 /**
  * @title AutoVotingLogic
  * @notice Library that handles user preferences for automatic voting in allocation rounds

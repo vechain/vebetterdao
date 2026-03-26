@@ -40,7 +40,7 @@ import {
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { autoVotingLibraries } from "../scripts/libraries"
+import { xAllocationVotingLibraries } from "../scripts/libraries/xAllocationVotingLibraries"
 
 describe("X-Allocation Voting - @shard14-core", function () {
   // Environment params
@@ -58,17 +58,14 @@ describe("X-Allocation Voting - @shard14-core", function () {
   })
 
   describe("Deployment", function () {
-    it("Admins and addresses should be set correctly", async function () {
-      const { xAllocationVoting, owner, timeLock, emissions, x2EarnApps } = await getOrDeployContractInstances({
+    it("Admins should be set correctly", async function () {
+      const { xAllocationVoting, owner, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, await timeLock.getAddress())).to.eql(true)
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
-
-      expect(await xAllocationVoting.emissions()).to.eql(await emissions.getAddress())
-      expect(await xAllocationVoting.x2EarnApps()).to.eql(await x2EarnApps.getAddress())
     })
 
     it("Should not support invalid interface", async function () {
@@ -134,16 +131,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
       expect(await xAllocationVoting.version()).to.eql("8")
-    })
-
-    it("Counting mode is set correctly", async function () {
-      const { xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
-
-      expect(await xAllocationVoting.COUNTING_MODE()).to.eql("support=x-allocations&quorum=auto")
     })
 
     it("Clock mode is set correctly", async function () {
@@ -196,14 +184,6 @@ describe("X-Allocation Voting - @shard14-core", function () {
 
       //CLOKC_MODE should return "mode=blocknumber&from=default"
       expect(await xAllocationVotingWithB3TR.CLOCK_MODE()).to.eql("mode=blocknumber&from=default")
-    })
-
-    it("Voter rewards address is set correctly", async function () {
-      const { xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(await xAllocationVoting.voterRewards()).to.eql(await voterRewards.getAddress())
     })
 
     it("Should revert if VOT3 is set to zero address in initilisation", async () => {
@@ -325,12 +305,20 @@ describe("X-Allocation Voting - @shard14-core", function () {
         forceDeploy: true,
       })
 
-      const { AutoVotingLogic } = await autoVotingLibraries()
+      const xAllocLibs = await xAllocationVotingLibraries()
 
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("XAllocationVoting", {
         libraries: {
-          AutoVotingLogic: await AutoVotingLogic.getAddress(),
+          AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+          ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+          VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+          VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+          VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+          RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+          RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+          RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+          RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -410,7 +398,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
           config,
         })
 
-      const { AutoVotingLogic } = await autoVotingLibraries()
+      const xAllocLibs = await xAllocationVotingLibraries()
 
       await getVot3Tokens(otherAccount, "1000")
       await vot3.connect(otherAccount).approve(await governor.getAddress(), "1000")
@@ -422,7 +410,15 @@ describe("X-Allocation Voting - @shard14-core", function () {
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("XAllocationVoting", {
         libraries: {
-          AutoVotingLogic: await AutoVotingLogic.getAddress(),
+          AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+          ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+          VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+          VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+          VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+          RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+          RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+          RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+          RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -829,7 +825,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
       expect(await xAllocationVotingV7.currentRoundId()).to.equal(3n)
       expect(await xAllocationVotingV7.state(3n)).to.equal(0n) // Active
 
-      const { AutoVotingLogic } = await autoVotingLibraries()
+      const xAllocLibs = await xAllocationVotingLibraries()
 
       // Latest version
       const xAllocationVoting = (await upgradeProxy(
@@ -840,7 +836,15 @@ describe("X-Allocation Voting - @shard14-core", function () {
         {
           version: 8,
           libraries: {
-            AutoVotingLogic: await AutoVotingLogic.getAddress(),
+            AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+            ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+            VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+            VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+            VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+            RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+            RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+            RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+            RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
           },
         },
       )) as XAllocationVoting
@@ -866,7 +870,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
 
       describe("emissions address", function () {
         it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set a new emissions contract correctly", async function () {
-          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+          const { xAllocationVoting, owner, emissions } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
           await bootstrapAndStartEmissions()
@@ -875,10 +879,26 @@ describe("X-Allocation Voting - @shard14-core", function () {
             await xAllocationVoting.hasRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
           ).to.be.true
 
-          await xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)
-
-          const updatedEmissionsAddress = await xAllocationVoting.emissions()
-          expect(updatedEmissionsAddress).to.eql(owner.address)
+          const oldEmissionsAddress = await emissions.getAddress()
+          const emissionsSetIface = new ethers.Interface([
+            "event EmissionsSet(address oldContractAddress, address newContractAddress)",
+          ])
+          const receipt = await (await xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)).wait()
+          let emissionsSetEvent: ReturnType<typeof emissionsSetIface.parseLog> | undefined
+          for (const log of receipt?.logs ?? []) {
+            try {
+              const p = emissionsSetIface.parseLog({ topics: [...log.topics], data: log.data })
+              if (p !== null && p.name === "EmissionsSet") {
+                emissionsSetEvent = p
+                break
+              }
+            } catch {
+              /* ignore non-matching logs */
+            }
+          }
+          expect(emissionsSetEvent).to.not.be.undefined
+          expect(emissionsSetEvent!.args.oldContractAddress).to.equal(oldEmissionsAddress)
+          expect(emissionsSetEvent!.args.newContractAddress).to.equal(owner.address)
         })
 
         it("Cannot set a new emissions contract to zero address", async function () {
@@ -888,9 +908,6 @@ describe("X-Allocation Voting - @shard14-core", function () {
           await bootstrapAndStartEmissions()
 
           await expect(xAllocationVoting.connect(owner).setEmissionsAddress(ZERO_ADDRESS)).to.be.reverted
-
-          const updatedEmissionsAddress = await xAllocationVoting.emissions()
-          expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
         })
 
         it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE should be able to set a new emissions contract", async function () {
@@ -911,7 +928,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
 
       describe("x2EarnApps address", function () {
         it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set x2EarnApps address correctly", async function () {
-          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+          const { xAllocationVoting, owner, x2EarnApps } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
 
@@ -919,10 +936,28 @@ describe("X-Allocation Voting - @shard14-core", function () {
             await xAllocationVoting.hasRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
           ).to.be.true
 
-          await xAllocationVoting.connect(owner).setX2EarnAppsAddress(owner.address)
+          const oldX2EarnAppsAddress = await x2EarnApps.getAddress()
+          const tx = await xAllocationVoting.connect(owner).setX2EarnAppsAddress(owner.address)
 
-          const updatedX2EarnAppsAddress = await xAllocationVoting.x2EarnApps()
-          expect(updatedX2EarnAppsAddress).to.eql(owner.address)
+          const x2EarnAppsSetIface = new ethers.Interface([
+            "event X2EarnAppsSet(address oldContractAddress, address newContractAddress)",
+          ])
+          const receipt = await tx.wait()
+          let x2EarnAppsSetEvent: ReturnType<typeof x2EarnAppsSetIface.parseLog> | undefined
+          for (const log of receipt?.logs ?? []) {
+            try {
+              const p = x2EarnAppsSetIface.parseLog({ topics: [...log.topics], data: log.data })
+              if (p !== null && p.name === "X2EarnAppsSet") {
+                x2EarnAppsSetEvent = p
+                break
+              }
+            } catch {
+              /* ignore non-matching logs */
+            }
+          }
+          expect(x2EarnAppsSetEvent).to.not.be.undefined
+          expect(x2EarnAppsSetEvent!.args.oldContractAddress).to.equal(oldX2EarnAppsAddress)
+          expect(x2EarnAppsSetEvent!.args.newContractAddress).to.equal(owner.address)
         })
 
         it("Cannot set x2EarnApps address to zero address", async function () {
@@ -931,9 +966,6 @@ describe("X-Allocation Voting - @shard14-core", function () {
           })
 
           await expect(xAllocationVoting.connect(owner).setX2EarnAppsAddress(ZERO_ADDRESS)).to.be.reverted
-
-          const updatedX2EarnAppsAddress = await xAllocationVoting.x2EarnApps()
-          expect(updatedX2EarnAppsAddress).to.not.eql(ZERO_ADDRESS)
         })
 
         it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set x2EarnApps address", async function () {
@@ -955,7 +987,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
 
       describe("VoterRewards address", function () {
         it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set voter rewards address correctly", async function () {
-          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+          const { xAllocationVoting, owner, voterRewards } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
 
@@ -963,10 +995,29 @@ describe("X-Allocation Voting - @shard14-core", function () {
             await xAllocationVoting.hasRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
           ).to.be.true
 
-          await xAllocationVoting.connect(owner).setVoterRewardsAddress(owner.address)
+          const oldVoterRewardsAddress = await voterRewards.getAddress()
 
-          const updatedVoterRewardsAddress = await xAllocationVoting.voterRewards()
-          expect(updatedVoterRewardsAddress).to.eql(owner.address)
+          const tx = await xAllocationVoting.connect(owner).setVoterRewardsAddress(owner.address)
+
+          const voterRewardsSetIface = new ethers.Interface([
+            "event VoterRewardsSet(address oldContractAddress, address newContractAddress)",
+          ])
+          const receipt = await tx.wait()
+          let voterRewardsSetEvent: ReturnType<typeof voterRewardsSetIface.parseLog> | undefined
+          for (const log of receipt?.logs ?? []) {
+            try {
+              const p = voterRewardsSetIface.parseLog({ topics: [...log.topics], data: log.data })
+              if (p !== null && p.name === "VoterRewardsSet") {
+                voterRewardsSetEvent = p
+                break
+              }
+            } catch {
+              /* ignore non-matching logs */
+            }
+          }
+          expect(voterRewardsSetEvent).to.not.be.undefined
+          expect(voterRewardsSetEvent!.args.oldContractAddress).to.equal(oldVoterRewardsAddress)
+          expect(voterRewardsSetEvent!.args.newContractAddress).to.equal(owner.address)
         })
 
         it("Cannot set voter rewards address to zero address", async function () {
@@ -975,9 +1026,6 @@ describe("X-Allocation Voting - @shard14-core", function () {
           })
 
           await expect(xAllocationVoting.connect(owner).setVoterRewardsAddress(ZERO_ADDRESS)).to.be.reverted
-
-          const updatedVoterRewardsAddress = await xAllocationVoting.voterRewards()
-          expect(updatedVoterRewardsAddress).to.not.eql(ZERO_ADDRESS)
         })
 
         it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set voter rewards address", async function () {
@@ -998,16 +1046,37 @@ describe("X-Allocation Voting - @shard14-core", function () {
       })
 
       it("Can get and set veBetterPassport address", async function () {
-        const { xAllocationVoting, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+        const { xAllocationVoting, owner, otherAccount, veBetterPassport } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const oldVeBetterPassportAddress = await veBetterPassport.getAddress()
 
         // assign governance role to owner
         await xAllocationVoting.grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)
         expect(await xAllocationVoting.hasRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)).to.be.true
 
-        await xAllocationVoting.connect(owner).setVeBetterPassport(owner.address)
+        const tx = await xAllocationVoting.connect(owner).setVeBetterPassport(owner.address)
 
-        const updatedVeBetterPassportAddress = await xAllocationVoting.veBetterPassport()
-        expect(updatedVeBetterPassportAddress).to.eql(owner.address)
+        const veBetterPassportSetIface = new ethers.Interface([
+          "event VeBetterPassportSet(address oldContractAddress, address newContractAddress)",
+        ])
+        const receipt = await tx.wait()
+        let veBetterPassportSetEvent: ReturnType<typeof veBetterPassportSetIface.parseLog> | undefined
+        for (const log of receipt?.logs ?? []) {
+          try {
+            const p = veBetterPassportSetIface.parseLog({ topics: [...log.topics], data: log.data })
+            if (p !== null && p.name === "VeBetterPassportSet") {
+              veBetterPassportSetEvent = p
+              break
+            }
+          } catch {
+            /* ignore non-matching logs */
+          }
+        }
+        expect(veBetterPassportSetEvent).to.not.be.undefined
+        expect(veBetterPassportSetEvent!.args.oldContractAddress).to.equal(oldVeBetterPassportAddress)
+        expect(veBetterPassportSetEvent!.args.newContractAddress).to.equal(owner.address)
 
         // only GOVERNANCE_ROLE can set the veBetterPassport address
         expect(await xAllocationVoting.hasRole(await xAllocationVoting.GOVERNANCE_ROLE(), otherAccount.address)).to.be
@@ -1022,7 +1091,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
           forceDeploy: true,
         })
 
-        const { AutoVotingLogic } = await autoVotingLibraries()
+        const xAllocLibs = await xAllocationVotingLibraries()
 
         await veBetterPassport.whitelist(owner.address)
         await veBetterPassport.toggleCheck(1)
@@ -1034,7 +1103,15 @@ describe("X-Allocation Voting - @shard14-core", function () {
           xAllocationVoting,
           await ethers.getContractFactory("XAllocationVoting", {
             libraries: {
-              AutoVotingLogic: await AutoVotingLogic.getAddress(),
+              AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+              ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+              VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+              VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+              VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+              RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+              RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+              RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+              RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
             },
           }),
           "Update Voting Threshold",
@@ -1067,7 +1144,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
           forceDeploy: true,
         })
 
-        const { AutoVotingLogic } = await autoVotingLibraries()
+        const xAllocLibs = await xAllocationVotingLibraries()
 
         await bootstrapAndStartEmissions()
 
@@ -1080,7 +1157,15 @@ describe("X-Allocation Voting - @shard14-core", function () {
           xAllocationVoting,
           await ethers.getContractFactory("XAllocationVoting", {
             libraries: {
-              AutoVotingLogic: await AutoVotingLogic.getAddress(),
+              AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+              ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+              VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+              VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+              VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+              RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+              RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+              RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+              RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
             },
           }),
           "Updating quorum numerator",
@@ -1104,7 +1189,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
           forceDeploy: true,
         })
 
-        const { AutoVotingLogic } = await autoVotingLibraries()
+        const xAllocLibs = await xAllocationVotingLibraries()
 
         await bootstrapAndStartEmissions()
 
@@ -1118,7 +1203,15 @@ describe("X-Allocation Voting - @shard14-core", function () {
             xAllocationVoting,
             await ethers.getContractFactory("XAllocationVoting", {
               libraries: {
-                AutoVotingLogic: await AutoVotingLogic.getAddress(),
+                AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+                ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+                VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+                VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+                VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+                RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+                RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+                RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+                RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
               },
             }),
             "Updating quorum numerator",
@@ -1158,7 +1251,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
           forceDeploy: true,
         })
 
-        const { AutoVotingLogic } = await autoVotingLibraries()
+        const xAllocLibs = await xAllocationVotingLibraries()
 
         await getVot3Tokens(otherAccount, "1000")
 
@@ -1178,7 +1271,15 @@ describe("X-Allocation Voting - @shard14-core", function () {
           xAllocationVoting,
           await ethers.getContractFactory("XAllocationVoting", {
             libraries: {
-              AutoVotingLogic: await AutoVotingLogic.getAddress(),
+              AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+              ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+              VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+              VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+              VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+              RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+              RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+              RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+              RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
             },
           }),
           "Updating quorum numerator",
@@ -1254,7 +1355,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
           forceDeploy: true,
         })
 
-        const { AutoVotingLogic } = await autoVotingLibraries()
+        const xAllocLibs = await xAllocationVotingLibraries()
 
         await bootstrapAndStartEmissions()
 
@@ -1268,7 +1369,15 @@ describe("X-Allocation Voting - @shard14-core", function () {
             xAllocationVoting,
             await ethers.getContractFactory("XAllocationVoting", {
               libraries: {
-                AutoVotingLogic: await AutoVotingLogic.getAddress(),
+                AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+                ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+                VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+                VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+                VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+                RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+                RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+                RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+                RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
               },
             }),
             "Updating voting period",
@@ -1614,22 +1723,6 @@ describe("X-Allocation Voting - @shard14-core", function () {
 
       expect(roundSnapshot).to.eql(await xAllocationVoting.roundSnapshot(roundId))
       expect(deadline).to.eql(await xAllocationVoting.roundDeadline(roundId))
-    })
-
-    it("Should correctly store the round proposer", async function () {
-      const { xAllocationVoting, emissions, minterAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Bootstrap emissions
-      await bootstrapEmissions()
-
-      await emissions.connect(minterAccount).start()
-
-      let roundId = await xAllocationVoting.currentRoundId()
-      let roundProposer = await xAllocationVoting.roundProposer(roundId)
-
-      expect(roundProposer).to.eql(await emissions.getAddress())
     })
 
     it("Cannot get state of non-existing round", async function () {

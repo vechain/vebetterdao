@@ -14,17 +14,6 @@ describe("XAllocationVoting - V9 Upgrade - @shard14a", function () {
     expect(await xAllocationVoting.getAddress()).to.not.equal(ethers.ZeroAddress)
   })
 
-  it("Should preserve external contract references after upgrade chain", async () => {
-    const config = createLocalConfig()
-    const { xAllocationVoting, voterRewards, emissions } = await getOrDeployContractInstances({
-      forceDeploy: true,
-      config,
-    })
-
-    expect(await xAllocationVoting.voterRewards()).to.equal(await voterRewards.getAddress())
-    expect(await xAllocationVoting.emissions()).to.equal(await emissions.getAddress())
-  })
-
   it("Should preserve roles after upgrade chain", async () => {
     const config = createLocalConfig()
     const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true, config })

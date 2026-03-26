@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { upgradeProxy } from "../../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
-import { XAllocationVoting } from "../../../../typechain-types"
+import { XAllocationVoting, XAllocationVotingV7 } from "../../../../typechain-types"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -16,13 +16,13 @@ async function main() {
 
   const xAllocationVotingV6 = (await upgradeProxy(
     "XAllocationVotingV6",
-    "XAllocationVoting",
+    "XAllocationVotingV7",
     config.xAllocationVotingContractAddress,
     [config.b3trGovernorAddress],
     {
       version: 7,
     },
-  )) as XAllocationVoting
+  )) as XAllocationVotingV7
 
   console.log(`XAllocationVoting upgraded`)
 

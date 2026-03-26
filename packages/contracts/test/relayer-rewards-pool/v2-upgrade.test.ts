@@ -5,6 +5,7 @@ import { ethers } from "hardhat"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
 import { getOrDeployContractInstances, waitForNextCycle } from "../helpers"
 import { B3TR, Emissions, RelayerRewardsPool, XAllocationVoting } from "../../typechain-types"
+import { RelayerRewardsPoolV1 } from "../../typechain-types/contracts/deprecated/V1"
 
 describe("RelayerRewardsPool - V2 Upgrade - @shard18", function () {
   let b3tr: B3TR
@@ -36,13 +37,13 @@ describe("RelayerRewardsPool - V2 Upgrade - @shard18", function () {
   })
 
   it("should preserve v1 state and initialize preferred relayer storage on upgrade", async function () {
-    const relayerRewardsPoolV1 = await deployProxy("RelayerRewardsPoolV1", [
+    const relayerRewardsPoolV1 = (await deployProxy("RelayerRewardsPoolV1", [
       owner.address,
       owner.address,
       await b3tr.getAddress(),
       await emissions.getAddress(),
       await xAllocationVoting.getAddress(),
-    ])
+    ])) as RelayerRewardsPoolV1
 
     expect(await relayerRewardsPoolV1.version()).to.equal("1")
 
