@@ -83,6 +83,10 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *
  * ----- Version 9 -----
  *  - Refactored from module inheritance to library architecture for contract size optimization
+ *  - Removed the following public functions to reduce contract size (accessible via libraries or storage reads):
+ *    - name(), initialize(), COUNTING_MODE()
+ *    - x2EarnApps(), emissions(), voterRewards(), veBetterPassport(), b3trGovernor(), relayerRewardsPool(), token()
+ *    - roundProposer(), getAndValidateVotingPower()
  */
 contract XAllocationVoting is
   Initializable,
