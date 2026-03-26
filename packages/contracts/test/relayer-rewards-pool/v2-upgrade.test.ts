@@ -4,8 +4,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ethers } from "hardhat"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
 import { getOrDeployContractInstances, waitForNextCycle } from "../helpers"
-import { B3TR, Emissions, RelayerRewardsPool, XAllocationVoting } from "../../typechain-types"
-import { RelayerRewardsPoolV1 } from "../../typechain-types/contracts/deprecated/V1"
+import { B3TR, Emissions, RelayerRewardsPool, RelayerRewardsPoolV1, XAllocationVoting } from "../../typechain-types"
 
 describe("RelayerRewardsPool - V2 Upgrade - @shard18", function () {
   let b3tr: B3TR

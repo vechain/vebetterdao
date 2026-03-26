@@ -4,6 +4,8 @@ import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
 import { getParticipatedInGovernanceQueryKey } from "@/api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
+import { relayerRewardsPoolAbi } from "@/api/contracts/relayerRewardsPool/abi"
+import { getPreferredRelayerQueryKey } from "@/api/contracts/relayerRewardsPool/hooks/usePreferredRelayer"
 import { getXAppRoundEarningsQueryKey } from "@/api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
 import { getAllocationVotersQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVoters"
 import { getAllocationVotesQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVotes"
@@ -16,10 +18,13 @@ import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 const abi = XAllocationVoting__factory.abi
-const address = getConfig().xAllocationVotingContractAddress
+const config = getConfig()
+const address = config.xAllocationVotingContractAddress
+const relayerPoolAddress = config.relayerRewardsPoolContractAddress
 
 type ClausesProps = {
   appIds: string[]
+  preferredRelayerAddress?: string
 }
 
 type UseUpdateVotingPreferencesProps = {
@@ -49,12 +54,25 @@ export const useUpdateVotingPreferences = ({
   const thor = useThor()
 
   const contract = thor.contracts.load(address, abi)
+  const relayerPoolContract = thor.contracts.load(relayerPoolAddress, relayerRewardsPoolAbi)
 
-  const clauseBuilder = ({ appIds }: ClausesProps) => [
-    contract.clause.setUserVotingPreferences(appIds, {
-      comment: "Update voting preferences for auto-voting",
-    }).clause,
-  ]
+  const clauseBuilder = ({ appIds, preferredRelayerAddress }: ClausesProps) => {
+    const clauses = [
+      contract.clause.setUserVotingPreferences(appIds, {
+        comment: "Update voting preferences for auto-voting",
+      }).clause,
+    ]
+
+    if (preferredRelayerAddress) {
+      clauses.push(
+        relayerPoolContract.clause.setPreferredRelayer(preferredRelayerAddress, {
+          comment: "Set preferred relayer",
+        }).clause,
+      )
+    }
+
+    return clauses
+  }
 
   const refetchQueryKeys = useMemo(() => {
     return [
@@ -66,6 +84,7 @@ export const useUpdateVotingPreferences = ({
       getXAppRoundEarningsQueryKey(roundId),
       getParticipatedInGovernanceQueryKey(account?.address ?? ""),
       getUserVotingPreferencesQueryKey(account?.address ?? ""),
+      getPreferredRelayerQueryKey(account?.address ?? ""),
     ]
   }, [roundId, account?.address])
 
