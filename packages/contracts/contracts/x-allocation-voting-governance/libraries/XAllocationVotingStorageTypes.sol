@@ -68,6 +68,8 @@ library XAllocationVotingStorageTypes {
     mapping(address user => bool) hasVoted;
     // Total number of voters in the round
     uint256 totalVoters;
+    // Mapping to track which apps a user voted for in this round
+    mapping(address user => mapping(bytes32 appId => bool)) userVotedForApp;
   }
 
   struct RoundVotesCountingStorage {

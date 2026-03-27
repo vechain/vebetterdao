@@ -117,6 +117,16 @@ library RoundVotesCountingUtils {
     return quorumValue <= $._roundVotes[roundId].totalVotes;
   }
 
+  /// @notice Returns whether a user voted for a specific app in a given round
+  /// @param roundId The round to query
+  /// @param user The voter address
+  /// @param appId The app to check
+  function hasUserVotedForApp(uint256 roundId, address user, bytes32 appId) external view returns (bool) {
+    XAllocationVotingStorageTypes.RoundVotesCountingStorage storage $ = XAllocationVotingStorageTypes
+      ._getRoundVotesCountingStorage();
+    return $._roundVotes[roundId].userVotedForApp[user][appId];
+  }
+
   /// @notice Returns whether the vote succeeded (totalVotes > 0)
   /// @dev Vote is successful if quorum is reached
   function voteSucceeded(uint256 roundId, uint256 quorumValue) external view returns (bool) {
@@ -184,6 +194,9 @@ library RoundVotesCountingUtils {
       }
 
       totalQFVotesAdjustment += _processAppVote($, roundId, apps[i], weights[i]);
+
+      // Track which apps the user voted for (for external queries)
+      $._roundVotes[roundId].userVotedForApp[voter][apps[i]] = true;
     }
 
     // Check if the total weight of votes cast by the voter is greater than the voting threshold

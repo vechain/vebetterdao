@@ -638,6 +638,11 @@ contract XAllocationVoting is
     return RoundVotesCountingUtils.hasVotedOnce(user);
   }
 
+  /// @dev Returns whether a user voted for a specific app in a given round.
+  function hasUserVotedForApp(uint256 roundId, address user, bytes32 appId) public view returns (bool) {
+    return RoundVotesCountingUtils.hasUserVotedForApp(roundId, user, appId);
+  }
+
   /// @dev Returns the minimum amount of tokens needed to cast a vote.
   function votingThreshold() public view returns (uint256) {
     return RoundVotesCountingUtils.votingThreshold();
