@@ -19,6 +19,20 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
  * Reusable for Phase 2 (navigators inherit freshness from their navigator's preferences).
  */
 library FreshnessUtils {
+  /// @notice Emitted when a vote's freshness multiplier is applied
+  /// @param voter The voter address
+  /// @param roundId The round in which the vote was cast
+  /// @param fingerprint The XOR fingerprint of the voted apps
+  /// @param lastChangedRound The round when the voter's fingerprint last changed
+  /// @param multiplier The freshness multiplier applied (basis points, 10000 = 1x)
+  event FreshnessMultiplierApplied(
+    address indexed voter,
+    uint256 indexed roundId,
+    bytes32 fingerprint,
+    uint256 lastChangedRound,
+    uint256 multiplier
+  );
+
   /// @notice Compute a fingerprint of the voted apps using XOR
   /// @dev Order-independent: voting [A, B] and [B, A] produce the same fingerprint.
   /// Only detects app set changes — weight distribution changes are NOT detected.
@@ -49,6 +63,20 @@ library FreshnessUtils {
     uint256 timepoint,
     address voterRewardsAddress
   ) external returns (uint256 multiplier) {
+    // Update fingerprint storage and get rounds since last change
+    uint256 roundsSinceChange = _updateFingerprint(voter, roundId, appIds);
+
+    // Look up and select freshness tier
+    multiplier = _selectTier(roundsSinceChange, timepoint, voterRewardsAddress);
+
+    // Emit event with current state
+    XAllocationVotingStorageTypes.RoundVotesCountingStorage storage $ = XAllocationVotingStorageTypes
+      ._getRoundVotesCountingStorage();
+    emit FreshnessMultiplierApplied(voter, roundId, $._lastVoteFingerprint[voter], $._lastFingerprintChangedRound[voter], multiplier);
+  }
+
+  /// @dev Update fingerprint storage and return rounds since last change
+  function _updateFingerprint(address voter, uint256 roundId, bytes32[] memory appIds) private returns (uint256) {
     XAllocationVotingStorageTypes.RoundVotesCountingStorage storage $ = XAllocationVotingStorageTypes
       ._getRoundVotesCountingStorage();
 
@@ -61,20 +89,15 @@ library FreshnessUtils {
       $._lastFingerprintChangedRound[voter] = roundId;
     }
 
-    // Calculate rounds since last change
-    uint256 lastChangedRound = $._lastFingerprintChangedRound[voter];
-    uint256 roundsSinceChange = roundId - lastChangedRound;
+    return roundId - $._lastFingerprintChangedRound[voter];
+  }
 
-    // Look up freshness multiplier tiers from VoterRewards at the round snapshot
+  /// @dev Select the appropriate freshness tier based on rounds since change
+  function _selectTier(uint256 roundsSinceChange, uint256 timepoint, address voterRewardsAddress) private view returns (uint256) {
     (uint256 tier1, uint256 tier2, uint256 tier3) = IVoterRewards(voterRewardsAddress).getFreshnessMultipliers(timepoint);
 
-    // Select tier based on rounds since last change
-    if (roundsSinceChange == 0) {
-      multiplier = tier1;
-    } else if (roundsSinceChange == 1) {
-      multiplier = tier2;
-    } else {
-      multiplier = tier3;
-    }
+    if (roundsSinceChange == 0) return tier1;
+    if (roundsSinceChange == 1) return tier2;
+    return tier3;
   }
 }

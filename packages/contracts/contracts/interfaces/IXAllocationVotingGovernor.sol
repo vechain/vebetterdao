@@ -154,6 +154,22 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   event PreferredAppsUpdated(address indexed account, bytes32[] apps);
 
   /**
+   * @dev Emitted when a freshness multiplier is applied to a vote.
+   * @param voter The voter address
+   * @param roundId The round in which the vote was cast
+   * @param fingerprint The XOR fingerprint of the voted apps
+   * @param lastChangedRound The round when the voter's fingerprint last changed
+   * @param multiplier The freshness multiplier applied (basis points, 10000 = 1x)
+   */
+  event FreshnessMultiplierApplied(
+    address indexed voter,
+    uint256 indexed roundId,
+    bytes32 fingerprint,
+    uint256 lastChangedRound,
+    uint256 multiplier
+  );
+
+  /**
    * @notice module:core
    * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
    */
