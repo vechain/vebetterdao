@@ -70,7 +70,11 @@ export const useCurrentRoundProposalActivities = (
 
     const lifecycleActivities: ActivityItem[] = enrichedProposals
       .map((p): ActivityItem | null => {
-        let activityType: ActivityType | undefined
+        let activityType:
+          | ActivityType.PROPOSAL_CANCELLED
+          | ActivityType.PROPOSAL_IN_DEVELOPMENT
+          | ActivityType.PROPOSAL_EXECUTED
+          | undefined
         let date: number | undefined
 
         if (p.state === ProposalState.Canceled) {

@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/factories/x-2-earn-apps/X2EarnApps__factory"
-import { EnhancedClause, UseSendTransactionReturnValue, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { EnhancedClause, UseSendTransactionReturnValue, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
 import { getXAppMetadataQueryKey } from "../../api/contracts/xApps/hooks/useXAppMetadata"
@@ -52,7 +52,7 @@ export const useUpdateAppDetails = ({
     () => [
       getXAppsQueryKey(),
       getXAppMetadataQueryKey(appId),
-      getCallClauseQueryKey<typeof x2EarnAppsAbi>({
+      getCallClauseQueryKeyWithArgs<typeof x2EarnAppsAbi, "app">({
         abi: x2EarnAppsAbi,
         address: x2EarnAppsAddress,
         method: "app",
