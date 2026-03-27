@@ -9,18 +9,19 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Voter Rewards": {
     name: "voter-rewards",
     configAddressField: "voterRewardsContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
       v3: "Vechain Nodes x GM upgrades feature",
       v4: "Update GalaxyMember interface to use version 3",
       v5: "Proposal Execution: Add GM Pool for GM Holder Rewards",
       v6: "Integrate Auto-voting relayer rewards pool and fees",
+      v7: "Add rewards multipliers (freshness + governance intent)",
     },
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Give ability to contract admins to call governance only functions",
@@ -31,12 +32,13 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v7: "Proposal Execution + Grants Feature: Add extra voting power based on support tokens + deposit threshold cap + proposal type concept",
       v8: "Give ability to mark proposals as in development/completed",
       v9: "Give ability to provide a reason for proposal cancellation",
+      v10: "Refactor to library architecture + governance intent multiplier",
     },
   },
   XAllocationVoting: {
     name: "x-allocation-voting",
     configAddressField: "xAllocationVotingContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"],
     descriptions: {
       v2: "Integrate VeBetterPassport contract",
       v3: "Update X2Earn interface to include new endorsement feature",
@@ -45,6 +47,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards and IEmissions)",
       v7: "Proposal Execution: Count proposal deposits to x-allocation voting power",
       v8: "Add Auto-Voting functionality",
+      v9: "Refactor to library architecture + freshness multiplier + hasUserVotedForApp",
     },
   },
   "XAllocation Pool": {
