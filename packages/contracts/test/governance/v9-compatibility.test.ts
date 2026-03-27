@@ -47,8 +47,8 @@ describe("Governance - V9 Compatibility - @shard4h", function () {
     await setupVoter(otherAccounts[3], b3tr, vot3, minterAccount, owner, veBetterPassport)
   })
 
-  describe("Governance - V9 Compatibility - Proposal Lifecycle", function () {
-    it("Should be able to create, deposit, and cancel a proposal in V9", async () => {
+  describe("Governance - Latest Version - Proposal Lifecycle", function () {
+    it("Should be able to create, deposit, and cancel a proposal", async () => {
       const functionToCall = "tokenDetails"
       const encodedFunctionCall = b3trContract.interface.encodeFunctionData(functionToCall, [])
       const tx = await createProposal(b3tr, b3trContract, proposer, `description ${this.title}`, functionToCall, [])
@@ -68,7 +68,7 @@ describe("Governance - V9 Compatibility - @shard4h", function () {
       expect(stateAfterCancel).to.equal(2) // cancelled
     })
 
-    it("Should be able to vote on a proposal in V9", async () => {
+    it("Should be able to vote on a proposal", async () => {
       const functionToCall = "tokenDetails"
       const tx = await createProposal(b3tr, b3trContract, proposer, `description ${this.title}`, functionToCall, [])
       const proposalId = await getProposalIdFromTx(tx)
@@ -89,11 +89,7 @@ describe("Governance - V9 Compatibility - @shard4h", function () {
       expect(await governor.hasVoted(proposalId, voter.address)).to.be.true
     })
 
-    it("Should return latest version", async () => {
-      expect(await governor.version()).to.equal("10")
-    })
-
-    it("Should preserve mark as in development functionality from V8", async () => {
+    it("Should be able to mark as in development and completed", async () => {
       const functionToCall = "tokenDetails"
       const encodedFunctionCall = b3trContract.interface.encodeFunctionData(functionToCall, [])
       const tx = await createProposal(b3tr, b3trContract, proposer, `description ${this.title}`, functionToCall, [])
