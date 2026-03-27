@@ -154,6 +154,13 @@ export function createMainnetConfig() {
     GM_MULTIPLIERS_V2: [110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers according
     VOTER_REWARDS_LEVELS_V2: [2, 3, 4, 5, 6, 7, 8, 9, 10], // Voter rewards levels for the new GM multipliers
 
+    // Rewards Multipliers (basis points, 10000 = 1x)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1: 30000, // Updated this round (x3)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2: 20000, // Updated within 2 rounds (x2)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3: 10000, // No update >= 3 rounds (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST: 10000, // For/Against vote (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: 3000, // Abstain vote (x0.30)
+
     /*
       Level => B3TR Required (halved)
 

@@ -745,7 +745,14 @@ export async function deployAll(config: ContractsConfig) {
     "VoterRewardsV6",
     "VoterRewards",
     await voterRewards.getAddress(),
-    [0, 30000, 20000, 10000, 10000, 3000],
+    [
+      0, // roundStartTimepoint — no active round during fresh deploy
+      config.VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1,
+      config.VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2,
+      config.VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3,
+      config.VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST,
+      config.VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN,
+    ],
     {
       version: 7,
     },

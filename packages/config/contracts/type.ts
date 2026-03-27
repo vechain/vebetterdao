@@ -91,6 +91,13 @@ export type ContractsConfig = {
   GM_MULTIPLIERS_V2: number[]
   VOTER_REWARDS_LEVELS_V2: number[]
 
+  // Rewards Multipliers (basis points, 10000 = 1x)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1: number // Updated this round (default: 30000 = x3)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2: number // Updated within 2 rounds (default: 20000 = x2)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3: number // No update >= 3 rounds (default: 10000 = x1)
+  VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST: number // For/Against vote (default: 10000 = x1)
+  VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: number // Abstain vote (default: 3000 = x0.30)
+
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
 
   // Stargate contracts
