@@ -6,6 +6,7 @@ import { ethers } from "ethers"
 
 import {
   ChallengeDetail,
+  SettlementMode,
   ChallengeStatus,
   ChallengeTab,
   ChallengeView,
@@ -17,9 +18,43 @@ const contractAbi = B3TRChallenges__factory.abi
 const abi = contractAbi as any
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000"
 const challengeCreatedEventName = "ChallengeCreated" as const
+const payoutClaimedEventName = "ChallengePayoutClaimed" as const
 const refundClaimedEventName = "ChallengeRefundClaimed" as const
 
 const getAddress = () => getConfig().challengesContractAddress as `0x${string}`
+
+async function fetchClaimedChallengeIds(
+  thor: ThorClient,
+  address: `0x${string}`,
+  viewerAddress: string,
+): Promise<Set<number>> {
+  const eventAbi = thor.contracts.load(address, abi).getEventAbi(payoutClaimedEventName)
+  const topics = eventAbi.encodeFilterTopicsNoNull({ account: viewerAddress })
+  const logs = await thor.logs.filterEventLogs({
+    criteriaSet: [
+      {
+        criteria: {
+          address,
+          topic0: topics[0] ?? undefined,
+          topic1: topics[1] ?? undefined,
+          topic2: topics[2] ?? undefined,
+        },
+        eventAbi,
+      },
+    ],
+    options: { limit: 1000 },
+  })
+
+  const claimedChallengeIds = new Set<number>()
+  for (const log of logs) {
+    const event = decodeEventLog(log, contractAbi)
+    if (event.decodedData.eventName === payoutClaimedEventName) {
+      claimedChallengeIds.add(Number(event.decodedData.args.challengeId))
+    }
+  }
+
+  return claimedChallengeIds
+}
 
 async function fetchRefundedChallengeIds(
   thor: ThorClient,
@@ -95,8 +130,10 @@ function parseChallengeView(
   viewerAddress: string | undefined,
   viewerStatus: number,
   viewerEligible: boolean,
+  viewerActions: bigint,
   currentRound: number,
   createdAt = 0,
+  hasClaimed = false,
   hasRefunded = false,
 ): ChallengeView & { canFinalize: boolean } {
   const challengeId = Number(raw.challengeId ?? raw[0])
@@ -110,13 +147,15 @@ function parseChallengeView(
   const startRound = Number(raw.startRound ?? raw[8])
   const endRound = Number(raw.endRound ?? raw[9])
   const duration = Number(raw.duration ?? raw[10])
-  const threshold = BigInt(raw.threshold ?? raw[11]).toString()
+  const thresholdValue = BigInt(raw.threshold ?? raw[11])
+  const threshold = thresholdValue.toString()
   const allApps = Boolean(raw.allApps ?? raw[12])
   const totalPrize = ethers.formatEther(BigInt(raw.totalPrize ?? raw[13]))
   const participantCount = Number(raw.participantCount ?? raw[14])
   const invitedCount = Number(raw.invitedCount ?? raw[15])
   const declinedCount = Number(raw.declinedCount ?? raw[16])
   const selectedAppsCount = Number(raw.selectedAppsCount ?? raw[17])
+  const bestScore = BigInt(raw.bestScore ?? raw[19] ?? 0)
 
   const isCreator = !!viewerAddress && compareAddresses(creator, viewerAddress)
   const isJoined = viewerStatus === ParticipantStatus.Joined
@@ -126,6 +165,15 @@ function parseChallengeView(
 
   const canJoinPublic = isPending && visibility === ChallengeVisibility.Public && !isJoined && !isCreator
   const canAcceptInvite = isInvitationPending && !isJoined
+  const canClaim =
+    !hasClaimed &&
+    status === ChallengeStatus.Finalized &&
+    (settlementMode === SettlementMode.CreatorRefund
+      ? isCreator
+      : isJoined &&
+        (settlementMode === SettlementMode.QualifiedSplit
+          ? viewerActions >= thresholdValue
+          : viewerActions === bestScore))
 
   return {
     challengeId,
@@ -156,7 +204,7 @@ function parseChallengeView(
     canAccept: canAcceptInvite,
     canDecline: isInvitationPending && viewerStatus !== ParticipantStatus.Declined,
     canCancel: isPending && isCreator,
-    canClaim: status === ChallengeStatus.Finalized && isJoined,
+    canClaim,
     canRefund:
       !hasRefunded &&
       (status === ChallengeStatus.Cancelled || status === ChallengeStatus.Invalid) &&
@@ -186,11 +234,12 @@ export async function fetchAllChallenges(
   const address = getAddress()
   if (!address || address.toLowerCase() === ZERO_ADDR) return []
 
-  const [countResult, refundedChallengeIds] = await Promise.all([
+  const [countResult, claimedChallengeIds, refundedChallengeIds] = await Promise.all([
     executeMultipleClausesCall({
       thor,
       calls: [{ abi, address, functionName: "challengeCount", args: [] }],
     }),
+    viewerAddress ? fetchClaimedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
     viewerAddress ? fetchRefundedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
   ])
   const [count] = countResult
@@ -205,6 +254,7 @@ export async function fetchAllChallenges(
     if (viewerAddress) {
       calls.push({ abi, address, functionName: "getParticipantStatus", args: [BigInt(id), viewerAddress] })
       calls.push({ abi, address, functionName: "isInvitationEligible", args: [BigInt(id), viewerAddress] })
+      calls.push({ abi, address, functionName: "getParticipantActions", args: [BigInt(id), viewerAddress] })
     }
   }
 
@@ -212,13 +262,14 @@ export async function fetchAllChallenges(
     executeMultipleClausesCall({ thor, calls }),
     fetchChallengeCreationTimestamps(thor, address, n),
   ])
-  const stride = viewerAddress ? 3 : 1
+  const stride = viewerAddress ? 4 : 1
   const challenges: ChallengeView[] = []
 
   for (let i = 0; i < n; i++) {
     const raw = results[i * stride] as any
     const viewerStatus = viewerAddress ? Number(results[i * stride + 1]) : 0
     const eligible = viewerAddress ? Boolean(results[i * stride + 2]) : false
+    const viewerActions = viewerAddress ? BigInt(String(results[i * stride + 3] ?? 0)) : 0n
     const challengeId = Number(raw.challengeId ?? raw[0])
     challenges.push(
       parseChallengeView(
@@ -226,8 +277,10 @@ export async function fetchAllChallenges(
         viewerAddress,
         viewerStatus,
         eligible,
+        viewerActions,
         currentRound,
         creationTimestamps.get(challengeId) ?? 0,
+        claimedChallengeIds.has(challengeId),
         refundedChallengeIds.has(challengeId),
       ),
     )
@@ -244,7 +297,8 @@ export async function fetchChallengeDetail(
 ): Promise<ChallengeDetail | null> {
   const address = getAddress()
   if (!address || address.toLowerCase() === ZERO_ADDR) return null
-  const [refundedChallengeIds, creationTimestamps] = await Promise.all([
+  const [claimedChallengeIds, refundedChallengeIds, creationTimestamps] = await Promise.all([
+    viewerAddress ? fetchClaimedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
     viewerAddress ? fetchRefundedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
     fetchChallengeCreationTimestamps(thor, address, 1, challengeId),
   ])
@@ -261,6 +315,7 @@ export async function fetchChallengeDetail(
   if (viewerAddress) {
     calls.push({ abi, address, functionName: "getParticipantStatus", args: [BigInt(challengeId), viewerAddress] })
     calls.push({ abi, address, functionName: "isInvitationEligible", args: [BigInt(challengeId), viewerAddress] })
+    calls.push({ abi, address, functionName: "getParticipantActions", args: [BigInt(challengeId), viewerAddress] })
   }
 
   try {
@@ -273,14 +328,17 @@ export async function fetchChallengeDetail(
     const selectedApps = ((results[4] as string[]) ?? []).map(String)
     const viewerStatus = viewerAddress ? Number(results[5]) : 0
     const eligible = viewerAddress ? Boolean(results[6]) : false
+    const viewerActions = viewerAddress ? BigInt(String(results[7] ?? 0)) : 0n
 
     const view = parseChallengeView(
       raw,
       viewerAddress,
       viewerStatus,
       eligible,
+      viewerActions,
       currentRound,
       creationTimestamps.get(challengeId) ?? 0,
+      claimedChallengeIds.has(challengeId),
       refundedChallengeIds.has(challengeId),
     )
 

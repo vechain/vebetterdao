@@ -1,12 +1,14 @@
 "use client"
 
-import { Box, Heading, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { Badge, Box, Heading, HStack, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
-import { ChallengeDetail } from "@/api/challenges/types"
+import { ChallengeDetail, ChallengeStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 
 const compactFormatter = getCompactFormatter(1)
@@ -47,6 +49,8 @@ const ChartTooltip = ({ active, payload }: { active?: boolean; payload?: { paylo
 
 export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: ChallengeDetail }) => {
   const { t } = useTranslation()
+  const { account } = useWallet()
+  const viewerAddress = account?.address
   const { data, isLoading, isError } = useChallengeParticipantActions(challenge.challengeId, challenge.participants)
   const [leaderColorToken, trailingColorToken, gridColorToken, axisColorToken] = useToken("colors", [
     "blue.600",
@@ -58,18 +62,46 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
   const trailingColor = trailingColorToken ?? "#B3CCFF"
   const gridColor = gridColorToken ?? "#E7E9EB"
   const axisColor = axisColorToken ?? "#AAAFB6"
+  const leaderboard = data?.leaderboard ?? []
 
   const chartData = useMemo<ChartEntry[]>(() => {
-    const leaderboard = data?.leaderboard ?? []
     const bestScore = leaderboard[0]?.actions ?? 0
 
     return leaderboard.map(entry => ({
       participant: entry.participant,
       label: humanAddress(entry.participant, 6, 4),
       actions: entry.actions,
-      fill: bestScore > 0 && entry.actions === bestScore ? leaderColor : trailingColor,
+      fill: leaderboard.length > 0 && entry.actions === bestScore ? leaderColor : trailingColor,
     }))
-  }, [data?.leaderboard, leaderColor, trailingColor])
+  }, [leaderColor, leaderboard, trailingColor])
+
+  const outcome = useMemo(() => {
+    if (challenge.status !== ChallengeStatus.Finalized) return null
+
+    if (challenge.settlementMode === SettlementMode.CreatorRefund) {
+      return {
+        kind: "payout" as const,
+        addresses: [challenge.creator],
+        isViewerWinner: false,
+      }
+    }
+
+    const addresses =
+      challenge.settlementMode === SettlementMode.QualifiedSplit
+        ? leaderboard.filter(entry => entry.actions >= Number(challenge.threshold)).map(entry => entry.participant)
+        : (() => {
+            const bestScore = leaderboard[0]?.actions
+            return typeof bestScore === "number"
+              ? leaderboard.filter(entry => entry.actions === bestScore).map(entry => entry.participant)
+              : []
+          })()
+
+    return {
+      kind: "winner" as const,
+      addresses,
+      isViewerWinner: !!viewerAddress && addresses.some(address => compareAddresses(address, viewerAddress)),
+    }
+  }, [challenge.creator, challenge.settlementMode, challenge.status, challenge.threshold, leaderboard, viewerAddress])
 
   const chartHeight = Math.max(220, chartData.length * 44)
 
@@ -85,6 +117,44 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
         </Text>
       </VStack>
 
+      {outcome && outcome.addresses.length > 0 && (
+        <VStack align="stretch" gap="2">
+          <Text textStyle="sm" color="text.subtle">
+            {t("Challenge outcome")}
+          </Text>
+          {outcome.kind === "winner" && viewerAddress && (
+            <Text textStyle="sm" fontWeight="semibold">
+              {t(outcome.isViewerWinner ? "You won this challenge" : "You did not win this challenge")}
+            </Text>
+          )}
+          {outcome.kind === "payout" && (
+            <Text textStyle="sm" fontWeight="semibold">
+              {t("No participant won this challenge")}
+            </Text>
+          )}
+          <VStack align="start" gap="1">
+            <Text textStyle="xs" color="text.subtle">
+              {t(
+                outcome.kind === "payout"
+                  ? outcome.addresses.length === 1
+                    ? "Payout recipient"
+                    : "Payout recipients"
+                  : outcome.addresses.length === 1
+                    ? "Winner"
+                    : "Winners",
+              )}
+            </Text>
+            <HStack flexWrap="wrap" gap="2">
+              {outcome.addresses.map(address => (
+                <Badge key={address} variant="subtle" rounded="sm">
+                  {humanAddress(address, 6, 4)}
+                </Badge>
+              ))}
+            </HStack>
+          </VStack>
+        </VStack>
+      )}
+
       {isLoading ? (
         <Skeleton h="260px" borderRadius="xl" />
       ) : isError ? (
@@ -98,7 +168,7 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
       ) : (
         <Box w="full" h={`${chartHeight}px`}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 12, bottom: 0 }}>
+            <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 24, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
               <XAxis
                 type="number"
@@ -111,8 +181,9 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
               <YAxis
                 type="category"
                 dataKey="label"
-                width={96}
+                width={112}
                 tick={{ fontSize: 11 }}
+                tickMargin={8}
                 stroke={axisColor}
                 axisLine={false}
                 tickLine={false}

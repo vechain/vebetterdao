@@ -182,41 +182,35 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content maxW={{ base: "95vw", md: "lg" }}>
-            <Dialog.Header>
+            <Dialog.Header pb="5">
               <Dialog.Title>{t(titleKey)}</Dialog.Title>
             </Dialog.Header>
 
             <Dialog.Body>
               <VStack align="stretch" gap="4">
-                <HStack gap="2">
-                  <Button
-                    size="sm"
-                    variant={form.kind === ChallengeKind.Stake ? "solid" : "outline"}
-                    onClick={() => updateKind(ChallengeKind.Stake)}>
-                    {t("Stake")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={form.kind === ChallengeKind.Sponsored ? "solid" : "outline"}
-                    onClick={() => updateKind(ChallengeKind.Sponsored)}>
-                    {t("Sponsored")}
-                  </Button>
-                </HStack>
-
-                <HStack gap="2">
-                  <Button
-                    size="sm"
-                    variant={form.visibility === ChallengeVisibility.Public ? "solid" : "outline"}
-                    onClick={() => update("visibility", ChallengeVisibility.Public)}>
-                    {t("Public")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={form.visibility === ChallengeVisibility.Private ? "solid" : "outline"}
-                    onClick={() => update("visibility", ChallengeVisibility.Private)}>
-                    {t("Private")}
-                  </Button>
-                </HStack>
+                <VStack align="stretch" gap="2">
+                  <HStack gap="2">
+                    <Button
+                      size="sm"
+                      variant={form.kind === ChallengeKind.Stake ? "primary" : "tertiary"}
+                      onClick={() => updateKind(ChallengeKind.Stake)}>
+                      {t("Stake")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={form.kind === ChallengeKind.Sponsored ? "primary" : "tertiary"}
+                      onClick={() => updateKind(ChallengeKind.Sponsored)}>
+                      {t("Sponsored")}
+                    </Button>
+                  </HStack>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t(
+                      form.kind === ChallengeKind.Stake
+                        ? "Stake challenge type description"
+                        : "Sponsored challenge type description",
+                    )}
+                  </Text>
+                </VStack>
 
                 <Field.Root invalid={hasInsufficientB3tr}>
                   <Field.Label>{t(amountLabelKey)}</Field.Label>
@@ -267,6 +261,12 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                   </Field.Root>
                 </HStack>
 
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Duration: {{count}} rounds", {
+                    count: Math.max(0, form.endRound - form.startRound + 1),
+                  })}
+                </Text>
+
                 {isSponsored && (
                   <>
                     <Field.Root>
@@ -282,20 +282,29 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                     </Field.Root>
 
                     {thresholdValue > 0 && (
-                      <HStack gap="2">
-                        <Button
-                          size="sm"
-                          variant={form.thresholdMode === ThresholdMode.SplitAboveThreshold ? "solid" : "outline"}
-                          onClick={() => update("thresholdMode", ThresholdMode.SplitAboveThreshold)}>
-                          {t("Split above threshold")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={form.thresholdMode === ThresholdMode.TopAboveThreshold ? "solid" : "outline"}
-                          onClick={() => update("thresholdMode", ThresholdMode.TopAboveThreshold)}>
-                          {t("Top above threshold")}
-                        </Button>
-                      </HStack>
+                      <VStack align="stretch" gap="2">
+                        <HStack gap="2">
+                          <Button
+                            size="sm"
+                            variant={form.thresholdMode === ThresholdMode.SplitAboveThreshold ? "primary" : "tertiary"}
+                            onClick={() => update("thresholdMode", ThresholdMode.SplitAboveThreshold)}>
+                            {t("Split above threshold")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={form.thresholdMode === ThresholdMode.TopAboveThreshold ? "primary" : "tertiary"}
+                            onClick={() => update("thresholdMode", ThresholdMode.TopAboveThreshold)}>
+                            {t("Top above threshold")}
+                          </Button>
+                        </HStack>
+                        <Text textStyle="xs" color="text.subtle">
+                          {t(
+                            form.thresholdMode === ThresholdMode.TopAboveThreshold
+                              ? "Top above threshold description"
+                              : "Split above threshold description",
+                          )}
+                        </Text>
+                      </VStack>
                     )}
                   </>
                 )}
@@ -365,6 +374,30 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                   )}
                 </Field.Root>
 
+                <VStack align="stretch" gap="2">
+                  <HStack gap="2">
+                    <Button
+                      size="sm"
+                      variant={form.visibility === ChallengeVisibility.Public ? "primary" : "tertiary"}
+                      onClick={() => update("visibility", ChallengeVisibility.Public)}>
+                      {t("Public")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={form.visibility === ChallengeVisibility.Private ? "primary" : "tertiary"}
+                      onClick={() => update("visibility", ChallengeVisibility.Private)}>
+                      {t("Private")}
+                    </Button>
+                  </HStack>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t(
+                      form.visibility === ChallengeVisibility.Public
+                        ? "Public challenge visibility description"
+                        : "Private challenge visibility description",
+                    )}
+                  </Text>
+                </VStack>
+
                 {isPrivate && (
                   <Field.Root>
                     <Field.Label>{t("Invitees")}</Field.Label>
@@ -384,12 +417,6 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                     </VStack>
                   </Field.Root>
                 )}
-
-                <Text textStyle="xs" color="text.subtle">
-                  {t("Duration: {{count}} rounds", {
-                    count: Math.max(0, form.endRound - form.startRound + 1),
-                  })}
-                </Text>
               </VStack>
             </Dialog.Body>
 
