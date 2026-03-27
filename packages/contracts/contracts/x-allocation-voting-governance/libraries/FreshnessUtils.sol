@@ -65,17 +65,16 @@ library FreshnessUtils {
     uint256 lastChangedRound = $._lastFingerprintChangedRound[voter];
     uint256 roundsSinceChange = roundId - lastChangedRound;
 
-    // Look up multiplier config from VoterRewards at the round snapshot
-    IVoterRewards voterRewards = IVoterRewards(voterRewardsAddress);
-    IVoterRewards.MultiplierConfig memory config = voterRewards.getMultiplierConfig(timepoint);
+    // Look up freshness multiplier tiers from VoterRewards at the round snapshot
+    (uint256 tier1, uint256 tier2, uint256 tier3) = IVoterRewards(voterRewardsAddress).getFreshnessMultipliers(timepoint);
 
     // Select tier based on rounds since last change
     if (roundsSinceChange == 0) {
-      multiplier = config.freshnessMultiplierTier1;
+      multiplier = tier1;
     } else if (roundsSinceChange == 1) {
-      multiplier = config.freshnessMultiplierTier2;
+      multiplier = tier2;
     } else {
-      multiplier = config.freshnessMultiplierTier3;
+      multiplier = tier3;
     }
   }
 }

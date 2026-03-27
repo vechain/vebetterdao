@@ -337,9 +337,9 @@ library GovernorVotesLogic {
   ) private {
     // Get intent multiplier based on vote support type
     // support: 0 = Against, 1 = For, 2 = Abstain
-    IVoterRewards.MultiplierConfig memory config = IVoterRewards(address($.voterRewards))
-      .getMultiplierConfig(proposalSnapshot);
-    uint256 intentMultiplier = (support == 2) ? config.intentMultiplierAbstain : config.intentMultiplierForAgainst;
+    (uint256 forAgainstMultiplier, uint256 abstainMultiplier) = IVoterRewards(address($.voterRewards))
+      .getIntentMultipliers(proposalSnapshot);
+    uint256 intentMultiplier = (support == 2) ? abstainMultiplier : forAgainstMultiplier;
     uint256 rewardWeight = (weight * intentMultiplier) / 10000;
 
     $.voterRewards.registerVote(proposalId, voter, rewardWeight, Math.sqrt(rewardWeight));

@@ -721,14 +721,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice Basis points scale for multipliers (10000 = 1x)
   uint256 public constant MULTIPLIER_SCALE = 10000;
 
-  /// @notice Multiplier config returned by getMultiplierConfig
-  struct MultiplierConfig {
-    uint256 freshnessMultiplierTier1;
-    uint256 freshnessMultiplierTier2;
-    uint256 freshnessMultiplierTier3;
-    uint256 intentMultiplierForAgainst;
-    uint256 intentMultiplierAbstain;
-  }
+  /// @notice Role for governance-controlled settings
+  bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
 
   /// @notice Emitted when freshness multiplier values are updated
   event FreshnessMultipliersSet(uint256 tier1, uint256 tier2, uint256 tier3);
@@ -736,25 +730,39 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice Emitted when governance intent multiplier values are updated
   event IntentMultipliersSet(uint256 forAgainst, uint256 abstain);
 
-  /// @notice Returns all multiplier values resolved at a given timepoint (checkpoint lookup)
+  /// @notice Returns freshness multiplier values resolved at a given timepoint (checkpoint lookup)
   /// @param timepoint The block number / timepoint to query (typically round snapshot)
-  /// @return config The multiplier config at the given timepoint
-  function getMultiplierConfig(uint256 timepoint) external view returns (MultiplierConfig memory config) {
+  /// @return tier1 Basis points for "updated this round"
+  /// @return tier2 Basis points for "updated within 2 rounds"
+  /// @return tier3 Basis points for "no update >= 3 rounds"
+  function getFreshnessMultipliers(uint256 timepoint) external view returns (uint256 tier1, uint256 tier2, uint256 tier3) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     uint48 tp = SafeCast.toUint48(timepoint);
 
-    config.freshnessMultiplierTier1 = uint256($.freshnessMultiplierTier1.upperLookupRecent(tp));
-    config.freshnessMultiplierTier2 = uint256($.freshnessMultiplierTier2.upperLookupRecent(tp));
-    config.freshnessMultiplierTier3 = uint256($.freshnessMultiplierTier3.upperLookupRecent(tp));
-    config.intentMultiplierForAgainst = uint256($.intentMultiplierForAgainst.upperLookupRecent(tp));
-    config.intentMultiplierAbstain = uint256($.intentMultiplierAbstain.upperLookupRecent(tp));
+    tier1 = uint256($.freshnessMultiplierTier1.upperLookupRecent(tp));
+    tier2 = uint256($.freshnessMultiplierTier2.upperLookupRecent(tp));
+    tier3 = uint256($.freshnessMultiplierTier3.upperLookupRecent(tp));
 
     // If not yet initialized (all zeros), return neutral (1x) values
-    if (config.freshnessMultiplierTier1 == 0) config.freshnessMultiplierTier1 = MULTIPLIER_SCALE;
-    if (config.freshnessMultiplierTier2 == 0) config.freshnessMultiplierTier2 = MULTIPLIER_SCALE;
-    if (config.freshnessMultiplierTier3 == 0) config.freshnessMultiplierTier3 = MULTIPLIER_SCALE;
-    if (config.intentMultiplierForAgainst == 0) config.intentMultiplierForAgainst = MULTIPLIER_SCALE;
-    if (config.intentMultiplierAbstain == 0) config.intentMultiplierAbstain = MULTIPLIER_SCALE;
+    if (tier1 == 0) tier1 = MULTIPLIER_SCALE;
+    if (tier2 == 0) tier2 = MULTIPLIER_SCALE;
+    if (tier3 == 0) tier3 = MULTIPLIER_SCALE;
+  }
+
+  /// @notice Returns governance intent multiplier values resolved at a given timepoint (checkpoint lookup)
+  /// @param timepoint The block number / timepoint to query (typically proposal snapshot)
+  /// @return forAgainst Basis points for For/Against votes
+  /// @return abstain Basis points for Abstain votes
+  function getIntentMultipliers(uint256 timepoint) external view returns (uint256 forAgainst, uint256 abstain) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    uint48 tp = SafeCast.toUint48(timepoint);
+
+    forAgainst = uint256($.intentMultiplierForAgainst.upperLookupRecent(tp));
+    abstain = uint256($.intentMultiplierAbstain.upperLookupRecent(tp));
+
+    // If not yet initialized (all zeros), return neutral (1x) values
+    if (forAgainst == 0) forAgainst = MULTIPLIER_SCALE;
+    if (abstain == 0) abstain = MULTIPLIER_SCALE;
   }
 
   /// @notice Set the freshness multiplier values (governance only)
@@ -765,7 +773,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     uint256 tier1,
     uint256 tier2,
     uint256 tier3
-  ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  ) external onlyRole(GOVERNANCE_ROLE) {
     require(tier1 > 0 && tier2 > 0 && tier3 > 0, "VoterRewards: multiplier must be > 0");
     require(tier1 >= tier2 && tier2 >= tier3, "VoterRewards: tiers must be in descending order");
 
@@ -785,7 +793,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   function setIntentMultipliers(
     uint256 forAgainst,
     uint256 abstain
-  ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  ) external onlyRole(GOVERNANCE_ROLE) {
     require(forAgainst > 0 && abstain > 0, "VoterRewards: multiplier must be > 0");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
