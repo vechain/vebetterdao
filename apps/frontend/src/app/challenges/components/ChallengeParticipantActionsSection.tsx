@@ -1,8 +1,8 @@
 "use client"
 
-import { Badge, Box, Heading, HStack, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { Badge, Box, Card, Heading, HStack, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -63,6 +63,7 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
   const gridColor = gridColorToken ?? "#E7E9EB"
   const axisColor = axisColorToken ?? "#AAAFB6"
   const leaderboard = data?.leaderboard ?? []
+  const isPending = challenge.status === ChallengeStatus.Pending
 
   const chartData = useMemo<ChartEntry[]>(() => {
     const bestScore = leaderboard[0]?.actions ?? 0
@@ -106,98 +107,139 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
   const chartHeight = Math.max(220, chartData.length * 44)
 
   return (
-    <VStack align="stretch" gap="4">
-      <VStack align="start" gap="0">
-        <Text textStyle="sm" color="text.subtle">
-          {t("Participants")}
-        </Text>
-        <Heading size="xl">{compactFormatter.format(data?.totalActions ?? 0)}</Heading>
-        <Text textStyle="xs" color="text.subtle">
-          {t("total actions")}
-        </Text>
-      </VStack>
-
-      {outcome && outcome.addresses.length > 0 && (
-        <VStack align="stretch" gap="2">
-          <Text textStyle="sm" color="text.subtle">
-            {t("Challenge outcome")}
+    <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" borderRadius="3xl" boxShadow="sm">
+      <VStack align="stretch" gap="5">
+        <VStack align="start" gap="1">
+          <Text
+            textStyle="xxs"
+            color="text.subtle"
+            textTransform="uppercase"
+            letterSpacing="0.08em"
+            fontWeight="semibold">
+            {t("Participants")}
           </Text>
-          {outcome.kind === "winner" && viewerAddress && (
-            <Text textStyle="sm" fontWeight="semibold">
-              {t(outcome.isViewerWinner ? "You won this challenge" : "You did not win this challenge")}
+          <Heading size="2xl">{humanNumber(challenge.participantCount)}</Heading>
+          {!isPending && (
+            <Text textStyle="sm" color="text.subtle">
+              {compactFormatter.format(data?.totalActions ?? 0)} {t("total actions")}
             </Text>
           )}
-          {outcome.kind === "payout" && (
-            <Text textStyle="sm" fontWeight="semibold">
-              {t("No participant won this challenge")}
-            </Text>
-          )}
-          <VStack align="start" gap="1">
-            <Text textStyle="xs" color="text.subtle">
-              {t(
-                outcome.kind === "payout"
-                  ? outcome.addresses.length === 1
-                    ? "Payout recipient"
-                    : "Payout recipients"
-                  : outcome.addresses.length === 1
-                    ? "Winner"
-                    : "Winners",
-              )}
-            </Text>
-            <HStack flexWrap="wrap" gap="2">
-              {outcome.addresses.map(address => (
-                <Badge key={address} variant="subtle" rounded="sm">
-                  {humanAddress(address, 6, 4)}
-                </Badge>
-              ))}
-            </HStack>
-          </VStack>
         </VStack>
-      )}
 
-      {isLoading ? (
-        <Skeleton h="260px" borderRadius="xl" />
-      ) : isError ? (
-        <Text textStyle="sm" color="text.subtle">
-          {t("No round data available yet")}
-        </Text>
-      ) : !chartData.length ? (
-        <Text textStyle="sm" color="text.subtle">
-          {t("None yet")}
-        </Text>
-      ) : (
-        <Box w="full" h={`${chartHeight}px`}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 24, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
-              <XAxis
-                type="number"
-                tick={{ fontSize: 11 }}
-                tickFormatter={value => compactFormatter.format(value as number)}
-                stroke={axisColor}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                type="category"
-                dataKey="label"
-                width={112}
-                tick={{ fontSize: 11 }}
-                tickMargin={8}
-                stroke={axisColor}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<ChartTooltip />} cursor={false} />
-              <Bar dataKey="actions" radius={[0, 6, 6, 0]} minPointSize={4}>
-                {chartData.map(entry => (
-                  <Cell key={entry.participant} fill={entry.fill} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
-      )}
-    </VStack>
+        {challenge.participants.length > 0 && (
+          <HStack flexWrap="wrap" gap="2">
+            {challenge.participants.map(address => (
+              <Badge
+                key={address}
+                variant={viewerAddress && compareAddresses(address, viewerAddress) ? "positive" : "neutral"}
+                size="sm">
+                {humanAddress(address, 6, 4)}
+              </Badge>
+            ))}
+          </HStack>
+        )}
+
+        {outcome && outcome.addresses.length > 0 && (
+          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+            <VStack align="stretch" gap="3">
+              <Text
+                textStyle="xxs"
+                color="text.subtle"
+                textTransform="uppercase"
+                letterSpacing="0.08em"
+                fontWeight="semibold">
+                {t("Challenge outcome")}
+              </Text>
+              {outcome.kind === "winner" && viewerAddress && (
+                <Text textStyle="sm" fontWeight="semibold">
+                  {t(outcome.isViewerWinner ? "You won this challenge" : "You did not win this challenge")}
+                </Text>
+              )}
+              {outcome.kind === "payout" && (
+                <Text textStyle="sm" fontWeight="semibold">
+                  {t("No participant won this challenge")}
+                </Text>
+              )}
+              <VStack align="start" gap="2">
+                <Text textStyle="xs" color="text.subtle">
+                  {t(
+                    outcome.kind === "payout"
+                      ? outcome.addresses.length === 1
+                        ? "Payout recipient"
+                        : "Payout recipients"
+                      : outcome.addresses.length === 1
+                        ? "Winner"
+                        : "Winners",
+                  )}
+                </Text>
+                <HStack flexWrap="wrap" gap="2">
+                  {outcome.addresses.map(address => (
+                    <Badge key={address} variant="neutral" size="sm">
+                      {humanAddress(address, 6, 4)}
+                    </Badge>
+                  ))}
+                </HStack>
+              </VStack>
+            </VStack>
+          </Box>
+        )}
+
+        {isLoading ? (
+          <Skeleton h="320px" borderRadius="2xl" />
+        ) : isPending ? (
+          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+            <Text textStyle="sm" color="text.subtle">
+              {t("Waiting for the round to start")}
+            </Text>
+          </Box>
+        ) : isError ? (
+          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+            <Text textStyle="sm" color="text.subtle">
+              {t("No round data available yet")}
+            </Text>
+          </Box>
+        ) : !chartData.length ? (
+          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+            <Text textStyle="sm" color="text.subtle">
+              {t("None yet")}
+            </Text>
+          </Box>
+        ) : (
+          <Box bg="bg.secondary" borderRadius="2xl" p={{ base: "4", md: "5" }}>
+            <Box w="full" h={`${chartHeight}px`}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={value => compactFormatter.format(value as number)}
+                    stroke={axisColor}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="label"
+                    width={96}
+                    tick={{ fontSize: 11 }}
+                    tickMargin={8}
+                    stroke={axisColor}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<ChartTooltip />} cursor={false} />
+                  <Bar dataKey="actions" radius={[0, 6, 6, 0]} minPointSize={4}>
+                    {chartData.map(entry => (
+                      <Cell key={entry.participant} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          </Box>
+        )}
+      </VStack>
+    </Card.Root>
   )
 }

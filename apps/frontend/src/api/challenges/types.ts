@@ -54,6 +54,7 @@ export interface ChallengeView {
   canAccept: boolean
   canDecline: boolean
   canCancel: boolean
+  canAddInvites: boolean
   canClaim: boolean
   canRefund: boolean
   canFinalize: boolean

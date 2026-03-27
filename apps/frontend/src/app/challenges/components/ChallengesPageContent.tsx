@@ -28,7 +28,7 @@ export const ChallengesPageContent = ({ tab }: { tab: ChallengeTab }) => {
     AnalyticsUtils.trackPage("Challenges")
   }, [])
 
-  const pendingInvitationCount = allChallenges.filter(c => c.isInvitationPending).length
+  const pendingInvitationCount = allChallenges.filter(c => c.canDecline).length
   const round = Number(currentRoundId ?? 0)
 
   return (
@@ -76,7 +76,7 @@ export const ChallengesPageContent = ({ tab }: { tab: ChallengeTab }) => {
             ) : (
               <SimpleGrid columns={{ base: 1, xl: 2 }} gap="4" gridAutoRows="1fr">
                 {challenges.map(challenge => (
-                  <ChallengeCard key={challenge.challengeId} challenge={challenge} />
+                  <ChallengeCard key={challenge.challengeId} challenge={challenge} currentRound={round} />
                 ))}
               </SimpleGrid>
             )}

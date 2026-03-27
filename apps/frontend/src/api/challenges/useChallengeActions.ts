@@ -30,6 +30,7 @@ type ActionParams =
   | { type: "leave"; challengeId: number }
   | { type: "decline"; challengeId: number }
   | { type: "cancel"; challengeId: number }
+  | { type: "addInvites"; challengeId: number; invitees: string[] }
   | { type: "claimPayout"; challengeId: number }
   | { type: "claimRefund"; challengeId: number }
   | { type: "finalize"; challengeId: number; batchSize: number }
@@ -147,6 +148,17 @@ export const useChallengeActions = () => {
             }),
           ]
 
+        case "addInvites":
+          return [
+            buildClause({
+              contractInterface: ChallengesInterface,
+              to: challengesAddr,
+              method: "addInvites",
+              args: [params.challengeId, params.invitees],
+              comment: `Add invites to challenge #${params.challengeId}`,
+            }),
+          ]
+
         case "claimPayout":
           return [
             buildClause({
@@ -199,6 +211,8 @@ export const useChallengeActions = () => {
     leaveChallenge: (id: number) => tx.sendTransaction({ type: "leave", challengeId: id }),
     declineChallenge: (id: number) => tx.sendTransaction({ type: "decline", challengeId: id }),
     cancelChallenge: (id: number) => tx.sendTransaction({ type: "cancel", challengeId: id }),
+    addInvites: (id: number, invitees: string[]) =>
+      tx.sendTransaction({ type: "addInvites", challengeId: id, invitees }),
     claimChallenge: (id: number) => tx.sendTransaction({ type: "claimPayout", challengeId: id }),
     refundChallenge: (id: number) => tx.sendTransaction({ type: "claimRefund", challengeId: id }),
     finalizeChallenge: (id: number, batchSize = DEFAULT_FINALIZE_BATCH_SIZE) =>

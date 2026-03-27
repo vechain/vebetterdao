@@ -35,13 +35,18 @@ export const ChallengeTabs = ({ currentTab, children }: { currentTab: ChallengeT
           inlineStart={{ base: "4", md: "0" }}
           inlineEnd={{ base: "4", md: "0" }}>
           <Tabs.List
+            w="full"
+            justifyContent="space-between"
             pt={isStuck ? "3" : undefined}
             px={{ base: "4", md: "0" }}
-            bg={isStuck ? "bg.primary" : undefined}
-            overflowX="auto"
-            scrollbar="hidden">
+            bg={isStuck ? "bg.primary" : undefined}>
             {tabDefs.map(tab => (
-              <Tabs.Trigger key={tab.value} value={tab.value} asChild flexShrink={0}>
+              <Tabs.Trigger
+                key={tab.value}
+                value={tab.value}
+                asChild
+                flex={{ base: 1, md: "unset" }}
+                justifyContent="center">
                 <NextLink href={tab.href}>{t(tab.labelKey)}</NextLink>
               </Tabs.Trigger>
             ))}

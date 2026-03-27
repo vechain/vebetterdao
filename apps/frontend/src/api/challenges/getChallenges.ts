@@ -161,10 +161,12 @@ function parseChallengeView(
   const isJoined = viewerStatus === ParticipantStatus.Joined
   const isInvited = viewerStatus === ParticipantStatus.Invited || viewerEligible
   const isPending = status === ChallengeStatus.Pending
-  const isInvitationPending = isPending && isInvited && !isJoined && viewerStatus !== ParticipantStatus.Declined
+  const isInvitationPending = isPending && isInvited && !isJoined
 
   const canJoinPublic = isPending && visibility === ChallengeVisibility.Public && !isJoined && !isCreator
-  const canAcceptInvite = isInvitationPending && !isJoined
+  const canAcceptInvite = isInvitationPending
+  const canAddInvites =
+    isPending && visibility === ChallengeVisibility.Private && isCreator && currentRound < startRound
   const canClaim =
     !hasClaimed &&
     status === ChallengeStatus.Finalized &&
@@ -204,6 +206,7 @@ function parseChallengeView(
     canAccept: canAcceptInvite,
     canDecline: isInvitationPending && viewerStatus !== ParticipantStatus.Declined,
     canCancel: isPending && isCreator,
+    canAddInvites,
     canClaim,
     canRefund:
       !hasRefunded &&
