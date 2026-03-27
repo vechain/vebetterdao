@@ -1,4 +1,4 @@
-import { address } from "thor-devkit"
+import { Address } from "@vechain/sdk-core"
 import * as HexUtils from "../HexUtils"
 
 /**
@@ -17,7 +17,7 @@ export const compareAddresses = (address1?: string, address2?: string): boolean 
   }
 
   try {
-    return HexUtils.normalize(address1) === HexUtils.normalize(address2)
+    return Address.of(HexUtils.addPrefix(address1)).toString() === Address.of(HexUtils.addPrefix(address2)).toString()
   } catch (e) {
     return false
   }
@@ -42,8 +42,7 @@ export const regexPattern = () => {
 export const isValid = (addr: string | undefined | null): boolean => {
   try {
     if (typeof addr !== "string") return false
-    address.toChecksumed(HexUtils.addPrefix(addr))
-    return true
+    return Address.isValid(HexUtils.addPrefix(addr))
   } catch (e) {
     return false
   }
