@@ -377,7 +377,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                           </IconButton>
                         </HStack>
                       ))}
-                      <Button size="sm" variant="outline" onClick={addInvitee}>
+                      <Button size="sm" variant="tertiary" onClick={addInvitee}>
                         <LuPlus />
                         {t("Add invitee")}
                       </Button>
@@ -395,9 +395,9 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
 
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
-                <Button variant="outline">{t("Cancel")}</Button>
+                <Button variant="secondary">{t("Cancel")}</Button>
               </Dialog.ActionTrigger>
-              <Button variant="solid" disabled={!canSubmit} onClick={handleSubmit}>
+              <Button variant="primary" disabled={!canSubmit} onClick={handleSubmit}>
                 {t("Create")}
               </Button>
             </Dialog.Footer>

@@ -18,7 +18,7 @@ export const PendingInvitationsBanner = ({ count }: { count: number }) => {
             <Text textStyle="sm">{t("{{count}} invitations still need a response", { count })}</Text>
           </Alert.Description>
         </VStack>
-        <Button asChild size="sm" variant="solid">
+        <Button asChild size="sm" variant="primary">
           <NextLink href="/challenges/invited">{t("Review invites")}</NextLink>
         </Button>
       </HStack>

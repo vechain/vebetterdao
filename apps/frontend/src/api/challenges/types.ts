@@ -27,6 +27,7 @@ export type ChallengeTab = "all" | "mine" | "invited" | "public"
 
 export interface ChallengeView {
   challengeId: number
+  createdAt: number
   kind: ChallengeKind
   visibility: ChallengeVisibility
   thresholdMode: ThresholdMode

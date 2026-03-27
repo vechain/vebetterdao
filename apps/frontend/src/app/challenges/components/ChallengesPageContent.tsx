@@ -44,10 +44,10 @@ export const ChallengesPageContent = ({ tab }: { tab: ChallengeTab }) => {
 
           <Stack direction={{ base: "column", sm: "row" }} gap="2">
             <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
-              <Button variant="solid">{t("Create stake challenge")}</Button>
+              <Button variant="primary">{t("Create stake challenge")}</Button>
             </CreateChallengeModal>
             <CreateChallengeModal defaultKind={ChallengeKind.Sponsored} currentRound={round}>
-              <Button variant="ghost">{t("Create sponsored challenge")}</Button>
+              <Button variant="secondary">{t("Create sponsored challenge")}</Button>
             </CreateChallengeModal>
           </Stack>
         </Stack>
@@ -74,7 +74,7 @@ export const ChallengesPageContent = ({ tab }: { tab: ChallengeTab }) => {
                 </VStack>
               </Card.Root>
             ) : (
-              <SimpleGrid columns={{ base: 1, xl: 2 }} gap="4">
+              <SimpleGrid columns={{ base: 1, xl: 2 }} gap="4" gridAutoRows="1fr">
                 {challenges.map(challenge => (
                   <ChallengeCard key={challenge.challengeId} challenge={challenge} />
                 ))}

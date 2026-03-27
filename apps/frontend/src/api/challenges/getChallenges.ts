@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { ThorClient, executeMultipleClausesCall } from "@vechain/vechain-kit"
+import { decodeEventLog, ThorClient, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 import {
@@ -13,10 +13,81 @@ import {
   ParticipantStatus,
 } from "./types"
 
-const abi = B3TRChallenges__factory.abi as any
+const contractAbi = B3TRChallenges__factory.abi
+const abi = contractAbi as any
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000"
+const challengeCreatedEventName = "ChallengeCreated" as const
+const refundClaimedEventName = "ChallengeRefundClaimed" as const
 
 const getAddress = () => getConfig().challengesContractAddress as `0x${string}`
+
+async function fetchRefundedChallengeIds(
+  thor: ThorClient,
+  address: `0x${string}`,
+  viewerAddress: string,
+): Promise<Set<number>> {
+  const eventAbi = thor.contracts.load(address, abi).getEventAbi(refundClaimedEventName)
+  const topics = eventAbi.encodeFilterTopicsNoNull({ account: viewerAddress })
+  const logs = await thor.logs.filterEventLogs({
+    criteriaSet: [
+      {
+        criteria: {
+          address,
+          topic0: topics[0] ?? undefined,
+          topic1: topics[1] ?? undefined,
+          topic2: topics[2] ?? undefined,
+        },
+        eventAbi,
+      },
+    ],
+    options: { limit: 1000 },
+  })
+
+  const refundedChallengeIds = new Set<number>()
+  for (const log of logs) {
+    const event = decodeEventLog(log, contractAbi)
+    if (event.decodedData.eventName === refundClaimedEventName) {
+      refundedChallengeIds.add(Number(event.decodedData.args.challengeId))
+    }
+  }
+
+  return refundedChallengeIds
+}
+
+async function fetchChallengeCreationTimestamps(
+  thor: ThorClient,
+  address: `0x${string}`,
+  limit: number,
+  challengeId?: number,
+): Promise<Map<number, number>> {
+  const eventAbi = thor.contracts.load(address, abi).getEventAbi(challengeCreatedEventName)
+  const topics = eventAbi.encodeFilterTopicsNoNull(challengeId ? { challengeId: BigInt(challengeId) } : {})
+  const logs = await thor.logs.filterEventLogs({
+    criteriaSet: [
+      {
+        criteria: {
+          address,
+          topic0: topics[0] ?? undefined,
+          topic1: topics[1] ?? undefined,
+          topic2: topics[2] ?? undefined,
+          topic3: topics[3] ?? undefined,
+        },
+        eventAbi,
+      },
+    ],
+    options: { limit },
+  })
+
+  const creationTimestamps = new Map<number, number>()
+  for (const log of logs) {
+    const event = decodeEventLog(log, contractAbi)
+    if (event.decodedData.eventName === challengeCreatedEventName) {
+      creationTimestamps.set(Number(event.decodedData.args.challengeId), log.meta.blockTimestamp)
+    }
+  }
+
+  return creationTimestamps
+}
 
 function parseChallengeView(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +96,8 @@ function parseChallengeView(
   viewerStatus: number,
   viewerEligible: boolean,
   currentRound: number,
+  createdAt = 0,
+  hasRefunded = false,
 ): ChallengeView & { canFinalize: boolean } {
   const challengeId = Number(raw.challengeId ?? raw[0])
   const kind = Number(raw.kind ?? raw[1]) as ChallengeView["kind"]
@@ -56,6 +129,7 @@ function parseChallengeView(
 
   return {
     challengeId,
+    createdAt,
     kind,
     visibility,
     thresholdMode,
@@ -83,7 +157,10 @@ function parseChallengeView(
     canDecline: isInvitationPending && viewerStatus !== ParticipantStatus.Declined,
     canCancel: isPending && isCreator,
     canClaim: status === ChallengeStatus.Finalized && isJoined,
-    canRefund: (status === ChallengeStatus.Cancelled || status === ChallengeStatus.Invalid) && (isJoined || isCreator),
+    canRefund:
+      !hasRefunded &&
+      (status === ChallengeStatus.Cancelled || status === ChallengeStatus.Invalid) &&
+      (isJoined || isCreator),
     canFinalize: status === ChallengeStatus.Active && endRound < currentRound,
   }
 }
@@ -109,10 +186,14 @@ export async function fetchAllChallenges(
   const address = getAddress()
   if (!address || address.toLowerCase() === ZERO_ADDR) return []
 
-  const [count] = await executeMultipleClausesCall({
-    thor,
-    calls: [{ abi, address, functionName: "challengeCount", args: [] }],
-  })
+  const [countResult, refundedChallengeIds] = await Promise.all([
+    executeMultipleClausesCall({
+      thor,
+      calls: [{ abi, address, functionName: "challengeCount", args: [] }],
+    }),
+    viewerAddress ? fetchRefundedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
+  ])
+  const [count] = countResult
 
   const n = Number(count)
   if (n === 0) return []
@@ -127,18 +208,32 @@ export async function fetchAllChallenges(
     }
   }
 
-  const results = await executeMultipleClausesCall({ thor, calls })
+  const [results, creationTimestamps] = await Promise.all([
+    executeMultipleClausesCall({ thor, calls }),
+    fetchChallengeCreationTimestamps(thor, address, n),
+  ])
   const stride = viewerAddress ? 3 : 1
   const challenges: ChallengeView[] = []
 
   for (let i = 0; i < n; i++) {
-    const raw = results[i * stride]
+    const raw = results[i * stride] as any
     const viewerStatus = viewerAddress ? Number(results[i * stride + 1]) : 0
     const eligible = viewerAddress ? Boolean(results[i * stride + 2]) : false
-    challenges.push(parseChallengeView(raw, viewerAddress, viewerStatus, eligible, currentRound))
+    const challengeId = Number(raw.challengeId ?? raw[0])
+    challenges.push(
+      parseChallengeView(
+        raw,
+        viewerAddress,
+        viewerStatus,
+        eligible,
+        currentRound,
+        creationTimestamps.get(challengeId) ?? 0,
+        refundedChallengeIds.has(challengeId),
+      ),
+    )
   }
 
-  return challenges
+  return challenges.sort((a, b) => b.createdAt - a.createdAt || b.challengeId - a.challengeId)
 }
 
 export async function fetchChallengeDetail(
@@ -149,6 +244,10 @@ export async function fetchChallengeDetail(
 ): Promise<ChallengeDetail | null> {
   const address = getAddress()
   if (!address || address.toLowerCase() === ZERO_ADDR) return null
+  const [refundedChallengeIds, creationTimestamps] = await Promise.all([
+    viewerAddress ? fetchRefundedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
+    fetchChallengeCreationTimestamps(thor, address, 1, challengeId),
+  ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const calls: any[] = [
@@ -175,7 +274,15 @@ export async function fetchChallengeDetail(
     const viewerStatus = viewerAddress ? Number(results[5]) : 0
     const eligible = viewerAddress ? Boolean(results[6]) : false
 
-    const view = parseChallengeView(raw, viewerAddress, viewerStatus, eligible, currentRound)
+    const view = parseChallengeView(
+      raw,
+      viewerAddress,
+      viewerStatus,
+      eligible,
+      currentRound,
+      creationTimestamps.get(challengeId) ?? 0,
+      refundedChallengeIds.has(challengeId),
+    )
 
     return {
       ...view,

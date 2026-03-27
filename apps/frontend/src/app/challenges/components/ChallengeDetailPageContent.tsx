@@ -3,6 +3,7 @@
 import { Badge, Button, Card, Heading, HStack, Icon, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
@@ -13,6 +14,12 @@ import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { MotionVStack } from "@/components/MotionVStack"
 
 import { ChallengeActions } from "./ChallengeActions"
+import {
+  getChallengeKindBadgeVariant,
+  getChallengeStatusBadgeVariant,
+  getChallengeVisibilityBadgeVariant,
+} from "./challengeBadgeVariants"
+import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
 
 export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: string }) => {
   const { account } = useWallet()
@@ -57,17 +64,17 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
         <Card.Root variant="subtle" p={{ base: "4", md: "6" }} gap="5">
           <VStack align="stretch" gap="4">
             <HStack flexWrap="wrap" gap="2">
-              <Badge variant="subtle" rounded="sm">
+              <Badge variant={getChallengeKindBadgeVariant(challenge.kind)} rounded="sm">
                 {t(challengeKindLabel(challenge.kind))}
               </Badge>
-              <Badge variant="subtle" rounded="sm">
+              <Badge variant={getChallengeVisibilityBadgeVariant(challenge.visibility)} rounded="sm">
                 {t(challengeVisibilityLabel(challenge.visibility))}
               </Badge>
-              <Badge variant="subtle" rounded="sm">
+              <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} rounded="sm">
                 {t(challengeStatusLabel(challenge.status))}
               </Badge>
               {challenge.isInvitationPending && (
-                <Badge variant="solid" rounded="sm">
+                <Badge variant="warning" rounded="sm">
                   {t("Pending invitation")}
                 </Badge>
               )}
@@ -78,6 +85,11 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
               <Text color="text.subtle" textStyle="sm">
                 {t("Created by")} {humanAddress(challenge.creator, 6, 4)}
               </Text>
+              {challenge.createdAt > 0 && (
+                <Text color="text.subtle" textStyle="sm">
+                  {t("Created")} {dayjs.unix(challenge.createdAt).format("D MMM, YYYY")}
+                </Text>
+              )}
             </VStack>
 
             <SimpleGrid columns={{ base: 2, md: 4 }} gap="3">
@@ -134,24 +146,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
               </HStack>
             </VStack>
 
-            <VStack align="stretch" gap="2">
-              <Text textStyle="sm" color="text.subtle">
-                {t("Participants")}
-              </Text>
-              <HStack flexWrap="wrap" gap="2">
-                {challenge.participants.length > 0 ? (
-                  challenge.participants.map(address => (
-                    <Badge key={address} variant="subtle" rounded="sm">
-                      {humanAddress(address, 6, 4)}
-                    </Badge>
-                  ))
-                ) : (
-                  <Text textStyle="sm" color="text.subtle">
-                    {t("None yet")}
-                  </Text>
-                )}
-              </HStack>
-            </VStack>
+            <ChallengeParticipantActionsSection challenge={challenge} />
 
             {challenge.invited.length > 0 && (
               <VStack align="stretch" gap="2">
