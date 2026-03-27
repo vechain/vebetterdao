@@ -31,7 +31,7 @@ function setHeaders(response: NextResponse, headers: Record<string, string>) {
     response.headers.set(key, value)
   })
 }
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const appOrigin = getAppOrigin(request)
 
   // Browser hardening: when present, this prevents cross-site calls in real browsers.
