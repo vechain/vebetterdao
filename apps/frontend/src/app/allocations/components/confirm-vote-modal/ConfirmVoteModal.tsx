@@ -12,6 +12,7 @@ import { AllocationAlertCard } from "../AllocationAlertCard"
 import { AutomationToggleCard } from "../AutomationToggleCard"
 import { PreferredRelayerSection } from "../PreferredRelayerSection"
 
+import { FreshnessHint } from "./FreshnessHint"
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"
 import { useConfirmVoteModal } from "./useConfirmVoteModal"
@@ -141,6 +142,7 @@ export const ConfirmVoteModal = ({
                 )
               }
             />
+            <FreshnessHint isUpdated={!hasVoted} tierLabel={!hasVoted ? "x3" : "x2"} isFirstVote={!hasVoted} />
             <SelectedAppsPreview
               apps={selectedApps}
               onEditSelection={showEditSelection ? onEditSelection : undefined}
