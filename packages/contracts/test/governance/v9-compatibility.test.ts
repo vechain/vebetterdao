@@ -89,8 +89,8 @@ describe("Governance - V9 Compatibility - @shard4h", function () {
       expect(await governor.hasVoted(proposalId, voter.address)).to.be.true
     })
 
-    it("Should return version 9", async () => {
-      expect(await governor.version()).to.equal("9")
+    it("Should return latest version", async () => {
+      expect(await governor.version()).to.equal("10")
     })
 
     it("Should preserve mark as in development functionality from V8", async () => {

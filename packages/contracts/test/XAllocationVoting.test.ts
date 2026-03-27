@@ -126,14 +126,6 @@ describe("X-Allocation Voting - @shard14-core", function () {
       expect(await xAllocationVoting.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
     })
 
-    it("Should correctly return name and version", async function () {
-      const { xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(await xAllocationVoting.version()).to.eql("8")
-    })
-
     it("Clock mode is set correctly", async function () {
       const { xAllocationVoting, vot3 } = await getOrDeployContractInstances({
         forceDeploy: false,
@@ -516,7 +508,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("8")
+      expect(await xAllocationVoting.version()).to.equal("9")
     })
 
     it("Should not break storage when upgrading to V2, V3, V4, V5, V6, V7 and V8", async () => {
@@ -849,7 +841,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
         },
       )) as XAllocationVoting
 
-      expect(await xAllocationVoting.version()).to.equal("8")
+      expect(await xAllocationVoting.version()).to.equal("9")
     })
   })
 

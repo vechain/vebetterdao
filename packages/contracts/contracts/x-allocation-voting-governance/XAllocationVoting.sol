@@ -147,18 +147,16 @@ contract XAllocationVoting is
     // Create new round
     uint48 currentClock = VotesUtils.clock();
     uint32 currentVotingPeriod = uint32(VotingSettingsUtils.votingPeriod());
-    uint256 newRoundId = RoundsStorageUtils.createRound(proposer, currentClock, currentVotingPeriod);
-
-    // Store eligible apps for the round
-    RoundsStorageUtils.setAppsEligibleForVoting(newRoundId, eligibleApps);
+    uint256 newRoundId = RoundsStorageUtils.createRound(proposer, currentClock, currentVotingPeriod, eligibleApps);
 
     // Snapshot earnings settings for the round
     RoundEarningsSettingsUtils.snapshotRoundEarningsCap(newRoundId);
 
     // Set expected auto-voting actions for relayer rewards
-    IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
-    if (address(pool) != address(0)) {
-      uint208 totalAutoVotingUsers = AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(currentClock);
+    // Only set if there are auto-voting users (avoids emitting TotalAutoVotingActionsSet with 0)
+    uint208 totalAutoVotingUsers = AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(currentClock);
+    if (totalAutoVotingUsers > 0) {
+      IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
       pool.setTotalActionsForRound(newRoundId, totalAutoVotingUsers);
     }
 
@@ -456,7 +454,7 @@ contract XAllocationVoting is
 
     if (deadline >= currentTimepoint) {
       return RoundState.Active;
-    } else if (!RoundVotesCountingUtils.voteSucceeded(roundId)) {
+    } else if (!RoundVotesCountingUtils.voteSucceeded(roundId, quorum(snapshot))) {
       return RoundState.Failed;
     } else {
       return RoundState.Succeeded;

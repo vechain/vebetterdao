@@ -17,7 +17,7 @@ library RoundVotesCountingUtils {
   event VotingThresholdSet(uint256 oldVotingThreshold, uint256 newVotingThreshold);
 
   /// @notice Emitted when a vote is cast
-  event AllocationVoteCast(address indexed voter, uint256 roundId, bytes32[] appIds, uint256[] voteWeights);
+  event AllocationVoteCast(address indexed voter, uint256 indexed roundId, bytes32[] appsIds, uint256[] voteWeights);
 
   // ------- Errors ------- //
 
@@ -117,10 +117,11 @@ library RoundVotesCountingUtils {
   }
 
   /// @notice Returns whether the vote succeeded (totalVotes > 0)
-  function voteSucceeded(uint256 roundId) external view returns (bool) {
+  /// @dev Vote is successful if quorum is reached
+  function voteSucceeded(uint256 roundId, uint256 quorumValue) external view returns (bool) {
     XAllocationVotingStorageTypes.RoundVotesCountingStorage storage $ = XAllocationVotingStorageTypes
       ._getRoundVotesCountingStorage();
-    return $._roundVotes[roundId].totalVotes > 0;
+    return $._roundVotes[roundId].totalVotes >= quorumValue;
   }
 
   // ------- Core Vote Counting ------- //

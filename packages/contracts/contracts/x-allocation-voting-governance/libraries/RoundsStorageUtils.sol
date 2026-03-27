@@ -15,11 +15,11 @@ import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 library RoundsStorageUtils {
   /// @dev Emitted when a new round is created
   event RoundCreated(
-    uint256 indexed roundId,
-    address indexed proposer,
-    uint256 startBlock,
-    uint256 deadline,
-    bytes32[] eligible_apps
+    uint256 roundId,
+    address proposer,
+    uint256 voteStart,
+    uint256 voteEnd,
+    bytes32[] appsIds
   );
 
   // ------- Setters ------- //
@@ -37,7 +37,8 @@ library RoundsStorageUtils {
   function createRound(
     address proposer,
     uint48 clock,
-    uint32 votingPeriodDuration
+    uint32 votingPeriodDuration,
+    bytes32[] memory eligibleApps
   ) external returns (uint256 roundId) {
     XAllocationVotingStorageTypes.RoundsStorageStorage storage $ = XAllocationVotingStorageTypes
       ._getRoundsStorageStorage();
@@ -50,18 +51,10 @@ library RoundsStorageUtils {
     round.voteStart = SafeCast.toUint48(clock);
     round.voteDuration = votingPeriodDuration;
 
-    emit RoundCreated(roundId, proposer, clock, uint256(clock) + uint256(votingPeriodDuration), $._appsEligibleForVoting[roundId]);
-  }
+    // Store eligible apps BEFORE emitting event so apps are included in event args
+    $._appsEligibleForVoting[roundId] = eligibleApps;
 
-  /**
-   * @dev Store the apps eligible for voting in a round
-   * @param roundId The round to set apps for
-   * @param apps The app ids eligible for voting
-   */
-  function setAppsEligibleForVoting(uint256 roundId, bytes32[] memory apps) external {
-    XAllocationVotingStorageTypes.RoundsStorageStorage storage $ = XAllocationVotingStorageTypes
-      ._getRoundsStorageStorage();
-    $._appsEligibleForVoting[roundId] = apps;
+    emit RoundCreated(roundId, proposer, clock, uint256(clock) + uint256(votingPeriodDuration), eligibleApps);
   }
 
   // ------- Getters ------- //

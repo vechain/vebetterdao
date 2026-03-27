@@ -76,6 +76,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error GovernorInsufficientVotingPower();
 
   /**
+   * @dev The `voter` has voted for the same app multiple times in the same transaction.
+   */
+  error DuplicateAppVote();
+
+  /**
    * The `voter` is not identified as a person via the VeBetterPassport.
    */
   error GovernorPersonhoodVerificationFailed(address person, string reason);
