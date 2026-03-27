@@ -308,6 +308,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         nextRoundNumber={roundDetails.id + 1}
         onEditSelection={handleEditSelection}
         hasVoted={hasVoted ?? false}
+        roundId={roundDetails.id.toString()}
       />
     </AllocationTabsContext.Provider>
   )
