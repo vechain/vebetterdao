@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { XAllocationVotingStorageTypes } from "./XAllocationVotingStorageTypes.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { FreshnessUtils } from "./FreshnessUtils.sol";
 
 /**
  * @title RoundVotesCountingUtils
@@ -206,8 +207,19 @@ library RoundVotesCountingUtils {
       $._hasVotedOnce[voter] = true;
     }
 
-    // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
-    contracts._voterRewards.registerVote(roundStart, voter, totalWeight, Math.sqrt(totalWeight));
+    // Apply freshness multiplier to reward weight (does NOT affect on-chain vote count)
+    uint256 freshnessMultiplier = FreshnessUtils.updateAndGetMultiplier(
+      voter,
+      roundId,
+      apps,
+      roundStart,
+      address(contracts._voterRewards)
+    );
+    uint256 rewardWeight = (totalWeight * freshnessMultiplier) / 10000;
+    uint256 rewardSqrt = Math.sqrt(rewardWeight);
+
+    // Register the vote for rewards calculation with freshness-adjusted weight
+    contracts._voterRewards.registerVote(roundStart, voter, rewardWeight, rewardSqrt);
 
     // Emit the AllocationVoteCast event
     emit AllocationVoteCast(voter, roundId, apps, weights);

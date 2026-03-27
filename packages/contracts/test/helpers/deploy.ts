@@ -645,7 +645,14 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
-      [], // v7
+      [
+        0, // roundStartTimepoint — no active round during initial deploy, 0 ensures values take effect immediately
+        10000, // freshnessT1 — x1 (neutral for existing tests; dedicated multiplier tests set their own values)
+        10000, // freshnessT2 — x1
+        10000, // freshnessT3 — x1
+        10000, // intentFA — x1
+        10000, // intentAb — x1 (neutral for existing tests)
+      ],
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7],

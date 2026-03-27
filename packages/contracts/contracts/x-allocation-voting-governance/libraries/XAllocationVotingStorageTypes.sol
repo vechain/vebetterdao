@@ -74,6 +74,11 @@ library XAllocationVotingStorageTypes {
     mapping(address user => bool) _hasVotedOnce;
     mapping(uint256 roundId => RoundVote) _roundVotes;
     uint256 votingThreshold;
+    // --------------------------- V9 Additions (Freshness Tracking) --------------------------- //
+    // XOR fingerprint of the apps voted for (order-independent)
+    mapping(address voter => bytes32) _lastVoteFingerprint;
+    // Round number when the fingerprint last changed
+    mapping(address voter => uint256) _lastFingerprintChangedRound;
   }
 
   struct EarningsSettingsStorage {

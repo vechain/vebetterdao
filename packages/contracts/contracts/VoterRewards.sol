@@ -130,6 +130,15 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // --------------------------- V6 Additions --------------------------- //
     IXAllocationVotingGovernor xAllocationVoting;
     IRelayerRewardsPool relayerRewardsPool;
+    // --------------------------- V7 Additions --------------------------- //
+    // Rewards multiplier checkpoints (basis points, 10000 = 1x)
+    // Freshness multiplier tiers for allocation voting
+    Checkpoints.Trace208 freshnessMultiplierTier1; // Updated this round (default: 30000 = x3)
+    Checkpoints.Trace208 freshnessMultiplierTier2; // Updated within 2 rounds (default: 20000 = x2)
+    Checkpoints.Trace208 freshnessMultiplierTier3; // No update >= 3 rounds (default: 10000 = x1)
+    // Governance intent multiplier for proposal voting
+    Checkpoints.Trace208 intentMultiplierForAgainst; // For or Against vote (default: 10000 = x1)
+    Checkpoints.Trace208 intentMultiplierAbstain; // Abstain vote (default: 3000 = x0.30)
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -705,6 +714,121 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     // Emit an event to log the new quadratic rewarding status.
     emit QuadraticRewardingToggled(!currentStatus);
+  }
+
+  // ======================== Rewards Multipliers (V7) ======================== //
+
+  /// @notice Basis points scale for multipliers (10000 = 1x)
+  uint256 public constant MULTIPLIER_SCALE = 10000;
+
+  /// @notice Multiplier config returned by getMultiplierConfig
+  struct MultiplierConfig {
+    uint256 freshnessMultiplierTier1;
+    uint256 freshnessMultiplierTier2;
+    uint256 freshnessMultiplierTier3;
+    uint256 intentMultiplierForAgainst;
+    uint256 intentMultiplierAbstain;
+  }
+
+  /// @notice Emitted when freshness multiplier values are updated
+  event FreshnessMultipliersSet(uint256 tier1, uint256 tier2, uint256 tier3);
+
+  /// @notice Emitted when governance intent multiplier values are updated
+  event IntentMultipliersSet(uint256 forAgainst, uint256 abstain);
+
+  /// @notice Returns all multiplier values resolved at a given timepoint (checkpoint lookup)
+  /// @param timepoint The block number / timepoint to query (typically round snapshot)
+  /// @return config The multiplier config at the given timepoint
+  function getMultiplierConfig(uint256 timepoint) external view returns (MultiplierConfig memory config) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    uint48 tp = SafeCast.toUint48(timepoint);
+
+    config.freshnessMultiplierTier1 = uint256($.freshnessMultiplierTier1.upperLookupRecent(tp));
+    config.freshnessMultiplierTier2 = uint256($.freshnessMultiplierTier2.upperLookupRecent(tp));
+    config.freshnessMultiplierTier3 = uint256($.freshnessMultiplierTier3.upperLookupRecent(tp));
+    config.intentMultiplierForAgainst = uint256($.intentMultiplierForAgainst.upperLookupRecent(tp));
+    config.intentMultiplierAbstain = uint256($.intentMultiplierAbstain.upperLookupRecent(tp));
+
+    // If not yet initialized (all zeros), return neutral (1x) values
+    if (config.freshnessMultiplierTier1 == 0) config.freshnessMultiplierTier1 = MULTIPLIER_SCALE;
+    if (config.freshnessMultiplierTier2 == 0) config.freshnessMultiplierTier2 = MULTIPLIER_SCALE;
+    if (config.freshnessMultiplierTier3 == 0) config.freshnessMultiplierTier3 = MULTIPLIER_SCALE;
+    if (config.intentMultiplierForAgainst == 0) config.intentMultiplierForAgainst = MULTIPLIER_SCALE;
+    if (config.intentMultiplierAbstain == 0) config.intentMultiplierAbstain = MULTIPLIER_SCALE;
+  }
+
+  /// @notice Set the freshness multiplier values (governance only)
+  /// @param tier1 Basis points for "updated this round" (e.g., 30000 = x3)
+  /// @param tier2 Basis points for "updated within 2 rounds" (e.g., 20000 = x2)
+  /// @param tier3 Basis points for "no update >= 3 rounds" (e.g., 10000 = x1)
+  function setFreshnessMultipliers(
+    uint256 tier1,
+    uint256 tier2,
+    uint256 tier3
+  ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(tier1 > 0 && tier2 > 0 && tier3 > 0, "VoterRewards: multiplier must be > 0");
+    require(tier1 >= tier2 && tier2 >= tier3, "VoterRewards: tiers must be in descending order");
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    uint48 currentClock = clock();
+
+    $.freshnessMultiplierTier1.push(currentClock, SafeCast.toUint208(tier1));
+    $.freshnessMultiplierTier2.push(currentClock, SafeCast.toUint208(tier2));
+    $.freshnessMultiplierTier3.push(currentClock, SafeCast.toUint208(tier3));
+
+    emit FreshnessMultipliersSet(tier1, tier2, tier3);
+  }
+
+  /// @notice Set the governance intent multiplier values (governance only)
+  /// @param forAgainst Basis points for For/Against votes (e.g., 10000 = x1)
+  /// @param abstain Basis points for Abstain votes (e.g., 3000 = x0.30)
+  function setIntentMultipliers(
+    uint256 forAgainst,
+    uint256 abstain
+  ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(forAgainst > 0 && abstain > 0, "VoterRewards: multiplier must be > 0");
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    uint48 currentClock = clock();
+
+    $.intentMultiplierForAgainst.push(currentClock, SafeCast.toUint208(forAgainst));
+    $.intentMultiplierAbstain.push(currentClock, SafeCast.toUint208(abstain));
+
+    emit IntentMultipliersSet(forAgainst, abstain);
+  }
+
+  /// @notice Initialize V7: set multiplier checkpoints with neutral values for current round
+  /// and real values for next round
+  /// @param roundStartTimepoint The block number when the current round started (for neutral checkpoint)
+  /// @param freshnessT1 Freshness tier 1 value in basis points
+  /// @param freshnessT2 Freshness tier 2 value in basis points
+  /// @param freshnessT3 Freshness tier 3 value in basis points
+  /// @param intentFA Intent For/Against value in basis points
+  /// @param intentAb Intent Abstain value in basis points
+  function initializeV7(
+    uint48 roundStartTimepoint,
+    uint256 freshnessT1,
+    uint256 freshnessT2,
+    uint256 freshnessT3,
+    uint256 intentFA,
+    uint256 intentAb
+  ) external reinitializer(7) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    uint48 currentClock = clock();
+
+    // Checkpoint 1: at round start → neutral (1x) so current round is unaffected
+    $.freshnessMultiplierTier1.push(roundStartTimepoint, SafeCast.toUint208(MULTIPLIER_SCALE));
+    $.freshnessMultiplierTier2.push(roundStartTimepoint, SafeCast.toUint208(MULTIPLIER_SCALE));
+    $.freshnessMultiplierTier3.push(roundStartTimepoint, SafeCast.toUint208(MULTIPLIER_SCALE));
+    $.intentMultiplierForAgainst.push(roundStartTimepoint, SafeCast.toUint208(MULTIPLIER_SCALE));
+    $.intentMultiplierAbstain.push(roundStartTimepoint, SafeCast.toUint208(MULTIPLIER_SCALE));
+
+    // Checkpoint 2: at current block → real values (takes effect next round)
+    $.freshnessMultiplierTier1.push(currentClock, SafeCast.toUint208(freshnessT1));
+    $.freshnessMultiplierTier2.push(currentClock, SafeCast.toUint208(freshnessT2));
+    $.freshnessMultiplierTier3.push(currentClock, SafeCast.toUint208(freshnessT3));
+    $.intentMultiplierForAgainst.push(currentClock, SafeCast.toUint208(intentFA));
+    $.intentMultiplierAbstain.push(currentClock, SafeCast.toUint208(intentAb));
   }
 
   /// @notice Returns the version of the contract

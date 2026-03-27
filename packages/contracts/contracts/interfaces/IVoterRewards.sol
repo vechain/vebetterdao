@@ -315,4 +315,23 @@ interface IVoterRewards {
   /// @notice Disables quadratic rewarding
   /// @param _disableQuadraticRewarding The disable flag
   function disableQuadraticRewarding(bool _disableQuadraticRewarding) external;
+
+  // ======================== Rewards Multipliers (V7) ======================== //
+
+  /// @notice Multiplier config returned by getMultiplierConfig
+  struct MultiplierConfig {
+    uint256 freshnessMultiplierTier1;
+    uint256 freshnessMultiplierTier2;
+    uint256 freshnessMultiplierTier3;
+    uint256 intentMultiplierForAgainst;
+    uint256 intentMultiplierAbstain;
+  }
+
+  /// @notice Returns all multiplier values resolved at a given timepoint
+  /// @param timepoint The block number to query (typically round/proposal snapshot)
+  /// @return config The multiplier config at the given timepoint
+  function getMultiplierConfig(uint256 timepoint) external view returns (MultiplierConfig memory config);
+
+  /// @notice Returns the basis points scale constant (10000 = 1x)
+  function MULTIPLIER_SCALE() external view returns (uint256);
 }

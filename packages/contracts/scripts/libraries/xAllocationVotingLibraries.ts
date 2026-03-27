@@ -17,7 +17,15 @@ export const xAllocationVotingLibraries = async (logOutput = false) => {
   const RoundEarningsSettingsUtils = await deploy("RoundEarningsSettingsUtils")
   const RoundFinalizationUtils = await deploy("RoundFinalizationUtils")
   const RoundsStorageUtils = await deploy("RoundsStorageUtils")
-  const RoundVotesCountingUtils = await deploy("RoundVotesCountingUtils")
+  const FreshnessUtils = await deploy("FreshnessUtils")
+
+  // RoundVotesCountingUtils depends on FreshnessUtils
+  const RoundVotesCountingUtilsFactory = await ethers.getContractFactory("RoundVotesCountingUtils", {
+    libraries: { FreshnessUtils: await FreshnessUtils.getAddress() },
+  })
+  const RoundVotesCountingUtils = await RoundVotesCountingUtilsFactory.deploy()
+  await RoundVotesCountingUtils.waitForDeployment()
+  logOutput && console.log("RoundVotesCountingUtils Library deployed")
 
   return {
     AutoVotingLogic,
@@ -29,5 +37,6 @@ export const xAllocationVotingLibraries = async (logOutput = false) => {
     RoundFinalizationUtils,
     RoundsStorageUtils,
     RoundVotesCountingUtils,
+    FreshnessUtils,
   }
 }

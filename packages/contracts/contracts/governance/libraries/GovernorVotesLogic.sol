@@ -32,6 +32,7 @@ import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 
 /// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
@@ -247,7 +248,8 @@ library GovernorVotesLogic {
 
     _countVote(proposalId, voter, support, weight, power);
 
-    $.voterRewards.registerVote(proposalId, voter, weight, Math.sqrt(weight));
+    // Apply governance intent multiplier and register vote for rewards
+    _registerVoteWithIntentMultiplier($, proposalId, voter, weight, support, proposalSnapshot);
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 
@@ -316,5 +318,30 @@ library GovernorVotesLogic {
 
     // Check if quadratic voting is enabled or disabled for the current round.
     return $.quadraticVotingDisabled.upperLookupRecent(SafeCast.toUint48(roundStartBlock)) == 1; // 0: enabled, 1: disabled
+  }
+
+  /// @dev Register a vote with governance intent multiplier applied to reward weight
+  /// @param $ The governor storage
+  /// @param proposalId The proposal ID
+  /// @param voter The voter address
+  /// @param weight The raw voting weight (unmultiplied)
+  /// @param support The vote support value (0=Against, 1=For, 2=Abstain)
+  /// @param proposalSnapshot The proposal snapshot timepoint for multiplier lookup
+  function _registerVoteWithIntentMultiplier(
+    GovernorStorageTypes.GovernorStorage storage $,
+    uint256 proposalId,
+    address voter,
+    uint256 weight,
+    uint8 support,
+    uint256 proposalSnapshot
+  ) private {
+    // Get intent multiplier based on vote support type
+    // support: 0 = Against, 1 = For, 2 = Abstain
+    IVoterRewards.MultiplierConfig memory config = IVoterRewards(address($.voterRewards))
+      .getMultiplierConfig(proposalSnapshot);
+    uint256 intentMultiplier = (support == 2) ? config.intentMultiplierAbstain : config.intentMultiplierForAgainst;
+    uint256 rewardWeight = (weight * intentMultiplier) / 10000;
+
+    $.voterRewards.registerVote(proposalId, voter, rewardWeight, Math.sqrt(rewardWeight));
   }
 }
