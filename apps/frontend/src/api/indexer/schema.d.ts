@@ -72,6 +72,36 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/accounts/totals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get cumulative total account counts for a timestamp range
+         * @description Returns cumulative unique-account totals for the requested timestamp range.
+         *
+         *                 The API automatically determines the appropriate granularity from the range:
+         *                 RAW, HOURLY, DAILY, WEEKLY, or MONTHLY.
+         *
+         *                 For sampled ranges, the response includes the nearest records at or before the
+         *                 requested boundaries so cumulative charts remain continuous even when sampled
+         *                 points are sparse.
+         *
+         *                 Values are monotonic cumulative totals. To derive accounts added between two
+         *                 consecutive points, subtract the earlier `totalAccounts` from the later one.
+         */
+        get: operations["getTotalAccountsV2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/vevote/proposal/results": {
         parameters: {
             query?: never;
@@ -118,17 +148,37 @@ export interface paths {
          * @description This endpoint retrieves validator stats.
          *
          *                 You can filter the results by:
-         *                 - `validatorId`: specific validator ID
+         *                 - `validatorId`: (deprecated - use GET /api/v1/validators/{validatorId} instead)
          *                 - `status`: validator status
          *                 - `endorser`: endorser address
          *
          *                 You can also sort the results by one of the supported fields and paginate.
          *
-         *                 - `sortBy`: Choose between `validatorTvl`, `totalTvl`, or `blockProbability`
+         *                 - `sortBy`: Choose between `validatorTvl`, `totalTvl`, `blockProbability`, `delegatorTvl`, or `nft:<Level>` (e.g. `nft:Strength`)
          *                 - `page` and `size`: Controls pagination
          *                 - `direction`: Either `asc` or `desc`
          */
         get: operations["getValidators"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/{validatorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single validator by ID
+         * @description Returns a single validator's stats by their address.
+         */
+        get: operations["getValidatorById"];
         put?: never;
         post?: never;
         delete?: never;
@@ -192,8 +242,9 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get VTHO rewards for a validator for a given block
-         * @description Returns the block VTHO rewards generated for the specified block number or up to the latest block. You can optionally filter by a specific validator.
+         * Get validator block records (deprecated)
+         * @deprecated
+         * @description Note: the original description was inaccurate. This endpoint does not return cumulative rewards 'up to the latest block'. It returns a paginated list of individual block reward/miss records, optionally filtered by an exact block number, validator, or status. Deprecated: use /api/v1/validators/block-rewards for paginated listing or /api/v1/validators/block-rewards/{blockNumber} for lookup by block.
          */
         get: operations["getValidatorBlocks"];
         put?: never;
@@ -233,9 +284,49 @@ export interface paths {
         };
         /**
          * Get historic VTHO rewards in a custom time range
-         * @description Returns a time series of VTHO rewards between the given timestamps. Granularity (hourly/daily/weekly/monthly) is automatically chosen based on the time range. You can filter by validator address.
+         * @description Returns a time series of VTHO rewards between the given timestamps. Granularity (hourly/daily/weekly/monthly) is automatically chosen based on the time range. For sampled ranges, the response includes the nearest records at or before the requested boundaries. You can filter by validator address.
          */
         get: operations["getHistoricValidatorRewardsRange"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/block-rewards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get paginated validator block reward records
+         * @description Returns a paginated list of validator block reward and performance records. You can filter by validator address and/or block status (VALIDATED or MISSED). Results are sorted by block number (default: descending).
+         */
+        get: operations["getValidatorBlockRewards"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/block-rewards/{blockNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get validator block records for a specific block number
+         * @description Returns all validator block reward records for a specific block number. You can optionally filter by validator address to narrow to a single record.
+         */
+        get: operations["getBlockByBlockNumber"];
         put?: never;
         post?: never;
         delete?: never;
@@ -899,8 +990,11 @@ export interface paths {
          *                 - Range ≤ 4,000 seconds: Returns all blocks (~360 data points)
          *                 - Range ≤ 700,000 seconds: Returns hourly values (~168 data points)
          *                 - Range ≤ 6,000,000 seconds: Returns daily values (~60 data points)
-         *                 - Range ≤ 35,000,000 seconds: Returns daily values (~400 data points)
-         *                 - Range > 35,000,000 seconds: Returns weekly values
+         *                 - Range ≤ 35,000,000 seconds: Returns weekly values (~52 data points)
+         *                 - Range > 35,000,000 seconds: Returns monthly values
+         *
+         *                 For sampled ranges, the response also includes the nearest records at or before the requested
+         *                 boundaries so cumulative charts remain continuous even when the sampled points are sparse.
          *
          *                 Values are represented as a monotonic cumulative counter which means the values increase over time. This is
          *                 a semantic used by Grafana for example. It requires some processing on the client side to convert to a value
@@ -916,6 +1010,32 @@ export interface paths {
          *                     averageGasUsedPerBlock = (gasUsedAtBlock(n+k) - gasUsedAtBlockN) / k
          */
         get: operations["getBlockUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/explorer/average-fees-per-user": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get daily average fees per user for a timestamp range
+         * @description Returns daily AFPU (Average Fees Per User) points for the requested timestamp range.
+         *
+         *                 AFPU is computed per UTC day as:
+         *                     total fees paid that day / distinct transaction origins that day
+         *
+         *                 Values are daily period metrics, not cumulative counters. The source fee amount uses the
+         *                 transaction `paid` value in the native gas token VTHO.
+         */
+        get: operations["getAverageFeesPerUser"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1007,6 +1127,69 @@ export interface paths {
         };
         /** Get the comments made by a user on proposals. */
         get: operations["getUserProposalComments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/treasury/transfers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get treasury B3TR transfers
+         * @description Returns B3TR token transfers to/from the treasury, classified by category.
+         */
+        get: operations["getTreasuryTransfers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/richlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get B3TR richlist
+         * @description Returns the list of holders by balance descending, with cursor pagination.
+         *                 Use scope=ALL (default) for combined VOT3+B3TR, scope=VOT3 or scope=B3TR for a single token.
+         *                 B3TR held by the VOT3 contract is excluded when scope is B3TR or ALL.
+         */
+        get: operations["getRichlist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/richlist/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get B3TR rank for an address
+         * @description Returns the address's rank, total holders, and top percentage for the chosen scope.
+         *                 Use scope=ALL (default), scope=VOT3, or scope=B3TR.
+         */
+        get: operations["getAddressRank"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1301,26 +1484,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/authority-endorsers/endorsers/{user}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Check if a user is an endorser of any Authority Master Node.
-         * @deprecated
-         */
-        get: operations["checkUserIsEndorser"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/accounts/totals": {
         parameters: {
             query?: never;
@@ -1329,11 +1492,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Retrieve total unique accounts overview
+         * Retrieve total unique accounts overview (deprecated)
+         * @deprecated
          * @description Retrieves historical totals of unique VeChain accounts tracked per time frame (DAY, WEEK, MONTH, YEAR).
          *                 The "ALL" account aggregates totals across all time frames.
          *
          *                 If no `timeFrame` is provided, the response defaults to showing the full cumulative totals (ALL).
+         *
+         *                 Deprecated: use `GET /api/v2/accounts/totals` for cumulative time-series responses.
          */
         get: operations["getTotalAccounts"];
         put?: never;
@@ -1555,6 +1721,15 @@ export interface components {
             data: components["schemas"]["ProposalResult"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
+        AccountTotalsSeries: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            /** Format: int64 */
+            totalAccounts?: number;
+        };
         PaginatedResponseVeVoteProposalResult: {
             data: components["schemas"]["VeVoteProposalResult"][];
             pagination: components["schemas"]["PaginationDetail"];
@@ -1607,11 +1782,6 @@ export interface components {
         };
         Validator: {
             id: string;
-            blockId: string;
-            /** Format: int64 */
-            blockNumber: number;
-            /** Format: int64 */
-            blockTimestamp: number;
             endorser?: string;
             beneficiary?: string;
             /** @enum {string} */
@@ -2031,6 +2201,15 @@ export interface components {
             cumulativeNumTransactions: number;
             cumulativeNumClauses: number;
         };
+        AverageFeesPerUser: {
+            date: string;
+            /** Format: int64 */
+            dayStartTimestamp?: number;
+            totalFeesPaid?: number;
+            /** Format: int64 */
+            dailyActiveUsers?: number;
+            averageFeesPerUser?: number;
+        };
         Contract: {
             address: string;
             /** Format: int64 */
@@ -2080,6 +2259,42 @@ export interface components {
             weight: number;
             power: number;
             reason: string;
+        };
+        PaginatedResponseTreasuryTransfer: {
+            data: components["schemas"]["TreasuryTransfer"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        TreasuryTransfer: {
+            /** Format: int64 */
+            blockTimestamp: number;
+            txId: string;
+            from: string;
+            to: string;
+            value: string;
+            /** @enum {string} */
+            category: "EMISSION" | "SURPLUS" | "GM_UPGRADE" | "GRANT" | "OUT" | "OTHER";
+            label: string;
+            counterpartyName?: string;
+        };
+        B3trRichlistItem: {
+            address: string;
+            balance: number;
+            /** Format: int64 */
+            rank: number;
+        };
+        PaginatedResponseB3trRichlistItem: {
+            data: components["schemas"]["B3trRichlistItem"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        B3trRankResponse: {
+            address: string;
+            balance: number;
+            /** Format: int64 */
+            rank: number;
+            /** Format: int64 */
+            totalHolders: number;
+            /** Format: double */
+            topPercentage: number;
         };
         ProposalResultDeprecated: {
             proposalId: string;
@@ -2230,10 +2445,6 @@ export interface components {
             /** Format: int64 */
             totalUniqueUserInteractions: number;
         };
-        AmnEndorser: {
-            nodeMaster: string;
-            endorser?: string;
-        };
         PaginatedResponseTotalAccounts: {
             data: components["schemas"]["TotalAccounts"][];
             pagination: components["schemas"]["PaginationDetail"];
@@ -2282,7 +2493,10 @@ export interface components {
         };
     };
     responses: never;
-    parameters: never;
+    parameters: {
+        /** @description Optional caller/project identifier used for observability and usage tracking. */
+        XProjectIdHeader: string;
+    };
     requestBodies: never;
     headers: never;
     pathItems: never;
@@ -2296,6 +2510,10 @@ export interface operations {
                 eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 contractAddress?: string;
                 /**
                  * @description Return records after this time (Unix time in seconds).
@@ -2320,8 +2538,15 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 account: string;
             };
             cookie?: never;
@@ -2345,7 +2570,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2356,7 +2580,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2366,6 +2589,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2375,6 +2599,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2412,7 +2637,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description A valid tokenId */
                 tokenId: string;
@@ -2438,7 +2666,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2449,7 +2676,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2459,6 +2685,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2468,6 +2695,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2475,9 +2703,15 @@ export interface operations {
     getProposalResult: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
-                /** @description Proposal ID to filter by. */
+                /**
+                 * @description Proposal ID to filter by.
+                 * @example 8.365401932242087e+76
+                 */
                 proposalId: string;
             };
             cookie?: never;
@@ -2501,7 +2735,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2512,7 +2745,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2522,6 +2754,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2531,6 +2764,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2553,7 +2787,10 @@ export interface operations {
                 /** @description Filter by proposal states. */
                 states?: ("Pending" | "Active" | "Canceled" | "Defeated" | "Succeeded" | "Queued" | "Executed" | "DepositNotMet" | "InDevelopment" | "Completed")[];
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -2576,7 +2813,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2587,7 +2823,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2597,6 +2832,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2606,6 +2842,81 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTotalAccountsV2: {
+        parameters: {
+            query: {
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                startTimestamp: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountTotalsSeries"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2613,7 +2924,10 @@ export interface operations {
     getResults: {
         parameters: {
             query?: {
-                /** @description Proposal ID to filter by. */
+                /**
+                 * @description Proposal ID to filter by.
+                 * @example 8.365401932242087e+76
+                 */
                 proposalId?: string;
                 /** @description Filter by support. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
@@ -2630,7 +2944,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -2653,7 +2970,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2664,7 +2980,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2674,6 +2989,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2683,6 +2999,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2702,7 +3019,10 @@ export interface operations {
                 /** @description If true, include proposals that were used for testing. */
                 testProposals?: boolean;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -2725,7 +3045,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2736,7 +3055,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2746,6 +3064,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2755,6 +3074,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2762,7 +3082,15 @@ export interface operations {
     getValidators: {
         parameters: {
             query?: {
+                /**
+                 * @description Filter by endorser address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 endorser?: string;
+                /**
+                 * @deprecated
+                 * @description Deprecated: use GET /api/v1/validators/{validatorId} instead.
+                 */
                 validatorId?: string;
                 /** @description Filter by one or more validator statuses */
                 status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
@@ -2781,7 +3109,10 @@ export interface operations {
                 /** @description The sort by field */
                 sortBy?: "validatorTvl" | "totalTvl" | "blockProbability" | "delegatorTvl" | "nft:Strength" | "nft:Thunder" | "nft:Mjolnir" | "nft:VeThorX" | "nft:StrengthX" | "nft:ThunderX" | "nft:MjolnirX" | "nft:Dawn" | "nft:Lightning" | "nft:Flash";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -2804,7 +3135,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2815,7 +3145,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2825,6 +3154,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2834,6 +3164,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidatorById: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description Validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Validator"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2863,7 +3263,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -2886,7 +3289,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2897,7 +3299,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2907,6 +3308,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2916,6 +3318,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -2929,7 +3332,10 @@ export interface operations {
                  */
                 validator?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -2952,7 +3358,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -2963,7 +3368,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -2973,6 +3377,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -2982,6 +3387,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3001,11 +3407,23 @@ export interface operations {
                 validator?: string;
                 /** @description Filter by block status - either VALIDATED or MISSED. */
                 status?: "VALIDATED" | "MISSED";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3028,7 +3446,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3039,7 +3456,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3049,6 +3465,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3058,6 +3475,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3073,7 +3491,10 @@ export interface operations {
                  */
                 validator?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3096,7 +3517,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3107,7 +3527,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3117,6 +3536,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3126,6 +3546,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3144,7 +3565,10 @@ export interface operations {
                  */
                 endTimestamp: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description Validator address
@@ -3173,7 +3597,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3184,7 +3607,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3194,6 +3616,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3203,6 +3626,170 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidatorBlockRewards: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional validator address to filter by
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+                /**
+                 * @description Filter results by block number. When direction is 'desc' (default), returns records at or before this block. When direction is 'asc', returns records at or after this block.
+                 * @example 12345678
+                 */
+                blockNumber?: number;
+                /** @description Filter by block status - either VALIDATED or MISSED. */
+                status?: "VALIDATED" | "MISSED";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseValidatorBlock"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getBlockByBlockNumber: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional validator address to filter by
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The block number to look up.
+                 * @example 12345678
+                 */
+                blockNumber: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ValidatorBlock"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3210,7 +3797,15 @@ export interface operations {
     getTransferEvents: {
         parameters: {
             query?: {
+                /**
+                 * @description To or from address of the transfer event. Either address or tokenAddress must be provided
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 address?: string;
+                /**
+                 * @description The token contract address. Either address or tokenAddress must be provided
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 tokenAddress?: string;
                 /** @description Filter by transfer event type(s) */
                 eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
@@ -3237,7 +3832,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3260,7 +3858,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3271,7 +3868,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3281,6 +3877,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3290,6 +3887,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3297,7 +3895,15 @@ export interface operations {
     getTransferEventsByTo: {
         parameters: {
             query: {
+                /**
+                 * @description To address of the transfer event
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 address: string;
+                /**
+                 * @description The token contract address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 tokenAddress?: string;
                 /** @description Filter by transfer event type(s) */
                 eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
@@ -3324,7 +3930,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3347,7 +3956,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3358,7 +3966,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3368,6 +3975,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3377,6 +3985,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3407,7 +4016,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3430,7 +4042,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3441,7 +4052,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3451,6 +4061,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3460,6 +4071,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3467,7 +4079,15 @@ export interface operations {
     getTransferEventsByFrom: {
         parameters: {
             query: {
+                /**
+                 * @description From address of the transfer event
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 address: string;
+                /**
+                 * @description The token contract address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 tokenAddress?: string;
                 /** @description Filter by transfer event type(s) */
                 eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
@@ -3494,7 +4114,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3517,7 +4140,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3528,7 +4150,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3538,6 +4159,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3547,6 +4169,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3579,7 +4202,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3602,7 +4228,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3613,7 +4238,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3623,6 +4247,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3632,6 +4257,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3667,7 +4293,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3690,7 +4319,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3701,7 +4329,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3711,6 +4338,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3720,6 +4348,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3733,7 +4362,10 @@ export interface operations {
                  */
                 expanded?: boolean;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid transaction ID
@@ -3762,7 +4394,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3773,7 +4404,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3783,6 +4413,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3792,6 +4423,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3822,7 +4454,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3845,7 +4480,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3856,7 +4490,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3866,6 +4499,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3875,6 +4509,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3905,7 +4540,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -3928,7 +4566,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -3939,7 +4576,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -3949,6 +4585,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -3958,6 +4595,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -3976,11 +4614,23 @@ export interface operations {
                  * @example 1704153600
                  */
                 to?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description Preset aggregation period */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
@@ -4006,7 +4656,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4017,7 +4666,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4027,6 +4675,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4036,6 +4685,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4054,11 +4704,23 @@ export interface operations {
                  * @example 1704153600
                  */
                 to?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description Preset aggregation period */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
@@ -4084,7 +4746,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4095,7 +4756,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4105,6 +4765,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4114,6 +4775,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4131,11 +4793,23 @@ export interface operations {
                  * @example 1704153600
                  */
                 to?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description Preset aggregation period */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
@@ -4161,7 +4835,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4172,7 +4845,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4182,6 +4854,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4191,6 +4864,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4208,11 +4882,23 @@ export interface operations {
                  * @example 1704153600
                  */
                 to?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description Preset aggregation period */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
@@ -4238,7 +4924,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4249,7 +4934,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4259,6 +4943,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4268,6 +4953,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4281,7 +4967,10 @@ export interface operations {
                  */
                 blockNumber?: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -4304,7 +4993,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4315,7 +5003,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4325,6 +5012,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4334,6 +5022,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4341,7 +5030,10 @@ export interface operations {
     getTotalVthoGenerated_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description Time range preset to use for the query.
@@ -4370,7 +5062,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4381,7 +5072,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4391,6 +5081,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4400,6 +5091,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4415,7 +5107,10 @@ export interface operations {
                 /** @description Optional query parameter to filter rewards by type. If not all rewards will be returned. */
                 rewardsType?: "LEGACY" | "DELEGATION";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -4438,7 +5133,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4449,7 +5143,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4459,6 +5152,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4468,6 +5162,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4478,7 +5173,10 @@ export interface operations {
                 /** @description Optional query parameter to filter rewards by type. If not provided, all types will be included. */
                 rewardsType?: "LEGACY" | "DELEGATION";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid address
@@ -4507,7 +5205,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4518,7 +5215,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4528,6 +5224,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4537,6 +5234,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4547,7 +5245,10 @@ export interface operations {
                 /** @description Optional query parameter to filter rewards by type. If not provided, all types will be included. */
                 rewardsType?: "LEGACY" | "DELEGATION";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid address
@@ -4578,7 +5279,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4589,7 +5289,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4599,6 +5298,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4608,6 +5308,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4615,7 +5316,10 @@ export interface operations {
     getTotalVthoClaimed_3: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description Time range preset to use for the query.
@@ -4644,7 +5348,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4655,7 +5358,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4665,6 +5367,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4674,6 +5377,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4687,7 +5391,10 @@ export interface operations {
                  */
                 blockNumber?: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -4710,7 +5417,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4721,7 +5427,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4731,6 +5436,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4740,6 +5446,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4750,7 +5457,10 @@ export interface operations {
                 /** @description Optional query parameter to filter total VET staked by level. If not provided, all levels will be included. */
                 level?: "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description Time range preset to use for the query.
@@ -4779,7 +5489,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4790,7 +5499,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4800,6 +5508,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4809,6 +5518,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4822,7 +5532,10 @@ export interface operations {
                  */
                 blockNumber?: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -4845,7 +5558,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4856,7 +5568,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4866,6 +5577,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4875,6 +5587,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -4886,11 +5599,23 @@ export interface operations {
                 tokenId?: string;
                 manager?: string;
                 owner?: string;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -4913,7 +5638,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4924,7 +5648,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -4934,6 +5657,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -4943,25 +5667,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
     };
     getStargateTokenRewards: {
         parameters: {
-            query: {
+            query?: {
                 /**
                  * @description A valid address
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator?: string;
                 /** @description Reward period to filter by. Options: CYCLE, DAY, WEEK, MONTH, YEAR, ALL. */
-                periodType: "CYCLE" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
+                periodType?: "CYCLE" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description A valid tokenId */
                 tokenId: string;
@@ -4987,7 +5724,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -4998,7 +5734,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5008,6 +5743,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5017,6 +5753,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5030,7 +5767,10 @@ export interface operations {
                  */
                 blockNumber?: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -5053,7 +5793,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5064,7 +5803,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5074,6 +5812,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5083,6 +5822,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5100,11 +5840,23 @@ export interface operations {
                  * @example 1704153600
                  */
                 to?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description Preset aggregation period */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
@@ -5130,7 +5882,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5141,7 +5892,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5151,6 +5901,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5160,6 +5911,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5170,7 +5922,10 @@ export interface operations {
                 /** @description Optional query parameter to filter NFT holders by level. If not provided, all levels will be included. */
                 level?: "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description Time range preset to use for the query.
@@ -5199,7 +5954,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5210,7 +5964,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5220,6 +5973,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5229,6 +5983,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5236,7 +5991,15 @@ export interface operations {
     getOwnedNFTs: {
         parameters: {
             query: {
+                /**
+                 * @description Address of the NFT owner
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 address: string;
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 contractAddress?: string;
                 /** @description A valid tokenId */
                 tokenId?: string;
@@ -5260,7 +6023,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -5283,7 +6049,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse_Public"];
                     "application/problem+json": components["schemas"]["ExceptionResponse_Public"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5294,7 +6059,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5304,6 +6068,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse_Public"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse_Public"];
                 };
             };
             /** @description Service not available */
@@ -5313,6 +6078,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse_Public"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse_Public"];
                 };
             };
         };
@@ -5345,7 +6111,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -5368,7 +6137,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5379,7 +6147,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5389,6 +6156,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5398,6 +6166,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5409,6 +6178,10 @@ export interface operations {
                 eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 contractAddress?: string;
                 /**
                  * @description Return records after this time (Unix time in seconds).
@@ -5433,8 +6206,15 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
                 account: string;
             };
             cookie?: never;
@@ -5458,7 +6238,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5469,7 +6248,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5479,6 +6257,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5488,6 +6267,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5506,7 +6286,10 @@ export interface operations {
                  */
                 endTimestamp: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -5529,7 +6312,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5540,7 +6322,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5550,6 +6331,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5559,6 +6341,81 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getAverageFeesPerUser: {
+        parameters: {
+            query: {
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                startTimestamp: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AverageFeesPerUser"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5566,7 +6423,10 @@ export interface operations {
     getContract: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description The address of the contract to retrieve.
@@ -5595,7 +6455,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5606,7 +6465,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5616,6 +6474,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5625,6 +6484,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5645,7 +6505,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description The address to query as master.
@@ -5674,7 +6537,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5685,7 +6547,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5695,6 +6556,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5704,6 +6566,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5717,7 +6580,10 @@ export interface operations {
                  */
                 appId?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /** @description Round ID to filter by. */
                 roundId: number;
@@ -5743,7 +6609,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5754,7 +6619,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5764,6 +6628,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5773,6 +6638,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5788,7 +6654,10 @@ export interface operations {
                 /** @description Round ID to filter by. */
                 roundId?: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -5811,7 +6680,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5822,7 +6690,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5832,6 +6699,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5841,6 +6709,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5848,7 +6717,10 @@ export interface operations {
     getUserProposalComments: {
         parameters: {
             query?: {
-                /** @description Proposal ID to filter by. */
+                /**
+                 * @description Proposal ID to filter by.
+                 * @example 8.365401932242087e+76
+                 */
                 proposalId?: string;
                 /** @description Filter by support. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
@@ -5865,7 +6737,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid address
@@ -5894,7 +6769,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5905,7 +6779,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5915,6 +6788,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5924,6 +6798,240 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTreasuryTransfers: {
+        parameters: {
+            query?: {
+                /** @description Filter by category: emission, surplus, gm_upgrade, grant, out, other. If omitted, returns all. */
+                category?: "EMISSION" | "SURPLUS" | "GM_UPGRADE" | "GRANT" | "OUT" | "OTHER";
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseTreasuryTransfer"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getRichlist: {
+        parameters: {
+            query?: {
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+                /** @description The pagination cursor returned by a previous request. */
+                cursor?: string;
+                scope?: "ALL" | "B3TR" | "VOT3";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseB3trRichlistItem"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getAddressRank: {
+        parameters: {
+            query?: {
+                scope?: "ALL" | "B3TR" | "VOT3";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The address to get the rank for.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["B3trRankResponse"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -5931,9 +7039,15 @@ export interface operations {
     getProposalResultDeprecated: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
-                /** @description Proposal ID to filter by. */
+                /**
+                 * @description Proposal ID to filter by.
+                 * @example 8.365401932242087e+76
+                 */
                 proposalId: string;
             };
             cookie?: never;
@@ -5957,7 +7071,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -5968,7 +7081,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -5978,6 +7090,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -5987,6 +7100,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6009,9 +7123,15 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
-                /** @description Proposal ID to filter by. */
+                /**
+                 * @description Proposal ID to filter by.
+                 * @example 8.365401932242087e+76
+                 */
                 proposalId: string;
             };
             cookie?: never;
@@ -6035,7 +7155,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6046,7 +7165,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6056,6 +7174,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6065,6 +7184,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6075,7 +7195,10 @@ export interface operations {
                 /** @description Optional level to filter by */
                 level?: "ALL" | "EARTH" | "MOON" | "MERCURY" | "VENUS" | "MARS" | "JUPITER" | "SATURN" | "URANUS" | "NEPTUNE" | "GALAXY";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -6098,7 +7221,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6109,7 +7231,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6119,6 +7240,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6128,6 +7250,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6163,7 +7286,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid address
@@ -6192,7 +7318,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6203,7 +7328,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6213,6 +7337,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6222,6 +7347,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6233,7 +7359,10 @@ export interface operations {
                 roundId?: number;
                 date?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid address
@@ -6262,7 +7391,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6273,7 +7401,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6283,6 +7410,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6292,6 +7420,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6316,7 +7445,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid address
@@ -6345,7 +7477,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6356,7 +7487,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6366,6 +7496,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6375,6 +7506,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6387,7 +7519,10 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description A valid address
@@ -6421,7 +7556,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6432,7 +7566,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6442,6 +7575,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6451,6 +7585,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6473,7 +7608,10 @@ export interface operations {
                 /** @description The pagination cursor returned by a previous request. */
                 cursor?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -6496,7 +7634,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6507,7 +7644,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6517,6 +7653,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6526,6 +7663,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6549,7 +7687,10 @@ export interface operations {
                 /** @description The pagination cursor returned by a previous request. */
                 cursor?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -6572,7 +7713,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6583,7 +7723,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6593,6 +7732,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6602,6 +7742,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6625,7 +7766,10 @@ export interface operations {
                 /** @description The pagination cursor returned by a previous request. */
                 cursor?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description App ID to query by.
@@ -6654,7 +7798,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6665,7 +7808,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6675,6 +7817,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6684,6 +7827,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6696,7 +7840,10 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -6719,7 +7866,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6730,7 +7876,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6740,6 +7885,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6749,6 +7895,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6779,7 +7926,10 @@ export interface operations {
                 /** @description The sort direction */
                 direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description App ID to query by.
@@ -6808,7 +7958,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6819,7 +7968,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -6829,6 +7977,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6838,6 +7987,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6849,7 +7999,10 @@ export interface operations {
                 /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
                 date?: string;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description App ID to query by.
@@ -6878,7 +8031,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -6889,82 +8041,16 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    checkUserIsEndorser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description User address to check if they are an endorser.
-                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
-                 */
-                user: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AmnEndorser"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                    "text/html": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -6974,6 +8060,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -6983,11 +8070,23 @@ export interface operations {
             query?: {
                 /** @description Time frame to query totals for (DAY, WEEK, MONTH, YEAR, ALL). */
                 timeFrame?: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
                 page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
                 size?: number;
-                direction?: string;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -7010,7 +8109,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -7021,7 +8119,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -7031,6 +8128,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -7040,6 +8138,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -7047,7 +8146,10 @@ export interface operations {
     getOverview: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description The address of the account to retrieve the overview for.
@@ -7076,7 +8178,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -7087,7 +8188,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -7097,6 +8197,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -7106,6 +8207,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };
@@ -7124,7 +8226,10 @@ export interface operations {
                  */
                 endTimestamp: number;
             };
-            header?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
             path: {
                 /**
                  * @description The address to retrieve the VET balance history for.
@@ -7153,7 +8258,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
-                    "text/html": string;
                 };
             };
             /** @description Access to the requested resource is forbidden */
@@ -7164,7 +8268,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                     "application/problem+json": string;
-                    "text/html": string;
                 };
             };
             /** @description Requested resource was not found */
@@ -7174,6 +8277,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
             /** @description Service not available */
@@ -7183,6 +8287,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
         };

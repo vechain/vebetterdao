@@ -1014,7 +1014,7 @@ export const getOrDeployContractInstances = async ({
   )) as B3TRGovernor
 
   const relayerRewardsPool = (await deployAndUpgrade(
-    ["RelayerRewardsPool"],
+    ["RelayerRewardsPoolV1", "RelayerRewardsPool"],
     [
       [
         owner.address, // admin
@@ -1023,9 +1023,10 @@ export const getOrDeployContractInstances = async ({
         await emissions.getAddress(), // emissionsAddress
         await xAllocationVoting.getAddress(), // xAllocationVotingAddress
       ],
+      [],
     ],
     {
-      versions: [undefined],
+      versions: [undefined, 2],
       logOutput: false,
     },
   )) as RelayerRewardsPool

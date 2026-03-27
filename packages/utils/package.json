@@ -22,8 +22,7 @@
   },
   "dependencies": {
     "@vechain/sdk-core": "1.2.0-rc.2",
-    "@vechain/sdk-network": "1.2.0-rc.2",
-    "thor-devkit": "^2.0.9"
+    "@vechain/sdk-network": "1.2.0-rc.2"
   },
   "devDependencies": {
     "happy-dom": "^15.10.2",

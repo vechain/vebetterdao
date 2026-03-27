@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query"
 import BigNumber from "bignumber.js"
 import { useMemo } from "react"
 
+import { indexerFetch } from "../../indexer/api"
+
 import type { TreasuryTransfer } from "./types"
 import { useTreasuryB3trBalance } from "./useTreasuryBalances"
 
-const config = getConfig()
-const treasuryAddress = config.treasuryContractAddress.toLowerCase()
-const baseUrl = config.indexerUrl?.replace("/api/v1", "") ?? ""
+const treasuryAddress = getConfig().treasuryContractAddress.toLowerCase()
 
 export type BalancePeriod = "1M" | "3M" | "1Y" | "All"
 
@@ -31,7 +31,7 @@ const fetchAllTreasuryTransfers = async (after: number): Promise<TreasuryTransfe
     params.set("size", "150")
     params.set("page", String(page))
 
-    const res = await fetch(`${baseUrl}/api/v1/b3tr/treasury/transfers?${params}`)
+    const res = await indexerFetch(`/api/v1/b3tr/treasury/transfers?${params}`)
     if (!res.ok) break
 
     const json = await res.json()

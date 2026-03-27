@@ -669,7 +669,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as VoterRewards
 
   const relayerRewardsPool = (await deployAndUpgrade(
-    ["RelayerRewardsPool"],
+    ["RelayerRewardsPoolV1", "RelayerRewardsPool"],
     [
       [
         TEMP_ADMIN, // admin
@@ -678,9 +678,10 @@ export async function deployAll(config: ContractsConfig) {
         await emissions.getAddress(), // emissionsAddress
         TEMP_ADMIN, // xAllocationVotingAddress - will be assigned later below
       ],
+      [],
     ],
     {
-      versions: [undefined],
+      versions: [undefined, 2],
       logOutput: true,
     },
   )) as RelayerRewardsPool

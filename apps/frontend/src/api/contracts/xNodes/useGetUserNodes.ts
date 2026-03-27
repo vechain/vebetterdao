@@ -1,4 +1,5 @@
 import { getConfig } from "@repo/config"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import {
   type StargateNFT,
@@ -13,7 +14,6 @@ import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain
 import { notFoundImage } from "@/constants"
 import { convertUriToUrl } from "@/utils/uri"
 
-import { compareAddresses } from "../../../utils/AddressUtils/AddressUtils"
 import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
 
 const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
