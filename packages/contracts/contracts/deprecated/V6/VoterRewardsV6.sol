@@ -25,15 +25,15 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import "./interfaces/IGalaxyMember.sol";
-import "./interfaces/IEmissions.sol";
-import "./interfaces/IB3TR.sol";
+import "../../interfaces/IGalaxyMember.sol";
+import "../../interfaces/IEmissions.sol";
+import "../../interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import "@openzeppelin/contracts/utils/types/Time.sol";
-import "./interfaces/IXAllocationVotingGovernor.sol";
-import "./interfaces/IRelayerRewardsPool.sol";
+import "../../interfaces/IXAllocationVotingGovernor.sol";
+import "../../interfaces/IRelayerRewardsPool.sol";
 
 /**
  * @title VoterRewards
@@ -81,7 +81,7 @@ import "./interfaces/IRelayerRewardsPool.sol";
  * - Added relayer fees for auto-voting claims
  * - Added RelayerRewardsPool integration for fee distribution
  */
-contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract VoterRewardsV6 is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
 
   /// @notice The role that can register votes for rewards calculation.
@@ -711,7 +711,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "7";
+    return "6";
   }
 
   /// @dev Clock used for flagging checkpoints.

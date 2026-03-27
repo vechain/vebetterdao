@@ -733,13 +733,17 @@ export async function deployAll(config: ContractsConfig) {
 
   voterRewards = (await upgradeProxy(
     "VoterRewardsV5",
-    "VoterRewards",
+    "VoterRewardsV6",
     await voterRewards.getAddress(),
     [await xAllocationVoting.getAddress(), await relayerRewardsPool.getAddress()],
     {
       version: 6,
     },
   )) as VoterRewards
+
+  voterRewards = (await upgradeProxy("VoterRewardsV6", "VoterRewards", await voterRewards.getAddress(), [], {
+    version: 7,
+  })) as VoterRewards
 
   const veBetterPassportV1 = (await initializeProxy(
     veBetterPassportContractAddress,

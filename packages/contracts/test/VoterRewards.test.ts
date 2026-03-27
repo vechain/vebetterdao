@@ -445,7 +445,7 @@ describe("VoterRewards - @shard10-core", () => {
         forceDeploy: true,
       })
 
-      expect(await voterRewards.version()).to.equal("6")
+      expect(await voterRewards.version()).to.equal("7")
     })
   })
 

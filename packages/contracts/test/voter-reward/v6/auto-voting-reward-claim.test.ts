@@ -80,10 +80,6 @@ describe("VoterRewards V6 - @shard10b", function () {
       await emissions.connect(minterAccount).start()
     })
 
-    it("should return the correct version", async function () {
-      expect(await voterRewards.version()).to.equal("6")
-    })
-
     it("should take a fee when a relayer claims for a user with auto-voting enabled", async function () {
       // Create a test app
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))

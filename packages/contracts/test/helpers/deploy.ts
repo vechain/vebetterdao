@@ -620,7 +620,15 @@ export const getOrDeployContractInstances = async ({
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewardsV5", "VoterRewards"],
+    [
+      "VoterRewardsV1",
+      "VoterRewardsV2",
+      "VoterRewardsV3",
+      "VoterRewardsV4",
+      "VoterRewardsV5",
+      "VoterRewardsV6",
+      "VoterRewards",
+    ],
     [
       [
         owner.address, // admin
@@ -637,9 +645,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [], // v7
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
     },
   )) as VoterRewards
 
