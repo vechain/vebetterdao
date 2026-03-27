@@ -1,31 +1,20 @@
 import { getConfig } from "@repo/config"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+
+const abi = VoterRewards__factory.abi
+const address = getConfig().voterRewardsContractAddress
+const method = "getFreshnessMultipliers" as const
 
 /**
  * Hook to get the freshness multiplier values from VoterRewards at a given timepoint.
  * Returns the 3 freshness tiers in basis points (10000 = 1x).
  */
 export const useFreshnessMultipliers = (timepoint?: string) => {
-  const voterRewardsAddress = getConfig().voterRewardsContractAddress
-
-  // We need to call VoterRewards directly for this
-  // Import the VoterRewards ABI
   return useCallClause({
-    abi: [
-      {
-        inputs: [{ internalType: "uint256", name: "timepoint", type: "uint256" }],
-        name: "getFreshnessMultipliers",
-        outputs: [
-          { internalType: "uint256", name: "tier1", type: "uint256" },
-          { internalType: "uint256", name: "tier2", type: "uint256" },
-          { internalType: "uint256", name: "tier3", type: "uint256" },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-    ] as const,
-    address: voterRewardsAddress,
-    method: "getFreshnessMultipliers",
+    abi,
+    address,
+    method,
     args: [BigInt(timepoint || 0)],
     queryOptions: {
       enabled: !!timepoint,
@@ -38,20 +27,8 @@ export const useFreshnessMultipliers = (timepoint?: string) => {
  */
 export const getFreshnessMultipliersQueryKey = (timepoint?: string) =>
   getCallClauseQueryKeyWithArgs({
-    abi: [
-      {
-        inputs: [{ internalType: "uint256", name: "timepoint", type: "uint256" }],
-        name: "getFreshnessMultipliers",
-        outputs: [
-          { internalType: "uint256", name: "tier1", type: "uint256" },
-          { internalType: "uint256", name: "tier2", type: "uint256" },
-          { internalType: "uint256", name: "tier3", type: "uint256" },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-    ] as const,
-    address: getConfig().voterRewardsContractAddress,
-    method: "getFreshnessMultipliers",
+    abi,
+    address,
+    method,
     args: [BigInt(timepoint || 0)],
   })
