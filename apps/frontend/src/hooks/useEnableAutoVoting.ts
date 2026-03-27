@@ -4,6 +4,8 @@ import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
 import { getParticipatedInGovernanceQueryKey } from "@/api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
+import { relayerRewardsPoolAbi } from "@/api/contracts/relayerRewardsPool/abi"
+import { getPreferredRelayerQueryKey } from "@/api/contracts/relayerRewardsPool/hooks/usePreferredRelayer"
 import { getXAppRoundEarningsQueryKey } from "@/api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
 import { getAllocationVotersQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVoters"
 import { getAllocationVotesQueryKey } from "@/api/contracts/xAllocations/hooks/useAllocationVotes"
@@ -17,7 +19,9 @@ import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 const abi = XAllocationVoting__factory.abi
-const address = getConfig().xAllocationVotingContractAddress
+const config = getConfig()
+const address = config.xAllocationVotingContractAddress
+const relayerPoolAddress = config.relayerRewardsPoolContractAddress
 
 type ClausesProps = {
   roundId: string
@@ -29,6 +33,7 @@ type ClausesProps = {
   shouldDisable: boolean
   isAutoVotingEnabledInCurrentRound: boolean
   needsPreferenceUpdate?: boolean
+  preferredRelayerAddress?: string
 }
 
 type UseManageAutoVotingAndVoteProps = {
@@ -70,6 +75,7 @@ export const useEnableAutoVotingAndVote = ({
   const thor = useThor()
 
   const contract = thor.contracts.load(address, abi)
+  const relayerPoolContract = thor.contracts.load(relayerPoolAddress, relayerRewardsPoolAbi)
 
   const clauseBuilder = ({
     roundId,
@@ -81,6 +87,7 @@ export const useEnableAutoVotingAndVote = ({
     shouldDisable,
     isAutoVotingEnabledInCurrentRound,
     needsPreferenceUpdate = true,
+    preferredRelayerAddress,
   }: ClausesProps) => {
     const clauses = []
 
@@ -114,6 +121,25 @@ export const useEnableAutoVotingAndVote = ({
         }).clause,
       )
     }
+
+    // Set preferred relayer (must come after toggleAutoVoting when enabling)
+    if (preferredRelayerAddress) {
+      clauses.push(
+        relayerPoolContract.clause.setPreferredRelayer(preferredRelayerAddress, {
+          comment: "Set preferred relayer",
+        }).clause,
+      )
+    }
+
+    // Clear preferred relayer when disabling auto-voting
+    if (shouldDisable) {
+      clauses.push(
+        relayerPoolContract.clause.setPreferredRelayer("0x0000000000000000000000000000000000000000", {
+          comment: "Clear preferred relayer",
+        }).clause,
+      )
+    }
+
     return clauses
   }
 
@@ -128,6 +154,7 @@ export const useEnableAutoVotingAndVote = ({
       getParticipatedInGovernanceQueryKey(account?.address ?? ""),
       getIsAutoVotingEnabledQueryKey(account?.address ?? ""),
       getUserVotingPreferencesQueryKey(account?.address ?? ""),
+      getPreferredRelayerQueryKey(account?.address ?? ""),
     ]
   }, [roundId, account?.address])
 

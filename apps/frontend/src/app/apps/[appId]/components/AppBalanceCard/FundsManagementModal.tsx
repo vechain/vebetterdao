@@ -273,7 +273,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                     w={"full"}>
                     <VStack w={"full"} alignItems={"flex-start"} borderBottomWidth={2} borderColor="border.secondary">
                       <Text fontWeight="semibold">
-                        {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To App Balance")}
+                        {activeTab === "balance-to-rewards" ? t("To Rewards Pool") : t("To Balance")}
                       </Text>
                       <Input
                         placeholder="0"

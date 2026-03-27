@@ -1,8 +1,7 @@
 import { Box, Grid, GridItem, Stack } from "@chakra-ui/react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
-
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 
 import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useMaxPointsPerApp } from "../../../../api/contracts/xApps/hooks/endorsement/useMaxPointsPerApp"

@@ -11,10 +11,8 @@ import { useProposalStateChangeMaps } from "./useProposalStateChangeMaps"
 export const useCurrentRoundProposalActivities = (
   currentRoundId?: string,
 ): { data: ActivityItem[]; isLoading: boolean } => {
-  const {
-    data: { enrichedStandardProposals: enrichedProposals } = { enrichedStandardProposals: [] },
-    isLoading: isProposalsLoading,
-  } = useProposalEnriched()
+  const { data: { enrichedProposals } = { enrichedProposals: [] }, isLoading: isProposalsLoading } =
+    useProposalEnriched()
 
   const {
     canceledMap,
@@ -47,6 +45,16 @@ export const useCurrentRoundProposalActivities = (
 
     const pendingActivities: ActivityItem[] = currentRoundProposals
       .map((p): ActivityItem | null => {
+        if (p.state === ProposalState.DepositNotMet) {
+          return {
+            type: ActivityType.PROPOSAL_SUPPORT_NOT_REACHED,
+            date: roundStart,
+            roundId: currentRoundId,
+            title: p.title,
+            metadata: { proposalId: p.id, proposalTitle: p.title, state: p.state },
+          }
+        }
+
         if (p.state !== ProposalState.Pending) return null
 
         const isDepositReached = depositsReached?.find(d => d.proposalId === p.id)?.depositReached
@@ -62,7 +70,11 @@ export const useCurrentRoundProposalActivities = (
 
     const lifecycleActivities: ActivityItem[] = enrichedProposals
       .map((p): ActivityItem | null => {
-        let activityType: ActivityType | undefined
+        let activityType:
+          | ActivityType.PROPOSAL_CANCELLED
+          | ActivityType.PROPOSAL_IN_DEVELOPMENT
+          | ActivityType.PROPOSAL_EXECUTED
+          | undefined
         let date: number | undefined
 
         if (p.state === ProposalState.Canceled) {

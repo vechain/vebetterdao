@@ -39,7 +39,7 @@ export type SubmitCreatorFormData = {
 type Props = {
   register: UseFormRegister<SubmitCreatorFormData>
   watch: UseFormWatch<SubmitCreatorFormData>
-  control: Control<SubmitCreatorFormData>
+  control: Control<SubmitCreatorFormData, any>
   setError: UseFormSetError<SubmitCreatorFormData>
   clearErrors: UseFormClearErrors<SubmitCreatorFormData>
   errors: FieldErrors<SubmitCreatorFormData>

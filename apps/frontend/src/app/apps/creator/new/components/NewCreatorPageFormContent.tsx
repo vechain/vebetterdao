@@ -16,27 +16,29 @@ import { SubmitCreatorFormData, SubmitCreatorForm } from "../../../../../compone
 import { CreatorApplicationModal } from "./CreatorApplicationModal"
 
 export const NewCreatorPageFormContent = () => {
-  const { register, reset, setValue, setError, watch, formState, control, handleSubmit, clearErrors } =
-    useForm<SubmitCreatorFormData>({
-      defaultValues: {
-        appName: "",
-        appDescription: "",
-        adminWalletAddress: "",
-        projectUrl: "",
-        adminName: "",
-        adminEmail: "",
-        githubUsername: "",
-        twitterUsername: "",
-        distributionStrategy: "",
-        testnetProjectUrl: "",
-        testnetAppId: "",
-        securityApiSecurityMeasures: false,
-        securityActionVerification: false,
-        securityDeviceFingerprint: false,
-        securitySecureKeyManagement: false,
-        securityAntiFarming: false,
-      },
-    })
+  const { register, reset, setValue, setError, watch, formState, control, handleSubmit, clearErrors } = useForm<
+    SubmitCreatorFormData,
+    any,
+    SubmitCreatorFormData
+  >({
+    defaultValues: {
+      appName: "",
+      appDescription: "",
+      adminWalletAddress: "",
+      projectUrl: "",
+      adminName: "",
+      adminEmail: "",
+      githubUsername: "",
+      distributionStrategy: "",
+      testnetProjectUrl: "",
+      testnetAppId: "",
+      securityApiSecurityMeasures: false,
+      securityActionVerification: false,
+      securityDeviceFingerprint: false,
+      securitySecureKeyManagement: false,
+      securityAntiFarming: false,
+    },
+  })
   const { errors } = formState
   const { t } = useTranslation()
   const { open: isOpen, onClose, onOpen } = useDisclosure()

@@ -1,12 +1,12 @@
 "use client"
 import { Spinner, VStack } from "@chakra-ui/react"
+import { isValid } from "@repo/utils/AddressUtils"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
 import Custom404 from "@/app/not-found"
 
 import { MotionVStack } from "../../../components/MotionVStack"
-import { isValid } from "../../../utils/AddressUtils/AddressUtils"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 const ProfilePageContent = dynamic(
