@@ -333,8 +333,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     uint256 freshnessT2,
     uint256 freshnessT3,
     uint256 intentFA,
-    uint256 intentAb
-  ) external reinitializer(7) {
+    uint256 intentAb,
+    address _navigatorRegistry
+  ) external onlyRole(UPGRADER_ROLE) reinitializer(7) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     uint48 currentClock = clock();
 
@@ -351,6 +352,11 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.freshnessMultiplierTier3.push(currentClock, SafeCast.toUint208(freshnessT3));
     $.intentMultiplierForAgainst.push(currentClock, SafeCast.toUint208(intentFA));
     $.intentMultiplierAbstain.push(currentClock, SafeCast.toUint208(intentAb));
+
+    // Navigator registry (address(0) allowed — navigator feature can be activated later via setter)
+    if (_navigatorRegistry != address(0)) {
+      $.navigatorRegistry = INavigatorRegistry(_navigatorRegistry);
+    }
   }
 
   /// @notice Set the XAllocationVoting contract.

@@ -90,12 +90,7 @@ import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
  * - Added reason parameter to cancel function for providing cancellation rationale.
  * - Added ProposalCanceledWithReason event.
  */
-contract B3TRGovernor is
-  IB3TRGovernor,
-  AccessControlUpgradeable,
-  UUPSUpgradeable,
-  PausableUpgradeable
-{
+contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeable, PausableUpgradeable {
   /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
   /// @notice The role that can pause the contract
@@ -110,6 +105,14 @@ contract B3TRGovernor is
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
+  }
+
+  /// @notice Initialize V10: set NavigatorRegistry address
+  function initializeV10(
+    INavigatorRegistry _navigatorRegistry
+  ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) reinitializer(8) {
+    require(address(_navigatorRegistry) != address(0), "B3TRGovernor: invalid navigator registry");
+    GovernorConfigurator.setNavigatorRegistry(_navigatorRegistry);
   }
 
   /**
@@ -132,8 +135,7 @@ contract B3TRGovernor is
    * @param role The role to check against
    */
   modifier onlyRoleOrGovernance(bytes32 role) {
-    if (!hasRole(role, _msgSender()))
-      GovernorGovernanceLogic.checkGovernance(_msgSender(), _msgData(), address(this));
+    if (!hasRole(role, _msgSender())) GovernorGovernanceLogic.checkGovernance(_msgSender(), _msgData(), address(this));
     _;
   }
 
@@ -645,6 +647,7 @@ contract B3TRGovernor is
   function quorumNumeratorByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
     return GovernorQuorumLogic.quorumNumeratorByProposalType(uint8(proposalTypeValue));
   }
+
   /**
    * @notice Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
    * @param timepoint The timepoint to get the quorum numerator for

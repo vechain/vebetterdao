@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT 
+// SPDX-License-Identifier: MIT
 
 //                                      #######
 //                                 ################
@@ -46,8 +46,6 @@ contract VOT3 is
   /// @notice Role hash for addresses allowed to upgrade the contract
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-  /// @notice Role for the NavigatorRegistry to lock/unlock delegated VOT3
-  bytes32 public constant NAVIGATOR_ROLE = keccak256("NAVIGATOR_ROLE");
 
   /// @notice Storage structure for VOT3 contract
   /// @dev VOT3Storage structure holds all the state variables in a single location.
@@ -57,6 +55,8 @@ contract VOT3 is
     mapping(address account => uint256) _convertedB3TR; // Mapping of B3TR tokens converted to VOT3 tokens
     // V2: VOT3 locked per citizen for navigator delegation (cannot be transferred/burned while locked)
     mapping(address account => uint256) _navigatorLockedAmount;
+    // V2: NavigatorRegistry contract address (only this address can lock/unlock VOT3)
+    address navigatorRegistry;
   }
 
   /// @dev The slot for VOT3 storage in contract storage
@@ -100,6 +100,14 @@ contract VOT3 is
 
     require(_b3tr != address(0), "VOT3: B3TR address cannot be 0");
     $.b3tr = IERC20(_b3tr);
+  }
+
+  /// @notice Initialize V2 — grants NAVIGATOR_ROLE to NavigatorRegistry
+  /// @param _navigatorRegistry The NavigatorRegistry contract address
+  function initializeV2(address _navigatorRegistry) external onlyRole(UPGRADER_ROLE) reinitializer(2) {
+    require(_navigatorRegistry != address(0), "VOT3: navigator registry is zero");
+    VOT3Storage storage $ = _getVOT3Storage();
+    $.navigatorRegistry = _navigatorRegistry;
   }
 
   /// @notice Pauses the VOT3 contract
@@ -263,19 +271,13 @@ contract VOT3 is
 
   // ======================== V2: Navigator Delegation Lock ======================== //
 
-  /// @notice Initialize V2 — grants NAVIGATOR_ROLE to NavigatorRegistry
-  /// @param _navigatorRegistry The NavigatorRegistry contract address
-  function initializeV2(address _navigatorRegistry) external reinitializer(2) {
-    require(_navigatorRegistry != address(0), "VOT3: navigator registry is zero");
-    _grantRole(NAVIGATOR_ROLE, _navigatorRegistry);
-  }
-
   /// @notice Set the locked VOT3 amount for a citizen's navigator delegation
-  /// @dev Only callable by NavigatorRegistry (NAVIGATOR_ROLE). Setting to 0 unlocks all VOT3.
+  /// @dev Only callable by NavigatorRegistry. Setting to 0 unlocks all VOT3.
   /// @param account The citizen address
   /// @param amount The amount of VOT3 to lock
-  function setNavigatorLockedAmount(address account, uint256 amount) external onlyRole(NAVIGATOR_ROLE) {
+  function setNavigatorLockedAmount(address account, uint256 amount) external {
     VOT3Storage storage $ = _getVOT3Storage();
+    require(msg.sender == $.navigatorRegistry, "VOT3: not navigator registry");
     $._navigatorLockedAmount[account] = amount;
   }
 

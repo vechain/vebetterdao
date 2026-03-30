@@ -114,6 +114,12 @@ contract XAllocationVoting is
     _disableInitializers();
   }
 
+  /// @notice Initialize V9: set NavigatorRegistry address
+  function initializeV9(INavigatorRegistry _navigatorRegistry) external onlyRole(UPGRADER_ROLE) reinitializer(8) {
+    require(address(_navigatorRegistry) != address(0), "XAllocationVoting: invalid navigator registry");
+    ExternalContractsUtils.setNavigatorRegistry(_navigatorRegistry);
+  }
+
   // ======================== Authorizations ======================== //
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
@@ -308,14 +314,7 @@ contract XAllocationVoting is
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
     // Count the vote using the library
-    RoundVotesCountingUtils.countVote(
-      roundId,
-      voter,
-      appIds,
-      voteWeights,
-      votingPower,
-      roundSnapshot(roundId)
-    );
+    RoundVotesCountingUtils.countVote(roundId, voter, appIds, voteWeights, votingPower, roundSnapshot(roundId));
 
     if (isAutoVote) {
       XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.registerRelayerAction(
@@ -384,7 +383,10 @@ contract XAllocationVoting is
    */
   function disableAutoVotingFor(address user) external {
     INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
-    require(address(navRegistry) != address(0) && _msgSender() == address(navRegistry), "XAllocationVoting: not navigator registry");
+    require(
+      address(navRegistry) != address(0) && _msgSender() == address(navRegistry),
+      "XAllocationVoting: not navigator registry"
+    );
 
     if (AutoVotingLogic.isAutoVotingEnabled(user)) {
       AutoVotingLogic.toggleAutoVoting(address(this), user, VotesUtils.clock());
