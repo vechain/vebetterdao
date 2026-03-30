@@ -28,6 +28,8 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
+import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
+
 import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
 import { NavigatorStakingUtils } from "./libraries/NavigatorStakingUtils.sol";
 import { NavigatorDelegationUtils } from "./libraries/NavigatorDelegationUtils.sol";
@@ -418,8 +420,6 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
   function _getCurrentRound() internal view returns (uint256) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     if ($.xAllocationVoting == address(0)) return 0;
-    (bool success, bytes memory data) = $.xAllocationVoting.staticcall(abi.encodeWithSignature("currentRoundId()"));
-    if (!success || data.length == 0) return 0;
-    return abi.decode(data, (uint256));
+    return IXAllocationVotingGovernor($.xAllocationVoting).currentRoundId();
   }
 }
