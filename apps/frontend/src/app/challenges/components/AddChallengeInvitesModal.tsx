@@ -12,13 +12,13 @@ import {
   Portal,
   VStack,
 } from "@chakra-ui/react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuPlus, LuX } from "react-icons/lu"
 
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 
-const getInitialInvitees = () => [""]
+type InviteeEntry = { id: number; value: string }
 
 type AddChallengeInvitesModalProps = {
   challengeId: number
@@ -27,29 +27,28 @@ type AddChallengeInvitesModalProps = {
 
 export const AddChallengeInvitesModal = ({ challengeId, triggerProps }: AddChallengeInvitesModalProps) => {
   const [open, setOpen] = useState(false)
-  const [invitees, setInvitees] = useState<string[]>(getInitialInvitees)
+  const nextId = useRef(1)
+  const [invitees, setInvitees] = useState<InviteeEntry[]>([{ id: 0, value: "" }])
   const actions = useChallengeActions()
   const { t } = useTranslation()
-  const sanitizedInvitees = invitees.map(value => value.trim()).filter(Boolean)
+  const sanitizedInvitees = invitees.map(e => e.value.trim()).filter(Boolean)
   const canSubmit = sanitizedInvitees.length > 0
 
-  const updateInvitee = (index: number, value: string) => {
-    setInvitees(prev => {
-      const next = [...prev]
-      next[index] = value
-      return next
-    })
+  const updateInvitee = (id: number, value: string) => {
+    setInvitees(prev => prev.map(e => (e.id === id ? { ...e, value } : e)))
   }
 
-  const addInvitee = () => setInvitees(prev => [...prev, ""])
+  const addInvitee = () => {
+    setInvitees(prev => [...prev, { id: nextId.current++, value: "" }])
+  }
 
-  const removeInvitee = (index: number) => {
-    setInvitees(prev => prev.filter((_, i) => i !== index))
+  const removeInvitee = (id: number) => {
+    setInvitees(prev => prev.filter(e => e.id !== id))
   }
 
   const handleOpen = (e: { open: boolean }) => {
     if (e.open) {
-      setInvitees(getInitialInvitees())
+      setInvitees([{ id: nextId.current++, value: "" }])
     }
     setOpen(e.open)
   }
@@ -80,13 +79,13 @@ export const AddChallengeInvitesModal = ({ challengeId, triggerProps }: AddChall
               <Field.Root>
                 <Field.Label>{t("Invitees")}</Field.Label>
                 <VStack align="stretch" gap="2" w="full">
-                  {invitees.map((address, index) => (
-                    <HStack key={index} gap="2">
-                      <Input value={address} onChange={e => updateInvitee(index, e.target.value)} />
+                  {invitees.map(entry => (
+                    <HStack key={entry.id} gap="2">
+                      <Input value={entry.value} onChange={e => updateInvitee(entry.id, e.target.value)} />
                       <IconButton
                         size="sm"
                         variant="ghost"
-                        onClick={() => removeInvitee(index)}
+                        onClick={() => removeInvitee(entry.id)}
                         aria-label={t("Remove")}>
                         <LuX />
                       </IconButton>
