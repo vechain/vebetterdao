@@ -2,6 +2,8 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title NavigatorDelegationUtils
 /// @notice Handles citizen delegation to navigators.
@@ -14,6 +16,7 @@ import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
 /// - Citizens cannot vote manually while delegated
 /// - Auto-voting disabled when delegating
 library NavigatorDelegationUtils {
+  using Checkpoints for Checkpoints.Trace208;
   // ======================== Events ======================== //
 
   /// @notice Emitted when a citizen delegates VOT3 to a navigator
@@ -89,7 +92,7 @@ library NavigatorDelegationUtils {
 
     // Store delegation
     $.citizenToNavigator[citizen] = navigator;
-    $.delegatedAmount[citizen] = amount;
+    $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(amount));
     $.totalDelegatedToNavigator[navigator] += amount;
 
     // Add citizen to navigator's citizen list
@@ -108,21 +111,24 @@ library NavigatorDelegationUtils {
 
     if ($.citizenToNavigator[citizen] == address(0)) revert NotDelegated(citizen);
     if (reduceBy == 0) revert ZeroDelegationAmount();
-    if (reduceBy > $.delegatedAmount[citizen]) {
-      revert InsufficientDelegation(reduceBy, $.delegatedAmount[citizen]);
+
+    uint256 current = _currentDelegatedAmount($, citizen);
+    if (reduceBy > current) {
+      revert InsufficientDelegation(reduceBy, current);
     }
 
     address navigator = $.citizenToNavigator[citizen];
+    uint256 newAmount = current - reduceBy;
 
-    $.delegatedAmount[citizen] -= reduceBy;
+    $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newAmount));
     $.totalDelegatedToNavigator[navigator] -= reduceBy;
 
     // If reduced to 0, fully undelegate
-    if ($.delegatedAmount[citizen] == 0) {
+    if (newAmount == 0) {
       _removeDelegation($, citizen, navigator);
       emit DelegationRemoved(citizen, navigator);
     } else {
-      emit DelegationUpdated(citizen, navigator, $.delegatedAmount[citizen]);
+      emit DelegationUpdated(citizen, navigator, newAmount);
     }
   }
 
@@ -134,9 +140,9 @@ library NavigatorDelegationUtils {
     address navigator = $.citizenToNavigator[citizen];
     if (navigator == address(0)) revert NotDelegated(citizen);
 
-    uint256 amount = $.delegatedAmount[citizen];
+    uint256 amount = _currentDelegatedAmount($, citizen);
     $.totalDelegatedToNavigator[navigator] -= amount;
-    $.delegatedAmount[citizen] = 0;
+    $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), 0);
 
     _removeDelegation($, citizen, navigator);
 
@@ -150,9 +156,19 @@ library NavigatorDelegationUtils {
     return NavigatorStorageTypes.getNavigatorStorage().citizenToNavigator[citizen];
   }
 
-  /// @notice Get the VOT3 amount a citizen has delegated
+  /// @notice Get the current VOT3 amount a citizen has delegated
   function getDelegatedAmount(address citizen) external view returns (uint256) {
-    return NavigatorStorageTypes.getNavigatorStorage().delegatedAmount[citizen];
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    return _currentDelegatedAmount($, citizen);
+  }
+
+  /// @notice Get the delegated amount at a past block (for snapshot-based voting power)
+  function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256) {
+    return uint256(
+      NavigatorStorageTypes.getNavigatorStorage().delegatedAmount[citizen].upperLookupRecent(
+        SafeCast.toUint48(timepoint)
+      )
+    );
   }
 
   /// @notice Get total VOT3 delegated to a navigator
@@ -176,6 +192,14 @@ library NavigatorDelegationUtils {
   }
 
   // ======================== Internal ======================== //
+
+  /// @dev Read the latest checkpointed delegated amount for a citizen
+  function _currentDelegatedAmount(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address citizen
+  ) private view returns (uint256) {
+    return uint256($.delegatedAmount[citizen].latest());
+  }
 
   /// @dev Remove a citizen from navigator's citizen list and clear delegation mapping
   function _removeDelegation(

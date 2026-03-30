@@ -149,6 +149,7 @@ interface INavigatorRegistry {
   function getCitizens(address navigator) external view returns (address[] memory);
   function getCitizenCount(address navigator) external view returns (uint256);
   function isDelegated(address citizen) external view returns (bool);
+  function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256);
 
   // -- Voting --
   function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory);

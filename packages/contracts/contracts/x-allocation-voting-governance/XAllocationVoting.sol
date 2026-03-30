@@ -246,13 +246,17 @@ contract XAllocationVoting is
 
     bytes32[] memory appIds = navRegistry.getAllocationPreferences(navigator, roundId);
 
+    // Voting power = delegated amount at round snapshot (not full VOT3 balance)
+    uint256 snapshot = roundSnapshot(roundId);
+    uint256 delegatedPower = navRegistry.getDelegatedAmountAtTimepoint(citizen, snapshot);
+
     // Equal-weight distribution across navigator's preferred apps
     uint256[] memory voteWeights = new uint256[](appIds.length);
     for (uint256 i; i < appIds.length; i++) {
       voteWeights[i] = 1; // equal weight — countVote normalizes to voting power
     }
 
-    _handleCastVote(citizen, roundId, appIds, voteWeights, false);
+    _handleCastVoteWithPower(citizen, roundId, appIds, voteWeights, delegatedPower, false);
 
     emit NavigatorVoteCast(citizen, navigator, roundId, appIds, voteWeights);
   }
@@ -272,10 +276,20 @@ contract XAllocationVoting is
     uint256[] memory voteWeights,
     bool isAutoVote
   ) internal {
-    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
-
-    // Get voter's total voting power (VOT3 + deposits)
+    // Use voter's full voting power (VOT3 + deposits)
     uint256 voterTotalVotingPower = getTotalVotingPower(voter, roundSnapshot(roundId));
+    _handleCastVoteWithPower(voter, roundId, appIds, voteWeights, voterTotalVotingPower, isAutoVote);
+  }
+
+  function _handleCastVoteWithPower(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory appIds,
+    uint256[] memory voteWeights,
+    uint256 votingPower,
+    bool isAutoVote
+  ) internal {
+    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
     // Count the vote using the library
     RoundVotesCountingUtils.countVote(
@@ -283,7 +297,7 @@ contract XAllocationVoting is
       voter,
       appIds,
       voteWeights,
-      voterTotalVotingPower,
+      votingPower,
       roundSnapshot(roundId)
     );
 

@@ -299,7 +299,8 @@ library GovernorVotesLogic {
     uint8 support = decision - 1;
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
-    uint256 weight = $.vot3.getPastVotes(citizen, proposalSnapshot);
+    // Voting power = delegated amount at snapshot (not full VOT3 balance)
+    uint256 weight = $.navigatorRegistry.getDelegatedAmountAtTimepoint(citizen, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;
     GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(GovernorProposalLogic.proposalType(proposalId));
 

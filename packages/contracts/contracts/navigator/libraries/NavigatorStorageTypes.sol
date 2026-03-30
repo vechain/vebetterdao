@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+
 /// @title NavigatorStorageTypes
 /// @notice Defines storage types and ERC-7201 namespaced getter for the NavigatorRegistry system.
 /// @dev Single namespace for all navigator state. Field order MUST NOT change across upgrades.
@@ -29,8 +31,8 @@ library NavigatorStorageTypes {
     // ======================== Delegation ======================== //
     // citizen => navigator they delegated to
     mapping(address => address) citizenToNavigator;
-    // citizen => VOT3 amount delegated
-    mapping(address => uint256) delegatedAmount;
+    // citizen => checkpointed VOT3 delegation amount (current via latest(), past via upperLookupRecent)
+    mapping(address => Checkpoints.Trace208) delegatedAmount;
     // navigator => total VOT3 delegated to them
     mapping(address => uint256) totalDelegatedToNavigator;
     // navigator => list of citizens delegating to them

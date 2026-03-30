@@ -154,8 +154,8 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   function reduceDelegation(uint256 reduceBy) external nonReentrant {
     NavigatorDelegationUtils.reduceDelegation(_msgSender(), reduceBy);
     // Update locked amount to reflect new delegation
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    IVOT3($.vot3Token).setNavigatorLockedAmount(_msgSender(), $.delegatedAmount[_msgSender()]);
+    uint256 newAmount = NavigatorDelegationUtils.getDelegatedAmount(_msgSender());
+    IVOT3(NavigatorStorageTypes.getNavigatorStorage().vot3Token).setNavigatorLockedAmount(_msgSender(), newAmount);
   }
 
   /// @notice Fully undelegate from the current navigator
@@ -347,6 +347,10 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
 
   function isDelegated(address citizen) external view returns (bool) {
     return NavigatorDelegationUtils.isDelegated(citizen);
+  }
+
+  function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256) {
+    return NavigatorDelegationUtils.getDelegatedAmountAtTimepoint(citizen, timepoint);
   }
 
   // -- Voting --
