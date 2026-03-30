@@ -27,6 +27,7 @@ const config: AppConfig = {
   grantsManagerContractAddress: "0x005af71e9b2d629c0c6e2f9d39fdfd1bb967c0ea",
   relayerRewardsPoolContractAddress: "0x92b5a7484970d9b2ad981e8135ff14e6f996dc04",
   dbaPoolContractAddress: "0x328710f4925c3e4c04961882b96c50cc7cd9d958",
+  navigatorRegistryContractAddress: "",
   veDelegateAutoDepositContractAddress: "0xf5DcEfC27461480A75c328402F1633c462Bece6c",
   indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",

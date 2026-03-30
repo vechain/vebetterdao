@@ -49,6 +49,8 @@ import type { PassportLibraries } from "../../scripts/libraries/passportLibrarie
 import { setWhitelistedFunctions } from "./whitelistGovernance"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
+import { navigatorRegistryLibraries } from "../../scripts/libraries/navigatorRegistryLibraries"
+import { NavigatorRegistry } from "../../typechain-types"
 import { APPS } from "../../scripts/deploy/setup"
 import { xAllocationVotingLibraries } from "../../scripts/libraries/xAllocationVotingLibraries"
 import { deployStargateMock } from "../../scripts/deploy/mocks/deployStargate"
@@ -110,6 +112,9 @@ export interface DeployInstance
 
   // AutoVoting Libraries
   autoVotingLogic: AutoVotingLogic
+
+  // Navigator Registry
+  navigatorRegistry: NavigatorRegistry
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -652,6 +657,7 @@ export const getOrDeployContractInstances = async ({
         10000, // freshnessT3 — x1
         10000, // intentFA — x1
         10000, // intentAb — x1 (neutral for existing tests)
+        ethers.ZeroAddress, // navigatorRegistry — not yet deployed, will be set via setter after deployment
       ],
     ],
     {
@@ -661,6 +667,41 @@ export const getOrDeployContractInstances = async ({
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
+
+  // ---------------------- Deploy NavigatorRegistry ----------------------
+  const navigatorLibs = await navigatorRegistryLibraries()
+  const navigatorLibraryAddresses: Record<string, string> = {
+    NavigatorStakingUtils: await navigatorLibs.NavigatorStakingUtils.getAddress(),
+    NavigatorDelegationUtils: await navigatorLibs.NavigatorDelegationUtils.getAddress(),
+    NavigatorVotingUtils: await navigatorLibs.NavigatorVotingUtils.getAddress(),
+    NavigatorFeeUtils: await navigatorLibs.NavigatorFeeUtils.getAddress(),
+    NavigatorSlashingUtils: await navigatorLibs.NavigatorSlashingUtils.getAddress(),
+    NavigatorLifecycleUtils: await navigatorLibs.NavigatorLifecycleUtils.getAddress(),
+  }
+
+  const navigatorRegistry = (await deployProxy(
+    "NavigatorRegistry",
+    [
+      {
+        admin: owner.address,
+        upgrader: owner.address,
+        governance: owner.address,
+        b3trToken: await b3tr.getAddress(),
+        vot3Token: await vot3.getAddress(),
+        treasury: await treasury.getAddress(),
+        minStake: config.NAVIGATOR_MIN_STAKE,
+        maxStakePercentage: config.NAVIGATOR_MAX_STAKE_PERCENTAGE,
+        feeLockPeriod: config.NAVIGATOR_FEE_LOCK_PERIOD,
+        feePercentage: config.NAVIGATOR_FEE_PERCENTAGE,
+        exitNoticePeriod: config.NAVIGATOR_EXIT_NOTICE_PERIOD,
+        reportInterval: config.NAVIGATOR_REPORT_INTERVAL,
+        minorSlashPercentage: config.NAVIGATOR_MINOR_SLASH_PERCENTAGE,
+        preferenceCutoffPeriod: config.NAVIGATOR_PREFERENCE_CUTOFF_PERIOD,
+        voterRewards: await voterRewards.getAddress(),
+      },
+    ],
+    navigatorLibraryAddresses,
+  )) as unknown as NavigatorRegistry
 
   const tempB3trGovernorAddress = owner.address
   const xAllocationVoting = (await deployAndUpgrade(
@@ -1236,6 +1277,21 @@ export const getOrDeployContractInstances = async ({
   // Grant PROPOSAL_STATE_MANAGER_ROLE to owner in B3TRGovernor contract
   await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
 
+  // Wire NavigatorRegistry with XAllocationVoting
+  await navigatorRegistry.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
+
+  // VOT3 V2: set navigator registry
+  await vot3.connect(owner).initializeV2(await navigatorRegistry.getAddress())
+
+  // XAllocationVoting V9: set navigator registry
+  await xAllocationVoting.connect(owner).initializeV9(await navigatorRegistry.getAddress())
+
+  // B3TRGovernor V10: set navigator registry
+  await governor.connect(owner).initializeV10(await navigatorRegistry.getAddress())
+
+  // VoterRewards: set navigator registry (was deployed before NavigatorRegistry, so use setter)
+  await voterRewards.connect(owner).setNavigatorRegistry(await navigatorRegistry.getAddress())
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions({ b3tr, emissions, minterAccount, owner })
@@ -1404,6 +1460,7 @@ export const getOrDeployContractInstances = async ({
     stargateMock,
     relayerRewardsPool,
     autoVotingLogic: xAllocLibs.AutoVotingLogic as unknown as AutoVotingLogic,
+    navigatorRegistry,
   }
   return cachedDeployInstance
 }
