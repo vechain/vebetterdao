@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
-import { HDNode, mnemonic } from "thor-devkit"
+import { Address, Mnemonic } from "@vechain/sdk-core"
+import { describe, expect, test } from "vitest"
 import { compareAddresses, compareListOfAddresses, isValid, leftPadWithZeros, regexPattern } from "./AddressUtils"
 
 const address1 = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
@@ -29,8 +30,7 @@ describe("compareAddresses - positive testing", () => {
   })
 
   test("generated node", () => {
-    const hdNode = HDNode.fromMnemonic(mnemonic.generate())
-    const rootAddress = hdNode.address
+    const rootAddress = Address.ofMnemonic(Mnemonic.of()).toString()
 
     expect(compareAddresses(rootAddress, rootAddress)).toBe(true)
 

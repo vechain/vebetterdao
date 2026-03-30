@@ -1,10 +1,29 @@
-import { abi, keccak256 } from "thor-devkit"
+import { ABIContract, Hex } from "@vechain/sdk-core"
+import type { AbiFunction, AbiParameter } from "viem"
+
+export type ContractAbiParameter = AbiParameter & {
+  name: string
+  requiresEthParse?: boolean
+}
+
+export type ContractAbiDefinition = {
+  type: string
+  name?: string
+  stateMutability?: string
+  inputs?: ContractAbiParameter[]
+  outputs?: AbiParameter[]
+  [key: string]: unknown
+}
+
+export type ContractFunctionDefinition = Omit<AbiFunction, "inputs"> & {
+  inputs: ContractAbiParameter[]
+}
 
 export type JsonContractAbi = {
   _format: string
   contractName: string
   sourceName: string
-  abi: abi.Event.Definition[] | abi.Function.Definition[]
+  abi: ContractAbiDefinition[]
 }
 
 /**
@@ -13,18 +32,33 @@ export type JsonContractAbi = {
 export type JsonContractType = {
   _format: string
   contractName: string
-  abi: ((
-    | Omit<abi.Function.Definition, "type" | "name" | "stateMutability" | "inputs">
-    | Omit<abi.Event.Definition, "type" | "name" | "stateMutability" | "inputs">
-  ) & {
-    type: string
-    name?: string
-    stateMutability?: string
-    inputs?: (Omit<abi.Function.Parameter, "indexed"> & {
-      indexed?: boolean
-    })[]
-  })[]
+  abi: ContractAbiDefinition[]
   bytecode: string
+}
+
+export type DecodedFunctionData = Record<string, unknown>
+
+const getFunctionAbi = (abiDefinition: ContractFunctionDefinition) => {
+  return ABIContract.ofAbi([abiDefinition] as unknown as Parameters<typeof ABIContract.ofAbi>[0]).getFunction(
+    abiDefinition.name,
+  )
+}
+
+export const encodeFunctionCalldata = (abiDefinition: ContractFunctionDefinition, args: unknown[]) => {
+  return getFunctionAbi(abiDefinition).encodeData(args).toString()
+}
+
+export const decodeFunctionCalldata = (
+  calldata: string,
+  abiDefinition: ContractFunctionDefinition,
+): DecodedFunctionData => {
+  const decoded = getFunctionAbi(abiDefinition).decodeData(Hex.of(calldata))
+
+  return (abiDefinition.inputs ?? []).reduce<DecodedFunctionData>((acc, input, index) => {
+    acc[input.name] = decoded.args?.[index]
+
+    return acc
+  }, {})
 }
 
 /**
@@ -35,14 +69,12 @@ export type JsonContractType = {
  */
 export const resolveAbiFunctionFromCalldata = (calldata: string, contractAbi: JsonContractAbi | JsonContractType) => {
   for (const method of contractAbi.abi) {
-    if (method.type !== "function") continue
+    if (method.type !== "function" || !method.name || !method.inputs) continue
 
-    // The first 4 bytes of the calldata are the function to call hash (function signature) i.e keccak256(methodNameAndParams)
     const functionToCallHash = calldata.slice(0, 10)
-    const methodNameAndParams = `${method.name}(${method.inputs?.map(i => i.type).join(",")})`
-    const methodNameAndParamsHash = `0x${keccak256(methodNameAndParams).toString("hex").slice(0, 8)}`
+    const methodNameAndParamsHash = getFunctionAbi(method as ContractFunctionDefinition).signatureHash
 
     if (functionToCallHash !== methodNameAndParamsHash) continue
-    return method
+    return method as ContractFunctionDefinition
   }
 }

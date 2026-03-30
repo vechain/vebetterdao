@@ -47,7 +47,9 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   const availableBalanceOriginal = vot3Original > swappableOriginal ? swappableOriginal : vot3Original
 
   const availableBalance =
-    vot3Balance?.scaled > swappableVot3Balance?.scaled ? swappableVot3Balance?.scaled : (vot3Balance?.scaled ?? "0")
+    (vot3Balance?.scaled ?? 0) > (swappableVot3Balance?.scaled ?? 0)
+      ? (swappableVot3Balance?.scaled ?? "0")
+      : (vot3Balance?.scaled ?? "0")
 
   const showTransferredVOT3Warning = vot3Original > swappableOriginal
 
