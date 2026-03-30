@@ -112,6 +112,8 @@ library NavigatorStorageTypes {
     address xAllocationVoting;
     // RelayerRewardsPool contract address (for preferredRelayer management)
     address relayerRewardsPool;
+    // VoterRewards contract address (only this address can deposit navigator fees)
+    address voterRewards;
   }
 
   /// @notice Returns the navigator storage slot

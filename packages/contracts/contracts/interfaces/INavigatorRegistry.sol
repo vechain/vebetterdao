@@ -132,6 +132,7 @@ interface INavigatorRegistry {
   function setPreferenceCutoffPeriod(uint256 newPeriod) external;
   function setXAllocationVoting(address newAddress) external;
   function setRelayerRewardsPool(address newAddress) external;
+  function setVoterRewards(address newAddress) external;
 
   // ======================== View Functions ======================== //
 

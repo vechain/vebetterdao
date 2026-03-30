@@ -89,6 +89,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
     uint256 reportInterval;
     uint256 minorSlashPercentage;
     uint256 preferenceCutoffPeriod;
+    address voterRewards;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -122,6 +123,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
     $.reportInterval = params.reportInterval;
     $.minorSlashPercentage = params.minorSlashPercentage;
     $.preferenceCutoffPeriod = params.preferenceCutoffPeriod;
+    $.voterRewards = params.voterRewards;
   }
 
   // ======================== Navigator Registration & Staking ======================== //
@@ -184,6 +186,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @notice Deposit a navigator fee (called by VoterRewards during reward claim)
   /// @dev B3TR must already be transferred to this contract before calling.
   function depositNavigatorFee(address navigator, uint256 roundId, uint256 amount) external {
+    require(_msgSender() == NavigatorStorageTypes.getNavigatorStorage().voterRewards, "NavigatorRegistry: not voter rewards");
     NavigatorFeeUtils.depositFee(navigator, roundId, amount);
   }
 
@@ -306,6 +309,11 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   function setRelayerRewardsPool(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(newAddress != address(0), "NavigatorRegistry: zero address");
     NavigatorStorageTypes.getNavigatorStorage().relayerRewardsPool = newAddress;
+  }
+
+  function setVoterRewards(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(newAddress != address(0), "NavigatorRegistry: zero address");
+    NavigatorStorageTypes.getNavigatorStorage().voterRewards = newAddress;
   }
 
   // ======================== View Functions ======================== //
