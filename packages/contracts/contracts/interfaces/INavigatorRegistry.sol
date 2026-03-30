@@ -102,6 +102,7 @@ interface INavigatorRegistry {
   // ======================== Fees ======================== //
 
   function claimFee(uint256 roundId) external;
+  function depositNavigatorFee(address navigator, uint256 roundId, uint256 amount) external;
 
   // ======================== Slashing Reports ======================== //
 

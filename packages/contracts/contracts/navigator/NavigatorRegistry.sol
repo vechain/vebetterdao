@@ -179,6 +179,12 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
 
   // ======================== Fee Management ======================== //
 
+  /// @notice Deposit a navigator fee (called by VoterRewards during reward claim)
+  /// @dev B3TR must already be transferred to this contract before calling.
+  function depositNavigatorFee(address navigator, uint256 roundId, uint256 amount) external {
+    NavigatorFeeUtils.depositFee(navigator, roundId, amount);
+  }
+
   /// @notice Claim unlocked fees for a specific round
   function claimFee(uint256 roundId) external nonReentrant onlyNavigator {
     NavigatorFeeUtils.claimFee(_msgSender(), roundId, _getCurrentRound());
