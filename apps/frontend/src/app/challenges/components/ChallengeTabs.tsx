@@ -36,7 +36,8 @@ export const ChallengeTabs = ({ currentTab, children }: { currentTab: ChallengeT
           inlineEnd={{ base: "4", md: "0" }}>
           <Tabs.List
             w="full"
-            justifyContent="space-between"
+            justifyContent={{ base: "space-between", md: "flex-start" }}
+            gap={{ base: "0", md: "6" }}
             pt={isStuck ? "3" : undefined}
             px={{ base: "4", md: "0" }}
             bg={isStuck ? "bg.primary" : undefined}>
