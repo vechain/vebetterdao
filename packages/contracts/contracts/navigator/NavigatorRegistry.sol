@@ -29,6 +29,12 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
+import { NavigatorStakingUtils } from "./libraries/NavigatorStakingUtils.sol";
+import { NavigatorDelegationUtils } from "./libraries/NavigatorDelegationUtils.sol";
+import { NavigatorVotingUtils } from "./libraries/NavigatorVotingUtils.sol";
+import { NavigatorFeeUtils } from "./libraries/NavigatorFeeUtils.sol";
+import { NavigatorSlashingUtils } from "./libraries/NavigatorSlashingUtils.sol";
+import { NavigatorLifecycleUtils } from "./libraries/NavigatorLifecycleUtils.sol";
 
 /**
  * @title NavigatorRegistry
@@ -37,8 +43,8 @@ import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
  *
  * @dev Architecture:
  * - Upgradeable via UUPS proxy pattern
- * - Logic split into external libraries for contract size optimization
- * - ERC-7201 namespaced storage (7 namespaces)
+ * - Logic split into 6 external libraries for contract size optimization
+ * - Single ERC-7201 namespaced storage
  * - Role-based access control (GOVERNANCE_ROLE, UPGRADER_ROLE)
  *
  * Key features:
@@ -50,23 +56,12 @@ import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
  * - Exit process with notice period
  */
 contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
-  /// @notice Role for governance-controlled settings and deactivation
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-
-  /// @notice Role for contract upgrades
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-
-  /// @notice Basis points scale (10000 = 100%)
   uint256 public constant BASIS_POINTS = 10000;
 
   // ======================== Initialization ======================== //
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
-  /// @notice Initialization parameters packed into a struct to avoid stack-too-deep
   struct InitParams {
     address admin;
     address upgrader;
@@ -74,19 +69,20 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
     address b3trToken;
     address vot3Token;
     address treasury;
-    uint256 minStake; // default: 50000e18
-    uint256 maxStakePercentage; // basis points of VOT3 supply (default: 100 = 1%)
-    uint256 feeLockPeriod; // rounds (default: 4)
-    uint256 feePercentage; // basis points (default: 2000 = 20%)
-    uint256 exitNoticePeriod; // rounds (default: 1)
-    uint256 reportInterval; // rounds (default: 2)
-    uint256 minorSlashPercentage; // basis points (default: 1000 = 10%)
+    uint256 minStake;
+    uint256 maxStakePercentage;
+    uint256 feeLockPeriod;
+    uint256 feePercentage;
+    uint256 exitNoticePeriod;
+    uint256 reportInterval;
+    uint256 minorSlashPercentage;
   }
 
-  /**
-   * @notice Initialize the NavigatorRegistry contract
-   * @param params Initialization parameters
-   */
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
   function initialize(InitParams calldata params) public initializer {
     require(params.admin != address(0), "NavigatorRegistry: admin is zero");
     require(params.b3trToken != address(0), "NavigatorRegistry: b3tr is zero");
@@ -102,36 +98,201 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
     _grantRole(GOVERNANCE_ROLE, params.governance);
 
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-
-    // Staking config
     $.minStake = params.minStake;
     $.maxStakePercentage = params.maxStakePercentage;
     $.b3trToken = params.b3trToken;
     $.vot3Token = params.vot3Token;
     $.treasury = params.treasury;
-
-    // Fee config
     $.feeLockPeriod = params.feeLockPeriod;
     $.feePercentage = params.feePercentage;
-
-    // Lifecycle config
     $.exitNoticePeriod = params.exitNoticePeriod;
-
-    // Profile config
     $.reportInterval = params.reportInterval;
-
-    // Slashing config
     $.minorSlashPercentage = params.minorSlashPercentage;
   }
 
-  // ======================== Version ======================== //
+  // ======================== Navigator Registration & Staking ======================== //
 
-  /// @notice Returns the version of the contract
-  function version() external pure returns (string memory) {
-    return "1";
+  /// @notice Register as a navigator by staking B3TR (permissionless, must approve B3TR first)
+  function register(uint256 amount, string calldata metadataURI) external nonReentrant {
+    NavigatorStakingUtils.register(_msgSender(), amount, metadataURI);
   }
 
-  // ======================== Upgrade Authorization ======================== //
+  /// @notice Add more B3TR to an existing navigator's stake
+  function addStake(uint256 amount) external nonReentrant {
+    NavigatorStakingUtils.addStake(_msgSender(), amount);
+  }
+
+  /// @notice Withdraw staked B3TR (only after exit finalized or deactivation)
+  function withdrawStake(uint256 amount) external nonReentrant {
+    NavigatorStakingUtils.withdrawStake(_msgSender(), amount);
+  }
+
+  // ======================== Citizen Delegation ======================== //
+
+  /// @notice Delegate VOT3 to a navigator
+  function delegate(address navigator, uint256 amount) external nonReentrant {
+    NavigatorDelegationUtils.delegate(_msgSender(), navigator, amount);
+    // TODO: call VOT3.setDelegatedAmount to lock VOT3
+    // TODO: set preferredRelayer if navigator is a registered relayer
+  }
+
+  /// @notice Partially reduce delegation amount
+  function reduceDelegation(uint256 reduceBy) external nonReentrant {
+    NavigatorDelegationUtils.reduceDelegation(_msgSender(), reduceBy);
+    // TODO: update VOT3 delegated amount
+  }
+
+  /// @notice Fully undelegate from the current navigator
+  function undelegate() external nonReentrant {
+    NavigatorDelegationUtils.undelegate(_msgSender());
+    // TODO: call VOT3.setDelegatedAmount(0) to unlock VOT3
+    // TODO: clear preferredRelayer
+  }
+
+  // ======================== Navigator Voting Decisions ======================== //
+
+  /// @notice Set allocation voting preferences for a round (also navigator's own vote)
+  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds) external {
+    NavigatorVotingUtils.setAllocationPreferences(_msgSender(), roundId, appIds);
+  }
+
+  /// @notice Set governance proposal decision (1=Against, 2=For, 3=Abstain; also navigator's own vote)
+  function setProposalDecision(uint256 proposalId, uint8 decision) external {
+    NavigatorVotingUtils.setProposalDecision(_msgSender(), proposalId, decision);
+  }
+
+  // ======================== Fee Management ======================== //
+
+  /// @notice Claim unlocked fees for a specific round
+  function claimFee(uint256 roundId) external nonReentrant {
+    NavigatorFeeUtils.claimFee(_msgSender(), roundId, _getCurrentRound());
+  }
+
+  // ======================== Slashing Reports (anyone can call) ======================== //
+
+  /// @notice Report navigator for missing allocation vote
+  function reportMissedAllocationVote(address navigator, uint256 roundId) external {
+    NavigatorSlashingUtils.reportMissedAllocationVote(navigator, roundId);
+  }
+
+  /// @notice Report navigator for missing governance proposal vote
+  function reportMissedGovernanceVote(address navigator, uint256 proposalId) external {
+    NavigatorSlashingUtils.reportMissedGovernanceVote(navigator, proposalId);
+  }
+
+  /// @notice Report navigator for stale allocation preferences (no update >= 3 rounds)
+  function reportStalePreferences(address navigator, uint256 roundId) external {
+    NavigatorSlashingUtils.reportStalePreferences(navigator, roundId);
+  }
+
+  /// @notice Report navigator for missing required report
+  function reportMissedReport(address navigator, uint256 roundId) external {
+    NavigatorSlashingUtils.reportMissedReport(navigator, roundId);
+  }
+
+  /// @notice Deactivate a navigator by governance (major infraction with slash)
+  function deactivateNavigator(address navigator, uint256 slashPercentage, bool slashFees) external onlyRole(GOVERNANCE_ROLE) {
+    NavigatorSlashingUtils.majorSlash(navigator, slashPercentage, slashFees);
+    NavigatorLifecycleUtils.deactivate(navigator);
+  }
+
+  // ======================== Lifecycle ======================== //
+
+  /// @notice Announce intent to exit (starts notice period)
+  function announceExit() external {
+    NavigatorLifecycleUtils.announceExit(_msgSender(), _getCurrentRound());
+  }
+
+  /// @notice Finalize exit after notice period
+  function finalizeExit() external {
+    NavigatorLifecycleUtils.finalizeExit(_msgSender(), _getCurrentRound());
+  }
+
+  // ======================== Profile & Reports ======================== //
+
+  /// @notice Update navigator metadata URI
+  function setMetadataURI(string calldata uri) external {
+    NavigatorLifecycleUtils.setMetadataURI(_msgSender(), uri);
+  }
+
+  /// @notice Submit a periodic report
+  function submitReport(string calldata reportURI) external {
+    NavigatorLifecycleUtils.submitReport(_msgSender(), _getCurrentRound(), reportURI);
+  }
+
+  // ======================== Governance Setters ======================== //
+
+  function setMinStake(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().minStake = v; }
+  function setMaxStakePercentage(uint256 v) external onlyRole(GOVERNANCE_ROLE) { require(v <= BASIS_POINTS, "NavigatorRegistry: > 100%"); NavigatorStorageTypes.getNavigatorStorage().maxStakePercentage = v; }
+  function setFeeLockPeriod(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().feeLockPeriod = v; }
+  function setFeePercentage(uint256 v) external onlyRole(GOVERNANCE_ROLE) { require(v <= BASIS_POINTS, "NavigatorRegistry: > 100%"); NavigatorStorageTypes.getNavigatorStorage().feePercentage = v; }
+  function setExitNoticePeriod(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().exitNoticePeriod = v; }
+  function setReportInterval(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().reportInterval = v; }
+  function setMinorSlashPercentage(uint256 v) external onlyRole(GOVERNANCE_ROLE) { require(v <= BASIS_POINTS, "NavigatorRegistry: > 100%"); NavigatorStorageTypes.getNavigatorStorage().minorSlashPercentage = v; }
+  function setXAllocationVoting(address v) external onlyRole(DEFAULT_ADMIN_ROLE) { NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting = v; }
+  function setRelayerRewardsPool(address v) external onlyRole(DEFAULT_ADMIN_ROLE) { NavigatorStorageTypes.getNavigatorStorage().relayerRewardsPool = v; }
+
+  // ======================== View Functions ======================== //
+
+  // -- Staking --
+  function getStake(address navigator) external view returns (uint256) { return NavigatorStakingUtils.getStake(navigator); }
+  function isNavigator(address account) external view returns (bool) { return NavigatorStakingUtils.isNavigator(account); }
+  function canAcceptDelegations(address navigator) external view returns (bool) { return NavigatorStakingUtils.canAcceptDelegations(navigator); }
+  function getDelegationCapacity(address navigator) external view returns (uint256) { return NavigatorStakingUtils.getDelegationCapacity(navigator); }
+  function getRemainingCapacity(address navigator) external view returns (uint256) { return NavigatorStakingUtils.getRemainingCapacity(navigator); }
+  function getMinStake() external view returns (uint256) { return NavigatorStakingUtils.getMinStake(); }
+  function getMaxStake() external view returns (uint256) { return NavigatorStakingUtils.getMaxStake(); }
+
+  // -- Delegation --
+  function getNavigator(address citizen) external view returns (address) { return NavigatorDelegationUtils.getNavigator(citizen); }
+  function getDelegatedAmount(address citizen) external view returns (uint256) { return NavigatorDelegationUtils.getDelegatedAmount(citizen); }
+  function getTotalDelegated(address navigator) external view returns (uint256) { return NavigatorDelegationUtils.getTotalDelegated(navigator); }
+  function getCitizens(address navigator) external view returns (address[] memory) { return NavigatorDelegationUtils.getCitizens(navigator); }
+  function getCitizenCount(address navigator) external view returns (uint256) { return NavigatorDelegationUtils.getCitizenCount(navigator); }
+  function isDelegated(address citizen) external view returns (bool) { return NavigatorDelegationUtils.isDelegated(citizen); }
+
+  // -- Voting --
+  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory) { return NavigatorVotingUtils.getAllocationPreferences(navigator, roundId); }
+  function hasSetPreferences(address navigator, uint256 roundId) external view returns (bool) { return NavigatorVotingUtils.hasSetPreferences(navigator, roundId); }
+  function getProposalDecision(address navigator, uint256 proposalId) external view returns (uint8) { return NavigatorVotingUtils.getProposalDecision(navigator, proposalId); }
+  function hasSetDecision(address navigator, uint256 proposalId) external view returns (bool) { return NavigatorVotingUtils.hasSetDecision(navigator, proposalId); }
+
+  // -- Fees --
+  function getRoundFee(address navigator, uint256 roundId) external view returns (uint256) { return NavigatorFeeUtils.getRoundFee(navigator, roundId); }
+  function getFeeLockPeriod() external view returns (uint256) { return NavigatorFeeUtils.getFeeLockPeriod(); }
+  function getFeePercentage() external view returns (uint256) { return NavigatorFeeUtils.getFeePercentage(); }
+  function isRoundFeeUnlocked(uint256 roundId) external view returns (bool) { return NavigatorFeeUtils.isRoundFeeUnlocked(roundId, _getCurrentRound()); }
+
+  // -- Slashing --
+  function getTotalSlashed(address navigator) external view returns (uint256) { return NavigatorSlashingUtils.getTotalSlashed(navigator); }
+  function getMinorSlashPercentage() external view returns (uint256) { return NavigatorSlashingUtils.getMinorSlashPercentage(); }
+
+  // -- Lifecycle --
+  function isExiting(address navigator) external view returns (bool) { return NavigatorLifecycleUtils.isExiting(navigator); }
+  function isExitReady(address navigator) external view returns (bool) { return NavigatorLifecycleUtils.isExitReady(navigator, _getCurrentRound()); }
+  function isDeactivated(address navigator) external view returns (bool) { return NavigatorLifecycleUtils.isDeactivated(navigator); }
+  function getExitNoticePeriod() external view returns (uint256) { return NavigatorLifecycleUtils.getExitNoticePeriod(); }
+  function getReportInterval() external view returns (uint256) { return NavigatorLifecycleUtils.getReportInterval(); }
+
+  // -- Profile --
+  function getMetadataURI(address navigator) external view returns (string memory) { return NavigatorLifecycleUtils.getMetadataURI(navigator); }
+  function getLastReportRound(address navigator) external view returns (uint256) { return NavigatorLifecycleUtils.getLastReportRound(navigator); }
+  function getLastReportURI(address navigator) external view returns (string memory) { return NavigatorLifecycleUtils.getLastReportURI(navigator); }
+
+  // ======================== Version & Upgrade ======================== //
+
+  function version() external pure returns (string memory) { return "1"; }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+  // ======================== Internal ======================== //
+
+  /// @dev Get current round ID from XAllocationVoting (returns 0 if not set)
+  function _getCurrentRound() internal view returns (uint256) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    if ($.xAllocationVoting == address(0)) return 0;
+    (bool success, bytes memory data) = $.xAllocationVoting.staticcall(abi.encodeWithSignature("currentRoundId()"));
+    if (!success || data.length == 0) return 0;
+    return abi.decode(data, (uint256));
+  }
 }
