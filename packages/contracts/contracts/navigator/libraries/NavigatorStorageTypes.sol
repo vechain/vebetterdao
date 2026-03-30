@@ -47,8 +47,10 @@ library NavigatorStorageTypes {
     uint256 lastSnapshotRound;
 
     // ======================== Voting Decisions ======================== //
-    // navigator => round => app preferences (bytes32[] of app IDs, equal weight)
+    // navigator => round => app preferences (bytes32[] of app IDs)
     mapping(address => mapping(uint256 => bytes32[])) roundAppPreferences;
+    // navigator => round => allocation percentage per app in basis points (must sum to 10000)
+    mapping(address => mapping(uint256 => uint256[])) roundAppPercentages;
     // navigator => proposalId => vote decision (0=not set, 1=Against, 2=For, 3=Abstain)
     // Offset by 1 so 0 means "decision not set"
     mapping(address => mapping(uint256 => uint8)) proposalDecision;

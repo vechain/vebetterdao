@@ -10,6 +10,7 @@ import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
 /// - Governance: per-proposal decision (Against=1, For=2, Abstain=3; 0=not set)
 /// - Votes for citizens are BLOCKED until navigator sets their decision
 library NavigatorVotingUtils {
+  uint256 private constant BASIS_POINTS = 10000;
   // ======================== Events ======================== //
 
   /// @notice Emitted when a navigator sets allocation preferences for a round
@@ -47,28 +48,40 @@ library NavigatorVotingUtils {
   // ======================== Allocation Preferences ======================== //
 
   /// @notice Set allocation voting preferences for a round
-  /// @dev This also serves as the navigator's own vote (cast automatically by the system).
-  /// Apps receive equal weight distribution. Max 15 apps.
+  /// @dev Navigator specifies app IDs and allocation percentages (basis points, must sum to 10000).
+  /// The same ratio is applied to every citizen's delegated amount.
   /// @param navigator The navigator address
   /// @param roundId The allocation round ID
-  /// @param appIds Array of app IDs to vote for
-  function setAllocationPreferences(address navigator, uint256 roundId, bytes32[] calldata appIds) external {
+  /// @param appIds Array of app IDs to vote for (max 15, no duplicates)
+  /// @param percentages Allocation percentage per app in basis points (must sum to 10000)
+  function setAllocationPreferences(
+    address navigator,
+    uint256 roundId,
+    bytes32[] calldata appIds,
+    uint256[] calldata percentages
+  ) external {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
 
     if (!$.isRegistered[navigator] || $.isDeactivated[navigator]) revert NotANavigator(navigator);
     if (appIds.length == 0) revert EmptyPreferences();
     if (appIds.length > 15) revert TooManyApps(appIds.length);
+    require(appIds.length == percentages.length, "NavigatorVotingUtils: length mismatch");
     if ($.preferencesSet[navigator][roundId]) revert PreferencesAlreadySet(navigator, roundId);
 
-    // Check for duplicates (O(n^2) but n <= 15)
+    // Validate: no duplicates, non-zero percentages, sum = 10000
+    uint256 totalPct;
     for (uint256 i; i < appIds.length; i++) {
+      require(percentages[i] > 0, "NavigatorVotingUtils: zero percentage");
+      totalPct += percentages[i];
       for (uint256 j; j < i; j++) {
         require(appIds[i] != appIds[j], "NavigatorVotingUtils: duplicate app");
       }
     }
+    require(totalPct == BASIS_POINTS, "NavigatorVotingUtils: percentages must sum to BASIS_POINTS");
 
-    // Store preferences
+    // Store preferences and percentages
     $.roundAppPreferences[navigator][roundId] = appIds;
+    $.roundAppPercentages[navigator][roundId] = percentages;
     $.preferencesSet[navigator][roundId] = true;
     $.preferencesSetBlock[navigator][roundId] = block.number;
 
@@ -79,9 +92,9 @@ library NavigatorVotingUtils {
   function getAllocationPreferences(
     address navigator,
     uint256 roundId
-  ) external view returns (bytes32[] memory) {
+  ) external view returns (bytes32[] memory appIds, uint256[] memory percentages) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    return $.roundAppPreferences[navigator][roundId];
+    return ($.roundAppPreferences[navigator][roundId], $.roundAppPercentages[navigator][roundId]);
   }
 
   /// @notice Check if a navigator has set preferences for a round

@@ -96,7 +96,7 @@ interface INavigatorRegistry {
 
   // ======================== Voting Decisions ======================== //
 
-  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds) external;
+  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds, uint256[] calldata percentages) external;
   function setProposalDecision(uint256 proposalId, uint8 decision) external;
 
   // ======================== Fees ======================== //
@@ -154,7 +154,7 @@ interface INavigatorRegistry {
   function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256);
 
   // -- Voting --
-  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory);
+  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory appIds, uint256[] memory percentages);
   function hasSetPreferences(address navigator, uint256 roundId) external view returns (bool);
   function getPreferencesSetBlock(address navigator, uint256 roundId) external view returns (uint256);
   function getProposalDecision(address navigator, uint256 proposalId) external view returns (uint8);

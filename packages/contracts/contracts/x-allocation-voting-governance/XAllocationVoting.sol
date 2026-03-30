@@ -244,16 +244,24 @@ contract XAllocationVoting is
 
     _checkEarlyAccessEligibility(roundId, citizen);
 
-    bytes32[] memory appIds = navRegistry.getAllocationPreferences(navigator, roundId);
+    // Get navigator's preferences with allocation percentages (basis points, sum to 10000)
+    (bytes32[] memory appIds, uint256[] memory percentages) = navRegistry.getAllocationPreferences(navigator, roundId);
 
     // Voting power = delegated amount at round snapshot (not full VOT3 balance)
     uint256 snapshot = roundSnapshot(roundId);
     uint256 delegatedPower = navRegistry.getDelegatedAmountAtTimepoint(citizen, snapshot);
 
-    // Equal-weight distribution across navigator's preferred apps
-    uint256[] memory voteWeights = new uint256[](appIds.length);
-    for (uint256 i; i < appIds.length; i++) {
-      voteWeights[i] = 1; // equal weight — countVote normalizes to voting power
+    // Convert percentages to absolute VOT3 amounts (countVote expects absolute weights)
+    uint256 basisPoints = navRegistry.BASIS_POINTS();
+    uint256[] memory voteWeights = new uint256[](percentages.length);
+    uint256 allocated;
+    for (uint256 i; i < percentages.length; i++) {
+      voteWeights[i] = (delegatedPower * percentages[i]) / basisPoints;
+      allocated += voteWeights[i];
+    }
+    // Assign any dust from rounding to the first app
+    if (allocated < delegatedPower && voteWeights.length > 0) {
+      voteWeights[0] += delegatedPower - allocated;
     }
 
     _handleCastVoteWithPower(citizen, roundId, appIds, voteWeights, delegatedPower, false);

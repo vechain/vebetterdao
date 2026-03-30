@@ -175,8 +175,8 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   // ======================== Navigator Voting Decisions ======================== //
 
   /// @notice Set allocation voting preferences for a round (also navigator's own vote)
-  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds) external onlyNavigator {
-    NavigatorVotingUtils.setAllocationPreferences(_msgSender(), roundId, appIds);
+  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds, uint256[] calldata weights) external onlyNavigator {
+    NavigatorVotingUtils.setAllocationPreferences(_msgSender(), roundId, appIds, weights);
   }
 
   /// @notice Set governance proposal decision (1=Against, 2=For, 3=Abstain; also navigator's own vote)
@@ -374,7 +374,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   }
 
   // -- Voting --
-  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory) {
+  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory, uint256[] memory) {
     return NavigatorVotingUtils.getAllocationPreferences(navigator, roundId);
   }
 
