@@ -37,7 +37,7 @@ export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote }: FreshnessHi
     if (isUpdated) {
       return t("You updated your app selection! You'll receive a higher freshness bonus on your rewards.")
     }
-    return t("Tip: Update your app selection to earn a higher freshness bonus on your rewards.")
+    return t("Tip: Weekly update your app selection to earn a higher freshness bonus on your rewards.")
   }
 
   return (
