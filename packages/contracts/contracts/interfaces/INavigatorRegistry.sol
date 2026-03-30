@@ -51,6 +51,16 @@ interface INavigatorRegistry {
   error NoticePeriodNotElapsed(uint256 currentRound, uint256 requiredRound);
   error AlreadyDeactivated(address navigator);
 
+  // -- General --
+  error ZeroAddress(string param);
+  error InvalidParameter(string reason);
+  error UnauthorizedCaller(address caller);
+  error InsufficientStake(uint256 available, uint256 requested);
+  error DuplicateApp(bytes32 appId);
+  error PercentageMismatch(uint256 total, uint256 expected);
+  error SlashExceedsMax(uint256 slashPercentage, uint256 max);
+  error ZeroPercentage();
+
   // ======================== Events ======================== //
 
   // -- Staking --

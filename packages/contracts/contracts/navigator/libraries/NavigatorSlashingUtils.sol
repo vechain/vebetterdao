@@ -39,6 +39,9 @@ library NavigatorSlashingUtils {
   /// @notice Thrown when navigator has no stake to slash
   error NoStakeToSlash(address navigator);
 
+  /// @notice Thrown when slash percentage exceeds maximum
+  error SlashExceedsMax(uint256 slashPercentage, uint256 max);
+
   // ======================== Minor Slashing ======================== //
 
   /// @notice Report a navigator for missing allocation vote in a round
@@ -181,7 +184,7 @@ library NavigatorSlashingUtils {
   ) external {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
 
-    require(slashPercentage <= BASIS_POINTS, "NavigatorSlashingUtils: slash > 100%");
+    if (slashPercentage > BASIS_POINTS) revert SlashExceedsMax(slashPercentage, BASIS_POINTS);
 
     uint256 stakeSlash = ($.stakedAmount[navigator] * slashPercentage) / BASIS_POINTS;
 

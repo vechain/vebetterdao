@@ -48,6 +48,9 @@ library NavigatorStakingUtils {
   /// @notice Thrown when trying to unstake while still active (must exit first)
   error NavigatorStillActive(address navigator);
 
+  /// @notice Thrown when trying to withdraw more stake than is available
+  error InsufficientStake(uint256 available, uint256 requested);
+
   // ======================== Registration ======================== //
 
   /// @notice Register as a navigator by staking B3TR
@@ -116,7 +119,7 @@ library NavigatorStakingUtils {
     bool isDeactivated = $.isDeactivated[navigator];
     if (!isExiting && !isDeactivated) revert NavigatorStillActive(navigator);
 
-    require(amount <= $.stakedAmount[navigator], "NavigatorStakingUtils: insufficient stake");
+    if (amount > $.stakedAmount[navigator]) revert InsufficientStake($.stakedAmount[navigator], amount);
 
     $.stakedAmount[navigator] -= amount;
     $.totalStaked -= amount;

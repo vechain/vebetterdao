@@ -45,6 +45,18 @@ library NavigatorVotingUtils {
   /// @notice Thrown when querying preferences that haven't been set
   error PreferencesNotSet(address navigator, uint256 roundId);
 
+  /// @notice Thrown when appIds and percentages arrays have different lengths
+  error LengthMismatch(uint256 appsLength, uint256 percentagesLength);
+
+  /// @notice Thrown when a percentage is zero
+  error ZeroPercentage();
+
+  /// @notice Thrown when a duplicate app is found
+  error DuplicateApp(bytes32 appId);
+
+  /// @notice Thrown when percentages don't sum to BASIS_POINTS
+  error PercentageMismatch(uint256 total, uint256 expected);
+
   // ======================== Allocation Preferences ======================== //
 
   /// @notice Set allocation voting preferences for a round
@@ -65,19 +77,19 @@ library NavigatorVotingUtils {
     if (!$.isRegistered[navigator] || $.isDeactivated[navigator]) revert NotANavigator(navigator);
     if (appIds.length == 0) revert EmptyPreferences();
     if (appIds.length > 15) revert TooManyApps(appIds.length);
-    require(appIds.length == percentages.length, "NavigatorVotingUtils: length mismatch");
+    if (appIds.length != percentages.length) revert LengthMismatch(appIds.length, percentages.length);
     if ($.preferencesSet[navigator][roundId]) revert PreferencesAlreadySet(navigator, roundId);
 
-    // Validate: no duplicates, non-zero percentages, sum = 10000
+    // Validate: no duplicates, non-zero percentages, sum = BASIS_POINTS
     uint256 totalPct;
     for (uint256 i; i < appIds.length; i++) {
-      require(percentages[i] > 0, "NavigatorVotingUtils: zero percentage");
+      if (percentages[i] == 0) revert ZeroPercentage();
       totalPct += percentages[i];
       for (uint256 j; j < i; j++) {
-        require(appIds[i] != appIds[j], "NavigatorVotingUtils: duplicate app");
+        if (appIds[i] == appIds[j]) revert DuplicateApp(appIds[i]);
       }
     }
-    require(totalPct == BASIS_POINTS, "NavigatorVotingUtils: percentages must sum to BASIS_POINTS");
+    if (totalPct != BASIS_POINTS) revert PercentageMismatch(totalPct, BASIS_POINTS);
 
     // Store preferences and percentages
     $.roundAppPreferences[navigator][roundId] = appIds;
@@ -146,7 +158,7 @@ library NavigatorVotingUtils {
   /// @param decision The stored decision value
   /// @return support The B3TRGovernor support value
   function decisionToSupport(uint8 decision) external pure returns (uint8 support) {
-    require(decision >= 1 && decision <= 3, "NavigatorVotingUtils: invalid decision");
+    if (decision < 1 || decision > 3) revert InvalidDecision(decision);
     return decision - 1;
   }
 }

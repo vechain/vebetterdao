@@ -68,7 +68,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @dev Reverts if caller is not a registered, active navigator
   modifier onlyNavigator() {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    require($.isRegistered[_msgSender()] && !$.isDeactivated[_msgSender()], "NavigatorRegistry: not a navigator");
+    if (!$.isRegistered[_msgSender()] || $.isDeactivated[_msgSender()]) revert NotRegistered(_msgSender());
     _;
   }
 
@@ -98,10 +98,10 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   }
 
   function initialize(InitParams calldata params) public initializer {
-    require(params.admin != address(0), "NavigatorRegistry: admin is zero");
-    require(params.b3trToken != address(0), "NavigatorRegistry: b3tr is zero");
-    require(params.vot3Token != address(0), "NavigatorRegistry: vot3 is zero");
-    require(params.treasury != address(0), "NavigatorRegistry: treasury is zero");
+    if (params.admin == address(0)) revert ZeroAddress("admin");
+    if (params.b3trToken == address(0)) revert ZeroAddress("b3trToken");
+    if (params.vot3Token == address(0)) revert ZeroAddress("vot3Token");
+    if (params.treasury == address(0)) revert ZeroAddress("treasury");
 
     __AccessControl_init();
     __UUPSUpgradeable_init();
@@ -186,7 +186,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @notice Deposit a navigator fee (called by VoterRewards during reward claim)
   /// @dev B3TR must already be transferred to this contract before calling.
   function depositNavigatorFee(address navigator, uint256 roundId, uint256 amount) external {
-    require(_msgSender() == NavigatorStorageTypes.getNavigatorStorage().voterRewards, "NavigatorRegistry: not voter rewards");
+    if (_msgSender() != NavigatorStorageTypes.getNavigatorStorage().voterRewards) revert UnauthorizedCaller(_msgSender());
     NavigatorFeeUtils.depositFee(navigator, roundId, amount);
   }
 
@@ -262,57 +262,57 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   // ======================== Governance Setters ======================== //
 
   function setMinStake(uint256 newMinStake) external onlyRole(GOVERNANCE_ROLE) {
-    require(newMinStake > 0, "NavigatorRegistry: minStake must be > 0");
+    if (newMinStake == 0) revert InvalidParameter("minStake must be > 0");
     NavigatorStorageTypes.getNavigatorStorage().minStake = newMinStake;
   }
 
   function setMaxStakePercentage(uint256 newPercentage) external onlyRole(GOVERNANCE_ROLE) {
-    require(newPercentage > 0 && newPercentage <= BASIS_POINTS, "NavigatorRegistry: must be 1-10000");
+    if (newPercentage == 0 || newPercentage > BASIS_POINTS) revert InvalidParameter("must be 1-10000");
     NavigatorStorageTypes.getNavigatorStorage().maxStakePercentage = newPercentage;
   }
 
   function setFeeLockPeriod(uint256 newPeriod) external onlyRole(GOVERNANCE_ROLE) {
-    require(newPeriod > 0, "NavigatorRegistry: feeLockPeriod must be > 0");
+    if (newPeriod == 0) revert InvalidParameter("feeLockPeriod must be > 0");
     NavigatorStorageTypes.getNavigatorStorage().feeLockPeriod = newPeriod;
   }
 
   function setFeePercentage(uint256 newPercentage) external onlyRole(GOVERNANCE_ROLE) {
-    require(newPercentage <= BASIS_POINTS, "NavigatorRegistry: feePercentage must be <= 10000");
+    if (newPercentage > BASIS_POINTS) revert InvalidParameter("feePercentage must be <= 10000");
     NavigatorStorageTypes.getNavigatorStorage().feePercentage = newPercentage;
   }
 
   function setExitNoticePeriod(uint256 newPeriod) external onlyRole(GOVERNANCE_ROLE) {
-    require(newPeriod > 0, "NavigatorRegistry: exitNoticePeriod must be > 0");
+    if (newPeriod == 0) revert InvalidParameter("exitNoticePeriod must be > 0");
     NavigatorStorageTypes.getNavigatorStorage().exitNoticePeriod = newPeriod;
   }
 
   function setReportInterval(uint256 newInterval) external onlyRole(GOVERNANCE_ROLE) {
-    require(newInterval > 0, "NavigatorRegistry: reportInterval must be > 0");
+    if (newInterval == 0) revert InvalidParameter("reportInterval must be > 0");
     NavigatorStorageTypes.getNavigatorStorage().reportInterval = newInterval;
   }
 
   function setMinorSlashPercentage(uint256 newPercentage) external onlyRole(GOVERNANCE_ROLE) {
-    require(newPercentage > 0 && newPercentage <= BASIS_POINTS, "NavigatorRegistry: must be 1-10000");
+    if (newPercentage == 0 || newPercentage > BASIS_POINTS) revert InvalidParameter("must be 1-10000");
     NavigatorStorageTypes.getNavigatorStorage().minorSlashPercentage = newPercentage;
   }
 
   function setPreferenceCutoffPeriod(uint256 newPeriod) external onlyRole(GOVERNANCE_ROLE) {
-    require(newPeriod > 0, "NavigatorRegistry: preferenceCutoffPeriod must be > 0");
+    if (newPeriod == 0) revert InvalidParameter("preferenceCutoffPeriod must be > 0");
     NavigatorStorageTypes.getNavigatorStorage().preferenceCutoffPeriod = newPeriod;
   }
 
   function setXAllocationVoting(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(newAddress != address(0), "NavigatorRegistry: zero address");
+    if (newAddress == address(0)) revert ZeroAddress("xAllocationVoting");
     NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting = newAddress;
   }
 
   function setRelayerRewardsPool(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(newAddress != address(0), "NavigatorRegistry: zero address");
+    if (newAddress == address(0)) revert ZeroAddress("relayerRewardsPool");
     NavigatorStorageTypes.getNavigatorStorage().relayerRewardsPool = newAddress;
   }
 
   function setVoterRewards(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(newAddress != address(0), "NavigatorRegistry: zero address");
+    if (newAddress == address(0)) revert ZeroAddress("voterRewards");
     NavigatorStorageTypes.getNavigatorStorage().voterRewards = newAddress;
   }
 
