@@ -62,6 +62,15 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   uint256 public constant BASIS_POINTS = 10000;
 
+  // ======================== Modifiers ======================== //
+
+  /// @dev Reverts if caller is not a registered, active navigator
+  modifier onlyNavigator() {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    require($.isRegistered[_msgSender()] && !$.isDeactivated[_msgSender()], "NavigatorRegistry: not a navigator");
+    _;
+  }
+
   // ======================== Initialization ======================== //
 
   struct InitParams {
@@ -120,12 +129,13 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
   }
 
   /// @notice Add more B3TR to an existing navigator's stake
-  function addStake(uint256 amount) external nonReentrant {
+  function addStake(uint256 amount) external nonReentrant onlyNavigator {
     NavigatorStakingUtils.addStake(_msgSender(), amount);
   }
 
   /// @notice Withdraw staked B3TR (only after exit finalized or deactivation)
   function withdrawStake(uint256 amount) external nonReentrant {
+    // No onlyNavigator — deactivated navigators also need to withdraw
     NavigatorStakingUtils.withdrawStake(_msgSender(), amount);
   }
 
@@ -154,19 +164,19 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
   // ======================== Navigator Voting Decisions ======================== //
 
   /// @notice Set allocation voting preferences for a round (also navigator's own vote)
-  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds) external {
+  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds) external onlyNavigator {
     NavigatorVotingUtils.setAllocationPreferences(_msgSender(), roundId, appIds);
   }
 
   /// @notice Set governance proposal decision (1=Against, 2=For, 3=Abstain; also navigator's own vote)
-  function setProposalDecision(uint256 proposalId, uint8 decision) external {
+  function setProposalDecision(uint256 proposalId, uint8 decision) external onlyNavigator {
     NavigatorVotingUtils.setProposalDecision(_msgSender(), proposalId, decision);
   }
 
   // ======================== Fee Management ======================== //
 
   /// @notice Claim unlocked fees for a specific round
-  function claimFee(uint256 roundId) external nonReentrant {
+  function claimFee(uint256 roundId) external nonReentrant onlyNavigator {
     NavigatorFeeUtils.claimFee(_msgSender(), roundId, _getCurrentRound());
   }
 
@@ -205,24 +215,24 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
   // ======================== Lifecycle ======================== //
 
   /// @notice Announce intent to exit (starts notice period)
-  function announceExit() external {
+  function announceExit() external onlyNavigator {
     NavigatorLifecycleUtils.announceExit(_msgSender(), _getCurrentRound());
   }
 
   /// @notice Finalize exit after notice period
-  function finalizeExit() external {
+  function finalizeExit() external onlyNavigator {
     NavigatorLifecycleUtils.finalizeExit(_msgSender(), _getCurrentRound());
   }
 
   // ======================== Profile & Reports ======================== //
 
   /// @notice Update navigator metadata URI
-  function setMetadataURI(string calldata uri) external {
+  function setMetadataURI(string calldata uri) external onlyNavigator {
     NavigatorLifecycleUtils.setMetadataURI(_msgSender(), uri);
   }
 
   /// @notice Submit a periodic report
-  function submitReport(string calldata reportURI) external {
+  function submitReport(string calldata reportURI) external onlyNavigator {
     NavigatorLifecycleUtils.submitReport(_msgSender(), _getCurrentRound(), reportURI);
   }
 
