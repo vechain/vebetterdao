@@ -58,7 +58,13 @@ import { NavigatorLifecycleUtils } from "./libraries/NavigatorLifecycleUtils.sol
  * - Automatic minor slashing for negligence, governance-driven major slashing
  * - Exit process with notice period
  */
-contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
+contract NavigatorRegistry is
+  Initializable,
+  INavigatorRegistry,
+  AccessControlUpgradeable,
+  UUPSUpgradeable,
+  ReentrancyGuardUpgradeable
+{
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   uint256 public constant BASIS_POINTS = 10000;
@@ -126,6 +132,14 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
     $.voterRewards = params.voterRewards;
   }
 
+  // ======================== Version & Upgrade ======================== //
+
+  function version() external pure returns (string memory) {
+    return "1";
+  }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
   // ======================== Navigator Registration & Staking ======================== //
 
   /// @notice Register as a navigator by staking B3TR (permissionless, must approve B3TR first)
@@ -172,7 +186,11 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   // ======================== Navigator Voting Decisions ======================== //
 
   /// @notice Set allocation voting preferences for a round (also navigator's own vote)
-  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds, uint256[] calldata weights) external onlyNavigator {
+  function setAllocationPreferences(
+    uint256 roundId,
+    bytes32[] calldata appIds,
+    uint256[] calldata weights
+  ) external onlyNavigator {
     NavigatorVotingUtils.setAllocationPreferences(_msgSender(), roundId, appIds, weights);
   }
 
@@ -186,7 +204,8 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @notice Deposit a navigator fee (called by VoterRewards during reward claim)
   /// @dev B3TR must already be transferred to this contract before calling.
   function depositNavigatorFee(address navigator, uint256 roundId, uint256 amount) external {
-    if (_msgSender() != NavigatorStorageTypes.getNavigatorStorage().voterRewards) revert UnauthorizedCaller(_msgSender());
+    if (_msgSender() != NavigatorStorageTypes.getNavigatorStorage().voterRewards)
+      revert UnauthorizedCaller(_msgSender());
     NavigatorFeeUtils.depositFee(navigator, roundId, amount);
   }
 
@@ -219,9 +238,8 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
 
   /// @notice Report navigator for setting allocation preferences after the cutoff
   function reportLatePreferences(address navigator, uint256 roundId) external {
-    uint256 roundDeadline = IXAllocationVotingGovernor(
-      NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting
-    ).roundDeadline(roundId);
+    uint256 roundDeadline = IXAllocationVotingGovernor(NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting)
+      .roundDeadline(roundId);
     NavigatorSlashingUtils.reportLatePreferences(navigator, roundId, roundDeadline);
   }
 
@@ -377,7 +395,10 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   }
 
   // -- Voting --
-  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory, uint256[] memory) {
+  function getAllocationPreferences(
+    address navigator,
+    uint256 roundId
+  ) external view returns (bytes32[] memory, uint256[] memory) {
     return NavigatorVotingUtils.getAllocationPreferences(navigator, roundId);
   }
 
@@ -460,14 +481,6 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   function getLastReportURI(address navigator) external view returns (string memory) {
     return NavigatorLifecycleUtils.getLastReportURI(navigator);
   }
-
-  // ======================== Version & Upgrade ======================== //
-
-  function version() external pure returns (string memory) {
-    return "1";
-  }
-
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ======================== Internal ======================== //
 
