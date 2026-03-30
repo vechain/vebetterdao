@@ -1,27 +1,15 @@
 "use client"
 
-import { Badge, Box, Card, Heading, HStack, LinkBox, LinkOverlay, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Heading, HStack, LinkBox, LinkOverlay, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
-import {
-  ChallengeKind,
-  ChallengeStatus,
-  ChallengeVisibility,
-  ChallengeView,
-  challengeKindLabel,
-  challengeStatusLabel,
-  challengeVisibilityLabel,
-} from "@/api/challenges/types"
+import { ChallengeKind, ChallengeStatus, ChallengeView } from "@/api/challenges/types"
 
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
-import {
-  getChallengeKindBadgeVariant,
-  getChallengeStatusBadgeVariant,
-  getChallengeVisibilityBadgeVariant,
-} from "./challengeBadgeVariants"
+import { ChallengeStatusBadges } from "./ChallengeStatusBadges"
 
 export const ChallengeCard = ({ challenge, currentRound }: { challenge: ChallengeView; currentRound: number }) => {
   const { t } = useTranslation()
@@ -31,12 +19,6 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
     currentRound > 0 && challenge.duration > 0
       ? `${Math.min(Math.max(currentRound - challenge.startRound + 1, 0), challenge.duration)} / ${challenge.duration}`
       : `${challenge.startRound}-${challenge.endRound}`
-  const kindBadgeVariant = isSponsored ? "positive" : getChallengeKindBadgeVariant(challenge.kind)
-  const visibilityBadgeVariant =
-    challenge.visibility === ChallengeVisibility.Private
-      ? "neutral"
-      : getChallengeVisibilityBadgeVariant(challenge.visibility)
-  const showStatusBadge = challenge.status !== ChallengeStatus.Active
   const showParticipatingBadge =
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
 
@@ -44,19 +26,7 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
     <LinkBox h="full">
       <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" h="full" borderRadius="3xl" boxShadow="sm">
         <VStack align="stretch" gap="5" h="full">
-          <HStack flexWrap="wrap" gap="2">
-            <Badge variant={kindBadgeVariant} size="sm">
-              {t(challengeKindLabel(challenge.kind))}
-            </Badge>
-            <Badge variant={visibilityBadgeVariant} size="sm">
-              {t(challengeVisibilityLabel(challenge.visibility))}
-            </Badge>
-            {showStatusBadge && (
-              <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">
-                {t(challengeStatusLabel(challenge.status))}
-              </Badge>
-            )}
-          </HStack>
+          <ChallengeStatusBadges challenge={challenge} />
 
           <VStack align="stretch" gap="3">
             <Heading size="lg">

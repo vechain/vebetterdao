@@ -56,6 +56,6 @@ export const useChallengeParticipantActions = (challengeId: number, participants
         leaderboard,
       }
     },
-    enabled: !!thor && !!challengeId,
+    enabled: !!thor && !!challengeId && participants.length > 0,
   })
 }

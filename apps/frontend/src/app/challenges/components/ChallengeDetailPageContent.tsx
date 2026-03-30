@@ -9,26 +9,15 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
 
-import {
-  ChallengeKind,
-  ChallengeStatus,
-  ChallengeVisibility,
-  challengeKindLabel,
-  challengeStatusLabel,
-  challengeVisibilityLabel,
-} from "@/api/challenges/types"
+import { ChallengeKind, ChallengeStatus } from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { MotionVStack } from "@/components/MotionVStack"
 
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
-import {
-  getChallengeKindBadgeVariant,
-  getChallengeStatusBadgeVariant,
-  getChallengeVisibilityBadgeVariant,
-} from "./challengeBadgeVariants"
 import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
+import { ChallengeStatusBadges } from "./ChallengeStatusBadges"
 
 export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: string }) => {
   const { account } = useWallet()
@@ -69,12 +58,6 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
     currentRound > 0 && challenge.duration > 0
       ? `${Math.min(Math.max(currentRound - challenge.startRound + 1, 0), challenge.duration)} / ${challenge.duration}`
       : `${challenge.startRound}-${challenge.endRound}`
-  const kindBadgeVariant = isSponsored ? "positive" : getChallengeKindBadgeVariant(challenge.kind)
-  const visibilityBadgeVariant =
-    challenge.visibility === ChallengeVisibility.Private
-      ? "neutral"
-      : getChallengeVisibilityBadgeVariant(challenge.visibility)
-  const showStatusBadge = challenge.status !== ChallengeStatus.Active
   const showParticipatingBadge =
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
 
@@ -92,19 +75,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
 
         <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" borderRadius="3xl" boxShadow="sm">
           <VStack align="stretch" gap="5">
-            <HStack flexWrap="wrap" gap="2">
-              <Badge variant={kindBadgeVariant} size="sm">
-                {t(challengeKindLabel(challenge.kind))}
-              </Badge>
-              <Badge variant={visibilityBadgeVariant} size="sm">
-                {t(challengeVisibilityLabel(challenge.visibility))}
-              </Badge>
-              {showStatusBadge && (
-                <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">
-                  {t(challengeStatusLabel(challenge.status))}
-                </Badge>
-              )}
-            </HStack>
+            <ChallengeStatusBadges challenge={challenge} />
 
             <VStack align="stretch" gap="3">
               <Heading size="xl">{t("Challenge #{{id}}", { id: challenge.challengeId })}</Heading>
