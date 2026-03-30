@@ -191,7 +191,11 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
   }
 
   /// @notice Deactivate a navigator by governance (major infraction with slash)
-  function deactivateNavigator(address navigator, uint256 slashPercentage, bool slashFees) external onlyRole(GOVERNANCE_ROLE) {
+  function deactivateNavigator(
+    address navigator,
+    uint256 slashPercentage,
+    bool slashFees
+  ) external onlyRole(GOVERNANCE_ROLE) {
     NavigatorSlashingUtils.majorSlash(navigator, slashPercentage, slashFees);
     NavigatorLifecycleUtils.deactivate(navigator);
   }
@@ -222,66 +226,189 @@ contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgra
 
   // ======================== Governance Setters ======================== //
 
-  function setMinStake(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().minStake = v; }
-  function setMaxStakePercentage(uint256 v) external onlyRole(GOVERNANCE_ROLE) { require(v <= BASIS_POINTS, "NavigatorRegistry: > 100%"); NavigatorStorageTypes.getNavigatorStorage().maxStakePercentage = v; }
-  function setFeeLockPeriod(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().feeLockPeriod = v; }
-  function setFeePercentage(uint256 v) external onlyRole(GOVERNANCE_ROLE) { require(v <= BASIS_POINTS, "NavigatorRegistry: > 100%"); NavigatorStorageTypes.getNavigatorStorage().feePercentage = v; }
-  function setExitNoticePeriod(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().exitNoticePeriod = v; }
-  function setReportInterval(uint256 v) external onlyRole(GOVERNANCE_ROLE) { NavigatorStorageTypes.getNavigatorStorage().reportInterval = v; }
-  function setMinorSlashPercentage(uint256 v) external onlyRole(GOVERNANCE_ROLE) { require(v <= BASIS_POINTS, "NavigatorRegistry: > 100%"); NavigatorStorageTypes.getNavigatorStorage().minorSlashPercentage = v; }
-  function setXAllocationVoting(address v) external onlyRole(DEFAULT_ADMIN_ROLE) { NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting = v; }
-  function setRelayerRewardsPool(address v) external onlyRole(DEFAULT_ADMIN_ROLE) { NavigatorStorageTypes.getNavigatorStorage().relayerRewardsPool = v; }
+  function setMinStake(uint256 newMinStake) external onlyRole(GOVERNANCE_ROLE) {
+    require(newMinStake > 0, "NavigatorRegistry: minStake must be > 0");
+    NavigatorStorageTypes.getNavigatorStorage().minStake = newMinStake;
+  }
+
+  function setMaxStakePercentage(uint256 newPercentage) external onlyRole(GOVERNANCE_ROLE) {
+    require(newPercentage > 0 && newPercentage <= BASIS_POINTS, "NavigatorRegistry: must be 1-10000");
+    NavigatorStorageTypes.getNavigatorStorage().maxStakePercentage = newPercentage;
+  }
+
+  function setFeeLockPeriod(uint256 newPeriod) external onlyRole(GOVERNANCE_ROLE) {
+    require(newPeriod > 0, "NavigatorRegistry: feeLockPeriod must be > 0");
+    NavigatorStorageTypes.getNavigatorStorage().feeLockPeriod = newPeriod;
+  }
+
+  function setFeePercentage(uint256 newPercentage) external onlyRole(GOVERNANCE_ROLE) {
+    require(newPercentage <= BASIS_POINTS, "NavigatorRegistry: feePercentage must be <= 10000");
+    NavigatorStorageTypes.getNavigatorStorage().feePercentage = newPercentage;
+  }
+
+  function setExitNoticePeriod(uint256 newPeriod) external onlyRole(GOVERNANCE_ROLE) {
+    require(newPeriod > 0, "NavigatorRegistry: exitNoticePeriod must be > 0");
+    NavigatorStorageTypes.getNavigatorStorage().exitNoticePeriod = newPeriod;
+  }
+
+  function setReportInterval(uint256 newInterval) external onlyRole(GOVERNANCE_ROLE) {
+    require(newInterval > 0, "NavigatorRegistry: reportInterval must be > 0");
+    NavigatorStorageTypes.getNavigatorStorage().reportInterval = newInterval;
+  }
+
+  function setMinorSlashPercentage(uint256 newPercentage) external onlyRole(GOVERNANCE_ROLE) {
+    require(newPercentage > 0 && newPercentage <= BASIS_POINTS, "NavigatorRegistry: must be 1-10000");
+    NavigatorStorageTypes.getNavigatorStorage().minorSlashPercentage = newPercentage;
+  }
+
+  function setXAllocationVoting(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(newAddress != address(0), "NavigatorRegistry: zero address");
+    NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting = newAddress;
+  }
+
+  function setRelayerRewardsPool(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(newAddress != address(0), "NavigatorRegistry: zero address");
+    NavigatorStorageTypes.getNavigatorStorage().relayerRewardsPool = newAddress;
+  }
 
   // ======================== View Functions ======================== //
 
   // -- Staking --
-  function getStake(address navigator) external view returns (uint256) { return NavigatorStakingUtils.getStake(navigator); }
-  function isNavigator(address account) external view returns (bool) { return NavigatorStakingUtils.isNavigator(account); }
-  function canAcceptDelegations(address navigator) external view returns (bool) { return NavigatorStakingUtils.canAcceptDelegations(navigator); }
-  function getDelegationCapacity(address navigator) external view returns (uint256) { return NavigatorStakingUtils.getDelegationCapacity(navigator); }
-  function getRemainingCapacity(address navigator) external view returns (uint256) { return NavigatorStakingUtils.getRemainingCapacity(navigator); }
-  function getMinStake() external view returns (uint256) { return NavigatorStakingUtils.getMinStake(); }
-  function getMaxStake() external view returns (uint256) { return NavigatorStakingUtils.getMaxStake(); }
+  function getStake(address navigator) external view returns (uint256) {
+    return NavigatorStakingUtils.getStake(navigator);
+  }
+
+  function isNavigator(address account) external view returns (bool) {
+    return NavigatorStakingUtils.isNavigator(account);
+  }
+
+  function canAcceptDelegations(address navigator) external view returns (bool) {
+    return NavigatorStakingUtils.canAcceptDelegations(navigator);
+  }
+
+  function getDelegationCapacity(address navigator) external view returns (uint256) {
+    return NavigatorStakingUtils.getDelegationCapacity(navigator);
+  }
+
+  function getRemainingCapacity(address navigator) external view returns (uint256) {
+    return NavigatorStakingUtils.getRemainingCapacity(navigator);
+  }
+
+  function getMinStake() external view returns (uint256) {
+    return NavigatorStakingUtils.getMinStake();
+  }
+
+  function getMaxStake() external view returns (uint256) {
+    return NavigatorStakingUtils.getMaxStake();
+  }
 
   // -- Delegation --
-  function getNavigator(address citizen) external view returns (address) { return NavigatorDelegationUtils.getNavigator(citizen); }
-  function getDelegatedAmount(address citizen) external view returns (uint256) { return NavigatorDelegationUtils.getDelegatedAmount(citizen); }
-  function getTotalDelegated(address navigator) external view returns (uint256) { return NavigatorDelegationUtils.getTotalDelegated(navigator); }
-  function getCitizens(address navigator) external view returns (address[] memory) { return NavigatorDelegationUtils.getCitizens(navigator); }
-  function getCitizenCount(address navigator) external view returns (uint256) { return NavigatorDelegationUtils.getCitizenCount(navigator); }
-  function isDelegated(address citizen) external view returns (bool) { return NavigatorDelegationUtils.isDelegated(citizen); }
+  function getNavigator(address citizen) external view returns (address) {
+    return NavigatorDelegationUtils.getNavigator(citizen);
+  }
+
+  function getDelegatedAmount(address citizen) external view returns (uint256) {
+    return NavigatorDelegationUtils.getDelegatedAmount(citizen);
+  }
+
+  function getTotalDelegated(address navigator) external view returns (uint256) {
+    return NavigatorDelegationUtils.getTotalDelegated(navigator);
+  }
+
+  function getCitizens(address navigator) external view returns (address[] memory) {
+    return NavigatorDelegationUtils.getCitizens(navigator);
+  }
+
+  function getCitizenCount(address navigator) external view returns (uint256) {
+    return NavigatorDelegationUtils.getCitizenCount(navigator);
+  }
+
+  function isDelegated(address citizen) external view returns (bool) {
+    return NavigatorDelegationUtils.isDelegated(citizen);
+  }
 
   // -- Voting --
-  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory) { return NavigatorVotingUtils.getAllocationPreferences(navigator, roundId); }
-  function hasSetPreferences(address navigator, uint256 roundId) external view returns (bool) { return NavigatorVotingUtils.hasSetPreferences(navigator, roundId); }
-  function getProposalDecision(address navigator, uint256 proposalId) external view returns (uint8) { return NavigatorVotingUtils.getProposalDecision(navigator, proposalId); }
-  function hasSetDecision(address navigator, uint256 proposalId) external view returns (bool) { return NavigatorVotingUtils.hasSetDecision(navigator, proposalId); }
+  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory) {
+    return NavigatorVotingUtils.getAllocationPreferences(navigator, roundId);
+  }
+
+  function hasSetPreferences(address navigator, uint256 roundId) external view returns (bool) {
+    return NavigatorVotingUtils.hasSetPreferences(navigator, roundId);
+  }
+
+  function getProposalDecision(address navigator, uint256 proposalId) external view returns (uint8) {
+    return NavigatorVotingUtils.getProposalDecision(navigator, proposalId);
+  }
+
+  function hasSetDecision(address navigator, uint256 proposalId) external view returns (bool) {
+    return NavigatorVotingUtils.hasSetDecision(navigator, proposalId);
+  }
 
   // -- Fees --
-  function getRoundFee(address navigator, uint256 roundId) external view returns (uint256) { return NavigatorFeeUtils.getRoundFee(navigator, roundId); }
-  function getFeeLockPeriod() external view returns (uint256) { return NavigatorFeeUtils.getFeeLockPeriod(); }
-  function getFeePercentage() external view returns (uint256) { return NavigatorFeeUtils.getFeePercentage(); }
-  function isRoundFeeUnlocked(uint256 roundId) external view returns (bool) { return NavigatorFeeUtils.isRoundFeeUnlocked(roundId, _getCurrentRound()); }
+  function getRoundFee(address navigator, uint256 roundId) external view returns (uint256) {
+    return NavigatorFeeUtils.getRoundFee(navigator, roundId);
+  }
+
+  function getFeeLockPeriod() external view returns (uint256) {
+    return NavigatorFeeUtils.getFeeLockPeriod();
+  }
+
+  function getFeePercentage() external view returns (uint256) {
+    return NavigatorFeeUtils.getFeePercentage();
+  }
+
+  function isRoundFeeUnlocked(uint256 roundId) external view returns (bool) {
+    return NavigatorFeeUtils.isRoundFeeUnlocked(roundId, _getCurrentRound());
+  }
 
   // -- Slashing --
-  function getTotalSlashed(address navigator) external view returns (uint256) { return NavigatorSlashingUtils.getTotalSlashed(navigator); }
-  function getMinorSlashPercentage() external view returns (uint256) { return NavigatorSlashingUtils.getMinorSlashPercentage(); }
+  function getTotalSlashed(address navigator) external view returns (uint256) {
+    return NavigatorSlashingUtils.getTotalSlashed(navigator);
+  }
+
+  function getMinorSlashPercentage() external view returns (uint256) {
+    return NavigatorSlashingUtils.getMinorSlashPercentage();
+  }
 
   // -- Lifecycle --
-  function isExiting(address navigator) external view returns (bool) { return NavigatorLifecycleUtils.isExiting(navigator); }
-  function isExitReady(address navigator) external view returns (bool) { return NavigatorLifecycleUtils.isExitReady(navigator, _getCurrentRound()); }
-  function isDeactivated(address navigator) external view returns (bool) { return NavigatorLifecycleUtils.isDeactivated(navigator); }
-  function getExitNoticePeriod() external view returns (uint256) { return NavigatorLifecycleUtils.getExitNoticePeriod(); }
-  function getReportInterval() external view returns (uint256) { return NavigatorLifecycleUtils.getReportInterval(); }
+  function isExiting(address navigator) external view returns (bool) {
+    return NavigatorLifecycleUtils.isExiting(navigator);
+  }
+
+  function isExitReady(address navigator) external view returns (bool) {
+    return NavigatorLifecycleUtils.isExitReady(navigator, _getCurrentRound());
+  }
+
+  function isDeactivated(address navigator) external view returns (bool) {
+    return NavigatorLifecycleUtils.isDeactivated(navigator);
+  }
+
+  function getExitNoticePeriod() external view returns (uint256) {
+    return NavigatorLifecycleUtils.getExitNoticePeriod();
+  }
+
+  function getReportInterval() external view returns (uint256) {
+    return NavigatorLifecycleUtils.getReportInterval();
+  }
 
   // -- Profile --
-  function getMetadataURI(address navigator) external view returns (string memory) { return NavigatorLifecycleUtils.getMetadataURI(navigator); }
-  function getLastReportRound(address navigator) external view returns (uint256) { return NavigatorLifecycleUtils.getLastReportRound(navigator); }
-  function getLastReportURI(address navigator) external view returns (string memory) { return NavigatorLifecycleUtils.getLastReportURI(navigator); }
+  function getMetadataURI(address navigator) external view returns (string memory) {
+    return NavigatorLifecycleUtils.getMetadataURI(navigator);
+  }
+
+  function getLastReportRound(address navigator) external view returns (uint256) {
+    return NavigatorLifecycleUtils.getLastReportRound(navigator);
+  }
+
+  function getLastReportURI(address navigator) external view returns (string memory) {
+    return NavigatorLifecycleUtils.getLastReportURI(navigator);
+  }
 
   // ======================== Version & Upgrade ======================== //
 
-  function version() external pure returns (string memory) { return "1"; }
+  function version() external pure returns (string memory) {
+    return "1";
+  }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
