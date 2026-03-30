@@ -36,6 +36,9 @@ coverage
 
 # nyc test coverage
 .nyc_output
+playwright-report/
+test-results/
+blob-report/
 
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
@@ -174,3 +177,4 @@ packages/contracts/temp-verify-*
 prd.json
 progress.txt
 tasks/
+features/
