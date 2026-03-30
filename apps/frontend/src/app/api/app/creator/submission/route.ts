@@ -1,7 +1,6 @@
-import { AddressUtils } from "@repo/utils"
+import * as AddressUtils from "@repo/utils/AddressUtils"
 import { NextRequest, NextResponse } from "next/server"
 
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
 
 import { formatSubmission } from "../utils"
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<Submission
       .filter(
         (result: FreshdeskTicket) =>
           result?.custom_fields?.cf_admin_wallet_address &&
-          compareAddresses(result.custom_fields.cf_admin_wallet_address, walletAddress),
+          AddressUtils.compareAddresses(result.custom_fields.cf_admin_wallet_address, walletAddress),
       )
       .map((result: FreshdeskTicket) => formatSubmission(result, freshdeskClient))
     return NextResponse.json({ submissions: formattedResponse.length > 0 ? formattedResponse : [] })

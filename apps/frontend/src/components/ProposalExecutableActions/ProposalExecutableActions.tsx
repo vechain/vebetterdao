@@ -1,9 +1,9 @@
 import { VStack, Heading } from "@chakra-ui/react"
+import { decodeFunctionCalldata, DecodedFunctionData } from "@repo/utils/ContractUtils"
 import { ethers } from "ethers"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { abi } from "thor-devkit"
 
 import { ExecutableFunctionCard } from "@/app/proposals/new/form/functions/details/components/ExecutableFunctionCard"
 // This is to reuse the same components of the form. This is a read-only version of the form
@@ -14,10 +14,10 @@ import { ProposalFormAction } from "../../store/useProposalFormStore"
 type Props = {
   actions: ProposalFormAction[]
 }
-const getParamValue = (decoded: abi.Decoded, paramName: string, requiresEthParse?: boolean) => {
-  if (!decoded[paramName]) return
+const getParamValue = (decoded: DecodedFunctionData, paramName: string, requiresEthParse?: boolean) => {
+  if (typeof decoded[paramName] === "undefined") return
   if (requiresEthParse) {
-    return ethers.formatEther(decoded[paramName])
+    return ethers.formatEther(decoded[paramName] as ethers.BigNumberish)
   }
   return decoded[paramName]
 }
@@ -32,21 +32,24 @@ export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
   //parse actions from store and set them in the form, decoding calldata inf available
   useEffect(() => {
     const formActions = actions.map(action => {
-      const _abi = new abi.Function(action.abiDefinition)
-      let decoded: abi.Decoded = {}
+      let decoded: DecodedFunctionData = {}
       try {
-        if (action.calldata) decoded = abi.decodeParameters(_abi.definition.inputs, `0x${action.calldata.slice(10)}`)
+        if (action.calldata) decoded = decodeFunctionCalldata(action.calldata, action.abiDefinition)
       } catch (e) {
         console.error("Error decoding call data", e)
       }
       return {
         ...action,
-        params: action.abiDefinition.inputs.map(param => ({
-          name: param.name,
-          type: param.type,
-          value: getParamValue(decoded, param.name, param.requiresEthParse),
-          requiresEthParse: param.requiresEthParse,
-        })),
+        params: action.abiDefinition.inputs.map(param => {
+          const requiresEthParse = param.requiresEthParse === true
+
+          return {
+            name: param.name,
+            type: param.type,
+            value: getParamValue(decoded, param.name, requiresEthParse),
+            requiresEthParse,
+          }
+        }),
       }
     })
     setValue("actions", formActions)

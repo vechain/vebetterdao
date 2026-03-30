@@ -14,7 +14,7 @@ export type FreshdeskTicket = {
     cf_app_name: string
     cf_app_url_optional: string
     cf_github_username: string
-    cf_x_username: string
+    cf_x_username?: string
     cf_admin_wallet_address: string
     cf_app_creator_email: string
     cf_app_creator_name_optional: string
@@ -41,7 +41,7 @@ export type FreshdeskTicketBody = {
     cf_app_name: string
     cf_app_url_optional?: string
     cf_github_username: string
-    cf_x_username: string
+    cf_x_username?: string
     cf_admin_wallet_address: string
     cf_app_creator_email: string
     cf_app_creator_name_optional?: string

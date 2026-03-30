@@ -1,8 +1,8 @@
+import * as AddressUtils from "@repo/utils/AddressUtils"
 import dayjs from "dayjs"
 import { t } from "i18next"
 
 import { GrantFormData } from "@/hooks/proposals/grants/types"
-import * as AddressUtils from "@/utils/AddressUtils/AddressUtils"
 import * as AppUtils from "@/utils/AppUtils/AppUtils"
 
 import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "../../constants/proposals"

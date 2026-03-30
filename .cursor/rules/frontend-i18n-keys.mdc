@@ -1,0 +1,14 @@
+---
+description: Use English source text as i18n keys in frontend code
+globs: apps/frontend/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend i18n Keys
+
+- When calling `t(...)`, use the exact English source text as the key.
+- Do not introduce semantic ids like `authErrorTitle`, `profileButtonLogin`, or similar.
+- Do not use `defaultValue` to avoid adding a real translation key.
+- If the English phrase is new, add it to `apps/frontend/src/i18n/languages/en.json` with the same text as both key and value.
+- Add the same key to every locale file in `apps/frontend/src/i18n/languages/`.
+- Keep interpolation in the English key itself, for example: `t("Round #{{roundId}} completed", { roundId })`.

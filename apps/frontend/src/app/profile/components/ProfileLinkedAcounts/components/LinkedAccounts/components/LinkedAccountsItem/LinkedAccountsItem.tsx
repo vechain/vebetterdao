@@ -1,12 +1,12 @@
 import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack } from "@chakra-ui/react"
 import { UilLinkBroken } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
 import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 
 import { useAccountLinking } from "../../../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
 import { useUserActionCurrentRoundOverview } from "../../../../../../../../api/indexer/actions/useUserActionOverview"
