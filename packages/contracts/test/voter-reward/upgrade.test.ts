@@ -1408,7 +1408,7 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     }
 
     // Verify V6 initialization
-    expect(await voterRewardsV6.version()).to.equal("6")
+    expect(await voterRewardsV6.version()).to.equal("7")
     expect(await voterRewardsV6.relayerRewardsPool()).to.equal(await relayerRewardsPool.getAddress())
 
     // Test V6 relayer fee functionality with real voting round
