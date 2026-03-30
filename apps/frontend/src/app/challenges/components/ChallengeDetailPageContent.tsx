@@ -5,6 +5,7 @@ import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
 
@@ -36,7 +37,10 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: appsData } = useXApps()
   const { t } = useTranslation()
-  const appNames = new Map((appsData?.allApps ?? []).map(app => [app.id.toLowerCase(), app.name]))
+  const appNames = useMemo(
+    () => new Map((appsData?.allApps ?? []).map(app => [app.id.toLowerCase(), app.name])),
+    [appsData?.allApps],
+  )
   const currentRound = Number(currentRoundId ?? 0)
 
   if (isLoading) {

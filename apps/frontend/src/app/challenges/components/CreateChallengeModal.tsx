@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { parseEther } from "ethers"
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuPlus, LuX } from "react-icons/lu"
 
@@ -49,6 +49,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
   const [appSearch, setAppSearch] = useState("")
   const [showAppDropdown, setShowAppDropdown] = useState(false)
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>()
+  useEffect(() => () => clearTimeout(dropdownTimeout.current), [])
   const { account } = useWallet()
   const actions = useChallengeActions()
   const { t } = useTranslation()

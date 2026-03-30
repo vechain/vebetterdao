@@ -23,12 +23,13 @@ const refundClaimedEventName = "ChallengeRefundClaimed" as const
 
 const getAddress = () => getConfig().challengesContractAddress as `0x${string}`
 
-async function fetchClaimedChallengeIds(
+async function fetchChallengeIdsByEvent(
   thor: ThorClient,
   address: `0x${string}`,
   viewerAddress: string,
+  eventName: string,
 ): Promise<Set<number>> {
-  const eventAbi = thor.contracts.load(address, abi).getEventAbi(payoutClaimedEventName)
+  const eventAbi = thor.contracts.load(address, abi).getEventAbi(eventName)
   const topics = eventAbi.encodeFilterTopicsNoNull({ account: viewerAddress })
   const logs = await thor.logs.filterEventLogs({
     criteriaSet: [
@@ -45,48 +46,15 @@ async function fetchClaimedChallengeIds(
     options: { limit: 1000 },
   })
 
-  const claimedChallengeIds = new Set<number>()
+  const ids = new Set<number>()
   for (const log of logs) {
     const event = decodeEventLog(log, contractAbi)
-    if (event.decodedData.eventName === payoutClaimedEventName) {
-      claimedChallengeIds.add(Number(event.decodedData.args.challengeId))
+    if (event.decodedData.eventName === eventName) {
+      ids.add(Number(event.decodedData.args.challengeId))
     }
   }
 
-  return claimedChallengeIds
-}
-
-async function fetchRefundedChallengeIds(
-  thor: ThorClient,
-  address: `0x${string}`,
-  viewerAddress: string,
-): Promise<Set<number>> {
-  const eventAbi = thor.contracts.load(address, abi).getEventAbi(refundClaimedEventName)
-  const topics = eventAbi.encodeFilterTopicsNoNull({ account: viewerAddress })
-  const logs = await thor.logs.filterEventLogs({
-    criteriaSet: [
-      {
-        criteria: {
-          address,
-          topic0: topics[0] ?? undefined,
-          topic1: topics[1] ?? undefined,
-          topic2: topics[2] ?? undefined,
-        },
-        eventAbi,
-      },
-    ],
-    options: { limit: 1000 },
-  })
-
-  const refundedChallengeIds = new Set<number>()
-  for (const log of logs) {
-    const event = decodeEventLog(log, contractAbi)
-    if (event.decodedData.eventName === refundClaimedEventName) {
-      refundedChallengeIds.add(Number(event.decodedData.args.challengeId))
-    }
-  }
-
-  return refundedChallengeIds
+  return ids
 }
 
 async function fetchChallengeCreationTimestamps(
@@ -242,8 +210,12 @@ export async function fetchAllChallenges(
       thor,
       calls: [{ abi, address, functionName: "challengeCount", args: [] }],
     }),
-    viewerAddress ? fetchClaimedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
-    viewerAddress ? fetchRefundedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
+    viewerAddress
+      ? fetchChallengeIdsByEvent(thor, address, viewerAddress, payoutClaimedEventName)
+      : Promise.resolve(new Set<number>()),
+    viewerAddress
+      ? fetchChallengeIdsByEvent(thor, address, viewerAddress, refundClaimedEventName)
+      : Promise.resolve(new Set<number>()),
   ])
   const [count] = countResult
 
@@ -301,8 +273,12 @@ export async function fetchChallengeDetail(
   const address = getAddress()
   if (!address || address.toLowerCase() === ZERO_ADDR) return null
   const [claimedChallengeIds, refundedChallengeIds, creationTimestamps] = await Promise.all([
-    viewerAddress ? fetchClaimedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
-    viewerAddress ? fetchRefundedChallengeIds(thor, address, viewerAddress) : Promise.resolve(new Set<number>()),
+    viewerAddress
+      ? fetchChallengeIdsByEvent(thor, address, viewerAddress, payoutClaimedEventName)
+      : Promise.resolve(new Set<number>()),
+    viewerAddress
+      ? fetchChallengeIdsByEvent(thor, address, viewerAddress, refundClaimedEventName)
+      : Promise.resolve(new Set<number>()),
     fetchChallengeCreationTimestamps(thor, address, 1, challengeId),
   ])
 
@@ -352,7 +328,8 @@ export async function fetchChallengeDetail(
       declined: [...declined],
       selectedApps: [...selectedApps],
     }
-  } catch {
+  } catch (error) {
+    console.error(`[getChallengeDetail] Failed to fetch challenge ${challengeId}:`, error)
     return null
   }
 }
