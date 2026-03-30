@@ -258,6 +258,14 @@ contract XAllocationVoting is
 
     _handleCastVoteWithPower(citizen, roundId, appIds, voteWeights, delegatedPower, false);
 
+    // Register relayer action for the caller
+    XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.registerRelayerAction(
+      _msgSender(),
+      citizen,
+      roundId,
+      RelayerAction.VOTE
+    );
+
     emit NavigatorVoteCast(citizen, navigator, roundId, appIds, voteWeights);
   }
 
@@ -360,6 +368,19 @@ contract XAllocationVoting is
       revert InvalidCaller(_msgSender());
     }
     AutoVotingLogic.toggleAutoVoting(address(this), user, VotesUtils.clock());
+  }
+
+  /**
+   * @dev Disable autovoting for a user. Called by NavigatorRegistry when a citizen delegates.
+   * No-op if auto-voting is already disabled.
+   */
+  function disableAutoVotingFor(address user) external {
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    require(address(navRegistry) != address(0) && _msgSender() == address(navRegistry), "XAllocationVoting: not navigator registry");
+
+    if (AutoVotingLogic.isAutoVotingEnabled(user)) {
+      AutoVotingLogic.toggleAutoVoting(address(this), user, VotesUtils.clock());
+    }
   }
 
   /**

@@ -136,6 +136,36 @@ library NavigatorSlashingUtils {
     _applyMinorSlash($, navigator, "missedReport");
   }
 
+  /// @notice Report a navigator for setting allocation preferences too late
+  /// @dev Preferences must be set at least preferenceCutoffPeriod blocks before round deadline.
+  /// Setting them after the cutoff still works but incurs a minor slash.
+  /// @param navigator The navigator address
+  /// @param roundId The round to check
+  /// @param roundDeadline The block number when the round ends (passed by caller, verified on-chain)
+  function reportLatePreferences(address navigator, uint256 roundId, uint256 roundDeadline) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if ($.slashedForLatePreferences[navigator][roundId]) {
+      revert AlreadySlashed(navigator, "latePreferences");
+    }
+
+    // Navigator must have citizens
+    bool hasCitizens = $.navigatorCitizens[navigator].length > 0;
+    // Preferences must have been set
+    uint256 setBlock = $.preferencesSetBlock[navigator][roundId];
+    // Cutoff = roundDeadline - preferenceCutoffPeriod
+    uint256 cutoff = roundDeadline > $.preferenceCutoffPeriod ? roundDeadline - $.preferenceCutoffPeriod : 0;
+    // Late if: has citizens AND preferences were set after the cutoff
+    bool isLate = hasCitizens && setBlock > 0 && setBlock > cutoff;
+
+    if (!isLate) {
+      revert NoInfractionFound(navigator, "latePreferences");
+    }
+
+    $.slashedForLatePreferences[navigator][roundId] = true;
+    _applyMinorSlash($, navigator, "latePreferences");
+  }
+
   // ======================== Major Slashing ======================== //
 
   /// @notice Slash a navigator by governance decision (major infraction)

@@ -89,6 +89,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
     uint256 exitNoticePeriod;
     uint256 reportInterval;
     uint256 minorSlashPercentage;
+    uint256 preferenceCutoffPeriod;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -121,6 +122,7 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
     $.exitNoticePeriod = params.exitNoticePeriod;
     $.reportInterval = params.reportInterval;
     $.minorSlashPercentage = params.minorSlashPercentage;
+    $.preferenceCutoffPeriod = params.preferenceCutoffPeriod;
   }
 
   // ======================== Navigator Registration & Staking ======================== //
@@ -146,8 +148,13 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @notice Delegate VOT3 to a navigator
   function delegate(address navigator, uint256 amount) external nonReentrant {
     NavigatorDelegationUtils.delegate(_msgSender(), navigator, amount);
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     // Lock the delegated VOT3 in citizen's wallet
-    IVOT3(NavigatorStorageTypes.getNavigatorStorage().vot3Token).setNavigatorLockedAmount(_msgSender(), amount);
+    IVOT3($.vot3Token).setNavigatorLockedAmount(_msgSender(), amount);
+    // Disable auto-voting if enabled (citizen votes through navigator now)
+    if ($.xAllocationVoting != address(0)) {
+      IXAllocationVotingGovernor($.xAllocationVoting).disableAutoVotingFor(_msgSender());
+    }
   }
 
   /// @notice Partially reduce delegation amount
@@ -210,6 +217,14 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @notice Report navigator for missing required report
   function reportMissedReport(address navigator, uint256 roundId) external {
     NavigatorSlashingUtils.reportMissedReport(navigator, roundId);
+  }
+
+  /// @notice Report navigator for setting allocation preferences after the cutoff
+  function reportLatePreferences(address navigator, uint256 roundId) external {
+    uint256 roundDeadline = IXAllocationVotingGovernor(
+      NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting
+    ).roundDeadline(roundId);
+    NavigatorSlashingUtils.reportLatePreferences(navigator, roundId, roundDeadline);
   }
 
   /// @notice Deactivate a navigator by governance (major infraction with slash)
@@ -281,6 +296,11 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   function setMinorSlashPercentage(uint256 newPercentage) external onlyRole(GOVERNANCE_ROLE) {
     require(newPercentage > 0 && newPercentage <= BASIS_POINTS, "NavigatorRegistry: must be 1-10000");
     NavigatorStorageTypes.getNavigatorStorage().minorSlashPercentage = newPercentage;
+  }
+
+  function setPreferenceCutoffPeriod(uint256 newPeriod) external onlyRole(GOVERNANCE_ROLE) {
+    require(newPeriod > 0, "NavigatorRegistry: preferenceCutoffPeriod must be > 0");
+    NavigatorStorageTypes.getNavigatorStorage().preferenceCutoffPeriod = newPeriod;
   }
 
   function setXAllocationVoting(address newAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -362,6 +382,10 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
     return NavigatorVotingUtils.hasSetPreferences(navigator, roundId);
   }
 
+  function getPreferencesSetBlock(address navigator, uint256 roundId) external view returns (uint256) {
+    return NavigatorVotingUtils.getPreferencesSetBlock(navigator, roundId);
+  }
+
   function getProposalDecision(address navigator, uint256 proposalId) external view returns (uint8) {
     return NavigatorVotingUtils.getProposalDecision(navigator, proposalId);
   }
@@ -394,6 +418,10 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
 
   function getMinorSlashPercentage() external view returns (uint256) {
     return NavigatorSlashingUtils.getMinorSlashPercentage();
+  }
+
+  function getPreferenceCutoffPeriod() external view returns (uint256) {
+    return NavigatorStorageTypes.getNavigatorStorage().preferenceCutoffPeriod;
   }
 
   // -- Lifecycle --

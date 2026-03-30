@@ -472,8 +472,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
     bool hadAutoVotingEnabled = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
+    bool isDelegated = address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter);
 
-    if (hadAutoVotingEnabled) {
+    // Early access check applies to both auto-voters and navigator citizens
+    if (hadAutoVotingEnabled || isDelegated) {
       _checkEarlyAccessEligibility(cycle, voter);
     }
 
@@ -620,10 +622,12 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
       afterNavFee = totalReward - navigatorFee;
     }
 
-    // Relayer fee: applies to auto-voting users (on amount after navigator fee)
+    // Relayer fee: applies to auto-voting users AND navigator citizens (on amount after navigator fee)
     uint256 afterAllFees = afterNavFee;
     uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
-    if ($.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock)) {
+    bool isDelegated = address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter);
+    bool hadAutoVoting = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
+    if (hadAutoVoting || isDelegated) {
       relayerFee = $.relayerRewardsPool.calculateRelayerFee(afterNavFee);
       afterAllFees = afterNavFee - relayerFee;
     }

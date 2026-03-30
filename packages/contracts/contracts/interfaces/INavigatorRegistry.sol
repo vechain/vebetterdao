@@ -110,6 +110,7 @@ interface INavigatorRegistry {
   function reportMissedGovernanceVote(address navigator, uint256 proposalId) external;
   function reportStalePreferences(address navigator, uint256 roundId) external;
   function reportMissedReport(address navigator, uint256 roundId) external;
+  function reportLatePreferences(address navigator, uint256 roundId) external;
   function deactivateNavigator(address navigator, uint256 slashPercentage, bool slashFees) external;
 
   // ======================== Lifecycle ======================== //
@@ -128,6 +129,7 @@ interface INavigatorRegistry {
   function setExitNoticePeriod(uint256 newPeriod) external;
   function setReportInterval(uint256 newInterval) external;
   function setMinorSlashPercentage(uint256 newPercentage) external;
+  function setPreferenceCutoffPeriod(uint256 newPeriod) external;
   function setXAllocationVoting(address newAddress) external;
   function setRelayerRewardsPool(address newAddress) external;
 
@@ -154,6 +156,7 @@ interface INavigatorRegistry {
   // -- Voting --
   function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory);
   function hasSetPreferences(address navigator, uint256 roundId) external view returns (bool);
+  function getPreferencesSetBlock(address navigator, uint256 roundId) external view returns (uint256);
   function getProposalDecision(address navigator, uint256 proposalId) external view returns (uint8);
   function hasSetDecision(address navigator, uint256 proposalId) external view returns (bool);
 
@@ -166,6 +169,7 @@ interface INavigatorRegistry {
   // -- Slashing --
   function getTotalSlashed(address navigator) external view returns (uint256);
   function getMinorSlashPercentage() external view returns (uint256);
+  function getPreferenceCutoffPeriod() external view returns (uint256);
 
   // -- Lifecycle --
   function isExiting(address navigator) external view returns (bool);

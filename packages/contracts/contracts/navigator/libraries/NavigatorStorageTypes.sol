@@ -54,6 +54,10 @@ library NavigatorStorageTypes {
     mapping(address => mapping(uint256 => uint8)) proposalDecision;
     // navigator => round => whether allocation preferences were set for this round
     mapping(address => mapping(uint256 => bool)) preferencesSet;
+    // navigator => round => block number when preferences were set (0 = not set)
+    mapping(address => mapping(uint256 => uint256)) preferencesSetBlock;
+    // blocks before round deadline by which preferences must be set (default: 8640 = ~24hr at 10s/block)
+    uint256 preferenceCutoffPeriod;
 
     // ======================== Fees ======================== //
     // navigator => round => accumulated fee amount (B3TR)
@@ -78,6 +82,8 @@ library NavigatorStorageTypes {
     mapping(address => mapping(uint256 => bool)) slashedForStalePreferences;
     // navigator => round => slashed for missed report
     mapping(address => mapping(uint256 => bool)) slashedForMissedReport;
+    // navigator => round => slashed for late preferences (set after cutoff)
+    mapping(address => mapping(uint256 => bool)) slashedForLatePreferences;
 
     // ======================== Lifecycle ======================== //
     // navigator => whether registered (active or in exit process)

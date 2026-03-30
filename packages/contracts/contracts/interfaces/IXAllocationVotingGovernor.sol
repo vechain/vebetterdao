@@ -314,6 +314,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function toggleAutoVoting(address user) external;
 
   /**
+   * @dev Disable autovoting for a user. Called by NavigatorRegistry when a citizen delegates.
+   * @param user The address to disable autovoting for
+   */
+  function disableAutoVotingFor(address user) external;
+
+  /**
    * @dev Check if autovoting is enabled for an account
    * @param user The address to check
    * @return Whether autovoting is enabled for the account

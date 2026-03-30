@@ -70,6 +70,7 @@ library NavigatorVotingUtils {
     // Store preferences
     $.roundAppPreferences[navigator][roundId] = appIds;
     $.preferencesSet[navigator][roundId] = true;
+    $.preferencesSetBlock[navigator][roundId] = block.number;
 
     emit AllocationPreferencesSet(navigator, roundId, appIds);
   }
@@ -86,6 +87,11 @@ library NavigatorVotingUtils {
   /// @notice Check if a navigator has set preferences for a round
   function hasSetPreferences(address navigator, uint256 roundId) external view returns (bool) {
     return NavigatorStorageTypes.getNavigatorStorage().preferencesSet[navigator][roundId];
+  }
+
+  /// @notice Get the block number when preferences were set (0 if not set)
+  function getPreferencesSetBlock(address navigator, uint256 roundId) external view returns (uint256) {
+    return NavigatorStorageTypes.getNavigatorStorage().preferencesSetBlock[navigator][roundId];
   }
 
   // ======================== Governance Decisions ======================== //
