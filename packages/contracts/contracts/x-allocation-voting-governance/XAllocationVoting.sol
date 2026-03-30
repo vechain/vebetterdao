@@ -88,6 +88,18 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *    - name(), initialize(), COUNTING_MODE()
  *    - x2EarnApps(), emissions(), voterRewards(), veBetterPassport(), b3trGovernor(), relayerRewardsPool(), token()
  *    - roundProposer(), getAndValidateVotingPower()
+ *  - Added freshness multiplier (XOR fingerprint) in RoundVotesCountingUtils via FreshnessUtils library
+ *  - New storage in RoundVotesCountingStorage: _lastVoteFingerprint, _lastFingerprintChangedRound, userVotedForApp
+ *  - New storage in ExternalContractsStorage: _navigatorRegistry (INavigatorRegistry)
+ *  - New function: castNavigatorVote(citizen, roundId) — votes on behalf of navigator-delegated citizens
+ *    - Voting power = delegated amount at round snapshot (checkpointed in NavigatorRegistry)
+ *    - Uses navigator's allocation percentages (basis points, sum to 10000) converted to absolute weights
+ *    - Registers RelayerAction.VOTE for the caller
+ *  - New function: disableAutoVotingFor(user) — privileged, callable only by NavigatorRegistry
+ *  - New events: NavigatorVoteCast, FreshnessMultiplierApplied
+ *  - New errors: NotDelegatedToNavigator, NavigatorPreferencesNotSet
+ *  - New initializer: initializeV9(INavigatorRegistry) — reinitializer(8)
+ *  - setNavigatorRegistry() setter via ExternalContractsUtils
  */
 contract XAllocationVoting is
   Initializable,

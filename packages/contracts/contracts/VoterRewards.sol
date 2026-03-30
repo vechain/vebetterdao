@@ -81,6 +81,23 @@ import "./interfaces/INavigatorRegistry.sol";
  * ------------------ Version 6 Changes ------------------
  * - Added relayer fees for auto-voting claims
  * - Added RelayerRewardsPool integration for fee distribution
+ *
+ * ------------------ Version 7 Changes ------------------
+ * - Added freshness multiplier checkpoints (tier1/tier2/tier3) for allocation voting rewards
+ * - Added governance intent multiplier checkpoints (forAgainst/abstain) for proposal voting rewards
+ * - New storage: freshnessMultiplierTier1/2/3, intentMultiplierForAgainst, intentMultiplierAbstain (Checkpoints.Trace208)
+ * - New storage: navigatorRegistry (INavigatorRegistry) for navigator fee deduction
+ * - New role: GOVERNANCE_ROLE for multiplier configuration
+ * - Multipliers applied at registerVote() time — do NOT affect on-chain voting power
+ * - initializeV7 sets dual checkpoints (neutral at round start, real at current block) for safe mid-round upgrade
+ * - Navigator fee deduction at claimReward(): deducted from gross reward first, transferred to NavigatorRegistry
+ * - Relayer fee now applies to both auto-voters AND navigator citizens (hadAutoVoting || isDelegated)
+ * - CLAIM action registered for navigator citizens (not just auto-voters)
+ * - Early access check applies to navigator citizens
+ * - _getRewardsAndFees returns 4 values: (netReward, netGmReward, relayerFee, navigatorFee)
+ * - New events: FreshnessMultipliersSet, IntentMultipliersSet, NavigatorFeeTaken, NavigatorRegistryAddressUpdated
+ * - New view: getNavigatorFee(cycle, voter)
+ * - setNavigatorRegistry() setter
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user

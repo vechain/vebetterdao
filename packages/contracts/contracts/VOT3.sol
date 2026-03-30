@@ -36,6 +36,13 @@ import "./interfaces/INavigatorRegistry.sol";
 /// @title VOT3 Token Contract
 /// @dev Extends ERC20 Fungible Token Standard basic implementation with upgradeability, pausability, ability for gasless transactions and governance capabilities.
 /// @notice This contract governs the issuance and management of VOT3 tokens, which are the tokens used for voting in the VeBetter DAO Ecosystem.
+///
+/// ----- Version 2 -----
+/// - Added navigator delegation lock: citizens who delegate VOT3 to a navigator cannot transfer the delegated portion
+/// - New storage: navigatorRegistry (address) — source of truth for delegation lock amounts
+/// - _update() now calls NavigatorRegistry.getDelegatedAmount(from) to enforce transfer lock
+/// - getNavigatorLockedAmount(account) view reads from NavigatorRegistry (single source of truth, no duplicate storage)
+/// - initializeV2(navigatorRegistry) — reinitializer(2), stores NavigatorRegistry address
 contract VOT3 is
   ERC20Upgradeable,
   ERC20PausableUpgradeable,

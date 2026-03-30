@@ -89,6 +89,15 @@ import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
  * ------------------ VERSION 9 ------------------
  * - Added reason parameter to cancel function for providing cancellation rationale.
  * - Added ProposalCanceledWithReason event.
+ * ------------------ VERSION 10 ------------------
+ * - Refactored from module inheritance to library architecture for contract size optimization
+ * - Added navigator delegation voting via castNavigatorVote(proposalId, citizen)
+ * - New storage: GovernorStorage.navigatorRegistry (INavigatorRegistry)
+ * - New events: NavigatorGovernanceVoteCast
+ * - New errors: NotDelegatedToNavigator, NavigatorDecisionNotSet (in GovernorVotesLogic)
+ * - New initializer: initializeV10(INavigatorRegistry) — reinitializer(8)
+ * - Citizen voting power = delegated amount at proposal snapshot (not full VOT3 balance)
+ * - setNavigatorRegistry() setter via GovernorConfigurator
  */
 contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeable, PausableUpgradeable {
   /// @notice The role that can whitelist allowed functions in the propose function
