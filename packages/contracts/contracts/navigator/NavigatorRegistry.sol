@@ -30,7 +30,6 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
-import { IVOT3 } from "../interfaces/IVOT3.sol";
 
 import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
 import { NavigatorStakingUtils } from "./libraries/NavigatorStakingUtils.sol";
@@ -148,28 +147,24 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @notice Delegate VOT3 to a navigator
   function delegate(address navigator, uint256 amount) external nonReentrant {
     NavigatorDelegationUtils.delegate(_msgSender(), navigator, amount);
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    // Lock the delegated VOT3 in citizen's wallet
-    IVOT3($.vot3Token).setNavigatorLockedAmount(_msgSender(), amount);
     // Disable auto-voting if enabled (citizen votes through navigator now)
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     if ($.xAllocationVoting != address(0)) {
       IXAllocationVotingGovernor($.xAllocationVoting).disableAutoVotingFor(_msgSender());
     }
+    // VOT3 transfer lock is enforced by VOT3._update() reading getDelegatedAmount() from this contract
   }
 
   /// @notice Partially reduce delegation amount
   function reduceDelegation(uint256 reduceBy) external nonReentrant {
     NavigatorDelegationUtils.reduceDelegation(_msgSender(), reduceBy);
-    // Update locked amount to reflect new delegation
-    uint256 newAmount = NavigatorDelegationUtils.getDelegatedAmount(_msgSender());
-    IVOT3(NavigatorStorageTypes.getNavigatorStorage().vot3Token).setNavigatorLockedAmount(_msgSender(), newAmount);
+    // VOT3 lock auto-adjusts — VOT3._update() reads current delegation from this contract
   }
 
   /// @notice Fully undelegate from the current navigator
   function undelegate() external nonReentrant {
     NavigatorDelegationUtils.undelegate(_msgSender());
-    // Unlock all VOT3
-    IVOT3(NavigatorStorageTypes.getNavigatorStorage().vot3Token).setNavigatorLockedAmount(_msgSender(), 0);
+    // VOT3 lock auto-releases — delegation is now 0
   }
 
   // ======================== Navigator Voting Decisions ======================== //

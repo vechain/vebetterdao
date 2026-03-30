@@ -172,9 +172,7 @@ interface IVOT3 {
 
   function version() external view returns (string memory);
 
-  // V2: Navigator delegation lock
-  function setNavigatorLockedAmount(address account, uint256 amount) external;
-
+  // V2: Navigator delegation lock (reads from NavigatorRegistry)
   function getNavigatorLockedAmount(address account) external view returns (uint256);
 }
 

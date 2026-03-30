@@ -31,6 +31,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "./interfaces/INavigatorRegistry.sol";
 
 /// @title VOT3 Token Contract
 /// @dev Extends ERC20 Fungible Token Standard basic implementation with upgradeability, pausability, ability for gasless transactions and governance capabilities.
@@ -53,9 +54,7 @@ contract VOT3 is
   struct VOT3Storage {
     IERC20 b3tr; // B3TR token contract
     mapping(address account => uint256) _convertedB3TR; // Mapping of B3TR tokens converted to VOT3 tokens
-    // V2: VOT3 locked per citizen for navigator delegation (cannot be transferred/burned while locked)
-    mapping(address account => uint256) _navigatorLockedAmount;
-    // V2: NavigatorRegistry contract address (only this address can lock/unlock VOT3)
+    // V2: NavigatorRegistry contract address — source of truth for delegation lock amounts
     address navigatorRegistry;
   }
 
@@ -211,12 +210,14 @@ contract VOT3 is
     address to,
     uint256 amount
   ) internal override(ERC20Upgradeable, ERC20VotesUpgradeable, ERC20PausableUpgradeable) {
-    // Enforce navigator delegation lock: citizen cannot transfer/burn below their locked amount
+    // Enforce navigator delegation lock: citizen cannot transfer/burn below their delegated amount
     if (from != address(0)) {
       VOT3Storage storage $ = _getVOT3Storage();
-      uint256 locked = $._navigatorLockedAmount[from];
-      if (locked > 0) {
-        require(balanceOf(from) - amount >= locked, "VOT3: transfer exceeds unlocked balance");
+      if ($.navigatorRegistry != address(0)) {
+        uint256 locked = INavigatorRegistry($.navigatorRegistry).getDelegatedAmount(from);
+        if (locked > 0) {
+          require(balanceOf(from) - amount >= locked, "VOT3: transfer exceeds unlocked balance");
+        }
       }
     }
 
@@ -271,22 +272,14 @@ contract VOT3 is
 
   // ======================== V2: Navigator Delegation Lock ======================== //
 
-  /// @notice Set the locked VOT3 amount for a citizen's navigator delegation
-  /// @dev Only callable by NavigatorRegistry. Setting to 0 unlocks all VOT3.
-  /// @param account The citizen address
-  /// @param amount The amount of VOT3 to lock
-  function setNavigatorLockedAmount(address account, uint256 amount) external {
-    VOT3Storage storage $ = _getVOT3Storage();
-    require(msg.sender == $.navigatorRegistry, "VOT3: not navigator registry");
-    $._navigatorLockedAmount[account] = amount;
-  }
-
   /// @notice Get the locked VOT3 amount for a citizen's navigator delegation
+  /// @dev Reads from NavigatorRegistry (single source of truth)
   /// @param account The citizen address
   /// @return The amount of VOT3 locked for navigator delegation
   function getNavigatorLockedAmount(address account) external view returns (uint256) {
     VOT3Storage storage $ = _getVOT3Storage();
-    return $._navigatorLockedAmount[account];
+    if ($.navigatorRegistry == address(0)) return 0;
+    return INavigatorRegistry($.navigatorRegistry).getDelegatedAmount(account);
   }
 
   /// @notice Returns the version of the contract
