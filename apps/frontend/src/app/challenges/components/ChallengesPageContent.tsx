@@ -29,6 +29,7 @@ export const ChallengesPageContent = ({ tab }: { tab: ChallengeTab }) => {
   }, [])
 
   const pendingInvitationCount = allChallenges.filter(c => c.canDecline).length
+
   const round = Number(currentRoundId ?? 0)
 
   return (

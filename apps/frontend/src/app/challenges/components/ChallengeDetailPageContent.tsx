@@ -71,6 +71,8 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
       ? "neutral"
       : getChallengeVisibilityBadgeVariant(challenge.visibility)
   const showStatusBadge = challenge.status !== ChallengeStatus.Active
+  const showParticipatingBadge =
+    challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
 
   return (
     <MotionVStack renderInnerStack={false} gap="6">
@@ -119,7 +121,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                   </Text>
                 )}
               </HStack>
-              {challenge.isJoined && (
+              {showParticipatingBadge && (
                 <HStack
                   alignSelf="start"
                   gap="2"

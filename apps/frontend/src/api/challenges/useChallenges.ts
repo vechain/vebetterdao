@@ -20,10 +20,7 @@ export const useChallenges = (tab: ChallengeTab, viewerAddress?: string) => {
 
   const query = useQuery({
     queryKey: getChallengesQueryKey(tab, currentRoundId, viewerAddress),
-    queryFn: async () => {
-      const all = await fetchAllChallenges(thor, Number(currentRoundId), viewerAddress)
-      return filterByTab(all, tab)
-    },
+    queryFn: () => fetchAllChallenges(thor, Number(currentRoundId), viewerAddress).then(all => filterByTab(all, tab)),
     enabled: !!thor && currentRoundId !== undefined,
   })
 

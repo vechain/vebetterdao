@@ -37,6 +37,8 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
       ? "neutral"
       : getChallengeVisibilityBadgeVariant(challenge.visibility)
   const showStatusBadge = challenge.status !== ChallengeStatus.Active
+  const showParticipatingBadge =
+    challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
 
   return (
     <LinkBox h="full">
@@ -81,7 +83,7 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 </Text>
               )}
             </HStack>
-            {challenge.isJoined && (
+            {showParticipatingBadge && (
               <HStack
                 alignSelf="start"
                 gap="2"
