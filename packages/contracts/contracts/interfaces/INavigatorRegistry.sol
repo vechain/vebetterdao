@@ -38,6 +38,7 @@ interface INavigatorRegistry {
   // -- Fees --
   error FeesStillLocked(uint256 roundId, uint256 unlockRound, uint256 currentRound);
   error NoFeesToClaim(address navigator, uint256 roundId);
+  error FeesForfeited(address navigator);
 
   // -- Slashing --
   error AlreadySlashed(address navigator, string reason);

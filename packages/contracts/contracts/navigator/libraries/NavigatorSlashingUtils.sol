@@ -164,8 +164,10 @@ library NavigatorSlashingUtils {
       IERC20($.b3trToken).transfer($.treasury, stakeSlash);
     }
 
-    // Note: fee slashing requires iterating over round fees — handled by the caller
-    // (NavigatorRegistry) since it needs to know which rounds to clear
+    // Forfeit all unclaimed locked fees — claimFee will revert for this navigator
+    if (slashFees) {
+      $.feesForfeited[navigator] = true;
+    }
 
     emit NavigatorSlashed(navigator, stakeSlash, $.stakedAmount[navigator], "majorSlash");
   }

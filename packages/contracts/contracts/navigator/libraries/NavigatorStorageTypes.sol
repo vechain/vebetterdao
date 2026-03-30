@@ -60,6 +60,8 @@ library NavigatorStorageTypes {
     uint256 feeLockPeriod;
     // navigator fee percentage in basis points (default: 2000 = 20%)
     uint256 feePercentage;
+    // navigator => whether all unclaimed fees have been forfeited (major slash)
+    mapping(address => bool) feesForfeited;
 
     // ======================== Slashing ======================== //
     // navigator => total amount slashed over lifetime

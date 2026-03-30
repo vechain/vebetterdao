@@ -28,6 +28,9 @@ library NavigatorFeeUtils {
   /// @notice Thrown when there are no fees to claim for the round
   error NoFeesToClaim(address navigator, uint256 roundId);
 
+  /// @notice Thrown when navigator's fees have been forfeited via major slash
+  error FeesForfeited(address navigator);
+
   // ======================== Fee Collection ======================== //
 
   /// @notice Deposit a fee for a navigator in a specific round
@@ -50,6 +53,8 @@ library NavigatorFeeUtils {
   /// @param currentRound The current round ID (passed by caller)
   function claimFee(address navigator, uint256 roundId, uint256 currentRound) external {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if ($.feesForfeited[navigator]) revert FeesForfeited(navigator);
 
     uint256 amount = $.roundFees[navigator][roundId];
     if (amount == 0) revert NoFeesToClaim(navigator, roundId);

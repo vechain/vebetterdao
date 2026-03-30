@@ -50,6 +50,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IGrantsManager } from "../interfaces/IGrantsManager.sol";
 import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
+import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
 
 /**
  * @title B3TRGovernor
@@ -821,6 +822,16 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Cast a governance vote on behalf of a citizen delegated to a navigator.
+   * @param proposalId The id of the proposal
+   * @param citizen The delegated citizen whose voting power is used
+   * @return uint256 The voting weight used
+   */
+  function castNavigatorVote(uint256 proposalId, address citizen) external returns (uint256) {
+    return GovernorVotesLogic.castNavigatorVote(proposalId, citizen);
+  }
+
+  /**
    * @notice Withdraws deposits for a specific proposal
    * @param proposalId The id of the proposal
    * @param depositor The address of the depositor
@@ -945,6 +956,16 @@ contract B3TRGovernor is
     IVeBetterPassport newVeBetterPassport
   ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     GovernorConfigurator.setVeBetterPassport(newVeBetterPassport);
+  }
+
+  /**
+   * @notice Set the NavigatorRegistry contract
+   * @param newNavigatorRegistry The new NavigatorRegistry contract
+   */
+  function setNavigatorRegistry(
+    INavigatorRegistry newNavigatorRegistry
+  ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorConfigurator.setNavigatorRegistry(newNavigatorRegistry);
   }
 
   /**

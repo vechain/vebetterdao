@@ -30,6 +30,7 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
+import { IVOT3 } from "../interfaces/IVOT3.sol";
 
 import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
 import { NavigatorStakingUtils } from "./libraries/NavigatorStakingUtils.sol";
@@ -145,21 +146,23 @@ contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUp
   /// @notice Delegate VOT3 to a navigator
   function delegate(address navigator, uint256 amount) external nonReentrant {
     NavigatorDelegationUtils.delegate(_msgSender(), navigator, amount);
-    // TODO: call VOT3.setDelegatedAmount to lock VOT3
-    // TODO: set preferredRelayer if navigator is a registered relayer
+    // Lock the delegated VOT3 in citizen's wallet
+    IVOT3(NavigatorStorageTypes.getNavigatorStorage().vot3Token).setNavigatorLockedAmount(_msgSender(), amount);
   }
 
   /// @notice Partially reduce delegation amount
   function reduceDelegation(uint256 reduceBy) external nonReentrant {
     NavigatorDelegationUtils.reduceDelegation(_msgSender(), reduceBy);
-    // TODO: update VOT3 delegated amount
+    // Update locked amount to reflect new delegation
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    IVOT3($.vot3Token).setNavigatorLockedAmount(_msgSender(), $.delegatedAmount[_msgSender()]);
   }
 
   /// @notice Fully undelegate from the current navigator
   function undelegate() external nonReentrant {
     NavigatorDelegationUtils.undelegate(_msgSender());
-    // TODO: call VOT3.setDelegatedAmount(0) to unlock VOT3
-    // TODO: clear preferredRelayer
+    // Unlock all VOT3
+    IVOT3(NavigatorStorageTypes.getNavigatorStorage().vot3Token).setNavigatorLockedAmount(_msgSender(), 0);
   }
 
   // ======================== Navigator Voting Decisions ======================== //

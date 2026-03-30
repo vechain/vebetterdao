@@ -39,6 +39,7 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
+import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 
 // Libraries
@@ -223,6 +224,40 @@ contract XAllocationVoting is
   }
 
   /**
+   * @dev Cast a vote on behalf of a citizen delegated to a navigator.
+   * Uses the navigator's allocation preferences and equal-weight distribution.
+   * No personhood check — delegation already implies trust.
+   * @param citizen The delegated citizen whose voting power is used
+   * @param roundId The round ID to vote in
+   */
+  function castNavigatorVote(address citizen, uint256 roundId) public {
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+
+    // Citizen must be delegated to a navigator
+    address navigator = navRegistry.getNavigator(citizen);
+    if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
+
+    // Navigator must have set allocation preferences for this round
+    if (!navRegistry.hasSetPreferences(navigator, roundId)) {
+      revert NavigatorPreferencesNotSet(navigator, roundId);
+    }
+
+    _checkEarlyAccessEligibility(roundId, citizen);
+
+    bytes32[] memory appIds = navRegistry.getAllocationPreferences(navigator, roundId);
+
+    // Equal-weight distribution across navigator's preferred apps
+    uint256[] memory voteWeights = new uint256[](appIds.length);
+    for (uint256 i; i < appIds.length; i++) {
+      voteWeights[i] = 1; // equal weight — countVote normalizes to voting power
+    }
+
+    _handleCastVote(citizen, roundId, appIds, voteWeights, false);
+
+    emit NavigatorVoteCast(citizen, navigator, roundId, appIds, voteWeights);
+  }
+
+  /**
    * @dev Internal function to handle common voting logic
    * @param voter The address casting the vote
    * @param roundId The round ID to vote in
@@ -381,6 +416,15 @@ contract XAllocationVoting is
     IRelayerRewardsPool newRelayerRewardsPool
   ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     ExternalContractsUtils.setRelayerRewardsPool(newRelayerRewardsPool);
+  }
+
+  /**
+   * @dev Set the address of the NavigatorRegistry contract
+   */
+  function setNavigatorRegistry(
+    INavigatorRegistry newNavigatorRegistry
+  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    ExternalContractsUtils.setNavigatorRegistry(newNavigatorRegistry);
   }
 
   /**

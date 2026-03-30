@@ -116,7 +116,8 @@ async function saveLibrariesToFile(
   libraries:
     | { B3TRGovernor?: Record<string, string> }
     | { VeBetterPassport?: Record<string, string> }
-    | { X2EarnApps?: Record<string, string> },
+    | { X2EarnApps?: Record<string, string> }
+    | { XAllocationVoting?: Record<string, string> },
 ): Promise<void> {
   const OUTPUT_PATH = path.join(__dirname, `../../deploy_output`)
   const LIBRARY_FILE_PATH = path.join(OUTPUT_PATH, "libraries.txt")
