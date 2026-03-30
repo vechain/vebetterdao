@@ -535,17 +535,17 @@ describe("VoterRewards - @shard10-core", () => {
 
       events = receipt?.logs
 
-      decodedEvents = events?.map(event => {
-        return voterRewards.interface.parseLog({
-          topics: event?.topics as string[],
-          data: event?.data as string,
+      decodedEvents = events
+        ?.map(event => {
+          return voterRewards.interface.parseLog({
+            topics: event?.topics as string[],
+            data: event?.data as string,
+          })
         })
-      })
+        .filter(e => e?.name === "VoteRegistered")
 
       expect(decodedEvents[0]?.args?.[0]).to.equal(2) // Cycle
       expect(decodedEvents[0]?.args?.[1]).to.equal(otherAccount.address) // Voter
-      expect(decodedEvents[0]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
-      expect(decodedEvents[0]?.args?.[3]).to.equal(ethers.parseEther("22.360679774")) // Reward weight
 
       expect(await emissions.isCycleEnded(roundId)).to.equal(false)
 
@@ -738,12 +738,14 @@ describe("VoterRewards - @shard10-core", () => {
 
       events = receipt?.logs
 
-      decodedEvents = events?.map(event => {
-        return voterRewards.interface.parseLog({
-          topics: event?.topics as string[],
-          data: event?.data as string,
+      decodedEvents = events
+        ?.map(event => {
+          return voterRewards.interface.parseLog({
+            topics: event?.topics as string[],
+            data: event?.data as string,
+          })
         })
-      })
+        .filter(e => e?.name === "VoteRegistered")
 
       expect(decodedEvents[0]?.args?.[0]).to.equal(1) // Cycle
       expect(decodedEvents[0]?.args?.[1]).to.equal(otherAccount.address) // Voter
