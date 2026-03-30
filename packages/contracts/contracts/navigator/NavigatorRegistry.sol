@@ -29,6 +29,7 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
 
 import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
 import { NavigatorStakingUtils } from "./libraries/NavigatorStakingUtils.sol";
@@ -57,7 +58,7 @@ import { NavigatorLifecycleUtils } from "./libraries/NavigatorLifecycleUtils.sol
  * - Automatic minor slashing for negligence, governance-driven major slashing
  * - Exit process with notice period
  */
-contract NavigatorRegistry is Initializable, AccessControlUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
+contract NavigatorRegistry is Initializable, INavigatorRegistry, AccessControlUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   uint256 public constant BASIS_POINTS = 10000;
