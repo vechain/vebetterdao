@@ -11,6 +11,10 @@ async function main() {
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
+  if (!config.navigatorRegistryContractAddress) {
+    throw new Error("Missing NavigatorRegistry contract address")
+  }
+
   console.log("Deploying B3TRGovernor V10 libraries...")
   const {
     GovernorClockLogicLib,
@@ -41,10 +45,16 @@ async function main() {
   )
 
   // V10: Refactored to library architecture + governance intent multiplier in GovernorVotesLogic
-  const governor = (await upgradeProxy("B3TRGovernorV9", "B3TRGovernor", config.b3trGovernorAddress, [], {
-    version: 10,
-    libraries: libraryAddresses,
-  })) as B3TRGovernor
+  const governor = (await upgradeProxy(
+    "B3TRGovernorV9",
+    "B3TRGovernor",
+    config.b3trGovernorAddress,
+    [config.navigatorRegistryContractAddress],
+    {
+      version: 10,
+      libraries: libraryAddresses,
+    },
+  )) as B3TRGovernor
 
   console.log(`B3TRGovernor upgraded`)
 
@@ -53,6 +63,13 @@ async function main() {
 
   if (parseInt(version) !== 10) {
     throw new Error(`B3TRGovernor version is not the expected one: ${version}`)
+  }
+
+  // check that navigator registry was correctly set by accessing directly the storage slot
+  const navigatorRegistry = await governor.navigatorRegistry()
+  console.log(`Navigator registry: ${navigatorRegistry}`)
+  if (navigatorRegistry !== config.navigatorRegistryContractAddress) {
+    throw new Error("Navigator registry was not correctly set")
   }
 
   console.log("Execution completed")

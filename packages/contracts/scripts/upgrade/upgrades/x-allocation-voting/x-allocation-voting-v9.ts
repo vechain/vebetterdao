@@ -11,6 +11,10 @@ async function main() {
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
+  if (!config.navigatorRegistryContractAddress) {
+    throw new Error("Missing NavigatorRegistry contract address")
+  }
+
   console.log("Deploying XAllocationVoting V9 libraries...")
   const xAllocLibs = await xAllocationVotingLibraries(true)
 
@@ -37,7 +41,7 @@ async function main() {
     "XAllocationVotingV8",
     "XAllocationVoting",
     config.xAllocationVotingContractAddress,
-    [],
+    [config.navigatorRegistryContractAddress],
     {
       version: 9,
       libraries: libraryAddresses,
@@ -53,9 +57,17 @@ async function main() {
     throw new Error(`XAllocationVoting version is not the expected one: ${version}`)
   }
 
-  console.log("Execution completed")
+  // check that navigator registry was correctly set by accessing directly the storage slot
+  const navigatorRegistry = await xAllocationVoting.navigatorRegistry()
+  console.log(`Navigator registry: ${navigatorRegistry}`)
+  if (navigatorRegistry !== config.navigatorRegistryContractAddress) {
+    throw new Error("Navigator registry was not correctly set")
+  }
 
   await saveLibrariesToFile({ XAllocationVoting: libraryAddresses })
+
+  console.log("Execution completed")
+
   process.exit(0)
 }
 

@@ -16,7 +16,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v4: "Update GalaxyMember interface to use version 3",
       v5: "Proposal Execution: Add GM Pool for GM Holder Rewards",
       v6: "Integrate Auto-voting relayer rewards pool and fees",
-      v7: "Add rewards multipliers (freshness + governance intent)",
+      v7: "Add rewards multipliers (freshness + governance intent) + NavigatorRegistry",
     },
   },
   B3TRGovernor: {
@@ -32,7 +32,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v7: "Proposal Execution + Grants Feature: Add extra voting power based on support tokens + deposit threshold cap + proposal type concept",
       v8: "Give ability to mark proposals as in development/completed",
       v9: "Give ability to provide a reason for proposal cancellation",
-      v10: "Refactor to library architecture + governance intent multiplier",
+      v10: "Refactor to library architecture + governance intent multiplier + NavigatorRegistry + castNavigatorVote",
     },
   },
   XAllocationVoting: {
@@ -47,7 +47,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards and IEmissions)",
       v7: "Proposal Execution: Count proposal deposits to x-allocation voting power",
       v8: "Add Auto-Voting functionality",
-      v9: "Refactor to library architecture + freshness multiplier + hasUserVotedForApp",
+      v9: "Refactor to library architecture + freshness multiplier + hasUserVotedForApp + NavigatorRegistry",
     },
   },
   "XAllocation Pool": {
@@ -160,6 +160,14 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     versions: ["v2"],
     descriptions: {
       v2: "Allow users to set a preferred relayer for early-access vote and claim actions",
+    },
+  },
+  VOT3: {
+    name: "vot3",
+    configAddressField: "vot3ContractAddress",
+    versions: ["v2"] as const,
+    descriptions: {
+      v2: "Set NavigatorRegistry for delegation lock enforcement",
     },
   },
 } as const

@@ -853,6 +853,15 @@ contract XAllocationVoting is
     return AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(timepoint);
   }
 
+  // ======================== Navigator Registry ======================== //
+
+  /**
+   * @dev Get the NavigatorRegistry contract.
+   */
+  function navigatorRegistry() public view returns (INavigatorRegistry) {
+    return XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+  }
+
   // ======================== Helpers ======================== //
 
   /**

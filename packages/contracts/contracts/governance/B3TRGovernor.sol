@@ -564,8 +564,7 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
    * @return IVoterRewardsV2 The voter rewards contract
    */
   function voterRewards() external view returns (IVoterRewards) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.voterRewards;
+    return GovernorStorageTypes.getGovernorStorage().voterRewards;
   }
 
   /**
@@ -573,8 +572,7 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
    * @return IXAllocationVotingGovernor The XAllocationVotingGovernor contract
    */
   function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.xAllocationVoting;
+    return GovernorStorageTypes.getGovernorStorage().xAllocationVoting;
   }
 
   /**
@@ -582,8 +580,7 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
    * @return IB3TR The B3TR contract
    */
   function b3tr() external view returns (IB3TR) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.b3tr;
+    return GovernorStorageTypes.getGovernorStorage().b3tr;
   }
 
   /**
@@ -600,8 +597,15 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
    * @return The current VeBetterPassport contract.
    */
   function veBetterPassport() external view returns (IVeBetterPassport) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.veBetterPassport;
+    return GovernorStorageTypes.getGovernorStorage().veBetterPassport;
+  }
+
+  /**
+   * @notice Returns the NavigatorRegistry contract.
+   * @return INavigatorRegistry The NavigatorRegistry contract
+   */
+  function navigatorRegistry() external view returns (INavigatorRegistry) {
+    return GovernorStorageTypes.getGovernorStorage().navigatorRegistry;
   }
 
   /**

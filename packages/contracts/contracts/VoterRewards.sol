@@ -748,6 +748,12 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     return $.xAllocationVoting;
   }
 
+  /// @notice Get the NavigatorRegistry contract.
+  function navigatorRegistry() external view returns (INavigatorRegistry) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.navigatorRegistry;
+  }
+
   /// @notice Check if quadratic rewarding is disabled at a specific block number.
   /// @dev To check if quadratic rewarding was disabled for a cycle, use the block number the cycle started.
   /// @param blockNumber - The block number to check the quadratic rewarding status.
