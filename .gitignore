@@ -180,6 +180,3 @@ tasks/
 
 # Temporary e2e test cases
 packages/e2e/src/temporary_test_cases
-
-# E2E extension binaries
-packages/e2e/chrome.zip
