@@ -118,7 +118,7 @@ export const NFT_NAME = "GalaxyMember"
 export const NFT_SYMBOL = "GM"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 const CHALLENGES_MAX_DURATION = 4
-const CHALLENGES_MAX_SELECTED_APPS = 10
+const CHALLENGES_MAX_SELECTED_APPS = 5
 
 // // Voter Rewards
 export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels

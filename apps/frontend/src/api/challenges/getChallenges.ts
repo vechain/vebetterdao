@@ -50,7 +50,7 @@ async function fetchChallengeIdsByEvent(
   const ids = new Set<number>()
   for (const log of logs) {
     const event = decodeEventLog(log, contractAbi)
-    if (event.decodedData.eventName === eventName) {
+    if (event.decodedData.eventName === eventName && "challengeId" in event.decodedData.args) {
       ids.add(Number(event.decodedData.args.challengeId))
     }
   }

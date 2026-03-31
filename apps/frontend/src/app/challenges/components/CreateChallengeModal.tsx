@@ -31,6 +31,8 @@ interface CreateChallengeModalProps {
   children: React.ReactNode
 }
 
+const MAX_SELECTED_APPS = 5
+
 const initialForm = (kind: number, currentRound: number): CreateChallengeFormData => ({
   kind,
   visibility: ChallengeVisibility.Public,
@@ -55,14 +57,15 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
   const { t } = useTranslation()
   const { data: appsData } = useXApps({ filterBlacklisted: true })
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
+  const hasReachedSelectedAppsLimit = form.appIds.length >= MAX_SELECTED_APPS
 
   const filteredApps = useMemo(() => {
-    if (!appsData?.allApps) return []
+    if (!appsData?.allApps || hasReachedSelectedAppsLimit) return []
     const q = appSearch.toLowerCase()
     return appsData.allApps.filter(
       app => !form.appIds.includes(app.id) && (app.name.toLowerCase().includes(q) || app.id.toLowerCase().includes(q)),
     )
-  }, [appsData, appSearch, form.appIds])
+  }, [appsData, appSearch, form.appIds, hasReachedSelectedAppsLimit])
   const stakeAmountWei = useMemo(() => {
     if (!form.stakeAmount) return 0n
 
@@ -117,6 +120,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
   }
 
   const addApp = (appId: string) => {
+    if (hasReachedSelectedAppsLimit || form.appIds.includes(appId)) return
     update("appIds", [...form.appIds, appId])
     setAppSearch("")
     setShowAppDropdown(false)
@@ -311,11 +315,19 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                 )}
 
                 <Field.Root>
-                  <Field.Label>{t("Apps (leave empty for all)")}</Field.Label>
+                  <HStack justify="space-between" align="center">
+                    <Field.Label>{t("Apps (leave empty for all)")}</Field.Label>
+                    <Text textStyle="xs" color="text.subtle">
+                      {form.appIds.length}
+                      {"/"}
+                      {MAX_SELECTED_APPS}
+                    </Text>
+                  </HStack>
                   <Box position="relative">
                     <Input
                       placeholder={t("Search apps...")}
                       value={appSearch}
+                      disabled={hasReachedSelectedAppsLimit}
                       onChange={e => {
                         setAppSearch(e.target.value)
                         setShowAppDropdown(true)

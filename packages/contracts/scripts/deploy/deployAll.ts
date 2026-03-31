@@ -63,7 +63,7 @@ import { deployLegacyNodesMock } from "./mocks/deployLegacyNodes"
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
 const CHALLENGES_MAX_DURATION = 4
-const CHALLENGES_MAX_SELECTED_APPS = 10
+const CHALLENGES_MAX_SELECTED_APPS = 5
 
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()

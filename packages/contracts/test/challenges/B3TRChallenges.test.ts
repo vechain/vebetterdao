@@ -7,6 +7,10 @@ const STAKE_AMOUNT = ethers.parseEther("100")
 const INITIAL_BALANCE = ethers.parseEther("1000")
 const APP_1 = ethers.keccak256(ethers.toUtf8Bytes("app-1"))
 const APP_2 = ethers.keccak256(ethers.toUtf8Bytes("app-2"))
+const APP_3 = ethers.keccak256(ethers.toUtf8Bytes("app-3"))
+const APP_4 = ethers.keccak256(ethers.toUtf8Bytes("app-4"))
+const APP_5 = ethers.keccak256(ethers.toUtf8Bytes("app-5"))
+const APP_6 = ethers.keccak256(ethers.toUtf8Bytes("app-6"))
 
 const ChallengeKind = {
   Stake: 0,
@@ -64,8 +68,9 @@ async function deployFixture() {
   const x2EarnApps = (await (await ethers.getContractFactory("MockX2EarnApps")).deploy()) as MockX2EarnApps
   await x2EarnApps.waitForDeployment()
 
-  await x2EarnApps.setAppExists(APP_1, true)
-  await x2EarnApps.setAppExists(APP_2, true)
+  for (const appId of [APP_1, APP_2, APP_3, APP_4, APP_5, APP_6]) {
+    await x2EarnApps.setAppExists(appId, true)
+  }
 
   const challenges = (await deployProxy("B3TRChallenges", [
     {
@@ -74,7 +79,7 @@ async function deployFixture() {
       xAllocationVotingAddress: await roundGovernor.getAddress(),
       x2EarnAppsAddress: await x2EarnApps.getAddress(),
       maxChallengeDuration: 4,
-      maxSelectedApps: 10,
+      maxSelectedApps: 5,
     },
     {
       admin: admin.address,
@@ -142,6 +147,43 @@ describe("B3TRChallenges - @shard9a", function () {
     await expect(createChallenge(challenges, { startRound: 3, endRound: 2 }))
       .to.be.revertedWithCustomError(challenges, "InvalidEndRound")
       .withArgs(3, 2)
+  })
+
+  it("allows selecting up to five apps", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      appIds: [APP_1, APP_2, APP_3, APP_4, APP_5],
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.allApps).to.equal(false)
+    expect(challenge.selectedAppsCount).to.equal(5n)
+  })
+
+  it("rejects challenges with more than five selected apps", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        appIds: [APP_1, APP_2, APP_3, APP_4, APP_5, APP_6],
+      }),
+    )
+      .to.be.revertedWithCustomError(challenges, "MaxSelectedAppsExceeded")
+      .withArgs(6, 5)
+  })
+
+  it("treats an empty app selection as all apps", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, { appIds: [] })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.allApps).to.equal(true)
+    expect(challenge.selectedAppsCount).to.equal(0n)
   })
 
   it("lets an invited user decline and later join a private sponsored challenge", async function () {

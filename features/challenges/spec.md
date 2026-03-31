@@ -1,56 +1,56 @@
 ---
 name: B3TR Challenges
-overview: Feature challenges implementata con contratto upgradeable `B3TRChallenges`, upgrade `VeBetterPassport` V5 per contatori per-round, lambda schedulata `finalizeChallenges` e frontend `Challenges` collegato direttamente on-chain via `useQuery`, event logs e transazioni wallet.
+overview: Challenges feature implemented with the upgradeable `B3TRChallenges` contract, `VeBetterPassport` V5 upgrade for per-round counters, scheduled `finalizeChallenges` lambda, and `Challenges` frontend connected directly on-chain via `useQuery`, event logs, and wallet transactions.
 todos:
   - id: design-contract-shape
-    content: Definita API di `B3TRChallenges` con storage ERC-7201, enum/stati, eventi e read models
+    content: Defined the `B3TRChallenges` API with ERC-7201 storage, enums/statuses, events, and read models
     status: completed
   - id: implement-challenge-logic
-    content: Implementati create/join/leave/decline/addInvites/cancel con escrow B3TR per `Stake` e `Sponsored`
+    content: Implemented create/join/leave/decline/addInvites/cancel with B3TR escrow for `Stake` and `Sponsored`
     status: completed
   - id: implement-batched-settlement
-    content: Implementati `syncChallenge`, `finalizeChallengeBatch`, claim payout e refund pull-based
+    content: Implemented `syncChallenge`, `finalizeChallengeBatch`, pull-based payout claims, and refunds
     status: completed
   - id: wire-deployment-config
-    content: Integrato wiring di deploy, fixture, config e admin contract list per `B3TRChallenges`
+    content: Integrated deploy wiring, fixtures, config, and admin contract list for `B3TRChallenges`
     status: completed
   - id: add-tests-and-ci
-    content: Aggiunti test contratti, round tracking Passport V5 e shard CI `shard9a` per `B3TRChallenges`
+    content: Added contract tests, Passport V5 round tracking, and CI shard `shard9a` for `B3TRChallenges`
     status: completed
   - id: add-frontend-challenges
-    content: Aggiunta sezione frontend `Challenges` con route/tab, detail page, banner inviti e action flow reali
+    content: Added the `Challenges` frontend section with routes/tabs, detail page, invitation banner, and real action flows
     status: completed
   - id: add-finalize-challenges-lambda
-    content: Aggiunta lambda schedulata `finalizeChallenges` con terraform, scheduler e workflow deploy
+    content: Added the scheduled `finalizeChallenges` lambda with terraform, scheduler, and deploy workflow
     status: completed
 isProject: false
 ---
 
 # B3TR Challenges
 
-## Scope implementato
+## Implemented Scope
 
-- Nuovo contratto upgradeable `B3TRChallenges.sol` con librerie `ChallengeCoreLogic`, `ChallengeSettlementLogic`, `ChallengeStorageTypes`, `ChallengeTypes` e interfaccia `IChallenges`.
-- Upgrade `VeBetterPassport` a V5 con nuovi contatori per round usati dalla finalizzazione challenge.
-- Nuova sezione frontend `Challenges` con route dedicate, tab, list/detail page, banner inviti, create flow e azioni utente.
-- Nuova lambda schedulata `finalizeChallenges` con terraform e workflow di deploy dedicato.
+- New upgradeable contract `B3TRChallenges.sol` with `ChallengeCoreLogic`, `ChallengeSettlementLogic`, `ChallengeStorageTypes`, `ChallengeTypes` libraries and `IChallenges` interface.
+- `VeBetterPassport` upgraded to V5 with new per-round counters used by challenge finalization.
+- New `Challenges` frontend section with dedicated routes, tabs, list/detail pages, invitation banner, create flow, and user actions.
+- New scheduled `finalizeChallenges` lambda with terraform and dedicated deploy workflow.
 
-## Contratti
+## Contracts
 
-- I tipi implementati sono `Stake` e `Sponsored`:
-  - `Stake`: il creator deposita lo stake iniziale, viene aggiunto automaticamente ai partecipanti e ogni join aumenta `totalPrize`.
-  - `Sponsored`: il creator finanzia il premio ma non partecipa.
-- Le visibility implementate sono `Public` e `Private`.
-- Gli stati implementati sono `Pending`, `Active`, `Finalizing`, `Finalized`, `Cancelled`, `Invalid`.
-- I threshold mode implementati sono `None`, `SplitAboveThreshold`, `TopAboveThreshold`.
-- Configurazioni applicate:
-  - `startRound` deve essere > round corrente; `0` significa prossimo round.
-  - durata massima challenge: `4` round.
-  - massimo app selezionabili: `10`.
-  - `appIds = []` significa `all apps`.
-  - le challenge private possono essere joinate solo da wallet `invitationEligible`.
-  - il creator puo' solo aggiungere inviti e cancellare finche' la challenge e' `Pending`.
-- API/read models esposti:
+- The implemented types are `Stake` and `Sponsored`:
+  - `Stake`: the creator deposits the initial stake, is automatically added to participants, and each join increases `totalPrize`.
+  - `Sponsored`: the creator funds the prize but does not participate.
+- The implemented visibilities are `Public` and `Private`.
+- The implemented statuses are `Pending`, `Active`, `Finalizing`, `Finalized`, `Cancelled`, `Invalid`.
+- The implemented threshold modes are `None`, `SplitAboveThreshold`, `TopAboveThreshold`.
+- Applied configuration:
+  - `startRound` must be > the current round; `0` means next round.
+  - maximum challenge duration: `4` rounds.
+  - maximum selectable apps: `5`.
+  - `appIds = []` means `all apps`.
+  - private challenges can only be joined by `invitationEligible` wallets.
+  - the creator can only add invites and cancel while the challenge is `Pending`.
+- Exposed APIs/read models:
   - `getChallenge`
   - `getChallengeStatus`
   - `getChallengeParticipants`
@@ -60,7 +60,7 @@ isProject: false
   - `getParticipantStatus`
   - `isInvitationEligible`
   - `getParticipantActions`
-- Lifecycle/actioni implementate:
+- Implemented lifecycle/actions:
   - `createChallenge`
   - `addInvites`
   - `joinChallenge`
@@ -68,8 +68,8 @@ isProject: false
   - `declineChallenge`
   - `cancelChallenge`
   - `syncChallenge`
-- Un invitee puo' declinare e poi rientrare via `joinChallenge` finche' la challenge non parte.
-- Eventi emessi:
+- An invitee can decline and later re-enter via `joinChallenge` until the challenge starts.
+- Emitted events:
   - `ChallengeCreated`
   - `ChallengeInviteAdded`
   - `ChallengeJoined`
@@ -82,109 +82,110 @@ isProject: false
   - `ChallengeFinalized`
   - `ChallengePayoutClaimed`
   - `ChallengeRefundClaimed`
-- Regola di validita' effettiva:
-  - `Stake` richiede almeno `2` partecipanti totali, creator incluso.
-  - `Sponsored` richiede almeno `1` partecipante.
+- Effective validity rule:
+  - `Stake` requires at least `2` total participants, including the creator.
+  - `Sponsored` requires at least `1` participant.
 
-## Settlement e payout
+## Settlement and Payout
 
-- La finalizzazione e' permissionless e batch-based via `finalizeChallengeBatch(challengeId, batchSize)`.
-- Il cursore on-chain usato e' `nextFinalizeIndex`; lo stato passa `Active -> Finalizing -> Finalized`.
-- Le actions sono lette da `VeBetterPassport`:
-  - `userRoundActionCount()` quando la challenge copre tutte le app.
-  - `userRoundActionCountApp()` quando la challenge ha una lista di app.
-- Settlement mode implementati:
-  - `TopWinners` per challenge senza threshold o `TopAboveThreshold` con almeno un qualificato.
-  - `QualifiedSplit` per `SplitAboveThreshold` con almeno un qualificato.
-  - `CreatorRefund` se in una `Sponsored` con threshold nessuno si qualifica.
-- Payout e refund sono pull-based:
+- Finalization is permissionless and batch-based via `finalizeChallengeBatch(challengeId, batchSize)`.
+- The on-chain cursor used is `nextFinalizeIndex`; status moves `Active -> Finalizing -> Finalized`.
+- Actions are read from `VeBetterPassport`:
+  - `userRoundActionCount()` when the challenge covers all apps.
+  - `userRoundActionCountApp()` when the challenge has a list of apps.
+- Implemented settlement modes:
+  - `TopWinners` for challenges without a threshold or `TopAboveThreshold` with at least one qualified participant.
+  - `QualifiedSplit` for `SplitAboveThreshold` with at least one qualified participant.
+  - `CreatorRefund` when nobody qualifies in a threshold-based `Sponsored` challenge.
+- Payouts and refunds are pull-based:
   - `claimChallengePayout`
   - `claimChallengeRefund`
-- Refund effettivi:
-  - challenge `Stake` cancellata o invalid: refund dello stake a ogni participant `Joined`.
-  - challenge `Sponsored` cancellata o invalid: refund del premio al creator.
-- Il calcolo payout assegna l'eventuale remainder all'ultimo claim, cosi' `totalPrize` viene distribuito interamente senza residui.
+- Effective refunds:
+  - cancelled or invalid `Stake` challenge: refund the stake to each `Joined` participant.
+  - cancelled or invalid `Sponsored` challenge: refund the prize to the creator.
+- Payout calculation assigns any remainder to the last claim, so `totalPrize` is fully distributed with no leftovers.
 
 ## VeBetterPassport V5
 
-- La feature ha richiesto un upgrade `VeBetterPassport` V4 -> V5, non solo wiring lato challenge.
-- Sono stati aggiunti e testati i contatori per round:
+- The feature required a `VeBetterPassport` V4 -> V5 upgrade, not just challenge-side wiring.
+- Added and tested per-round counters:
   - `userRoundActionCount`
   - `userRoundActionCountApp`
   - `userRoundAppCount`
   - `appRoundActionCount`
   - `registerActionForRound`
-- Sono stati aggiunti:
-  - contratto V4 deprecated per upgrade tests
+- Added:
+  - deprecated V4 contract for upgrade tests
   - script `vebetter-passport-v5.ts`
-  - test dedicati `round-tracking.test.ts`
-  - update degli upgrade tests e delle librerie Passport
+  - dedicated tests `round-tracking.test.ts`
+  - updates to upgrade tests and Passport libraries
 
 ## Frontend
 
-- La sezione `Challenges` e' stata aggiunta in navbar, footer, metadata e admin contracts view.
-- Le route implementate sono:
-  - `/challenges` con redirect a `/challenges/all`
+- The `Challenges` section was added to the navbar, footer, metadata, and admin contracts view.
+- Implemented routes:
+  - `/challenges` with redirect to `/challenges/all`
   - `/challenges/all`
   - `/challenges/mine`
   - `/challenges/invited`
   - `/challenges/public`
   - `/challenges/[challengeId]`
-- Il frontend non usa mock statici: legge dati live on-chain con `useQuery`, `useThor`, multicall e filtri sugli eventi `ChallengeCreated`, `ChallengePayoutClaimed` e `ChallengeRefundClaimed`.
-- Query/hooks implementati:
+- The frontend does not use static mocks: it reads live on-chain data with `useQuery`, `useThor`, multicall, and filters on `ChallengeCreated`, `ChallengePayoutClaimed`, and `ChallengeRefundClaimed` events.
+- Implemented queries/hooks:
   - `useChallenges`
   - `useChallenge`
   - `useChallengeActions`
   - `useChallengeParticipantActions`
-- UX implementata:
+- Implemented UX:
   - create stake challenge
   - create sponsored challenge
   - public/private visibility
-  - selezione app oppure `all apps`
-  - threshold configuration per sponsored challenge
+  - selection of up to `5` apps or `all apps`
+  - threshold configuration for sponsored challenges
   - accept/join, leave, decline, cancel, add invites, claim payout, claim refund, finalize
   - pending invitations banner
-  - detail page con badge di stato, lista wallet, selected apps, invited wallets e leaderboard delle actions
-- Lo stato delle CTA e' derivato client-side da status challenge, viewer status, invitation eligibility, claim/refund gia' eseguiti e saldo B3TR disponibile.
-- Non c'e' dipendenza da indexer esterno in questa repo: liste e dettagli vengono ricostruiti da log + call on-chain.
+  - detail page with status badge, wallet list, selected apps, invited wallets, and actions leaderboard
+- CTA state is derived client-side from challenge status, viewer status, invitation eligibility, whether claim/refund was already executed, and available B3TR balance.
+- There is no dependency on an external indexer in this repo: lists and details are reconstructed from logs + on-chain calls.
 
-## Lambda e infra
+## Lambda and Infra
 
-- E' stata aggiunta la lambda `packages/lambda/src/finalizeChallenges/lambda.ts`.
-- La lambda:
-  - legge il round corrente da `XAllocationVoting`
-  - cerca le challenge con `endRound == currentRound - 1` filtrando `ChallengeCreated`
-  - finalizza in loop con retry fino a `Finalized` o fino al cap `MAX_BATCHES_PER_CHALLENGE`
-  - salta challenge `Cancelled`, `Invalid` o gia' `Finalized`
-  - usa il distributor wallet gia' esistente
-  - supporta `dryRun` e `batchSize` custom
-  - invia notifiche Slack su successi e failure parziali
-- Infra aggiunta:
-  - terraform dedicato sotto `terraform/finalize-challenges`
+- Added the lambda `packages/lambda/src/finalizeChallenges/lambda.ts`.
+- The lambda:
+  - reads the current round from `XAllocationVoting`
+  - looks for challenges with `endRound == currentRound - 1` by filtering `ChallengeCreated`
+  - finalizes in a retry loop until `Finalized` or until the `MAX_BATCHES_PER_CHALLENGE` cap is reached
+  - skips `Cancelled`, `Invalid`, or already `Finalized` challenges
+  - uses the existing distributor wallet
+  - supports custom `dryRun` and `batchSize`
+  - sends Slack notifications for successes and partial failures
+- Added infra:
+  - dedicated terraform under `terraform/finalize-challenges`
   - scheduler EventBridge
   - workflow `.github/workflows/finalize-challenges-lambda-deploy.yml`
-- Scheduling configurato:
-  - dev/testnet: 10 minuti dopo `start-emissions-round`
-  - prod/mainnet: 10 minuti dopo `start-emissions-round`
-- Se `challengesContractAddress` e' `0x0`, la lambda esce in skip senza rompere il flusso.
+- Configured scheduling:
+  - dev/testnet: 10 minutes after `start-emissions-round`
+  - prod/mainnet: 10 minutes after `start-emissions-round`
+- If `challengesContractAddress` is `0x0`, the lambda exits in skip mode without breaking the flow.
 
-## Integrazione repo
+## Repo Integration
 
-- Deploy e fixture allineati in `deployAll.ts` e `test/helpers/deploy.ts`.
-- Aggiunto `challengesContractAddress` in `@repo/config` e nel generatore config locale.
-- Aggiunto check deployment e visibilita' del contratto nella sezione admin.
-- Gli indirizzi remote in `testnet`, `testnet-staging` e `mainnet` restano `0x0` finche' non viene fatto il deploy effettivo; il local wiring invece e' presente.
+- Deploy and fixtures aligned in `deployAll.ts` and `test/helpers/deploy.ts`.
+- Added `challengesContractAddress` in `@repo/config` and in the local config generator.
+- Added deployment check and contract visibility in the admin section.
+- Remote addresses in `testnet`, `testnet-staging`, and `mainnet` remain `0x0` until the actual deployment is performed; local wiring is already present.
 
-## Verifica
+## Verification
 
-- Test contratti aggiunti in `packages/contracts/test/challenges/B3TRChallenges.test.ts` per:
+- Contract tests added in `packages/contracts/test/challenges/B3TRChallenges.test.ts` for:
   - create / join / leave / decline / cancel
-  - validazione start/end round
-  - invalid challenge e refund
-  - settlement batch
+  - start/end round validation
+  - `max 5 apps` limit and `appIds = []` as `all apps`
+  - invalid challenge and refunds
+  - batch settlement
   - tie split
-  - sponsored con threshold su `all apps` e `selected apps`
-- Test Passport round tracking aggiunti in `packages/contracts/test/vebetterpassport/round-tracking.test.ts`.
-- Nuovo shard CI `shard9a` registrato in `.github/workflows/unit-tests.yml` e `packages/contracts/test/README.md`.
-- Test lambda aggiunti in `packages/lambda/test/finalizeChallenges.test.ts` per skip config, no-ended-round case e dry-run base.
-- In questo branch non e' stato aggiunto uno step CI dedicato per i test lambda nel workflow unitario principale.
+  - threshold-based sponsored challenges on `all apps` and `selected apps`
+- Passport round-tracking tests added in `packages/contracts/test/vebetterpassport/round-tracking.test.ts`.
+- New CI shard `shard9a` registered in `.github/workflows/unit-tests.yml` and `packages/contracts/test/README.md`.
+- Lambda tests added in `packages/lambda/test/finalizeChallenges.test.ts` for config skip, no-ended-round case, and basic dry-run.
+- In this branch, no dedicated CI step was added for lambda tests in the main unit-test workflow.
