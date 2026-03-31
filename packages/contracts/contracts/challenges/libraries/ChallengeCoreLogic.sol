@@ -74,7 +74,6 @@ library ChallengeCoreLogic {
   }
 
   function addInvites(uint256 challengeId, address[] memory invitees) internal {
-    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     _ensurePendingChallenge(challengeId, challenge);
@@ -100,6 +99,10 @@ library ChallengeCoreLogic {
 
     if ($.participantStatus[challengeId][msg.sender] == ChallengeTypes.ParticipantStatus.Joined) {
       revert IChallenges.AlreadyParticipating(challengeId, msg.sender);
+    }
+
+    if (challenge.participants.length >= $.maxParticipants) {
+      revert IChallenges.MaxParticipantsExceeded(challenge.participants.length + 1, $.maxParticipants);
     }
 
     if (challenge.kind == ChallengeTypes.ChallengeKind.Stake) {

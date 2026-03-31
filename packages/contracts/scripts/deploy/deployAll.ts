@@ -64,6 +64,7 @@ const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
 const CHALLENGES_MAX_DURATION = 4
 const CHALLENGES_MAX_SELECTED_APPS = 5
+const CHALLENGES_MAX_PARTICIPANTS = 100
 
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
@@ -1136,6 +1137,7 @@ export async function deployAll(config: ContractsConfig) {
         x2EarnAppsAddress: await x2EarnApps.getAddress(),
         maxChallengeDuration: CHALLENGES_MAX_DURATION,
         maxSelectedApps: CHALLENGES_MAX_SELECTED_APPS,
+        maxParticipants: CHALLENGES_MAX_PARTICIPANTS,
       },
       {
         admin: config.CONTRACTS_ADMIN_ADDRESS,

@@ -40,7 +40,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     ) {
       revert ZeroAddress();
     }
-    if (data.maxChallengeDuration == 0 || data.maxSelectedApps == 0) revert InvalidAmount();
+    if (data.maxChallengeDuration == 0 || data.maxSelectedApps == 0 || data.maxParticipants == 0) revert InvalidAmount();
 
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -49,6 +49,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     $.maxChallengeDuration = data.maxChallengeDuration;
     $.maxSelectedApps = data.maxSelectedApps;
+    $.maxParticipants = data.maxParticipants;
 
     _initializeAddresses(
       data.b3trAddress,
@@ -82,6 +83,10 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
 
   function maxSelectedApps() external view returns (uint256) {
     return ChallengeStorageTypes.getChallengesStorage().maxSelectedApps;
+  }
+
+  function maxParticipants() external view returns (uint256) {
+    return ChallengeStorageTypes.getChallengesStorage().maxParticipants;
   }
 
   function getChallenge(uint256 challengeId) external view returns (ChallengeTypes.ChallengeView memory) {
@@ -242,6 +247,16 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     $.maxSelectedApps = newValue;
 
     emit MaxSelectedAppsUpdated(oldValue, newValue);
+  }
+
+  function setMaxParticipants(uint256 newValue) external nonReentrant onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    if (newValue == 0) revert InvalidAmount();
+
+    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
+    uint256 oldValue = $.maxParticipants;
+    $.maxParticipants = newValue;
+
+    emit MaxParticipantsUpdated(oldValue, newValue);
   }
 
   function _setB3TRAddress(address newAddress) private {

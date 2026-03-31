@@ -101,6 +101,7 @@ function parseChallengeView(
   viewerEligible: boolean,
   viewerActions: bigint,
   currentRound: number,
+  maxParticipants: number,
   createdAt = 0,
   hasClaimed = false,
   hasRefunded = false,
@@ -131,9 +132,11 @@ function parseChallengeView(
   const isInvited = viewerStatus === ParticipantStatus.Invited || viewerEligible
   const isPending = status === ChallengeStatus.Pending
   const isInvitationPending = isPending && isInvited && !isJoined
+  const hasReachedParticipantLimit = participantCount >= maxParticipants
 
-  const canJoinPublic = isPending && visibility === ChallengeVisibility.Public && !isJoined && !isCreator
-  const canAcceptInvite = isInvitationPending
+  const canJoinPublic =
+    isPending && visibility === ChallengeVisibility.Public && !isJoined && !isCreator && !hasReachedParticipantLimit
+  const canAcceptInvite = isInvitationPending && !hasReachedParticipantLimit
   const canAddInvites =
     isPending && visibility === ChallengeVisibility.Private && isCreator && currentRound < startRound
   const canClaim =
@@ -167,6 +170,7 @@ function parseChallengeView(
     threshold,
     allApps,
     participantCount,
+    maxParticipants,
     invitedCount,
     declinedCount,
     selectedAppsCount,
@@ -210,7 +214,10 @@ export async function fetchAllChallenges(
   const [countResult, claimedChallengeIds, refundedChallengeIds] = await Promise.all([
     executeMultipleClausesCall({
       thor,
-      calls: [{ abi, address, functionName: "challengeCount", args: [] }],
+      calls: [
+        { abi, address, functionName: "challengeCount", args: [] },
+        { abi, address, functionName: "maxParticipants", args: [] },
+      ],
     }),
     viewerAddress
       ? fetchChallengeIdsByEvent(thor, address, viewerAddress, payoutClaimedEventName)
@@ -219,7 +226,8 @@ export async function fetchAllChallenges(
       ? fetchChallengeIdsByEvent(thor, address, viewerAddress, refundClaimedEventName)
       : Promise.resolve(new Set<number>()),
   ])
-  const [count] = countResult
+  const [count, maxParticipantsResult] = countResult
+  const maxParticipants = Number(maxParticipantsResult)
 
   const n = Number(count)
   if (n === 0) return []
@@ -256,6 +264,7 @@ export async function fetchAllChallenges(
         eligible,
         viewerActions,
         currentRound,
+        maxParticipants,
         creationTimestamps.get(challengeId) ?? 0,
         claimedChallengeIds.has(challengeId),
         refundedChallengeIds.has(challengeId),
@@ -286,6 +295,7 @@ export async function fetchChallengeDetail(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const calls: any[] = [
+    { abi, address, functionName: "maxParticipants", args: [] },
     { abi, address, functionName: "getChallenge", args: [BigInt(challengeId)] },
     { abi, address, functionName: "getChallengeParticipants", args: [BigInt(challengeId)] },
     { abi, address, functionName: "getChallengeInvited", args: [BigInt(challengeId)] },
@@ -302,14 +312,15 @@ export async function fetchChallengeDetail(
   try {
     const results = await executeMultipleClausesCall({ thor, calls })
 
-    const raw = results[0]
-    const participants = (results[1] as string[]) ?? []
-    const invited = (results[2] as string[]) ?? []
-    const declined = (results[3] as string[]) ?? []
-    const selectedApps = ((results[4] as string[]) ?? []).map(String)
-    const viewerStatus = viewerAddress ? Number(results[5]) : 0
-    const eligible = viewerAddress ? Boolean(results[6]) : false
-    const viewerActions = viewerAddress ? BigInt(String(results[7] ?? 0)) : 0n
+    const maxParticipants = Number(results[0])
+    const raw = results[1]
+    const participants = (results[2] as string[]) ?? []
+    const invited = (results[3] as string[]) ?? []
+    const declined = (results[4] as string[]) ?? []
+    const selectedApps = ((results[5] as string[]) ?? []).map(String)
+    const viewerStatus = viewerAddress ? Number(results[6]) : 0
+    const eligible = viewerAddress ? Boolean(results[7]) : false
+    const viewerActions = viewerAddress ? BigInt(String(results[8] ?? 0)) : 0n
 
     const view = parseChallengeView(
       raw,
@@ -318,6 +329,7 @@ export async function fetchChallengeDetail(
       eligible,
       viewerActions,
       currentRound,
+      maxParticipants,
       creationTimestamps.get(challengeId) ?? 0,
       claimedChallengeIds.has(challengeId),
       refundedChallengeIds.has(challengeId),

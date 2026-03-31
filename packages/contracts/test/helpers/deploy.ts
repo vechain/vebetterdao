@@ -119,6 +119,7 @@ export const NFT_SYMBOL = "GM"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 const CHALLENGES_MAX_DURATION = 4
 const CHALLENGES_MAX_SELECTED_APPS = 5
+const CHALLENGES_MAX_PARTICIPANTS = 100
 
 // // Voter Rewards
 export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels
@@ -1096,6 +1097,7 @@ export const getOrDeployContractInstances = async ({
       x2EarnAppsAddress: await x2EarnApps.getAddress(),
       maxChallengeDuration: CHALLENGES_MAX_DURATION,
       maxSelectedApps: CHALLENGES_MAX_SELECTED_APPS,
+      maxParticipants: CHALLENGES_MAX_PARTICIPANTS,
     },
     {
       admin: owner.address,

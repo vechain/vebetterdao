@@ -17,6 +17,7 @@ library ChallengeStorageTypes {
     uint256 maxChallengeDuration;
     uint256 maxSelectedApps;
     uint256 challengeCount;
+    uint256 maxParticipants;
     mapping(uint256 challengeId => ChallengeTypes.Challenge challenge) challenges;
     mapping(uint256 challengeId => mapping(address account => ChallengeTypes.ParticipantStatus status)) participantStatus;
     mapping(uint256 challengeId => mapping(address account => bool eligible)) invitationEligible;

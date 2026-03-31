@@ -12,6 +12,7 @@ interface IChallenges {
   error InvalidThresholdConfiguration();
   error MaxChallengeDurationExceeded(uint256 provided, uint256 maximum);
   error MaxSelectedAppsExceeded(uint256 provided, uint256 maximum);
+  error MaxParticipantsExceeded(uint256 provided, uint256 maximum);
   error ChallengeDoesNotExist(uint256 challengeId);
   error ChallengeUnknownApp(bytes32 appId);
   error DuplicateApp(bytes32 appId);
@@ -36,6 +37,7 @@ interface IChallenges {
   event X2EarnAppsAddressUpdated(address indexed oldAddress, address indexed newAddress);
   event MaxChallengeDurationUpdated(uint256 oldValue, uint256 newValue);
   event MaxSelectedAppsUpdated(uint256 oldValue, uint256 newValue);
+  event MaxParticipantsUpdated(uint256 oldValue, uint256 newValue);
 
   function initialize(
     ChallengeTypes.InitializationData calldata data,
@@ -49,6 +51,8 @@ interface IChallenges {
   function maxChallengeDuration() external view returns (uint256);
 
   function maxSelectedApps() external view returns (uint256);
+
+  function maxParticipants() external view returns (uint256);
 
   function getChallenge(uint256 challengeId) external view returns (ChallengeTypes.ChallengeView memory);
 
@@ -105,4 +109,6 @@ interface IChallenges {
   function setMaxChallengeDuration(uint256 newValue) external;
 
   function setMaxSelectedApps(uint256 newValue) external;
+
+  function setMaxParticipants(uint256 newValue) external;
 }

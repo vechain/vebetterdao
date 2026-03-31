@@ -47,6 +47,8 @@ isProject: false
   - `startRound` must be > the current round; `0` means next round.
   - maximum challenge duration: `4` rounds.
   - maximum selectable apps: `5`.
+  - maximum participants: `100` total.
+  - in `Stake`, the creator counts toward the cap, so only `99` additional participants can join.
   - `appIds = []` means `all apps`.
   - private challenges can only be joined by `invitationEligible` wallets.
   - the creator can only add invites and cancel while the challenge is `Pending`.
@@ -141,6 +143,7 @@ isProject: false
   - create sponsored challenge
   - public/private visibility
   - selection of up to `5` apps or `all apps`
+  - participant counters show the current count against the challenge cap
   - threshold configuration for sponsored challenges
   - accept/join, leave, decline, cancel, add invites, claim payout, claim refund, finalize
   - pending invitations banner
@@ -181,6 +184,7 @@ isProject: false
   - create / join / leave / decline / cancel
   - start/end round validation
   - `max 5 apps` limit and `appIds = []` as `all apps`
+  - participant cap enforcement for `Sponsored` and `Stake`
   - invalid challenge and refunds
   - batch settlement
   - tie split

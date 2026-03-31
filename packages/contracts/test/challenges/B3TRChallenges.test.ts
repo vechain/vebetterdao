@@ -51,7 +51,7 @@ const SettlementMode = {
   CreatorRefund: 3,
 } as const
 
-async function deployFixture() {
+async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: number } = {}) {
   const [admin, alice, bob, carol] = await ethers.getSigners()
 
   const b3tr = (await (
@@ -80,6 +80,7 @@ async function deployFixture() {
       x2EarnAppsAddress: await x2EarnApps.getAddress(),
       maxChallengeDuration: 4,
       maxSelectedApps: 5,
+      maxParticipants,
     },
     {
       admin: admin.address,
@@ -129,6 +130,36 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(challenge.totalPrize).to.equal(STAKE_AMOUNT)
     expect(await challenges.getParticipantStatus(1, admin.address)).to.equal(ParticipantStatus.Joined)
     expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(STAKE_AMOUNT)
+  })
+
+  it("rejects joining a sponsored challenge after reaching the participant cap", async function () {
+    const { alice, bob, carol, roundGovernor, challenges } = await deployFixture({ maxParticipants: 2 })
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      thresholdMode: ThresholdMode.None,
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+
+    await expect(challenges.connect(carol).joinChallenge(1))
+      .to.be.revertedWithCustomError(challenges, "MaxParticipantsExceeded")
+      .withArgs(3, 2)
+  })
+
+  it("counts the creator toward the participant cap for stake challenges", async function () {
+    const { alice, bob, carol, roundGovernor, challenges } = await deployFixture({ maxParticipants: 3 })
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges)
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+
+    await expect(challenges.connect(carol).joinChallenge(1))
+      .to.be.revertedWithCustomError(challenges, "MaxParticipantsExceeded")
+      .withArgs(4, 3)
   })
 
   it("rejects challenges whose start round is not after the current round", async function () {

@@ -109,7 +109,7 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 {t("Participants")}
               </Text>
               <Text textStyle="lg" fontWeight="bold">
-                {humanNumber(challenge.participantCount)}
+                {humanNumber(challenge.participantCount)} {"/"} {humanNumber(challenge.maxParticipants)}
               </Text>
             </VStack>
             <VStack align="start" gap="1">

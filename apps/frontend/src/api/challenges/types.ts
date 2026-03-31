@@ -42,6 +42,7 @@ export interface ChallengeView {
   threshold: string
   allApps: boolean
   participantCount: number
+  maxParticipants: number
   invitedCount: number
   declinedCount: number
   selectedAppsCount: number

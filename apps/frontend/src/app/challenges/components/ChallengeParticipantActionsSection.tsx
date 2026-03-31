@@ -118,7 +118,9 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
             fontWeight="semibold">
             {t("Participants")}
           </Text>
-          <Heading size="2xl">{humanNumber(challenge.participantCount)}</Heading>
+          <Heading size="2xl">
+            {humanNumber(challenge.participantCount)} {"/"} {humanNumber(challenge.maxParticipants)}
+          </Heading>
           {!isPending && (
             <Text textStyle="sm" color="text.subtle">
               {compactFormatter.format(data?.totalActions ?? 0)} {t("total actions")}

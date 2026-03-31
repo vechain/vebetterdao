@@ -60,6 +60,7 @@ library ChallengeTypes {
     address x2EarnAppsAddress;
     uint256 maxChallengeDuration;
     uint256 maxSelectedApps;
+    uint256 maxParticipants;
   }
 
   struct InitializationRoleData {
