@@ -1,9 +1,10 @@
 "use client"
 
-import { Box, Button, Card, Heading, HStack, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, Heading, HStack, IconButton, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 import { A11y, Navigation } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
@@ -14,6 +15,7 @@ import { MotionVStack } from "@/components/MotionVStack"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 import "swiper/css"
+import "swiper/css/navigation"
 
 import { ChallengeCard } from "./ChallengeCard"
 import { ChallengeCompactCard } from "./ChallengeCompactCard"
@@ -96,12 +98,16 @@ export const ChallengesPageContent = () => {
                 ))}
               </HStack>
             ) : (
-              <Box mx={{ base: "-4", md: "0" }}>
+              <Box position="relative" mx={{ base: "-4", md: "0" }}>
                 <Swiper
                   modules={[A11y, Navigation]}
                   spaceBetween={16}
                   slidesPerView={1.15}
-                  style={{ paddingLeft: "16px", paddingRight: "16px" }}
+                  style={{ padding: "4px 16px" }}
+                  navigation={{
+                    nextEl: ".active-swiper-next",
+                    prevEl: ".active-swiper-prev",
+                  }}
                   breakpoints={{
                     768: { slidesPerView: 1.5, spaceBetween: 16 },
                     1024: { slidesPerView: 2.2, spaceBetween: 20 },
@@ -112,6 +118,34 @@ export const ChallengesPageContent = () => {
                     </SwiperSlide>
                   ))}
                 </Swiper>
+                <IconButton
+                  hideBelow="md"
+                  className="active-swiper-prev"
+                  pos="absolute"
+                  zIndex={2}
+                  rounded="full"
+                  variant="outline"
+                  size="sm"
+                  left="-12"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  aria-label="Previous challenge">
+                  <FaArrowLeft />
+                </IconButton>
+                <IconButton
+                  hideBelow="md"
+                  className="active-swiper-next"
+                  pos="absolute"
+                  zIndex={2}
+                  rounded="full"
+                  variant="outline"
+                  size="sm"
+                  right="-12"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  aria-label="Next challenge">
+                  <FaArrowRight />
+                </IconButton>
               </Box>
             )}
           </ChallengeHubSection>
@@ -127,12 +161,16 @@ export const ChallengesPageContent = () => {
                 </Box>
               </HStack>
             ) : (
-              <Box mx={{ base: "-4", md: "0" }}>
+              <Box position="relative" mx={{ base: "-4", md: "0" }}>
                 <Swiper
                   modules={[A11y, Navigation]}
                   spaceBetween={16}
                   slidesPerView={1.15}
-                  style={{ paddingLeft: "16px", paddingRight: "16px" }}
+                  style={{ padding: "4px 16px" }}
+                  navigation={{
+                    nextEl: ".invites-swiper-next",
+                    prevEl: ".invites-swiper-prev",
+                  }}
                   breakpoints={{
                     768: { slidesPerView: 1.5, spaceBetween: 16 },
                     1024: { slidesPerView: 2.2, spaceBetween: 20 },
@@ -143,6 +181,34 @@ export const ChallengesPageContent = () => {
                     </SwiperSlide>
                   ))}
                 </Swiper>
+                <IconButton
+                  hideBelow="md"
+                  className="invites-swiper-prev"
+                  pos="absolute"
+                  zIndex={2}
+                  rounded="full"
+                  variant="outline"
+                  size="sm"
+                  left="-12"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  aria-label="Previous invitation">
+                  <FaArrowLeft />
+                </IconButton>
+                <IconButton
+                  hideBelow="md"
+                  className="invites-swiper-next"
+                  pos="absolute"
+                  zIndex={2}
+                  rounded="full"
+                  variant="outline"
+                  size="sm"
+                  right="-12"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  aria-label="Next invitation">
+                  <FaArrowRight />
+                </IconButton>
               </Box>
             )}
           </ChallengeHubSection>
