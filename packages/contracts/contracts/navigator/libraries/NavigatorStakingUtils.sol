@@ -164,11 +164,15 @@ library NavigatorStakingUtils {
   // ======================== Getters ======================== //
 
   /// @notice Get the staked B3TR amount for a navigator
+  /// @param navigator The navigator address
+  /// @return The staked B3TR amount
   function getStake(address navigator) external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().stakedAmount[navigator];
   }
 
   /// @notice Check if an address is a registered navigator
+  /// @param account The address to check
+  /// @return True if the address is a registered and active navigator
   function isNavigator(address account) external view returns (bool) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     return $.isRegistered[account] && !$.isDeactivated[account];
@@ -176,6 +180,8 @@ library NavigatorStakingUtils {
 
   /// @notice Check if navigator can accept new delegations
   /// @dev Returns false if deactivated, below minimum stake, or in exit process
+  /// @param navigator The navigator address
+  /// @return True if the navigator can accept new delegations
   function canAcceptDelegations(address navigator) external view returns (bool) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     if (!$.isRegistered[navigator]) return false;
@@ -187,11 +193,13 @@ library NavigatorStakingUtils {
   }
 
   /// @notice Get the minimum stake required to register
+  /// @return The minimum B3TR stake amount
   function getMinStake() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().minStake;
   }
 
   /// @notice Get the current maximum stake allowed
+  /// @return The maximum B3TR stake amount (based on VOT3 supply)
   function getMaxStake() external view returns (uint256) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     return _getMaxStake($);

@@ -10,11 +10,12 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// Anyone can call the report functions — contract verifies on-chain.
 /// Slashed funds sent to treasury.
 ///
-/// Four minor infraction triggers:
+/// Five minor infraction triggers:
 /// 1. Missed allocation vote (had citizens, didn't set preferences for a round)
 /// 2. Missed governance proposal vote (had citizens, didn't set decision during voting period)
 /// 3. Stale allocation preferences (no update >= 3 rounds)
 /// 4. Missed report (must submit every reportInterval rounds)
+/// 5. Late preferences (set after preferenceCutoffPeriod before round deadline)
 library NavigatorSlashingUtils {
   uint256 private constant BASIS_POINTS = 10000;
 
@@ -208,11 +209,14 @@ library NavigatorSlashingUtils {
   // ======================== Getters ======================== //
 
   /// @notice Get the total amount slashed from a navigator over their lifetime
+  /// @param navigator The navigator address
+  /// @return The total B3TR amount slashed
   function getTotalSlashed(address navigator) external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().totalSlashed[navigator];
   }
 
   /// @notice Get the minor slash percentage in basis points
+  /// @return The minor slash percentage in basis points (e.g., 1000 = 10%)
   function getMinorSlashPercentage() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().minorSlashPercentage;
   }

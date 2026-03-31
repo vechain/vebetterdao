@@ -6,9 +6,10 @@ import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
 /// @title NavigatorVotingUtils
 /// @notice Handles navigator voting decisions for allocation rounds and governance proposals.
 /// @dev Navigators set their preferences/decisions, which also counts as their own vote.
-/// - Allocation: app preferences (bytes32[] of app IDs, equal weight distribution)
+/// - Allocation: app preferences with custom percentage distribution (basis points, must sum to 10000)
 /// - Governance: per-proposal decision (Against=1, For=2, Abstain=3; 0=not set)
 /// - Votes for citizens are BLOCKED until navigator sets their decision
+/// - preferencesSetBlock records when preferences were set (for late preferences slashing)
 library NavigatorVotingUtils {
   uint256 private constant BASIS_POINTS = 10000;
   // ======================== Events ======================== //
@@ -101,6 +102,8 @@ library NavigatorVotingUtils {
   }
 
   /// @notice Get allocation preferences for a navigator in a round
+  /// @param navigator The navigator address
+  /// @param roundId The allocation round ID
   function getAllocationPreferences(
     address navigator,
     uint256 roundId
@@ -110,11 +113,17 @@ library NavigatorVotingUtils {
   }
 
   /// @notice Check if a navigator has set preferences for a round
+  /// @param navigator The navigator address
+  /// @param roundId The allocation round ID
+  /// @return True if preferences have been set
   function hasSetPreferences(address navigator, uint256 roundId) external view returns (bool) {
     return NavigatorStorageTypes.getNavigatorStorage().preferencesSet[navigator][roundId];
   }
 
   /// @notice Get the block number when preferences were set (0 if not set)
+  /// @param navigator The navigator address
+  /// @param roundId The allocation round ID
+  /// @return The block number when preferences were set, or 0 if not set
   function getPreferencesSetBlock(address navigator, uint256 roundId) external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().preferencesSetBlock[navigator][roundId];
   }
@@ -140,6 +149,8 @@ library NavigatorVotingUtils {
   }
 
   /// @notice Get a navigator's decision for a proposal
+  /// @param navigator The navigator address
+  /// @param proposalId The governance proposal ID
   /// @return decision The vote decision (1=Against, 2=For, 3=Abstain)
   function getProposalDecision(address navigator, uint256 proposalId) external view returns (uint8) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
@@ -149,6 +160,9 @@ library NavigatorVotingUtils {
   }
 
   /// @notice Check if a navigator has set a decision for a proposal
+  /// @param navigator The navigator address
+  /// @param proposalId The governance proposal ID
+  /// @return True if a decision has been set
   function hasSetDecision(address navigator, uint256 proposalId) external view returns (bool) {
     return NavigatorStorageTypes.getNavigatorStorage().proposalDecision[navigator][proposalId] != 0;
   }

@@ -117,6 +117,7 @@ library NavigatorStorageTypes {
   }
 
   /// @notice Returns the navigator storage slot
+  /// @return $ The NavigatorStorage struct at the namespaced storage slot
   function getNavigatorStorage() internal pure returns (NavigatorStorage storage $) {
     assembly {
       $.slot := NavigatorStorageLocation

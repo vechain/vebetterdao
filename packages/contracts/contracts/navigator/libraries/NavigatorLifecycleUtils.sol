@@ -7,13 +7,15 @@ import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
 /// @notice Handles navigator exit process, deactivation, and profile/report management.
 /// @dev Exit flow:
 /// 1. Navigator calls announceExit() — emits event, citizens notified
-/// 2. Navigator must continue voting during notice period (1 round, governance-configurable)
-/// 3. After notice period: all delegations auto-cease
+/// 2. Lazy invalidation: citizen delegations become void immediately at view level
+///    (isDelegated=false, getDelegatedAmount=0, VOT3 auto-unlocked)
+/// 3. Navigator must continue voting during notice period (1 round, governance-configurable)
 /// 4. Navigator calls finalizeExit() — stake available immediately, locked fees on schedule
-/// 5. Re-entry requires fresh registration
+/// 5. Citizens can re-delegate to new navigator without calling undelegate (auto-clear)
+/// 6. Re-entry requires fresh registration
 ///
 /// Deactivation (by governance):
-/// - Takes effect next round, current round completes normally
+/// - Same lazy invalidation applies (citizen VOT3 auto-unlocked)
 /// - Cannot reactivate — must register fresh
 library NavigatorLifecycleUtils {
   // ======================== Events ======================== //
@@ -92,6 +94,9 @@ library NavigatorLifecycleUtils {
   }
 
   /// @notice Check if a navigator's exit notice period has elapsed
+  /// @param navigator The navigator address
+  /// @param currentRound The current round ID
+  /// @return True if the exit notice period has elapsed
   function isExitReady(address navigator, uint256 currentRound) external view returns (bool) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     uint256 announcedRound = $.exitAnnouncedRound[navigator];
@@ -100,6 +105,8 @@ library NavigatorLifecycleUtils {
   }
 
   /// @notice Check if a navigator is in the exit process
+  /// @param navigator The navigator address
+  /// @return True if the navigator has announced exit
   function isExiting(address navigator) external view returns (bool) {
     return NavigatorStorageTypes.getNavigatorStorage().exitAnnouncedRound[navigator] > 0;
   }
@@ -121,6 +128,8 @@ library NavigatorLifecycleUtils {
   }
 
   /// @notice Check if a navigator is deactivated
+  /// @param navigator The navigator address
+  /// @return True if the navigator has been deactivated by governance
   function isDeactivated(address navigator) external view returns (bool) {
     return NavigatorStorageTypes.getNavigatorStorage().isDeactivated[navigator];
   }
@@ -155,26 +164,34 @@ library NavigatorLifecycleUtils {
   }
 
   /// @notice Get navigator metadata URI
+  /// @param navigator The navigator address
+  /// @return The metadata URI string
   function getMetadataURI(address navigator) external view returns (string memory) {
     return NavigatorStorageTypes.getNavigatorStorage().metadataURI[navigator];
   }
 
   /// @notice Get the round of the navigator's last report
+  /// @param navigator The navigator address
+  /// @return The round ID of the last submitted report
   function getLastReportRound(address navigator) external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().lastReportRound[navigator];
   }
 
   /// @notice Get the navigator's last report URI
+  /// @param navigator The navigator address
+  /// @return The last report metadata URI string
   function getLastReportURI(address navigator) external view returns (string memory) {
     return NavigatorStorageTypes.getNavigatorStorage().lastReportURI[navigator];
   }
 
   /// @notice Get the exit notice period (in rounds)
+  /// @return The number of rounds in the exit notice period
   function getExitNoticePeriod() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().exitNoticePeriod;
   }
 
   /// @notice Get the report interval (in rounds)
+  /// @return The number of rounds between required reports
   function getReportInterval() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().reportInterval;
   }

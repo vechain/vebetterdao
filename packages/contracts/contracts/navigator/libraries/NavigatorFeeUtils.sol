@@ -84,16 +84,21 @@ library NavigatorFeeUtils {
   // ======================== Getters ======================== //
 
   /// @notice Get the fee amount for a navigator in a specific round
+  /// @param navigator The navigator address
+  /// @param roundId The round ID
+  /// @return The accumulated fee amount in B3TR
   function getRoundFee(address navigator, uint256 roundId) external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().roundFees[navigator][roundId];
   }
 
   /// @notice Get the fee lock period (number of rounds)
+  /// @return The number of rounds fees are locked before becoming claimable
   function getFeeLockPeriod() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().feeLockPeriod;
   }
 
   /// @notice Get the fee percentage in basis points
+  /// @return The fee percentage in basis points (e.g., 2000 = 20%)
   function getFeePercentage() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().feePercentage;
   }
@@ -101,6 +106,7 @@ library NavigatorFeeUtils {
   /// @notice Check if fees for a round are unlocked
   /// @param roundId The round to check
   /// @param currentRound The current round ID
+  /// @return True if the fee lock period has elapsed
   function isRoundFeeUnlocked(uint256 roundId, uint256 currentRound) external view returns (bool) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     return currentRound >= roundId + $.feeLockPeriod;

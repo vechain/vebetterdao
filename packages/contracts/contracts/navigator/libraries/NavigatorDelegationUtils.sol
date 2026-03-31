@@ -168,6 +168,8 @@ library NavigatorDelegationUtils {
   // ======================== Getters ======================== //
 
   /// @notice Get the navigator a citizen is delegated to (address(0) if delegation is void)
+  /// @param citizen The citizen address
+  /// @return The navigator address, or address(0) if not delegated or delegation is void
   function getNavigator(address citizen) external view returns (address) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     address nav = $.citizenToNavigator[citizen];
@@ -178,6 +180,8 @@ library NavigatorDelegationUtils {
   }
 
   /// @notice Get the current VOT3 amount a citizen has delegated (0 if delegation is void)
+  /// @param citizen The citizen address
+  /// @return The delegated VOT3 amount
   function getDelegatedAmount(address citizen) external view returns (uint256) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     address nav = $.citizenToNavigator[citizen];
@@ -188,6 +192,9 @@ library NavigatorDelegationUtils {
 
   /// @notice Get the delegated amount at a past block (for snapshot-based voting power)
   /// @dev Does NOT apply lazy invalidation — historical data is preserved for reward calculation
+  /// @param citizen The citizen address
+  /// @param timepoint The block number to query
+  /// @return The delegated VOT3 amount at the given block
   function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256) {
     return uint256(
       NavigatorStorageTypes.getNavigatorStorage().delegatedAmount[citizen].upperLookupRecent(
@@ -197,21 +204,29 @@ library NavigatorDelegationUtils {
   }
 
   /// @notice Get total VOT3 delegated to a navigator
+  /// @param navigator The navigator address
+  /// @return The total VOT3 delegated to the navigator
   function getTotalDelegated(address navigator) external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().totalDelegatedToNavigator[navigator];
   }
 
   /// @notice Get list of citizens delegating to a navigator
+  /// @param navigator The navigator address
+  /// @return Array of citizen addresses delegating to the navigator
   function getCitizens(address navigator) external view returns (address[] memory) {
     return NavigatorStorageTypes.getNavigatorStorage().navigatorCitizens[navigator];
   }
 
   /// @notice Get number of citizens delegating to a navigator
+  /// @param navigator The navigator address
+  /// @return The number of citizens delegating to the navigator
   function getCitizenCount(address navigator) external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().navigatorCitizens[navigator].length;
   }
 
   /// @notice Check if a citizen has an active delegation (false if navigator exited/deactivated)
+  /// @param citizen The citizen address
+  /// @return True if the citizen has an active delegation
   function isDelegated(address citizen) external view returns (bool) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     address nav = $.citizenToNavigator[citizen];
