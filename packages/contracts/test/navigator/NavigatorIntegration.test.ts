@@ -1,0 +1,487 @@
+import { ethers } from "hardhat"
+import { expect } from "chai"
+import { describe, it, beforeEach } from "mocha"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+
+import { getOrDeployContractInstances } from "../helpers/deploy"
+import {
+  bootstrapAndStartEmissions,
+  getVot3Tokens,
+  waitForRoundToEnd,
+  waitForNextBlock,
+  createProposal,
+  payDeposit,
+  waitForProposalToBeActive,
+  getProposalIdFromTx,
+} from "../helpers/common"
+import { endorseApp } from "../helpers/xnodes"
+import {
+  B3TR,
+  VOT3,
+  NavigatorRegistry,
+  XAllocationVoting,
+  Emissions,
+  VoterRewards,
+  VeBetterPassport,
+  B3TRGovernor,
+  X2EarnApps,
+  RelayerRewardsPool,
+  GovernorVotesLogic,
+} from "../../typechain-types"
+import { GovernorVotesLogic__factory } from "../../typechain-types/factories/contracts/governance/libraries/GovernorVotesLogic__factory"
+
+describe("NavigatorRegistry Integration - @shard19g", function () {
+  let navigatorRegistry: NavigatorRegistry
+  let xAllocationVoting: XAllocationVoting
+  let governor: B3TRGovernor
+  let voterRewards: VoterRewards
+  let b3tr: B3TR
+  let vot3: VOT3
+  let emissions: Emissions
+  let veBetterPassport: VeBetterPassport
+  let x2EarnApps: X2EarnApps
+  let relayerRewardsPool: RelayerRewardsPool
+  let governorVotesLogicLib: GovernorVotesLogic
+
+  let owner: HardhatEthersSigner
+  let minterAccount: HardhatEthersSigner
+  let otherAccounts: HardhatEthersSigner[]
+  let creators: HardhatEthersSigner[]
+
+  let navigator: HardhatEthersSigner
+  let citizen: HardhatEthersSigner
+  let relayer: HardhatEthersSigner
+
+  let app1Id: string
+  let app2Id: string
+
+  const STAKE_AMOUNT = ethers.parseEther("50000")
+  const DELEGATE_AMOUNT = ethers.parseEther("500")
+  const CITIZEN_VOT3 = "1000"
+  const METADATA_URI = "ipfs://nav-meta"
+
+  // Helper: fund B3TR to an account and approve NavigatorRegistry
+  const fundAndApprove = async (account: HardhatEthersSigner, amount: bigint) => {
+    await b3tr.connect(owner).transfer(account.address, amount)
+    await b3tr.connect(account).approve(await navigatorRegistry.getAddress(), amount)
+  }
+
+  /**
+   * Full ecosystem bootstrap:
+   * - Deploy all contracts fresh
+   * - Create and endorse 2 apps
+   * - Register a navigator with B3TR stake
+   * - Get VOT3 for citizen and delegate to navigator
+   * - Whitelist citizen in passport
+   * - Bootstrap and start emissions
+   */
+  async function setupFullEcosystem() {
+    const deployment = await getOrDeployContractInstances({ forceDeploy: true })
+    if (!deployment) throw new Error("Failed to deploy contracts")
+
+    navigatorRegistry = deployment.navigatorRegistry
+    xAllocationVoting = deployment.xAllocationVoting
+    governor = deployment.governor
+    voterRewards = deployment.voterRewards
+    b3tr = deployment.b3tr
+    vot3 = deployment.vot3
+    emissions = deployment.emissions
+    veBetterPassport = deployment.veBetterPassport
+    x2EarnApps = deployment.x2EarnApps
+    relayerRewardsPool = deployment.relayerRewardsPool
+    governorVotesLogicLib = deployment.governorVotesLogicLib
+    owner = deployment.owner
+    minterAccount = deployment.minterAccount
+    otherAccounts = deployment.otherAccounts
+    creators = deployment.creators
+
+    navigator = otherAccounts[10]
+    citizen = otherAccounts[11]
+    relayer = otherAccounts[12]
+
+    // Mint B3TR to owner for distribution
+    await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("10000000"))
+
+    // Create VOT3 supply (maxStakePercentage requires enough VOT3 supply for 50k B3TR stake)
+    await getVot3Tokens(otherAccounts[15], "10000000")
+
+    // Register navigator
+    await fundAndApprove(navigator, STAKE_AMOUNT)
+    await navigatorRegistry.connect(navigator).register(STAKE_AMOUNT, METADATA_URI)
+
+    // Create and endorse 2 apps (each app needs a unique creator with their own NFT)
+    const creator1 = creators[0] // otherAccounts[0]
+    const creator2 = creators[1] // otherAccounts[1]
+    await x2EarnApps.connect(creator1).submitApp(creator1.address, creator1.address, "IntegrationApp1", "metadataURI")
+    app1Id = await x2EarnApps.hashAppName("IntegrationApp1")
+    await endorseApp(app1Id, otherAccounts[3])
+
+    await x2EarnApps.connect(creator2).submitApp(creator2.address, creator2.address, "IntegrationApp2", "metadataURI")
+    app2Id = await x2EarnApps.hashAppName("IntegrationApp2")
+    await endorseApp(app2Id, otherAccounts[4])
+
+    // Get VOT3 for citizen
+    await getVot3Tokens(citizen, CITIZEN_VOT3)
+
+    // Whitelist citizen in passport
+    await veBetterPassport.whitelist(citizen.address)
+    if (!(await veBetterPassport.isCheckEnabled(1))) {
+      await veBetterPassport.toggleCheck(1)
+    }
+
+    // Register relayer on the relayer rewards pool (required for early access period)
+    await relayerRewardsPool.registerRelayer(relayer.address)
+
+    // Bootstrap and start emissions
+    await bootstrapAndStartEmissions()
+
+    // Wait one block so delegation snapshot is after emissions start
+    await waitForNextBlock()
+
+    // Citizen delegates 500 VOT3 to navigator
+    await navigatorRegistry.connect(citizen).delegate(navigator.address, DELEGATE_AMOUNT)
+
+    // Wait a block so the delegation checkpoint is recorded
+    await waitForNextBlock()
+  }
+
+  // ======================== 1. XAllocationVoting: castNavigatorVote ======================== //
+
+  describe("castNavigatorVote on XAllocationVoting", function () {
+    let roundId: bigint
+
+    beforeEach(async function () {
+      await setupFullEcosystem()
+
+      // Start a new round so the delegation snapshot captures the delegation
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      roundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator sets allocation preferences: 60/40 split
+      await navigatorRegistry.connect(navigator).setAllocationPreferences(roundId, [app1Id, app2Id], [6000, 4000])
+    })
+
+    it("happy path: cast vote, verify vote counted in round totals", async function () {
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      expect(await xAllocationVoting.hasVoted(roundId, citizen.address)).to.be.true
+      const totalVotes = await xAllocationVoting.totalVotes(roundId)
+      expect(totalVotes).to.equal(DELEGATE_AMOUNT)
+    })
+
+    it("voting power equals delegated amount (500), not full balance (1000)", async function () {
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      // Total votes should be 500 (delegated), not 1000 (full VOT3 balance)
+      const totalVotes = await xAllocationVoting.totalVotes(roundId)
+      expect(totalVotes).to.equal(ethers.parseEther("500"))
+
+      // Citizen has 1000 VOT3 total
+      const citizenBalance = await vot3.balanceOf(citizen.address)
+      expect(citizenBalance).to.equal(ethers.parseEther("1000"))
+    })
+
+    it("60/40 split: app1 gets 300 weight, app2 gets 200 weight", async function () {
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      // 500 * 6000/10000 = 300
+      const app1Votes = await xAllocationVoting.getAppVotes(roundId, app1Id)
+      expect(app1Votes).to.equal(ethers.parseEther("300"))
+
+      // 500 * 4000/10000 = 200
+      const app2Votes = await xAllocationVoting.getAppVotes(roundId, app2Id)
+      expect(app2Votes).to.equal(ethers.parseEther("200"))
+
+      // Total = 300 + 200 = 500
+      const totalVotes = await xAllocationVoting.totalVotes(roundId)
+      expect(totalVotes).to.equal(ethers.parseEther("500"))
+    })
+
+    it("reverts NotDelegatedToNavigator when citizen is not delegated", async function () {
+      const nonDelegated = otherAccounts[13]
+      await getVot3Tokens(nonDelegated, "1000")
+      await veBetterPassport.whitelist(nonDelegated.address)
+
+      await expect(
+        xAllocationVoting.connect(relayer).castNavigatorVote(nonDelegated.address, roundId),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "NotDelegatedToNavigator")
+    })
+
+    it("reverts NavigatorPreferencesNotSet when navigator has no preferences", async function () {
+      // Start another round where navigator hasn't set preferences
+      await waitForRoundToEnd(Number(roundId))
+      await emissions.distribute()
+      const newRoundId = await xAllocationVoting.currentRoundId()
+
+      await expect(
+        xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, newRoundId),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "NavigatorPreferencesNotSet")
+    })
+
+    it("relayer action VOTE is registered for caller", async function () {
+      const weightedBefore = await relayerRewardsPool.totalRelayerWeightedActions(relayer.address, roundId)
+
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      const weightedAfter = await relayerRewardsPool.totalRelayerWeightedActions(relayer.address, roundId)
+      expect(weightedAfter).to.be.gt(weightedBefore)
+    })
+  })
+
+  // ======================== 2. B3TRGovernor: castNavigatorVote ======================== //
+
+  describe("castNavigatorVote on B3TRGovernor", function () {
+    let roundId: bigint
+    let proposalId: bigint
+
+    beforeEach(async function () {
+      await setupFullEcosystem()
+
+      // Advance to a new round so delegation snapshot is captured
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      roundId = await xAllocationVoting.currentRoundId()
+
+      // Give owner VOT3 to create proposals (needs enough for deposit)
+      await getVot3Tokens(owner, "300000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(b3tr, await ethers.getContractFactory("B3TR"), owner, "Nav integration test")
+      proposalId = await getProposalIdFromTx(tx)
+
+      // Pay deposit and wait for proposal to become active
+      await payDeposit(proposalId.toString(), owner)
+      await waitForProposalToBeActive(proposalId)
+
+      // Navigator sets decision: 2 = For (stored as 1-indexed: 1=Against, 2=For, 3=Abstain)
+      await navigatorRegistry.connect(navigator).setProposalDecision(proposalId, 2)
+    })
+
+    it("happy path: cast navigator vote, verify vote counted as For", async function () {
+      await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
+
+      expect(await governor.hasVoted(proposalId, citizen.address)).to.be.true
+
+      // proposalVotes returns (againstVotes, forVotes, abstainVotes)
+      const [, forVotes] = await governor.proposalVotes(proposalId)
+      // forVotes should include the citizen's delegated amount (sqrt-based power)
+      expect(forVotes).to.be.gt(0n)
+    })
+
+    it("voting power equals delegated amount at proposal snapshot", async function () {
+      const tx = await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
+      const receipt = await tx.wait()
+
+      // Find NavigatorGovernanceVoteCast event (emitted from GovernorVotesLogic library)
+      const libraryInterface = GovernorVotesLogic__factory.createInterface()
+      const event = receipt?.logs
+        .map(log => {
+          try {
+            return libraryInterface.parseLog({ topics: [...log.topics], data: log.data })
+          } catch {
+            return null
+          }
+        })
+        .find(e => e?.name === "NavigatorGovernanceVoteCast")
+
+      expect(event).to.not.be.undefined
+      // weight arg (index 4) should equal DELEGATE_AMOUNT
+      expect(event?.args[4]).to.equal(DELEGATE_AMOUNT)
+    })
+
+    it("reverts NavigatorDecisionNotSet when no decision set", async function () {
+      // Create a new proposal without setting a navigator decision
+      // Use proposalId's round + 1 to avoid advancing rounds
+      const nextRound = (await xAllocationVoting.currentRoundId()) + 1n
+      const tx2 = await createProposal(
+        b3tr,
+        await ethers.getContractFactory("B3TR"),
+        owner,
+        "No decision proposal",
+        "tokenDetails",
+        [],
+        nextRound.toString(),
+      )
+      const newProposalId = await getProposalIdFromTx(tx2)
+      await payDeposit(newProposalId.toString(), owner)
+      await waitForProposalToBeActive(newProposalId)
+
+      await expect(
+        governor.connect(relayer).castNavigatorVote(newProposalId, citizen.address),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "DecisionNotSet")
+    })
+
+    it("reverts NotDelegatedToNavigator when citizen is not delegated", async function () {
+      const nonDelegated = otherAccounts[14]
+
+      await expect(
+        governor.connect(relayer).castNavigatorVote(proposalId, nonDelegated.address),
+      ).to.be.revertedWithCustomError(governorVotesLogicLib, "NotDelegatedToNavigator")
+    })
+  })
+
+  // ======================== 3. VoterRewards: fee deduction ======================== //
+
+  describe("VoterRewards fee deduction", function () {
+    let roundId: bigint
+
+    beforeEach(async function () {
+      await setupFullEcosystem()
+
+      // Advance to a new round
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      roundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator sets preferences and casts vote for citizen
+      await navigatorRegistry.connect(navigator).setAllocationPreferences(roundId, [app1Id, app2Id], [6000, 4000])
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      // End the round so rewards can be claimed
+      await waitForRoundToEnd(Number(roundId))
+      await emissions.distribute()
+    })
+
+    it("navigator fee is deducted from citizen's gross reward on claim", async function () {
+      // getReward returns netReward (after all fees), so compute gross from components
+      const netReward = await voterRewards.getReward(roundId, citizen.address)
+      const netGmReward = await voterRewards.getGMReward(roundId, citizen.address)
+      const relayerFee = await voterRewards.getRelayerFee(roundId, citizen.address)
+      const navigatorFee = await voterRewards.getNavigatorFee(roundId, citizen.address)
+      const grossReward = netReward + netGmReward + relayerFee + navigatorFee
+
+      expect(grossReward).to.be.gt(0n)
+      expect(navigatorFee).to.be.gt(0n)
+
+      // Claim reward
+      const citizenBalanceBefore = await b3tr.balanceOf(citizen.address)
+      await voterRewards.connect(relayer).claimReward(roundId, citizen.address)
+      const citizenBalanceAfter = await b3tr.balanceOf(citizen.address)
+
+      // Citizen receives netReward + netGmReward, less than gross reward
+      const received = citizenBalanceAfter - citizenBalanceBefore
+      expect(received).to.equal(netReward + netGmReward)
+      expect(received).to.be.lt(grossReward)
+    })
+
+    it("navigator fee = feePercentage (2000 = 20%) of gross reward", async function () {
+      const feePercentage = await navigatorRegistry.getFeePercentage()
+      expect(feePercentage).to.equal(2000n)
+
+      // Compute gross reward from all components
+      const netReward = await voterRewards.getReward(roundId, citizen.address)
+      const netGmReward = await voterRewards.getGMReward(roundId, citizen.address)
+      const relayerFee = await voterRewards.getRelayerFee(roundId, citizen.address)
+      const navigatorFee = await voterRewards.getNavigatorFee(roundId, citizen.address)
+      const grossReward = netReward + netGmReward + relayerFee + navigatorFee
+
+      // Fee should be 20% of gross reward
+      const expectedFee = (grossReward * 2000n) / 10000n
+      expect(navigatorFee).to.equal(expectedFee)
+    })
+
+    it("relayer fee is applied on remainder after navigator fee", async function () {
+      const grossReward = await voterRewards.getReward(roundId, citizen.address)
+      const navigatorFee = await voterRewards.getNavigatorFee(roundId, citizen.address)
+      const relayerFee = await voterRewards.getRelayerFee(roundId, citizen.address)
+
+      // Relayer fee is computed on (grossReward - navigatorFee), not on grossReward
+      const afterNavFee = grossReward - navigatorFee
+
+      // Use the pool's own calculation to verify
+      const expectedRelayerFee = await relayerRewardsPool.calculateRelayerFee(afterNavFee)
+
+      expect(relayerFee).to.equal(expectedRelayerFee)
+    })
+
+    it("fee deposited to NavigatorRegistry (check getRoundFee)", async function () {
+      const feeBefore = await navigatorRegistry.getRoundFee(navigator.address, roundId)
+      expect(feeBefore).to.equal(0n)
+
+      // Read navigator fee before claim (claim resets cycle data)
+      const navigatorFee = await voterRewards.getNavigatorFee(roundId, citizen.address)
+      expect(navigatorFee).to.be.gt(0n)
+
+      await voterRewards.connect(relayer).claimReward(roundId, citizen.address)
+
+      const feeAfter = await navigatorRegistry.getRoundFee(navigator.address, roundId)
+      expect(feeAfter).to.be.gt(0n)
+
+      // Should match the navigator fee amount
+      expect(feeAfter).to.equal(navigatorFee)
+    })
+
+    it("getNavigatorFee view returns correct amount before claim", async function () {
+      // Compute gross reward from all components
+      const netReward = await voterRewards.getReward(roundId, citizen.address)
+      const netGmReward = await voterRewards.getGMReward(roundId, citizen.address)
+      const relayerFee = await voterRewards.getRelayerFee(roundId, citizen.address)
+      const navigatorFee = await voterRewards.getNavigatorFee(roundId, citizen.address)
+      const grossReward = netReward + netGmReward + relayerFee + navigatorFee
+
+      // Verify the fee matches manual calculation
+      const feePercentage = await navigatorRegistry.getFeePercentage()
+      const expected = (grossReward * feePercentage) / 10000n
+      expect(navigatorFee).to.equal(expected)
+
+      // Verify it's not zero (citizen did vote and has rewards)
+      expect(navigatorFee).to.be.gt(0n)
+    })
+  })
+
+  // ======================== 4. VOT3 lock integration ======================== //
+
+  describe("VOT3 lock integration", function () {
+    beforeEach(async function () {
+      await setupFullEcosystem()
+    })
+
+    it("delegate 500 of 1000: transfer 500 OK, transfer 501 fails", async function () {
+      // Citizen has 1000 VOT3, 500 delegated => 500 unlocked
+      const recipient = otherAccounts[9]
+
+      // Transfer 500 should succeed (exactly the unlocked portion)
+      await expect(vot3.connect(citizen).transfer(recipient.address, ethers.parseEther("500"))).to.not.be.reverted
+
+      // Get citizen new balance (should be 500 — all locked)
+      const balance = await vot3.balanceOf(citizen.address)
+      expect(balance).to.equal(ethers.parseEther("500"))
+
+      // Attempting to transfer even 1 wei should fail now (entire balance is locked)
+      await expect(vot3.connect(citizen).transfer(recipient.address, 1n)).to.be.revertedWith(
+        "VOT3: transfer exceeds unlocked balance",
+      )
+    })
+
+    it("undelegate: transfer full balance OK", async function () {
+      // Undelegate first
+      await navigatorRegistry.connect(citizen).undelegate()
+
+      // Now citizen should be able to transfer full 1000 VOT3
+      const balance = await vot3.balanceOf(citizen.address)
+      expect(balance).to.equal(ethers.parseEther("1000"))
+
+      const recipient = otherAccounts[9]
+      await expect(vot3.connect(citizen).transfer(recipient.address, ethers.parseEther("1000"))).to.not.be.reverted
+
+      expect(await vot3.balanceOf(citizen.address)).to.equal(0n)
+    })
+
+    it("convertToB3TR: blocked for locked portion, allowed for unlocked", async function () {
+      // Citizen has 1000 VOT3, 500 delegated
+      // Converting 500 (unlocked) should succeed
+      await vot3.connect(citizen).convertToB3TR(ethers.parseEther("500"))
+      expect(await vot3.balanceOf(citizen.address)).to.equal(ethers.parseEther("500"))
+
+      // Converting 1 more should fail (all remaining 500 is locked)
+      await expect(vot3.connect(citizen).convertToB3TR(1n)).to.be.revertedWith(
+        "VOT3: transfer exceeds unlocked balance",
+      )
+    })
+  })
+})
