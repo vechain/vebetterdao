@@ -1,9 +1,14 @@
 import { connectWithVeWorld, expect, test } from "../../src/fixtures/veworld"
 
-test("connects VeWorld from the navbar", async ({ appPage }) => {
+test("connects VeWorld from the navbar", async ({ appPage, extensionPage }) => {
   await expect(appPage.getByRole("button", { name: /^login$/i }).first()).toBeVisible()
 
-  await connectWithVeWorld(appPage)
+  const creatorSubmissionResponse = appPage.waitForResponse(
+    response => response.url().includes("/api/app/creator/submission?walletAddress=") && response.status() === 200,
+    { timeout: 120_000 },
+  )
 
-  await expect(appPage.getByTestId("wallet-connected")).toBeVisible()
+  await connectWithVeWorld(appPage, extensionPage)
+
+  await creatorSubmissionResponse
 })

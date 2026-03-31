@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process"
-import { access, mkdir, rm } from "node:fs/promises"
+import { access, mkdir, readdir, rm } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import { promisify } from "node:util"
@@ -10,6 +10,15 @@ const execFileAsync = promisify(execFile)
 const unpackDir = path.join(os.tmpdir(), "b3tr-e2e-veworld")
 
 let cachedExtensionPath: string | undefined
+
+const hasManifest = async (candidatePath: string) => {
+  try {
+    await access(path.join(candidatePath, "manifest.json"))
+    return true
+  } catch {
+    return false
+  }
+}
 
 export const ensureVeWorldExtensionPath = async () => {
   if (cachedExtensionPath) return cachedExtensionPath
@@ -24,9 +33,18 @@ export const ensureVeWorldExtensionPath = async () => {
   await mkdir(unpackDir, { recursive: true })
   await execFileAsync("unzip", ["-o", extensionZipPath, "-d", unpackDir])
 
-  const resolvedExtensionPath = path.join(unpackDir, "veworld-dist")
-  await access(path.join(resolvedExtensionPath, "manifest.json"))
+  const directoryEntries = await readdir(unpackDir, { withFileTypes: true })
+  const candidatePaths = [
+    unpackDir,
+    ...directoryEntries.filter(entry => entry.isDirectory()).map(entry => path.join(unpackDir, entry.name)),
+  ]
 
-  cachedExtensionPath = resolvedExtensionPath
-  return cachedExtensionPath
+  for (const candidatePath of candidatePaths) {
+    if (await hasManifest(candidatePath)) {
+      cachedExtensionPath = candidatePath
+      return cachedExtensionPath
+    }
+  }
+
+  throw new Error(`VeWorld manifest.json not found in "${extensionZipPath}"`)
 }

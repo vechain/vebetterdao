@@ -5,6 +5,7 @@ import { decodeEventLog, ThorClient, executeMultipleClausesCall } from "@vechain
 import { ethers } from "ethers"
 
 import {
+  ChallengeKind,
   ChallengeDetail,
   SettlementMode,
   ChallengeStatus,
@@ -144,6 +145,10 @@ function parseChallengeView(
         (settlementMode === SettlementMode.QualifiedSplit
           ? viewerActions >= thresholdValue
           : viewerActions === bestScore))
+  const canRefund =
+    !hasRefunded &&
+    (status === ChallengeStatus.Cancelled || status === ChallengeStatus.Invalid) &&
+    (kind === ChallengeKind.Stake ? isJoined : isCreator)
 
   return {
     challengeId,
@@ -176,10 +181,7 @@ function parseChallengeView(
     canCancel: isPending && isCreator,
     canAddInvites,
     canClaim,
-    canRefund:
-      !hasRefunded &&
-      (status === ChallengeStatus.Cancelled || status === ChallengeStatus.Invalid) &&
-      (isJoined || isCreator),
+    canRefund,
     canFinalize: status === ChallengeStatus.Active && endRound < currentRound,
   }
 }
