@@ -54,6 +54,9 @@ library NavigatorDelegationUtils {
   /// @notice Thrown when trying to undelegate more than delegated
   error InsufficientDelegation(uint256 requested, uint256 available);
 
+  /// @notice Thrown when navigator tries to delegate to themselves
+  error SelfDelegationNotAllowed(address account);
+
   // ======================== Delegation ======================== //
 
   /// @notice Delegate VOT3 to a navigator
@@ -66,6 +69,9 @@ library NavigatorDelegationUtils {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
 
     if (amount == 0) revert ZeroDelegationAmount();
+
+    // Navigator cannot delegate to themselves
+    if (citizen == navigator) revert SelfDelegationNotAllowed(citizen);
 
     // Citizen must not already be delegated
     if ($.citizenToNavigator[citizen] != address(0)) {

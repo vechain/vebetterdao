@@ -255,7 +255,7 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
 
       // Pay deposit and wait for proposal to become active
       await payDeposit(proposalId.toString(), owner)
-      await waitForProposalToBeActive(proposalId)
+      await waitForProposalToBeActive(Number(proposalId))
 
       // Navigator sets decision: 2 = For (stored as 1-indexed: 1=Against, 2=For, 3=Abstain)
       await navigatorRegistry.connect(navigator).setProposalDecision(proposalId, 2)

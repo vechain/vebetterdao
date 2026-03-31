@@ -195,6 +195,12 @@ contract XAllocationVoting is
       revert AutoVotingEnabled(_msgSender());
     }
 
+    // Citizens delegated to a navigator cannot vote manually
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    if (address(navRegistry) != address(0) && navRegistry.isDelegated(_msgSender())) {
+      revert DelegatedToNavigator(_msgSender());
+    }
+
     validatePersonhoodForCurrentRound(_msgSender());
 
     _handleCastVote(_msgSender(), roundId, appIds, voteWeights, false);
@@ -386,6 +392,14 @@ contract XAllocationVoting is
     if (_msgSender() != user) {
       revert InvalidCaller(_msgSender());
     }
+
+    // Navigators and delegated citizens cannot enable auto-voting
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    if (address(navRegistry) != address(0)) {
+      if (navRegistry.isNavigator(user)) revert NavigatorCannotEnableAutoVoting(user);
+      if (navRegistry.isDelegated(user)) revert DelegatedToNavigator(user);
+    }
+
     AutoVotingLogic.toggleAutoVoting(address(this), user, VotesUtils.clock());
   }
 

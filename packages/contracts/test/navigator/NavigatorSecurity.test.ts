@@ -549,4 +549,108 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       expect(navigatorFee + relayerFee + citizenNet).to.equal(grossReward)
     })
   })
+
+  // ======================== 6. Contract-Level Protections ======================== //
+
+  describe("Contract-level protections", function () {
+    it("self-delegation: navigator cannot delegate to themselves", async function () {
+      const navigator1 = otherAccounts[10]
+      await registerNavigator(navigator1)
+      await getVot3Tokens(navigator1, "1000")
+
+      await expect(
+        navigatorRegistry.connect(navigator1).delegate(navigator1.address, ethers.parseEther("500")),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "SelfDelegationNotAllowed")
+    })
+
+    it("delegated citizen cannot castVote manually on XAllocationVoting", async function () {
+      const navigator1 = otherAccounts[10]
+      const citizen = otherAccounts[11]
+
+      await registerNavigator(navigator1)
+      await getVot3Tokens(citizen, "1000")
+      await navigatorRegistry.connect(citizen).delegate(navigator1.address, ethers.parseEther("500"))
+
+      await bootstrapAndStartEmissions()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Whitelist citizen for personhood
+      await veBetterPassport.connect(owner).whitelist(citizen.address)
+
+      const appId = ethers.keccak256(ethers.toUtf8Bytes("TestApp"))
+      await expect(
+        xAllocationVoting.connect(citizen).castVote(roundId, [appId], [ethers.parseEther("100")]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "DelegatedToNavigator")
+    })
+
+    it("navigator cannot enable auto-voting", async function () {
+      const navigator1 = otherAccounts[10]
+      await registerNavigator(navigator1)
+
+      await expect(
+        xAllocationVoting.connect(navigator1).toggleAutoVoting(navigator1.address),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "NavigatorCannotEnableAutoVoting")
+    })
+
+    it("delegated citizen cannot enable auto-voting", async function () {
+      const navigator1 = otherAccounts[10]
+      const citizen = otherAccounts[11]
+
+      await registerNavigator(navigator1)
+      await getVot3Tokens(citizen, "1000")
+      await navigatorRegistry.connect(citizen).delegate(navigator1.address, ethers.parseEther("500"))
+
+      await expect(xAllocationVoting.connect(citizen).toggleAutoVoting(citizen.address)).to.be.revertedWithCustomError(
+        xAllocationVoting,
+        "DelegatedToNavigator",
+      )
+    })
+
+    it("double voting blocked: navigator votes for citizen, citizen cannot vote again", async function () {
+      const navigator1 = otherAccounts[10]
+      const citizen = otherAccounts[11]
+
+      await registerNavigator(navigator1)
+      await getVot3Tokens(citizen, "1000")
+      await navigatorRegistry.connect(citizen).delegate(navigator1.address, ethers.parseEther("500"))
+
+      // Create endorsed app BEFORE starting emissions (so it's eligible in round 1)
+      const appId = await createEndorsedApp(creators[0], otherAccounts[8])
+
+      await bootstrapAndStartEmissions()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator sets preferences and casts vote for citizen
+      await navigatorRegistry.connect(navigator1).setAllocationPreferences(roundId, [appId], [10000])
+
+      await veBetterPassport.connect(owner).whitelist(citizen.address)
+      await xAllocationVoting.castNavigatorVote(citizen.address, roundId)
+
+      // Citizen tries to vote manually — blocked by DelegatedToNavigator (not just hasVoted)
+      await expect(
+        xAllocationVoting.connect(citizen).castVote(roundId, [appId], [ethers.parseEther("100")]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "DelegatedToNavigator")
+    })
+
+    it("re-delegate after undelegate: checkpoints correct", async function () {
+      const navigator1 = otherAccounts[10]
+      const citizen = otherAccounts[11]
+
+      await registerNavigator(navigator1)
+      await getVot3Tokens(citizen, "1000")
+
+      // Delegate
+      await navigatorRegistry.connect(citizen).delegate(navigator1.address, ethers.parseEther("500"))
+      expect(await navigatorRegistry.getDelegatedAmount(citizen.address)).to.equal(ethers.parseEther("500"))
+
+      // Undelegate
+      await navigatorRegistry.connect(citizen).undelegate()
+      expect(await navigatorRegistry.getDelegatedAmount(citizen.address)).to.equal(0)
+
+      // Re-delegate different amount
+      await navigatorRegistry.connect(citizen).delegate(navigator1.address, ethers.parseEther("300"))
+      expect(await navigatorRegistry.getDelegatedAmount(citizen.address)).to.equal(ethers.parseEther("300"))
+      expect(await navigatorRegistry.getNavigator(citizen.address)).to.equal(navigator1.address)
+    })
+  })
 })

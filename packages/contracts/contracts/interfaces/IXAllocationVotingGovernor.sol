@@ -117,6 +117,16 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error NotDelegatedToNavigator(address citizen);
 
   /**
+   * @dev Citizen is delegated to a navigator and cannot vote manually
+   */
+  error DelegatedToNavigator(address citizen);
+
+  /**
+   * @dev Navigator cannot enable auto-voting
+   */
+  error NavigatorCannotEnableAutoVoting(address navigator);
+
+  /**
    * @dev Navigator has not set allocation preferences for the round
    */
   error NavigatorPreferencesNotSet(address navigator, uint256 roundId);

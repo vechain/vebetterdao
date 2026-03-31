@@ -86,6 +86,9 @@ library GovernorVotesLogic {
   /// @dev Thrown when citizen is not delegated to any navigator
   error NotDelegatedToNavigator(address citizen);
 
+  /// @dev Thrown when citizen is delegated to a navigator and cannot vote manually
+  error DelegatedToNavigator(address citizen);
+
   /// @dev Thrown when navigator has not set a decision for the proposal
   error NavigatorDecisionNotSet(address navigator, uint256 proposalId);
 
@@ -245,6 +248,11 @@ library GovernorVotesLogic {
     );
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
+
+    // Citizens delegated to a navigator cannot vote manually on governance proposals
+    if (address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter)) {
+      revert DelegatedToNavigator(voter);
+    }
 
     (bool isPerson, string memory explanation) = $.veBetterPassport.isPersonAtTimepoint(
       voter,

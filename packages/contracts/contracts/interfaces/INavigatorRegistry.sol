@@ -25,6 +25,7 @@ interface INavigatorRegistry {
   error ExceedsNavigatorCapacity(address navigator, uint256 requested, uint256 available);
   error ZeroDelegationAmount();
   error InsufficientDelegation(uint256 requested, uint256 available);
+  error SelfDelegationNotAllowed(address account);
 
   // -- Voting --
   error EmptyPreferences();
