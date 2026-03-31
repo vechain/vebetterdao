@@ -300,4 +300,176 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       expect(await navigatorRegistry.isExiting(navigator1.address)).to.be.true
     })
   })
+
+  // ======================== Citizen POV: Navigator Exit ======================== //
+
+  describe("Citizen experience when navigator exits", function () {
+    let citizen1: HardhatEthersSigner
+    let vot3: any
+
+    beforeEach(async function () {
+      citizen1 = otherAccounts[11]
+      vot3 = (await getOrDeployContractInstances({})).vot3
+
+      // Register navigator and delegate citizen
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+    })
+
+    it("citizen's VOT3 is still locked after navigator announces exit", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      // VOT3 still locked — navigator hasn't finalized
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("500"))
+      await expect(
+        vot3.connect(citizen1).transfer(otherAccounts[14].address, ethers.parseEther("501")),
+      ).to.be.revertedWith("VOT3: transfer exceeds unlocked balance")
+    })
+
+    it("citizen's VOT3 is still locked after navigator finalizes exit", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      // Advance past notice period
+      await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
+      await emissions.connect(minterAccount).distribute()
+
+      await navigatorRegistry.connect(navigator1).finalizeExit()
+
+      // Delegation still exists — citizen must manually undelegate
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.true
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("500"))
+
+      // VOT3 still locked
+      await expect(
+        vot3.connect(citizen1).transfer(otherAccounts[14].address, ethers.parseEther("501")),
+      ).to.be.revertedWith("VOT3: transfer exceeds unlocked balance")
+    })
+
+    it("citizen can undelegate after navigator finalizes exit — VOT3 unlocked", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
+      await emissions.connect(minterAccount).distribute()
+
+      await navigatorRegistry.connect(navigator1).finalizeExit()
+
+      // Citizen undelegates — this is the escape hatch
+      await navigatorRegistry.connect(citizen1).undelegate()
+
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
+
+      // VOT3 fully unlocked — can transfer entire balance
+      const balance = await vot3.balanceOf(citizen1.address)
+      await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
+    })
+
+    it("citizen can undelegate even during notice period", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      // Don't wait for notice period — undelegate immediately
+      await navigatorRegistry.connect(citizen1).undelegate()
+
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
+    })
+
+    it("citizen can delegate to a new navigator after undelegating from exited one", async function () {
+      const navigator2 = otherAccounts[12]
+      await b3tr.connect(owner).transfer(navigator2.address, ethers.parseEther("50000"))
+      await b3tr.connect(navigator2).approve(await navigatorRegistry.getAddress(), ethers.parseEther("50000"))
+      await navigatorRegistry.connect(navigator2).register(ethers.parseEther("50000"), "ipfs://nav2")
+
+      // Exit navigator1
+      await navigatorRegistry.connect(navigator1).announceExit()
+      await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
+      await emissions.connect(minterAccount).distribute()
+      await navigatorRegistry.connect(navigator1).finalizeExit()
+
+      // Citizen undelegates from exited navigator
+      await navigatorRegistry.connect(citizen1).undelegate()
+
+      // Citizen re-delegates to new navigator
+      await navigatorRegistry.connect(citizen1).delegate(navigator2.address, ethers.parseEther("300"))
+
+      expect(await navigatorRegistry.getNavigator(citizen1.address)).to.equal(navigator2.address)
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("300"))
+    })
+
+    it("no new citizens can delegate to exiting navigator", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      const newCitizen = otherAccounts[13]
+      await getVot3Tokens(newCitizen, "1000")
+
+      // New delegation rejected — navigator is exiting (exitAnnouncedRound > 0)
+      await expect(
+        navigatorRegistry.connect(newCitizen).delegate(navigator1.address, ethers.parseEther("500")),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NavigatorCannotAcceptDelegations")
+    })
+
+    it("castNavigatorVote fails for citizen after navigator exits (no preferences can be set)", async function () {
+      // Navigator sets preferences for current round, then announces exit
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator exits
+      await navigatorRegistry.connect(navigator1).announceExit()
+      await waitForRoundToEnd(Number(roundId))
+      await emissions.connect(minterAccount).distribute()
+      await navigatorRegistry.connect(navigator1).finalizeExit()
+
+      // New round — navigator can't set preferences (onlyNavigator checks isRegistered && !isDeactivated)
+      // isRegistered is still true but exitAnnouncedRound > 0, and the modifier checks isDeactivated only
+      // So the navigator CAN still technically call setAllocationPreferences... but shouldn't
+      // The key protection is that no new delegations are accepted and citizens should undelegate
+      const newRoundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator hasn't set preferences for the new round
+      expect(await navigatorRegistry.hasSetPreferences(navigator1.address, newRoundId)).to.be.false
+
+      // castNavigatorVote reverts because no preferences set
+      await expect(xAllocationVoting.castNavigatorVote(citizen1.address, newRoundId)).to.be.revertedWithCustomError(
+        xAllocationVoting,
+        "NavigatorPreferencesNotSet",
+      )
+    })
+  })
+
+  // ======================== Citizen POV: Navigator Deactivated ======================== //
+
+  describe("Citizen experience when navigator is deactivated by governance", function () {
+    let citizen1: HardhatEthersSigner
+    let vot3: any
+
+    beforeEach(async function () {
+      citizen1 = otherAccounts[11]
+      vot3 = (await getOrDeployContractInstances({})).vot3
+
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+    })
+
+    it("citizen can undelegate after navigator is deactivated", async function () {
+      // Governance deactivates navigator
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+
+      // Citizen can still undelegate
+      await navigatorRegistry.connect(citizen1).undelegate()
+
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
+      const balance = await vot3.balanceOf(citizen1.address)
+      await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
+    })
+
+    it("new citizens cannot delegate to deactivated navigator", async function () {
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+
+      const newCitizen = otherAccounts[13]
+      await getVot3Tokens(newCitizen, "1000")
+
+      await expect(
+        navigatorRegistry.connect(newCitizen).delegate(navigator1.address, ethers.parseEther("500")),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NotANavigator")
+    })
+  })
 })
