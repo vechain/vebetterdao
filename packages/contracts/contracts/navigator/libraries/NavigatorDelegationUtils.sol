@@ -73,9 +73,19 @@ library NavigatorDelegationUtils {
     // Navigator cannot delegate to themselves
     if (citizen == navigator) revert SelfDelegationNotAllowed(citizen);
 
-    // Citizen must not already be delegated
-    if ($.citizenToNavigator[citizen] != address(0)) {
-      revert AlreadyDelegated(citizen, $.citizenToNavigator[citizen]);
+    // Citizen must not already be delegated (unless current navigator is dead — auto-clear)
+    address currentNav = $.citizenToNavigator[citizen];
+    if (currentNav != address(0)) {
+      if (_isNavigatorDead($, currentNav)) {
+        // Auto-clear stale delegation — navigator exited or deactivated
+        uint256 oldAmount = _currentDelegatedAmount($, citizen);
+        $.totalDelegatedToNavigator[currentNav] -= oldAmount;
+        $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), 0);
+        _removeDelegation($, citizen, currentNav);
+        emit DelegationRemoved(citizen, currentNav);
+      } else {
+        revert AlreadyDelegated(citizen, currentNav);
+      }
     }
 
     // Navigator must be registered and active
@@ -157,18 +167,27 @@ library NavigatorDelegationUtils {
 
   // ======================== Getters ======================== //
 
-  /// @notice Get the navigator a citizen is delegated to
+  /// @notice Get the navigator a citizen is delegated to (address(0) if delegation is void)
   function getNavigator(address citizen) external view returns (address) {
-    return NavigatorStorageTypes.getNavigatorStorage().citizenToNavigator[citizen];
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    address nav = $.citizenToNavigator[citizen];
+    if (nav == address(0)) return address(0);
+    // Lazy invalidation: if navigator is exited or deactivated, delegation is void
+    if (_isNavigatorDead($, nav)) return address(0);
+    return nav;
   }
 
-  /// @notice Get the current VOT3 amount a citizen has delegated
+  /// @notice Get the current VOT3 amount a citizen has delegated (0 if delegation is void)
   function getDelegatedAmount(address citizen) external view returns (uint256) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    address nav = $.citizenToNavigator[citizen];
+    if (nav == address(0)) return 0;
+    if (_isNavigatorDead($, nav)) return 0;
     return _currentDelegatedAmount($, citizen);
   }
 
   /// @notice Get the delegated amount at a past block (for snapshot-based voting power)
+  /// @dev Does NOT apply lazy invalidation — historical data is preserved for reward calculation
   function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256) {
     return uint256(
       NavigatorStorageTypes.getNavigatorStorage().delegatedAmount[citizen].upperLookupRecent(
@@ -192,9 +211,13 @@ library NavigatorDelegationUtils {
     return NavigatorStorageTypes.getNavigatorStorage().navigatorCitizens[navigator].length;
   }
 
-  /// @notice Check if a citizen is delegated to any navigator
+  /// @notice Check if a citizen has an active delegation (false if navigator exited/deactivated)
   function isDelegated(address citizen) external view returns (bool) {
-    return NavigatorStorageTypes.getNavigatorStorage().citizenToNavigator[citizen] != address(0);
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    address nav = $.citizenToNavigator[citizen];
+    if (nav == address(0)) return false;
+    if (_isNavigatorDead($, nav)) return false;
+    return true;
   }
 
   // ======================== Internal ======================== //
@@ -205,6 +228,14 @@ library NavigatorDelegationUtils {
     address citizen
   ) private view returns (uint256) {
     return uint256($.delegatedAmount[citizen].latest());
+  }
+
+  /// @dev Check if a navigator is "dead" (exited or deactivated) — delegation is void
+  function _isNavigatorDead(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address navigator
+  ) private view returns (bool) {
+    return $.isDeactivated[navigator] || $.exitAnnouncedRound[navigator] > 0;
   }
 
   /// @dev Remove a citizen from navigator's citizen list and clear delegation mapping

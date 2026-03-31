@@ -316,52 +316,42 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
     })
 
-    it("citizen's VOT3 is still locked after navigator announces exit", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      // VOT3 still locked — navigator hasn't finalized
-      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("500"))
-      await expect(
-        vot3.connect(citizen1).transfer(otherAccounts[14].address, ethers.parseEther("501")),
-      ).to.be.revertedWith("VOT3: transfer exceeds unlocked balance")
-    })
-
-    it("citizen's VOT3 is still locked after navigator finalizes exit", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      // Advance past notice period
-      await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
-      await emissions.connect(minterAccount).distribute()
-
-      await navigatorRegistry.connect(navigator1).finalizeExit()
-
-      // Delegation still exists — citizen must manually undelegate
-      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.true
+    it("citizen's VOT3 is auto-unlocked as soon as navigator announces exit", async function () {
+      // Before exit: VOT3 is locked
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("500"))
 
-      // VOT3 still locked
-      await expect(
-        vot3.connect(citizen1).transfer(otherAccounts[14].address, ethers.parseEther("501")),
-      ).to.be.revertedWith("VOT3: transfer exceeds unlocked balance")
-    })
-
-    it("citizen can undelegate after navigator finalizes exit — VOT3 unlocked", async function () {
       await navigatorRegistry.connect(navigator1).announceExit()
 
-      await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
-      await emissions.connect(minterAccount).distribute()
-
-      await navigatorRegistry.connect(navigator1).finalizeExit()
-
-      // Citizen undelegates — this is the escape hatch
-      await navigatorRegistry.connect(citizen1).undelegate()
-
+      // Lazy invalidation: delegation void immediately on announceExit
       expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
 
-      // VOT3 fully unlocked — can transfer entire balance
+      // VOT3 auto-unlocked — full balance transferable
       const balance = await vot3.balanceOf(citizen1.address)
       await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
+    })
+
+    it("citizen's VOT3 is auto-unlocked after navigator announces exit (lazy invalidation)", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      // Lazy invalidation: isDelegated returns false, getDelegatedAmount returns 0
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
+
+      // VOT3 auto-unlocked — full balance transferable
+      const balance = await vot3.balanceOf(citizen1.address)
+      await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
+    })
+
+    it("citizen can undelegate to clean up storage, or just re-delegate to new navigator", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      // VOT3 already unlocked via lazy invalidation — but citizen can still undelegate to clean storage
+      await navigatorRegistry.connect(citizen1).undelegate()
+
+      // Storage cleaned
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
+      expect(await navigatorRegistry.getNavigator(citizen1.address)).to.equal(ethers.ZeroAddress)
     })
 
     it("citizen can undelegate even during notice period", async function () {
@@ -374,7 +364,7 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
     })
 
-    it("citizen can delegate to a new navigator after undelegating from exited one", async function () {
+    it("citizen can re-delegate to new navigator without calling undelegate (auto-clear)", async function () {
       const navigator2 = otherAccounts[12]
       await b3tr.connect(owner).transfer(navigator2.address, ethers.parseEther("50000"))
       await b3tr.connect(navigator2).approve(await navigatorRegistry.getAddress(), ethers.parseEther("50000"))
@@ -382,14 +372,8 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
 
       // Exit navigator1
       await navigatorRegistry.connect(navigator1).announceExit()
-      await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
-      await emissions.connect(minterAccount).distribute()
-      await navigatorRegistry.connect(navigator1).finalizeExit()
 
-      // Citizen undelegates from exited navigator
-      await navigatorRegistry.connect(citizen1).undelegate()
-
-      // Citizen re-delegates to new navigator
+      // Citizen directly delegates to new navigator — stale delegation auto-cleared
       await navigatorRegistry.connect(citizen1).delegate(navigator2.address, ethers.parseEther("300"))
 
       expect(await navigatorRegistry.getNavigator(citizen1.address)).to.equal(navigator2.address)
@@ -427,10 +411,10 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       // Navigator hasn't set preferences for the new round
       expect(await navigatorRegistry.hasSetPreferences(navigator1.address, newRoundId)).to.be.false
 
-      // castNavigatorVote reverts because no preferences set
+      // castNavigatorVote reverts — lazy invalidation: getNavigator returns address(0)
       await expect(xAllocationVoting.castNavigatorVote(citizen1.address, newRoundId)).to.be.revertedWithCustomError(
         xAllocationVoting,
-        "NavigatorPreferencesNotSet",
+        "NotDelegatedToNavigator",
       )
     })
   })
