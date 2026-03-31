@@ -7,6 +7,7 @@ import { ethers } from "ethers"
 import {
   ChallengeKind,
   ChallengeDetail,
+  GroupedChallenges,
   SettlementMode,
   ChallengeStatus,
   ChallengeTab,
@@ -188,6 +189,40 @@ function parseChallengeView(
     canRefund,
     canFinalize: status === ChallengeStatus.Active && endRound < currentRound,
   }
+}
+
+export function groupChallenges(challenges: ChallengeView[]): GroupedChallenges {
+  const activeParticipating: ChallengeView[] = []
+  const pendingInvites: ChallengeView[] = []
+  const publicJoinable: ChallengeView[] = []
+  const past: ChallengeView[] = []
+
+  for (const c of challenges) {
+    const isLive = c.status === ChallengeStatus.Active || c.status === ChallengeStatus.Pending
+    const isDone =
+      c.status === ChallengeStatus.Finalized ||
+      c.status === ChallengeStatus.Finalizing ||
+      c.status === ChallengeStatus.Cancelled ||
+      c.status === ChallengeStatus.Invalid
+
+    if (isLive && (c.isJoined || c.isCreator)) {
+      activeParticipating.push(c)
+    }
+
+    if (c.isInvitationPending) {
+      pendingInvites.push(c)
+    }
+
+    if (c.status === ChallengeStatus.Pending && c.visibility === ChallengeVisibility.Public && c.canJoin) {
+      publicJoinable.push(c)
+    }
+
+    if (isDone || c.canClaim || c.canRefund || c.canFinalize) {
+      past.push(c)
+    }
+  }
+
+  return { activeParticipating, pendingInvites, publicJoinable, past }
 }
 
 export function filterByTab(challenges: ChallengeView[], tab: ChallengeTab): ChallengeView[] {

@@ -25,6 +25,13 @@ export type SettlementMode = (typeof SettlementMode)[keyof typeof SettlementMode
 
 export type ChallengeTab = "all" | "mine" | "invited" | "public"
 
+export interface GroupedChallenges {
+  activeParticipating: ChallengeView[]
+  pendingInvites: ChallengeView[]
+  publicJoinable: ChallengeView[]
+  past: ChallengeView[]
+}
+
 export interface ChallengeView {
   challengeId: number
   createdAt: number

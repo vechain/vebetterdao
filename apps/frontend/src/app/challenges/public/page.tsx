@@ -1,5 +1,5 @@
-import { ChallengesPageContent } from "../components/ChallengesPageContent"
+import { redirect } from "next/navigation"
 
 export default function ChallengesPublicPage() {
-  return <ChallengesPageContent tab="public" />
+  redirect("/challenges")
 }

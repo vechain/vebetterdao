@@ -19,6 +19,19 @@ import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
 import { ChallengeStatusBadges } from "./ChallengeStatusBadges"
 
+const StatItem = ({ label, value, color }: { label: string; value: string | number; color?: string }) => {
+  return (
+    <VStack align="start" gap="1">
+      <Text textStyle="xxs" color="text.subtle" textTransform="uppercase" letterSpacing="0.08em" fontWeight="semibold">
+        {label}
+      </Text>
+      <Text textStyle="xl" fontWeight="bold" color={color}>
+        {typeof value === "number" ? humanNumber(value) : value}
+      </Text>
+    </VStack>
+  )
+}
+
 export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: string }) => {
   const { account } = useWallet()
   const viewerAddress = account?.address
@@ -35,7 +48,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   if (isLoading) {
     return (
       <MotionVStack renderInnerStack={false} gap="6">
-        <Card.Root variant="primary" p={{ base: "6", md: "7" }} w="full" borderRadius="3xl" boxShadow="sm">
+        <Card.Root variant="primary" p={{ base: "6", md: "8" }} w="full" borderRadius="3xl" boxShadow="sm">
           <Skeleton h="360px" borderRadius="2xl" />
         </Card.Root>
       </MotionVStack>
@@ -45,8 +58,13 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   if (!challenge) {
     return (
       <MotionVStack renderInnerStack={false} gap="6">
-        <Card.Root variant="primary" p={{ base: "6", md: "7" }} w="full" borderRadius="3xl" boxShadow="sm">
-          <Heading size="md">{t("Challenge not found")}</Heading>
+        <Card.Root variant="primary" p={{ base: "6", md: "8" }} w="full" borderRadius="3xl" boxShadow="sm">
+          <VStack gap="3" py="8">
+            <Heading size="md">{t("Challenge not found")}</Heading>
+            <Button asChild variant="secondary" size="sm">
+              <NextLink href="/challenges">{t("Back to challenges")}</NextLink>
+            </Button>
+          </VStack>
         </Card.Root>
       </MotionVStack>
     )
@@ -64,8 +82,9 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   return (
     <MotionVStack renderInnerStack={false} gap="6">
       <VStack align="stretch" w="full" gap="5">
+        {/* Back nav */}
         <Button asChild w="fit-content" variant="ghost" px="0">
-          <NextLink href="/challenges/all">
+          <NextLink href="/challenges">
             <Icon as={FaAngleLeft} boxSize={3} />
             <Text color="inherit" textStyle="sm" fontWeight="semibold">
               {t("Back to challenges")}
@@ -73,142 +92,97 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
           </NextLink>
         </Button>
 
-        <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" borderRadius="3xl" boxShadow="sm">
-          <VStack align="stretch" gap="5">
-            <ChallengeStatusBadges challenge={challenge} />
+        {/* Hero card */}
+        <Card.Root variant="primary" p={{ base: "6", md: "8" }} gap="6" borderRadius="3xl" boxShadow="sm">
+          <VStack align="stretch" gap="6">
+            {/* Top: badges + title + meta */}
+            <VStack align="stretch" gap="4">
+              <ChallengeStatusBadges challenge={challenge} />
 
-            <VStack align="stretch" gap="3">
-              <Heading size="xl">{t("Challenge #{{id}}", { id: challenge.challengeId })}</Heading>
-              <HStack flexWrap="wrap" gap="2">
-                <Text
-                  textStyle="xs"
-                  color="text.subtle"
-                  bg="bg.secondary"
-                  borderRadius="full"
-                  px="2.5"
-                  py="1"
-                  fontWeight="semibold">
-                  {humanAddress(challenge.creator, 6, 4)}
-                </Text>
-                {createdAtLabel && (
-                  <Text color="text.subtle" textStyle="sm">
-                    {"•"} {createdAtLabel}
+              <VStack align="stretch" gap="2">
+                <Heading size={{ base: "xl", md: "2xl" }}>
+                  {t("Challenge #{{id}}", { id: challenge.challengeId })}
+                </Heading>
+                <HStack flexWrap="wrap" gap="2" align="center">
+                  <Text
+                    textStyle="xs"
+                    color="text.subtle"
+                    bg="bg.secondary"
+                    borderRadius="full"
+                    px="2.5"
+                    py="1"
+                    fontWeight="semibold">
+                    {humanAddress(challenge.creator, 6, 4)}
                   </Text>
-                )}
-              </HStack>
-              {showParticipatingBadge && (
-                <HStack
-                  alignSelf="start"
-                  gap="2"
-                  bg="status.positive.subtle"
-                  color="status.positive.strong"
-                  borderRadius="full"
-                  px="3"
-                  py="1.5">
-                  <Box boxSize="2" borderRadius="full" bg="status.positive.strong" />
-                  <Text textStyle="xs" fontWeight="semibold">
-                    {t("Participating")}
-                  </Text>
+                  {createdAtLabel && (
+                    <Text color="text.subtle" textStyle="sm">
+                      {"•"} {createdAtLabel}
+                    </Text>
+                  )}
+                  {showParticipatingBadge && (
+                    <HStack
+                      gap="1.5"
+                      bg="status.positive.subtle"
+                      color="status.positive.strong"
+                      borderRadius="full"
+                      px="2.5"
+                      py="1">
+                      <Box boxSize="1.5" borderRadius="full" bg="status.positive.strong" />
+                      <Text textStyle="xs" fontWeight="semibold">
+                        {t("Participating")}
+                      </Text>
+                    </HStack>
+                  )}
                 </HStack>
-              )}
+              </VStack>
             </VStack>
 
-            <SimpleGrid columns={{ base: 2, md: 3 }} gapX={{ base: "6", md: "8" }} gapY="4">
-              <VStack align="start" gap="1">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  textTransform="uppercase"
-                  letterSpacing="0.08em"
-                  fontWeight="semibold">
-                  {t("Prize")}
-                </Text>
-                <Text textStyle="lg" fontWeight="bold" color="brand.primary">
-                  {humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
-                </Text>
-              </VStack>
-              {!isSponsored && (
-                <VStack align="start" gap="1">
-                  <Text
-                    textStyle="xxs"
-                    color="text.subtle"
-                    textTransform="uppercase"
-                    letterSpacing="0.08em"
-                    fontWeight="semibold">
-                    {t("Stake")}
-                  </Text>
-                  <Text textStyle="lg" fontWeight="bold">
-                    {humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
-                  </Text>
-                </VStack>
-              )}
-              <VStack align="start" gap="1">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  textTransform="uppercase"
-                  letterSpacing="0.08em"
-                  fontWeight="semibold">
-                  {t("Participants")}
-                </Text>
-                <Text textStyle="lg" fontWeight="bold">
-                  {humanNumber(challenge.participantCount)} {"/"} {humanNumber(challenge.maxParticipants)}
-                </Text>
-              </VStack>
-              <VStack align="start" gap="1">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  textTransform="uppercase"
-                  letterSpacing="0.08em"
-                  fontWeight="semibold">
-                  {t("Rounds")}
-                </Text>
-                <Text textStyle="lg" fontWeight="bold">
-                  {roundsProgress}
-                </Text>
-              </VStack>
-              <VStack align="start" gap="1">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  textTransform="uppercase"
-                  letterSpacing="0.08em"
-                  fontWeight="semibold">
-                  {t("Threshold")}
-                </Text>
-                <Text textStyle="lg" fontWeight="bold">
-                  {challenge.threshold === "0" ? t("None") : humanNumber(challenge.threshold)}
-                </Text>
-              </VStack>
-              <VStack align="start" gap="1">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  textTransform="uppercase"
-                  letterSpacing="0.08em"
-                  fontWeight="semibold">
-                  {t("Apps")}
-                </Text>
-                <Text textStyle="lg" fontWeight="bold">
-                  {challenge.allApps ? t("All apps") : humanNumber(challenge.selectedApps.length)}
-                </Text>
-              </VStack>
-            </SimpleGrid>
+            {/* Stats grid */}
+            <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "6" }} py={{ base: "4", md: "5" }}>
+              <SimpleGrid columns={{ base: 2, md: 3 }} gapX={{ base: "4", md: "8" }} gapY="4">
+                <StatItem
+                  label={t("Prize")}
+                  value={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
+                  color="brand.primary"
+                />
+                {!isSponsored && (
+                  <StatItem
+                    label={t("Stake")}
+                    value={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+                  />
+                )}
+                <StatItem
+                  label={t("Participants")}
+                  value={`${humanNumber(challenge.participantCount)} / ${humanNumber(challenge.maxParticipants)}`}
+                />
+                <StatItem label={t("Rounds")} value={roundsProgress} />
+                <StatItem
+                  label={t("Threshold")}
+                  value={challenge.threshold === "0" ? t("None") : humanNumber(challenge.threshold)}
+                />
+                <StatItem
+                  label={t("Apps")}
+                  value={challenge.allApps ? t("All apps") : String(challenge.selectedApps.length)}
+                />
+              </SimpleGrid>
+            </Box>
 
+            {/* CTA */}
             {hasChallengeActions(challenge) && (
-              <Box pt="5" borderTopWidth="1px" borderColor="border.secondary">
+              <Box pt="2">
                 <ChallengeActions challenge={challenge} layout="card" />
               </Box>
             )}
           </VStack>
         </Card.Root>
 
+        {/* Leaderboard / participant actions */}
         <ChallengeParticipantActionsSection challenge={challenge} />
 
+        {/* Details: apps + invited */}
         <SimpleGrid columns={{ base: 1, lg: challenge.invited.length > 0 ? 2 : 1 }} gap="4">
-          <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
-            <VStack align="stretch" gap="4">
+          <Card.Root variant="primary" p={{ base: "5", md: "6" }} gap="4" borderRadius="2xl">
+            <VStack align="stretch" gap="3">
               <Text
                 textStyle="xxs"
                 color="text.subtle"
@@ -234,8 +208,8 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
           </Card.Root>
 
           {challenge.invited.length > 0 && (
-            <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
-              <VStack align="stretch" gap="4">
+            <Card.Root variant="primary" p={{ base: "5", md: "6" }} gap="4" borderRadius="2xl">
+              <VStack align="stretch" gap="3">
                 <Text
                   textStyle="xxs"
                   color="text.subtle"
