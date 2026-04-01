@@ -10,6 +10,7 @@ interface StatCardProps extends Omit<CardRootProps, "variant"> {
   cta?: ReactNode
   isLoading?: boolean
   gap?: CardRootProps["gap"]
+  onClick?: () => void
 }
 
 export const StatCard = ({
@@ -21,6 +22,7 @@ export const StatCard = ({
   icon,
   cta,
   gap,
+  onClick,
 }: StatCardProps) => {
   return (
     <Card.Root
@@ -35,7 +37,11 @@ export const StatCard = ({
       alignItems="center"
       justifyContent="space-between"
       gap={{ base: "2", md: "4" }}
-      maxBlockSize={{ base: "fit-content", md: "unset" }}>
+      maxBlockSize={{ base: "fit-content", md: "unset" }}
+      onClick={onClick}
+      cursor={onClick ? "pointer" : undefined}
+      _hover={onClick ? { opacity: 0.85 } : undefined}
+      transition={onClick ? "opacity 0.15s" : undefined}>
       {showIcon && icon && (
         <Square
           rounded={{ base: "8px", md: "12px" }}

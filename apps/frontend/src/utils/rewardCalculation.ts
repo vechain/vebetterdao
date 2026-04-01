@@ -29,7 +29,7 @@ interface RewardCalculationInput {
   hadAutoVotingEnabled?: boolean
 }
 
-interface RewardCalculationResult {
+export interface RewardCalculationResult {
   rawReward: bigint
   rawGmReward: bigint
   totalRawReward: bigint
