@@ -8,12 +8,17 @@ import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
 import { useCallClause, useMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 import { Gift } from "iconoir-react"
-import { useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
+import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
+import { ProposalFilter } from "@/store/useProposalFilters"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
 
+import { PotentialRewardsBottomSheet } from "./PotentialRewardsBottomSheet"
 import { StatCard } from "./StatCard"
 
 const voterRewardsAbi = VoterRewards__factory.abi
@@ -32,6 +37,8 @@ export const PotentialRewardBox = () => {
   const { account } = useWallet()
   const thor = useThor()
   const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const onClose = useCallback(() => setIsOpen(false), [])
 
   const { data: currentRoundId } = useCallClause({
     abi: xAllocationVotingAbi,
@@ -91,7 +98,19 @@ export const PotentialRewardBox = () => {
     enabled: !!thor && !!currentRoundId,
   })
 
-  const potentialReward = useMemo(() => {
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { filteredProposals: activeProposals } = useFilteredProposals([ProposalFilter.InThisRound], enrichedProposals)
+  const { data: hasVotedInProposals } = useHasVotedInProposals(
+    activeProposals?.map(p => p?.id),
+    account?.address ?? undefined,
+  )
+
+  const unvotedProposalCount = useMemo(() => {
+    if (!hasVotedInProposals || !activeProposals?.length) return 0
+    return activeProposals.filter(p => !hasVotedInProposals[p.id]).length
+  }, [activeProposals, hasVotedInProposals])
+
+  const { potentialReward, hasVoted, hasGmNft, hadAutoVotingEnabled, relayerFeePercentage } = useMemo(() => {
     if (data) {
       const [
         cycleTotal,
@@ -99,40 +118,66 @@ export const PotentialRewardBox = () => {
         userVoterTotal,
         userGMWeight,
         [_xAllocationsAmount, vote2EarnAmount, _treasuryAmount, gmAmount],
-        relayerFeePercentage,
-        hadAutoVotingEnabled = false,
+        relayerFee,
+        autoVotingEnabled = false,
       ] = data
 
-      return calculatePotentialRewards({
-        voterTotal: userVoterTotal,
-        cycleTotal: cycleTotal,
-        vote2EarnAmount,
-        gmEmissionsAmount: gmAmount,
-        gmWeightTotal: userGMWeight,
-        cycleGMTotal: cycleTotalGMWeight,
-        relayerFeePercentage: relayerFeePercentage,
-        hadAutoVotingEnabled,
-      })
+      return {
+        potentialReward: calculatePotentialRewards({
+          voterTotal: userVoterTotal,
+          cycleTotal: cycleTotal,
+          vote2EarnAmount,
+          gmEmissionsAmount: gmAmount,
+          gmWeightTotal: userGMWeight,
+          cycleGMTotal: cycleTotalGMWeight,
+          relayerFeePercentage: relayerFee,
+          hadAutoVotingEnabled: autoVotingEnabled,
+        }),
+        hasVoted: userVoterTotal > 0n,
+        hasGmNft: userGMWeight > 0n,
+        hadAutoVotingEnabled: autoVotingEnabled as boolean,
+        relayerFeePercentage: relayerFee as bigint,
+      }
     }
 
-    return null
+    return {
+      potentialReward: null,
+      hasVoted: false,
+      hasGmNft: false,
+      hadAutoVotingEnabled: false,
+      relayerFeePercentage: 0n,
+    }
   }, [data])
 
   return (
-    <StatCard
-      variant="warning"
-      title={t("Your potential rewards")}
-      icon={<Gift />}
-      subtitle={
-        <Skeleton asChild loading={isLoading}>
-          <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>
-            <Mark variant="text" fontWeight="semibold">
-              {potentialReward ? Number(formatEther(potentialReward.netTotal)).toFixed(2) : "-"}
-            </Mark>
-            {potentialReward && " B3TR"}
-          </Text>
-        </Skeleton>
-      }
-    />
+    <>
+      <StatCard
+        variant="warning"
+        title={t("Your rewards")}
+        icon={<Gift />}
+        onClick={() => setIsOpen(true)}
+        subtitle={
+          <Skeleton asChild loading={isLoading}>
+            <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>
+              <Mark variant="text" fontWeight="semibold">
+                {potentialReward ? Number(formatEther(potentialReward.netTotal)).toFixed(2) : "-"}
+              </Mark>
+              {potentialReward && " B3TR"}
+            </Text>
+          </Skeleton>
+        }
+      />
+      <PotentialRewardsBottomSheet
+        isOpen={isOpen}
+        onClose={onClose}
+        reward={potentialReward}
+        currentRoundId={currentRoundId}
+        hasVoted={hasVoted}
+        hasGmNft={hasGmNft}
+        hadAutoVotingEnabled={hadAutoVotingEnabled}
+        relayerFeePercentage={relayerFeePercentage}
+        unvotedProposalCount={unvotedProposalCount}
+      />
+    </>
   )
 }
