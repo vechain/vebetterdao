@@ -1,4 +1,5 @@
 import { Card, Icon, Text, Skeleton, Square, VStack, type CardRootProps } from "@chakra-ui/react"
+import { NavArrowRight } from "iconoir-react"
 import { ReactNode } from "react"
 
 interface StatCardProps extends Omit<CardRootProps, "variant"> {
@@ -68,6 +69,11 @@ export const StatCard = ({
         )}
       </VStack>
       {cta && cta}
+      {onClick && (
+        <Icon boxSize={{ base: "4", md: "5" }} color="text.subtle" flexShrink={0} alignSelf="center">
+          <NavArrowRight />
+        </Icon>
+      )}
     </Card.Root>
   )
 }
