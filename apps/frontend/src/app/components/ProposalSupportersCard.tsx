@@ -97,13 +97,7 @@ const SupporterTable = ({
   )
 }
 
-export const ProposalSupportersCard = ({
-  proposalId,
-  totalSupporters,
-}: {
-  proposalId: string
-  totalSupporters: number
-}) => {
+export const ProposalSupportersCard = ({ proposalId }: { proposalId: string }) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [page, setPage] = useState(1)
@@ -183,7 +177,7 @@ export const ProposalSupportersCard = ({
           <Pagination.Root
             mx={{ base: "auto", md: "unset" }}
             mt="6"
-            count={totalSupporters}
+            count={aggregatedSupporters.length}
             pageSize={PAGE_SIZE}
             page={page}
             display="flex"
