@@ -42,6 +42,8 @@ type Props = {
   isLoading: boolean
 }
 
+// TODO: Add "B3TR_PROPOSAL_WITHDRAW" once indexer PR #1232 is merged and released
+// https://github.com/vechain/vechain-indexer/pull/1232
 const VOTING_POWER_EVENT_NAMES = ["B3TR_SWAP_B3TR_TO_VOT3", "B3TR_SWAP_VOT3_TO_B3TR", "B3TR_PROPOSAL_SUPPORT"] as const
 const compactFormatter = getCompactFormatter(2)
 
