@@ -3,14 +3,12 @@
 import {
   Box,
   Button,
-  Flex,
   HStack,
   Icon,
   Text,
   VStack,
   Badge,
   Skeleton,
-  Spinner,
   useMediaQuery,
   Dialog,
   Portal,
@@ -19,18 +17,16 @@ import {
 import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
 import { Flash, NavArrowRight, InfoCircle, HeartSolid, ArrowDown } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { FiAlertCircle } from "react-icons/fi"
 import { formatEther } from "viem"
 
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { Transaction, useTransactions } from "@/api/indexer/transactions/useTransactions"
+import { Transaction } from "@/api/indexer/transactions/useTransactions"
+import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/ActivityList"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
-import { EmptyState } from "@/components/ui/empty-state"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
@@ -47,82 +43,44 @@ type Props = {
 const VOTING_POWER_EVENT_NAMES = ["B3TR_SWAP_B3TR_TO_VOT3", "B3TR_SWAP_VOT3_TO_B3TR", "B3TR_PROPOSAL_SUPPORT"] as const
 const compactFormatter = getCompactFormatter(2)
 
-const getActivityProps = (tx: Transaction) => {
+const getVotingPowerActivityProps = (tx: Transaction): ActivityItemProps | null => {
   switch (tx.eventName) {
     case "B3TR_SWAP_B3TR_TO_VOT3":
       return {
         label: "Power up",
         icon: <Flash />,
-        iconBg: "status.positive.subtle" as const,
-        iconColor: "status.positive.strong" as const,
+        iconBg: "status.positive.subtle",
+        iconColor: "status.positive.strong",
         amount: tx.outputValue ? compactFormatter.format(Number(formatEther(BigInt(tx.outputValue)))) : "0",
         token: "VOT3",
-        sign: "+" as const,
-        amountColor: "status.positive.strong" as const,
+        sign: "+",
+        amountColor: "status.positive.strong",
       }
     case "B3TR_SWAP_VOT3_TO_B3TR":
       return {
         label: "Power down",
         icon: <ArrowDown />,
-        iconBg: "status.negative.subtle" as const,
-        iconColor: "status.negative.strong" as const,
+        iconBg: "status.negative.subtle",
+        iconColor: "status.negative.strong",
         amount: tx.outputValue ? compactFormatter.format(Number(formatEther(BigInt(tx.outputValue)))) : "0",
         token: "B3TR",
-        sign: "+" as const,
+        sign: "+",
         amountColor: undefined,
       }
     case "B3TR_PROPOSAL_SUPPORT":
       return {
         label: "Supported proposal",
         icon: <HeartSolid />,
-        iconBg: "status.info.subtle" as const,
-        iconColor: "status.info.strong" as const,
+        iconBg: "status.info.subtle",
+        iconColor: "status.info.strong",
         amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
         token: "VOT3",
-        sign: "-" as const,
+        sign: "-",
         amountColor: undefined,
       }
     default:
       return null
   }
-}
-
-const ACTIVITY_LABELS = {
-  B3TR_SWAP_B3TR_TO_VOT3: "Power up",
-  B3TR_SWAP_VOT3_TO_B3TR: "Power down",
-  B3TR_PROPOSAL_SUPPORT: "Supported proposal",
-} as const
-
-const ActivityItem = ({ transaction }: { transaction: Transaction }) => {
-  const { t } = useTranslation()
-  const props = getActivityProps(transaction)
-  if (!props) return null
-
-  const label = ACTIVITY_LABELS[transaction.eventName as keyof typeof ACTIVITY_LABELS]
-
-  return (
-    <HStack gap="3" py="2">
-      <Flex rounded="full" bg={props.iconBg} p="2" flexShrink={0}>
-        <Icon boxSize="4" color={props.iconColor}>
-          {props.icon}
-        </Icon>
-      </Flex>
-      <VStack gap="0" align="start" flex={1} minW={0}>
-        <Text textStyle="sm" fontWeight="semibold" lineClamp={1}>
-          {label ? t(label) : ""}
-        </Text>
-        <Text textStyle="xs" color="text.subtle">
-          {dayjs.unix(transaction.blockTimestamp ?? 0).fromNow()}
-        </Text>
-      </VStack>
-      <VStack gap="0" align="end" flexShrink={0}>
-        <Text textStyle="sm" fontWeight="semibold" color={props.amountColor}>
-          {props.sign}
-          {props.amount} {props.token}
-        </Text>
-      </VStack>
-    </HStack>
-  )
 }
 
 const CompositionLine = ({ label, value }: { label: string; value: string }) => (
@@ -185,19 +143,6 @@ const VotingPowerContent = ({
 }: Omit<Props, "isOpen"> & { onOpenPowerUp: () => void; onOpenPowerDown: () => void }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
-  const {
-    data: txData,
-    isLoading: isTxLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useTransactions(account?.address ?? "", {
-    eventName: [...VOTING_POWER_EVENT_NAMES],
-    size: 5,
-  })
-
-  const transactions = useMemo(() => txData?.pages.flatMap(page => page.data) ?? [], [txData])
 
   // Current composition: wallet VOT3 balance + deposit voting power at current block
   const { data: currentVot3Balance } = useGetVot3Balance(account?.address)
@@ -323,37 +268,7 @@ const VotingPowerContent = ({
         />
       </VStack>
 
-      {/* Recent activity */}
-      {account?.address && (
-        <>
-          <Text textStyle="sm" fontWeight="semibold" color="text.subtle" mt="1">
-            {t("Recent activity")}
-          </Text>
-
-          <Skeleton loading={isTxLoading} rounded="lg">
-            {transactions.length > 0 ? (
-              <VStack gap="0" align="stretch" divideY="1px" divideColor="border.secondary">
-                {transactions.map(transaction => (
-                  <ActivityItem key={transaction.txId} transaction={transaction} />
-                ))}
-                {hasNextPage && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    mx="auto"
-                    mt="2"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}>
-                    {isFetchingNextPage ? <Spinner size="sm" /> : t("View more")}
-                  </Button>
-                )}
-              </VStack>
-            ) : (
-              <EmptyState bg="transparent" size="sm" title={t("No activity yet")} icon={<FiAlertCircle />} />
-            )}
-          </Skeleton>
-        </>
-      )}
+      <ActivityList eventNames={[...VOTING_POWER_EVENT_NAMES]} getActivityProps={getVotingPowerActivityProps} />
     </VStack>
   )
 }

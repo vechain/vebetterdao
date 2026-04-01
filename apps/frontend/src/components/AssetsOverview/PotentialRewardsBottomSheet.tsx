@@ -1,11 +1,15 @@
 "use client"
 
 import { Box, HStack, Icon, Text, VStack, Badge, useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { Gift, Check, Xmark, StarSolid, Flash, RefreshDouble, InfoCircle, NavArrowRight } from "iconoir-react"
 import { useRouter } from "next/navigation"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
+import { Transaction } from "@/api/indexer/transactions/useTransactions"
+import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/ActivityList"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { timestampToTimeLeftCompact } from "@/utils/date"
 import type { RewardCalculationResult } from "@/utils/rewardCalculation"
@@ -22,6 +26,9 @@ type Props = {
   unvotedProposalCount: number
   roundEndTimestamp: import("dayjs").Dayjs | null
 }
+
+const REWARDS_EVENT_NAMES = ["B3TR_CLAIM_REWARD"] as const
+const compactFormatter = getCompactFormatter(2)
 
 const CheckItem = ({ label, checked }: { label: string; checked: boolean }) => (
   <HStack gap="2" p="2" rounded="md" bg="card.subtle">
@@ -65,6 +72,23 @@ const RewardsContent = ({
   const router = useRouter()
 
   const fmt = (val: bigint) => Number(formatEther(val)).toFixed(2)
+
+  const getRewardsActivityProps = useCallback(
+    (tx: Transaction): ActivityItemProps | null => {
+      if (tx.eventName !== "B3TR_CLAIM_REWARD") return null
+      return {
+        label: tx.roundId ? t("Claimed reward for round {{round}}", { round: tx.roundId }) : t("Claimed rewards"),
+        icon: <Gift />,
+        iconBg: "status.positive.subtle",
+        iconColor: "status.positive.strong",
+        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
+        token: "B3TR",
+        sign: "+",
+        amountColor: "status.positive.strong",
+      }
+    },
+    [t],
+  )
   const hasVotedOnAllProposals = unvotedProposalCount === 0
   const timeLeft = roundEndTimestamp ? timestampToTimeLeftCompact(roundEndTimestamp.valueOf()) : null
 
@@ -215,6 +239,8 @@ const RewardsContent = ({
           </VStack>
         </HStack>
       </VStack>
+
+      <ActivityList eventNames={[...REWARDS_EVENT_NAMES]} getActivityProps={getRewardsActivityProps} />
     </VStack>
   )
 }
