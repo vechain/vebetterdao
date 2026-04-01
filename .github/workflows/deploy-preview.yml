@@ -55,7 +55,7 @@ jobs:
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
 
           if [ "${{ github.base_ref }}" == "main" ]; then
-            echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
+            echo 'flavors=["staging", "beta", "dev"]' >> $GITHUB_OUTPUT
             echo "::notice::PR to main - deploying staging + beta previews"
           else
             echo "::error::Unsupported base branch: ${{ github.base_ref }}"
@@ -163,6 +163,9 @@ jobs:
       custom_url_beta: ${{ steps.save-urls.outputs.custom_url_beta }}
       service_url_beta: ${{ steps.save-urls.outputs.service_url_beta }}
       status_beta: ${{ steps.save-urls.outputs.status_beta }}
+      custom_url_dev: ${{ steps.save-urls.outputs.custom_url_dev }}
+      service_url_dev: ${{ steps.save-urls.outputs.service_url_dev }}
+      status_dev: ${{ steps.save-urls.outputs.status_dev }}
 
     steps:
       - name: Checkout code
@@ -311,6 +314,9 @@ jobs:
           CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
           SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
           STATUS_BETA: ${{ needs.deploy.outputs.status_beta }}
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
           # Overall job results (for detecting if deploy was skipped due to build failure)
           BUILD_RESULT: ${{ needs.build-and-push.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
@@ -336,6 +342,11 @@ jobs:
                 custom: process.env.CUSTOM_URL_BETA || '',
                 service: process.env.SERVICE_URL_BETA || '',
                 status: process.env.STATUS_BETA || ''
+              },
+              dev: {
+                custom: process.env.CUSTOM_URL_DEV || '',
+                service: process.env.SERVICE_URL_DEV || '',
+                status: process.env.STATUS_DEV || ''
               }
             };
 
@@ -433,6 +444,9 @@ jobs:
           CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
           SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
           STATUS_BETA: ${{ needs.deploy.outputs.status_beta }}
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
         run: |
           echo "### Preview Environments Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
