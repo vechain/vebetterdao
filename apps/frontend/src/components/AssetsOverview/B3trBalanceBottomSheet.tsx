@@ -12,7 +12,6 @@ import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerDownModal } from "@/components/PowerUpModal"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 type Props = {
   isOpen: boolean
@@ -63,7 +62,6 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
   const { account } = useWallet()
   const router = useRouter()
   const { data: b3trBalance } = useGetB3trBalance(account?.address)
-  const { data: vot3Balance } = useGetVot3Balance(account?.address)
   const { data: convertibleVot3 } = useB3trConverted(account?.address)
 
   return (
@@ -76,11 +74,6 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
           {b3trBalance?.formatted ?? "0"}
           {" B3TR"}
         </Text>
-        {vot3Balance && Number(vot3Balance.scaled) > 0 && (
-          <Text textStyle="xs" color="text.subtle" mt="1">
-            {t("{{amount}} VOT3 locked as voting power", { amount: vot3Balance.formatted })}
-          </Text>
-        )}
       </Box>
 
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
