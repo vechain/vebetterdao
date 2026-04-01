@@ -1,4 +1,5 @@
 import { Button, Heading, HStack, Icon, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
@@ -6,9 +7,11 @@ import { Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { BaseModal } from "@/components/BaseModal"
 import CircleGreenVot3Icon from "@/components/Icons/svg/circle-green-vot3.svg"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -35,6 +38,7 @@ export const ProposalSupportModal = ({
   proposalThreshold,
   proposalDeposits,
 }: Props) => {
+  const compactFormatter = getCompactFormatter(2)
   const { account } = useWallet()
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
@@ -42,6 +46,11 @@ export const ProposalSupportModal = ({
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   // Get user's VOT3 balance and current deposits using hooks
   const { data: vot3Balance } = useGetVot3Balance(account?.address)
+  const { data: bestBlock } = useBestBlockCompressed()
+  const { data: currentVotingPower } = useTotalVotesOnBlock(
+    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    account?.address,
+  )
   const canClaimNextRound = useMemo(() => {
     return votingRoundId === Number(currentRoundId ?? 0) + 1
   }, [votingRoundId, currentRoundId])
@@ -66,6 +75,7 @@ export const ProposalSupportModal = ({
       return 0n
     }
   }, [amount])
+  const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
 
   // Calculate missing support
   const missingSupport = useMemo(() => {
@@ -187,6 +197,16 @@ export const ProposalSupportModal = ({
           <Button variant="plain" color="blue.500" textStyle="sm" onClick={handleDepositMax} alignSelf="flex-end">
             {"Deposit max"}
           </Button>
+          <Text textStyle="xs" color="text.subtle">
+            {t("Available VOT3: {{amount}}", { amount: compactFormatter.format(Number(vot3Balance?.scaled ?? 0)) })}
+          </Text>
+          {lockedForSupport > 0 && (
+            <Text textStyle="xs" color="text.subtle">
+              {t("Locked for support in proposals: {{amount}} VOT3", {
+                amount: compactFormatter.format(lockedForSupport),
+              })}
+            </Text>
+          )}
         </VStack>
         {/* Results Header */}
         <HStack>

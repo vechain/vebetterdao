@@ -9,9 +9,11 @@ import { useTranslation } from "react-i18next"
 import { parseEther } from "viem"
 
 import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
+import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { BaseModal } from "@/components/BaseModal"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
 import { useConvertVot3 } from "@/hooks/useConvertVot3"
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -37,6 +39,11 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
 
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
+  const { data: bestBlock } = useBestBlockCompressed()
+  const { data: currentVotingPower } = useTotalVotesOnBlock(
+    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    account?.address,
+  )
 
   // It can happen that a user converts B3TR to VOT3 then transfers VOT3 to another account.
   // In this case, the available balance is less then the "convertedB3trOf", so using swappableVot3Balance would revert the transaction.
@@ -47,11 +54,12 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   const availableBalanceOriginal = vot3Original > swappableOriginal ? swappableOriginal : vot3Original
 
   const availableBalance =
-    (vot3Balance?.scaled ?? 0) > (swappableVot3Balance?.scaled ?? 0)
+    availableBalanceOriginal === swappableOriginal
       ? (swappableVot3Balance?.scaled ?? "0")
       : (vot3Balance?.scaled ?? "0")
 
   const showTransferredVOT3Warning = vot3Original > swappableOriginal
+  const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
 
   const handleSuccess = useCallback(() => {
     onClose()
@@ -103,7 +111,7 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
             invalid={!!amount && amount !== "." && parseEther(amount) > availableBalanceOriginal}>
             <Field.Label w="full" alignItems="center" justifyContent="space-between">
               <Text textStyle="sm" color="text.subtle">
-                {t("Use available Voting Power")}
+                {t("VOT3 to convert")}
               </Text>
               <Button
                 variant="link"
@@ -133,7 +141,7 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
                 </NumberInput.Root>
                 <Field.ErrorText>
                   <Icon as={WarningTriangle} boxSize="4" />
-                  {t("Not enough Voting Power")}
+                  {t("Insufficient VOT3 balance")}
                 </Field.ErrorText>
               </VStack>
 
@@ -159,6 +167,13 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
         {showTransferredVOT3Warning && (
           <Text textStyle="xs" color="text.subtle">
             {t("You can only convert Voting Power that you powered up yourself.")}
+          </Text>
+        )}
+        {lockedForSupport > 0 && (
+          <Text textStyle="xs" color="text.subtle">
+            {t("You have {{amount}} VOT3 locked for supporting proposals. Withdraw support to convert them.", {
+              amount: compactFormatter.format(lockedForSupport),
+            })}
           </Text>
         )}
 
