@@ -1,9 +1,9 @@
 "use client"
 
-import { Button, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { WarningTriangle } from "iconoir-react"
+import { InfoCircle, WarningTriangle } from "iconoir-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { parseEther } from "viem"
@@ -170,11 +170,16 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
           </Text>
         )}
         {lockedForSupport > 0 && (
-          <Text textStyle="xs" color="text.subtle">
-            {t("You have {{amount}} VOT3 locked for supporting proposals. Withdraw support to convert them.", {
-              amount: compactFormatter.format(lockedForSupport),
-            })}
-          </Text>
+          <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="text.subtle">
+                {t("You have {{amount}} VOT3 locked for supporting proposals. Withdraw support to convert them.", {
+                  amount: compactFormatter.format(lockedForSupport),
+                })}
+              </Text>
+            </HStack>
+          </Card.Root>
         )}
 
         <VStack gap={2} mt={2} w="full">

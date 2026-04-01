@@ -59,28 +59,27 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
           {" VOT3"}
         </Text>
 
-        <Skeleton loading={isVot3Loading}>
-          <HStack gap={1}>
-            <Text textStyle="sm" color="text.subtle">
-              {t("VOT3 Balance:")}
-            </Text>
-            <Text textStyle="sm" fontWeight="semibold">
-              {formatter.format(currentVot3Balance)} {"VOT3"}
-            </Text>
-          </HStack>
-        </Skeleton>
-        {lockedForSupport > 0 && (
-          <Skeleton loading={isCurrentVotingPowerLoading}>
+        <Skeleton loading={isVot3Loading || isCurrentVotingPowerLoading}>
+          <VStack align="start" gap={0.5}>
             <HStack gap={1}>
               <Text textStyle="sm" color="text.subtle">
-                {t("Locked for support:")}
+                {t("Next round voting power:")}
               </Text>
               <Text textStyle="sm" fontWeight="semibold">
-                {formatter.format(lockedForSupport)} {"VOT3"}
+                {formatter.format(currentVot3Balance + lockedForSupport)} {"VOT3"}
               </Text>
             </HStack>
-          </Skeleton>
-        )}
+            {lockedForSupport > 0 && (
+              <Text textStyle="xs" color="text.subtle">
+                {"("}
+                {formatter.format(currentVot3Balance)} {t("in wallet")}
+                {" + "}
+                {formatter.format(lockedForSupport)} {t("in support")}
+                {")"}
+              </Text>
+            )}
+          </VStack>
+        </Skeleton>
 
         <Skeleton loading={isRoundLoading}>
           <HStack gap={1}>
