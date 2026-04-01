@@ -198,7 +198,7 @@ const SupportResultContent = ({
         </HStack>
       </VStack>
 
-      <ProposalSupportersCard proposalId={proposalId} totalSupporters={totalSupporters} />
+      <ProposalSupportersCard proposalId={proposalId} />
     </VStack>
   )
 }
