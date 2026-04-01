@@ -8,7 +8,9 @@ import { useCallback, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
+import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import { StatCard } from "./StatCard"
@@ -22,9 +24,19 @@ export const VotingPowerBox = () => {
 
   const { vot3Balance, isLoading, votesAtSnapshot } = useVotingPowerAtSnapshot()
   const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
+  const { data: bestBlock } = useBestBlockCompressed()
+  const { data: currentDepositsVotes, isLoading: isCurrentDepositsVotesLoading } = useTotalVotesOnBlock(
+    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    account?.address,
+  )
 
   const formatted = vot3Balance?.formatted ?? "-"
-  const votingPowerNextRound = BigInt(currentVot3Balance?.original || "0") - BigInt(vot3Balance?.original || "0")
+  // Next-round delta accounts for both wallet VOT3 balance and deposit voting power
+  const currentVotingPowerForNextRoundWei =
+    BigInt(currentVot3Balance?.original ?? "0") + (currentDepositsVotes?.depositsVotesWei ?? 0n)
+  const votingPowerNextRound = currentVotingPowerForNextRoundWei - (votesAtSnapshot?.totalVotesWithDepositsWei ?? 0n)
+
+  const allLoading = isLoading || isCurrentVot3BalanceLoading || isCurrentDepositsVotesLoading
 
   return (
     <>
@@ -32,10 +44,10 @@ export const VotingPowerBox = () => {
         variant="positive"
         title={t("Your voting power")}
         icon={<Flash />}
-        isLoading={isLoading || isCurrentVot3BalanceLoading}
+        isLoading={allLoading}
         onClick={() => setIsOpen(true)}
         subtitle={
-          <Skeleton asChild loading={isLoading || isCurrentVot3BalanceLoading}>
+          <Skeleton asChild loading={allLoading}>
             <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>
               <Mark variant="text" fontWeight="semibold">
                 {formatted}
@@ -78,7 +90,7 @@ export const VotingPowerBox = () => {
         formatted={formatted}
         votingPowerNextRound={votingPowerNextRound}
         votesAtSnapshot={votesAtSnapshot}
-        isLoading={isLoading || isCurrentVot3BalanceLoading}
+        isLoading={allLoading}
       />
     </>
   )

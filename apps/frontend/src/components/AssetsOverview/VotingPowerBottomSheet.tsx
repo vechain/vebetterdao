@@ -34,6 +34,7 @@ type VotesAtSnapshot = {
   totalVotesWithDeposits: string
   totalVotesWithDepositsWei: bigint
   depositsVotes: string
+  depositsVotesWei: bigint
 }
 
 type Props = {
@@ -117,20 +118,15 @@ const VotingPowerContent = ({
   const transactions = useMemo(() => txData?.pages.flatMap(page => page.data) ?? [], [txData])
   const hasNextPage = useMemo(() => txData?.pages[0]?.pagination?.hasNext ?? false, [txData])
 
-  // Composition: VOT3 balance = total - deposits
   const vot3BalanceOnly = useMemo(() => {
     if (!votesAtSnapshot) return "0"
-    const totalWei = votesAtSnapshot.totalVotesWithDepositsWei
-    const depositsWei = votesAtSnapshot.depositsVotes
-      ? BigInt(Math.round(Number(votesAtSnapshot.depositsVotes) * 1e18))
-      : 0n
-    const balanceWei = totalWei - depositsWei
+    const balanceWei = votesAtSnapshot.totalVotesWithDepositsWei - votesAtSnapshot.depositsVotesWei
     if (balanceWei <= 0n) return "0"
     return FormattingUtils.humanNumber(formatEther(balanceWei))
   }, [votesAtSnapshot])
 
   const depositsFormatted = useMemo(() => {
-    if (!votesAtSnapshot?.depositsVotes || votesAtSnapshot.depositsVotes === "0") return null
+    if (!votesAtSnapshot?.depositsVotesWei || votesAtSnapshot.depositsVotesWei === 0n) return null
     return FormattingUtils.humanNumber(votesAtSnapshot.depositsVotes)
   }, [votesAtSnapshot])
 

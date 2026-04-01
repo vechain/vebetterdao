@@ -1,23 +1,29 @@
-import { Button, Heading, HStack, Icon, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+"use client"
+
+import { Button, Card, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
-import { Reports } from "iconoir-react"
-import { useCallback, useMemo, useState } from "react"
+import { InfoCircle, WarningTriangle } from "iconoir-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { parseEther } from "viem"
 
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { BaseModal } from "@/components/BaseModal"
-import CircleGreenVot3Icon from "@/components/Icons/svg/circle-green-vot3.svg"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
+import { VOT3Icon } from "@/components/Icons/VOT3Icon"
+import { MulticolorBar } from "@/components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "@/components/Proposal/ResultsDisplay"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { filterAmountInput } from "@/utils/filterAmountInput"
 
-import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
-import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
-import { GenericAlert } from "../../../../components/Alert/GenericAlert"
+import { handleAmountInput } from "../../../../../components/PowerUpModal/utils"
+
+const compactFormatter = getCompactFormatter(4)
+const PERCENTAGE_SHORTCUTS = [25, 50, 75, 100] as const
 
 type Props = {
   isSupportModalOpen: boolean
@@ -27,6 +33,7 @@ type Props = {
   proposalThreshold: bigint
   proposalDeposits: bigint
 }
+
 export const ProposalSupportModal = ({
   isSupportModalOpen,
   onClose,
@@ -39,26 +46,38 @@ export const ProposalSupportModal = ({
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const [amount, setAmount] = useState("")
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  // Get user's VOT3 balance and current deposits using hooks
+
   const { data: vot3Balance } = useGetVot3Balance(account?.address)
-  const canClaimNextRound = useMemo(() => {
-    return votingRoundId === Number(currentRoundId ?? 0) + 1
-  }, [votingRoundId, currentRoundId])
-  // Helper function to calculate accurate percentage using wei precision
-  const getPercentage = useCallback((deposits: bigint, threshold: bigint) => {
-    if (threshold === 0n) return 0
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
-    // Use bigint arithmetic for exact comparison - only show 100% when truly equal or greater
-    if (deposits >= threshold) return 100
+  useEffect(() => {
+    if (isSupportModalOpen) setAmount("")
+  }, [isSupportModalOpen])
 
-    // For percentages less than 100%, use bigint math to maintain precision
-    // Calculate (deposits * 10000) / threshold for 2 decimal precision, then divide by 100
-    const basisPoints = (deposits * 10000n) / threshold
-    return Number(basisPoints) / 100
-  }, [])
+  const canClaimNextRound = votingRoundId === Number(currentRoundId ?? 0) + 1
 
-  // Convert amount input to bigint
+  const missingSupport = useMemo(() => {
+    const thresholdBN = new BigNumber(ethers.formatEther(proposalThreshold))
+    const currentBN = new BigNumber(ethers.formatEther(proposalDeposits))
+    const missing = thresholdBN.minus(currentBN)
+    return missing.isGreaterThan(0) ? missing : new BigNumber(0)
+  }, [proposalThreshold, proposalDeposits])
+
+  const availableBalance = useMemo(() => {
+    const walletBN = new BigNumber(vot3Balance?.scaled ?? "0")
+    return BigNumber.min(walletBN, missingSupport).isGreaterThan(0)
+      ? BigNumber.min(walletBN, missingSupport)
+      : new BigNumber(0)
+  }, [vot3Balance?.scaled, missingSupport])
+
+  const handlePercentage = useCallback(
+    (pct: number) => {
+      const result = availableBalance.times(pct).div(100)
+      setAmount(handleAmountInput(result.toFixed(18)))
+    },
+    [availableBalance],
+  )
+
   const inputAmount = useMemo(() => {
     try {
       return amount ? ethers.parseEther(amount) : 0n
@@ -67,73 +86,47 @@ export const ProposalSupportModal = ({
     }
   }, [amount])
 
-  // Calculate missing support
-  const missingSupport = useMemo(() => {
-    const thresholdBN = new BigNumber(ethers.formatEther(proposalThreshold))
-    const currentBN = new BigNumber(ethers.formatEther(proposalDeposits))
-    const missing = thresholdBN.minus(currentBN)
-    return missing.isGreaterThan(0) ? missing.toString() : "0"
-  }, [proposalThreshold, proposalDeposits])
-
-  // Parsed amount in wei
   const parsedAmount = useMemo(() => {
-    if (!amount || !ethers) return "0"
-
     try {
-      return `${ethers.parseEther(amount)}`
+      return amount ? `${ethers.parseEther(amount)}` : "0"
     } catch {
       return "0"
     }
   }, [amount])
 
-  // Input handling (exactly like old interface)
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.value) return setAmount("0")
-      const input = filterAmountInput(e.target.value, { maxBalance: vot3Balance?.scaled })
-      const scaledBalanceBN = new BigNumber(vot3Balance?.scaled ?? 0)
-      const missingSupportBN = new BigNumber(missingSupport ?? 0)
+  const invalidAmount =
+    !amount ||
+    amount === "." ||
+    Number(amount) === 0 ||
+    parseEther(amount || "0") > BigInt(vot3Balance?.original ?? "0")
 
-      // Get the minimum value, between the input, the scaled balance and the missing support
-      const cappedAmountBN = BigNumber.min(new BigNumber(input), scaledBalanceBN, missingSupportBN)
-
-      setAmount(cappedAmountBN.toString())
-    },
-    [vot3Balance?.scaled, missingSupport],
-  )
-
-  // Deposit max logic
-  const handleDepositMax = useCallback(() => {
-    if (!vot3Balance) return
-
-    const scaledBalanceBN = new BigNumber(vot3Balance.scaled)
-    const missingSupportBN = new BigNumber(missingSupport)
-
-    if (scaledBalanceBN.gt(missingSupportBN)) {
-      setAmount(missingSupportBN.toString())
-      return
+  const exceedsMissing = useMemo(() => {
+    try {
+      return amount ? new BigNumber(amount).isGreaterThan(missingSupport) : false
+    } catch {
+      return false
     }
-    setAmount(scaledBalanceBN.toString())
-  }, [vot3Balance, missingSupport])
+  }, [amount, missingSupport])
 
-  // Current and predicted percentages
+  const getPercentage = useCallback((deposits: bigint, threshold: bigint) => {
+    if (threshold === 0n) return 0
+    if (deposits >= threshold) return 100
+    const basisPoints = (deposits * 10000n) / threshold
+    return Number(basisPoints) / 100
+  }, [])
+
   const currentPercent = useMemo(
     () => getPercentage(proposalDeposits, proposalThreshold),
     [proposalDeposits, proposalThreshold, getPercentage],
   )
 
   const predictedPercent = useMemo(() => {
-    // Calculate forecasted total deposits including user's contribution
-    const currentTotal = proposalDeposits
-    const forecastedTotal = currentTotal + inputAmount
-    const thresholdNumber = proposalThreshold
-
-    if (forecastedTotal >= thresholdNumber) return 100
-
-    const expectedPercentage = new BigNumber(forecastedTotal.toString()).div(thresholdNumber.toString())
-    return expectedPercentage.times(100).toNumber()
+    const forecastedTotal = proposalDeposits + inputAmount
+    if (forecastedTotal >= proposalThreshold) return 100
+    const pct = new BigNumber(forecastedTotal.toString()).div(proposalThreshold.toString())
+    return pct.times(100).toNumber()
   }, [proposalDeposits, proposalThreshold, inputAmount])
-  // Display data for progress and results
+
   const displayPercent = Number(amount || "0") > 0 ? predictedPercent : currentPercent
   const progressData = useMemo(
     () => ({
@@ -153,7 +146,6 @@ export const ProposalSupportModal = ({
     proposalId,
     onSuccess: () => {
       onSupportSuccess()
-      //Reset transaction to prevent infinite loop
       depositMutation.resetStatus()
     },
   })
@@ -162,60 +154,123 @@ export const ProposalSupportModal = ({
     if (!Number(amount)) return
     depositMutation.sendTransaction({ proposalId, amount: parsedAmount })
   }, [depositMutation, amount, proposalId, parsedAmount])
+
   return (
     <BaseModal
       showCloseButton
       isCloseable
-      ariaTitle="Support this grant"
-      modalProps={{ size: "md" }}
+      ariaTitle="Support this proposal"
+      modalProps={{ size: "md", closeOnInteractOutside: true }}
+      modalContentProps={{ maxW: "500px" }}
       isOpen={isSupportModalOpen && !isTxModalOpen}
       onClose={onClose}>
-      <VStack w="full" align="stretch" gap={6}>
-        {/* Amount Input Section */}
-        <VStack align="stretch" gap={2}>
-          <Text>{"Amount"}</Text>
-          <InputGroup
-            endElement={
-              <HStack>
-                <Text>{"VOT3"}</Text>
-                <Icon as={CircleGreenVot3Icon} />
-              </HStack>
-            }>
-            <Input placeholder="0" size={"lg"} value={amount} onChange={handleChange} />
-          </InputGroup>
-          {/* Deposit Max Button */}
-          <Button variant="plain" color="blue.500" textStyle="sm" onClick={handleDepositMax} alignSelf="flex-end">
-            {"Deposit max"}
-          </Button>
-        </VStack>
-        {/* Results Header */}
-        <HStack>
-          <Icon as={Reports} boxSize={5} />
-          <Heading size="md">{t("Results")}</Heading>
-        </HStack>
+      <VStack w="full" align="stretch" gap={5}>
+        <Heading size="xl" textAlign="center" fontWeight="bold">
+          {t("Support this proposal")}
+        </Heading>
 
-        {/* Progress Bar */}
+        <VStack
+          bg="card.default"
+          border="1px solid"
+          borderColor="border.secondary"
+          borderRadius="2xl"
+          p={4}
+          gap={2}
+          align="start"
+          w="full">
+          <Field.Root gap={2} required invalid={!!amount && amount !== "." && (invalidAmount || exceedsMissing)}>
+            <Field.Label w="full" alignItems="center" justifyContent="space-between">
+              <Text textStyle="sm" color="text.subtle">
+                {t("Amount to support")}
+              </Text>
+              <Button variant="link" height="5" size="sm" p="0" onClick={() => handlePercentage(100)}>
+                {t("Use max")}
+              </Button>
+            </Field.Label>
+
+            <HStack w="full" justifyContent="space-between">
+              <VStack align="start" gap="2" w="full">
+                <NumberInput.Root asChild textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
+                  <NumberInput.Input
+                    min={0}
+                    p="0"
+                    value={amount}
+                    placeholder="0"
+                    onChange={e => setAmount(handleAmountInput(e.target.value))}
+                    onBlur={() => setAmount(prev => prev.replace(/\.$/, ""))}
+                    border="none"
+                    outline="none"
+                    textStyle={(amount || "0").length > 15 ? "lg" : (amount || "0").length > 10 ? "xl" : "3xl"}
+                    transition="font-size 0.15s ease-out"
+                  />
+                </NumberInput.Root>
+                <Field.ErrorText>
+                  <Icon as={WarningTriangle} boxSize="4" />
+                  {exceedsMissing ? t("Exceeds remaining support needed") : t("Not enough VOT3")}
+                </Field.ErrorText>
+              </VStack>
+
+              <VStack align="end" gap={2} flexShrink={0}>
+                <HStack gap={2}>
+                  <VOT3Icon boxSize="24px" />
+                  <Text textStyle="lg" fontWeight="semibold">
+                    {"VOT3"}
+                  </Text>
+                </HStack>
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Available:")} {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
+                </Text>
+              </VStack>
+            </HStack>
+          </Field.Root>
+
+          <HStack gap={2} w="full" justifyContent="center" pt={1}>
+            {PERCENTAGE_SHORTCUTS.map(pct => (
+              <Button key={pct} variant="outline" size="xs" flex={1} onClick={() => handlePercentage(pct)}>
+                {pct === 100 ? t("Max") : `${pct}%`}
+              </Button>
+            ))}
+          </HStack>
+        </VStack>
+
         <MulticolorBar segments={[progressData]} />
-        {/* Results Section */}
         <ResultsDisplay proposalId={proposalId} segments={[{ ...progressData, icon: HeartIcon }]} />
 
-        {/* Info Message */}
-        <GenericAlert
-          type="info"
-          isLoading={false}
-          message={t("Claim your VOT3 tokens back {{round}} when voting starts.", {
-            round: canClaimNextRound ? "next week (round)" : `in round ${votingRoundId}`,
-          })}
-        />
+        <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+          <VStack gap={2} align="start">
+            <HStack gap={2} align="flex-start">
+              <Icon as={InfoCircle} boxSize="4" color="text.subtle" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="text.subtle">
+                {t(
+                  "Your VOT3 is not spent. It stays locked until voting starts and still counts as voting power for allocation rounds.",
+                )}
+              </Text>
+            </HStack>
+            <HStack gap={2} align="flex-start">
+              <Icon as={InfoCircle} boxSize="4" color="text.subtle" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="text.subtle">
+                {t("Claim your VOT3 tokens back {{round}} when voting starts.", {
+                  round: canClaimNextRound ? t("next round") : `${t("in round")} ${votingRoundId}`,
+                })}
+              </Text>
+            </HStack>
+          </VStack>
+        </Card.Root>
 
-        {/* Support Button */}
-        <Button
-          variant="primary"
-          w="full"
-          disabled={!Number(amount) || depositMutation.isTransactionPending}
-          onClick={handleSupport}>
-          {"Support"}
-        </Button>
+        <VStack gap={2} w="full">
+          <Button
+            variant="primary"
+            w="full"
+            rounded="full"
+            size="lg"
+            disabled={!Number(amount) || invalidAmount || exceedsMissing || depositMutation.isTransactionPending}
+            onClick={handleSupport}>
+            {t("Support")}
+          </Button>
+          <Button variant="ghost" w="full" rounded="full" size="lg" onClick={onClose}>
+            {t("Cancel")}
+          </Button>
+        </VStack>
       </VStack>
     </BaseModal>
   )

@@ -8,7 +8,7 @@ import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useEvents } from "@/hooks/useEvents"
 
-import { ActivityItem, ActivityType, UserProposalVoteMeta } from "./types"
+import { ActivityItem, ActivityType, UserProposalSupportMeta, UserProposalVoteMeta } from "./types"
 
 const xAllocationAbi = XAllocationVoting__factory.abi
 const xAllocationAddress = getConfig().xAllocationVotingContractAddress
@@ -61,6 +61,19 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
         proposalId: e.decodedData.args.proposalId.toString(),
         support: Number(e.decodedData.args.support),
         blockNumber: e.meta.blockNumber,
+        timestamp: e.meta.blockTimestamp,
+      })),
+    enabled: !!account?.address,
+  })
+  const proposalSupportEvents = useEvents({
+    abi: b3trGovernorAbi,
+    contractAddress: b3trGovernorAddress,
+    eventName: "ProposalDeposit",
+    filterParams: { depositor: (account?.address ?? "") as `0x${string}` },
+    select: events =>
+      events.map(e => ({
+        proposalId: e.decodedData.args.proposalId.toString(),
+        amount: e.decodedData.args.amount.toString(),
         timestamp: e.meta.blockTimestamp,
       })),
     enabled: !!account?.address,
@@ -137,7 +150,42 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
           item !== null,
       )
 
-    return [...allocationItems, ...proposalItems].sort((a, b) => b.date - a.date)
+    // votingRoundId on proposals is roundIdVoteStart (when voting begins). Users often deposit
+    // in the prior allocation round, so strict equality misses support events on the activity feed.
+    const proposalSupports = (proposalSupportEvents.data ?? []).filter(e => {
+      const info = proposalInfoMap.get(e.proposalId)
+      if (!info) return false
+      const voteRound = Number(info.votingRoundId)
+      const currentRound = Number(selectedRoundId)
+      if (Number.isNaN(voteRound) || Number.isNaN(currentRound)) return false
+      return currentRound === voteRound || currentRound === voteRound - 1
+    })
+
+    const proposalSupportItems: ActivityItem[] = proposalSupports
+      .map(e => {
+        const info = proposalInfoMap.get(e.proposalId)
+        if (!info?.title) return null
+        return {
+          type: ActivityType.USER_PROPOSAL_SUPPORT as const,
+          date: e.timestamp,
+          roundId: selectedRoundId,
+          title: `You supported "${info.title}"`,
+          metadata: {
+            proposalId: e.proposalId,
+            proposalTitle: info.title,
+            amount: e.amount,
+            proposalType: info.proposalType,
+          },
+        }
+      })
+      .filter(
+        (
+          item,
+        ): item is ActivityItem & { type: ActivityType.USER_PROPOSAL_SUPPORT; metadata: UserProposalSupportMeta } =>
+          item !== null,
+      )
+
+    return [...allocationItems, ...proposalItems, ...proposalSupportItems].sort((a, b) => b.date - a.date)
   }, [
     account?.address,
     selectedRoundId,
@@ -147,12 +195,14 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
     allocationVoteEvents.data,
     allocationAutoVoteEvents.data,
     proposalVoteEvents.data,
+    proposalSupportEvents.data,
   ])
 
   const isLoading =
     allocationVoteEvents.isLoading ||
     allocationAutoVoteEvents.isLoading ||
     proposalVoteEvents.isLoading ||
+    proposalSupportEvents.isLoading ||
     isProposalsLoading
 
   return { data, isLoading }

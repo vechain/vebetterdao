@@ -7,6 +7,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { formatEther, parseEther } from "viem"
 
 import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import { ProposalSupportersCard } from "@/app/components/ProposalSupportersCard"
 import { ProposalVotersCard } from "@/app/components/ProposalVotersCard"
 import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
 import { Modal } from "@/components/Modal"
@@ -196,6 +197,8 @@ const SupportResultContent = ({
           </Text>
         </HStack>
       </VStack>
+
+      <ProposalSupportersCard proposalId={proposalId} totalSupporters={totalSupporters} />
     </VStack>
   )
 }
