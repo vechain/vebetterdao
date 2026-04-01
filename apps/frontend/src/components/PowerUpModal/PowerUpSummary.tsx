@@ -1,8 +1,9 @@
 "use client"
 
-import { Card, HStack, Skeleton, Text, VStack, useDisclosure, Button } from "@chakra-ui/react"
+import { Card, HStack, Icon, IconButton, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { InfoCircle } from "iconoir-react"
 import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 
@@ -102,11 +103,14 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
                 )}
               />
             )}
-          </HStack>
-          <HStack>
-            <Button p="0" variant="link" onClick={onOpenSnapshot}>
-              {t("Learn more")}
-            </Button>
+            <IconButton
+              variant="ghost"
+              size="2xs"
+              rounded="full"
+              aria-label={t("Learn more about snapshot")}
+              onClick={onOpenSnapshot}>
+              <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
+            </IconButton>
             <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
           </HStack>
         </Skeleton>
