@@ -37,7 +37,9 @@ export const VotingPowerBox = () => {
 
   return (
     <Card.Root
-      p={4}
+      p={{ base: "4", md: "6" }}
+      pt={{ base: "4", md: "6" }}
+      pb={{ base: "4", md: "6" }}
       variant="subtle"
       border="sm"
       borderColor="border.secondary"
@@ -45,7 +47,7 @@ export const VotingPowerBox = () => {
       flexDirection={{ base: "row", md: "row" }}
       alignItems={{ base: "stretch", md: "center" }}
       justifyContent="space-between"
-      gap={4}>
+      gap={{ base: "2", md: "4" }}>
       <HStack gap="3" alignItems="center" flex={1}>
         <Square
           display={{ base: "none", md: "flex" }}
