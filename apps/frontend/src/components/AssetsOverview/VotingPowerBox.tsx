@@ -1,6 +1,6 @@
 "use client"
 
-import { Text, Skeleton, Mark, Badge } from "@chakra-ui/react"
+import { Text, Skeleton, Mark, Badge, Flex } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
@@ -44,43 +44,47 @@ export const VotingPowerBox = () => {
         variant="positive"
         title={t("Your voting power")}
         icon={<Flash />}
+        hideIconOnMobile
         isLoading={allLoading}
         onClick={() => setIsOpen(true)}
         subtitle={
           <Skeleton asChild loading={allLoading}>
-            <Text textStyle={{ base: "sm", md: "2xl" }} lineClamp={1}>
-              <Mark variant="text" fontWeight="semibold">
-                {formatted}
-              </Mark>
+            <Flex
+              direction={{ base: "row", md: "column" }}
+              align={{ base: "center", md: "start" }}
+              gap={1}
+              flexWrap="wrap">
+              <Text textStyle={{ base: "xl", md: "2xl" }} lineClamp={1}>
+                <Mark variant="text" fontWeight="semibold">
+                  {formatted}
+                </Mark>
+              </Text>
               {votingPowerNextRound !== 0n && (
-                <>
-                  {" "}
-                  <Badge
-                    variant="neutral"
-                    bg="card.subtle"
-                    color="text.subtle"
-                    fontWeight="normal"
-                    size="sm"
-                    rounded="md">
-                    <Trans
-                      i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
-                      values={{
-                        sign: votingPowerNextRound > 0n ? "+" : "",
-                        votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
-                      }}
-                      components={{
-                        bold: (
-                          <Text
-                            color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
-                            as="span"
-                          />
-                        ),
-                      }}
-                    />
-                  </Badge>
-                </>
+                <Badge
+                  variant="neutral"
+                  bg="card.subtle"
+                  color="text.subtle"
+                  fontWeight="normal"
+                  size="sm"
+                  rounded="md">
+                  <Trans
+                    i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
+                    values={{
+                      sign: votingPowerNextRound > 0n ? "+" : "",
+                      votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
+                    }}
+                    components={{
+                      bold: (
+                        <Text
+                          color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
+                          as="span"
+                        />
+                      ),
+                    }}
+                  />
+                </Badge>
               )}
-            </Text>
+            </Flex>
           </Skeleton>
         }
       />

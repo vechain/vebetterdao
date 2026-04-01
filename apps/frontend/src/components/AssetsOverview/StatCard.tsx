@@ -7,6 +7,7 @@ interface StatCardProps extends Omit<CardRootProps, "variant"> {
   title: string
   subtitle: string | ReactNode
   showIcon?: boolean
+  hideIconOnMobile?: boolean
   icon?: ReactNode
   cta?: ReactNode
   isLoading?: boolean
@@ -20,6 +21,7 @@ export const StatCard = ({
   subtitle,
   isLoading = false,
   showIcon = true,
+  hideIconOnMobile = false,
   icon,
   cta,
   gap,
@@ -27,9 +29,7 @@ export const StatCard = ({
 }: StatCardProps) => {
   return (
     <Card.Root
-      p={{ base: showIcon ? "2" : "4", md: "6" }}
-      pt={{ base: "4", md: "6" }}
-      pb={{ base: "4", md: "6" }}
+      p={{ base: "4", md: "6" }}
       variant="subtle"
       border="sm"
       borderColor="border.secondary"
@@ -45,6 +45,7 @@ export const StatCard = ({
       transition={onClick ? "opacity 0.15s" : undefined}>
       {showIcon && icon && (
         <Square
+          display={hideIconOnMobile ? { base: "none", md: "flex" } : undefined}
           rounded={{ base: "8px", md: "12px" }}
           bg={`status.${variant}.secondary`}
           aspectRatio={1}
@@ -55,12 +56,12 @@ export const StatCard = ({
         </Square>
       )}
       <VStack flex={1} alignItems="start" gap={gap ?? "1"}>
-        <Text textStyle={{ base: "xs", md: "md" }} color="text.subtle" lineClamp={1}>
+        <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle" lineClamp={1}>
           {title}
         </Text>
         {typeof subtitle === "string" ? (
           <Skeleton loading={isLoading}>
-            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="semibold">
+            <Text textStyle={{ base: "xl", md: "2xl" }} fontWeight="semibold">
               {subtitle}
             </Text>
           </Skeleton>
