@@ -15,7 +15,6 @@ import dynamic from "next/dynamic"
 
 import { ColorModeButton } from "../ui/color-mode"
 
-import { NavbarBalance } from "./NavbarBalance"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import { ProfileButton } from "./ProfileButton"
@@ -80,11 +79,6 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   return (
     <>
       <NavbarLogo />
-      {isLargerThan500 && (
-        <HStack>
-          <NavbarBalance />
-        </HStack>
-      )}
 
       <HStack gap={2}>
         <ConnectWalletButton />
