@@ -94,11 +94,14 @@ export const ProposalSupportModal = ({
     }
   }, [amount])
 
-  const invalidAmount =
-    !amount ||
-    amount === "." ||
-    Number(amount) === 0 ||
-    parseEther(amount || "0") > BigInt(vot3Balance?.original ?? "0")
+  const invalidAmount = useMemo(() => {
+    if (!amount || amount === "." || Number(amount) === 0) return true
+    try {
+      return parseEther(amount || "0") > BigInt(vot3Balance?.original ?? "0")
+    } catch {
+      return true
+    }
+  }, [amount, vot3Balance?.original])
 
   const exceedsMissing = useMemo(() => {
     try {
