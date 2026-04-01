@@ -17,7 +17,7 @@ import { MotionVStack } from "@/components/MotionVStack"
 
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
-import { ChallengeStatusBadges } from "./ChallengeStatusBadges"
+import { ChallengeKindBadges, ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
 
 const StatItem = ({ label, value, color }: { label: string; value: string | number; color?: string }) => {
   return (
@@ -97,12 +97,17 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
           <VStack align="stretch" gap="6">
             {/* Top: badges + title + meta */}
             <VStack align="stretch" gap="4">
-              <ChallengeStatusBadges challenge={challenge} />
+              <HStack justify="space-between" align="center">
+                <HStack gap="3" align="center">
+                  <ChallengeVisibilityBadge challenge={challenge} />
+                  <Heading size={{ base: "xl", md: "2xl" }}>
+                    {t("Challenge #{{id}}", { id: challenge.challengeId })}
+                  </Heading>
+                </HStack>
+                <ChallengeStatusBadge challenge={challenge} />
+              </HStack>
 
               <VStack align="stretch" gap="2">
-                <Heading size={{ base: "xl", md: "2xl" }}>
-                  {t("Challenge #{{id}}", { id: challenge.challengeId })}
-                </Heading>
                 <HStack flexWrap="wrap" gap="2" align="center">
                   <Text
                     textStyle="xs"
@@ -167,9 +172,11 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
               </SimpleGrid>
             </Box>
 
+            <ChallengeKindBadges challenge={challenge} />
+
             {/* CTA */}
             {hasChallengeActions(challenge) && (
-              <Box pt="2">
+              <Box pt="2" maxW={{ md: "sm" }}>
                 <ChallengeActions challenge={challenge} layout="card" />
               </Box>
             )}

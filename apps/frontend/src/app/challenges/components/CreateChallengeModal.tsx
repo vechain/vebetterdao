@@ -177,7 +177,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
     !hasInvalidEndRound &&
     !hasInsufficientB3tr &&
     !hasInvalidThresholdConfiguration
-  const titleKey = isSponsored ? "Create sponsored challenge" : "Create stake challenge"
+  const titleKey = isSponsored ? "Create sponsored challenge" : "Create challenge"
   const amountLabelKey = isSponsored ? "Prize amount (B3TR)" : "Stake amount (B3TR)"
 
   return (
@@ -211,7 +211,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                   <Text textStyle="xs" color="text.subtle">
                     {t(
                       form.kind === ChallengeKind.Stake
-                        ? "Stake challenge type description"
+                        ? "Challenge type description"
                         : "Sponsored challenge type description",
                     )}
                   </Text>

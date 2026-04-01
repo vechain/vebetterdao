@@ -7,9 +7,10 @@ import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
 import { ChallengeKind, ChallengeStatus, ChallengeView } from "@/api/challenges/types"
+import { AddressIcon } from "@/components/AddressIcon"
 
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
-import { ChallengeStatusBadges } from "./ChallengeStatusBadges"
+import { ChallengeKindBadges, ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
 
 export const ChallengeCard = ({ challenge, currentRound }: { challenge: ChallengeView; currentRound: number }) => {
   const { t } = useTranslation()
@@ -26,27 +27,28 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
     <LinkBox h="full">
       <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" h="full" borderRadius="3xl" boxShadow="sm">
         <VStack align="stretch" gap="5" h="full">
-          <ChallengeStatusBadges challenge={challenge} />
+          <HStack justify="space-between" align="center">
+            <HStack gap="3" align="center">
+              <ChallengeVisibilityBadge challenge={challenge} />
+              <Heading size="lg">
+                <LinkOverlay asChild>
+                  <NextLink href={`/challenges/${challenge.challengeId}`}>
+                    {t("Challenge #{{id}}", { id: challenge.challengeId })}
+                  </NextLink>
+                </LinkOverlay>
+              </Heading>
+            </HStack>
+            <ChallengeStatusBadge challenge={challenge} />
+          </HStack>
 
           <VStack align="stretch" gap="3">
-            <Heading size="lg">
-              <LinkOverlay asChild>
-                <NextLink href={`/challenges/${challenge.challengeId}`}>
-                  {t("Challenge #{{id}}", { id: challenge.challengeId })}
-                </NextLink>
-              </LinkOverlay>
-            </Heading>
-            <HStack flexWrap="wrap" gap="2">
-              <Text
-                textStyle="xs"
-                color="text.subtle"
-                bg="bg.secondary"
-                borderRadius="full"
-                px="2.5"
-                py="1"
-                fontWeight="semibold">
-                {humanAddress(challenge.creator, 6, 4)}
-              </Text>
+            <HStack flexWrap="wrap" gap="2" align="center">
+              <HStack gap="1.5" bg="bg.secondary" borderRadius="full" px="2.5" py="1" align="center">
+                <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" />
+                <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                  {humanAddress(challenge.creator, 6, 4)}
+                </Text>
+              </HStack>
               {createdAtLabel && (
                 <Text color="text.subtle" textStyle="sm">
                   {"•"} {createdAtLabel}
@@ -70,8 +72,8 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
             )}
           </VStack>
 
-          <SimpleGrid columns={2} gapX={{ base: "6", md: "8" }} gapY="4">
-            <VStack align="start" gap="1">
+          <SimpleGrid columns={2} gap="3">
+            <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
               <Text
                 textStyle="xxs"
                 color="text.subtle"
@@ -80,12 +82,12 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 fontWeight="semibold">
                 {t("Prize")}
               </Text>
-              <Text textStyle="lg" fontWeight="bold" color="brand.primary">
+              <Text textStyle="lg" fontWeight="bold" color="brand.primary" mt="1">
                 {humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
               </Text>
-            </VStack>
+            </Box>
             {!isSponsored && (
-              <VStack align="start" gap="1">
+              <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
                 <Text
                   textStyle="xxs"
                   color="text.subtle"
@@ -94,12 +96,12 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                   fontWeight="semibold">
                   {t("Stake")}
                 </Text>
-                <Text textStyle="lg" fontWeight="bold">
+                <Text textStyle="lg" fontWeight="bold" mt="1">
                   {humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
                 </Text>
-              </VStack>
+              </Box>
             )}
-            <VStack align="start" gap="1">
+            <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
               <Text
                 textStyle="xxs"
                 color="text.subtle"
@@ -108,11 +110,11 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 fontWeight="semibold">
                 {t("Participants")}
               </Text>
-              <Text textStyle="lg" fontWeight="bold">
+              <Text textStyle="lg" fontWeight="bold" mt="1">
                 {humanNumber(challenge.participantCount)} {"/"} {humanNumber(challenge.maxParticipants)}
               </Text>
-            </VStack>
-            <VStack align="start" gap="1">
+            </Box>
+            <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
               <Text
                 textStyle="xxs"
                 color="text.subtle"
@@ -121,11 +123,13 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 fontWeight="semibold">
                 {t("Rounds")}
               </Text>
-              <Text textStyle="lg" fontWeight="bold">
+              <Text textStyle="lg" fontWeight="bold" mt="1">
                 {roundsProgress}
               </Text>
-            </VStack>
+            </Box>
           </SimpleGrid>
+
+          <ChallengeKindBadges challenge={challenge} />
 
           {hasChallengeActions(challenge) && (
             <Box mt="auto" pt="5" borderTopWidth="1px" borderColor="border.secondary">

@@ -139,7 +139,7 @@ isProject: false
   - `useChallengeActions`
   - `useChallengeParticipantActions`
 - Implemented UX:
-  - create stake challenge
+  - create challenge
   - create sponsored challenge
   - public/private visibility
   - selection of up to `5` apps or `all apps`

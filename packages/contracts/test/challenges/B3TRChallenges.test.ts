@@ -117,7 +117,7 @@ async function createChallenge(
 }
 
 describe("B3TRChallenges - @shard9a", function () {
-  it("creates a stake challenge and auto-adds the creator", async function () {
+  it("creates a challenge and auto-adds the creator", async function () {
     const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
@@ -149,7 +149,7 @@ describe("B3TRChallenges - @shard9a", function () {
       .withArgs(3, 2)
   })
 
-  it("counts the creator toward the participant cap for stake challenges", async function () {
+  it("counts the creator toward the participant cap", async function () {
     const { alice, bob, carol, roundGovernor, challenges } = await deployFixture({ maxParticipants: 3 })
     await roundGovernor.setCurrentRoundId(1)
 
@@ -239,7 +239,7 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await challenges.getParticipantStatus(1, alice.address)).to.equal(ParticipantStatus.Joined)
   })
 
-  it("marks an unjoined stake challenge invalid and refunds the creator", async function () {
+  it("marks an unjoined challenge invalid and refunds the creator", async function () {
     const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
@@ -254,7 +254,7 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE)
   })
 
-  it("cancels a stake challenge and refunds creator and participant", async function () {
+  it("cancels a challenge and refunds creator and participant", async function () {
     const { admin, alice, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 

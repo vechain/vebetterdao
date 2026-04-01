@@ -75,12 +75,7 @@ export const ChallengesPageContent = () => {
           <HStack gap="2" flexShrink={0}>
             <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
               <Button variant="primary" size="sm">
-                {t("Create stake challenge")}
-              </Button>
-            </CreateChallengeModal>
-            <CreateChallengeModal defaultKind={ChallengeKind.Sponsored} currentRound={round}>
-              <Button variant="secondary" size="sm">
-                {t("Create sponsored challenge")}
+                {t("Create challenge")}
               </Button>
             </CreateChallengeModal>
           </HStack>
