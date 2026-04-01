@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "Siz devam ettirene kadar ödül dağıtımı duracaktır. Havuz fonlarınız dokunulmadan kalacaktır.",
   "Rewards distributor already present": "Ödül dağıtıcısı zaten mevcut",
   "Rewards earned": "Kazanılan ödüller",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "#{{round}} turundaki ödüller tur sona erdiğinde talep edilebilir, yaklaşık {{time}} içinde.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Tur #{{round}}'un ödülleri tur sona erdiğinde talep edilebilir hale gelir.",
   "Rewards Pool": "Ödül Havuzu",
   "Rewards Pool Active": "Ödül Havuzu Aktif",

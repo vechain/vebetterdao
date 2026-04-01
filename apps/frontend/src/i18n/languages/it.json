@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "La distribuzione delle ricompense si fermerà finché non la riprenderai. I fondi del tuo pool resteranno intatti.",
   "Rewards distributor already present": "Distributore di premi già presente",
   "Rewards earned": "Ricompense guadagnate",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "Le ricompense del round #{{round}} saranno riscattabili al termine del round, tra circa {{time}}.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Le ricompense del round #{{round}} diventano riscattabili una volta terminato il round.",
   "Rewards Pool": "Pool dei Premi",
   "Rewards Pool Active": "Pool Ricompense Attivo",

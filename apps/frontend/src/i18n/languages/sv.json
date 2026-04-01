@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "Belöningsdistributionen stoppas tills du återupptar den. Dina poolmedel förblir orörda.",
   "Rewards distributor already present": "Belöningsdistributör redan närvarande",
   "Rewards earned": "Förvärvade belöningar",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "Belöningar från omgång #{{round}} kan hämtas när omgången slutar, om ungefär {{time}}.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Belöningar från runda #{{round}} blir tillgängliga när rundan avslutas.",
   "Rewards Pool": "Belöningspool",
   "Rewards Pool Active": "Belöningspool aktiv",

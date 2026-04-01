@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "जब तक आप इसे फिर से शुरू नहीं करते, रिवॉर्ड वितरण बंद रहेगा। आपके पूल फंड अछूते रहेंगे।",
   "Rewards distributor already present": "इनाम वितरक पहले से मौजूद है",
   "Rewards earned": "कमाए गए पुरस्कार",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "राउंड #{{round}} के पुरस्कार राउंड समाप्त होने पर क्लेम किए जा सकेंगे, लगभग {{time}} में।",
   "Rewards from round #{{round}} become claimable once the round ends.": "राउंड #{{round}} के पुरस्कार राउंड समाप्त होने पर क्लेम योग्य हो जाते हैं।",
   "Rewards Pool": "इनाम पूल",
   "Rewards Pool Active": "रिवॉर्ड पूल सक्रिय",

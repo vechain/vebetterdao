@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "De beloningsdistributie stopt totdat je deze hervat. Je poolmiddelen blijven onaangeroerd.",
   "Rewards distributor already present": "Beloningsverschaffer reeds aanwezig",
   "Rewards earned": "Verdiende beloningen",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "Beloningen van ronde #{{round}} worden opeisbaar zodra de ronde eindigt, over ongeveer {{time}}.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Beloningen van ronde #{{round}} worden claimbaar zodra de ronde eindigt.",
   "Rewards Pool": "Beloningspool",
   "Rewards Pool Active": "Beloningspool actief",

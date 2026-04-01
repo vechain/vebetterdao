@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
+import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { ProposalFilter } from "@/store/useProposalFilters"
@@ -47,6 +48,8 @@ export const PotentialRewardBox = () => {
     args: [],
     queryOptions: { select: data => data[0] },
   })
+
+  const { data: roundData } = useAllocationsRound(currentRoundId?.toString())
 
   const { data, isLoading } = useMultipleClausesCall({
     thor,
@@ -177,6 +180,7 @@ export const PotentialRewardBox = () => {
         hadAutoVotingEnabled={hadAutoVotingEnabled}
         relayerFeePercentage={relayerFeePercentage}
         unvotedProposalCount={unvotedProposalCount}
+        roundEndTimestamp={roundData?.voteEndTimestamp ?? null}
       />
     </>
   )

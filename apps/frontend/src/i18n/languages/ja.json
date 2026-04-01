@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "再開するまで報酬配布は停止されます。プールの資金はそのまま保持されます。",
   "Rewards distributor already present": "報酬分配者は既に存在します",
   "Rewards earned": "獲得した報酬",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "ラウンド #{{round}} の報酬はラウンド終了後に請求可能になります。約{{time}}後に終了します。",
   "Rewards from round #{{round}} become claimable once the round ends.": "ラウンド#{{round}}の報酬はラウンド終了後に請求可能になります。",
   "Rewards Pool": "報酬プール",
   "Rewards Pool Active": "報酬プール有効",

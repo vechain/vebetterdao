@@ -1322,6 +1322,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "Distribuția recompenselor se va opri până când o reiei. Fondurile din pool vor rămâne neatinse.",
   "Rewards distributor already present": "Distribuitor de recompense deja prezent",
   "Rewards earned": "Recompense câștigate",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "Recompensele din runda #{{round}} devin revendicabile la încheierea rundei, în aproximativ {{time}}.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Rewards from round #{{round}} become claimable once the round ends.",
   "Rewards Pool": "Pool Recompense",
   "Rewards Pool Active": "Pool Recompense Activ",

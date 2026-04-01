@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "재개할 때까지 보상 분배가 중단됩니다. 풀 자금은 그대로 유지됩니다.",
   "Rewards distributor already present": "보상 분배자가 이미 존재합니다",
   "Rewards earned": "획득한 보상",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "라운드 #{{round}}의 보상은 라운드가 종료되면 청구할 수 있으며, 약 {{time}} 후에 종료됩니다.",
   "Rewards from round #{{round}} become claimable once the round ends.": "라운드 #{{round}}의 보상은 라운드 종료 후 청구 가능합니다.",
   "Rewards Pool": "보상 풀",
   "Rewards Pool Active": "보상 풀 활성",

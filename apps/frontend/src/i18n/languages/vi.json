@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "Phân phối phần thưởng sẽ dừng cho đến khi bạn tiếp tục. Quỹ pool của bạn sẽ không bị ảnh hưởng.",
   "Rewards distributor already present": "Nhà phân phối phần thưởng đã có sẵn",
   "Rewards earned": "Phần thưởng đạt được",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "Phần thưởng từ vòng #{{round}} có thể nhận được khi vòng kết thúc, trong khoảng {{time}}.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Phần thưởng từ vòng #{{round}} có thể nhận khi vòng kết thúc.",
   "Rewards Pool": "Quỹ phần thưởng",
   "Rewards Pool Active": "Pool phần thưởng đang hoạt động",

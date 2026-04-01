@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
+import { timestampToTimeLeftCompact } from "@/utils/date"
 import type { RewardCalculationResult } from "@/utils/rewardCalculation"
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
   hadAutoVotingEnabled: boolean
   relayerFeePercentage: bigint
   unvotedProposalCount: number
+  roundEndTimestamp: import("dayjs").Dayjs | null
 }
 
 const CheckItem = ({ label, checked }: { label: string; checked: boolean }) => (
@@ -57,12 +59,14 @@ const RewardsContent = ({
   hadAutoVotingEnabled,
   relayerFeePercentage,
   unvotedProposalCount,
+  roundEndTimestamp,
 }: Omit<Props, "isOpen">) => {
   const { t } = useTranslation()
   const router = useRouter()
 
   const fmt = (val: bigint) => Number(formatEther(val)).toFixed(2)
   const hasVotedOnAllProposals = unvotedProposalCount === 0
+  const timeLeft = roundEndTimestamp ? timestampToTimeLeftCompact(roundEndTimestamp.valueOf()) : null
 
   return (
     <VStack gap="4" align="stretch">
@@ -197,11 +201,16 @@ const RewardsContent = ({
               {t("When are rewards claimable?")}
             </Text>
             <Text textStyle="xs" color="text.subtle">
-              {currentRoundId
-                ? t("Rewards from round #{{round}} become claimable once the round ends.", {
+              {currentRoundId && timeLeft
+                ? t("Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.", {
                     round: currentRoundId.toString(),
+                    time: timeLeft,
                   })
-                : t("Rewards become claimable after the round ends.")}
+                : currentRoundId
+                  ? t("Rewards from round #{{round}} become claimable once the round ends.", {
+                      round: currentRoundId.toString(),
+                    })
+                  : t("Rewards become claimable after the round ends.")}
             </Text>
           </VStack>
         </HStack>

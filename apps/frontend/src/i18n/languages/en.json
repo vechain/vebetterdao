@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.",
   "Rewards distributor already present": "Rewards distributor already present",
   "Rewards earned": "Rewards earned",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Rewards from round #{{round}} become claimable once the round ends.",
   "Rewards Pool": "Rewards Pool",
   "Rewards Pool Active": "Rewards Pool Active",

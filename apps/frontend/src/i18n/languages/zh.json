@@ -1349,6 +1349,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "奖励分发将停止，直到您恢复为止。池中资金将保持不变。",
   "Rewards distributor already present": "奖励分配者已存在",
   "Rewards earned": "获得的奖励",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "第 #{{round}} 轮的奖励在该轮结束后即可领取，大约 {{time}}后结束。",
   "Rewards from round #{{round}} become claimable once the round ends.": "第 #{{round}} 回合的奖励在回合结束后可领取。",
   "Rewards Pool": "奖励池",
   "Rewards Pool Active": "奖励池已激活",

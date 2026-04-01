@@ -1322,6 +1322,7 @@
   "Rewards distribution will stop until you resume it. Your pool funds will remain untouched.": "Раздача наград остановится, пока вы не возобновите её. Средства в пуле останутся нетронутыми.",
   "Rewards distributor already present": "Раздатчик наград уже добавлен",
   "Rewards earned": "Заработанные награды",
+  "Rewards from round #{{round}} become claimable once the round ends, in approximately {{time}}.": "Награды за раунд #{{round}} станут доступны после окончания раунда, примерно через {{time}}.",
   "Rewards from round #{{round}} become claimable once the round ends.": "Rewards from round #{{round}} become claimable once the round ends.",
   "Rewards Pool": "Пул наград",
   "Rewards Pool Active": "Пул наград активен",
