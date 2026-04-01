@@ -17,14 +17,12 @@ const AppDetailPageContent = dynamic(
   },
 )
 type Props = {
-  params: {
-    appId: string
-  }
+  appId: string
 }
-export const AppDetailPage = ({ params }: Props) => {
+export const AppDetailPage = ({ appId }: Props) => {
   useEffect(() => {
-    AnalyticsUtils.trackPage(`App/${params.appId}`)
-  }, [params.appId])
+    AnalyticsUtils.trackPage(`App/${appId}`)
+  }, [appId])
   return (
     <MotionVStack>
       <AppDetailPageContent />
