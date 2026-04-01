@@ -1,14 +1,17 @@
 "use client"
 
-import { Card, HStack, Skeleton, Text, VStack, useDisclosure, Button } from "@chakra-ui/react"
+import { Card, HStack, Icon, IconButton, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { InfoCircle } from "iconoir-react"
 import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 
+import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { SnapshotExplanationModal } from "@/app/components/Countdown/SnapshotExplanationModal"
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 type Props = {
@@ -23,12 +26,18 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: vot3Balance, isLoading: isVot3Loading } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: bestBlock } = useBestBlockCompressed()
+  const { data: currentVotingPower, isLoading: isCurrentVotingPowerLoading } = useTotalVotesOnBlock(
+    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    account?.address,
+  )
   const { open: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: allocationRound, isLoading: isRoundLoading } = useAllocationsRound(currentRoundId)
 
   const numericAmount = Number(amount) || 0
-  const currentVotingPower = Number(vot3Balance?.scaled ?? "0")
+  const currentVot3Balance = Number(vot3Balance?.scaled ?? "0")
+  const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
   const sign = mode === "power-up" ? "+" : "-"
   const changeColor = mode === "power-up" ? "status.positive.strong" : "status.negative.strong"
 
@@ -51,15 +60,26 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
           {" VOT3"}
         </Text>
 
-        <Skeleton loading={isVot3Loading}>
-          <HStack gap={1}>
-            <Text textStyle="sm" color="text.subtle">
-              {t("Current Voting Power:")}
-            </Text>
-            <Text textStyle="sm" fontWeight="semibold">
-              {formatter.format(currentVotingPower)} {"VOT3"}
-            </Text>
-          </HStack>
+        <Skeleton loading={isVot3Loading || isCurrentVotingPowerLoading}>
+          <VStack align="start" gap={0.5}>
+            <HStack gap={1}>
+              <Text textStyle="sm" color="text.subtle">
+                {t("Next round voting power:")}
+              </Text>
+              <Text textStyle="sm" fontWeight="semibold">
+                {formatter.format(currentVot3Balance + lockedForSupport)} {"VOT3"}
+              </Text>
+            </HStack>
+            {lockedForSupport > 0 && (
+              <Text textStyle="xs" color="text.subtle">
+                {"("}
+                {formatter.format(currentVot3Balance)} {t("in wallet")}
+                {" + "}
+                {formatter.format(lockedForSupport)} {t("in support")}
+                {")"}
+              </Text>
+            )}
+          </VStack>
         </Skeleton>
 
         <Skeleton loading={isRoundLoading}>
@@ -83,11 +103,14 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
                 )}
               />
             )}
-          </HStack>
-          <HStack>
-            <Button p="0" variant="link" onClick={onOpenSnapshot}>
-              {t("Learn more")}
-            </Button>
+            <IconButton
+              variant="ghost"
+              size="2xs"
+              rounded="full"
+              aria-label={t("Learn more about snapshot")}
+              onClick={onOpenSnapshot}>
+              <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
+            </IconButton>
             <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
           </HStack>
         </Skeleton>

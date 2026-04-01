@@ -1,23 +1,38 @@
 "use client"
 
 import { Box, HStack, Icon, Text, VStack, useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { NavArrowRight, RefreshDouble, InfoCircle } from "iconoir-react"
+import { Gift, NavArrowRight, RefreshDouble, InfoCircle, ArrowDown, ArrowUp, StarSolid } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { TbContract, TbLeaf } from "react-icons/tb"
+import { formatEther } from "viem"
 
 import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
+import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
+import { Transaction } from "@/api/indexer/transactions/useTransactions"
+import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/ActivityList"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerDownModal } from "@/components/PowerUpModal"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
 }
+
+const BALANCE_EVENT_NAMES = [
+  "B3TR_CLAIM_REWARD",
+  "B3TR_ACTION",
+  "B3TR_UPGRADE_GM",
+  "B3TR_SWAP_B3TR_TO_VOT3",
+  "B3TR_SWAP_VOT3_TO_B3TR",
+  "TRANSFER_FT",
+] as const
+const compactFormatter = getCompactFormatter(2)
+const fmtValue = (raw?: string) => (raw ? compactFormatter.format(Number(formatEther(BigInt(raw)))) : "0")
 
 const InfoRow = ({
   icon,
@@ -63,8 +78,88 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
   const { account } = useWallet()
   const router = useRouter()
   const { data: b3trBalance } = useGetB3trBalance(account?.address)
-  const { data: vot3Balance } = useGetVot3Balance(account?.address)
   const { data: convertibleVot3 } = useB3trConverted(account?.address)
+  const { data: apps } = useXApps()
+
+  const getBalanceActivityProps = useCallback(
+    (tx: Transaction, account: string): ActivityItemProps | null => {
+      switch (tx.eventName) {
+        case "B3TR_CLAIM_REWARD":
+          return {
+            label: tx.roundId ? t("Claimed reward for round {{round}}", { round: tx.roundId }) : t("Claimed rewards"),
+            icon: <Gift />,
+            iconBg: "status.positive.subtle",
+            iconColor: "status.positive.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "+",
+            amountColor: "status.positive.strong",
+          }
+        case "B3TR_ACTION": {
+          const appName = apps?.allApps.find(a => a.id === tx.appId)?.name ?? ""
+          return {
+            label: `${t("Better action on")} ${appName}`,
+            icon: <TbLeaf />,
+            iconBg: "status.positive.subtle",
+            iconColor: "status.positive.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "+",
+            amountColor: "status.positive.strong",
+          }
+        }
+        case "B3TR_UPGRADE_GM":
+          return {
+            label: t("GM upgrade"),
+            icon: <StarSolid />,
+            iconBg: "status.warning.subtle",
+            iconColor: "status.warning.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "-",
+            amountColor: undefined,
+          }
+        case "B3TR_SWAP_B3TR_TO_VOT3":
+          return {
+            label: t("Powered up"),
+            icon: <ArrowUp />,
+            iconBg: "status.info.subtle",
+            iconColor: "status.info.strong",
+            amount: fmtValue(tx.inputValue),
+            token: "B3TR",
+            sign: "-",
+            amountColor: undefined,
+          }
+        case "B3TR_SWAP_VOT3_TO_B3TR":
+          return {
+            label: t("Converted from VOT3"),
+            icon: <ArrowDown />,
+            iconBg: "status.positive.subtle",
+            iconColor: "status.positive.strong",
+            amount: fmtValue(tx.outputValue),
+            token: "B3TR",
+            sign: "+",
+            amountColor: "status.positive.strong",
+          }
+        case "TRANSFER_FT": {
+          const isOutgoing = tx.from?.toLowerCase() === account.toLowerCase()
+          return {
+            label: isOutgoing ? t("Outgoing transfer") : t("Incoming transfer"),
+            icon: isOutgoing ? <ArrowUp /> : <ArrowDown />,
+            iconBg: isOutgoing ? "status.negative.subtle" : "status.positive.subtle",
+            iconColor: isOutgoing ? "status.negative.strong" : "status.positive.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: isOutgoing ? "-" : "+",
+            amountColor: isOutgoing ? undefined : "status.positive.strong",
+          }
+        }
+        default:
+          return null
+      }
+    },
+    [t, apps],
+  )
 
   return (
     <VStack gap="4" align="stretch">
@@ -76,11 +171,6 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
           {b3trBalance?.formatted ?? "0"}
           {" B3TR"}
         </Text>
-        {vot3Balance && Number(vot3Balance.scaled) > 0 && (
-          <Text textStyle="xs" color="text.subtle" mt="1">
-            {t("{{amount}} VOT3 locked as voting power", { amount: vot3Balance.formatted })}
-          </Text>
-        )}
       </Box>
 
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
@@ -130,6 +220,8 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
           )}
         />
       </VStack>
+
+      <ActivityList eventNames={[...BALANCE_EVENT_NAMES]} getActivityProps={getBalanceActivityProps} />
     </VStack>
   )
 }
