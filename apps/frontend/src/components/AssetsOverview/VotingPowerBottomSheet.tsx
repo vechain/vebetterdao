@@ -5,6 +5,7 @@ import {
   Button,
   HStack,
   Icon,
+  Stack,
   Text,
   VStack,
   Badge,
@@ -167,15 +168,44 @@ const VotingPowerContent = ({
       {/* Summary */}
       <Skeleton loading={isLoading} rounded="lg">
         <Box p="4" rounded="lg" bg="status.positive.subtle">
-          <Text textStyle="xs" color="text.subtle" mb="1">
-            {t("Your voting power")}
-          </Text>
-          <HStack justify="space-between" align="center">
-            <Text textStyle="2xl" fontWeight="bold">
-              {formatted}
-            </Text>
+          <HStack justify="space-between" align="start">
+            <Box>
+              <Text textStyle="xs" color="text.subtle" mb="1">
+                {t("Your voting power")}
+              </Text>
+              <Text textStyle="2xl" fontWeight="bold">
+                {formatted}
+              </Text>
+              {votingPowerNextRound !== 0n && (
+                <Badge
+                  variant="neutral"
+                  bg="card.subtle"
+                  color="text.subtle"
+                  fontWeight="normal"
+                  size="sm"
+                  rounded="md"
+                  mt="2">
+                  <Trans
+                    i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
+                    values={{
+                      sign: votingPowerNextRound > 0n ? "+" : "",
+                      votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
+                    }}
+                    components={{
+                      bold: (
+                        <Text
+                          color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
+                          as="span"
+                        />
+                      ),
+                    }}
+                  />
+                </Badge>
+              )}
+            </Box>
+
             {account?.address && (
-              <HStack gap="1">
+              <Stack direction={{ base: "column", md: "row" }} gap="1">
                 <Button
                   variant="primary"
                   size="sm"
@@ -197,35 +227,9 @@ const VotingPowerContent = ({
                   }}>
                   {t("Reduce")}
                 </Button>
-              </HStack>
+              </Stack>
             )}
           </HStack>
-          {votingPowerNextRound !== 0n && (
-            <Badge
-              variant="neutral"
-              bg="card.subtle"
-              color="text.subtle"
-              fontWeight="normal"
-              size="sm"
-              rounded="md"
-              mt="2">
-              <Trans
-                i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
-                values={{
-                  sign: votingPowerNextRound > 0n ? "+" : "",
-                  votingPowerNextRound: getCompactFormatter(2).format(Number(formatEther(votingPowerNextRound))),
-                }}
-                components={{
-                  bold: (
-                    <Text
-                      color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
-                      as="span"
-                    />
-                  ),
-                }}
-              />
-            </Badge>
-          )}
 
           {/* Composition breakdown */}
           <Box mt="3" pt="3" borderTopWidth="1px" borderColor="border.secondary">
