@@ -24,25 +24,20 @@ import { Trans, useTranslation } from "react-i18next"
 import { FiAlertCircle } from "react-icons/fi"
 import { formatEther } from "viem"
 
+import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useTransactions } from "@/api/indexer/transactions/useTransactions"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
 import { TransactionCard } from "@/components/TransactionCard/TransactionCard"
 import { EmptyState } from "@/components/ui/empty-state"
-
-type VotesAtSnapshot = {
-  totalVotesWithDeposits: string
-  totalVotesWithDepositsWei: bigint
-  depositsVotes: string
-  depositsVotesWei: bigint
-}
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   formatted: string
   votingPowerNextRound: bigint
-  votesAtSnapshot: VotesAtSnapshot | undefined
   isLoading: boolean
 }
 
@@ -102,7 +97,6 @@ const VotingPowerContent = ({
   onClose,
   formatted,
   votingPowerNextRound,
-  votesAtSnapshot,
   isLoading,
   onOpenPowerUp,
   onOpenPowerDown,
@@ -118,17 +112,23 @@ const VotingPowerContent = ({
   const transactions = useMemo(() => txData?.pages.flatMap(page => page.data) ?? [], [txData])
   const hasNextPage = useMemo(() => txData?.pages[0]?.pagination?.hasNext ?? false, [txData])
 
+  // Current composition: wallet VOT3 balance + deposit voting power at current block
+  const { data: currentVot3Balance } = useGetVot3Balance(account?.address)
+  const { data: bestBlock } = useBestBlockCompressed()
+  const { data: currentVotes } = useTotalVotesOnBlock(
+    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    account?.address,
+  )
+
   const vot3BalanceOnly = useMemo(() => {
-    if (!votesAtSnapshot) return "0"
-    const balanceWei = votesAtSnapshot.totalVotesWithDepositsWei - votesAtSnapshot.depositsVotesWei
-    if (balanceWei <= 0n) return "0"
-    return FormattingUtils.humanNumber(formatEther(balanceWei))
-  }, [votesAtSnapshot])
+    if (!currentVot3Balance) return "0"
+    return currentVot3Balance.formatted
+  }, [currentVot3Balance])
 
   const depositsFormatted = useMemo(() => {
-    if (!votesAtSnapshot?.depositsVotesWei || votesAtSnapshot.depositsVotesWei === 0n) return null
-    return FormattingUtils.humanNumber(votesAtSnapshot.depositsVotes)
-  }, [votesAtSnapshot])
+    if (!currentVotes?.depositsVotesWei || currentVotes.depositsVotesWei === 0n) return null
+    return FormattingUtils.humanNumber(currentVotes.depositsVotes)
+  }, [currentVotes])
 
   return (
     <VStack gap="4" align="stretch">

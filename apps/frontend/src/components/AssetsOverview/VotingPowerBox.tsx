@@ -89,7 +89,6 @@ export const VotingPowerBox = () => {
         onClose={onClose}
         formatted={formatted}
         votingPowerNextRound={votingPowerNextRound}
-        votesAtSnapshot={votesAtSnapshot}
         isLoading={allLoading}
       />
     </>
