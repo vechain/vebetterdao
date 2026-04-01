@@ -3,12 +3,14 @@
 import {
   Box,
   Button,
+  Flex,
   HStack,
   Icon,
   Text,
   VStack,
   Badge,
   Skeleton,
+  Spinner,
   useMediaQuery,
   Dialog,
   Portal,
@@ -17,18 +19,17 @@ import {
 import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { Flash, NavArrowRight, InfoCircle, HeartSolid } from "iconoir-react"
-import NextLink from "next/link"
+import dayjs from "dayjs"
+import { Flash, NavArrowRight, InfoCircle, HeartSolid, ArrowDown } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FiAlertCircle } from "react-icons/fi"
 import { formatEther } from "viem"
 
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useTransactions } from "@/api/indexer/transactions/useTransactions"
+import { Transaction, useTransactions } from "@/api/indexer/transactions/useTransactions"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
-import { TransactionCard } from "@/components/TransactionCard/TransactionCard"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
@@ -42,6 +43,85 @@ type Props = {
 }
 
 const VOTING_POWER_EVENT_NAMES = ["B3TR_SWAP_B3TR_TO_VOT3", "B3TR_SWAP_VOT3_TO_B3TR", "B3TR_PROPOSAL_SUPPORT"] as const
+const compactFormatter = getCompactFormatter(2)
+
+const getActivityProps = (tx: Transaction) => {
+  switch (tx.eventName) {
+    case "B3TR_SWAP_B3TR_TO_VOT3":
+      return {
+        label: "Power up",
+        icon: <Flash />,
+        iconBg: "status.positive.subtle" as const,
+        iconColor: "status.positive.strong" as const,
+        amount: tx.outputValue ? compactFormatter.format(Number(formatEther(BigInt(tx.outputValue)))) : "0",
+        token: "VOT3",
+        sign: "+" as const,
+        amountColor: "status.positive.strong" as const,
+      }
+    case "B3TR_SWAP_VOT3_TO_B3TR":
+      return {
+        label: "Power down",
+        icon: <ArrowDown />,
+        iconBg: "status.negative.subtle" as const,
+        iconColor: "status.negative.strong" as const,
+        amount: tx.outputValue ? compactFormatter.format(Number(formatEther(BigInt(tx.outputValue)))) : "0",
+        token: "B3TR",
+        sign: "+" as const,
+        amountColor: undefined,
+      }
+    case "B3TR_PROPOSAL_SUPPORT":
+      return {
+        label: "Supported proposal",
+        icon: <HeartSolid />,
+        iconBg: "status.info.subtle" as const,
+        iconColor: "status.info.strong" as const,
+        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
+        token: "VOT3",
+        sign: "-" as const,
+        amountColor: undefined,
+      }
+    default:
+      return null
+  }
+}
+
+const ACTIVITY_LABELS = {
+  B3TR_SWAP_B3TR_TO_VOT3: "Power up",
+  B3TR_SWAP_VOT3_TO_B3TR: "Power down",
+  B3TR_PROPOSAL_SUPPORT: "Supported proposal",
+} as const
+
+const ActivityItem = ({ transaction }: { transaction: Transaction }) => {
+  const { t } = useTranslation()
+  const props = getActivityProps(transaction)
+  if (!props) return null
+
+  const label = ACTIVITY_LABELS[transaction.eventName as keyof typeof ACTIVITY_LABELS]
+
+  return (
+    <HStack gap="3" py="2">
+      <Flex rounded="full" bg={props.iconBg} p="2" flexShrink={0}>
+        <Icon boxSize="4" color={props.iconColor}>
+          {props.icon}
+        </Icon>
+      </Flex>
+      <VStack gap="0" align="start" flex={1} minW={0}>
+        <Text textStyle="sm" fontWeight="semibold" lineClamp={1}>
+          {label ? t(label) : ""}
+        </Text>
+        <Text textStyle="xs" color="text.subtle">
+          {dayjs.unix(transaction.blockTimestamp ?? 0).fromNow()}
+        </Text>
+      </VStack>
+      <VStack gap="0" align="end" flexShrink={0}>
+        <Text textStyle="sm" fontWeight="semibold" color={props.amountColor}>
+          {props.sign}
+          {props.amount} {props.token}
+        </Text>
+      </VStack>
+    </HStack>
+  )
+}
 
 const CompositionLine = ({ label, value }: { label: string; value: string }) => (
   <HStack justify="space-between" py="1">
@@ -104,13 +184,18 @@ const VotingPowerContent = ({
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { data: txData, isLoading: isTxLoading } = useTransactions(account?.address ?? "", {
+  const {
+    data: txData,
+    isLoading: isTxLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useTransactions(account?.address ?? "", {
     eventName: [...VOTING_POWER_EVENT_NAMES],
     size: 5,
   })
 
   const transactions = useMemo(() => txData?.pages.flatMap(page => page.data) ?? [], [txData])
-  const hasNextPage = useMemo(() => txData?.pages[0]?.pagination?.hasNext ?? false, [txData])
 
   // Current composition: wallet VOT3 balance + deposit voting power at current block
   const { data: currentVot3Balance } = useGetVot3Balance(account?.address)
@@ -138,9 +223,36 @@ const VotingPowerContent = ({
           <Text textStyle="xs" color="text.subtle" mb="1">
             {t("Your voting power")}
           </Text>
-          <Text textStyle="2xl" fontWeight="bold">
-            {formatted}
-          </Text>
+          <HStack justify="space-between" align="center">
+            <Text textStyle="2xl" fontWeight="bold">
+              {formatted}
+            </Text>
+            {account?.address && (
+              <HStack gap="1">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  rounded="full"
+                  onClick={() => {
+                    onClose()
+                    onOpenPowerUp()
+                  }}>
+                  <Icon as={Flash} boxSize="3.5" />
+                  {t("Power up")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  rounded="full"
+                  onClick={() => {
+                    onClose()
+                    onOpenPowerDown()
+                  }}>
+                  {t("Reduce")}
+                </Button>
+              </HStack>
+            )}
+          </HStack>
           {votingPowerNextRound !== 0n && (
             <Badge
               variant="neutral"
@@ -218,13 +330,19 @@ const VotingPowerContent = ({
 
           <Skeleton loading={isTxLoading} rounded="lg">
             {transactions.length > 0 ? (
-              <VStack gap="2" align="stretch">
+              <VStack gap="0" align="stretch" divideY="1px" divideColor="border.secondary">
                 {transactions.map(transaction => (
-                  <TransactionCard key={transaction.txId} transaction={transaction} />
+                  <ActivityItem key={transaction.txId} transaction={transaction} />
                 ))}
                 {hasNextPage && (
-                  <Button variant="link" asChild mx="auto">
-                    <NextLink href={`/transactions/${account.address}`}>{t("See all")}</NextLink>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    mx="auto"
+                    mt="2"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}>
+                    {isFetchingNextPage ? <Spinner size="sm" /> : t("View more")}
                   </Button>
                 )}
               </VStack>
@@ -233,35 +351,6 @@ const VotingPowerContent = ({
             )}
           </Skeleton>
         </>
-      )}
-
-      {/* CTAs */}
-      {account?.address && (
-        <VStack gap="2" mt="2" w="full">
-          <Button
-            variant="primary"
-            w="full"
-            rounded="full"
-            size="lg"
-            onClick={() => {
-              onClose()
-              onOpenPowerUp()
-            }}>
-            <Icon as={Flash} boxSize="4" />
-            {t("Power up")}
-          </Button>
-          <Button
-            variant="ghost"
-            w="full"
-            rounded="full"
-            size="lg"
-            onClick={() => {
-              onClose()
-              onOpenPowerDown()
-            }}>
-            {t("Reduce")}
-          </Button>
-        </VStack>
       )}
     </VStack>
   )
