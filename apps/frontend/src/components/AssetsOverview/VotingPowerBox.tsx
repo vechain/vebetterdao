@@ -28,7 +28,7 @@ export const VotingPowerBox = () => {
 
   return (
     <Card.Root
-      p={{ base: "2", md: "4" }}
+      p={4}
       variant="subtle"
       border="sm"
       borderColor="border.secondary"
@@ -36,9 +36,14 @@ export const VotingPowerBox = () => {
       flexDirection={{ base: "row", md: "row" }}
       alignItems={{ base: "stretch", md: "center" }}
       justifyContent="space-between"
-      gap={{ base: "3", md: "4" }}>
+      gap={4}>
       <HStack gap="3" alignItems="center" flex={1}>
-        <Square rounded="12px" bg="status.positive.secondary" aspectRatio={1} height={{ base: "46px", md: "60px" }}>
+        <Square
+          display={{ base: "none", md: "flex" }}
+          rounded="12px"
+          bg="status.positive.secondary"
+          aspectRatio={1}
+          height={{ base: "46px", md: "60px" }}>
           <Icon as={Flash} boxSize={{ base: "8", md: "9" }} color="status.positive.strong"></Icon>
         </Square>
 
@@ -84,11 +89,11 @@ export const VotingPowerBox = () => {
       {!!account?.address && (
         <>
           <Flex pt={4} direction={{ base: "column", md: "column" }} gap="1">
-            <Button flex={1} variant="primary" size="xs" onClick={() => setIsPowerUpOpen(true)}>
+            <Button flex={1} variant="primary" onClick={() => setIsPowerUpOpen(true)}>
               <Icon as={Flash} boxSize="4" />
               {t("Power up")}
             </Button>
-            <Button flex={1} variant="link" size="xs" onClick={() => setIsRedeemOpen(true)}>
+            <Button flex={1} variant="link" onClick={() => setIsRedeemOpen(true)}>
               {t("Reduce")}
             </Button>
           </Flex>
