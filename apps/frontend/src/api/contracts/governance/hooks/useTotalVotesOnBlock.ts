@@ -39,6 +39,7 @@ export const useTotalVotesOnBlock = (block?: number, address?: string, enabled =
           totalVotesWithDeposits,
           totalVotesWithDepositsWei,
           depositsVotes,
+          depositsVotesWei,
         }
       },
     },

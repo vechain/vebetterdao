@@ -12,6 +12,7 @@ import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalV
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 export const VotingPowerBox = () => {
   const [isPowerUpOpen, setIsPowerUpOpen] = useState(false)
@@ -22,15 +23,17 @@ export const VotingPowerBox = () => {
   const { account } = useWallet()
 
   const { vot3Balance, isLoading, votesAtSnapshot } = useVotingPowerAtSnapshot()
+  const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
   const { data: bestBlock } = useBestBlockCompressed()
-  const { data: currentVotingPower, isLoading: isCurrentVotingPowerLoading } = useTotalVotesOnBlock(
+  const { data: currentDepositsVotes, isLoading: isCurrentDepositsVotesLoading } = useTotalVotesOnBlock(
     bestBlock?.number ? Number(bestBlock.number) : undefined,
     account?.address,
   )
 
   const formatted = vot3Balance?.formatted ?? "-"
-  const votingPowerNextRound =
-    (currentVotingPower?.totalVotesWithDepositsWei ?? 0n) - (votesAtSnapshot?.totalVotesWithDepositsWei ?? 0n)
+  const currentVotingPowerForNextRoundWei =
+    BigInt(currentVot3Balance?.original ?? "0") + (currentDepositsVotes?.depositsVotesWei ?? 0n)
+  const votingPowerNextRound = currentVotingPowerForNextRoundWei - (votesAtSnapshot?.totalVotesWithDepositsWei ?? 0n)
 
   return (
     <Card.Root
@@ -53,7 +56,7 @@ export const VotingPowerBox = () => {
           <Icon as={Flash} boxSize={{ base: "8", md: "9" }} color="status.positive.strong"></Icon>
         </Square>
 
-        <Skeleton loading={isLoading || isCurrentVotingPowerLoading}>
+        <Skeleton loading={isLoading || isCurrentVot3BalanceLoading || isCurrentDepositsVotesLoading}>
           <VStack align="flex-start" gap="0.5">
             <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
               {t("Your voting power")}
