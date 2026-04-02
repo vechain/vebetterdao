@@ -173,6 +173,18 @@ const DBAPoolAbi = [
 ] as const
 
 /**
+ * Reads the current cycle number from the Emissions contract.
+ */
+async function getCurrentCycleId(thor: ThorClient): Promise<number> {
+  const res = await thor.contracts.executeCall(
+    CONFIG.emissionsContractAddress,
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("getCurrentCycle"),
+    [],
+  )
+  return Number(res.result?.array?.[0] ?? 0)
+}
+
+/**
  * Distributes the VeBetterDAO emissions and starts the next round.
  *
  * @param thor - The ThorClient instance
@@ -181,6 +193,9 @@ const DBAPoolAbi = [
 export async function distributeEmissions(thor: ThorClient) {
   const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
+
+  // Save current round ID before attempting distribution
+  const roundIdBefore = await getCurrentCycleId(thor)
 
   // Prepare the contract function call with necessary parameters
   const clause = Clause.callFunction(
@@ -194,6 +209,15 @@ export async function distributeEmissions(thor: ThorClient) {
 
   // Check if the transaction was estimated to revert and handle accordingly
   if (gasResult.reverted) {
+    // Check if the round was already started (by us or someone else)
+    const roundIdAfter = await getCurrentCycleId(thor)
+    if (roundIdAfter > roundIdBefore) {
+      console.log(
+        `Gas estimation reverted but round already advanced (${roundIdBefore} -> ${roundIdAfter}). Proceeding.`,
+      )
+      return { receipt: null, gasResult, roundAlreadyStarted: true }
+    }
+
     // Publish an error message to the Slack channel
     await publishMessage(
       client,
@@ -201,7 +225,7 @@ export async function distributeEmissions(thor: ThorClient) {
       `${SLACK_MESSAGE_PREFIX}:alert: Round failed to start: ${gasResult.revertReasons}, ${gasResult.vmErrors}`,
     )
 
-    return { receipt: null, gasResult }
+    return { receipt: null, gasResult, roundAlreadyStarted: false }
   }
 
   // Build the transaction body with the estimated gas
@@ -221,9 +245,16 @@ export async function distributeEmissions(thor: ThorClient) {
   if (!receipt) {
     console.log("WARNING: Emissions distribution transaction was sent but receipt was not received")
     console.log(`Transaction ID: ${tx.id}`)
+
+    // Check if the round actually started on-chain despite not receiving a receipt
+    const roundIdAfter = await getCurrentCycleId(thor)
+    if (roundIdAfter > roundIdBefore) {
+      console.log(`No receipt but round advanced on-chain (${roundIdBefore} -> ${roundIdAfter}). Treating as success.`)
+      return { receipt: null, gasResult, roundAlreadyStarted: true }
+    }
   }
 
-  return { receipt, gasResult }
+  return { receipt, gasResult, roundAlreadyStarted: false }
 }
 
 /**
@@ -556,11 +587,17 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
           }
         }
 
-        const { receipt, gasResult } = emissionsResult
+        const { receipt, gasResult, roundAlreadyStarted } = emissionsResult
         receiptEmissions = receipt
         gasResultEmissions = gasResult
 
-        if (!receiptEmissions) {
+        if (roundAlreadyStarted) {
+          await publishMessage(
+            client,
+            SLACK_CHANNEL_ID,
+            `${SLACK_MESSAGE_PREFIX}:information_source: Round already started, skipping emissions distribution. Proceeding with claims.`,
+          )
+        } else if (!receiptEmissions) {
           await publishMessage(
             client,
             SLACK_CHANNEL_ID,
@@ -572,17 +609,17 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
               error: `Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
             }),
           }
+        } else {
+          // Log the transaction receipt for debugging and verification
+          console.log("Receipt:", receiptEmissions)
+
+          // Publish a success message to the Slack channel
+          await publishMessage(
+            client,
+            SLACK_CHANNEL_ID,
+            `${SLACK_MESSAGE_PREFIX}:white_check_mark: Round started successfully`,
+          )
         }
-
-        // Log the transaction receipt for debugging and verification
-        console.log("Receipt:", receiptEmissions)
-
-        // Publish a success message to the Slack channel
-        await publishMessage(
-          client,
-          SLACK_CHANNEL_ID,
-          `${SLACK_MESSAGE_PREFIX}:white_check_mark: Round started successfully`,
-        )
       }
     }
 

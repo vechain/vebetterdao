@@ -17,17 +17,15 @@ const GrantPageContent = dynamic(
   },
 )
 type Props = {
-  params: {
-    grantId: string
-  }
+  grantId: string
 }
-export const GrantPage = ({ params }: Readonly<Props>) => {
+export const GrantPage = ({ grantId }: Readonly<Props>) => {
   useEffect(() => {
     AnalyticsUtils.trackPage("Grants")
   }, [])
   return (
     <MotionVStack>
-      <GrantPageContent proposalId={params.grantId} typeFilter="grant" />
+      <GrantPageContent proposalId={grantId} typeFilter="grant" />
     </MotionVStack>
   )
 }
