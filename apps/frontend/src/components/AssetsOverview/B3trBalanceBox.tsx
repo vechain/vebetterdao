@@ -6,6 +6,7 @@ import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 
 import { B3trBalanceBottomSheet } from "./B3trBalanceBottomSheet"
@@ -14,6 +15,7 @@ import { StatCard } from "./StatCard"
 export const B3trBalanceBox = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { isMobile } = useBreakpoints()
   const { data: b3trBalance, isLoading } = useGetB3trBalance(account?.address)
   const [isOpen, setIsOpen] = useState(false)
   const onClose = useCallback(() => setIsOpen(false), [])
@@ -23,7 +25,7 @@ export const B3trBalanceBox = () => {
       <StatCard
         variant="info"
         title={t("Your balance")}
-        icon={<B3TRIcon />}
+        icon={isMobile ? undefined : <B3TRIcon />}
         onClick={() => setIsOpen(true)}
         subtitle={
           <Skeleton asChild loading={isLoading}>
