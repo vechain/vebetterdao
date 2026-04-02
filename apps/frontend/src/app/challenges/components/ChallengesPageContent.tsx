@@ -9,6 +9,7 @@ import {
   HStack,
   IconButton,
   Pagination,
+  SimpleGrid,
   Skeleton,
   Stack,
   Text,
@@ -70,7 +71,7 @@ export const ChallengesPageContent = () => {
     AnalyticsUtils.trackPage("Challenges")
   }, [])
 
-  const OPEN_PAGE_SIZE = 10
+  const OPEN_PAGE_SIZE = 12
   const [openPage, setOpenPage] = useState(1)
 
   const hasActive = grouped.activeParticipating.length > 0
@@ -234,16 +235,18 @@ export const ChallengesPageContent = () => {
         {/* Public joinable - compact list */}
         <ChallengeHubSection title={t("Open to join")} count={grouped.publicJoinable.length}>
           {isLoading ? (
-            <VStack gap="2" align="stretch">
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
               {[0, 1, 2].map(i => (
                 <CompactSkeleton key={i} />
               ))}
-            </VStack>
+            </SimpleGrid>
           ) : hasPublic ? (
-            <VStack gap="2" align="stretch">
-              {pagedPublic.map(c => (
-                <ChallengeCompactCard key={c.challengeId} challenge={c} />
-              ))}
+            <VStack gap="3" align="stretch">
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                {pagedPublic.map(c => (
+                  <ChallengeCompactCard key={c.challengeId} challenge={c} />
+                ))}
+              </SimpleGrid>
               {grouped.publicJoinable.length > OPEN_PAGE_SIZE && (
                 <Pagination.Root
                   mx={{ base: "auto", md: "unset" }}
@@ -290,17 +293,17 @@ export const ChallengesPageContent = () => {
         {(hasPast || isLoading) && (
           <ChallengeHubSection title={t("History")} count={grouped.past.length}>
             {isLoading ? (
-              <VStack gap="2" align="stretch">
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
                 {[0, 1].map(i => (
                   <CompactSkeleton key={i} />
                 ))}
-              </VStack>
+              </SimpleGrid>
             ) : (
-              <VStack gap="2" align="stretch">
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
                 {grouped.past.map(c => (
                   <ChallengeCompactCard key={c.challengeId} challenge={c} />
                 ))}
-              </VStack>
+              </SimpleGrid>
             )}
           </ChallengeHubSection>
         )}

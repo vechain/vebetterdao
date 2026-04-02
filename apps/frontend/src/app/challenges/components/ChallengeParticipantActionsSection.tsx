@@ -1,15 +1,19 @@
 "use client"
 
-import { Badge, Box, Card, Heading, HStack, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { Badge, Box, Card, Heading, HStack, Mark, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { getCompactFormatter, humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { ChallengeDetail, ChallengeStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
+import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
+import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
+import { blockNumberToDate } from "@/utils/date"
 
 const compactFormatter = getCompactFormatter(1)
 
@@ -62,8 +66,15 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
   const trailingColor = trailingColorToken ?? "#B3CCFF"
   const gridColor = gridColorToken ?? "#E7E9EB"
   const axisColor = axisColorToken ?? "#AAAFB6"
+  const { data: deadlineBlock } = useCurrentAllocationsRoundDeadline()
+  const { data: bestBlock } = useBestBlockCompressed()
   const leaderboard = data?.leaderboard ?? []
   const isPending = challenge.status === ChallengeStatus.Pending
+
+  const roundStartDate = useMemo(() => {
+    if (!isPending || deadlineBlock == null || !bestBlock) return null
+    return blockNumberToDate(BigInt(deadlineBlock), bestBlock)
+  }, [isPending, deadlineBlock, bestBlock])
 
   const chartData = useMemo<ChartEntry[]>(() => {
     const bestScore = leaderboard[0]?.actions ?? 0
@@ -190,9 +201,63 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
           <Skeleton h="320px" borderRadius="2xl" />
         ) : isPending ? (
           <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
-            <Text textStyle="sm" color="text.subtle">
-              {t("Waiting for the round to start")}
-            </Text>
+            <VStack gap="2" align="start">
+              {roundStartDate ? (
+                <Countdown
+                  date={roundStartDate}
+                  now={() => Date.now()}
+                  renderer={({ days, hours, minutes, seconds }) => (
+                    <VStack gap="1" align="start">
+                      <Text
+                        textStyle="xxs"
+                        color="text.subtle"
+                        textTransform="uppercase"
+                        letterSpacing="0.08em"
+                        fontWeight="semibold">
+                        {t("Starts in")}
+                      </Text>
+                      <HStack gap="1">
+                        {days > 0 && (
+                          <>
+                            <Mark variant="text" fontWeight="semibold" textStyle="lg">
+                              {days}
+                            </Mark>
+                            <Text textStyle="sm" color="text.subtle">
+                              {"d"}
+                            </Text>
+                          </>
+                        )}
+                        <Mark variant="text" fontWeight="semibold" textStyle="lg">
+                          {hours}
+                        </Mark>
+                        <Text textStyle="sm" color="text.subtle">
+                          {"h"}
+                        </Text>
+                        <Mark variant="text" fontWeight="semibold" textStyle="lg">
+                          {minutes}
+                        </Mark>
+                        <Text textStyle="sm" color="text.subtle">
+                          {"m"}
+                        </Text>
+                        <Mark variant="text" fontWeight="semibold" textStyle="lg">
+                          {seconds}
+                        </Mark>
+                        <Text textStyle="sm" color="text.subtle">
+                          {"s"}
+                        </Text>
+                      </HStack>
+                    </VStack>
+                  )}
+                />
+              ) : (
+                <Text textStyle="sm" color="text.subtle">
+                  {t("Waiting for the round to start")}
+                </Text>
+              )}
+              <Text textStyle="xs" color="text.subtle">
+                {t("Round {{start}} → {{end}}", { start: challenge.startRound, end: challenge.endRound })}
+              </Text>
+            </VStack>
           </Box>
         ) : isError ? (
           <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">

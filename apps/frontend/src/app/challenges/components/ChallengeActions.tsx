@@ -6,7 +6,7 @@ import { parseEther } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ChallengeKind, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
+import { ChallengeDetail, ChallengeKind, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 
@@ -117,6 +117,8 @@ export const ChallengeActions = ({
       {challenge.canAddInvites && (
         <AddChallengeInvitesModal
           challengeId={id}
+          creatorAddress={challenge.creator}
+          existingInvitees={"invited" in challenge ? (challenge as ChallengeDetail).invited : undefined}
           triggerProps={isCardLayout ? { size: "md", variant: "subtle", w: "full", minH: "11" } : undefined}
         />
       )}

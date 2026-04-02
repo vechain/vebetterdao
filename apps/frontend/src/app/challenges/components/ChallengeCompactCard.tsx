@@ -18,26 +18,30 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
     <LinkBox>
       <Card.Root
         variant="primary"
-        px={{ base: "4", md: "5" }}
-        py={{ base: "4", md: "4" }}
+        px="4"
+        py="4"
         borderRadius="2xl"
         transition="all 0.15s ease"
+        h="full"
         _hover={{ borderColor: "border.active", boxShadow: "md" }}>
-        <HStack gap={{ base: "3", md: "5" }} align="center" flexWrap={{ base: "wrap", md: "nowrap" }}>
-          <VStack align="start" gap="1" flex="1" minW="0">
-            <LinkOverlay asChild>
-              <NextLink href={`/challenges/${challenge.challengeId}`}>
-                <Text textStyle="md" fontWeight="bold" truncate>
-                  {t("Challenge #{{id}}", { id: challenge.challengeId })}
-                </Text>
-              </NextLink>
-            </LinkOverlay>
-            <HStack gap="1.5" flexWrap="wrap">
-              <ChallengeStatusBadges challenge={challenge} />
-            </HStack>
-          </VStack>
+        <VStack gap="3" align="stretch" h="full">
+          <HStack justify="space-between" align="start">
+            <VStack align="start" gap="1" flex="1" minW="0">
+              <LinkOverlay asChild>
+                <NextLink href={`/challenges/${challenge.challengeId}`}>
+                  <Text textStyle="md" fontWeight="bold" truncate>
+                    {t("Challenge #{{id}}", { id: challenge.challengeId })}
+                  </Text>
+                </NextLink>
+              </LinkOverlay>
+              <HStack gap="1.5" flexWrap="wrap">
+                <ChallengeStatusBadges challenge={challenge} />
+              </HStack>
+            </VStack>
+            {hasChallengeActions(challenge) && <ChallengeActions challenge={challenge} layout="default" />}
+          </HStack>
 
-          <HStack gap={{ base: "4", md: "6" }} flexShrink={0} flexWrap={{ base: "wrap", md: "nowrap" }}>
+          <HStack gap="4" flexWrap="wrap" mt="auto">
             <VStack align="start" gap="0">
               <Text textStyle="xxs" color="text.subtle" fontWeight="semibold" textTransform="uppercase">
                 {t("Prize")}
@@ -73,13 +77,7 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
               </Text>
             </VStack>
           </HStack>
-
-          {hasChallengeActions(challenge) && (
-            <HStack flexShrink={0}>
-              <ChallengeActions challenge={challenge} layout="default" />
-            </HStack>
-          )}
-        </HStack>
+        </VStack>
       </Card.Root>
     </LinkBox>
   )
