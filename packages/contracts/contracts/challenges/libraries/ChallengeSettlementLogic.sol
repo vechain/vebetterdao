@@ -91,7 +91,7 @@ library ChallengeSettlementLogic {
     $.hasClaimed[challengeId][msg.sender] = true;
     challenge.payoutsClaimed++;
 
-    require($.b3tr.transfer(msg.sender, amount), "Challenges: transfer failed");
+    if (!$.b3tr.transfer(msg.sender, amount)) revert IChallenges.TransferFailed();
 
     emit ChallengePayoutClaimed(challengeId, msg.sender, amount);
   }
@@ -115,7 +115,7 @@ library ChallengeSettlementLogic {
 
     $.hasRefunded[challengeId][msg.sender] = true;
 
-    require($.b3tr.transfer(msg.sender, amount), "Challenges: transfer failed");
+    if (!$.b3tr.transfer(msg.sender, amount)) revert IChallenges.TransferFailed();
 
     emit ChallengeRefundClaimed(challengeId, msg.sender, amount);
   }

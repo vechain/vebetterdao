@@ -60,7 +60,7 @@ library ChallengeCoreLogic {
       challenge.appIds.push(params.appIds[i]);
     }
 
-    require($.b3tr.transferFrom(msg.sender, address(this), params.stakeAmount), "Challenges: transferFrom failed");
+    if (!$.b3tr.transferFrom(msg.sender, address(this), params.stakeAmount)) revert IChallenges.TransferFailed();
 
     if (params.kind == ChallengeTypes.ChallengeKind.Stake) {
       _addParticipant(challengeId, msg.sender);
@@ -106,8 +106,8 @@ library ChallengeCoreLogic {
     }
 
     if (challenge.kind == ChallengeTypes.ChallengeKind.Stake) {
-      require($.b3tr.transferFrom(msg.sender, address(this), challenge.stakeAmount), "Challenges: transferFrom failed");
       challenge.totalPrize += challenge.stakeAmount;
+      if (!$.b3tr.transferFrom(msg.sender, address(this), challenge.stakeAmount)) revert IChallenges.TransferFailed();
     }
 
     _removeFromInvitedIfPresent(challengeId, msg.sender);
@@ -132,7 +132,7 @@ library ChallengeCoreLogic {
 
     if (challenge.kind == ChallengeTypes.ChallengeKind.Stake) {
       challenge.totalPrize -= challenge.stakeAmount;
-      require($.b3tr.transfer(msg.sender, challenge.stakeAmount), "Challenges: transfer failed");
+      if (!$.b3tr.transfer(msg.sender, challenge.stakeAmount)) revert IChallenges.TransferFailed();
     }
 
     if ($.invitationEligible[challengeId][msg.sender]) {
@@ -158,7 +158,7 @@ library ChallengeCoreLogic {
 
       if (challenge.kind == ChallengeTypes.ChallengeKind.Stake) {
         challenge.totalPrize -= challenge.stakeAmount;
-        require($.b3tr.transfer(msg.sender, challenge.stakeAmount), "Challenges: transfer failed");
+        if (!$.b3tr.transfer(msg.sender, challenge.stakeAmount)) revert IChallenges.TransferFailed();
       }
     }
 
@@ -182,26 +182,26 @@ library ChallengeCoreLogic {
   }
 
   function syncChallenge(uint256 challengeId) internal returns (ChallengeTypes.ChallengeStatus) {
-    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     if (challenge.status != ChallengeTypes.ChallengeStatus.Pending) {
       return challenge.status;
     }
 
-    if (_currentRound($) < challenge.startRound) {
-      return ChallengeTypes.ChallengeStatus.Pending;
+    ChallengeTypes.ChallengeStatus computed = getComputedStatus(challengeId);
+    if (computed == ChallengeTypes.ChallengeStatus.Pending) {
+      return computed;
     }
 
-    if (_isChallengeValid(challenge)) {
-      challenge.status = ChallengeTypes.ChallengeStatus.Active;
+    challenge.status = computed;
+
+    if (computed == ChallengeTypes.ChallengeStatus.Active) {
       emit ChallengeActivated(challengeId);
     } else {
-      challenge.status = ChallengeTypes.ChallengeStatus.Invalid;
       emit ChallengeInvalidated(challengeId);
     }
 
-    return challenge.status;
+    return computed;
   }
 
   function getComputedStatus(uint256 challengeId) internal view returns (ChallengeTypes.ChallengeStatus) {
@@ -269,20 +269,21 @@ library ChallengeCoreLogic {
       return;
     }
 
-    if (!$.invitationEligible[challengeId][invitee]) {
-      $.invitationEligible[challengeId][invitee] = true;
-    }
-
     if ($.participantStatus[challengeId][invitee] == ChallengeTypes.ParticipantStatus.Joined) {
       return;
     }
 
-    _removeFromDeclinedIfPresent(challengeId, invitee);
-
-    if ($.participantStatus[challengeId][invitee] != ChallengeTypes.ParticipantStatus.Invited) {
-      _addInvited(challengeId, invitee);
-      emit ChallengeInviteAdded(challengeId, invitee);
+    if ($.participantStatus[challengeId][invitee] == ChallengeTypes.ParticipantStatus.Invited) {
+      revert IChallenges.AlreadyInvited(challengeId, invitee);
     }
+
+    if (!$.invitationEligible[challengeId][invitee]) {
+      $.invitationEligible[challengeId][invitee] = true;
+    }
+
+    _removeFromDeclinedIfPresent(challengeId, invitee);
+    _addInvited(challengeId, invitee);
+    emit ChallengeInviteAdded(challengeId, invitee);
   }
 
   function _addParticipant(uint256 challengeId, address participant) private {
@@ -290,7 +291,7 @@ library ChallengeCoreLogic {
     ChallengeTypes.Challenge storage challenge = $.challenges[challengeId];
 
     if ($.participantIndexPlusOne[challengeId][participant] != 0) {
-      return;
+      revert IChallenges.AlreadyParticipating(challengeId, participant);
     }
 
     challenge.participants.push(participant);

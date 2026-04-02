@@ -29,6 +29,8 @@ interface IChallenges {
   error NothingToRefund(uint256 challengeId, address account);
   error AlreadyClaimed(uint256 challengeId, address account);
   error AlreadyRefunded(uint256 challengeId, address account);
+  error AlreadyInvited(uint256 challengeId, address invitee);
+  error TransferFailed();
   error ChallengesUnauthorizedUser(address user);
 
   event B3TRAddressUpdated(address indexed oldAddress, address indexed newAddress);
