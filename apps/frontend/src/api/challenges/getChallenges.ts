@@ -264,12 +264,12 @@ export async function fetchAllChallenges(
   const [count, maxParticipantsResult] = countResult
   const maxParticipants = Number(maxParticipantsResult)
 
-  const n = Number(count)
-  if (n === 0) return []
+  const totalChallenges = Number(count)
+  if (totalChallenges === 0) return []
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const calls: any[] = []
-  for (let id = 1; id <= n; id++) {
+  for (let id = 1; id <= totalChallenges; id++) {
     calls.push({ abi, address, functionName: "getChallenge", args: [BigInt(id)] })
     if (viewerAddress) {
       calls.push({ abi, address, functionName: "getParticipantStatus", args: [BigInt(id), viewerAddress] })
@@ -280,12 +280,12 @@ export async function fetchAllChallenges(
 
   const [results, creationTimestamps] = await Promise.all([
     executeMultipleClausesCall({ thor, calls }),
-    fetchChallengeCreationTimestamps(thor, address, n),
+    fetchChallengeCreationTimestamps(thor, address, totalChallenges),
   ])
   const stride = viewerAddress ? 4 : 1
   const challenges: ChallengeView[] = []
 
-  for (let i = 0; i < n; i++) {
+  for (let i = 0; i < totalChallenges; i++) {
     const raw = results[i * stride] as any
     const viewerStatus = viewerAddress ? Number(results[i * stride + 1]) : 0
     const eligible = viewerAddress ? Boolean(results[i * stride + 2]) : false
