@@ -21,6 +21,7 @@ export enum ActivityType {
   GM_UPGRADED = "GM_UPGRADED",
   USER_ALLOCATION_VOTE_CAST = "USER_ALLOCATION_VOTE_CAST",
   USER_PROPOSAL_VOTE_CAST = "USER_PROPOSAL_VOTE_CAST",
+  USER_PROPOSAL_SUPPORT = "USER_PROPOSAL_SUPPORT",
 }
 
 export type ProposalActivityMeta = {
@@ -82,6 +83,13 @@ export type UserProposalVoteMeta = {
   proposalId: string
   proposalTitle: string
   support: number
+  proposalType: "grant" | "proposal"
+}
+
+export type UserProposalSupportMeta = {
+  proposalId: string
+  proposalTitle: string
+  amount: string
   proposalType: "grant" | "proposal"
 }
 
@@ -162,4 +170,12 @@ export type ActivityItem =
       title: string
       description?: string
       metadata: UserProposalVoteMeta
+    }
+  | {
+      type: ActivityType.USER_PROPOSAL_SUPPORT
+      date: number
+      roundId: string
+      title: string
+      description?: string
+      metadata: UserProposalSupportMeta
     }
