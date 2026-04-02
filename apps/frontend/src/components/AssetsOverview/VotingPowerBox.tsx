@@ -10,6 +10,7 @@ import { formatEther } from "viem"
 
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
@@ -21,6 +22,8 @@ export const VotingPowerBox = () => {
   const { account } = useWallet()
   const [isOpen, setIsOpen] = useState(false)
   const onClose = useCallback(() => setIsOpen(false), [])
+
+  const { isMobile } = useBreakpoints()
 
   const { vot3Balance, isLoading, votesAtSnapshot } = useVotingPowerAtSnapshot()
   const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
@@ -43,8 +46,7 @@ export const VotingPowerBox = () => {
       <StatCard
         variant="positive"
         title={t("Your voting power")}
-        icon={<Flash />}
-        hideIconOnMobile
+        icon={isMobile ? undefined : <Flash />}
         isLoading={allLoading}
         onClick={() => setIsOpen(true)}
         subtitle={
@@ -54,7 +56,7 @@ export const VotingPowerBox = () => {
               align={{ base: "center", md: "start" }}
               gap={1}
               flexWrap="wrap">
-              <Text textStyle={{ base: "xl", md: "2xl" }} lineClamp={1}>
+              <Text textStyle={{ base: "2xl", md: "2xl" }} lineClamp={1}>
                 <Mark variant="text" fontWeight="semibold">
                   {formatted}
                 </Mark>
