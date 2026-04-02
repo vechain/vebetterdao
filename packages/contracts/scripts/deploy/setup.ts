@@ -163,21 +163,26 @@ export const setupLocalEnvironment = async (
   const deployer = (await ethers.getSigners())[0]
   await assignAppCategories(x2EarnApps, deployer, APPS)
 
-  // Seed the first 5 accounts with some tokens
+  // Seed the first 10 accounts with B3TR + VOT3
   const treasuryAddress = await treasury.getAddress()
-  // 5+ 8 accounts: 13 accounts
-  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
-  const seedAccounts = allAccounts.slice(0, 5)
+  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 10 + APPS.length, 0)
+  const first10 = allAccounts.slice(0, 10)
+  const appCreatorSeedAccounts = allAccounts.slice(10)
 
   await airdropVTHO(
-    seedAccounts.map(acct => acct.key.address),
+    first10.map(acct => acct.key.address),
     500n,
     admin,
   )
 
-  await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
+  // Step 1: small airdrop (10k B3TR) → convert all to VOT3
+  const vot3Accounts = first10.map(a => ({ ...a, amount: ethers.parseEther("10000") }))
+  await airdropB3trFromTreasury(treasuryAddress, admin, [...vot3Accounts, ...appCreatorSeedAccounts])
+  await convertB3trForVot3(b3tr, vot3, vot3Accounts)
 
-  await convertB3trForVot3(b3tr, vot3, seedAccounts)
+  // Step 2: airdrop 50k B3TR — stays as B3TR for challenges etc.
+  const b3trAccounts = first10.map(a => ({ ...a, amount: ethers.parseEther("50000") }))
+  await airdropB3trFromTreasury(treasuryAddress, admin, b3trAccounts)
 
   // If the first 8 accounts does not have the correct nodes, run the following line
   await startEmissions(emissionsContract, admin)

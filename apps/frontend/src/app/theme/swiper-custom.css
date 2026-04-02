@@ -1,16 +1,15 @@
-/* yourStyles.css */
 .slide {
-  opacity: 0.8; /* Slightly faded by default */
-  transition: opacity 0.5s ease; /* Smooth transition for the opacity */
+  opacity: 0.8;
+  transition: opacity 0.5s ease;
 }
 
-.swiper-slide-active {
-  opacity: 1; /* Fully visible for the active slide */
+.action-banner .swiper-slide-active {
+  opacity: 1;
 }
 
-.swiper-slide-prev,
-.swiper-slide-next {
-  opacity: 0.5; /* Faded for the next/prev slides */
+.action-banner .swiper-slide-prev,
+.action-banner .swiper-slide-next {
+  opacity: 0.5;
 }
 
 .action-banner ~ .swiper-pagination {

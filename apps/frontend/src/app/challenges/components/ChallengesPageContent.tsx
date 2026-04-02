@@ -1,8 +1,22 @@
 "use client"
 
-import { Box, Button, Card, Heading, HStack, IconButton, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Card,
+  Heading,
+  HStack,
+  IconButton,
+  Pagination,
+  Skeleton,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useEffect } from "react"
+import { NavArrowLeft, NavArrowRight } from "iconoir-react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 import { A11y, Navigation } from "swiper/modules"
@@ -56,10 +70,18 @@ export const ChallengesPageContent = () => {
     AnalyticsUtils.trackPage("Challenges")
   }, [])
 
+  const OPEN_PAGE_SIZE = 10
+  const [openPage, setOpenPage] = useState(1)
+
   const hasActive = grouped.activeParticipating.length > 0
   const hasInvites = grouped.pendingInvites.length > 0
   const hasPublic = grouped.publicJoinable.length > 0
   const hasPast = grouped.past.length > 0
+
+  const pagedPublic = useMemo(
+    () => grouped.publicJoinable.slice((openPage - 1) * OPEN_PAGE_SIZE, openPage * OPEN_PAGE_SIZE),
+    [grouped.publicJoinable, openPage],
+  )
 
   return (
     <MotionVStack renderInnerStack={false} gap="6">
@@ -219,9 +241,45 @@ export const ChallengesPageContent = () => {
             </VStack>
           ) : hasPublic ? (
             <VStack gap="2" align="stretch">
-              {grouped.publicJoinable.map(c => (
+              {pagedPublic.map(c => (
                 <ChallengeCompactCard key={c.challengeId} challenge={c} />
               ))}
+              {grouped.publicJoinable.length > OPEN_PAGE_SIZE && (
+                <Pagination.Root
+                  mx={{ base: "auto", md: "unset" }}
+                  mt="2"
+                  count={grouped.publicJoinable.length}
+                  pageSize={OPEN_PAGE_SIZE}
+                  page={openPage}
+                  display="flex"
+                  flexWrap="wrap"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap="4"
+                  siblingCount={1}
+                  onPageChange={p => setOpenPage(p.page)}>
+                  <Pagination.PageText format="compact" textStyle="sm" />
+                  <ButtonGroup variant="ghost" size="xs" flexWrap="wrap">
+                    <Pagination.PrevTrigger asChild>
+                      <IconButton>
+                        <NavArrowLeft />
+                      </IconButton>
+                    </Pagination.PrevTrigger>
+                    <Pagination.Items
+                      render={p => (
+                        <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
+                          {p.value}
+                        </IconButton>
+                      )}
+                    />
+                    <Pagination.NextTrigger asChild>
+                      <IconButton>
+                        <NavArrowRight />
+                      </IconButton>
+                    </Pagination.NextTrigger>
+                  </ButtonGroup>
+                </Pagination.Root>
+              )}
             </VStack>
           ) : (
             <EmptyState message={t("No public challenges available right now")} />
