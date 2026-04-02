@@ -98,7 +98,7 @@ export const setupEnvironment = async (
       await setupLocalEnvironment(emissions, treasury, x2EarnApps, b3tr, vot3, stargateMock)
       break
     case "testnet":
-      await setupTestEnvironment(emissions, x2EarnApps, stargateMock)
+      await setupTestEnvironment(emissions, treasury, x2EarnApps, b3tr, vot3, stargateMock)
       break
     case "testnet-staging":
       await setupTestnetStagingEnvironment(
@@ -322,26 +322,96 @@ export const setupTestnetStagingEnvironment = async (
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps, stargateMock: Stargate) => {
+export const setupTestEnvironment = async (
+  emissions: Emissions,
+  treasury: Treasury,
+  x2EarnApps: X2EarnApps,
+  b3tr: B3TR,
+  vot3: VOT3,
+  stargateMock: Stargate,
+) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
   const admin = accounts[0]
+
+  // Make sure the first 10 accounts have a VTHO balance
+  await airdropVTHO(
+    accounts.slice(1, 10).map(acct => acct.address),
+    5000n,
+    admin,
+  )
 
   // Bootstrap emissions
   const emissionsContract = await emissions.getAddress()
   await bootstrapEmissions(emissionsContract, admin)
 
   // Add x-apps to the XAllocationPool
-  console.log("Adding x-apps...")
-
-  // Add x-apps to the XAllocationPool
   const x2EarnAppsAddress = await x2EarnApps.getAddress()
   await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
-  console.log("x-apps added")
 
-  const end = performance.now()
-  console.log(`Setup complete in ${end - start}ms`)
+  // Assign categories to apps (deployer has DEFAULT_ADMIN_ROLE)
+  const deployer = (await ethers.getSigners())[0]
+  await assignAppCategories(x2EarnApps, deployer, APPS)
+
+  // Seed the first 10 accounts with B3TR + VOT3
+  const treasuryAddress = await treasury.getAddress()
+  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 10 + APPS.length, 0)
+  const first10 = allAccounts.slice(0, 10)
+  const appCreatorSeedAccounts = allAccounts.slice(10)
+
+  await airdropVTHO(
+    first10.map(acct => acct.key.address),
+    500n,
+    admin,
+  )
+
+  // Step 1: small airdrop (10k B3TR) → convert all to VOT3
+  const vot3Accounts = first10.map(a => ({ ...a, amount: ethers.parseEther("10000") }))
+  await airdropB3trFromTreasury(treasuryAddress, admin, [...vot3Accounts, ...appCreatorSeedAccounts])
+  await convertB3trForVot3(b3tr, vot3, vot3Accounts)
+
+  // Step 2: airdrop 50k B3TR — stays as B3TR for challenges etc.
+  const b3trAccounts = first10.map(a => ({ ...a, amount: ethers.parseEther("50000") }))
+  await airdropB3trFromTreasury(treasuryAddress, admin, b3trAccounts)
+
+  await startEmissions(emissionsContract, admin)
+
+  // Endorse all apps
+  const allSigners = await ethers.getSigners()
+  const endorserSigners = allSigners.slice(0, 10)
+
+  await airdropVTHO(
+    endorserSigners.map(acct => Address.of(acct.address)),
+    5000n,
+    admin,
+  )
+
+  const mintAccounts: typeof endorserSigners = []
+  const mintLevels: number[] = []
+  for (const acct of endorserSigners) {
+    mintAccounts.push(acct, acct, acct)
+    mintLevels.push(7, 7, 7)
+  }
+
+  const unendorsedApps = await x2EarnApps.unendorsedAppIds()
+  await endorseXApps(endorserSigners, x2EarnApps, unendorsedApps, stargateMock)
+
+  const remaining = await x2EarnApps.unendorsedAppIds()
+  console.log(`Remaining apps: ${remaining.length} ${remaining.join(", ")}`)
+  if (remaining.length > 0) {
+    const threshold = Number(await x2EarnApps.endorsementScoreThreshold())
+    console.log(`Threshold: ${threshold}`)
+    for (const appId of remaining) {
+      const score = Number(await x2EarnApps.getScore(appId))
+      console.error(`App ${appId} has ${score}/${threshold} endorsement points`)
+    }
+    throw new Error(`${remaining.length} app(s) did not reach endorsement threshold`)
+  }
+  console.log(`All apps verified as endorsed (>= ${await x2EarnApps.endorsementScoreThreshold()} pts)`)
+
+  const end = new Date(performance.now() - start)
+  console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
 export const setupMainnetEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
