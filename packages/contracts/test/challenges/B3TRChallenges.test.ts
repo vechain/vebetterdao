@@ -372,4 +372,118 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await b3tr.balanceOf(bob.address)).to.equal(INITIAL_BALANCE + STAKE_AMOUNT)
     expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE - STAKE_AMOUNT)
   })
+
+  it("splits the sponsored prize among all participants who reach the threshold", async function () {
+    const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      appIds: [],
+      threshold: 5,
+      endRound: 3,
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+
+    // Both alice and bob reach threshold (>= 5)
+    await passport.setUserRoundActionCount(alice.address, 2, 3)
+    await passport.setUserRoundActionCount(alice.address, 3, 4) // total: 7
+    await passport.setUserRoundActionCount(bob.address, 2, 2)
+    await passport.setUserRoundActionCount(bob.address, 3, 3) // total: 5
+
+    await roundGovernor.setCurrentRoundId(4)
+    await challenges.finalizeChallengeBatch(1, 10)
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.settlementMode).to.equal(SettlementMode.QualifiedSplit)
+    expect(challenge.qualifiedCount).to.equal(2n)
+
+    // Creator cannot claim
+    await expect(challenges.claimChallengePayout(1)).to.be.revertedWithCustomError(challenges, "NothingToClaim")
+
+    await challenges.connect(alice).claimChallengePayout(1)
+    await challenges.connect(bob).claimChallengePayout(1)
+
+    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("50"))
+    expect(await b3tr.balanceOf(bob.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("50"))
+    expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE - STAKE_AMOUNT)
+  })
+
+  it("only pays qualified participants when some fall below the threshold", async function () {
+    const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      appIds: [],
+      threshold: 5,
+      endRound: 2,
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+
+    await passport.setUserRoundActionCount(alice.address, 2, 6) // qualifies
+    await passport.setUserRoundActionCount(bob.address, 2, 3) // does NOT qualify
+
+    await roundGovernor.setCurrentRoundId(3)
+    await challenges.finalizeChallengeBatch(1, 10)
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.settlementMode).to.equal(SettlementMode.QualifiedSplit)
+    expect(challenge.qualifiedCount).to.equal(1n)
+
+    await expect(challenges.connect(bob).claimChallengePayout(1)).to.be.revertedWithCustomError(
+      challenges,
+      "NothingToClaim",
+    )
+
+    await challenges.connect(alice).claimChallengePayout(1)
+    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + STAKE_AMOUNT)
+  })
+
+  it("rejects sponsored challenge with threshold > 0 and ThresholdMode.None", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        thresholdMode: ThresholdMode.None,
+        threshold: 5,
+        appIds: [],
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidThresholdConfiguration")
+  })
+
+  it("rejects sponsored challenge with threshold 0 and SplitAboveThreshold mode", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        thresholdMode: ThresholdMode.SplitAboveThreshold,
+        threshold: 0,
+        appIds: [],
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidThresholdConfiguration")
+  })
+
+  it("rejects stake challenge with a threshold", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Stake,
+        thresholdMode: ThresholdMode.SplitAboveThreshold,
+        threshold: 5,
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidThresholdConfiguration")
+  })
 })

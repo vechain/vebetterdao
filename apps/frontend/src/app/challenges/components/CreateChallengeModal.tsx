@@ -82,7 +82,9 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
     stakeAmountWei > BigInt(b3trBalance?.original ?? "0")
   const thresholdValue = Number(form.threshold || "0")
   const hasInvalidThresholdConfiguration =
-    form.kind === ChallengeKind.Sponsored && thresholdValue > 0 && form.thresholdMode === ThresholdMode.None
+    form.kind === ChallengeKind.Sponsored &&
+    ((thresholdValue > 0 && form.thresholdMode === ThresholdMode.None) ||
+      (form.thresholdMode === ThresholdMode.SplitAboveThreshold && thresholdValue === 0))
   const minStartRound = currentRound + 1
   const hasInvalidStartRound = form.startRound <= currentRound
   const hasInvalidEndRound = form.endRound < form.startRound
@@ -103,20 +105,20 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
     }))
   }
 
-  const updateThreshold = (value: string) => {
-    const normalizedThreshold =
-      value === "" ? "0" : String(Math.max(0, Math.trunc(Number.isFinite(Number(value)) ? Number(value) : 0)))
+  const isSplitPrize = form.thresholdMode === ThresholdMode.SplitAboveThreshold
 
+  const setWinnerMode = (splitPrize: boolean) => {
     setForm(prev => ({
       ...prev,
-      threshold: normalizedThreshold,
-      thresholdMode:
-        Number(normalizedThreshold) > 0
-          ? prev.thresholdMode === ThresholdMode.None
-            ? ThresholdMode.SplitAboveThreshold
-            : prev.thresholdMode
-          : ThresholdMode.None,
+      thresholdMode: splitPrize ? ThresholdMode.SplitAboveThreshold : ThresholdMode.None,
+      threshold: splitPrize ? (prev.threshold === "0" ? "1" : prev.threshold) : "0",
     }))
+  }
+
+  const updateThreshold = (value: string) => {
+    const normalized =
+      value === "" ? "0" : String(Math.max(0, Math.trunc(Number.isFinite(Number(value)) ? Number(value) : 0)))
+    update("threshold", normalized)
   }
 
   const addApp = (appId: string) => {
@@ -273,45 +275,45 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
                 </Text>
 
                 {isSponsored && (
-                  <>
-                    <Field.Root>
-                      <Field.Label>{t("Threshold")}</Field.Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="1"
-                        placeholder="0"
-                        value={form.threshold}
-                        onChange={e => updateThreshold(e.target.value)}
-                      />
-                    </Field.Root>
+                  <VStack align="stretch" gap="2">
+                    <Text fontWeight="semibold" textStyle="sm">
+                      {t("Winner")}
+                    </Text>
+                    <HStack gap="2">
+                      <Button
+                        size="sm"
+                        variant={!isSplitPrize ? "primary" : "tertiary"}
+                        onClick={() => setWinnerMode(false)}>
+                        {t("Max actions")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={isSplitPrize ? "primary" : "tertiary"}
+                        onClick={() => setWinnerMode(true)}>
+                        {t("Split prize")}
+                      </Button>
+                    </HStack>
+                    <Text textStyle="xs" color="text.subtle">
+                      {t(isSplitPrize ? "Split prize description" : "Max actions description")}
+                    </Text>
 
-                    {thresholdValue > 0 && (
-                      <VStack align="stretch" gap="2">
-                        <HStack gap="2">
-                          <Button
-                            size="sm"
-                            variant={form.thresholdMode === ThresholdMode.SplitAboveThreshold ? "primary" : "tertiary"}
-                            onClick={() => update("thresholdMode", ThresholdMode.SplitAboveThreshold)}>
-                            {t("Split above threshold")}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant={form.thresholdMode === ThresholdMode.TopAboveThreshold ? "primary" : "tertiary"}
-                            onClick={() => update("thresholdMode", ThresholdMode.TopAboveThreshold)}>
-                            {t("Top above threshold")}
-                          </Button>
-                        </HStack>
-                        <Text textStyle="xs" color="text.subtle">
-                          {t(
-                            form.thresholdMode === ThresholdMode.TopAboveThreshold
-                              ? "Top above threshold description"
-                              : "Split above threshold description",
-                          )}
-                        </Text>
-                      </VStack>
+                    {isSplitPrize && (
+                      <Field.Root invalid={isSplitPrize && thresholdValue === 0}>
+                        <Field.Label>{t("Minimum actions")}</Field.Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          step="1"
+                          placeholder="1"
+                          value={form.threshold}
+                          onChange={e => updateThreshold(e.target.value)}
+                        />
+                        {isSplitPrize && thresholdValue === 0 && (
+                          <Field.ErrorText>{t("Minimum actions must be greater than 0")}</Field.ErrorText>
+                        )}
+                      </Field.Root>
                     )}
-                  </>
+                  </VStack>
                 )}
 
                 <Field.Root>
