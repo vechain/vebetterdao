@@ -13,7 +13,7 @@ const ToggleField = ({
 }) => (
   <HStack justify="space-between" w="full">
     <Text textStyle="sm">{label}</Text>
-    <Switch.Root checked={checked} onCheckedChange={e => onCheckedChange(e.checked)} colorPalette="green" size="sm">
+    <Switch.Root checked={checked} onCheckedChange={e => onCheckedChange(e.checked)} colorPalette="blue" size="sm">
       <Switch.HiddenInput />
       <Switch.Control>
         <Switch.Thumb />

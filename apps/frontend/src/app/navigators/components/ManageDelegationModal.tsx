@@ -205,7 +205,7 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
         </Card.Root>
 
         <Button
-          colorPalette={isDecreasing || isFullRemoval ? "red" : "green"}
+          variant={isDecreasing || isFullRemoval ? "negative" : "primary"}
           w="full"
           onClick={handleSubmit}
           disabled={!isValid}

@@ -148,7 +148,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
             )}
           </VStack>
 
-          <Button colorPalette="green" w="full" onClick={() => setStep(2)} disabled={!isAmountValid} size="lg">
+          <Button variant="primary" w="full" onClick={() => setStep(2)} disabled={!isAmountValid} size="lg">
             {"Continue"}
           </Button>
         </VStack>
@@ -268,7 +268,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
             <Button variant="outline" flex={1} onClick={() => setStep(1)} size="lg">
               {"Back"}
             </Button>
-            <Button colorPalette="green" flex={1} onClick={handleDelegate} size="lg">
+            <Button variant="primary" flex={1} onClick={handleDelegate} size="lg">
               {"Delegate "}
               {formatter.format(amountNum)}
               {" VOT3"}

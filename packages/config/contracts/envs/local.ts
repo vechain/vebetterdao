@@ -240,7 +240,7 @@ export function createLocalConfig() {
     DBA_DISTRIBUTION_START_ROUND: 1,
 
     // Navigator Registry
-    NAVIGATOR_MIN_STAKE: 50000n * 10n ** 18n, // 50,000 B3TR
+    NAVIGATOR_MIN_STAKE: 500n * 10n ** 18n, // 50,000 B3TR
     NAVIGATOR_MAX_STAKE_PERCENTAGE: 100, // 1% of VOT3 supply
     NAVIGATOR_FEE_LOCK_PERIOD: 4, // 4 rounds
     NAVIGATOR_FEE_PERCENTAGE: 2000, // 20% in basis points

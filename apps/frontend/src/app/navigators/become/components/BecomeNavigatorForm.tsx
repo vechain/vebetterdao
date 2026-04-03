@@ -138,7 +138,7 @@ export const BecomeNavigatorForm = () => {
 
       <Grid templateColumns={{ base: "1fr", lg: "1fr 300px" }} gap={6} alignItems="start">
         <VStack gap={6} align="stretch">
-          <Steps.Root step={currentStep} count={STEPS.length} size="sm" colorPalette="green" variant="subtle">
+          <Steps.Root step={currentStep} count={STEPS.length} size="sm" colorPalette="blue" variant="subtle">
             <Steps.List>
               {STEPS.map((step, index) => (
                 <Steps.Item key={step.title} index={index}>
@@ -166,13 +166,13 @@ export const BecomeNavigatorForm = () => {
             </Button>
 
             {currentStep < STEPS.length - 1 ? (
-              <Button colorPalette="green" onClick={goNext} disabled={!canProceed()} size="sm">
+              <Button variant="primary" onClick={goNext} disabled={!canProceed()} size="sm">
                 {"Next"}
                 <LuArrowRight />
               </Button>
             ) : (
               <Button
-                colorPalette="green"
+                variant="primary"
                 onClick={onSubmit}
                 disabled={!canProceed() || isSubmitting}
                 loading={isSubmitting}

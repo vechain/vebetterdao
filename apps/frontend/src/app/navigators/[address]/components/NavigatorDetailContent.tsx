@@ -97,12 +97,12 @@ export const NavigatorDetailContent = () => {
               </Badge>
               <HStack flex={1} justify="end">
                 {account?.address && isDelegatedHere && (
-                  <Button colorPalette="green" variant="outline" size="sm" onClick={() => setIsManageOpen(true)}>
+                  <Button variant="secondary" size="sm" onClick={() => setIsManageOpen(true)}>
                     {"Manage Delegation"}
                   </Button>
                 )}
                 {account?.address && isActive && !isDelegatedHere && (
-                  <Button colorPalette="green" size="sm" onClick={() => setIsDelegateOpen(true)}>
+                  <Button variant="primary" size="sm" onClick={() => setIsDelegateOpen(true)}>
                     {"Delegate"}
                   </Button>
                 )}
