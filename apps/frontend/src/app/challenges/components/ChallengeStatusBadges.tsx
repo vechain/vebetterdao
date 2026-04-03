@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next"
 
 import {
   ChallengeKind,
-  ChallengeStatus,
   ChallengeVisibility,
   ChallengeView,
   challengeStatusLabel,
@@ -34,14 +33,13 @@ export const ChallengeKindBadges = ({ challenge }: { challenge: ChallengeView })
 
   return (
     <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-      {t("Sponsored by the creator — no stake required")}
+      {t("Sponsored challenge: No stake required!")}
     </Text>
   )
 }
 
 export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
-  if (challenge.status === ChallengeStatus.Active) return null
 
   return (
     <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">

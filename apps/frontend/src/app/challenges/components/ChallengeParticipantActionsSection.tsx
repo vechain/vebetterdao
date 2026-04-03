@@ -3,11 +3,13 @@
 import { Badge, Box, Card, Heading, HStack, Mark, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { getCompactFormatter, humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
+import { getPicassoImgSrc } from "@repo/utils/PicassoUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { useMemo } from "react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
 import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { ChallengeDetail, ChallengeStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
@@ -54,6 +56,7 @@ const ChartTooltip = ({ active, payload }: { active?: boolean; payload?: { paylo
 export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: ChallengeDetail }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const router = useRouter()
   const viewerAddress = account?.address
   const { data, isLoading, isError } = useChallengeParticipantActions(challenge.challengeId, challenge.participants)
   const [leaderColorToken, trailingColorToken, gridColorToken, axisColorToken] = useToken("colors", [
@@ -81,7 +84,7 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
 
     return leaderboard.map(entry => ({
       participant: entry.participant,
-      label: humanAddress(entry.participant, 6, 4),
+      label: humanAddress(entry.participant, 4, 4),
       actions: entry.actions,
       fill: leaderboard.length > 0 && entry.actions === bestScore ? leaderColor : trailingColor,
     }))
@@ -117,6 +120,30 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
 
   const chartHeight = Math.max(220, chartData.length * 44)
 
+  const renderYAxisTick = useCallback(
+    ({ x, y, index }: { x: number; y: number; index: number }) => {
+      const entry = chartData[index]
+      if (!entry) return null
+      const imgSrc = getPicassoImgSrc(entry.participant, true)
+      const imgX = x - 122
+      return (
+        <g style={{ cursor: "pointer" }} onClick={() => router.push(`/profile/${entry.participant}`)}>
+          <defs>
+            <clipPath id={`av-${index}`}>
+              <circle cx={imgX + 9} cy={y} r={9} />
+            </clipPath>
+          </defs>
+          <rect x={imgX - 4} y={y - 14} width={x - imgX + 8} height={28} fill="transparent" />
+          <image href={imgSrc} x={imgX} y={y - 9} width={18} height={18} clipPath={`url(#av-${index})`} />
+          <text x={imgX + 26} y={y} textAnchor="start" fontSize={11} fill={axisColor} dominantBaseline="central">
+            {entry.label}
+          </text>
+        </g>
+      )
+    },
+    [chartData, axisColor, router],
+  )
+
   return (
     <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" borderRadius="3xl" boxShadow="sm">
       <VStack align="stretch" gap="5">
@@ -138,19 +165,6 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
             </Text>
           )}
         </VStack>
-
-        {challenge.participants.length > 0 && (
-          <HStack flexWrap="wrap" gap="2">
-            {challenge.participants.map(address => (
-              <Badge
-                key={address}
-                variant={viewerAddress && compareAddresses(address, viewerAddress) ? "positive" : "neutral"}
-                size="sm">
-                {humanAddress(address, 6, 4)}
-              </Badge>
-            ))}
-          </HStack>
-        )}
 
         {outcome && outcome.addresses.length > 0 && (
           <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
@@ -275,31 +289,35 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
           <Box bg="bg.secondary" borderRadius="2xl" p={{ base: "4", md: "5" }}>
             <Box w="full" h={`${chartHeight}px`}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 8, bottom: 0 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 44, left: 8, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
-                  <XAxis
-                    type="number"
-                    tick={{ fontSize: 11 }}
-                    tickFormatter={value => compactFormatter.format(value as number)}
-                    stroke={axisColor}
-                    axisLine={false}
-                    tickLine={false}
-                  />
+                  <XAxis type="number" hide />
                   <YAxis
                     type="category"
                     dataKey="label"
-                    width={96}
-                    tick={{ fontSize: 11 }}
-                    tickMargin={8}
-                    stroke={axisColor}
+                    width={140}
+                    tick={renderYAxisTick}
+                    tickMargin={12}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip content={<ChartTooltip />} cursor={false} />
-                  <Bar dataKey="actions" radius={[0, 6, 6, 0]} minPointSize={4}>
+                  <Bar
+                    dataKey="actions"
+                    radius={[0, 6, 6, 0]}
+                    minPointSize={4}
+                    cursor="pointer"
+                    onClick={(data: ChartEntry) => router.push(`/profile/${data.participant}`)}>
                     {chartData.map(entry => (
                       <Cell key={entry.participant} fill={entry.fill} />
                     ))}
+                    <LabelList
+                      dataKey="actions"
+                      position="right"
+                      formatter={(value: number) => compactFormatter.format(value)}
+                      fontSize={11}
+                      fill={axisColor}
+                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>

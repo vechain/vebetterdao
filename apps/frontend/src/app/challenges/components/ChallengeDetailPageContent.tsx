@@ -13,6 +13,7 @@ import { ChallengeKind, ChallengeStatus } from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
+import { AddressIcon } from "@/components/AddressIcon"
 import { MotionVStack } from "@/components/MotionVStack"
 
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
@@ -83,7 +84,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
     <MotionVStack renderInnerStack={false} gap="6">
       <VStack align="stretch" w="full" gap="5">
         {/* Back nav */}
-        <Button asChild w="fit-content" variant="ghost" px="0">
+        <Button asChild w="fit-content" variant="ghost" px="3">
           <NextLink href="/challenges">
             <Icon as={FaAngleLeft} boxSize={3} />
             <Text color="inherit" textStyle="sm" fontWeight="semibold">
@@ -109,16 +110,12 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
 
               <VStack align="stretch" gap="2">
                 <HStack flexWrap="wrap" gap="2" align="center">
-                  <Text
-                    textStyle="xs"
-                    color="text.subtle"
-                    bg="bg.secondary"
-                    borderRadius="full"
-                    px="2.5"
-                    py="1"
-                    fontWeight="semibold">
-                    {humanAddress(challenge.creator, 6, 4)}
-                  </Text>
+                  <HStack gap="1.5" bg="bg.secondary" borderRadius="full" px="2.5" py="1" align="center">
+                    <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" />
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {humanAddress(challenge.creator, 6, 4)}
+                    </Text>
+                  </HStack>
                   {createdAtLabel && (
                     <Text color="text.subtle" textStyle="sm">
                       {"•"} {createdAtLabel}
@@ -161,10 +158,9 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                   value={`${humanNumber(challenge.participantCount)} / ${humanNumber(challenge.maxParticipants)}`}
                 />
                 <StatItem label={t("Rounds")} value={roundsProgress} />
-                <StatItem
-                  label={t("Threshold")}
-                  value={challenge.threshold === "0" ? t("None") : humanNumber(challenge.threshold)}
-                />
+                {challenge.threshold !== "0" && (
+                  <StatItem label={t("Threshold")} value={humanNumber(challenge.threshold)} />
+                )}
                 <StatItem
                   label={t("Apps")}
                   value={challenge.allApps ? t("All apps") : String(challenge.selectedApps.length)}
@@ -183,59 +179,57 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
           </VStack>
         </Card.Root>
 
+        {/* Details: apps + invited */}
+        {(!challenge.allApps || challenge.invited.length > 0) && (
+          <SimpleGrid columns={{ base: 1, lg: !challenge.allApps && challenge.invited.length > 0 ? 2 : 1 }} gap="4">
+            {!challenge.allApps && (
+              <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
+                <VStack align="stretch" gap="3">
+                  <Text
+                    textStyle="xxs"
+                    color="text.subtle"
+                    textTransform="uppercase"
+                    letterSpacing="0.08em"
+                    fontWeight="semibold">
+                    {t("Selected apps")}
+                  </Text>
+                  <HStack flexWrap="wrap" gap="2">
+                    {challenge.selectedApps.map(app => (
+                      <Badge key={app} variant="neutral" size="sm">
+                        {appNames.get(app.toLowerCase()) ?? humanAddress(app, 6, 4)}
+                      </Badge>
+                    ))}
+                  </HStack>
+                </VStack>
+              </Card.Root>
+            )}
+
+            {challenge.invited.length > 0 && (
+              <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
+                <VStack align="stretch" gap="3">
+                  <Text
+                    textStyle="xxs"
+                    color="text.subtle"
+                    textTransform="uppercase"
+                    letterSpacing="0.08em"
+                    fontWeight="semibold">
+                    {t("Invited wallets")}
+                  </Text>
+                  <HStack flexWrap="wrap" gap="2">
+                    {challenge.invited.map(address => (
+                      <Badge key={address} variant="neutral" size="sm">
+                        {humanAddress(address, 6, 4)}
+                      </Badge>
+                    ))}
+                  </HStack>
+                </VStack>
+              </Card.Root>
+            )}
+          </SimpleGrid>
+        )}
+
         {/* Leaderboard / participant actions */}
         <ChallengeParticipantActionsSection challenge={challenge} />
-
-        {/* Details: apps + invited */}
-        <SimpleGrid columns={{ base: 1, lg: challenge.invited.length > 0 ? 2 : 1 }} gap="4">
-          <Card.Root variant="primary" p={{ base: "5", md: "6" }} gap="4" borderRadius="2xl">
-            <VStack align="stretch" gap="3">
-              <Text
-                textStyle="xxs"
-                color="text.subtle"
-                textTransform="uppercase"
-                letterSpacing="0.08em"
-                fontWeight="semibold">
-                {t("Selected apps")}
-              </Text>
-              <HStack flexWrap="wrap" gap="2">
-                {challenge.allApps ? (
-                  <Badge variant="neutral" size="sm">
-                    {t("All apps")}
-                  </Badge>
-                ) : (
-                  challenge.selectedApps.map(app => (
-                    <Badge key={app} variant="neutral" size="sm">
-                      {appNames.get(app.toLowerCase()) ?? humanAddress(app, 6, 4)}
-                    </Badge>
-                  ))
-                )}
-              </HStack>
-            </VStack>
-          </Card.Root>
-
-          {challenge.invited.length > 0 && (
-            <Card.Root variant="primary" p={{ base: "5", md: "6" }} gap="4" borderRadius="2xl">
-              <VStack align="stretch" gap="3">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  textTransform="uppercase"
-                  letterSpacing="0.08em"
-                  fontWeight="semibold">
-                  {t("Invited wallets")}
-                </Text>
-                <HStack flexWrap="wrap" gap="2">
-                  {challenge.invited.map(address => (
-                    <Badge key={address} variant="neutral" size="sm">
-                      {humanAddress(address, 6, 4)}
-                    </Badge>
-                  ))}
-                </HStack>
-              </VStack>
-            </Card.Root>
-          )}
-        </SimpleGrid>
       </VStack>
     </MotionVStack>
   )
