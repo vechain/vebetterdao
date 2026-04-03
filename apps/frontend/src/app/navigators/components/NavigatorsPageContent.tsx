@@ -1,4 +1,18 @@
-import { Button, Card, Grid, Spinner, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  Grid,
+  Heading,
+  HStack,
+  Icon,
+  Link,
+  Spinner,
+  Stack,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -7,19 +21,27 @@ import { LuPlus, LuShield } from "react-icons/lu"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted, useNavigatorRegistrations } from "@/api/indexer/navigators/useNavigators"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { DelegateModal } from "./DelegateModal"
 import { NavigatorCard } from "./NavigatorCard"
 import { NavigatorsSidebar } from "./NavigatorsSidebar"
+import { NavigatorStatsCards } from "./NavigatorStatsCards"
 import { NavigatorStatusBanner } from "./NavigatorStatusBanner"
+import { NavigatorStepsCard } from "./NavigatorStepsCard"
 
 export const NavigatorsPageContent = () => {
   const router = useRouter()
   const { account } = useWallet()
+  const { isMobile } = useBreakpoints()
   const { data: isNavigator } = useIsNavigator()
   const { data: isDelegated } = useIsDelegated()
   const { data: navigators, isLoading: navigatorsLoading } = useNavigatorRegistrations()
   const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
+
+  const desktopStepCardDisclosure = useDisclosure({ defaultOpen: true })
+  const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
+  const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
 
   if (navigatorsLoading) {
     return (
@@ -33,26 +55,38 @@ export const NavigatorsPageContent = () => {
     <VStack w="full" gap={8} pb={8}>
       {account?.address && <NavigatorStatusBanner isNavigator={isNavigator} isDelegated={isDelegated} />}
 
+      <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
+        <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
+          <Heading size={{ base: "2xl", lg: "3xl" }}>{"Navigators"}</Heading>
+          {!open && (
+            <Link
+              display="inline-flex"
+              alignItems="center"
+              fontWeight={500}
+              color="primary.500"
+              px={0}
+              textStyle={{ base: "xs", lg: "md" }}
+              onClick={onOpen}>
+              <Icon as={UilInfoCircle} boxSize={4} />
+              {!isMobile && "More info"}
+            </Link>
+          )}
+        </HStack>
+        {account?.address && !isNavigator && (
+          <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }}>
+            <Button onClick={() => router.push("/navigators/become")} variant="primary" size="md">
+              <LuPlus />
+              {"Become a Navigator"}
+            </Button>
+          </HStack>
+        )}
+      </Stack>
+
+      <NavigatorStepsCard isOpen={open} onClose={onClose} />
+      <NavigatorStatsCards />
+
       <Grid alignItems="flex-start" w="full" gap={4} templateColumns={{ base: "1fr", md: "2fr 1fr" }}>
         <Card.Root unstyled>
-          <Card.Header
-            w="full"
-            display="flex"
-            py="4"
-            flexDirection="row"
-            alignItems="flex-start"
-            justifyContent="space-between">
-            <Card.Title textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
-              {"Navigators"}
-            </Card.Title>
-
-            {account?.address && !isNavigator && (
-              <Button onClick={() => router.push("/navigators/become")} variant="primary">
-                <LuPlus />
-                {"Become a Navigator"}
-              </Button>
-            )}
-          </Card.Header>
           <Card.Body>
             <VStack alignSelf="flex-start" gap={4} w={{ base: "full", md: undefined }}>
               {!navigators || navigators.length === 0 ? (
