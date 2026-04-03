@@ -78,14 +78,36 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       )
     })
 
-    it("should revert with AlreadyDelegated when citizen is already delegated", async function () {
-      await getVot3Tokens(citizen1, "1000")
+    it("should increase delegation when citizen delegates to the same navigator again", async function () {
+      await getVot3Tokens(citizen1, "2000")
+      const amount1 = ethers.parseEther("500")
+      const amount2 = ethers.parseEther("300")
+
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount1)
+
+      // Second delegation to same navigator should add to existing
+      await expect(navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount2))
+        .to.emit(navigatorRegistry, "DelegationUpdated")
+        .withArgs(citizen1.address, navigator1.address, amount1 + amount2)
+
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(amount1 + amount2)
+      expect(await navigatorRegistry.getTotalDelegated(navigator1.address)).to.equal(amount1 + amount2)
+      // Citizen count should still be 1
+      expect(await navigatorRegistry.getCitizenCount(navigator1.address)).to.equal(1)
+    })
+
+    it("should revert with AlreadyDelegated when citizen delegates to a different navigator", async function () {
+      await getVot3Tokens(citizen1, "2000")
       const amount = ethers.parseEther("500")
+
+      // Register a second navigator
+      const navigator2 = otherAccount
+      await registerNavigator(navigator2)
 
       await navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount)
 
       await expect(
-        navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount),
+        navigatorRegistry.connect(citizen1).delegate(navigator2.address, amount),
       ).to.be.revertedWithCustomError(navigatorRegistry, "AlreadyDelegated")
     })
 

@@ -14,6 +14,6 @@ export const useGetMetadataURI = (navigator: string) =>
     args: [navigator as `0x${string}`],
     queryOptions: {
       enabled: !!navigator && !!address,
-      select: data => data[0] as string,
+      select: data => (data?.[0] as string) ?? "",
     },
   })

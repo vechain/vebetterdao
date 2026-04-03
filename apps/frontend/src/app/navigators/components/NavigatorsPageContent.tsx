@@ -1,12 +1,14 @@
 import { Button, Grid, Heading, HStack, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { LuPlus, LuShield } from "react-icons/lu"
 
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
-import { useNavigatorRegistrations } from "@/api/indexer/navigators/useNavigators"
+import { NavigatorEntityFormatted, useNavigatorRegistrations } from "@/api/indexer/navigators/useNavigators"
 
+import { DelegateModal } from "./DelegateModal"
 import { NavigatorCard } from "./NavigatorCard"
 import { NavigatorsSidebar } from "./NavigatorsSidebar"
 import { NavigatorStatusBanner } from "./NavigatorStatusBanner"
@@ -17,6 +19,7 @@ export const NavigatorsPageContent = () => {
   const { data: isNavigator } = useIsNavigator()
   const { data: isDelegated } = useIsDelegated()
   const { data: navigators, isLoading: navigatorsLoading } = useNavigatorRegistrations()
+  const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
 
   return (
     <VStack w="full" gap={6} align="stretch" px={{ base: 4, md: 0 }}>
@@ -60,7 +63,7 @@ export const NavigatorsPageContent = () => {
           ) : (
             <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
               {navigators.map(nav => (
-                <NavigatorCard key={nav.address} navigator={nav} onDelegate={() => {}} />
+                <NavigatorCard key={nav.address} navigator={nav} onDelegate={() => setDelegateTarget(nav)} />
               ))}
             </Grid>
           )}
@@ -68,6 +71,10 @@ export const NavigatorsPageContent = () => {
 
         <NavigatorsSidebar />
       </Grid>
+
+      {delegateTarget && (
+        <DelegateModal isOpen={!!delegateTarget} onClose={() => setDelegateTarget(null)} navigator={delegateTarget} />
+      )}
     </VStack>
   )
 }

@@ -17,8 +17,12 @@ import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
 import { LuArrowLeft, LuExternalLink, LuShield, LuUsers } from "react-icons/lu"
 
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { DelegateModal } from "@/app/navigators/components/DelegateModal"
+import { ManageDelegationModal } from "@/app/navigators/components/ManageDelegationModal"
 import { AddressButton } from "@/components/AddressButton"
 import { AddressIcon } from "@/components/AddressIcon"
 
@@ -33,10 +37,14 @@ export const NavigatorDetailContent = () => {
   const { account } = useWallet()
   const address = params?.address ?? ""
   const [tab, setTab] = useState("about")
+  const [isDelegateOpen, setIsDelegateOpen] = useState(false)
+  const [isManageOpen, setIsManageOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address)
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
+  const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
+  const { data: currentNavigator } = useGetNavigator(account?.address)
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
 
@@ -64,6 +72,8 @@ export const NavigatorDetailContent = () => {
   }
 
   const isActive = nav.status === "ACTIVE"
+  const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
+  const isDelegatedHere = currentNavigator?.toLowerCase() === address.toLowerCase() && currentDelegatedNum > 0
 
   return (
     <VStack w="full" gap={6} align="stretch" px={{ base: 4, md: 0 }}>
@@ -86,8 +96,13 @@ export const NavigatorDetailContent = () => {
                 {nav.status}
               </Badge>
               <HStack flex={1} justify="end">
-                {isActive && account?.address && (
-                  <Button colorPalette="green" size="sm">
+                {account?.address && isDelegatedHere && (
+                  <Button colorPalette="green" variant="outline" size="sm" onClick={() => setIsManageOpen(true)}>
+                    {"Manage Delegation"}
+                  </Button>
+                )}
+                {account?.address && isActive && !isDelegatedHere && (
+                  <Button colorPalette="green" size="sm" onClick={() => setIsDelegateOpen(true)}>
                     {"Delegate"}
                   </Button>
                 )}
@@ -285,6 +300,13 @@ export const NavigatorDetailContent = () => {
           </VStack>
         </Tabs.Content>
       </Tabs.Root>
+
+      {nav && (
+        <>
+          <DelegateModal isOpen={isDelegateOpen} onClose={() => setIsDelegateOpen(false)} navigator={nav} />
+          <ManageDelegationModal isOpen={isManageOpen} onClose={() => setIsManageOpen(false)} navigator={nav} />
+        </>
+      )}
     </VStack>
   )
 }

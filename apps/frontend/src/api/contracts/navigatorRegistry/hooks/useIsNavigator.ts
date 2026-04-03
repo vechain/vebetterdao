@@ -20,7 +20,7 @@ export const useIsNavigator = (account?: string) => {
     args: [addr as `0x${string}`],
     queryOptions: {
       enabled: !!addr && !!address,
-      select: data => data[0] as boolean,
+      select: data => (data?.[0] as boolean) ?? false,
     },
   })
 }

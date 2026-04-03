@@ -14,6 +14,6 @@ export const useGetCitizenCount = (navigator: string) =>
     args: [navigator as `0x${string}`],
     queryOptions: {
       enabled: !!navigator && !!address,
-      select: data => Number(data[0]),
+      select: data => Number(data?.[0] ?? 0),
     },
   })

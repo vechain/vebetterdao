@@ -73,8 +73,9 @@ library NavigatorDelegationUtils {
     // Navigator cannot delegate to themselves
     if (citizen == navigator) revert SelfDelegationNotAllowed(citizen);
 
-    // Citizen must not already be delegated (unless current navigator is dead — auto-clear)
     address currentNav = $.citizenToNavigator[citizen];
+    bool isIncrease = false;
+
     if (currentNav != address(0)) {
       if (_isNavigatorDead($, currentNav)) {
         // Auto-clear stale delegation — navigator exited or deactivated
@@ -83,7 +84,11 @@ library NavigatorDelegationUtils {
         $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), 0);
         _removeDelegation($, citizen, currentNav);
         emit DelegationRemoved(citizen, currentNav);
+      } else if (currentNav == navigator) {
+        // Already delegated to the same navigator — increase delegation
+        isIncrease = true;
       } else {
+        // Delegated to a different active navigator
         revert AlreadyDelegated(citizen, currentNav);
       }
     }
@@ -106,16 +111,22 @@ library NavigatorDelegationUtils {
       revert ExceedsNavigatorCapacity(navigator, amount, remaining);
     }
 
-    // Store delegation
-    $.citizenToNavigator[citizen] = navigator;
-    $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(amount));
-    $.totalDelegatedToNavigator[navigator] += amount;
-
-    // Add citizen to navigator's citizen list
-    $.navigatorCitizens[navigator].push(citizen);
-    $.citizenIndex[navigator][citizen] = $.navigatorCitizens[navigator].length; // 1-indexed
-
-    emit DelegationCreated(citizen, navigator, amount);
+    if (isIncrease) {
+      // Increase existing delegation
+      uint256 currentAmount = _currentDelegatedAmount($, citizen);
+      uint256 newAmount = currentAmount + amount;
+      $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newAmount));
+      $.totalDelegatedToNavigator[navigator] += amount;
+      emit DelegationUpdated(citizen, navigator, newAmount);
+    } else {
+      // New delegation
+      $.citizenToNavigator[citizen] = navigator;
+      $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(amount));
+      $.totalDelegatedToNavigator[navigator] += amount;
+      $.navigatorCitizens[navigator].push(citizen);
+      $.citizenIndex[navigator][citizen] = $.navigatorCitizens[navigator].length; // 1-indexed
+      emit DelegationCreated(citizen, navigator, amount);
+    }
   }
 
   /// @notice Partially reduce delegation amount

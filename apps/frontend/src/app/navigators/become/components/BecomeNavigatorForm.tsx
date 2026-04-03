@@ -38,8 +38,12 @@ export const BecomeNavigatorForm = () => {
 
   const handleSuccess = useCallback(() => {
     clearData()
-    router.push("/navigators")
-  }, [clearData, router])
+    if (account?.address) {
+      router.push(`/navigators/${account.address}`)
+    } else {
+      router.push("/navigators")
+    }
+  }, [clearData, router, account])
 
   const { sendTransaction, status } = useRegisterNavigator({
     onSuccess: handleSuccess,

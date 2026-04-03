@@ -15,9 +15,9 @@ export const useGetMaxStake = () =>
     args: [],
     queryOptions: {
       enabled: !!address,
-      select: data => ({
-        raw: data[0] as bigint,
-        scaled: formatEther(data[0] as bigint),
-      }),
+      select: data => {
+        const raw = (data?.[0] as bigint) ?? 0n
+        return { raw, scaled: formatEther(raw) }
+      },
     },
   })

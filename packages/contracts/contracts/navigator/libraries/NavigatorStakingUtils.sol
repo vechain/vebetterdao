@@ -105,6 +105,35 @@ library NavigatorStakingUtils {
     emit StakeAdded(navigator, amount, newTotal);
   }
 
+  /// @notice Reduce stake while active (must stay above min stake and maintain delegation capacity)
+  /// @param navigator The navigator address
+  /// @param amount The B3TR amount to reduce
+  function reduceStake(address navigator, uint256 amount) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if (!$.isRegistered[navigator]) revert NotRegistered(navigator);
+    if ($.isDeactivated[navigator]) revert NavigatorDeactivated(navigator);
+    if (amount > $.stakedAmount[navigator]) revert InsufficientStake($.stakedAmount[navigator], amount);
+
+    uint256 newStake = $.stakedAmount[navigator] - amount;
+
+    // Must stay above min stake
+    if (newStake < $.minStake) revert StakeBelowMinimum(newStake, $.minStake);
+
+    // Must maintain capacity for existing delegations (stake * 10 >= totalDelegated)
+    uint256 totalDelegated = $.totalDelegatedToNavigator[navigator];
+    if (newStake * DELEGATION_RATIO < totalDelegated) {
+      revert StakeBelowMinimum(newStake, (totalDelegated + DELEGATION_RATIO - 1) / DELEGATION_RATIO);
+    }
+
+    $.stakedAmount[navigator] = newStake;
+    $.totalStaked -= amount;
+
+    IERC20($.b3trToken).transfer(navigator, amount);
+
+    emit StakeWithdrawn(navigator, amount, newStake);
+  }
+
   /// @notice Withdraw staked B3TR (only after exit is finalized or deactivation)
   /// @param navigator The navigator address
   /// @param amount The B3TR amount to withdraw

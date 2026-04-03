@@ -15,9 +15,9 @@ export const useGetTotalDelegated = (navigator: string) =>
     args: [navigator as `0x${string}`],
     queryOptions: {
       enabled: !!navigator && !!address,
-      select: data => ({
-        raw: data[0] as bigint,
-        scaled: formatEther(data[0] as bigint),
-      }),
+      select: data => {
+        const raw = (data?.[0] as bigint) ?? 0n
+        return { raw, scaled: formatEther(raw) }
+      },
     },
   })
