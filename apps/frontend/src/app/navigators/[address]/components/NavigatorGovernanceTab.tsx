@@ -1,0 +1,123 @@
+import { Card, Icon, VStack } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { t } from "i18next"
+import { useCallback, useMemo, useState } from "react"
+
+import { useUserProposalsVoteEvents } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useUserVotedProposals } from "@/api/contracts/governance/hooks/useUserVotedProposals"
+import { useUserTopVotedApps } from "@/api/contracts/xApps/hooks/useUserTopVotedApps"
+import { PaginatedProposals } from "@/app/profile/components/ProfileGovernance/components/PaginatedProposals"
+import { PaginatedTopVotedApps } from "@/app/profile/components/ProfileGovernance/components/PaginatedTopVotedApps"
+import { PreviewCreatedProposals } from "@/app/profile/components/ProfileGovernance/components/PreviewCreatedProposals"
+import { TopVotedApps } from "@/app/profile/components/ProfileGovernance/components/TopVotedApps"
+import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import { EmptyState } from "@/components/ui/empty-state"
+import { useUserCreatedProposal } from "@/hooks/proposals/common/useUserCreatedProposal"
+
+enum ListView {
+  ALL,
+  CREATED,
+  VOTED,
+  APPS_VOTED,
+}
+
+const PREVIEW_SIZE = 3
+
+type Props = {
+  address: string
+}
+
+export const NavigatorGovernanceTab = ({ address }: Props) => {
+  const { data: createdProposals } = useUserCreatedProposal(address)
+  const { data: votedProposals } = useUserProposalsVoteEvents()
+  const votedProposalsIds = useMemo(() => votedProposals?.map(p => p.proposalId.toString()), [votedProposals])
+  const votedProposalsWithDescription = useUserVotedProposals(votedProposalsIds)
+  const topVotedApps = useUserTopVotedApps(address)
+
+  const [listView, setListView] = useState<ListView>(ListView.ALL)
+
+  const firstCreatedProposals = useMemo(() => createdProposals?.slice(0, PREVIEW_SIZE), [createdProposals])
+  const firstVotedProposals = useMemo(
+    () => votedProposalsWithDescription?.slice(0, PREVIEW_SIZE),
+    [votedProposalsWithDescription],
+  )
+  const firstTopVotedApps = useMemo(() => topVotedApps?.slice(0, PREVIEW_SIZE), [topVotedApps])
+
+  const isMoreCreatedProposals = (createdProposals?.length ?? 0) > PREVIEW_SIZE
+  const isMoreVotedProposals = (votedProposals?.length ?? 0) > PREVIEW_SIZE
+  const isMoreTopVotedApps = (topVotedApps?.length ?? 0) > PREVIEW_SIZE
+
+  const onGoBack = useCallback(() => setListView(ListView.ALL), [])
+
+  switch (listView) {
+    case ListView.ALL:
+      return (
+        <VStack gap={8} w="full">
+          {firstCreatedProposals && firstCreatedProposals.length > 0 && (
+            <PreviewCreatedProposals
+              firstProposals={firstCreatedProposals}
+              isMoreProposals={isMoreCreatedProposals}
+              isCreatedProposals
+              onSeeAllProposals={() => setListView(ListView.CREATED)}
+            />
+          )}
+
+          {firstVotedProposals && firstVotedProposals.length > 0 ? (
+            <PreviewCreatedProposals
+              firstProposals={firstVotedProposals}
+              isMoreProposals={isMoreVotedProposals}
+              onSeeAllProposals={() => setListView(ListView.VOTED)}
+            />
+          ) : (
+            <Card.Root variant="primary" w="full">
+              <Card.Title textStyle="xl">{t("Voted Proposals")}</Card.Title>
+              <Card.Body asChild>
+                <EmptyState
+                  title={t("Voted Proposals")}
+                  description={t("{{subject}} voted proposals will appear here.", {
+                    subject: `${humanAddress(address, 4, 3)}`,
+                  })}
+                  icon={
+                    <Icon boxSize={20} color="actions.secondary.text-lighter">
+                      <HandPlantIcon color="rgba(117, 117, 117, 1)" />
+                    </Icon>
+                  }
+                />
+              </Card.Body>
+            </Card.Root>
+          )}
+
+          {firstTopVotedApps && firstTopVotedApps.length > 0 ? (
+            <TopVotedApps
+              votedApps={firstTopVotedApps}
+              isMoreTopVotedApps={isMoreTopVotedApps}
+              onSeeAllAppsVoted={() => setListView(ListView.APPS_VOTED)}
+            />
+          ) : (
+            <Card.Root variant="primary" w="full">
+              <Card.Title textStyle="xl">{t("Most voted apps")}</Card.Title>
+              <Card.Body asChild>
+                <EmptyState
+                  title={t("Most voted apps")}
+                  description={t("{{subject}} top voted apps will appear here.", {
+                    subject: `${humanAddress(address, 4, 3)}`,
+                  })}
+                  icon={
+                    <Icon boxSize={20} color="actions.secondary.text-lighter">
+                      <HandPlantIcon color="rgba(117, 117, 117, 1)" />
+                    </Icon>
+                  }
+                />
+              </Card.Body>
+            </Card.Root>
+          )}
+        </VStack>
+      )
+    case ListView.CREATED:
+      return <PaginatedProposals proposals={createdProposals ?? []} goBack={onGoBack} />
+    case ListView.VOTED:
+      return <PaginatedProposals proposals={votedProposalsWithDescription ?? []} goBack={onGoBack} />
+    case ListView.APPS_VOTED:
+      return <PaginatedTopVotedApps topVotedApps={topVotedApps ?? []} goBack={onGoBack} />
+  }
+}
