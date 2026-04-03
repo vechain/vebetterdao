@@ -22,6 +22,7 @@ import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressButton } from "@/components/AddressButton"
 import { AddressIcon } from "@/components/AddressIcon"
 
+import { NavigatorCitizensTab } from "./NavigatorCitizensTab"
 import { NavigatorGovernanceTab } from "./NavigatorGovernanceTab"
 
 const formatter = getCompactFormatter(2)
@@ -183,6 +184,9 @@ export const NavigatorDetailContent = () => {
           <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="about">
             {"About"}
           </Tabs.Trigger>
+          <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="citizens">
+            {"Citizens"}
+          </Tabs.Trigger>
           <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="governance">
             {"Governance Activity"}
           </Tabs.Trigger>
@@ -269,6 +273,10 @@ export const NavigatorDetailContent = () => {
               </Card.Root>
             )}
           </VStack>
+        </Tabs.Content>
+
+        <Tabs.Content value="citizens">
+          <NavigatorCitizensTab address={address} />
         </Tabs.Content>
 
         <Tabs.Content value="governance">
