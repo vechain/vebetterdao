@@ -1,8 +1,9 @@
-import { Button, Card, Grid, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
-import { LuArrowLeft, LuArrowRight, LuShield } from "react-icons/lu"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { LuShield } from "react-icons/lu"
 
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
@@ -10,22 +11,31 @@ import { useRegisterNavigator } from "@/hooks/navigator/useRegisterNavigator"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 
-import { NavigatorDetailsCard } from "../../components/NavigatorDetailsCard"
-import { NavigatorInfoCard } from "../../components/NavigatorInfoCard"
+import { DisclosuresStep } from "../steps/DisclosuresStep"
+import { MotivationStep } from "../steps/MotivationStep"
+import { SocialsStep } from "../steps/SocialsStep"
+import { StakeStep } from "../steps/StakeStep"
 
-import { DisclosuresStep } from "./steps/DisclosuresStep"
-import { MotivationStep } from "./steps/MotivationStep"
-import { SocialsStep } from "./steps/SocialsStep"
-import { StakeStep } from "./steps/StakeStep"
+import { BecomeNavigatorFormStepIndicator } from "./BecomeNavigatorFormStepIndicator"
 
-const STEPS = [
-  { title: "Motivation", description: "Why you want to be a navigator" },
-  { title: "Disclosures", description: "Conflicts of interest" },
-  { title: "Socials", description: "Your public profiles" },
-  { title: "Stake", description: "Stake B3TR to register" },
-]
+export enum NavigatorFormStep {
+  MOTIVATION = "MOTIVATION",
+  DISCLOSURES = "DISCLOSURES",
+  SOCIALS = "SOCIALS",
+  STAKE = "STAKE",
+}
 
-export const BecomeNavigatorForm = () => {
+export type NavigatorStep = {
+  key: NavigatorFormStep
+  content: React.ReactNode
+  title: string
+}
+
+const FIRST_STEP = 0
+const LAST_STEP = 3
+
+export const BecomeNavigatorFormStepCard = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
   const data = useNavigatorApplicationStore(s => s.data)
@@ -68,8 +78,18 @@ export const BecomeNavigatorForm = () => {
     }
   }, [currentStep, data, minStake, maxStake])
 
+  const steps: NavigatorStep[] = useMemo(
+    () => [
+      { key: NavigatorFormStep.MOTIVATION, content: <MotivationStep />, title: t("Motivation") },
+      { key: NavigatorFormStep.DISCLOSURES, content: <DisclosuresStep />, title: t("Disclosures") },
+      { key: NavigatorFormStep.SOCIALS, content: <SocialsStep />, title: t("Socials") },
+      { key: NavigatorFormStep.STAKE, content: <StakeStep />, title: t("Stake") },
+    ],
+    [t],
+  )
+
   const goNext = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -85,7 +105,6 @@ export const BecomeNavigatorForm = () => {
     setIsUploading(true)
 
     try {
-      // Upload metadata to IPFS
       const metadata = {
         motivation: data.motivation,
         qualifications: data.qualifications,
@@ -97,7 +116,6 @@ export const BecomeNavigatorForm = () => {
           foundationRole: data.foundationRole,
           hasConflictsOfInterest: data.hasConflictsOfInterest,
           conflictsDescription: data.conflictsDescription,
-          previousDaoExperience: data.previousDaoExperience,
         },
         socials: {
           twitter: data.twitterHandle,
@@ -113,7 +131,6 @@ export const BecomeNavigatorForm = () => {
       const ipfsHash = await uploadBlobToIPFS(blob, "navigator-metadata.json")
       const uri = `ipfs://${ipfsHash}`
 
-      // Send the approve + register transaction with params
       await sendTransaction({ stakeAmount: data.stakeAmount, metadataURI: uri })
     } catch (error) {
       console.error("Failed to register:", error)
@@ -123,72 +140,48 @@ export const BecomeNavigatorForm = () => {
   }
 
   const isSubmitting = isUploading || status === "pending"
+  const currentStepData = steps[currentStep]
 
   return (
-    <VStack gap={6} align="stretch" w="full" px={{ base: 4, md: 0 }}>
-      <VStack gap={1} align="start">
-        <HStack gap={2}>
-          <LuShield size={24} />
-          <Heading size={{ base: "lg", md: "xl" }}>{"Become a Navigator"}</Heading>
-        </HStack>
-        <Text textStyle="sm" color="fg.muted">
-          {"Complete the following steps to register as a professional voting delegate."}
-        </Text>
-      </VStack>
+    <Card.Root p={{ base: "6", md: "8" }}>
+      <Card.Body>
+        <VStack gap={4} w="full" align="flex-start">
+          <BecomeNavigatorFormStepIndicator activeStep={currentStep} steps={steps} />
 
-      <Grid templateColumns={{ base: "1fr", lg: "1fr 300px" }} gap={6} alignItems="start">
-        <VStack gap={6} align="stretch">
-          <Steps.Root step={currentStep} count={STEPS.length} size="sm" colorPalette="blue" variant="subtle">
-            <Steps.List>
-              {STEPS.map((step, index) => (
-                <Steps.Item key={step.title} index={index}>
-                  <Steps.Indicator />
-                  <Steps.Title>{step.title}</Steps.Title>
-                  <Steps.Separator />
-                </Steps.Item>
-              ))}
-            </Steps.List>
-          </Steps.Root>
+          {currentStepData?.content}
 
-          <Card.Root variant="outline" borderRadius="xl">
-            <Card.Body>
-              {currentStep === 0 && <MotivationStep />}
-              {currentStep === 1 && <DisclosuresStep />}
-              {currentStep === 2 && <SocialsStep />}
-              {currentStep === 3 && <StakeStep />}
-            </Card.Body>
-          </Card.Root>
-
-          <HStack justify="space-between">
-            <Button variant="ghost" onClick={currentStep === 0 ? () => router.push("/navigators") : goBack} size="sm">
-              <LuArrowLeft />
-              {currentStep === 0 ? "Cancel" : "Back"}
-            </Button>
-
-            {currentStep < STEPS.length - 1 ? (
-              <Button variant="primary" onClick={goNext} disabled={!canProceed()} size="sm">
-                {"Next"}
-                <LuArrowRight />
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                onClick={onSubmit}
-                disabled={!canProceed() || isSubmitting}
-                loading={isSubmitting}
-                size="sm">
-                <LuShield />
-                {"Register as Navigator"}
+          <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
+            <HStack gap={4} w="full">
+              {currentStep !== FIRST_STEP && (
+                <Button w="40" type="button" onClick={goBack} variant="secondary" size="lg">
+                  {t("Back")}
+                </Button>
+              )}
+              {currentStep === LAST_STEP ? (
+                <Button
+                  w="40"
+                  variant="primary"
+                  onClick={onSubmit}
+                  disabled={!canProceed() || isSubmitting}
+                  loading={isSubmitting}
+                  size="lg">
+                  <LuShield />
+                  {t("Register")}
+                </Button>
+              ) : (
+                <Button w="40" variant="primary" onClick={goNext} disabled={!canProceed()} size="lg">
+                  {t("Continue")}
+                </Button>
+              )}
+            </HStack>
+            {currentStep === FIRST_STEP && (
+              <Button w="40" variant="link" onClick={() => router.push("/navigators")} size="lg">
+                {t("Cancel")}
               </Button>
             )}
-          </HStack>
+          </Stack>
         </VStack>
-
-        <VStack gap={4} align="stretch" display={{ base: "none", lg: "flex" }}>
-          <NavigatorInfoCard />
-          <NavigatorDetailsCard />
-        </VStack>
-      </Grid>
-    </VStack>
+      </Card.Body>
+    </Card.Root>
   )
 }

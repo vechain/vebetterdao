@@ -13,7 +13,6 @@ export type NavigatorMetadata = {
     foundationRole: string
     hasConflictsOfInterest: boolean
     conflictsDescription: string
-    previousDaoExperience: string
   }
   socials: {
     twitter: string

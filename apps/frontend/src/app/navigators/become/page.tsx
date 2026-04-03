@@ -6,8 +6,8 @@ import { useEffect } from "react"
 import { MotionVStack } from "@/components/MotionVStack"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
-const BecomeNavigatorForm = dynamic(
-  () => import("./components/BecomeNavigatorForm").then(mod => mod.BecomeNavigatorForm),
+const BecomeNavigatorPageContent = dynamic(
+  () => import("./components/BecomeNavigatorPageContent").then(mod => mod.BecomeNavigatorPageContent),
   {
     ssr: false,
     loading: () => (
@@ -24,7 +24,7 @@ export default function BecomeNavigatorPage() {
   }, [])
   return (
     <MotionVStack>
-      <BecomeNavigatorForm />
+      <BecomeNavigatorPageContent />
     </MotionVStack>
   )
 }

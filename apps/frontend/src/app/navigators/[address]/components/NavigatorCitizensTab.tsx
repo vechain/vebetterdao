@@ -1,6 +1,6 @@
 import { Card, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { t } from "i18next"
+import { useTranslation } from "react-i18next"
 import { LuUsers } from "react-icons/lu"
 
 import { useNavigatorCitizens } from "@/api/indexer/navigators/useNavigatorCitizens"
@@ -14,6 +14,7 @@ type Props = {
 }
 
 export const NavigatorCitizensTab = ({ address }: Props) => {
+  const { t } = useTranslation()
   const { data: citizens, isLoading } = useNavigatorCitizens(address)
 
   if (isLoading) {
@@ -74,12 +75,12 @@ export const NavigatorCitizensTab = ({ address }: Props) => {
               <HStack gap={4}>
                 <VStack gap={0} align="end">
                   <Text textStyle="sm" fontWeight="semibold">
-                    {formatter.format(Number(citizen.amountFormatted))}
-                    {" VOT3"}
+                    {formatter.format(Number(citizen.amountFormatted))} {t("VOT3")}
                   </Text>
                   <Text textStyle="xs" color="fg.muted">
-                    {"Since "}
-                    {new Date(citizen.delegatedAt * 1000).toLocaleDateString()}
+                    {t("Since {{date}}", {
+                      date: new Date(citizen.delegatedAt * 1000).toLocaleDateString(),
+                    })}
                   </Text>
                 </VStack>
               </HStack>

@@ -2,6 +2,7 @@ import { Badge, Button, Card, HStack, Skeleton, Text, VStack } from "@chakra-ui/
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { LuUsers } from "react-icons/lu"
 
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
@@ -15,6 +16,7 @@ type Props = {
 }
 
 export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(nav.address)
   const isActive = nav.status === "ACTIVE"
@@ -52,21 +54,20 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
                 {formatter.format(Number(nav.stakeFormatted))}
               </Text>
               <Text textStyle="xs" color="fg.muted">
-                {"B3TR"}
+                {t("B3TR")}
               </Text>
             </VStack>
           </HStack>
 
           <Text textStyle="xs" color="fg.muted" lineClamp={2} minH="32px">
-            {nav.metadataURI || "No description provided"}
+            {nav.metadataURI || t("No description provided")}
           </Text>
 
           <HStack justify="space-between" align="center">
             <HStack gap={1}>
               <LuUsers size={14} />
               <Text textStyle="xs" color="fg.muted">
-                {nav.citizenCount}
-                {" citizens"}
+                {t("{{count}} citizens", { count: nav.citizenCount })}
               </Text>
             </HStack>
             {isActive && (
@@ -77,7 +78,7 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
                   e.stopPropagation()
                   onDelegate?.()
                 }}>
-                {"Delegate"}
+                {t("Delegate")}
               </Button>
             )}
           </HStack>

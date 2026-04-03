@@ -16,6 +16,7 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { LuPlus, LuShield } from "react-icons/lu"
 
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
@@ -31,6 +32,7 @@ import { NavigatorStatusBanner } from "./NavigatorStatusBanner"
 import { NavigatorStepsCard } from "./NavigatorStepsCard"
 
 export const NavigatorsPageContent = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
   const { isMobile } = useBreakpoints()
@@ -57,7 +59,7 @@ export const NavigatorsPageContent = () => {
 
       <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
         <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
-          <Heading size={{ base: "2xl", lg: "3xl" }}>{"Navigators"}</Heading>
+          <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Navigators")}</Heading>
           {!open && (
             <Link
               display="inline-flex"
@@ -68,7 +70,7 @@ export const NavigatorsPageContent = () => {
               textStyle={{ base: "xs", lg: "md" }}
               onClick={onOpen}>
               <Icon as={UilInfoCircle} boxSize={4} />
-              {!isMobile && "More info"}
+              {!isMobile && t("More info")}
             </Link>
           )}
         </HStack>
@@ -76,7 +78,7 @@ export const NavigatorsPageContent = () => {
           <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }}>
             <Button onClick={() => router.push("/navigators/become")} variant="primary" size="md">
               <LuPlus />
-              {"Become a Navigator"}
+              {t("Become a Navigator")}
             </Button>
           </HStack>
         )}
@@ -93,10 +95,10 @@ export const NavigatorsPageContent = () => {
                 <VStack py={12} gap={3}>
                   <LuShield size={48} color="var(--chakra-colors-fg-muted)" />
                   <Text textStyle="md" color="fg.muted" textAlign="center">
-                    {"No navigators registered yet."}
+                    {t("No navigators registered yet.")}
                   </Text>
                   <Text textStyle="sm" color="fg.muted" textAlign="center">
-                    {"Be the first to register as a navigator and start earning delegation fees."}
+                    {t("Be the first to register as a navigator and start earning delegation fees.")}
                   </Text>
                 </VStack>
               ) : (

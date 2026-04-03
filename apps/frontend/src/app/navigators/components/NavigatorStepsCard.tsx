@@ -1,7 +1,8 @@
 import { Box, Button, Card, Flex, Heading, HStack, Icon, List, Steps, Text, VStack } from "@chakra-ui/react"
 import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
 import { motion, AnimatePresence, useAnimate } from "framer-motion"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 import { LuSearch, LuShield, LuStar, LuVote } from "react-icons/lu"
 
@@ -15,49 +16,6 @@ type Step = {
   heading: string
   listItems: string[]
 }
-
-const STEPS: Step[] = [
-  {
-    key: "browse",
-    title: "How does delegation work?",
-    icon: LuSearch,
-    heading: "1. Browse Navigators",
-    listItems: [
-      "Navigators are professional voters who stake B3TR to vote on your behalf.",
-      "Review their motivation, qualifications, voting strategy, and track record before delegating.",
-    ],
-  },
-  {
-    key: "delegate",
-    title: "How does delegation work?",
-    icon: LuVote,
-    heading: "2. Delegate your VOT3",
-    listItems: [
-      "Choose how much VOT3 to delegate. Your tokens stay in your wallet — only the delegated portion is locked.",
-      "You can increase or decrease your delegation at any time. Changes take effect next round.",
-    ],
-  },
-  {
-    key: "earn",
-    title: "How does delegation work?",
-    icon: LuStar,
-    heading: "3. Earn rewards passively",
-    listItems: [
-      "The navigator votes on allocation rounds and governance proposals for you.",
-      "Your rewards are proportional to your delegated amount. A 20% navigator fee is deducted automatically.",
-    ],
-  },
-  {
-    key: "manage",
-    title: "How does delegation work?",
-    icon: LuShield,
-    heading: "4. Stay in control",
-    listItems: [
-      "You can undelegate fully or partially at any time.",
-      "If a navigator exits or is deactivated, your VOT3 is automatically unlocked — no action needed.",
-    ],
-  },
-]
 
 const StepIndicator = ({ activeStep, count }: { activeStep: number; count: number }) => (
   <HStack gap={2} w="full" justify="center">
@@ -75,9 +33,58 @@ const StepIndicator = ({ activeStep, count }: { activeStep: number; count: numbe
 )
 
 export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [scope, animate] = useAnimate()
+
+  const steps = useMemo<Step[]>(
+    () => [
+      {
+        key: "browse",
+        title: t("How does delegation work?"),
+        icon: LuSearch,
+        heading: t("1. Browse Navigators"),
+        listItems: [
+          t("Navigators are professional voters who stake B3TR to vote on your behalf."),
+          t("Review their motivation, qualifications, voting strategy, and track record before delegating."),
+        ],
+      },
+      {
+        key: "delegate",
+        title: t("How does delegation work?"),
+        icon: LuVote,
+        heading: t("2. Delegate your VOT3"),
+        listItems: [
+          t(
+            "Choose how much VOT3 to delegate. Your tokens stay in your wallet — only the delegated portion is locked.",
+          ),
+          t("You can increase or decrease your delegation at any time. Changes take effect next round."),
+        ],
+      },
+      {
+        key: "earn",
+        title: t("How does delegation work?"),
+        icon: LuStar,
+        heading: t("3. Earn rewards passively"),
+        listItems: [
+          t("The navigator votes on allocation rounds and governance proposals for you."),
+          t("Your rewards are proportional to your delegated amount. A 20% navigator fee is deducted automatically."),
+        ],
+      },
+      {
+        key: "manage",
+        title: t("How does delegation work?"),
+        icon: LuShield,
+        heading: t("4. Stay in control"),
+        listItems: [
+          t("You can undelegate fully or partially at any time."),
+          t("If a navigator exits or is deactivated, your VOT3 is automatically unlocked — no action needed."),
+        ],
+      },
+    ],
+    [t],
+  )
 
   const goToNext = useCallback(() => {
     if (currentStepIndex === 0 && !isMobile) {
@@ -93,8 +100,8 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
     }
   }, [currentStepIndex, isMobile, animate, scope])
 
-  const currentStep = STEPS[currentStepIndex]
-  const isLastStep = currentStepIndex === STEPS.length - 1
+  const currentStep = steps[currentStepIndex]
+  const isLastStep = currentStepIndex === steps.length - 1
 
   const handleNext = useCallback(() => {
     if (isLastStep) {
@@ -114,10 +121,10 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
         ariaTitle={currentStep.title}
         ariaDescription={currentStep.heading}
         height="100%">
-        <Steps.Root step={currentStepIndex} count={STEPS.length} size="sm">
+        <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
           <HStack w="full" justify="space-between" alignItems="center">
             {currentStepIndex > 0 && <UilArrowLeft onClick={goToPrevious} cursor="pointer" />}
-            <StepIndicator activeStep={currentStepIndex} count={STEPS.length} />
+            <StepIndicator activeStep={currentStepIndex} count={steps.length} />
             <UilTimes onClick={onClose} cursor="pointer" size={24} />
           </HStack>
           <Box pt={5}>
@@ -137,7 +144,7 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
               </List.Root>
               <HStack w="full" justifyContent="flex-start" pt={5}>
                 <Button variant="primary" w="full" onClick={handleNext}>
-                  {isLastStep ? "Got it" : "Next"}
+                  {isLastStep ? t("Got it") : t("Next")}
                 </Button>
               </HStack>
             </VStack>
@@ -155,11 +162,11 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
       h="full"
       borderRadius="xl"
       overflow="hidden">
-      <Steps.Root step={currentStepIndex} count={STEPS.length}>
+      <Steps.Root step={currentStepIndex} count={steps.length}>
         <Flex h="full">
           <Box flex="1">
             <Box pl={8} pt={8} pb={4} w={{ base: "100%", lg: "35%" }}>
-              <StepIndicator activeStep={currentStepIndex} count={STEPS.length} />
+              <StepIndicator activeStep={currentStepIndex} count={steps.length} />
             </Box>
             <VStack gap={10} alignItems="flex-start" w="full" p={10}>
               <VStack alignItems="flex-start" w="full">
@@ -194,14 +201,14 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.4, ease: [0.25, 0.25, 0.25, 0.2] }}>
                       <Button variant="secondary" w="32" onClick={goToPrevious}>
-                        {"Back"}
+                        {t("Back")}
                       </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
                 <Button ref={scope} variant="primary" onClick={handleNext} w="32">
-                  {isLastStep ? "Got it" : "Next"}
+                  {isLastStep ? t("Got it") : t("Next")}
                 </Button>
               </HStack>
             </VStack>

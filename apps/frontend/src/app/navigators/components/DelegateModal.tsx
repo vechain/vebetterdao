@@ -2,6 +2,7 @@ import { Button, Card, Heading, HStack, Input, Skeleton, Text, VStack } from "@c
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { LuCircleAlert, LuInfo, LuShield, LuUsers } from "react-icons/lu"
 
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
@@ -20,6 +21,7 @@ type Props = {
 }
 
 export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
   const { data: vot3Balance, isLoading: balanceLoading } = useGetVot3Balance(account?.address)
@@ -66,7 +68,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
       {step === 1 ? (
         <VStack gap={6} align="stretch" w="full">
           <Heading size="xl" fontWeight="bold">
-            {"Delegate to Navigator"}
+            {t("Delegate to Navigator")}
           </Heading>
 
           {/* Navigator info */}
@@ -81,8 +83,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
                   <HStack gap={2}>
                     <LuUsers size={12} />
                     <Text textStyle="xs" color="fg.muted">
-                      {nav.citizenCount}
-                      {" citizens"}
+                      {t("{{count}} citizens", { count: nav.citizenCount })}
                     </Text>
                   </HStack>
                 </VStack>
@@ -91,7 +92,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
                     {formatter.format(Number(nav.stakeFormatted))}
                   </Text>
                   <Text textStyle="xs" color="fg.muted">
-                    {"B3TR staked"}
+                    {t("B3TR staked")}
                   </Text>
                 </VStack>
               </HStack>
@@ -102,16 +103,15 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
           <VStack gap={2} align="stretch">
             <HStack justify="space-between">
               <Text textStyle="sm" fontWeight="semibold">
-                {"VOT3 amount to delegate"}
+                {t("VOT3 amount to delegate")}
               </Text>
               <Skeleton loading={balanceLoading}>
                 <HStack gap={1}>
                   <Text textStyle="xs" color="fg.muted">
-                    {"Balance: "}
-                    {formatter.format(balanceNum)}
+                    {t("Balance: {{amount}}", { amount: formatter.format(balanceNum) })}
                   </Text>
                   <Button size="xs" variant="ghost" onClick={handleSetMax}>
-                    {"MAX"}
+                    {t("MAX")}
                   </Button>
                 </HStack>
               </Skeleton>
@@ -125,50 +125,44 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
             />
             <HStack justify="space-between">
               <Text textStyle="xs" color="fg.muted">
-                {"Navigator capacity: "}
-                {formatter.format(remainingCapacity)}
-                {" VOT3"}
+                {t("Navigator capacity: {{capacity}} VOT3", {
+                  capacity: formatter.format(remainingCapacity),
+                })}
               </Text>
             </HStack>
             {amountNum > balanceNum && (
               <HStack gap={1} color="red.500">
                 <LuCircleAlert size={14} />
-                <Text textStyle="xs">{"Insufficient VOT3 balance"}</Text>
+                <Text textStyle="xs">{t("Insufficient VOT3 balance")}</Text>
               </HStack>
             )}
             {exceedsCapacity && amountNum <= balanceNum && (
               <HStack gap={1} color="red.500">
                 <LuCircleAlert size={14} />
                 <Text textStyle="xs">
-                  {"Exceeds navigator capacity. Max: "}
-                  {formatter.format(remainingCapacity)}
-                  {" VOT3"}
+                  {t("Exceeds navigator capacity. Max: {{max}} VOT3", {
+                    max: formatter.format(remainingCapacity),
+                  })}
                 </Text>
               </HStack>
             )}
           </VStack>
 
           <Button variant="primary" w="full" onClick={() => setStep(2)} disabled={!isAmountValid} size="lg">
-            {"Continue"}
+            {t("Continue")}
           </Button>
         </VStack>
       ) : (
         <VStack gap={5} align="stretch" w="full">
           <Heading size="xl" fontWeight="bold">
-            {"Confirm Delegation"}
+            {t("Confirm Delegation")}
           </Heading>
 
           <Text textStyle="sm" color="fg.muted">
-            {"You are about to delegate "}
-            <Text as="span" fontWeight="bold" color="fg.default">
-              {formatter.format(amountNum)}
-              {" VOT3"}
-            </Text>
-            {" to "}
-            <Text as="span" fontWeight="bold" color="fg.default">
-              {displayName}
-            </Text>
-            {". Please review what this means:"}
+            {t("You are about to delegate {{amount}} VOT3 to {{name}}. Please review what this means:", {
+              amount: formatter.format(amountNum),
+              name: displayName,
+            })}
           </Text>
 
           {/* Consequences */}
@@ -179,12 +173,12 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
                   <LuShield size={18} style={{ marginTop: 2, flexShrink: 0 }} />
                   <VStack gap={1} align="start">
                     <Text textStyle="sm" fontWeight="semibold">
-                      {"Navigator votes on your behalf"}
+                      {t("Navigator votes on your behalf")}
                     </Text>
                     <Text textStyle="xs" color="fg.muted">
-                      {
-                        "The navigator will choose which apps to vote for in allocation rounds and how to vote on governance proposals. You cannot vote manually while delegated."
-                      }
+                      {t(
+                        "The navigator will choose which apps to vote for in allocation rounds and how to vote on governance proposals. You cannot vote manually while delegated.",
+                      )}
                     </Text>
                   </VStack>
                 </HStack>
@@ -197,12 +191,12 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
                   <LuInfo size={18} style={{ marginTop: 2, flexShrink: 0 }} />
                   <VStack gap={1} align="start">
                     <Text textStyle="sm" fontWeight="semibold">
-                      {"Delegated VOT3 is locked"}
+                      {t("Delegated VOT3 is locked")}
                     </Text>
                     <Text textStyle="xs" color="fg.muted">
-                      {
-                        "The delegated portion of your VOT3 cannot be transferred or converted back to B3TR. Your remaining VOT3 stays free to move. Your VOT3 never leaves your wallet."
-                      }
+                      {t(
+                        "The delegated portion of your VOT3 cannot be transferred or converted back to B3TR. Your remaining VOT3 stays free to move. Your VOT3 never leaves your wallet.",
+                      )}
                     </Text>
                   </VStack>
                 </HStack>
@@ -215,12 +209,12 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
                   <LuInfo size={18} style={{ marginTop: 2, flexShrink: 0 }} />
                   <VStack gap={1} align="start">
                     <Text textStyle="sm" fontWeight="semibold">
-                      {"Only delegated amount earns rewards"}
+                      {t("Only delegated amount earns rewards")}
                     </Text>
                     <Text textStyle="xs" color="fg.muted">
-                      {
-                        "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards."
-                      }
+                      {t(
+                        "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards.",
+                      )}
                     </Text>
                   </VStack>
                 </HStack>
@@ -233,12 +227,12 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
                   <LuInfo size={18} style={{ marginTop: 2, flexShrink: 0 }} />
                   <VStack gap={1} align="start">
                     <Text textStyle="sm" fontWeight="semibold">
-                      {"20% navigator fee on rewards"}
+                      {t("20% navigator fee on rewards")}
                     </Text>
                     <Text textStyle="xs" color="fg.muted">
-                      {
-                        "The navigator receives 20% of your earned rewards as a fee. This is deducted automatically when rewards are claimed."
-                      }
+                      {t(
+                        "The navigator receives 20% of your earned rewards as a fee. This is deducted automatically when rewards are claimed.",
+                      )}
                     </Text>
                   </VStack>
                 </HStack>
@@ -251,12 +245,12 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
                   <LuInfo size={18} style={{ marginTop: 2, flexShrink: 0 }} />
                   <VStack gap={1} align="start">
                     <Text textStyle="sm" fontWeight="semibold">
-                      {"You can undelegate anytime"}
+                      {t("You can undelegate anytime")}
                     </Text>
                     <Text textStyle="xs" color="fg.muted">
-                      {
-                        "You can reduce or fully remove your delegation at any time. Changes take effect at the start of the next round. If the navigator exits, your VOT3 is automatically unlocked."
-                      }
+                      {t(
+                        "You can reduce or fully remove your delegation at any time. Changes take effect at the start of the next round. If the navigator exits, your VOT3 is automatically unlocked.",
+                      )}
                     </Text>
                   </VStack>
                 </HStack>
@@ -266,12 +260,10 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
 
           <HStack gap={4} w="full">
             <Button variant="outline" flex={1} onClick={() => setStep(1)} size="lg">
-              {"Back"}
+              {t("Back")}
             </Button>
             <Button variant="primary" flex={1} onClick={handleDelegate} size="lg">
-              {"Delegate "}
-              {formatter.format(amountNum)}
-              {" VOT3"}
+              {t("Delegate {{amount}} VOT3", { amount: formatter.format(amountNum) })}
             </Button>
           </HStack>
         </VStack>

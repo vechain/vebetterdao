@@ -1,7 +1,7 @@
 import { Card, Icon, VStack } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { t } from "i18next"
 import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { useUserProposalsVoteEvents } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useUserVotedProposals } from "@/api/contracts/governance/hooks/useUserVotedProposals"
@@ -28,6 +28,7 @@ type Props = {
 }
 
 export const NavigatorGovernanceTab = ({ address }: Props) => {
+  const { t } = useTranslation()
   const { data: createdProposals } = useUserCreatedProposal(address)
   const { data: votedProposals } = useUserProposalsVoteEvents()
   const votedProposalsIds = useMemo(() => votedProposals?.map(p => p.proposalId.toString()), [votedProposals])

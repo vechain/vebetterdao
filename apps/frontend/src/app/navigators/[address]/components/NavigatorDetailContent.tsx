@@ -15,6 +15,7 @@ import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/Form
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { LuArrowLeft, LuExternalLink, LuShield, LuUsers } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
@@ -32,6 +33,7 @@ import { NavigatorGovernanceTab } from "./NavigatorGovernanceTab"
 const formatter = getCompactFormatter(2)
 
 export const NavigatorDetailContent = () => {
+  const { t } = useTranslation()
   const params = useParams<{ address: string }>()
   const router = useRouter()
   const { account } = useWallet()
@@ -61,11 +63,11 @@ export const NavigatorDetailContent = () => {
       <VStack w="full" py={20} gap={4}>
         <LuShield size={48} />
         <Text textStyle="md" color="fg.muted">
-          {"Navigator not found"}
+          {t("Navigator not found")}
         </Text>
         <Button variant="ghost" onClick={() => router.push("/navigators")}>
           <LuArrowLeft />
-          {"Back to Navigators"}
+          {t("Back to Navigators")}
         </Button>
       </VStack>
     )
@@ -79,7 +81,7 @@ export const NavigatorDetailContent = () => {
     <VStack w="full" gap={6} align="stretch" px={{ base: 4, md: 0 }}>
       <Button variant="ghost" size="sm" w="fit-content" onClick={() => router.push("/navigators")}>
         <LuArrowLeft />
-        {"Back to Navigators"}
+        {t("Back to Navigators")}
       </Button>
 
       {/* Header */}
@@ -98,12 +100,12 @@ export const NavigatorDetailContent = () => {
               <HStack flex={1} justify="end">
                 {account?.address && isDelegatedHere && (
                   <Button variant="secondary" size="sm" onClick={() => setIsManageOpen(true)}>
-                    {"Manage Delegation"}
+                    {t("Manage Delegation")}
                   </Button>
                 )}
                 {account?.address && isActive && !isDelegatedHere && (
                   <Button variant="primary" size="sm" onClick={() => setIsDelegateOpen(true)}>
-                    {"Delegate"}
+                    {t("Delegate")}
                   </Button>
                 )}
               </HStack>
@@ -113,11 +115,8 @@ export const NavigatorDetailContent = () => {
             <HStack gap={{ base: 3, md: 6 }} flexWrap="wrap">
               <HStack gap={1}>
                 <LuUsers size={14} />
-                <Text textStyle="sm" fontWeight="semibold">
-                  {nav.citizenCount}
-                </Text>
                 <Text textStyle="sm" color="fg.muted">
-                  {"citizens"}
+                  {t("{{count}} citizens", { count: nav.citizenCount })}
                 </Text>
               </HStack>
               <Text textStyle="sm" color="fg.muted">
@@ -128,7 +127,7 @@ export const NavigatorDetailContent = () => {
                   {formatter.format(Number(nav.stakeFormatted))}
                 </Text>
                 <Text textStyle="sm" color="fg.muted">
-                  {"B3TR staked"}
+                  {t("B3TR staked")}
                 </Text>
               </HStack>
               <Text textStyle="sm" color="fg.muted">
@@ -139,22 +138,23 @@ export const NavigatorDetailContent = () => {
                   {formatter.format(Number(nav.totalDelegatedFormatted))}
                 </Text>
                 <Text textStyle="sm" color="fg.muted">
-                  {"VOT3 delegated"}
+                  {t("VOT3 delegated")}
                 </Text>
               </HStack>
               <Text textStyle="sm" color="fg.muted">
                 {"·"}
               </Text>
               <Text textStyle="sm" color="fg.muted">
-                {"Since "}
-                {new Date(nav.registeredAt * 1000).toLocaleDateString()}
+                {t("Since {{date}}", {
+                  date: new Date(nav.registeredAt * 1000).toLocaleDateString(),
+                })}
               </Text>
             </HStack>
 
             {/* Row 3: Description from metadata */}
             <Skeleton loading={metadataLoading}>
               <Text textStyle="sm" color="fg.muted">
-                {metadata?.motivation || "No description provided"}
+                {metadata?.motivation || t("No description provided")}
               </Text>
             </Skeleton>
 
@@ -197,13 +197,13 @@ export const NavigatorDetailContent = () => {
         lazyMount>
         <Tabs.List>
           <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="about">
-            {"About"}
+            {t("About")}
           </Tabs.Trigger>
           <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="citizens">
-            {"Citizens"}
+            {t("Citizens")}
           </Tabs.Trigger>
           <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="governance">
-            {"Governance Activity"}
+            {t("Governance Activity")}
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -213,22 +213,22 @@ export const NavigatorDetailContent = () => {
             <Card.Root variant="primary" w="full">
               <Card.Body>
                 <VStack gap={4} align="stretch">
-                  <Card.Title textStyle="xl">{"Motivation"}</Card.Title>
+                  <Card.Title textStyle="xl">{t("Motivation")}</Card.Title>
                   <Skeleton loading={metadataLoading}>
-                    <Text textStyle="sm">{metadata?.motivation || "No motivation provided"}</Text>
+                    <Text textStyle="sm">{metadata?.motivation || t("No motivation provided")}</Text>
                   </Skeleton>
 
                   <Separator />
 
-                  <Card.Title textStyle="xl">{"Qualifications"}</Card.Title>
+                  <Card.Title textStyle="xl">{t("Qualifications")}</Card.Title>
                   <Skeleton loading={metadataLoading}>
-                    <Text textStyle="sm">{metadata?.qualifications || "No qualifications provided"}</Text>
+                    <Text textStyle="sm">{metadata?.qualifications || t("No qualifications provided")}</Text>
                   </Skeleton>
 
                   {metadata?.votingStrategy && (
                     <>
                       <Separator />
-                      <Card.Title textStyle="xl">{"Voting Strategy"}</Card.Title>
+                      <Card.Title textStyle="xl">{t("Voting Strategy")}</Card.Title>
                       <Text textStyle="sm">{metadata.votingStrategy}</Text>
                     </>
                   )}
@@ -241,32 +241,36 @@ export const NavigatorDetailContent = () => {
               <Card.Root variant="primary" w="full">
                 <Card.Body>
                   <VStack gap={3} align="stretch">
-                    <Card.Title textStyle="xl">{"Disclosures"}</Card.Title>
+                    <Card.Title textStyle="xl">{t("Disclosures")}</Card.Title>
 
                     <HStack justify="space-between">
                       <Text textStyle="sm" color="fg.muted">
-                        {"App affiliated"}
+                        {t("App affiliated")}
                       </Text>
                       <Text textStyle="sm" fontWeight="semibold">
-                        {metadata.disclosures.isAppAffiliated ? metadata.disclosures.affiliatedAppNames || "Yes" : "No"}
+                        {metadata.disclosures.isAppAffiliated
+                          ? metadata.disclosures.affiliatedAppNames || t("Yes")
+                          : t("No")}
                       </Text>
                     </HStack>
 
                     <HStack justify="space-between">
                       <Text textStyle="sm" color="fg.muted">
-                        {"Foundation member"}
+                        {t("Foundation member")}
                       </Text>
                       <Text textStyle="sm" fontWeight="semibold">
-                        {metadata.disclosures.isFoundationMember ? metadata.disclosures.foundationRole || "Yes" : "No"}
+                        {metadata.disclosures.isFoundationMember
+                          ? metadata.disclosures.foundationRole || t("Yes")
+                          : t("No")}
                       </Text>
                     </HStack>
 
                     <HStack justify="space-between">
                       <Text textStyle="sm" color="fg.muted">
-                        {"Conflicts of interest"}
+                        {t("Conflicts of interest")}
                       </Text>
                       <Text textStyle="sm" fontWeight="semibold">
-                        {metadata.disclosures.hasConflictsOfInterest ? "Yes" : "No"}
+                        {metadata.disclosures.hasConflictsOfInterest ? t("Yes") : t("No")}
                       </Text>
                     </HStack>
 
@@ -274,14 +278,6 @@ export const NavigatorDetailContent = () => {
                       <Text textStyle="xs" color="fg.muted">
                         {metadata.disclosures.conflictsDescription}
                       </Text>
-                    )}
-
-                    {metadata.disclosures.previousDaoExperience && (
-                      <>
-                        <Separator />
-                        <Card.Title textStyle="xl">{"Previous DAO Experience"}</Card.Title>
-                        <Text textStyle="sm">{metadata.disclosures.previousDaoExperience}</Text>
-                      </>
                     )}
                   </VStack>
                 </Card.Body>

@@ -14,7 +14,6 @@ export type NavigatorFormData = {
   foundationRole: string
   hasConflictsOfInterest: boolean
   conflictsDescription: string
-  previousDaoExperience: string
 
   // Step 3: Socials
   twitterHandle: string
@@ -44,7 +43,6 @@ const initialData: NavigatorFormData = {
   foundationRole: "",
   hasConflictsOfInterest: false,
   conflictsDescription: "",
-  previousDaoExperience: "",
   twitterHandle: "",
   discordHandle: "",
   websiteUrl: "",

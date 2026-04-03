@@ -1,4 +1,5 @@
 import { Card, HStack, Text } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 import { LuShield, LuUsers } from "react-icons/lu"
 
 type Props = {
@@ -7,6 +8,8 @@ type Props = {
 }
 
 export const NavigatorStatusBanner = ({ isNavigator, isDelegated }: Props) => {
+  const { t } = useTranslation()
+
   if (isNavigator) {
     return (
       <Card.Root variant="outline" borderColor="green.500" bg="green.50" _dark={{ bg: "green.900/20" }}>
@@ -14,7 +17,7 @@ export const NavigatorStatusBanner = ({ isNavigator, isDelegated }: Props) => {
           <HStack gap={3}>
             <LuShield size={20} color="var(--chakra-colors-green-500)" />
             <Text textStyle="sm" fontWeight="semibold">
-              {"You are a registered Navigator"}
+              {t("You are a registered Navigator")}
             </Text>
           </HStack>
         </Card.Body>
@@ -29,7 +32,7 @@ export const NavigatorStatusBanner = ({ isNavigator, isDelegated }: Props) => {
           <HStack gap={3}>
             <LuUsers size={20} color="var(--chakra-colors-blue-500)" />
             <Text textStyle="sm" fontWeight="semibold">
-              {"You are delegated to a Navigator"}
+              {t("You are delegated to a Navigator")}
             </Text>
           </HStack>
         </Card.Body>

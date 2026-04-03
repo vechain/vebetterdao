@@ -1,46 +1,47 @@
 import { Card, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 
 export const NavigatorDetailsCard = () => {
+  const { t } = useTranslation()
   const { data: minStake } = useGetMinStake()
 
   return (
     <Card.Root variant="outline" borderRadius="xl">
       <Card.Body>
         <VStack gap={3} align="start">
-          <Heading size="sm">{"Details"}</Heading>
+          <Heading size="sm">{t("Details")}</Heading>
           <HStack justify="space-between" w="full">
             <Text textStyle="sm" color="fg.muted">
-              {"Min Stake"}
+              {t("Min Stake")}
             </Text>
             <Text textStyle="sm" fontWeight="semibold">
-              {minStake ? Number(minStake.scaled).toLocaleString() : "-"}
-              {" B3TR"}
+              {minStake ? Number(minStake.scaled).toLocaleString() : "-"} {t("B3TR")}
             </Text>
           </HStack>
           <HStack justify="space-between" w="full">
             <Text textStyle="sm" color="fg.muted">
-              {"Navigator Fee"}
+              {t("Navigator Fee")}
             </Text>
             <Text textStyle="sm" fontWeight="semibold">
-              {"20%"}
+              {t("20%")}
             </Text>
           </HStack>
           <HStack justify="space-between" w="full">
             <Text textStyle="sm" color="fg.muted">
-              {"Fee Lock Period"}
+              {t("Fee Lock Period")}
             </Text>
             <Text textStyle="sm" fontWeight="semibold">
-              {"4 rounds"}
+              {t("4 rounds")}
             </Text>
           </HStack>
           <HStack justify="space-between" w="full">
             <Text textStyle="sm" color="fg.muted">
-              {"Capacity Ratio"}
+              {t("Capacity Ratio")}
             </Text>
             <Text textStyle="sm" fontWeight="semibold">
-              {"10:1 (stake:delegation)"}
+              {t("10:1 (stake:delegation)")}
             </Text>
           </HStack>
         </VStack>

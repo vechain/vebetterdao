@@ -2,6 +2,7 @@ import { Button, Card, Heading, HStack, Input, Skeleton, Text, VStack } from "@c
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { LuCircleAlert, LuInfo, LuUsers } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
@@ -22,6 +23,7 @@ type Props = {
 }
 
 export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
   const { data: vot3Balance, isLoading: balanceLoading } = useGetVot3Balance(account?.address)
@@ -85,17 +87,17 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
   }, [maxNewAmount])
 
   const getButtonLabel = () => {
-    if (isFullRemoval) return "Remove all delegation"
-    if (isDecreasing) return `Reduce by ${formatter.format(Math.abs(delta))} VOT3`
-    if (isIncreasing) return `Add ${formatter.format(delta)} VOT3`
-    return "No changes"
+    if (isFullRemoval) return t("Remove all delegation")
+    if (isDecreasing) return t("Reduce by {{amount}} VOT3", { amount: formatter.format(Math.abs(delta)) })
+    if (isIncreasing) return t("Add {{amount}} VOT3", { amount: formatter.format(delta) })
+    return t("No changes")
   }
 
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
       <VStack gap={6} align="stretch" w="full">
         <Heading size="xl" fontWeight="bold">
-          {"Manage Delegation"}
+          {t("Manage Delegation")}
         </Heading>
 
         {/* Navigator info */}
@@ -110,8 +112,7 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
                 <HStack gap={2}>
                   <LuUsers size={12} />
                   <Text textStyle="xs" color="fg.muted">
-                    {nav.citizenCount}
-                    {" citizens"}
+                    {t("{{count}} citizens", { count: nav.citizenCount })}
                   </Text>
                 </HStack>
               </VStack>
@@ -120,7 +121,7 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
                   {formatter.format(currentDelegatedNum)}
                 </Text>
                 <Text textStyle="xs" color="fg.muted">
-                  {"VOT3 delegated"}
+                  {t("VOT3 delegated")}
                 </Text>
               </VStack>
             </HStack>
@@ -131,16 +132,15 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
         <VStack gap={2} align="stretch">
           <HStack justify="space-between">
             <Text textStyle="sm" fontWeight="semibold">
-              {"New delegation amount"}
+              {t("New delegation amount")}
             </Text>
             <Skeleton loading={balanceLoading}>
               <HStack gap={1}>
                 <Text textStyle="xs" color="fg.muted">
-                  {"Balance: "}
-                  {formatter.format(balanceNum)}
+                  {t("Balance: {{amount}}", { amount: formatter.format(balanceNum) })}
                 </Text>
                 <Button size="xs" variant="ghost" onClick={handleSetMax}>
-                  {"MAX"}
+                  {t("MAX")}
                 </Button>
               </HStack>
             </Skeleton>
@@ -157,34 +157,32 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
           {hasChanged && !exceedsCapacity && !exceedsBalance && (
             <Text textStyle="xs" color={isIncreasing ? "green.500" : "red.500"}>
               {isFullRemoval
-                ? "Full removal — your VOT3 will be unlocked"
+                ? t("Full removal — your VOT3 will be unlocked")
                 : isDecreasing
-                  ? `Reducing by ${formatter.format(Math.abs(delta))} VOT3`
-                  : `Adding ${formatter.format(delta)} VOT3`}
+                  ? t("Reducing by {{amount}} VOT3", { amount: formatter.format(Math.abs(delta)) })
+                  : t("Adding {{amount}} VOT3", { amount: formatter.format(delta) })}
             </Text>
           )}
 
           <HStack justify="space-between">
             <Text textStyle="xs" color="fg.muted">
-              {"Navigator capacity: "}
-              {formatter.format(maxCapacity)}
-              {" VOT3"}
+              {t("Navigator capacity: {{capacity}} VOT3", { capacity: formatter.format(maxCapacity) })}
             </Text>
           </HStack>
 
           {exceedsBalance && (
             <HStack gap={1} color="red.500">
               <LuCircleAlert size={14} />
-              <Text textStyle="xs">{"Insufficient VOT3 balance"}</Text>
+              <Text textStyle="xs">{t("Insufficient VOT3 balance")}</Text>
             </HStack>
           )}
           {exceedsCapacity && !exceedsBalance && (
             <HStack gap={1} color="red.500">
               <LuCircleAlert size={14} />
               <Text textStyle="xs">
-                {"Exceeds navigator capacity. Max: "}
-                {formatter.format(maxCapacity)}
-                {" VOT3"}
+                {t("Exceeds navigator capacity. Max: {{max}} VOT3", {
+                  max: formatter.format(maxCapacity),
+                })}
               </Text>
             </HStack>
           )}
@@ -196,9 +194,9 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
             <HStack gap={2} align="start">
               <LuInfo size={16} style={{ marginTop: 2, flexShrink: 0 }} />
               <Text textStyle="xs" color="fg.muted">
-                {
-                  "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards."
-                }
+                {t(
+                  "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
+                )}
               </Text>
             </HStack>
           </Card.Body>
