@@ -1,4 +1,4 @@
-import { Button, Card, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Grid, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
@@ -9,6 +9,9 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useRegisterNavigator } from "@/hooks/navigator/useRegisterNavigator"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
+
+import { NavigatorDetailsCard } from "../../components/NavigatorDetailsCard"
+import { NavigatorInfoCard } from "../../components/NavigatorInfoCard"
 
 import { DisclosuresStep } from "./steps/DisclosuresStep"
 import { MotivationStep } from "./steps/MotivationStep"
@@ -118,7 +121,7 @@ export const BecomeNavigatorForm = () => {
   const isSubmitting = isUploading || status === "pending"
 
   return (
-    <VStack gap={6} align="stretch" w="full" maxW="700px" mx="auto" px={{ base: 4, md: 0 }}>
+    <VStack gap={6} align="stretch" w="full" px={{ base: 4, md: 0 }}>
       <VStack gap={1} align="start">
         <HStack gap={2}>
           <LuShield size={24} />
@@ -129,50 +132,59 @@ export const BecomeNavigatorForm = () => {
         </Text>
       </VStack>
 
-      <Steps.Root step={currentStep} count={STEPS.length} size="sm" colorPalette="green" variant="subtle">
-        <Steps.List>
-          {STEPS.map((step, index) => (
-            <Steps.Item key={step.title} index={index}>
-              <Steps.Indicator />
-              <Steps.Title>{step.title}</Steps.Title>
-              <Steps.Separator />
-            </Steps.Item>
-          ))}
-        </Steps.List>
-      </Steps.Root>
+      <Grid templateColumns={{ base: "1fr", lg: "1fr 300px" }} gap={6} alignItems="start">
+        <VStack gap={6} align="stretch">
+          <Steps.Root step={currentStep} count={STEPS.length} size="sm" colorPalette="green" variant="subtle">
+            <Steps.List>
+              {STEPS.map((step, index) => (
+                <Steps.Item key={step.title} index={index}>
+                  <Steps.Indicator />
+                  <Steps.Title>{step.title}</Steps.Title>
+                  <Steps.Separator />
+                </Steps.Item>
+              ))}
+            </Steps.List>
+          </Steps.Root>
 
-      <Card.Root variant="outline" borderRadius="xl">
-        <Card.Body>
-          {currentStep === 0 && <MotivationStep />}
-          {currentStep === 1 && <DisclosuresStep />}
-          {currentStep === 2 && <SocialsStep />}
-          {currentStep === 3 && <StakeStep />}
-        </Card.Body>
-      </Card.Root>
+          <Card.Root variant="outline" borderRadius="xl">
+            <Card.Body>
+              {currentStep === 0 && <MotivationStep />}
+              {currentStep === 1 && <DisclosuresStep />}
+              {currentStep === 2 && <SocialsStep />}
+              {currentStep === 3 && <StakeStep />}
+            </Card.Body>
+          </Card.Root>
 
-      <HStack justify="space-between">
-        <Button variant="ghost" onClick={currentStep === 0 ? () => router.push("/navigators") : goBack} size="sm">
-          <LuArrowLeft />
-          {currentStep === 0 ? "Cancel" : "Back"}
-        </Button>
+          <HStack justify="space-between">
+            <Button variant="ghost" onClick={currentStep === 0 ? () => router.push("/navigators") : goBack} size="sm">
+              <LuArrowLeft />
+              {currentStep === 0 ? "Cancel" : "Back"}
+            </Button>
 
-        {currentStep < STEPS.length - 1 ? (
-          <Button colorPalette="green" onClick={goNext} disabled={!canProceed()} size="sm">
-            {"Next"}
-            <LuArrowRight />
-          </Button>
-        ) : (
-          <Button
-            colorPalette="green"
-            onClick={onSubmit}
-            disabled={!canProceed() || isSubmitting}
-            loading={isSubmitting}
-            size="sm">
-            <LuShield />
-            {"Register as Navigator"}
-          </Button>
-        )}
-      </HStack>
+            {currentStep < STEPS.length - 1 ? (
+              <Button colorPalette="green" onClick={goNext} disabled={!canProceed()} size="sm">
+                {"Next"}
+                <LuArrowRight />
+              </Button>
+            ) : (
+              <Button
+                colorPalette="green"
+                onClick={onSubmit}
+                disabled={!canProceed() || isSubmitting}
+                loading={isSubmitting}
+                size="sm">
+                <LuShield />
+                {"Register as Navigator"}
+              </Button>
+            )}
+          </HStack>
+        </VStack>
+
+        <VStack gap={4} align="stretch" display={{ base: "none", lg: "flex" }}>
+          <NavigatorInfoCard />
+          <NavigatorDetailsCard />
+        </VStack>
+      </Grid>
     </VStack>
   )
 }

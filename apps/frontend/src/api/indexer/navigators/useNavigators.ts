@@ -73,3 +73,31 @@ export const useNavigatorByAddress = (address: string) =>
 
 // Keep backward compat export name
 export const useNavigatorRegistrations = () => useNavigators({ status: ["ACTIVE", "EXITING"] })
+
+export type NavigatorOverview = {
+  activeNavigators: number
+  totalStaked: string
+  totalCitizens: number
+  totalDelegated: string
+}
+
+export type NavigatorOverviewFormatted = NavigatorOverview & {
+  totalStakedFormatted: string
+  totalDelegatedFormatted: string
+}
+
+export const useNavigatorOverview = () =>
+  useQuery({
+    queryKey: ["indexer", "navigators", "overview"],
+    queryFn: async (): Promise<NavigatorOverview> => {
+      const res = await fetch(`${baseUrl}/api/v1/b3tr/navigators/overview`)
+      if (!res.ok) throw new Error(`Indexer error: ${res.status}`)
+      return res.json()
+    },
+    staleTime: 30_000,
+    select: (data): NavigatorOverviewFormatted => ({
+      ...data,
+      totalStakedFormatted: formatEther(data.totalStaked),
+      totalDelegatedFormatted: formatEther(data.totalDelegated),
+    }),
+  })
