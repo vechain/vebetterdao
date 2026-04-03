@@ -38,10 +38,9 @@ const ParticipantStatus = {
 const ChallengeStatus = {
   Pending: 0,
   Active: 1,
-  Finalizing: 2,
-  Finalized: 3,
-  Cancelled: 4,
-  Invalid: 5,
+  Finalized: 2,
+  Cancelled: 3,
+  Invalid: 4,
 } as const
 
 const SettlementMode = {
@@ -269,7 +268,7 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE)
   })
 
-  it("finalizes in batches and splits the stake pot between tied winners", async function () {
+  it("finalizes and splits the stake pot between tied winners", async function () {
     const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
@@ -285,9 +284,7 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await roundGovernor.setCurrentRoundId(4)
 
-    await challenges.finalizeChallengeBatch(1, 2)
-    expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Finalizing)
-    await challenges.finalizeChallengeBatch(1, 2)
+    await challenges.finalizeChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.status).to.equal(ChallengeStatus.Finalized)
@@ -325,7 +322,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await passport.setUserRoundActionCount(bob.address, 3, 1)
 
     await roundGovernor.setCurrentRoundId(4)
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.settlementMode).to.equal(SettlementMode.CreatorRefund)
@@ -356,7 +353,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await passport.setUserRoundActionCountApp(bob.address, 3, APP_1, 4)
 
     await roundGovernor.setCurrentRoundId(4)
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.bestScore).to.equal(8n)
@@ -395,7 +392,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await passport.setUserRoundActionCount(bob.address, 3, 3) // total: 5
 
     await roundGovernor.setCurrentRoundId(4)
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.settlementMode).to.equal(SettlementMode.QualifiedSplit)
@@ -431,7 +428,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await passport.setUserRoundActionCount(bob.address, 2, 3) // does NOT qualify
 
     await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.settlementMode).to.equal(SettlementMode.QualifiedSplit)
@@ -1056,18 +1053,7 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Invalid)
   })
 
-  // ──── finalizeChallengeBatch edge cases ────
-
-  it("rejects finalize with batchSize 0", async function () {
-    const { alice, roundGovernor, challenges } = await deployFixture()
-    await roundGovernor.setCurrentRoundId(1)
-
-    await createChallenge(challenges)
-    await challenges.connect(alice).joinChallenge(1)
-    await roundGovernor.setCurrentRoundId(4)
-
-    await expect(challenges.finalizeChallengeBatch(1, 0)).to.be.revertedWithCustomError(challenges, "InvalidBatchSize")
-  })
+  // ──── finalizeChallenge edge cases ────
 
   it("rejects finalize before challenge ends", async function () {
     const { alice, roundGovernor, challenges } = await deployFixture()
@@ -1076,10 +1062,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges)
     await challenges.connect(alice).joinChallenge(1)
 
-    await expect(challenges.finalizeChallengeBatch(1, 10)).to.be.revertedWithCustomError(
-      challenges,
-      "ChallengeNotEnded",
-    )
+    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeNotEnded")
   })
 
   it("rejects finalize on cancelled challenge", async function () {
@@ -1091,10 +1074,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await challenges.cancelChallenge(1)
     await roundGovernor.setCurrentRoundId(4)
 
-    await expect(challenges.finalizeChallengeBatch(1, 10)).to.be.revertedWithCustomError(
-      challenges,
-      "ChallengeInvalidStatus",
-    )
+    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeInvalidStatus")
   })
 
   it("rejects finalize on already-finalized challenge", async function () {
@@ -1105,12 +1085,9 @@ describe("B3TRChallenges - @shard9a", function () {
     await challenges.connect(alice).joinChallenge(1)
     await roundGovernor.setCurrentRoundId(4)
 
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
-    await expect(challenges.finalizeChallengeBatch(1, 10)).to.be.revertedWithCustomError(
-      challenges,
-      "ChallengeAlreadyFinalized",
-    )
+    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeAlreadyFinalized")
   })
 
   it("rejects finalize on invalid challenge", async function () {
@@ -1120,10 +1097,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, { endRound: 2 })
     await roundGovernor.setCurrentRoundId(3)
 
-    await expect(challenges.finalizeChallengeBatch(1, 10)).to.be.revertedWithCustomError(
-      challenges,
-      "ChallengeInvalidStatus",
-    )
+    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeInvalidStatus")
   })
 
   // ──── claimChallengePayout edge cases ────
@@ -1147,7 +1121,7 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 10)
     await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
     await challenges.connect(alice).claimChallengePayout(1)
 
@@ -1171,7 +1145,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 5)
 
     await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
     const totalPrize = stakeAmount * 3n
     const baseShare = totalPrize / 3n
@@ -1276,7 +1250,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 5)
 
     await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallengeBatch(1, 10)
+    await challenges.finalizeChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.settlementMode).to.equal(SettlementMode.CreatorRefund)
@@ -1332,10 +1306,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await expect(challenges.declineChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.cancelChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.syncChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
-    await expect(challenges.finalizeChallengeBatch(99, 1)).to.be.revertedWithCustomError(
-      challenges,
-      "ChallengeDoesNotExist",
-    )
+    await expect(challenges.finalizeChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.claimChallengePayout(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.claimChallengeRefund(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.addInvites(99, [])).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")

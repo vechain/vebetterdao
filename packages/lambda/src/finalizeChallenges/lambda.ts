@@ -12,7 +12,7 @@ import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 
 import { aggregateAllEvents, buildGasEstimate, buildTxBody, getCurrentRoundId, getSecret, withRetry } from "../helpers"
-import { parseBatchSize, parseDryRunFlag } from "../helpers/api"
+import { parseDryRunFlag } from "../helpers/api"
 import { buildResponse } from "../helpers/api/response"
 import { CustomApiError, StandardApiError, SuccessResponseType } from "../helpers/api.types"
 import { logger } from "../helpers/logger"
@@ -34,7 +34,7 @@ interface SlackConfig {
   messagePrefix: string
 }
 
-interface FinalizeBatchResult {
+interface FinalizeResult {
   success: boolean
   txId?: string
   reason?: string
@@ -42,16 +42,13 @@ interface FinalizeBatchResult {
 }
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-const DEFAULT_BATCH_SIZE = 25
-const MAX_BATCHES_PER_CHALLENGE = 200
 
 const ChallengeStatus = {
   Pending: 0,
   Active: 1,
-  Finalizing: 2,
-  Finalized: 3,
-  Cancelled: 4,
-  Invalid: 5,
+  Finalized: 2,
+  Cancelled: 3,
+  Invalid: 4,
 } as const
 
 const challengesContract = ABIContract.ofAbi(B3TRChallenges__factory.abi)
@@ -188,19 +185,18 @@ const getChallengeStatus = async (
   return Number(res.result?.array?.[0] ?? -1)
 }
 
-const finalizeSingleBatch = async (
+const finalizeSingleChallenge = async (
   thor: ThorClient,
   challengesContractAddress: string,
   challengeId: number,
-  batchSize: number,
   walletAddress: string,
   privateKey: string,
   dryRun: boolean,
-): Promise<FinalizeBatchResult> => {
+): Promise<FinalizeResult> => {
   const clause = Clause.callFunction(
     Address.of(challengesContractAddress),
-    challengesContract.getFunction("finalizeChallengeBatch"),
-    [challengeId, batchSize],
+    challengesContract.getFunction("finalizeChallenge"),
+    [challengeId],
   )
 
   const gasResult = await buildGasEstimate(thor, [clause], walletAddress)
@@ -247,11 +243,9 @@ const finalizeSingleBatch = async (
 
 export const handler = async (event: unknown, _context: Context): Promise<APIGatewayProxyResult> => {
   const dryRun = parseDryRunFlag(event)
-  const batchSize = parseBatchSize(event, DEFAULT_BATCH_SIZE)
 
   logger.info("Starting finalizeChallenges lambda", {
     dryRun,
-    batchSize,
     challengesContractAddress: CONFIG.challengesContractAddress,
     environment: process.env.LAMBDA_ENV ?? AppEnv.TESTNET_STAGING,
   })
@@ -293,21 +287,12 @@ export const handler = async (event: unknown, _context: Context): Promise<APIGat
     }
 
     const { privateKey, walletAddress } = await getCallerWalletInfo()
-    const queue = [...challengeIds]
     const finalizedChallengeIds = new Set<number>()
     const skippedChallengeIds = new Set<number>()
     const transactionIds: string[] = []
     const failedChallenges: Array<{ challengeId: number; reason: string; vmError?: string }> = []
-    const attemptsByChallenge = new Map<number, number>()
-    let processedBatches = 0
 
-    while (queue.length > 0) {
-      const challengeId = queue.shift() as number
-
-      if (finalizedChallengeIds.has(challengeId) || skippedChallengeIds.has(challengeId)) {
-        continue
-      }
-
+    for (const challengeId of challengeIds) {
       const status = await getChallengeStatus(thor, CONFIG.challengesContractAddress, challengeId)
       if (
         status === ChallengeStatus.Finalized ||
@@ -318,31 +303,19 @@ export const handler = async (event: unknown, _context: Context): Promise<APIGat
         continue
       }
 
-      if (status !== ChallengeStatus.Active && status !== ChallengeStatus.Finalizing) {
+      if (status !== ChallengeStatus.Active) {
         skippedChallengeIds.add(challengeId)
         continue
       }
 
-      const attempts = (attemptsByChallenge.get(challengeId) ?? 0) + 1
-      attemptsByChallenge.set(challengeId, attempts)
-
-      if (attempts > MAX_BATCHES_PER_CHALLENGE) {
-        failedChallenges.push({
-          challengeId,
-          reason: `Exceeded max batches per challenge (${MAX_BATCHES_PER_CHALLENGE})`,
-        })
-        continue
-      }
-
-      let finalizeResult: FinalizeBatchResult
+      let finalizeResult: FinalizeResult
       try {
         finalizeResult = await withRetry(
           () =>
-            finalizeSingleBatch(
+            finalizeSingleChallenge(
               thor,
               CONFIG.challengesContractAddress,
               challengeId,
-              batchSize,
               walletAddress,
               privateKey,
               dryRun,
@@ -368,46 +341,21 @@ export const handler = async (event: unknown, _context: Context): Promise<APIGat
         continue
       }
 
-      processedBatches += 1
       if (finalizeResult.txId) {
         transactionIds.push(finalizeResult.txId)
       }
 
-      if (dryRun) {
-        continue
-      }
-
-      const updatedStatus = await getChallengeStatus(thor, CONFIG.challengesContractAddress, challengeId)
-
-      if (updatedStatus === ChallengeStatus.Finalized) {
+      if (!dryRun) {
         finalizedChallengeIds.add(challengeId)
-        continue
       }
-
-      if (updatedStatus === ChallengeStatus.Active || updatedStatus === ChallengeStatus.Finalizing) {
-        queue.push(challengeId)
-        continue
-      }
-
-      if (updatedStatus === ChallengeStatus.Cancelled || updatedStatus === ChallengeStatus.Invalid) {
-        skippedChallengeIds.add(challengeId)
-        continue
-      }
-
-      failedChallenges.push({
-        challengeId,
-        reason: `Unexpected status ${updatedStatus} after finalization`,
-      })
     }
 
     const responseData = {
       currentRoundId,
       endedRound,
       dryRun,
-      batchSize,
       discoveredChallenges: challengeIds.length,
       matchedEvents: totalEvents,
-      processedBatches,
       finalizedChallengeIds: Array.from(finalizedChallengeIds),
       skippedChallengeIds: Array.from(skippedChallengeIds),
       failedChallenges,
@@ -421,7 +369,7 @@ export const handler = async (event: unknown, _context: Context): Promise<APIGat
         data: responseData,
         slack: slackOptions,
       })
-    } else if (!dryRun && processedBatches > 0) {
+    } else if (!dryRun && finalizedChallengeIds.size > 0) {
       await notify({
         level: "success",
         message: `Challenge finalization completed for round ${endedRound}.`,
@@ -430,7 +378,7 @@ export const handler = async (event: unknown, _context: Context): Promise<APIGat
       })
     }
 
-    if (failedChallenges.length > 0 && finalizedChallengeIds.size === 0 && processedBatches === 0) {
+    if (failedChallenges.length > 0 && finalizedChallengeIds.size === 0) {
       return buildResponse(CustomApiError.TRANSACTION_REVERTED, responseData)
     }
 

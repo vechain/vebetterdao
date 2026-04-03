@@ -126,7 +126,7 @@ function parseChallengeView(
   const invitedCount = Number(raw.invitedCount ?? raw[15])
   const declinedCount = Number(raw.declinedCount ?? raw[16])
   const selectedAppsCount = Number(raw.selectedAppsCount ?? raw[17])
-  const bestScore = BigInt(raw.bestScore ?? raw[19] ?? 0)
+  const bestScore = BigInt(raw.bestScore ?? raw[18] ?? 0)
 
   const isCreator = !!viewerAddress && compareAddresses(creator, viewerAddress)
   const isJoined = viewerStatus === ParticipantStatus.Joined
@@ -201,7 +201,6 @@ export function groupChallenges(challenges: ChallengeView[]): GroupedChallenges 
     const isLive = c.status === ChallengeStatus.Active || c.status === ChallengeStatus.Pending
     const isDone =
       c.status === ChallengeStatus.Finalized ||
-      c.status === ChallengeStatus.Finalizing ||
       c.status === ChallengeStatus.Cancelled ||
       c.status === ChallengeStatus.Invalid
 

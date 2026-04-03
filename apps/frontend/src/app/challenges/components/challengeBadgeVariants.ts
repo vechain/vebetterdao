@@ -14,8 +14,6 @@ export const getChallengeStatusBadgeVariant = (status: ChallengeStatus): Challen
       return "warning"
     case ChallengeStatus.Active:
       return "positive"
-    case ChallengeStatus.Finalizing:
-      return "info"
     case ChallengeStatus.Finalized:
       return "neutral"
     case ChallengeStatus.Cancelled:

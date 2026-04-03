@@ -33,10 +33,8 @@ type ActionParams =
   | { type: "addInvites"; challengeId: number; invitees: string[] }
   | { type: "claimPayout"; challengeId: number }
   | { type: "claimRefund"; challengeId: number }
-  | { type: "finalize"; challengeId: number; batchSize: number }
+  | { type: "finalize"; challengeId: number }
   | { type: "create"; form: CreateChallengeFormData }
-
-const DEFAULT_FINALIZE_BATCH_SIZE = 25
 
 export const useChallengeActions = () => {
   const challengesAddr = getConfig().challengesContractAddress
@@ -186,8 +184,8 @@ export const useChallengeActions = () => {
             buildClause({
               contractInterface: ChallengesInterface,
               to: challengesAddr,
-              method: "finalizeChallengeBatch",
-              args: [params.challengeId, params.batchSize],
+              method: "finalizeChallenge",
+              args: [params.challengeId],
               comment: `Finalize challenge #${params.challengeId}`,
             }),
           ]
@@ -215,8 +213,7 @@ export const useChallengeActions = () => {
       tx.sendTransaction({ type: "addInvites", challengeId: id, invitees }),
     claimChallenge: (id: number) => tx.sendTransaction({ type: "claimPayout", challengeId: id }),
     refundChallenge: (id: number) => tx.sendTransaction({ type: "claimRefund", challengeId: id }),
-    finalizeChallenge: (id: number, batchSize = DEFAULT_FINALIZE_BATCH_SIZE) =>
-      tx.sendTransaction({ type: "finalize", challengeId: id, batchSize }),
+    finalizeChallenge: (id: number) => tx.sendTransaction({ type: "finalize", challengeId: id }),
 
     status: tx.status,
   }

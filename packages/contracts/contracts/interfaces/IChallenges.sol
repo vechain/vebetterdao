@@ -6,7 +6,6 @@ import { ChallengeTypes } from "../challenges/libraries/ChallengeTypes.sol";
 interface IChallenges {
   error ZeroAddress();
   error InvalidAmount();
-  error InvalidBatchSize(uint256 batchSize);
   error InvalidStartRound(uint256 startRound, uint256 currentRound);
   error InvalidEndRound(uint256 startRound, uint256 endRound);
   error InvalidThresholdConfiguration();
@@ -91,10 +90,7 @@ interface IChallenges {
 
   function syncChallenge(uint256 challengeId) external returns (ChallengeTypes.ChallengeStatus);
 
-  function finalizeChallengeBatch(
-    uint256 challengeId,
-    uint256 batchSize
-  ) external returns (uint256 nextFinalizeIndex, ChallengeTypes.ChallengeStatus status);
+  function finalizeChallenge(uint256 challengeId) external;
 
   function claimChallengePayout(uint256 challengeId) external returns (uint256);
 

@@ -21,7 +21,6 @@ library ChallengeTypes {
   enum ChallengeStatus {
     Pending,
     Active,
-    Finalizing,
     Finalized,
     Cancelled,
     Invalid
@@ -83,7 +82,6 @@ library ChallengeTypes {
     uint256 threshold;
     bool allApps;
     uint256 totalPrize;
-    uint256 nextFinalizeIndex;
     uint256 bestScore;
     uint256 bestCount;
     uint256 qualifiedCount;
@@ -113,7 +111,6 @@ library ChallengeTypes {
     uint256 invitedCount;
     uint256 declinedCount;
     uint256 selectedAppsCount;
-    uint256 nextFinalizeIndex;
     uint256 bestScore;
     uint256 bestCount;
     uint256 qualifiedCount;

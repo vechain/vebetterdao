@@ -115,7 +115,6 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
       invitedCount: challenge.invited.length,
       declinedCount: challenge.declined.length,
       selectedAppsCount: challenge.appIds.length,
-      nextFinalizeIndex: challenge.nextFinalizeIndex,
       bestScore: challenge.bestScore,
       bestCount: challenge.bestCount,
       qualifiedCount: challenge.qualifiedCount,
@@ -198,11 +197,8 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     return ChallengeCoreLogic.syncChallenge(challengeId);
   }
 
-  function finalizeChallengeBatch(
-    uint256 challengeId,
-    uint256 batchSize
-  ) external nonReentrant returns (uint256 nextFinalizeIndex, ChallengeTypes.ChallengeStatus status) {
-    return ChallengeSettlementLogic.finalizeChallengeBatch(challengeId, batchSize);
+  function finalizeChallenge(uint256 challengeId) external nonReentrant {
+    ChallengeSettlementLogic.finalizeChallenge(challengeId);
   }
 
   function claimChallengePayout(uint256 challengeId) external nonReentrant returns (uint256) {

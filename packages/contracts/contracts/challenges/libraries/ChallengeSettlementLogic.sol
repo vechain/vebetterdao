@@ -7,7 +7,6 @@ import { ChallengeStorageTypes } from "./ChallengeStorageTypes.sol";
 import { ChallengeTypes } from "./ChallengeTypes.sol";
 
 library ChallengeSettlementLogic {
-  event ChallengeFinalizationAdvanced(uint256 indexed challengeId, uint256 nextFinalizeIndex, uint256 processedCount);
   event ChallengeFinalized(
     uint256 indexed challengeId,
     ChallengeTypes.SettlementMode settlementMode,
@@ -18,12 +17,7 @@ library ChallengeSettlementLogic {
   event ChallengePayoutClaimed(uint256 indexed challengeId, address indexed account, uint256 amount);
   event ChallengeRefundClaimed(uint256 indexed challengeId, address indexed account, uint256 amount);
 
-  function finalizeChallengeBatch(
-    uint256 challengeId,
-    uint256 batchSize
-  ) internal returns (uint256 nextFinalizeIndex, ChallengeTypes.ChallengeStatus status) {
-    if (batchSize == 0) revert IChallenges.InvalidBatchSize(batchSize);
-
+  function finalizeChallenge(uint256 challengeId) internal {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
     uint256 currentRound = $.xAllocationVoting.currentRoundId();
@@ -32,7 +26,7 @@ library ChallengeSettlementLogic {
       revert IChallenges.ChallengeNotEnded(challengeId, challenge.endRound, currentRound);
     }
 
-    status = ChallengeCoreLogic.syncChallenge(challengeId);
+    ChallengeTypes.ChallengeStatus status = ChallengeCoreLogic.syncChallenge(challengeId);
     if (status == ChallengeTypes.ChallengeStatus.Invalid || status == ChallengeTypes.ChallengeStatus.Cancelled) {
       revert IChallenges.ChallengeInvalidStatus(challengeId, status);
     }
@@ -40,31 +34,12 @@ library ChallengeSettlementLogic {
       revert IChallenges.ChallengeAlreadyFinalized(challengeId);
     }
 
-    if (challenge.status == ChallengeTypes.ChallengeStatus.Active) {
-      challenge.status = ChallengeTypes.ChallengeStatus.Finalizing;
-    }
-
-    uint256 startIndex = challenge.nextFinalizeIndex;
-    uint256 endIndex = startIndex + batchSize;
-    if (endIndex > challenge.participants.length) {
-      endIndex = challenge.participants.length;
-    }
-
-    for (uint256 i = startIndex; i < endIndex; i++) {
+    for (uint256 i; i < challenge.participants.length; i++) {
       uint256 actions = _getParticipantActions(challenge, challenge.participants[i]);
       _updateSettlementState(challenge, actions);
     }
 
-    challenge.nextFinalizeIndex = endIndex;
-    nextFinalizeIndex = endIndex;
-
-    if (endIndex == challenge.participants.length) {
-      _finalizeSettlement(challengeId, challenge);
-      status = challenge.status;
-    } else {
-      emit ChallengeFinalizationAdvanced(challengeId, endIndex, endIndex);
-      status = ChallengeTypes.ChallengeStatus.Finalizing;
-    }
+    _finalizeSettlement(challengeId, challenge);
   }
 
   function claimChallengePayout(uint256 challengeId) internal returns (uint256 amount) {

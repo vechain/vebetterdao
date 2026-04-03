@@ -7,10 +7,9 @@ export type ChallengeVisibility = (typeof ChallengeVisibility)[keyof typeof Chal
 export const ChallengeStatus = {
   Pending: 0,
   Active: 1,
-  Finalizing: 2,
-  Finalized: 3,
-  Cancelled: 4,
-  Invalid: 5,
+  Finalized: 2,
+  Cancelled: 3,
+  Invalid: 4,
 } as const
 export type ChallengeStatus = (typeof ChallengeStatus)[keyof typeof ChallengeStatus]
 
@@ -77,7 +76,7 @@ export interface ChallengeDetail extends ChallengeView {
 
 export type ChallengeKindLabel = "Stake" | "Sponsored"
 export type ChallengeVisibilityLabel = "Public" | "Private"
-export type ChallengeStatusLabel = "Pending" | "Active" | "Finalizing" | "Finalized" | "Cancelled" | "Invalid"
+export type ChallengeStatusLabel = "Pending" | "Active" | "Finalized" | "Cancelled" | "Invalid"
 
 export const challengeKindLabel = (kind: ChallengeKind): ChallengeKindLabel =>
   kind === ChallengeKind.Stake ? "Stake" : "Sponsored"
@@ -86,4 +85,4 @@ export const challengeVisibilityLabel = (v: ChallengeVisibility): ChallengeVisib
   v === ChallengeVisibility.Public ? "Public" : "Private"
 
 export const challengeStatusLabel = (s: ChallengeStatus): ChallengeStatusLabel =>
-  (["Pending", "Active", "Finalizing", "Finalized", "Cancelled", "Invalid"] as const)[s]
+  (["Pending", "Active", "Finalized", "Cancelled", "Invalid"] as const)[s]

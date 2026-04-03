@@ -6,6 +6,7 @@ const BATCH_SIZE = 10
 const SPONSORED_AMOUNT = ethers.parseEther("500")
 const VTHO_PER_ACCOUNT = ethers.parseEther("100")
 const VTHO_CONTRACT_ADDRESS = "0x0000000000000000000000000000456E65726779"
+const MAX_ACTIONS_PER_USER = 5
 
 const VTHO_ABI = [
   {
@@ -35,13 +36,19 @@ async function main() {
   const b3tr = await ethers.getContractAt("B3TR", config.b3trContractAddress, creator)
   const challenges = await ethers.getContractAt("B3TRChallenges", config.challengesContractAddress, creator)
   const xAllocationVoting = await ethers.getContractAt("XAllocationVoting", config.xAllocationVotingContractAddress)
+  const x2EarnApps = await ethers.getContractAt("X2EarnApps", config.x2EarnAppsContractAddress)
+  const passport = await ethers.getContractAt("VeBetterPassport", config.veBetterPassportContractAddress, creator)
   const vtho = await ethers.getContractAt(VTHO_ABI, VTHO_CONTRACT_ADDRESS, creator)
 
   const currentRound = Number(await xAllocationVoting.currentRoundId())
   const startRound = currentRound + 1
 
+  const allApps = await x2EarnApps.apps()
+  const appIds = allApps.map((a: { id: string }) => a.id)
+  if (appIds.length === 0) throw new Error("No apps found")
+
   console.log(`Creator: ${creator.address} | Current round: ${currentRound}`)
-  console.log(`Joiners: ${joiners.length} (signers[1] to signers[${NUM_JOINERS}])\n`)
+  console.log(`Joiners: ${joiners.length} | Apps: ${appIds.length}\n`)
 
   // Fund joiners with VTHO for gas
   console.log(`Funding ${NUM_JOINERS} accounts with ${ethers.formatEther(VTHO_PER_ACCOUNT)} VTHO each...`)
@@ -51,12 +58,12 @@ async function main() {
   }
   console.log(`  Funded ${NUM_JOINERS}/${NUM_JOINERS}\n`)
 
-  // Create sponsored/public challenge
+  // Create sponsored/public challenge (allApps)
   await (await b3tr.approve(config.challengesContractAddress, SPONSORED_AMOUNT)).wait()
   const tx = await challenges.createChallenge({
-    kind: 1, // Sponsored
-    visibility: 0, // Public
-    thresholdMode: 0, // None
+    kind: 1,
+    visibility: 0,
+    thresholdMode: 0,
     stakeAmount: SPONSORED_AMOUNT,
     startRound,
     endRound: startRound + 2,
@@ -93,8 +100,30 @@ async function main() {
     console.log(`  Joined ${joined}/${NUM_JOINERS}`)
   }
 
+  // Register random actions for each joiner across the challenge rounds
+  console.log(`\nRegistering random actions for ${joined} participants...`)
+  let totalActions = 0
+  for (let i = 0; i < joiners.length; i++) {
+    const numActions = Math.floor(Math.random() * (MAX_ACTIONS_PER_USER + 1)) // 0..MAX
+    for (let a = 0; a < numActions; a++) {
+      const round = startRound + Math.floor(Math.random() * 3) // startRound to startRound+2
+      const appId = appIds[Math.floor(Math.random() * appIds.length)]
+      try {
+        await (await passport.registerActionForRound(joiners[i].address, appId, round)).wait()
+        totalActions++
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.log(`  Action failed for joiner ${i}: ${msg.slice(0, 120)}`)
+      }
+    }
+    if ((i + 1) % 20 === 0) console.log(`  Processed ${i + 1}/${NUM_JOINERS} (${totalActions} actions so far)`)
+  }
+  console.log(`  Registered ${totalActions} total actions\n`)
+
   const challenge = await challenges.getChallenge(challengeId)
-  console.log(`\nDone! Challenge #${challengeId} has ${challenge.participantCount} participants`)
+  console.log(
+    `Done! Challenge #${challengeId} has ${challenge.participantCount} participants, ${totalActions} actions registered`,
+  )
 }
 
 main().catch(console.error)
