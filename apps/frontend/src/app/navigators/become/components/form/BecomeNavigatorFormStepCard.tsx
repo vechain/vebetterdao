@@ -11,9 +11,9 @@ import { useRegisterNavigator } from "@/hooks/navigator/useRegisterNavigator"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 
+import { AcknowledgeStep } from "../steps/AcknowledgeStep"
 import { DisclosuresStep } from "../steps/DisclosuresStep"
 import { MotivationStep } from "../steps/MotivationStep"
-import { SocialsStep } from "../steps/SocialsStep"
 import { StakeStep } from "../steps/StakeStep"
 
 import { BecomeNavigatorFormStepIndicator } from "./BecomeNavigatorFormStepIndicator"
@@ -21,8 +21,8 @@ import { BecomeNavigatorFormStepIndicator } from "./BecomeNavigatorFormStepIndic
 export enum NavigatorFormStep {
   MOTIVATION = "MOTIVATION",
   DISCLOSURES = "DISCLOSURES",
-  SOCIALS = "SOCIALS",
   STAKE = "STAKE",
+  ACCEPT_TERMS = "ACCEPT_TERMS",
 }
 
 export type NavigatorStep = {
@@ -65,14 +65,14 @@ export const BecomeNavigatorFormStepCard = () => {
         return data.motivation.trim().length > 0 && data.qualifications.trim().length > 0
       case 1:
         return true
-      case 2:
-        return true
-      case 3: {
+      case 2: {
         const stakeNum = Number(data.stakeAmount) || 0
         const minNum = minStake ? Number(minStake.scaled) : 0
         const maxNum = maxStake ? Number(maxStake.scaled) : Infinity
         return stakeNum >= minNum && stakeNum <= maxNum && stakeNum > 0
       }
+      case 3:
+        return data.ackVotingSlash && data.ackReportSlash && data.ackDisclosureSlash
       default:
         return false
     }
@@ -82,8 +82,8 @@ export const BecomeNavigatorFormStepCard = () => {
     () => [
       { key: NavigatorFormStep.MOTIVATION, content: <MotivationStep />, title: t("Motivation") },
       { key: NavigatorFormStep.DISCLOSURES, content: <DisclosuresStep />, title: t("Disclosures") },
-      { key: NavigatorFormStep.SOCIALS, content: <SocialsStep />, title: t("Socials") },
       { key: NavigatorFormStep.STAKE, content: <StakeStep />, title: t("Stake") },
+      { key: NavigatorFormStep.ACCEPT_TERMS, content: <AcknowledgeStep />, title: t("Accept terms") },
     ],
     [t],
   )

@@ -146,7 +146,11 @@ export const NavigatorDetailContent = () => {
               </Text>
               <Text textStyle="sm" color="fg.muted">
                 {t("Since {{date}}", {
-                  date: new Date(nav.registeredAt * 1000).toLocaleDateString(),
+                  date: new Date(nav.registeredAt * 1000).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  }),
                 })}
               </Text>
             </HStack>

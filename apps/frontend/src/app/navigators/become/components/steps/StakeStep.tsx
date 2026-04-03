@@ -1,20 +1,7 @@
-import {
-  Button,
-  Card,
-  Separator,
-  Field,
-  Heading,
-  HStack,
-  Icon,
-  NumberInput,
-  Skeleton,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Separator, Field, Heading, HStack, Icon, NumberInput, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { WarningTriangle } from "iconoir-react"
 import { useTranslation } from "react-i18next"
-import { LuShield } from "react-icons/lu"
 
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
@@ -173,19 +160,6 @@ export const StakeStep = () => {
           </HStack>
         </HStack>
       </VStack>
-
-      <Card.Root variant="outline" bg="blue.50" _dark={{ bg: "blue.900/20" }} borderRadius="xl">
-        <Card.Body py={3}>
-          <HStack gap={2}>
-            <LuShield size={16} />
-            <Text textStyle="xs" color="fg.muted">
-              {t(
-                "By registering, you commit to voting every round and submitting reports. Failure to do so will result in automatic slashing of 10% of your stake per infraction.",
-              )}
-            </Text>
-          </HStack>
-        </Card.Body>
-      </Card.Root>
     </VStack>
   )
 }

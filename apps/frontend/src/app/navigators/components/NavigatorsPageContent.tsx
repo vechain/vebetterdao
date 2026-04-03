@@ -1,21 +1,8 @@
-import {
-  Button,
-  Card,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  Link,
-  Spinner,
-  Stack,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Grid, Heading, HStack, Icon, Link, Spinner, Stack, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuPlus, LuShield } from "react-icons/lu"
 
@@ -41,9 +28,18 @@ export const NavigatorsPageContent = () => {
   const { data: navigators, isLoading: navigatorsLoading } = useNavigatorRegistrations()
   const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
 
-  const desktopStepCardDisclosure = useDisclosure({ defaultOpen: true })
-  const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
-  const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
+  const STORAGE_KEY = "NAVIGATOR_STEPS_DISMISSED"
+  const [open, setOpen] = useState(() => {
+    if (isMobile) return false
+    if (typeof window === "undefined") return true
+    return localStorage.getItem(STORAGE_KEY) !== "true"
+  })
+
+  const onOpen = useCallback(() => setOpen(true), [])
+  const onClose = useCallback(() => {
+    setOpen(false)
+    localStorage.setItem(STORAGE_KEY, "true")
+  }, [])
 
   if (navigatorsLoading) {
     return (
@@ -55,7 +51,7 @@ export const NavigatorsPageContent = () => {
 
   return (
     <VStack w="full" gap={8} pb={8}>
-      {account?.address && <NavigatorStatusBanner isNavigator={isNavigator} isDelegated={isDelegated} />}
+      {account?.address && <NavigatorStatusBanner isDelegated={isDelegated} />}
 
       <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
         <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">

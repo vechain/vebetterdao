@@ -1,0 +1,95 @@
+import { Card, Checkbox, Heading, Text, VStack } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+
+import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
+
+export const AcknowledgeStep = () => {
+  const { t } = useTranslation()
+  const { data, setData } = useNavigatorApplicationStore()
+
+  return (
+    <VStack gap={5} align="stretch">
+      <VStack gap={1} align="start">
+        <Heading size="md">{t("Accept terms")}</Heading>
+        <Text textStyle="sm" color="fg.muted">
+          {t(
+            "Navigators are subject to protocol-enforced penalties designed to deter negligence and misconduct. Please acknowledge the following:",
+          )}
+        </Text>
+      </VStack>
+
+      <VStack gap={3} align="stretch">
+        <Checkbox.Root
+          checked={data.ackVotingSlash}
+          onCheckedChange={e => setData({ ackVotingSlash: !!e.checked })}
+          colorPalette="blue"
+          alignItems="flex-start"
+          gap={3}>
+          <Checkbox.HiddenInput />
+          <Checkbox.Control mt="1" />
+          <Checkbox.Label>
+            <Text textStyle="sm">
+              {t(
+                "I acknowledge that failing to vote on governance proposals and app allocations every round may result in slashing of 5% of my staked funds per infraction.",
+              )}
+            </Text>
+          </Checkbox.Label>
+        </Checkbox.Root>
+
+        <Checkbox.Root
+          checked={data.ackReportSlash}
+          onCheckedChange={e => setData({ ackReportSlash: !!e.checked })}
+          colorPalette="blue"
+          alignItems="flex-start"
+          gap={3}>
+          <Checkbox.HiddenInput />
+          <Checkbox.Control mt="1" />
+          <Checkbox.Label>
+            <Text textStyle="sm">
+              {t(
+                "I acknowledge that I must publish a Navigator Report at least once every two rounds, covering allocation rationale, strategy changes, dApp performance insights, and recommendations. Failure to do so may result in slashing of 5% of my staked funds.",
+              )}
+            </Text>
+          </Checkbox.Label>
+        </Checkbox.Root>
+
+        <Checkbox.Root
+          checked={data.ackDisclosureSlash}
+          onCheckedChange={e => setData({ ackDisclosureSlash: !!e.checked })}
+          colorPalette="blue"
+          alignItems="flex-start"
+          gap={3}>
+          <Checkbox.HiddenInput />
+          <Checkbox.Control mt="1" />
+          <Checkbox.Label>
+            <Text textStyle="sm">
+              {t(
+                "I acknowledge that I must provide full and timely conflict-of-interest disclosures, including compensation, token allocations, or advisory relationships with any dApp. Failure to do so may result in slashing of 5% of my staked funds.",
+              )}
+            </Text>
+          </Checkbox.Label>
+        </Checkbox.Root>
+      </VStack>
+
+      <Card.Root variant="outline" bg="red.50" _dark={{ bg: "red.900/20" }} borderRadius="xl">
+        <Card.Body py={3}>
+          <VStack gap={2} align="start">
+            <Text textStyle="xs" fontWeight="semibold">
+              {t("Severe violations")}
+            </Text>
+            <Text textStyle="xs" color="fg.muted">
+              {t(
+                "Governance manipulation or bribery, vote buying, undisclosed paid relationships with dApps, and attacks on governance or protocol integrity are considered severe violations.",
+              )}
+            </Text>
+            <Text textStyle="xs" color="fg.muted" fontStyle="italic">
+              {t(
+                "The applicable penalty will be proposed and decided through governance and may result in slashing of up to 100% of the staked funds, depending on severity.",
+              )}
+            </Text>
+          </VStack>
+        </Card.Body>
+      </Card.Root>
+    </VStack>
+  )
+}
