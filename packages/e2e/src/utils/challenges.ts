@@ -52,23 +52,42 @@ export const fillCreateChallengeForm = async (
   page: Page,
   opts: {
     amount: string
-    startRound?: number
-    endRound?: number
+    kind?: "Stake" | "Sponsored"
+    visibility?: "Public" | "Private"
+    duration?: 1 | 2 | 3 | 4
+    splitPrize?: boolean
+    threshold?: string
   },
 ) => {
   const dialog = page.getByRole("dialog")
+  const kind = opts.kind ?? "Stake"
+  const visibility = opts.visibility ?? "Public"
 
-  const amountInput = dialog.locator("input[type='number']").first()
-  await amountInput.fill(opts.amount)
+  await dialog.getByRole("button", { name: new RegExp(`^${kind}$`, "i") }).click()
 
-  if (opts.startRound !== undefined) {
-    const startInput = dialog.locator("input[type='number']").nth(1)
-    await startInput.fill(String(opts.startRound))
+  const amountLabel = kind === "Sponsored" ? /prize amount \(b3tr\)/i : /stake amount \(b3tr\)/i
+  await dialog.getByLabel(amountLabel).fill(opts.amount)
+  await dialog.getByRole("button", { name: /^continue$/i }).click()
+
+  await dialog.getByRole("button", { name: /next round/i }).click()
+  await dialog.getByRole("button", { name: new RegExp(`^${opts.duration ?? 1}$`) }).click()
+
+  if (kind === "Sponsored") {
+    if (opts.splitPrize) {
+      await dialog.getByRole("button", { name: /^split prize$/i }).click()
+      const thresholdInput = dialog.getByLabel(/minimum actions/i)
+      await thresholdInput.fill(opts.threshold ?? "1")
+      await dialog.getByRole("button", { name: /^continue$/i }).click()
+    } else {
+      await dialog.getByRole("button", { name: /^max actions$/i }).click()
+    }
   }
 
-  if (opts.endRound !== undefined) {
-    const endInput = dialog.locator("input[type='number']").nth(2)
-    await endInput.fill(String(opts.endRound))
+  await dialog.getByRole("button", { name: /^all apps$/i }).click()
+  await dialog.getByRole("button", { name: new RegExp(`^${visibility}$`, "i") }).click()
+
+  if (visibility === "Private") {
+    await dialog.getByRole("button", { name: /^skip$/i }).click()
   }
 }
 

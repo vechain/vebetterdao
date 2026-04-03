@@ -1,10 +1,5 @@
 import { connectWithVeWorld, expect, test } from "../../src/fixtures/veworld"
-import {
-  fillCreateChallengeForm,
-  navigateToChallenges,
-  openCreateChallengeModal,
-  submitCreateChallenge,
-} from "../../src/utils/challenges"
+import { fillCreateChallengeForm, navigateToChallenges, openCreateChallengeModal } from "../../src/utils/challenges"
 import { baseUrl } from "../../src/config"
 
 test.describe("Create challenge", () => {
@@ -18,26 +13,30 @@ test.describe("Create challenge", () => {
 
     const dialog = appPage.getByRole("dialog")
 
-    // Verify form defaults
-    await expect(dialog.getByText(/stake/i).first()).toBeVisible()
-    await expect(dialog.getByText(/public/i).first()).toBeVisible()
+    await expect(dialog.getByText(/b3mo/i).first()).toBeVisible()
 
     await fillCreateChallengeForm(appPage, { amount: "100" })
 
-    // Create button should be enabled
+    await expect(dialog.getByText(/review your challenge/i)).toBeVisible()
     const createButton = dialog.getByRole("button", { name: /^create$/i })
-    await expect(createButton).toBeVisible()
     await expect(createButton).toBeEnabled()
 
-    // Switch to sponsored kind and verify threshold field appears
-    await dialog.getByRole("button", { name: /^sponsored$/i }).click()
-    await expect(dialog.getByText(/threshold/i).first()).toBeVisible()
+    await dialog.getByRole("button", { name: /^cancel$/i }).click()
+    await expect(dialog).not.toBeVisible()
 
-    // Switch to private and verify invitee field appears
-    await dialog.getByRole("button", { name: /^private$/i }).click()
-    await expect(dialog.getByRole("button", { name: /add invitee/i })).toBeVisible()
+    await openCreateChallengeModal(appPage)
 
-    // Cancel closes the dialog
+    await fillCreateChallengeForm(appPage, {
+      amount: "100",
+      kind: "Sponsored",
+      visibility: "Private",
+      splitPrize: true,
+      threshold: "3",
+    })
+
+    await expect(dialog.getByText(/review your challenge/i)).toBeVisible()
+    await expect(createButton).toBeEnabled()
+
     await dialog.getByRole("button", { name: /^cancel$/i }).click()
     await expect(dialog).not.toBeVisible()
   })
