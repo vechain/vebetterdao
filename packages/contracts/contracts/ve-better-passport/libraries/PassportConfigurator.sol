@@ -39,19 +39,20 @@ library PassportConfigurator {
 
   // ---------- Getters ---------- //
   /// @notice Gets the x2EarnApps contract address
-  function getX2EarnApps(PassportStorageTypes.PassportStorage storage self) internal view returns (IX2EarnApps) {
+  function getX2EarnApps() internal view returns (IX2EarnApps) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.x2EarnApps;
   }
 
   /// @notice Gets the xAllocationVoting contract address
-  function getXAllocationVoting(
-    PassportStorageTypes.PassportStorage storage self
-  ) internal view returns (IXAllocationVotingGovernor) {
+  function getXAllocationVoting() internal view returns (IXAllocationVotingGovernor) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.xAllocationVoting;
   }
 
   /// @notice Gets the galaxy member contract address
-  function getGalaxyMember(PassportStorageTypes.PassportStorage storage self) internal view returns (IGalaxyMember) {
+  function getGalaxyMember() internal view returns (IGalaxyMember) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.galaxyMember;
   }
 
@@ -59,13 +60,13 @@ library PassportConfigurator {
 
   /// @notice Initializes the PassportStorage struct with the provided initialization data
   function initializePassportStorage(
-    PassportStorageTypes.PassportStorage storage self,
     PassportTypes.InitializationData memory initializationData
   ) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Initialize the external contracts
-    setX2EarnApps(self, initializationData.x2EarnApps);
-    setXAllocationVoting(self, initializationData.xAllocationVoting);
-    setGalaxyMember(self, initializationData.galaxyMember);
+    setX2EarnApps(initializationData.x2EarnApps);
+    setXAllocationVoting(initializationData.xAllocationVoting);
+    setGalaxyMember(initializationData.galaxyMember);
 
     // Initialize the bot signals threshold
     self.signalsThreshold = initializationData.signalingThreshold;
@@ -98,28 +99,28 @@ library PassportConfigurator {
   /// @notice Sets the X2EarnApps contract address
   /// @dev The X2EarnApps contract address can be modified by the CONTRACTS_ADDRESS_MANAGER_ROLE
   /// @param _x2EarnApps - the X2EarnApps contract address
-  function setX2EarnApps(PassportStorageTypes.PassportStorage storage self, IX2EarnApps _x2EarnApps) public {
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) public {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     require(address(_x2EarnApps) != address(0), "VeBetterPassport: x2EarnApps is the zero address");
 
     self.x2EarnApps = _x2EarnApps;
   }
 
   /// @dev Sets the xAllocationVoting contract
-  /// @param self - the PassportStorage struct
   /// @param _xAllocationVoting - the xAllocationVoting contract address
   function setXAllocationVoting(
-    PassportStorageTypes.PassportStorage storage self,
     IXAllocationVotingGovernor _xAllocationVoting
   ) public {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     require(address(_xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
 
     self.xAllocationVoting = _xAllocationVoting;
   }
 
   /// @notice Sets the galaxy member contract address
-  /// @param self - the PassportStorage struct
   /// @param _galaxyMember - the galaxy member contract address
-  function setGalaxyMember(PassportStorageTypes.PassportStorage storage self, IGalaxyMember _galaxyMember) public {
+  function setGalaxyMember(IGalaxyMember _galaxyMember) public {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     require(address(_galaxyMember) != address(0), "VeBetterPassport: galaxyMember is the zero address");
 
     self.galaxyMember = _galaxyMember;

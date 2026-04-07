@@ -1,7 +1,7 @@
 "use client"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { use, useEffect } from "react"
 
 import { MotionVStack } from "../../../../components/MotionVStack"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
@@ -17,14 +17,13 @@ const EditAppPageContent = dynamic(
   },
 )
 type Props = {
-  params: {
-    appId: string
-  }
+  params: Promise<{ appId: string }>
 }
 export default function AppEdit({ params }: Readonly<Props>) {
+  const { appId } = use(params)
   useEffect(() => {
-    AnalyticsUtils.trackPage(`App/${params.appId}`)
-  }, [params.appId])
+    AnalyticsUtils.trackPage(`App/${appId}`)
+  }, [appId])
   return (
     <MotionVStack w="full">
       <EditAppPageContent />

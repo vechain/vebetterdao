@@ -46,17 +46,17 @@ library PassportPersonhoodLogic {
    * @return reason string representing the reason for the result
    */
   function isPerson(
-    PassportStorageTypes.PassportStorage storage self,
     address user
   ) external view returns (bool person, string memory reason) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Get the current timepoint
     uint48 timepoint = PassportClockLogic.clock();
 
     // Resolve the address of the person based on the delegation status
-    user = _resolvePersonhoodAddress(self, user, timepoint);
+    user = _resolvePersonhoodAddress(user, timepoint);
 
     // Check is the user is a person
-    return _checkPassport(self, user, timepoint);
+    return _checkPassport(user, timepoint);
   }
 
   /**
@@ -67,15 +67,15 @@ library PassportPersonhoodLogic {
    * @return reason string representing the reason for the result
    */
   function isPersonAtTimepoint(
-    PassportStorageTypes.PassportStorage storage self,
     address user,
     uint48 timepoint
   ) external view returns (bool person, string memory reason) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Resolve the address of the person based on the delegation status
-    user = _resolvePersonhoodAddress(self, user, timepoint);
+    user = _resolvePersonhoodAddress(user, timepoint);
 
     // Check is the user is a person
-    return _checkPassport(self, user, timepoint);
+    return _checkPassport(user, timepoint);
   }
 
   // ---------- Internal & Private Functions ---------- //
@@ -86,7 +86,6 @@ library PassportPersonhoodLogic {
    * If the user is neither a delegatee nor a delegator (or entity), it returns the user's own address,
    * representing their passport.
    *
-   * @param self The storage object for the Passport contract containing all delegation data.
    * @param user The address of the user whose personhood is being resolved.
    * @param timepoint The timepoint (block number or timestamp) at which the delegation status is checked.
    *
@@ -96,15 +95,15 @@ library PassportPersonhoodLogic {
    * - Returns the user's own address (passport) if no delegation is found.
    */
   function _resolvePersonhoodAddress(
-    PassportStorageTypes.PassportStorage storage self,
     address user,
     uint256 timepoint
   ) private view returns (address) {
-    if (PassportDelegationLogic._isDelegateeInTimepoint(self, user, timepoint)) {
-      return PassportDelegationLogic._getDelegatorInTimepoint(self, user, timepoint); // Return the delegator's passport address
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
+    if (PassportDelegationLogic._isDelegateeInTimepoint(user, timepoint)) {
+      return PassportDelegationLogic._getDelegatorInTimepoint(user, timepoint); // Return the delegator's passport address
     } else if (
-      PassportDelegationLogic._isDelegatorInTimepoint(self, user, timepoint) ||
-      PassportEntityLogic._isEntityInTimepoint(self, user, timepoint)
+      PassportDelegationLogic._isDelegatorInTimepoint(user, timepoint) ||
+      PassportEntityLogic._isEntityInTimepoint(user, timepoint)
     ) {
       return address(0); // Return zero address if they delegated their personhood or entity
     } else {
@@ -117,7 +116,6 @@ library PassportPersonhoodLogic {
    * based on various conditions such as delegation status, whitelist/blacklist status, signaling, participation score,
    * and node ownership.
    *
-   * @param self The storage object for the Passport contract containing all relevant data.
    * @param user The address of the user whose passport status is being checked.
    *
    * @return person bool indicating whether the user meets the criteria.
@@ -139,10 +137,10 @@ library PassportPersonhoodLogic {
    * - Checks if the user's selected Galaxy Member is above the minimum level.
    */
   function _checkPassport(
-    PassportStorageTypes.PassportStorage storage self,
     address user,
     uint48 timepoint
   ) private view returns (bool person, string memory reason) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
       return (false, "User has delegated their personhood");
@@ -150,48 +148,47 @@ library PassportPersonhoodLogic {
 
     // If a wallet is whitelisted, it is a person
     if (
-      PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.WHITELIST_CHECK) &&
-      PassportWhitelistAndBlacklistLogic._isPassportWhitelisted(self, user)
+      PassportChecksLogic._isCheckEnabled(PassportTypes.CheckType.WHITELIST_CHECK) &&
+      PassportWhitelistAndBlacklistLogic._isPassportWhitelisted(user)
     ) {
       return (true, "User is whitelisted");
     }
 
     // If a wallet is blacklisted, it is not a person
     if (
-      PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.BLACKLIST_CHECK) &&
-      PassportWhitelistAndBlacklistLogic._isPassportBlacklisted(self, user)
+      PassportChecksLogic._isCheckEnabled(PassportTypes.CheckType.BLACKLIST_CHECK) &&
+      PassportWhitelistAndBlacklistLogic._isPassportBlacklisted(user)
     ) {
       return (false, "User is blacklisted");
     }
 
     // If a wallet is not whitelisted and has been signaled more than X times
     if (
-      (PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.SIGNALING_CHECK) &&
-        PassportSignalingLogic.signaledCounter(self, user) >= PassportSignalingLogic.signalingThreshold(self))
+      (PassportChecksLogic._isCheckEnabled(PassportTypes.CheckType.SIGNALING_CHECK) &&
+        PassportSignalingLogic.signaledCounter(user) >= PassportSignalingLogic.signalingThreshold())
     ) {
       return (false, "User has been signaled too many times");
     }
 
-    if (PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.PARTICIPATION_SCORE_CHECK)) {
+    if (PassportChecksLogic._isCheckEnabled(PassportTypes.CheckType.PARTICIPATION_SCORE_CHECK)) {
       uint256 participationScore = PassportPoPScoreLogic._cumulativeScoreWithDecay(
-        self,
         user,
         self.xAllocationVoting.currentRoundId()
       );
 
       // If the user's cumulated score in the last rounds is greater than or equal to the threshold
-      if ((participationScore >= PassportPoPScoreLogic._thresholdPoPScoreAtTimepoint(self, timepoint))) {
+      if ((participationScore >= PassportPoPScoreLogic._thresholdPoPScoreAtTimepoint(timepoint))) {
         return (true, "User's participation score is above the threshold");
       }
     }
 
     // Check if user's selected GalaxyMember, in the timepoint, was above the minimum level
-    if (PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.GM_OWNERSHIP_CHECK)) {
+    if (PassportChecksLogic._isCheckEnabled(PassportTypes.CheckType.GM_OWNERSHIP_CHECK)) {
       uint256 selectedTokenId = self.galaxyMember.getSelectedTokenIdAtBlock(user, timepoint);
 
       if (
         selectedTokenId != 0 &&
-        self.galaxyMember.levelOf(selectedTokenId) >= PassportChecksLogic.getMinimumGalaxyMemberLevel(self)
+        self.galaxyMember.levelOf(selectedTokenId) >= PassportChecksLogic.getMinimumGalaxyMemberLevel()
       ) {
         return (true, "User's selected Galaxy Member is above the minimum level");
       }

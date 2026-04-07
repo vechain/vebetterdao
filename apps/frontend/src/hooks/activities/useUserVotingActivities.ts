@@ -4,11 +4,12 @@ import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/facto
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useEvents } from "@/hooks/useEvents"
 
-import { ActivityItem, ActivityType, UserProposalVoteMeta } from "./types"
+import { ActivityItem, ActivityType, UserProposalSupportMeta, UserProposalVoteMeta } from "./types"
 
 const xAllocationAbi = XAllocationVoting__factory.abi
 const xAllocationAddress = getConfig().xAllocationVotingContractAddress
@@ -20,6 +21,11 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
   const { data: xApps } = useXApps()
   const { data: { enrichedStandardProposals = [], enrichedGrantProposals = [] } = {}, isLoading: isProposalsLoading } =
     useProposalEnriched()
+
+  const previousRoundId =
+    selectedRoundId && Number(selectedRoundId) > 1 ? String(Number(selectedRoundId) - 1) : undefined
+  const { data: previousRound, isLoading: isPreviousRoundLoading } = useAllocationsRound(previousRoundId)
+  const { data: currentRound, isLoading: isCurrentRoundLoading } = useAllocationsRound(selectedRoundId)
 
   const allocationVoteEvents = useEvents({
     abi: xAllocationAbi,
@@ -61,6 +67,19 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
         proposalId: e.decodedData.args.proposalId.toString(),
         support: Number(e.decodedData.args.support),
         blockNumber: e.meta.blockNumber,
+        timestamp: e.meta.blockTimestamp,
+      })),
+    enabled: !!account?.address,
+  })
+  const proposalSupportEvents = useEvents({
+    abi: b3trGovernorAbi,
+    contractAddress: b3trGovernorAddress,
+    eventName: "ProposalDeposit",
+    filterParams: { depositor: (account?.address ?? "") as `0x${string}` },
+    select: events =>
+      events.map(e => ({
+        proposalId: e.decodedData.args.proposalId.toString(),
+        amount: e.decodedData.args.amount.toString(),
         timestamp: e.meta.blockTimestamp,
       })),
     enabled: !!account?.address,
@@ -137,7 +156,39 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
           item !== null,
       )
 
-    return [...allocationItems, ...proposalItems].sort((a, b) => b.date - a.date)
+    const roundStart = previousRound?.voteEndTimestamp?.unix() ?? 0
+    const roundEnd = currentRound?.voteEndTimestamp?.unix() ?? Infinity
+
+    const proposalSupports = (proposalSupportEvents.data ?? []).filter(e => {
+      if (!proposalInfoMap.has(e.proposalId)) return false
+      return e.timestamp >= roundStart && e.timestamp <= roundEnd
+    })
+
+    const proposalSupportItems: ActivityItem[] = proposalSupports
+      .map(e => {
+        const info = proposalInfoMap.get(e.proposalId)
+        if (!info?.title) return null
+        return {
+          type: ActivityType.USER_PROPOSAL_SUPPORT as const,
+          date: e.timestamp,
+          roundId: selectedRoundId,
+          title: `You supported "${info.title}"`,
+          metadata: {
+            proposalId: e.proposalId,
+            proposalTitle: info.title,
+            amount: e.amount,
+            proposalType: info.proposalType,
+          },
+        }
+      })
+      .filter(
+        (
+          item,
+        ): item is ActivityItem & { type: ActivityType.USER_PROPOSAL_SUPPORT; metadata: UserProposalSupportMeta } =>
+          item !== null,
+      )
+
+    return [...allocationItems, ...proposalItems, ...proposalSupportItems].sort((a, b) => b.date - a.date)
   }, [
     account?.address,
     selectedRoundId,
@@ -147,13 +198,19 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
     allocationVoteEvents.data,
     allocationAutoVoteEvents.data,
     proposalVoteEvents.data,
+    proposalSupportEvents.data,
+    previousRound?.voteEndTimestamp,
+    currentRound?.voteEndTimestamp,
   ])
 
   const isLoading =
     allocationVoteEvents.isLoading ||
     allocationAutoVoteEvents.isLoading ||
     proposalVoteEvents.isLoading ||
-    isProposalsLoading
+    proposalSupportEvents.isLoading ||
+    isProposalsLoading ||
+    isPreviousRoundLoading ||
+    isCurrentRoundLoading
 
   return { data, isLoading }
 }

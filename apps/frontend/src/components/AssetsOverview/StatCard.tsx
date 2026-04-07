@@ -1,4 +1,5 @@
 import { Card, Icon, Text, Skeleton, Square, VStack, type CardRootProps } from "@chakra-ui/react"
+import { NavArrowRight } from "iconoir-react"
 import { ReactNode } from "react"
 
 interface StatCardProps extends Omit<CardRootProps, "variant"> {
@@ -6,10 +7,12 @@ interface StatCardProps extends Omit<CardRootProps, "variant"> {
   title: string
   subtitle: string | ReactNode
   showIcon?: boolean
+  hideIconOnMobile?: boolean
   icon?: ReactNode
   cta?: ReactNode
   isLoading?: boolean
   gap?: CardRootProps["gap"]
+  onClick?: () => void
 }
 
 export const StatCard = ({
@@ -18,15 +21,15 @@ export const StatCard = ({
   subtitle,
   isLoading = false,
   showIcon = true,
+  hideIconOnMobile = false,
   icon,
   cta,
   gap,
+  onClick,
 }: StatCardProps) => {
   return (
     <Card.Root
-      p={{ base: showIcon ? "2" : "4", md: "6" }}
-      pt={{ base: "4", md: "6" }}
-      pb={{ base: "4", md: "6" }}
+      p={{ base: "4", md: "6" }}
       variant="subtle"
       border="sm"
       borderColor="border.secondary"
@@ -35,9 +38,14 @@ export const StatCard = ({
       alignItems="center"
       justifyContent="space-between"
       gap={{ base: "2", md: "4" }}
-      maxBlockSize={{ base: "fit-content", md: "unset" }}>
+      maxBlockSize={{ base: "fit-content", md: "unset" }}
+      onClick={onClick}
+      cursor={onClick ? "pointer" : undefined}
+      _hover={onClick ? { opacity: 0.85 } : undefined}
+      transition={onClick ? "opacity 0.15s" : undefined}>
       {showIcon && icon && (
         <Square
+          display={hideIconOnMobile ? { base: "none", md: "flex" } : undefined}
           rounded={{ base: "8px", md: "12px" }}
           bg={`status.${variant}.secondary`}
           aspectRatio={1}
@@ -48,12 +56,12 @@ export const StatCard = ({
         </Square>
       )}
       <VStack flex={1} alignItems="start" gap={gap ?? "1"}>
-        <Text textStyle={{ base: "xs", md: "md" }} color="text.subtle" lineClamp={1}>
+        <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle" lineClamp={1}>
           {title}
         </Text>
         {typeof subtitle === "string" ? (
           <Skeleton loading={isLoading}>
-            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="semibold">
+            <Text textStyle={{ base: "xl", md: "2xl" }} fontWeight="semibold">
               {subtitle}
             </Text>
           </Skeleton>
@@ -62,6 +70,11 @@ export const StatCard = ({
         )}
       </VStack>
       {cta && cta}
+      {onClick && (
+        <Icon boxSize={{ base: "4", md: "5" }} color="text.subtle" flexShrink={0} alignSelf="center">
+          <NavArrowRight />
+        </Icon>
+      )}
     </Card.Root>
   )
 }

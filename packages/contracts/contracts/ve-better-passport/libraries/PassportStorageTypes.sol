@@ -130,5 +130,25 @@ library PassportStorageTypes {
     mapping(bytes32 app => mapping(address user => uint256)) appSignalsCounter;
     // Mapping of apps to total signals
     mapping(bytes32 app => uint256) appTotalSignalsCounter;
+    // ---------- Version 5 - Participation Tracking ---------- //
+    // Track which apps a user has interacted with in a specific round
+    mapping(address user => mapping(uint256 round => mapping(bytes32 appId => bool))) userRoundUniqueAppInteraction;
+    // Number of distinct apps a user has interacted with in a specific round
+    mapping(address user => mapping(uint256 round => uint256 count)) userRoundAppCount;
+    // Number of actions distributed by an app in a specific round
+    mapping(bytes32 appId => mapping(uint256 round => uint256 count)) appRoundActionCount;
+    // Number of actions registered per user (passport) per app per round
+    mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 count))) userAppRoundActionCount;
+    // Total number of actions registered per user (passport) per round
+    mapping(address user => mapping(uint256 round => uint256 count)) userRoundActionCount;
+  }
+
+  // keccak256(abi.encode(uint256(keccak256("PassportStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant PassportStorageLocation = 0x273c9387b78d9b22e6f3371bb3aa3a918f53507e8cacc54e4831933cbb844100;
+
+  function getPassportStorage() internal pure returns (PassportStorage storage $) {
+    assembly {
+      $.slot := PassportStorageLocation
+    }
   }
 }
