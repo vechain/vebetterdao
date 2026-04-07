@@ -99,6 +99,12 @@ export const PotentialRewardBox = () => {
         functionName: "isUserAutoVotingEnabledInCurrentRound" as const,
         args: [(account?.address || "") as `0x${string}`],
       },
+      {
+        abi: relayerRewardsAbi,
+        address: relayerRewardsAddress,
+        functionName: "getFeeCap" as const,
+        args: [],
+      },
     ],
     enabled: !!thor && !!currentRoundId,
   })
@@ -125,6 +131,7 @@ export const PotentialRewardBox = () => {
         [_xAllocationsAmount, vote2EarnAmount, _treasuryAmount, gmAmount],
         relayerFee,
         autoVotingEnabled = false,
+        feeCap,
       ] = data
 
       return {
@@ -136,6 +143,7 @@ export const PotentialRewardBox = () => {
           gmWeightTotal: userGMWeight,
           cycleGMTotal: cycleTotalGMWeight,
           relayerFeePercentage: relayerFee,
+          feeCap: feeCap as bigint,
           hadAutoVotingEnabled: autoVotingEnabled,
         }),
         hasVoted: userVoterTotal > 0n,

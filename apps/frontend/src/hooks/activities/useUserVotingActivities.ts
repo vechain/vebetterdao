@@ -4,6 +4,7 @@ import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/facto
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useEvents } from "@/hooks/useEvents"
@@ -20,6 +21,11 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
   const { data: xApps } = useXApps()
   const { data: { enrichedStandardProposals = [], enrichedGrantProposals = [] } = {}, isLoading: isProposalsLoading } =
     useProposalEnriched()
+
+  const previousRoundId =
+    selectedRoundId && Number(selectedRoundId) > 1 ? String(Number(selectedRoundId) - 1) : undefined
+  const { data: previousRound, isLoading: isPreviousRoundLoading } = useAllocationsRound(previousRoundId)
+  const { data: currentRound, isLoading: isCurrentRoundLoading } = useAllocationsRound(selectedRoundId)
 
   const allocationVoteEvents = useEvents({
     abi: xAllocationAbi,
@@ -150,15 +156,12 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
           item !== null,
       )
 
-    // votingRoundId on proposals is roundIdVoteStart (when voting begins). Users often deposit
-    // in the prior allocation round, so strict equality misses support events on the activity feed.
+    const roundStart = previousRound?.voteEndTimestamp?.unix() ?? 0
+    const roundEnd = currentRound?.voteEndTimestamp?.unix() ?? Infinity
+
     const proposalSupports = (proposalSupportEvents.data ?? []).filter(e => {
-      const info = proposalInfoMap.get(e.proposalId)
-      if (!info) return false
-      const voteRound = Number(info.votingRoundId)
-      const currentRound = Number(selectedRoundId)
-      if (Number.isNaN(voteRound) || Number.isNaN(currentRound)) return false
-      return currentRound === voteRound || currentRound === voteRound - 1
+      if (!proposalInfoMap.has(e.proposalId)) return false
+      return e.timestamp >= roundStart && e.timestamp <= roundEnd
     })
 
     const proposalSupportItems: ActivityItem[] = proposalSupports
@@ -196,6 +199,8 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
     allocationAutoVoteEvents.data,
     proposalVoteEvents.data,
     proposalSupportEvents.data,
+    previousRound?.voteEndTimestamp,
+    currentRound?.voteEndTimestamp,
   ])
 
   const isLoading =
@@ -203,7 +208,9 @@ export const useUserVotingActivities = (selectedRoundId?: string): { data: Activ
     allocationAutoVoteEvents.isLoading ||
     proposalVoteEvents.isLoading ||
     proposalSupportEvents.isLoading ||
-    isProposalsLoading
+    isProposalsLoading ||
+    isPreviousRoundLoading ||
+    isCurrentRoundLoading
 
   return { data, isLoading }
 }
