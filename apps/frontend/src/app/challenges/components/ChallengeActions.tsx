@@ -83,11 +83,7 @@ export const ChallengeActions = ({
         </Button>
       )}
       {challenge.canDecline && (
-        <Button
-          size={buttonSize}
-          variant={isCardLayout ? "subtle" : "secondary"}
-          onClick={() => actions.declineChallenge(id)}
-          {...cardButtonProps}>
+        <Button size={buttonSize} variant="negative" onClick={() => actions.declineChallenge(id)} {...cardButtonProps}>
           {t("Decline")}
         </Button>
       )}
@@ -102,11 +98,7 @@ export const ChallengeActions = ({
         </Button>
       )}
       {challenge.canLeave && (
-        <Button
-          size={buttonSize}
-          variant={isCardLayout ? "subtle" : "secondary"}
-          onClick={() => actions.leaveChallenge(id)}
-          {...cardButtonProps}>
+        <Button size={buttonSize} variant="negative" onClick={() => actions.leaveChallenge(id)} {...cardButtonProps}>
           {t("Leave")}
         </Button>
       )}
@@ -136,9 +128,14 @@ export const ChallengeActions = ({
   return (
     <VStack align={isCardLayout ? "stretch" : "start"} gap={isCardLayout ? "3" : "1"}>
       {isReacceptingInvite && (
-        <Text textStyle="sm" color="text.subtle">
-          {t("Changed your mind? There is still time to accept.")}
-        </Text>
+        <VStack align="start" gap="1">
+          <Text textStyle="sm" color="status.negative.strong" fontWeight="semibold">
+            {t("Declined")}
+          </Text>
+          <Text textStyle="sm" color="text.subtle">
+            {t("Changed your mind? There is still time to accept.")}
+          </Text>
+        </VStack>
       )}
       {isCardLayout ? (
         <SimpleGrid columns={actionCount > 1 ? 2 : 1} gap="3" w="full">

@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react"
 import { TFunction } from "i18next"
 import { ReactNode } from "react"
-import { LuPlus, LuX } from "react-icons/lu"
+import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
 
@@ -449,14 +449,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       ),
       controls: (
         <VStack align="stretch" gap="3">
-          <Field.Root>
-            <Field.Label>{t("Apps (leave empty for all)")}</Field.Label>
-            <Input
-              placeholder={t("Search apps...")}
-              value={appSearch}
-              onChange={e => updateAppFilter(e.target.value)}
-            />
-          </Field.Root>
           {form.appIds.length > 0 && (
             <Box px="3" py="3" borderRadius="xl" bg="bg.muted" border="1px solid" borderColor="border.secondary">
               <VStack align="stretch" gap="3">
@@ -503,18 +495,27 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               </VStack>
             </Box>
           )}
-          <HStack justify="space-between" align="center" flexWrap="wrap" gap="2">
-            <Text textStyle="xs" color="text.subtle">
-              {filteredApps.length > 0
-                ? `${t("Showing")} ${appResultsStart}-${appResultsEnd} / ${filteredApps.length}`
-                : ""}
-            </Text>
+          <HStack align="end" gap="2">
+            <Field.Root flex="1" minW="0">
+              <Field.Label>{t("Apps (leave empty for all)")}</Field.Label>
+              <Input
+                placeholder={t("Search apps...")}
+                value={appSearch}
+                borderRadius="full"
+                onChange={e => updateAppFilter(e.target.value)}
+              />
+            </Field.Root>
             {appSearch ? (
               <Button size="sm" variant={tertiaryVariant} onClick={clearAppFilter}>
                 {t("Clear")}
               </Button>
             ) : null}
           </HStack>
+          <Text textStyle="xs" color="text.subtle">
+            {filteredApps.length > 0
+              ? `${t("Showing")} ${appResultsStart}-${appResultsEnd} / ${filteredApps.length}`
+              : ""}
+          </Text>
           {isAppsLoading ? (
             <SimpleGrid columns={{ base: 2, md: 2 }} gap="2">
               {["app-skeleton-1", "app-skeleton-2", "app-skeleton-3", "app-skeleton-4"].map(key => (
@@ -551,20 +552,22 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
           )}
           {(hasPreviousAppsPage || hasNextAppsPage) && (
             <HStack justify="space-between">
-              <Button
+              <IconButton
                 size="sm"
                 variant={tertiaryVariant}
                 disabled={!hasPreviousAppsPage}
+                aria-label={t("Back")}
                 onClick={() => flow.setAppResultsPage(currentAppResultsPage - 1)}>
-                {t("Back")}
-              </Button>
-              <Button
+                <LuChevronLeft />
+              </IconButton>
+              <IconButton
                 size="sm"
                 variant={tertiaryVariant}
                 disabled={!hasNextAppsPage}
+                aria-label={t("Next")}
                 onClick={() => flow.setAppResultsPage(currentAppResultsPage + 1)}>
-                {t("Next")}
-              </Button>
+                <LuChevronRight />
+              </IconButton>
             </HStack>
           )}
           <HStack justify="flex-end">
