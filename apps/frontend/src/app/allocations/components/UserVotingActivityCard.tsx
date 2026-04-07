@@ -22,7 +22,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useWallet } from "@vechain/vechain-kit"
-import { Activity, Check } from "iconoir-react"
+import { Activity, Check, Sparks } from "iconoir-react"
 import { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
@@ -140,6 +140,27 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
   const rewardClaimed = rewardClaimedV2 ?? rewardClaimedV1
   const isRewardClaimedLoading = isV2Loading || isV1Loading
 
+  // Read FreshnessMultiplierApplied event to get the actual multiplier used
+  const { data: freshnessEvents, isLoading: _isFreshnessLoading } = useEvents({
+    abi,
+    contractAddress,
+    eventName: "FreshnessMultiplierApplied",
+    filterParams: { voter: (account?.address ?? "") as `0x${string}`, roundId: BigInt(roundId) },
+    select: events =>
+      events.map(({ decodedData }) => ({
+        multiplier: decodedData.args.multiplier,
+        lastChangedRound: decodedData.args.lastChangedRound,
+      })),
+    enabled: !!account?.address,
+  })
+
+  const freshnessMultiplier = freshnessEvents?.[0]?.multiplier
+  const freshnessLabel = useMemo(() => {
+    if (!freshnessMultiplier) return null
+    const value = Number(freshnessMultiplier) / 10000
+    return `x${value}`
+  }, [freshnessMultiplier])
+
   const [appsVotedInRound] = voteCastEvents || []
 
   const appVoteMetrics = useMemo(() => {
@@ -198,7 +219,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
           />
         ) : (
           <Grid
-            gridTemplateColumns={{ base: "1fr 1px 1fr", md: "repeat(2,1fr)" }}
+            gridTemplateColumns={{ base: "1fr 1px 1fr", md: freshnessLabel ? "repeat(3,1fr)" : "repeat(2,1fr)" }}
             rowGap={{ base: "5", md: "8" }}
             columnGap={{ base: "8", md: "3" }}>
             <Card.Root
@@ -242,7 +263,28 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                 </Text>
               </Skeleton>
             </Card.Root>
-            <VStack gridColumn={{ base: "1 / 4", md: "1 / 3" }} align="stretch" gap="3">
+            {freshnessLabel && (
+              <>
+                <Separator hideFrom="md" orientation="vertical" borderColor="border.secondary" />
+                <Card.Root
+                  p={{ base: 0, md: "4" }}
+                  bg={{ base: "transparent", md: "card.subtle" }}
+                  gap="1"
+                  border="none"
+                  height="max-content">
+                  <HStack gap="1">
+                    <Icon as={Sparks} boxSize="3.5" color="text.subtle" />
+                    <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
+                      {t("Freshness Bonus")}
+                    </Text>
+                  </HStack>
+                  <Text textStyle="xl" fontWeight="semibold" color="status.positive.primary">
+                    {freshnessLabel}
+                  </Text>
+                </Card.Root>
+              </>
+            )}
+            <VStack gridColumn={{ base: "1 / -1", md: "1 / -1" }} align="stretch" gap="3">
               <HStack justifyContent="space-between">
                 <Heading size="sm">{t("Voted for")}</Heading>
                 <Badge variant="neutral" size="sm" rounded="sm">

@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { XAllocationVotingStorageTypes } from "./XAllocationVotingStorageTypes.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { FreshnessUtils } from "./FreshnessUtils.sol";
 
 /**
  * @title RoundVotesCountingUtils
@@ -116,6 +117,16 @@ library RoundVotesCountingUtils {
     return quorumValue <= $._roundVotes[roundId].totalVotes;
   }
 
+  /// @notice Returns whether a user voted for a specific app in a given round
+  /// @param roundId The round to query
+  /// @param user The voter address
+  /// @param appId The app to check
+  function hasUserVotedForApp(uint256 roundId, address user, bytes32 appId) external view returns (bool) {
+    XAllocationVotingStorageTypes.RoundVotesCountingStorage storage $ = XAllocationVotingStorageTypes
+      ._getRoundVotesCountingStorage();
+    return $._roundVotes[roundId].userVotedForApp[user][appId];
+  }
+
   /// @notice Returns whether the vote succeeded (totalVotes > 0)
   /// @dev Vote is successful if quorum is reached
   function voteSucceeded(uint256 roundId, uint256 quorumValue) external view returns (bool) {
@@ -183,6 +194,9 @@ library RoundVotesCountingUtils {
       }
 
       totalQFVotesAdjustment += _processAppVote($, roundId, apps[i], weights[i]);
+
+      // Track which apps the user voted for (for external queries)
+      $._roundVotes[roundId].userVotedForApp[voter][apps[i]] = true;
     }
 
     // Check if the total weight of votes cast by the voter is greater than the voting threshold
@@ -206,8 +220,19 @@ library RoundVotesCountingUtils {
       $._hasVotedOnce[voter] = true;
     }
 
-    // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
-    contracts._voterRewards.registerVote(roundStart, voter, totalWeight, Math.sqrt(totalWeight));
+    // Apply freshness multiplier to reward weight (does NOT affect on-chain vote count)
+    uint256 freshnessMultiplier = FreshnessUtils.updateAndGetMultiplier(
+      voter,
+      roundId,
+      apps,
+      roundStart,
+      address(contracts._voterRewards)
+    );
+    uint256 rewardWeight = (totalWeight * freshnessMultiplier) / 10000;
+    uint256 rewardSqrt = Math.sqrt(rewardWeight);
+
+    // Register the vote for rewards calculation with freshness-adjusted weight
+    contracts._voterRewards.registerVote(roundStart, voter, rewardWeight, rewardSqrt);
 
     // Emit the AllocationVoteCast event
     emit AllocationVoteCast(voter, roundId, apps, weights);

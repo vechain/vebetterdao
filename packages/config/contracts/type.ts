@@ -91,6 +91,13 @@ export type ContractsConfig = {
   GM_MULTIPLIERS_V2: number[]
   VOTER_REWARDS_LEVELS_V2: number[]
 
+  // Rewards Multipliers (basis points, 10000 = 1x)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1: number // Updated this round (default: 30000 = x3)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2: number // Updated within 2 rounds (default: 20000 = x2)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3: number // No update >= 3 rounds (default: 10000 = x1)
+  VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST: number // For/Against vote (default: 10000 = x1)
+  VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: number // Abstain vote (default: 3000 = x0.30)
+
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
 
   // Stargate contracts
@@ -108,4 +115,14 @@ export type ContractsConfig = {
 
   // DBA distribution start round
   DBA_DISTRIBUTION_START_ROUND: number
+
+  // Navigator Registry
+  NAVIGATOR_MIN_STAKE: bigint // minimum B3TR to register (default: 50000e18)
+  NAVIGATOR_MAX_STAKE_PERCENTAGE: number // max stake as basis points of VOT3 supply (default: 100 = 1%)
+  NAVIGATOR_FEE_LOCK_PERIOD: number // rounds before fees claimable (default: 4)
+  NAVIGATOR_FEE_PERCENTAGE: number // navigator fee in basis points (default: 2000 = 20%)
+  NAVIGATOR_EXIT_NOTICE_PERIOD: number // rounds for exit notice (default: 1)
+  NAVIGATOR_REPORT_INTERVAL: number // rounds between required reports (default: 2)
+  NAVIGATOR_MINOR_SLASH_PERCENTAGE: number // minor slash in basis points (default: 1000 = 10%)
+  NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: number // blocks before round deadline (default: 8640 = ~24hr)
 }

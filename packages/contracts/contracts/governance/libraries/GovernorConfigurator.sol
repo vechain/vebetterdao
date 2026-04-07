@@ -34,6 +34,7 @@ import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
 import { GovernorTypes } from "./GovernorTypes.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 
 /// @title GovernorConfigurator Library
 /// @notice Library for managing the configuration of a Governor contract.
@@ -59,6 +60,7 @@ library GovernorConfigurator {
 
   /// @dev Emitted when the VeBetterPassport contract is set.
   event VeBetterPassportSet(address oldVeBetterPassport, address newVeBetterPassport);
+  event NavigatorRegistrySet(address oldNavigatorRegistry, address newNavigatorRegistry);
 
   /// @dev The deposit threshold is not in the valid range for a percentage - 0 to 100.
   error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
@@ -106,6 +108,16 @@ library GovernorConfigurator {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     emit VeBetterPassportSet(address($.veBetterPassport), address(newVeBetterPassport));
     $.veBetterPassport = newVeBetterPassport;
+  }
+
+  /**
+   * @notice Sets the NavigatorRegistry contract.
+   * @param newNavigatorRegistry The new NavigatorRegistry contract.
+   */
+  function setNavigatorRegistry(INavigatorRegistry newNavigatorRegistry) external {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    emit NavigatorRegistrySet(address($.navigatorRegistry), address(newNavigatorRegistry));
+    $.navigatorRegistry = newNavigatorRegistry;
   }
 
   /**

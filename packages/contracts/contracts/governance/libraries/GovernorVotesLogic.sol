@@ -32,6 +32,7 @@ import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 
 /// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
@@ -71,6 +72,25 @@ library GovernorVotesLogic {
     uint256 power,
     string reason
   );
+
+  /// @notice Emitted when a navigator casts a vote on behalf of a delegated citizen
+  event NavigatorGovernanceVoteCast(
+    address indexed citizen,
+    address indexed navigator,
+    uint256 indexed proposalId,
+    uint8 support,
+    uint256 weight,
+    uint256 power
+  );
+
+  /// @dev Thrown when citizen is not delegated to any navigator
+  error NotDelegatedToNavigator(address citizen);
+
+  /// @dev Thrown when citizen is delegated to a navigator and cannot vote manually
+  error DelegatedToNavigator(address citizen);
+
+  /// @dev Thrown when navigator has not set a decision for the proposal
+  error NavigatorDecisionNotSet(address navigator, uint256 proposalId);
 
   /// @notice Emits true if quadratic voting is disabled, false otherwise.
   /// @param disabled - The flag to enable or disable quadratic voting.
@@ -229,6 +249,11 @@ library GovernorVotesLogic {
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
 
+    // Citizens delegated to a navigator cannot vote manually on governance proposals
+    if (address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter)) {
+      revert DelegatedToNavigator(voter);
+    }
+
     (bool isPerson, string memory explanation) = $.veBetterPassport.isPersonAtTimepoint(
       voter,
       SafeCast.toUint48(proposalSnapshot)
@@ -247,9 +272,53 @@ library GovernorVotesLogic {
 
     _countVote(proposalId, voter, support, weight, power);
 
-    $.voterRewards.registerVote(proposalId, voter, weight, Math.sqrt(weight));
+    // Apply governance intent multiplier and register vote for rewards
+    _registerVoteWithIntentMultiplier($, proposalId, voter, weight, support, proposalSnapshot);
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
+
+    return weight;
+  }
+
+  /**
+   * @notice Cast a governance vote on behalf of a citizen delegated to a navigator.
+   * @dev Uses the navigator's decision. No personhood check — delegation implies trust.
+   * @param proposalId The proposal to vote on
+   * @param citizen The delegated citizen whose voting power is used
+   * @return weight The voting weight used
+   */
+  function castNavigatorVote(uint256 proposalId, address citizen) external returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    GovernorStateLogic.validateStateBitmap(
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
+    );
+
+    // Citizen must be delegated to a navigator
+    address navigator = $.navigatorRegistry.getNavigator(citizen);
+    if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
+
+    // Navigator must have set a decision for this proposal
+    uint8 decision = $.navigatorRegistry.getProposalDecision(navigator, proposalId);
+    if (decision == 0) revert NavigatorDecisionNotSet(navigator, proposalId);
+
+    // Decision is offset by 1 in NavigatorRegistry: 1=Against, 2=For, 3=Abstain
+    // B3TRGovernor uses: 0=Against, 1=For, 2=Abstain
+    uint8 support = decision - 1;
+
+    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
+    // Voting power = delegated amount at snapshot (not full VOT3 balance)
+    uint256 weight = $.navigatorRegistry.getDelegatedAmountAtTimepoint(citizen, proposalSnapshot);
+    uint256 power = Math.sqrt(weight) * 1e9;
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(GovernorProposalLogic.proposalType(proposalId));
+
+    _checkVotingThreshold(weight, proposalType);
+    _countVote(proposalId, citizen, support, weight, power);
+
+    // Register vote for rewards (with intent multiplier)
+    _registerVoteWithIntentMultiplier($, proposalId, citizen, weight, support, proposalSnapshot);
+
+    emit NavigatorGovernanceVoteCast(citizen, navigator, proposalId, support, weight, power);
 
     return weight;
   }
@@ -316,5 +385,30 @@ library GovernorVotesLogic {
 
     // Check if quadratic voting is enabled or disabled for the current round.
     return $.quadraticVotingDisabled.upperLookupRecent(SafeCast.toUint48(roundStartBlock)) == 1; // 0: enabled, 1: disabled
+  }
+
+  /// @dev Register a vote with governance intent multiplier applied to reward weight
+  /// @param $ The governor storage
+  /// @param proposalId The proposal ID
+  /// @param voter The voter address
+  /// @param weight The raw voting weight (unmultiplied)
+  /// @param support The vote support value (0=Against, 1=For, 2=Abstain)
+  /// @param proposalSnapshot The proposal snapshot timepoint for multiplier lookup
+  function _registerVoteWithIntentMultiplier(
+    GovernorStorageTypes.GovernorStorage storage $,
+    uint256 proposalId,
+    address voter,
+    uint256 weight,
+    uint8 support,
+    uint256 proposalSnapshot
+  ) private {
+    // Get intent multiplier based on vote support type
+    // support: 0 = Against, 1 = For, 2 = Abstain
+    (uint256 forAgainstMultiplier, uint256 abstainMultiplier) = IVoterRewards(address($.voterRewards))
+      .getIntentMultipliers(proposalSnapshot);
+    uint256 intentMultiplier = (support == 2) ? abstainMultiplier : forAgainstMultiplier;
+    uint256 rewardWeight = (weight * intentMultiplier) / 10000;
+
+    $.voterRewards.registerVote(proposalId, voter, rewardWeight, Math.sqrt(rewardWeight));
   }
 }

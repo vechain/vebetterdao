@@ -43,6 +43,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "dba-pool",
     description: "Deploy only this contract",
   },
+  "Navigator Registry": {
+    name: "navigator-registry",
+    description: "Deploy only this contract",
+  },
 } as const
 
 async function deployContract() {
@@ -125,6 +129,13 @@ async function deployContract() {
         break
       case "dba-pool":
         console.log("Deploying Dynamic Base Allocation Pool")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
+      case "navigator-registry":
+        console.log("Deploying Navigator Registry")
         // Set environment variables
         process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
         // Run the upgrade script

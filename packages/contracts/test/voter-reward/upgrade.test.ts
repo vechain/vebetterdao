@@ -1408,7 +1408,7 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     }
 
     // Verify V6 initialization
-    expect(await voterRewardsV6.version()).to.equal("6")
+    expect(await voterRewardsV6.version()).to.equal("7")
     expect(await voterRewardsV6.relayerRewardsPool()).to.equal(await relayerRewardsPool.getAddress())
 
     // Test V6 relayer fee functionality with real voting round
@@ -1535,7 +1535,7 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     // ========================================
 
     // Verify V6 contract is functional and state is intact
-    expect(await voterRewardsV6.version()).to.equal("6", "V6 contract should report correct version")
+    expect(await voterRewardsV6.version()).to.equal("7", "V7 contract should report correct version")
 
     // Verify V6 fee logic works correctly (core V6 functionality)
     expect(voter1Fee).to.be.gt(0, "V6: Auto-voting user should have relayer fees")

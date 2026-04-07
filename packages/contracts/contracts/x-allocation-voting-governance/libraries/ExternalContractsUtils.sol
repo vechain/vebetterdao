@@ -7,6 +7,7 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 import { XAllocationVotingStorageTypes } from "./XAllocationVotingStorageTypes.sol";
 
 /**
@@ -29,6 +30,8 @@ library ExternalContractsUtils {
   event B3TRGovernorSet(address oldContractAddress, address newContractAddress);
   /// @dev Emitted when the RelayerRewardsPool contract is set
   event RelayerRewardsPoolSet(address oldContractAddress, address newContractAddress);
+  /// @dev Emitted when the NavigatorRegistry contract is set
+  event NavigatorRegistrySet(address oldContractAddress, address newContractAddress);
 
   // ------- Errors ------- //
 
@@ -122,5 +125,16 @@ library ExternalContractsUtils {
       ._getExternalContractsStorage();
     emit RelayerRewardsPoolSet(address($._relayerRewardsPool), address(newRelayerRewardsPool));
     $._relayerRewardsPool = newRelayerRewardsPool;
+  }
+
+  /// @notice Sets the NavigatorRegistry contract
+  /// @param newNavigatorRegistry The new NavigatorRegistry contract address
+  function setNavigatorRegistry(INavigatorRegistry newNavigatorRegistry) external {
+    if (address(newNavigatorRegistry) == address(0)) revert InvalidContractAddress("NavigatorRegistry");
+
+    XAllocationVotingStorageTypes.ExternalContractsStorage storage $ = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage();
+    emit NavigatorRegistrySet(address($._navigatorRegistry), address(newNavigatorRegistry));
+    $._navigatorRegistry = newNavigatorRegistry;
   }
 }

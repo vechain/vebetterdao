@@ -9,6 +9,7 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 
 /// @title XAllocationVotingStorageTypes
 /// @notice Defines all storage types and getters for the XAllocationVoting system.
@@ -68,12 +69,19 @@ library XAllocationVotingStorageTypes {
     mapping(address user => bool) hasVoted;
     // Total number of voters in the round
     uint256 totalVoters;
+    // Mapping to track which apps a user voted for in this round
+    mapping(address user => mapping(bytes32 appId => bool)) userVotedForApp;
   }
 
   struct RoundVotesCountingStorage {
     mapping(address user => bool) _hasVotedOnce;
     mapping(uint256 roundId => RoundVote) _roundVotes;
     uint256 votingThreshold;
+    // --------------------------- V9 Additions (Freshness Tracking) --------------------------- //
+    // XOR fingerprint of the apps voted for (order-independent)
+    mapping(address voter => bytes32) _lastVoteFingerprint;
+    // Round number when the fingerprint last changed
+    mapping(address voter => uint256) _lastFingerprintChangedRound;
   }
 
   struct EarningsSettingsStorage {
@@ -107,6 +115,8 @@ library XAllocationVotingStorageTypes {
     IVeBetterPassport _veBetterPassport;
     IB3TRGovernor _b3trGovernor;
     IRelayerRewardsPool _relayerRewardsPool;
+    // V10: NavigatorRegistry for navigator delegation voting
+    INavigatorRegistry _navigatorRegistry;
   }
 
   struct AutoVotingStorage {
