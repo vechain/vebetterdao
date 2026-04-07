@@ -13,7 +13,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { isValidAddress } from "@vechain/vechain-kit/utils"
 import { useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuPlus, LuX } from "react-icons/lu"
@@ -21,18 +20,18 @@ import { LuPlus, LuX } from "react-icons/lu"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useGetAddressFromVetDomains } from "@/hooks/useGetVetDomains"
 
-type InviteeEntry = { id: number; value: string }
-type ParsedInviteeEntry = InviteeEntry & {
-  normalizedValue: string
-  isAddress: boolean
-  isDomain: boolean
-  resolvedAddress?: string
-}
+import {
+  countResolvedInvitees,
+  getInviteeValidationError,
+  getInviteeValidationMessage,
+  getSanitizedInvitees,
+  isVetDomain,
+  ParsedInviteeValue,
+  parseInviteeValues,
+} from "./inviteeValidation"
 
-const isVetDomain = (value: string) => {
-  const normalizedValue = value.toLowerCase()
-  return !normalizedValue.startsWith("0x") && normalizedValue.endsWith(".vet")
-}
+type InviteeEntry = { id: number; value: string }
+type ParsedInviteeEntry = InviteeEntry & ParsedInviteeValue
 
 type AddChallengeInvitesModalProps = {
   challengeId: number
@@ -55,7 +54,6 @@ export const AddChallengeInvitesModal = ({
   const actions = useChallengeActions()
   const { t } = useTranslation()
 
-  const creatorLower = creatorAddress?.toLowerCase()
   const existingSet = useMemo(() => new Set((existingInvitees ?? []).map(a => a.toLowerCase())), [existingInvitees])
   const domainInvitees = useMemo(
     () =>
@@ -68,53 +66,37 @@ export const AddChallengeInvitesModal = ({
     isFetching,
   } = useGetAddressFromVetDomains(domainInvitees.length > 0 ? domainInvitees.map(entry => entry.value) : undefined)
   const parsedInvitees = useMemo<ParsedInviteeEntry[]>(() => {
-    let domainIndex = 0
+    const parsedInviteeValues = parseInviteeValues(
+      invitees.map(entry => entry.value),
+      resolvedDomainAddresses,
+    )
 
-    return invitees.map(entry => {
-      const normalizedValue = entry.value.trim()
-      const isAddress = isValidAddress(normalizedValue)
-      const isDomain = isVetDomain(normalizedValue)
-      const resolvedDomain = isDomain ? resolvedDomainAddresses[domainIndex++] : undefined
+    return invitees.map((entry, index) => {
+      const parsedInvitee = parsedInviteeValues[index]
 
       return {
         ...entry,
-        normalizedValue,
-        isAddress,
-        isDomain,
-        resolvedAddress: isAddress
-          ? normalizedValue.toLowerCase()
-          : typeof resolvedDomain === "string"
-            ? resolvedDomain.toLowerCase()
-            : undefined,
+        normalizedValue: parsedInvitee?.normalizedValue ?? entry.value.trim(),
+        isAddress: parsedInvitee?.isAddress ?? false,
+        isDomain: parsedInvitee?.isDomain ?? false,
+        resolvedAddress: parsedInvitee?.resolvedAddress,
       }
     })
   }, [invitees, resolvedDomainAddresses])
-  const resolvedInviteeCounts = useMemo(() => {
-    const counts = new Map<string, number>()
-
-    for (const entry of parsedInvitees) {
-      if (!entry.resolvedAddress) continue
-      counts.set(entry.resolvedAddress, (counts.get(entry.resolvedAddress) ?? 0) + 1)
-    }
-
-    return counts
-  }, [parsedInvitees])
-  const sanitizedInvitees = parsedInvitees
-    .map(entry => entry.resolvedAddress)
-    .filter((address): address is string => !!address)
+  const resolvedInviteeCounts = useMemo(() => countResolvedInvitees(parsedInvitees), [parsedInvitees])
+  const sanitizedInvitees = useMemo(() => getSanitizedInvitees(parsedInvitees), [parsedInvitees])
   const isResolvingDomains = domainInvitees.length > 0 && (isPending || isFetching)
 
   const getEntryError = (entry: ParsedInviteeEntry): string | null => {
-    if (!entry.normalizedValue) return null
-    if (entry.normalizedValue.toLowerCase().startsWith("0x") && !entry.isAddress)
-      return t("Please enter a valid wallet address")
-    if (!entry.isAddress && !entry.isDomain) return t("Please enter a valid wallet address or domain")
-    if (entry.isDomain && !entry.resolvedAddress) return isResolvingDomains ? null : t("Please enter a valid domain")
-    if (!entry.resolvedAddress) return t("Invalid address")
-    if (creatorLower && entry.resolvedAddress === creatorLower) return t("Creator cannot be invited")
-    if (existingSet.has(entry.resolvedAddress)) return t("Already invited")
-    if ((resolvedInviteeCounts.get(entry.resolvedAddress) ?? 0) > 1) return t("Duplicate address")
-    return null
+    const error = getInviteeValidationError({
+      invitee: entry,
+      creatorAddress,
+      existingInvitees: existingSet,
+      resolvedInviteeCounts,
+      isResolvingDomains,
+    })
+
+    return error ? getInviteeValidationMessage(t, error) : null
   }
 
   const hasErrors = parsedInvitees.some(e => getEntryError(e) !== null)

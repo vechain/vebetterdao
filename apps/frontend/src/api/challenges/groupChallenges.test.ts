@@ -81,22 +81,36 @@ describe("groupChallenges", () => {
     expect(g.publicJoinable).toHaveLength(0)
   })
 
-  it("places finalized challenges in past", () => {
-    const c = make({ status: ChallengeStatus.Finalized, challengeId: 6 })
+  it("places finalized challenges in past when viewer participated", () => {
+    const c = make({ status: ChallengeStatus.Finalized, isJoined: true, challengeId: 6 })
     const g = groupChallenges([c])
     expect(g.past).toHaveLength(1)
   })
 
-  it("places cancelled challenges in past", () => {
-    const c = make({ status: ChallengeStatus.Cancelled, challengeId: 7 })
+  it("places cancelled challenges in past when viewer created them", () => {
+    const c = make({ status: ChallengeStatus.Cancelled, isCreator: true, challengeId: 7 })
     const g = groupChallenges([c])
     expect(g.past).toHaveLength(1)
   })
 
-  it("places claimable challenges in past", () => {
+  it("places claimable challenges in claimRewards", () => {
     const c = make({ status: ChallengeStatus.Finalized, canClaim: true, isJoined: true, challengeId: 8 })
     const g = groupChallenges([c])
-    expect(g.past).toHaveLength(1)
+    expect(g.claimRewards).toHaveLength(1)
+    expect(g.past).toHaveLength(0)
+  })
+
+  it("places finalizable challenges in claimRewards instead of activeParticipating", () => {
+    const c = make({ status: ChallengeStatus.Active, canFinalize: true, isCreator: true, challengeId: 10 })
+    const g = groupChallenges([c])
+    expect(g.claimRewards).toHaveLength(1)
+    expect(g.activeParticipating).toHaveLength(0)
+  })
+
+  it("does not place unrelated completed challenges in past", () => {
+    const c = make({ status: ChallengeStatus.Finalized, challengeId: 11 })
+    const g = groupChallenges([c])
+    expect(g.past).toHaveLength(0)
   })
 
   it("a challenge can appear in multiple groups", () => {
@@ -119,6 +133,7 @@ describe("groupChallenges", () => {
     expect(g.activeParticipating).toHaveLength(0)
     expect(g.pendingInvites).toHaveLength(0)
     expect(g.publicJoinable).toHaveLength(0)
+    expect(g.claimRewards).toHaveLength(0)
     expect(g.past).toHaveLength(0)
   })
 })

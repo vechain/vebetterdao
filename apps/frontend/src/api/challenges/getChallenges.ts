@@ -195,6 +195,7 @@ export function groupChallenges(challenges: ChallengeView[]): GroupedChallenges 
   const activeParticipating: ChallengeView[] = []
   const pendingInvites: ChallengeView[] = []
   const publicJoinable: ChallengeView[] = []
+  const claimRewards: ChallengeView[] = []
   const past: ChallengeView[] = []
 
   for (const c of challenges) {
@@ -203,8 +204,10 @@ export function groupChallenges(challenges: ChallengeView[]): GroupedChallenges 
       c.status === ChallengeStatus.Finalized ||
       c.status === ChallengeStatus.Cancelled ||
       c.status === ChallengeStatus.Invalid
+    const needsPastAction = c.canClaim || c.canRefund || c.canFinalize
+    const isRelevantPastChallenge = c.isJoined || c.isCreator
 
-    if (isLive && (c.isJoined || c.isCreator)) {
+    if (isLive && !c.canFinalize && isRelevantPastChallenge) {
       activeParticipating.push(c)
     }
 
@@ -216,12 +219,16 @@ export function groupChallenges(challenges: ChallengeView[]): GroupedChallenges 
       publicJoinable.push(c)
     }
 
-    if (isDone || c.canClaim || c.canRefund || c.canFinalize) {
+    if (needsPastAction && isRelevantPastChallenge) {
+      claimRewards.push(c)
+    }
+
+    if (isDone && isRelevantPastChallenge && !needsPastAction) {
       past.push(c)
     }
   }
 
-  return { activeParticipating, pendingInvites, publicJoinable, past }
+  return { activeParticipating, pendingInvites, publicJoinable, claimRewards, past }
 }
 
 export function filterByTab(challenges: ChallengeView[], tab: ChallengeTab): ChallengeView[] {

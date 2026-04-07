@@ -5,6 +5,15 @@ import { ChallengeKind, ChallengeVisibility, ThresholdMode } from "@/api/challen
 import { CreateChallengeFormData, useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
+import { useGetAddressFromVetDomains } from "@/hooks/useGetVetDomains"
+
+import {
+  countResolvedInvitees,
+  getInviteeValidationError,
+  getSanitizedInvitees,
+  isVetDomain,
+  parseInviteeValues,
+} from "../inviteeValidation"
 
 import {
   AppScope,
@@ -110,6 +119,33 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const isSponsored = form.kind === ChallengeKind.Sponsored
   const isPrivate = form.visibility === ChallengeVisibility.Private
   const isSplitPrize = form.thresholdMode === ThresholdMode.SplitAboveThreshold
+  const domainInvitees = useMemo(() => form.invitees.map(value => value.trim()).filter(isVetDomain), [form.invitees])
+  const {
+    data: resolvedDomainAddresses = [],
+    isPending: isInviteesPending,
+    isFetching: isInviteesFetching,
+  } = useGetAddressFromVetDomains(domainInvitees.length > 0 ? domainInvitees : undefined)
+  const parsedInvitees = useMemo(
+    () => parseInviteeValues(form.invitees, resolvedDomainAddresses),
+    [form.invitees, resolvedDomainAddresses],
+  )
+  const resolvedInviteeCounts = useMemo(() => countResolvedInvitees(parsedInvitees), [parsedInvitees])
+  const sanitizedInvitees = useMemo(() => getSanitizedInvitees(parsedInvitees), [parsedInvitees])
+  const isResolvingInvitees = domainInvitees.length > 0 && (isInviteesPending || isInviteesFetching)
+  const inviteeErrorKeys = useMemo(
+    () =>
+      parsedInvitees.map(invitee =>
+        getInviteeValidationError({
+          invitee,
+          creatorAddress: account?.address,
+          resolvedInviteeCounts,
+          isResolvingDomains: isResolvingInvitees,
+        }),
+      ),
+    [account?.address, isResolvingInvitees, parsedInvitees, resolvedInviteeCounts],
+  )
+  const hasInviteeErrors = inviteeErrorKeys.some(error => error !== null)
+  const canConfirmInvitees = !isResolvingInvitees && !hasInviteeErrors
 
   const update = <K extends keyof CreateChallengeFormData>(key: K, value: CreateChallengeFormData[K]) =>
     setForm(prev => ({ ...prev, [key]: value }))
@@ -245,7 +281,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   }
 
   const confirmInvitees = (skip = false) => {
-    update("invitees", skip ? [] : form.invitees.map(value => value.trim()).filter(Boolean))
+    if (!skip && !canConfirmInvitees) return
+    update("invitees", skip ? [] : sanitizedInvitees)
     withTyping(() => setInviteesConfirmed(true))
   }
 
@@ -288,13 +325,15 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     !hasInvalidStartRound &&
     !hasInvalidEndRound &&
     !hasInsufficientB3tr &&
-    !hasInvalidThresholdConfiguration
+    !hasInvalidThresholdConfiguration &&
+    !isResolvingInvitees &&
+    !hasInviteeErrors
 
   const handleSubmit = () => {
     if (!canSubmit) return
     const parsed: CreateChallengeFormData = {
       ...form,
-      invitees: form.invitees.map(s => s.trim()).filter(Boolean),
+      invitees: sanitizedInvitees,
     }
     actions.createChallenge(parsed)
     setOpen(false)
@@ -327,6 +366,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     isB3trBalanceLoading,
     appsData,
     isAppsLoading,
+    inviteeErrorKeys,
+    canConfirmInvitees,
 
     // step flags
     kindChosen,

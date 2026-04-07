@@ -28,6 +28,7 @@ export interface GroupedChallenges {
   activeParticipating: ChallengeView[]
   pendingInvites: ChallengeView[]
   publicJoinable: ChallengeView[]
+  claimRewards: ChallengeView[]
   past: ChallengeView[]
 }
 

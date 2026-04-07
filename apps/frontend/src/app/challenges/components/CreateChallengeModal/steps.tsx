@@ -17,6 +17,8 @@ import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
 
+import { getInviteeValidationMessage } from "../inviteeValidation"
+
 import { SummaryItem } from "./ChatBubbles"
 import {
   getChoiceVariant,
@@ -61,6 +63,8 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     appsData,
     isAppsLoading,
     appSearch,
+    inviteeErrorKeys,
+    canConfirmInvitees,
 
     kindChosen,
     amountConfirmed,
@@ -645,14 +649,33 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         <VStack align="stretch" gap="3">
           {form.invitees.length > 0 && (
             <VStack align="stretch" gap="2" w="full">
-              {form.invitees.map((addr, index) => (
-                <HStack key={`invitee-${addr || index}`} gap="2">
-                  <Input placeholder="0x..." value={addr} onChange={e => flow.updateInvitee(index, e.target.value)} />
-                  <IconButton size="sm" variant="ghost" onClick={() => flow.removeInvitee(index)} aria-label="Remove">
-                    <LuX />
-                  </IconButton>
-                </HStack>
-              ))}
+              {form.invitees.map((addr, index) => {
+                const error = inviteeErrorKeys[index]
+                return (
+                  <VStack key={getInviteeKey(form.invitees, addr, index)} align="stretch" gap="1">
+                    <HStack gap="2">
+                      <Input
+                        placeholder="0x..."
+                        value={addr}
+                        onChange={e => flow.updateInvitee(index, e.target.value)}
+                        borderColor={error ? "border.error" : undefined}
+                      />
+                      <IconButton
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => flow.removeInvitee(index)}
+                        aria-label={t("Remove")}>
+                        <LuX />
+                      </IconButton>
+                    </HStack>
+                    {error && (
+                      <Text textStyle="xs" color="fg.error">
+                        {getInviteeValidationMessage(t, error)}
+                      </Text>
+                    )}
+                  </VStack>
+                )
+              })}
             </VStack>
           )}
           <Button size="sm" variant={tertiaryVariant} alignSelf="start" onClick={flow.addInvitee}>
@@ -663,7 +686,11 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
             <Button size="sm" variant={tertiaryVariant} onClick={() => flow.confirmInvitees(true)}>
               {t("Skip")}
             </Button>
-            <Button size="sm" variant={primaryVariant} onClick={() => flow.confirmInvitees(false)}>
+            <Button
+              size="sm"
+              variant={primaryVariant}
+              disabled={!canConfirmInvitees}
+              onClick={() => flow.confirmInvitees(false)}>
               {t("Continue")}
             </Button>
           </HStack>
@@ -727,4 +754,9 @@ function getCompactListLabel(items: string[]) {
   if (items.length === 0) return ""
   if (items.length <= 2) return items.join(", ")
   return `${items.slice(0, 2).join(", ")}, +${items.length - 2}`
+}
+
+function getInviteeKey(invitees: string[], value: string, index: number) {
+  const occurrence = invitees.slice(0, index).filter(candidate => candidate === value).length
+  return `invitee-${value || "empty"}-${occurrence}`
 }

@@ -25,9 +25,11 @@ export const hasChallengeActions = (challenge: ChallengeView) =>
 export const ChallengeActions = ({
   challenge,
   layout = "default",
+  buttonSize,
 }: {
   challenge: ChallengeView
   layout?: ChallengeActionsLayout
+  buttonSize?: "sm" | "md"
 }) => {
   const { account } = useWallet()
   const actions = useChallengeActions()
@@ -52,7 +54,7 @@ export const ChallengeActions = ({
     BigInt(b3trBalance.original) < joinStakeAmount
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const isCardLayout = layout === "card"
-  const buttonSize = isCardLayout ? "md" : "sm"
+  const resolvedButtonSize = buttonSize ?? (isCardLayout ? "md" : "sm")
   const cardButtonProps = isCardLayout ? { w: "full", minH: "11" } : {}
   const actionCount = [
     challenge.canAccept,
@@ -74,7 +76,7 @@ export const ChallengeActions = ({
     <>
       {challenge.canAccept && (
         <Button
-          size={buttonSize}
+          size={resolvedButtonSize}
           variant="primary"
           disabled={hasInsufficientB3trForJoin}
           onClick={() => actions.acceptChallenge(challenge)}
@@ -83,13 +85,17 @@ export const ChallengeActions = ({
         </Button>
       )}
       {challenge.canDecline && (
-        <Button size={buttonSize} variant="negative" onClick={() => actions.declineChallenge(id)} {...cardButtonProps}>
+        <Button
+          size={resolvedButtonSize}
+          variant="negative"
+          onClick={() => actions.declineChallenge(id)}
+          {...cardButtonProps}>
           {t("Decline")}
         </Button>
       )}
       {challenge.canJoin && (
         <Button
-          size={buttonSize}
+          size={resolvedButtonSize}
           variant="primary"
           disabled={hasInsufficientB3trForJoin}
           onClick={() => actions.joinChallenge(challenge)}
@@ -98,27 +104,47 @@ export const ChallengeActions = ({
         </Button>
       )}
       {challenge.canLeave && (
-        <Button size={buttonSize} variant="negative" onClick={() => actions.leaveChallenge(id)} {...cardButtonProps}>
+        <Button
+          size={resolvedButtonSize}
+          variant="negative"
+          onClick={() => actions.leaveChallenge(id)}
+          {...cardButtonProps}>
           {t("Leave")}
         </Button>
       )}
       {challenge.canCancel && (
-        <Button size={buttonSize} variant="negative" onClick={() => actions.cancelChallenge(id)} {...cardButtonProps}>
+        <Button
+          size={resolvedButtonSize}
+          variant="negative"
+          onClick={() => actions.cancelChallenge(id)}
+          {...cardButtonProps}>
           {t("Cancel")}
         </Button>
       )}
       {challenge.canClaim && (
-        <Button size={buttonSize} variant="primary" onClick={() => actions.claimChallenge(id)} {...cardButtonProps}>
+        <Button
+          size={resolvedButtonSize}
+          variant="primary"
+          onClick={() => actions.claimChallenge(id)}
+          {...cardButtonProps}>
           {t("Claim payout")}
         </Button>
       )}
       {challenge.canRefund && (
-        <Button size={buttonSize} variant="primary" onClick={() => actions.refundChallenge(id)} {...cardButtonProps}>
+        <Button
+          size={resolvedButtonSize}
+          variant="primary"
+          onClick={() => actions.refundChallenge(id)}
+          {...cardButtonProps}>
           {t("Claim refund")}
         </Button>
       )}
       {challenge.canFinalize && (
-        <Button size={buttonSize} variant="primary" onClick={() => actions.finalizeChallenge(id)} {...cardButtonProps}>
+        <Button
+          size={resolvedButtonSize}
+          variant="primary"
+          onClick={() => actions.finalizeChallenge(id)}
+          {...cardButtonProps}>
           {t("Finalize")}
         </Button>
       )}

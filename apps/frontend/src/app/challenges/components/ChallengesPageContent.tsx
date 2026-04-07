@@ -49,16 +49,6 @@ const CompactSkeleton = () => (
   </Card.Root>
 )
 
-const EmptyState = ({ message }: { message: string }) => {
-  return (
-    <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "5", md: "6" }} py={{ base: "6", md: "8" }}>
-      <Text textStyle="sm" color="text.subtle">
-        {message}
-      </Text>
-    </Box>
-  )
-}
-
 export const ChallengesPageContent = () => {
   const { account } = useWallet()
   const viewerAddress = account?.address
@@ -74,6 +64,7 @@ export const ChallengesPageContent = () => {
   const OPEN_PAGE_SIZE = 12
   const [openPage, setOpenPage] = useState(1)
 
+  const hasClaimRewards = grouped.claimRewards.length > 0
   const hasActive = grouped.activeParticipating.length > 0
   const hasInvites = grouped.pendingInvites.length > 0
   const hasPublic = grouped.publicJoinable.length > 0
@@ -103,6 +94,25 @@ export const ChallengesPageContent = () => {
             </CreateChallengeModal>
           </HStack>
         </Stack>
+
+        {/* Claim rewards - compact list */}
+        {(hasClaimRewards || (isLoading && viewerAddress)) && (
+          <ChallengeHubSection title={t("Claim rewards")} count={grouped.claimRewards.length}>
+            {isLoading ? (
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                {[0, 1].map(i => (
+                  <CompactSkeleton key={i} />
+                ))}
+              </SimpleGrid>
+            ) : (
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                {grouped.claimRewards.map(c => (
+                  <ChallengeCompactCard key={c.challengeId} challenge={c} />
+                ))}
+              </SimpleGrid>
+            )}
+          </ChallengeHubSection>
+        )}
 
         {/* Active participating - horizontal carousel */}
         {(hasActive || isLoading) && (
@@ -233,64 +243,64 @@ export const ChallengesPageContent = () => {
         )}
 
         {/* Public joinable - compact list */}
-        <ChallengeHubSection title={t("Open to join")} count={grouped.publicJoinable.length}>
-          {isLoading ? (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-              {[0, 1, 2].map(i => (
-                <CompactSkeleton key={i} />
-              ))}
-            </SimpleGrid>
-          ) : hasPublic ? (
-            <VStack gap="3" align="stretch">
+        {(hasPublic || isLoading) && (
+          <ChallengeHubSection title={t("Open to join")} count={grouped.publicJoinable.length}>
+            {isLoading ? (
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-                {pagedPublic.map(c => (
-                  <ChallengeCompactCard key={c.challengeId} challenge={c} />
+                {[0, 1, 2].map(i => (
+                  <CompactSkeleton key={i} />
                 ))}
               </SimpleGrid>
-              {grouped.publicJoinable.length > OPEN_PAGE_SIZE && (
-                <Pagination.Root
-                  mx={{ base: "auto", md: "unset" }}
-                  mt="2"
-                  count={grouped.publicJoinable.length}
-                  pageSize={OPEN_PAGE_SIZE}
-                  page={openPage}
-                  display="flex"
-                  flexWrap="wrap"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  gap="4"
-                  siblingCount={1}
-                  onPageChange={p => setOpenPage(p.page)}>
-                  <Pagination.PageText format="compact" textStyle="sm" />
-                  <ButtonGroup variant="ghost" size="xs" flexWrap="wrap">
-                    <Pagination.PrevTrigger asChild>
-                      <IconButton>
-                        <NavArrowLeft />
-                      </IconButton>
-                    </Pagination.PrevTrigger>
-                    <Pagination.Items
-                      render={p => (
-                        <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
-                          {p.value}
+            ) : (
+              <VStack gap="3" align="stretch">
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                  {pagedPublic.map(c => (
+                    <ChallengeCompactCard key={c.challengeId} challenge={c} />
+                  ))}
+                </SimpleGrid>
+                {grouped.publicJoinable.length > OPEN_PAGE_SIZE && (
+                  <Pagination.Root
+                    mx={{ base: "auto", md: "unset" }}
+                    mt="2"
+                    count={grouped.publicJoinable.length}
+                    pageSize={OPEN_PAGE_SIZE}
+                    page={openPage}
+                    display="flex"
+                    flexWrap="wrap"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap="4"
+                    siblingCount={1}
+                    onPageChange={p => setOpenPage(p.page)}>
+                    <Pagination.PageText format="compact" textStyle="sm" />
+                    <ButtonGroup variant="ghost" size="xs" flexWrap="wrap">
+                      <Pagination.PrevTrigger asChild>
+                        <IconButton>
+                          <NavArrowLeft />
                         </IconButton>
-                      )}
-                    />
-                    <Pagination.NextTrigger asChild>
-                      <IconButton>
-                        <NavArrowRight />
-                      </IconButton>
-                    </Pagination.NextTrigger>
-                  </ButtonGroup>
-                </Pagination.Root>
-              )}
-            </VStack>
-          ) : (
-            <EmptyState message={t("No public challenges available right now")} />
-          )}
-        </ChallengeHubSection>
+                      </Pagination.PrevTrigger>
+                      <Pagination.Items
+                        render={p => (
+                          <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
+                            {p.value}
+                          </IconButton>
+                        )}
+                      />
+                      <Pagination.NextTrigger asChild>
+                        <IconButton>
+                          <NavArrowRight />
+                        </IconButton>
+                      </Pagination.NextTrigger>
+                    </ButtonGroup>
+                  </Pagination.Root>
+                )}
+              </VStack>
+            )}
+          </ChallengeHubSection>
+        )}
 
         {/* Past / completed */}
-        {(hasPast || isLoading) && (
+        {(hasPast || (isLoading && viewerAddress)) && (
           <ChallengeHubSection title={t("History")} count={grouped.past.length}>
             {isLoading ? (
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">

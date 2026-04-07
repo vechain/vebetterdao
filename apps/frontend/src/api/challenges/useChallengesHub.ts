@@ -7,7 +7,13 @@ import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks
 import { fetchAllChallenges, groupChallenges } from "./getChallenges"
 import { GroupedChallenges } from "./types"
 
-const EMPTY: GroupedChallenges = { activeParticipating: [], pendingInvites: [], publicJoinable: [], past: [] }
+const EMPTY: GroupedChallenges = {
+  activeParticipating: [],
+  pendingInvites: [],
+  publicJoinable: [],
+  claimRewards: [],
+  past: [],
+}
 
 export const getChallengesHubQueryKey = (currentRoundId?: string, viewerAddress?: string) => [
   "challenges",
