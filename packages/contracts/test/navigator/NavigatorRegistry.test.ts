@@ -236,6 +236,69 @@ describe("NavigatorRegistry - @shard19a", function () {
       })
     })
 
+    describe("reduceStake()", function () {
+      it("should allow active navigator to reduce stake and emit StakeWithdrawn", async function () {
+        const navigator = otherAccounts[10]
+        const extraStake = ethers.parseEther("100000")
+        await registerNavigator(navigator, extraStake)
+
+        const reduceAmount = ethers.parseEther("10000")
+        const remaining = extraStake - reduceAmount
+
+        const tx = await navigatorRegistry.connect(navigator).reduceStake(reduceAmount)
+
+        expect(await navigatorRegistry.getStake(navigator.address)).to.equal(remaining)
+        await expect(tx)
+          .to.emit(navigatorRegistry, "StakeWithdrawn")
+          .withArgs(navigator.address, reduceAmount, remaining)
+      })
+
+      it("should revert with StakeBelowMinimum when reducing below min stake", async function () {
+        const navigator = otherAccounts[10]
+        await registerNavigator(navigator)
+
+        // Try to reduce to below minimum (50K staked, min is 50K, so any reduction should fail)
+        await expect(
+          navigatorRegistry.connect(navigator).reduceStake(ethers.parseEther("1")),
+        ).to.be.revertedWithCustomError(navigatorRegistry, "StakeBelowMinimum")
+      })
+
+      it("should revert when reducing would break delegation capacity", async function () {
+        const navigator = otherAccounts[10]
+        // Register with extra stake so we can reduce
+        const extraStake = ethers.parseEther("100000")
+        await registerNavigator(navigator, extraStake)
+
+        // Delegate close to capacity: 100K stake * 10 = 1M capacity, delegate 600K
+        const citizen = otherAccounts[11]
+        await getVot3Tokens(citizen, "600000")
+        await navigatorRegistry.connect(citizen).delegate(navigator.address, ethers.parseEther("600000"))
+
+        // Reducing 50K would leave 50K stake, capacity = 500K < 600K delegated
+        await expect(
+          navigatorRegistry.connect(navigator).reduceStake(ethers.parseEther("50000")),
+        ).to.be.revertedWithCustomError(navigatorRegistry, "StakeBelowMinimum")
+      })
+
+      it("should revert with InsufficientStake when reducing more than staked", async function () {
+        const navigator = otherAccounts[10]
+        await registerNavigator(navigator)
+
+        const tooMuch = STAKE_AMOUNT + ethers.parseEther("1")
+        await expect(navigatorRegistry.connect(navigator).reduceStake(tooMuch)).to.be.revertedWithCustomError(
+          navigatorRegistry,
+          "InsufficientStake",
+        )
+      })
+
+      it("should revert when caller is not a navigator", async function () {
+        const nonNavigator = otherAccounts[11]
+        await expect(
+          navigatorRegistry.connect(nonNavigator).reduceStake(ethers.parseEther("1000")),
+        ).to.be.revertedWithCustomError(navigatorRegistry, "NotRegistered")
+      })
+    })
+
     describe("Delegation Capacity", function () {
       it("getDelegationCapacity should be stake * 10", async function () {
         const navigator = otherAccounts[10]

@@ -172,6 +172,12 @@ contract NavigatorRegistry is
     NavigatorStakingUtils.addStake(_msgSender(), amount);
   }
 
+  /// @notice Reduce stake while active (must stay above min stake and maintain delegation capacity)
+  /// @param amount Amount of B3TR to reduce
+  function reduceStake(uint256 amount) external nonReentrant onlyNavigator {
+    NavigatorStakingUtils.reduceStake(_msgSender(), amount);
+  }
+
   /// @notice Withdraw staked B3TR (only after exit finalized or deactivation)
   /// @param amount Amount of B3TR to withdraw
   function withdrawStake(uint256 amount) external nonReentrant {

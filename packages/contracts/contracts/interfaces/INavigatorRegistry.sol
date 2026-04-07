@@ -263,6 +263,10 @@ interface INavigatorRegistry {
   /// @param amount The additional B3TR to stake
   function addStake(uint256 amount) external;
 
+  /// @notice Reduce stake while active (must stay above min stake and maintain delegation capacity)
+  /// @param amount The B3TR amount to reduce
+  function reduceStake(uint256 amount) external;
+
   /// @notice Withdraw staked B3TR (only after exit is finalized or deactivation)
   /// @param amount The B3TR amount to withdraw
   function withdrawStake(uint256 amount) external;

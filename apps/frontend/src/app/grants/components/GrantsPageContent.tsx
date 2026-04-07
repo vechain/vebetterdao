@@ -126,9 +126,18 @@ export const GrantsPageContent = () => {
 
   //UI HOOKS
   const { isMobile } = useBreakpoints()
-  const desktopStepCardDisclosure = useDisclosure({ defaultOpen: true })
-  const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
-  const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
+
+  const GRANTS_STEPS_STORAGE_KEY = "GRANTS_STEPS_DISMISSED"
+  const [open, setOpen] = useState(() => {
+    if (isMobile) return false
+    if (typeof window === "undefined") return true
+    return localStorage.getItem(GRANTS_STEPS_STORAGE_KEY) !== "true"
+  })
+  const onOpen = useCallback(() => setOpen(true), [])
+  const onClose = useCallback(() => {
+    setOpen(false)
+    localStorage.setItem(GRANTS_STEPS_STORAGE_KEY, "true")
+  }, [])
   const { open: isOpenConvertModal, onClose: onCloseConvertModal, onOpen: onOpenConvertModal } = useDisclosure()
 
   // LOGIC HOOKS
