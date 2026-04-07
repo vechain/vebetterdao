@@ -40,6 +40,7 @@ import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
 
 import { NavigatorCitizensModal } from "./NavigatorCitizensModal"
+import { NavigatorDelegationsModal } from "./NavigatorDelegationsModal"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorStakeHistoryModal } from "./NavigatorStakeHistoryModal"
 
@@ -55,6 +56,7 @@ export const NavigatorDetailContent = () => {
   const [isManageOpen, setIsManageOpen] = useState(false)
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
   const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
+  const [isDelegationsOpen, setIsDelegationsOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address)
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
@@ -294,13 +296,15 @@ export const NavigatorDetailContent = () => {
       {/* Stats */}
       <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: 2, md: 4 }} w="full">
         {stats.map(({ id, label, value, icon: IconComponent, bg, color }) => {
-          const isClickable = id === "citizens" || id === "staked"
+          const isClickable = id === "citizens" || id === "staked" || id === "delegated"
           const handleClick =
             id === "citizens"
               ? () => setIsCitizensOpen(true)
               : id === "staked"
                 ? () => setIsStakeHistoryOpen(true)
-                : undefined
+                : id === "delegated"
+                  ? () => setIsDelegationsOpen(true)
+                  : undefined
 
           return (
             <Card.Root
@@ -359,6 +363,11 @@ export const NavigatorDetailContent = () => {
           <NavigatorStakeHistoryModal
             isOpen={isStakeHistoryOpen}
             onClose={() => setIsStakeHistoryOpen(false)}
+            address={address}
+          />
+          <NavigatorDelegationsModal
+            isOpen={isDelegationsOpen}
+            onClose={() => setIsDelegationsOpen(false)}
             address={address}
           />
         </>

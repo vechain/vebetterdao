@@ -154,6 +154,8 @@ export const NavigatorGovernanceActivity = ({ address }: Props) => {
           </Card.Root>
         )}
 
+        <NavigatorRoundVotesCard address={address} />
+
         {/* Most Voted Apps */}
         {topVotedApps && topVotedApps.length > 0 ? (
           <Card.Root w="full" variant="primary">
@@ -199,8 +201,6 @@ export const NavigatorGovernanceActivity = ({ address }: Props) => {
             </Card.Body>
           </Card.Root>
         )}
-
-        <NavigatorRoundVotesCard address={address} />
       </VStack>
 
       {/* Modals */}
