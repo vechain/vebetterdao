@@ -2,9 +2,12 @@ import {
   Badge,
   Button,
   Card,
+  Flex,
   Heading,
   HStack,
+  Icon,
   Separator,
+  SimpleGrid,
   Skeleton,
   Spinner,
   Tabs,
@@ -14,9 +17,9 @@ import {
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useRouter } from "next/navigation"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuArrowLeft, LuExternalLink, LuShield, LuUsers } from "react-icons/lu"
+import { LuArrowLeft, LuCalendar, LuChevronRight, LuExternalLink, LuShield, LuUsers } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
@@ -24,10 +27,11 @@ import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetad
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { DelegateModal } from "@/app/navigators/components/DelegateModal"
 import { ManageDelegationModal } from "@/app/navigators/components/ManageDelegationModal"
-import { AddressButton } from "@/components/AddressButton"
 import { AddressIcon } from "@/components/AddressIcon"
+import B3trSvg from "@/components/Icons/svg/b3tr.svg"
+import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
 
-import { NavigatorCitizensTab } from "./NavigatorCitizensTab"
+import { NavigatorCitizensModal } from "./NavigatorCitizensModal"
 import { NavigatorGovernanceTab } from "./NavigatorGovernanceTab"
 
 const formatter = getCompactFormatter(2)
@@ -41,6 +45,7 @@ export const NavigatorDetailContent = () => {
   const [tab, setTab] = useState("about")
   const [isDelegateOpen, setIsDelegateOpen] = useState(false)
   const [isManageOpen, setIsManageOpen] = useState(false)
+  const [isCitizensOpen, setIsCitizensOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address)
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
@@ -49,6 +54,50 @@ export const NavigatorDetailContent = () => {
   const { data: currentNavigator } = useGetNavigator(account?.address)
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
+
+  const stats = useMemo(
+    () => [
+      {
+        id: "citizens",
+        label: t("Citizens"),
+        value: String(nav?.citizenCount ?? 0),
+        icon: LuUsers,
+        bg: "status.positive.subtle",
+        color: "status.positive.primary",
+      },
+      {
+        id: "staked",
+        label: t("Total Staked"),
+        value: `${formatter.format(Number(nav?.stakeFormatted ?? 0))} B3TR`,
+        icon: B3trSvg,
+        bg: "status.warning.subtle",
+        color: "status.warning.primary",
+      },
+      {
+        id: "delegated",
+        label: t("Total Delegated"),
+        value: `${formatter.format(Number(nav?.totalDelegatedFormatted ?? 0))} VOT3`,
+        icon: Vot3Svg,
+        bg: "status.info.subtle",
+        color: "status.info.primary",
+      },
+      {
+        id: "since",
+        label: t("Registered"),
+        value: nav
+          ? new Date(nav.registeredAt * 1000).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "-",
+        icon: LuCalendar,
+        bg: "status.info.subtle",
+        color: "status.info.primary",
+      },
+    ],
+    [nav, t],
+  )
 
   if (navLoading) {
     return (
@@ -111,60 +160,15 @@ export const NavigatorDetailContent = () => {
               </HStack>
             </HStack>
 
-            {/* Row 2: Stats */}
-            <HStack gap={{ base: 3, md: 6 }} flexWrap="wrap">
-              <HStack gap={1}>
-                <LuUsers size={14} />
-                <Text textStyle="sm" color="fg.muted">
-                  {t("{{count}} citizens", { count: nav.citizenCount })}
-                </Text>
-              </HStack>
-              <Text textStyle="sm" color="fg.muted">
-                {"·"}
-              </Text>
-              <HStack gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
-                  {formatter.format(Number(nav.stakeFormatted))}
-                </Text>
-                <Text textStyle="sm" color="fg.muted">
-                  {t("B3TR staked")}
-                </Text>
-              </HStack>
-              <Text textStyle="sm" color="fg.muted">
-                {"·"}
-              </Text>
-              <HStack gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
-                  {formatter.format(Number(nav.totalDelegatedFormatted))}
-                </Text>
-                <Text textStyle="sm" color="fg.muted">
-                  {t("VOT3 delegated")}
-                </Text>
-              </HStack>
-              <Text textStyle="sm" color="fg.muted">
-                {"·"}
-              </Text>
-              <Text textStyle="sm" color="fg.muted">
-                {t("Since {{date}}", {
-                  date: new Date(nav.registeredAt * 1000).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  }),
-                })}
-              </Text>
-            </HStack>
-
-            {/* Row 3: Description from metadata */}
+            {/* Description from metadata */}
             <Skeleton loading={metadataLoading}>
               <Text textStyle="sm" color="fg.muted">
                 {metadata?.motivation || t("No description provided")}
               </Text>
             </Skeleton>
 
-            {/* Row 4: Address + socials */}
+            {/* Address + socials */}
             <HStack justify="space-between" flexWrap="wrap" gap={2}>
-              <AddressButton address={address} size="xs" showAddressIcon={false} />
               {metadata?.socials && (
                 <HStack gap={3}>
                   {metadata.socials.twitter && (
@@ -191,6 +195,53 @@ export const NavigatorDetailContent = () => {
         </Card.Body>
       </Card.Root>
 
+      {/* Stats */}
+      <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: 2, md: 4 }} w="full">
+        {stats.map(({ id, label, value, icon: IconComponent, bg, color }) => (
+          <Card.Root
+            key={id}
+            variant="outline"
+            p={{ base: 2, md: 4 }}
+            {...(id === "citizens" && {
+              cursor: "pointer",
+              _hover: { borderColor: "border.emphasized" },
+              onClick: () => setIsCitizensOpen(true),
+            })}>
+            <Card.Body flex={1}>
+              <Flex direction="column" justify="space-between" h={{ base: "full", md: "auto" }} flex={1}>
+                <HStack justify="space-between">
+                  <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={2}>
+                    {label}
+                  </Text>
+                  {id === "citizens" && (
+                    <Button variant="plain" size="xs" p={0} minW="auto" h="auto" color="fg.muted">
+                      {t("More")}
+                      <LuChevronRight size={14} />
+                    </Button>
+                  )}
+                </HStack>
+                <HStack gap={{ base: 2, md: 3 }}>
+                  <HStack
+                    justify="center"
+                    align="center"
+                    w={{ base: "7", md: "10" }}
+                    h={{ base: "7", md: "10" }}
+                    rounded="full"
+                    bg={bg}
+                    color={color}
+                    flexShrink={0}>
+                    <Icon as={IconComponent} boxSize={{ base: 4, md: 5 }} />
+                  </HStack>
+                  <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
+                    {value}
+                  </Text>
+                </HStack>
+              </Flex>
+            </Card.Body>
+          </Card.Root>
+        ))}
+      </SimpleGrid>
+
       {/* Tabs */}
       <Tabs.Root
         variant="line"
@@ -202,9 +253,6 @@ export const NavigatorDetailContent = () => {
         <Tabs.List>
           <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="about">
             {t("About")}
-          </Tabs.Trigger>
-          <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="citizens">
-            {t("Citizens")}
           </Tabs.Trigger>
           <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="governance">
             {t("Governance Activity")}
@@ -290,10 +338,6 @@ export const NavigatorDetailContent = () => {
           </VStack>
         </Tabs.Content>
 
-        <Tabs.Content value="citizens">
-          <NavigatorCitizensTab address={address} />
-        </Tabs.Content>
-
         <Tabs.Content value="governance">
           <VStack pt={4} align="stretch">
             <NavigatorGovernanceTab address={address} />
@@ -305,6 +349,7 @@ export const NavigatorDetailContent = () => {
         <>
           <DelegateModal isOpen={isDelegateOpen} onClose={() => setIsDelegateOpen(false)} navigator={nav} />
           <ManageDelegationModal isOpen={isManageOpen} onClose={() => setIsManageOpen(false)} navigator={nav} />
+          <NavigatorCitizensModal isOpen={isCitizensOpen} onClose={() => setIsCitizensOpen(false)} address={address} />
         </>
       )}
     </VStack>
