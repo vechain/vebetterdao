@@ -203,5 +203,15 @@ export function createMainnetConfig() {
       179381993472000000000000n,
     ],
     DBA_DISTRIBUTION_START_ROUND: 66,
+
+    // Navigator Registry
+    NAVIGATOR_MIN_STAKE: 50000n * 10n ** 18n, // 50,000 B3TR
+    NAVIGATOR_MAX_STAKE_PERCENTAGE: 100, // 1% of VOT3 supply
+    NAVIGATOR_FEE_LOCK_PERIOD: 4, // 4 rounds
+    NAVIGATOR_FEE_PERCENTAGE: 2000, // 20% in basis points
+    NAVIGATOR_EXIT_NOTICE_PERIOD: 1, // 1 round
+    NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
+    NAVIGATOR_MINOR_SLASH_PERCENTAGE: 1000, // 10% in basis points
+    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8640, // ~24hr at 10s/block
   })
 }

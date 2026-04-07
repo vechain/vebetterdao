@@ -22,6 +22,7 @@ export type ContractName =
   | "GrantsManager"
   | "DBAPool"
   | "RelayerRewardsPool"
+  | "NavigatorRegistry"
 
 export const PROXY_ABI = ["event Upgraded(address indexed implementation)"]
 
@@ -48,6 +49,7 @@ export function getAllContracts(config: AppConfig): Array<{ proxy: string; name:
     { proxy: config.grantsManagerContractAddress, name: "GrantsManager" },
     { proxy: config.dbaPoolContractAddress, name: "DBAPool" },
     { proxy: config.relayerRewardsPoolContractAddress, name: "RelayerRewardsPool" },
+    { proxy: config.navigatorRegistryContractAddress, name: "NavigatorRegistry" },
   ]
 }
 

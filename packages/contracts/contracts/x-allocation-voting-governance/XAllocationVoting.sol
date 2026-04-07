@@ -39,6 +39,7 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
+import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 
 // Libraries
@@ -87,6 +88,18 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *    - name(), initialize(), COUNTING_MODE()
  *    - x2EarnApps(), emissions(), voterRewards(), veBetterPassport(), b3trGovernor(), relayerRewardsPool(), token()
  *    - roundProposer(), getAndValidateVotingPower()
+ *  - Added freshness multiplier (XOR fingerprint) in RoundVotesCountingUtils via FreshnessUtils library
+ *  - New storage in RoundVotesCountingStorage: _lastVoteFingerprint, _lastFingerprintChangedRound, userVotedForApp
+ *  - New storage in ExternalContractsStorage: _navigatorRegistry (INavigatorRegistry)
+ *  - New function: castNavigatorVote(citizen, roundId) — votes on behalf of navigator-delegated citizens
+ *    - Voting power = delegated amount at round snapshot (checkpointed in NavigatorRegistry)
+ *    - Uses navigator's allocation percentages (basis points, sum to 10000) converted to absolute weights
+ *    - Registers RelayerAction.VOTE for the caller
+ *  - New function: disableAutoVotingFor(user) — privileged, callable only by NavigatorRegistry
+ *  - New events: NavigatorVoteCast, FreshnessMultiplierApplied
+ *  - New errors: NotDelegatedToNavigator, NavigatorPreferencesNotSet
+ *  - New initializer: initializeV9(INavigatorRegistry) — reinitializer(8)
+ *  - setNavigatorRegistry() setter via ExternalContractsUtils
  */
 contract XAllocationVoting is
   Initializable,
@@ -111,6 +124,12 @@ contract XAllocationVoting is
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
+  }
+
+  /// @notice Initialize V9: set NavigatorRegistry address
+  function initializeV9(INavigatorRegistry _navigatorRegistry) external onlyRole(UPGRADER_ROLE) reinitializer(8) {
+    require(address(_navigatorRegistry) != address(0), "XAllocationVoting: invalid navigator registry");
+    ExternalContractsUtils.setNavigatorRegistry(_navigatorRegistry);
   }
 
   // ======================== Authorizations ======================== //
@@ -176,6 +195,12 @@ contract XAllocationVoting is
       revert AutoVotingEnabled(_msgSender());
     }
 
+    // Citizens delegated to a navigator cannot vote manually
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    if (address(navRegistry) != address(0) && navRegistry.isDelegated(_msgSender())) {
+      revert DelegatedToNavigator(_msgSender());
+    }
+
     validatePersonhoodForCurrentRound(_msgSender());
 
     _handleCastVote(_msgSender(), roundId, appIds, voteWeights, false);
@@ -223,6 +248,60 @@ contract XAllocationVoting is
   }
 
   /**
+   * @dev Cast a vote on behalf of a citizen delegated to a navigator.
+   * Uses the navigator's allocation preferences and equal-weight distribution.
+   * No personhood check — delegation already implies trust.
+   * @param citizen The delegated citizen whose voting power is used
+   * @param roundId The round ID to vote in
+   */
+  function castNavigatorVote(address citizen, uint256 roundId) public {
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+
+    // Citizen must be delegated to a navigator
+    address navigator = navRegistry.getNavigator(citizen);
+    if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
+
+    // Navigator must have set allocation preferences for this round
+    if (!navRegistry.hasSetPreferences(navigator, roundId)) {
+      revert NavigatorPreferencesNotSet(navigator, roundId);
+    }
+
+    _checkEarlyAccessEligibility(roundId, citizen);
+
+    // Get navigator's preferences with allocation percentages (basis points, sum to 10000)
+    (bytes32[] memory appIds, uint256[] memory percentages) = navRegistry.getAllocationPreferences(navigator, roundId);
+
+    // Voting power = delegated amount at round snapshot (not full VOT3 balance)
+    uint256 snapshot = roundSnapshot(roundId);
+    uint256 delegatedPower = navRegistry.getDelegatedAmountAtTimepoint(citizen, snapshot);
+
+    // Convert percentages to absolute VOT3 amounts (countVote expects absolute weights)
+    uint256 basisPoints = navRegistry.BASIS_POINTS();
+    uint256[] memory voteWeights = new uint256[](percentages.length);
+    uint256 allocated;
+    for (uint256 i; i < percentages.length; i++) {
+      voteWeights[i] = (delegatedPower * percentages[i]) / basisPoints;
+      allocated += voteWeights[i];
+    }
+    // Assign any dust from rounding to the first app
+    if (allocated < delegatedPower && voteWeights.length > 0) {
+      voteWeights[0] += delegatedPower - allocated;
+    }
+
+    _handleCastVoteWithPower(citizen, roundId, appIds, voteWeights, delegatedPower, false);
+
+    // Register relayer action for the caller
+    XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.registerRelayerAction(
+      _msgSender(),
+      citizen,
+      roundId,
+      RelayerAction.VOTE
+    );
+
+    emit NavigatorVoteCast(citizen, navigator, roundId, appIds, voteWeights);
+  }
+
+  /**
    * @dev Internal function to handle common voting logic
    * @param voter The address casting the vote
    * @param roundId The round ID to vote in
@@ -237,20 +316,23 @@ contract XAllocationVoting is
     uint256[] memory voteWeights,
     bool isAutoVote
   ) internal {
+    // Use voter's full voting power (VOT3 + deposits)
+    uint256 voterTotalVotingPower = getTotalVotingPower(voter, roundSnapshot(roundId));
+    _handleCastVoteWithPower(voter, roundId, appIds, voteWeights, voterTotalVotingPower, isAutoVote);
+  }
+
+  function _handleCastVoteWithPower(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory appIds,
+    uint256[] memory voteWeights,
+    uint256 votingPower,
+    bool isAutoVote
+  ) internal {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
-    // Get voter's total voting power (VOT3 + deposits)
-    uint256 voterTotalVotingPower = getTotalVotingPower(voter, roundSnapshot(roundId));
-
     // Count the vote using the library
-    RoundVotesCountingUtils.countVote(
-      roundId,
-      voter,
-      appIds,
-      voteWeights,
-      voterTotalVotingPower,
-      roundSnapshot(roundId)
-    );
+    RoundVotesCountingUtils.countVote(roundId, voter, appIds, voteWeights, votingPower, roundSnapshot(roundId));
 
     if (isAutoVote) {
       XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.registerRelayerAction(
@@ -310,7 +392,31 @@ contract XAllocationVoting is
     if (_msgSender() != user) {
       revert InvalidCaller(_msgSender());
     }
+
+    // Navigators and delegated citizens cannot enable auto-voting
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    if (address(navRegistry) != address(0)) {
+      if (navRegistry.isNavigator(user)) revert NavigatorCannotEnableAutoVoting(user);
+      if (navRegistry.isDelegated(user)) revert DelegatedToNavigator(user);
+    }
+
     AutoVotingLogic.toggleAutoVoting(address(this), user, VotesUtils.clock());
+  }
+
+  /**
+   * @dev Disable autovoting for a user. Called by NavigatorRegistry when a citizen delegates.
+   * No-op if auto-voting is already disabled.
+   */
+  function disableAutoVotingFor(address user) external {
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    require(
+      address(navRegistry) != address(0) && _msgSender() == address(navRegistry),
+      "XAllocationVoting: not navigator registry"
+    );
+
+    if (AutoVotingLogic.isAutoVotingEnabled(user)) {
+      AutoVotingLogic.toggleAutoVoting(address(this), user, VotesUtils.clock());
+    }
   }
 
   /**
@@ -381,6 +487,15 @@ contract XAllocationVoting is
     IRelayerRewardsPool newRelayerRewardsPool
   ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     ExternalContractsUtils.setRelayerRewardsPool(newRelayerRewardsPool);
+  }
+
+  /**
+   * @dev Set the address of the NavigatorRegistry contract
+   */
+  function setNavigatorRegistry(
+    INavigatorRegistry newNavigatorRegistry
+  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    ExternalContractsUtils.setNavigatorRegistry(newNavigatorRegistry);
   }
 
   /**
@@ -750,6 +865,15 @@ contract XAllocationVoting is
    */
   function getTotalAutoVotingUsersAtTimepoint(uint48 timepoint) public view returns (uint208) {
     return AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(timepoint);
+  }
+
+  // ======================== Navigator Registry ======================== //
+
+  /**
+   * @dev Get the NavigatorRegistry contract.
+   */
+  function navigatorRegistry() public view returns (INavigatorRegistry) {
+    return XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
   }
 
   // ======================== Helpers ======================== //

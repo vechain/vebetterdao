@@ -34,6 +34,7 @@ import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import "@openzeppelin/contracts/utils/types/Time.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IRelayerRewardsPool.sol";
+import "./interfaces/INavigatorRegistry.sol";
 
 /**
  * @title VoterRewards
@@ -80,6 +81,23 @@ import "./interfaces/IRelayerRewardsPool.sol";
  * ------------------ Version 6 Changes ------------------
  * - Added relayer fees for auto-voting claims
  * - Added RelayerRewardsPool integration for fee distribution
+ *
+ * ------------------ Version 7 Changes ------------------
+ * - Added freshness multiplier checkpoints (tier1/tier2/tier3) for allocation voting rewards
+ * - Added governance intent multiplier checkpoints (forAgainst/abstain) for proposal voting rewards
+ * - New storage: freshnessMultiplierTier1/2/3, intentMultiplierForAgainst, intentMultiplierAbstain (Checkpoints.Trace208)
+ * - New storage: navigatorRegistry (INavigatorRegistry) for navigator fee deduction
+ * - New role: GOVERNANCE_ROLE for multiplier configuration
+ * - Multipliers applied at registerVote() time — do NOT affect on-chain voting power
+ * - initializeV7 sets dual checkpoints (neutral at round start, real at current block) for safe mid-round upgrade
+ * - Navigator fee deduction at claimReward(): deducted from gross reward first, transferred to NavigatorRegistry
+ * - Relayer fee now applies to both auto-voters AND navigator citizens (hadAutoVoting || isDelegated)
+ * - CLAIM action registered for navigator citizens (not just auto-voters)
+ * - Early access check applies to navigator citizens
+ * - _getRewardsAndFees returns 4 values: (netReward, netGmReward, relayerFee, navigatorFee)
+ * - New events: FreshnessMultipliersSet, IntentMultipliersSet, NavigatorFeeTaken, NavigatorRegistryAddressUpdated
+ * - New view: getNavigatorFee(cycle, voter)
+ * - setNavigatorRegistry() setter
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
@@ -145,6 +163,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Governance intent multiplier for proposal voting
     Checkpoints.Trace208 intentMultiplierForAgainst; // For or Against vote (default: 10000 = x1)
     Checkpoints.Trace208 intentMultiplierAbstain; // Abstain vote (default: 3000 = x0.30)
+    // --------------------------- V8 Additions --------------------------- //
+    // NavigatorRegistry for navigator fee deduction at claim time
+    INavigatorRegistry navigatorRegistry;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -231,6 +252,12 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
   /// @notice Emitted when governance intent multiplier values are updated
   event IntentMultipliersSet(uint256 forAgainst, uint256 abstain);
+
+  /// @notice Emitted when a navigator fee is deducted from a citizen's reward
+  event NavigatorFeeTaken(address indexed navigator, address indexed citizen, uint256 fee, uint256 indexed cycle);
+
+  /// @notice Emitted when the NavigatorRegistry contract address is set
+  event NavigatorRegistryAddressUpdated(address indexed newAddress, address indexed oldAddress);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -323,8 +350,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     uint256 freshnessT2,
     uint256 freshnessT3,
     uint256 intentFA,
-    uint256 intentAb
-  ) external reinitializer(7) {
+    uint256 intentAb,
+    address _navigatorRegistry
+  ) external onlyRole(UPGRADER_ROLE) reinitializer(7) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     uint48 currentClock = clock();
 
@@ -341,6 +369,11 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.freshnessMultiplierTier3.push(currentClock, SafeCast.toUint208(freshnessT3));
     $.intentMultiplierForAgainst.push(currentClock, SafeCast.toUint208(intentFA));
     $.intentMultiplierAbstain.push(currentClock, SafeCast.toUint208(intentAb));
+
+    // Navigator registry (address(0) allowed — navigator feature can be activated later via setter)
+    if (_navigatorRegistry != address(0)) {
+      $.navigatorRegistry = INavigatorRegistry(_navigatorRegistry);
+    }
   }
 
   /// @notice Set the XAllocationVoting contract.
@@ -364,6 +397,18 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.relayerRewardsPool = IRelayerRewardsPool(_relayerRewardsPool);
 
     emit RelayerRewardsPoolAddressUpdated(_relayerRewardsPool, oldAddress);
+  }
+
+  /// @notice Set the NavigatorRegistry contract.
+  /// @param _navigatorRegistry - The address of the NavigatorRegistry contract.
+  function setNavigatorRegistry(address _navigatorRegistry) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(_navigatorRegistry != address(0), "VoterRewards: Invalid address");
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    address oldAddress = address($.navigatorRegistry);
+    $.navigatorRegistry = INavigatorRegistry(_navigatorRegistry);
+
+    emit NavigatorRegistryAddressUpdated(_navigatorRegistry, oldAddress);
   }
 
   /// @notice Upgrade the implementation of the VoterRewards contract.
@@ -450,21 +495,26 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
     bool hadAutoVotingEnabled = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
+    bool isDelegated = address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter);
 
-    if (hadAutoVotingEnabled) {
+    // Early access check applies to both auto-voters and navigator citizens
+    if (hadAutoVotingEnabled || isDelegated) {
       _checkEarlyAccessEligibility(cycle, voter);
     }
 
-    (uint256 netReward, uint256 netGmReward, uint256 fee) = _getRewardsAndFees(cycle, voter);
+    (uint256 netReward, uint256 netGmReward, uint256 relayerFee, uint256 navigatorFee) = _getRewardsAndFees(
+      cycle,
+      voter
+    );
     uint256 totalNetReward = netReward + netGmReward;
-    uint256 totalRequiredNetReward = totalNetReward + fee;
+    uint256 totalRequired = totalNetReward + relayerFee + navigatorFee;
 
     // Ensure user has actual rewards to claim (not just fees to pay)
     require(totalNetReward > 0, "VoterRewards: reward must be greater than 0");
 
-    // Ensure contract has enough balance for both user rewards and relayer fees
+    // Ensure contract has enough balance for user rewards + all fees
     require(
-      $.b3tr.balanceOf(address(this)) >= totalRequiredNetReward,
+      $.b3tr.balanceOf(address(this)) >= totalRequired,
       "VoterRewards: not enough B3TR in the contract to pay reward"
     );
 
@@ -472,14 +522,24 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.cycleToVoterToTotal[cycle][voter] = 0;
     $.cycleToVoterToGMWeight[cycle][voter] = 0;
 
-    if (fee > 0) {
-      require($.b3tr.approve(address($.relayerRewardsPool), fee), "VoterRewards: pool fee approval failed");
-      $.relayerRewardsPool.deposit(fee, cycle);
+    // Navigator fee: transfer to NavigatorRegistry and record the deposit
+    if (navigatorFee > 0) {
+      address navigator = $.navigatorRegistry.getNavigator(voter);
+      require($.b3tr.transfer(address($.navigatorRegistry), navigatorFee), "VoterRewards: nav fee transfer failed");
+      $.navigatorRegistry.depositNavigatorFee(navigator, cycle, navigatorFee);
+
+      emit NavigatorFeeTaken(navigator, voter, navigatorFee, cycle);
+    }
+
+    // Relayer fee: deposit to RelayerRewardsPool
+    if (relayerFee > 0) {
+      require($.b3tr.approve(address($.relayerRewardsPool), relayerFee), "VoterRewards: pool fee approval failed");
+      $.relayerRewardsPool.deposit(relayerFee, cycle);
 
       // Register CLAIM action for the relayer
       $.relayerRewardsPool.registerRelayerAction(msg.sender, voter, cycle, RelayerAction.CLAIM);
 
-      emit RelayerFeeTaken(msg.sender, fee, cycle, voter);
+      emit RelayerFeeTaken(msg.sender, relayerFee, cycle, voter);
     }
 
     // Transfer the remaining reward to the voter
@@ -520,7 +580,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
   function getReward(uint256 cycle, address voter) public view virtual returns (uint256) {
-    (uint256 netReward, , ) = _getRewardsAndFees(cycle, voter);
+    (uint256 netReward, , , ) = _getRewardsAndFees(cycle, voter);
     return netReward;
   }
 
@@ -528,7 +588,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
   function getGMReward(uint256 cycle, address voter) public view virtual returns (uint256) {
-    (, uint256 netGmReward, ) = _getRewardsAndFees(cycle, voter);
+    (, uint256 netGmReward, , ) = _getRewardsAndFees(cycle, voter);
     return netGmReward;
   }
 
@@ -536,7 +596,15 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
   function getRelayerFee(uint256 cycle, address voter) public view virtual returns (uint256) {
-    (, , uint256 fee) = _getRewardsAndFees(cycle, voter);
+    (, , uint256 fee, ) = _getRewardsAndFees(cycle, voter);
+    return fee;
+  }
+
+  /// @notice Get the navigator fee for a user in a specific cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
+  /// @param voter - The address of the voter.
+  function getNavigatorFee(uint256 cycle, address voter) public view virtual returns (uint256) {
+    (, , , uint256 fee) = _getRewardsAndFees(cycle, voter);
     return fee;
   }
 
@@ -548,7 +616,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   function _getRewardsAndFees(
     uint256 cycle,
     address voter
-  ) private view returns (uint256 netReward, uint256 netGmReward, uint256 fee) {
+  ) private view returns (uint256 netReward, uint256 netGmReward, uint256 relayerFee, uint256 navigatorFee) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
     // Calculate raw rewards
@@ -567,25 +635,31 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     // If no rewards, return zeros
     if (totalReward == 0) {
-      return (0, 0, 0);
+      return (0, 0, 0, 0);
     }
 
-    // Check if fee applies for auto-voting users
+    // Navigator fee: deducted first if voter is delegated to a navigator
+    uint256 afterNavFee = totalReward;
+    if (address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter)) {
+      navigatorFee = (totalReward * $.navigatorRegistry.getFeePercentage()) / MULTIPLIER_SCALE;
+      afterNavFee = totalReward - navigatorFee;
+    }
+
+    // Relayer fee: applies to auto-voting users AND navigator citizens (on amount after navigator fee)
+    uint256 afterAllFees = afterNavFee;
     uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
-    if ($.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock)) {
-      fee = $.relayerRewardsPool.calculateRelayerFee(totalReward);
-
-      // Use the same proportional formula
-      netReward = rawReward - ((fee * rawReward) / totalReward);
-      netGmReward = rawGmReward - ((fee * rawGmReward) / totalReward);
-    } else {
-      // No fee applies
-      netReward = rawReward;
-      netGmReward = rawGmReward;
-      fee = 0;
+    bool isDelegated = address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter);
+    bool hadAutoVoting = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
+    if (hadAutoVoting || isDelegated) {
+      relayerFee = $.relayerRewardsPool.calculateRelayerFee(afterNavFee);
+      afterAllFees = afterNavFee - relayerFee;
     }
 
-    return (netReward, netGmReward, fee);
+    // Distribute remaining proportionally between reward pools
+    netReward = (afterAllFees * rawReward) / totalReward;
+    netGmReward = afterAllFees - netReward; // remainder to avoid dust
+
+    return (netReward, netGmReward, relayerFee, navigatorFee);
   }
 
   /// @notice Generic reward calculation helper
@@ -672,6 +746,12 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.xAllocationVoting;
+  }
+
+  /// @notice Get the NavigatorRegistry contract.
+  function navigatorRegistry() external view returns (INavigatorRegistry) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.navigatorRegistry;
   }
 
   /// @notice Check if quadratic rewarding is disabled at a specific block number.

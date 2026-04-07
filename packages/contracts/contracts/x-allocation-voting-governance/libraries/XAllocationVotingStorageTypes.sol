@@ -9,6 +9,7 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 
 /// @title XAllocationVotingStorageTypes
 /// @notice Defines all storage types and getters for the XAllocationVoting system.
@@ -114,6 +115,8 @@ library XAllocationVotingStorageTypes {
     IVeBetterPassport _veBetterPassport;
     IB3TRGovernor _b3trGovernor;
     IRelayerRewardsPool _relayerRewardsPool;
+    // V10: NavigatorRegistry for navigator delegation voting
+    INavigatorRegistry _navigatorRegistry;
   }
 
   struct AutoVotingStorage {

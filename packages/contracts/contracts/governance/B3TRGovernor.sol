@@ -50,6 +50,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IGrantsManager } from "../interfaces/IGrantsManager.sol";
 import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
+import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
 
 /**
  * @title B3TRGovernor
@@ -88,13 +89,17 @@ import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
  * ------------------ VERSION 9 ------------------
  * - Added reason parameter to cancel function for providing cancellation rationale.
  * - Added ProposalCanceledWithReason event.
+ * ------------------ VERSION 10 ------------------
+ * - Refactored from module inheritance to library architecture for contract size optimization
+ * - Added navigator delegation voting via castNavigatorVote(proposalId, citizen)
+ * - New storage: GovernorStorage.navigatorRegistry (INavigatorRegistry)
+ * - New events: NavigatorGovernanceVoteCast
+ * - New errors: NotDelegatedToNavigator, NavigatorDecisionNotSet (in GovernorVotesLogic)
+ * - New initializer: initializeV10(INavigatorRegistry) — reinitializer(8)
+ * - Citizen voting power = delegated amount at proposal snapshot (not full VOT3 balance)
+ * - setNavigatorRegistry() setter via GovernorConfigurator
  */
-contract B3TRGovernor is
-  IB3TRGovernor,
-  AccessControlUpgradeable,
-  UUPSUpgradeable,
-  PausableUpgradeable
-{
+contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeable, PausableUpgradeable {
   /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
   /// @notice The role that can pause the contract
@@ -109,6 +114,14 @@ contract B3TRGovernor is
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
+  }
+
+  /// @notice Initialize V10: set NavigatorRegistry address
+  function initializeV10(
+    INavigatorRegistry _navigatorRegistry
+  ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) reinitializer(8) {
+    require(address(_navigatorRegistry) != address(0), "B3TRGovernor: invalid navigator registry");
+    GovernorConfigurator.setNavigatorRegistry(_navigatorRegistry);
   }
 
   /**
@@ -131,8 +144,7 @@ contract B3TRGovernor is
    * @param role The role to check against
    */
   modifier onlyRoleOrGovernance(bytes32 role) {
-    if (!hasRole(role, _msgSender()))
-      GovernorGovernanceLogic.checkGovernance(_msgSender(), _msgData(), address(this));
+    if (!hasRole(role, _msgSender())) GovernorGovernanceLogic.checkGovernance(_msgSender(), _msgData(), address(this));
     _;
   }
 
@@ -552,8 +564,7 @@ contract B3TRGovernor is
    * @return IVoterRewardsV2 The voter rewards contract
    */
   function voterRewards() external view returns (IVoterRewards) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.voterRewards;
+    return GovernorStorageTypes.getGovernorStorage().voterRewards;
   }
 
   /**
@@ -561,8 +572,7 @@ contract B3TRGovernor is
    * @return IXAllocationVotingGovernor The XAllocationVotingGovernor contract
    */
   function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.xAllocationVoting;
+    return GovernorStorageTypes.getGovernorStorage().xAllocationVoting;
   }
 
   /**
@@ -570,8 +580,7 @@ contract B3TRGovernor is
    * @return IB3TR The B3TR contract
    */
   function b3tr() external view returns (IB3TR) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.b3tr;
+    return GovernorStorageTypes.getGovernorStorage().b3tr;
   }
 
   /**
@@ -588,8 +597,15 @@ contract B3TRGovernor is
    * @return The current VeBetterPassport contract.
    */
   function veBetterPassport() external view returns (IVeBetterPassport) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.veBetterPassport;
+    return GovernorStorageTypes.getGovernorStorage().veBetterPassport;
+  }
+
+  /**
+   * @notice Returns the NavigatorRegistry contract.
+   * @return INavigatorRegistry The NavigatorRegistry contract
+   */
+  function navigatorRegistry() external view returns (INavigatorRegistry) {
+    return GovernorStorageTypes.getGovernorStorage().navigatorRegistry;
   }
 
   /**
@@ -644,6 +660,7 @@ contract B3TRGovernor is
   function quorumNumeratorByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
     return GovernorQuorumLogic.quorumNumeratorByProposalType(uint8(proposalTypeValue));
   }
+
   /**
    * @notice Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
    * @param timepoint The timepoint to get the quorum numerator for
@@ -821,6 +838,16 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Cast a governance vote on behalf of a citizen delegated to a navigator.
+   * @param proposalId The id of the proposal
+   * @param citizen The delegated citizen whose voting power is used
+   * @return uint256 The voting weight used
+   */
+  function castNavigatorVote(uint256 proposalId, address citizen) external returns (uint256) {
+    return GovernorVotesLogic.castNavigatorVote(proposalId, citizen);
+  }
+
+  /**
    * @notice Withdraws deposits for a specific proposal
    * @param proposalId The id of the proposal
    * @param depositor The address of the depositor
@@ -945,6 +972,16 @@ contract B3TRGovernor is
     IVeBetterPassport newVeBetterPassport
   ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     GovernorConfigurator.setVeBetterPassport(newVeBetterPassport);
+  }
+
+  /**
+   * @notice Set the NavigatorRegistry contract
+   * @param newNavigatorRegistry The new NavigatorRegistry contract
+   */
+  function setNavigatorRegistry(
+    INavigatorRegistry newNavigatorRegistry
+  ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorConfigurator.setNavigatorRegistry(newNavigatorRegistry);
   }
 
   /**

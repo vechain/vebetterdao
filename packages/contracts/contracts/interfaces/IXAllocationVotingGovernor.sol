@@ -112,6 +112,26 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error InvalidCaller(address caller);
 
   /**
+   * @dev Citizen is not delegated to any navigator
+   */
+  error NotDelegatedToNavigator(address citizen);
+
+  /**
+   * @dev Citizen is delegated to a navigator and cannot vote manually
+   */
+  error DelegatedToNavigator(address citizen);
+
+  /**
+   * @dev Navigator cannot enable auto-voting
+   */
+  error NavigatorCannotEnableAutoVoting(address navigator);
+
+  /**
+   * @dev Navigator has not set allocation preferences for the round
+   */
+  error NavigatorPreferencesNotSet(address navigator, uint256 roundId);
+
+  /**
    * @dev Emitted when auto-voting is skipped.
    */
   event AutoVoteSkipped(
@@ -152,6 +172,17 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev Emitted when the preferred apps are updated for an account.
    */
   event PreferredAppsUpdated(address indexed account, bytes32[] apps);
+
+  /**
+   * @dev Emitted when a navigator casts a vote on behalf of a delegated citizen
+   */
+  event NavigatorVoteCast(
+    address indexed citizen,
+    address indexed navigator,
+    uint256 indexed roundId,
+    bytes32[] appsIds,
+    uint256[] voteWeights
+  );
 
   /**
    * @dev Emitted when a freshness multiplier is applied to a vote.
@@ -291,6 +322,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @notice This function is only callable by the VOT3 contract or the user themselves
    */
   function toggleAutoVoting(address user) external;
+
+  /**
+   * @dev Disable autovoting for a user. Called by NavigatorRegistry when a citizen delegates.
+   * @param user The address to disable autovoting for
+   */
+  function disableAutoVotingFor(address user) external;
 
   /**
    * @dev Check if autovoting is enabled for an account

@@ -26,6 +26,8 @@ import {
   NodeManagementV3,
   TokenAuction,
   X2EarnAppsV7,
+  NavigatorRegistry,
+  VOT3V1,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -35,12 +37,14 @@ import {
   deployAndUpgrade,
   deployProxy,
   deployProxyOnly,
+  deployProxyWithoutInitialization,
   initializeProxy,
   saveContractsToFile,
   upgradeProxy,
 } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import { xAllocationVotingLibraries } from "../libraries/xAllocationVotingLibraries"
+import { navigatorRegistryLibraries } from "../libraries/navigatorRegistryLibraries"
 import {
   transferAdminRole,
   transferContractsAddressManagerRole,
@@ -281,6 +285,9 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log("Deploying XAllocationVoting Libraries")
   const xAllocLibs = await xAllocationVotingLibraries(true)
+
+  console.log("Deploying NavigatorRegistry Libraries")
+  const navLibs = await navigatorRegistryLibraries(true)
   const { AutoVotingLogic } = xAllocLibs
 
   // Verify all required libraries are deployed
@@ -305,6 +312,34 @@ export async function deployAll(config: ContractsConfig) {
   if (!AdministrationUtils || !EndorsementUtils || !VoteEligibilityUtils || !AppStorageUtils) {
     throw new Error("Failed to deploy X2Earn latest libraries")
   }
+
+  console.log("Deploying NavigatorRegistry Libraries")
+  const navigatorLibraryAddresses: Record<string, string> = {
+    NavigatorStakingUtils: await navLibs.NavigatorStakingUtils.getAddress(),
+    NavigatorDelegationUtils: await navLibs.NavigatorDelegationUtils.getAddress(),
+    NavigatorVotingUtils: await navLibs.NavigatorVotingUtils.getAddress(),
+    NavigatorFeeUtils: await navLibs.NavigatorFeeUtils.getAddress(),
+    NavigatorSlashingUtils: await navLibs.NavigatorSlashingUtils.getAddress(),
+    NavigatorLifecycleUtils: await navLibs.NavigatorLifecycleUtils.getAddress(),
+  }
+  if (
+    !navigatorLibraryAddresses.NavigatorStakingUtils ||
+    !navigatorLibraryAddresses.NavigatorDelegationUtils ||
+    !navigatorLibraryAddresses.NavigatorVotingUtils ||
+    !navigatorLibraryAddresses.NavigatorFeeUtils ||
+    !navigatorLibraryAddresses.NavigatorSlashingUtils ||
+    !navigatorLibraryAddresses.NavigatorLifecycleUtils
+  ) {
+    throw new Error("Failed to deploy NavigatorRegistry libraries")
+  } else {
+    console.log("NavigatorRegistry libraries deployed successfully")
+  }
+
+  // Deploy NavigatorRegistry proxy only, we need only the address for the cross-contract wiring, we will initialize it later
+  const navigatorRegistryProxyAddress = await deployProxyWithoutInitialization(
+    "NavigatorRegistry",
+    navigatorLibraryAddresses,
+  )
 
   // In testnet and mainnet we want to point at the real external contracts,
   // to do so we need to first add the address in the appropriate config file
@@ -349,17 +384,21 @@ export async function deployAll(config: ContractsConfig) {
     config.CONTRACTS_ADMIN_ADDRESS, // Pauser
   )
 
-  let vot3 = (await deployProxy(
-    "VOT3",
+  let vot3 = (await deployAndUpgrade(
+    ["VOT3V1", "VOT3"],
     [
-      config.CONTRACTS_ADMIN_ADDRESS, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // pauser
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      await b3tr.getAddress(),
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // pauser
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        await b3tr.getAddress(),
+      ],
+      [navigatorRegistryProxyAddress],
     ],
-    undefined,
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+      logOutput: true,
+    },
   )) as VOT3
 
   const timelock = (await deployProxy(
@@ -702,7 +741,7 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
-      [],
+      [navigatorRegistryProxyAddress], // V9: set NavigatorRegistry address
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -752,6 +791,7 @@ export async function deployAll(config: ContractsConfig) {
       config.VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3,
       config.VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST,
       config.VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN,
+      navigatorRegistryProxyAddress,
     ],
     {
       version: 7,
@@ -920,7 +960,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [],
       [], // v9
-      [], // v10
+      [navigatorRegistryProxyAddress], // v10
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -1125,6 +1165,33 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log("X2EarnApps addresses set and upgraded to X2EarnAppsV8")
 
+  console.log("Initialize NavigatorRegistry Proxy and Implementation")
+  const navigatorRegistry = (await initializeProxy(
+    navigatorRegistryProxyAddress,
+    "NavigatorRegistry",
+    [
+      {
+        admin: config.CONTRACTS_ADMIN_ADDRESS,
+        upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+        governance: config.CONTRACTS_ADMIN_ADDRESS,
+        b3trToken: await b3tr.getAddress(),
+        vot3Token: await vot3.getAddress(),
+        treasury: await treasury.getAddress(),
+        minStake: config.NAVIGATOR_MIN_STAKE,
+        maxStakePercentage: config.NAVIGATOR_MAX_STAKE_PERCENTAGE,
+        feeLockPeriod: config.NAVIGATOR_FEE_LOCK_PERIOD,
+        feePercentage: config.NAVIGATOR_FEE_PERCENTAGE,
+        exitNoticePeriod: config.NAVIGATOR_EXIT_NOTICE_PERIOD,
+        reportInterval: config.NAVIGATOR_REPORT_INTERVAL,
+        minorSlashPercentage: config.NAVIGATOR_MINOR_SLASH_PERCENTAGE,
+        preferenceCutoffPeriod: config.NAVIGATOR_PREFERENCE_CUTOFF_PERIOD,
+        voterRewards: await voterRewards.getAddress(),
+      },
+    ],
+    navigatorLibraryAddresses,
+    undefined,
+  )) as NavigatorRegistry
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -1147,6 +1214,7 @@ export async function deployAll(config: ContractsConfig) {
     GrantsManager: await grantsManager.getAddress(),
     RelayerRewardsPool: await relayerRewardsPool.getAddress(),
     DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
+    NavigatorRegistry: await navigatorRegistry.getAddress(),
   }
 
   const libraries: {
@@ -1154,6 +1222,7 @@ export async function deployAll(config: ContractsConfig) {
     VeBetterPassport: Record<string, string>
     X2EarnApps: Record<string, string>
     XAllocationVoting: Record<string, string>
+    NavigatorRegistry: Record<string, string>
   } = {
     B3TRGovernor: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -1192,6 +1261,7 @@ export async function deployAll(config: ContractsConfig) {
       RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
       RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
     },
+    NavigatorRegistry: navigatorLibraryAddresses,
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries, true) // Set whitelisted functions for governor proposals
@@ -1849,6 +1919,7 @@ export async function deployAll(config: ContractsConfig) {
     stargate: stargateMock,
     stargateNFT: stargateNftMock,
     dynamicBaseAllocationPool: dynamicBaseAllocationPool,
+    navigatorRegistry: navigatorRegistry,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT 
 
 //                                      #######
 //                                 ################
@@ -31,19 +31,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "./interfaces/INavigatorRegistry.sol";
 
 /// @title VOT3 Token Contract
 /// @dev Extends ERC20 Fungible Token Standard basic implementation with upgradeability, pausability, ability for gasless transactions and governance capabilities.
 /// @notice This contract governs the issuance and management of VOT3 tokens, which are the tokens used for voting in the VeBetter DAO Ecosystem.
-///
-/// ----- Version 2 -----
-/// - Added navigator delegation lock: citizens who delegate VOT3 to a navigator cannot transfer the delegated portion
-/// - New storage: navigatorRegistry (address) — source of truth for delegation lock amounts
-/// - _update() now calls NavigatorRegistry.getDelegatedAmount(from) to enforce transfer lock
-/// - getNavigatorLockedAmount(account) view reads from NavigatorRegistry (single source of truth, no duplicate storage)
-/// - initializeV2(navigatorRegistry) — reinitializer(2), stores NavigatorRegistry address
-contract VOT3 is
+contract VOT3V1 is
   ERC20Upgradeable,
   ERC20PausableUpgradeable,
   AccessControlUpgradeable,
@@ -61,8 +53,6 @@ contract VOT3 is
   struct VOT3Storage {
     IERC20 b3tr; // B3TR token contract
     mapping(address account => uint256) _convertedB3TR; // Mapping of B3TR tokens converted to VOT3 tokens
-    // V2: NavigatorRegistry contract address — source of truth for delegation lock amounts
-    address navigatorRegistry;
   }
 
   /// @dev The slot for VOT3 storage in contract storage
@@ -106,14 +96,6 @@ contract VOT3 is
 
     require(_b3tr != address(0), "VOT3: B3TR address cannot be 0");
     $.b3tr = IERC20(_b3tr);
-  }
-
-  /// @notice Initialize V2 — grants NAVIGATOR_ROLE to NavigatorRegistry
-  /// @param _navigatorRegistry The NavigatorRegistry contract address
-  function initializeV2(address _navigatorRegistry) external onlyRole(UPGRADER_ROLE) reinitializer(2) {
-    require(_navigatorRegistry != address(0), "VOT3: navigator registry is zero");
-    VOT3Storage storage $ = _getVOT3Storage();
-    $.navigatorRegistry = _navigatorRegistry;
   }
 
   /// @notice Pauses the VOT3 contract
@@ -217,17 +199,6 @@ contract VOT3 is
     address to,
     uint256 amount
   ) internal override(ERC20Upgradeable, ERC20VotesUpgradeable, ERC20PausableUpgradeable) {
-    // Enforce navigator delegation lock: citizen cannot transfer/burn below their delegated amount
-    if (from != address(0)) {
-      VOT3Storage storage $ = _getVOT3Storage();
-      if ($.navigatorRegistry != address(0)) {
-        uint256 locked = INavigatorRegistry($.navigatorRegistry).getDelegatedAmount(from);
-        if (locked > 0) {
-          require(balanceOf(from) - amount >= locked, "VOT3: transfer exceeds unlocked balance");
-        }
-      }
-    }
-
     super._update(from, to, amount);
 
     // self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
@@ -277,22 +248,10 @@ contract VOT3 is
     return Math.sqrt(getPastVotes(account, timepoint)) * 1e9;
   }
 
-  // ======================== V2: Navigator Delegation Lock ======================== //
-
-  /// @notice Get the locked VOT3 amount for a citizen's navigator delegation
-  /// @dev Reads from NavigatorRegistry (single source of truth)
-  /// @param account The citizen address
-  /// @return The amount of VOT3 locked for navigator delegation
-  function getNavigatorLockedAmount(address account) external view returns (uint256) {
-    VOT3Storage storage $ = _getVOT3Storage();
-    if ($.navigatorRegistry == address(0)) return 0;
-    return INavigatorRegistry($.navigatorRegistry).getDelegatedAmount(account);
-  }
-
   /// @notice Returns the version of the contract
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() public pure virtual returns (string memory) {
-    return "2";
+    return "1";
   }
 }
