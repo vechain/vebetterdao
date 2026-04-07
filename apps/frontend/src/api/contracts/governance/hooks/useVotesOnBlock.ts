@@ -1,11 +1,12 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress
 const method = "getVotes" as const
+export const getVotesOnBlockPrefixQueryKey = () => getCallClauseQueryKey({ abi, address: contractAddress, method })
 export const getVotesOnBlockQueryKey = (userAddress: string, blockNumber: number) =>
   getCallClauseQueryKeyWithArgs({
     abi,

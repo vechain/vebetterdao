@@ -1,7 +1,7 @@
 "use client"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { use, useEffect } from "react"
 
 import { MotionVStack } from "../../../components/MotionVStack"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
@@ -17,17 +17,16 @@ const TransactionsContent = dynamic(
   },
 )
 type Props = {
-  params: {
-    address: string
-  }
+  params: Promise<{ address: string }>
 }
 export default function Home({ params }: Props) {
+  const { address } = use(params)
   useEffect(() => {
     AnalyticsUtils.trackPage("Transactions")
   }, [])
   return (
     <MotionVStack>
-      <TransactionsContent address={params.address} />
+      <TransactionsContent address={address} />
     </MotionVStack>
   )
 }

@@ -17,17 +17,15 @@ const ProposalPageContent = dynamic(
   },
 )
 type Props = {
-  params: {
-    proposalId: string
-  }
+  proposalId: string
 }
-export const ProposalPage = ({ params }: Props) => {
+export const ProposalPage = ({ proposalId }: Props) => {
   useEffect(() => {
     AnalyticsUtils.trackPage("Proposals")
   }, [])
   return (
     <MotionVStack>
-      <ProposalPageContent proposalId={params.proposalId} typeFilter="proposal" />
+      <ProposalPageContent proposalId={proposalId} typeFilter="proposal" />
     </MotionVStack>
   )
 }

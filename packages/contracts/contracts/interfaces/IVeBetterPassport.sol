@@ -244,6 +244,24 @@ interface IVeBetterPassport {
   /// @return The total score of the user
   function userTotalScore(address user) external view returns (uint256);
 
+  /// @notice Gets the number of actions distributed by an app in a round
+  /// @param appId The app ID
+  /// @param round The round to check
+  /// @return The number of actions
+  function appRoundActionCount(bytes32 appId, uint256 round) external view returns (uint256);
+
+  /// @notice Gets the number of distinct apps a user has interacted with in a round
+  /// @param user The user address
+  /// @param round The round to check
+  /// @return The number of distinct apps
+  function userRoundAppCount(address user, uint256 round) external view returns (uint256);
+
+  /// @notice Gets how many actions a user registered in a specific round
+  /// @param user The user address
+  /// @param round The round to check
+  /// @return The number of registered actions for that user and round
+  function userRoundActionCount(address user, uint256 round) external view returns (uint256);
+
   /// @notice Gets the score of a user for an app in a specific round
   /// @param user The user address
   /// @param round The round to check
@@ -251,11 +269,24 @@ interface IVeBetterPassport {
   /// @return The score of the user for the app in the round
   function userRoundScoreApp(address user, uint256 round, bytes32 appId) external view returns (uint256);
 
+  /// @notice Gets how many actions a user registered for an app in a specific round
+  /// @param user The user address
+  /// @param round The round to check
+  /// @param appId The app ID
+  /// @return The number of registered actions for that user, app, and round
+  function userRoundActionCountApp(address user, uint256 round, bytes32 appId) external view returns (uint256);
+
   /// @notice Gets the total score of a user for an app
   /// @param user The user address
   /// @param appId The app ID
   /// @return The total score of the user for the app
   function userAppTotalScore(address user, bytes32 appId) external view returns (uint256);
+
+  /// @notice Checks if a user has ever interacted with a specific app
+  function userUniqueAppInteraction(address user, bytes32 appId) external view returns (bool);
+
+  /// @notice Gets the list of apps a user has interacted with
+  function userInteractedApps(address user) external view returns (bytes32[] memory);
 
   /// @notice Gets the threshold score for a user to be considered a person
   /// @return The threshold participation score
@@ -426,14 +457,6 @@ interface IVeBetterPassport {
   /// @param appId - the app id of the action
   /// @param round - the round id of the action
   function registerActionForRound(address user, bytes32 appId, uint256 round) external;
-
-  /// @notice Function used to seed the passport with old actions by aggregating them
-  /// based on (user, appId, round) and summing up the total score offchain
-  /// @param user - the user that performed the actions
-  /// @param appId - the app id of the actions
-  /// @param round - the round id of the actions
-  /// @param totalScore - the total score of the actions
-  function registerAggregatedActionsForRound(address user, bytes32 appId, uint256 round, uint256 totalScore) external;
 
   /// @notice Gets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
   function blacklistThreshold() external view returns (uint256);

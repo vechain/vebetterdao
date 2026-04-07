@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 import { useGetVotesOnBlock } from "./useVotesOnBlock"
@@ -8,6 +8,8 @@ import { useGetVotesOnBlock } from "./useVotesOnBlock"
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress
 const method = "getDepositVotingPower" as const
+export const getDepositsVotesOnBlockPrefixQueryKey = () =>
+  getCallClauseQueryKey({ abi, address: contractAddress, method })
 export const getDepositsVotesOnBlockQueryKey = (userAddress: string, blockNumber: number) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -39,6 +41,7 @@ export const useTotalVotesOnBlock = (block?: number, address?: string, enabled =
           totalVotesWithDeposits,
           totalVotesWithDepositsWei,
           depositsVotes,
+          depositsVotesWei,
         }
       },
     },

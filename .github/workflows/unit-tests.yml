@@ -121,8 +121,10 @@ jobs:
             label: Galaxy Member - V6 Upgrade
           - shard: shard3c
             label: Galaxy Member - V6 Compatibility
-          - shard: shard4a
-            label: Governor & TimeLock
+          - shard: shard4a1
+            label: Governor & TimeLock - Part 1
+          - shard: shard4a2
+            label: Governor & TimeLock - Part 2
           - shard: shard4b
             label: Governance - Voting power with proposal deposit
           - shard: shard4c

@@ -9,6 +9,7 @@ import { GrantActivityCard } from "./GrantActivityCard"
 import { ProposalActivityCard } from "./ProposalActivityCard"
 import { RoundActivityCard } from "./RoundActivityCard"
 import { UserAllocationVoteCard } from "./UserAllocationVoteCard"
+import { UserProposalSupportCard } from "./UserProposalSupportCard"
 import { UserProposalVoteCard } from "./UserProposalVoteCard"
 
 type Props = {
@@ -45,5 +46,7 @@ export const ActivityCard: React.FC<Props> = ({ activity }) => {
       return <UserAllocationVoteCard activity={activity} />
     case ActivityType.USER_PROPOSAL_VOTE_CAST:
       return <UserProposalVoteCard activity={activity} />
+    case ActivityType.USER_PROPOSAL_SUPPORT:
+      return <UserProposalSupportCard activity={activity} />
   }
 }

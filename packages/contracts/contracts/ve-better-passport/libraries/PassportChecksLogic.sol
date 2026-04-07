@@ -76,9 +76,9 @@ library PassportChecksLogic {
   /// @param checkType The type of check to query (from the enum)
   /// @return True if the check is enabled, false otherwise
   function _isCheckEnabled(
-    PassportStorageTypes.PassportStorage storage self,
     PassportTypes.CheckType checkType
   ) internal view returns (bool) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     require(checkType != PassportTypes.CheckType.UNDEFINED, "Invalid check type");
 
     (uint256 checkBit, ) = _mapCheckTypeToBitmask(checkType);
@@ -88,28 +88,25 @@ library PassportChecksLogic {
   // ---------- Getters ---------- //
 
   /// @notice Checks if a specific check is enabled.
-  /// @param self The storage object for the Passport contract containing all checks.
   /// @param checkType The type of check to query (from the enum).
   /// @return True if the check is enabled, false otherwise.
   function isCheckEnabled(
-    PassportStorageTypes.PassportStorage storage self,
     PassportTypes.CheckType checkType
   ) external view returns (bool) {
-    return _isCheckEnabled(self, checkType);
+    return _isCheckEnabled(checkType);
   }
 
   /// @notice Returns the minimum galaxy member level
-  function getMinimumGalaxyMemberLevel(
-    PassportStorageTypes.PassportStorage storage self
-  ) internal view returns (uint256) {
+  function getMinimumGalaxyMemberLevel() internal view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     return self.minimumGalaxyMemberLevel;
   }
 
   // ---------- Setters ---------- //
   /// @notice Toggles the specified check between enabled and disabled.
-  /// @param self The storage object for the Passport contract containing all checks.
   /// @param checkType The type of check to toggle (from the enum).
-  function toggleCheck(PassportStorageTypes.PassportStorage storage self, PassportTypes.CheckType checkType) external {
+  function toggleCheck(PassportTypes.CheckType checkType) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     require(checkType != PassportTypes.CheckType.UNDEFINED, "Invalid check type");
 
     (uint256 checkBit, string memory checkName) = _mapCheckTypeToBitmask(checkType);
@@ -129,9 +126,9 @@ library PassportChecksLogic {
   /// @notice Sets the minimum galaxy member level
   /// @param minimumGalaxyMemberLevel The new minimum galaxy member level
   function setMinimumGalaxyMemberLevel(
-    PassportStorageTypes.PassportStorage storage self,
     uint256 minimumGalaxyMemberLevel
   ) external {
+    PassportStorageTypes.PassportStorage storage self = PassportStorageTypes.getPassportStorage();
     require(minimumGalaxyMemberLevel > 0, "VeBetterPassport: minimum galaxy member level must be greater than 0");
 
     self.minimumGalaxyMemberLevel = minimumGalaxyMemberLevel;

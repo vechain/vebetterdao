@@ -1,7 +1,7 @@
 "use client"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { use, useEffect } from "react"
 
 import { MotionVStack } from "../../../components/MotionVStack"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
@@ -16,14 +16,15 @@ const LeaderboardPageContent = dynamic(
     ),
   },
 )
-type Props = { params: { roundId: string } }
+type Props = { params: Promise<{ roundId: string }> }
 export default function LeaderboardPage({ params }: Props) {
+  const { roundId } = use(params)
   useEffect(() => {
-    AnalyticsUtils.trackPage(`Leaderboard/${params.roundId}`)
-  }, [params.roundId])
+    AnalyticsUtils.trackPage(`Leaderboard/${roundId}`)
+  }, [roundId])
   return (
     <MotionVStack>
-      <LeaderboardPageContent roundId={params.roundId} />
+      <LeaderboardPageContent roundId={roundId} />
     </MotionVStack>
   )
 }

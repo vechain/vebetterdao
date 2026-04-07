@@ -2,7 +2,7 @@
 import { Spinner, VStack } from "@chakra-ui/react"
 import { isValid } from "@repo/utils/AddressUtils"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { use, useEffect } from "react"
 
 import Custom404 from "@/app/not-found"
 
@@ -21,20 +21,19 @@ const ProfilePageContent = dynamic(
   },
 )
 type Props = {
-  params: {
-    address: string
-  }
+  params: Promise<{ address: string }>
 }
 export default function Profile({ params }: Readonly<Props>) {
+  const { address } = use(params)
   useEffect(() => {
     AnalyticsUtils.trackPage("Profile")
   }, [])
-  if (!isValid(params.address)) {
+  if (!isValid(address)) {
     return <Custom404 />
   }
   return (
     <MotionVStack>
-      <ProfilePageContent address={params.address} />
+      <ProfilePageContent address={address} />
     </MotionVStack>
   )
 }

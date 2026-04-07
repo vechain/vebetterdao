@@ -25,11 +25,13 @@ interface RewardCalculationInput {
   cycleGMTotal: bigint
   /** Relayer fee percentage (e.g., 10 = 10% fee) */
   relayerFeePercentage?: bigint
+  /** Max fee in wei (contract default: 100 ether = 100 tokens) */
+  feeCap?: bigint
   /** Whether user had auto-voting enabled (determines if fees apply) */
   hadAutoVotingEnabled?: boolean
 }
 
-interface RewardCalculationResult {
+export interface RewardCalculationResult {
   rawReward: bigint
   rawGmReward: bigint
   totalRawReward: bigint
@@ -54,14 +56,13 @@ function calculateRawReward(voterTotal: bigint, emissionsAmount: bigint, cycleTo
 }
 
 /**
- * Calculate relayer fee based on total reward
- * Simplified: assumes fee calculation similar to contract's relayerRewardsPool.calculateRelayerFee
+ * Calculate relayer fee matching contract's RelayerRewardsPool.calculateRelayerFee:
+ * fee = min((totalReward * feePercent) / denominator, feeCap)
  */
-function calculateRelayerFee(
-  totalReward: bigint,
-  feePercentage: bigint = 10n, // Default 10%
-): bigint {
-  return (totalReward * feePercentage) / 100n
+function calculateRelayerFee(totalReward: bigint, feePercentage: bigint = 10n, feeCap?: bigint): bigint {
+  const fee = (totalReward * feePercentage) / 100n
+  if (feeCap !== undefined && fee > feeCap) return feeCap
+  return fee
 }
 
 /**
@@ -76,6 +77,7 @@ export function calculatePotentialRewards({
   gmWeightTotal,
   cycleGMTotal,
   relayerFeePercentage = 10n,
+  feeCap,
   hadAutoVotingEnabled = false,
 }: RewardCalculationInput): RewardCalculationResult {
   // Calculate raw rewards
@@ -103,7 +105,7 @@ export function calculatePotentialRewards({
   let netGmReward = rawGmReward
 
   if (hadAutoVotingEnabled) {
-    fee = calculateRelayerFee(totalRawReward, relayerFeePercentage)
+    fee = calculateRelayerFee(totalRawReward, relayerFeePercentage, feeCap)
 
     // Apply proportional fee distribution with underflow protection
     const feePortionForReward = (fee * rawReward) / totalRawReward

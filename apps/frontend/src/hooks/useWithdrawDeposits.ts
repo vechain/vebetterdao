@@ -3,6 +3,8 @@ import { useCallback, useMemo } from "react"
 
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
+import { getDepositsVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { getVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useVotesOnBlock"
 import { ProposalDeposit, buildClaimDepositsTx } from "../api/contracts/governance/utils/buildClaimDepositsTx"
 
 import { useBuildTransaction } from "./useBuildTransaction"
@@ -41,6 +43,8 @@ export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: 
     )
     queryKeys.push(getProposalClaimableUserDepositsQueryKey(account?.address ?? ""))
     queryKeys.push(getVot3BalanceQueryKey(account?.address ?? ""))
+    queryKeys.push(getDepositsVotesOnBlockPrefixQueryKey())
+    queryKeys.push(getVotesOnBlockPrefixQueryKey())
     return queryKeys
   }, [account, proposalDeposits])
 
