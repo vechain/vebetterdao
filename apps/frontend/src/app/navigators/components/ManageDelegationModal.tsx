@@ -1,14 +1,17 @@
-import { Button, Card, Heading, HStack, Input, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Field, Heading, HStack, Icon, NumberInput, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { InfoCircle, WarningTriangle } from "iconoir-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCircleAlert, LuInfo, LuUsers } from "react-icons/lu"
+import { LuUsers } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
+import { VOT3Icon } from "@/components/Icons/VOT3Icon"
+import { handleAmountInput } from "@/components/PowerUpModal/utils"
 import { useDelegateToNavigator } from "@/hooks/navigator/useDelegateToNavigator"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
@@ -34,6 +37,7 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 6, 4)
   const balanceNum = vot3Balance ? Number(vot3Balance.scaled) : 0
+  const availableBalance = vot3Balance?.scaled ?? "0"
   const newAmountNum = Number(newAmount) || 0
 
   // Capacity: stake * 10 - totalDelegated + currentDelegation (user's own delegation is part of totalDelegated)
@@ -49,21 +53,15 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
 
   const exceedsCapacity = newAmountNum > maxCapacity
   const exceedsBalance = isIncreasing && delta > balanceNum
-
   const isValid = hasChanged && !exceedsCapacity && !exceedsBalance && newAmountNum >= 0
 
   useEffect(() => {
     if (isOpen) setNewAmount(currentDelegatedNum.toString())
   }, [isOpen, currentDelegatedNum])
 
-  const handleSuccess = useCallback(() => {
-    setNewAmount("")
-    onClose()
-  }, [onClose])
-
-  const { sendTransaction: sendDelegate } = useDelegateToNavigator({ onSuccess: handleSuccess })
-  const { sendTransaction: sendReduce } = useReduceDelegation({ onSuccess: handleSuccess })
-  const { sendTransaction: sendUndelegate } = useUndelegate({ onSuccess: handleSuccess })
+  const { sendTransaction: sendDelegate } = useDelegateToNavigator({ onSuccess: onClose })
+  const { sendTransaction: sendReduce } = useReduceDelegation({ onSuccess: onClose })
+  const { sendTransaction: sendUndelegate } = useUndelegate({ onSuccess: onClose })
 
   const handleSubmit = useCallback(() => {
     if (!isValid) return
@@ -77,15 +75,6 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
     }
   }, [isValid, isFullRemoval, isDecreasing, isIncreasing, delta, sendUndelegate, sendReduce, sendDelegate, nav.address])
 
-  const handleClose = useCallback(() => {
-    setNewAmount("")
-    onClose()
-  }, [onClose])
-
-  const handleSetMax = useCallback(() => {
-    setNewAmount(maxNewAmount.toString())
-  }, [maxNewAmount])
-
   const getButtonLabel = () => {
     if (isFullRemoval) return t("Remove all delegation")
     if (isDecreasing) return t("Reduce by {{amount}} VOT3", { amount: formatter.format(Math.abs(delta)) })
@@ -93,123 +82,191 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
     return t("No changes")
   }
 
+  const summaryColor = isDecreasing || isFullRemoval ? "status.negative" : "status.positive"
+
   return (
-    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} showCloseButton>
-      <VStack gap={6} align="stretch" w="full">
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={onClose}
+      showCloseButton
+      modalProps={{ closeOnInteractOutside: true }}>
+      <VStack gap={5} align="stretch" w="full">
         <Heading size="xl" fontWeight="bold">
           {t("Manage Delegation")}
         </Heading>
 
         {/* Navigator info */}
-        <Card.Root variant="outline" borderRadius="xl">
-          <Card.Body py={3}>
-            <HStack gap={3}>
-              <AddressIcon address={nav.address} boxSize={10} borderRadius="full" />
-              <VStack gap={0} align="start" flex={1}>
-                <Text textStyle="sm" fontWeight="semibold">
-                  {displayName}
-                </Text>
+        <HStack
+          gap={3}
+          w="full"
+          bg="card.default"
+          border="1px solid"
+          borderColor="border.secondary"
+          borderRadius="2xl"
+          p={4}>
+          <AddressIcon address={nav.address} boxSize={10} borderRadius="full" />
+          <VStack gap={0} align="start" flex={1}>
+            <Text textStyle="sm" fontWeight="semibold">
+              {displayName}
+            </Text>
+            <HStack gap={2}>
+              <LuUsers size={12} />
+              <Text textStyle="xs" color="fg.muted">
+                {t("{{count}} citizens", { count: nav.citizenCount })}
+              </Text>
+            </HStack>
+          </VStack>
+          <VStack gap={0} align="end">
+            <Text textStyle="sm" fontWeight="bold">
+              {formatter.format(currentDelegatedNum)}
+            </Text>
+            <Text textStyle="xs" color="fg.muted">
+              {t("VOT3 delegated")}
+            </Text>
+          </VStack>
+        </HStack>
+
+        {/* Amount input */}
+        <VStack
+          bg="card.default"
+          border="1px solid"
+          borderColor="border.secondary"
+          borderRadius="2xl"
+          p={4}
+          gap={2}
+          align="start"
+          w="full">
+          <Field.Root
+            gap={2}
+            required
+            invalid={!!newAmount && newAmount !== "." && (exceedsBalance || exceedsCapacity)}>
+            <Field.Label w="full" alignItems="center" justifyContent="space-between">
+              <Text textStyle="sm" color="text.subtle">
+                {t("New delegation amount")}
+              </Text>
+              <Button
+                variant="link"
+                height="5"
+                size="sm"
+                p="0"
+                onClick={() => setNewAmount(handleAmountInput(maxNewAmount.toString()))}>
+                {t("Use max")}
+              </Button>
+            </Field.Label>
+
+            <HStack w="full" justifyContent="space-between">
+              <VStack align="start" gap="2" w="full">
+                <NumberInput.Root asChild textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
+                  <NumberInput.Input
+                    min={0}
+                    p="0"
+                    value={newAmount}
+                    placeholder="0"
+                    onChange={e => setNewAmount(handleAmountInput(e.target.value))}
+                    onBlur={() => setNewAmount(prev => prev.replace(/\.$/, ""))}
+                    border="none"
+                    outline="none"
+                    textStyle={(newAmount || "0").length > 15 ? "lg" : (newAmount || "0").length > 10 ? "xl" : "3xl"}
+                    transition="font-size 0.15s ease-out"
+                  />
+                </NumberInput.Root>
+                <Field.ErrorText>
+                  <Icon as={WarningTriangle} boxSize="4" />
+                  {exceedsCapacity
+                    ? t("Exceeds navigator capacity. Max: {{max}} VOT3", {
+                        max: formatter.format(maxCapacity),
+                      })
+                    : t("Insufficient VOT3 balance")}
+                </Field.ErrorText>
+              </VStack>
+
+              <VStack align="end" gap={2} flexShrink={0}>
                 <HStack gap={2}>
-                  <LuUsers size={12} />
-                  <Text textStyle="xs" color="fg.muted">
-                    {t("{{count}} citizens", { count: nav.citizenCount })}
+                  <VOT3Icon boxSize="24px" />
+                  <Text textStyle="lg" fontWeight="semibold">
+                    {"VOT3"}
+                  </Text>
+                </HStack>
+                <Skeleton loading={balanceLoading}>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("Available:")} {formatter.format(Number(availableBalance))}
+                  </Text>
+                </Skeleton>
+              </VStack>
+            </HStack>
+          </Field.Root>
+        </VStack>
+
+        {/* Delta summary */}
+        {hasChanged && (
+          <Card.Root
+            w="full"
+            p={4}
+            bg={`${summaryColor}.subtle`}
+            border="1px solid"
+            borderColor={`${summaryColor}.strong`}
+            rounded="2xl">
+            <VStack align="start" gap={2}>
+              <Text textStyle="xs" color="text.subtle" fontStyle="italic">
+                {isDecreasing || isFullRemoval
+                  ? t("Voting Power removed from next round")
+                  : t("Voting Power added from next round")}
+              </Text>
+
+              <Text textStyle="3xl" fontWeight="bold" color={`${summaryColor}.strong`}>
+                {isDecreasing || isFullRemoval ? "-" : "+"}
+                {formatter.format(Math.abs(delta))}
+                {" VOT3"}
+              </Text>
+
+              <VStack align="start" gap={0.5}>
+                <HStack gap={1}>
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("Your current delegation:")}
+                  </Text>
+                  <Text textStyle="sm" fontWeight="semibold">
+                    {formatter.format(currentDelegatedNum)} {"VOT3"}
+                  </Text>
+                </HStack>
+                <HStack gap={1}>
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("Navigator capacity remaining:")}
+                  </Text>
+                  <Text textStyle="sm" fontWeight="semibold">
+                    {formatter.format(Math.max(0, maxCapacity - newAmountNum))} {"VOT3"}
                   </Text>
                 </HStack>
               </VStack>
-              <VStack gap={0} align="end">
-                <Text textStyle="sm" fontWeight="bold">
-                  {formatter.format(currentDelegatedNum)}
-                </Text>
-                <Text textStyle="xs" color="fg.muted">
-                  {t("VOT3 delegated")}
-                </Text>
-              </VStack>
-            </HStack>
-          </Card.Body>
-        </Card.Root>
-
-        {/* Amount input */}
-        <VStack gap={2} align="stretch">
-          <HStack justify="space-between">
-            <Text textStyle="sm" fontWeight="semibold">
-              {t("New delegation amount")}
-            </Text>
-            <Skeleton loading={balanceLoading}>
-              <HStack gap={1}>
-                <Text textStyle="xs" color="fg.muted">
-                  {t("Balance: {{amount}}", { amount: formatter.format(balanceNum) })}
-                </Text>
-                <Button size="xs" variant="ghost" onClick={handleSetMax}>
-                  {t("MAX")}
-                </Button>
-              </HStack>
-            </Skeleton>
-          </HStack>
-          <Input
-            type="number"
-            placeholder="0.00"
-            value={newAmount}
-            onChange={e => setNewAmount(e.target.value)}
-            size="lg"
-          />
-
-          {/* Delta summary */}
-          {hasChanged && !exceedsCapacity && !exceedsBalance && (
-            <Text textStyle="xs" color={isIncreasing ? "green.500" : "red.500"}>
-              {isFullRemoval
-                ? t("Full removal — your VOT3 will be unlocked")
-                : isDecreasing
-                  ? t("Reducing by {{amount}} VOT3", { amount: formatter.format(Math.abs(delta)) })
-                  : t("Adding {{amount}} VOT3", { amount: formatter.format(delta) })}
-            </Text>
-          )}
-
-          <HStack justify="space-between">
-            <Text textStyle="xs" color="fg.muted">
-              {t("Navigator capacity: {{capacity}} VOT3", { capacity: formatter.format(maxCapacity) })}
-            </Text>
-          </HStack>
-
-          {exceedsBalance && (
-            <HStack gap={1} color="red.500">
-              <LuCircleAlert size={14} />
-              <Text textStyle="xs">{t("Insufficient VOT3 balance")}</Text>
-            </HStack>
-          )}
-          {exceedsCapacity && !exceedsBalance && (
-            <HStack gap={1} color="red.500">
-              <LuCircleAlert size={14} />
-              <Text textStyle="xs">
-                {t("Exceeds navigator capacity. Max: {{max}} VOT3", {
-                  max: formatter.format(maxCapacity),
-                })}
-              </Text>
-            </HStack>
-          )}
-        </VStack>
+            </VStack>
+          </Card.Root>
+        )}
 
         {/* Info callout */}
-        <Card.Root variant="outline" borderRadius="lg">
-          <Card.Body py={3}>
-            <HStack gap={2} align="start">
-              <LuInfo size={16} style={{ marginTop: 2, flexShrink: 0 }} />
-              <Text textStyle="xs" color="fg.muted">
-                {t(
-                  "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
-                )}
-              </Text>
-            </HStack>
-          </Card.Body>
+        <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+          <HStack gap={3} align="flex-start">
+            <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
+            <Text textStyle="xs" color="text.subtle">
+              {t(
+                "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
+              )}
+            </Text>
+          </HStack>
         </Card.Root>
 
-        <Button
-          variant={isDecreasing || isFullRemoval ? "negative" : "primary"}
-          w="full"
-          onClick={handleSubmit}
-          disabled={!isValid}
-          size="lg">
-          {getButtonLabel()}
-        </Button>
+        <VStack gap={2} mt={2} w="full">
+          <Button
+            variant={isDecreasing || isFullRemoval ? "negative" : "primary"}
+            w="full"
+            rounded="full"
+            size="lg"
+            disabled={!isValid}
+            onClick={handleSubmit}>
+            {getButtonLabel()}
+          </Button>
+          <Button variant="ghost" w="full" rounded="full" size="lg" onClick={onClose}>
+            {t("Cancel")}
+          </Button>
+        </VStack>
       </VStack>
     </BaseModal>
   )

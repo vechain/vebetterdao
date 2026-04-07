@@ -5,7 +5,6 @@ import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNav
 
 import { NavigatorInfoCard } from "./NavigatorInfoCard"
 import { NavigatorMyStatusCard } from "./NavigatorMyStatusCard"
-import { NavigatorOverviewCard } from "./NavigatorOverviewCard"
 
 export const NavigatorsSidebar = () => {
   const { account } = useWallet()
@@ -15,7 +14,6 @@ export const NavigatorsSidebar = () => {
     <VStack gap={4} align="stretch" w="full">
       {account?.address && isNavigator && <NavigatorMyStatusCard />}
       <NavigatorInfoCard />
-      <NavigatorOverviewCard />
     </VStack>
   )
 }

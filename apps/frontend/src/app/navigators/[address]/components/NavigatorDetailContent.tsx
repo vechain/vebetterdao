@@ -1,7 +1,7 @@
 import {
-  Badge,
   Button,
   Card,
+  Collapsible,
   Flex,
   Heading,
   HStack,
@@ -10,21 +10,29 @@ import {
   SimpleGrid,
   Skeleton,
   Spinner,
-  Tabs,
   Text,
   VStack,
 } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuArrowLeft, LuCalendar, LuChevronRight, LuExternalLink, LuShield, LuUsers } from "react-icons/lu"
+import {
+  LuCalendar,
+  LuChevronDown,
+  LuChevronRight,
+  LuChevronUp,
+  LuExternalLink,
+  LuShield,
+  LuUsers,
+} from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { DelegateModal } from "@/app/navigators/components/DelegateModal"
 import { ManageDelegationModal } from "@/app/navigators/components/ManageDelegationModal"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -39,10 +47,9 @@ const formatter = getCompactFormatter(2)
 export const NavigatorDetailContent = () => {
   const { t } = useTranslation()
   const params = useParams<{ address: string }>()
-  const router = useRouter()
   const { account } = useWallet()
   const address = params?.address ?? ""
-  const [tab, setTab] = useState("about")
+  const [isAboutOpen, setIsAboutOpen] = useState(false)
   const [isDelegateOpen, setIsDelegateOpen] = useState(false)
   const [isManageOpen, setIsManageOpen] = useState(false)
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
@@ -66,14 +73,6 @@ export const NavigatorDetailContent = () => {
         color: "status.positive.primary",
       },
       {
-        id: "staked",
-        label: t("Total Staked"),
-        value: `${formatter.format(Number(nav?.stakeFormatted ?? 0))} B3TR`,
-        icon: B3trSvg,
-        bg: "status.warning.subtle",
-        color: "status.warning.primary",
-      },
-      {
         id: "delegated",
         label: t("Total Delegated"),
         value: `${formatter.format(Number(nav?.totalDelegatedFormatted ?? 0))} VOT3`,
@@ -82,8 +81,16 @@ export const NavigatorDetailContent = () => {
         color: "status.info.primary",
       },
       {
+        id: "staked",
+        label: t("Total Staked"),
+        value: `${formatter.format(Number(nav?.stakeFormatted ?? 0))} B3TR`,
+        icon: B3trSvg,
+        bg: "status.warning.subtle",
+        color: "status.warning.primary",
+      },
+      {
         id: "since",
-        label: t("Registered"),
+        label: t("Since"),
         value: nav
           ? new Date(nav.registeredAt * 1000).toLocaleDateString("en-US", {
               month: "short",
@@ -109,15 +116,14 @@ export const NavigatorDetailContent = () => {
 
   if (!nav) {
     return (
-      <VStack w="full" py={20} gap={4}>
-        <LuShield size={48} />
-        <Text textStyle="md" color="fg.muted">
-          {t("Navigator not found")}
-        </Text>
-        <Button variant="ghost" onClick={() => router.push("/navigators")}>
-          <LuArrowLeft />
-          {t("Back to Navigators")}
-        </Button>
+      <VStack w="full" gap={4} align="stretch" px={{ base: 4, md: 0 }}>
+        <PageBreadcrumb items={[{ label: t("Navigators"), href: "/navigators" }]} />
+        <VStack w="full" py={20} gap={4}>
+          <LuShield size={48} />
+          <Text textStyle="md" color="fg.muted">
+            {t("Navigator not found")}
+          </Text>
+        </VStack>
       </VStack>
     )
   }
@@ -128,10 +134,12 @@ export const NavigatorDetailContent = () => {
 
   return (
     <VStack w="full" gap={6} align="stretch" px={{ base: 4, md: 0 }}>
-      <Button variant="ghost" size="sm" w="fit-content" onClick={() => router.push("/navigators")}>
-        <LuArrowLeft />
-        {t("Back to Navigators")}
-      </Button>
+      <PageBreadcrumb
+        items={[
+          { label: t("Navigators"), href: "/navigators" },
+          { label: domainData?.domain ? displayName : t("Overview"), href: `/navigators/${address}` },
+        ]}
+      />
 
       {/* Header */}
       <Card.Root variant="outline" borderRadius="xl">
@@ -143,9 +151,7 @@ export const NavigatorDetailContent = () => {
               <Skeleton loading={domainLoading}>
                 <Heading size={{ base: "md", md: "lg" }}>{displayName}</Heading>
               </Skeleton>
-              <Badge colorPalette={isActive ? "green" : nav.status === "EXITING" ? "yellow" : "red"} size="sm">
-                {nav.status}
-              </Badge>
+
               <HStack flex={1} justify="end">
                 {account?.address && isDelegatedHere && (
                   <Button variant="secondary" size="sm" onClick={() => setIsManageOpen(true)}>
@@ -191,6 +197,94 @@ export const NavigatorDetailContent = () => {
                 </HStack>
               )}
             </HStack>
+
+            {/* Collapsible About section */}
+            <Collapsible.Root open={isAboutOpen} onOpenChange={e => setIsAboutOpen(e.open)}>
+              <Collapsible.Content>
+                <VStack gap={4} align="stretch" pt={2}>
+                  <Separator />
+
+                  <Text textStyle="sm" fontWeight="semibold">
+                    {t("Motivation")}
+                  </Text>
+                  <Skeleton loading={metadataLoading}>
+                    <Text textStyle="sm">{metadata?.motivation || t("No motivation provided")}</Text>
+                  </Skeleton>
+
+                  <Separator />
+
+                  <Text textStyle="sm" fontWeight="semibold">
+                    {t("Qualifications")}
+                  </Text>
+                  <Skeleton loading={metadataLoading}>
+                    <Text textStyle="sm">{metadata?.qualifications || t("No qualifications provided")}</Text>
+                  </Skeleton>
+
+                  {metadata?.votingStrategy && (
+                    <>
+                      <Separator />
+                      <Text textStyle="sm" fontWeight="semibold">
+                        {t("Voting Strategy")}
+                      </Text>
+                      <Text textStyle="sm">{metadata.votingStrategy}</Text>
+                    </>
+                  )}
+
+                  {metadata?.disclosures && (
+                    <>
+                      <Separator />
+                      <Text textStyle="sm" fontWeight="semibold">
+                        {t("Disclosures")}
+                      </Text>
+
+                      <HStack justify="space-between">
+                        <Text textStyle="sm" color="fg.muted">
+                          {t("App affiliated")}
+                        </Text>
+                        <Text textStyle="sm" fontWeight="semibold">
+                          {metadata.disclosures.isAppAffiliated
+                            ? metadata.disclosures.affiliatedAppNames || t("Yes")
+                            : t("No")}
+                        </Text>
+                      </HStack>
+
+                      <HStack justify="space-between">
+                        <Text textStyle="sm" color="fg.muted">
+                          {t("Foundation member")}
+                        </Text>
+                        <Text textStyle="sm" fontWeight="semibold">
+                          {metadata.disclosures.isFoundationMember
+                            ? metadata.disclosures.foundationRole || t("Yes")
+                            : t("No")}
+                        </Text>
+                      </HStack>
+
+                      <HStack justify="space-between">
+                        <Text textStyle="sm" color="fg.muted">
+                          {t("Conflicts of interest")}
+                        </Text>
+                        <Text textStyle="sm" fontWeight="semibold">
+                          {metadata.disclosures.hasConflictsOfInterest ? t("Yes") : t("No")}
+                        </Text>
+                      </HStack>
+
+                      {metadata.disclosures.hasConflictsOfInterest && metadata.disclosures.conflictsDescription && (
+                        <Text textStyle="xs" color="fg.muted">
+                          {metadata.disclosures.conflictsDescription}
+                        </Text>
+                      )}
+                    </>
+                  )}
+                </VStack>
+              </Collapsible.Content>
+
+              <Collapsible.Trigger asChild>
+                <Button variant="plain" size="xs" w="full" mt={2} color="fg.muted">
+                  {isAboutOpen ? t("Read less") : t("Read more")}
+                  {isAboutOpen ? <LuChevronUp /> : <LuChevronDown />}
+                </Button>
+              </Collapsible.Trigger>
+            </Collapsible.Root>
           </VStack>
         </Card.Body>
       </Card.Root>
@@ -242,108 +336,8 @@ export const NavigatorDetailContent = () => {
         ))}
       </SimpleGrid>
 
-      {/* Tabs */}
-      <Tabs.Root
-        variant="line"
-        size={{ base: "md", md: "lg" }}
-        w="full"
-        value={tab}
-        onValueChange={d => setTab(d.value)}
-        lazyMount>
-        <Tabs.List>
-          <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="about">
-            {t("About")}
-          </Tabs.Trigger>
-          <Tabs.Trigger flex={{ base: 1, md: "unset" }} justifyContent="center" value="governance">
-            {t("Governance Activity")}
-          </Tabs.Trigger>
-        </Tabs.List>
-
-        <Tabs.Content value="about">
-          <VStack gap={6} align="stretch" pt={4}>
-            {/* Motivation & Qualifications */}
-            <Card.Root variant="primary" w="full">
-              <Card.Body>
-                <VStack gap={4} align="stretch">
-                  <Card.Title textStyle="xl">{t("Motivation")}</Card.Title>
-                  <Skeleton loading={metadataLoading}>
-                    <Text textStyle="sm">{metadata?.motivation || t("No motivation provided")}</Text>
-                  </Skeleton>
-
-                  <Separator />
-
-                  <Card.Title textStyle="xl">{t("Qualifications")}</Card.Title>
-                  <Skeleton loading={metadataLoading}>
-                    <Text textStyle="sm">{metadata?.qualifications || t("No qualifications provided")}</Text>
-                  </Skeleton>
-
-                  {metadata?.votingStrategy && (
-                    <>
-                      <Separator />
-                      <Card.Title textStyle="xl">{t("Voting Strategy")}</Card.Title>
-                      <Text textStyle="sm">{metadata.votingStrategy}</Text>
-                    </>
-                  )}
-                </VStack>
-              </Card.Body>
-            </Card.Root>
-
-            {/* Disclosures */}
-            {metadata?.disclosures && (
-              <Card.Root variant="primary" w="full">
-                <Card.Body>
-                  <VStack gap={3} align="stretch">
-                    <Card.Title textStyle="xl">{t("Disclosures")}</Card.Title>
-
-                    <HStack justify="space-between">
-                      <Text textStyle="sm" color="fg.muted">
-                        {t("App affiliated")}
-                      </Text>
-                      <Text textStyle="sm" fontWeight="semibold">
-                        {metadata.disclosures.isAppAffiliated
-                          ? metadata.disclosures.affiliatedAppNames || t("Yes")
-                          : t("No")}
-                      </Text>
-                    </HStack>
-
-                    <HStack justify="space-between">
-                      <Text textStyle="sm" color="fg.muted">
-                        {t("Foundation member")}
-                      </Text>
-                      <Text textStyle="sm" fontWeight="semibold">
-                        {metadata.disclosures.isFoundationMember
-                          ? metadata.disclosures.foundationRole || t("Yes")
-                          : t("No")}
-                      </Text>
-                    </HStack>
-
-                    <HStack justify="space-between">
-                      <Text textStyle="sm" color="fg.muted">
-                        {t("Conflicts of interest")}
-                      </Text>
-                      <Text textStyle="sm" fontWeight="semibold">
-                        {metadata.disclosures.hasConflictsOfInterest ? t("Yes") : t("No")}
-                      </Text>
-                    </HStack>
-
-                    {metadata.disclosures.hasConflictsOfInterest && metadata.disclosures.conflictsDescription && (
-                      <Text textStyle="xs" color="fg.muted">
-                        {metadata.disclosures.conflictsDescription}
-                      </Text>
-                    )}
-                  </VStack>
-                </Card.Body>
-              </Card.Root>
-            )}
-          </VStack>
-        </Tabs.Content>
-
-        <Tabs.Content value="governance">
-          <VStack pt={4} align="stretch">
-            <NavigatorGovernanceTab address={address} />
-          </VStack>
-        </Tabs.Content>
-      </Tabs.Root>
+      {/* Governance Activity */}
+      <NavigatorGovernanceTab address={address} />
 
       {nav && (
         <>

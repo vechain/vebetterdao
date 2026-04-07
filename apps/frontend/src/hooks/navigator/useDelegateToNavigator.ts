@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
@@ -45,25 +45,20 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
   }, [])
 
   const handleSuccess = useCallback(() => {
-    // Invalidate all indexer navigator queries so they refetch
+    const addr = account?.address ?? ""
+    // Background-refetch all relevant queries without clearing existing data
+    queryClient.invalidateQueries({ queryKey: getIsDelegatedQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getGetDelegatedAmountQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getGetNavigatorQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getIsNavigatorQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getVot3BalanceQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: ["indexer", "navigators"] })
     onSuccess?.()
-  }, [queryClient, onSuccess])
-
-  const refetchQueryKeys = useMemo(
-    () => [
-      getIsDelegatedQueryKey(account?.address ?? ""),
-      getGetDelegatedAmountQueryKey(account?.address ?? ""),
-      getGetNavigatorQueryKey(account?.address ?? ""),
-      getIsNavigatorQueryKey(account?.address ?? ""),
-      getVot3BalanceQueryKey(account?.address ?? ""),
-    ],
-    [account],
-  )
+  }, [queryClient, account, onSuccess])
 
   return useBuildTransaction<DelegateParams>({
     clauseBuilder,
-    refetchQueryKeys,
+    invalidateCache: false,
     onSuccess: handleSuccess,
   })
 }

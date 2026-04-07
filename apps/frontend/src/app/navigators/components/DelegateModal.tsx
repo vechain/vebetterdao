@@ -78,11 +78,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
   const currentDelegationNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const totalDelegatedToNav = Number(nav.totalDelegatedFormatted)
 
-  const handleSuccess = useCallback(() => {
-    onClose()
-  }, [onClose])
-
-  const { sendTransaction } = useDelegateToNavigator({ onSuccess: handleSuccess })
+  const { sendTransaction } = useDelegateToNavigator({ onSuccess: onClose })
 
   const handleDelegate = useCallback(() => {
     if (invalidAmount || !allAcked) return
@@ -90,7 +86,11 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
   }, [invalidAmount, allAcked, sendTransaction, nav.address, amount])
 
   return (
-    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose} showCloseButton>
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={onClose}
+      showCloseButton
+      modalProps={{ closeOnInteractOutside: true }}>
       <VStack gap={5} align="stretch" w="full">
         <Heading size="xl" fontWeight="bold">
           {t("Delegate to Navigator")}
@@ -257,7 +257,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
               <Checkbox.HiddenInput />
               <Checkbox.Control mt="1" />
               <Checkbox.Label>
-                <Text textStyle="sm">
+                <Text textStyle="xs" lineHeight="1.2">
                   {t(
                     "I acknowledge that the navigator will vote on governance proposals and app allocation rounds on my behalf. I will not be able to vote manually while delegated.",
                   )}
@@ -274,7 +274,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
               <Checkbox.HiddenInput />
               <Checkbox.Control mt="1" />
               <Checkbox.Label>
-                <Text textStyle="sm">
+                <Text textStyle="xs" lineHeight="1.2">
                   {t(
                     "I acknowledge that my delegated VOT3 cannot be transferred or converted back to B3TR until I undelegate. My VOT3 never leaves my wallet.",
                   )}
@@ -291,7 +291,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
               <Checkbox.HiddenInput />
               <Checkbox.Control mt="1" />
               <Checkbox.Label>
-                <Text textStyle="sm">
+                <Text textStyle="xs" lineHeight="1.2">
                   {t(
                     "I acknowledge that the navigator receives 20% of my earned rewards as a fee, deducted automatically when rewards are claimed.",
                   )}

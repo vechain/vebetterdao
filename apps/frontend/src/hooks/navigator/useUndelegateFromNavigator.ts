@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
@@ -27,9 +27,23 @@ type Props = {
   onSuccess?: () => void
 }
 
-export const useReduceDelegation = ({ onSuccess }: Props) => {
+const useInvalidateNavigatorQueries = () => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
+
+  return useCallback(() => {
+    const addr = account?.address ?? ""
+    queryClient.invalidateQueries({ queryKey: getIsDelegatedQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getGetDelegatedAmountQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getGetNavigatorQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getIsNavigatorQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getVot3BalanceQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: ["indexer", "navigators"] })
+  }, [queryClient, account])
+}
+
+export const useReduceDelegation = ({ onSuccess }: Props) => {
+  const invalidateAll = useInvalidateNavigatorQueries()
 
   const clauseBuilder = useCallback((params: ReduceParams) => {
     const amountWei = ethers.parseEther(params.amount)
@@ -46,31 +60,19 @@ export const useReduceDelegation = ({ onSuccess }: Props) => {
   }, [])
 
   const handleSuccess = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["indexer", "navigators"] })
+    invalidateAll()
     onSuccess?.()
-  }, [queryClient, onSuccess])
-
-  const refetchQueryKeys = useMemo(
-    () => [
-      getIsDelegatedQueryKey(account?.address ?? ""),
-      getGetDelegatedAmountQueryKey(account?.address ?? ""),
-      getGetNavigatorQueryKey(account?.address ?? ""),
-      getIsNavigatorQueryKey(account?.address ?? ""),
-      getVot3BalanceQueryKey(account?.address ?? ""),
-    ],
-    [account],
-  )
+  }, [invalidateAll, onSuccess])
 
   return useBuildTransaction<ReduceParams>({
     clauseBuilder,
-    refetchQueryKeys,
+    invalidateCache: false,
     onSuccess: handleSuccess,
   })
 }
 
 export const useUndelegate = ({ onSuccess }: Props) => {
-  const { account } = useWallet()
-  const queryClient = useQueryClient()
+  const invalidateAll = useInvalidateNavigatorQueries()
 
   const clauseBuilder = useCallback((_params: UndelegateParams) => {
     return [
@@ -85,24 +87,13 @@ export const useUndelegate = ({ onSuccess }: Props) => {
   }, [])
 
   const handleSuccess = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["indexer", "navigators"] })
+    invalidateAll()
     onSuccess?.()
-  }, [queryClient, onSuccess])
-
-  const refetchQueryKeys = useMemo(
-    () => [
-      getIsDelegatedQueryKey(account?.address ?? ""),
-      getGetDelegatedAmountQueryKey(account?.address ?? ""),
-      getGetNavigatorQueryKey(account?.address ?? ""),
-      getIsNavigatorQueryKey(account?.address ?? ""),
-      getVot3BalanceQueryKey(account?.address ?? ""),
-    ],
-    [account],
-  )
+  }, [invalidateAll, onSuccess])
 
   return useBuildTransaction<UndelegateParams>({
     clauseBuilder,
-    refetchQueryKeys,
+    invalidateCache: false,
     onSuccess: handleSuccess,
   })
 }

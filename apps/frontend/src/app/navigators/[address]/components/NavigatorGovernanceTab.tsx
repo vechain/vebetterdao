@@ -1,4 +1,4 @@
-import { Card, Icon, VStack } from "@chakra-ui/react"
+import { Card, Heading, Icon, VStack } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -21,8 +21,6 @@ enum ListView {
   APPS_VOTED,
 }
 
-const PREVIEW_SIZE = 3
-
 type Props = {
   address: string
 }
@@ -30,23 +28,12 @@ type Props = {
 export const NavigatorGovernanceTab = ({ address }: Props) => {
   const { t } = useTranslation()
   const { data: createdProposals } = useUserCreatedProposal(address)
-  const { data: votedProposals } = useUserProposalsVoteEvents()
+  const { data: votedProposals } = useUserProposalsVoteEvents(address)
   const votedProposalsIds = useMemo(() => votedProposals?.map(p => p.proposalId.toString()), [votedProposals])
   const votedProposalsWithDescription = useUserVotedProposals(votedProposalsIds)
   const topVotedApps = useUserTopVotedApps(address)
 
   const [listView, setListView] = useState<ListView>(ListView.ALL)
-
-  const firstCreatedProposals = useMemo(() => createdProposals?.slice(0, PREVIEW_SIZE), [createdProposals])
-  const firstVotedProposals = useMemo(
-    () => votedProposalsWithDescription?.slice(0, PREVIEW_SIZE),
-    [votedProposalsWithDescription],
-  )
-  const firstTopVotedApps = useMemo(() => topVotedApps?.slice(0, PREVIEW_SIZE), [topVotedApps])
-
-  const isMoreCreatedProposals = (createdProposals?.length ?? 0) > PREVIEW_SIZE
-  const isMoreVotedProposals = (votedProposals?.length ?? 0) > PREVIEW_SIZE
-  const isMoreTopVotedApps = (topVotedApps?.length ?? 0) > PREVIEW_SIZE
 
   const onGoBack = useCallback(() => setListView(ListView.ALL), [])
 
@@ -54,24 +41,25 @@ export const NavigatorGovernanceTab = ({ address }: Props) => {
     case ListView.ALL:
       return (
         <VStack gap={8} w="full">
-          {firstCreatedProposals && firstCreatedProposals.length > 0 && (
+          {createdProposals && createdProposals.length > 0 && (
             <PreviewCreatedProposals
-              firstProposals={firstCreatedProposals}
-              isMoreProposals={isMoreCreatedProposals}
+              firstProposals={createdProposals}
               isCreatedProposals
               onSeeAllProposals={() => setListView(ListView.CREATED)}
             />
           )}
 
-          {firstVotedProposals && firstVotedProposals.length > 0 ? (
+          {votedProposalsWithDescription && votedProposalsWithDescription.length > 0 ? (
             <PreviewCreatedProposals
-              firstProposals={firstVotedProposals}
+              firstProposals={votedProposalsWithDescription}
               isMoreProposals={isMoreVotedProposals}
               onSeeAllProposals={() => setListView(ListView.VOTED)}
             />
           ) : (
             <Card.Root variant="primary" w="full">
-              <Card.Title textStyle="xl">{t("Voted Proposals")}</Card.Title>
+              <Heading size={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
+                {t("Voted Proposals")}
+              </Heading>
               <Card.Body asChild>
                 <EmptyState
                   title={t("Voted Proposals")}
@@ -88,12 +76,8 @@ export const NavigatorGovernanceTab = ({ address }: Props) => {
             </Card.Root>
           )}
 
-          {firstTopVotedApps && firstTopVotedApps.length > 0 ? (
-            <TopVotedApps
-              votedApps={firstTopVotedApps}
-              isMoreTopVotedApps={isMoreTopVotedApps}
-              onSeeAllAppsVoted={() => setListView(ListView.APPS_VOTED)}
-            />
+          {topVotedApps && topVotedApps.length > 0 ? (
+            <TopVotedApps votedApps={topVotedApps} onSeeAllAppsVoted={() => setListView(ListView.APPS_VOTED)} />
           ) : (
             <Card.Root variant="primary" w="full">
               <Card.Title textStyle="xl">{t("Most voted apps")}</Card.Title>

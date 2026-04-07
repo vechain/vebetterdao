@@ -186,7 +186,7 @@ export const ProposalInteractionCard = ({
     }
 
     if (proposal?.state === ProposalState.Pending) {
-      return !proposalDepositReached && userVot3Balance > 0 && !isProposer
+      return !proposalDepositReached && userVot3Balance > 0
     }
 
     //User has permissions to execute or queue
@@ -205,7 +205,6 @@ export const ProposalInteractionCard = ({
     userVotingPower,
     proposalDepositReached,
     userVot3Balance,
-    isProposer,
   ])
 
   const isActionButtonDisabled = useMemo(() => {

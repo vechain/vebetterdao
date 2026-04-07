@@ -6,7 +6,6 @@ import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuPlus, LuShield } from "react-icons/lu"
 
-import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted, useNavigatorRegistrations } from "@/api/indexer/navigators/useNavigators"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
@@ -15,7 +14,6 @@ import { DelegateModal } from "./DelegateModal"
 import { NavigatorCard } from "./NavigatorCard"
 import { NavigatorsSidebar } from "./NavigatorsSidebar"
 import { NavigatorStatsCards } from "./NavigatorStatsCards"
-import { NavigatorStatusBanner } from "./NavigatorStatusBanner"
 import { NavigatorStepsCard } from "./NavigatorStepsCard"
 
 export const NavigatorsPageContent = () => {
@@ -24,7 +22,6 @@ export const NavigatorsPageContent = () => {
   const { account } = useWallet()
   const { isMobile } = useBreakpoints()
   const { data: isNavigator } = useIsNavigator()
-  const { data: isDelegated } = useIsDelegated()
   const { data: navigators, isLoading: navigatorsLoading } = useNavigatorRegistrations()
   const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
 
@@ -51,8 +48,6 @@ export const NavigatorsPageContent = () => {
 
   return (
     <VStack w="full" gap={8} pb={8}>
-      {account?.address && <NavigatorStatusBanner isDelegated={isDelegated} />}
-
       <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
         <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
           <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Navigators")}</Heading>
