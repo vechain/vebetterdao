@@ -25,7 +25,7 @@ type Props = {
   address: string
 }
 
-export const NavigatorGovernanceTab = ({ address }: Props) => {
+export const NavigatorGovernanceActivity = ({ address }: Props) => {
   const { t } = useTranslation()
   const { data: createdProposals } = useUserCreatedProposal(address)
   const { data: votedProposals } = useUserProposalsVoteEvents(address)

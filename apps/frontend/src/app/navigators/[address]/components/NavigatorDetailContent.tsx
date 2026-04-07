@@ -40,7 +40,7 @@ import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
 
 import { NavigatorCitizensModal } from "./NavigatorCitizensModal"
-import { NavigatorGovernanceTab } from "./NavigatorGovernanceTab"
+import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 
 const formatter = getCompactFormatter(2)
 
@@ -337,7 +337,7 @@ export const NavigatorDetailContent = () => {
       </SimpleGrid>
 
       {/* Governance Activity */}
-      <NavigatorGovernanceTab address={address} />
+      <NavigatorGovernanceActivity address={address} />
 
       {nav && (
         <>
