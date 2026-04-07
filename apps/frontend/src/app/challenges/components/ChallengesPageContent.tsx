@@ -131,7 +131,7 @@ export const ChallengesPageContent = () => {
                   modules={[A11y, Navigation]}
                   spaceBetween={16}
                   slidesPerView={1.15}
-                  style={{ padding: "4px 16px" }}
+                  style={{ padding: "4px 16px 16px" }}
                   navigation={{
                     nextEl: ".active-swiper-next",
                     prevEl: ".active-swiper-prev",
@@ -194,7 +194,7 @@ export const ChallengesPageContent = () => {
                   modules={[A11y, Navigation]}
                   spaceBetween={16}
                   slidesPerView={1.15}
-                  style={{ padding: "4px 16px" }}
+                  style={{ padding: "4px 16px 16px" }}
                   navigation={{
                     nextEl: ".invites-swiper-next",
                     prevEl: ".invites-swiper-prev",

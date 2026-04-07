@@ -16,6 +16,7 @@ import { ReactNode } from "react"
 import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
+import { AppImage } from "@/components/AppImage/AppImage"
 
 import { getInviteeValidationMessage } from "../inviteeValidation"
 
@@ -333,20 +334,52 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <HStack gap="2" flexWrap="wrap">
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap="2" w="full">
           <Button
             size="sm"
+            h="auto"
+            minH="unset"
+            w="full"
+            borderRadius="xl"
+            px="4"
+            py="3"
+            justifyContent="flex-start"
+            textAlign="left"
+            whiteSpace="normal"
             variant={getExplicitChoiceVariant(winnerChosen, !isSplitPrize)}
             onClick={() => flow.setWinnerMode(false)}>
-            {t("Max actions")}
+            <VStack align="start" gap="1" w="full">
+              <Text textStyle="sm" fontWeight="semibold" color="inherit">
+                {t("Max actions")}
+              </Text>
+              <Text textStyle="xs" color="inherit" opacity={0.8}>
+                {t("Max actions description")}
+              </Text>
+            </VStack>
           </Button>
           <Button
             size="sm"
+            h="auto"
+            minH="unset"
+            w="full"
+            borderRadius="xl"
+            px="4"
+            py="3"
+            justifyContent="flex-start"
+            textAlign="left"
+            whiteSpace="normal"
             variant={getExplicitChoiceVariant(winnerChosen, isSplitPrize)}
             onClick={() => flow.setWinnerMode(true)}>
-            {t("Split prize")}
+            <VStack align="start" gap="1" w="full">
+              <Text textStyle="sm" fontWeight="semibold" color="inherit">
+                {t("Split prize")}
+              </Text>
+              <Text textStyle="xs" color="inherit" opacity={0.8}>
+                {t("Split prize description")}
+              </Text>
+            </VStack>
           </Button>
-        </HStack>
+        </SimpleGrid>
       ),
     },
     {
@@ -453,127 +486,147 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       ),
       controls: (
         <VStack align="stretch" gap="3">
-          {form.appIds.length > 0 && (
-            <Box px="3" py="3" borderRadius="xl" bg="bg.muted" border="1px solid" borderColor="border.secondary">
-              <VStack align="stretch" gap="3">
-                <HStack justify="space-between" gap="2">
-                  <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                    {t("Selected apps")}
-                  </Text>
-                  <Text textStyle="xs" color="text.subtle">
-                    {form.appIds.length}
-                    {"/"}
-                    {5}
-                  </Text>
-                </HStack>
-                <Wrap gap="2">
-                  {form.appIds.map(appId => {
-                    const app = appsData?.allApps.find(candidate => candidate.id === appId)
-                    return (
-                      <HStack
-                        key={appId}
-                        gap="1.5"
-                        maxW="full"
-                        px="3"
-                        py="2"
-                        borderRadius="full"
-                        bg="bg.primary"
-                        border="1px solid"
-                        borderColor="border.secondary"
-                        boxShadow="sm">
-                        <Text textStyle="sm" minW="0">
-                          {app?.name ?? appId}
-                        </Text>
-                        <IconButton
-                          size="2xs"
-                          variant="ghost"
-                          borderRadius="full"
-                          onClick={() => flow.removeApp(appId)}
-                          aria-label={t("Remove")}>
-                          <LuX />
-                        </IconButton>
-                      </HStack>
-                    )
-                  })}
-                </Wrap>
-              </VStack>
-            </Box>
-          )}
-          <HStack align="end" gap="2">
-            <Field.Root flex="1" minW="0">
-              <Field.Label>{t("Apps (leave empty for all)")}</Field.Label>
-              <Input
-                placeholder={t("Search apps...")}
-                value={appSearch}
-                borderRadius="full"
-                onChange={e => updateAppFilter(e.target.value)}
-              />
-            </Field.Root>
-            {appSearch ? (
-              <Button size="sm" variant={tertiaryVariant} onClick={clearAppFilter}>
-                {t("Clear")}
-              </Button>
-            ) : null}
-          </HStack>
-          <Text textStyle="xs" color="text.subtle">
-            {filteredApps.length > 0
-              ? `${t("Showing")} ${appResultsStart}-${appResultsEnd} / ${filteredApps.length}`
-              : ""}
-          </Text>
-          {isAppsLoading ? (
-            <SimpleGrid columns={{ base: 2, md: 2 }} gap="2">
-              {["app-skeleton-1", "app-skeleton-2", "app-skeleton-3", "app-skeleton-4"].map(key => (
-                <Skeleton key={key} h="10" borderRadius="lg" />
-              ))}
-            </SimpleGrid>
-          ) : currentAppResults.length > 0 ? (
-            <SimpleGrid columns={{ base: 2, md: 2 }} gap="2">
-              {currentAppResults.map(app => (
-                <Button
-                  key={app.id}
-                  size="sm"
-                  variant={tertiaryVariant}
-                  justifyContent="flex-start"
-                  minH="10"
-                  h="auto"
-                  py="2"
-                  px="4"
-                  textAlign="left"
-                  textStyle="sm"
-                  whiteSpace="normal"
-                  disabled={hasReachedSelectedAppsLimit}
-                  onClick={() => flow.addApp(app.id)}>
-                  {app.name}
-                </Button>
-              ))}
-            </SimpleGrid>
-          ) : (
-            <Box px="3" py="3" borderRadius="md" bg="bg.muted">
-              <Text textStyle="sm" color="text.subtle">
-                {t("No apps found")}
+          <Box px="3" py="3" borderRadius="xl" border="1px solid" borderColor="border.primary">
+            <VStack align="stretch" gap="3">
+              {form.appIds.length > 0 && (
+                <>
+                  <HStack justify="space-between" gap="2">
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {t("Selected apps")}
+                    </Text>
+                    <Text textStyle="xs" color="text.subtle">
+                      {form.appIds.length}
+                      {"/"}
+                      {5}
+                    </Text>
+                  </HStack>
+                  <Wrap gap="2">
+                    {form.appIds.map(appId => {
+                      const app = appsData?.allApps.find(candidate => candidate.id === appId)
+                      return (
+                        <HStack
+                          key={appId}
+                          justify="space-between"
+                          gap="2"
+                          w={{ base: "full", sm: "auto" }}
+                          maxW={{ base: "full", sm: "xs" }}
+                          minH="11"
+                          px="3.5"
+                          py="2.5"
+                          borderRadius="2xl"
+                          bg="bg.primary"
+                          border="1px solid"
+                          borderColor="border.primary">
+                          <HStack gap="2.5" flex="1" minW="0">
+                            <AppImage appId={appId} boxSize="5" borderRadius="md" flexShrink={0} />
+                            <Text
+                              textStyle="sm"
+                              fontWeight="medium"
+                              flex="1"
+                              minW="0"
+                              overflow="hidden"
+                              textOverflow="ellipsis"
+                              whiteSpace="nowrap">
+                              {app?.name ?? appId}
+                            </Text>
+                          </HStack>
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            borderRadius="full"
+                            flexShrink="0"
+                            onClick={() => flow.removeApp(appId)}
+                            aria-label={t("Remove")}>
+                            <LuX />
+                          </IconButton>
+                        </HStack>
+                      )
+                    })}
+                  </Wrap>
+                </>
+              )}
+              <HStack align="end" gap="2">
+                <Field.Root flex="1" minW="0">
+                  <Field.Label>{t("Apps (leave empty for all)")}</Field.Label>
+                  <Input
+                    placeholder={t("Search apps...")}
+                    value={appSearch}
+                    borderRadius="full"
+                    borderColor="border.primary"
+                    _hover={{ borderColor: "border.primary" }}
+                    onChange={e => updateAppFilter(e.target.value)}
+                  />
+                </Field.Root>
+                {appSearch ? (
+                  <Button size="sm" variant={tertiaryVariant} borderColor="border.primary" onClick={clearAppFilter}>
+                    {t("Clear")}
+                  </Button>
+                ) : null}
+              </HStack>
+              <Text textStyle="xs" color="text.subtle">
+                {filteredApps.length > 0
+                  ? `${t("Showing")} ${appResultsStart}-${appResultsEnd} / ${filteredApps.length}`
+                  : ""}
               </Text>
-            </Box>
-          )}
-          {(hasPreviousAppsPage || hasNextAppsPage) && (
-            <HStack justify="space-between">
-              <IconButton
-                size="sm"
-                variant={tertiaryVariant}
-                disabled={!hasPreviousAppsPage}
-                aria-label={t("Back")}
-                onClick={() => flow.setAppResultsPage(currentAppResultsPage - 1)}>
-                <LuChevronLeft />
-              </IconButton>
-              <IconButton
-                size="sm"
-                variant={tertiaryVariant}
-                disabled={!hasNextAppsPage}
-                aria-label={t("Next")}
-                onClick={() => flow.setAppResultsPage(currentAppResultsPage + 1)}>
-                <LuChevronRight />
-              </IconButton>
-            </HStack>
-          )}
+              {isAppsLoading ? (
+                <SimpleGrid columns={{ base: 2, md: 2 }} gap="2">
+                  {["app-skeleton-1", "app-skeleton-2", "app-skeleton-3", "app-skeleton-4"].map(key => (
+                    <Skeleton key={key} h="10" borderRadius="lg" />
+                  ))}
+                </SimpleGrid>
+              ) : currentAppResults.length > 0 ? (
+                <SimpleGrid columns={{ base: 2, md: 2 }} gap="2">
+                  {currentAppResults.map(app => (
+                    <Button
+                      key={app.id}
+                      size="sm"
+                      variant={tertiaryVariant}
+                      borderColor="border.primary"
+                      justifyContent="flex-start"
+                      minH="10"
+                      h="auto"
+                      py="2"
+                      px="4"
+                      textAlign="left"
+                      textStyle="sm"
+                      whiteSpace="normal"
+                      disabled={hasReachedSelectedAppsLimit}
+                      onClick={() => flow.addApp(app.id)}>
+                      {app.name}
+                    </Button>
+                  ))}
+                </SimpleGrid>
+              ) : (
+                <Box px="3" py="3" borderRadius="md" bg="bg.muted">
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("No apps found")}
+                  </Text>
+                </Box>
+              )}
+              {(hasPreviousAppsPage || hasNextAppsPage) && (
+                <HStack justify="space-between">
+                  <IconButton
+                    size="sm"
+                    variant={tertiaryVariant}
+                    borderColor="border.primary"
+                    disabled={!hasPreviousAppsPage}
+                    aria-label={t("Back")}
+                    onClick={() => flow.setAppResultsPage(currentAppResultsPage - 1)}>
+                    <LuChevronLeft />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    variant={tertiaryVariant}
+                    borderColor="border.primary"
+                    disabled={!hasNextAppsPage}
+                    aria-label={t("Next")}
+                    onClick={() => flow.setAppResultsPage(currentAppResultsPage + 1)}>
+                    <LuChevronRight />
+                  </IconButton>
+                </HStack>
+              )}
+            </VStack>
+          </Box>
           <HStack justify="flex-end">
             <Button
               size="sm"

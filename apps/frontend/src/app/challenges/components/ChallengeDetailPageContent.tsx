@@ -13,6 +13,7 @@ import {
   Skeleton,
   Text,
   VStack,
+  Wrap,
 } from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -28,6 +29,7 @@ import { useChallenge } from "@/api/challenges/useChallenge"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AddressIcon } from "@/components/AddressIcon"
+import { AppImage } from "@/components/AppImage/AppImage"
 import { MotionVStack } from "@/components/MotionVStack"
 
 import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
@@ -245,13 +247,33 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                     fontWeight="semibold">
                     {t("Selected apps")}
                   </Text>
-                  <HStack flexWrap="wrap" gap="2">
+                  <Wrap gap="2">
                     {challenge.selectedApps.map(app => (
-                      <Badge key={app} variant="neutral" size="sm">
-                        {appNames.get(app.toLowerCase()) ?? humanAddress(app, 6, 4)}
-                      </Badge>
+                      <HStack
+                        key={app}
+                        gap="2.5"
+                        w={{ base: "full", sm: "auto" }}
+                        maxW={{ base: "full", sm: "xs" }}
+                        minH="11"
+                        px="3.5"
+                        py="2.5"
+                        borderRadius="2xl"
+                        bg="bg.secondary"
+                        border="1px solid"
+                        borderColor="border.secondary">
+                        <AppImage appId={app} boxSize="6" borderRadius="md" flexShrink={0} />
+                        <Text
+                          textStyle="sm"
+                          fontWeight="medium"
+                          minW="0"
+                          overflow="hidden"
+                          textOverflow="ellipsis"
+                          whiteSpace="nowrap">
+                          {appNames.get(app.toLowerCase()) ?? humanAddress(app, 6, 4)}
+                        </Text>
+                      </HStack>
                     ))}
-                  </HStack>
+                  </Wrap>
                 </VStack>
               </Card.Root>
             )}
