@@ -1,6 +1,19 @@
 "use client"
 
-import { Badge, Box, Button, Card, Heading, HStack, Icon, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
@@ -8,6 +21,7 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
+import { LuPlus } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeStatus } from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
@@ -16,6 +30,7 @@ import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AddressIcon } from "@/components/AddressIcon"
 import { MotionVStack } from "@/components/MotionVStack"
 
+import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
 import { ChallengeKindBadges, ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
@@ -153,10 +168,47 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                     value={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
                   />
                 )}
-                <StatItem
-                  label={t("Participants")}
-                  value={`${humanNumber(challenge.participantCount)} / ${humanNumber(challenge.maxParticipants)}`}
-                />
+                <VStack align="start" gap="1" position="relative" pe={challenge.canAddInvites ? "14" : undefined}>
+                  <Text
+                    textStyle="xxs"
+                    color="text.subtle"
+                    textTransform="uppercase"
+                    letterSpacing="0.08em"
+                    fontWeight="semibold">
+                    {t("Participants")}
+                  </Text>
+                  {challenge.canAddInvites && (
+                    <AddChallengeInvitesModal
+                      challengeId={challenge.challengeId}
+                      creatorAddress={challenge.creator}
+                      existingInvitees={challenge.invited}>
+                      <IconButton
+                        position="absolute"
+                        top="50%"
+                        right="0"
+                        transform="translateY(-50%)"
+                        minW="8"
+                        h="8"
+                        p="0"
+                        borderRadius="full"
+                        bg="actions.primary.default"
+                        color="actions.primary.text"
+                        fontSize="lg"
+                        lineHeight="1"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        _hover={{ bg: "actions.primary.hover" }}
+                        _active={{ bg: "actions.primary.pressed" }}
+                        aria-label={t("Add invitee")}>
+                        <LuPlus />
+                      </IconButton>
+                    </AddChallengeInvitesModal>
+                  )}
+                  <Text textStyle="xl" fontWeight="bold">
+                    {humanNumber(challenge.participantCount)} {" / "} {humanNumber(challenge.maxParticipants)}
+                  </Text>
+                </VStack>
                 <StatItem label={t("Rounds")} value={roundsProgress} />
                 {challenge.threshold !== "0" && (
                   <StatItem label={t("Threshold")} value={humanNumber(challenge.threshold)} />

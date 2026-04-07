@@ -1,4 +1,16 @@
-import { Box, Button, Field, HStack, IconButton, Input, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Field,
+  HStack,
+  IconButton,
+  Input,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  VStack,
+  Wrap,
+} from "@chakra-ui/react"
 import { TFunction } from "i18next"
 import { ReactNode } from "react"
 import { LuPlus, LuX } from "react-icons/lu"
@@ -25,6 +37,8 @@ export interface StepDefinition {
   controls: ReactNode
 }
 
+const APP_RESULTS_PAGE_SIZE = 8
+
 export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinition[] => {
   const {
     form,
@@ -42,10 +56,11 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     b3trBalance,
     isB3trBalanceLoading,
     filteredApps,
+    appResultsPage,
     selectedAppNames,
     appsData,
+    isAppsLoading,
     appSearch,
-    showAppDropdown,
 
     kindChosen,
     amountConfirmed,
@@ -62,6 +77,24 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
   const currentQuickStartRounds = [minStartRound, minStartRound + 1, minStartRound + 2]
   const inviteesPreview = form.invitees.length === 0 ? t("Skip") : getCompactListLabel(form.invitees)
   const selectedAppsPreview = appScope === "all" ? t("All apps") : getCompactListLabel(selectedAppNames)
+  const getExplicitChoiceVariant = (isChosen: boolean, isActive: boolean) => getChoiceVariant(isChosen && isActive)
+  const maxAppResultsPage = Math.max(0, Math.ceil(filteredApps.length / APP_RESULTS_PAGE_SIZE) - 1)
+  const currentAppResultsPage = Math.min(appResultsPage, maxAppResultsPage)
+  const currentAppResults = filteredApps.slice(
+    currentAppResultsPage * APP_RESULTS_PAGE_SIZE,
+    (currentAppResultsPage + 1) * APP_RESULTS_PAGE_SIZE,
+  )
+  const hasPreviousAppsPage = currentAppResultsPage > 0
+  const hasNextAppsPage = currentAppResultsPage < maxAppResultsPage
+  const appResultsStart = filteredApps.length === 0 ? 0 : currentAppResultsPage * APP_RESULTS_PAGE_SIZE + 1
+  const appResultsEnd =
+    filteredApps.length === 0 ? 0 : currentAppResultsPage * APP_RESULTS_PAGE_SIZE + currentAppResults.length
+  const updateAppFilter = (value: string) => {
+    flow.setAppSearch(value)
+    flow.setAppResultsPage(0)
+    flow.setAppsConfirmed(false)
+  }
+  const clearAppFilter = () => updateAppFilter("")
 
   return [
     {
@@ -69,9 +102,12 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       isRelevant: true,
       isComplete: kindChosen,
       prompt: (
-        <Text textStyle="sm" fontWeight="semibold">
-          {t("Choose challenge type")}
-        </Text>
+        <VStack align="start" gap="1" w="full">
+          <Text textStyle="sm">{t("Hi, I'm B3MO. I'll guide you through your challenge setup.")}</Text>
+          <Text textStyle="sm" fontWeight="semibold">
+            {t("Choose challenge type")}
+          </Text>
+        </VStack>
       ),
       answer: (
         <Text textStyle="sm" color="inherit">
@@ -79,19 +115,21 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <VStack gap="2" ml="auto">
+        <VStack align="stretch" gap="2" w="full">
           <Box
             as="button"
             w="full"
             textAlign="left"
-            bg="bg.secondary"
+            bg="bg.primary"
             color="text.default"
-            borderRadius="2xl"
+            borderRadius="xl"
             px={{ base: "4", md: "5" }}
-            py="3"
+            py="4"
             border="1px solid"
             borderColor="border.secondary"
-            _hover={{ borderColor: "border.active" }}
+            boxShadow="sm"
+            transition="all 0.2s ease"
+            _hover={{ borderColor: "border.active", bg: "actions.secondary.default" }}
             onClick={() => flow.updateKind(ChallengeKind.Stake)}>
             <Text textStyle="sm" fontWeight="semibold">
               {t("Bet")}
@@ -104,14 +142,16 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
             as="button"
             w="full"
             textAlign="left"
-            bg="bg.secondary"
+            bg="bg.primary"
             color="text.default"
-            borderRadius="2xl"
+            borderRadius="xl"
             px={{ base: "4", md: "5" }}
-            py="3"
+            py="4"
             border="1px solid"
             borderColor="border.secondary"
-            _hover={{ borderColor: "border.active" }}
+            boxShadow="sm"
+            transition="all 0.2s ease"
+            _hover={{ borderColor: "border.active", bg: "actions.secondary.default" }}
             onClick={() => flow.updateKind(ChallengeKind.Sponsored)}>
             <Text textStyle="sm" fontWeight="semibold">
               {t("Sponsored")}
@@ -147,13 +187,13 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <VStack align="stretch" gap="3" ml="auto">
+        <VStack align="stretch" gap="3">
           <HStack gap="2" flexWrap="wrap">
             {QUICK_AMOUNTS.map(value => (
               <Button
                 key={value}
                 size="sm"
-                variant={getChoiceVariant(form.stakeAmount === value)}
+                variant={getExplicitChoiceVariant(amountConfirmed, form.stakeAmount === value)}
                 onClick={() => {
                   flow.update("stakeAmount", value)
                   if (flow.canUseAmount(value)) flow.withTyping(() => flow.setAmountConfirmed(true))
@@ -197,20 +237,20 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       answer: (
-        <Text textStyle="sm">
+        <Text textStyle="sm" color="inherit">
           {t("Start round")}
           {": "}
           {form.startRound}
         </Text>
       ),
       controls: (
-        <VStack align="stretch" gap="3" ml="auto">
+        <VStack align="stretch" gap="3">
           <HStack gap="2" flexWrap="wrap">
             {currentQuickStartRounds.map(value => (
               <Button
                 key={value}
                 size="sm"
-                variant={getChoiceVariant(form.startRound === value)}
+                variant={getExplicitChoiceVariant(startRoundChosen, form.startRound === value)}
                 onClick={() => flow.chooseStartRound(value)}>
                 {value === minStartRound ? t("Next round") : `+${value - (minStartRound - 1)}`}
               </Button>
@@ -256,12 +296,12 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <HStack gap="2" flexWrap="wrap" ml="auto">
+        <HStack gap="2" flexWrap="wrap">
           {[1, 2, 3, 4].map(value => (
             <Button
               key={value}
               size="sm"
-              variant={getChoiceVariant(duration === value)}
+              variant={getExplicitChoiceVariant(durationChosen, duration === value)}
               onClick={() => flow.chooseDuration(value)}>
               {value}
             </Button>
@@ -289,11 +329,17 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <HStack gap="2" flexWrap="wrap" ml="auto">
-          <Button size="sm" variant={getChoiceVariant(!isSplitPrize)} onClick={() => flow.setWinnerMode(false)}>
+        <HStack gap="2" flexWrap="wrap">
+          <Button
+            size="sm"
+            variant={getExplicitChoiceVariant(winnerChosen, !isSplitPrize)}
+            onClick={() => flow.setWinnerMode(false)}>
             {t("Max actions")}
           </Button>
-          <Button size="sm" variant={getChoiceVariant(isSplitPrize)} onClick={() => flow.setWinnerMode(true)}>
+          <Button
+            size="sm"
+            variant={getExplicitChoiceVariant(winnerChosen, isSplitPrize)}
+            onClick={() => flow.setWinnerMode(true)}>
             {t("Split prize")}
           </Button>
         </HStack>
@@ -314,13 +360,13 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <VStack align="stretch" gap="3" ml="auto">
+        <VStack align="stretch" gap="3">
           <HStack gap="2" flexWrap="wrap">
             {QUICK_THRESHOLDS.map(value => (
               <Button
                 key={value}
                 size="sm"
-                variant={getChoiceVariant(form.threshold === value)}
+                variant={getExplicitChoiceVariant(thresholdConfirmed, form.threshold === value)}
                 onClick={() => {
                   flow.update("threshold", value)
                   flow.withTyping(() => flow.confirmThreshold())
@@ -364,16 +410,16 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <HStack gap="2" flexWrap="wrap" ml="auto">
+        <HStack gap="2" flexWrap="wrap">
           <Button
             size="sm"
-            variant={getChoiceVariant((appScope ?? "all") === "all")}
+            variant={getExplicitChoiceVariant(appScope !== null, appScope === "all")}
             onClick={() => flow.chooseAppScope("all")}>
             {t("All apps")}
           </Button>
           <Button
             size="sm"
-            variant={getChoiceVariant(appScope === "selected")}
+            variant={getExplicitChoiceVariant(appScope !== null, appScope === "selected")}
             onClick={() => flow.chooseAppScope("selected")}>
             {t("Selected apps")}
           </Button>
@@ -402,72 +448,124 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <VStack align="stretch" gap="3" ml="auto">
+        <VStack align="stretch" gap="3">
           <Field.Root>
             <Field.Label>{t("Apps (leave empty for all)")}</Field.Label>
-            <Box position="relative">
-              <Input
-                placeholder={t("Search apps...")}
-                value={appSearch}
-                disabled={hasReachedSelectedAppsLimit}
-                onChange={e => {
-                  flow.setAppSearch(e.target.value)
-                  flow.setShowAppDropdown(true)
-                  flow.setAppsConfirmed(false)
-                }}
-                onFocus={() => flow.setShowAppDropdown(true)}
-                onBlur={() => {
-                  flow.dropdownTimeout.current = setTimeout(() => flow.setShowAppDropdown(false), 150)
-                }}
-              />
-              {showAppDropdown && filteredApps.length > 0 && (
-                <Box
-                  position="absolute"
-                  top="100%"
-                  left="0"
-                  right="0"
-                  zIndex="dropdown"
-                  bg="bg"
-                  border="1px solid"
-                  borderColor="border"
-                  borderRadius="md"
-                  maxH="200px"
-                  overflowY="auto"
-                  mt="1">
-                  {filteredApps.map(app => (
-                    <Box
-                      key={app.id}
-                      px="3"
-                      py="2"
-                      cursor="pointer"
-                      _hover={{ bg: "bg.muted" }}
-                      onMouseDown={() => {
-                        clearTimeout(flow.dropdownTimeout.current)
-                        flow.addApp(app.id)
-                      }}>
-                      <Text textStyle="sm">{app.name}</Text>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </Box>
+            <Input
+              placeholder={t("Search apps...")}
+              value={appSearch}
+              onChange={e => updateAppFilter(e.target.value)}
+            />
           </Field.Root>
           {form.appIds.length > 0 && (
-            <VStack align="stretch" gap="1" w="full">
-              {form.appIds.map(appId => {
-                const app = appsData?.allApps.find(candidate => candidate.id === appId)
-                return (
-                  <HStack key={appId} justify="space-between" px="2" py="1" borderRadius="md" bg="bg.muted">
-                    <Text textStyle="sm" truncate>
-                      {app?.name ?? appId}
-                    </Text>
-                    <IconButton size="2xs" variant="ghost" onClick={() => flow.removeApp(appId)} aria-label="Remove">
-                      <LuX />
-                    </IconButton>
-                  </HStack>
-                )
-              })}
-            </VStack>
+            <Box px="3" py="3" borderRadius="xl" bg="bg.muted" border="1px solid" borderColor="border.secondary">
+              <VStack align="stretch" gap="3">
+                <HStack justify="space-between" gap="2">
+                  <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                    {t("Selected apps")}
+                  </Text>
+                  <Text textStyle="xs" color="text.subtle">
+                    {form.appIds.length}
+                    {"/"}
+                    {5}
+                  </Text>
+                </HStack>
+                <Wrap gap="2">
+                  {form.appIds.map(appId => {
+                    const app = appsData?.allApps.find(candidate => candidate.id === appId)
+                    return (
+                      <HStack
+                        key={appId}
+                        gap="1.5"
+                        maxW="full"
+                        px="3"
+                        py="2"
+                        borderRadius="full"
+                        bg="bg.primary"
+                        border="1px solid"
+                        borderColor="border.secondary"
+                        boxShadow="sm">
+                        <Text textStyle="sm" minW="0">
+                          {app?.name ?? appId}
+                        </Text>
+                        <IconButton
+                          size="2xs"
+                          variant="ghost"
+                          borderRadius="full"
+                          onClick={() => flow.removeApp(appId)}
+                          aria-label={t("Remove")}>
+                          <LuX />
+                        </IconButton>
+                      </HStack>
+                    )
+                  })}
+                </Wrap>
+              </VStack>
+            </Box>
+          )}
+          <HStack justify="space-between" align="center" flexWrap="wrap" gap="2">
+            <Text textStyle="xs" color="text.subtle">
+              {filteredApps.length > 0
+                ? `${t("Showing")} ${appResultsStart}-${appResultsEnd} / ${filteredApps.length}`
+                : ""}
+            </Text>
+            {appSearch ? (
+              <Button size="sm" variant={tertiaryVariant} onClick={clearAppFilter}>
+                {t("Clear")}
+              </Button>
+            ) : null}
+          </HStack>
+          {isAppsLoading ? (
+            <SimpleGrid columns={{ base: 2, md: 2 }} gap="2">
+              {["app-skeleton-1", "app-skeleton-2", "app-skeleton-3", "app-skeleton-4"].map(key => (
+                <Skeleton key={key} h="10" borderRadius="lg" />
+              ))}
+            </SimpleGrid>
+          ) : currentAppResults.length > 0 ? (
+            <SimpleGrid columns={{ base: 2, md: 2 }} gap="2">
+              {currentAppResults.map(app => (
+                <Button
+                  key={app.id}
+                  size="sm"
+                  variant={tertiaryVariant}
+                  justifyContent="flex-start"
+                  minH="10"
+                  h="auto"
+                  py="2"
+                  px="4"
+                  textAlign="left"
+                  textStyle="sm"
+                  whiteSpace="normal"
+                  disabled={hasReachedSelectedAppsLimit}
+                  onClick={() => flow.addApp(app.id)}>
+                  {app.name}
+                </Button>
+              ))}
+            </SimpleGrid>
+          ) : (
+            <Box px="3" py="3" borderRadius="md" bg="bg.muted">
+              <Text textStyle="sm" color="text.subtle">
+                {t("No apps found")}
+              </Text>
+            </Box>
+          )}
+          {(hasPreviousAppsPage || hasNextAppsPage) && (
+            <HStack justify="space-between">
+              <Button
+                size="sm"
+                variant={tertiaryVariant}
+                disabled={!hasPreviousAppsPage}
+                onClick={() => flow.setAppResultsPage(currentAppResultsPage - 1)}>
+                {t("Back")}
+              </Button>
+              <Button
+                size="sm"
+                variant={tertiaryVariant}
+                disabled={!hasNextAppsPage}
+                onClick={() => flow.setAppResultsPage(currentAppResultsPage + 1)}>
+                {t("Next")}
+              </Button>
+            </HStack>
           )}
           <HStack justify="flex-end">
             <Button
@@ -505,16 +603,16 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <HStack gap="2" flexWrap="wrap" ml="auto">
+        <HStack gap="2" flexWrap="wrap">
           <Button
             size="sm"
-            variant={getChoiceVariant(form.visibility === ChallengeVisibility.Public)}
+            variant={getExplicitChoiceVariant(visibilityChosen, form.visibility === ChallengeVisibility.Public)}
             onClick={() => flow.chooseVisibility(ChallengeVisibility.Public)}>
             {t("Public")}
           </Button>
           <Button
             size="sm"
-            variant={getChoiceVariant(form.visibility === ChallengeVisibility.Private)}
+            variant={getExplicitChoiceVariant(visibilityChosen, form.visibility === ChallengeVisibility.Private)}
             onClick={() => flow.chooseVisibility(ChallengeVisibility.Private)}>
             {t("Private")}
           </Button>
@@ -541,11 +639,11 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <VStack align="stretch" gap="3" ml="auto">
+        <VStack align="stretch" gap="3">
           {form.invitees.length > 0 && (
             <VStack align="stretch" gap="2" w="full">
               {form.invitees.map((addr, index) => (
-                <HStack key={index} gap="2">
+                <HStack key={`invitee-${addr || index}`} gap="2">
                   <Input placeholder="0x..." value={addr} onChange={e => flow.updateInvitee(index, e.target.value)} />
                   <IconButton size="sm" variant="ghost" onClick={() => flow.removeInvitee(index)} aria-label="Remove">
                     <LuX />
@@ -579,8 +677,15 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <Box ml="auto">
-          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py={{ base: "4", md: "5" }}>
+        <Box w="full">
+          <Box
+            bg="bg.primary"
+            borderRadius="2xl"
+            px={{ base: "4", md: "5" }}
+            py={{ base: "4", md: "5" }}
+            border="1px solid"
+            borderColor="border.secondary"
+            boxShadow="sm">
             <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
               <SummaryItem
                 label={t("Choose challenge type")}

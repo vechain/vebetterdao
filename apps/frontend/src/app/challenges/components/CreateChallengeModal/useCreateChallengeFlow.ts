@@ -30,16 +30,14 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const [visibilityChosen, setVisibilityChosen] = useState(false)
   const [inviteesConfirmed, setInviteesConfirmed] = useState(false)
   const [appSearch, setAppSearch] = useState("")
-  const [showAppDropdown, setShowAppDropdown] = useState(false)
+  const [appResultsPage, setAppResultsPage] = useState(0)
   const [isTyping, setIsTyping] = useState(false)
 
   const typingTimeout = useRef<ReturnType<typeof setTimeout>>()
-  const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(
     () => () => {
-      clearTimeout(dropdownTimeout.current)
       clearTimeout(typingTimeout.current)
     },
     [],
@@ -56,7 +54,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
 
   const { account } = useWallet()
   const actions = useChallengeActions()
-  const { data: appsData } = useXApps({ filterBlacklisted: true })
+  const { data: appsData, isLoading: isAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const hasReachedSelectedAppsLimit = form.appIds.length >= MAX_SELECTED_APPS
 
@@ -73,18 +71,18 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     setVisibilityChosen(false)
     setInviteesConfirmed(false)
     setAppSearch("")
-    setShowAppDropdown(false)
+    setAppResultsPage(0)
     setIsTyping(false)
     clearTimeout(typingTimeout.current)
   }
 
   const filteredApps = useMemo(() => {
-    if (!appsData?.allApps || hasReachedSelectedAppsLimit || appScope !== "selected") return []
+    if (!appsData?.allApps || appScope !== "selected") return []
     const q = appSearch.toLowerCase()
     return appsData.allApps.filter(
       app => !form.appIds.includes(app.id) && (app.name.toLowerCase().includes(q) || app.id.toLowerCase().includes(q)),
     )
-  }, [appScope, appsData, appSearch, form.appIds, hasReachedSelectedAppsLimit])
+  }, [appScope, appsData, appSearch, form.appIds])
 
   const selectedAppNames = useMemo(
     () => form.appIds.map(appId => appsData?.allApps.find(app => app.id === appId)?.name ?? appId),
@@ -151,8 +149,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const addApp = (appId: string) => {
     if (hasReachedSelectedAppsLimit || form.appIds.includes(appId)) return
     update("appIds", [...form.appIds, appId])
-    setAppSearch("")
-    setShowAppDropdown(false)
+    setAppResultsPage(0)
     setAppsConfirmed(false)
   }
 
@@ -161,6 +158,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       "appIds",
       form.appIds.filter(id => id !== appId),
     )
+    setAppResultsPage(0)
     setAppsConfirmed(false)
   }
 
@@ -203,11 +201,14 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   }
 
   const chooseAppScope = (value: AppScope) => {
+    setAppSearch("")
+    setAppResultsPage(0)
     if (value === "all") {
       update("appIds", [])
       setAppsConfirmed(false)
       withTyping(() => setAppScope(value))
     } else {
+      setAppsConfirmed(false)
       setAppScope(value)
     }
   }
@@ -305,9 +306,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     isTyping,
     appScope,
     appSearch,
-    showAppDropdown,
+    appResultsPage,
     messagesEndRef,
-    dropdownTimeout,
 
     // derived
     stakeAmountWei,
@@ -326,6 +326,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     b3trBalance,
     isB3trBalanceLoading,
     appsData,
+    isAppsLoading,
 
     // step flags
     kindChosen,
@@ -363,7 +364,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     withTyping,
     canUseAmount,
     setAppSearch,
-    setShowAppDropdown,
+    setAppResultsPage,
     setAppsConfirmed,
     setAmountConfirmed,
     setStartRoundChosen,

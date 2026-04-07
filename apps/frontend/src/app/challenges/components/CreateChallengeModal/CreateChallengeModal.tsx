@@ -31,6 +31,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
   const currentStepIndex = steps.findIndex(step => step.key === currentStep.key)
   const visibleSteps = steps.filter((step, index) => step.isRelevant && index <= currentStepIndex)
   const previousStep = [...steps.slice(0, currentStepIndex)].reverse().find(step => step.isRelevant)
+  const showFooter = (!!previousStep && previousStep.key !== "review") || currentStep.key === "review"
 
   useEffect(() => {
     if (!flow.open) return
@@ -44,10 +45,17 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
   return (
     <Dialog.Root open={flow.open} onOpenChange={flow.handleOpen}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
-      <CustomModalContent maxW={{ base: "100%", md: "2xl" }} maxH="90vh">
-        <Dialog.Header pb="5">
+      <CustomModalContent w="full" maxW="40rem" maxH="90vh">
+        <Dialog.Header pb="4" borderBottomWidth="1px" borderColor="border.secondary">
           <HStack gap="3" align="center">
-            <Box boxSize="14" borderRadius="3xl" bg="bg.secondary" overflow="hidden" p="1.5">
+            <Box
+              boxSize="12"
+              borderRadius="full"
+              bg="bg.secondary"
+              overflow="hidden"
+              p="1.5"
+              border="1px solid"
+              borderColor="border.secondary">
               <Image src="/assets/images/B3MO_Rewards.png" alt="B3MO" boxSize="full" objectFit="contain" />
             </Box>
             <VStack align="start" gap="0">
@@ -59,19 +67,26 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
           </HStack>
         </Dialog.Header>
 
-        <Dialog.Body overflowY="auto" pb="2">
-          <VStack align="stretch" gap="4">
-            <AssistantBubble>
-              <Text textStyle="sm">{t("Hi, I'm B3MO. I'll guide you through your challenge setup.")}</Text>
-            </AssistantBubble>
-
+        <Dialog.Body
+          overflowY="auto"
+          px={{ base: "4", md: "6" }}
+          py="5"
+          bg="bg.secondary"
+          pb="4"
+          borderBottomRadius={showFooter ? undefined : "inherit"}>
+          <VStack align="stretch" gap="5">
             {visibleSteps.map(step => {
               const isCurrent = step.key === currentStep.key
+              const controlsMaxWidth = step.key === "review" ? "40rem" : "32rem"
               return (
                 <VStack key={step.key} align="stretch" gap="3">
                   <AssistantBubble>{step.prompt}</AssistantBubble>
                   {step.answer && (!isCurrent || flow.isTyping) && <UserBubble>{step.answer}</UserBubble>}
-                  {isCurrent && !flow.isTyping && step.controls}
+                  {isCurrent && !flow.isTyping && (
+                    <Box pl={{ base: "12", md: "13" }} w="full">
+                      <Box maxW={controlsMaxWidth}>{step.controls}</Box>
+                    </Box>
+                  )}
                 </VStack>
               )
             })}
@@ -82,25 +97,24 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
           </VStack>
         </Dialog.Body>
 
-        <Dialog.Footer>
-          <Dialog.ActionTrigger asChild>
-            <Button variant="outline">{t("Cancel")}</Button>
-          </Dialog.ActionTrigger>
-          {!!previousStep && previousStep.key !== "review" && (
-            <Button
-              variant={tertiaryVariant}
-              onClick={() => {
-                if (previousStep.key !== "review") flow.resetFrom(previousStep.key)
-              }}>
-              {t("Back")}
-            </Button>
-          )}
-          {currentStep.key === "review" && (
-            <Button variant={primaryVariant} disabled={!flow.canSubmit} onClick={flow.handleSubmit}>
-              {t("Create")}
-            </Button>
-          )}
-        </Dialog.Footer>
+        {showFooter && (
+          <Dialog.Footer pt="4" borderTopWidth="1px" borderColor="border.secondary">
+            {!!previousStep && previousStep.key !== "review" && (
+              <Button
+                variant={tertiaryVariant}
+                onClick={() => {
+                  if (previousStep.key !== "review") flow.resetFrom(previousStep.key)
+                }}>
+                {t("Back")}
+              </Button>
+            )}
+            {currentStep.key === "review" && (
+              <Button variant={primaryVariant} disabled={!flow.canSubmit} onClick={flow.handleSubmit}>
+                {t("Create")}
+              </Button>
+            )}
+          </Dialog.Footer>
+        )}
 
         <Dialog.CloseTrigger asChild>
           <CloseButton size="sm" />

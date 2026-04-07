@@ -1,14 +1,27 @@
 "use client"
 
-import { Box, Card, Heading, HStack, LinkBox, LinkOverlay, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  Heading,
+  HStack,
+  IconButton,
+  LinkBox,
+  LinkOverlay,
+  SimpleGrid,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
+import { LuPlus } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeStatus, ChallengeView } from "@/api/challenges/types"
+import { ChallengeDetail, ChallengeKind, ChallengeStatus, ChallengeView } from "@/api/challenges/types"
 import { AddressIcon } from "@/components/AddressIcon"
 
+import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeKindBadges, ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
 
@@ -101,7 +114,13 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 </Text>
               </Box>
             )}
-            <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
+            <Box
+              bg="bg.secondary"
+              borderRadius="xl"
+              px="4"
+              py="3"
+              pe={challenge.canAddInvites ? "14" : "4"}
+              position="relative">
               <Text
                 textStyle="xxs"
                 color="text.subtle"
@@ -110,6 +129,34 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 fontWeight="semibold">
                 {t("Participants")}
               </Text>
+              {challenge.canAddInvites && (
+                <AddChallengeInvitesModal
+                  challengeId={challenge.challengeId}
+                  creatorAddress={challenge.creator}
+                  existingInvitees={"invited" in challenge ? (challenge as ChallengeDetail).invited : undefined}>
+                  <IconButton
+                    position="absolute"
+                    top="50%"
+                    right="3"
+                    transform="translateY(-50%)"
+                    minW="8"
+                    h="8"
+                    p="0"
+                    borderRadius="full"
+                    bg="actions.primary.default"
+                    color="actions.primary.text"
+                    fontSize="lg"
+                    lineHeight="1"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    _hover={{ bg: "actions.primary.hover" }}
+                    _active={{ bg: "actions.primary.pressed" }}
+                    aria-label={t("Add invitee")}>
+                    <LuPlus />
+                  </IconButton>
+                </AddChallengeInvitesModal>
+              )}
               <Text textStyle="lg" fontWeight="bold" mt="1">
                 {humanNumber(challenge.participantCount)} {"/"} {humanNumber(challenge.maxParticipants)}
               </Text>

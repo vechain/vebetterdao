@@ -6,11 +6,9 @@ import { parseEther } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ChallengeDetail, ChallengeKind, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
-
-import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 
 type ChallengeActionsLayout = "default" | "card"
 
@@ -20,7 +18,6 @@ export const hasChallengeActions = (challenge: ChallengeView) =>
   challenge.canJoin ||
   challenge.canLeave ||
   challenge.canCancel ||
-  challenge.canAddInvites ||
   challenge.canClaim ||
   challenge.canRefund ||
   challenge.canFinalize
@@ -63,7 +60,6 @@ export const ChallengeActions = ({
     challenge.canJoin,
     challenge.canLeave,
     challenge.canCancel,
-    challenge.canAddInvites,
     challenge.canClaim,
     challenge.canRefund,
     challenge.canFinalize,
@@ -113,14 +109,6 @@ export const ChallengeActions = ({
           {...cardButtonProps}>
           {t("Leave")}
         </Button>
-      )}
-      {challenge.canAddInvites && (
-        <AddChallengeInvitesModal
-          challengeId={id}
-          creatorAddress={challenge.creator}
-          existingInvitees={"invited" in challenge ? (challenge as ChallengeDetail).invited : undefined}
-          triggerProps={isCardLayout ? { size: "md", variant: "subtle", w: "full", minH: "11" } : undefined}
-        />
       )}
       {challenge.canCancel && (
         <Button size={buttonSize} variant="negative" onClick={() => actions.cancelChallenge(id)} {...cardButtonProps}>

@@ -1,12 +1,14 @@
 "use client"
 
-import { Card, HStack, LinkBox, LinkOverlay, Text, VStack } from "@chakra-ui/react"
+import { Card, HStack, IconButton, LinkBox, LinkOverlay, Text, VStack } from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
+import { LuPlus } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeView } from "@/api/challenges/types"
 
+import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeStatusBadges } from "./ChallengeStatusBadges"
 
@@ -60,14 +62,23 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
                 </Text>
               </VStack>
             )}
-            <VStack align="start" gap="0">
-              <Text textStyle="xxs" color="text.subtle" fontWeight="semibold" textTransform="uppercase">
-                {t("Participants")}
-              </Text>
-              <Text textStyle="sm" fontWeight="bold">
-                {humanNumber(challenge.participantCount)}
-              </Text>
-            </VStack>
+            <HStack gap="1" align="end">
+              <VStack align="start" gap="0">
+                <Text textStyle="xxs" color="text.subtle" fontWeight="semibold" textTransform="uppercase">
+                  {t("Participants")}
+                </Text>
+                <Text textStyle="sm" fontWeight="bold">
+                  {humanNumber(challenge.participantCount)}
+                </Text>
+              </VStack>
+              {challenge.canAddInvites && (
+                <AddChallengeInvitesModal challengeId={challenge.challengeId} creatorAddress={challenge.creator}>
+                  <IconButton size="2xs" variant="ghost" borderRadius="full" aria-label={t("Add invitee")}>
+                    <LuPlus />
+                  </IconButton>
+                </AddChallengeInvitesModal>
+              )}
+            </HStack>
             <VStack align="start" gap="0">
               <Text textStyle="xxs" color="text.subtle" fontWeight="semibold" textTransform="uppercase">
                 {t("Created by")}
