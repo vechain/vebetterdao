@@ -41,6 +41,7 @@ import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
 
 import { NavigatorCitizensModal } from "./NavigatorCitizensModal"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
+import { NavigatorStakeHistoryModal } from "./NavigatorStakeHistoryModal"
 
 const formatter = getCompactFormatter(2)
 
@@ -53,6 +54,7 @@ export const NavigatorDetailContent = () => {
   const [isDelegateOpen, setIsDelegateOpen] = useState(false)
   const [isManageOpen, setIsManageOpen] = useState(false)
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
+  const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address)
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
@@ -291,52 +293,62 @@ export const NavigatorDetailContent = () => {
 
       {/* Stats */}
       <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: 2, md: 4 }} w="full">
-        {stats.map(({ id, label, value, icon: IconComponent, bg, color }) => (
-          <Card.Root
-            key={id}
-            variant="outline"
-            p={{ base: 2, md: 4 }}
-            {...(id === "citizens" && {
-              cursor: "pointer",
-              _hover: { borderColor: "border.emphasized" },
-              onClick: () => setIsCitizensOpen(true),
-            })}>
-            <Card.Body flex={1}>
-              <Flex direction="column" justify="space-between" h={{ base: "full", md: "auto" }} flex={1}>
-                <HStack justify="space-between">
+        {stats.map(({ id, label, value, icon: IconComponent, bg, color }) => {
+          const isClickable = id === "citizens" || id === "staked"
+          const handleClick =
+            id === "citizens"
+              ? () => setIsCitizensOpen(true)
+              : id === "staked"
+                ? () => setIsStakeHistoryOpen(true)
+                : undefined
+
+          return (
+            <Card.Root
+              key={id}
+              variant="outline"
+              p={{ base: 2, md: 4 }}
+              flexDirection={isClickable ? "row" : undefined}
+              alignItems={isClickable ? "center" : undefined}
+              cursor={isClickable ? "pointer" : undefined}
+              _hover={isClickable ? { borderColor: "border.emphasized" } : undefined}
+              onClick={handleClick}>
+              <Card.Body flex={1}>
+                <Flex direction="column" justify="space-between" h={{ base: "full", md: "auto" }} flex={1}>
                   <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={2}>
                     {label}
                   </Text>
-                  {id === "citizens" && (
-                    <Button variant="plain" size="xs" p={0} minW="auto" h="auto" color="fg.muted">
-                      {t("More")}
-                      <LuChevronRight size={14} />
-                    </Button>
-                  )}
-                </HStack>
-                <HStack gap={{ base: 2, md: 3 }}>
-                  <HStack
-                    justify="center"
-                    align="center"
-                    w={{ base: "7", md: "10" }}
-                    h={{ base: "7", md: "10" }}
-                    rounded="full"
-                    bg={bg}
-                    color={color}
-                    flexShrink={0}>
-                    <Icon as={IconComponent} boxSize={{ base: 4, md: 5 }} />
+                  <HStack gap={{ base: 2, md: 3 }}>
+                    <HStack
+                      justify="center"
+                      align="center"
+                      w={{ base: "7", md: "10" }}
+                      h={{ base: "7", md: "10" }}
+                      rounded="full"
+                      bg={bg}
+                      color={color}
+                      flexShrink={0}>
+                      <Icon as={IconComponent} boxSize={{ base: 4, md: 5 }} />
+                    </HStack>
+                    <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
+                      {value}
+                    </Text>
                   </HStack>
-                  <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
-                    {value}
-                  </Text>
-                </HStack>
-              </Flex>
-            </Card.Body>
-          </Card.Root>
-        ))}
+                </Flex>
+              </Card.Body>
+              {isClickable && (
+                <Icon boxSize={{ base: "4", md: "5" }} color="text.subtle" flexShrink={0}>
+                  <LuChevronRight />
+                </Icon>
+              )}
+            </Card.Root>
+          )
+        })}
       </SimpleGrid>
 
       {/* Governance Activity */}
+      <Heading size={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
+        {t("Activity")}
+      </Heading>
       <NavigatorGovernanceActivity address={address} />
 
       {nav && (
@@ -344,6 +356,11 @@ export const NavigatorDetailContent = () => {
           <DelegateModal isOpen={isDelegateOpen} onClose={() => setIsDelegateOpen(false)} navigator={nav} />
           <ManageDelegationModal isOpen={isManageOpen} onClose={() => setIsManageOpen(false)} navigator={nav} />
           <NavigatorCitizensModal isOpen={isCitizensOpen} onClose={() => setIsCitizensOpen(false)} address={address} />
+          <NavigatorStakeHistoryModal
+            isOpen={isStakeHistoryOpen}
+            onClose={() => setIsStakeHistoryOpen(false)}
+            address={address}
+          />
         </>
       )}
     </VStack>

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+import { VoteType } from "@/types/voting"
 
 import { ProposalBox } from "./ProposalBox"
 
@@ -11,12 +12,14 @@ type Props = {
   isMoreProposals?: boolean
   isCreatedProposals?: boolean
   onSeeAllProposals?: () => void
+  voteTypes?: Record<string, VoteType>
 }
 export const PreviewCreatedProposals = ({
   firstProposals,
   isCreatedProposals,
   isMoreProposals,
   onSeeAllProposals,
+  voteTypes,
 }: Props) => {
   const { t } = useTranslation()
   if (!firstProposals || firstProposals.length == 0) return null
@@ -44,6 +47,7 @@ export const PreviewCreatedProposals = ({
                 shortDescription: proposal.description,
                 markdownDescription: proposal.markdownDescription,
               }}
+              voteType={voteTypes?.[proposal.id]}
             />
           ))}
         </VStack>

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa"
 
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+import { VoteType } from "@/types/voting"
 
 import { useInfiniteScroll } from "../../../../../hooks/useInfiniteScroll"
 import { usePagination } from "../../../../../hooks/usePagination"
@@ -13,8 +14,9 @@ type PaginatedProposalsProps = {
   proposals: ProposalEnriched[] | GrantProposalEnriched[]
   itemsPerPage?: number
   goBack: () => void
+  voteTypes?: Record<string, VoteType>
 }
-export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: PaginatedProposalsProps) => {
+export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack, voteTypes }: PaginatedProposalsProps) => {
   const { t } = useTranslation()
   const { currentItems, hasMore, loadMore, loading } = usePagination(proposals ?? [], itemsPerPage)
   useInfiniteScroll({
@@ -40,6 +42,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
                 shortDescription: proposal.description,
                 markdownDescription: proposal.markdownDescription,
               }}
+              voteType={voteTypes?.[proposal.id]}
             />
           ))}
         </VStack>

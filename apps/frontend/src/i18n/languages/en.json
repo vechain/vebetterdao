@@ -243,6 +243,7 @@
   "apps": "apps",
   "Apps eligible in next round": "Apps eligible in next round",
   "Apps looking for endorsement": "Apps looking for endorsement",
+  "Apps ranked by total votes received from this navigator.": "Apps ranked by total votes received from this navigator.",
   "Apps without categories: {{count}}": "Apps without categories: {{count}}",
   "Are you a VeChain Foundation member or employee?": "Are you a VeChain Foundation member or employee?",
   "Are you absolutely sure you want to edit it?": "Are you absolutely sure you want to edit it?",
@@ -1595,6 +1596,7 @@
   "Signal User": "Signal User",
   "Signaler already present": "Signaler already present",
   "Signalers": "Signalers",
+  "Since": "Since",
   "Since {{date}}": "Since {{date}}",
   "Skip": "Skip",
   "Snapshot in:": "Snapshot in:",
@@ -2351,6 +2353,5 @@
   "Your voting power": "Your voting power",
   "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards.": "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards.",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
-  "Your Voting Qualification": "Your Voting Qualification",
-  "Since": "Since"
+  "Your Voting Qualification": "Your Voting Qualification"
 }
