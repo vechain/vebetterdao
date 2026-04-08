@@ -9,7 +9,7 @@ import { useUserVotesInAllRounds } from "@/api/contracts/xApps/hooks/useUserVote
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AppImage } from "@/components/AppImage/AppImage"
 
-import { NavigatorRoundVotesModal } from "./NavigatorRoundVotesModal"
+import { NavigatorRoundVotesModal } from "./modals/NavigatorRoundVotesModal"
 
 const PREVIEW_ROUNDS = 3
 

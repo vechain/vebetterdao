@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
 
-import { RoundVote } from "./NavigatorRoundVotesCard"
+import { RoundVote } from "../NavigatorRoundVotesCard"
 
 type Props = {
   isOpen: boolean

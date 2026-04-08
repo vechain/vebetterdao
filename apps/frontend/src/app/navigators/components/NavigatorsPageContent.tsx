@@ -1,21 +1,23 @@
-import { Button, Card, Heading, HStack, Icon, Link, SimpleGrid, Stack, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Link, SimpleGrid, Stack, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuArrowRight, LuPlus, LuShield } from "react-icons/lu"
+import { LuPlus, LuShield } from "react-icons/lu"
 
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted, NavigatorOrderBy, useNavigators } from "@/api/indexer/navigators/useNavigators"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { DelegateModal } from "./DelegateModal"
+import { DelegateModal } from "../shared/DelegateModal"
+
+import { BecomeNavigatorCTA } from "./BecomeNavigatorCTA"
 import { NavigatorCard } from "./NavigatorCard"
 import { NavigatorCardSkeleton } from "./NavigatorCardSkeleton"
 import { NavigatorFilters, useNavigatorFilterValues } from "./NavigatorFilters"
-import { NavigatorStatsCards } from "./NavigatorStatsCards"
 import { NavigatorStepsCard } from "./NavigatorStepsCard"
+import { NavigatorStatsCards } from "./stats/NavigatorStatsCards"
 
 type StatusFilter = "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
 
@@ -121,37 +123,5 @@ export const NavigatorsPageContent = () => {
         <DelegateModal isOpen={!!delegateTarget} onClose={() => setDelegateTarget(null)} navigator={delegateTarget} />
       )}
     </VStack>
-  )
-}
-
-const BecomeNavigatorCTA = () => {
-  const { t } = useTranslation()
-  const router = useRouter()
-
-  return (
-    <Card.Root
-      variant="outline"
-      w="full"
-      borderRadius="xl"
-      borderStyle="dashed"
-      cursor="pointer"
-      _hover={{ borderColor: "primary.500", bg: "primary.500/5" }}
-      onClick={() => router.push("/navigators/become")}>
-      <Card.Body display="flex" justifyContent="center" alignItems="center">
-        <VStack gap={3} align="center" textAlign="center" py={4}>
-          <LuShield size={32} color="var(--chakra-colors-primary-500)" />
-          <Text textStyle="sm" fontWeight="semibold">
-            {t("Become a Navigator")}
-          </Text>
-          <Text textStyle="xs" color="fg.muted">
-            {t("Stake B3TR, vote on behalf of citizens, and earn delegation fees.")}
-          </Text>
-          <Button size="xs" variant="outline" colorPalette="primary" mt={1}>
-            {t("Get Started")}
-            <LuArrowRight />
-          </Button>
-        </VStack>
-      </Card.Body>
-    </Card.Root>
   )
 }

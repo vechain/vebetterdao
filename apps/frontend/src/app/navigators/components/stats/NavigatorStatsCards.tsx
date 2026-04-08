@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 import { LuChevronRight, LuShield, LuUsers } from "react-icons/lu"
 
 import { useNavigatorOverview } from "@/api/indexer/navigators/useNavigators"
-import { NavigatorDelegationsModal } from "@/app/navigators/[address]/components/NavigatorDelegationsModal"
-import { NavigatorStakeHistoryModal } from "@/app/navigators/[address]/components/NavigatorStakeHistoryModal"
+import { NavigatorDelegationsModal } from "@/app/navigators/[address]/components/modals/NavigatorDelegationsModal"
+import { NavigatorStakeHistoryModal } from "@/app/navigators/[address]/components/modals/NavigatorStakeHistoryModal"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
 

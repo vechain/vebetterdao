@@ -17,9 +17,9 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { useUserCreatedProposal } from "@/hooks/proposals/common/useUserCreatedProposal"
 import { VoteType } from "@/types/voting"
 
-import { NavigatorProposalsModal } from "./NavigatorProposalsModal"
+import { NavigatorProposalsModal } from "./modals/NavigatorProposalsModal"
+import { NavigatorTopAppsModal } from "./modals/NavigatorTopAppsModal"
 import { NavigatorRoundVotesCard } from "./NavigatorRoundVotesCard"
-import { NavigatorTopAppsModal } from "./NavigatorTopAppsModal"
 
 const PREVIEW_COUNT = 3
 

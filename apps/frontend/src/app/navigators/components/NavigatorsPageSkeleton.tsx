@@ -1,7 +1,7 @@
 import { HStack, SimpleGrid, Skeleton, Stack, VStack } from "@chakra-ui/react"
 
 import { NavigatorCardSkeleton } from "./NavigatorCardSkeleton"
-import { NavigatorStatsCardsSkeleton } from "./NavigatorStatsCardsSkeleton"
+import { NavigatorStatsCardsSkeleton } from "./stats/NavigatorStatsCardsSkeleton"
 
 export const NavigatorsPageSkeleton = () => (
   <VStack w="full" gap={8} pb={8}>
