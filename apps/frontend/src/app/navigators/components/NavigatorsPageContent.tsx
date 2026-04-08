@@ -1,4 +1,4 @@
-import { Button, Card, Heading, HStack, Icon, Link, SimpleGrid, Spinner, Stack, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Icon, Link, SimpleGrid, Stack, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
@@ -12,6 +12,7 @@ import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { DelegateModal } from "./DelegateModal"
 import { NavigatorCard } from "./NavigatorCard"
+import { NavigatorCardSkeleton } from "./NavigatorCardSkeleton"
 import { NavigatorFilters, useNavigatorFilterValues } from "./NavigatorFilters"
 import { NavigatorStatsCards } from "./NavigatorStatsCards"
 import { NavigatorStepsCard } from "./NavigatorStepsCard"
@@ -92,9 +93,11 @@ export const NavigatorsPageContent = () => {
       />
 
       {navigatorsLoading ? (
-        <VStack w="full" gap={12} py={12} justify="center">
-          <Spinner size="lg" />
-        </VStack>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4} w="full">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <NavigatorCardSkeleton key={i} />
+          ))}
+        </SimpleGrid>
       ) : !navigators || navigators.length === 0 ? (
         <VStack py={12} gap={3}>
           <LuShield size={48} color="var(--chakra-colors-fg-muted)" />

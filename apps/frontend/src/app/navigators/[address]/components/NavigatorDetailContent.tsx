@@ -9,7 +9,6 @@ import {
   Separator,
   SimpleGrid,
   Skeleton,
-  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react"
@@ -41,6 +40,7 @@ import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
 
 import { NavigatorCitizensModal } from "./NavigatorCitizensModal"
 import { NavigatorDelegationsModal } from "./NavigatorDelegationsModal"
+import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorStakeHistoryModal } from "./NavigatorStakeHistoryModal"
 
@@ -112,11 +112,7 @@ export const NavigatorDetailContent = () => {
   )
 
   if (navLoading) {
-    return (
-      <VStack w="full" py={20}>
-        <Spinner size="lg" />
-      </VStack>
-    )
+    return <NavigatorDetailSkeleton />
   }
 
   if (!nav) {

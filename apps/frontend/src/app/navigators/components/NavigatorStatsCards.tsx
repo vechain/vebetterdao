@@ -1,4 +1,4 @@
-import { Card, Flex, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react"
+import { Card, Flex, HStack, Icon, SimpleGrid, Skeleton, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -14,7 +14,7 @@ const formatter = getCompactFormatter(2)
 
 export const NavigatorStatsCards = () => {
   const { t } = useTranslation()
-  const { data: overview } = useNavigatorOverview()
+  const { data: overview, isLoading } = useNavigatorOverview()
   const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
   const [isDelegationsOpen, setIsDelegationsOpen] = useState(false)
 
@@ -96,9 +96,11 @@ export const NavigatorStatsCards = () => {
                         <Icon as={IconComponent} boxSize={{ base: 4, md: 5 }} />
                       </HStack>
                     )}
-                    <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
-                      {value}
-                    </Text>
+                    <Skeleton loading={isLoading}>
+                      <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
+                        {value}
+                      </Text>
+                    </Skeleton>
                   </HStack>
                 </Flex>
               </Card.Body>
