@@ -1,4 +1,4 @@
-import { Button, Card, Heading, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { LuExternalLink } from "react-icons/lu"
 
@@ -70,21 +70,37 @@ export const NavigatorHeader = ({
             {metadata?.socials && (
               <HStack gap={3}>
                 {metadata.socials.twitter && (
-                  <HStack gap={1} cursor="pointer" _hover={{ textDecoration: "underline" }}>
-                    <Text textStyle="xs" color="fg.muted">
-                      {"@"}
-                      {metadata.socials.twitter}
-                    </Text>
-                    <LuExternalLink size={10} />
-                  </HStack>
+                  <Link
+                    href={`https://x.com/${metadata.socials.twitter}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="plain">
+                    <HStack gap={1}>
+                      <Text textStyle="xs" color="fg.muted">
+                        {"@"}
+                        {metadata.socials.twitter}
+                      </Text>
+                      <LuExternalLink size={10} />
+                    </HStack>
+                  </Link>
                 )}
                 {metadata.socials.website && (
-                  <HStack gap={1} cursor="pointer" _hover={{ textDecoration: "underline" }}>
-                    <Text textStyle="xs" color="fg.muted">
-                      {metadata.socials.website}
-                    </Text>
-                    <LuExternalLink size={10} />
-                  </HStack>
+                  <Link
+                    href={
+                      metadata.socials.website.startsWith("http")
+                        ? metadata.socials.website
+                        : `https://${metadata.socials.website}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="plain">
+                    <HStack gap={1}>
+                      <Text textStyle="xs" color="fg.muted">
+                        {metadata.socials.website}
+                      </Text>
+                      <LuExternalLink size={10} />
+                    </HStack>
+                  </Link>
                 )}
               </HStack>
             )}
