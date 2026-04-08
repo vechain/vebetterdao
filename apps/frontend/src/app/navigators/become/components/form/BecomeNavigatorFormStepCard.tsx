@@ -51,7 +51,7 @@ export const BecomeNavigatorFormStepCard = () => {
   const handleSuccess = useCallback(() => {
     clearData()
     if (account?.address) {
-      router.push(`/navigators/${account.address}`)
+      router.push(`/navigators/${account.address}?registered=true`)
     } else {
       router.push("/navigators")
     }

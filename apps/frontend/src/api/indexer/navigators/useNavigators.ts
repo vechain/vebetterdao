@@ -42,7 +42,9 @@ export const useNavigators = (params?: NavigatorsQueryParams) =>
     },
   )
 
-export const useNavigatorByAddress = (address: string) =>
+// waitForIndexer: after registration the indexer may not have the data yet,
+// so we poll every 2s until it appears (triggered via ?registered=true redirect).
+export const useNavigatorByAddress = (address: string, { waitForIndexer = false } = {}) =>
   indexerQueryClient.useQuery(
     "get",
     "/api/v1/b3tr/navigators",
@@ -54,6 +56,10 @@ export const useNavigatorByAddress = (address: string) =>
       select: data => {
         const nav = data.data[0]
         return nav ? formatNavigator(nav) : null
+      },
+      refetchInterval: query => {
+        if (waitForIndexer && !query.state.data?.data?.[0]) return 2000
+        return false
       },
     },
   )

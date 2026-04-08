@@ -1,7 +1,7 @@
 import { Text, VStack } from "@chakra-ui/react"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuShield } from "react-icons/lu"
@@ -25,15 +25,17 @@ import { NavigatorStatsGrid } from "./NavigatorStatsGrid"
 export const NavigatorDetailContent = () => {
   const { t } = useTranslation()
   const params = useParams<{ address: string }>()
+  const searchParams = useSearchParams()
   const { account } = useWallet()
   const address = params?.address ?? ""
+  const waitForIndexer = searchParams?.get("registered") === "true"
   const [isDelegateOpen, setIsDelegateOpen] = useState(false)
   const [isManageOpen, setIsManageOpen] = useState(false)
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
   const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
   const [isDelegationsOpen, setIsDelegationsOpen] = useState(false)
 
-  const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address)
+  const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address, { waitForIndexer })
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
@@ -42,7 +44,7 @@ export const NavigatorDetailContent = () => {
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
 
-  if (navLoading) {
+  if (navLoading || (waitForIndexer && !nav)) {
     return <NavigatorDetailSkeleton />
   }
 
