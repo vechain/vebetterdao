@@ -31,16 +31,24 @@ type PaginatedResponse = {
 
 const baseUrl = getConfig().indexerUrl?.replace("/api/v1", "") || "http://localhost:8080"
 
-const fetchNavigators = async (params?: {
+export type NavigatorOrderBy = "stake" | "totalDelegated" | "citizenCount" | "registeredAt"
+export type SortDirection = "ASC" | "DESC"
+
+export type NavigatorQueryParams = {
   navigator?: string
   status?: string[]
   size?: number
-}): Promise<PaginatedResponse> => {
+  orderBy?: NavigatorOrderBy
+  direction?: SortDirection
+}
+
+const fetchNavigators = async (params?: NavigatorQueryParams): Promise<PaginatedResponse> => {
   const searchParams = new URLSearchParams()
   if (params?.navigator) searchParams.set("navigator", params.navigator)
   if (params?.status) params.status.forEach(s => searchParams.append("status", s))
   if (params?.size) searchParams.set("size", params.size.toString())
-  searchParams.set("direction", "DESC")
+  if (params?.orderBy) searchParams.set("orderBy", params.orderBy)
+  searchParams.set("direction", params?.direction ?? "DESC")
 
   const url = `${baseUrl}/api/v1/b3tr/navigators?${searchParams.toString()}`
   const res = await fetch(url)
@@ -54,10 +62,18 @@ const formatNavigator = (nav: NavigatorEntity): NavigatorEntityFormatted => ({
   totalDelegatedFormatted: formatEther(nav.totalDelegated),
 })
 
-export const useNavigators = (params?: { status?: string[]; size?: number }) =>
+export const useNavigators = (params?: NavigatorQueryParams) =>
   useQuery({
-    queryKey: ["indexer", "navigators", params?.status, params?.size],
-    queryFn: () => fetchNavigators({ status: params?.status, size: params?.size ?? 50 }),
+    queryKey: [
+      "indexer",
+      "navigators",
+      params?.status,
+      params?.size,
+      params?.orderBy,
+      params?.direction,
+      params?.navigator,
+    ],
+    queryFn: () => fetchNavigators({ ...params, size: params?.size ?? 50 }),
     staleTime: 30_000,
     select: data => data.data.map(formatNavigator),
   })
@@ -71,8 +87,8 @@ export const useNavigatorByAddress = (address: string) =>
     select: data => (data.data.length > 0 ? formatNavigator(data.data[0]) : null),
   })
 
-// Keep backward compat export name
-export const useNavigatorRegistrations = () => useNavigators({ status: ["ACTIVE", "EXITING"] })
+export const useNavigatorRegistrations = (params?: Omit<NavigatorQueryParams, "status">) =>
+  useNavigators({ ...params, status: ["ACTIVE", "EXITING"] })
 
 export type NavigatorOverview = {
   activeNavigators: number

@@ -14,7 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -61,6 +61,7 @@ export const NavigatorDetailContent = () => {
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address)
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
+  const { data: textRecords } = useGetTextRecords(domainData?.domain)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
 
@@ -170,12 +171,10 @@ export const NavigatorDetailContent = () => {
               </HStack>
             </HStack>
 
-            {/* Description from metadata */}
-            <Skeleton loading={metadataLoading}>
-              <Text textStyle="sm" color="fg.muted">
-                {metadata?.motivation || t("No description provided")}
-              </Text>
-            </Skeleton>
+            {/* Bio from VET domain text records */}
+            <Text textStyle="sm" color="fg.muted">
+              {textRecords?.description || t("No bio provided")}
+            </Text>
 
             {/* Address + socials */}
             <HStack justify="space-between" flexWrap="wrap" gap={2}>
