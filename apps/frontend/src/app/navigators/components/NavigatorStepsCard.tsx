@@ -1,10 +1,10 @@
 import { Box, Button, Card, Flex, Heading, HStack, Icon, List, Steps, Text, VStack } from "@chakra-ui/react"
 import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
 import { motion, AnimatePresence, useAnimate } from "framer-motion"
+import Image from "next/image"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
-import { LuSearch, LuShield, LuStar, LuVote } from "react-icons/lu"
 
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
@@ -12,7 +12,7 @@ import { useBreakpoints } from "@/hooks/useBreakpoints"
 type Step = {
   key: string
   title: string
-  icon: React.ElementType
+  image: string
   heading: string
   listItems: string[]
 }
@@ -41,31 +41,37 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
   const steps = useMemo<Step[]>(
     () => [
       {
-        key: "browse",
+        key: "what",
         title: t("How does delegation work?"),
-        icon: LuSearch,
-        heading: t("1. Browse Navigators"),
+        image: "/assets/3d-illustrations/badge.webp",
+        heading: t("1. What are Navigators?"),
         listItems: [
-          t("Navigators are professional voters who stake B3TR to vote on your behalf."),
-          t("Review their motivation, qualifications, voting strategy, and track record before delegating."),
+          t(
+            "Navigators are experienced voters who vote on allocation rounds and governance proposals on behalf of their citizens (users that delegate to them).",
+          ),
+          t(
+            "They earn a 20% fee on delegator rewards — so they are incentivized to vote well. If they miss votes or act badly, their stake gets slashed.",
+          ),
         ],
       },
       {
         key: "delegate",
         title: t("How does delegation work?"),
-        icon: LuVote,
+        image: "/assets/3d-illustrations/voting-power-hr.png",
         heading: t("2. Delegate your VOT3"),
         listItems: [
           t(
-            "Choose how much VOT3 to delegate. Your tokens stay in your wallet — only the delegated portion is locked.",
+            "Pick a navigator and choose how much VOT3 to delegate. Your tokens stay in your wallet — only the delegated portion is locked.",
           ),
-          t("You can increase or decrease your delegation at any time. Changes take effect next round."),
+          t(
+            "Review their voting strategy, track record, and reports before delegating. You can switch navigators anytime.",
+          ),
         ],
       },
       {
         key: "earn",
         title: t("How does delegation work?"),
-        icon: LuStar,
+        image: "/assets/images/grants/step-4.webp",
         heading: t("3. Earn rewards passively"),
         listItems: [
           t("The navigator votes on allocation rounds and governance proposals for you."),
@@ -75,7 +81,7 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
       {
         key: "manage",
         title: t("How does delegation work?"),
-        icon: LuShield,
+        image: "/assets/images/grants/step-3.webp",
         heading: t("4. Stay in control"),
         listItems: [
           t("You can undelegate fully or partially at any time."),
@@ -130,7 +136,14 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
           <Box pt={5}>
             <VStack w="full" textAlign="center" gap={4}>
               <Heading size="md">{currentStep.title}</Heading>
-              <Icon as={currentStep.icon} boxSize={16} color="actions.primary.default" />
+              <Image
+                src={currentStep.image}
+                alt={`Step ${currentStepIndex + 1}`}
+                objectFit="contain"
+                width={150}
+                height={150}
+                unoptimized
+              />
               <Heading size="sm">{currentStep.heading}</Heading>
               <List.Root variant="plain" pl={5} textStyle="sm" gap={2} textAlign="left">
                 {currentStep.listItems.map((item, index) => (
@@ -230,7 +243,14 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
               key={currentStep.key}>
-              <Icon as={currentStep.icon} boxSize={32} color="actions.primary.default" opacity={0.3} />
+              <Image
+                src={currentStep.image}
+                alt={`Step ${currentStepIndex + 1}`}
+                objectFit="contain"
+                width={220}
+                height={320}
+                unoptimized
+              />
             </motion.div>
           </Box>
         </Flex>
