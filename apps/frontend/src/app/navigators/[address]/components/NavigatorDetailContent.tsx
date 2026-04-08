@@ -88,8 +88,11 @@ export const NavigatorDetailContent = () => {
         isDelegatedHere={isDelegatedHere}
         isConnected={!!account?.address}
         isNavigator={!!isNavigator}
+        isOwnPage={!!isNavigator && !!account?.address && account.address.toLowerCase() === address.toLowerCase()}
         onDelegateClick={() => setIsDelegateOpen(true)}
         onManageClick={() => setIsManageOpen(true)}
+        onManageStakeClick={() => {}}
+        onExitDelegation={() => setIsManageOpen(true)}
       />
 
       <NavigatorStatsGrid

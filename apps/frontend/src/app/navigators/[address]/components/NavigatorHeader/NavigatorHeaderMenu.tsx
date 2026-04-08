@@ -1,0 +1,40 @@
+import { IconButton, Menu, Portal } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+import { FaEllipsisVertical } from "react-icons/fa6"
+import { LuLogOut, LuShare2 } from "react-icons/lu"
+
+type Props = {
+  isDelegatedHere: boolean
+  onExitDelegation: () => void
+  onShareClick: () => void
+}
+
+export const NavigatorHeaderMenu = ({ isDelegatedHere, onExitDelegation, onShareClick }: Props) => {
+  const { t } = useTranslation()
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger asChild>
+        <IconButton variant="subtle" rounded="full" size="sm" aria-label="More options">
+          <FaEllipsisVertical />
+        </IconButton>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content bg={{ base: "white", _dark: "#2D3748" }}>
+            {isDelegatedHere && (
+              <Menu.Item value="exit-delegation" onClick={onExitDelegation}>
+                <LuLogOut />
+                {t("Exit Delegation")}
+              </Menu.Item>
+            )}
+            <Menu.Item value="share" onClick={onShareClick}>
+              <LuShare2 />
+              {t("Share")}
+            </Menu.Item>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+  )
+}

@@ -1,11 +1,16 @@
 import { Button, Card, Heading, HStack, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuExternalLink } from "react-icons/lu"
+import { LuExternalLink, LuShare2 } from "react-icons/lu"
 
 import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { AddressIcon } from "@/components/AddressIcon"
 
 import { NavigatorAboutSection } from "./NavigatorAboutSection"
+import { NavigatorHeaderMenu } from "./NavigatorHeaderMenu"
+import { NavigatorShareModal } from "./NavigatorShareModal"
+
+type MainAction = "manage-delegation" | "manage-stake" | "delegate" | "share"
 
 type Props = {
   address: string
@@ -18,8 +23,24 @@ type Props = {
   isDelegatedHere: boolean
   isConnected: boolean
   isNavigator: boolean
+  isOwnPage: boolean
   onDelegateClick: () => void
   onManageClick: () => void
+  onManageStakeClick: () => void
+  onExitDelegation: () => void
+}
+
+const getMainAction = (
+  isDelegatedHere: boolean,
+  isNavigator: boolean,
+  isOwnPage: boolean,
+  isConnected: boolean,
+  isActive: boolean,
+): MainAction => {
+  if (isDelegatedHere) return "manage-delegation"
+  if (isNavigator && isOwnPage) return "manage-stake"
+  if (isConnected && !isNavigator && isActive) return "delegate"
+  return "share"
 }
 
 export const NavigatorHeader = ({
@@ -33,10 +54,29 @@ export const NavigatorHeader = ({
   isDelegatedHere,
   isConnected,
   isNavigator,
+  isOwnPage,
   onDelegateClick,
   onManageClick,
+  onManageStakeClick,
+  onExitDelegation,
 }: Props) => {
   const { t } = useTranslation()
+  const [isShareOpen, setIsShareOpen] = useState(false)
+
+  const mainAction = getMainAction(isDelegatedHere, isNavigator, isOwnPage, isConnected, isActive)
+  const showMenu = mainAction !== "share"
+
+  const handleShare = () => setIsShareOpen(true)
+
+  const mainButtonConfig: Record<MainAction, { label: string; onClick: () => void; variant: "primary" | "secondary" }> =
+    {
+      "manage-delegation": { label: t("Manage Delegation"), onClick: onManageClick, variant: "secondary" },
+      "manage-stake": { label: t("Manage Stake"), onClick: onManageStakeClick, variant: "secondary" },
+      delegate: { label: t("Delegate"), onClick: onDelegateClick, variant: "primary" },
+      share: { label: t("Share"), onClick: handleShare, variant: "secondary" },
+    }
+
+  const { label, onClick, variant } = mainButtonConfig[mainAction]
 
   return (
     <Card.Root variant="outline" borderRadius="xl">
@@ -48,16 +88,17 @@ export const NavigatorHeader = ({
               <Heading size={{ base: "md", md: "lg" }}>{displayName}</Heading>
             </Skeleton>
 
-            <HStack flex={1} justify="end">
-              {isConnected && isDelegatedHere && (
-                <Button variant="secondary" size="sm" onClick={onManageClick}>
-                  {t("Manage Delegation")}
-                </Button>
-              )}
-              {isConnected && isActive && !isDelegatedHere && !isNavigator && (
-                <Button variant="primary" size="sm" onClick={onDelegateClick}>
-                  {t("Delegate")}
-                </Button>
+            <HStack flex={1} justify="end" gap={2}>
+              <Button variant={variant} size="sm" onClick={onClick}>
+                {mainAction === "share" && <LuShare2 />}
+                {label}
+              </Button>
+              {showMenu && (
+                <NavigatorHeaderMenu
+                  isDelegatedHere={isDelegatedHere}
+                  onExitDelegation={onExitDelegation}
+                  onShareClick={handleShare}
+                />
               )}
             </HStack>
           </HStack>
@@ -109,6 +150,8 @@ export const NavigatorHeader = ({
           <NavigatorAboutSection metadata={metadata} metadataLoading={metadataLoading} />
         </VStack>
       </Card.Body>
+
+      <NavigatorShareModal isOpen={isShareOpen} onClose={() => setIsShareOpen(false)} displayName={displayName} />
     </Card.Root>
   )
 }
