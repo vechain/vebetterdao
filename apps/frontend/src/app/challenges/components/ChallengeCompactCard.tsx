@@ -10,7 +10,7 @@ import { ChallengeKind, ChallengeView } from "@/api/challenges/types"
 
 import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
-import { ChallengeStatusBadges } from "./ChallengeStatusBadges"
+import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
 
 export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
@@ -56,7 +56,10 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
                   </Heading>
                 </NextLink>
               </LinkOverlay>
-              <ChallengeStatusBadges challenge={challenge} />
+              <Stack direction="row" flexWrap="wrap" gap="2">
+                <ChallengeVisibilityBadge challenge={challenge} />
+                <ChallengeStatusBadge challenge={challenge} />
+              </Stack>
             </VStack>
             {hasChallengeActions(challenge) && (
               <Box w={{ base: "full", md: "auto" }} flexShrink={0}>
@@ -90,27 +93,31 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
                 {humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
               </Text>
             </Box>
-            {!isSponsored && (
-              <Box
-                bg="bg.secondary"
-                borderRadius="2xl"
-                border="sm"
-                borderColor="border.secondary"
-                px={{ base: "4", md: "5" }}
-                py="4">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  fontWeight="semibold"
-                  textTransform="uppercase"
-                  letterSpacing="0.08em">
-                  {t("Stake")}
-                </Text>
-                <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold" mt="2" lineHeight="1.15">
-                  {humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
-                </Text>
-              </Box>
-            )}
+            <Box
+              bg="bg.secondary"
+              borderRadius="2xl"
+              border="sm"
+              borderColor="border.secondary"
+              px={{ base: "4", md: "5" }}
+              py="4">
+              <Text
+                textStyle="xxs"
+                color="text.subtle"
+                fontWeight="semibold"
+                textTransform="uppercase"
+                letterSpacing="0.08em">
+                {t(isSponsored ? "Type" : "Stake")}
+              </Text>
+              <Text
+                textStyle={isSponsored ? { base: "sm", md: "md" } : { base: "lg", md: "xl" }}
+                fontWeight="bold"
+                mt="2"
+                lineHeight="1.15">
+                {isSponsored
+                  ? t("Sponsored challenge: No stake required!")
+                  : humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+              </Text>
+            </Box>
             <Box
               bg="bg.secondary"
               borderRadius="2xl"

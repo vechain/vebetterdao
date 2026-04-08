@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
 import { LuPlus } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeStatus } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeStatus, ThresholdMode } from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
@@ -35,7 +35,7 @@ import { MotionVStack } from "@/components/MotionVStack"
 import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
-import { ChallengeKindBadges, ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
+import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
 
 const StatItem = ({ label, value, color }: { label: string; value: string | number; color?: string }) => {
   return (
@@ -90,12 +90,16 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
 
   const createdAtLabel = challenge.createdAt > 0 ? dayjs.unix(challenge.createdAt).format("D MMM, YYYY") : null
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
+  const winnerTypeLabel = t(
+    challenge.thresholdMode === ThresholdMode.SplitAboveThreshold ? "Split prize" : "Max actions",
+  )
   const roundsProgress =
     currentRound > 0 && challenge.duration > 0
       ? `${Math.min(Math.max(currentRound - challenge.startRound + 1, 0), challenge.duration)} / ${challenge.duration}`
       : `${challenge.startRound}-${challenge.endRound}`
   const showParticipatingBadge =
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
+  const showSponsoringBadge = isSponsored && challenge.isCreator
 
   return (
     <MotionVStack renderInnerStack={false} gap="6">
@@ -138,18 +142,39 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                       {"•"} {createdAtLabel}
                     </Text>
                   )}
-                  {showParticipatingBadge && (
-                    <HStack
-                      gap="1.5"
-                      bg="status.positive.subtle"
-                      color="status.positive.strong"
-                      borderRadius="full"
-                      px="2.5"
-                      py="1">
-                      <Box boxSize="1.5" borderRadius="full" bg="status.positive.strong" />
-                      <Text textStyle="xs" fontWeight="semibold">
-                        {t("Participating")}
-                      </Text>
+                  <Text color="text.subtle" textStyle="sm">
+                    {"•"} {t("Start round")} {humanNumber(challenge.startRound)}
+                  </Text>
+                  {(showParticipatingBadge || showSponsoringBadge) && (
+                    <HStack flexWrap="wrap" gap="2">
+                      {showParticipatingBadge && (
+                        <HStack
+                          gap="1.5"
+                          bg="status.positive.subtle"
+                          color="status.positive.strong"
+                          borderRadius="full"
+                          px="2.5"
+                          py="1">
+                          <Box boxSize="1.5" borderRadius="full" bg="status.positive.strong" />
+                          <Text textStyle="xs" fontWeight="semibold">
+                            {t("Participating")}
+                          </Text>
+                        </HStack>
+                      )}
+                      {showSponsoringBadge && (
+                        <HStack
+                          gap="1.5"
+                          bg="status.warning.subtle"
+                          color="status.warning.strong"
+                          borderRadius="full"
+                          px="2.5"
+                          py="1">
+                          <Box boxSize="1.5" borderRadius="full" bg="status.warning.primary" />
+                          <Text textStyle="xs" fontWeight="semibold">
+                            {t("Sponsoring")}
+                          </Text>
+                        </HStack>
+                      )}
                     </HStack>
                   )}
                 </HStack>
@@ -164,7 +189,21 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                   value={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
                   color="brand.primary"
                 />
-                {!isSponsored && (
+                {isSponsored ? (
+                  <VStack align="start" gap="1" gridColumn={{ base: "span 2", md: "auto" }}>
+                    <Text
+                      textStyle="xxs"
+                      color="text.subtle"
+                      textTransform="uppercase"
+                      letterSpacing="0.08em"
+                      fontWeight="semibold">
+                      {t("Type")}
+                    </Text>
+                    <Text textStyle="md" fontWeight="bold">
+                      {t("Sponsored challenge: No stake required!")}
+                    </Text>
+                  </VStack>
+                ) : (
                   <StatItem
                     label={t("Stake")}
                     value={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
@@ -212,8 +251,9 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                   </Text>
                 </VStack>
                 <StatItem label={t("Rounds")} value={roundsProgress} />
+                {isSponsored && <StatItem label={t("Winner")} value={winnerTypeLabel} />}
                 {challenge.threshold !== "0" && (
-                  <StatItem label={t("Threshold")} value={humanNumber(challenge.threshold)} />
+                  <StatItem label={t("Minimum actions")} value={humanNumber(challenge.threshold)} />
                 )}
                 <StatItem
                   label={t("Apps")}
@@ -221,8 +261,6 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                 />
               </SimpleGrid>
             </Box>
-
-            <ChallengeKindBadges challenge={challenge} />
 
             {/* CTA */}
             {hasChallengeActions(challenge) && (

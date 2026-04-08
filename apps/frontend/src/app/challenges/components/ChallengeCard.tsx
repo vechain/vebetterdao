@@ -18,19 +18,22 @@ import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { LuPlus } from "react-icons/lu"
 
-import { ChallengeDetail, ChallengeKind, ChallengeStatus, ChallengeView } from "@/api/challenges/types"
+import { ChallengeDetail, ChallengeKind, ChallengeStatus, ChallengeView, ThresholdMode } from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
 import { AddressIcon } from "@/components/AddressIcon"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
 import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
-import { ChallengeKindBadges, ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
+import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
 
 export const ChallengeCard = ({ challenge, currentRound }: { challenge: ChallengeView; currentRound: number }) => {
   const { t } = useTranslation()
   const createdAtLabel = challenge.createdAt > 0 ? dayjs.unix(challenge.createdAt).format("D MMM, YYYY") : null
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
+  const winnerTypeLabel = t(
+    challenge.thresholdMode === ThresholdMode.SplitAboveThreshold ? "Split prize" : "Max actions",
+  )
   const shouldLoadSelectedApps = !challenge.allApps && challenge.selectedAppsCount > 0
   const { data: challengeDetail, isLoading: isSelectedAppsLoading } = useChallenge(
     shouldLoadSelectedApps ? String(challenge.challengeId) : "",
@@ -41,6 +44,7 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
       : `${challenge.startRound}-${challenge.endRound}`
   const showParticipatingBadge =
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
+  const showSponsoringBadge = isSponsored && challenge.isCreator
 
   return (
     <LinkBox h="full">
@@ -95,20 +99,40 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                   {"•"} {createdAtLabel}
                 </Text>
               )}
+              <Text color="text.subtle" textStyle="sm">
+                {"•"} {t("Start round")} {humanNumber(challenge.startRound)}
+              </Text>
             </HStack>
-            {showParticipatingBadge && (
-              <HStack
-                alignSelf="start"
-                gap="2"
-                bg="status.positive.subtle"
-                color="status.positive.strong"
-                borderRadius="full"
-                px="3"
-                py="1.5">
-                <Box boxSize="2" borderRadius="full" bg="status.positive.strong" />
-                <Text textStyle="xs" fontWeight="semibold">
-                  {t("Participating")}
-                </Text>
+            {(showParticipatingBadge || showSponsoringBadge) && (
+              <HStack alignSelf="start" flexWrap="wrap" gap="2">
+                {showParticipatingBadge && (
+                  <HStack
+                    gap="2"
+                    bg="status.positive.subtle"
+                    color="status.positive.strong"
+                    borderRadius="full"
+                    px="3"
+                    py="1.5">
+                    <Box boxSize="2" borderRadius="full" bg="status.positive.strong" />
+                    <Text textStyle="xs" fontWeight="semibold">
+                      {t("Participating")}
+                    </Text>
+                  </HStack>
+                )}
+                {showSponsoringBadge && (
+                  <HStack
+                    gap="2"
+                    bg="status.warning.subtle"
+                    color="status.warning.strong"
+                    borderRadius="full"
+                    px="3"
+                    py="1.5">
+                    <Box boxSize="2" borderRadius="full" bg="status.warning.primary" />
+                    <Text textStyle="xs" fontWeight="semibold">
+                      {t("Sponsoring")}
+                    </Text>
+                  </HStack>
+                )}
               </HStack>
             )}
           </VStack>
@@ -127,7 +151,21 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 {humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
               </Text>
             </Box>
-            {!isSponsored && (
+            {isSponsored ? (
+              <Box bg="bg.secondary" borderRadius="xl" px="4" py="3" gridColumn={{ base: "span 2", md: "auto" }}>
+                <Text
+                  textStyle="xxs"
+                  color="text.subtle"
+                  textTransform="uppercase"
+                  letterSpacing="0.08em"
+                  fontWeight="semibold">
+                  {t("Type")}
+                </Text>
+                <Text textStyle="sm" fontWeight="bold" mt="1">
+                  {t("Sponsored challenge: No stake required!")}
+                </Text>
+              </Box>
+            ) : (
               <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
                 <Text
                   textStyle="xxs"
@@ -139,6 +177,21 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 </Text>
                 <Text textStyle="lg" fontWeight="bold" mt="1">
                   {humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+                </Text>
+              </Box>
+            )}
+            {isSponsored && (
+              <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
+                <Text
+                  textStyle="xxs"
+                  color="text.subtle"
+                  textTransform="uppercase"
+                  letterSpacing="0.08em"
+                  fontWeight="semibold">
+                  {t("Winner")}
+                </Text>
+                <Text textStyle="lg" fontWeight="bold" mt="1">
+                  {winnerTypeLabel}
                 </Text>
               </Box>
             )}
@@ -230,8 +283,6 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
               </Text>
             </Box>
           </SimpleGrid>
-
-          <ChallengeKindBadges challenge={challenge} />
 
           {hasChallengeActions(challenge) && (
             <Box mt="auto" pt="5" borderTopWidth="1px" borderColor="border.secondary">
