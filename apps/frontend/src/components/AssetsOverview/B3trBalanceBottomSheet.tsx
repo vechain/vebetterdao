@@ -176,6 +176,8 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
         </Text>
       </Box>
 
+      <ActivityList eventNames={[...BALANCE_EVENT_NAMES]} getActivityProps={getBalanceActivityProps} />
+
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
         {t("How to get more B3TR")}
       </Text>
@@ -223,8 +225,6 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
           )}
         />
       </VStack>
-
-      <ActivityList eventNames={[...BALANCE_EVENT_NAMES]} getActivityProps={getBalanceActivityProps} />
     </VStack>
   )
 }

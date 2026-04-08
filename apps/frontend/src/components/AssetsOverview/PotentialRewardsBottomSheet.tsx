@@ -135,6 +135,8 @@ const RewardsContent = ({
         <CheckItem label={t("Own a Galaxy Member NFT")} checked={hasGmNft} />
       </VStack>
 
+      <ActivityList eventNames={[...REWARDS_EVENT_NAMES]} getActivityProps={getRewardsActivityProps} />
+
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle" mt="1">
         {t("How it works")}
       </Text>
@@ -239,8 +241,6 @@ const RewardsContent = ({
           </VStack>
         </HStack>
       </VStack>
-
-      <ActivityList eventNames={[...REWARDS_EVENT_NAMES]} getActivityProps={getRewardsActivityProps} />
     </VStack>
   )
 }

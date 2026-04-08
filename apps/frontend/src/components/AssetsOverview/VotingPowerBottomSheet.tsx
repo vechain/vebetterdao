@@ -16,15 +16,21 @@ import {
   CloseButton,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/vechain-kit"
+import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { Flash, NavArrowRight, InfoCircle, HeartSolid, ArrowDown } from "iconoir-react"
+import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { LuUsers } from "react-icons/lu"
 import { formatEther } from "viem"
 
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useGetCitizenCount } from "@/api/contracts/navigatorRegistry/hooks/useGetCitizenCount"
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { Transaction } from "@/api/indexer/transactions/useTransactions"
+import { AddressIcon } from "@/components/AddressIcon"
 import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/ActivityList"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
@@ -37,6 +43,7 @@ type Props = {
   formatted: string
   votingPowerNextRound: bigint
   isLoading: boolean
+  isDelegated?: boolean
 }
 
 // TODO: Add "B3TR_PROPOSAL_WITHDRAW" once indexer PR #1232 is merged and released
@@ -139,6 +146,7 @@ const VotingPowerContent = ({
   formatted,
   votingPowerNextRound,
   isLoading,
+  isDelegated,
   onOpenPowerUp,
   onOpenPowerDown,
 }: Omit<Props, "isOpen"> & { onOpenPowerUp: () => void; onOpenPowerDown: () => void }) => {
@@ -152,11 +160,26 @@ const VotingPowerContent = ({
     bestBlock?.number ? Number(bestBlock.number) : undefined,
     account?.address,
   )
+  const { data: currentDelegated } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
+  const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
+  const { data: navigatorDomain } = useVechainDomain(isDelegated ? navigatorAddress : undefined)
+  const { data: citizenCount } = useGetCitizenCount(navigatorAddress ?? "")
+  const router = useRouter()
+
+  const navigatorDisplayName = useMemo(() => {
+    if (!navigatorAddress) return ""
+    return navigatorDomain?.domain ? humanDomain(navigatorDomain.domain, 15, 10) : humanAddress(navigatorAddress, 8, 6)
+  }, [navigatorAddress, navigatorDomain])
 
   const vot3BalanceOnly = useMemo(() => {
     if (!currentVot3Balance) return "0"
     return currentVot3Balance.formatted
   }, [currentVot3Balance])
+
+  const delegatedFormatted = useMemo(() => {
+    if (!currentDelegated?.raw || currentDelegated.raw === 0n) return null
+    return FormattingUtils.humanNumber(currentDelegated.scaled)
+  }, [currentDelegated])
 
   const depositsFormatted = useMemo(() => {
     if (!currentVotes?.depositsVotesWei || currentVotes.depositsVotesWei === 0n) return null
@@ -217,7 +240,10 @@ const VotingPowerContent = ({
             borderColor="border.secondary"
             w="full">
             <CompositionLine label={t("VOT3 balance")} value={`${vot3BalanceOnly} VOT3`} />
-            {depositsFormatted && (
+            {isDelegated && delegatedFormatted && (
+              <CompositionLine label={t("VOT3 delegated")} value={`${delegatedFormatted} VOT3`} />
+            )}
+            {!isDelegated && depositsFormatted && (
               <CompositionLine label={t("From proposal support")} value={`${depositsFormatted} VOT3`} />
             )}
           </VStack>
@@ -247,6 +273,45 @@ const VotingPowerContent = ({
           </Stack>
         )}
       </VStack>
+
+      {isDelegated && navigatorAddress && (
+        <HStack
+          gap="3"
+          p="3"
+          rounded="lg"
+          bg="status.info.subtle"
+          borderWidth="1px"
+          borderColor="status.info.muted"
+          cursor="pointer"
+          _hover={{ opacity: 0.85 }}
+          onClick={() => {
+            onClose()
+            router.push(`/navigators/${navigatorAddress}`)
+          }}>
+          <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
+          <VStack align="start" gap="0.5" flex={1}>
+            <Text textStyle="xs" color="text.subtle">
+              {t("Delegated to navigator")}
+            </Text>
+            <Text textStyle="sm" fontWeight="semibold">
+              {navigatorDisplayName}
+            </Text>
+            {citizenCount != null && (
+              <HStack gap={1}>
+                <LuUsers size={12} color="var(--chakra-colors-fg-muted)" />
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Trusted by {{count}} citizens", { count: citizenCount })}
+                </Text>
+              </HStack>
+            )}
+          </VStack>
+          <Icon boxSize="4" color="text.subtle">
+            <NavArrowRight />
+          </Icon>
+        </HStack>
+      )}
+
+      <ActivityList eventNames={[...VOTING_POWER_EVENT_NAMES]} getActivityProps={getVotingPowerActivityProps} />
 
       {/* Educational info */}
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
@@ -278,8 +343,6 @@ const VotingPowerContent = ({
           description={t("VOT3 deposited to support proposals also counts toward your voting power.")}
         />
       </VStack>
-
-      <ActivityList eventNames={[...VOTING_POWER_EVENT_NAMES]} getActivityProps={getVotingPowerActivityProps} />
     </VStack>
   )
 }
