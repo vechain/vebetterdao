@@ -30,18 +30,6 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
         overflow="hidden"
         boxShadow="sm"
         transform="translateY(0)"
-        _before={{
-          content: '""',
-          position: "absolute",
-          top: "-12",
-          insetInlineEnd: "-10",
-          boxSize: "36",
-          borderRadius: "full",
-          bg: "brand.primary",
-          opacity: "0.08",
-          filter: "blur(40px)",
-          pointerEvents: "none",
-        }}
         _hover={{ borderColor: "border.active", boxShadow: "lg", transform: "translateY(-2px)" }}>
         <VStack gap={{ base: "5", md: "6" }} align="stretch" h="full" position="relative">
           <Stack

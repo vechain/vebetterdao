@@ -15,7 +15,7 @@ export const SponsoredChallengeInfo = ({ textProps, iconSize = "4" }: SponsoredC
   const { t } = useTranslation()
 
   return (
-    <HStack align="center" gap="1.5" w="fit-content">
+    <HStack align="center" gap="1.5" w="fit-content" position="relative" zIndex={1}>
       <Text lineHeight="1.15" {...textProps}>
         {t("Sponsored")}
       </Text>
@@ -33,6 +33,8 @@ export const SponsoredChallengeInfo = ({ textProps, iconSize = "4" }: SponsoredC
           cursor="pointer"
           color="text.subtle"
           flexShrink={0}
+          position="relative"
+          zIndex={1}
           bg="transparent"
           borderWidth="0"
           p="0"
