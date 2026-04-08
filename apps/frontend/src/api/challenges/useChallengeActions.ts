@@ -164,7 +164,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "claimChallengePayout",
               args: [params.challengeId],
-              comment: `Claim payout for challenge #${params.challengeId}`,
+              comment: `Claim prize for challenge #${params.challengeId}`,
             }),
           ]
 

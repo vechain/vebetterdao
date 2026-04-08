@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge, HStack, Text } from "@chakra-ui/react"
+import { Badge, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/api/challenges/types"
 
 import { getChallengeStatusBadgeVariant, getChallengeVisibilityBadgeVariant } from "./challengeBadgeVariants"
+import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
 
 export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
@@ -28,13 +29,13 @@ export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeVi
 }
 
 export const ChallengeKindBadges = ({ challenge }: { challenge: ChallengeView }) => {
-  const { t } = useTranslation()
   if (challenge.kind === ChallengeKind.Stake) return null
 
   return (
-    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-      {t("Sponsored challenge: No stake required!")}
-    </Text>
+    <SponsoredChallengeInfo
+      textProps={{ textStyle: "xs", color: "text.subtle", fontWeight: "semibold" }}
+      iconSize="3.5"
+    />
   )
 }
 

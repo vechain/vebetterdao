@@ -11,6 +11,7 @@ import { ChallengeKind, ChallengeView } from "@/api/challenges/types"
 import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
+import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
 
 export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
@@ -108,15 +109,15 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
                 letterSpacing="0.08em">
                 {t(isSponsored ? "Type" : "Stake")}
               </Text>
-              <Text
-                textStyle={isSponsored ? { base: "sm", md: "md" } : { base: "lg", md: "xl" }}
-                fontWeight="bold"
-                mt="2"
-                lineHeight="1.15">
-                {isSponsored
-                  ? t("Sponsored challenge: No stake required!")
-                  : humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
-              </Text>
+              {isSponsored ? (
+                <Box mt="2">
+                  <SponsoredChallengeInfo textProps={{ textStyle: { base: "sm", md: "md" }, fontWeight: "bold" }} />
+                </Box>
+              ) : (
+                <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold" mt="2" lineHeight="1.15">
+                  {humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+                </Text>
+              )}
             </Box>
             <Box
               bg="bg.secondary"

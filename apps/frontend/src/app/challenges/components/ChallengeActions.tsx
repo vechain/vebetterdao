@@ -1,10 +1,11 @@
 "use client"
 
-import { Button, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Button, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { parseEther } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { LuTrophy } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
@@ -126,8 +127,33 @@ export const ChallengeActions = ({
           size={resolvedButtonSize}
           variant="primary"
           onClick={() => actions.claimChallenge(id)}
+          gap="2"
+          bg="status.yellow.primary"
+          color="status.yellow.strong"
+          borderWidth="1px"
+          borderColor="status.yellow.secondary"
+          boxShadow="sm"
+          transition="all 0.2s ease"
+          _hover={{
+            bg: "status.yellow.secondary",
+            borderColor: "status.yellow.primary",
+            boxShadow: "md",
+            transform: "translateY(-1px)",
+          }}
+          _active={{
+            bg: "status.yellow.primary",
+            transform: "translateY(0)",
+          }}
+          _disabled={{
+            bg: "actions.disabled.disabled",
+            color: "actions.disabled.text",
+            borderColor: "transparent",
+            boxShadow: "none",
+            transform: "none",
+          }}
           {...cardButtonProps}>
-          {t("Claim payout")}
+          <Icon as={LuTrophy} boxSize="4" />
+          {t("Claim prize")}
         </Button>
       )}
       {challenge.canRefund && (

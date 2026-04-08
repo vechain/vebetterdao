@@ -196,7 +196,7 @@ async function main() {
 
   const selectedAppIds = allAppIds.slice(0, SELECTED_APP_COUNT)
 
-  // Use non-overlapping rounds so actions for one challenge do not affect the others.
+  // All challenges start next round; keep only the original duration differences.
   const challengePlans: ChallengePlan[] = [
     {
       label: "MaxActions/1Round/5Apps",
@@ -209,8 +209,8 @@ async function main() {
     },
     {
       label: "MaxActions/4Rounds/5Apps",
-      startRound: baseStartRound + 1,
-      endRound: baseStartRound + 4,
+      startRound: baseStartRound,
+      endRound: baseStartRound + 3,
       appIds: selectedAppIds,
       thresholdMode: ThresholdMode.None,
       threshold: 0,
@@ -218,8 +218,8 @@ async function main() {
     },
     {
       label: "MaxActions/4Rounds/AllApps",
-      startRound: baseStartRound + 5,
-      endRound: baseStartRound + 8,
+      startRound: baseStartRound,
+      endRound: baseStartRound + 3,
       appIds: [],
       thresholdMode: ThresholdMode.None,
       threshold: 0,
@@ -227,8 +227,8 @@ async function main() {
     },
     {
       label: "SplitPrize/4Rounds/AllApps",
-      startRound: baseStartRound + 9,
-      endRound: baseStartRound + 12,
+      startRound: baseStartRound,
+      endRound: baseStartRound + 3,
       appIds: [],
       thresholdMode: ThresholdMode.SplitAboveThreshold,
       threshold: SPLIT_THRESHOLD,
@@ -236,8 +236,8 @@ async function main() {
     },
     {
       label: "SplitPrize/4Rounds/5Apps",
-      startRound: baseStartRound + 13,
-      endRound: baseStartRound + 16,
+      startRound: baseStartRound,
+      endRound: baseStartRound + 3,
       appIds: selectedAppIds,
       thresholdMode: ThresholdMode.SplitAboveThreshold,
       threshold: SPLIT_THRESHOLD,

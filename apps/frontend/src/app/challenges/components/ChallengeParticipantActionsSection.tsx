@@ -14,6 +14,7 @@ import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Too
 import { ChallengeDetail, ChallengeStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
+import { AddressIcon } from "@/components/AddressIcon"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { blockNumberToDate } from "@/utils/date"
 
@@ -79,16 +80,37 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
     return blockNumberToDate(BigInt(deadlineBlock), bestBlock)
   }, [isPending, deadlineBlock, bestBlock])
 
+  const winnerAddresses = useMemo(() => {
+    if (challenge.status !== ChallengeStatus.Finalized || challenge.settlementMode === SettlementMode.CreatorRefund)
+      return []
+
+    if (challenge.settlementMode === SettlementMode.QualifiedSplit) {
+      return leaderboard.filter(entry => entry.actions >= Number(challenge.threshold)).map(entry => entry.participant)
+    }
+
+    const bestScore = leaderboard[0]?.actions
+    return typeof bestScore === "number"
+      ? leaderboard.filter(entry => entry.actions === bestScore).map(entry => entry.participant)
+      : []
+  }, [challenge.settlementMode, challenge.status, challenge.threshold, leaderboard])
+
   const chartData = useMemo<ChartEntry[]>(() => {
     const bestScore = leaderboard[0]?.actions ?? 0
 
-    return leaderboard.map(entry => ({
-      participant: entry.participant,
-      label: humanAddress(entry.participant, 4, 4),
-      actions: entry.actions,
-      fill: leaderboard.length > 0 && entry.actions === bestScore ? leaderColor : trailingColor,
-    }))
-  }, [leaderColor, leaderboard, trailingColor])
+    return leaderboard.map(entry => {
+      const isWinner =
+        challenge.status === ChallengeStatus.Finalized
+          ? winnerAddresses.some(address => compareAddresses(address, entry.participant))
+          : leaderboard.length > 0 && entry.actions === bestScore
+
+      return {
+        participant: entry.participant,
+        label: humanAddress(entry.participant, 4, 4),
+        actions: entry.actions,
+        fill: isWinner ? leaderColor : trailingColor,
+      }
+    })
+  }, [challenge.status, leaderColor, leaderboard, trailingColor, winnerAddresses])
 
   const outcome = useMemo(() => {
     if (challenge.status !== ChallengeStatus.Finalized) return null
@@ -101,22 +123,12 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
       }
     }
 
-    const addresses =
-      challenge.settlementMode === SettlementMode.QualifiedSplit
-        ? leaderboard.filter(entry => entry.actions >= Number(challenge.threshold)).map(entry => entry.participant)
-        : (() => {
-            const bestScore = leaderboard[0]?.actions
-            return typeof bestScore === "number"
-              ? leaderboard.filter(entry => entry.actions === bestScore).map(entry => entry.participant)
-              : []
-          })()
-
     return {
       kind: "winner" as const,
-      addresses,
-      isViewerWinner: !!viewerAddress && addresses.some(address => compareAddresses(address, viewerAddress)),
+      addresses: winnerAddresses,
+      isViewerWinner: !!viewerAddress && winnerAddresses.some(address => compareAddresses(address, viewerAddress)),
     }
-  }, [challenge.creator, challenge.settlementMode, challenge.status, challenge.threshold, leaderboard, viewerAddress])
+  }, [challenge.creator, challenge.settlementMode, challenge.status, viewerAddress, winnerAddresses])
 
   const chartHeight = Math.max(220, chartData.length * 44)
 
@@ -202,7 +214,10 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
                 <HStack flexWrap="wrap" gap="2">
                   {outcome.addresses.map(address => (
                     <Badge key={address} variant="neutral" size="sm">
-                      {humanAddress(address, 6, 4)}
+                      <HStack gap="1.5">
+                        <AddressIcon address={address} boxSize="4" borderRadius="full" flexShrink={0} />
+                        <Text textStyle="xs">{humanAddress(address, 6, 4)}</Text>
+                      </HStack>
                     </Badge>
                   ))}
                 </HStack>

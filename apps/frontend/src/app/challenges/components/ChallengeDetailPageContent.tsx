@@ -24,8 +24,9 @@ import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
 import { LuPlus } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeStatus, ThresholdMode } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeStatus, SettlementMode, ThresholdMode } from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
+import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -36,6 +37,7 @@ import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
 import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
+import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
 
 const StatItem = ({ label, value, color }: { label: string; value: string | number; color?: string }) => {
   return (
@@ -54,6 +56,10 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   const { account } = useWallet()
   const viewerAddress = account?.address
   const { data: challenge, isLoading } = useChallenge(challengeId, viewerAddress)
+  const { data: participantActions } = useChallengeParticipantActions(
+    challenge?.challengeId ?? 0,
+    challenge?.participants ?? [],
+  )
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: appsData } = useXApps()
   const { t } = useTranslation()
@@ -100,6 +106,22 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   const showParticipatingBadge =
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
   const showSponsoringBadge = isSponsored && challenge.isCreator
+  const splitPrizeWinnerCount =
+    challenge.status !== ChallengeStatus.Finalized || challenge.settlementMode !== SettlementMode.QualifiedSplit
+      ? 0
+      : (participantActions?.leaderboard.filter(entry => entry.actions >= Number(challenge.threshold)).length ?? 0)
+  const splitPrizePerWinnerLabel =
+    splitPrizeWinnerCount > 0
+      ? humanNumber(
+          Number(challenge.totalPrize) / splitPrizeWinnerCount,
+          Number(challenge.totalPrize) / splitPrizeWinnerCount,
+          "B3TR",
+        )
+      : null
+  const winnerValue =
+    challenge.thresholdMode === ThresholdMode.SplitAboveThreshold && splitPrizePerWinnerLabel
+      ? `${winnerTypeLabel} · ${splitPrizePerWinnerLabel}`
+      : winnerTypeLabel
 
   return (
     <MotionVStack renderInnerStack={false} gap="6">
@@ -199,9 +221,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                       fontWeight="semibold">
                       {t("Type")}
                     </Text>
-                    <Text textStyle="md" fontWeight="bold">
-                      {t("Sponsored challenge: No stake required!")}
-                    </Text>
+                    <SponsoredChallengeInfo textProps={{ textStyle: "md", fontWeight: "bold" }} />
                   </VStack>
                 ) : (
                   <StatItem
@@ -251,7 +271,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                   </Text>
                 </VStack>
                 <StatItem label={t("Rounds")} value={roundsProgress} />
-                {isSponsored && <StatItem label={t("Winner")} value={winnerTypeLabel} />}
+                {isSponsored && <StatItem label={t("Winner")} value={winnerValue} />}
                 {challenge.threshold !== "0" && (
                   <StatItem label={t("Minimum actions")} value={humanNumber(challenge.threshold)} />
                 )}

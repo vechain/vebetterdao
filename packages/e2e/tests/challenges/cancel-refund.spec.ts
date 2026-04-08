@@ -24,7 +24,7 @@ test.describe("Challenge actions visibility", () => {
     const hasCancel = await getChallengeActionButton(appPage, "Cancel")
       .isVisible()
       .catch(() => false)
-    const hasClaim = await getChallengeActionButton(appPage, "Claim payout")
+    const hasClaim = await getChallengeActionButton(appPage, "Claim prize")
       .isVisible()
       .catch(() => false)
     const hasRefund = await getChallengeActionButton(appPage, "Claim refund")
@@ -50,7 +50,7 @@ test.describe("Challenge actions visibility", () => {
     // Log which actions are available for debugging
     const available = [
       hasCancel && "Cancel",
-      hasClaim && "Claim payout",
+      hasClaim && "Claim prize",
       hasRefund && "Claim refund",
       hasJoin && "Join",
       hasAccept && "Accept",

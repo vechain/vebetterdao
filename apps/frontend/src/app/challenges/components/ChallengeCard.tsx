@@ -26,6 +26,7 @@ import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
+import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
 
 export const ChallengeCard = ({ challenge, currentRound }: { challenge: ChallengeView; currentRound: number }) => {
   const { t } = useTranslation()
@@ -161,9 +162,9 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                   fontWeight="semibold">
                   {t("Type")}
                 </Text>
-                <Text textStyle="sm" fontWeight="bold" mt="1">
-                  {t("Sponsored challenge: No stake required!")}
-                </Text>
+                <Box mt="1">
+                  <SponsoredChallengeInfo textProps={{ textStyle: "sm", fontWeight: "bold" }} />
+                </Box>
               </Box>
             ) : (
               <Box bg="bg.secondary" borderRadius="xl" px="4" py="3">
