@@ -13,19 +13,28 @@ export type DelegationEventFormatted = DelegationEvent & {
   deltaFormatted: string
 }
 
-export const useNavigatorDelegations = (filters: Pick<DelegationsQueryParams, "navigator" | "citizen">, size = 50) =>
-  indexerQueryClient.useQuery(
+const formatEvents = (data: DelegationsResponse): DelegationEventFormatted[] =>
+  data.data.map(e => ({
+    ...e,
+    amountFormatted: formatEther(e.amount ?? 0),
+    deltaFormatted: formatEther(e.delta ?? 0),
+  }))
+
+export const useNavigatorDelegations = (filters: Pick<DelegationsQueryParams, "navigator" | "citizen">, size = 20) =>
+  indexerQueryClient.useInfiniteQuery(
     "get",
     "/api/v1/b3tr/navigators/delegations",
     {
       params: { query: { ...filters, size, direction: "DESC" } },
     },
     {
-      select: (data): DelegationEventFormatted[] =>
-        data.data.map(e => ({
-          ...e,
-          amountFormatted: formatEther(e.amount ?? 0),
-          deltaFormatted: formatEther(e.delta ?? 0),
-        })),
+      pageParamName: "page",
+      initialPageParam: 0,
+      getNextPageParam: (lastPage: DelegationsResponse, _allPages: DelegationsResponse[], lastPageParam: unknown) =>
+        lastPage.pagination.hasNext ? (lastPageParam as number) + 1 : undefined,
+      select: data => ({
+        ...data,
+        pages: data.pages.map(page => formatEvents(page)),
+      }),
     },
   )

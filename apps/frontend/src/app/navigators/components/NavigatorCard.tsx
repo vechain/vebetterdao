@@ -1,11 +1,12 @@
-import { Badge, Card, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Badge, Button, Card, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useGetTextRecords, useVechainDomain } from "@vechain/vechain-kit"
+import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
-import { LuUsers } from "react-icons/lu"
+import { LuSettings, LuUsers } from "react-icons/lu"
 
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
@@ -15,14 +16,18 @@ const formatter = getCompactFormatter(2)
 
 type Props = {
   navigator: NavigatorEntityFormatted
+  onDelegate?: (navigator: NavigatorEntityFormatted) => void
 }
 
-export const NavigatorCard = ({ navigator: nav }: Props) => {
+export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { account } = useWallet()
+  const { data: isNavigator } = useIsNavigator()
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(nav.address)
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
   const isActive = nav.status === "ACTIVE"
+  const isOwnCard = account?.address?.toLowerCase() === nav.address.toLowerCase()
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 8, 6)
   const twitterHandle = textRecords?.["com.x"]
@@ -39,7 +44,7 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
       <Card.Body>
         <VStack gap={3} align="stretch" justify="space-between" h="full">
           <VStack gap={6} align="stretch">
-            <HStack justify="space-between" align="start">
+            <HStack justify="space-between" align="center">
               <HStack gap={2}>
                 <AddressIcon address={nav.address} boxSize={10} borderRadius="full" />
                 <VStack gap={0} align="start">
@@ -55,18 +60,44 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
                   )}
                 </VStack>
               </HStack>
-              {twitterHandle && (
-                <HStack
-                  gap={1}
-                  color="fg.muted"
-                  _hover={{ color: "fg" }}
-                  onClick={e => {
-                    e.stopPropagation()
-                    window.open(`https://x.com/${twitterHandle}`, "_blank")
-                  }}>
-                  <FaXTwitter size={14} />
-                </HStack>
-              )}
+              <HStack gap={2}>
+                {twitterHandle && (
+                  <HStack
+                    gap={1}
+                    color="fg.muted"
+                    _hover={{ color: "fg" }}
+                    onClick={e => {
+                      e.stopPropagation()
+                      window.open(`https://x.com/${twitterHandle}`, "_blank")
+                    }}>
+                    <FaXTwitter size={14} />
+                  </HStack>
+                )}
+                {isOwnCard && isNavigator ? (
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={e => {
+                      e.stopPropagation()
+                      router.push(`/navigators/${nav.address}`)
+                    }}>
+                    <LuSettings />
+                    {t("Manage")}
+                  </Button>
+                ) : (
+                  onDelegate && (
+                    <Button
+                      variant="primary"
+                      size="xs"
+                      onClick={e => {
+                        e.stopPropagation()
+                        onDelegate(nav)
+                      }}>
+                      {t("Delegate")}
+                    </Button>
+                  )
+                )}
+              </HStack>
             </HStack>
 
             <Text textStyle="xs" color="fg.muted" lineClamp={2}>

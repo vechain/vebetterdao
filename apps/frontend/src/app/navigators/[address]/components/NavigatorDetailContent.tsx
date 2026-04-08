@@ -67,7 +67,7 @@ export const NavigatorDetailContent = () => {
   const isDelegatedHere = currentNavigator?.toLowerCase() === address.toLowerCase() && currentDelegatedNum > 0
 
   return (
-    <VStack w="full" gap={6} align="stretch" px={{ base: 4, md: 0 }}>
+    <VStack w="full" gap={6} align="stretch">
       <PageBreadcrumb
         items={[
           { label: t("Navigators"), href: "/navigators" },

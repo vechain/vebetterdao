@@ -49,7 +49,7 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
         )}
 
         {!isLoading && data && data.length > 0 && (
-          <VStack gap={0} align="stretch">
+          <VStack maxH="60vh" overflowY="auto" gap={0} align="stretch">
             {data.map((entry, i) => {
               const isDeposit = entry.type === "registered" || entry.type === "deposit"
               return (

@@ -1,7 +1,5 @@
-import { Button, Heading, HStack, Icon, Link, SimpleGrid, Stack, Text, VStack } from "@chakra-ui/react"
+import { Heading, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/vechain-kit"
-import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuShield } from "react-icons/lu"
@@ -23,8 +21,6 @@ type StatusFilter = "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
 
 export const NavigatorsPageContent = () => {
   const { t } = useTranslation()
-  const router = useRouter()
-  const { account } = useWallet()
   const { isMobile } = useBreakpoints()
   const { data: isNavigator } = useIsNavigator()
   const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
@@ -55,31 +51,22 @@ export const NavigatorsPageContent = () => {
 
   return (
     <VStack w="full" gap={8} pb={8}>
-      <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
-        <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
-          <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Navigators")}</Heading>
-          {!open && (
-            <Link
-              display="inline-flex"
-              alignItems="center"
-              fontWeight={500}
-              color="primary.500"
-              px={0}
-              textStyle={{ base: "xs", lg: "md" }}
-              onClick={onOpen}>
-              <Icon as={UilInfoCircle} boxSize={4} />
-              {!isMobile && t("More info")}
-            </Link>
-          )}
-        </HStack>
-        {account?.address && !isNavigator && (
-          <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }}>
-            <Button onClick={() => router.push("/navigators/become")} variant="primary" size="md">
-              {t("Become a Navigator")}
-            </Button>
-          </HStack>
+      <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
+        <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Navigators")}</Heading>
+        {!open && (
+          <Link
+            display="inline-flex"
+            alignItems="center"
+            fontWeight={500}
+            color="primary.500"
+            px={0}
+            textStyle={{ base: "xs", lg: "md" }}
+            onClick={onOpen}>
+            <Icon as={UilInfoCircle} boxSize={4} />
+            {!isMobile && t("More info")}
+          </Link>
         )}
-      </Stack>
+      </HStack>
 
       <NavigatorStepsCard isOpen={open} onClose={onClose} />
       <NavigatorStatsCards />
@@ -113,7 +100,7 @@ export const NavigatorsPageContent = () => {
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4} w="full">
           {!hasActiveFilters && !isNavigator && <BecomeNavigatorCTA />}
           {navigators.map(nav => (
-            <NavigatorCard key={nav.address} navigator={nav} />
+            <NavigatorCard key={nav.address} navigator={nav} onDelegate={setDelegateTarget} />
           ))}
         </SimpleGrid>
       )}

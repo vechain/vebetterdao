@@ -22,7 +22,7 @@ export const NavigatorGovernanceActivity = ({ address }: Props) => {
   const hasRoundVotes = !!voteEvents && voteEvents.length > 0
 
   return (
-    <VStack gap={6} w="full">
+    <VStack gap={4} w="full">
       <Heading w="full" size={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
         {t("Governance Activity")}
       </Heading>
@@ -31,7 +31,7 @@ export const NavigatorGovernanceActivity = ({ address }: Props) => {
         <NavigatorCreatedProposalsCard address={address} />
       </SimpleGrid>
 
-      <Heading w="full" size={{ base: "lg", md: "xl" }} fontWeight="bold">
+      <Heading mt={4} w="full" size={{ base: "lg", md: "xl" }} fontWeight="bold">
         {t("Apps Voting Activity")}
       </Heading>
       <SimpleGrid columns={{ base: 1, md: hasRoundVotes ? 2 : 1 }} gap={6} w="full" alignItems="stretch">

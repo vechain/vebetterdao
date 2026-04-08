@@ -1,7 +1,9 @@
-import { HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Center, HStack, Icon, Link, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuArrowDownLeft, LuArrowRight, LuArrowUpRight, LuExternalLink } from "react-icons/lu"
+import InfiniteScroll from "react-infinite-scroll-component"
 
 import { DelegationEventFormatted, useNavigatorDelegations } from "@/api/indexer/navigators/useNavigatorDelegations"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
@@ -24,9 +26,13 @@ type Props = {
   onClose: () => void
 }
 
+const SCROLL_TARGET_ID = "delegation-history-scroll"
+
 export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { data, isLoading } = useNavigatorDelegations(address ? { navigator: address } : {})
+  const { data, isLoading, fetchNextPage, hasNextPage } = useNavigatorDelegations(address ? { navigator: address } : {})
+
+  const events = useMemo(() => data?.pages.flat() ?? [], [data])
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} ariaTitle={t("Delegation History")} showCloseButton>
@@ -43,7 +49,7 @@ export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) =
           </VStack>
         )}
 
-        {!isLoading && (!data || data.length === 0) && (
+        {!isLoading && events.length === 0 && (
           <EmptyState
             title={t("No delegation activity")}
             description={t("No delegation events found for this navigator.")}
@@ -55,24 +61,37 @@ export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) =
           />
         )}
 
-        {!isLoading && data && data.length > 0 && (
-          <VStack gap={0} align="stretch">
-            {data.map((event, i) => {
-              const deltaNum = Number(event.deltaFormatted)
-              const isPositive = deltaNum >= 0
-              const label = getEventLabel(event.eventType, isPositive)
+        {!isLoading && events.length > 0 && (
+          <VStack
+            id={SCROLL_TARGET_ID}
+            maxH={{ base: "none", md: "60vh" }}
+            overflowY={{ base: "visible", md: "auto" }}
+            gap={0}
+            align="stretch">
+            <InfiniteScroll
+              dataLength={events.length}
+              next={fetchNextPage}
+              hasMore={!!hasNextPage}
+              scrollableTarget={SCROLL_TARGET_ID}
+              loader={
+                <Center py={4}>
+                  <Spinner size="md" />
+                </Center>
+              }>
+              {events.map((event, i) => {
+                const deltaNum = Number(event.deltaFormatted)
+                const isPositive = deltaNum >= 0
+                const label = getEventLabel(event.eventType, isPositive)
 
-              return (
-                <HStack
-                  key={`${event.txId}-${i}`}
-                  justify="space-between"
-                  py={3}
-                  borderBottomWidth="1px"
-                  borderColor="border.primary"
-                  _last={{ borderBottomWidth: 0 }}
-                  flexWrap="wrap"
-                  gap={2}>
-                  <HStack gap={3}>
+                return (
+                  <HStack
+                    key={`${event.txId}-${i}`}
+                    align="start"
+                    py={3}
+                    borderBottomWidth="1px"
+                    borderColor="border.primary"
+                    _last={{ borderBottomWidth: 0 }}
+                    gap={3}>
                     <HStack
                       justify="center"
                       align="center"
@@ -84,44 +103,48 @@ export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) =
                       flexShrink={0}>
                       {isPositive ? <LuArrowDownLeft size={16} /> : <LuArrowUpRight size={16} />}
                     </HStack>
-                    <VStack gap={0} align="start">
-                      <Text textStyle="sm" fontWeight="semibold">
-                        {t(label)}
-                      </Text>
-                      <HStack gap={2} flexWrap="wrap">
-                        <AddressWithProfilePicture address={event.citizen} />
-                        {!address && (
-                          <>
-                            <LuArrowRight size={12} />
-                            <AddressWithProfilePicture address={event.navigator} />
-                          </>
-                        )}
-                        <Link href={getExplorerTxLink(event.txId)} target="_blank" rel="noopener noreferrer">
-                          <LuExternalLink size={10} />
-                        </Link>
+
+                    <VStack gap={1} align="start" flex={1} minW={0}>
+                      <HStack justify="space-between" w="full">
+                        <Text textStyle="sm" fontWeight="semibold" truncate>
+                          {t(label)}
+                        </Text>
+                        <Text
+                          textStyle="sm"
+                          fontWeight="semibold"
+                          flexShrink={0}
+                          color={isPositive ? "status.positive.primary" : "status.negative.primary"}>
+                          {isPositive ? "+" : "-"}
+                          {formatter.format(Math.abs(deltaNum))} {"VOT3"}
+                        </Text>
+                      </HStack>
+
+                      <HStack justify="space-between" w="full">
+                        <HStack gap={2} flexWrap="wrap" minW={0}>
+                          <AddressWithProfilePicture address={event.citizen} />
+                          {!address && (
+                            <>
+                              <LuArrowRight size={12} />
+                              <AddressWithProfilePicture address={event.navigator} />
+                            </>
+                          )}
+                          <Link href={getExplorerTxLink(event.txId)} target="_blank" rel="noopener noreferrer">
+                            <LuExternalLink size={10} />
+                          </Link>
+                        </HStack>
+                        <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                          {new Date(event.blockTimestamp * 1000).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </Text>
                       </HStack>
                     </VStack>
                   </HStack>
-
-                  <VStack gap={0} align="end">
-                    <Text
-                      textStyle="sm"
-                      fontWeight="semibold"
-                      color={isPositive ? "status.positive.primary" : "status.negative.primary"}>
-                      {isPositive ? "+" : "-"}
-                      {formatter.format(Math.abs(deltaNum))} {"VOT3"}
-                    </Text>
-                    <Text textStyle="xs" color="fg.muted">
-                      {new Date(event.blockTimestamp * 1000).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </Text>
-                  </VStack>
-                </HStack>
-              )
-            })}
+                )
+              })}
+            </InfiniteScroll>
           </VStack>
         )}
       </VStack>
