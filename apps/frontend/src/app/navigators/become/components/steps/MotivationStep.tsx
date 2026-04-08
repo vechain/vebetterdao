@@ -8,30 +8,27 @@ export const MotivationStep = () => {
   const { data, setData } = useNavigatorApplicationStore()
 
   return (
-    <VStack gap={5} align="stretch">
+    <VStack gap={5} align="stretch" w="full">
       <VStack gap={1} align="start">
-        <Heading size="md">{t("Why do you want to be a Navigator?")}</Heading>
-        <Text textStyle="sm" color="fg.muted">
-          {t(
-            "Help the community understand your motivation and qualifications. This information will be stored on IPFS and publicly visible.",
-          )}
+        <Heading size="md">{t("Motivation and Qualifications")}</Heading>
+        <Text textStyle="md" color="fg.muted">
+          {t("Share your motivation and qualifications to help the community understand your qualifications.")}
         </Text>
       </VStack>
 
       <Field.Root required>
-        <Field.Label>{t("Motivation")}</Field.Label>
+        <Field.Label>{t("Why do you want to become a navigator?")}</Field.Label>
         <Textarea
-          placeholder={t("I want to become a navigator because...")}
+          placeholder={t("My motivation for becoming a navigator is...")}
           value={data.motivation}
           onChange={e => setData({ motivation: e.target.value })}
           rows={4}
           maxLength={1000}
         />
-        <Field.HelperText>{t("Why do you want to become a voting delegate?")}</Field.HelperText>
       </Field.Root>
 
       <Field.Root required>
-        <Field.Label>{t("Qualifications")}</Field.Label>
+        <Field.Label>{t("What experience do you have with VeBetterDAO and governance?")}</Field.Label>
         <Textarea
           placeholder={t("I have been active in VeBetterDAO for...")}
           value={data.qualifications}
@@ -39,11 +36,10 @@ export const MotivationStep = () => {
           rows={4}
           maxLength={1000}
         />
-        <Field.HelperText>{t("What experience do you have with VeBetterDAO and governance?")}</Field.HelperText>
       </Field.Root>
 
       <Field.Root>
-        <Field.Label>{t("Voting Strategy")}</Field.Label>
+        <Field.Label>{t("How will you decide which apps to vote for and how to vote on proposals?")}</Field.Label>
         <Textarea
           placeholder={t("My voting strategy will focus on...")}
           value={data.votingStrategy}
@@ -51,9 +47,6 @@ export const MotivationStep = () => {
           rows={4}
           maxLength={1000}
         />
-        <Field.HelperText>
-          {t("How will you decide which apps to vote for and how to vote on proposals?")}
-        </Field.HelperText>
       </Field.Root>
     </VStack>
   )

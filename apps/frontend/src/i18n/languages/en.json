@@ -2353,5 +2353,8 @@
   "Your voting power": "Your voting power",
   "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards.": "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards.",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
-  "Your Voting Qualification": "Your Voting Qualification"
+  "Your Voting Qualification": "Your Voting Qualification",
+  "Share your motivation and qualifications to help the community understand your qualifications.": "Share your motivation and qualifications to help the community understand your qualifications.",
+  "Why do you want to become a navigator?": "Why do you want to become a navigator?",
+  "My motivation for becoming a navigator is...": "My motivation for becoming a navigator is..."
 }
