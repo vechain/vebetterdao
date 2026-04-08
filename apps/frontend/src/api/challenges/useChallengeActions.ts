@@ -197,6 +197,7 @@ export const useChallengeActions = () => {
   const tx = useBuildTransaction<ActionParams>({
     clauseBuilder,
     refetchQueryKeys: [["challenges"]],
+    gasPadding: 0.3,
   })
 
   return {
