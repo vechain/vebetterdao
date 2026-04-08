@@ -11,7 +11,7 @@ import { AppImage } from "@/components/AppImage/AppImage"
 
 import { NavigatorRoundVotesModal } from "./modals/NavigatorRoundVotesModal"
 
-const PREVIEW_ROUNDS = 3
+const PREVIEW_ROUNDS = 5
 
 export type RoundVote = {
   roundId: string
@@ -119,7 +119,7 @@ export const NavigatorRoundVotesCard = ({ address }: Props) => {
                 size="sm"
                 fontWeight="semibold"
                 onClick={() => setVisibleCount(prev => prev + PREVIEW_ROUNDS)}>
-                {t("View more")}
+                {t("Show more")}
               </Button>
             )}
           </VStack>

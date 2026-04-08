@@ -8,6 +8,7 @@ import { LuShield } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
@@ -41,6 +42,7 @@ export const NavigatorDetailContent = () => {
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
+  const { data: isNavigator } = useIsNavigator()
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
 
@@ -85,6 +87,7 @@ export const NavigatorDetailContent = () => {
         isActive={isActive}
         isDelegatedHere={isDelegatedHere}
         isConnected={!!account?.address}
+        isNavigator={!!isNavigator}
         onDelegateClick={() => setIsDelegateOpen(true)}
         onManageClick={() => setIsManageOpen(true)}
       />

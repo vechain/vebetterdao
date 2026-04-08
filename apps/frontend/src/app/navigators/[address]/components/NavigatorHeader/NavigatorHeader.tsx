@@ -17,6 +17,7 @@ type Props = {
   isActive: boolean
   isDelegatedHere: boolean
   isConnected: boolean
+  isNavigator: boolean
   onDelegateClick: () => void
   onManageClick: () => void
 }
@@ -31,6 +32,7 @@ export const NavigatorHeader = ({
   isActive,
   isDelegatedHere,
   isConnected,
+  isNavigator,
   onDelegateClick,
   onManageClick,
 }: Props) => {
@@ -52,7 +54,7 @@ export const NavigatorHeader = ({
                   {t("Manage Delegation")}
                 </Button>
               )}
-              {isConnected && isActive && !isDelegatedHere && (
+              {isConnected && isActive && !isDelegatedHere && !isNavigator && (
                 <Button variant="primary" size="sm" onClick={onDelegateClick}>
                   {t("Delegate")}
                 </Button>
