@@ -290,9 +290,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
           <Text textStyle="sm" fontWeight="semibold">
             {t("How long should it run?")}
           </Text>
-          <Text textStyle="xs" color="text.subtle">
-            {t("Duration: {{count}} rounds", { count: duration })}
-          </Text>
         </VStack>
       ),
       answer: (
@@ -647,13 +644,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         <VStack align="stretch" gap="2">
           <Text textStyle="sm" fontWeight="semibold">
             {t("Who can join?")}
-          </Text>
-          <Text textStyle="xs" color="text.subtle">
-            {t(
-              form.visibility === ChallengeVisibility.Public
-                ? "Public challenge visibility description"
-                : "Private challenge visibility description",
-            )}
           </Text>
         </VStack>
       ),

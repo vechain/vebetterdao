@@ -209,6 +209,23 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     return ChallengeSettlementLogic.claimChallengeRefund(challengeId);
   }
 
+  /// @notice Withdraws B3TR from the contract.
+  /// @dev Emergency admin function that can drain any B3TR held by the contract.
+  /// @param to Recipient of the withdrawn B3TR.
+  /// @param amount Amount of B3TR to withdraw.
+  function withdraw(address to, uint256 amount) external nonReentrant onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    if (to == address(0)) revert ZeroAddress();
+    if (amount == 0) revert InvalidAmount();
+
+    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
+    uint256 available = $.b3tr.balanceOf(address(this));
+    if (amount > available) revert InsufficientWithdrawableFunds(available, amount);
+
+    if (!$.b3tr.transfer(to, amount)) revert TransferFailed();
+
+    emit AdminWithdrawal(msg.sender, to, amount);
+  }
+
   function setB3TRAddress(address newAddress) external nonReentrant onlyRoleOrAdmin(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setB3TRAddress(newAddress);
   }

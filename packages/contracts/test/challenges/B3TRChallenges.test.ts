@@ -606,6 +606,28 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await challenges.maxParticipants()).to.equal(50n)
   })
 
+  it("allows admin to withdraw all funds from a pending challenge", async function () {
+    const { admin, alice, b3tr, roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges)
+
+    await expect(challenges.withdraw(alice.address, STAKE_AMOUNT))
+      .to.emit(challenges, "AdminWithdrawal")
+      .withArgs(admin.address, alice.address, STAKE_AMOUNT)
+
+    expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(0n)
+    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + STAKE_AMOUNT)
+  })
+
+  it("reverts withdraw when amount exceeds contract balance", async function () {
+    const { admin, challenges } = await deployFixture()
+
+    await expect(challenges.withdraw(admin.address, 1))
+      .to.be.revertedWithCustomError(challenges, "InsufficientWithdrawableFunds")
+      .withArgs(0, 1)
+  })
+
   it("reverts settings setters with zero value", async function () {
     const { challenges } = await deployFixture()
 
@@ -622,6 +644,10 @@ describe("B3TRChallenges - @shard9a", function () {
       "ChallengesUnauthorizedUser",
     )
     await expect(challenges.connect(alice).setMaxChallengeDuration(10)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengesUnauthorizedUser",
+    )
+    await expect(challenges.connect(alice).withdraw(alice.address, 1)).to.be.revertedWithCustomError(
       challenges,
       "ChallengesUnauthorizedUser",
     )

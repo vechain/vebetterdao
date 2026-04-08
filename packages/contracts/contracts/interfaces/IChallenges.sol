@@ -30,6 +30,7 @@ interface IChallenges {
   error AlreadyRefunded(uint256 challengeId, address account);
   error AlreadyInvited(uint256 challengeId, address invitee);
   error TransferFailed();
+  error InsufficientWithdrawableFunds(uint256 available, uint256 requested);
   error ChallengesUnauthorizedUser(address user);
 
   event B3TRAddressUpdated(address indexed oldAddress, address indexed newAddress);
@@ -39,6 +40,7 @@ interface IChallenges {
   event MaxChallengeDurationUpdated(uint256 oldValue, uint256 newValue);
   event MaxSelectedAppsUpdated(uint256 oldValue, uint256 newValue);
   event MaxParticipantsUpdated(uint256 oldValue, uint256 newValue);
+  event AdminWithdrawal(address indexed admin, address indexed recipient, uint256 amount);
 
   function initialize(
     ChallengeTypes.InitializationData calldata data,
@@ -95,6 +97,8 @@ interface IChallenges {
   function claimChallengePayout(uint256 challengeId) external returns (uint256);
 
   function claimChallengeRefund(uint256 challengeId) external returns (uint256);
+
+  function withdraw(address to, uint256 amount) external;
 
   function setB3TRAddress(address newAddress) external;
 
