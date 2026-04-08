@@ -1,9 +1,9 @@
-import { Badge, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { LuArrowDownLeft, LuArrowUpRight, LuExternalLink } from "react-icons/lu"
+import { LuArrowDownLeft, LuArrowRight, LuArrowUpRight, LuExternalLink } from "react-icons/lu"
 
-import { useNavigatorDelegations } from "@/api/indexer/navigators/useNavigatorDelegations"
+import { DelegationEventFormatted, useNavigatorDelegations } from "@/api/indexer/navigators/useNavigatorDelegations"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { BaseModal } from "@/components/BaseModal"
 import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
@@ -12,21 +12,21 @@ import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 const formatter = getCompactFormatter(2)
 
-const eventLabel = {
-  B3TR_DelegationCreated: { labelKey: "Delegated", badge: "New", badgeColor: "green" },
-  B3TR_DelegationUpdated: { labelKey: "Updated", badge: null, badgeColor: null },
-  B3TR_DelegationRemoved: { labelKey: "Removed", badge: null, badgeColor: null },
-} as const
+const getEventLabel = (eventType: DelegationEventFormatted["eventType"], isPositive: boolean) => {
+  if (eventType === "B3TR_DelegationCreated") return "Created new delegation"
+  if (eventType === "B3TR_DelegationRemoved") return "Exited delegation"
+  return isPositive ? "Increased delegation" : "Decreased delegation"
+}
 
 type Props = {
-  address: string
+  address?: string
   isOpen: boolean
   onClose: () => void
 }
 
 export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { data, isLoading } = useNavigatorDelegations({ navigator: address })
+  const { data, isLoading } = useNavigatorDelegations(address ? { navigator: address } : {})
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} ariaTitle={t("Delegation History")} showCloseButton>
@@ -58,9 +58,9 @@ export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) =
         {!isLoading && data && data.length > 0 && (
           <VStack gap={0} align="stretch">
             {data.map((event, i) => {
-              const label = eventLabel[event.eventType]
               const deltaNum = Number(event.deltaFormatted)
               const isPositive = deltaNum >= 0
+              const label = getEventLabel(event.eventType, isPositive)
 
               return (
                 <HStack
@@ -85,18 +85,17 @@ export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) =
                       {isPositive ? <LuArrowDownLeft size={16} /> : <LuArrowUpRight size={16} />}
                     </HStack>
                     <VStack gap={0} align="start">
-                      <HStack gap={2}>
-                        <Text textStyle="sm" fontWeight="semibold">
-                          {t(label.labelKey)}
-                        </Text>
-                        {label.badge && (
-                          <Badge size="xs" colorPalette={label.badgeColor}>
-                            {t(label.badge)}
-                          </Badge>
-                        )}
-                      </HStack>
-                      <HStack gap={2}>
+                      <Text textStyle="sm" fontWeight="semibold">
+                        {t(label)}
+                      </Text>
+                      <HStack gap={2} flexWrap="wrap">
                         <AddressWithProfilePicture address={event.citizen} />
+                        {!address && (
+                          <>
+                            <LuArrowRight size={12} />
+                            <AddressWithProfilePicture address={event.navigator} />
+                          </>
+                        )}
                         <Link href={getExplorerTxLink(event.txId)} target="_blank" rel="noopener noreferrer">
                           <LuExternalLink size={10} />
                         </Link>

@@ -10,6 +10,7 @@ const abi = NavigatorRegistry__factory.abi
 
 export type StakeHistoryEntry = {
   type: "registered" | "deposit" | "withdrawal"
+  navigator: string
   amount: string
   newTotal: string
   blockNumber: number
@@ -17,17 +18,19 @@ export type StakeHistoryEntry = {
   timestamp: number
 }
 
-export const useNavigatorStakeHistory = (navigator: string) => {
+export const useNavigatorStakeHistory = (navigator?: string) => {
+  const filterParams = navigator ? { navigator: navigator as `0x${string}` } : undefined
+
   const registeredEvents = useEvents({
     contractAddress: address,
     abi,
     eventName: "NavigatorRegistered",
-    filterParams: { navigator: navigator as `0x${string}` },
-    enabled: !!navigator,
+    filterParams,
     order: "desc",
     select: events =>
       events.map(({ decodedData, meta }) => ({
         type: "registered" as const,
+        navigator: String(decodedData.args.navigator ?? ""),
         amount: formatEther(decodedData.args.stakeAmount ?? 0n),
         newTotal: formatEther(decodedData.args.stakeAmount ?? 0n),
         blockNumber: meta.blockNumber,
@@ -40,12 +43,12 @@ export const useNavigatorStakeHistory = (navigator: string) => {
     contractAddress: address,
     abi,
     eventName: "StakeAdded",
-    filterParams: { navigator: navigator as `0x${string}` },
-    enabled: !!navigator,
+    filterParams,
     order: "desc",
     select: events =>
       events.map(({ decodedData, meta }) => ({
         type: "deposit" as const,
+        navigator: String(decodedData.args.navigator ?? ""),
         amount: formatEther(decodedData.args.amount ?? 0n),
         newTotal: formatEther(decodedData.args.newTotal ?? 0n),
         blockNumber: meta.blockNumber,
@@ -58,12 +61,12 @@ export const useNavigatorStakeHistory = (navigator: string) => {
     contractAddress: address,
     abi,
     eventName: "StakeWithdrawn",
-    filterParams: { navigator: navigator as `0x${string}` },
-    enabled: !!navigator,
+    filterParams,
     order: "desc",
     select: events =>
       events.map(({ decodedData, meta }) => ({
         type: "withdrawal" as const,
+        navigator: String(decodedData.args.navigator ?? ""),
         amount: formatEther(decodedData.args.amount ?? 0n),
         newTotal: formatEther(decodedData.args.remaining ?? 0n),
         blockNumber: meta.blockNumber,

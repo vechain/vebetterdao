@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { LuArrowDownLeft, LuArrowUpRight, LuExternalLink, LuShield } from "react-icons/lu"
 
 import { useNavigatorStakeHistory } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
+import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { BaseModal } from "@/components/BaseModal"
 import { EmptyState } from "@/components/ui/empty-state"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
@@ -11,7 +12,7 @@ import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 const formatter = getCompactFormatter(2)
 
 type Props = {
-  address: string
+  address?: string
   isOpen: boolean
   onClose: () => void
 }
@@ -88,6 +89,7 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
                           </Badge>
                         )}
                       </HStack>
+                      {!address && entry.navigator && <AddressWithProfilePicture address={entry.navigator} />}
                       <HStack gap={1}>
                         <Text textStyle="xs" color="fg.muted">
                           {new Date(entry.timestamp * 1000).toLocaleDateString("en-US", {

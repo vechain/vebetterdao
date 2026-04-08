@@ -41,7 +41,7 @@ export const useNavigatorDelegations = (filters: { navigator?: string; citizen?:
       if (!res.ok) throw new Error(`Indexer error: ${res.status}`)
       return res.json()
     },
-    enabled: !!(filters.navigator || filters.citizen),
+    enabled: true,
     staleTime: 30_000,
     select: (data): DelegationEventFormatted[] =>
       data.data.map(e => ({
