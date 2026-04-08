@@ -69,8 +69,8 @@ export const NavigatorRoundVotesCard = ({ address }: Props) => {
     <>
       <Card.Root w="full" variant="primary">
         <Card.Body>
-          <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold" mb={{ base: 2, md: 4 }}>
-            {t("Allocation Rounds")}
+          <Text textStyle={{ base: "sm", md: "md" }} fontWeight="bold" mb={{ base: 2, md: 4 }}>
+            {t("Voted apps")}
           </Text>
 
           <VStack gap={3} w="full" align="stretch">

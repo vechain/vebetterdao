@@ -1,4 +1,4 @@
-import { Heading, Text, VStack } from "@chakra-ui/react"
+import { Text, VStack } from "@chakra-ui/react"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams } from "next/navigation"
@@ -94,9 +94,6 @@ export const NavigatorDetailContent = () => {
         onDelegatedClick={() => setIsDelegationsOpen(true)}
       />
 
-      <Heading size={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
-        {t("Activity")}
-      </Heading>
       <NavigatorGovernanceActivity address={address} />
 
       <DelegateModal isOpen={isDelegateOpen} onClose={() => setIsDelegateOpen(false)} navigator={nav} />
