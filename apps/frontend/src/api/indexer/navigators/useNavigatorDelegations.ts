@@ -1,52 +1,31 @@
-import { getConfig } from "@repo/config"
-import { useQuery } from "@tanstack/react-query"
 import { formatEther } from "ethers"
 
-export type DelegationEvent = {
-  txId: string
-  navigator: string
-  citizen: string
-  eventType: "B3TR_DelegationCreated" | "B3TR_DelegationUpdated" | "B3TR_DelegationRemoved"
-  amount: string
-  delta: string
-  blockTimestamp: number
-}
+import { indexerQueryClient } from "../api"
+import { paths } from "../schema"
 
+type DelegationsQuery = paths["/api/v1/b3tr/navigators/delegations"]["get"]
+type DelegationsQueryParams = NonNullable<DelegationsQuery["parameters"]["query"]>
+type DelegationsResponse = DelegationsQuery["responses"]["200"]["content"]["*/*"]
+
+export type DelegationEvent = DelegationsResponse["data"][number]
 export type DelegationEventFormatted = DelegationEvent & {
   amountFormatted: string
   deltaFormatted: string
 }
 
-type PaginatedResponse = {
-  data: DelegationEvent[]
-  pagination: {
-    hasNext: boolean
-    cursor: string | null
-  }
-}
-
-const baseUrl = getConfig().indexerUrl?.replace("/api/v1", "") || "http://localhost:8080"
-
-export const useNavigatorDelegations = (filters: { navigator?: string; citizen?: string }, size = 50) =>
-  useQuery({
-    queryKey: ["indexer", "navigators", "delegations", filters.navigator, filters.citizen, size],
-    queryFn: async (): Promise<PaginatedResponse> => {
-      const params = new URLSearchParams()
-      if (filters.navigator) params.set("navigator", filters.navigator)
-      if (filters.citizen) params.set("citizen", filters.citizen)
-      params.set("size", size.toString())
-      params.set("direction", "DESC")
-
-      const res = await fetch(`${baseUrl}/api/v1/b3tr/navigators/delegations?${params.toString()}`)
-      if (!res.ok) throw new Error(`Indexer error: ${res.status}`)
-      return res.json()
+export const useNavigatorDelegations = (filters: Pick<DelegationsQueryParams, "navigator" | "citizen">, size = 50) =>
+  indexerQueryClient.useQuery(
+    "get",
+    "/api/v1/b3tr/navigators/delegations",
+    {
+      params: { query: { ...filters, size, direction: "DESC" } },
     },
-    enabled: true,
-    staleTime: 30_000,
-    select: (data): DelegationEventFormatted[] =>
-      data.data.map(e => ({
-        ...e,
-        amountFormatted: formatEther(e.amount),
-        deltaFormatted: formatEther(e.delta),
-      })),
-  })
+    {
+      select: (data): DelegationEventFormatted[] =>
+        data.data.map(e => ({
+          ...e,
+          amountFormatted: formatEther(e.amount ?? 0),
+          deltaFormatted: formatEther(e.delta ?? 0),
+        })),
+    },
+  )

@@ -3,17 +3,19 @@ import { isValidAddress } from "@vechain/vechain-kit/utils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { NavigatorOrderBy, SortDirection } from "@/api/indexer/navigators/useNavigators"
+import { NavigatorEntity, NavigatorOrderBy, SortDirection } from "@/api/indexer/navigators/useNavigators"
 import { SearchField } from "@/components/SearchField/SearchField"
 import { useDebounce } from "@/hooks/useDebounce"
 import { useGetAddressFromVetDomains } from "@/hooks/useGetVetDomains"
 
 type StatusFilter = "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
 
+type NavigatorStatus = NavigatorEntity["status"]
+
 type NavigatorFilterValues = {
   orderBy: NavigatorOrderBy
   direction: SortDirection
-  status: string[]
+  status: NavigatorStatus[]
   navigator?: string
 }
 
@@ -26,7 +28,7 @@ type Props = {
   onStatusFilterChange: (value: StatusFilter) => void
 }
 
-const STATUS_TO_API: Record<StatusFilter, string[]> = {
+const STATUS_TO_API: Record<StatusFilter, NavigatorStatus[]> = {
   all: [],
   ACTIVE: ["ACTIVE"],
   EXITING: ["EXITING"],
