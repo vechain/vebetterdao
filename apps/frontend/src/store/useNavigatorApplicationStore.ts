@@ -23,9 +23,10 @@ export type NavigatorFormData = {
 
   // Step 4: Stake
   stakeAmount: string
-  ackVotingSlash: boolean
-  ackReportSlash: boolean
-  ackDisclosureSlash: boolean
+  acceptedVotingPenalty: boolean
+  acceptedReportPenalty: boolean
+  acceptedDisclosurePenalty: boolean
+  acceptedDelegationExit: boolean
 }
 
 type NavigatorApplicationStore = {
@@ -51,9 +52,10 @@ const initialData: NavigatorFormData = {
   websiteUrl: "",
   otherLinks: "",
   stakeAmount: "",
-  ackVotingSlash: false,
-  ackReportSlash: false,
-  ackDisclosureSlash: false,
+  acceptedVotingPenalty: false,
+  acceptedReportPenalty: false,
+  acceptedDisclosurePenalty: false,
+  acceptedDelegationExit: false,
 }
 
 export const useNavigatorApplicationStore = create<NavigatorApplicationStore>()(

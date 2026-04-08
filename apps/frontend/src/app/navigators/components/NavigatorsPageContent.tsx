@@ -4,7 +4,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuPlus, LuShield } from "react-icons/lu"
+import { LuShield } from "react-icons/lu"
 
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted, NavigatorOrderBy, useNavigators } from "@/api/indexer/navigators/useNavigators"
@@ -75,7 +75,6 @@ export const NavigatorsPageContent = () => {
         {account?.address && !isNavigator && (
           <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }}>
             <Button onClick={() => router.push("/navigators/become")} variant="primary" size="md">
-              <LuPlus />
               {t("Become a Navigator")}
             </Button>
           </HStack>
@@ -112,7 +111,7 @@ export const NavigatorsPageContent = () => {
         </VStack>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4} w="full">
-          {!hasActiveFilters && <BecomeNavigatorCTA />}
+          {!hasActiveFilters && !isNavigator && <BecomeNavigatorCTA />}
           {navigators.map(nav => (
             <NavigatorCard key={nav.address} navigator={nav} />
           ))}

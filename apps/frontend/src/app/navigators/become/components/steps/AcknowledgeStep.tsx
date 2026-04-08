@@ -1,11 +1,15 @@
 import { Card, Checkbox, Heading, Text, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 
 export const AcknowledgeStep = () => {
   const { t } = useTranslation()
   const { data, setData } = useNavigatorApplicationStore()
+  const { account } = useWallet()
+  const { data: isDelegated } = useIsDelegated(account?.address)
 
   return (
     <VStack gap={5} align="stretch">
@@ -19,9 +23,27 @@ export const AcknowledgeStep = () => {
       </VStack>
 
       <VStack gap={3} align="stretch">
+        {isDelegated && (
+          <Checkbox.Root
+            checked={data.acceptedDelegationExit}
+            onCheckedChange={e => setData({ acceptedDelegationExit: !!e.checked })}
+            colorPalette="orange"
+            alignItems="flex-start"
+            gap={3}>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control mt="1" />
+            <Checkbox.Label>
+              <Text textStyle="sm">
+                {t(
+                  "I understand that I am currently delegating to a navigator, and by registering I will automatically exit my current delegation.",
+                )}
+              </Text>
+            </Checkbox.Label>
+          </Checkbox.Root>
+        )}
         <Checkbox.Root
-          checked={data.ackVotingSlash}
-          onCheckedChange={e => setData({ ackVotingSlash: !!e.checked })}
+          checked={data.acceptedVotingPenalty}
+          onCheckedChange={e => setData({ acceptedVotingPenalty: !!e.checked })}
           colorPalette="blue"
           alignItems="flex-start"
           gap={3}>
@@ -37,8 +59,8 @@ export const AcknowledgeStep = () => {
         </Checkbox.Root>
 
         <Checkbox.Root
-          checked={data.ackReportSlash}
-          onCheckedChange={e => setData({ ackReportSlash: !!e.checked })}
+          checked={data.acceptedReportPenalty}
+          onCheckedChange={e => setData({ acceptedReportPenalty: !!e.checked })}
           colorPalette="blue"
           alignItems="flex-start"
           gap={3}>
@@ -54,8 +76,8 @@ export const AcknowledgeStep = () => {
         </Checkbox.Root>
 
         <Checkbox.Root
-          checked={data.ackDisclosureSlash}
-          onCheckedChange={e => setData({ ackDisclosureSlash: !!e.checked })}
+          checked={data.acceptedDisclosurePenalty}
+          onCheckedChange={e => setData({ acceptedDisclosurePenalty: !!e.checked })}
           colorPalette="blue"
           alignItems="flex-start"
           gap={3}>

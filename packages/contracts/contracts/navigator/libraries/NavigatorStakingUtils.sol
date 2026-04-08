@@ -39,6 +39,9 @@ library NavigatorStakingUtils {
   /// @notice Thrown when caller is already a registered navigator
   error AlreadyRegistered(address navigator);
 
+  /// @notice Thrown when caller is currently delegating to a navigator
+  error DelegatorCannotRegister(address delegator, address currentNavigator);
+
   /// @notice Thrown when caller is not a registered navigator
   error NotRegistered(address navigator);
 
@@ -63,6 +66,13 @@ library NavigatorStakingUtils {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
 
     if ($.isRegistered[navigator]) revert AlreadyRegistered(navigator);
+
+    // Delegators must exit their delegation before becoming a navigator
+    address currentNav = $.citizenToNavigator[navigator];
+    if (currentNav != address(0) && !$.isDeactivated[currentNav] && $.exitAnnouncedRound[currentNav] == 0) {
+      revert DelegatorCannotRegister(navigator, currentNav);
+    }
+
     if (amount < $.minStake) revert StakeBelowMinimum(amount, $.minStake);
 
     // Check max stake (% of VOT3 supply, enforced at deposit only)

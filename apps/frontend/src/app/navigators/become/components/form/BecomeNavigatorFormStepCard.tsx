@@ -7,6 +7,7 @@ import { LuShield } from "react-icons/lu"
 
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useRegisterNavigator } from "@/hooks/navigator/useRegisterNavigator"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
@@ -44,6 +45,7 @@ export const BecomeNavigatorFormStepCard = () => {
   const clearData = useNavigatorApplicationStore(s => s.clearData)
   const { data: minStake } = useGetMinStake()
   const { data: maxStake } = useGetMaxStake()
+  const { data: isDelegated } = useIsDelegated(account?.address)
   const [isUploading, setIsUploading] = useState(false)
 
   const handleSuccess = useCallback(() => {
@@ -71,12 +73,16 @@ export const BecomeNavigatorFormStepCard = () => {
         const maxNum = maxStake ? Number(maxStake.scaled) : Infinity
         return stakeNum >= minNum && stakeNum <= maxNum && stakeNum > 0
       }
-      case 3:
-        return data.ackVotingSlash && data.ackReportSlash && data.ackDisclosureSlash
+      case 3: {
+        const delegationAck = isDelegated ? data.acceptedDelegationExit : true
+        return (
+          data.acceptedVotingPenalty && data.acceptedReportPenalty && data.acceptedDisclosurePenalty && delegationAck
+        )
+      }
       default:
         return false
     }
-  }, [currentStep, data, minStake, maxStake])
+  }, [currentStep, data, minStake, maxStake, isDelegated])
 
   const steps: NavigatorStep[] = useMemo(
     () => [

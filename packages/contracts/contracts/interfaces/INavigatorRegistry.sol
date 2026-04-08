@@ -20,6 +20,9 @@ interface INavigatorRegistry {
   /// @notice Thrown when caller is already a registered navigator
   error AlreadyRegistered(address navigator);
 
+  /// @notice Thrown when caller is currently delegating to a navigator
+  error DelegatorCannotRegister(address delegator, address currentNavigator);
+
   /// @notice Thrown when caller is not a registered navigator
   error NotRegistered(address navigator);
 

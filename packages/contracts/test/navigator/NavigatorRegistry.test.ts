@@ -162,6 +162,61 @@ describe("NavigatorRegistry - @shard19a", function () {
           navigatorRegistry.connect(navigator).register(STAKE_AMOUNT, METADATA_URI),
         ).to.be.revertedWithCustomError(navigatorRegistry, "AlreadyRegistered")
       })
+
+      it("should revert with DelegatorCannotRegister when caller is currently delegating", async function () {
+        const existingNavigator = otherAccounts[10]
+        const delegator = otherAccounts[11]
+
+        await registerNavigator(existingNavigator)
+
+        // delegator gets VOT3 and delegates to the existing navigator
+        await getVot3Tokens(delegator, "1000")
+        await navigatorRegistry.connect(delegator).delegate(existingNavigator.address, ethers.parseEther("500"))
+
+        // delegator tries to register as a navigator while still delegating
+        await fundAndApprove(delegator, STAKE_AMOUNT)
+        await expect(
+          navigatorRegistry.connect(delegator).register(STAKE_AMOUNT, METADATA_URI),
+        ).to.be.revertedWithCustomError(navigatorRegistry, "DelegatorCannotRegister")
+      })
+
+      it("should allow registration after delegator undelegates", async function () {
+        const existingNavigator = otherAccounts[10]
+        const delegator = otherAccounts[11]
+
+        await registerNavigator(existingNavigator)
+
+        // delegator delegates then undelegates
+        await getVot3Tokens(delegator, "1000")
+        await navigatorRegistry.connect(delegator).delegate(existingNavigator.address, ethers.parseEther("500"))
+        await navigatorRegistry.connect(delegator).undelegate()
+
+        // Now registration should succeed
+        await fundAndApprove(delegator, STAKE_AMOUNT)
+        await navigatorRegistry.connect(delegator).register(STAKE_AMOUNT, METADATA_URI)
+
+        expect(await navigatorRegistry.isNavigator(delegator.address)).to.be.true
+      })
+
+      it("should allow registration when previous navigator was deactivated (stale delegation)", async function () {
+        const existingNavigator = otherAccounts[10]
+        const delegator = otherAccounts[11]
+
+        await registerNavigator(existingNavigator)
+
+        // delegator delegates
+        await getVot3Tokens(delegator, "1000")
+        await navigatorRegistry.connect(delegator).delegate(existingNavigator.address, ethers.parseEther("500"))
+
+        // Governance deactivates the navigator — delegation becomes stale
+        await navigatorRegistry.connect(owner).deactivateNavigator(existingNavigator.address, 0, false)
+
+        // Delegator should be able to register since their navigator is dead
+        await fundAndApprove(delegator, STAKE_AMOUNT)
+        await navigatorRegistry.connect(delegator).register(STAKE_AMOUNT, METADATA_URI)
+
+        expect(await navigatorRegistry.isNavigator(delegator.address)).to.be.true
+      })
     })
 
     describe("addStake()", function () {

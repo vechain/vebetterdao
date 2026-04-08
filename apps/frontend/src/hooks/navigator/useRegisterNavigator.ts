@@ -1,10 +1,11 @@
 import { getConfig } from "@repo/config"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { useWallet } from "@vechain/vechain-kit"
+import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { buildClause } from "@/utils/buildClause"
 
 import { getIsNavigatorQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useIsNavigator"
@@ -26,27 +27,47 @@ type Props = {
 
 export const useRegisterNavigator = ({ onSuccess }: Props) => {
   const { account } = useWallet()
+  const { data: isDelegated } = useIsDelegated(account?.address)
 
-  const clauseBuilder = useCallback((params: RegisterParams) => {
-    const amountWei = ethers.parseEther(params.stakeAmount)
+  const clauseBuilder = useCallback(
+    (params: RegisterParams) => {
+      const amountWei = ethers.parseEther(params.stakeAmount)
 
-    return [
-      buildClause({
-        to: getConfig().b3trContractAddress,
-        contractInterface: B3trInterface,
-        method: "approve",
-        args: [navigatorRegistryAddress, amountWei],
-        comment: `Approve ${params.stakeAmount} B3TR to NavigatorRegistry`,
-      }),
-      buildClause({
-        to: navigatorRegistryAddress,
-        contractInterface: NavigatorRegistryInterface,
-        method: "register",
-        args: [amountWei, params.metadataURI],
-        comment: `Register as navigator with ${params.stakeAmount} B3TR stake`,
-      }),
-    ]
-  }, [])
+      const clauses: EnhancedClause[] = []
+
+      if (isDelegated) {
+        clauses.push(
+          buildClause({
+            to: navigatorRegistryAddress,
+            contractInterface: NavigatorRegistryInterface,
+            method: "undelegate",
+            args: [],
+            comment: "Exit current delegation before registering as navigator",
+          }),
+        )
+      }
+
+      clauses.push(
+        buildClause({
+          to: getConfig().b3trContractAddress,
+          contractInterface: B3trInterface,
+          method: "approve",
+          args: [navigatorRegistryAddress, amountWei],
+          comment: `Approve ${params.stakeAmount} B3TR to NavigatorRegistry`,
+        }),
+        buildClause({
+          to: navigatorRegistryAddress,
+          contractInterface: NavigatorRegistryInterface,
+          method: "register",
+          args: [amountWei, params.metadataURI],
+          comment: `Register as navigator with ${params.stakeAmount} B3TR stake`,
+        }),
+      )
+
+      return clauses
+    },
+    [isDelegated],
+  )
 
   const refetchQueryKeys = useMemo(
     () => [getIsNavigatorQueryKey(account?.address ?? ""), getB3trBalanceQueryKey(account?.address ?? "")],
