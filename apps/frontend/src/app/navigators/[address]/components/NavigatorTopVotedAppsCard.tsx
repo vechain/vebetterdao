@@ -29,7 +29,7 @@ export const NavigatorTopVotedAppsCard = ({ address }: Props) => {
           <Card.Body>
             <HStack w="full" justify="space-between" align="center" mb={{ base: 2, md: 4 }}>
               <HStack gap={2} align="center">
-                <Text textStyle={{ base: "sm", md: "md" }} fontWeight="bold">
+                <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
                   {t("Most voted apps")}
                 </Text>
                 <Badge variant="neutral" size="sm" rounded="sm">

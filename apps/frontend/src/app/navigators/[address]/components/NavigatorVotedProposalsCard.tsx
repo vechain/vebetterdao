@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Heading, HStack, Icon, VStack } from "@chakra-ui/react"
+import { Badge, Button, Card, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -10,7 +10,7 @@ import {
 } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useUserVotedProposals } from "@/api/contracts/governance/hooks/useUserVotedProposals"
 import { ProposalBox } from "@/app/profile/components/ProfileGovernance/components/ProposalBox"
-import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import VoteIcon from "@/components/Icons/svg/vote.svg"
 import { EmptyState } from "@/components/ui/empty-state"
 import { VoteType } from "@/types/voting"
 
@@ -51,9 +51,9 @@ export const NavigatorVotedProposalsCard = ({ address }: Props) => {
           <Card.Body>
             <HStack w="full" justify="space-between" align="center" mb={{ base: 2, md: 4 }}>
               <HStack gap={2} align="center">
-                <Heading size={{ base: "sm", md: "md" }} fontWeight="bold">
+                <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
                   {t("Voted proposals")}
-                </Heading>
+                </Text>
                 <Badge variant="neutral" size="sm" rounded="sm">
                   {votedProposalsWithDescription.length}
                 </Badge>
@@ -104,7 +104,7 @@ export const NavigatorVotedProposalsCard = ({ address }: Props) => {
           })}
           icon={
             <Icon boxSize={20} color="actions.secondary.text-lighter">
-              <HandPlantIcon color="rgba(117, 117, 117, 1)" />
+              <VoteIcon color="rgba(117, 117, 117, 1)" />
             </Icon>
           }
         />

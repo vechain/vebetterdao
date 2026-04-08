@@ -1,9 +1,12 @@
-import { Badge, Button, Card, Heading, HStack, VStack } from "@chakra-ui/react"
+import { Badge, Button, Card, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
 import { ProposalBox } from "@/app/profile/components/ProfileGovernance/components/ProposalBox"
+import ProposalIcon from "@/components/Icons/svg/proposal.svg"
+import { EmptyState } from "@/components/ui/empty-state"
 import { useUserCreatedProposal } from "@/hooks/proposals/common/useUserCreatedProposal"
 
 import { NavigatorProposalsModal } from "./modals/NavigatorProposalsModal"
@@ -23,7 +26,25 @@ export const NavigatorCreatedProposalsCard = ({ address }: Props) => {
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  if (!createdProposals || createdProposals.length === 0) return null
+  if (!createdProposals || createdProposals.length === 0) {
+    return (
+      <Card.Root variant="primary" w="full" h="full">
+        <Card.Body asChild>
+          <EmptyState
+            title={t("Created proposals")}
+            description={t("{{subject}} created proposals will appear here.", {
+              subject: `${humanAddress(address, 4, 3)}`,
+            })}
+            icon={
+              <Icon boxSize={20} color="actions.secondary.text-lighter">
+                <ProposalIcon color="rgba(117, 117, 117, 1)" />
+              </Icon>
+            }
+          />
+        </Card.Body>
+      </Card.Root>
+    )
+  }
 
   return (
     <>
@@ -31,9 +52,9 @@ export const NavigatorCreatedProposalsCard = ({ address }: Props) => {
         <Card.Body>
           <HStack w="full" justify="space-between" align="center" mb={{ base: 2, md: 4 }}>
             <HStack gap={2} align="center">
-              <Heading size={{ base: "sm", md: "md" }} fontWeight="bold">
+              <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
                 {t("Created proposals")}
-              </Heading>
+              </Text>
               <Badge variant="neutral" size="sm" rounded="sm">
                 {createdProposals.length}
               </Badge>

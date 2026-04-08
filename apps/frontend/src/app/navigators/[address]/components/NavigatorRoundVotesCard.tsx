@@ -1,6 +1,7 @@
 "use client"
 
-import { Button, Card, HStack, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { ethers } from "ethers"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -8,6 +9,8 @@ import { useTranslation } from "react-i18next"
 import { useUserVotesInAllRounds } from "@/api/contracts/xApps/hooks/useUserVotesInAllRounds"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AppImage } from "@/components/AppImage/AppImage"
+import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import { EmptyState } from "@/components/ui/empty-state"
 
 import { NavigatorRoundVotesModal } from "./modals/NavigatorRoundVotesModal"
 
@@ -63,13 +66,31 @@ export const NavigatorRoundVotesCard = ({ address }: Props) => {
   const visibleRounds = roundVotes.slice(0, visibleCount)
   const hasMore = visibleCount < roundVotes.length
 
-  if (roundVotes.length === 0) return null
+  if (roundVotes.length === 0) {
+    return (
+      <Card.Root variant="primary" w="full" h="full">
+        <Card.Body asChild>
+          <EmptyState
+            title={t("Voted apps")}
+            description={t("{{subject}} voted apps will appear here.", {
+              subject: `${humanAddress(address, 4, 3)}`,
+            })}
+            icon={
+              <Icon boxSize={20} color="actions.secondary.text-lighter">
+                <HandPlantIcon color="rgba(117, 117, 117, 1)" />
+              </Icon>
+            }
+          />
+        </Card.Body>
+      </Card.Root>
+    )
+  }
 
   return (
     <>
       <Card.Root w="full" variant="primary">
         <Card.Body>
-          <Text textStyle={{ base: "sm", md: "md" }} fontWeight="bold" mb={{ base: 2, md: 4 }}>
+          <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={{ base: 2, md: 4 }}>
             {t("Voted apps")}
           </Text>
 
