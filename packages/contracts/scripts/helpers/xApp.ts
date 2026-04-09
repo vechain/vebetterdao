@@ -6,6 +6,7 @@ import {
   XAllocationVoting__factory,
   X2EarnApps,
   Stargate,
+  NodeManagementV3,
 } from "../../typechain-types"
 import { type TransactionClause, Clause, Address, ABIContract } from "@vechain/sdk-core"
 import { TransactionUtils } from "@repo/utils"
@@ -26,6 +27,11 @@ export type App = {
   name: string
   metadataURI: string
   categories?: string[]
+}
+
+type EndorserNodes = {
+  signer: HardhatEthersSigner
+  nodeIds: bigint[]
 }
 
 export const registerXDapps = async (contractAddress: string, accounts: TestPk[], apps: App[]) => {
@@ -72,8 +78,7 @@ export const endorseXApps = async (
   const stargateNFTAddress = await stargateMock.stargateNFT()
   const stargateNFT = await ethers.getContractAt("StargateNFT", stargateNFTAddress)
 
-  // Build a map of endorser -> nodeIds
-  const endorserNodes: { signer: HardhatEthersSigner; nodeIds: bigint[] }[] = []
+  const endorserNodes: EndorserNodes[] = []
   for (const endorser of endorsers) {
     const nodeIds = await stargateNFT.idsOwnedBy(endorser.address)
     if (nodeIds.length > 0) {
@@ -81,9 +86,56 @@ export const endorseXApps = async (
     }
   }
 
+  await endorseAppsWithNodeIds(x2EarnApps, apps, threshold, maxPointsPerNode, endorserNodes)
+}
+
+export const endorseXAppsWithExistingNodes = async (
+  endorsers: HardhatEthersSigner[],
+  x2EarnApps: X2EarnApps,
+  apps: string[],
+  nodeManagement: NodeManagementV3,
+): Promise<void> => {
+  const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+
+  if (contractsConfig.X2EARN_NODE_COOLDOWN_PERIOD > 1) {
+    return console.warn("Endorsement cooldown period is greater than 1. Skipping endorsement.")
+  }
+
+  const maxPointsPerNode = Number(await x2EarnApps.maxPointsPerNodePerApp())
+  const threshold = Number(await x2EarnApps.endorsementScoreThreshold())
+
+  console.log(`\n========== Endorsing ${apps.length} x-apps ==========`)
+  console.log(`  Threshold: ${threshold} pts | Max per node per app: ${maxPointsPerNode} pts`)
+  console.log(`  Endorsers available: ${endorsers.length}`)
+
+  const endorserNodes: EndorserNodes[] = []
+  for (const endorser of endorsers) {
+    const userNodes = await nodeManagement.getUserNodes(endorser.address)
+    const nodeIds = userNodes.map(node => node.nodeId)
+    if (nodeIds.length > 0) {
+      endorserNodes.push({ signer: endorser, nodeIds })
+    }
+  }
+
+  await endorseAppsWithNodeIds(x2EarnApps, apps, threshold, maxPointsPerNode, endorserNodes)
+}
+
+const endorseAppsWithNodeIds = async (
+  x2EarnApps: X2EarnApps,
+  apps: string[],
+  threshold: number,
+  maxPointsPerNode: number,
+  endorserNodes: EndorserNodes[],
+) => {
+  const x2EarnAppsAddress = await x2EarnApps.getAddress()
   console.log(
     `  Endorsers with nodes: ${endorserNodes.length} (total nodes: ${endorserNodes.reduce((sum, e) => sum + e.nodeIds.length, 0)})`,
   )
+
+  if (endorserNodes.length === 0) {
+    console.log(`\n========== Endorsement complete ==========\n`)
+    return
+  }
 
   // For each app, stagger starting endorser to avoid exhausting the same
   // nodes' total budget (each MjolnirX node has 100 pts across ALL apps).
@@ -93,6 +145,7 @@ export const endorseXApps = async (
     const appName = appInfo.name || appId.slice(0, 10) + "..."
 
     const endorsements: string[] = []
+    let lastError: unknown = null
 
     for (let j = 0; j < endorserNodes.length; j++) {
       const endorser = endorserNodes[(appIdx + j) % endorserNodes.length]
@@ -107,14 +160,16 @@ export const endorseXApps = async (
         const points = Math.min(remaining, maxPointsPerNode)
 
         try {
-          await x2EarnApps.connect(endorser.signer).endorseApp(appId, nodeId, points)
+          const freshX2EarnApps = (await ethers.getContractAt("X2EarnApps", x2EarnAppsAddress)) as unknown as X2EarnApps
+          await freshX2EarnApps.connect(endorser.signer).endorseApp(appId, nodeId, points)
           const scoreAfter = Number(await x2EarnApps.getScore(appId))
           const applied = scoreAfter - scoreBefore
           if (applied > 0) {
             endorsements.push(`    node #${nodeId} (${endorser.signer.address.slice(0, 8)}...) -> ${applied} pts`)
           }
-        } catch {
+        } catch (error) {
           // Node may have hit its cap or budget, skip
+          lastError = error
         }
       }
     }
@@ -123,6 +178,9 @@ export const endorseXApps = async (
     const status = finalScore >= threshold ? "ENDORSED" : "PARTIAL"
     console.log(`\n  [${status}] ${appName} — ${finalScore}/${threshold} pts`)
     endorsements.forEach(line => console.log(line))
+    if (status === "PARTIAL" && lastError instanceof Error) {
+      console.log(`    last error: ${lastError.message}`)
+    }
   }
 
   console.log(`\n========== Endorsement complete ==========\n`)

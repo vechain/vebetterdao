@@ -1,9 +1,10 @@
-import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
+import { AppEnv, EnvConfig, getContractsConfig, shouldEndorseXApps } from "@repo/config/contracts"
 
 import {
   B3TR,
   B3TRGovernor,
   Emissions,
+  NodeManagementV3,
   Stargate,
   Treasury,
   VOT3,
@@ -18,7 +19,8 @@ import { getSeedAccounts, getTestKeys, SeedStrategy } from "../helpers/seedAccou
 import { convertB3trForVot3 } from "../helpers/swap"
 import { ethers } from "hardhat"
 import { Address } from "@vechain/sdk-core"
-import { App, assignAppCategories, endorseXApps, registerXDapps } from "../helpers/xApp"
+import { App, assignAppCategories, endorseXApps, endorseXAppsWithExistingNodes, registerXDapps } from "../helpers/xApp"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 const accounts = getTestKeys(17)
 const xDappCreatorAccounts = accounts.slice(0, 8)
@@ -131,6 +133,52 @@ export const updateGMMultipliers = async (levels: number[], multipliers: number[
   }
 }
 
+export const endorseAndVerifySeededApps = async (
+  x2EarnApps: X2EarnApps,
+  stargateMock: Stargate,
+  endorserSigners: HardhatEthersSigner[],
+) => {
+  const mintAccounts: HardhatEthersSigner[] = []
+  const mintLevels: number[] = []
+
+  for (const acct of endorserSigners) {
+    mintAccounts.push(acct, acct, acct)
+    mintLevels.push(7, 7, 7)
+  }
+
+  await mintStargateNFTs(stargateMock, mintAccounts, mintLevels)
+
+  const unendorsedApps = await x2EarnApps.unendorsedAppIds()
+  await endorseXApps(endorserSigners, x2EarnApps, unendorsedApps, stargateMock)
+
+  await verifyEndorsedApps(x2EarnApps)
+}
+
+export const endorseAndVerifyAppsWithExistingNodes = async (
+  x2EarnApps: X2EarnApps,
+  nodeManagement: NodeManagementV3,
+  endorserSigners: HardhatEthersSigner[],
+) => {
+  const unendorsedApps = await x2EarnApps.unendorsedAppIds()
+  await endorseXAppsWithExistingNodes(endorserSigners, x2EarnApps, unendorsedApps, nodeManagement)
+  await verifyEndorsedApps(x2EarnApps)
+}
+
+const verifyEndorsedApps = async (x2EarnApps: X2EarnApps) => {
+  const remaining = await x2EarnApps.unendorsedAppIds()
+  console.log(`Remaining apps: ${remaining.length} ${remaining.join(", ")}`)
+  if (remaining.length > 0) {
+    const threshold = Number(await x2EarnApps.endorsementScoreThreshold())
+    console.log(`Threshold: ${threshold}`)
+    for (const appId of remaining) {
+      const score = Number(await x2EarnApps.getScore(appId))
+      console.error(`App ${appId} has ${score}/${threshold} endorsement points`)
+    }
+    throw new Error(`${remaining.length} app(s) did not reach endorsement threshold`)
+  }
+  console.log(`All apps verified as endorsed (>= ${await x2EarnApps.endorsementScoreThreshold()} pts)`)
+}
+
 export const setupLocalEnvironment = async (
   emissions: Emissions,
   treasury: Treasury,
@@ -199,30 +247,7 @@ export const setupLocalEnvironment = async (
 
   // Every endorser gets 3 MjolnirX nodes (need 3 per app since max 49 pts/node/app)
   // Total: 30 nodes x 100 pts = 3000 pts >> 8 apps x 100 threshold
-  const mintAccounts: typeof endorserSigners = []
-  const mintLevels: number[] = []
-  for (const acct of endorserSigners) {
-    mintAccounts.push(acct, acct, acct)
-    mintLevels.push(7, 7, 7)
-  }
-  await mintStargateNFTs(stargateMock, mintAccounts, mintLevels)
-
-  const unendorsedApps = await x2EarnApps.unendorsedAppIds()
-  await endorseXApps(endorserSigners, x2EarnApps, unendorsedApps, stargateMock)
-
-  // Verify all apps reached the endorsement threshold
-  const remaining = await x2EarnApps.unendorsedAppIds()
-  console.log(`Remaining apps: ${remaining.length} ${remaining.join(", ")}`)
-  if (remaining.length > 0) {
-    const threshold = Number(await x2EarnApps.endorsementScoreThreshold())
-    console.log(`Threshold: ${threshold}`)
-    for (const appId of remaining) {
-      const score = Number(await x2EarnApps.getScore(appId))
-      console.error(`App ${appId} has ${score}/${threshold} endorsement points`)
-    }
-    throw new Error(`${remaining.length} app(s) did not reach endorsement threshold`)
-  }
-  console.log(`All apps verified as endorsed (>= ${await x2EarnApps.endorsementScoreThreshold()} pts)`)
+  await endorseAndVerifySeededApps(x2EarnApps, stargateMock, endorserSigners)
 
   // await proposeUpgradeGovernance(governor, xAllocationVoting)
 
@@ -239,7 +264,7 @@ export const setupTestnetStagingEnvironment = async (
   xAllocationVoting: XAllocationVoting,
   b3tr: B3TR,
   vot3: VOT3,
-  stargateMock: Stargate,
+  _stargateMock: Stargate,
   endorseApps: boolean,
 ) => {
   const start = performance.now()
@@ -287,9 +312,12 @@ export const setupTestnetStagingEnvironment = async (
   await startEmissions(emissionsContract, admin)
 
   if (endorseApps) {
-    // In V8, one node can endorse multiple apps (max 49 pts/node/app)
     const allSigners = await ethers.getSigners()
     const endorserSigners = allSigners.slice(0, 10)
+    const nodeManagement = (await ethers.getContractAt(
+      "NodeManagementV3",
+      getContractsConfig(AppEnv.TESTNET_STAGING).NODE_MANAGEMENT_CONTRACT_ADDRESS,
+    )) as unknown as NodeManagementV3
 
     await airdropVTHO(
       endorserSigners.map(acct => Address.of(acct.address)),
@@ -297,22 +325,7 @@ export const setupTestnetStagingEnvironment = async (
       admin,
     )
 
-    // First 2 endorsers get 2 MjolnirX each (for multi-node testing), rest get 1
-    // Total: 4 + 10 = 14 nodes x 100 pts = 1400 pts > 8 apps x 100 threshold
-    const mintAccounts: typeof endorserSigners = []
-    const mintLevels: number[] = []
-    for (const acct of endorserSigners.slice(0, 2)) {
-      mintAccounts.push(acct, acct)
-      mintLevels.push(7, 7)
-    }
-    for (const acct of endorserSigners.slice(2)) {
-      mintAccounts.push(acct)
-      mintLevels.push(7)
-    }
-    await mintStargateNFTs(stargateMock, mintAccounts, mintLevels)
-
-    const unendorsedApps = await x2EarnApps.unendorsedAppIds()
-    await endorseXApps(endorserSigners, x2EarnApps, unendorsedApps, stargateMock)
+    await endorseAndVerifyAppsWithExistingNodes(x2EarnApps, nodeManagement, endorserSigners)
   }
 
   // await proposeUpgradeGovernance(governor, xAllocationVoting)
@@ -328,17 +341,20 @@ export const setupTestEnvironment = async (
   x2EarnApps: X2EarnApps,
   b3tr: B3TR,
   vot3: VOT3,
-  stargateMock: Stargate,
+  _stargateMock: Stargate,
 ) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
   const admin = accounts[0]
+  const initialVthoAirdrop = 100n
+  const seedVthoAirdrop = 50n
+  const endorsementVthoAirdrop = 100n
 
   // Make sure the first 10 accounts have a VTHO balance
   await airdropVTHO(
     accounts.slice(1, 10).map(acct => acct.address),
-    5000n,
+    initialVthoAirdrop,
     admin,
   )
 
@@ -362,7 +378,7 @@ export const setupTestEnvironment = async (
 
   await airdropVTHO(
     first10.map(acct => acct.key.address),
-    500n,
+    seedVthoAirdrop,
     admin,
   )
 
@@ -380,35 +396,18 @@ export const setupTestEnvironment = async (
   // Endorse all apps
   const allSigners = await ethers.getSigners()
   const endorserSigners = allSigners.slice(0, 10)
+  const nodeManagement = (await ethers.getContractAt(
+    "NodeManagementV3",
+    getContractsConfig(AppEnv.TESTNET).NODE_MANAGEMENT_CONTRACT_ADDRESS,
+  )) as unknown as NodeManagementV3
 
   await airdropVTHO(
     endorserSigners.map(acct => Address.of(acct.address)),
-    5000n,
+    endorsementVthoAirdrop,
     admin,
   )
 
-  const mintAccounts: typeof endorserSigners = []
-  const mintLevels: number[] = []
-  for (const acct of endorserSigners) {
-    mintAccounts.push(acct, acct, acct)
-    mintLevels.push(7, 7, 7)
-  }
-
-  const unendorsedApps = await x2EarnApps.unendorsedAppIds()
-  await endorseXApps(endorserSigners, x2EarnApps, unendorsedApps, stargateMock)
-
-  const remaining = await x2EarnApps.unendorsedAppIds()
-  console.log(`Remaining apps: ${remaining.length} ${remaining.join(", ")}`)
-  if (remaining.length > 0) {
-    const threshold = Number(await x2EarnApps.endorsementScoreThreshold())
-    console.log(`Threshold: ${threshold}`)
-    for (const appId of remaining) {
-      const score = Number(await x2EarnApps.getScore(appId))
-      console.error(`App ${appId} has ${score}/${threshold} endorsement points`)
-    }
-    throw new Error(`${remaining.length} app(s) did not reach endorsement threshold`)
-  }
-  console.log(`All apps verified as endorsed (>= ${await x2EarnApps.endorsementScoreThreshold()} pts)`)
+  await endorseAndVerifyAppsWithExistingNodes(x2EarnApps, nodeManagement, endorserSigners)
 
   const end = new Date(performance.now() - start)
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)

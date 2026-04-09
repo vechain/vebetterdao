@@ -55,8 +55,7 @@ import {
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 import { deployStargateMock } from "./mocks/deployStargate"
 import { deployNodeManagementMock } from "./mocks/deployNodeManagement"
-import { getConfig } from "@repo/config"
-import { AppEnv, EnvConfig } from "@repo/config/contracts"
+import { AppEnv } from "@repo/config/contracts"
 import { deployLegacyNodesMock } from "./mocks/deployLegacyNodes"
 
 // GalaxyMember NFT Values
@@ -69,7 +68,6 @@ const CHALLENGES_MAX_PARTICIPANTS = 100
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
-  const envConfig = getConfig(config.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
   console.log(
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
@@ -351,15 +349,15 @@ export async function deployAll(config: ContractsConfig) {
     const { vechainNodesMock: vechainNodesMockDeployed } = await deployLegacyNodesMock({ logOutput: true })
     vechainNodesMock = vechainNodesMockDeployed
   } else {
-    stargateMock = (await ethers.getContractAt("Stargate", envConfig.stargateContractAddress)) as Stargate
-    stargateNftMock = (await ethers.getContractAt("StargateNFT", envConfig.stargateNFTContractAddress)) as StargateNFT
+    stargateMock = (await ethers.getContractAt("Stargate", config.STARGATE_CONTRACT_ADDRESS)) as Stargate
+    stargateNftMock = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
     nodeManagementMock = (await ethers.getContractAt(
       "NodeManagementV3",
-      envConfig.nodeManagementContractAddress,
+      config.NODE_MANAGEMENT_CONTRACT_ADDRESS,
     )) as NodeManagementV3
     vechainNodesMock = (await ethers.getContractAt(
       "TokenAuction",
-      envConfig.tokenAuctionContractAddress,
+      config.VECHAIN_NODES_CONTRACT_ADDRESS,
     )) as TokenAuction
   }
 
@@ -1419,6 +1417,14 @@ export async function deployAll(config: ContractsConfig) {
     .updateCooldownPeriod(1)
     .then(async tx => await tx.wait())
   console.log("Cooldown period for X2Earn nodes set to 1 round")
+
+  if (config.NEXT_PUBLIC_APP_ENV === AppEnv.TESTNET) {
+    await x2EarnApps
+      .connect(deployer)
+      .updateEndorsementScoreThreshold(1)
+      .then(async tx => await tx.wait())
+    console.log("Endorsement score threshold set to 1 for testnet")
+  }
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
