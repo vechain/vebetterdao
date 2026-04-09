@@ -1,8 +1,8 @@
 "use client"
 
-import { Badge, Box, Card, Heading, HStack, Mark, Skeleton, Text, useToken, VStack } from "@chakra-ui/react"
+import { Badge, Box, Card, Heading, HStack, Mark, Skeleton, Text, useToken, VStack, Wrap } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { getCompactFormatter, humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanAddress, humanDomain, humanNumber } from "@repo/utils/FormattingUtils"
 import { getPicassoImgSrc } from "@repo/utils/PicassoUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
@@ -16,6 +16,7 @@ import { useChallengeParticipantActions } from "@/api/challenges/useChallengePar
 import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
+import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 import { blockNumberToDate } from "@/utils/date"
 
 const compactFormatter = getCompactFormatter(1)
@@ -54,10 +55,60 @@ const ChartTooltip = ({ active, payload }: { active?: boolean; payload?: { paylo
   )
 }
 
+const AddressBadgeGroup = ({
+  title,
+  addresses,
+  domainMap,
+  onAddressClick,
+}: {
+  title: string
+  addresses: string[]
+  domainMap: Record<string, string>
+  onAddressClick: (address: string) => void
+}) => {
+  return (
+    <VStack align="stretch" gap="2">
+      <Text textStyle="xs" color="text.subtle">
+        {title}
+      </Text>
+      <Wrap gap="2">
+        {addresses.map(address => {
+          const domain = domainMap[address.toLowerCase()]
+
+          return (
+            <Badge
+              key={address}
+              variant="neutral"
+              size="sm"
+              title={address}
+              cursor="pointer"
+              role="button"
+              tabIndex={0}
+              _hover={{ opacity: 0.8 }}
+              onClick={() => onAddressClick(address)}
+              onKeyDown={event => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault()
+                  onAddressClick(address)
+                }
+              }}>
+              <HStack gap="1.5">
+                <AddressIcon address={address} boxSize="4" borderRadius="full" flexShrink={0} />
+                <Text textStyle="xs">{domain ? humanDomain(domain, 8, 4) : humanAddress(address, 6, 4)}</Text>
+              </HStack>
+            </Badge>
+          )
+        })}
+      </Wrap>
+    </VStack>
+  )
+}
+
 export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: ChallengeDetail }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const router = useRouter()
+  const openProfile = useCallback((address: string) => router.push(`/profile/${address}`), [router])
   const viewerAddress = account?.address
   const { data, isLoading, isError } = useChallengeParticipantActions(challenge.challengeId, challenge.participants)
   const [leaderColorToken, trailingColorToken, gridColorToken, axisColorToken] = useToken("colors", [
@@ -72,8 +123,34 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
   const axisColor = axisColorToken ?? "#AAAFB6"
   const { data: deadlineBlock } = useCurrentAllocationsRoundDeadline()
   const { data: bestBlock } = useBestBlockCompressed()
+  const uniqueChallengeAddresses = useMemo(() => {
+    const seen = new Set<string>()
+
+    return [...challenge.participants, ...challenge.invited, ...challenge.declined].filter(address => {
+      const normalizedAddress = address.toLowerCase()
+      if (seen.has(normalizedAddress)) return false
+      seen.add(normalizedAddress)
+      return true
+    })
+  }, [challenge.declined, challenge.invited, challenge.participants])
+  const { data: vetDomains } = useGetVetDomains(
+    uniqueChallengeAddresses.length > 0 ? uniqueChallengeAddresses : undefined,
+  )
   const leaderboard = data?.leaderboard ?? []
   const isPending = challenge.status === ChallengeStatus.Pending
+  const domainMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    if (!vetDomains) return map
+
+    uniqueChallengeAddresses.forEach((address, index) => {
+      const domain = vetDomains[index]
+      if (domain) map[address.toLowerCase()] = domain
+    })
+
+    return map
+  }, [uniqueChallengeAddresses, vetDomains])
+  const hasAddressLists =
+    challenge.participants.length > 0 || challenge.invited.length > 0 || challenge.declined.length > 0
 
   const roundStartDate = useMemo(() => {
     if (!isPending || deadlineBlock == null || !bestBlock) return null
@@ -213,7 +290,22 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
                 </Text>
                 <HStack flexWrap="wrap" gap="2">
                   {outcome.addresses.map(address => (
-                    <Badge key={address} variant="neutral" size="sm">
+                    <Badge
+                      key={address}
+                      variant="neutral"
+                      size="sm"
+                      title={address}
+                      cursor="pointer"
+                      role="button"
+                      tabIndex={0}
+                      _hover={{ opacity: 0.8 }}
+                      onClick={() => openProfile(address)}
+                      onKeyDown={event => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault()
+                          openProfile(address)
+                        }
+                      }}>
                       <HStack gap="1.5">
                         <AddressIcon address={address} boxSize="4" borderRadius="full" flexShrink={0} />
                         <Text textStyle="xs">{humanAddress(address, 6, 4)}</Text>
@@ -222,6 +314,37 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
                   ))}
                 </HStack>
               </VStack>
+            </VStack>
+          </Box>
+        )}
+
+        {hasAddressLists && (
+          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+            <VStack align="stretch" gap="4">
+              {challenge.participants.length > 0 && (
+                <AddressBadgeGroup
+                  title={t("Participants")}
+                  addresses={challenge.participants}
+                  domainMap={domainMap}
+                  onAddressClick={openProfile}
+                />
+              )}
+              {challenge.invited.length > 0 && (
+                <AddressBadgeGroup
+                  title={t("Invited wallets")}
+                  addresses={challenge.invited}
+                  domainMap={domainMap}
+                  onAddressClick={openProfile}
+                />
+              )}
+              {challenge.declined.length > 0 && (
+                <AddressBadgeGroup
+                  title={t("Declined")}
+                  addresses={challenge.declined}
+                  domainMap={domainMap}
+                  onAddressClick={openProfile}
+                />
+              )}
             </VStack>
           </Box>
         )}

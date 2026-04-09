@@ -95,7 +95,7 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
                 fontWeight="semibold"
                 textTransform="uppercase"
                 letterSpacing="0.08em">
-                {t(isSponsored ? "Type" : "Stake")}
+                {t(isSponsored ? "Type" : "Bet")}
               </Text>
               {isSponsored ? (
                 <Box mt="2">

@@ -1,7 +1,6 @@
 "use client"
 
 import {
-  Badge,
   Box,
   Button,
   Card,
@@ -225,7 +224,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                   </VStack>
                 ) : (
                   <StatItem
-                    label={t("Stake")}
+                    label={t("Bet")}
                     value={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
                   />
                 )}
@@ -291,73 +290,47 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
           </VStack>
         </Card.Root>
 
-        {/* Details: apps + invited */}
-        {(!challenge.allApps || challenge.invited.length > 0) && (
-          <SimpleGrid columns={{ base: 1, lg: !challenge.allApps && challenge.invited.length > 0 ? 2 : 1 }} gap="4">
-            {!challenge.allApps && (
-              <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
-                <VStack align="stretch" gap="3">
-                  <Text
-                    textStyle="xxs"
-                    color="text.subtle"
-                    textTransform="uppercase"
-                    letterSpacing="0.08em"
-                    fontWeight="semibold">
-                    {t("Selected apps")}
-                  </Text>
-                  <Wrap gap="2">
-                    {challenge.selectedApps.map(app => (
-                      <HStack
-                        key={app}
-                        gap="2.5"
-                        w={{ base: "full", sm: "auto" }}
-                        maxW={{ base: "full", sm: "xs" }}
-                        minH="11"
-                        px="3.5"
-                        py="2.5"
-                        borderRadius="2xl"
-                        bg="bg.secondary"
-                        border="1px solid"
-                        borderColor="border.secondary">
-                        <AppImage appId={app} boxSize="6" borderRadius="md" flexShrink={0} />
-                        <Text
-                          textStyle="sm"
-                          fontWeight="medium"
-                          minW="0"
-                          overflow="hidden"
-                          textOverflow="ellipsis"
-                          whiteSpace="nowrap">
-                          {appNames.get(app.toLowerCase()) ?? humanAddress(app, 6, 4)}
-                        </Text>
-                      </HStack>
-                    ))}
-                  </Wrap>
-                </VStack>
-              </Card.Root>
-            )}
-
-            {challenge.invited.length > 0 && (
-              <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
-                <VStack align="stretch" gap="3">
-                  <Text
-                    textStyle="xxs"
-                    color="text.subtle"
-                    textTransform="uppercase"
-                    letterSpacing="0.08em"
-                    fontWeight="semibold">
-                    {t("Invited wallets")}
-                  </Text>
-                  <HStack flexWrap="wrap" gap="2">
-                    {challenge.invited.map(address => (
-                      <Badge key={address} variant="neutral" size="sm">
-                        {humanAddress(address, 6, 4)}
-                      </Badge>
-                    ))}
+        {/* Details: apps */}
+        {!challenge.allApps && (
+          <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
+            <VStack align="stretch" gap="3">
+              <Text
+                textStyle="xxs"
+                color="text.subtle"
+                textTransform="uppercase"
+                letterSpacing="0.08em"
+                fontWeight="semibold">
+                {t("Selected apps")}
+              </Text>
+              <Wrap gap="2">
+                {challenge.selectedApps.map(app => (
+                  <HStack
+                    key={app}
+                    gap="2.5"
+                    w={{ base: "full", sm: "auto" }}
+                    maxW={{ base: "full", sm: "xs" }}
+                    minH="11"
+                    px="3.5"
+                    py="2.5"
+                    borderRadius="2xl"
+                    bg="bg.secondary"
+                    border="1px solid"
+                    borderColor="border.secondary">
+                    <AppImage appId={app} boxSize="6" borderRadius="md" flexShrink={0} />
+                    <Text
+                      textStyle="sm"
+                      fontWeight="medium"
+                      minW="0"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap">
+                      {appNames.get(app.toLowerCase()) ?? humanAddress(app, 6, 4)}
+                    </Text>
                   </HStack>
-                </VStack>
-              </Card.Root>
-            )}
-          </SimpleGrid>
+                ))}
+              </Wrap>
+            </VStack>
+          </Card.Root>
         )}
 
         {/* Leaderboard / participant actions */}

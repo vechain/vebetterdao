@@ -162,7 +162,7 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                   textTransform="uppercase"
                   letterSpacing="0.08em"
                   fontWeight="semibold">
-                  {t("Stake")}
+                  {t("Bet")}
                 </Text>
                 <Text textStyle="lg" fontWeight="bold" mt="1">
                   {humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}

@@ -112,7 +112,8 @@
     "endorsement-migration:verify:local": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_solo",
     "endorsement-migration:verify:testnet-staging": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_testnet",
     "endorsement-migration:verify:mainnet": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_mainnet",
-    "stress:challenges:local": "NEXT_PUBLIC_APP_ENV=local npx hardhat run scripts/stressTest/stressChallengeJoin.ts --network vechain_solo"
+    "stress:challenges:local": "NEXT_PUBLIC_APP_ENV=local npx hardhat run scripts/stressTest/stressChallengeSponsored.ts --network vechain_solo",
+    "stress:challenges:stake:local": "NEXT_PUBLIC_APP_ENV=local npx hardhat run scripts/stressTest/stressChallengeStake.ts --network vechain_solo"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
