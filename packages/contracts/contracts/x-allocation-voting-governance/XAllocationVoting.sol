@@ -100,6 +100,7 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *  - New errors: NotDelegatedToNavigator, NavigatorPreferencesNotSet
  *  - New initializer: initializeV9(INavigatorRegistry) — reinitializer(8)
  *  - setNavigatorRegistry() setter via ExternalContractsUtils
+ *  - VotesUtils.getVotes() returns delegated amount when citizen has active navigator at snapshot
  */
 contract XAllocationVoting is
   Initializable,
@@ -195,10 +196,14 @@ contract XAllocationVoting is
       revert AutoVotingEnabled(_msgSender());
     }
 
-    // Citizens delegated to a navigator cannot vote manually
-    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
-    if (address(navRegistry) != address(0) && navRegistry.isDelegated(_msgSender())) {
-      revert DelegatedToNavigator(_msgSender());
+    // Citizens delegated to an alive navigator at the round snapshot cannot vote manually
+    INavigatorRegistry navigatorRegistryContract = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._navigatorRegistry;
+    if (address(navigatorRegistryContract) != address(0)) {
+      if (navigatorRegistryContract.getNavigatorAtTimepoint(_msgSender(), roundSnapshot(roundId)) != address(0)) {
+        revert DelegatedToNavigator(_msgSender());
+      }
     }
 
     validatePersonhoodForCurrentRound(_msgSender());
@@ -255,28 +260,33 @@ contract XAllocationVoting is
    * @param roundId The round ID to vote in
    */
   function castNavigatorVote(address citizen, uint256 roundId) public {
-    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    INavigatorRegistry navigatorRegistryContract = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._navigatorRegistry;
 
-    // Citizen must be delegated to a navigator
-    address navigator = navRegistry.getNavigator(citizen);
+    // getNavigatorAtTimepoint returns address(0) if not delegated or navigator dead at snapshot
+    uint256 snapshot = roundSnapshot(roundId);
+    address navigator = navigatorRegistryContract.getNavigatorAtTimepoint(citizen, snapshot);
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
     // Navigator must have set allocation preferences for this round
-    if (!navRegistry.hasSetPreferences(navigator, roundId)) {
+    if (!navigatorRegistryContract.hasSetPreferences(navigator, roundId)) {
       revert NavigatorPreferencesNotSet(navigator, roundId);
     }
 
     _checkEarlyAccessEligibility(roundId, citizen);
 
     // Get navigator's preferences with allocation percentages (basis points, sum to 10000)
-    (bytes32[] memory appIds, uint256[] memory percentages) = navRegistry.getAllocationPreferences(navigator, roundId);
+    (bytes32[] memory appIds, uint256[] memory percentages) = navigatorRegistryContract.getAllocationPreferences(
+      navigator,
+      roundId
+    );
 
-    // Voting power = delegated amount at round snapshot (not full VOT3 balance)
-    uint256 snapshot = roundSnapshot(roundId);
-    uint256 delegatedPower = navRegistry.getDelegatedAmountAtTimepoint(citizen, snapshot);
+    // Voting power = delegated amount at round snapshot
+    uint256 delegatedPower = navigatorRegistryContract.getDelegatedAmountAtTimepoint(citizen, snapshot);
 
     // Convert percentages to absolute VOT3 amounts (countVote expects absolute weights)
-    uint256 basisPoints = navRegistry.BASIS_POINTS();
+    uint256 basisPoints = navigatorRegistryContract.BASIS_POINTS();
     uint256[] memory voteWeights = new uint256[](percentages.length);
     uint256 allocated;
     for (uint256 i; i < percentages.length; i++) {

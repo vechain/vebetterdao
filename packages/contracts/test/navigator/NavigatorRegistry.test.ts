@@ -82,10 +82,6 @@ describe("NavigatorRegistry - @shard19a", function () {
       expect(await navigatorRegistry.getFeePercentage()).to.equal(config.NAVIGATOR_FEE_PERCENTAGE)
     })
 
-    it("getExitNoticePeriod returns config value", async function () {
-      expect(await navigatorRegistry.getExitNoticePeriod()).to.equal(config.NAVIGATOR_EXIT_NOTICE_PERIOD)
-    })
-
     it("getReportInterval returns config value", async function () {
       expect(await navigatorRegistry.getReportInterval()).to.equal(config.NAVIGATOR_REPORT_INTERVAL)
     })
@@ -469,24 +465,6 @@ describe("NavigatorRegistry - @shard19a", function () {
 
       it("should revert when caller lacks GOVERNANCE_ROLE", async function () {
         await expect(navigatorRegistry.connect(otherAccount).setFeePercentage(3000)).to.be.reverted
-      })
-    })
-
-    describe("setExitNoticePeriod", function () {
-      it("should update exitNoticePeriod", async function () {
-        await navigatorRegistry.connect(owner).setExitNoticePeriod(3)
-        expect(await navigatorRegistry.getExitNoticePeriod()).to.equal(3)
-      })
-
-      it("should revert with InvalidParameter when value is 0", async function () {
-        await expect(navigatorRegistry.connect(owner).setExitNoticePeriod(0)).to.be.revertedWithCustomError(
-          navigatorRegistry,
-          "InvalidParameter",
-        )
-      })
-
-      it("should revert when caller lacks GOVERNANCE_ROLE", async function () {
-        await expect(navigatorRegistry.connect(otherAccount).setExitNoticePeriod(3)).to.be.reverted
       })
     })
 

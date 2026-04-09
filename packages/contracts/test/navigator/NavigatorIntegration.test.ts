@@ -255,7 +255,7 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
 
       // Pay deposit and wait for proposal to become active
       await payDeposit(proposalId.toString(), owner)
-      await waitForProposalToBeActive(Number(proposalId))
+      await waitForProposalToBeActive(proposalId as any)
 
       // Navigator sets decision: 2 = For (stored as 1-indexed: 1=Against, 2=For, 3=Abstain)
       await navigatorRegistry.connect(navigator).setProposalDecision(proposalId, 2)
@@ -308,7 +308,7 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       )
       const newProposalId = await getProposalIdFromTx(tx2)
       await payDeposit(newProposalId.toString(), owner)
-      await waitForProposalToBeActive(newProposalId)
+      await waitForProposalToBeActive(newProposalId as any)
 
       await expect(
         governor.connect(relayer).castNavigatorVote(newProposalId, citizen.address),
@@ -434,6 +434,195 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
     })
   })
 
+  // ======================== Snapshot-consistent delegation ======================== //
+
+  describe("snapshot-consistent delegation", function () {
+    beforeEach(async function () {
+      await setupFullEcosystem()
+    })
+
+    it("mid-round delegation: getVotes unchanged until next round", async function () {
+      const newCitizen = otherAccounts[16]
+      await getVot3Tokens(newCitizen, "1000")
+      await veBetterPassport.whitelist(newCitizen.address)
+      await waitForNextBlock()
+
+      // Advance to a new round
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForNextBlock()
+
+      const snapshot = await xAllocationVoting.roundSnapshot(roundId)
+
+      // getVotes at round snapshot = full balance (not delegated at snapshot)
+      const votesBefore = await xAllocationVoting.getVotes(newCitizen.address, snapshot)
+      expect(votesBefore).to.equal(ethers.parseEther("1000"))
+
+      // Delegate mid-round
+      await navigatorRegistry.connect(newCitizen).delegate(navigator.address, ethers.parseEther("500"))
+      await waitForNextBlock()
+
+      // getVotes at round snapshot is STILL full balance (snapshot is before delegation)
+      const votesAfter = await xAllocationVoting.getVotes(newCitizen.address, snapshot)
+      expect(votesAfter).to.equal(ethers.parseEther("1000"))
+    })
+
+    it("mid-round undelegate: citizen blocked from manual vote this round", async function () {
+      // Advance to a new round
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForNextBlock()
+
+      // citizen was delegated before round start, so snapshot shows delegation
+      // Undelegate mid-round
+      await navigatorRegistry.connect(citizen).undelegate()
+      await waitForNextBlock()
+
+      // Manual vote should still be blocked (was delegated at snapshot, navigator alive)
+      await expect(
+        xAllocationVoting.connect(citizen).castVote(roundId, [app1Id], [ethers.parseEther("500")]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "DelegatedToNavigator")
+    })
+
+    it("castNavigatorVote uses snapshot navigator, not current", async function () {
+      // Advance to a new round
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForNextBlock()
+
+      // Navigator sets preferences
+      await navigatorRegistry.connect(navigator).setAllocationPreferences(roundId, [app1Id, app2Id], [5000, 5000])
+
+      // citizen was delegated to navigator at snapshot
+      // Undelegate mid-round (current = no navigator, snapshot = navigator)
+      await navigatorRegistry.connect(citizen).undelegate()
+      await waitForNextBlock()
+
+      // castNavigatorVote should still work (uses snapshot navigator)
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+      expect(await xAllocationVoting.hasVoted(roundId, citizen.address)).to.be.true
+    })
+
+    it("getVotes returns full balance when navigator is dead at timepoint", async function () {
+      await waitForNextBlock()
+
+      // Deactivate the navigator
+      await navigatorRegistry.deactivateNavigator(navigator.address, 0, false)
+      await waitForNextBlock()
+
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      // Navigator was dead at timepoint (deactivation happened before) => full balance
+      const govVotes = await governor.getVotes(citizen.address, timepoint)
+      const xAllocVotes = await xAllocationVoting.getVotes(citizen.address, timepoint)
+
+      expect(govVotes).to.equal(ethers.parseEther(CITIZEN_VOT3))
+      expect(xAllocVotes).to.equal(ethers.parseEther(CITIZEN_VOT3))
+    })
+
+    it("getVotes returns delegated amount at timepoint before navigator death", async function () {
+      const blockBeforeDeath = await ethers.provider.getBlockNumber()
+      await waitForNextBlock()
+
+      // Deactivate the navigator
+      await navigatorRegistry.deactivateNavigator(navigator.address, 0, false)
+      await waitForNextBlock()
+
+      // At the timepoint BEFORE death, navigator was alive => returns delegated amount
+      const govVotes = await governor.getVotes(citizen.address, blockBeforeDeath)
+      const xAllocVotes = await xAllocationVoting.getVotes(citizen.address, blockBeforeDeath)
+
+      expect(govVotes).to.equal(DELEGATE_AMOUNT)
+      expect(xAllocVotes).to.equal(DELEGATE_AMOUNT)
+    })
+
+    it("double-vote prevention: delegated at snapshot blocks castVote", async function () {
+      // Advance to a new round
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForNextBlock()
+
+      // citizen was delegated at snapshot => manual vote should be blocked
+      await expect(
+        xAllocationVoting.connect(citizen).castVote(roundId, [app1Id], [ethers.parseEther("500")]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "DelegatedToNavigator")
+    })
+
+    it("dead navigator before round start allows manual voting", async function () {
+      // Deactivate the navigator BEFORE advancing to next round
+      await navigatorRegistry.deactivateNavigator(navigator.address, 0, false)
+
+      // Now advance to a new round — snapshot captures navigator as already dead
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForNextBlock()
+
+      // Manual vote should be allowed (navigator was dead at snapshot)
+      await xAllocationVoting.connect(citizen).castVote(roundId, [app1Id], [ethers.parseEther("500")])
+      expect(await xAllocationVoting.hasVoted(roundId, citizen.address)).to.be.true
+    })
+
+    it("getNavigatorAtTimepoint returns correct navigator at past block", async function () {
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      const navAtTimepoint = await navigatorRegistry.getNavigatorAtTimepoint(citizen.address, timepoint)
+      expect(navAtTimepoint).to.equal(navigator.address)
+    })
+
+    it("getNavigatorAtTimepoint returns zero before delegation", async function () {
+      const newCitizen = otherAccounts[17]
+      await getVot3Tokens(newCitizen, "1000")
+      await waitForNextBlock()
+
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      const navAtTimepoint = await navigatorRegistry.getNavigatorAtTimepoint(newCitizen.address, timepoint)
+      expect(navAtTimepoint).to.equal(ethers.ZeroAddress)
+    })
+
+    it("isDeactivatedAtTimepoint tracks navigator lifecycle", async function () {
+      const blockBeforeExit = await ethers.provider.getBlockNumber()
+
+      // Navigator announces exit
+      await navigatorRegistry.connect(navigator).announceExit()
+      await waitForNextBlock()
+
+      const blockAfterExit = await ethers.provider.getBlockNumber()
+
+      // Before exit announcement: not deactivated
+      expect(await navigatorRegistry.isDeactivatedAtTimepoint(navigator.address, blockBeforeExit)).to.be.false
+      // After exit announcement: deactivated
+      expect(await navigatorRegistry.isDeactivatedAtTimepoint(navigator.address, blockAfterExit - 1)).to.be.true
+    })
+
+    it("isDelegatedAtTimepoint returns false after undelegation", async function () {
+      const blockBefore = await ethers.provider.getBlockNumber()
+
+      await navigatorRegistry.connect(citizen).undelegate()
+      await waitForNextBlock()
+
+      const blockAfter = await ethers.provider.getBlockNumber()
+
+      // Was delegated before undelegation
+      expect(await navigatorRegistry.isDelegatedAtTimepoint(citizen.address, blockBefore)).to.be.true
+      // Not delegated after undelegation
+      expect(await navigatorRegistry.isDelegatedAtTimepoint(citizen.address, blockAfter - 1)).to.be.false
+    })
+  })
+
   // ======================== 4. VOT3 lock integration ======================== //
 
   describe("VOT3 lock integration", function () {
@@ -482,6 +671,104 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       await expect(vot3.connect(citizen).convertToB3TR(1n)).to.be.revertedWith(
         "VOT3: transfer exceeds unlocked balance",
       )
+    })
+  })
+
+  // ======================== 5. getVotes reflects delegation ======================== //
+
+  describe("getVotes reflects delegation", function () {
+    beforeEach(async function () {
+      await setupFullEcosystem()
+    })
+
+    it("getVotes returns full balance before delegation", async function () {
+      const nonDelegated = otherAccounts[13]
+      await getVot3Tokens(nonDelegated, CITIZEN_VOT3)
+      await waitForNextBlock()
+
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      const govVotes = await governor.getVotes(nonDelegated.address, timepoint)
+      const xAllocVotes = await xAllocationVoting.getVotes(nonDelegated.address, timepoint)
+
+      expect(govVotes).to.equal(ethers.parseEther(CITIZEN_VOT3))
+      expect(xAllocVotes).to.equal(ethers.parseEther(CITIZEN_VOT3))
+    })
+
+    it("getVotes returns delegated amount when citizen has active navigator", async function () {
+      // citizen has 1000 VOT3 and 500 delegated (from setupFullEcosystem)
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      const govVotes = await governor.getVotes(citizen.address, timepoint)
+      const xAllocVotes = await xAllocationVoting.getVotes(citizen.address, timepoint)
+
+      // Returns the delegated amount (effective participation via navigator)
+      expect(govVotes).to.equal(DELEGATE_AMOUNT)
+      expect(xAllocVotes).to.equal(DELEGATE_AMOUNT)
+    })
+
+    it("getVotes returns full balance after undelegation", async function () {
+      await navigatorRegistry.connect(citizen).undelegate()
+      await waitForNextBlock()
+
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      const govVotes = await governor.getVotes(citizen.address, timepoint)
+      const xAllocVotes = await xAllocationVoting.getVotes(citizen.address, timepoint)
+
+      expect(govVotes).to.equal(ethers.parseEther(CITIZEN_VOT3))
+      expect(xAllocVotes).to.equal(ethers.parseEther(CITIZEN_VOT3))
+    })
+
+    it("getVotes returns delegated amount when fully delegated", async function () {
+      const fullDelegator = otherAccounts[14]
+      const fullAmount = ethers.parseEther("800")
+      await getVot3Tokens(fullDelegator, "800")
+      await waitForNextBlock()
+
+      await navigatorRegistry.connect(fullDelegator).delegate(navigator.address, fullAmount)
+      await waitForNextBlock()
+
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      const govVotes = await governor.getVotes(fullDelegator.address, timepoint)
+      const xAllocVotes = await xAllocationVoting.getVotes(fullDelegator.address, timepoint)
+
+      expect(govVotes).to.equal(fullAmount)
+      expect(xAllocVotes).to.equal(fullAmount)
+    })
+
+    it("getQuadraticVotingPower reflects delegated amount", async function () {
+      // citizen: 1000 VOT3, 500 delegated => getVotes returns 500 (delegated amount)
+      const block = await ethers.provider.getBlockNumber()
+      const timepoint = block - 1
+
+      // GovernorVotesLogic: Math.sqrt(votes) * 1e9
+      const expectedQVP = BigInt(Math.floor(Math.sqrt(Number(DELEGATE_AMOUNT)))) * 1_000_000_000n
+
+      const qvp = await governor.getQuadraticVotingPower(citizen.address, timepoint)
+      expect(qvp).to.equal(expectedQVP)
+    })
+
+    it("getTotalVotingPower returns delegated amount on XAllocationVoting", async function () {
+      // citizen: 1000 VOT3, 500 delegated => getTotalVotingPower returns 500 (delegated amount)
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Wait a block so roundSnapshot is in the past (getPastVotes requires past timepoint)
+      await waitForNextBlock()
+
+      const roundStart = await xAllocationVoting.roundSnapshot(roundId)
+      const totalPower = await xAllocationVoting.getTotalVotingPower(citizen.address, roundStart)
+
+      expect(totalPower).to.equal(DELEGATE_AMOUNT)
     })
   })
 })

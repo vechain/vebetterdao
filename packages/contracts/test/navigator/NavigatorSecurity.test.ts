@@ -221,12 +221,6 @@ describe("NavigatorRegistry Security - @shard19h", function () {
         navigatorRegistry,
         "NotRegistered",
       )
-
-      // finalizeExit
-      await expect(navigatorRegistry.connect(user).finalizeExit()).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NotRegistered",
-      )
     })
   })
 
@@ -263,19 +257,6 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       await expect(navigatorRegistry.connect(navigator1).claimFee(depositRoundId)).to.be.revertedWithCustomError(
         navigatorRegistry,
         "FeesStillLocked",
-      )
-    })
-
-    it("exit without notice: announceExit then immediately finalizeExit, reverts NoticePeriodNotElapsed", async function () {
-      const navigator1 = otherAccounts[10]
-      await registerNavigator(navigator1)
-      await bootstrapAndStartEmissions()
-
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      await expect(navigatorRegistry.connect(navigator1).finalizeExit()).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NoticePeriodNotElapsed",
       )
     })
 

@@ -96,8 +96,12 @@ import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
  * - New events: NavigatorGovernanceVoteCast
  * - New errors: NotDelegatedToNavigator, NavigatorDecisionNotSet (in GovernorVotesLogic)
  * - New initializer: initializeV10(INavigatorRegistry) — reinitializer(8)
- * - Citizen voting power = delegated amount at proposal snapshot (not full VOT3 balance)
  * - setNavigatorRegistry() setter via GovernorConfigurator
+ * - GovernorVotesLogic.getVotes() returns delegated amount when citizen has active navigator at snapshot
+ * - Dead navigator (deactivated/exiting) = delegation void, returns full VOT3 balance
+ * - castNavigatorVote uses snapshot-based navigator lookup (getNavigatorAtTimepoint)
+ * - castVote double-vote prevention: blocks manual voting if delegated at proposal snapshot with alive navigator
+ * - Uses checkpointed citizenToNavigator and isDeactivatedAtTimepoint for snapshot consistency
  */
 contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeable, PausableUpgradeable {
   /// @notice The role that can whitelist allowed functions in the propose function

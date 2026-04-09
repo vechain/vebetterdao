@@ -2,29 +2,29 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title NavigatorLifecycleUtils
 /// @notice Handles navigator exit process, deactivation, and profile/report management.
 /// @dev Exit flow:
-/// 1. Navigator calls announceExit() — emits event, citizens notified
-/// 2. Lazy invalidation: citizen delegations become void immediately at view level
-///    (isDelegated=false, getDelegatedAmount=0, VOT3 auto-unlocked)
-/// 3. Navigator must continue voting during notice period (1 round, governance-configurable)
-/// 4. Navigator calls finalizeExit() — stake available immediately, locked fees on schedule
+/// 1. Navigator calls announceExit() — marked dead at current round's deadline
+/// 2. Navigator remains alive for current round's snapshot lookups, dead from next round
+/// 3. Citizen delegations become void at view level (isDelegated=false, getDelegatedAmount=0)
+/// 4. Navigator can withdraw stake after exit
 /// 5. Citizens can re-delegate to new navigator without calling undelegate (auto-clear)
-/// 6. Re-entry requires fresh registration
+/// 6. Re-registration not allowed — must use a new wallet
 ///
 /// Deactivation (by governance):
 /// - Same lazy invalidation applies (citizen VOT3 auto-unlocked)
 /// - Cannot reactivate — must register fresh
 library NavigatorLifecycleUtils {
+  using Checkpoints for Checkpoints.Trace208;
   // ======================== Events ======================== //
 
   /// @notice Emitted when a navigator announces their exit
-  event ExitAnnounced(address indexed navigator, uint256 announcedAtRound, uint256 effectiveRound);
-
-  /// @notice Emitted when a navigator finalizes their exit
-  event ExitFinalized(address indexed navigator);
+  event ExitAnnounced(address indexed navigator, uint256 announcedAtRound);
 
   /// @notice Emitted when a navigator is deactivated by governance
   event NavigatorDeactivated(address indexed navigator, uint256 slashPercentage);
@@ -46,62 +46,31 @@ library NavigatorLifecycleUtils {
   /// @notice Thrown when navigator has not announced exit
   error NotExiting(address navigator);
 
-  /// @notice Thrown when notice period has not elapsed
-  error NoticePeriodNotElapsed(uint256 currentRound, uint256 requiredRound);
-
   /// @notice Thrown when navigator is already deactivated
   error AlreadyDeactivated(address navigator);
 
   // ======================== Exit Process ======================== //
 
   /// @notice Announce intent to exit as a navigator
-  /// @dev Starts the notice period. Navigator must continue voting during this period.
-  /// After notice period, all delegations auto-cease.
+  /// @dev Starts the notice period. The deactivation checkpoint is written at
+  /// roundDeadline(currentRound + exitNoticePeriod), so the navigator remains alive
+  /// and must keep voting for the notice period, then automatically becomes dead.
   /// @param navigator The navigator address
-  /// @param currentRound The current round ID
-  function announceExit(address navigator, uint256 currentRound) external {
+  function announceExit(address navigator) external {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
 
     if (!$.isRegistered[navigator]) revert NotRegistered(navigator);
     if ($.isDeactivated[navigator]) revert AlreadyDeactivated(navigator);
     if ($.exitAnnouncedRound[navigator] > 0) revert AlreadyExiting(navigator);
 
+    uint256 currentRound = _getCurrentRound($);
     $.exitAnnouncedRound[navigator] = currentRound;
 
-    uint256 effectiveRound = currentRound + $.exitNoticePeriod;
-    emit ExitAnnounced(navigator, currentRound, effectiveRound);
-  }
+    // Navigator stays alive through the notice period, dead after
+    uint256 effectiveDeadline = _getRoundDeadline($, currentRound + $.exitNoticePeriod);
+    $.navigatorDeactivated[navigator].push(SafeCast.toUint48(effectiveDeadline), 1);
 
-  /// @notice Finalize exit after notice period has elapsed
-  /// @dev After this, stake can be withdrawn. Navigator is no longer registered.
-  /// @param navigator The navigator address
-  /// @param currentRound The current round ID
-  function finalizeExit(address navigator, uint256 currentRound) external {
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-
-    if (!$.isRegistered[navigator]) revert NotRegistered(navigator);
-    uint256 announcedRound = $.exitAnnouncedRound[navigator];
-    if (announcedRound == 0) revert NotExiting(navigator);
-
-    uint256 requiredRound = announcedRound + $.exitNoticePeriod;
-    if (currentRound < requiredRound) revert NoticePeriodNotElapsed(currentRound, requiredRound);
-
-    // Mark as no longer registered (but keep isRegistered=true so withdrawStake works)
-    // The navigator will need to call withdrawStake separately
-    // Setting exitAnnouncedRound > 0 indicates exit is in progress/finalized
-
-    emit ExitFinalized(navigator);
-  }
-
-  /// @notice Check if a navigator's exit notice period has elapsed
-  /// @param navigator The navigator address
-  /// @param currentRound The current round ID
-  /// @return True if the exit notice period has elapsed
-  function isExitReady(address navigator, uint256 currentRound) external view returns (bool) {
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    uint256 announcedRound = $.exitAnnouncedRound[navigator];
-    if (announcedRound == 0) return false;
-    return currentRound >= announcedRound + $.exitNoticePeriod;
+    emit ExitAnnounced(navigator, currentRound);
   }
 
   /// @notice Check if a navigator is in the exit process
@@ -123,8 +92,14 @@ library NavigatorLifecycleUtils {
     if ($.isDeactivated[navigator]) revert AlreadyDeactivated(navigator);
 
     $.isDeactivated[navigator] = true;
+    // Mark as dead at round deadline (only if not already pushed by announceExit)
+    if ($.navigatorDeactivated[navigator].length() == 0 || $.navigatorDeactivated[navigator].latest() == 0) {
+      uint256 currentRound = _getCurrentRound($);
+      uint256 deadline = _getRoundDeadline($, currentRound);
+      $.navigatorDeactivated[navigator].push(SafeCast.toUint48(deadline), 1);
+    }
 
-    emit NavigatorDeactivated(navigator, 0); // slashPercentage decided by governance separately
+    emit NavigatorDeactivated(navigator, 0);
   }
 
   /// @notice Check if a navigator is deactivated
@@ -185,7 +160,7 @@ library NavigatorLifecycleUtils {
   }
 
   /// @notice Get the exit notice period (in rounds)
-  /// @return The number of rounds in the exit notice period
+  /// @return The number of rounds navigator must remain active after announcing exit
   function getExitNoticePeriod() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().exitNoticePeriod;
   }
@@ -194,5 +169,18 @@ library NavigatorLifecycleUtils {
   /// @return The number of rounds between required reports
   function getReportInterval() external view returns (uint256) {
     return NavigatorStorageTypes.getNavigatorStorage().reportInterval;
+  }
+
+  // ======================== Internal ======================== //
+
+  /// @dev Get current round ID from XAllocationVoting
+  function _getCurrentRound(NavigatorStorageTypes.NavigatorStorage storage $) private view returns (uint256) {
+    if ($.xAllocationVoting == address(0)) return 0;
+    return IXAllocationVotingGovernor($.xAllocationVoting).currentRoundId();
+  }
+
+  /// @dev Get the deadline block of a round from XAllocationVoting
+  function _getRoundDeadline(NavigatorStorageTypes.NavigatorStorage storage $, uint256 roundId) private view returns (uint256) {
+    return IXAllocationVotingGovernor($.xAllocationVoting).roundDeadline(roundId);
   }
 }

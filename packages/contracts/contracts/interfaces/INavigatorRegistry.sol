@@ -351,9 +351,6 @@ interface INavigatorRegistry {
   /// @notice Announce intent to exit as a navigator, starting the notice period
   function announceExit() external;
 
-  /// @notice Finalize exit after the notice period has elapsed
-  function finalizeExit() external;
-
   /// @notice Update the navigator's metadata URI
   /// @param uri The new metadata URI
   function setMetadataURI(string calldata uri) external;
@@ -380,7 +377,7 @@ interface INavigatorRegistry {
   /// @param newPercentage The new fee percentage (basis points)
   function setFeePercentage(uint256 newPercentage) external;
 
-  /// @notice Set the exit notice period navigators must wait after announcing exit
+  /// @notice Set the exit notice period navigators must remain active after announcing exit
   /// @param newPeriod The new notice period (in rounds)
   function setExitNoticePeriod(uint256 newPeriod) external;
 
@@ -452,6 +449,11 @@ interface INavigatorRegistry {
   /// @return The navigator address (address(0) if not delegated or delegation is void)
   function getNavigator(address citizen) external view returns (address);
 
+  /// @notice Get the raw navigator stored for a citizen, ignoring dead-navigator status
+  /// @param citizen The citizen address
+  /// @return The raw navigator address, or address(0) if never delegated or undelegated
+  function getRawNavigator(address citizen) external view returns (address);
+
   /// @notice Get the current VOT3 amount a citizen has delegated
   /// @param citizen The citizen address
   /// @return The delegated VOT3 amount (0 if not delegated or delegation is void)
@@ -462,15 +464,11 @@ interface INavigatorRegistry {
   /// @return The total delegated VOT3 amount
   function getTotalDelegated(address navigator) external view returns (uint256);
 
-  /// @notice Get the list of citizens delegating to a navigator
+  /// @notice Get total VOT3 delegated to a navigator at a past block
   /// @param navigator The navigator address
-  /// @return The array of citizen addresses
-  function getCitizens(address navigator) external view returns (address[] memory);
-
-  /// @notice Get the number of citizens delegating to a navigator
-  /// @param navigator The navigator address
-  /// @return The citizen count
-  function getCitizenCount(address navigator) external view returns (uint256);
+  /// @param timepoint The block number to query
+  /// @return The total VOT3 delegated at that block
+  function getTotalDelegatedAtTimepoint(address navigator, uint256 timepoint) external view returns (uint256);
 
   /// @notice Check if a citizen has an active delegation
   /// @param citizen The citizen address
@@ -482,6 +480,20 @@ interface INavigatorRegistry {
   /// @param timepoint The block number to query
   /// @return The delegated VOT3 amount at the given block
   function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256);
+
+  /// @notice Get the navigator a citizen was delegated to at a past block (checkpointed)
+  /// @dev Does NOT apply dead-navigator invalidation — callers decide.
+  /// @param citizen The citizen address
+  /// @param timepoint The block number to query
+  /// @return The navigator address at the given block (address(0) if not delegated)
+  function getNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address);
+
+  /// @notice Check if a citizen was delegated at a past block (checkpointed)
+  /// @dev Does NOT apply dead-navigator invalidation — callers decide.
+  /// @param citizen The citizen address
+  /// @param timepoint The block number to query
+  /// @return True if the citizen had a navigator at the given block
+  function isDelegatedAtTimepoint(address citizen, uint256 timepoint) external view returns (bool);
 
   // -- Voting --
 
@@ -559,15 +571,22 @@ interface INavigatorRegistry {
   /// @return True if the navigator has announced exit
   function isExiting(address navigator) external view returns (bool);
 
-  /// @notice Check if a navigator's exit notice period has elapsed
-  /// @param navigator The navigator address
-  /// @return True if exit can be finalized
-  function isExitReady(address navigator) external view returns (bool);
-
   /// @notice Check if a navigator has been deactivated
   /// @param navigator The navigator address
   /// @return True if deactivated
   function isDeactivated(address navigator) external view returns (bool);
+
+  /// @notice Check if a navigator was deactivated (exited or governance-deactivated) at a given timepoint
+  /// @dev Uses checkpointed navigatorDeactivated mapping.
+  /// @param navigator The navigator address
+  /// @param timepoint The block number to query
+  /// @return True if the navigator was dead at the given timepoint
+  function isDeactivatedAtTimepoint(address navigator, uint256 timepoint) external view returns (bool);
+
+  /// @notice Get the round when exit was announced (0 = not exiting)
+  /// @param navigator The navigator address
+  /// @return The exit-announced round ID (0 if not exiting)
+  function exitAnnouncedRound(address navigator) external view returns (uint256);
 
   /// @notice Get the exit notice period (in rounds)
   /// @return The notice period

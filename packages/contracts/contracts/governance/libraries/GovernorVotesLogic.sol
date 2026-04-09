@@ -106,13 +106,7 @@ library GovernorVotesLogic {
    * @param weight The weight of the vote.
    * @param power The voting power of the voter.
    */
-  function _countVote(
-    uint256 proposalId,
-    address account,
-    uint8 support,
-    uint256 weight,
-    uint256 power
-  ) private {
+  function _countVote(uint256 proposalId, address account, uint8 support, uint256 weight, uint256 power) private {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     GovernorTypes.ProposalVote storage proposalVote = $.proposalVotes[proposalId];
 
@@ -147,9 +141,7 @@ library GovernorVotesLogic {
    * @param proposalId The ID of the proposal.
    * @return True if the vote succeeded, false otherwise.
    */
-  function voteSucceeded(
-    uint256 proposalId
-  ) internal view returns (bool) {
+  function voteSucceeded(uint256 proposalId) internal view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     GovernorTypes.ProposalVote storage proposalVote = $.proposalVotes[proposalId];
     return proposalVote.forVotes > proposalVote.againstVotes;
@@ -158,17 +150,23 @@ library GovernorVotesLogic {
   /** ------------------ GETTERS ------------------ **/
 
   /**
-   * @notice Retrieves the votes for a specific account at a given timepoint.
+   * @notice Retrieves the effective voting power for an account at a given timepoint.
+   * @dev If citizen had a navigator at the snapshot and that navigator is still alive (not deactivated/exiting),
+   *      returns the delegated amount (their effective participation via navigator).
+   *      If navigator is dead, delegation is void and citizen has full VOT3 balance.
+   *      If not delegated, returns full VOT3 balance.
    * @param account The address of the account.
    * @param timepoint The specific timepoint.
-   * @return The votes of the account at the given timepoint.
+   * @return The effective voting power at the given timepoint.
    */
-  function getVotes(
-    address account,
-    uint256 timepoint
-  ) internal view returns (uint256) {
+  function getVotes(address account, uint256 timepoint) internal view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return $.vot3.getPastVotes(account, timepoint);
+    uint256 totalVotes = $.vot3.getPastVotes(account, timepoint);
+
+    if (address($.navigatorRegistry) == address(0)) return totalVotes;
+    // getNavigatorAtTimepoint returns address(0) if not delegated or navigator was dead
+    if ($.navigatorRegistry.getNavigatorAtTimepoint(account, timepoint) == address(0)) return totalVotes;
+    return $.navigatorRegistry.getDelegatedAmountAtTimepoint(account, timepoint);
   }
 
   /**
@@ -177,13 +175,9 @@ library GovernorVotesLogic {
    * @param timepoint The specific timepoint.
    * @return The quadratic voting power of the account.
    */
-  function getQuadraticVotingPower(
-    address account,
-    uint256 timepoint
-  ) external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+  function getQuadraticVotingPower(address account, uint256 timepoint) external view returns (uint256) {
     // Scale the votes by 1e9 so that the number returned is 1e18
-    return Math.sqrt($.vot3.getPastVotes(account, timepoint)) * 1e9;
+    return Math.sqrt(getVotes(account, timepoint)) * 1e9;
   }
 
   /**
@@ -192,10 +186,7 @@ library GovernorVotesLogic {
    * @param account The address of the account.
    * @return True if the account has voted, false otherwise.
    */
-  function hasVoted(
-    uint256 proposalId,
-    address account
-  ) internal view returns (bool) {
+  function hasVoted(uint256 proposalId, address account) internal view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.proposalVotes[proposalId].hasVoted[account];
   }
@@ -249,9 +240,11 @@ library GovernorVotesLogic {
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
 
-    // Citizens delegated to a navigator cannot vote manually on governance proposals
-    if (address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter)) {
-      revert DelegatedToNavigator(voter);
+    // Citizens delegated to an alive navigator at the proposal snapshot cannot vote manually
+    if (address($.navigatorRegistry) != address(0)) {
+      if ($.navigatorRegistry.getNavigatorAtTimepoint(voter, proposalSnapshot) != address(0)) {
+        revert DelegatedToNavigator(voter);
+      }
     }
 
     (bool isPerson, string memory explanation) = $.veBetterPassport.isPersonAtTimepoint(
@@ -266,7 +259,9 @@ library GovernorVotesLogic {
 
     uint256 weight = $.vot3.getPastVotes(voter, proposalSnapshot); // aka voting power without quadratic voting
     uint256 power = Math.sqrt(weight) * 1e9;
-    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(GovernorProposalLogic.proposalType(proposalId));
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(
+      GovernorProposalLogic.proposalType(proposalId)
+    );
 
     _checkVotingThreshold(weight, proposalType);
 
@@ -294,8 +289,9 @@ library GovernorVotesLogic {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
     );
 
-    // Citizen must be delegated to a navigator
-    address navigator = $.navigatorRegistry.getNavigator(citizen);
+    // Use snapshot-based navigator lookup — returns address(0) if not delegated or navigator dead
+    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
+    address navigator = $.navigatorRegistry.getNavigatorAtTimepoint(citizen, proposalSnapshot);
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
     // Navigator must have set a decision for this proposal
@@ -306,11 +302,12 @@ library GovernorVotesLogic {
     // B3TRGovernor uses: 0=Against, 1=For, 2=Abstain
     uint8 support = decision - 1;
 
-    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
-    // Voting power = delegated amount at snapshot (not full VOT3 balance)
+    // Voting power = delegated amount at snapshot
     uint256 weight = $.navigatorRegistry.getDelegatedAmountAtTimepoint(citizen, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;
-    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(GovernorProposalLogic.proposalType(proposalId));
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(
+      GovernorProposalLogic.proposalType(proposalId)
+    );
 
     _checkVotingThreshold(weight, proposalType);
     _countVote(proposalId, citizen, support, weight, power);
@@ -328,15 +325,13 @@ library GovernorVotesLogic {
    * @param weight - The weight of the vote.
    * @param proposalType - The type of proposal.
    */
-  function _checkVotingThreshold(
-    uint256 weight,
-    GovernorTypes.ProposalType proposalType
-  ) private view {
+  function _checkVotingThreshold(uint256 weight, GovernorTypes.ProposalType proposalType) private view {
     uint256 threshold = GovernorConfigurator.getVotingThreshold(proposalType);
     if (weight < threshold) {
       revert GovernorVotingThresholdNotMet(threshold, weight);
     }
   }
+
   /**
    * @notice Toggle quadratic voting for a specific cycle.
    * @dev This function toggles the state of quadratic voting for a specific cycle.
@@ -362,9 +357,7 @@ library GovernorVotesLogic {
    * @param roundId - The round ID for which to check if quadratic voting is disabled.
    * @return true if quadratic voting is disabled, false otherwise.
    */
-  function isQuadraticVotingDisabledForRound(
-    uint256 roundId
-  ) external view returns (bool) {
+  function isQuadraticVotingDisabledForRound(uint256 roundId) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     // Get the block number the round started.
     uint48 blockNumber = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(roundId));
@@ -377,8 +370,7 @@ library GovernorVotesLogic {
    * @notice Check if quadratic voting is disabled for the current round.
    * @return true if quadratic voting is disabled, false otherwise.
    */
-  function isQuadraticVotingDisabledForCurrentRound(
-  ) public view returns (bool) {
+  function isQuadraticVotingDisabledForCurrentRound() public view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     // Get the block number the emission round started.
     uint256 roundStartBlock = $.xAllocationVoting.currentRoundSnapshot();

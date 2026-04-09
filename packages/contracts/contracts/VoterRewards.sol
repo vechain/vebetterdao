@@ -523,8 +523,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.cycleToVoterToGMWeight[cycle][voter] = 0;
 
     // Navigator fee: transfer to NavigatorRegistry and record the deposit
+    // Use snapshot-based navigator so fee goes to the navigator who actually voted for the citizen
     if (navigatorFee > 0) {
-      address navigator = $.navigatorRegistry.getNavigator(voter);
+      address navigator = $.navigatorRegistry.getNavigatorAtTimepoint(voter, emissionCycleStartBlock);
       require($.b3tr.transfer(address($.navigatorRegistry), navigatorFee), "VoterRewards: nav fee transfer failed");
       $.navigatorRegistry.depositNavigatorFee(navigator, cycle, navigatorFee);
 

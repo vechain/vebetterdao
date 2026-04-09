@@ -2,6 +2,8 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { NavigatorDelegationUtils } from "./NavigatorDelegationUtils.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title NavigatorSlashingUtils
@@ -56,11 +58,12 @@ library NavigatorSlashingUtils {
       revert AlreadySlashed(navigator, "missedAllocationVote");
     }
 
-    // Navigator must have citizens and NOT have set preferences
-    bool hasCitizens = $.navigatorCitizens[navigator].length > 0;
+    // Navigator must have had delegations at round snapshot and NOT have set preferences
+    uint256 snapshot = _getRoundSnapshot($, roundId);
+    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
     bool setPreferences = $.preferencesSet[navigator][roundId];
 
-    if (!hasCitizens || setPreferences) {
+    if (!hadDelegations || setPreferences) {
       revert NoInfractionFound(navigator, "missedAllocationVote");
     }
 
@@ -78,11 +81,12 @@ library NavigatorSlashingUtils {
       revert AlreadySlashed(navigator, "missedGovernanceVote");
     }
 
-    // Navigator must have citizens and NOT have set a decision
-    bool hasCitizens = $.navigatorCitizens[navigator].length > 0;
+    // Navigator must have had delegations and NOT have set a decision
+    // Uses current total since we don't have the round context for governance proposals
+    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegated(navigator) > 0;
     bool setDecision = $.proposalDecision[navigator][proposalId] != 0;
 
-    if (!hasCitizens || setDecision) {
+    if (!hadDelegations || setDecision) {
       revert NoInfractionFound(navigator, "missedGovernanceVote");
     }
 
@@ -102,8 +106,9 @@ library NavigatorSlashingUtils {
 
     // Check that preferences haven't been set in the last 3 rounds
     // (roundId, roundId-1, roundId-2 must all be false)
-    bool hasCitizens = $.navigatorCitizens[navigator].length > 0;
-    bool stale = hasCitizens
+    uint256 snapshot = _getRoundSnapshot($, roundId);
+    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
+    bool stale = hadDelegations
       && !$.preferencesSet[navigator][roundId]
       && (roundId < 2 || !$.preferencesSet[navigator][roundId - 1])
       && (roundId < 3 || !$.preferencesSet[navigator][roundId - 2]);
@@ -126,11 +131,12 @@ library NavigatorSlashingUtils {
       revert AlreadySlashed(navigator, "missedReport");
     }
 
-    // Navigator must have citizens
-    bool hasCitizens = $.navigatorCitizens[navigator].length > 0;
+    // Navigator must have had delegations at round snapshot
+    uint256 snapshot = _getRoundSnapshot($, roundId);
+    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
     // Must have missed the report interval
     uint256 lastReport = $.lastReportRound[navigator];
-    bool missedReport = hasCitizens && (roundId > lastReport + $.reportInterval);
+    bool missedReport = hadDelegations && (roundId > lastReport + $.reportInterval);
 
     if (!missedReport) {
       revert NoInfractionFound(navigator, "missedReport");
@@ -153,14 +159,15 @@ library NavigatorSlashingUtils {
       revert AlreadySlashed(navigator, "latePreferences");
     }
 
-    // Navigator must have citizens
-    bool hasCitizens = $.navigatorCitizens[navigator].length > 0;
+    // Navigator must have had delegations at round snapshot
+    uint256 snapshot = _getRoundSnapshot($, roundId);
+    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
     // Preferences must have been set
     uint256 setBlock = $.preferencesSetBlock[navigator][roundId];
     // Cutoff = roundDeadline - preferenceCutoffPeriod
     uint256 cutoff = roundDeadline > $.preferenceCutoffPeriod ? roundDeadline - $.preferenceCutoffPeriod : 0;
-    // Late if: has citizens AND preferences were set after the cutoff
-    bool isLate = hasCitizens && setBlock > 0 && setBlock > cutoff;
+    // Late if: had delegations AND preferences were set after the cutoff
+    bool isLate = hadDelegations && setBlock > 0 && setBlock > cutoff;
 
     if (!isLate) {
       revert NoInfractionFound(navigator, "latePreferences");
@@ -243,5 +250,10 @@ library NavigatorSlashingUtils {
     IERC20($.b3trToken).transfer($.treasury, slashAmount);
 
     emit NavigatorSlashed(navigator, slashAmount, $.stakedAmount[navigator], reason);
+  }
+
+  /// @dev Get the snapshot block of a round from XAllocationVoting
+  function _getRoundSnapshot(NavigatorStorageTypes.NavigatorStorage storage $, uint256 roundId) private view returns (uint256) {
+    return IXAllocationVotingGovernor($.xAllocationVoting).roundSnapshot(roundId);
   }
 }

@@ -5,6 +5,7 @@ import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { XAllocationVotingStorageTypes } from "./XAllocationVotingStorageTypes.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 
 /**
  * @title VotesUtils
@@ -54,14 +55,20 @@ library VotesUtils {
   }
 
   /**
-   * @notice Returns the voting weight of an account at a given timepoint
-   * @dev Read the voting weight from the token's built in snapshot mechanism (see {IVotes-getPastVotes}).
+   * @notice Returns the effective voting power of an account at a given timepoint
+   * @dev If citizen had a navigator at the snapshot and that navigator is still alive,
+   *      returns the delegated amount (effective participation via navigator).
+   *      Dead navigator = delegation void, citizen has full VOT3 balance.
    * @param account The address to get votes for
    * @param timepoint The timepoint (block number / timestamp) to query
-   * @return The number of votes the account had at the given timepoint
+   * @return The effective voting power at the given timepoint
    */
   function getVotes(address account, uint256 timepoint) external view returns (uint256) {
-    XAllocationVotingStorageTypes.VotesStorage storage $ = XAllocationVotingStorageTypes._getVotesStorage();
-    return $._token.getPastVotes(account, timepoint);
+    XAllocationVotingStorageTypes.VotesStorage storage vs = XAllocationVotingStorageTypes._getVotesStorage();
+    uint256 totalVotes = vs._token.getPastVotes(account, timepoint);
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    if (address(navRegistry) == address(0)) return totalVotes;
+    if (navRegistry.getNavigatorAtTimepoint(account, timepoint) == address(0)) return totalVotes;
+    return navRegistry.getDelegatedAmountAtTimepoint(account, timepoint);
   }
 }

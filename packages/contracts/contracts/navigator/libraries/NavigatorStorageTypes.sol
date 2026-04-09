@@ -29,22 +29,13 @@ library NavigatorStorageTypes {
     address treasury;
 
     // ======================== Delegation ======================== //
-    // citizen => navigator they delegated to
-    mapping(address => address) citizenToNavigator;
+    // citizen => checkpointed navigator address (uint208(uint160(navigator)))
+    // Current via latest(), past via upperLookupRecent
+    mapping(address => Checkpoints.Trace208) citizenToNavigator;
     // citizen => checkpointed VOT3 delegation amount (current via latest(), past via upperLookupRecent)
     mapping(address => Checkpoints.Trace208) delegatedAmount;
-    // navigator => total VOT3 delegated to them
-    mapping(address => uint256) totalDelegatedToNavigator;
-    // navigator => list of citizens delegating to them
-    mapping(address => address[]) navigatorCitizens;
-    // navigator => citizen => index in navigatorCitizens array (+ 1, so 0 means not present)
-    mapping(address => mapping(address => uint256)) citizenIndex;
-    // citizen => navigator pending for next round (address(0) = no pending change)
-    mapping(address => address) pendingNavigator;
-    // citizen => pending delegation amount for next round
-    mapping(address => uint256) pendingDelegatedAmount;
-    // round ID when delegation snapshots were last taken
-    uint256 lastSnapshotRound;
+    // navigator => checkpointed total VOT3 delegated to them (current via latest(), past via upperLookupRecent)
+    mapping(address => Checkpoints.Trace208) totalDelegatedToNavigator;
 
     // ======================== Voting Decisions ======================== //
     // navigator => round => app preferences (bytes32[] of app IDs)
@@ -94,7 +85,10 @@ library NavigatorStorageTypes {
     mapping(address => bool) isDeactivated;
     // navigator => round when exit was announced (0 = not exiting)
     mapping(address => uint256) exitAnnouncedRound;
-    // number of rounds for exit notice period (default: 1)
+    // navigator => checkpointed deactivation status (1 = dead, 0 = active)
+    // Pushed on announceExit and deactivate; reset on re-registration
+    mapping(address => Checkpoints.Trace208) navigatorDeactivated;
+    // number of rounds navigator must remain active after announcing exit (default: 1)
     uint256 exitNoticePeriod;
 
     // ======================== Profile & Reports ======================== //

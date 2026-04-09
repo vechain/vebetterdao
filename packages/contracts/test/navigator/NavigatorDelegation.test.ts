@@ -62,11 +62,7 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       expect(await navigatorRegistry.getNavigator(citizen1.address)).to.equal(navigator1.address)
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(amount)
       expect(await navigatorRegistry.getTotalDelegated(navigator1.address)).to.equal(amount)
-      expect(await navigatorRegistry.getCitizenCount(navigator1.address)).to.equal(1)
       expect(await navigatorRegistry.isDelegated(citizen1.address)).to.equal(true)
-
-      const citizens = await navigatorRegistry.getCitizens(navigator1.address)
-      expect(citizens).to.include(citizen1.address)
     })
 
     it("should revert with ZeroDelegationAmount when amount is 0", async function () {
@@ -92,8 +88,6 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
 
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(amount1 + amount2)
       expect(await navigatorRegistry.getTotalDelegated(navigator1.address)).to.equal(amount1 + amount2)
-      // Citizen count should still be 1
-      expect(await navigatorRegistry.getCitizenCount(navigator1.address)).to.equal(1)
     })
 
     it("should revert with AlreadyDelegated when citizen delegates to a different navigator", async function () {
@@ -162,7 +156,9 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       await navigatorRegistry.connect(citizen2).delegate(navigator1.address, ethers.parseEther("200"))
       await navigatorRegistry.connect(citizen3).delegate(navigator1.address, ethers.parseEther("300"))
 
-      expect(await navigatorRegistry.getCitizenCount(navigator1.address)).to.equal(3)
+      expect(await navigatorRegistry.getTotalDelegated(navigator1.address)).to.equal(
+        ethers.parseEther("100") + ethers.parseEther("200") + ethers.parseEther("300"),
+      )
     })
 
     it("should emit DelegationCreated event", async function () {
@@ -274,12 +270,9 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       // Undelegate the middle citizen
       await navigatorRegistry.connect(citizen2).undelegate()
 
-      const citizens = await navigatorRegistry.getCitizens(navigator1.address)
-      expect(citizens.length).to.equal(2)
-      expect(citizens).to.include(citizen1.address)
-      expect(citizens).to.include(citizen3.address)
-      expect(citizens).to.not.include(citizen2.address)
-      expect(await navigatorRegistry.getCitizenCount(navigator1.address)).to.equal(2)
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.equal(true)
+      expect(await navigatorRegistry.isDelegated(citizen2.address)).to.equal(false)
+      expect(await navigatorRegistry.isDelegated(citizen3.address)).to.equal(true)
     })
   })
 

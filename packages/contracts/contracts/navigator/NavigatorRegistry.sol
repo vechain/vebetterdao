@@ -307,14 +307,9 @@ contract NavigatorRegistry is
 
   // ======================== Lifecycle ======================== //
 
-  /// @notice Announce intent to exit (starts notice period)
+  /// @notice Announce intent to exit. Navigator is marked dead at the current round's deadline.
   function announceExit() external onlyNavigator {
-    NavigatorLifecycleUtils.announceExit(_msgSender(), _getCurrentRound());
-  }
-
-  /// @notice Finalize exit after notice period
-  function finalizeExit() external onlyNavigator {
-    NavigatorLifecycleUtils.finalizeExit(_msgSender(), _getCurrentRound());
+    NavigatorLifecycleUtils.announceExit(_msgSender());
   }
 
   // ======================== Profile & Reports ======================== //
@@ -362,9 +357,8 @@ contract NavigatorRegistry is
   }
 
   /// @notice Update the exit notice period. Only callable by GOVERNANCE_ROLE.
-  /// @param newPeriod Number of rounds a navigator must wait after announcing exit
+  /// @param newPeriod Number of rounds navigator must remain active after announcing exit
   function setExitNoticePeriod(uint256 newPeriod) external onlyRole(GOVERNANCE_ROLE) {
-    if (newPeriod == 0) revert InvalidParameter("exitNoticePeriod must be > 0");
     NavigatorStorageTypes.getNavigatorStorage().exitNoticePeriod = newPeriod;
   }
 
@@ -468,6 +462,11 @@ contract NavigatorRegistry is
     return NavigatorDelegationUtils.getNavigator(citizen);
   }
 
+  /// @inheritdoc INavigatorRegistry
+  function getRawNavigator(address citizen) external view returns (address) {
+    return NavigatorDelegationUtils.getRawNavigator(citizen);
+  }
+
   /// @notice Get the VOT3 amount a citizen has delegated
   /// @param citizen Address of the citizen
   /// @return The delegated VOT3 amount
@@ -482,18 +481,9 @@ contract NavigatorRegistry is
     return NavigatorDelegationUtils.getTotalDelegated(navigator);
   }
 
-  /// @notice Get all citizens currently delegating to a navigator
-  /// @param navigator Address of the navigator
-  /// @return Array of citizen addresses
-  function getCitizens(address navigator) external view returns (address[] memory) {
-    return NavigatorDelegationUtils.getCitizens(navigator);
-  }
-
-  /// @notice Get the number of citizens delegating to a navigator
-  /// @param navigator Address of the navigator
-  /// @return Number of delegating citizens
-  function getCitizenCount(address navigator) external view returns (uint256) {
-    return NavigatorDelegationUtils.getCitizenCount(navigator);
+  /// @inheritdoc INavigatorRegistry
+  function getTotalDelegatedAtTimepoint(address navigator, uint256 timepoint) external view returns (uint256) {
+    return NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, timepoint);
   }
 
   /// @notice Check if a citizen is currently delegating to any navigator
@@ -509,6 +499,24 @@ contract NavigatorRegistry is
   /// @return The delegated VOT3 amount at that timepoint
   function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256) {
     return NavigatorDelegationUtils.getDelegatedAmountAtTimepoint(citizen, timepoint);
+  }
+
+  /// @notice Get the navigator a citizen was delegated to at a historical timepoint
+  /// @dev Does NOT apply dead-navigator invalidation — callers decide.
+  /// @param citizen Address of the citizen
+  /// @param timepoint Block number to query
+  /// @return The navigator address at that timepoint (address(0) if not delegated)
+  function getNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address) {
+    return NavigatorDelegationUtils.getNavigatorAtTimepoint(citizen, timepoint);
+  }
+
+  /// @notice Check if a citizen was delegated at a historical timepoint
+  /// @dev Does NOT apply dead-navigator invalidation — callers decide.
+  /// @param citizen Address of the citizen
+  /// @param timepoint Block number to query
+  /// @return True if the citizen had a navigator at that timepoint
+  function isDelegatedAtTimepoint(address citizen, uint256 timepoint) external view returns (bool) {
+    return NavigatorDelegationUtils.isDelegatedAtTimepoint(citizen, timepoint);
   }
 
   // -- Voting --
@@ -611,13 +619,6 @@ contract NavigatorRegistry is
     return NavigatorLifecycleUtils.isExiting(navigator);
   }
 
-  /// @notice Check if a navigator's exit notice period has elapsed and exit can be finalized
-  /// @param navigator Address of the navigator
-  /// @return True if the navigator can finalize their exit
-  function isExitReady(address navigator) external view returns (bool) {
-    return NavigatorLifecycleUtils.isExitReady(navigator, _getCurrentRound());
-  }
-
   /// @notice Check if a navigator has been deactivated (by governance or exit)
   /// @param navigator Address of the navigator
   /// @return True if the navigator is deactivated
@@ -625,8 +626,23 @@ contract NavigatorRegistry is
     return NavigatorLifecycleUtils.isDeactivated(navigator);
   }
 
-  /// @notice Get the required exit notice period in rounds
-  /// @return The exit notice period
+  /// @notice Check if a navigator was deactivated at a given timepoint (checkpointed)
+  /// @param navigator Address of the navigator
+  /// @param timepoint Block number to query
+  /// @return True if the navigator was dead at that timepoint
+  function isDeactivatedAtTimepoint(address navigator, uint256 timepoint) external view returns (bool) {
+    return NavigatorDelegationUtils.isDeactivatedAtTimepoint(navigator, timepoint);
+  }
+
+  /// @notice Get the round when a navigator announced exit (0 = not exiting)
+  /// @param navigator Address of the navigator
+  /// @return The exit-announced round ID (0 if not exiting)
+  function exitAnnouncedRound(address navigator) external view returns (uint256) {
+    return NavigatorStorageTypes.getNavigatorStorage().exitAnnouncedRound[navigator];
+  }
+
+  /// @notice Get the exit notice period in rounds
+  /// @return The notice period
   function getExitNoticePeriod() external view returns (uint256) {
     return NavigatorLifecycleUtils.getExitNoticePeriod();
   }

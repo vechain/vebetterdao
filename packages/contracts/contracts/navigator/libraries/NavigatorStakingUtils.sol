@@ -2,7 +2,9 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { NavigatorDelegationUtils } from "./NavigatorDelegationUtils.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title NavigatorStakingUtils
 /// @notice Handles navigator registration, staking, and capacity management.
@@ -11,6 +13,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// - Maximum stake: configurable percentage of VOT3 total supply (enforced at deposit only)
 /// - Delegation capacity: stake must be >= 10% of total delegated VOT3
 library NavigatorStakingUtils {
+  using Checkpoints for Checkpoints.Trace208;
+
   /// @notice Basis points scale
   uint256 private constant BASIS_POINTS = 10000;
 
@@ -68,9 +72,9 @@ library NavigatorStakingUtils {
     if ($.isRegistered[navigator]) revert AlreadyRegistered(navigator);
 
     // Delegators must exit their delegation before becoming a navigator
-    address currentNav = $.citizenToNavigator[navigator];
-    if (currentNav != address(0) && !$.isDeactivated[currentNav] && $.exitAnnouncedRound[currentNav] == 0) {
-      revert DelegatorCannotRegister(navigator, currentNav);
+    address currentNavigator = _currentNavigatorOf($, navigator);
+    if (currentNavigator != address(0) && !$.isDeactivated[currentNavigator] && $.exitAnnouncedRound[currentNavigator] == 0) {
+      revert DelegatorCannotRegister(navigator, currentNavigator);
     }
 
     if (amount < $.minStake) revert StakeBelowMinimum(amount, $.minStake);
@@ -131,7 +135,7 @@ library NavigatorStakingUtils {
     if (newStake < $.minStake) revert StakeBelowMinimum(newStake, $.minStake);
 
     // Must maintain capacity for existing delegations (stake * 10 >= totalDelegated)
-    uint256 totalDelegated = $.totalDelegatedToNavigator[navigator];
+    uint256 totalDelegated = NavigatorDelegationUtils.getTotalDelegated(navigator);
     if (newStake * DELEGATION_RATIO < totalDelegated) {
       revert StakeBelowMinimum(newStake, (totalDelegated + DELEGATION_RATIO - 1) / DELEGATION_RATIO);
     }
@@ -176,8 +180,7 @@ library NavigatorStakingUtils {
   /// @return Whether the navigator has capacity
   function hasCapacity(address navigator, uint256 additionalDelegation) external view returns (bool) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    uint256 totalAfter = $.totalDelegatedToNavigator[navigator] + additionalDelegation;
-    // Stake must be >= 10% of total delegated
+    uint256 totalAfter = NavigatorDelegationUtils.getTotalDelegated(navigator) + additionalDelegation;
     return $.stakedAmount[navigator] >= totalAfter / DELEGATION_RATIO;
   }
 
@@ -195,7 +198,7 @@ library NavigatorStakingUtils {
   function getRemainingCapacity(address navigator) external view returns (uint256) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
     uint256 maxCapacity = $.stakedAmount[navigator] * DELEGATION_RATIO;
-    uint256 currentDelegated = $.totalDelegatedToNavigator[navigator];
+    uint256 currentDelegated = NavigatorDelegationUtils.getTotalDelegated(navigator);
     if (currentDelegated >= maxCapacity) return 0;
     return maxCapacity - currentDelegated;
   }
@@ -250,5 +253,14 @@ library NavigatorStakingUtils {
   function _getMaxStake(NavigatorStorageTypes.NavigatorStorage storage $) private view returns (uint256) {
     uint256 vot3Supply = IERC20($.vot3Token).totalSupply();
     return (vot3Supply * $.maxStakePercentage) / BASIS_POINTS;
+  }
+
+  /// @dev Read the current navigator address from checkpoint
+  function _currentNavigatorOf(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address citizen
+  ) private view returns (address) {
+    if ($.citizenToNavigator[citizen].length() == 0) return address(0);
+    return address(uint160($.citizenToNavigator[citizen].latest()));
   }
 }

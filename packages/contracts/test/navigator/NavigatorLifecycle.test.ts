@@ -70,12 +70,7 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
 
       const tx = await navigatorRegistry.connect(navigator1).announceExit()
 
-      const noticePeriod = await navigatorRegistry.getExitNoticePeriod()
-      const effectiveRound = currentRound + noticePeriod
-
-      await expect(tx)
-        .to.emit(navigatorRegistry, "ExitAnnounced")
-        .withArgs(navigator1.address, currentRound, effectiveRound)
+      await expect(tx).to.emit(navigatorRegistry, "ExitAnnounced").withArgs(navigator1.address, currentRound)
 
       expect(await navigatorRegistry.isExiting(navigator1.address)).to.be.true
     })
@@ -106,60 +101,7 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
     })
   })
 
-  // ======================== 2. finalizeExit() ======================== //
-
-  describe("finalizeExit()", function () {
-    it("happy path: succeeds after notice period and emits ExitFinalized", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      // Advance 1 round (notice period = 1 in test config)
-      const currentRound = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(currentRound))
-      await emissions.connect(minterAccount).distribute()
-
-      const tx = await navigatorRegistry.connect(navigator1).finalizeExit()
-      await expect(tx).to.emit(navigatorRegistry, "ExitFinalized").withArgs(navigator1.address)
-    })
-
-    it("reverts if notice period not elapsed", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      // Try to finalize immediately (same round)
-      await expect(navigatorRegistry.connect(navigator1).finalizeExit()).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NoticePeriodNotElapsed",
-      )
-    })
-
-    it("reverts if not exiting", async function () {
-      await expect(navigatorRegistry.connect(navigator1).finalizeExit()).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NotExiting",
-      )
-    })
-  })
-
-  // ======================== 3. isExitReady() ======================== //
-
-  describe("isExitReady()", function () {
-    it("returns false immediately after announcement", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-      expect(await navigatorRegistry.isExitReady(navigator1.address)).to.be.false
-    })
-
-    it("returns true after notice period elapsed", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      // Advance past notice period
-      const currentRound = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(currentRound))
-      await emissions.connect(minterAccount).distribute()
-
-      expect(await navigatorRegistry.isExitReady(navigator1.address)).to.be.true
-    })
-  })
-
-  // ======================== 4. Deactivation ======================== //
+  // ======================== 2. Deactivation ======================== //
 
   describe("Deactivation", function () {
     it("deactivateNavigator: sets isDeactivated and emits NavigatorDeactivated", async function () {
@@ -259,48 +201,6 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
     })
   })
 
-  // ======================== 7. Post-exit state ======================== //
-
-  describe("Post-exit state", function () {
-    it("can withdrawStake after finalizeExit (full amount)", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      // Advance past notice period
-      const currentRound = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(currentRound))
-      await emissions.connect(minterAccount).distribute()
-
-      await navigatorRegistry.connect(navigator1).finalizeExit()
-
-      const stake = await navigatorRegistry.getStake(navigator1.address)
-      const balanceBefore = await b3tr.balanceOf(navigator1.address)
-
-      await navigatorRegistry.connect(navigator1).withdrawStake(stake)
-
-      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(0n)
-      expect(await b3tr.balanceOf(navigator1.address)).to.equal(balanceBefore + stake)
-    })
-
-    it("isNavigator returns false after finalizeExit", async function () {
-      // isNavigator checks isRegistered && !isDeactivated
-      // After exit, exitAnnouncedRound > 0 but isRegistered still true and isDeactivated false
-      // So isNavigator may still return true — verify actual behavior
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      const currentRound = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(currentRound))
-      await emissions.connect(minterAccount).distribute()
-
-      await navigatorRegistry.connect(navigator1).finalizeExit()
-
-      // isNavigator = isRegistered && !isDeactivated
-      // After exit: isRegistered is still true (for withdrawStake), isDeactivated is false
-      // So isNavigator returns true even after exit finalization
-      // The exiting state is tracked via isExiting()
-      expect(await navigatorRegistry.isExiting(navigator1.address)).to.be.true
-    })
-  })
-
   // ======================== Citizen POV: Navigator Exit ======================== //
 
   describe("Citizen experience when navigator exits", function () {
@@ -390,32 +290,6 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       await expect(
         navigatorRegistry.connect(newCitizen).delegate(navigator1.address, ethers.parseEther("500")),
       ).to.be.revertedWithCustomError(navigatorRegistry, "NavigatorCannotAcceptDelegations")
-    })
-
-    it("castNavigatorVote fails for citizen after navigator exits (no preferences can be set)", async function () {
-      // Navigator sets preferences for current round, then announces exit
-      const roundId = await xAllocationVoting.currentRoundId()
-
-      // Navigator exits
-      await navigatorRegistry.connect(navigator1).announceExit()
-      await waitForRoundToEnd(Number(roundId))
-      await emissions.connect(minterAccount).distribute()
-      await navigatorRegistry.connect(navigator1).finalizeExit()
-
-      // New round — navigator can't set preferences (onlyNavigator checks isRegistered && !isDeactivated)
-      // isRegistered is still true but exitAnnouncedRound > 0, and the modifier checks isDeactivated only
-      // So the navigator CAN still technically call setAllocationPreferences... but shouldn't
-      // The key protection is that no new delegations are accepted and citizens should undelegate
-      const newRoundId = await xAllocationVoting.currentRoundId()
-
-      // Navigator hasn't set preferences for the new round
-      expect(await navigatorRegistry.hasSetPreferences(navigator1.address, newRoundId)).to.be.false
-
-      // castNavigatorVote reverts — lazy invalidation: getNavigator returns address(0)
-      await expect(xAllocationVoting.castNavigatorVote(citizen1.address, newRoundId)).to.be.revertedWithCustomError(
-        xAllocationVoting,
-        "NotDelegatedToNavigator",
-      )
     })
   })
 
