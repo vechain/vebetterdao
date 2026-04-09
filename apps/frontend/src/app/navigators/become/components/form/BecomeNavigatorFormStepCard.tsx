@@ -8,6 +8,7 @@ import { LuShield } from "react-icons/lu"
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { useRegisterNavigator } from "@/hooks/navigator/useRegisterNavigator"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
@@ -46,6 +47,7 @@ export const BecomeNavigatorFormStepCard = () => {
   const { data: minStake } = useGetMinStake()
   const { data: maxStake } = useGetMaxStake()
   const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: isAutoVotingEnabled } = useIsAutoVotingEnabled()
   const [isUploading, setIsUploading] = useState(false)
 
   const handleSuccess = useCallback(() => {
@@ -75,14 +77,19 @@ export const BecomeNavigatorFormStepCard = () => {
       }
       case 3: {
         const delegationAck = isDelegated ? data.acceptedDelegationExit : true
+        const autoVotingAck = isAutoVotingEnabled ? data.acceptedAutoVotingDisable : true
         return (
-          data.acceptedVotingPenalty && data.acceptedReportPenalty && data.acceptedDisclosurePenalty && delegationAck
+          data.acceptedVotingPenalty &&
+          data.acceptedReportPenalty &&
+          data.acceptedDisclosurePenalty &&
+          delegationAck &&
+          autoVotingAck
         )
       }
       default:
         return false
     }
-  }, [currentStep, data, minStake, maxStake, isDelegated])
+  }, [currentStep, data, minStake, maxStake, isDelegated, isAutoVotingEnabled])
 
   const steps: NavigatorStep[] = useMemo(
     () => [

@@ -592,6 +592,7 @@
   "Deposit max": "Deposit max",
   "Deposit now": "Deposit now",
   "Deposit VOT3": "Deposit VOT3",
+  "Deposited for proposal support": "Deposited for proposal support",
   "Depositing...": "Depositing...",
   "Deposits": "Deposits",
   "Describe any conflicts...": "Describe any conflicts...",
@@ -2234,10 +2235,12 @@
   "You have {{value}} B3TR rewards pending claim.": "You have <strong>{{value}}</strong> B3TR rewards pending claim.",
   "You have {{votesToClaim}} VOT3 tokens ready to be claimed from supporting {{amountProposals}} proposals.": "You have {{votesToClaim}} VOT3 tokens ready to be claimed from supporting {{amountProposals}} proposals.",
   "You have <b>{{votesToClaim}} VOT3</b> tokens ready to be claimed from supporting {{amountProposals}} proposals.": "You have <b>{{votesToClaim}} VOT3</b> tokens ready to be claimed from supporting {{amountProposals}} proposals.",
+  "You have 0 voting power. Your {{amount}} VOT3 tokens were used to support a proposal and count as voting power only for allocation rounds, not for proposals.": "You have 0 voting power. Your {{amount}} VOT3 tokens were used to support a proposal and count as voting power only for allocation rounds, not for proposals.",
   "You have already submitted your app.": "You have already submitted your app.",
   "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.": "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.",
   "You have been added as a manager for this node": "You have been added as a manager for this node",
   "You have been signalled": "You have been signalled",
+  "You have delegated to a navigator. Your navigator votes on proposals on your behalf.": "You have delegated to a navigator. Your navigator votes on proposals on your behalf.",
   "You have no linked accounts": "You have no linked accounts",
   "You have no nodes yet.": "You have no nodes yet.",
   "You have not voted": "You have not voted",
@@ -2387,6 +2390,5 @@
   "Your voting power": "Your voting power",
   "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards.": "Your voting power equals the delegated amount only (not your full balance). Non-delegated VOT3 does not participate in voting or earn rewards.",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
-  "Your Voting Qualification": "Your Voting Qualification",
-  "Deposited for proposal support": "Deposited for proposal support"
+  "Your Voting Qualification": "Your Voting Qualification"
 }

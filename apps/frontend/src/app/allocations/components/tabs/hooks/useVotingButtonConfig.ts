@@ -40,6 +40,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     onSaveAutoVote,
     onEnableAutoVoting,
     isDelegatedToNavigator,
+    isNavigator,
   } = context
 
   const { t } = useTranslation()
@@ -48,7 +49,8 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     if (isDelegatedToNavigator) return null
 
     // Case 1: User is editing auto-vote preferences - show cancel/save buttons
-    if (isEditingAutoVote) {
+    // Navigators cannot use auto-vote so skip this entirely
+    if (isEditingAutoVote && !isNavigator) {
       return {
         type: "editing" as const,
         primaryText: t("Save"),
@@ -60,8 +62,8 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     }
 
     // Case 2: Auto-voting active (current status OR in current round) - show edit button
-    // This includes users who disabled mid-round but were enabled at round start
-    if (isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) {
+    // Navigators cannot use auto-vote so skip this
+    if ((isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isNavigator) {
       return {
         type: "edit" as const,
         primaryText: hasExistingPreferences ? t("Edit auto-vote settings") : t("Enable auto-vote"),
@@ -89,6 +91,9 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     }
 
     // Case 4: User has voted + auto-voting NOT enabled - show enable button
+    // Navigators cannot use auto-vote
+    if (isNavigator) return null
+
     return {
       type: "enable" as const,
       primaryText: t("Enable auto-vote"),
@@ -97,6 +102,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     }
   }, [
     isDelegatedToNavigator,
+    isNavigator,
     hasVoted,
     isEditingAutoVote,
     isAutoVotingEnabled,

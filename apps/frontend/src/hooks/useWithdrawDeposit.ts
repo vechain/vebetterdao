@@ -7,8 +7,11 @@ import { buildClause } from "@/utils/buildClause"
 
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
+import { getDepositsVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { getVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useVotesOnBlock"
 
 import { useBuildTransaction } from "./useBuildTransaction"
+import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
 const config = getConfig()
 const GovernorInterface = B3TRGovernor__factory.createInterface()
@@ -46,6 +49,10 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
     () => [
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
+      getVot3BalanceQueryKey(account?.address ?? ""),
+      getDepositsVotesOnBlockPrefixQueryKey(),
+      getVotesOnBlockPrefixQueryKey(),
+      ["bestBlockCompressed"],
     ],
     [account, proposalId],
   )

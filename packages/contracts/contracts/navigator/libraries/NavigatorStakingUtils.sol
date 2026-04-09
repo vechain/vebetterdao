@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
 import { NavigatorDelegationUtils } from "./NavigatorDelegationUtils.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
@@ -58,6 +59,9 @@ library NavigatorStakingUtils {
   /// @notice Thrown when trying to withdraw more stake than is available
   error InsufficientStake(uint256 available, uint256 requested);
 
+  /// @notice Thrown when caller has auto-voting enabled (must disable before registering)
+  error AutoVotingMustBeDisabled(address navigator);
+
   // ======================== Registration ======================== //
 
   /// @notice Register as a navigator by staking B3TR
@@ -75,6 +79,13 @@ library NavigatorStakingUtils {
     address currentNavigator = _currentNavigatorOf($, navigator);
     if (currentNavigator != address(0) && !$.isDeactivated[currentNavigator] && $.exitAnnouncedRound[currentNavigator] == 0) {
       revert DelegatorCannotRegister(navigator, currentNavigator);
+    }
+
+    // Auto-voting must be disabled before registering as navigator
+    if ($.xAllocationVoting != address(0)) {
+      if (IXAllocationVotingGovernor($.xAllocationVoting).isUserAutoVotingEnabled(navigator)) {
+        revert AutoVotingMustBeDisabled(navigator);
+      }
     }
 
     if (amount < $.minStake) revert StakeBelowMinimum(amount, $.minStake);

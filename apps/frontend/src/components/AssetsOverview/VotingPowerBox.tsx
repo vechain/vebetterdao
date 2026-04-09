@@ -29,14 +29,14 @@ export const VotingPowerBox = () => {
   const { data: snapshotBlock } = useCurrentRoundSnapshot()
   const { data: bestBlock } = useBestBlockCompressed()
 
-  // Single getVotes call per block — handles delegation atomically
-  // (returns delegated amount for delegated users, VOT3 balance otherwise)
+  // getVotes handles delegation (returns delegated amount) and includes deposits
   const { data: snapshotVotes, isLoading: isSnapshotLoading } = useGetVotesOnBlock(
     snapshotBlock ? Number(snapshotBlock) : undefined,
     account?.address,
   )
+  // getPastVotes requires timepoint < block.number, so use bestBlock - 1
   const { data: currentVotes, isLoading: isCurrentLoading } = useGetVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
     account?.address,
   )
 

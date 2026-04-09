@@ -1,20 +1,25 @@
 import { getConfig } from "@repo/config"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { buildClause } from "@/utils/buildClause"
 
 import { getIsNavigatorQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useIsNavigator"
+import { getIsAutoVotingEnabledQueryKey } from "../../api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { useBuildTransaction } from "../useBuildTransaction"
 import { getB3trBalanceQueryKey } from "../useGetB3trBalance"
 
 const B3trInterface = B3TR__factory.createInterface()
 const NavigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
+const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
 const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress
+const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress
 
 type RegisterParams = {
   stakeAmount: string
@@ -28,12 +33,25 @@ type Props = {
 export const useRegisterNavigator = ({ onSuccess }: Props) => {
   const { account } = useWallet()
   const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: isAutoVotingEnabled } = useIsAutoVotingEnabled()
 
   const clauseBuilder = useCallback(
     (params: RegisterParams) => {
       const amountWei = ethers.parseEther(params.stakeAmount)
 
       const clauses: EnhancedClause[] = []
+
+      if (isAutoVotingEnabled) {
+        clauses.push(
+          buildClause({
+            to: xAllocationVotingAddress,
+            contractInterface: XAllocationVotingInterface,
+            method: "toggleAutoVoting",
+            args: [account?.address],
+            comment: "Disable auto-voting before registering as navigator",
+          }),
+        )
+      }
 
       if (isDelegated) {
         clauses.push(
@@ -66,11 +84,15 @@ export const useRegisterNavigator = ({ onSuccess }: Props) => {
 
       return clauses
     },
-    [isDelegated],
+    [isDelegated, isAutoVotingEnabled, account?.address],
   )
 
   const refetchQueryKeys = useMemo(
-    () => [getIsNavigatorQueryKey(account?.address ?? ""), getB3trBalanceQueryKey(account?.address ?? "")],
+    () => [
+      getIsNavigatorQueryKey(account?.address ?? ""),
+      getB3trBalanceQueryKey(account?.address ?? ""),
+      getIsAutoVotingEnabledQueryKey(account?.address ?? ""),
+    ],
     [account],
   )
 

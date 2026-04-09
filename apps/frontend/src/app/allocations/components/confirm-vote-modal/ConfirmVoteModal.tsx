@@ -33,6 +33,7 @@ interface ConfirmVoteModalProps {
   hasVoted: boolean
   roundId?: string
   snapshotBlock?: string
+  isNavigator?: boolean
 }
 
 export const ConfirmVoteModal = ({
@@ -49,6 +50,7 @@ export const ConfirmVoteModal = ({
   hasVoted,
   roundId,
   snapshotBlock,
+  isNavigator = false,
 }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
@@ -183,6 +185,13 @@ export const ConfirmVoteModal = ({
                 </Button>
               }
             />
+            {!freshnessPreview.isLoading && (
+              <FreshnessHint
+                isUpdated={freshnessPreview.isUpdated}
+                tierLabel={freshnessPreview.tierLabel}
+                isFirstVote={freshnessPreview.isFirstVote}
+              />
+            )}
             <SelectedAppsSection
               apps={selectedApps}
               allocations={allocations}
@@ -198,16 +207,20 @@ export const ConfirmVoteModal = ({
             )}
           </>
         )}
-        <AutomationToggleCard
-          checked={isAutoVotingEnabled}
-          onCheckedChange={onToggleAutoVoting}
-          nextRoundNumber={nextRoundNumber}
-          isEnabledOnChain={isAutoVotingEnabledOnChain}
-          hasVoted={hasVoted}
-          isActiveInCurrentRound={isAutoVotingEnabledInCurrentRound}
-        />
-        {isAutoVotingEnabled && (
-          <PreferredRelayerSection selectedRelayer={selectedRelayer} onSelectRelayer={setSelectedRelayer} />
+        {!isNavigator && (
+          <>
+            <AutomationToggleCard
+              checked={isAutoVotingEnabled}
+              onCheckedChange={onToggleAutoVoting}
+              nextRoundNumber={nextRoundNumber}
+              isEnabledOnChain={isAutoVotingEnabledOnChain}
+              hasVoted={hasVoted}
+              isActiveInCurrentRound={isAutoVotingEnabledInCurrentRound}
+            />
+            {isAutoVotingEnabled && (
+              <PreferredRelayerSection selectedRelayer={selectedRelayer} onSelectRelayer={setSelectedRelayer} />
+            )}
+          </>
         )}
       </VStack>
     </Modal>

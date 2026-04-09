@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 import { getB3TrTokenDetailsQueryKey } from "../api/contracts/b3tr/hooks/useB3trTokenDetails"
+import { getVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useVotesOnBlock"
 import { buildConvertVot3Tx } from "../api/contracts/vot3/utils/buildConvertVot3Tx"
 import { removingExcessDecimals } from "../utils/MathUtils/MathUtils"
 
@@ -46,6 +47,8 @@ export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: 
       //  getVotesQueryKey(account?.address ?? undefined),
       getB3trBalanceQueryKey(config.vot3ContractAddress),
       getB3TrTokenDetailsQueryKey(),
+      getVotesOnBlockPrefixQueryKey(),
+      ["bestBlockCompressed"],
     ],
     [account?.address],
   )

@@ -45,6 +45,7 @@ export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: 
     queryKeys.push(getVot3BalanceQueryKey(account?.address ?? ""))
     queryKeys.push(getDepositsVotesOnBlockPrefixQueryKey())
     queryKeys.push(getVotesOnBlockPrefixQueryKey())
+    queryKeys.push(["bestBlockCompressed"])
     return queryKeys
   }, [account, proposalDeposits])
 

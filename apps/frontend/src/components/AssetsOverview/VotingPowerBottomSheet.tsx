@@ -218,8 +218,9 @@ const VotingPowerContent = ({
   // Current composition: wallet VOT3 balance + deposit voting power at current block
   const { data: currentVot3Balance } = useGetVot3Balance(account?.address)
   const { data: bestBlock } = useBestBlockCompressed()
+  // bestBlock - 1: getPastVotes requires timepoint < block.number
   const { data: currentVotes } = useTotalVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
     account?.address,
   )
   const { data: currentDelegated } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)

@@ -41,7 +41,7 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
   const { data: bestBlock } = useBestBlockCompressed()
   const { data: currentVotingPower } = useTotalVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
     account?.address,
   )
 

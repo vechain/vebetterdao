@@ -1,5 +1,6 @@
 import { Alert, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { Clock, InfoCircle, Reports } from "iconoir-react"
@@ -8,6 +9,7 @@ import { useTranslation } from "react-i18next"
 
 import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { useGetProposalDeposits } from "@/api/contracts/governance/hooks/useGetProposalDeposits"
+import { useGovernorVotesOnBlock } from "@/api/contracts/governance/hooks/useGovernorVotesOnBlock"
 import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
@@ -17,8 +19,8 @@ import { useProposalQuorumNumeratorByType } from "@/api/contracts/governance/hoo
 import { useProposalSnapshot } from "@/api/contracts/governance/hooks/useProposalSnapshot"
 import { useProposalTotalVotes } from "@/api/contracts/governance/hooks/useProposalTotalVotes"
 import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
+import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
-import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useVot3PastSupply } from "@/api/contracts/vot3/hooks/useVot3PastTotalSupply"
 import { useProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
@@ -83,7 +85,7 @@ export const ProposalInteractionCard = ({
   const { data: proposalDepositThresholdQueryData } = useProposalDepositThreshold(proposalId)
   const { data: currentDepositAmountQueryData } = useGetProposalDeposits(proposalId)
   const { data: roundSnapshot } = useProposalSnapshot(proposalId)
-  const { data: userVot3OnSnapshot } = useGetVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
+  const { data: userVot3OnSnapshot } = useGovernorVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
   const { data: proposalQuorumNumerator } = useProposalQuorumNumeratorByType(
@@ -98,6 +100,10 @@ export const ProposalInteractionCard = ({
   const { data: proposalTotalVotesQueryData } = useProposalTotalVotes(proposalId)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
 
+  const { data: userTotalVotesAtSnapshot } = useTotalVotesOnBlock(
+    roundSnapshot ? Number(roundSnapshot) : undefined,
+    account?.address,
+  )
   const { data: isDelegatedToNavigator } = useIsDelegated(account?.address)
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
@@ -121,6 +127,7 @@ export const ProposalInteractionCard = ({
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
   const proposalQuorumBigInt = BigInt(proposalQuorum ?? "0")
   const userVotingPower = Number(userVot3OnSnapshot ?? 0)
+  const userDepositedAmount = userTotalVotesAtSnapshot?.depositsVotes ?? "0"
   const hasUserAlreadyVoted = userHasAlreadyVotedInProposal?.[proposalId] ?? false
   const userVot3Balance = Number(userVot3BalanceQueryData?.original ?? 0)
   const proposalDepositReached = isDepositReached ?? false
@@ -422,6 +429,22 @@ export const ProposalInteractionCard = ({
                   </Alert.Indicator>
                   <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
                     {t("You have delegated to a navigator. Your navigator votes on proposals on your behalf.")}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
+
+            {!isDelegatedToNavigator && isVotingPhase && userVotingPower === 0 && Number(userDepositedAmount) > 0 && (
+              <Alert.Root status="info" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
+                    {t(
+                      "You have 0 voting power. Your {{amount}} VOT3 tokens were used to support a proposal and count as voting power only for allocation rounds, not for proposals.",
+                      { amount: humanNumber(userDepositedAmount) },
+                    )}
                   </Text>
                 </HStack>
               </Alert.Root>

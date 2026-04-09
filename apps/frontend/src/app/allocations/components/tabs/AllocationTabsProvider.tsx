@@ -7,6 +7,7 @@ import { useRef, createContext, useState, useCallback, useMemo, useEffect } from
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
@@ -53,6 +54,7 @@ interface AllocationTabsContextType {
   onEnableAutoVoting: () => void
   isAtSelectionLimit: boolean
   isDelegatedToNavigator: boolean
+  isNavigator: boolean
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
@@ -70,6 +72,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
   const { account } = useWallet()
   const { data: isDelegatedToNavigator } = useIsDelegated(account?.address)
+  const { data: isNavigator } = useIsNavigator(account?.address)
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const {
     hasVotesAtSnapshot,
@@ -100,10 +103,23 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
   // Show the AutoVoteModal once on first visit to vote tab if user has voting power
   useEffect(() => {
-    if (isVoteTab && preferences?.SHOW_AUTOVOTING_MODAL !== false && hasVotesAtSnapshot && !isDelegatedToNavigator) {
+    if (
+      isVoteTab &&
+      preferences?.SHOW_AUTOVOTING_MODAL !== false &&
+      hasVotesAtSnapshot &&
+      !isDelegatedToNavigator &&
+      !isNavigator
+    ) {
       openAutoVoteModal()
     }
-  }, [isVoteTab, hasVotesAtSnapshot, openAutoVoteModal, preferences?.SHOW_AUTOVOTING_MODAL, isDelegatedToNavigator])
+  }, [
+    isVoteTab,
+    hasVotesAtSnapshot,
+    openAutoVoteModal,
+    preferences?.SHOW_AUTOVOTING_MODAL,
+    isDelegatedToNavigator,
+    isNavigator,
+  ])
 
   // Keep local state synced with chain state
   useEffect(() => {
@@ -274,6 +290,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onEnableAutoVoting: handleEnableAutoVoting,
         isAtSelectionLimit,
         isDelegatedToNavigator: isDelegatedToNavigator ?? false,
+        isNavigator: isNavigator ?? false,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
@@ -318,6 +335,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onEditSelection={handleEditSelection}
         hasVoted={hasVoted ?? false}
         roundId={roundDetails.id.toString()}
+        isNavigator={isNavigator ?? false}
       />
     </AllocationTabsContext.Provider>
   )

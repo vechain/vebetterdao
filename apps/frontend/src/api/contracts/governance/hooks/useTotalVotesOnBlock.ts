@@ -33,10 +33,10 @@ export const useTotalVotesOnBlock = (block?: number, address?: string, enabled =
       select: data => {
         const depositsVotesWei = data[0]
         const depositsVotes = ethers.formatEther(depositsVotesWei)
-        // Use bigint arithmetic to preserve full precision (parseFloat loses precision for large numbers)
-        const votesWei = votes ? ethers.parseEther(votes) : 0n
-        const totalVotesWithDepositsWei = votesWei + depositsVotesWei
-        const totalVotesWithDeposits = ethers.formatEther(totalVotesWithDepositsWei)
+        // getVotes (XAllocationVoting) already includes deposits for non-delegated users,
+        // so no addition needed — just pass through as the total.
+        const totalVotesWithDepositsWei = votes ? ethers.parseEther(votes) : 0n
+        const totalVotesWithDeposits = votes ?? "0"
         return {
           totalVotesWithDeposits,
           totalVotesWithDepositsWei,

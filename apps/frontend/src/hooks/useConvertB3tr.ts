@@ -6,6 +6,7 @@ import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 import { getB3TrTokenDetailsQueryKey } from "../api/contracts/b3tr/hooks/useB3trTokenDetails"
 import { buildB3trApprovesTx } from "../api/contracts/b3tr/utils/buildB3trApprovesTx"
+import { getVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useVotesOnBlock"
 import { buildConvertB3trTx } from "../api/contracts/vot3/utils/buildConvertB3trTx"
 import { buildDelegateVot3Tx } from "../api/contracts/vot3/utils/buildDelegateVot3Tx"
 import { removingExcessDecimals } from "../utils/MathUtils/MathUtils"
@@ -66,6 +67,8 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
       // getVotesQueryKey(account?.address ?? undefined),
       getB3trBalanceQueryKey(config.vot3ContractAddress),
       getB3TrTokenDetailsQueryKey(),
+      getVotesOnBlockPrefixQueryKey(),
+      ["bestBlockCompressed"],
     ],
     [account?.address],
   )

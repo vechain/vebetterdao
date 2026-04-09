@@ -27,6 +27,7 @@ export type NavigatorFormData = {
   acceptedReportPenalty: boolean
   acceptedDisclosurePenalty: boolean
   acceptedDelegationExit: boolean
+  acceptedAutoVotingDisable: boolean
 }
 
 type NavigatorApplicationStore = {
@@ -56,6 +57,7 @@ const initialData: NavigatorFormData = {
   acceptedReportPenalty: false,
   acceptedDisclosurePenalty: false,
   acceptedDelegationExit: false,
+  acceptedAutoVotingDisable: false,
 }
 
 export const useNavigatorApplicationStore = create<NavigatorApplicationStore>()(

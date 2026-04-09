@@ -28,7 +28,7 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
   const { data: vot3Balance, isLoading: isVot3Loading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: bestBlock } = useBestBlockCompressed()
   const { data: currentVotingPower, isLoading: isCurrentVotingPowerLoading } = useTotalVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
     account?.address,
   )
   const { open: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()

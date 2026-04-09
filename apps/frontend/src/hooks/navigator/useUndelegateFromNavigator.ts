@@ -7,6 +7,7 @@ import { useCallback } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
+import { getVotesOnBlockPrefixQueryKey } from "../../api/contracts/governance/hooks/useVotesOnBlock"
 import { getGetDelegatedAmountQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { getGetNavigatorQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { getIsDelegatedQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useIsDelegated"
@@ -39,6 +40,8 @@ const useInvalidateNavigatorQueries = () => {
     queryClient.invalidateQueries({ queryKey: getIsNavigatorQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getVot3BalanceQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: ["indexer", "navigators"] })
+    queryClient.invalidateQueries({ queryKey: getVotesOnBlockPrefixQueryKey() })
+    queryClient.invalidateQueries({ queryKey: ["bestBlockCompressed"] })
   }, [queryClient, account])
 }
 

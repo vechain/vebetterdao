@@ -3,6 +3,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 
 export const AcknowledgeStep = () => {
@@ -10,6 +11,7 @@ export const AcknowledgeStep = () => {
   const { data, setData } = useNavigatorApplicationStore()
   const { account } = useWallet()
   const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: isAutoVotingEnabled } = useIsAutoVotingEnabled()
 
   return (
     <VStack gap={5} align="stretch">
@@ -23,6 +25,24 @@ export const AcknowledgeStep = () => {
       </VStack>
 
       <VStack gap={3} align="stretch">
+        {isAutoVotingEnabled && (
+          <Checkbox.Root
+            checked={data.acceptedAutoVotingDisable}
+            onCheckedChange={e => setData({ acceptedAutoVotingDisable: !!e.checked })}
+            colorPalette="orange"
+            alignItems="flex-start"
+            gap={3}>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control mt="1" />
+            <Checkbox.Label>
+              <Text textStyle="sm">
+                {t(
+                  "I understand that I currently have auto-voting enabled, and by registering as a navigator, auto-voting will be disabled and cannot be used while I am a navigator.",
+                )}
+              </Text>
+            </Checkbox.Label>
+          </Checkbox.Root>
+        )}
         {isDelegated && (
           <Checkbox.Root
             checked={data.acceptedDelegationExit}
