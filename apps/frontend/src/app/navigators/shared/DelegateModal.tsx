@@ -127,6 +127,25 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
           </VStack>
         </HStack>
 
+        {remainingCapacity <= 0 && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.negative.subtle"
+            border="1px solid"
+            borderColor="status.negative.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.negative.strong" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="status.negative.strong" fontWeight="semibold">
+                {t(
+                  "This navigator reached its maximum delegation capacity and cannot receive further delegations for now.",
+                )}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
+
         {/* Amount input */}
         <VStack
           bg="card.default"

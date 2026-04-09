@@ -23,12 +23,12 @@ export const NavigatorHeaderMenu = ({ isDelegatedHere, onExitDelegation, onShare
         <Menu.Positioner>
           <Menu.Content bg={{ base: "white", _dark: "#2D3748" }}>
             {isDelegatedHere && (
-              <Menu.Item value="exit-delegation" onClick={onExitDelegation}>
+              <Menu.Item value="exit-delegation" cursor="pointer" onClick={onExitDelegation}>
                 <LuLogOut />
                 {t("Exit Delegation")}
               </Menu.Item>
             )}
-            <Menu.Item value="share" onClick={onShareClick}>
+            <Menu.Item value="share" cursor="pointer" onClick={onShareClick}>
               <LuShare2 />
               {t("Share")}
             </Menu.Item>

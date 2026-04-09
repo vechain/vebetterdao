@@ -26,9 +26,9 @@ import { LuUsers } from "react-icons/lu"
 import { formatEther } from "viem"
 
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useGetCitizenCount } from "@/api/contracts/navigatorRegistry/hooks/useGetCitizenCount"
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { Transaction } from "@/api/indexer/transactions/useTransactions"
 import { AddressIcon } from "@/components/AddressIcon"
 import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/ActivityList"
@@ -163,7 +163,7 @@ const VotingPowerContent = ({
   const { data: currentDelegated } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
   const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
   const { data: navigatorDomain } = useVechainDomain(isDelegated ? navigatorAddress : undefined)
-  const { data: citizenCount } = useGetCitizenCount(navigatorAddress ?? "")
+  const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
   const router = useRouter()
 
   const navigatorDisplayName = useMemo(() => {
@@ -296,11 +296,11 @@ const VotingPowerContent = ({
             <Text textStyle="sm" fontWeight="semibold">
               {navigatorDisplayName}
             </Text>
-            {citizenCount != null && (
+            {navigatorData?.citizenCount != null && (
               <HStack gap={1}>
                 <LuUsers size={12} color="var(--chakra-colors-fg-muted)" />
                 <Text textStyle="xs" color="text.subtle">
-                  {t("Trusted by {{count}} citizens", { count: citizenCount })}
+                  {t("Trusted by {{count}} citizens", { count: navigatorData.citizenCount })}
                 </Text>
               </HStack>
             )}

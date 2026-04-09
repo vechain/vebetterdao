@@ -23,9 +23,10 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   navigator: NavigatorEntityFormatted
+  exitMode?: boolean
 }
 
-export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props) => {
+export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = false }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
@@ -51,13 +52,14 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
   const isFullRemoval = newAmountNum === 0 && currentDelegatedNum > 0
   const hasChanged = delta !== 0
 
+  const isAtCapacity = Number(nav.stakeFormatted) * 10 <= Number(nav.totalDelegatedFormatted)
   const exceedsCapacity = newAmountNum > maxCapacity
   const exceedsBalance = isIncreasing && delta > balanceNum
   const isValid = hasChanged && !exceedsCapacity && !exceedsBalance && newAmountNum >= 0
 
   useEffect(() => {
-    if (isOpen) setNewAmount(currentDelegatedNum.toString())
-  }, [isOpen, currentDelegatedNum])
+    if (isOpen) setNewAmount(exitMode ? "0" : currentDelegatedNum.toString())
+  }, [isOpen, currentDelegatedNum, exitMode])
 
   const { sendTransaction: sendDelegate } = useDelegateToNavigator({ onSuccess: onClose })
   const { sendTransaction: sendReduce } = useReduceDelegation({ onSuccess: onClose })
@@ -76,7 +78,7 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
   }, [isValid, isFullRemoval, isDecreasing, isIncreasing, delta, sendUndelegate, sendReduce, sendDelegate, nav.address])
 
   const getButtonLabel = () => {
-    if (isFullRemoval) return t("Remove all delegation")
+    if (isFullRemoval) return t("Exit all delegation")
     if (isDecreasing) return t("Reduce by {{amount}} VOT3", { amount: formatter.format(Math.abs(delta)) })
     if (isIncreasing) return t("Add {{amount}} VOT3", { amount: formatter.format(delta) })
     return t("No changes")
@@ -92,7 +94,7 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
       modalProps={{ closeOnInteractOutside: true }}>
       <VStack gap={5} align="stretch" w="full">
         <Heading size="xl" fontWeight="bold">
-          {t("Manage Delegation")}
+          {exitMode ? t("Exit Delegation") : t("Manage Delegation")}
         </Heading>
 
         {/* Navigator info */}
@@ -242,16 +244,37 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav }: Props
         )}
 
         {/* Info callout */}
-        <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
-          <HStack gap={3} align="flex-start">
-            <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
-            <Text textStyle="xs" color="text.subtle">
-              {t(
-                "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
-              )}
-            </Text>
-          </HStack>
-        </Card.Root>
+        {isValid && (
+          <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="text.subtle">
+                {t(
+                  "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
+                )}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
+
+        {isAtCapacity && !isDecreasing && !isFullRemoval && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.negative.subtle"
+            border="1px solid"
+            borderColor="status.negative.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.negative.strong" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="status.negative.strong" fontWeight="semibold">
+                {t(
+                  "This navigator reached its maximum delegation capacity and cannot receive further delegations for now.",
+                )}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
 
         <VStack gap={2} mt={2} w="full">
           <Button

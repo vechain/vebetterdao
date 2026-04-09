@@ -32,6 +32,7 @@ export const NavigatorDetailContent = () => {
   const waitForIndexer = searchParams?.get("registered") === "true"
   const [isDelegateOpen, setIsDelegateOpen] = useState(false)
   const [isManageOpen, setIsManageOpen] = useState(false)
+  const [isExitMode, setIsExitMode] = useState(false)
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
   const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
   const [isDelegationsOpen, setIsDelegationsOpen] = useState(false)
@@ -90,9 +91,15 @@ export const NavigatorDetailContent = () => {
         isNavigator={!!isNavigator}
         isOwnPage={!!isNavigator && !!account?.address && account.address.toLowerCase() === address.toLowerCase()}
         onDelegateClick={() => setIsDelegateOpen(true)}
-        onManageClick={() => setIsManageOpen(true)}
+        onManageClick={() => {
+          setIsExitMode(false)
+          setIsManageOpen(true)
+        }}
         onManageStakeClick={() => {}}
-        onExitDelegation={() => setIsManageOpen(true)}
+        onExitDelegation={() => {
+          setIsExitMode(true)
+          setIsManageOpen(true)
+        }}
       />
 
       <NavigatorStatsGrid
@@ -105,7 +112,12 @@ export const NavigatorDetailContent = () => {
       <NavigatorGovernanceActivity address={address} />
 
       <DelegateModal isOpen={isDelegateOpen} onClose={() => setIsDelegateOpen(false)} navigator={nav} />
-      <ManageDelegationModal isOpen={isManageOpen} onClose={() => setIsManageOpen(false)} navigator={nav} />
+      <ManageDelegationModal
+        isOpen={isManageOpen}
+        onClose={() => setIsManageOpen(false)}
+        navigator={nav}
+        exitMode={isExitMode}
+      />
       <NavigatorCitizensModal isOpen={isCitizensOpen} onClose={() => setIsCitizensOpen(false)} address={address} />
       <NavigatorStakeHistoryModal
         isOpen={isStakeHistoryOpen}
