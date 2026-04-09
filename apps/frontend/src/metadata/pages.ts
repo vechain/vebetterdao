@@ -32,7 +32,7 @@ export const pagesMetadata = {
     path: "/challenges",
     title: "VeBetter Challenges | Compete in Stake and Sponsored Rounds",
     description:
-      "Explore mock challenge flows for VeBetter users, from invitations and joins to payout, refunds, and batch finalization.",
+      "Explore mock challenge flows for VeBetter users, from invitations and joins to payout, refunds, and manual finalization.",
     image: "/assets/images/allocations_page.webp",
     imageExtension: "image/webp",
   },
