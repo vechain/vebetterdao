@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
@@ -62,6 +63,7 @@ export const ActionBanner = () => {
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
   const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
+  const { data: isDelegatedToNavigator } = useIsDelegated(account?.address)
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
 
@@ -167,12 +169,13 @@ export const ActionBanner = () => {
   const showDelegatingBanner = !!account?.address && (isVeDelegated || hasAutoDeposit) && !isDelegateeLoading
   const showEntityBanner = !!account?.address && isEntity && !isLoadingAccountLinking
 
-  const showCastVoteBanner = !!account?.address && !isLoading && canUserVote
+  const showCastVoteBanner = !!account?.address && !isLoading && canUserVote && !isDelegatedToNavigator
 
   const showClaimB3trBanner =
     !!account?.address &&
     votingRewardsQuery.data?.claimableTotal &&
-    Number(votingRewardsQuery.data.claimableTotal) !== 0
+    Number(votingRewardsQuery.data.claimableTotal) !== 0 &&
+    !isDelegatedToNavigator
 
   // Creator NFT banners logic
   const showCreatorNftBannerPreference = preferences?.[BannerStorageKey.SHOW_CREATOR_NFT] ?? true
@@ -191,7 +194,8 @@ export const ActionBanner = () => {
     !submissionsLoading &&
     isLatestSubmissionOngoing
 
-  const showCastVoteInProposalBanners = !!account?.address && hasProposals && userCanVoteInProposals
+  const showCastVoteInProposalBanners =
+    !!account?.address && hasProposals && userCanVoteInProposals && !isDelegatedToNavigator
 
   //Show one of the banners explainining why the user can't vote
   // Only one of the following banners can be shown at a time

@@ -21,7 +21,7 @@ export interface VotingButtonConfig {
  * Hook to determine which voting button(s) to show based on state.
  * Consumes AllocationTabsContext directly.
  */
-export const useVotingButtonConfig = (): VotingButtonConfig => {
+export const useVotingButtonConfig = (): VotingButtonConfig | null => {
   const context = useContext(AllocationTabsContext)
   if (!context) throw new Error("useVotingButtonConfig must be used within AllocationTabsProvider")
 
@@ -39,11 +39,14 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
     onCancelEditAutoVote,
     onSaveAutoVote,
     onEnableAutoVoting,
+    isDelegatedToNavigator,
   } = context
 
   const { t } = useTranslation()
 
   return useMemo(() => {
+    if (isDelegatedToNavigator) return null
+
     // Case 1: User is editing auto-vote preferences - show cancel/save buttons
     if (isEditingAutoVote) {
       return {
@@ -93,6 +96,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
       primaryOnClick: onEnableAutoVoting,
     }
   }, [
+    isDelegatedToNavigator,
     hasVoted,
     isEditingAutoVote,
     isAutoVotingEnabled,

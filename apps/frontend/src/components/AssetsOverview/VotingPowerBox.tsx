@@ -1,20 +1,18 @@
 "use client"
 
 import { Text, Skeleton, Mark, Badge, Flex } from "@chakra-ui/react"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { formatEther } from "viem"
+import { formatEther, parseEther } from "viem"
 
-import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
-import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import { StatCard } from "./StatCard"
 import { VotingPowerBottomSheet } from "./VotingPowerBottomSheet"
@@ -27,24 +25,29 @@ export const VotingPowerBox = () => {
 
   const { isMobile } = useBreakpoints()
 
-  const { vot3Balance, isLoading, votesAtSnapshot } = useVotingPowerAtSnapshot()
   const { data: isDelegated } = useIsDelegated(account?.address)
-  const { data: currentDelegatedAmount } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
-  const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
+  const { data: snapshotBlock } = useCurrentRoundSnapshot()
   const { data: bestBlock } = useBestBlockCompressed()
-  const { data: currentDepositsVotes, isLoading: isCurrentDepositsVotesLoading } = useTotalVotesOnBlock(
+
+  // Single getVotes call per block — handles delegation atomically
+  // (returns delegated amount for delegated users, VOT3 balance otherwise)
+  const { data: snapshotVotes, isLoading: isSnapshotLoading } = useGetVotesOnBlock(
+    snapshotBlock ? Number(snapshotBlock) : undefined,
+    account?.address,
+  )
+  const { data: currentVotes, isLoading: isCurrentLoading } = useGetVotesOnBlock(
     bestBlock?.number ? Number(bestBlock.number) : undefined,
     account?.address,
   )
 
-  const formatted = vot3Balance?.formatted ?? "-"
-  // When delegated, next-round power = delegated amount (not full wallet balance)
-  const currentVotingPowerForNextRoundWei = isDelegated
-    ? (currentDelegatedAmount?.raw ?? 0n) + (currentDepositsVotes?.depositsVotesWei ?? 0n)
-    : BigInt(currentVot3Balance?.original ?? "0") + (currentDepositsVotes?.depositsVotesWei ?? 0n)
-  const votingPowerNextRound = currentVotingPowerForNextRoundWei - (votesAtSnapshot?.totalVotesWithDepositsWei ?? 0n)
+  const formatted = snapshotVotes ? (parseEther(snapshotVotes) === 0n ? "0" : humanNumber(snapshotVotes)) : "-"
 
-  const allLoading = isLoading || isCurrentVot3BalanceLoading || isCurrentDepositsVotesLoading
+  const votingPowerNextRound = useMemo(() => {
+    if (!snapshotVotes || !currentVotes) return 0n
+    return parseEther(currentVotes) - parseEther(snapshotVotes)
+  }, [snapshotVotes, currentVotes])
+
+  const allLoading = isSnapshotLoading || isCurrentLoading
 
   return (
     <>

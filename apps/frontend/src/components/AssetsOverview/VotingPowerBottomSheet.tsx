@@ -305,8 +305,8 @@ const VotingPowerContent = ({
             {isDelegated && delegatedFormatted && (
               <CompositionLine label={t("VOT3 delegated")} value={`${delegatedFormatted} VOT3`} />
             )}
-            {!isDelegated && depositsFormatted && (
-              <CompositionLine label={t("From proposal support")} value={`${depositsFormatted} VOT3`} />
+            {depositsFormatted && (
+              <CompositionLine label={t("Deposited for proposal support")} value={`${depositsFormatted} VOT3`} />
             )}
           </VStack>
         </Skeleton>

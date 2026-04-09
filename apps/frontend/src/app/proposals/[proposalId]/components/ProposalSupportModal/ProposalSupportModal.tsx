@@ -10,6 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { parseEther } from "viem"
 
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { BaseModal } from "@/components/BaseModal"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
@@ -48,7 +50,23 @@ export const ProposalSupportModal = ({
   const [amount, setAmount] = useState("")
 
   const { data: vot3Balance } = useGetVot3Balance(account?.address)
+  const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: delegatedAmount } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
+  // Delegated VOT3 is locked and can't be used to support proposals
+  const effectiveBalanceScaled = useMemo(() => {
+    const wallet = new BigNumber(vot3Balance?.scaled ?? "0")
+    if (!isDelegated || !delegatedAmount?.scaled) return wallet
+    return BigNumber.max(wallet.minus(delegatedAmount.scaled), 0)
+  }, [vot3Balance?.scaled, isDelegated, delegatedAmount?.scaled])
+
+  const effectiveBalanceWei = useMemo(() => {
+    if (!isDelegated || !delegatedAmount?.raw) return BigInt(vot3Balance?.original ?? "0")
+    const wallet = BigInt(vot3Balance?.original ?? "0")
+    const delegated = delegatedAmount.raw
+    return wallet > delegated ? wallet - delegated : 0n
+  }, [vot3Balance?.original, isDelegated, delegatedAmount?.raw])
 
   useEffect(() => {
     if (isSupportModalOpen) setAmount("")
@@ -64,11 +82,10 @@ export const ProposalSupportModal = ({
   }, [proposalThreshold, proposalDeposits])
 
   const availableBalance = useMemo(() => {
-    const walletBN = new BigNumber(vot3Balance?.scaled ?? "0")
-    return BigNumber.min(walletBN, missingSupport).isGreaterThan(0)
-      ? BigNumber.min(walletBN, missingSupport)
+    return BigNumber.min(effectiveBalanceScaled, missingSupport).isGreaterThan(0)
+      ? BigNumber.min(effectiveBalanceScaled, missingSupport)
       : new BigNumber(0)
-  }, [vot3Balance?.scaled, missingSupport])
+  }, [effectiveBalanceScaled, missingSupport])
 
   const handlePercentage = useCallback(
     (pct: number) => {
@@ -97,11 +114,11 @@ export const ProposalSupportModal = ({
   const invalidAmount = useMemo(() => {
     if (!amount || amount === "." || Number(amount) === 0) return true
     try {
-      return parseEther(amount || "0") > BigInt(vot3Balance?.original ?? "0")
+      return parseEther(amount || "0") > effectiveBalanceWei
     } catch {
       return true
     }
-  }, [amount, vot3Balance?.original])
+  }, [amount, effectiveBalanceWei])
 
   const exceedsMissing = useMemo(() => {
     try {
@@ -221,7 +238,8 @@ export const ProposalSupportModal = ({
                   </Text>
                 </HStack>
                 <Text textStyle="xs" color="text.subtle">
-                  {t("Available:")} {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
+                  {t("Available")}
+                  {":"} {compactFormatter.format(effectiveBalanceScaled.toNumber())}
                 </Text>
               </VStack>
             </HStack>
@@ -257,6 +275,14 @@ export const ProposalSupportModal = ({
                 })}
               </Text>
             </HStack>
+            {isDelegated && (
+              <HStack gap={2} align="flex-start">
+                <Icon as={InfoCircle} boxSize="4" color="text.subtle" mt="0.5" flexShrink={0} />
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Delegated VOT3 is locked and cannot be used to support proposals.")}
+                </Text>
+              </HStack>
+            )}
           </VStack>
         </Card.Root>
 

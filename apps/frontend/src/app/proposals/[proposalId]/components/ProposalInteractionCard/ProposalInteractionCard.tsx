@@ -1,8 +1,8 @@
-import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
+import { Alert, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { Clock, Reports } from "iconoir-react"
+import { Clock, InfoCircle, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -19,6 +19,7 @@ import { useProposalTotalVotes } from "@/api/contracts/governance/hooks/usePropo
 import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useVot3PastSupply } from "@/api/contracts/vot3/hooks/useVot3PastTotalSupply"
 import { useProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
 import { CountdownBoxes } from "@/components/CountdownBoxes/CountdownBoxes"
@@ -97,6 +98,7 @@ export const ProposalInteractionCard = ({
   const { data: proposalTotalVotesQueryData } = useProposalTotalVotes(proposalId)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
 
+  const { data: isDelegatedToNavigator } = useIsDelegated(account?.address)
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   // ===== CONTRACT TRANSACTION HOOKS =====
@@ -182,6 +184,7 @@ export const ProposalInteractionCard = ({
     }
 
     if (proposal?.state === ProposalState.Active) {
+      if (isDelegatedToNavigator) return false
       return !hasUserAlreadyVoted && userVotingPower > 0
     }
 
@@ -205,6 +208,7 @@ export const ProposalInteractionCard = ({
     userVotingPower,
     proposalDepositReached,
     userVot3Balance,
+    isDelegatedToNavigator,
   ])
 
   const isActionButtonDisabled = useMemo(() => {
@@ -409,6 +413,19 @@ export const ProposalInteractionCard = ({
                 userVoteOption={userVoteOption}
               />
             </VStack>
+
+            {isDelegatedToNavigator && isVotingPhase && (
+              <Alert.Root status="info" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
+                    {t("You have delegated to a navigator. Your navigator votes on proposals on your behalf.")}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
 
             <HStack w="full" gap={4}>
               {/* Action Button */}

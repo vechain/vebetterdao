@@ -23,6 +23,7 @@ export const VotingAlerts = () => {
     isCanVoteLoading,
     isAutoVotingEnabled,
     isAutoVotingEnabledInCurrentRound,
+    isDelegatedToNavigator,
   } = context
 
   const { account } = useWallet()
@@ -50,6 +51,15 @@ export const VotingAlerts = () => {
   }, [isAutoVotingEnabledInCurrentRound, isAutoVotingEnabled, t])
 
   if (!account?.address) return null
+
+  if (isDelegatedToNavigator) {
+    return (
+      <AllocationAlertCard
+        status="info"
+        message={t("You have delegated to a navigator. Your navigator votes and claims rewards on your behalf.")}
+      />
+    )
+  }
 
   return (
     <>
