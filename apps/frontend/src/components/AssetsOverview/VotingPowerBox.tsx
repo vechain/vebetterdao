@@ -10,6 +10,8 @@ import { formatEther } from "viem"
 
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
@@ -26,6 +28,8 @@ export const VotingPowerBox = () => {
   const { isMobile } = useBreakpoints()
 
   const { vot3Balance, isLoading, votesAtSnapshot } = useVotingPowerAtSnapshot()
+  const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: currentDelegatedAmount } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
   const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
   const { data: bestBlock } = useBestBlockCompressed()
   const { data: currentDepositsVotes, isLoading: isCurrentDepositsVotesLoading } = useTotalVotesOnBlock(
@@ -34,9 +38,10 @@ export const VotingPowerBox = () => {
   )
 
   const formatted = vot3Balance?.formatted ?? "-"
-  // Next-round delta accounts for both wallet VOT3 balance and deposit voting power
-  const currentVotingPowerForNextRoundWei =
-    BigInt(currentVot3Balance?.original ?? "0") + (currentDepositsVotes?.depositsVotesWei ?? 0n)
+  // When delegated, next-round power = delegated amount (not full wallet balance)
+  const currentVotingPowerForNextRoundWei = isDelegated
+    ? (currentDelegatedAmount?.raw ?? 0n) + (currentDepositsVotes?.depositsVotesWei ?? 0n)
+    : BigInt(currentVot3Balance?.original ?? "0") + (currentDepositsVotes?.depositsVotesWei ?? 0n)
   const votingPowerNextRound = currentVotingPowerForNextRoundWei - (votesAtSnapshot?.totalVotesWithDepositsWei ?? 0n)
 
   const allLoading = isLoading || isCurrentVot3BalanceLoading || isCurrentDepositsVotesLoading
@@ -96,6 +101,7 @@ export const VotingPowerBox = () => {
         formatted={formatted}
         votingPowerNextRound={votingPowerNextRound}
         isLoading={allLoading}
+        isDelegated={isDelegated}
       />
     </>
   )

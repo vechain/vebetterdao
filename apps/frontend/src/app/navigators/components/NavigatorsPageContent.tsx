@@ -1,5 +1,6 @@
-import { Heading, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuShield } from "react-icons/lu"
@@ -21,6 +22,7 @@ type StatusFilter = "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
 
 export const NavigatorsPageContent = () => {
   const { t } = useTranslation()
+  const router = useRouter()
   const { isMobile } = useBreakpoints()
   const { data: isNavigator } = useIsNavigator()
   const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
@@ -95,6 +97,14 @@ export const NavigatorsPageContent = () => {
           <Text textStyle="sm" color="fg.muted" textAlign="center">
             {t("Be the first to register as a navigator and start earning delegation fees.")}
           </Text>
+          <Button
+            size="sm"
+            variant="outline"
+            colorPalette="primary"
+            mt={2}
+            onClick={() => router.push("/navigators/become")}>
+            {t("Become a Navigator")}
+          </Button>
         </VStack>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4} w="full">

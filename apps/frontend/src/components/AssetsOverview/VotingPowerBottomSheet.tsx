@@ -46,9 +46,16 @@ type Props = {
   isDelegated?: boolean
 }
 
-// TODO: Add "B3TR_PROPOSAL_WITHDRAW" once indexer PR #1232 is merged and released
-// https://github.com/vechain/vechain-indexer/pull/1232
-const VOTING_POWER_EVENT_NAMES = ["B3TR_SWAP_B3TR_TO_VOT3", "B3TR_SWAP_VOT3_TO_B3TR", "B3TR_PROPOSAL_SUPPORT"] as const
+const VOTING_POWER_EVENT_NAMES = [
+  "B3TR_SWAP_B3TR_TO_VOT3",
+  "B3TR_SWAP_VOT3_TO_B3TR",
+  "B3TR_PROPOSAL_SUPPORT",
+  "B3TR_PROPOSAL_WITHDRAW",
+  "B3TR_NAVIGATOR_DELEGATION_CREATED",
+  "B3TR_NAVIGATOR_DELEGATION_INCREASED",
+  "B3TR_NAVIGATOR_DELEGATION_DECREASED",
+  "B3TR_NAVIGATOR_DELEGATION_REMOVED",
+] as const
 const compactFormatter = getCompactFormatter(2)
 
 const getVotingPowerActivityProps = (tx: Transaction): ActivityItemProps | null => {
@@ -83,6 +90,61 @@ const getVotingPowerActivityProps = (tx: Transaction): ActivityItemProps | null 
         iconColor: "status.info.strong",
         amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
         token: "VOT3",
+        sign: "-",
+        amountColor: undefined,
+      }
+    case "B3TR_PROPOSAL_WITHDRAW":
+      return {
+        label: "Withdrew support",
+        icon: <ArrowDown />,
+        iconBg: "status.info.subtle",
+        iconColor: "status.info.strong",
+        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
+        token: "VOT3",
+        sign: "+",
+        amountColor: "status.positive.strong",
+      }
+    case "B3TR_NAVIGATOR_DELEGATION_CREATED":
+      return {
+        label: "Delegated",
+        icon: <Icon as={LuUsers} />,
+        iconBg: "status.positive.subtle",
+        iconColor: "status.positive.strong",
+        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
+        token: "VOT3",
+        sign: "-",
+        amountColor: undefined,
+      }
+    case "B3TR_NAVIGATOR_DELEGATION_INCREASED":
+      return {
+        label: "Increased delegation",
+        icon: <Icon as={LuUsers} />,
+        iconBg: "status.positive.subtle",
+        iconColor: "status.positive.strong",
+        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
+        token: "VOT3",
+        sign: "-",
+        amountColor: undefined,
+      }
+    case "B3TR_NAVIGATOR_DELEGATION_DECREASED":
+      return {
+        label: "Decreased delegation",
+        icon: <Icon as={LuUsers} />,
+        iconBg: "status.negative.subtle",
+        iconColor: "status.negative.strong",
+        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
+        token: "VOT3",
+        sign: "+",
+        amountColor: "status.positive.strong",
+      }
+    case "B3TR_NAVIGATOR_DELEGATION_REMOVED":
+      return {
+        label: "Removed delegation",
+        icon: <Icon as={LuUsers} />,
+        iconBg: "status.negative.subtle",
+        iconColor: "status.negative.strong",
+        amount: "",
+        token: "",
         sign: "-",
         amountColor: undefined,
       }
