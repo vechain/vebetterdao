@@ -19,17 +19,17 @@ library NavigatorDelegationUtils {
   using Checkpoints for Checkpoints.Trace208;
   // ======================== Events ======================== //
 
-  /// @notice Emitted when a citizen delegates VOT3 to a navigator
+  /// @notice Emitted when a citizen delegates VOT3 to a navigator for the first time
   event DelegationCreated(address indexed citizen, address indexed navigator, uint256 amount);
 
-  /// @notice Emitted when a citizen changes their delegation amount
-  event DelegationUpdated(address indexed citizen, address indexed navigator, uint256 newAmount);
+  /// @notice Emitted when a citizen increases their existing delegation
+  event DelegationIncreased(address indexed citizen, address indexed navigator, uint256 addedAmount, uint256 newTotal);
+
+  /// @notice Emitted when a citizen reduces their delegation (but doesn't fully remove)
+  event DelegationDecreased(address indexed citizen, address indexed navigator, uint256 removedAmount, uint256 newTotal);
 
   /// @notice Emitted when a citizen fully undelegates from a navigator
   event DelegationRemoved(address indexed citizen, address indexed navigator);
-
-  /// @notice Emitted when a citizen changes navigator (takes effect next round)
-  event NavigatorChangeRequested(address indexed citizen, address indexed oldNavigator, address indexed newNavigator);
 
   // ======================== Errors ======================== //
 
@@ -59,9 +59,9 @@ library NavigatorDelegationUtils {
 
   // ======================== Delegation ======================== //
 
-  /// @notice Delegate VOT3 to a navigator
+  /// @notice Delegate VOT3 to a navigator (first-time only)
   /// @dev Citizen must not already be delegated. Navigator must be active and have capacity.
-  /// The VOT3 lock is handled by calling VOT3.setDelegatedAmount() via NavigatorRegistry (privileged role).
+  /// If the citizen has a stale delegation (dead navigator), it is auto-cleared first.
   /// @param citizen The citizen address
   /// @param navigator The navigator to delegate to
   /// @param amount The VOT3 amount to delegate
@@ -69,13 +69,9 @@ library NavigatorDelegationUtils {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
 
     if (amount == 0) revert ZeroDelegationAmount();
-
-    // Navigator cannot delegate to themselves
     if (citizen == navigator) revert SelfDelegationNotAllowed(citizen);
 
     address currentNavigator = _currentNavigator($, citizen);
-    bool isIncrease = false;
-
     if (currentNavigator != address(0)) {
       if (_isNavigatorDead($, currentNavigator)) {
         // Auto-clear stale delegation — navigator exited or deactivated
@@ -84,46 +80,41 @@ library NavigatorDelegationUtils {
         $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), 0);
         _removeDelegation($, citizen, currentNavigator);
         emit DelegationRemoved(citizen, currentNavigator);
-      } else if (currentNavigator == navigator) {
-        // Already delegated to the same navigator — increase delegation
-        isIncrease = true;
       } else {
-        // Delegated to a different active navigator
         revert AlreadyDelegated(citizen, currentNavigator);
       }
     }
 
-    // Navigator must be registered and active
-    if (!$.isRegistered[navigator] || $.isDeactivated[navigator]) revert NotANavigator(navigator);
+    _validateNavigatorCanAccept($, navigator, amount);
 
-    // Navigator must be able to accept delegations (not exiting, above min stake)
-    if ($.exitAnnouncedRound[navigator] > 0 || $.stakedAmount[navigator] < $.minStake) {
-      revert NavigatorCannotAcceptDelegations(navigator);
-    }
+    $.citizenToNavigator[citizen].push(SafeCast.toUint48(block.number), uint208(uint160(navigator)));
+    $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(amount));
+    _pushTotalDelegated($, navigator, int256(amount));
 
-    // Check capacity (stake >= 10% of total delegated)
-    uint256 currentTotal = _currentTotalDelegated($, navigator);
-    uint256 totalAfter = currentTotal + amount;
-    if ($.stakedAmount[navigator] * 10 < totalAfter) {
-      uint256 maxCapacity = $.stakedAmount[navigator] * 10;
-      uint256 remaining = maxCapacity > currentTotal ? maxCapacity - currentTotal : 0;
-      revert ExceedsNavigatorCapacity(navigator, amount, remaining);
-    }
+    emit DelegationCreated(citizen, navigator, amount);
+  }
 
-    if (isIncrease) {
-      // Increase existing delegation
-      uint256 currentAmount = _currentDelegatedAmount($, citizen);
-      uint256 newAmount = currentAmount + amount;
-      $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newAmount));
-      _pushTotalDelegated($, navigator, int256(amount));
-      emit DelegationUpdated(citizen, navigator, newAmount);
-    } else {
-      // New delegation
-      $.citizenToNavigator[citizen].push(SafeCast.toUint48(block.number), uint208(uint160(navigator)));
-      $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(amount));
-      _pushTotalDelegated($, navigator, int256(amount));
-      emit DelegationCreated(citizen, navigator, amount);
-    }
+  /// @notice Increase delegation to the current navigator
+  /// @dev Citizen must already be delegated. Navigator must be active and have capacity for the additional amount.
+  /// @param citizen The citizen address
+  /// @param amount The additional VOT3 amount to delegate
+  function increaseDelegation(address citizen, uint256 amount) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if (amount == 0) revert ZeroDelegationAmount();
+
+    address currentNavigator = _currentNavigator($, citizen);
+    if (currentNavigator == address(0)) revert NotDelegated(citizen);
+    if (_isNavigatorDead($, currentNavigator)) revert NotDelegated(citizen);
+
+    _validateNavigatorCanAccept($, currentNavigator, amount);
+
+    uint256 currentAmount = _currentDelegatedAmount($, citizen);
+    uint256 newTotal = currentAmount + amount;
+    $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newTotal));
+    _pushTotalDelegated($, currentNavigator, int256(amount));
+
+    emit DelegationIncreased(citizen, currentNavigator, amount, newTotal);
   }
 
   /// @notice Partially reduce delegation amount
@@ -152,7 +143,7 @@ library NavigatorDelegationUtils {
       _removeDelegation($, citizen, currentNavigator);
       emit DelegationRemoved(citizen, currentNavigator);
     } else {
-      emit DelegationUpdated(citizen, currentNavigator, newAmount);
+      emit DelegationDecreased(citizen, currentNavigator, reduceBy, newAmount);
     }
   }
 
@@ -343,6 +334,25 @@ library NavigatorDelegationUtils {
   }
 
   /// @dev Clear a citizen's delegation checkpoint
+  /// @dev Validate that navigator can accept new delegation of the given amount
+  function _validateNavigatorCanAccept(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address navigator,
+    uint256 amount
+  ) private view {
+    if (!$.isRegistered[navigator] || $.isDeactivated[navigator]) revert NotANavigator(navigator);
+    if ($.exitAnnouncedRound[navigator] > 0 || $.stakedAmount[navigator] < $.minStake) {
+      revert NavigatorCannotAcceptDelegations(navigator);
+    }
+    uint256 currentTotal = _currentTotalDelegated($, navigator);
+    uint256 totalAfter = currentTotal + amount;
+    if ($.stakedAmount[navigator] * 10 < totalAfter) {
+      uint256 maxCapacity = $.stakedAmount[navigator] * 10;
+      uint256 remaining = maxCapacity > currentTotal ? maxCapacity - currentTotal : 0;
+      revert ExceedsNavigatorCapacity(navigator, amount, remaining);
+    }
+  }
+
   function _removeDelegation(
     NavigatorStorageTypes.NavigatorStorage storage $,
     address citizen,

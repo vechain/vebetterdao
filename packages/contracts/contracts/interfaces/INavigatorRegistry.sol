@@ -170,28 +170,30 @@ interface INavigatorRegistry {
 
   // -- Delegation --
 
-  /// @notice Emitted when a citizen delegates VOT3 to a navigator
+  /// @notice Emitted when a citizen delegates VOT3 to a navigator for the first time
   /// @param citizen The delegating citizen address
   /// @param navigator The navigator receiving the delegation
   /// @param amount The VOT3 amount delegated
   event DelegationCreated(address indexed citizen, address indexed navigator, uint256 amount);
 
-  /// @notice Emitted when a citizen changes their delegation amount
+  /// @notice Emitted when a citizen increases their existing delegation
   /// @param citizen The citizen address
   /// @param navigator The navigator address
-  /// @param newAmount The updated delegation amount
-  event DelegationUpdated(address indexed citizen, address indexed navigator, uint256 newAmount);
+  /// @param addedAmount The additional VOT3 delegated
+  /// @param newTotal The new total delegation amount
+  event DelegationIncreased(address indexed citizen, address indexed navigator, uint256 addedAmount, uint256 newTotal);
+
+  /// @notice Emitted when a citizen reduces their delegation (but doesn't fully remove)
+  /// @param citizen The citizen address
+  /// @param navigator The navigator address
+  /// @param removedAmount The VOT3 amount removed
+  /// @param newTotal The new total delegation amount
+  event DelegationDecreased(address indexed citizen, address indexed navigator, uint256 removedAmount, uint256 newTotal);
 
   /// @notice Emitted when a citizen fully undelegates from a navigator
   /// @param citizen The citizen address
   /// @param navigator The navigator address
   event DelegationRemoved(address indexed citizen, address indexed navigator);
-
-  /// @notice Emitted when a citizen requests to change navigator (takes effect next round)
-  /// @param citizen The citizen address
-  /// @param oldNavigator The previous navigator address
-  /// @param newNavigator The new navigator address
-  event NavigatorChangeRequested(address indexed citizen, address indexed oldNavigator, address indexed newNavigator);
 
   // -- Voting --
 
@@ -275,10 +277,14 @@ interface INavigatorRegistry {
 
   // ======================== Delegation ======================== //
 
-  /// @notice Delegate VOT3 to a navigator
+  /// @notice Delegate VOT3 to a navigator (first-time only)
   /// @param navigator The navigator to delegate to
   /// @param amount The VOT3 amount to delegate
   function delegate(address navigator, uint256 amount) external;
+
+  /// @notice Increase delegation to the current navigator
+  /// @param amount The additional VOT3 to delegate
+  function increaseDelegation(uint256 amount) external;
 
   /// @notice Partially reduce delegation amount
   /// @param reduceBy The VOT3 amount to reduce delegation by

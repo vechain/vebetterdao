@@ -12,7 +12,7 @@ import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
 import { handleAmountInput } from "@/components/PowerUpModal/utils"
-import { useDelegateToNavigator } from "@/hooks/navigator/useDelegateToNavigator"
+import { useIncreaseDelegation } from "@/hooks/navigator/useIncreaseDelegation"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -61,7 +61,7 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav, exitMod
     if (isOpen) setNewAmount(exitMode ? "0" : currentDelegatedNum.toString())
   }, [isOpen, currentDelegatedNum, exitMode])
 
-  const { sendTransaction: sendDelegate } = useDelegateToNavigator({ onSuccess: onClose })
+  const { sendTransaction: sendIncrease } = useIncreaseDelegation({ onSuccess: onClose })
   const { sendTransaction: sendReduce } = useReduceDelegation({ onSuccess: onClose })
   const { sendTransaction: sendUndelegate } = useUndelegate({ onSuccess: onClose })
 
@@ -73,9 +73,9 @@ export const ManageDelegationModal = ({ isOpen, onClose, navigator: nav, exitMod
     } else if (isDecreasing) {
       sendReduce({ amount: Math.abs(delta).toString() })
     } else if (isIncreasing) {
-      sendDelegate({ navigatorAddress: nav.address, amount: delta.toString() })
+      sendIncrease({ amount: delta.toString() })
     }
-  }, [isValid, isFullRemoval, isDecreasing, isIncreasing, delta, sendUndelegate, sendReduce, sendDelegate, nav.address])
+  }, [isValid, isFullRemoval, isDecreasing, isIncreasing, delta, sendUndelegate, sendReduce, sendIncrease])
 
   const getButtonLabel = () => {
     if (isFullRemoval) return t("Exit all delegation")

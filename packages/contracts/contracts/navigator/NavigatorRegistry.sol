@@ -200,6 +200,13 @@ contract NavigatorRegistry is
     // VOT3 transfer lock is enforced by VOT3._update() reading getDelegatedAmount() from this contract
   }
 
+  /// @notice Increase delegation to the current navigator
+  /// @param amount Additional VOT3 to delegate
+  function increaseDelegation(uint256 amount) external nonReentrant {
+    NavigatorDelegationUtils.increaseDelegation(_msgSender(), amount);
+    // VOT3 lock auto-adjusts — VOT3._update() reads current delegation from this contract
+  }
+
   /// @notice Partially reduce delegation amount
   /// @param reduceBy Amount of VOT3 to reduce from current delegation
   function reduceDelegation(uint256 reduceBy) external nonReentrant {

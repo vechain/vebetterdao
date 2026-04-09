@@ -74,27 +74,22 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       )
     })
 
-    it("should increase delegation when citizen delegates to the same navigator again", async function () {
+    it("should revert with AlreadyDelegated when citizen delegates again (use increaseDelegation instead)", async function () {
       await getVot3Tokens(citizen1, "2000")
-      const amount1 = ethers.parseEther("500")
-      const amount2 = ethers.parseEther("300")
+      const amount = ethers.parseEther("500")
 
-      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount1)
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount)
 
-      // Second delegation to same navigator should add to existing
-      await expect(navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount2))
-        .to.emit(navigatorRegistry, "DelegationUpdated")
-        .withArgs(citizen1.address, navigator1.address, amount1 + amount2)
-
-      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(amount1 + amount2)
-      expect(await navigatorRegistry.getTotalDelegated(navigator1.address)).to.equal(amount1 + amount2)
+      // Second delegate() to same navigator should revert
+      await expect(
+        navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "AlreadyDelegated")
     })
 
     it("should revert with AlreadyDelegated when citizen delegates to a different navigator", async function () {
       await getVot3Tokens(citizen1, "2000")
       const amount = ethers.parseEther("500")
 
-      // Register a second navigator
       const navigator2 = otherAccount
       await registerNavigator(navigator2)
 
@@ -184,16 +179,63 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
     })
   })
 
+  // ======================== increaseDelegation() ======================== //
+
+  describe("increaseDelegation()", function () {
+    it("should increase delegation and emit DelegationIncreased", async function () {
+      await getVot3Tokens(citizen1, "2000")
+      const initial = ethers.parseEther("500")
+      const increase = ethers.parseEther("300")
+
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, initial)
+
+      await expect(navigatorRegistry.connect(citizen1).increaseDelegation(increase))
+        .to.emit(navigatorRegistry, "DelegationIncreased")
+        .withArgs(citizen1.address, navigator1.address, increase, initial + increase)
+
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(initial + increase)
+      expect(await navigatorRegistry.getTotalDelegated(navigator1.address)).to.equal(initial + increase)
+    })
+
+    it("should revert with NotDelegated when citizen is not delegated", async function () {
+      await getVot3Tokens(citizen1, "1000")
+
+      await expect(
+        navigatorRegistry.connect(citizen1).increaseDelegation(ethers.parseEther("100")),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NotDelegated")
+    })
+
+    it("should revert with ZeroDelegationAmount when amount is 0", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+
+      await expect(navigatorRegistry.connect(citizen1).increaseDelegation(0)).to.be.revertedWithCustomError(
+        navigatorRegistry,
+        "ZeroDelegationAmount",
+      )
+    })
+
+    it("should revert with ExceedsNavigatorCapacity when increase exceeds capacity", async function () {
+      await getVot3Tokens(citizen1, "600000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("100"))
+
+      // Navigator staked 50K, capacity = 500K. Already 100 delegated. Trying to add 500K should fail.
+      await expect(
+        navigatorRegistry.connect(citizen1).increaseDelegation(ethers.parseEther("500000")),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "ExceedsNavigatorCapacity")
+    })
+  })
+
   // ======================== reduceDelegation() ======================== //
 
   describe("reduceDelegation()", function () {
-    it("should partially reduce delegation and emit DelegationUpdated", async function () {
+    it("should partially reduce delegation and emit DelegationDecreased", async function () {
       await getVot3Tokens(citizen1, "1000")
       await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
 
       await expect(navigatorRegistry.connect(citizen1).reduceDelegation(ethers.parseEther("200")))
-        .to.emit(navigatorRegistry, "DelegationUpdated")
-        .withArgs(citizen1.address, navigator1.address, ethers.parseEther("300"))
+        .to.emit(navigatorRegistry, "DelegationDecreased")
+        .withArgs(citizen1.address, navigator1.address, ethers.parseEther("200"), ethers.parseEther("300"))
 
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("300"))
     })
