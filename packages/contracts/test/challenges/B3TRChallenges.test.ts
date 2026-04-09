@@ -4,6 +4,7 @@ import { deployProxy } from "../../scripts/helpers"
 import { B3TR, B3TRChallenges, MockPassportActions, MockRoundGovernor, MockX2EarnApps } from "../../typechain-types"
 
 const STAKE_AMOUNT = ethers.parseEther("100")
+const MIN_BET_AMOUNT = ethers.parseEther("100")
 const INITIAL_BALANCE = ethers.parseEther("1000")
 const APP_1 = ethers.keccak256(ethers.toUtf8Bytes("app-1"))
 const APP_2 = ethers.keccak256(ethers.toUtf8Bytes("app-2"))
@@ -80,6 +81,7 @@ async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: numb
       maxChallengeDuration: 4,
       maxSelectedApps: 5,
       maxParticipants,
+      minBetAmount: MIN_BET_AMOUNT,
     },
     {
       admin: admin.address,
@@ -493,6 +495,7 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await challenges.maxChallengeDuration()).to.equal(4n)
     expect(await challenges.maxSelectedApps()).to.equal(5n)
     expect(await challenges.maxParticipants()).to.equal(100n)
+    expect(await challenges.minBetAmount()).to.equal(MIN_BET_AMOUNT)
 
     await roundGovernor.setCurrentRoundId(1)
     await createChallenge(challenges)
@@ -604,6 +607,11 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await expect(challenges.setMaxParticipants(50)).to.emit(challenges, "MaxParticipantsUpdated").withArgs(100, 50)
     expect(await challenges.maxParticipants()).to.equal(50n)
+
+    await expect(challenges.setMinBetAmount(ethers.parseEther("150")))
+      .to.emit(challenges, "MinBetAmountUpdated")
+      .withArgs(MIN_BET_AMOUNT, ethers.parseEther("150"))
+    expect(await challenges.minBetAmount()).to.equal(ethers.parseEther("150"))
   })
 
   it("allows admin to withdraw all funds from a pending challenge", async function () {
@@ -634,6 +642,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await expect(challenges.setMaxChallengeDuration(0)).to.be.revertedWithCustomError(challenges, "InvalidAmount")
     await expect(challenges.setMaxSelectedApps(0)).to.be.revertedWithCustomError(challenges, "InvalidAmount")
     await expect(challenges.setMaxParticipants(0)).to.be.revertedWithCustomError(challenges, "InvalidAmount")
+    await expect(challenges.setMinBetAmount(0)).to.be.revertedWithCustomError(challenges, "InvalidAmount")
   })
 
   it("reverts admin functions from unauthorized callers", async function () {
@@ -644,6 +653,10 @@ describe("B3TRChallenges - @shard9a", function () {
       "ChallengesUnauthorizedUser",
     )
     await expect(challenges.connect(alice).setMaxChallengeDuration(10)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengesUnauthorizedUser",
+    )
+    await expect(challenges.connect(alice).setMinBetAmount(ethers.parseEther("150"))).to.be.revertedWithCustomError(
       challenges,
       "ChallengesUnauthorizedUser",
     )
@@ -663,6 +676,26 @@ describe("B3TRChallenges - @shard9a", function () {
       challenges,
       "InvalidAmount",
     )
+  })
+
+  it("rejects stake challenge below minimum bet amount", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+    const belowMinimumBetAmount = ethers.parseEther("99")
+
+    await expect(createChallenge(challenges, { stakeAmount: belowMinimumBetAmount }))
+      .to.be.revertedWithCustomError(challenges, "BetAmountBelowMinimum")
+      .withArgs(belowMinimumBetAmount, MIN_BET_AMOUNT)
+  })
+
+  it("enforces the updated minimum bet amount", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+    await challenges.setMinBetAmount(ethers.parseEther("150"))
+
+    await expect(createChallenge(challenges))
+      .to.be.revertedWithCustomError(challenges, "BetAmountBelowMinimum")
+      .withArgs(STAKE_AMOUNT, ethers.parseEther("150"))
   })
 
   it("auto-calculates startRound when set to 0", async function () {
@@ -714,6 +747,22 @@ describe("B3TRChallenges - @shard9a", function () {
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.participantCount).to.equal(0n)
+  })
+
+  it("rejects sponsored challenge below minimum prize amount", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+    const belowMinimumPrizeAmount = ethers.parseEther("99")
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        thresholdMode: ThresholdMode.None,
+        stakeAmount: belowMinimumPrizeAmount,
+      }),
+    )
+      .to.be.revertedWithCustomError(challenges, "BetAmountBelowMinimum")
+      .withArgs(belowMinimumPrizeAmount, MIN_BET_AMOUNT)
   })
 
   it("creates challenge with invitees at creation time", async function () {

@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達しました",
   "Minimum actions": "最小アクション数",
   "Minimum actions must be greater than 0": "最小アクション数は0より大きくなければなりません",
+  "Minimum amount is {{amount}} B3TR": "最低金額は{{amount}} B3TRです",
   "Mint": "ミント",
   "Mint NFT": "NFTを発行する",
   "Minting your Creator NFT...": "クリエイターNFTをミント中...",

@@ -47,6 +47,7 @@ export function createMainnetConfig() {
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
+    CHALLENGES_MIN_BET_AMOUNT: 100000000000000000000n, // 100 B3TR
 
     CONTRACTS_ADMIN_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4",
     VOTE_2_EARN_POOL_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4", //temporarily pointing to CONTRACTS_ADMIN_ADDRESS, then updated in the deploy script to point to the voterReward contract

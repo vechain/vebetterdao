@@ -1,4 +1,4 @@
-import { parseEther } from "ethers"
+import { formatEther, parseEther } from "ethers"
 
 import { ChallengeVisibility, ThresholdMode } from "@/api/challenges/types"
 import { CreateChallengeFormData } from "@/api/challenges/useChallengeActions"
@@ -6,6 +6,19 @@ import { CreateChallengeFormData } from "@/api/challenges/useChallengeActions"
 export const MAX_SELECTED_APPS = 5
 export const QUICK_AMOUNTS = ["50", "100", "250"] as const
 export const QUICK_THRESHOLDS = ["1", "5", "10"] as const
+
+const formatTokenAmount = (value: bigint): string => {
+  const formatted = formatEther(value)
+  const [whole = formatted, decimal] = formatted.split(".")
+  if (!decimal) return whole
+  const trimmedDecimal = decimal.replace(/0+$/, "")
+  return trimmedDecimal ? `${whole}.${trimmedDecimal}` : whole
+}
+
+export const getMinimumBetQuickAmounts = (minBetAmount: bigint): string[] => {
+  const baseAmount = minBetAmount > 0n ? minBetAmount : parseEther("100")
+  return [baseAmount, baseAmount * 2n, baseAmount * 5n].map(formatTokenAmount)
+}
 
 export const STEP_ORDER = [
   "kind",

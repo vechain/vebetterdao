@@ -40,7 +40,12 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     ) {
       revert ZeroAddress();
     }
-    if (data.maxChallengeDuration == 0 || data.maxSelectedApps == 0 || data.maxParticipants == 0) revert InvalidAmount();
+    if (
+      data.maxChallengeDuration == 0 ||
+      data.maxSelectedApps == 0 ||
+      data.maxParticipants == 0 ||
+      data.minBetAmount == 0
+    ) revert InvalidAmount();
 
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -50,6 +55,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     $.maxChallengeDuration = data.maxChallengeDuration;
     $.maxSelectedApps = data.maxSelectedApps;
     $.maxParticipants = data.maxParticipants;
+    _setMinBetAmount(data.minBetAmount);
 
     _initializeAddresses(
       data.b3trAddress,
@@ -87,6 +93,10 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
 
   function maxParticipants() external view returns (uint256) {
     return ChallengeStorageTypes.getChallengesStorage().maxParticipants;
+  }
+
+  function minBetAmount() external view returns (uint256) {
+    return ChallengeStorageTypes.getChallengesStorage().minBetAmount;
   }
 
   function getChallenge(uint256 challengeId) external view returns (ChallengeTypes.ChallengeView memory) {
@@ -272,6 +282,10 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     emit MaxParticipantsUpdated(oldValue, newValue);
   }
 
+  function setMinBetAmount(uint256 newValue) external nonReentrant onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    _setMinBetAmount(newValue);
+  }
+
   function _setB3TRAddress(address newAddress) private {
     if (newAddress == address(0)) revert ZeroAddress();
 
@@ -310,6 +324,16 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     $.x2EarnApps = IX2EarnApps(newAddress);
 
     emit X2EarnAppsAddressUpdated(oldAddress, newAddress);
+  }
+
+  function _setMinBetAmount(uint256 newValue) private {
+    if (newValue == 0) revert InvalidAmount();
+
+    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
+    uint256 oldValue = $.minBetAmount;
+    $.minBetAmount = newValue;
+
+    emit MinBetAmountUpdated(oldValue, newValue);
   }
 
   function _initializeAddresses(

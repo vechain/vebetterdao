@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)",
   "Minimum actions": "最少操作數",
   "Minimum actions must be greater than 0": "最少操作數必須大於0",
+  "Minimum amount is {{amount}} B3TR": "最低金額為 {{amount}} B3TR",
   "Mint": "鑄造",
   "Mint NFT": "鑄造NFT",
   "Minting your Creator NFT...": "正在鑄造您的創作者 NFT...",

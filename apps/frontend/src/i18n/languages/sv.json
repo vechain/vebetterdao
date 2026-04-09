@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minsta <Link>kvorum</Link> ({{quorumNumerator}}%) nått",
   "Minimum actions": "Minsta åtgärder",
   "Minimum actions must be greater than 0": "Minsta åtgärder måste vara större än 0",
+  "Minimum amount is {{amount}} B3TR": "Minimibeloppet är {{amount}} B3TR",
   "Mint": "Prägla",
   "Mint NFT": "Skapa NFT",
   "Minting your Creator NFT...": "Ditt Creator NFT mintas...",

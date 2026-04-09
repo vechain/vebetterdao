@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)",
   "Minimum actions": "Hành động tối thiểu",
   "Minimum actions must be greater than 0": "Hành động tối thiểu phải lớn hơn 0",
+  "Minimum amount is {{amount}} B3TR": "Số tiền tối thiểu là {{amount}} B3TR",
   "Mint": "Đúc",
   "Mint NFT": "Tạo NFT",
   "Minting your Creator NFT...": "Đang đúc NFT Nhà sáng tạo của bạn...",

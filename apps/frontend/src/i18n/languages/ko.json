@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "최소 <Link>정족수</Link> ({{quorumNumerator}}%) 달성",
   "Minimum actions": "최소 액션",
   "Minimum actions must be greater than 0": "최소 액션은 0보다 커야 합니다",
+  "Minimum amount is {{amount}} B3TR": "최소 금액은 {{amount}} B3TR입니다",
   "Mint": "발행",
   "Mint NFT": "NFT 생성",
   "Minting your Creator NFT...": "크리에이터 NFT 발행 중...",

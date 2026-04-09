@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Raggiunto il <Link>quorum</Link> minimo ({{quorumNumerator}}%)",
   "Minimum actions": "Azioni minime",
   "Minimum actions must be greater than 0": "Le azioni minime devono essere maggiori di 0",
+  "Minimum amount is {{amount}} B3TR": "L'importo minimo è {{amount}} B3TR",
   "Mint": "Conia",
   "Mint NFT": "Conia NFT",
   "Minting your Creator NFT...": "Conio del tuo NFT Creatore in corso...",

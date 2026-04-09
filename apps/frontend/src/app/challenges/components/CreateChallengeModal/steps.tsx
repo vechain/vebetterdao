@@ -23,8 +23,8 @@ import { getInviteeValidationMessage } from "../inviteeValidation"
 import { SummaryItem } from "./ChatBubbles"
 import {
   getChoiceVariant,
+  getMinimumBetQuickAmounts,
   primaryVariant,
-  QUICK_AMOUNTS,
   QUICK_THRESHOLDS,
   tertiaryVariant,
   type ChallengeFlowStep,
@@ -56,6 +56,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     hasInvalidStartRound,
     hasReachedSelectedAppsLimit,
     stakeAmountWei,
+    minBetAmountWei,
     b3trBalance,
     isB3trBalanceLoading,
     filteredApps,
@@ -66,6 +67,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     appSearch,
     inviteeErrorKeys,
     canConfirmInvitees,
+    hasBelowMinimumBetAmount,
 
     kindChosen,
     amountConfirmed,
@@ -79,6 +81,8 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
   } = flow
 
   const amountLabelKey = isSponsored ? "Prize amount (B3TR)" : "Bet amount (B3TR)"
+  const quickAmounts = getMinimumBetQuickAmounts(minBetAmountWei)
+  const minimumBetAmount = quickAmounts[0] ?? "100"
   const currentQuickStartRounds = [minStartRound, minStartRound + 1, minStartRound + 2]
   const inviteesPreview = form.invitees.length === 0 ? t("Skip") : getCompactListLabel(form.invitees)
   const selectedAppsPreview = appScope === "all" ? t("All apps") : getCompactListLabel(selectedAppNames)
@@ -194,7 +198,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       controls: (
         <VStack align="stretch" gap="3">
           <HStack gap="2" flexWrap="wrap">
-            {QUICK_AMOUNTS.map(value => (
+            {quickAmounts.map(value => (
               <Button
                 key={value}
                 size="sm"
@@ -207,24 +211,28 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               </Button>
             ))}
           </HStack>
-          <Field.Root invalid={hasInsufficientB3tr}>
+          <Field.Root invalid={hasInsufficientB3tr || hasBelowMinimumBetAmount}>
             <Field.Label>{t(amountLabelKey)}</Field.Label>
             <Input
               type="number"
-              placeholder="100"
+              min={minimumBetAmount}
+              placeholder={minimumBetAmount}
               value={form.stakeAmount}
               onChange={e => {
                 flow.update("stakeAmount", e.target.value)
                 flow.setAmountConfirmed(false)
               }}
             />
+            {hasBelowMinimumBetAmount && (
+              <Field.ErrorText>{t("Minimum amount is {{amount}} B3TR", { amount: minimumBetAmount })}</Field.ErrorText>
+            )}
             {hasInsufficientB3tr && <Field.ErrorText>{t("Insufficient balance")}</Field.ErrorText>}
           </Field.Root>
           <HStack justify="flex-end">
             <Button
               size="sm"
               variant={primaryVariant}
-              disabled={stakeAmountWei === 0n || hasInsufficientB3tr}
+              disabled={stakeAmountWei === 0n || hasInsufficientB3tr || hasBelowMinimumBetAmount}
               onClick={flow.confirmAmount}>
               {t("Continue")}
             </Button>

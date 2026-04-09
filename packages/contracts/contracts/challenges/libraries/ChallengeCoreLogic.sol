@@ -20,6 +20,9 @@ library ChallengeCoreLogic {
     uint256 currentRound = _currentRound($);
 
     if (params.stakeAmount == 0) revert IChallenges.InvalidAmount();
+    if (params.stakeAmount < $.minBetAmount) {
+      revert IChallenges.BetAmountBelowMinimum(params.stakeAmount, $.minBetAmount);
+    }
 
     uint256 startRound = params.startRound == 0 ? currentRound + 1 : params.startRound;
     if (startRound <= currentRound) revert IChallenges.InvalidStartRound(startRound, currentRound);

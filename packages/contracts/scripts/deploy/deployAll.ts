@@ -1138,6 +1138,7 @@ export async function deployAll(config: ContractsConfig) {
         maxChallengeDuration: CHALLENGES_MAX_DURATION,
         maxSelectedApps: CHALLENGES_MAX_SELECTED_APPS,
         maxParticipants: CHALLENGES_MAX_PARTICIPANTS,
+        minBetAmount: config.CHALLENGES_MIN_BET_AMOUNT,
       },
       {
         admin: config.CONTRACTS_ADMIN_ADDRESS,

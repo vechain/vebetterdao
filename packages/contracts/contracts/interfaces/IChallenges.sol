@@ -6,6 +6,7 @@ import { ChallengeTypes } from "../challenges/libraries/ChallengeTypes.sol";
 interface IChallenges {
   error ZeroAddress();
   error InvalidAmount();
+  error BetAmountBelowMinimum(uint256 provided, uint256 minimum);
   error InvalidStartRound(uint256 startRound, uint256 currentRound);
   error InvalidEndRound(uint256 startRound, uint256 endRound);
   error InvalidThresholdConfiguration();
@@ -40,6 +41,7 @@ interface IChallenges {
   event MaxChallengeDurationUpdated(uint256 oldValue, uint256 newValue);
   event MaxSelectedAppsUpdated(uint256 oldValue, uint256 newValue);
   event MaxParticipantsUpdated(uint256 oldValue, uint256 newValue);
+  event MinBetAmountUpdated(uint256 oldValue, uint256 newValue);
   event AdminWithdrawal(address indexed admin, address indexed recipient, uint256 amount);
 
   function initialize(
@@ -56,6 +58,8 @@ interface IChallenges {
   function maxSelectedApps() external view returns (uint256);
 
   function maxParticipants() external view returns (uint256);
+
+  function minBetAmount() external view returns (uint256);
 
   function getChallenge(uint256 challengeId) external view returns (ChallengeTypes.ChallengeView memory);
 
@@ -113,4 +117,6 @@ interface IChallenges {
   function setMaxSelectedApps(uint256 newValue) external;
 
   function setMaxParticipants(uint256 newValue) external;
+
+  function setMinBetAmount(uint256 newValue) external;
 }

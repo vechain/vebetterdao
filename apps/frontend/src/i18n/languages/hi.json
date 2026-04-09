@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "न्यूनतम <Link>कोरम</Link> ({{quorumNumerator}}%) पूरा हुआ",
   "Minimum actions": "न्यूनतम क्रियाएं",
   "Minimum actions must be greater than 0": "न्यूनतम क्रियाएं 0 से अधिक होनी चाहिए",
+  "Minimum amount is {{amount}} B3TR": "न्यूनतम राशि {{amount}} B3TR है",
   "Mint": "मिंट",
   "Mint NFT": "NFT बनाएं",
   "Minting your Creator NFT...": "आपका क्रिएटर NFT मिंट हो रहा है...",

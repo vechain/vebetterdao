@@ -38,6 +38,9 @@ export type ContractsConfig = {
   X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: number
   X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: number
 
+  // Challenges
+  CHALLENGES_MIN_BET_AMOUNT: bigint
+
   CONTRACTS_ADMIN_ADDRESS: string
 
   VOTE_2_EARN_POOL_ADDRESS: string

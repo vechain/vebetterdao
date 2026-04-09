@@ -1003,6 +1003,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>Cvorumul</Link> minim ({{quorumNumerator}}%) atins",
   "Minimum actions": "Acțiuni minime",
   "Minimum actions must be greater than 0": "Acțiunile minime trebuie să fie mai mari de 0",
+  "Minimum amount is {{amount}} B3TR": "Suma minimă este {{amount}} B3TR",
   "Mint": "Creează",
   "Mint NFT": "Creează NFT",
   "Minting your Creator NFT...": "Se creează Creator NFT-ul tău...",

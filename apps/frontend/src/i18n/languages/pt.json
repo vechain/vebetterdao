@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Quórum mínimo de <Link>quorum</Link> ({{quorumNumerator}}%) alcançado",
   "Minimum actions": "Ações mínimas",
   "Minimum actions must be greater than 0": "As ações mínimas devem ser maiores que 0",
+  "Minimum amount is {{amount}} B3TR": "O valor mínimo é {{amount}} B3TR",
   "Mint": "Criar",
   "Mint NFT": "Criar NFT",
   "Minting your Creator NFT...": "Cunhando seu NFT de Criador...",

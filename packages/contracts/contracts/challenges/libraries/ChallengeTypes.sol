@@ -60,6 +60,7 @@ library ChallengeTypes {
     uint256 maxChallengeDuration;
     uint256 maxSelectedApps;
     uint256 maxParticipants;
+    uint256 minBetAmount;
   }
 
   struct InitializationRoleData {

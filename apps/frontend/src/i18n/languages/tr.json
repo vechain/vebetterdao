@@ -1032,6 +1032,7 @@
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı",
   "Minimum actions": "Minimum eylemler",
   "Minimum actions must be greater than 0": "Minimum eylemler 0'dan büyük olmalıdır",
+  "Minimum amount is {{amount}} B3TR": "Minimum tutar {{amount}} B3TR'dir",
   "Mint": "Bas",
   "Mint NFT": "NFT Oluştur",
   "Minting your Creator NFT...": "Creator NFT'niz basılıyor...",

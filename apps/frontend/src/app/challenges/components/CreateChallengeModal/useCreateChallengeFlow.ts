@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { ChallengeKind, ChallengeVisibility, ThresholdMode } from "@/api/challenges/types"
 import { CreateChallengeFormData, useChallengeActions } from "@/api/challenges/useChallengeActions"
+import { defaultMinBetAmount, useMinBetAmount } from "@/api/challenges/useMinBetAmount"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 import { useGetAddressFromVetDomains } from "@/hooks/useGetVetDomains"
@@ -65,6 +66,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const actions = useChallengeActions()
   const { data: appsData, isLoading: isAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
+  const { data: minBetAmountResult } = useMinBetAmount()
   const hasReachedSelectedAppsLimit = form.appIds.length >= MAX_SELECTED_APPS
 
   const resetFlow = () => {
@@ -99,6 +101,9 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   )
 
   const stakeAmountWei = useMemo(() => parseAmount(form.stakeAmount), [form.stakeAmount])
+  const minBetAmountData = minBetAmountResult?.[0]
+  const minBetAmountWei =
+    typeof minBetAmountData === "bigint" && minBetAmountData > 0n ? minBetAmountData : defaultMinBetAmount
 
   const hasInsufficientB3tr =
     !!account?.address &&
@@ -117,6 +122,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const hasInvalidEndRound = form.endRound < form.startRound
   const duration = Math.max(1, form.endRound - form.startRound + 1)
   const isSponsored = form.kind === ChallengeKind.Sponsored
+  const hasBelowMinimumBetAmount = stakeAmountWei > 0n && stakeAmountWei < minBetAmountWei
   const isPrivate = form.visibility === ChallengeVisibility.Private
   const isSplitPrize = form.thresholdMode === ThresholdMode.SplitAboveThreshold
   const domainInvitees = useMemo(() => form.invitees.map(value => value.trim()).filter(isVetDomain), [form.invitees])
@@ -261,7 +267,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   }
 
   const confirmAmount = () => {
-    if (stakeAmountWei === 0n || hasInsufficientB3tr) return
+    if (stakeAmountWei === 0n || hasInsufficientB3tr || hasBelowMinimumBetAmount) return
     withTyping(() => setAmountConfirmed(true))
   }
 
@@ -289,6 +295,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const canUseAmount = (value: string) => {
     const parsedAmount = parseAmount(value)
     if (parsedAmount === 0n) return false
+    if (parsedAmount < minBetAmountWei) return false
     if (!account?.address || isB3trBalanceLoading) return true
     return parsedAmount <= BigInt(b3trBalance?.original ?? "0")
   }
@@ -325,6 +332,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     !hasInvalidStartRound &&
     !hasInvalidEndRound &&
     !hasInsufficientB3tr &&
+    !hasBelowMinimumBetAmount &&
     !hasInvalidThresholdConfiguration &&
     !isResolvingInvitees &&
     !hasInviteeErrors
@@ -350,7 +358,9 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
 
     // derived
     stakeAmountWei,
+    minBetAmountWei,
     hasInsufficientB3tr,
+    hasBelowMinimumBetAmount,
     thresholdValue,
     minStartRound,
     hasInvalidStartRound,
