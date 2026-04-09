@@ -306,12 +306,15 @@ describe("NavigatorRegistry - @shard19a", function () {
 
       it("should revert with StakeBelowMinimum when reducing below min stake", async function () {
         const navigator = otherAccounts[10]
-        await registerNavigator(navigator)
+        const minStake = await navigatorRegistry.getMinStake()
+        // Register with exactly min stake
+        await registerNavigator(navigator, minStake)
 
-        // Try to reduce to below minimum (50K staked, min is 50K, so any reduction should fail)
-        await expect(
-          navigatorRegistry.connect(navigator).reduceStake(ethers.parseEther("1")),
-        ).to.be.revertedWithCustomError(navigatorRegistry, "StakeBelowMinimum")
+        // Reducing by any amount should revert since we're at the minimum
+        await expect(navigatorRegistry.connect(navigator).reduceStake(1n)).to.be.revertedWithCustomError(
+          navigatorRegistry,
+          "StakeBelowMinimum",
+        )
       })
 
       it("should revert when reducing would break delegation capacity", async function () {

@@ -60,6 +60,9 @@ interface INavigatorRegistry {
 
   // -- Voting --
 
+  /// @notice Thrown when appIds and percentages arrays have different lengths
+  error LengthMismatch(uint256 appsLength, uint256 percentagesLength);
+
   /// @notice Thrown when allocation preferences array is empty
   error EmptyPreferences();
 
@@ -232,12 +235,8 @@ interface INavigatorRegistry {
   /// @notice Emitted when a navigator announces their intent to exit
   /// @param navigator The navigator address
   /// @param announcedAtRound The round when exit was announced
-  /// @param effectiveRound The round when exit becomes effective
-  event ExitAnnounced(address indexed navigator, uint256 announcedAtRound, uint256 effectiveRound);
-
-  /// @notice Emitted when a navigator finalizes their exit
-  /// @param navigator The navigator address
-  event ExitFinalized(address indexed navigator);
+  /// @param effectiveDeadline The block number when the navigator becomes dead
+  event ExitAnnounced(address indexed navigator, uint256 announcedAtRound, uint256 effectiveDeadline);
 
   /// @notice Emitted when a navigator is deactivated by governance
   /// @param navigator The navigator address

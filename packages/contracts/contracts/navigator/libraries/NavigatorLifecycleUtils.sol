@@ -24,10 +24,10 @@ library NavigatorLifecycleUtils {
   // ======================== Events ======================== //
 
   /// @notice Emitted when a navigator announces their exit
-  event ExitAnnounced(address indexed navigator, uint256 announcedAtRound);
+  event ExitAnnounced(address indexed navigator, uint256 announcedAtRound, uint256 effectiveDeadline);
 
   /// @notice Emitted when a navigator is deactivated by governance
-  event NavigatorDeactivated(address indexed navigator, uint256 slashPercentage);
+  event NavigatorDeactivatedEvent(address indexed navigator, uint256 slashPercentage);
 
   /// @notice Emitted when a navigator updates their metadata URI
   event MetadataURIUpdated(address indexed navigator, string newURI);
@@ -67,10 +67,14 @@ library NavigatorLifecycleUtils {
     $.exitAnnouncedRound[navigator] = currentRound;
 
     // Navigator stays alive through the notice period, dead after
-    uint256 effectiveDeadline = _getRoundDeadline($, currentRound + $.exitNoticePeriod);
+    // Can't call roundDeadline for a future round that doesn't exist yet,
+    // so calculate manually: currentRoundDeadline + (votingPeriod * exitNoticePeriod)
+    uint256 currentDeadline = _getRoundDeadline($, currentRound);
+    uint256 roundDuration = IXAllocationVotingGovernor($.xAllocationVoting).votingPeriod();
+    uint256 effectiveDeadline = currentDeadline + (roundDuration * $.exitNoticePeriod);
     $.navigatorDeactivated[navigator].push(SafeCast.toUint48(effectiveDeadline), 1);
 
-    emit ExitAnnounced(navigator, currentRound);
+    emit ExitAnnounced(navigator, currentRound, effectiveDeadline);
   }
 
   /// @notice Check if a navigator is in the exit process
@@ -99,7 +103,7 @@ library NavigatorLifecycleUtils {
       $.navigatorDeactivated[navigator].push(SafeCast.toUint48(deadline), 1);
     }
 
-    emit NavigatorDeactivated(navigator, 0);
+    emit NavigatorDeactivatedEvent(navigator, 0);
   }
 
   /// @notice Check if a navigator is deactivated

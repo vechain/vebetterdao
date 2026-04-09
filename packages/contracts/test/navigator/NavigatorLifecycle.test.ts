@@ -67,10 +67,16 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
   describe("announceExit()", function () {
     it("happy path: sets isExiting and emits ExitAnnounced with correct rounds", async function () {
       const currentRound = await xAllocationVoting.currentRoundId()
+      const currentDeadline = await xAllocationVoting.roundDeadline(currentRound)
+      const votingPeriod = await xAllocationVoting.votingPeriod()
+      const exitNoticePeriod = await navigatorRegistry.getExitNoticePeriod()
+      const expectedDeadline = currentDeadline + votingPeriod * exitNoticePeriod
 
       const tx = await navigatorRegistry.connect(navigator1).announceExit()
 
-      await expect(tx).to.emit(navigatorRegistry, "ExitAnnounced").withArgs(navigator1.address, currentRound)
+      await expect(tx)
+        .to.emit(navigatorRegistry, "ExitAnnounced")
+        .withArgs(navigator1.address, currentRound, expectedDeadline)
 
       expect(await navigatorRegistry.isExiting(navigator1.address)).to.be.true
     })
@@ -104,16 +110,10 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
   // ======================== 2. Deactivation ======================== //
 
   describe("Deactivation", function () {
-    it("deactivateNavigator: sets isDeactivated and emits NavigatorDeactivated", async function () {
+    it("deactivateNavigator: sets isDeactivated and emits NavigatorDeactivatedEvent", async function () {
       const tx = await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
-      const receipt = await tx.wait()
 
-      // NavigatorDeactivated event is emitted from the library via delegatecall.
-      // The library event name collides with an error name in NavigatorStakingUtils,
-      // so hardhat-chai-matchers can't match it. Verify via raw log topic instead.
-      const deactivatedTopic = ethers.id("NavigatorDeactivated(address,uint256)")
-      const hasEvent = receipt?.logs.some(log => log.topics[0] === deactivatedTopic)
-      expect(hasEvent).to.be.true
+      await expect(tx).to.emit(navigatorRegistry, "NavigatorDeactivatedEvent").withArgs(navigator1.address, 0)
 
       expect(await navigatorRegistry.isDeactivated(navigator1.address)).to.be.true
     })

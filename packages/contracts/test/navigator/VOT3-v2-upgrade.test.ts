@@ -44,10 +44,14 @@ describe("VOT3 - V2 Upgrade - @shard19a", function () {
 
   it("Should still allow convertToVOT3 and convertToB3TR after upgrade", async () => {
     const config = createLocalConfig()
-    const { vot3, b3tr, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true, config })
+    const { vot3, b3tr, owner, otherAccount, minterAccount } = await getOrDeployContractInstances({
+      forceDeploy: true,
+      config,
+    })
 
-    // Transfer B3TR to otherAccount
+    // Mint B3TR to owner so we can transfer
     const amount = ethers.parseEther("100")
+    await b3tr.connect(minterAccount).mint(owner.address, amount)
     await b3tr.connect(owner).transfer(otherAccount.address, amount)
 
     // Approve and convert to VOT3
@@ -63,7 +67,7 @@ describe("VOT3 - V2 Upgrade - @shard19a", function () {
 
   it("Should enforce delegation lock after upgrade — transfer blocked for locked portion", async () => {
     const config = createLocalConfig()
-    const { vot3, b3tr, navigatorRegistry, owner, otherAccounts } = await getOrDeployContractInstances({
+    const { vot3, b3tr, navigatorRegistry, owner, otherAccounts, minterAccount } = await getOrDeployContractInstances({
       forceDeploy: true,
       config,
     })
@@ -71,6 +75,9 @@ describe("VOT3 - V2 Upgrade - @shard19a", function () {
     const navigator = otherAccounts[10]
     const citizen = otherAccounts[11]
     const recipient = otherAccounts[12]
+
+    // Mint B3TR to owner for distribution
+    await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("10000000"))
 
     // Ensure VOT3 supply exists for max stake check
     await getVot3Tokens(owner, "10000000")

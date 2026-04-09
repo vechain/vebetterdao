@@ -361,17 +361,25 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
     })
 
     it("should disallow delegations when stake drops below minimum", async function () {
-      await delegateCitizen(citizen1, navigator1)
+      // Register a navigator with exactly minStake so one slash drops below
+      const minStake = await navigatorRegistry.getMinStake()
+      const navForSlash = otherAccounts[15]
+      await b3tr.connect(minterAccount).mint(navForSlash.address, minStake)
+      await b3tr.connect(navForSlash).approve(await navigatorRegistry.getAddress(), minStake)
+      await navigatorRegistry.connect(navForSlash).register(minStake, "ipfs://test")
+
+      // Delegate so navigator has citizens (required for slashing to trigger)
+      await getVot3Tokens(citizen1, "100")
+      await navigatorRegistry.connect(citizen1).delegate(navForSlash.address, ethers.parseEther("100"))
 
       await bootstrapAndStartEmissions()
 
-      // Slash repeatedly to drop below minStake (50000 default)
-      // After 1 slash: 45000 < 50000 minStake => canAcceptDelegations = false
+      // After 1 slash: 10% of minStake removed => below minStake => canAcceptDelegations = false
       const round1 = await xAllocationVoting.currentRoundId()
       await waitForRoundToEnd(Number(round1))
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, round1)
+      await navigatorRegistry.reportMissedAllocationVote(navForSlash.address, round1)
 
-      expect(await navigatorRegistry.canAcceptDelegations(navigator1.address)).to.equal(false)
+      expect(await navigatorRegistry.canAcceptDelegations(navForSlash.address)).to.equal(false)
     })
   })
 

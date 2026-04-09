@@ -442,7 +442,7 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
     })
 
     it("mid-round delegation: getVotes unchanged until next round", async function () {
-      const newCitizen = otherAccounts[16]
+      const newCitizen = otherAccounts[13]
       await getVot3Tokens(newCitizen, "1000")
       await veBetterPassport.whitelist(newCitizen.address)
       await waitForNextBlock()
@@ -510,16 +510,19 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
     })
 
     it("getVotes returns full balance when navigator is dead at timepoint", async function () {
-      await waitForNextBlock()
-
-      // Deactivate the navigator
+      // Deactivate the navigator — checkpoint written at roundDeadline(currentRound)
       await navigatorRegistry.deactivateNavigator(navigator.address, 0, false)
+
+      // Wait for round to end so the timepoint is past the deadline checkpoint
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
       await waitForNextBlock()
 
       const block = await ethers.provider.getBlockNumber()
       const timepoint = block - 1
 
-      // Navigator was dead at timepoint (deactivation happened before) => full balance
+      // Navigator is dead at this timepoint (after round deadline) => full balance
       const govVotes = await governor.getVotes(citizen.address, timepoint)
       const xAllocVotes = await xAllocationVoting.getVotes(citizen.address, timepoint)
 
@@ -582,7 +585,7 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
     })
 
     it("getNavigatorAtTimepoint returns zero before delegation", async function () {
-      const newCitizen = otherAccounts[17]
+      const newCitizen = otherAccounts[14]
       await getVot3Tokens(newCitizen, "1000")
       await waitForNextBlock()
 
@@ -596,16 +599,19 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
     it("isDeactivatedAtTimepoint tracks navigator lifecycle", async function () {
       const blockBeforeExit = await ethers.provider.getBlockNumber()
 
-      // Navigator announces exit
+      // Navigator announces exit — checkpoint is at a FUTURE block (round deadline + notice period)
       await navigatorRegistry.connect(navigator).announceExit()
       await waitForNextBlock()
 
-      const blockAfterExit = await ethers.provider.getBlockNumber()
-
       // Before exit announcement: not deactivated
       expect(await navigatorRegistry.isDeactivatedAtTimepoint(navigator.address, blockBeforeExit)).to.be.false
-      // After exit announcement: deactivated
-      expect(await navigatorRegistry.isDeactivatedAtTimepoint(navigator.address, blockAfterExit - 1)).to.be.true
+
+      // Immediately after announcement: NOT yet deactivated (checkpoint is in the future)
+      const blockAfterExit = await ethers.provider.getBlockNumber()
+      expect(await navigatorRegistry.isDeactivatedAtTimepoint(navigator.address, blockAfterExit - 1)).to.be.false
+
+      // But isExiting is true
+      expect(await navigatorRegistry.isExiting(navigator.address)).to.be.true
     })
 
     it("isDelegatedAtTimepoint returns false after undelegation", async function () {
