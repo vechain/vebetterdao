@@ -3,12 +3,10 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   Card,
   Heading,
   HStack,
   IconButton,
-  Pagination,
   SimpleGrid,
   Skeleton,
   Stack,
@@ -16,8 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { NavArrowLeft, NavArrowRight } from "iconoir-react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 import { A11y, Navigation } from "swiper/modules"
@@ -61,19 +58,10 @@ export const ChallengesPageContent = () => {
     AnalyticsUtils.trackPage("Challenges")
   }, [])
 
-  const OPEN_PAGE_SIZE = 12
-  const [openPage, setOpenPage] = useState(1)
-
-  const hasClaimRewards = grouped.claimRewards.length > 0
-  const hasActive = grouped.activeParticipating.length > 0
-  const hasInvites = grouped.pendingInvites.length > 0
-  const hasPublic = grouped.publicJoinable.length > 0
-  const hasPast = grouped.past.length > 0
-
-  const pagedPublic = useMemo(
-    () => grouped.publicJoinable.slice((openPage - 1) * OPEN_PAGE_SIZE, openPage * OPEN_PAGE_SIZE),
-    [grouped.publicJoinable, openPage],
-  )
+  const hasNeededActions = grouped.neededActions.items.length > 0
+  const hasActive = grouped.active.items.length > 0
+  const hasOpen = grouped.open.items.length > 0
+  const hasHistory = grouped.history.items.length > 0
 
   return (
     <MotionVStack renderInnerStack={false} gap="6">
@@ -95,29 +83,41 @@ export const ChallengesPageContent = () => {
           </HStack>
         </Stack>
 
-        {/* Claim rewards - compact list */}
-        {(hasClaimRewards || (isLoading && viewerAddress)) && (
-          <ChallengeHubSection title={t("Claim rewards")} count={grouped.claimRewards.length}>
-            {isLoading ? (
+        {/* Needed actions */}
+        {(hasNeededActions || (isLoading && viewerAddress)) && (
+          <ChallengeHubSection title={t("Needed actions")} count={grouped.neededActions.items.length}>
+            {grouped.neededActions.isLoading ? (
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
                 {[0, 1].map(i => (
                   <CompactSkeleton key={i} />
                 ))}
               </SimpleGrid>
             ) : (
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-                {grouped.claimRewards.map(c => (
-                  <ChallengeCompactCard key={c.challengeId} challenge={c} />
-                ))}
-              </SimpleGrid>
+              <VStack gap="3" align="stretch">
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                  {grouped.neededActions.items.map(c => (
+                    <ChallengeCompactCard key={c.challengeId} challenge={c} />
+                  ))}
+                </SimpleGrid>
+                {grouped.neededActions.hasNextPage && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => grouped.neededActions.fetchNextPage()}
+                    loading={grouped.neededActions.isFetchingNextPage}
+                    w="full">
+                    {t("Load more")}
+                  </Button>
+                )}
+              </VStack>
             )}
           </ChallengeHubSection>
         )}
 
         {/* Active participating - horizontal carousel */}
         {(hasActive || isLoading) && (
-          <ChallengeHubSection title={t("Your active challenges")} count={grouped.activeParticipating.length}>
-            {isLoading ? (
+          <ChallengeHubSection title={t("Your active challenges")} count={grouped.active.items.length}>
+            {grouped.active.isLoading ? (
               <HStack gap="4">
                 {[0, 1].map(i => (
                   <Box key={i} minW={{ base: "85vw", md: "420px" }}>
@@ -140,7 +140,7 @@ export const ChallengesPageContent = () => {
                     768: { slidesPerView: 1.5, spaceBetween: 16 },
                     1024: { slidesPerView: 2.2, spaceBetween: 20 },
                   }}>
-                  {grouped.activeParticipating.map(c => (
+                  {grouped.active.items.map(c => (
                     <SwiperSlide key={c.challengeId} style={{ height: "auto" }}>
                       <ChallengeCard challenge={c} currentRound={round} />
                     </SwiperSlide>
@@ -174,78 +174,27 @@ export const ChallengesPageContent = () => {
                   aria-label="Next challenge">
                   <FaArrowRight />
                 </IconButton>
+                {grouped.active.hasNextPage && (
+                  <Box px={{ base: "4", md: "16" }} pt="1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => grouped.active.fetchNextPage()}
+                      loading={grouped.active.isFetchingNextPage}
+                      w={{ base: "full", md: "auto" }}>
+                      {t("Load more")}
+                    </Button>
+                  </Box>
+                )}
               </Box>
             )}
           </ChallengeHubSection>
         )}
 
-        {/* Pending invites - horizontal carousel */}
-        {(hasInvites || (isLoading && viewerAddress)) && (
-          <ChallengeHubSection title={t("Pending invitations")} count={grouped.pendingInvites.length}>
-            {isLoading ? (
-              <HStack gap="4">
-                <Box minW={{ base: "85vw", md: "420px" }}>
-                  <CardSkeleton />
-                </Box>
-              </HStack>
-            ) : (
-              <Box position="relative" mx={{ base: "-4", md: "0" }}>
-                <Swiper
-                  modules={[A11y, Navigation]}
-                  spaceBetween={16}
-                  slidesPerView={1.15}
-                  style={{ padding: "4px 16px 16px" }}
-                  navigation={{
-                    nextEl: ".invites-swiper-next",
-                    prevEl: ".invites-swiper-prev",
-                  }}
-                  breakpoints={{
-                    768: { slidesPerView: 1.5, spaceBetween: 16 },
-                    1024: { slidesPerView: 2.2, spaceBetween: 20 },
-                  }}>
-                  {grouped.pendingInvites.map(c => (
-                    <SwiperSlide key={c.challengeId} style={{ height: "auto" }}>
-                      <ChallengeCard challenge={c} currentRound={round} />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-                <IconButton
-                  hideBelow="md"
-                  className="invites-swiper-prev"
-                  pos="absolute"
-                  zIndex={2}
-                  rounded="full"
-                  variant="outline"
-                  size="sm"
-                  left="-12"
-                  top="50%"
-                  transform="translateY(-50%)"
-                  aria-label="Previous invitation">
-                  <FaArrowLeft />
-                </IconButton>
-                <IconButton
-                  hideBelow="md"
-                  className="invites-swiper-next"
-                  pos="absolute"
-                  zIndex={2}
-                  rounded="full"
-                  variant="outline"
-                  size="sm"
-                  right="-12"
-                  top="50%"
-                  transform="translateY(-50%)"
-                  aria-label="Next invitation">
-                  <FaArrowRight />
-                </IconButton>
-              </Box>
-            )}
-          </ChallengeHubSection>
-        )}
-
-        {/* Public joinable - compact list */}
-        {(hasPublic || isLoading) && (
-          <ChallengeHubSection title={t("Open to join")} count={grouped.publicJoinable.length}>
-            {isLoading ? (
+        {/* Open challenges */}
+        {(hasOpen || isLoading) && (
+          <ChallengeHubSection title={t("Open to join")} count={grouped.open.items.length}>
+            {grouped.open.isLoading ? (
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
                 {[0, 1, 2].map(i => (
                   <CompactSkeleton key={i} />
@@ -254,66 +203,52 @@ export const ChallengesPageContent = () => {
             ) : (
               <VStack gap="3" align="stretch">
                 <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-                  {pagedPublic.map(c => (
+                  {grouped.open.items.map(c => (
                     <ChallengeCompactCard key={c.challengeId} challenge={c} />
                   ))}
                 </SimpleGrid>
-                {grouped.publicJoinable.length > OPEN_PAGE_SIZE && (
-                  <Pagination.Root
-                    mx={{ base: "auto", md: "unset" }}
-                    mt="2"
-                    count={grouped.publicJoinable.length}
-                    pageSize={OPEN_PAGE_SIZE}
-                    page={openPage}
-                    display="flex"
-                    flexWrap="wrap"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    gap="4"
-                    siblingCount={1}
-                    onPageChange={p => setOpenPage(p.page)}>
-                    <Pagination.PageText format="compact" textStyle="sm" />
-                    <ButtonGroup variant="ghost" size="xs" flexWrap="wrap">
-                      <Pagination.PrevTrigger asChild>
-                        <IconButton>
-                          <NavArrowLeft />
-                        </IconButton>
-                      </Pagination.PrevTrigger>
-                      <Pagination.Items
-                        render={p => (
-                          <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
-                            {p.value}
-                          </IconButton>
-                        )}
-                      />
-                      <Pagination.NextTrigger asChild>
-                        <IconButton>
-                          <NavArrowRight />
-                        </IconButton>
-                      </Pagination.NextTrigger>
-                    </ButtonGroup>
-                  </Pagination.Root>
+                {grouped.open.hasNextPage && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => grouped.open.fetchNextPage()}
+                    loading={grouped.open.isFetchingNextPage}
+                    w="full">
+                    {t("Load more")}
+                  </Button>
                 )}
               </VStack>
             )}
           </ChallengeHubSection>
         )}
 
-        {/* Past / completed */}
-        {(hasPast || (isLoading && viewerAddress)) && (
-          <ChallengeHubSection title={t("History")} count={grouped.past.length}>
-            {isLoading ? (
+        {/* History */}
+        {(hasHistory || (isLoading && viewerAddress)) && (
+          <ChallengeHubSection title={t("History")} count={grouped.history.items.length}>
+            {grouped.history.isLoading ? (
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
                 {[0, 1].map(i => (
                   <CompactSkeleton key={i} />
                 ))}
               </SimpleGrid>
             ) : (
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-                {grouped.past.map(c => (
-                  <ChallengeCompactCard key={c.challengeId} challenge={c} />
-                ))}
-              </SimpleGrid>
+              <VStack gap="3" align="stretch">
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                  {grouped.history.items.map(c => (
+                    <ChallengeCompactCard key={c.challengeId} challenge={c} />
+                  ))}
+                </SimpleGrid>
+                {grouped.history.hasNextPage && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => grouped.history.fetchNextPage()}
+                    loading={grouped.history.isFetchingNextPage}
+                    w="full">
+                    {t("Load more")}
+                  </Button>
+                )}
+              </VStack>
             )}
           </ChallengeHubSection>
         )}

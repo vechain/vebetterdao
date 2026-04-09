@@ -1,9 +1,10 @@
 import { getConfig } from "@repo/config"
+import { useQueryClient } from "@tanstack/react-query"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { useCallback } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
@@ -39,6 +40,33 @@ type ActionParams =
 export const useChallengeActions = () => {
   const challengesAddr = getConfig().challengesContractAddress
   const b3trAddr = getConfig().b3trContractAddress
+  const queryClient = useQueryClient()
+  const scheduledRefetchesRef = useRef<number[]>([])
+
+  const clearScheduledRefetches = useCallback(() => {
+    scheduledRefetchesRef.current.forEach(timeoutId => window.clearTimeout(timeoutId))
+    scheduledRefetchesRef.current = []
+  }, [])
+
+  useEffect(() => clearScheduledRefetches, [clearScheduledRefetches])
+
+  const refetchChallengeQueries = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["challenges"] }),
+      queryClient.refetchQueries({ queryKey: ["challenges", "hub"], type: "active" }),
+      queryClient.refetchQueries({ queryKey: ["challenges", "detail"], type: "active" }),
+    ])
+  }, [queryClient])
+
+  const scheduleFollowUpRefetches = useCallback(() => {
+    clearScheduledRefetches()
+    ;[1500, 4000, 8000].forEach(delay => {
+      const timeoutId = window.setTimeout(() => {
+        void refetchChallengeQueries()
+      }, delay)
+      scheduledRefetchesRef.current.push(timeoutId)
+    })
+  }, [clearScheduledRefetches, refetchChallengeQueries])
 
   const clauseBuilder = useCallback(
     (params: ActionParams): EnhancedClause[] => {
@@ -197,6 +225,7 @@ export const useChallengeActions = () => {
   const tx = useBuildTransaction<ActionParams>({
     clauseBuilder,
     refetchQueryKeys: [["challenges"]],
+    onSuccess: scheduleFollowUpRefetches,
     gasPadding: 0.3,
   })
 

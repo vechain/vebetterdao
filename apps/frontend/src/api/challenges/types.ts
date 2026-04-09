@@ -75,6 +75,23 @@ export interface ChallengeDetail extends ChallengeView {
   selectedApps: string[]
 }
 
+export type ChallengeSection = "needed-actions" | "active" | "open" | "history"
+
+export interface PaginatedChallengeSection {
+  items: ChallengeView[]
+  hasNextPage: boolean
+  isLoading: boolean
+  isFetchingNextPage: boolean
+  fetchNextPage: () => Promise<unknown>
+}
+
+export interface ChallengesHubData {
+  neededActions: PaginatedChallengeSection
+  active: PaginatedChallengeSection
+  open: PaginatedChallengeSection
+  history: PaginatedChallengeSection
+}
+
 export type ChallengeKindLabel = "Stake" | "Sponsored"
 export type ChallengeVisibilityLabel = "Public" | "Private"
 export type ChallengeStatusLabel = "Pending" | "Active" | "Finalized" | "Cancelled" | "Invalid"
