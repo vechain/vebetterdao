@@ -6,7 +6,19 @@ import { ChallengeStorageTypes } from "./ChallengeStorageTypes.sol";
 import { ChallengeTypes } from "./ChallengeTypes.sol";
 
 library ChallengeCoreLogic {
-  event ChallengeCreated(uint256 indexed challengeId, address indexed creator, uint256 indexed endRound, uint256 startRound);
+  event ChallengeCreated(
+    uint256 indexed challengeId,
+    address indexed creator,
+    uint256 indexed endRound,
+    ChallengeTypes.ChallengeKind kind,
+    ChallengeTypes.ChallengeVisibility visibility,
+    ChallengeTypes.ThresholdMode thresholdMode,
+    uint256 stakeAmount,
+    uint256 startRound,
+    uint256 threshold,
+    bool allApps,
+    bytes32[] selectedApps
+  );
   event ChallengeInviteAdded(uint256 indexed challengeId, address indexed invitee);
   event ChallengeJoined(uint256 indexed challengeId, address indexed participant);
   event ChallengeLeft(uint256 indexed challengeId, address indexed participant);
@@ -69,7 +81,7 @@ library ChallengeCoreLogic {
       _addParticipant(challengeId, msg.sender);
     }
 
-    emit ChallengeCreated(challengeId, msg.sender, params.endRound, startRound);
+    _emitChallengeCreated(challengeId, challenge);
 
     for (uint256 i; i < params.invitees.length; i++) {
       _addInvite(challengeId, params.invitees[i]);
@@ -260,6 +272,22 @@ library ChallengeCoreLogic {
     if (_currentRound($) >= challenge.startRound) {
       revert IChallenges.ChallengeNotPending(challengeId);
     }
+  }
+
+  function _emitChallengeCreated(uint256 challengeId, ChallengeTypes.Challenge storage challenge) private {
+    emit ChallengeCreated(
+      challengeId,
+      challenge.creator,
+      challenge.endRound,
+      challenge.kind,
+      challenge.visibility,
+      challenge.thresholdMode,
+      challenge.stakeAmount,
+      challenge.startRound,
+      challenge.threshold,
+      challenge.allApps,
+      challenge.appIds
+    );
   }
 
   function _addInvite(uint256 challengeId, address invitee) private {

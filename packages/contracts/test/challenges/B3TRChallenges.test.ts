@@ -122,7 +122,21 @@ describe("B3TRChallenges - @shard9a", function () {
     const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await expect(createChallenge(challenges))
+      .to.emit(challenges, "ChallengeCreated")
+      .withArgs(
+        1n,
+        admin.address,
+        3n,
+        ChallengeKind.Stake,
+        ChallengeVisibility.Public,
+        ThresholdMode.None,
+        STAKE_AMOUNT,
+        2n,
+        0n,
+        false,
+        [APP_1],
+      )
 
     const challenge = await challenges.getChallenge(1)
 
