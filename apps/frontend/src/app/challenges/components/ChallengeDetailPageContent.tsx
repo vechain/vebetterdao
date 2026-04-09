@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -10,6 +11,7 @@ import {
   IconButton,
   SimpleGrid,
   Skeleton,
+  Stack,
   Text,
   VStack,
   Wrap,
@@ -23,7 +25,13 @@ import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa6"
 import { LuPlus } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeStatus, SettlementMode, ThresholdMode } from "@/api/challenges/types"
+import {
+  ChallengeKind,
+  ChallengeStatus,
+  ChallengeVisibility,
+  SettlementMode,
+  ThresholdMode,
+} from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
@@ -35,21 +43,9 @@ import { MotionVStack } from "@/components/MotionVStack"
 import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
 import { ChallengeParticipantActionsSection } from "./ChallengeParticipantActionsSection"
+import { ChallengeStatTile } from "./ChallengeStatTile"
 import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
 import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
-
-const StatItem = ({ label, value, color }: { label: string; value: string | number; color?: string }) => {
-  return (
-    <VStack align="start" gap="1">
-      <Text textStyle="xxs" color="text.subtle" textTransform="uppercase" letterSpacing="0.08em" fontWeight="semibold">
-        {label}
-      </Text>
-      <Text textStyle="xl" fontWeight="bold" color={color}>
-        {typeof value === "number" ? humanNumber(value) : value}
-      </Text>
-    </VStack>
-  )
-}
 
 export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: string }) => {
   const { account } = useWallet()
@@ -105,6 +101,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   const showParticipatingBadge =
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
   const showSponsoringBadge = isSponsored && challenge.isCreator
+  const showInviteStats = challenge.visibility === ChallengeVisibility.Private
   const splitPrizeWinnerCount =
     challenge.status !== ChallengeStatus.Finalized || challenge.settlementMode !== SettlementMode.QualifiedSplit
       ? 0
@@ -139,116 +136,112 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
         <Card.Root variant="primary" p={{ base: "6", md: "8" }} gap="6" borderRadius="3xl" boxShadow="sm">
           <VStack align="stretch" gap="6">
             {/* Top: badges + title + meta */}
-            <VStack align="stretch" gap="4">
-              <HStack justify="space-between" align="center">
-                <HStack gap="3" align="center">
+            <Stack direction={{ base: "column", xl: "row" }} gap="6" align={{ base: "stretch", xl: "start" }}>
+              <VStack align="stretch" gap="4" flex="1">
+                <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
-                  <Heading size={{ base: "xl", md: "2xl" }}>
-                    {t("Challenge #{{id}}", { id: challenge.challengeId })}
-                  </Heading>
-                </HStack>
-                <ChallengeStatusBadge challenge={challenge} />
-              </HStack>
+                  <ChallengeStatusBadge challenge={challenge} />
+                  {showParticipatingBadge && (
+                    <Badge variant="positive" size="sm">
+                      {t("Participating")}
+                    </Badge>
+                  )}
+                  {showSponsoringBadge && (
+                    <Badge variant="warning" size="sm">
+                      {t("Sponsoring")}
+                    </Badge>
+                  )}
+                </Wrap>
 
-              <VStack align="stretch" gap="2">
-                <HStack flexWrap="wrap" gap="2" align="center">
-                  <HStack gap="1.5" bg="bg.secondary" borderRadius="full" px="2.5" py="1" align="center">
+                <Heading textStyle={{ base: "2xl", md: "4xl" }} lineHeight="1.02">
+                  {t("Challenge #{{id}}", { id: challenge.challengeId })}
+                </Heading>
+
+                <Wrap gap="2">
+                  <HStack gap="1.5" bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
                     <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" />
                     <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
                       {humanAddress(challenge.creator, 6, 4)}
                     </Text>
                   </HStack>
                   {createdAtLabel && (
-                    <Text color="text.subtle" textStyle="sm">
-                      {"•"} {createdAtLabel}
-                    </Text>
-                  )}
-                  <Text color="text.subtle" textStyle="sm">
-                    {"•"} {t("Start round")} {humanNumber(challenge.startRound)}
-                  </Text>
-                  {(showParticipatingBadge || showSponsoringBadge) && (
-                    <HStack flexWrap="wrap" gap="2">
-                      {showParticipatingBadge && (
-                        <HStack
-                          gap="1.5"
-                          bg="status.positive.subtle"
-                          color="status.positive.strong"
-                          borderRadius="full"
-                          px="2.5"
-                          py="1">
-                          <Box boxSize="1.5" borderRadius="full" bg="status.positive.strong" />
-                          <Text textStyle="xs" fontWeight="semibold">
-                            {t("Participating")}
-                          </Text>
-                        </HStack>
-                      )}
-                      {showSponsoringBadge && (
-                        <HStack
-                          gap="1.5"
-                          bg="status.warning.subtle"
-                          color="status.warning.strong"
-                          borderRadius="full"
-                          px="2.5"
-                          py="1">
-                          <Box boxSize="1.5" borderRadius="full" bg="status.warning.primary" />
-                          <Text textStyle="xs" fontWeight="semibold">
-                            {t("Sponsoring")}
-                          </Text>
-                        </HStack>
-                      )}
+                    <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
+                      <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                        {t("Created")} {createdAtLabel}
+                      </Text>
                     </HStack>
                   )}
-                </HStack>
+                  <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {t("Start round")} {humanNumber(challenge.startRound)}
+                    </Text>
+                  </HStack>
+                  <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {t("End round")} {humanNumber(challenge.endRound)}
+                    </Text>
+                  </HStack>
+                </Wrap>
               </VStack>
-            </VStack>
+
+              {/* CTA */}
+              {hasChallengeActions(challenge) && (
+                <Box
+                  w={{ base: "full", xl: "sm" }}
+                  flexShrink={0}
+                  bg="bg.secondary"
+                  borderRadius="2xl"
+                  border="sm"
+                  borderColor="border.secondary"
+                  p="4">
+                  <ChallengeActions challenge={challenge} layout="card" />
+                </Box>
+              )}
+            </Stack>
 
             {/* Stats grid */}
-            <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "6" }} py={{ base: "4", md: "5" }}>
-              <SimpleGrid columns={{ base: 2, md: 3 }} gapX={{ base: "4", md: "8" }} gapY="4">
-                <StatItem
-                  label={t("Prize")}
-                  value={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
-                  color="brand.primary"
+            <SimpleGrid columns={{ base: 2, xl: 3 }} gap="3">
+              <ChallengeStatTile
+                label={t("Prize")}
+                value={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
+                valueProps={{ color: "brand.primary", textStyle: { base: "xl", md: "2xl" } }}
+              />
+              {isSponsored ? (
+                <ChallengeStatTile label={t("Type")}>
+                  <Box pt="0.5">
+                    <SponsoredChallengeInfo textProps={{ textStyle: { base: "md", md: "lg" }, fontWeight: "bold" }} />
+                  </Box>
+                </ChallengeStatTile>
+              ) : (
+                <ChallengeStatTile
+                  label={t("Bet")}
+                  value={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+                  valueProps={{ textStyle: { base: "xl", md: "2xl" } }}
                 />
-                {isSponsored ? (
-                  <VStack align="start" gap="1" gridColumn={{ base: "span 2", md: "auto" }}>
-                    <Text
-                      textStyle="xxs"
-                      color="text.subtle"
-                      textTransform="uppercase"
-                      letterSpacing="0.08em"
-                      fontWeight="semibold">
-                      {t("Type")}
+              )}
+              <ChallengeStatTile
+                label={t("Winner")}
+                value={winnerValue}
+                valueProps={{ textStyle: { base: "lg", md: "xl" } }}
+                helper={
+                  challenge.threshold !== "0" ? (
+                    <Text textStyle="xs" color="text.subtle">
+                      {t("Minimum actions")} {humanNumber(challenge.threshold)}
                     </Text>
-                    <SponsoredChallengeInfo textProps={{ textStyle: "md", fontWeight: "bold" }} />
-                  </VStack>
-                ) : (
-                  <StatItem
-                    label={t("Bet")}
-                    value={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
-                  />
-                )}
-                <VStack align="start" gap="1" position="relative" pe={challenge.canAddInvites ? "14" : undefined}>
-                  <Text
-                    textStyle="xxs"
-                    color="text.subtle"
-                    textTransform="uppercase"
-                    letterSpacing="0.08em"
-                    fontWeight="semibold">
-                    {t("Participants")}
-                  </Text>
-                  {challenge.canAddInvites && (
+                  ) : undefined
+                }
+              />
+              <ChallengeStatTile
+                label={t("Participants")}
+                action={
+                  challenge.canAddInvites ? (
                     <AddChallengeInvitesModal
                       challengeId={challenge.challengeId}
                       creatorAddress={challenge.creator}
                       existingInvitees={challenge.invited}>
                       <IconButton
-                        position="absolute"
-                        top="50%"
-                        right="0"
-                        transform="translateY(-50%)"
-                        minW="8"
-                        h="8"
+                        minW="9"
+                        h="9"
                         p="0"
                         borderRadius="full"
                         bg="actions.primary.default"
@@ -264,29 +257,54 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                         <LuPlus />
                       </IconButton>
                     </AddChallengeInvitesModal>
-                  )}
-                  <Text textStyle="xl" fontWeight="bold">
-                    {humanNumber(challenge.participantCount)} {" / "} {humanNumber(challenge.maxParticipants)}
+                  ) : undefined
+                }
+                helper={
+                  showInviteStats && (challenge.invited.length > 0 || challenge.declined.length > 0) ? (
+                    <Wrap gap="1.5">
+                      {challenge.invited.length > 0 && (
+                        <Badge variant="neutral" size="sm">
+                          {t("Invited")} {humanNumber(challenge.invited.length)}
+                        </Badge>
+                      )}
+                      {challenge.declined.length > 0 && (
+                        <Badge variant="neutral" size="sm">
+                          {t("Declined")} {humanNumber(challenge.declined.length)}
+                        </Badge>
+                      )}
+                    </Wrap>
+                  ) : undefined
+                }>
+                <Text textStyle={{ base: "xl", md: "2xl" }} fontWeight="bold" lineHeight="1.1">
+                  {humanNumber(challenge.participantCount)}
+                  <Text as="span" color="text.subtle" fontWeight="semibold">
+                    {" / "} {humanNumber(challenge.maxParticipants)}
                   </Text>
-                </VStack>
-                <StatItem label={t("Rounds")} value={roundsProgress} />
-                {isSponsored && <StatItem label={t("Winner")} value={winnerValue} />}
-                {challenge.threshold !== "0" && (
-                  <StatItem label={t("Minimum actions")} value={humanNumber(challenge.threshold)} />
-                )}
-                <StatItem
-                  label={t("Apps")}
-                  value={challenge.allApps ? t("All apps") : String(challenge.selectedApps.length)}
-                />
-              </SimpleGrid>
-            </Box>
-
-            {/* CTA */}
-            {hasChallengeActions(challenge) && (
-              <Box pt="2" maxW={{ md: "sm" }}>
-                <ChallengeActions challenge={challenge} layout="card" />
-              </Box>
-            )}
+                </Text>
+              </ChallengeStatTile>
+              <ChallengeStatTile
+                label={t("Rounds")}
+                value={roundsProgress}
+                valueProps={{ textStyle: { base: "xl", md: "2xl" } }}
+                helper={
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("End round")} {humanNumber(challenge.endRound)}
+                  </Text>
+                }
+              />
+              <ChallengeStatTile
+                label={t("Apps")}
+                value={challenge.allApps ? t("All apps") : humanNumber(challenge.selectedApps.length)}
+                valueProps={{ textStyle: { base: "xl", md: "2xl" } }}
+                helper={
+                  !challenge.allApps ? (
+                    <Text textStyle="xs" color="text.subtle">
+                      {t("Selected apps")}
+                    </Text>
+                  ) : undefined
+                }
+              />
+            </SimpleGrid>
           </VStack>
         </Card.Root>
 
@@ -294,14 +312,19 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
         {!challenge.allApps && (
           <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="4" borderRadius="3xl" boxShadow="sm">
             <VStack align="stretch" gap="3">
-              <Text
-                textStyle="xxs"
-                color="text.subtle"
-                textTransform="uppercase"
-                letterSpacing="0.08em"
-                fontWeight="semibold">
-                {t("Selected apps")}
-              </Text>
+              <HStack justify="space-between" align="center" gap="3">
+                <Text
+                  textStyle="xxs"
+                  color="text.subtle"
+                  textTransform="uppercase"
+                  letterSpacing="0.08em"
+                  fontWeight="semibold">
+                  {t("Selected apps")}
+                </Text>
+                <Badge variant="neutral" size="sm">
+                  {humanNumber(challenge.selectedApps.length)}
+                </Badge>
+              </HStack>
               <Wrap gap="2">
                 {challenge.selectedApps.map(app => (
                   <HStack
@@ -309,14 +332,14 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                     gap="2.5"
                     w={{ base: "full", sm: "auto" }}
                     maxW={{ base: "full", sm: "xs" }}
-                    minH="11"
-                    px="3.5"
-                    py="2.5"
-                    borderRadius="2xl"
+                    minH="12"
+                    px="4"
+                    py="3"
+                    borderRadius="xl"
                     bg="bg.secondary"
-                    border="1px solid"
+                    border="sm"
                     borderColor="border.secondary">
-                    <AppImage appId={app} boxSize="6" borderRadius="md" flexShrink={0} />
+                    <AppImage appId={app} boxSize="7" borderRadius="md" flexShrink={0} />
                     <Text
                       textStyle="sm"
                       fontWeight="medium"

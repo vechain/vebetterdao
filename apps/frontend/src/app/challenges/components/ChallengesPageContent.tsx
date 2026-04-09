@@ -39,13 +39,13 @@ import { CreateChallengeModal } from "./CreateChallengeModal"
 
 const CardSkeleton = () => (
   <Card.Root variant="primary" p="6" borderRadius="3xl" boxShadow="sm">
-    <Skeleton h="220px" borderRadius="2xl" />
+    <Skeleton h="360px" borderRadius="2xl" />
   </Card.Root>
 )
 
 const CompactSkeleton = () => (
-  <Card.Root variant="primary" px="5" py="4" borderRadius="2xl">
-    <Skeleton h="48px" borderRadius="lg" />
+  <Card.Root variant="primary" px="5" py="5" borderRadius="3xl">
+    <Skeleton h="220px" borderRadius="2xl" />
   </Card.Root>
 )
 

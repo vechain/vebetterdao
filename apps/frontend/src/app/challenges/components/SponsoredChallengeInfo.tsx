@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, HStack, Icon, Text, type TextProps } from "@chakra-ui/react"
+import { HStack, Icon, Text, chakra, type TextProps } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiInfo } from "react-icons/fi"
 
@@ -23,8 +23,7 @@ export const SponsoredChallengeInfo = ({ textProps, iconSize = "4" }: SponsoredC
         content={t("No bet required to participate")}
         contentProps={{ maxW: "xs" }}
         positioning={{ placement: "top" }}>
-        <Box
-          as="button"
+        <chakra.button
           type="button"
           aria-label={t("No bet required to participate")}
           display="inline-flex"
@@ -40,7 +39,7 @@ export const SponsoredChallengeInfo = ({ textProps, iconSize = "4" }: SponsoredC
           p="0"
           lineHeight="0">
           <Icon as={FiInfo} boxSize={iconSize} />
-        </Box>
+        </chakra.button>
       </Tooltip>
     </HStack>
   )

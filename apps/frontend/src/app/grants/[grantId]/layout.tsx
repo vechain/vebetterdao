@@ -11,13 +11,16 @@ import { getIpfsMetadata } from "../../../api/ipfs/hooks/useIpfsMetadata"
 import { getNodeJsThorClient } from "../../../utils/getNodeJsThorClient"
 import { toIPFSURL } from "../../../utils/ipfs"
 
-import { Props } from "./page"
-
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`
+
+type Props = {
+  params: Promise<{ grantId: string }>
+}
+
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   try {
-    const id = params.grantId
+    const { grantId: id } = await params
     if (!id) {
       return getDefaultMetadata()
     }
@@ -83,7 +86,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
       },
     }
   } catch (error) {
-    console.error("Error generating metadata for grant:", params.grantId, error)
+    console.error("Error generating metadata for grant:", error)
     return getDefaultMetadata()
   }
 }

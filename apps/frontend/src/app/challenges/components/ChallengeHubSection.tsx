@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Badge, Box, Heading, HStack, VStack } from "@chakra-ui/react"
 
 interface ChallengeHubSectionProps {
   title: string
@@ -10,13 +10,13 @@ interface ChallengeHubSectionProps {
 
 export const ChallengeHubSection = ({ title, count, children }: ChallengeHubSectionProps) => {
   return (
-    <VStack align="stretch" gap="3" w="full">
+    <VStack align="stretch" gap="4" w="full">
       <HStack justify="space-between">
         <HStack gap="2" align="baseline">
           <Heading size="lg">{title}</Heading>
-          <Text textStyle="sm" color="text.subtle" fontWeight="semibold">
+          <Badge variant="neutral" size="sm">
             {count}
-          </Text>
+          </Badge>
         </HStack>
       </HStack>
       <Box>{children}</Box>

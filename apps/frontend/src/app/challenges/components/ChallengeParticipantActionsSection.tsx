@@ -1,6 +1,19 @@
 "use client"
 
-import { Badge, Box, Card, Heading, HStack, Mark, Skeleton, Text, useToken, VStack, Wrap } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Card,
+  Heading,
+  HStack,
+  Mark,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  useToken,
+  VStack,
+  Wrap,
+} from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { getCompactFormatter, humanAddress, humanDomain, humanNumber } from "@repo/utils/FormattingUtils"
 import { getPicassoImgSrc } from "@repo/utils/PicassoUtils"
@@ -11,13 +24,15 @@ import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
-import { ChallengeDetail, ChallengeStatus, SettlementMode } from "@/api/challenges/types"
+import { ChallengeDetail, ChallengeStatus, ChallengeVisibility, SettlementMode } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 import { blockNumberToDate } from "@/utils/date"
+
+import { ChallengeStatTile } from "./ChallengeStatTile"
 
 const compactFormatter = getCompactFormatter(1)
 
@@ -67,40 +82,58 @@ const AddressBadgeGroup = ({
   onAddressClick: (address: string) => void
 }) => {
   return (
-    <VStack align="stretch" gap="2">
-      <Text textStyle="xs" color="text.subtle">
-        {title}
-      </Text>
-      <Wrap gap="2">
-        {addresses.map(address => {
-          const domain = domainMap[address.toLowerCase()]
+    <Box
+      bg="bg.secondary"
+      borderRadius="2xl"
+      border="sm"
+      borderColor="border.secondary"
+      px={{ base: "4", md: "5" }}
+      py="4">
+      <VStack align="stretch" gap="3">
+        <HStack justify="space-between" gap="3">
+          <Text
+            textStyle="xxs"
+            color="text.subtle"
+            textTransform="uppercase"
+            letterSpacing="0.08em"
+            fontWeight="semibold">
+            {title}
+          </Text>
+          <Badge variant="neutral" size="sm">
+            {humanNumber(addresses.length)}
+          </Badge>
+        </HStack>
+        <Wrap gap="2">
+          {addresses.map(address => {
+            const domain = domainMap[address.toLowerCase()]
 
-          return (
-            <Badge
-              key={address}
-              variant="neutral"
-              size="sm"
-              title={address}
-              cursor="pointer"
-              role="button"
-              tabIndex={0}
-              _hover={{ opacity: 0.8 }}
-              onClick={() => onAddressClick(address)}
-              onKeyDown={event => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault()
-                  onAddressClick(address)
-                }
-              }}>
-              <HStack gap="1.5">
-                <AddressIcon address={address} boxSize="4" borderRadius="full" flexShrink={0} />
-                <Text textStyle="xs">{domain ? humanDomain(domain, 8, 4) : humanAddress(address, 6, 4)}</Text>
-              </HStack>
-            </Badge>
-          )
-        })}
-      </Wrap>
-    </VStack>
+            return (
+              <Badge
+                key={address}
+                variant="neutral"
+                size="sm"
+                title={address}
+                cursor="pointer"
+                role="button"
+                tabIndex={0}
+                _hover={{ opacity: 0.8 }}
+                onClick={() => onAddressClick(address)}
+                onKeyDown={event => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    onAddressClick(address)
+                  }
+                }}>
+                <HStack gap="1.5">
+                  <AddressIcon address={address} boxSize="4" borderRadius="full" flexShrink={0} />
+                  <Text textStyle="xs">{domain ? humanDomain(domain, 8, 4) : humanAddress(address, 6, 4)}</Text>
+                </HStack>
+              </Badge>
+            )
+          })}
+        </Wrap>
+      </VStack>
+    </Box>
   )
 }
 
@@ -149,8 +182,13 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
 
     return map
   }, [uniqueChallengeAddresses, vetDomains])
+  const showInviteStats = challenge.visibility === ChallengeVisibility.Private
   const hasAddressLists =
-    challenge.participants.length > 0 || challenge.invited.length > 0 || challenge.declined.length > 0
+    challenge.participants.length > 0 ||
+    (showInviteStats && (challenge.invited.length > 0 || challenge.declined.length > 0))
+  const addressGroupCount = [challenge.participants.length, challenge.invited.length, challenge.declined.length].filter(
+    (count, index) => count > 0 && (showInviteStats || index === 0),
+  ).length
 
   const roundStartDate = useMemo(() => {
     if (!isPending || deadlineBlock == null || !bestBlock) return null
@@ -248,15 +286,31 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
           <Heading size="2xl">
             {humanNumber(challenge.participantCount)} {"/"} {humanNumber(challenge.maxParticipants)}
           </Heading>
-          {!isPending && (
-            <Text textStyle="sm" color="text.subtle">
-              {compactFormatter.format(data?.totalActions ?? 0)} {t("total actions")}
-            </Text>
-          )}
         </VStack>
 
+        <SimpleGrid columns={showInviteStats ? { base: 2, lg: 3 } : 1} gap="3">
+          {showInviteStats && <ChallengeStatTile label={t("Invited")} value={humanNumber(challenge.invited.length)} />}
+          {showInviteStats && (
+            <ChallengeStatTile label={t("Declined")} value={humanNumber(challenge.declined.length)} />
+          )}
+          <ChallengeStatTile
+            label={isPending ? t("Rounds") : t("total actions")}
+            value={
+              isPending
+                ? `${humanNumber(challenge.startRound)} → ${humanNumber(challenge.endRound)}`
+                : compactFormatter.format(data?.totalActions ?? 0)
+            }
+          />
+        </SimpleGrid>
+
         {outcome && outcome.addresses.length > 0 && (
-          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+          <Box
+            bg="bg.secondary"
+            borderRadius="2xl"
+            border="sm"
+            borderColor="border.secondary"
+            px={{ base: "4", md: "5" }}
+            py="4">
             <VStack align="stretch" gap="3">
               <Text
                 textStyle="xxs"
@@ -319,40 +373,44 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
         )}
 
         {hasAddressLists && (
-          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
-            <VStack align="stretch" gap="4">
-              {challenge.participants.length > 0 && (
-                <AddressBadgeGroup
-                  title={t("Participants")}
-                  addresses={challenge.participants}
-                  domainMap={domainMap}
-                  onAddressClick={openProfile}
-                />
-              )}
-              {challenge.invited.length > 0 && (
-                <AddressBadgeGroup
-                  title={t("Invited wallets")}
-                  addresses={challenge.invited}
-                  domainMap={domainMap}
-                  onAddressClick={openProfile}
-                />
-              )}
-              {challenge.declined.length > 0 && (
-                <AddressBadgeGroup
-                  title={t("Declined")}
-                  addresses={challenge.declined}
-                  domainMap={domainMap}
-                  onAddressClick={openProfile}
-                />
-              )}
-            </VStack>
-          </Box>
+          <SimpleGrid columns={addressGroupCount > 1 ? { base: 1, xl: 2 } : 1} gap="3">
+            {challenge.participants.length > 0 && (
+              <AddressBadgeGroup
+                title={t("Participants")}
+                addresses={challenge.participants}
+                domainMap={domainMap}
+                onAddressClick={openProfile}
+              />
+            )}
+            {showInviteStats && challenge.invited.length > 0 && (
+              <AddressBadgeGroup
+                title={t("Invited wallets")}
+                addresses={challenge.invited}
+                domainMap={domainMap}
+                onAddressClick={openProfile}
+              />
+            )}
+            {showInviteStats && challenge.declined.length > 0 && (
+              <AddressBadgeGroup
+                title={t("Declined")}
+                addresses={challenge.declined}
+                domainMap={domainMap}
+                onAddressClick={openProfile}
+              />
+            )}
+          </SimpleGrid>
         )}
 
         {isLoading ? (
           <Skeleton h="320px" borderRadius="2xl" />
         ) : isPending ? (
-          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+          <Box
+            bg="bg.secondary"
+            borderRadius="2xl"
+            border="sm"
+            borderColor="border.secondary"
+            px={{ base: "4", md: "5" }}
+            py="4">
             <VStack gap="2" align="start">
               {roundStartDate ? (
                 <Countdown
@@ -412,19 +470,36 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
             </VStack>
           </Box>
         ) : isError ? (
-          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+          <Box
+            bg="bg.secondary"
+            borderRadius="2xl"
+            border="sm"
+            borderColor="border.secondary"
+            px={{ base: "4", md: "5" }}
+            py="4">
             <Text textStyle="sm" color="text.subtle">
               {t("No round data available yet")}
             </Text>
           </Box>
         ) : !chartData.length ? (
-          <Box bg="bg.secondary" borderRadius="2xl" px={{ base: "4", md: "5" }} py="4">
+          <Box
+            bg="bg.secondary"
+            borderRadius="2xl"
+            border="sm"
+            borderColor="border.secondary"
+            px={{ base: "4", md: "5" }}
+            py="4">
             <Text textStyle="sm" color="text.subtle">
               {t("None yet")}
             </Text>
           </Box>
         ) : (
-          <Box bg="bg.secondary" borderRadius="2xl" p={{ base: "4", md: "5" }}>
+          <Box
+            bg="bg.secondary"
+            borderRadius="2xl"
+            border="sm"
+            borderColor="border.secondary"
+            p={{ base: "4", md: "5" }}>
             <Box w="full" h={`${chartHeight}px`}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 44, left: 8, bottom: 0 }}>
@@ -445,14 +520,17 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
                     radius={[0, 6, 6, 0]}
                     minPointSize={4}
                     cursor="pointer"
-                    onClick={(data: ChartEntry) => router.push(`/profile/${data.participant}`)}>
+                    onClick={data => {
+                      const participant = data.payload?.participant as string | undefined
+                      if (participant) router.push(`/profile/${participant}`)
+                    }}>
                     {chartData.map(entry => (
                       <Cell key={entry.participant} fill={entry.fill} />
                     ))}
                     <LabelList
                       dataKey="actions"
                       position="right"
-                      formatter={(value: number) => compactFormatter.format(value)}
+                      formatter={value => (typeof value === "number" ? compactFormatter.format(value) : (value ?? ""))}
                       fontSize={11}
                       fill={axisColor}
                     />
