@@ -101,6 +101,7 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *  - New initializer: initializeV9(INavigatorRegistry) — reinitializer(8)
  *  - setNavigatorRegistry() setter via ExternalContractsUtils
  *  - VotesUtils.getVotes() returns delegated amount when citizen has active navigator at snapshot
+ *  - Deprecated: getTotalVotingPower() is replaced by getVotes()
  */
 contract XAllocationVoting is
   Initializable,
@@ -326,9 +327,8 @@ contract XAllocationVoting is
     uint256[] memory voteWeights,
     bool isAutoVote
   ) internal {
-    // Use voter's full voting power (VOT3 + deposits)
-    uint256 voterTotalVotingPower = getTotalVotingPower(voter, roundSnapshot(roundId));
-    _handleCastVoteWithPower(voter, roundId, appIds, voteWeights, voterTotalVotingPower, isAutoVote);
+    uint256 votingPower = getVotes(voter, roundSnapshot(roundId));
+    _handleCastVoteWithPower(voter, roundId, appIds, voteWeights, votingPower, isAutoVote);
   }
 
   function _handleCastVoteWithPower(
@@ -600,16 +600,9 @@ contract XAllocationVoting is
     return VotesUtils.getVotes(account, timepoint);
   }
 
-  /**
-   * @dev Get the total voting power (VOT3 tokens + deposits) for a voter at a given timepoint
-   * @param voter The address of the voter
-   * @param roundStart The start of the round (timepoint)
-   * @return Combined voting power from held tokens and proposal deposits
-   */
+  /// @dev Deprecated: use getVotes instead, which now includes deposit voting power.
   function getTotalVotingPower(address voter, uint256 roundStart) public view returns (uint256) {
-    uint256 voterAvailableVotesWithDeposit = getDepositVotingPower(voter, roundStart);
-    uint256 voterAvailableVotes = getVotes(voter, roundStart) + voterAvailableVotesWithDeposit;
-    return voterAvailableVotes;
+    return getVotes(voter, roundStart);
   }
 
   /**

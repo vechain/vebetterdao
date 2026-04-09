@@ -88,14 +88,14 @@ library AutoVotingLogic {
   }
 
   /**
-   * @dev Gets total voting power (voting power + deposit voting power) for an account and validates it meets the minimum threshold for auto-voting
+   * @dev Gets effective voting power for an account and validates it meets the minimum threshold for auto-voting
    */
   function _getAndValidateVotingPower(
     IXAllocationVotingGovernor xAllocationVotingGovernor,
     address account,
     uint256 timepoint
   ) internal view returns (uint256, bool) {
-    uint256 voterAvailableVotes = xAllocationVotingGovernor.getTotalVotingPower(account, timepoint);
+    uint256 voterAvailableVotes = xAllocationVotingGovernor.getVotes(account, timepoint);
     bool isValid = voterAvailableVotes >= 1 ether;
     return (voterAvailableVotes, isValid);
   }
