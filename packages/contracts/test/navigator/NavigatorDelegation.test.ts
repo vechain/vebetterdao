@@ -246,7 +246,7 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
 
       await expect(navigatorRegistry.connect(citizen1).reduceDelegation(ethers.parseEther("500")))
         .to.emit(navigatorRegistry, "DelegationRemoved")
-        .withArgs(citizen1.address, navigator1.address)
+        .withArgs(citizen1.address, navigator1.address, ethers.parseEther("500"))
 
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
       expect(await navigatorRegistry.getNavigator(citizen1.address)).to.equal(ethers.ZeroAddress)

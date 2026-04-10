@@ -193,7 +193,8 @@ interface INavigatorRegistry {
   /// @notice Emitted when a citizen fully undelegates from a navigator
   /// @param citizen The citizen address
   /// @param navigator The navigator address
-  event DelegationRemoved(address indexed citizen, address indexed navigator);
+  /// @param amount The VOT3 amount that was delegated
+  event DelegationRemoved(address indexed citizen, address indexed navigator, uint256 amount);
 
   // -- Voting --
 

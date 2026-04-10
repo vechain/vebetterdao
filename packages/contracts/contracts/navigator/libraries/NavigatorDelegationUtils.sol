@@ -29,7 +29,7 @@ library NavigatorDelegationUtils {
   event DelegationDecreased(address indexed citizen, address indexed navigator, uint256 removedAmount, uint256 newTotal);
 
   /// @notice Emitted when a citizen fully undelegates from a navigator
-  event DelegationRemoved(address indexed citizen, address indexed navigator);
+  event DelegationRemoved(address indexed citizen, address indexed navigator, uint256 amount);
 
   // ======================== Errors ======================== //
 
@@ -79,7 +79,7 @@ library NavigatorDelegationUtils {
         _pushTotalDelegated($, currentNavigator, -int256(oldAmount));
         $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), 0);
         _removeDelegation($, citizen, currentNavigator);
-        emit DelegationRemoved(citizen, currentNavigator);
+        emit DelegationRemoved(citizen, currentNavigator, oldAmount);
       } else {
         revert AlreadyDelegated(citizen, currentNavigator);
       }
@@ -141,7 +141,7 @@ library NavigatorDelegationUtils {
     // If reduced to 0, fully undelegate
     if (newAmount == 0) {
       _removeDelegation($, citizen, currentNavigator);
-      emit DelegationRemoved(citizen, currentNavigator);
+      emit DelegationRemoved(citizen, currentNavigator, current);
     } else {
       emit DelegationDecreased(citizen, currentNavigator, reduceBy, newAmount);
     }
@@ -161,7 +161,7 @@ library NavigatorDelegationUtils {
 
     _removeDelegation($, citizen, currentNavigator);
 
-    emit DelegationRemoved(citizen, currentNavigator);
+    emit DelegationRemoved(citizen, currentNavigator, amount);
   }
 
   // ======================== Getters ======================== //
