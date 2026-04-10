@@ -142,7 +142,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   </Text>
                 </HStack>
                 <Text textStyle="xs" color="text.subtle">
-                  {t("Available:")} {compactFormatter.format(Number(availableBalance))}
+                  {t("Available: {{amount}}", { amount: compactFormatter.format(Number(availableBalance)) })}
                 </Text>
               </VStack>
             </HStack>

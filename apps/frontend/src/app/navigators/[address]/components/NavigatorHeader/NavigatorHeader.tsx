@@ -24,8 +24,7 @@ type Props = {
   isConnected: boolean
   isNavigator: boolean
   isOwnPage: boolean
-  onDelegateClick: () => void
-  onManageClick: () => void
+  onDelegationClick: () => void
   onManageStakeClick: () => void
   onExitDelegation: () => void
 }
@@ -55,8 +54,7 @@ export const NavigatorHeader = ({
   isConnected,
   isNavigator,
   isOwnPage,
-  onDelegateClick,
-  onManageClick,
+  onDelegationClick,
   onManageStakeClick,
   onExitDelegation,
 }: Props) => {
@@ -70,9 +68,9 @@ export const NavigatorHeader = ({
 
   const mainButtonConfig: Record<MainAction, { label: string; onClick: () => void; variant: "primary" | "secondary" }> =
     {
-      "manage-delegation": { label: t("Manage Delegation"), onClick: onManageClick, variant: "secondary" },
+      "manage-delegation": { label: t("Manage Delegation"), onClick: onDelegationClick, variant: "secondary" },
       "manage-stake": { label: t("Manage Stake"), onClick: onManageStakeClick, variant: "secondary" },
-      delegate: { label: t("Delegate"), onClick: onDelegateClick, variant: "primary" },
+      delegate: { label: t("Delegate"), onClick: onDelegationClick, variant: "primary" },
       share: { label: t("Share"), onClick: handleShare, variant: "secondary" },
     }
 

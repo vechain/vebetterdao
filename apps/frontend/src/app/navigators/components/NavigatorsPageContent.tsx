@@ -1,17 +1,21 @@
 import { Button, Heading, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuBadgeCheck } from "react-icons/lu"
 
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted, NavigatorOrderBy, useNavigators } from "@/api/indexer/navigators/useNavigators"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { DelegateModal } from "../shared/DelegateModal"
+import { DelegationModal } from "../shared/DelegationModal"
 
 import { BecomeNavigatorCTA } from "./BecomeNavigatorCTA"
+import { DelegatingAlert } from "./DelegatingAlert"
 import { NavigatorCard } from "./NavigatorCard"
 import { NavigatorCardSkeleton } from "./NavigatorCardSkeleton"
 import { NavigatorFilters, useNavigatorFilterValues } from "./NavigatorFilters"
@@ -24,8 +28,14 @@ export const NavigatorsPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { isMobile } = useBreakpoints()
+  const { account } = useWallet()
   const { data: isNavigator } = useIsNavigator()
+  const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
+  const { data: currentNavigatorAddr } = useGetNavigator(account?.address)
   const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
+
+  const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
+  const isDelegating = !!currentNavigatorAddr && currentDelegatedNum > 0
 
   const [searchTerm, setSearchTerm] = useState("")
   const [orderBy, setOrderBy] = useState<NavigatorOrderBy>("totalDelegated")
@@ -71,6 +81,11 @@ export const NavigatorsPageContent = () => {
       </HStack>
 
       <NavigatorStepsCard isOpen={open} onClose={onClose} />
+
+      {isDelegating && currentNavigatorAddr && (
+        <DelegatingAlert amount={currentDelegatedNum} navigatorAddress={currentNavigatorAddr} />
+      )}
+
       <NavigatorStatsCards />
 
       <NavigatorFilters
@@ -116,7 +131,7 @@ export const NavigatorsPageContent = () => {
       )}
 
       {delegateTarget && (
-        <DelegateModal isOpen={!!delegateTarget} onClose={() => setDelegateTarget(null)} navigator={delegateTarget} />
+        <DelegationModal isOpen={!!delegateTarget} onClose={() => setDelegateTarget(null)} navigator={delegateTarget} />
       )}
     </VStack>
   )

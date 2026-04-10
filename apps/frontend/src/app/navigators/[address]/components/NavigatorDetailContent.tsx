@@ -13,8 +13,7 @@ import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInf
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
-import { DelegateModal } from "@/app/navigators/shared/DelegateModal"
-import { ManageDelegationModal } from "@/app/navigators/shared/ManageDelegationModal"
+import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
 
 import { NavigatorCitizensModal } from "./modals/NavigatorCitizensModal"
 import { NavigatorDelegationsModal } from "./modals/NavigatorDelegationsModal"
@@ -33,8 +32,7 @@ export const NavigatorDetailContent = () => {
   const { account } = useWallet()
   const address = params?.address ?? ""
   const waitForIndexer = searchParams?.get("registered") === "true"
-  const [isDelegateOpen, setIsDelegateOpen] = useState(false)
-  const [isManageOpen, setIsManageOpen] = useState(false)
+  const [isDelegationOpen, setIsDelegationOpen] = useState(false)
   const [isExitMode, setIsExitMode] = useState(false)
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
   const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
@@ -88,8 +86,9 @@ export const NavigatorDetailContent = () => {
             <LuUserCheck />
           </Alert.Indicator>
           <Alert.Title textStyle="sm">
-            {t("You are delegating {{amount}} VOT3 to this Navigator", {
+            {t("You are delegating {{amount}} VOT3 to {{name}}", {
               amount: formatter.format(currentDelegatedNum),
+              name: displayName,
             })}
             {delegationInfo?.delegatedAt &&
               ` ${t("since {{date}}", {
@@ -115,15 +114,14 @@ export const NavigatorDetailContent = () => {
         isConnected={!!account?.address}
         isNavigator={!!isNavigator}
         isOwnPage={!!isNavigator && !!account?.address && account.address.toLowerCase() === address.toLowerCase()}
-        onDelegateClick={() => setIsDelegateOpen(true)}
-        onManageClick={() => {
+        onDelegationClick={() => {
           setIsExitMode(false)
-          setIsManageOpen(true)
+          setIsDelegationOpen(true)
         }}
         onManageStakeClick={() => {}}
         onExitDelegation={() => {
           setIsExitMode(true)
-          setIsManageOpen(true)
+          setIsDelegationOpen(true)
         }}
       />
 
@@ -136,10 +134,9 @@ export const NavigatorDetailContent = () => {
 
       <NavigatorGovernanceActivity address={address} />
 
-      <DelegateModal isOpen={isDelegateOpen} onClose={() => setIsDelegateOpen(false)} navigator={nav} />
-      <ManageDelegationModal
-        isOpen={isManageOpen}
-        onClose={() => setIsManageOpen(false)}
+      <DelegationModal
+        isOpen={isDelegationOpen}
+        onClose={() => setIsDelegationOpen(false)}
         navigator={nav}
         exitMode={isExitMode}
       />
