@@ -23,20 +23,20 @@ export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedCl
   const stats = useMemo(
     () => [
       {
-        id: "citizens",
-        label: t("Citizens"),
-        value: String(nav.citizenCount ?? 0),
-        icon: LuUsers,
-        bg: "status.positive.subtle",
-        color: "status.positive.primary",
-      },
-      {
         id: "staked",
         label: t("Total Staked"),
         value: `${formatter.format(Number(nav.stakeFormatted ?? 0))} B3TR`,
         icon: B3trSvg,
         bg: "status.warning.subtle",
         color: "status.warning.primary",
+      },
+      {
+        id: "citizens",
+        label: t("Citizens"),
+        value: String(nav.citizenCount ?? 0),
+        icon: LuUsers,
+        bg: "status.positive.subtle",
+        color: "status.positive.primary",
       },
       {
         id: "delegated",
@@ -51,8 +51,8 @@ export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedCl
         label: t("Delegation Capacity"),
         value: `${formatter.format(Number(nav.stakeFormatted ?? 0) * 10)} VOT3`,
         icon: LuGauge,
-        bg: "status.info.subtle",
-        color: "status.info.primary",
+        bg: "status.neutral.subtle",
+        color: "status.neutral.primary",
       },
     ],
     [nav, t],

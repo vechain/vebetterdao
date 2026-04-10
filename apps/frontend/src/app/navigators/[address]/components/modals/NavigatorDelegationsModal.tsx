@@ -80,7 +80,7 @@ export const NavigatorDelegationsModal = ({ address, isOpen, onClose }: Props) =
               }>
               {events.map((event, i) => {
                 const deltaNum = Number(event.deltaFormatted)
-                const isPositive = deltaNum >= 0
+                const isPositive = event.eventType === "B3TR_DelegationRemoved" ? false : deltaNum >= 0
                 const label = getEventLabel(event.eventType, isPositive)
 
                 return (

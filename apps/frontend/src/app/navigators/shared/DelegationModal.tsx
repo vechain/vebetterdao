@@ -336,13 +336,17 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
               <HStack w="full" justifyContent="space-between">
                 <VStack align="start" gap="2" w="full">
-                  <NumberInput.Root textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
+                  <NumberInput.Root
+                    textOverflow="ellipsis"
+                    p="0"
+                    allowOverflow={false}
+                    min={0}
+                    value={amount}
+                    onValueChange={details => setAmount(handleAmountInput(details.value))}>
                     <NumberInput.Input
                       min={0}
                       p="0"
-                      value={amount}
                       placeholder="0"
-                      onChange={e => setAmount(handleAmountInput(e.target.value))}
                       onBlur={() => setAmount(prev => prev.replace(/\.$/, ""))}
                       border="none"
                       outline="none"

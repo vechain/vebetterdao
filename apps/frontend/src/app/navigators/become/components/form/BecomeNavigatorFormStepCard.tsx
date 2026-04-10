@@ -50,12 +50,12 @@ export const BecomeNavigatorFormStepCard = () => {
   const [isUploading, setIsUploading] = useState(false)
 
   const handleSuccess = useCallback(() => {
-    clearData()
     if (account?.address) {
       router.push(`/navigators/${account.address}?registered=true`)
     } else {
       router.push("/navigators")
     }
+    clearData()
   }, [clearData, router, account])
 
   const { sendTransaction, status } = useRegisterNavigator({

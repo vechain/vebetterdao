@@ -12,7 +12,7 @@ export const MotivationStep = () => {
       <VStack gap={1} align="start">
         <Heading size="md">{t("Motivation and Qualifications")}</Heading>
         <Text textStyle="md" color="fg.muted">
-          {t("Share your motivation and qualifications to help the community understand your qualifications.")}
+          {t("Share with the community why you want to become a navigator and your qualifications.")}
         </Text>
       </VStack>
 

@@ -183,6 +183,20 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
       </Text>
 
       <VStack gap="2" align="stretch">
+        {convertibleVot3 && Number(convertibleVot3.scaled) > 0 && (
+          <InfoRow
+            icon={<RefreshDouble />}
+            title={t("Convert VOT3 to B3TR")}
+            description={t("You have {{amount}} VOT3 that can be converted back to B3TR.", {
+              amount: convertibleVot3.formatted,
+            })}
+            onClick={() => {
+              onClose()
+              onOpenPowerDown()
+            }}
+          />
+        )}
+
         <InfoRow
           icon={<TbLeaf />}
           title={t("Use sustainable apps")}
@@ -202,20 +216,6 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
             router.push("/allocations")
           }}
         />
-
-        {convertibleVot3 && Number(convertibleVot3.scaled) > 0 && (
-          <InfoRow
-            icon={<RefreshDouble />}
-            title={t("Convert VOT3 to B3TR")}
-            description={t("You have {{amount}} VOT3 that can be converted back to B3TR.", {
-              amount: convertibleVot3.formatted,
-            })}
-            onClick={() => {
-              onClose()
-              onOpenPowerDown()
-            }}
-          />
-        )}
 
         <InfoRow
           icon={<InfoCircle />}
