@@ -22,16 +22,6 @@ export type ParticipantStatus = (typeof ParticipantStatus)[keyof typeof Particip
 export const SettlementMode = { None: 0, TopWinners: 1, QualifiedSplit: 2, CreatorRefund: 3 } as const
 export type SettlementMode = (typeof SettlementMode)[keyof typeof SettlementMode]
 
-export type ChallengeTab = "all" | "mine" | "invited" | "public"
-
-export interface GroupedChallenges {
-  activeParticipating: ChallengeView[]
-  pendingInvites: ChallengeView[]
-  publicJoinable: ChallengeView[]
-  claimRewards: ChallengeView[]
-  past: ChallengeView[]
-}
-
 export interface ChallengeView {
   challengeId: number
   createdAt: number

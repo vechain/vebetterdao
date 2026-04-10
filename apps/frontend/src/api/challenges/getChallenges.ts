@@ -7,10 +7,8 @@ import { ethers } from "ethers"
 import {
   ChallengeKind,
   ChallengeDetail,
-  GroupedChallenges,
   SettlementMode,
   ChallengeStatus,
-  ChallengeTab,
   ChallengeView,
   ChallengeVisibility,
   ParticipantStatus,
@@ -189,131 +187,6 @@ function parseChallengeView(
     canRefund,
     canFinalize: status === ChallengeStatus.Active && endRound < currentRound,
   }
-}
-
-export function groupChallenges(challenges: ChallengeView[]): GroupedChallenges {
-  const activeParticipating: ChallengeView[] = []
-  const pendingInvites: ChallengeView[] = []
-  const publicJoinable: ChallengeView[] = []
-  const claimRewards: ChallengeView[] = []
-  const past: ChallengeView[] = []
-
-  for (const c of challenges) {
-    const isLive = c.status === ChallengeStatus.Active || c.status === ChallengeStatus.Pending
-    const isDone =
-      c.status === ChallengeStatus.Finalized ||
-      c.status === ChallengeStatus.Cancelled ||
-      c.status === ChallengeStatus.Invalid
-    const needsPastAction = c.canClaim || c.canRefund || c.canFinalize
-    const isRelevantPastChallenge = c.isJoined || c.isCreator
-
-    if (isLive && !c.canFinalize && isRelevantPastChallenge) {
-      activeParticipating.push(c)
-    }
-
-    if (c.isInvitationPending) {
-      pendingInvites.push(c)
-    }
-
-    if (c.status === ChallengeStatus.Pending && c.visibility === ChallengeVisibility.Public && c.canJoin) {
-      publicJoinable.push(c)
-    }
-
-    if (needsPastAction && isRelevantPastChallenge) {
-      claimRewards.push(c)
-    }
-
-    if (isDone && isRelevantPastChallenge && !needsPastAction) {
-      past.push(c)
-    }
-  }
-
-  return { activeParticipating, pendingInvites, publicJoinable, claimRewards, past }
-}
-
-export function filterByTab(challenges: ChallengeView[], tab: ChallengeTab): ChallengeView[] {
-  switch (tab) {
-    case "mine":
-      return challenges.filter(c => c.isCreator || c.isJoined)
-    case "invited":
-      return challenges.filter(c => c.isInvitationPending)
-    case "public":
-      return challenges.filter(c => c.visibility === ChallengeVisibility.Public && c.status === ChallengeStatus.Pending)
-    default:
-      return challenges
-  }
-}
-
-export async function fetchAllChallenges(
-  thor: ThorClient,
-  currentRound: number,
-  viewerAddress?: string,
-): Promise<ChallengeView[]> {
-  const address = getAddress()
-  if (!address || address.toLowerCase() === ZERO_ADDR) return []
-
-  const [countResult, claimedChallengeIds, refundedChallengeIds] = await Promise.all([
-    executeMultipleClausesCall({
-      thor,
-      calls: [
-        { abi, address, functionName: "challengeCount", args: [] },
-        { abi, address, functionName: "maxParticipants", args: [] },
-      ],
-    }),
-    viewerAddress
-      ? fetchChallengeIdsByEvent(thor, address, viewerAddress, payoutClaimedEventName)
-      : Promise.resolve(new Set<number>()),
-    viewerAddress
-      ? fetchChallengeIdsByEvent(thor, address, viewerAddress, refundClaimedEventName)
-      : Promise.resolve(new Set<number>()),
-  ])
-  const [count, maxParticipantsResult] = countResult
-  const maxParticipants = Number(maxParticipantsResult)
-
-  const totalChallenges = Number(count)
-  if (totalChallenges === 0) return []
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const calls: any[] = []
-  for (let id = 1; id <= totalChallenges; id++) {
-    calls.push({ abi, address, functionName: "getChallenge", args: [BigInt(id)] })
-    if (viewerAddress) {
-      calls.push({ abi, address, functionName: "getParticipantStatus", args: [BigInt(id), viewerAddress] })
-      calls.push({ abi, address, functionName: "isInvitationEligible", args: [BigInt(id), viewerAddress] })
-      calls.push({ abi, address, functionName: "getParticipantActions", args: [BigInt(id), viewerAddress] })
-    }
-  }
-
-  const [results, creationTimestamps] = await Promise.all([
-    executeMultipleClausesCall({ thor, calls }),
-    fetchChallengeCreationTimestamps(thor, address, totalChallenges),
-  ])
-  const stride = viewerAddress ? 4 : 1
-  const challenges: ChallengeView[] = []
-
-  for (let i = 0; i < totalChallenges; i++) {
-    const raw = results[i * stride] as any
-    const viewerStatus = viewerAddress ? Number(results[i * stride + 1]) : 0
-    const eligible = viewerAddress ? Boolean(results[i * stride + 2]) : false
-    const viewerActions = viewerAddress ? BigInt(String(results[i * stride + 3] ?? 0)) : 0n
-    const challengeId = Number(raw.challengeId ?? raw[0])
-    challenges.push(
-      parseChallengeView(
-        raw,
-        viewerAddress,
-        viewerStatus,
-        eligible,
-        viewerActions,
-        currentRound,
-        maxParticipants,
-        creationTimestamps.get(challengeId) ?? 0,
-        claimedChallengeIds.has(challengeId),
-        refundedChallengeIds.has(challengeId),
-      ),
-    )
-  }
-
-  return challenges.sort((a, b) => b.createdAt - a.createdAt || b.challengeId - a.challengeId)
 }
 
 export async function fetchChallengeDetail(
