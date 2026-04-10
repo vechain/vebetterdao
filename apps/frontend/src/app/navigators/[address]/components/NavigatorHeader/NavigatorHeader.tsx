@@ -28,6 +28,7 @@ type Props = {
   onDelegationClick: () => void
   onManageStakeClick: () => void
   onExitDelegation: () => void
+  onEditProfile: () => void
 }
 
 const getMainAction = (
@@ -59,6 +60,7 @@ export const NavigatorHeader = ({
   onDelegationClick,
   onManageStakeClick,
   onExitDelegation,
+  onEditProfile,
 }: Props) => {
   const { t } = useTranslation()
   const [isShareOpen, setIsShareOpen] = useState(false)
@@ -70,8 +72,8 @@ export const NavigatorHeader = ({
 
   const mainButtonConfig: Record<MainAction, { label: string; onClick: () => void; variant: "primary" | "secondary" }> =
     {
-      "manage-delegation": { label: t("Manage Delegation"), onClick: onDelegationClick, variant: "secondary" },
-      "manage-stake": { label: t("Manage Stake"), onClick: onManageStakeClick, variant: "secondary" },
+      "manage-delegation": { label: t("Manage Delegation"), onClick: onDelegationClick, variant: "primary" },
+      "manage-stake": { label: t("Manage Stake"), onClick: onManageStakeClick, variant: "primary" },
       delegate: { label: t("Delegate"), onClick: onDelegationClick, variant: "primary" },
       share: { label: t("Share"), onClick: handleShare, variant: "secondary" },
     }
@@ -96,8 +98,10 @@ export const NavigatorHeader = ({
               {showMenu && (
                 <NavigatorHeaderMenu
                   isDelegatedHere={isDelegatedHere}
+                  isOwnPage={isOwnPage}
                   onExitDelegation={onExitDelegation}
                   onShareClick={handleShare}
+                  onEditProfile={onEditProfile}
                 />
               )}
             </HStack>

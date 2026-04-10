@@ -15,6 +15,8 @@ import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
 
+import { EditNavigatorProfileModal } from "./modals/EditNavigatorProfileModal"
+import { ManageStakeModal } from "./modals/ManageStakeModal"
 import { NavigatorCitizensModal } from "./modals/NavigatorCitizensModal"
 import { NavigatorDelegationsModal } from "./modals/NavigatorDelegationsModal"
 import { NavigatorStakeHistoryModal } from "./modals/NavigatorStakeHistoryModal"
@@ -37,6 +39,8 @@ export const NavigatorDetailContent = () => {
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
   const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
   const [isDelegationsOpen, setIsDelegationsOpen] = useState(false)
+  const [isManageStakeOpen, setIsManageStakeOpen] = useState(false)
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address, { waitForIndexer })
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
@@ -119,11 +123,12 @@ export const NavigatorDetailContent = () => {
           setIsDelegationOpen(true)
         }}
         registeredAt={nav.registeredAt}
-        onManageStakeClick={() => {}}
+        onManageStakeClick={() => setIsManageStakeOpen(true)}
         onExitDelegation={() => {
           setIsExitMode(true)
           setIsDelegationOpen(true)
         }}
+        onEditProfile={() => setIsEditProfileOpen(true)}
       />
 
       <NavigatorStatsGrid
@@ -152,6 +157,15 @@ export const NavigatorDetailContent = () => {
         onClose={() => setIsDelegationsOpen(false)}
         address={address}
       />
+      <ManageStakeModal isOpen={isManageStakeOpen} onClose={() => setIsManageStakeOpen(false)} navigator={nav} />
+      {metadata && nav.metadataURI && (
+        <EditNavigatorProfileModal
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+          metadata={metadata}
+          metadataURI={nav.metadataURI}
+        />
+      )}
     </VStack>
   )
 }

@@ -1,0 +1,282 @@
+import { Button, Field, Heading, HStack, Input, Switch, Text, Textarea, VStack } from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
+import { BaseModal } from "@/components/BaseModal"
+import { useUpdateNavigatorMetadata } from "@/hooks/navigator/useUpdateNavigatorMetadata"
+import { uploadBlobToIPFS } from "@/utils/ipfs"
+
+type FormData = {
+  motivation: string
+  qualifications: string
+  votingStrategy: string
+  isAppAffiliated: boolean
+  affiliatedAppNames: string
+  isFoundationMember: boolean
+  foundationRole: string
+  hasConflictsOfInterest: boolean
+  conflictsDescription: string
+  twitter: string
+  discord: string
+  website: string
+  other: string
+}
+
+const fromMetadata = (m: NavigatorMetadata): FormData => ({
+  motivation: m.motivation ?? "",
+  qualifications: m.qualifications ?? "",
+  votingStrategy: m.votingStrategy ?? "",
+  isAppAffiliated: m.disclosures?.isAppAffiliated ?? false,
+  affiliatedAppNames: m.disclosures?.affiliatedAppNames ?? "",
+  isFoundationMember: m.disclosures?.isFoundationMember ?? false,
+  foundationRole: m.disclosures?.foundationRole ?? "",
+  hasConflictsOfInterest: m.disclosures?.hasConflictsOfInterest ?? false,
+  conflictsDescription: m.disclosures?.conflictsDescription ?? "",
+  twitter: m.socials?.twitter ?? "",
+  discord: m.socials?.discord ?? "",
+  website: m.socials?.website ?? "",
+  other: m.socials?.other ?? "",
+})
+
+const toMetadata = (form: FormData, original: NavigatorMetadata): NavigatorMetadata => ({
+  ...original,
+  motivation: form.motivation,
+  qualifications: form.qualifications,
+  votingStrategy: form.votingStrategy,
+  disclosures: {
+    isAppAffiliated: form.isAppAffiliated,
+    affiliatedAppNames: form.affiliatedAppNames,
+    isFoundationMember: form.isFoundationMember,
+    foundationRole: form.foundationRole,
+    hasConflictsOfInterest: form.hasConflictsOfInterest,
+    conflictsDescription: form.conflictsDescription,
+  },
+  socials: {
+    twitter: form.twitter,
+    discord: form.discord,
+    website: form.website,
+    other: form.other,
+  },
+})
+
+const ToggleField = ({
+  label,
+  checked,
+  onCheckedChange,
+}: {
+  label: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+}) => (
+  <HStack justify="space-between" w="full">
+    <Text textStyle="sm">{label}</Text>
+    <Switch.Root checked={checked} onCheckedChange={e => onCheckedChange(e.checked)} colorPalette="blue" size="sm">
+      <Switch.HiddenInput />
+      <Switch.Control>
+        <Switch.Thumb />
+      </Switch.Control>
+    </Switch.Root>
+  </HStack>
+)
+
+type Props = {
+  isOpen: boolean
+  onClose: () => void
+  metadata: NavigatorMetadata
+  metadataURI: string
+}
+
+export const EditNavigatorProfileModal = ({ isOpen, onClose, metadata, metadataURI }: Props) => {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const [form, setForm] = useState<FormData>(() => fromMetadata(metadata))
+  const [isUploading, setIsUploading] = useState(false)
+  const pendingUpdateRef = useRef<{ newMetadata: NavigatorMetadata; newURI: string } | null>(null)
+
+  useEffect(() => {
+    if (isOpen) setForm(fromMetadata(metadata))
+  }, [isOpen, metadata])
+
+  const update = (partial: Partial<FormData>) => setForm(prev => ({ ...prev, ...partial }))
+
+  const handleSuccess = useCallback(() => {
+    if (pendingUpdateRef.current) {
+      const { newMetadata, newURI } = pendingUpdateRef.current
+      queryClient.setQueryData(["navigator", "metadata", metadataURI], newMetadata)
+      queryClient.setQueryData(["navigator", "metadata", newURI], newMetadata)
+      pendingUpdateRef.current = null
+    }
+    onClose()
+  }, [onClose, queryClient, metadataURI])
+
+  const { sendTransaction, status } = useUpdateNavigatorMetadata({ onSuccess: handleSuccess })
+
+  const canSave = form.motivation.trim().length > 0 && form.qualifications.trim().length > 0
+
+  const onSave = async () => {
+    setIsUploading(true)
+    try {
+      const newMetadata = toMetadata(form, metadata)
+      const blob = new Blob([JSON.stringify(newMetadata)], { type: "application/json" })
+      const ipfsHash = await uploadBlobToIPFS(blob, "navigator-metadata.json")
+      const uri = `ipfs://${ipfsHash}`
+      pendingUpdateRef.current = { newMetadata, newURI: uri }
+      await sendTransaction({ metadataURI: uri })
+    } catch (error) {
+      console.error("Failed to update metadata:", error)
+      pendingUpdateRef.current = null
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const isSubmitting = isUploading || status === "pending"
+
+  return (
+    <BaseModal isOpen={isOpen} onClose={onClose} ariaTitle={t("Edit Profile")} showCloseButton>
+      <VStack gap={5} align="stretch" py={4} px={2}>
+        <Heading size="lg">{t("Edit Profile")}</Heading>
+
+        <VStack gap={4} align="stretch">
+          <Heading size="md">{t("Motivation and Qualifications")}</Heading>
+
+          <Field.Root required>
+            <Field.Label>{t("Why do you want to become a navigator?")}</Field.Label>
+            <Textarea
+              value={form.motivation}
+              onChange={e => update({ motivation: e.target.value })}
+              rows={3}
+              maxLength={1000}
+              size="sm"
+            />
+          </Field.Root>
+
+          <Field.Root required>
+            <Field.Label>{t("What experience do you have with VeBetterDAO and governance?")}</Field.Label>
+            <Textarea
+              value={form.qualifications}
+              onChange={e => update({ qualifications: e.target.value })}
+              rows={3}
+              maxLength={1000}
+              size="sm"
+            />
+          </Field.Root>
+
+          <Field.Root>
+            <Field.Label>{t("How will you decide which apps to vote for and how to vote on proposals?")}</Field.Label>
+            <Textarea
+              value={form.votingStrategy}
+              onChange={e => update({ votingStrategy: e.target.value })}
+              rows={3}
+              maxLength={1000}
+              size="sm"
+            />
+          </Field.Root>
+        </VStack>
+
+        <VStack gap={4} align="stretch">
+          <Heading size="md">{t("Disclosures")}</Heading>
+
+          <ToggleField
+            label={t("Are you affiliated with any VeBetterDAO app?")}
+            checked={form.isAppAffiliated}
+            onCheckedChange={checked => update({ isAppAffiliated: checked })}
+          />
+          {form.isAppAffiliated && (
+            <Field.Root>
+              <Field.Label>{t("App names")}</Field.Label>
+              <Input
+                placeholder={t("e.g. Mugshot, GreenCart")}
+                value={form.affiliatedAppNames}
+                onChange={e => update({ affiliatedAppNames: e.target.value })}
+                size="sm"
+              />
+            </Field.Root>
+          )}
+
+          <ToggleField
+            label={t("Are you a VeChain Foundation member or employee?")}
+            checked={form.isFoundationMember}
+            onCheckedChange={checked => update({ isFoundationMember: checked })}
+          />
+          {form.isFoundationMember && (
+            <Field.Root>
+              <Field.Label>{t("Role")}</Field.Label>
+              <Input
+                placeholder={t("e.g. Developer Relations")}
+                value={form.foundationRole}
+                onChange={e => update({ foundationRole: e.target.value })}
+                size="sm"
+              />
+            </Field.Root>
+          )}
+
+          <ToggleField
+            label={t("Do you have any other conflicts of interest to disclose?")}
+            checked={form.hasConflictsOfInterest}
+            onCheckedChange={checked => update({ hasConflictsOfInterest: checked })}
+          />
+          {form.hasConflictsOfInterest && (
+            <Field.Root>
+              <Field.Label>{t("Description")}</Field.Label>
+              <Textarea
+                value={form.conflictsDescription}
+                onChange={e => update({ conflictsDescription: e.target.value })}
+                rows={3}
+                maxLength={500}
+                size="sm"
+              />
+            </Field.Root>
+          )}
+        </VStack>
+
+        <VStack gap={4} align="stretch">
+          <Heading size="md">{t("Social Profiles")}</Heading>
+
+          <Field.Root>
+            <Field.Label>{t("Twitter / X")}</Field.Label>
+            <Input value={form.twitter} onChange={e => update({ twitter: e.target.value })} size="sm" />
+          </Field.Root>
+
+          <Field.Root>
+            <Field.Label>{t("Discord")}</Field.Label>
+            <Input value={form.discord} onChange={e => update({ discord: e.target.value })} size="sm" />
+          </Field.Root>
+
+          <Field.Root>
+            <Field.Label>{t("Website")}</Field.Label>
+            <Input value={form.website} onChange={e => update({ website: e.target.value })} size="sm" />
+          </Field.Root>
+
+          <Field.Root>
+            <Field.Label>{t("Other links")}</Field.Label>
+            <Textarea
+              placeholder={t("https://github.com/myuser\nhttps://linkedin.com/in/myprofile")}
+              value={form.other}
+              onChange={e => update({ other: e.target.value })}
+              rows={3}
+              size="sm"
+            />
+            <Field.HelperText>{t("GitHub, LinkedIn, forum profile, etc.")}</Field.HelperText>
+          </Field.Root>
+        </VStack>
+
+        <HStack gap={3} justify="end" pt={2}>
+          <Button variant="secondary" onClick={onClose} size="lg">
+            {t("Cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={onSave}
+            disabled={!canSave || isSubmitting}
+            loading={isSubmitting}
+            size="lg">
+            {t("Save")}
+          </Button>
+        </HStack>
+      </VStack>
+    </BaseModal>
+  )
+}

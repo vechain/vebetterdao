@@ -1,7 +1,7 @@
-import { Button, Collapsible, HStack, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useState } from "react"
+import { Button, Collapsible, HStack, Link, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuChevronDown, LuChevronUp } from "react-icons/lu"
+import { LuChevronDown, LuChevronUp, LuExternalLink } from "react-icons/lu"
 
 import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 
@@ -14,6 +14,17 @@ type Props = {
 export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt }: Props) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
+
+  const otherLinks = useMemo(
+    () =>
+      (metadata?.socials?.other ?? "")
+        .split("\n")
+        .map(l => l.trim())
+        .filter(Boolean),
+    [metadata?.socials?.other],
+  )
+
+  const hasOtherLinks = otherLinks.length > 0 || !!metadata?.socials?.discord
 
   return (
     <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
@@ -86,6 +97,40 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
                   {metadata.disclosures.conflictsDescription}
                 </Text>
               )}
+            </>
+          )}
+
+          {hasOtherLinks && (
+            <>
+              <Separator />
+              <Text textStyle="sm" fontWeight="semibold">
+                {t("Other links")}
+              </Text>
+              <VStack gap={1} align="stretch">
+                {metadata?.socials?.discord && (
+                  <HStack gap={1}>
+                    <Text textStyle="xs" color="fg.muted">
+                      {"Discord: "}
+                      {metadata.socials.discord}
+                    </Text>
+                  </HStack>
+                )}
+                {otherLinks.map(link => (
+                  <Link
+                    key={link}
+                    href={link.startsWith("http") ? link : `https://${link}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="plain">
+                    <HStack gap={1}>
+                      <Text textStyle="xs" color="fg.muted" truncate>
+                        {link}
+                      </Text>
+                      <LuExternalLink size={10} />
+                    </HStack>
+                  </Link>
+                ))}
+              </VStack>
             </>
           )}
 
