@@ -22,6 +22,7 @@ export const getMinimumBetQuickAmounts = (minBetAmount: bigint): string[] => {
 
 export const STEP_ORDER = [
   "kind",
+  "title",
   "amount",
   "startRound",
   "duration",
@@ -47,6 +48,10 @@ export const initialForm = (kind: number, currentRound: number): CreateChallenge
   threshold: "0",
   appIds: [],
   invitees: [],
+  title: "",
+  description: "",
+  imageURI: "",
+  metadataURI: "",
 })
 
 export const parseAmount = (value: string) => {

@@ -40,6 +40,10 @@ type RawChallengeView = {
   status: ChallengeUiEnum | number
   settlementMode: ChallengeUiEnum | number
   creator: string
+  title: string
+  description: string
+  imageURI: string
+  metadataURI: string
   stakeAmount: string
   totalPrize: string
   startRound: number
@@ -127,6 +131,10 @@ export const mapIndexerChallengeView = (challenge: RawChallengeView): ChallengeV
   status: normalizeEnum(challenge.status, challengeStatusMap, ChallengeStatus.Pending),
   settlementMode: normalizeEnum(challenge.settlementMode, settlementModeMap, SettlementMode.None),
   creator: challenge.creator,
+  title: challenge.title,
+  description: challenge.description,
+  imageURI: challenge.imageURI,
+  metadataURI: challenge.metadataURI,
   stakeAmount: challenge.stakeAmount,
   totalPrize: challenge.totalPrize,
   startRound: challenge.startRound,

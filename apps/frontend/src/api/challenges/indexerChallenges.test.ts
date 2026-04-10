@@ -19,6 +19,10 @@ describe("mapIndexerChallengeView", () => {
       status: "Finalized",
       settlementMode: "QualifiedSplit",
       creator: "0xabc",
+      title: "Spring sprint",
+      description: "",
+      imageURI: "",
+      metadataURI: "",
       stakeAmount: "500",
       totalPrize: "1000",
       startRound: 2,
@@ -52,6 +56,7 @@ describe("mapIndexerChallengeView", () => {
     expect(view.status).toBe(ChallengeStatus.Finalized)
     expect(view.settlementMode).toBe(SettlementMode.QualifiedSplit)
     expect(view.viewerStatus).toBe(ParticipantStatus.Declined)
+    expect(view.title).toBe("Spring sprint")
   })
 
   it("keeps numeric enum payloads unchanged", () => {
@@ -64,6 +69,10 @@ describe("mapIndexerChallengeView", () => {
       status: ChallengeStatus.Pending,
       settlementMode: SettlementMode.None,
       creator: "0xdef",
+      title: "",
+      description: "",
+      imageURI: "",
+      metadataURI: "",
       stakeAmount: "100",
       totalPrize: "100",
       startRound: 1,

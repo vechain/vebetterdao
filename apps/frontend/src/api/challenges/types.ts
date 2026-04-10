@@ -31,6 +31,10 @@ export interface ChallengeView {
   status: ChallengeStatus
   settlementMode: SettlementMode
   creator: string
+  title?: string
+  description?: string
+  imageURI?: string
+  metadataURI?: string
   stakeAmount: string
   totalPrize: string
   startRound: number

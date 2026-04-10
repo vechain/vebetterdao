@@ -24,6 +24,10 @@ export interface CreateChallengeFormData {
   threshold: string
   appIds: string[]
   invitees: string[]
+  title: string
+  description: string
+  imageURI: string
+  metadataURI: string
 }
 
 type ActionParams =
@@ -104,6 +108,10 @@ export const useChallengeActions = () => {
                   threshold: BigInt(form.threshold || "0"),
                   appIds: form.appIds,
                   invitees: form.invitees,
+                  title: form.title,
+                  description: form.description,
+                  imageURI: form.imageURI,
+                  metadataURI: form.metadataURI,
                 },
               ],
               comment: "Create challenge",

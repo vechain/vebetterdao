@@ -3,6 +3,7 @@ import { ethers } from "hardhat"
 import { deployProxy } from "../../scripts/helpers"
 import { challengesLibraries } from "../../scripts/libraries"
 import { B3TR, B3TRChallenges, MockPassportActions, MockRoundGovernor, MockX2EarnApps } from "../../typechain-types"
+import { ChallengeCoreLogic__factory } from "../../typechain-types/factories/contracts/challenges/libraries/ChallengeCoreLogic__factory"
 
 const STAKE_AMOUNT = ethers.parseEther("100")
 const MIN_BET_AMOUNT = ethers.parseEther("100")
@@ -124,6 +125,10 @@ async function createChallenge(
     threshold: 0,
     appIds: [APP_1],
     invitees: [],
+    title: "",
+    description: "",
+    imageURI: "",
+    metadataURI: "",
     ...overrides,
   })
 }
@@ -133,21 +138,34 @@ describe("B3TRChallenges - @shard9a", function () {
     const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await expect(createChallenge(challenges))
-      .to.emit(challenges, "ChallengeCreated")
-      .withArgs(
-        1n,
-        admin.address,
-        3n,
-        ChallengeKind.Stake,
-        ChallengeVisibility.Public,
-        ThresholdMode.None,
-        STAKE_AMOUNT,
-        2n,
-        0n,
-        false,
-        [APP_1],
-      )
+    const tx = await createChallenge(challenges)
+    const receipt = await tx.wait()
+    const challengeCreated = receipt?.logs
+      .map(log => {
+        try {
+          return ChallengeCoreLogic__factory.createInterface().parseLog(log)
+        } catch {
+          return null
+        }
+      })
+      .find(log => log?.name === "ChallengeCreated")
+
+    expect(challengeCreated).to.not.equal(undefined)
+    expect(challengeCreated?.args.challengeId).to.equal(1n)
+    expect(challengeCreated?.args.creator).to.equal(admin.address)
+    expect(challengeCreated?.args.endRound).to.equal(3n)
+    expect(challengeCreated?.args.kind).to.equal(ChallengeKind.Stake)
+    expect(challengeCreated?.args.visibility).to.equal(ChallengeVisibility.Public)
+    expect(challengeCreated?.args.thresholdMode).to.equal(ThresholdMode.None)
+    expect(challengeCreated?.args.stakeAmount).to.equal(STAKE_AMOUNT)
+    expect(challengeCreated?.args.startRound).to.equal(2n)
+    expect(challengeCreated?.args.threshold).to.equal(0n)
+    expect(challengeCreated?.args.allApps).to.equal(false)
+    expect(challengeCreated?.args.selectedApps).to.deep.equal([APP_1])
+    expect(challengeCreated?.args.title).to.equal("")
+    expect(challengeCreated?.args.description).to.equal("")
+    expect(challengeCreated?.args.imageURI).to.equal("")
+    expect(challengeCreated?.args.metadataURI).to.equal("")
 
     const challenge = await challenges.getChallenge(1)
 
@@ -156,6 +174,21 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(challenge.totalPrize).to.equal(STAKE_AMOUNT)
     expect(await challenges.getParticipantStatus(1, admin.address)).to.equal(ParticipantStatus.Joined)
     expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(STAKE_AMOUNT)
+  })
+
+  it("stores title and defaults the other metadata fields to empty strings", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      title: "Spring Sprint",
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.title).to.equal("Spring Sprint")
+    expect(challenge.description).to.equal("")
+    expect(challenge.imageURI).to.equal("")
+    expect(challenge.metadataURI).to.equal("")
   })
 
   it("rejects joining a sponsored challenge after reaching the participant cap", async function () {

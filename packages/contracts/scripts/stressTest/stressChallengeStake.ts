@@ -301,6 +301,10 @@ async function main() {
       threshold: 0,
       appIds: plan.appIds,
       invitees: [],
+      title: "",
+      description: "",
+      imageURI: "",
+      metadataURI: "",
     })
     await tx.wait()
 

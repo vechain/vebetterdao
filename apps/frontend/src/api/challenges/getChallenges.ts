@@ -16,8 +16,32 @@ import {
 
 const contractAbi = B3TRChallenges__factory.abi
 const abi = contractAbi as any
-const ZERO_ADDR = "0x0000000000000000000000000000000000000000"
 const challengeCreatedEventName = "ChallengeCreated" as const
+const challengeCreatedAbi = [
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "uint256", name: "challengeId", type: "uint256" },
+      { indexed: true, internalType: "address", name: "creator", type: "address" },
+      { indexed: true, internalType: "uint256", name: "endRound", type: "uint256" },
+      { indexed: false, internalType: "uint8", name: "kind", type: "uint8" },
+      { indexed: false, internalType: "uint8", name: "visibility", type: "uint8" },
+      { indexed: false, internalType: "uint8", name: "thresholdMode", type: "uint8" },
+      { indexed: false, internalType: "uint256", name: "stakeAmount", type: "uint256" },
+      { indexed: false, internalType: "uint256", name: "startRound", type: "uint256" },
+      { indexed: false, internalType: "uint256", name: "threshold", type: "uint256" },
+      { indexed: false, internalType: "bool", name: "allApps", type: "bool" },
+      { indexed: false, internalType: "bytes32[]", name: "selectedApps", type: "bytes32[]" },
+      { indexed: false, internalType: "string", name: "title", type: "string" },
+      { indexed: false, internalType: "string", name: "description", type: "string" },
+      { indexed: false, internalType: "string", name: "imageURI", type: "string" },
+      { indexed: false, internalType: "string", name: "metadataURI", type: "string" },
+    ],
+    name: challengeCreatedEventName,
+    type: "event",
+  },
+] as const
+const ZERO_ADDR = "0x0000000000000000000000000000000000000000"
 const payoutClaimedEventName = "ChallengePayoutClaimed" as const
 const refundClaimedEventName = "ChallengeRefundClaimed" as const
 
@@ -83,10 +107,10 @@ async function fetchChallengeCreationTimestamps(
 
   const creationTimestamps = new Map<number, number>()
   for (const log of logs) {
-    const event = decodeEventLog(log, contractAbi)
-    if (event.decodedData.eventName === challengeCreatedEventName) {
-      creationTimestamps.set(Number(event.decodedData.args.challengeId), log.meta.blockTimestamp)
+    const event = decodeEventLog(log, challengeCreatedAbi as any) as {
+      decodedData: { eventName: typeof challengeCreatedEventName; args: { challengeId: bigint } }
     }
+    creationTimestamps.set(Number(event.decodedData.args.challengeId), log.meta.blockTimestamp)
   }
 
   return creationTimestamps
@@ -112,6 +136,10 @@ function parseChallengeView(
   const status = Number(raw.status ?? raw[4]) as ChallengeView["status"]
   const settlementMode = Number(raw.settlementMode ?? raw[5]) as ChallengeView["settlementMode"]
   const creator = String(raw.creator ?? raw[6])
+  const title = String(raw.title ?? raw[22] ?? "")
+  const description = String(raw.description ?? raw[23] ?? "")
+  const imageURI = String(raw.imageURI ?? raw[24] ?? "")
+  const metadataURI = String(raw.metadataURI ?? raw[25] ?? "")
   const stakeAmount = ethers.formatEther(BigInt(raw.stakeAmount ?? raw[7]))
   const startRound = Number(raw.startRound ?? raw[8])
   const endRound = Number(raw.endRound ?? raw[9])
@@ -161,6 +189,10 @@ function parseChallengeView(
     status,
     settlementMode,
     creator,
+    title,
+    description,
+    imageURI,
+    metadataURI,
     stakeAmount,
     totalPrize,
     startRound,

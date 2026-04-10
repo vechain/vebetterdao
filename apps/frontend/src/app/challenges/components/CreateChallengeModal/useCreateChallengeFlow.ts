@@ -30,6 +30,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<CreateChallengeFormData>(initialForm(defaultKind, currentRound))
   const [kindChosen, setKindChosen] = useState(false)
+  const [titleConfirmed, setTitleConfirmed] = useState(false)
   const [amountConfirmed, setAmountConfirmed] = useState(false)
   const [startRoundChosen, setStartRoundChosen] = useState(false)
   const [durationChosen, setDurationChosen] = useState(false)
@@ -72,6 +73,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const resetFlow = () => {
     setForm(initialForm(defaultKind, currentRound))
     setKindChosen(false)
+    setTitleConfirmed(false)
     setAmountConfirmed(false)
     setStartRoundChosen(false)
     setDurationChosen(false)
@@ -188,6 +190,11 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     setThresholdConfirmed(false)
   }
 
+  const updateTitle = (value: string) => {
+    update("title", value)
+    setTitleConfirmed(false)
+  }
+
   const addApp = (appId: string) => {
     if (hasReachedSelectedAppsLimit || form.appIds.includes(appId)) return
     update("appIds", [...form.appIds, appId])
@@ -271,6 +278,10 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     withTyping(() => setAmountConfirmed(true))
   }
 
+  const confirmTitle = () => {
+    withTyping(() => setTitleConfirmed(true))
+  }
+
   const confirmStartRound = () => {
     if (hasInvalidStartRound) return
     withTyping(() => setStartRoundChosen(true))
@@ -303,6 +314,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const resetFrom = (stepKey: Exclude<ChallengeFlowStep, "review">) => {
     const index = STEP_ORDER.indexOf(stepKey)
     if (index <= STEP_ORDER.indexOf("kind")) setKindChosen(false)
+    if (index <= STEP_ORDER.indexOf("title")) setTitleConfirmed(false)
     if (index <= STEP_ORDER.indexOf("amount")) setAmountConfirmed(false)
     if (index <= STEP_ORDER.indexOf("startRound")) setStartRoundChosen(false)
     if (index <= STEP_ORDER.indexOf("duration")) setDurationChosen(false)
@@ -342,6 +354,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     const parsed: CreateChallengeFormData = {
       ...form,
       invitees: sanitizedInvitees,
+      title: form.title.trim(),
     }
     actions.createChallenge(parsed)
     setOpen(false)
@@ -381,6 +394,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
 
     // step flags
     kindChosen,
+    titleConfirmed,
     amountConfirmed,
     startRoundChosen,
     durationChosen,
@@ -395,6 +409,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     handleSubmit,
     resetFrom,
     updateKind,
+    updateTitle,
+    confirmTitle,
     confirmAmount,
     chooseStartRound,
     confirmStartRound,

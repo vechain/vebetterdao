@@ -45,6 +45,7 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
   const showSponsoringBadge = isSponsored && challenge.isCreator
   const showInviteStats = challenge.visibility === ChallengeVisibility.Private
+  const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
 
   return (
     <LinkBox h="full">
@@ -84,7 +85,7 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
               <LinkOverlay asChild>
                 <NextLink href={`/challenges/${challenge.challengeId}`}>
                   <Heading textStyle={{ base: "xl", md: "2xl" }} lineHeight="1.1">
-                    {t("Challenge #{{id}}", { id: challenge.challengeId })}
+                    {challengeTitle}
                   </Heading>
                 </NextLink>
               </LinkOverlay>

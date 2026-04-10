@@ -118,6 +118,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
     challenge.thresholdMode === ThresholdMode.SplitAboveThreshold && splitPrizePerWinnerLabel
       ? `${winnerTypeLabel} · ${splitPrizePerWinnerLabel}`
       : winnerTypeLabel
+  const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
 
   return (
     <MotionVStack renderInnerStack={false} gap="6">
@@ -154,7 +155,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                 </Wrap>
 
                 <Heading textStyle={{ base: "2xl", md: "4xl" }} lineHeight="1.02">
-                  {t("Challenge #{{id}}", { id: challenge.challengeId })}
+                  {challengeTitle}
                 </Heading>
 
                 <Wrap gap="2">

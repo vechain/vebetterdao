@@ -17,7 +17,11 @@ library ChallengeCoreLogic {
     uint256 startRound,
     uint256 threshold,
     bool allApps,
-    bytes32[] selectedApps
+    bytes32[] selectedApps,
+    string title,
+    string description,
+    string imageURI,
+    string metadataURI
   );
   event ChallengeInviteAdded(uint256 indexed challengeId, address indexed invitee);
   event ChallengeJoined(uint256 indexed challengeId, address indexed participant);
@@ -70,6 +74,10 @@ library ChallengeCoreLogic {
     challenge.threshold = params.threshold;
     challenge.allApps = allApps;
     challenge.totalPrize = params.stakeAmount;
+    challenge.title = params.title;
+    challenge.description = params.description;
+    challenge.imageURI = params.imageURI;
+    challenge.metadataURI = params.metadataURI;
 
     for (uint256 i; i < params.appIds.length; i++) {
       challenge.appIds.push(params.appIds[i]);
@@ -286,7 +294,11 @@ library ChallengeCoreLogic {
       challenge.startRound,
       challenge.threshold,
       challenge.allApps,
-      challenge.appIds
+      challenge.appIds,
+      challenge.title,
+      challenge.description,
+      challenge.imageURI,
+      challenge.metadataURI
     );
   }
 

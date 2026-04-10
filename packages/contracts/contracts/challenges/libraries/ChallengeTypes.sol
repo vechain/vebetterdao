@@ -50,6 +50,10 @@ library ChallengeTypes {
     uint256 threshold;
     bytes32[] appIds;
     address[] invitees;
+    string title;
+    string description;
+    string imageURI;
+    string metadataURI;
   }
 
   struct InitializationData {
@@ -91,6 +95,10 @@ library ChallengeTypes {
     address[] invited;
     address[] declined;
     bytes32[] appIds;
+    string title;
+    string description;
+    string imageURI;
+    string metadataURI;
   }
 
   struct ChallengeView {
@@ -116,5 +124,9 @@ library ChallengeTypes {
     uint256 bestCount;
     uint256 qualifiedCount;
     uint256 payoutsClaimed;
+    string title;
+    string description;
+    string imageURI;
+    string metadataURI;
   }
 }

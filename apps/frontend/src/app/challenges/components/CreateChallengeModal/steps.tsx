@@ -70,6 +70,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     hasBelowMinimumBetAmount,
 
     kindChosen,
+    titleConfirmed,
     amountConfirmed,
     startRoundChosen,
     durationChosen,
@@ -169,6 +170,34 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("Sponsored challenge type description")}
             </Text>
           </Box>
+        </VStack>
+      ),
+    },
+    {
+      key: "title",
+      isRelevant: true,
+      isComplete: titleConfirmed,
+      prompt: (
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("Title (optional)")}
+        </Text>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit">
+          {form.title || t("Skip")}
+        </Text>
+      ),
+      controls: (
+        <VStack align="stretch" gap="3">
+          <Field.Root>
+            <Field.Label>{t("Title (optional)")}</Field.Label>
+            <Input value={form.title} onChange={e => flow.updateTitle(e.target.value)} />
+          </Field.Root>
+          <HStack justify="flex-end">
+            <Button size="sm" variant={primaryVariant} onClick={flow.confirmTitle}>
+              {t("Continue")}
+            </Button>
+          </HStack>
         </VStack>
       ),
     },
@@ -772,6 +801,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
                 label={t("Choose challenge type")}
                 value={t(form.kind === ChallengeKind.Stake ? "Bet" : "Sponsored")}
               />
+              <SummaryItem label={t("Title (optional)")} value={form.title || t("Skip")} />
               <SummaryItem label={t(amountLabelKey)} value={`${form.stakeAmount} B3TR`} />
               <SummaryItem label={t("Start round")} value={form.startRound} />
               <SummaryItem label={t("End round")} value={form.endRound} />
