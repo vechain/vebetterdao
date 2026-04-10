@@ -61,6 +61,7 @@ export const ChallengesPageContent = () => {
   const hasNeededActions = grouped.neededActions.items.length > 0
   const hasActive = grouped.active.items.length > 0
   const hasOpen = grouped.open.items.length > 0
+  const hasExplore = grouped.explore.items.length > 0
   const hasHistory = grouped.history.items.length > 0
 
   return (
@@ -213,6 +214,37 @@ export const ChallengesPageContent = () => {
                     size="sm"
                     onClick={() => grouped.open.fetchNextPage()}
                     loading={grouped.open.isFetchingNextPage}
+                    w="full">
+                    {t("Load more")}
+                  </Button>
+                )}
+              </VStack>
+            )}
+          </ChallengeHubSection>
+        )}
+
+        {/* Explore active challenges */}
+        {(hasExplore || isLoading) && (
+          <ChallengeHubSection title={t("What others are doing")} count={grouped.explore.items.length}>
+            {grouped.explore.isLoading ? (
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                {[0, 1, 2].map(i => (
+                  <CompactSkeleton key={i} />
+                ))}
+              </SimpleGrid>
+            ) : (
+              <VStack gap="3" align="stretch">
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
+                  {grouped.explore.items.map(c => (
+                    <ChallengeCompactCard key={c.challengeId} challenge={c} />
+                  ))}
+                </SimpleGrid>
+                {grouped.explore.hasNextPage && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => grouped.explore.fetchNextPage()}
+                    loading={grouped.explore.isFetchingNextPage}
                     w="full">
                     {t("Load more")}
                   </Button>

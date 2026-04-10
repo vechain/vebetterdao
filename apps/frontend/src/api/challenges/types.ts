@@ -75,7 +75,7 @@ export interface ChallengeDetail extends ChallengeView {
   selectedApps: string[]
 }
 
-export type ChallengeSection = "needed-actions" | "active" | "open" | "history"
+export type ChallengeSection = "needed-actions" | "active" | "open" | "explore" | "history"
 
 export interface PaginatedChallengeSection {
   items: ChallengeView[]
@@ -89,6 +89,7 @@ export interface ChallengesHubData {
   neededActions: PaginatedChallengeSection
   active: PaginatedChallengeSection
   open: PaginatedChallengeSection
+  explore: PaginatedChallengeSection
   history: PaginatedChallengeSection
 }
 

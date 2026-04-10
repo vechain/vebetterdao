@@ -71,6 +71,7 @@ const SECTION_PAGE_SIZE: Record<ChallengeSection, number> = {
   "needed-actions": 12,
   active: 6,
   open: 12,
+  explore: 12,
   history: 12,
 }
 

@@ -2044,6 +2044,7 @@
   "What is the Treasury?": "トレジャリーとは？",
   "What is voting power?": "投票力とは？",
   "What is your proposal about?": "あなたの提案は何についてですか？",
+  "What others are doing": "他の人が取り組んでいること",
   "What you could earn if you upgraded to this GM level. Estimates are based on round {{round}} data.": "このGMレベルにアップグレードした場合に獲得できる推定報酬です。推定はラウンド{{round}}のデータに基づいています。",
   "When are rewards claimable?": "報酬はいつ請求可能ですか？",
   "When you disabled rewards pool, <bold>the funds will move to app balance</bold>, you can enable it back at any time. The distributor will <bold>stop distributing rewards</bold> from the app balance pool.": "報酬プールを無効にすると、<bold>資金はアプリの残高に移動します</bold>。いつでも再度有効にできます。分配者はアプリの残高プールから<bold>報酬の分配を停止</bold>します。",

@@ -15,6 +15,7 @@ export const useChallengesHub = (viewerAddress?: string) => {
   const neededActionsQuery = useChallengeSection("needed-actions", viewerAddress)
   const activeQuery = useChallengeSection("active", viewerAddress)
   const openQuery = useChallengeSection("open", viewerAddress)
+  const exploreQuery = useChallengeSection("explore", viewerAddress)
   const historyQuery = useChallengeSection("history", viewerAddress)
 
   const data = useMemo<ChallengesHubData>(
@@ -40,6 +41,13 @@ export const useChallengesHub = (viewerAddress?: string) => {
         isFetchingNextPage: openQuery.isFetchingNextPage,
         fetchNextPage: openQuery.fetchNextPage,
       },
+      explore: {
+        items: exploreQuery.data?.pages.flatMap(page => page.data) ?? [],
+        hasNextPage: !!exploreQuery.hasNextPage,
+        isLoading: exploreQuery.isLoading,
+        isFetchingNextPage: exploreQuery.isFetchingNextPage,
+        fetchNextPage: exploreQuery.fetchNextPage,
+      },
       history: {
         items: historyQuery.data?.pages.flatMap(page => page.data) ?? [],
         hasNextPage: !!historyQuery.hasNextPage,
@@ -54,6 +62,11 @@ export const useChallengesHub = (viewerAddress?: string) => {
       activeQuery.hasNextPage,
       activeQuery.isFetchingNextPage,
       activeQuery.isLoading,
+      exploreQuery.data,
+      exploreQuery.fetchNextPage,
+      exploreQuery.hasNextPage,
+      exploreQuery.isFetchingNextPage,
+      exploreQuery.isLoading,
       historyQuery.data,
       historyQuery.fetchNextPage,
       historyQuery.hasNextPage,
@@ -75,9 +88,26 @@ export const useChallengesHub = (viewerAddress?: string) => {
   return {
     data: viewerAddress
       ? data
-      : { neededActions: EMPTY_SECTION, active: EMPTY_SECTION, open: EMPTY_SECTION, history: EMPTY_SECTION },
+      : {
+          neededActions: EMPTY_SECTION,
+          active: EMPTY_SECTION,
+          open: EMPTY_SECTION,
+          explore: EMPTY_SECTION,
+          history: EMPTY_SECTION,
+        },
     isLoading: viewerAddress ? Object.values(data).some(section => section.isLoading) : false,
-    isError: neededActionsQuery.isError || activeQuery.isError || openQuery.isError || historyQuery.isError,
-    error: neededActionsQuery.error ?? activeQuery.error ?? openQuery.error ?? historyQuery.error ?? null,
+    isError:
+      neededActionsQuery.isError ||
+      activeQuery.isError ||
+      openQuery.isError ||
+      exploreQuery.isError ||
+      historyQuery.isError,
+    error:
+      neededActionsQuery.error ??
+      activeQuery.error ??
+      openQuery.error ??
+      exploreQuery.error ??
+      historyQuery.error ??
+      null,
   }
 }
