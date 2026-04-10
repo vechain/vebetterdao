@@ -8,6 +8,8 @@ import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { SnapshotExplanationModal } from "@/app/components/Countdown/SnapshotExplanationModal"
@@ -31,6 +33,8 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
     bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
     account?.address,
   )
+  const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: delegatedAmount } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
   const { open: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: allocationRound, isLoading: isRoundLoading } = useAllocationsRound(currentRoundId)
@@ -38,6 +42,9 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
   const numericAmount = Number(amount) || 0
   const currentVot3Balance = Number(vot3Balance?.scaled ?? "0")
   const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
+  const nextRoundVotingPower = isDelegated
+    ? Number(delegatedAmount?.scaled ?? "0")
+    : currentVot3Balance + lockedForSupport
   const sign = mode === "power-up" ? "+" : "-"
   const changeColor = mode === "power-up" ? "status.positive.strong" : "status.negative.strong"
 
@@ -67,10 +74,10 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
                 {t("Next round voting power:")}
               </Text>
               <Text textStyle="sm" fontWeight="semibold">
-                {formatter.format(currentVot3Balance + lockedForSupport)} {"VOT3"}
+                {formatter.format(nextRoundVotingPower)} {"VOT3"}
               </Text>
             </HStack>
-            {lockedForSupport > 0 && (
+            {!isDelegated && lockedForSupport > 0 && (
               <Text textStyle="xs" color="text.subtle">
                 {"("}
                 {formatter.format(currentVot3Balance)} {t("in wallet")}
