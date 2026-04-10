@@ -4,8 +4,9 @@ import {
   Box,
   Button,
   Card,
-  Heading,
+  chakra,
   HStack,
+  Icon,
   IconButton,
   SimpleGrid,
   Skeleton,
@@ -17,6 +18,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
+import { FiInfo } from "react-icons/fi"
 import { A11y, Navigation } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
@@ -24,6 +26,7 @@ import { ChallengeKind } from "@/api/challenges/types"
 import { useChallengesHub } from "@/api/challenges/useChallengesHub"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { MotionVStack } from "@/components/MotionVStack"
+import { Tooltip } from "@/components/ui/tooltip"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 import "swiper/css"
@@ -69,12 +72,31 @@ export const ChallengesPageContent = () => {
       <VStack align="stretch" w="full" gap="8">
         {/* Header */}
         <Stack direction={{ base: "column", md: "row" }} justify="space-between" align={{ md: "center" }} gap="4">
-          <VStack align="start" gap="1">
-            <Heading size="xl">{t("Challenges")}</Heading>
-            <Text color="text.subtle" textStyle="sm">
-              {t("Challenges description")}
+          <HStack align="center" gap="2">
+            <Text as="h1" textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+              {t("Challenges")}
             </Text>
-          </VStack>
+            <Tooltip
+              content={t("Challenges description")}
+              contentProps={{ maxW: "sm" }}
+              positioning={{ placement: "top" }}>
+              <chakra.button
+                type="button"
+                aria-label={t("Challenges description")}
+                display="inline-flex"
+                alignItems="center"
+                justifyContent="center"
+                cursor="pointer"
+                color="text.subtle"
+                flexShrink={0}
+                bg="transparent"
+                borderWidth="0"
+                p="0"
+                lineHeight="0">
+                <Icon as={FiInfo} boxSize="4" />
+              </chakra.button>
+            </Tooltip>
+          </HStack>
           <HStack gap="2" flexShrink={0}>
             <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
               <Button variant="primary" size="sm">
