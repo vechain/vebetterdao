@@ -43,6 +43,7 @@ import "./interfaces/INavigatorRegistry.sol";
 /// - _update() now calls NavigatorRegistry.getDelegatedAmount(from) to enforce transfer lock
 /// - getNavigatorLockedAmount(account) view reads from NavigatorRegistry (single source of truth, no duplicate storage)
 /// - initializeV2(navigatorRegistry) — reinitializer(2), stores NavigatorRegistry address
+/// - unlockedBalance(account) view returns balanceOf(account) - getNavigatorLockedAmount(account)
 contract VOT3 is
   ERC20Upgradeable,
   ERC20PausableUpgradeable,
@@ -287,6 +288,16 @@ contract VOT3 is
     VOT3Storage storage $ = _getVOT3Storage();
     if ($.navigatorRegistry == address(0)) return 0;
     return INavigatorRegistry($.navigatorRegistry).getDelegatedAmount(account);
+  }
+
+  /// @notice Get the unlocked VOT3 balance for an account (total balance minus navigator-delegated amount)
+  /// @param account The address to check
+  /// @return The unlocked VOT3 balance
+  function unlockedBalance(address account) external view returns (uint256) {
+    VOT3Storage storage $ = _getVOT3Storage();
+    if ($.navigatorRegistry == address(0)) return balanceOf(account);
+    uint256 locked = INavigatorRegistry($.navigatorRegistry).getDelegatedAmount(account);
+    return balanceOf(account) - locked;
   }
 
   /// @notice Returns the version of the contract

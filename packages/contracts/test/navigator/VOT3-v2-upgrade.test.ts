@@ -117,4 +117,101 @@ describe("VOT3 - V2 Upgrade - @shard19a", function () {
 
     await expect(vot3.initializeV2(ethers.ZeroAddress)).to.be.reverted
   })
+
+  describe("unlockedBalance", function () {
+    it("Should return full balance when no delegation exists", async () => {
+      const config = createLocalConfig()
+      const { vot3, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true, config })
+
+      const citizen = otherAccounts[11]
+      const amount = ethers.parseEther("1000")
+      await getVot3Tokens(citizen, "1000")
+
+      expect(await vot3.unlockedBalance(citizen.address)).to.equal(amount)
+      expect(await vot3.unlockedBalance(citizen.address)).to.equal(await vot3.balanceOf(citizen.address))
+    })
+
+    it("Should return balance minus delegated amount", async () => {
+      const config = createLocalConfig()
+      const { vot3, b3tr, navigatorRegistry, owner, otherAccounts, minterAccount } = await getOrDeployContractInstances(
+        { forceDeploy: true, config },
+      )
+
+      const navigator = otherAccounts[10]
+      const citizen = otherAccounts[11]
+
+      await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("10000000"))
+      await getVot3Tokens(owner, "10000000")
+
+      const stakeAmount = ethers.parseEther("50000")
+      await b3tr.connect(owner).transfer(navigator.address, stakeAmount)
+      await b3tr.connect(navigator).approve(await navigatorRegistry.getAddress(), stakeAmount)
+      await navigatorRegistry.connect(navigator).register(stakeAmount, "ipfs://nav")
+
+      await getVot3Tokens(citizen, "1000")
+
+      const delegateAmount = ethers.parseEther("400")
+      await navigatorRegistry.connect(citizen).delegate(navigator.address, delegateAmount)
+
+      const expected = ethers.parseEther("1000") - delegateAmount
+      expect(await vot3.unlockedBalance(citizen.address)).to.equal(expected)
+    })
+
+    it("Should return zero when entire balance is delegated", async () => {
+      const config = createLocalConfig()
+      const { vot3, b3tr, navigatorRegistry, owner, otherAccounts, minterAccount } = await getOrDeployContractInstances(
+        { forceDeploy: true, config },
+      )
+
+      const navigator = otherAccounts[10]
+      const citizen = otherAccounts[11]
+
+      await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("10000000"))
+      await getVot3Tokens(owner, "10000000")
+
+      const stakeAmount = ethers.parseEther("50000")
+      await b3tr.connect(owner).transfer(navigator.address, stakeAmount)
+      await b3tr.connect(navigator).approve(await navigatorRegistry.getAddress(), stakeAmount)
+      await navigatorRegistry.connect(navigator).register(stakeAmount, "ipfs://nav")
+
+      await getVot3Tokens(citizen, "1000")
+      await navigatorRegistry.connect(citizen).delegate(navigator.address, ethers.parseEther("1000"))
+
+      expect(await vot3.unlockedBalance(citizen.address)).to.equal(0n)
+    })
+
+    it("Should restore full balance after undelegation", async () => {
+      const config = createLocalConfig()
+      const { vot3, b3tr, navigatorRegistry, owner, otherAccounts, minterAccount } = await getOrDeployContractInstances(
+        { forceDeploy: true, config },
+      )
+
+      const navigator = otherAccounts[10]
+      const citizen = otherAccounts[11]
+
+      await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("10000000"))
+      await getVot3Tokens(owner, "10000000")
+
+      const stakeAmount = ethers.parseEther("50000")
+      await b3tr.connect(owner).transfer(navigator.address, stakeAmount)
+      await b3tr.connect(navigator).approve(await navigatorRegistry.getAddress(), stakeAmount)
+      await navigatorRegistry.connect(navigator).register(stakeAmount, "ipfs://nav")
+
+      const citizenBalance = ethers.parseEther("1000")
+      await getVot3Tokens(citizen, "1000")
+      await navigatorRegistry.connect(citizen).delegate(navigator.address, ethers.parseEther("500"))
+
+      expect(await vot3.unlockedBalance(citizen.address)).to.equal(ethers.parseEther("500"))
+
+      await navigatorRegistry.connect(citizen).undelegate()
+      expect(await vot3.unlockedBalance(citizen.address)).to.equal(citizenBalance)
+    })
+
+    it("Should return zero for account with no tokens", async () => {
+      const config = createLocalConfig()
+      const { vot3, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true, config })
+
+      expect(await vot3.unlockedBalance(otherAccounts[15].address)).to.equal(0n)
+    })
+  })
 })

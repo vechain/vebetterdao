@@ -174,5 +174,6 @@ interface IVOT3 {
 
   // V2: Navigator delegation lock (reads from NavigatorRegistry)
   function getNavigatorLockedAmount(address account) external view returns (uint256);
-}
 
+  function unlockedBalance(address account) external view returns (uint256);
+}
