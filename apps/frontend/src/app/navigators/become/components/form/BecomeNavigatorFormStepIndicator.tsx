@@ -12,16 +12,7 @@ export const BecomeNavigatorFormStepIndicator = ({
 }) => {
   const [isMobile] = useMediaQuery(["(max-width: 768px)"])
   return (
-    <Flex
-      w="full"
-      overflowX="auto"
-      overflowY="hidden"
-      whiteSpace="nowrap"
-      css={{
-        "&::-webkit-scrollbar": { display: "none" },
-        "-ms-overflow-style": "none",
-        "scrollbar-width": "none",
-      }}>
+    <Flex w="full" overflowX="auto" overflowY="hidden" whiteSpace="nowrap" scrollbar="hidden">
       <Steps.Root
         variant="subtle"
         size="xs"

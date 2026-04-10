@@ -14,7 +14,7 @@ export const BecomeNavigatorCTA = () => {
       borderRadius="xl"
       borderStyle="dashed"
       cursor="pointer"
-      _hover={{ borderColor: "primary.500", bg: "primary.500/5" }}
+      _hover={{ borderColor: "primary.500" }}
       onClick={() => router.push("/navigators/become")}>
       <Card.Body display="flex" justifyContent="center" alignItems="center">
         <VStack gap={3} align="center" textAlign="center" py={4}>
