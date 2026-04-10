@@ -17,7 +17,7 @@ library ChallengeSettlementLogic {
   event ChallengePayoutClaimed(uint256 indexed challengeId, address indexed account, uint256 amount);
   event ChallengeRefundClaimed(uint256 indexed challengeId, address indexed account, uint256 amount);
 
-  function finalizeChallenge(uint256 challengeId) internal {
+  function finalizeChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
     uint256 currentRound = $.xAllocationVoting.currentRoundId();
@@ -26,7 +26,7 @@ library ChallengeSettlementLogic {
       revert IChallenges.ChallengeNotEnded(challengeId, challenge.endRound, currentRound);
     }
 
-    ChallengeTypes.ChallengeStatus status = ChallengeCoreLogic.syncChallenge(challengeId);
+    ChallengeTypes.ChallengeStatus status = ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.syncChallenge(challengeId));
     if (status == ChallengeTypes.ChallengeStatus.Invalid || status == ChallengeTypes.ChallengeStatus.Cancelled) {
       revert IChallenges.ChallengeInvalidStatus(challengeId, status);
     }
@@ -42,7 +42,7 @@ library ChallengeSettlementLogic {
     _finalizeSettlement(challengeId, challenge);
   }
 
-  function claimChallengePayout(uint256 challengeId) internal returns (uint256 amount) {
+  function claimChallengePayout(uint256 challengeId) public returns (uint256 amount) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -71,7 +71,7 @@ library ChallengeSettlementLogic {
     emit ChallengePayoutClaimed(challengeId, msg.sender, amount);
   }
 
-  function claimChallengeRefund(uint256 challengeId) internal returns (uint256 amount) {
+  function claimChallengeRefund(uint256 challengeId) public returns (uint256 amount) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -95,7 +95,7 @@ library ChallengeSettlementLogic {
     emit ChallengeRefundClaimed(challengeId, msg.sender, amount);
   }
 
-  function getParticipantActions(uint256 challengeId, address participant) internal view returns (uint256) {
+  function getParticipantActions(uint256 challengeId, address participant) public view returns (uint256) {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
     return _getParticipantActions(challenge, participant);
   }

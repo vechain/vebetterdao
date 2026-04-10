@@ -40,7 +40,7 @@ import {
   saveContractsToFile,
   upgradeProxy,
 } from "../helpers"
-import { autoVotingLibraries, governanceLibraries, passportLibraries } from "../libraries"
+import { autoVotingLibraries, challengesLibraries, governanceLibraries, passportLibraries } from "../libraries"
 import {
   transferAdminRole,
   transferContractsAddressManagerRole,
@@ -302,6 +302,10 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log("Deploying AutoVoting Libraries")
   const { AutoVotingLogic } = await autoVotingLibraries()
+
+  console.log("Deploying Challenges Libraries")
+  const { ChallengeCoreLogic: ChallengeCoreLogicLib, ChallengeSettlementLogic: ChallengeSettlementLogicLib } =
+    await challengesLibraries({ logOutput: true })
 
   // Verify all required libraries are deployed
   if (!AdministrationUtilsV3 || !EndorsementUtilsV3 || !VoteEligibilityUtilsV3) {
@@ -1145,7 +1149,10 @@ export async function deployAll(config: ContractsConfig) {
         settingsManager: config.CONTRACTS_ADMIN_ADDRESS,
       },
     ],
-    {},
+    {
+      ChallengeCoreLogic: await ChallengeCoreLogicLib.getAddress(),
+      ChallengeSettlementLogic: await ChallengeSettlementLogicLib.getAddress(),
+    },
     undefined,
     true,
   )) as B3TRChallenges
@@ -1180,6 +1187,7 @@ export async function deployAll(config: ContractsConfig) {
     VeBetterPassport: Record<string, string>
     X2EarnApps: Record<string, string>
     XAllocationVoting: Record<string, string>
+    B3TRChallenges: Record<string, string>
   } = {
     B3TRGovernor: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -1209,6 +1217,10 @@ export async function deployAll(config: ContractsConfig) {
     },
     XAllocationVoting: {
       AutoVotingLogic: await AutoVotingLogic.getAddress(),
+    },
+    B3TRChallenges: {
+      ChallengeCoreLogic: await ChallengeCoreLogicLib.getAddress(),
+      ChallengeSettlementLogic: await ChallengeSettlementLogicLib.getAddress(),
     },
   }
 
@@ -1894,6 +1906,8 @@ export async function deployAll(config: ContractsConfig) {
       passportSignalingLogic: PassportSignalingLogic,
       passportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogic,
       autoVotingLogic: AutoVotingLogic,
+      challengeCoreLogic: ChallengeCoreLogicLib,
+      challengeSettlementLogic: ChallengeSettlementLogicLib,
     },
   }
 }

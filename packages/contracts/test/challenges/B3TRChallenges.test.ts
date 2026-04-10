@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
 import { deployProxy } from "../../scripts/helpers"
+import { challengesLibraries } from "../../scripts/libraries"
 import { B3TR, B3TRChallenges, MockPassportActions, MockRoundGovernor, MockX2EarnApps } from "../../typechain-types"
 
 const STAKE_AMOUNT = ethers.parseEther("100")
@@ -68,28 +69,38 @@ async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: numb
   const x2EarnApps = (await (await ethers.getContractFactory("MockX2EarnApps")).deploy()) as MockX2EarnApps
   await x2EarnApps.waitForDeployment()
 
+  const { ChallengeCoreLogic: challengeCoreLogic, ChallengeSettlementLogic: challengeSettlementLogic } =
+    await challengesLibraries({ logOutput: false })
+
   for (const appId of [APP_1, APP_2, APP_3, APP_4, APP_5, APP_6]) {
     await x2EarnApps.setAppExists(appId, true)
   }
 
-  const challenges = (await deployProxy("B3TRChallenges", [
+  const challenges = (await deployProxy(
+    "B3TRChallenges",
+    [
+      {
+        b3trAddress: await b3tr.getAddress(),
+        veBetterPassportAddress: await passport.getAddress(),
+        xAllocationVotingAddress: await roundGovernor.getAddress(),
+        x2EarnAppsAddress: await x2EarnApps.getAddress(),
+        maxChallengeDuration: 4,
+        maxSelectedApps: 5,
+        maxParticipants,
+        minBetAmount: MIN_BET_AMOUNT,
+      },
+      {
+        admin: admin.address,
+        upgrader: admin.address,
+        contractsAddressManager: admin.address,
+        settingsManager: admin.address,
+      },
+    ],
     {
-      b3trAddress: await b3tr.getAddress(),
-      veBetterPassportAddress: await passport.getAddress(),
-      xAllocationVotingAddress: await roundGovernor.getAddress(),
-      x2EarnAppsAddress: await x2EarnApps.getAddress(),
-      maxChallengeDuration: 4,
-      maxSelectedApps: 5,
-      maxParticipants,
-      minBetAmount: MIN_BET_AMOUNT,
+      ChallengeCoreLogic: await challengeCoreLogic.getAddress(),
+      ChallengeSettlementLogic: await challengeSettlementLogic.getAddress(),
     },
-    {
-      admin: admin.address,
-      upgrader: admin.address,
-      contractsAddressManager: admin.address,
-      settingsManager: admin.address,
-    },
-  ])) as B3TRChallenges
+  )) as B3TRChallenges
 
   for (const signer of [admin, alice, bob, carol]) {
     await b3tr.mint(signer.address, INITIAL_BALANCE)
