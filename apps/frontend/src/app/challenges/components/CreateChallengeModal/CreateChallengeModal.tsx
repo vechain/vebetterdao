@@ -45,7 +45,14 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
   return (
     <Dialog.Root open={flow.open} onOpenChange={flow.handleOpen}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
-      <CustomModalContent w="full" maxW="40rem" maxH="90vh">
+      <CustomModalContent
+        w="full"
+        maxW="40rem"
+        h={{ base: "90dvh", md: "60dvh" }}
+        maxHeight={{ base: "90dvh", md: "60dvh" }}
+        overflow="hidden"
+        display="flex"
+        flexDirection="column">
         <Dialog.Header pb="4" borderBottomWidth="1px" borderColor="border.secondary">
           <HStack gap="3" align="center">
             <Box
@@ -68,6 +75,8 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
         </Dialog.Header>
 
         <Dialog.Body
+          flex="1"
+          minH="0"
           overflowY="auto"
           px={{ base: "4", md: "6" }}
           py="5"

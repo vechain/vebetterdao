@@ -124,7 +124,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <VStack align="stretch" gap="2" w="full">
+        <VStack align="stretch" gap="2" w="80%" ml="auto">
           <Box
             as="button"
             w="full"
