@@ -118,6 +118,7 @@ export const NavigatorDetailContent = () => {
           setIsExitMode(false)
           setIsDelegationOpen(true)
         }}
+        registeredAt={nav.registeredAt}
         onManageStakeClick={() => {}}
         onExitDelegation={() => {
           setIsExitMode(true)

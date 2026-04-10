@@ -8,9 +8,10 @@ import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata
 type Props = {
   metadata: NavigatorMetadata | undefined
   metadataLoading: boolean
+  registeredAt: number
 }
 
-export const NavigatorAboutSection = ({ metadata, metadataLoading }: Props) => {
+export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt }: Props) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -85,6 +86,21 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading }: Props) => {
                   {metadata.disclosures.conflictsDescription}
                 </Text>
               )}
+            </>
+          )}
+
+          {registeredAt > 0 && (
+            <>
+              <Separator />
+              <Text textStyle="xs" color="fg.muted">
+                {t("Navigator since {{date}}", {
+                  date: new Date(registeredAt * 1000).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  }),
+                })}
+              </Text>
             </>
           )}
         </VStack>

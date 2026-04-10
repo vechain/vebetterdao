@@ -19,6 +19,7 @@ type Props = {
   bio: string | undefined
   metadata: NavigatorMetadata | undefined
   metadataLoading: boolean
+  registeredAt: number
   isActive: boolean
   isDelegatedHere: boolean
   isConnected: boolean
@@ -49,6 +50,7 @@ export const NavigatorHeader = ({
   bio,
   metadata,
   metadataLoading,
+  registeredAt,
   isActive,
   isDelegatedHere,
   isConnected,
@@ -145,7 +147,7 @@ export const NavigatorHeader = ({
             )}
           </HStack>
 
-          <NavigatorAboutSection metadata={metadata} metadataLoading={metadataLoading} />
+          <NavigatorAboutSection metadata={metadata} metadataLoading={metadataLoading} registeredAt={registeredAt} />
         </VStack>
       </Card.Body>
 

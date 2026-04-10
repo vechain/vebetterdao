@@ -2,6 +2,7 @@
 
 import { Text, Skeleton, Mark } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { RelayerRewardsPool__factory } from "@vechain/vebetterdao-contracts/factories/RelayerRewardsPool__factory"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
@@ -34,6 +35,9 @@ const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as
 
 const relayerRewardsAbi = RelayerRewardsPool__factory.abi
 const relayerRewardsAddress = getConfig().relayerRewardsPoolContractAddress as `0x${string}`
+
+const navigatorRegistryAbi = NavigatorRegistry__factory.abi
+const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress as `0x${string}`
 
 export const PotentialRewardBox = () => {
   const { account } = useWallet()
@@ -105,6 +109,18 @@ export const PotentialRewardBox = () => {
         functionName: "getFeeCap" as const,
         args: [],
       },
+      {
+        abi: navigatorRegistryAbi,
+        address: navigatorRegistryAddress,
+        functionName: "isDelegated" as const,
+        args: [(account?.address || "") as `0x${string}`],
+      },
+      {
+        abi: navigatorRegistryAbi,
+        address: navigatorRegistryAddress,
+        functionName: "getFeePercentage" as const,
+        args: [],
+      },
     ],
     enabled: !!thor && !!currentRoundId,
   })
@@ -121,7 +137,15 @@ export const PotentialRewardBox = () => {
     return activeProposals.filter(p => !hasVotedInProposals[p.id]).length
   }, [activeProposals, hasVotedInProposals])
 
-  const { potentialReward, hasVoted, hasGmNft, hadAutoVotingEnabled, relayerFeePercentage } = useMemo(() => {
+  const {
+    potentialReward,
+    hasVoted,
+    hasGmNft,
+    hadAutoVotingEnabled,
+    relayerFeePercentage,
+    isDelegating,
+    navigatorFeePercentage,
+  } = useMemo(() => {
     if (data) {
       const [
         cycleTotal,
@@ -132,6 +156,8 @@ export const PotentialRewardBox = () => {
         relayerFee,
         autoVotingEnabled = false,
         feeCap,
+        isDelegatedResult = false,
+        navFeePercentage = 0n,
       ] = data
 
       return {
@@ -150,6 +176,8 @@ export const PotentialRewardBox = () => {
         hasGmNft: userGMWeight > 0n,
         hadAutoVotingEnabled: autoVotingEnabled as boolean,
         relayerFeePercentage: relayerFee as bigint,
+        isDelegating: isDelegatedResult as boolean,
+        navigatorFeePercentage: navFeePercentage as bigint,
       }
     }
 
@@ -159,6 +187,8 @@ export const PotentialRewardBox = () => {
       hasGmNft: false,
       hadAutoVotingEnabled: false,
       relayerFeePercentage: 0n,
+      isDelegating: false,
+      navigatorFeePercentage: 0n,
     }
   }, [data])
 
@@ -191,6 +221,8 @@ export const PotentialRewardBox = () => {
         relayerFeePercentage={relayerFeePercentage}
         unvotedProposalCount={unvotedProposalCount}
         roundEndTimestamp={roundData?.voteEndTimestamp ?? null}
+        isDelegating={isDelegating}
+        navigatorFeePercentage={navigatorFeePercentage}
       />
     </>
   )

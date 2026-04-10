@@ -2,7 +2,7 @@ import { Card, Flex, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCalendar, LuChevronRight, LuUsers } from "react-icons/lu"
+import { LuChevronRight, LuGauge, LuUsers } from "react-icons/lu"
 
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
@@ -31,14 +31,6 @@ export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedCl
         color: "status.positive.primary",
       },
       {
-        id: "delegated",
-        label: t("Total Delegated"),
-        value: `${formatter.format(Number(nav.totalDelegatedFormatted ?? 0))} VOT3`,
-        icon: Vot3Svg,
-        bg: "status.info.subtle",
-        color: "status.info.primary",
-      },
-      {
         id: "staked",
         label: t("Total Staked"),
         value: `${formatter.format(Number(nav.stakeFormatted ?? 0))} B3TR`,
@@ -47,14 +39,18 @@ export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedCl
         color: "status.warning.primary",
       },
       {
-        id: "since",
-        label: t("Since"),
-        value: new Date(nav.registeredAt * 1000).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        icon: LuCalendar,
+        id: "delegated",
+        label: t("Total Delegated"),
+        value: `${formatter.format(Number(nav.totalDelegatedFormatted ?? 0))} VOT3`,
+        icon: Vot3Svg,
+        bg: "status.info.subtle",
+        color: "status.info.primary",
+      },
+      {
+        id: "capacity",
+        label: t("Delegation Capacity"),
+        value: `${formatter.format(Number(nav.stakeFormatted ?? 0) * 10)} VOT3`,
+        icon: LuGauge,
         bg: "status.info.subtle",
         color: "status.info.primary",
       },

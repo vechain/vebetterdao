@@ -2,7 +2,7 @@
 
 import { Box, HStack, Icon, Text, VStack, Badge, useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { Gift, Check, Xmark, StarSolid, Flash, RefreshDouble, InfoCircle, NavArrowRight } from "iconoir-react"
+import { Gift, Check, Xmark, StarSolid, Flash, RefreshDouble, InfoCircle, NavArrowRight, UserStar } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -25,6 +25,8 @@ type Props = {
   relayerFeePercentage: bigint
   unvotedProposalCount: number
   roundEndTimestamp: import("dayjs").Dayjs | null
+  isDelegating: boolean
+  navigatorFeePercentage: bigint
 }
 
 const REWARDS_EVENT_NAMES = ["B3TR_CLAIM_REWARD"] as const
@@ -67,6 +69,8 @@ const RewardsContent = ({
   relayerFeePercentage,
   unvotedProposalCount,
   roundEndTimestamp,
+  isDelegating,
+  navigatorFeePercentage,
 }: Omit<Props, "isOpen">) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -200,7 +204,7 @@ const RewardsContent = ({
           </Icon>
         </HStack>
 
-        {hadAutoVotingEnabled && (
+        {hadAutoVotingEnabled && !isDelegating && (
           <HStack gap="3" p="3" rounded="lg" bg="card.subtle" align="start">
             <Icon boxSize="5" color="text.subtle" mt="0.5">
               <RefreshDouble />
@@ -212,6 +216,24 @@ const RewardsContent = ({
               <Text textStyle="xs" color="text.subtle">
                 {t("A {{fee}}% fee is deducted for the auto-voting service.", {
                   fee: relayerFeePercentage.toString(),
+                })}
+              </Text>
+            </VStack>
+          </HStack>
+        )}
+
+        {isDelegating && (
+          <HStack gap="3" p="3" rounded="lg" bg="card.subtle" align="start">
+            <Icon boxSize="5" color="text.subtle" mt="0.5">
+              <UserStar />
+            </Icon>
+            <VStack align="start" gap="0.5" flex={1}>
+              <Text textStyle="sm" fontWeight="semibold">
+                {t("Navigator fee")}
+              </Text>
+              <Text textStyle="xs" color="text.subtle">
+                {t("A {{fee}}% fee is deducted for the navigator service.", {
+                  fee: (navigatorFeePercentage / 100n).toString(),
                 })}
               </Text>
             </VStack>
