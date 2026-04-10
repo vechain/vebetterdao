@@ -26,7 +26,7 @@ import { BaseModal } from "@/components/BaseModal"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
 import { handleAmountInput } from "@/components/PowerUpModal/utils"
 import { useDelegateToNavigator } from "@/hooks/navigator/useDelegateToNavigator"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const formatter = getCompactFormatter(2)
@@ -41,7 +41,7 @@ export const DelegateModal = ({ isOpen, onClose, navigator: nav }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
-  const { data: vot3Balance, isLoading: balanceLoading } = useGetVot3Balance(account?.address)
+  const { data: vot3Balance, isLoading: balanceLoading } = useGetVot3UnlockedBalance(account?.address)
   const { data: domainData } = useVechainDomain(nav.address)
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)

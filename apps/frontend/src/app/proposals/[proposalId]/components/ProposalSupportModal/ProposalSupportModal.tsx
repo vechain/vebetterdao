@@ -18,7 +18,7 @@ import HeartIcon from "@/components/Icons/svg/heart.svg"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
 import { MulticolorBar } from "@/components/MulticolorBar/MulticolorBar"
 import { ResultsDisplay } from "@/components/Proposal/ResultsDisplay"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -49,7 +49,7 @@ export const ProposalSupportModal = ({
   const { isTxModalOpen } = useTransactionModal()
   const [amount, setAmount] = useState("")
 
-  const { data: vot3Balance } = useGetVot3Balance(account?.address)
+  const { data: vot3Balance } = useGetVot3UnlockedBalance(account?.address)
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: delegatedAmount } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()

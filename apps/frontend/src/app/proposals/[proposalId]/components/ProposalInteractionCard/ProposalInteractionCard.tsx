@@ -39,7 +39,7 @@ import {
   ProposalType,
 } from "@/hooks/proposals/grants/types"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useMarkProposalCompleted } from "@/hooks/useMarkProposalCompleted"
 import { useMarkProposalInDevelopment } from "@/hooks/useMarkProposalInDevelopment"
 import { useQueueProposal } from "@/hooks/useQueueProposal"
@@ -81,7 +81,7 @@ export const ProposalInteractionCard = ({
   // ===== CONTRACT QUERIES =====
   const { data: isDepositReached } = useIsDepositReached(proposalId)
   const { data: userHasAlreadyVotedInProposal } = useHasVotedInProposals([proposalId], account?.address ?? "")
-  const { data: userVot3BalanceQueryData } = useGetVot3Balance(account?.address)
+  const { data: userVot3BalanceQueryData } = useGetVot3UnlockedBalance(account?.address)
   const { data: proposalDepositThresholdQueryData } = useProposalDepositThreshold(proposalId)
   const { data: currentDepositAmountQueryData } = useGetProposalDeposits(proposalId)
   const { data: roundSnapshot } = useProposalSnapshot(proposalId)

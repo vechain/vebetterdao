@@ -14,7 +14,7 @@ import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAlloc
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { SnapshotExplanationModal } from "@/app/components/Countdown/SnapshotExplanationModal"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 
 type Props = {
   mode: "power-up" | "power-down"
@@ -27,7 +27,7 @@ const formatter = getCompactFormatter(2)
 export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: vot3Balance, isLoading: isVot3Loading } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: isVot3Loading } = useGetVot3UnlockedBalance(account?.address ?? undefined)
   const { data: bestBlock } = useBestBlockCompressed()
   const { data: currentVotingPower, isLoading: isCurrentVotingPowerLoading } = useTotalVotesOnBlock(
     bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,

@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next"
 import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
 import { VOT3Icon } from "../../../../../../components/Icons/VOT3Icon"
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
-import { useGetVot3Balance } from "../../../../../../hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "../../../../../../hooks/useGetVot3UnlockedBalance"
 import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
 import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
@@ -21,7 +21,7 @@ export const NewProposalSupportPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: balance, isLoading: balanceLoading } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: balance, isLoading: balanceLoading } = useGetVot3UnlockedBalance(account?.address ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
   const { setData, depositAmount } = useProposalFormStore()
   const { register, handleSubmit, formState } = useForm<FormData>({

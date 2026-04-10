@@ -12,6 +12,7 @@ import { getVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey } from "./useGetVot3UnlockedBalance"
 
 const config = getConfig()
 const GovernorInterface = B3TRGovernor__factory.createInterface()
@@ -50,6 +51,7 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
       getVot3BalanceQueryKey(account?.address ?? ""),
+      getVot3UnlockedBalanceQueryKey(account?.address ?? ""),
       getDepositsVotesOnBlockPrefixQueryKey(),
       getVotesOnBlockPrefixQueryKey(),
       ["bestBlockCompressed"],

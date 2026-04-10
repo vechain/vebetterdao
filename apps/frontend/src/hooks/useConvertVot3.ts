@@ -12,6 +12,7 @@ import { removingExcessDecimals } from "../utils/MathUtils/MathUtils"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey } from "./useGetVot3UnlockedBalance"
 
 const config = getConfig()
 // Extra 5% to mitigate sporadic wrong estimation of gas
@@ -43,6 +44,7 @@ export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: 
     () => [
       getB3trBalanceQueryKey(account?.address ?? undefined),
       getVot3BalanceQueryKey(account?.address ?? ""),
+      getVot3UnlockedBalanceQueryKey(account?.address ?? ""),
       // TODO: migration check if this is needed cause hook not used anywhere
       //  getVotesQueryKey(account?.address ?? undefined),
       getB3trBalanceQueryKey(config.vot3ContractAddress),

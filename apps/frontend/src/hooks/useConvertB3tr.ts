@@ -14,6 +14,7 @@ import { removingExcessDecimals } from "../utils/MathUtils/MathUtils"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey } from "./useGetVot3UnlockedBalance"
 import { useVot3RequireSelfDelegation } from "./vechainKitHooks/useVot3RequireSelfDelegation"
 
 const config = getConfig()
@@ -63,6 +64,7 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
     () => [
       getB3trBalanceQueryKey(account?.address ?? undefined),
       getVot3BalanceQueryKey(account?.address ?? ""),
+      getVot3UnlockedBalanceQueryKey(account?.address ?? ""),
       // TODO: migration check if this is needed cause hook not used anywhere
       // getVotesQueryKey(account?.address ?? undefined),
       getB3trBalanceQueryKey(config.vot3ContractAddress),

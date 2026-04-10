@@ -14,6 +14,7 @@ import { getIsDelegatedQueryKey } from "../../api/contracts/navigatorRegistry/ho
 import { getIsNavigatorQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useBuildTransaction } from "../useBuildTransaction"
 import { getVot3BalanceQueryKey } from "../useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey } from "../useGetVot3UnlockedBalance"
 
 const NavigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
 const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress
@@ -51,6 +52,7 @@ export const useIncreaseDelegation = ({ onSuccess }: Props) => {
     queryClient.invalidateQueries({ queryKey: getGetNavigatorQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getIsNavigatorQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getVot3BalanceQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getVot3UnlockedBalanceQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: ["indexer", "navigators"] })
     queryClient.invalidateQueries({ queryKey: getVotesOnBlockPrefixQueryKey() })
     queryClient.invalidateQueries({ queryKey: ["bestBlockCompressed"] })

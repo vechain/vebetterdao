@@ -36,7 +36,7 @@ import { useConvertB3tr } from "@/hooks/useConvertB3tr"
 import { useConvertVot3 } from "@/hooks/useConvertVot3"
 import { useEstimateGasFee } from "@/hooks/useEstimateGasFee"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useSmartAccountUpgradeRequired } from "@/hooks/vechainKitHooks/useSmartAccountUpgradeRequired"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -57,7 +57,7 @@ export const ConvertB3trAndVot3Modal = ({ title = "Convert tokens", isOpen, onCl
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: vot3Balance } = useGetVot3UnlockedBalance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
   const { data: b3trToUsd } = useGetTokenUsdPrice("B3TR")
   const {} = useEstimateGasFee
