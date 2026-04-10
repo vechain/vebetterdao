@@ -20,11 +20,12 @@ type Props = {
   mode: "power-up" | "power-down"
   amount: string
   isHighlighted?: boolean
+  includeDelegation?: boolean
 }
 
 const formatter = getCompactFormatter(2)
 
-export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) => {
+export const PowerUpSummary = ({ mode, amount, isHighlighted = false, includeDelegation = false }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: vot3Balance, isLoading: isVot3Loading } = useGetVot3UnlockedBalance(account?.address ?? undefined)
@@ -42,11 +43,24 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
   const numericAmount = Number(amount) || 0
   const currentVot3Balance = Number(vot3Balance?.scaled ?? "0")
   const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
+  const currentDelegatedNum = Number(delegatedAmount?.scaled ?? "0")
+
   const nextRoundVotingPower = isDelegated
-    ? Number(delegatedAmount?.scaled ?? "0")
+    ? includeDelegation
+      ? currentDelegatedNum + numericAmount
+      : currentDelegatedNum
     : currentVot3Balance + lockedForSupport
+
+  const showsVotingPowerIncrease = mode === "power-up" && (!isDelegated || includeDelegation)
   const sign = mode === "power-up" ? "+" : "-"
   const changeColor = mode === "power-up" ? "status.positive.strong" : "status.negative.strong"
+
+  const summaryLabel =
+    mode === "power-up"
+      ? isDelegated && !includeDelegation
+        ? t("VOT3 added to wallet")
+        : t("Voting Power added from next round")
+      : t("Voting Power removed from next round")
 
   return (
     <Card.Root
@@ -58,7 +72,7 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
       rounded="2xl">
       <VStack align="start" gap={2}>
         <Text textStyle="xs" color="text.subtle" fontStyle="italic">
-          {mode === "power-up" ? t("Voting Power added from next round") : t("Voting Power removed from next round")}
+          {summaryLabel}
         </Text>
 
         <Text textStyle="3xl" fontWeight="bold" color={changeColor}>
@@ -69,58 +83,68 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
 
         <Skeleton loading={isVot3Loading || isCurrentVotingPowerLoading}>
           <VStack align="start" gap={0.5}>
-            <HStack gap={1}>
-              <Text textStyle="sm" color="text.subtle">
-                {t("Next round voting power:")}
-              </Text>
-              <Text textStyle="sm" fontWeight="semibold">
-                {formatter.format(nextRoundVotingPower)} {"VOT3"}
-              </Text>
-            </HStack>
-            {!isDelegated && lockedForSupport > 0 && (
+            {isDelegated && !includeDelegation && mode === "power-up" ? (
               <Text textStyle="xs" color="text.subtle">
-                {"("}
-                {formatter.format(currentVot3Balance)} {t("in wallet")}
-                {" + "}
-                {formatter.format(lockedForSupport)} {t("in support")}
-                {")"}
+                {t("To increase voting power, delegate the converted VOT3 to your navigator.")}
               </Text>
+            ) : (
+              <>
+                <HStack gap={1}>
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("Next round voting power:")}
+                  </Text>
+                  <Text textStyle="sm" fontWeight="semibold">
+                    {formatter.format(nextRoundVotingPower)} {"VOT3"}
+                  </Text>
+                </HStack>
+                {!isDelegated && lockedForSupport > 0 && (
+                  <Text textStyle="xs" color="text.subtle">
+                    {"("}
+                    {formatter.format(currentVot3Balance)} {t("in wallet")}
+                    {" + "}
+                    {formatter.format(lockedForSupport)} {t("in support")}
+                    {")"}
+                  </Text>
+                )}
+              </>
             )}
           </VStack>
         </Skeleton>
 
-        <Skeleton loading={isRoundLoading}>
-          <HStack gap={1}>
-            <Text textStyle="sm" color="text.subtle">
-              {t("Snapshot in:")}
-            </Text>
-            {allocationRound?.voteEndTimestamp && (
-              <Countdown
-                date={allocationRound.voteEndTimestamp.toDate()}
-                now={() => Date.now()}
-                renderer={({ days, hours, minutes }) => (
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {days}
-                    {"d "}
-                    {hours}
-                    {"h "}
-                    {minutes}
-                    {"m"}
-                  </Text>
-                )}
-              />
-            )}
-            <IconButton
-              variant="ghost"
-              size="2xs"
-              rounded="full"
-              aria-label={t("Learn more about snapshot")}
-              onClick={onOpenSnapshot}>
-              <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
-            </IconButton>
-            <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
-          </HStack>
-        </Skeleton>
+        {showsVotingPowerIncrease && (
+          <Skeleton loading={isRoundLoading}>
+            <HStack gap={1}>
+              <Text textStyle="sm" color="text.subtle">
+                {t("Snapshot in:")}
+              </Text>
+              {allocationRound?.voteEndTimestamp && (
+                <Countdown
+                  date={allocationRound.voteEndTimestamp.toDate()}
+                  now={() => Date.now()}
+                  renderer={({ days, hours, minutes }) => (
+                    <Text textStyle="sm" fontWeight="semibold">
+                      {days}
+                      {"d "}
+                      {hours}
+                      {"h "}
+                      {minutes}
+                      {"m"}
+                    </Text>
+                  )}
+                />
+              )}
+              <IconButton
+                variant="ghost"
+                size="2xs"
+                rounded="full"
+                aria-label={t("Learn more about snapshot")}
+                onClick={onOpenSnapshot}>
+                <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
+              </IconButton>
+              <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
+            </HStack>
+          </Skeleton>
+        )}
       </VStack>
     </Card.Root>
   )

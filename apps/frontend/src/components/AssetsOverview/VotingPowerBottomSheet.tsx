@@ -30,6 +30,7 @@ import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/u
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { Transaction } from "@/api/indexer/transactions/useTransactions"
+import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
 import { AddressIcon } from "@/components/AddressIcon"
 import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/ActivityList"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
@@ -211,7 +212,12 @@ const VotingPowerContent = ({
   isDelegated,
   onOpenPowerUp,
   onOpenPowerDown,
-}: Omit<Props, "isOpen"> & { onOpenPowerUp: () => void; onOpenPowerDown: () => void }) => {
+  onOpenDelegation,
+}: Omit<Props, "isOpen"> & {
+  onOpenPowerUp: () => void
+  onOpenPowerDown: () => void
+  onOpenDelegation: () => void
+}) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -339,14 +345,44 @@ const VotingPowerContent = ({
           borderTopWidth="1px"
           borderColor="border.secondary"
           w="full">
-          <CompositionLine label={t("VOT3 balance")} value={`${vot3BalanceOnly} VOT3`} />
+          <CompositionLine label={t("Balance")} value={`${vot3BalanceOnly} VOT3`} />
           {isDelegated && delegatedFormatted && (
-            <CompositionLine label={t("VOT3 delegated")} value={`${delegatedFormatted} VOT3`} />
+            <CompositionLine label={t("Delegated")} value={`${delegatedFormatted} VOT3`} />
           )}
           {depositsFormatted && (
             <CompositionLine label={t("Deposited for proposal support")} value={`${depositsFormatted} VOT3`} />
           )}
         </VStack>
+
+        {isDelegated && Number(vot3BalanceOnly) > 0 && (
+          <HStack
+            gap="2"
+            justify="space-between"
+            p="2"
+            w="full"
+            rounded="md"
+            bg="status.warning.subtle"
+            cursor="pointer"
+            _hover={{ opacity: 0.85 }}
+            onClick={() => {
+              onClose()
+              onOpenDelegation()
+            }}>
+            <HStack>
+              <Icon boxSize="4" color="status.warning.strong">
+                <InfoCircle />
+              </Icon>
+              <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
+                {t("You have {{amount}} undelegated VOT3 — delegate to increase voting power", {
+                  amount: FormattingUtils.humanNumber(vot3BalanceOnly),
+                })}
+              </Text>
+            </HStack>
+            <Icon boxSize="4" color="status.warning.strong">
+              <NavArrowRight />
+            </Icon>
+          </HStack>
+        )}
 
         {account?.address && (
           <Stack mt="3" gap="3" direction={"column"} w="full">
@@ -420,17 +456,31 @@ const VotingPowerContent = ({
 }
 
 export const VotingPowerBottomSheet = (props: Props) => {
-  const { isOpen, onClose } = props
+  const { isOpen, onClose, isDelegated } = props
   const { t } = useTranslation()
+  const { account } = useWallet()
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
   const [isPowerUpOpen, setIsPowerUpOpen] = useState(false)
   const [isPowerDownOpen, setIsPowerDownOpen] = useState(false)
+  const [isDelegationOpen, setIsDelegationOpen] = useState(false)
   const closePowerUp = useCallback(() => setIsPowerUpOpen(false), [])
   const closePowerDown = useCallback(() => setIsPowerDownOpen(false), [])
   const openPowerUp = useCallback(() => setIsPowerUpOpen(true), [])
   const openPowerDown = useCallback(() => setIsPowerDownOpen(true), [])
+  const closeDelegation = useCallback(() => setIsDelegationOpen(false), [])
+  const openDelegation = useCallback(() => setIsDelegationOpen(true), [])
 
-  const content = <VotingPowerContent {...props} onOpenPowerUp={openPowerUp} onOpenPowerDown={openPowerDown} />
+  const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
+  const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
+
+  const content = (
+    <VotingPowerContent
+      {...props}
+      onOpenPowerUp={openPowerUp}
+      onOpenPowerDown={openPowerDown}
+      onOpenDelegation={openDelegation}
+    />
+  )
 
   if (isDesktop) {
     return (
@@ -463,6 +513,9 @@ export const VotingPowerBottomSheet = (props: Props) => {
         </Dialog.Root>
         <PowerUpModal isOpen={isPowerUpOpen} onClose={closePowerUp} />
         <PowerDownModal isOpen={isPowerDownOpen} onClose={closePowerDown} />
+        {navigatorData && (
+          <DelegationModal isOpen={isDelegationOpen} onClose={closeDelegation} navigator={navigatorData} />
+        )}
       </>
     )
   }
@@ -479,6 +532,9 @@ export const VotingPowerBottomSheet = (props: Props) => {
       </BaseBottomSheet>
       <PowerUpModal isOpen={isPowerUpOpen} onClose={closePowerUp} />
       <PowerDownModal isOpen={isPowerDownOpen} onClose={closePowerDown} />
+      {navigatorData && (
+        <DelegationModal isOpen={isDelegationOpen} onClose={closeDelegation} navigator={navigatorData} />
+      )}
     </>
   )
 }

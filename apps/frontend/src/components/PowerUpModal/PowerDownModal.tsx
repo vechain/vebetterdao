@@ -153,10 +153,10 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
     <BaseModal
       isOpen={isOpen && !isTxModalOpen}
       onClose={onClose}
-      modalProps={{ closeOnInteractOutside: true }}
-      modalContentProps={{ maxW: "500px" }}>
-      <VStack gap={5} w="full">
-        <Heading pb={2} size="xl" textAlign="center" fontWeight="bold" data-testid={"tx-modal-title"}>
+      showCloseButton
+      modalProps={{ closeOnInteractOutside: true }}>
+      <VStack gap={5} w="full" align="stretch">
+        <Heading size="xl" fontWeight="bold" data-testid={"tx-modal-title"}>
           {t("Reduce your Voting Power")}
         </Heading>
 

@@ -197,7 +197,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const buttonLabel = useMemo(() => {
     if (mode === "new") return t("Delegate {{amount}} VOT3", { amount: formatter.format(amountNum) })
     if (mode === "switch") return t("Switch & Delegate {{amount}} VOT3", { amount: formatter.format(amountNum) })
-    if (manageValidation.isFullRemoval) return t("Exit all delegation")
+    if (manageValidation.isFullRemoval) return t("Exit delegation")
     if (manageValidation.isDecreasing)
       return t("Reduce by {{amount}} VOT3", { amount: formatter.format(Math.abs(manageValidation.delta)) })
     if (manageValidation.isIncreasing)
@@ -308,73 +308,75 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           </Card.Root>
         )}
 
-        {/* Amount input */}
-        <VStack
-          bg="card.default"
-          border="1px solid"
-          borderColor="border.secondary"
-          borderRadius="2xl"
-          p={4}
-          gap={2}
-          align="start"
-          w="full">
-          <Field.Root gap={2} required invalid={!!amount && amount !== "." && (exceedsBalance || exceedsCapacity)}>
-            <Field.Label w="full" alignItems="center" justifyContent="space-between">
-              <Text textStyle="sm" color="text.subtle">
-                {inputLabel}
-              </Text>
-              <Button
-                variant="link"
-                height="5"
-                size="sm"
-                p="0"
-                onClick={() => setAmount(handleAmountInput(maxAmount.toString()))}>
-                {t("Use max")}
-              </Button>
-            </Field.Label>
+        {/* Amount input — hidden in exit mode since we undelegate everything */}
+        {!exitMode && (
+          <VStack
+            bg="card.default"
+            border="1px solid"
+            borderColor="border.secondary"
+            borderRadius="2xl"
+            p={4}
+            gap={2}
+            align="start"
+            w="full">
+            <Field.Root gap={2} required invalid={!!amount && amount !== "." && (exceedsBalance || exceedsCapacity)}>
+              <Field.Label w="full" alignItems="center" justifyContent="space-between">
+                <Text textStyle="sm" color="text.subtle">
+                  {inputLabel}
+                </Text>
+                <Button
+                  variant="link"
+                  height="5"
+                  size="sm"
+                  p="0"
+                  onClick={() => setAmount(handleAmountInput(maxAmount.toString()))}>
+                  {t("Use max")}
+                </Button>
+              </Field.Label>
 
-            <HStack w="full" justifyContent="space-between">
-              <VStack align="start" gap="2" w="full">
-                <NumberInput.Root textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
-                  <NumberInput.Input
-                    min={0}
-                    p="0"
-                    value={amount}
-                    placeholder="0"
-                    onChange={e => setAmount(handleAmountInput(e.target.value))}
-                    onBlur={() => setAmount(prev => prev.replace(/\.$/, ""))}
-                    border="none"
-                    outline="none"
-                    textStyle={(amount || "0").length > 15 ? "lg" : (amount || "0").length > 10 ? "xl" : "3xl"}
-                    transition="font-size 0.15s ease-out"
-                  />
-                </NumberInput.Root>
-                <Field.ErrorText>
-                  <Icon as={WarningTriangle} boxSize="4" />
-                  {exceedsCapacity
-                    ? t("Exceeds navigator capacity. Max: {{max}} VOT3", {
-                        max: formatter.format(remainingCapacity),
-                      })
-                    : t("Insufficient VOT3 balance")}
-                </Field.ErrorText>
-              </VStack>
+              <HStack w="full" justifyContent="space-between">
+                <VStack align="start" gap="2" w="full">
+                  <NumberInput.Root textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
+                    <NumberInput.Input
+                      min={0}
+                      p="0"
+                      value={amount}
+                      placeholder="0"
+                      onChange={e => setAmount(handleAmountInput(e.target.value))}
+                      onBlur={() => setAmount(prev => prev.replace(/\.$/, ""))}
+                      border="none"
+                      outline="none"
+                      textStyle={(amount || "0").length > 15 ? "lg" : (amount || "0").length > 10 ? "xl" : "3xl"}
+                      transition="font-size 0.15s ease-out"
+                    />
+                  </NumberInput.Root>
+                  <Field.ErrorText>
+                    <Icon as={WarningTriangle} boxSize="4" />
+                    {exceedsCapacity
+                      ? t("Exceeds navigator capacity. Max: {{max}} VOT3", {
+                          max: formatter.format(remainingCapacity),
+                        })
+                      : t("Insufficient VOT3 balance")}
+                  </Field.ErrorText>
+                </VStack>
 
-              <VStack align="end" gap={2} flexShrink={0}>
-                <HStack gap={2}>
-                  <VOT3Icon boxSize="24px" />
-                  <Text textStyle="lg" fontWeight="semibold">
-                    {"VOT3"}
-                  </Text>
-                </HStack>
-                <Skeleton loading={balanceLoading}>
-                  <Text textStyle="xs" color="text.subtle">
-                    {t("Available: {{amount}}", { amount: formatter.format(Number(availableBalance)) })}
-                  </Text>
-                </Skeleton>
-              </VStack>
-            </HStack>
-          </Field.Root>
-        </VStack>
+                <VStack align="end" gap={2} flexShrink={0}>
+                  <HStack gap={2}>
+                    <VOT3Icon boxSize="24px" />
+                    <Text textStyle="lg" fontWeight="semibold">
+                      {"VOT3"}
+                    </Text>
+                  </HStack>
+                  <Skeleton loading={balanceLoading}>
+                    <Text textStyle="xs" color="text.subtle">
+                      {t("Available: {{amount}}", { amount: formatter.format(Number(availableBalance)) })}
+                    </Text>
+                  </Skeleton>
+                </VStack>
+              </HStack>
+            </Field.Root>
+          </VStack>
+        )}
 
         {/* Summary card */}
         {mode === "manage" ? (
@@ -611,14 +613,26 @@ const ManageSummary = ({
 
       {isValid && (
         <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
-          <HStack gap={3} align="flex-start">
-            <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
-            <Text textStyle="xs" color="text.subtle">
-              {t(
-                "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
-              )}
-            </Text>
-          </HStack>
+          <VStack gap={3} align="stretch">
+            {(isDecreasing || isFullRemoval) && (
+              <HStack gap={3} align="flex-start">
+                <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
+                <Text textStyle="xs" color="text.subtle">
+                  {t(
+                    "Your VOT3 tokens will be immediately unlocked in your wallet and can be used to delegate to another navigator or convert back to B3TR.",
+                  )}
+                </Text>
+              </HStack>
+            )}
+            <HStack gap={3} align="flex-start">
+              <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="text.subtle">
+                {t(
+                  "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
+                )}
+              </Text>
+            </HStack>
+          </VStack>
         </Card.Root>
       )}
     </>
