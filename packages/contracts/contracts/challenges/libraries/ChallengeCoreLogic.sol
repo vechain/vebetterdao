@@ -15,7 +15,7 @@ library ChallengeCoreLogic {
   event ChallengeActivated(uint256 indexed challengeId);
   event ChallengeInvalidated(uint256 indexed challengeId);
 
-  function createChallenge(ChallengeTypes.CreateChallengeParams memory params) internal returns (uint256 challengeId) {
+  function createChallenge(ChallengeTypes.CreateChallengeParams memory params) public returns (uint256 challengeId) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     uint256 currentRound = _currentRound($);
 
@@ -76,7 +76,7 @@ library ChallengeCoreLogic {
     }
   }
 
-  function addInvites(uint256 challengeId, address[] memory invitees) internal {
+  function addInvites(uint256 challengeId, address[] memory invitees) public {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     _ensurePendingChallenge(challengeId, challenge);
@@ -88,7 +88,7 @@ library ChallengeCoreLogic {
     }
   }
 
-  function joinChallenge(uint256 challengeId) internal {
+  function joinChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -120,7 +120,7 @@ library ChallengeCoreLogic {
     emit ChallengeJoined(challengeId, msg.sender);
   }
 
-  function leaveChallenge(uint256 challengeId) internal {
+  function leaveChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -147,7 +147,7 @@ library ChallengeCoreLogic {
     emit ChallengeLeft(challengeId, msg.sender);
   }
 
-  function declineChallenge(uint256 challengeId) internal {
+  function declineChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -172,7 +172,7 @@ library ChallengeCoreLogic {
     emit ChallengeDeclined(challengeId, msg.sender);
   }
 
-  function cancelChallenge(uint256 challengeId) internal {
+  function cancelChallenge(uint256 challengeId) public {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     _ensurePendingChallenge(challengeId, challenge);
@@ -184,16 +184,16 @@ library ChallengeCoreLogic {
     emit ChallengeCancelled(challengeId);
   }
 
-  function syncChallenge(uint256 challengeId) internal returns (ChallengeTypes.ChallengeStatus) {
+  function syncChallenge(uint256 challengeId) public returns (uint8) {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     if (challenge.status != ChallengeTypes.ChallengeStatus.Pending) {
-      return challenge.status;
+      return uint8(challenge.status);
     }
 
-    ChallengeTypes.ChallengeStatus computed = getComputedStatus(challengeId);
+    ChallengeTypes.ChallengeStatus computed = ChallengeTypes.ChallengeStatus(getComputedStatus(challengeId));
     if (computed == ChallengeTypes.ChallengeStatus.Pending) {
-      return computed;
+      return uint8(computed);
     }
 
     challenge.status = computed;
@@ -204,22 +204,22 @@ library ChallengeCoreLogic {
       emit ChallengeInvalidated(challengeId);
     }
 
-    return computed;
+    return uint8(computed);
   }
 
-  function getComputedStatus(uint256 challengeId) internal view returns (ChallengeTypes.ChallengeStatus) {
+  function getComputedStatus(uint256 challengeId) public view returns (uint8) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     if (challenge.status != ChallengeTypes.ChallengeStatus.Pending) {
-      return challenge.status;
+      return uint8(challenge.status);
     }
 
     if (_currentRound($) < challenge.startRound) {
-      return ChallengeTypes.ChallengeStatus.Pending;
+      return uint8(ChallengeTypes.ChallengeStatus.Pending);
     }
 
-    return _isChallengeValid(challenge) ? ChallengeTypes.ChallengeStatus.Active : ChallengeTypes.ChallengeStatus.Invalid;
+    return uint8(_isChallengeValid(challenge) ? ChallengeTypes.ChallengeStatus.Active : ChallengeTypes.ChallengeStatus.Invalid);
   }
 
   function _validateThresholdConfiguration(ChallengeTypes.CreateChallengeParams memory params) private pure {

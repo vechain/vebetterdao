@@ -111,7 +111,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
       kind: challenge.kind,
       visibility: challenge.visibility,
       thresholdMode: challenge.thresholdMode,
-      status: ChallengeCoreLogic.getComputedStatus(challengeId),
+      status: ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.getComputedStatus(challengeId)),
       settlementMode: challenge.settlementMode,
       creator: challenge.creator,
       stakeAmount: challenge.stakeAmount,
@@ -133,7 +133,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
   }
 
   function getChallengeStatus(uint256 challengeId) external view returns (ChallengeTypes.ChallengeStatus) {
-    return ChallengeCoreLogic.getComputedStatus(challengeId);
+    return ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.getComputedStatus(challengeId));
   }
 
   function getChallengeParticipants(uint256 challengeId) external view returns (address[] memory) {
@@ -204,7 +204,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
   }
 
   function syncChallenge(uint256 challengeId) external nonReentrant returns (ChallengeTypes.ChallengeStatus) {
-    return ChallengeCoreLogic.syncChallenge(challengeId);
+    return ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.syncChallenge(challengeId));
   }
 
   function finalizeChallenge(uint256 challengeId) external nonReentrant {
