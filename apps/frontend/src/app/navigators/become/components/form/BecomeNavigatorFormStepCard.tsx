@@ -3,7 +3,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuShield } from "react-icons/lu"
 
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
@@ -178,7 +177,6 @@ export const BecomeNavigatorFormStepCard = () => {
                   disabled={!canProceed() || isSubmitting}
                   loading={isSubmitting}
                   size="lg">
-                  <LuShield />
                   {t("Register")}
                 </Button>
               ) : (

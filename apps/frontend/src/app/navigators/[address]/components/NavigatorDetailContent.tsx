@@ -4,7 +4,7 @@ import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain
 import { useParams, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuShield, LuUserCheck } from "react-icons/lu"
+import { LuBadgeCheck, LuUserCheck } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
@@ -60,7 +60,7 @@ export const NavigatorDetailContent = () => {
       <VStack w="full" gap={4} align="stretch" px={{ base: 4, md: 0 }}>
         <PageBreadcrumb items={[{ label: t("Navigators"), href: "/navigators" }]} />
         <VStack w="full" py={20} gap={4}>
-          <LuShield size={48} />
+          <LuBadgeCheck size={48} />
           <Text textStyle="md" color="fg.muted">
             {t("Navigator not found")}
           </Text>

@@ -3,7 +3,7 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuShield } from "react-icons/lu"
+import { LuBadgeCheck } from "react-icons/lu"
 
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted, NavigatorOrderBy, useNavigators } from "@/api/indexer/navigators/useNavigators"
@@ -90,7 +90,7 @@ export const NavigatorsPageContent = () => {
         </SimpleGrid>
       ) : !navigators || navigators.length === 0 ? (
         <VStack py={12} gap={3}>
-          <LuShield size={48} color="var(--chakra-colors-fg-muted)" />
+          <LuBadgeCheck size={48} color="var(--chakra-colors-fg-muted)" />
           <Text textStyle="md" color="fg.muted" textAlign="center">
             {t("No navigators found.")}
           </Text>
