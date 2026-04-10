@@ -220,6 +220,7 @@ export const PotentialRewardBox = () => {
         hadAutoVotingEnabled={hadAutoVotingEnabled}
         relayerFeePercentage={relayerFeePercentage}
         unvotedProposalCount={unvotedProposalCount}
+        totalProposalCount={activeProposals?.length ?? 0}
         roundEndTimestamp={roundData?.voteEndTimestamp ?? null}
         isDelegating={isDelegating}
         navigatorFeePercentage={navigatorFeePercentage}

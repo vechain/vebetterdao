@@ -24,6 +24,7 @@ type Props = {
   hadAutoVotingEnabled: boolean
   relayerFeePercentage: bigint
   unvotedProposalCount: number
+  totalProposalCount: number
   roundEndTimestamp: import("dayjs").Dayjs | null
   isDelegating: boolean
   navigatorFeePercentage: bigint
@@ -68,6 +69,7 @@ const RewardsContent = ({
   hadAutoVotingEnabled,
   relayerFeePercentage,
   unvotedProposalCount,
+  totalProposalCount,
   roundEndTimestamp,
   isDelegating,
   navigatorFeePercentage,
@@ -93,7 +95,8 @@ const RewardsContent = ({
     },
     [t],
   )
-  const hasVotedOnAllProposals = unvotedProposalCount === 0
+  const hasProposals = totalProposalCount > 0
+  const hasVotedOnAllProposals = hasProposals && unvotedProposalCount === 0
   const timeLeft = roundEndTimestamp ? timestampToTimeLeftCompact(roundEndTimestamp.valueOf()) : null
 
   return (
@@ -135,7 +138,7 @@ const RewardsContent = ({
 
       <VStack gap="1.5" align="stretch">
         <CheckItem label={t("Voted this round")} checked={hasVoted} />
-        <CheckItem label={t("Voted on all proposals")} checked={hasVotedOnAllProposals} />
+        {hasProposals && <CheckItem label={t("Voted on all proposals")} checked={hasVotedOnAllProposals} />}
         <CheckItem label={t("Own a Galaxy Member NFT")} checked={hasGmNft} />
       </VStack>
 
