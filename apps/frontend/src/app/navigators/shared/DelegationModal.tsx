@@ -335,7 +335,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
             <HStack w="full" justifyContent="space-between">
               <VStack align="start" gap="2" w="full">
-                <NumberInput.Root asChild textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
+                <NumberInput.Root textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
                   <NumberInput.Input
                     min={0}
                     p="0"
