@@ -192,19 +192,16 @@ describe("Voting power with proposal deposit - @shard4b", function () {
       expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
       expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
 
-      //Sum of the voting power and the deposit voting power to get the total vote available for the voter to vote on the allocation
-      const totalVoteWithDeposit = votingPowerForAllocationAfterVotes + depositvotingpowerInAllocationAfterVotes
-
+      // getVotes already includes deposit voting power for non-delegated users
       const txForVote = await xAllocationVoting
         .connect(voter)
-        .castVote(roundIdAfterVotesDeposit, [app1Id], [totalVoteWithDeposit])
+        .castVote(roundIdAfterVotesDeposit, [app1Id], [votingPowerForAllocationAfterVotes])
 
       await txForVote.wait()
 
       const appVotes = await xAllocationVoting.getAppVotes(roundIdAfterVotesDeposit, app1Id)
 
-      //The app should have the total vote with the deposit as voting power as well
-      expect(totalVoteWithDeposit).to.equal(appVotes)
+      expect(votingPowerForAllocationAfterVotes).to.equal(appVotes)
     })
     it("Should be able to vote on allocation with the proposal deposit if deposit twice", async function () {
       //Submit the app
@@ -318,19 +315,16 @@ describe("Voting power with proposal deposit - @shard4b", function () {
       expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
       expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
 
-      //Sum of the voting power and the deposit voting power to get the total vote available for the voter to vote on the allocation
-      const totalVoteWithDeposit = votingPowerForAllocationAfterVotes + depositvotingpowerInAllocationAfterVotes
-
+      // getVotes already includes deposit voting power for non-delegated users
       const txForVote = await xAllocationVoting
         .connect(voter)
-        .castVote(roundIdAfterVotesDeposit, [app1Id], [totalVoteWithDeposit])
+        .castVote(roundIdAfterVotesDeposit, [app1Id], [votingPowerForAllocationAfterVotes])
 
       await txForVote.wait()
 
       const appVotes = await xAllocationVoting.getAppVotes(roundIdAfterVotesDeposit, app1Id)
 
-      //The app should have the total vote with the deposit as voting power as well
-      expect(totalVoteWithDeposit).to.equal(appVotes)
+      expect(votingPowerForAllocationAfterVotes).to.equal(appVotes)
     })
     it("Should be able to vote on allocation with the proposal deposit if the proposal is created already with a deposit", async function () {
       //Submit the app
@@ -433,19 +427,16 @@ describe("Voting power with proposal deposit - @shard4b", function () {
       expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
       expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
 
-      //Sum of the voting power and the deposit voting power to get the total vote available for the voter to vote on the allocation
-      const totalVoteWithDeposit = votingPowerForAllocationAfterVotes + depositvotingpowerInAllocationAfterVotes
-
+      // getVotes already includes deposit voting power for non-delegated users
       const txForVote = await xAllocationVoting
         .connect(voter)
-        .castVote(roundIdAfterVotesDeposit, [app1Id], [totalVoteWithDeposit])
+        .castVote(roundIdAfterVotesDeposit, [app1Id], [votingPowerForAllocationAfterVotes])
 
       await txForVote.wait()
 
       const appVotes = await xAllocationVoting.getAppVotes(roundIdAfterVotesDeposit, app1Id)
 
-      //The app should have the total vote with the deposit as voting power as well
-      expect(totalVoteWithDeposit).to.equal(appVotes)
+      expect(votingPowerForAllocationAfterVotes).to.equal(appVotes)
     })
 
     it("Should NOT be able to vote on allocation with the proposal deposit if the value is higher than the total voting power", async function () {
@@ -684,7 +675,8 @@ describe("Voting power with proposal deposit - @shard4b", function () {
         await xAllocationVoting.roundSnapshot(await xAllocationVoting.currentRoundId()),
       )
 
-      expect(proposalVP).to.equal(expectedVot3Balance)
+      // getVotes now includes deposit VP for allocation voting
+      expect(proposalVP).to.equal(totalVot3)
       expect(proposalDepositVP).to.equal(depositThreshold)
     })
   })
@@ -753,8 +745,9 @@ describe("Voting power with proposal deposit - @shard4b", function () {
       const votingPowerAfterVotes = await xAllocationVoting.getVotes(voter.address, currentRoundSnapshot)
       const depositVPAfterVotes = await xAllocationVoting.getDepositVotingPower(voter.address, currentRoundSnapshot)
 
-      const totalVP = votingPowerAfterVotes + depositVPAfterVotes
-      expect(totalVP).to.equal(totalVot3)
+      // getVotes already includes deposits, so it equals the total
+      expect(votingPowerAfterVotes).to.equal(totalVot3)
+      expect(depositVPAfterVotes).to.equal(depositThreshold)
 
       // claim the deposit back
       await governor.withdraw(proposalId, voter.address) // it goes back to the balance (getvotes is increased) of the voter
@@ -765,9 +758,8 @@ describe("Voting power with proposal deposit - @shard4b", function () {
       const vpAfterClaimBack_now = await xAllocationVoting.getVotes(voter.address, now)
       const depositVPAfterClaimBackDeposit_now = await xAllocationVoting.getDepositVotingPower(voter.address, now)
 
-      const totalVPNow = vpAfterClaimBack_now + depositVPAfterClaimBackDeposit_now
       expect(depositVPAfterClaimBackDeposit_now).to.equal(0) // withdraw the deposits
-      expect(totalVPNow).to.equal(totalVot3) // deposits goes back in the principal balance of the voter
+      expect(vpAfterClaimBack_now).to.equal(totalVot3) // deposits goes back in the principal balance
 
       await waitForCurrentRoundToEnd({ xAllocationVoting })
       await startNewAllocationRound({
@@ -782,10 +774,10 @@ describe("Voting power with proposal deposit - @shard4b", function () {
 
       const txForVote = await xAllocationVoting
         .connect(voter)
-        .castVote(currentRoundIdAfterWithdraw, [app1Id], [totalVPNow])
+        .castVote(currentRoundIdAfterWithdraw, [app1Id], [vpAfterClaimBack_now])
       await txForVote.wait()
       const appVotes = await xAllocationVoting.getAppVotes(currentRoundIdAfterWithdraw, app1Id)
-      expect(totalVPNow).to.equal(appVotes)
+      expect(vpAfterClaimBack_now).to.equal(appVotes)
 
       await waitForCurrentRoundToEnd({ xAllocationVoting })
       await startNewAllocationRound({
@@ -882,12 +874,14 @@ describe("Voting power with proposal deposit - @shard4b", function () {
 
       const vpVoter = await xAllocationVoting.getVotes(voter.address, nowSnapshot)
       const depositVPVoter = await xAllocationVoting.getDepositVotingPower(voter.address, nowSnapshot)
-      expect(vpVoter).to.equal(voterBalance)
-      expect(depositVPVoter).to.equal(voterDepositSecondTime + depositThresholdReduced)
+      // getVotes includes deposits for allocation voting
+      const voterTotalDeposits = voterDepositSecondTime + depositThresholdReduced
+      expect(vpVoter).to.equal(voterBalance + voterTotalDeposits)
+      expect(depositVPVoter).to.equal(voterTotalDeposits)
 
       const vpDepositor2 = await xAllocationVoting.getVotes(owner.address, nowSnapshot)
       const depositVPDepositor2 = await xAllocationVoting.getDepositVotingPower(owner.address, nowSnapshot)
-      expect(vpDepositor2).to.equal(depositor2Balance)
+      expect(vpDepositor2).to.equal(depositor2Balance + depositor2Deposit)
       expect(depositVPDepositor2).to.equal(depositor2Deposit)
 
       await governor.withdraw(proposalId, voter.address)

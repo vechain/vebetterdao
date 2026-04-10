@@ -77,7 +77,11 @@ library NavigatorStakingUtils {
 
     // Delegators must exit their delegation before becoming a navigator
     address currentNavigator = _currentNavigatorOf($, navigator);
-    if (currentNavigator != address(0) && !$.isDeactivated[currentNavigator] && $.exitAnnouncedRound[currentNavigator] == 0) {
+    if (
+      currentNavigator != address(0) &&
+      !$.isDeactivated[currentNavigator] &&
+      $.exitAnnouncedRound[currentNavigator] == 0
+    ) {
       revert DelegatorCannotRegister(navigator, currentNavigator);
     }
 
