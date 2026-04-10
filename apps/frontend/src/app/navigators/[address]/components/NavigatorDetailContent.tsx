@@ -1,14 +1,15 @@
-import { Text, VStack } from "@chakra-ui/react"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { Alert, Text, VStack } from "@chakra-ui/react"
+import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuShield } from "react-icons/lu"
+import { LuShield, LuUserCheck } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
+import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
@@ -22,6 +23,8 @@ import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorHeader } from "./NavigatorHeader/NavigatorHeader"
 import { NavigatorStatsGrid } from "./NavigatorStatsGrid"
+
+const formatter = getCompactFormatter(2)
 
 export const NavigatorDetailContent = () => {
   const { t } = useTranslation()
@@ -44,6 +47,7 @@ export const NavigatorDetailContent = () => {
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: isNavigator } = useIsNavigator()
+  const { data: delegationInfo } = useMyDelegationInfo(address)
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
 
@@ -77,6 +81,27 @@ export const NavigatorDetailContent = () => {
           { label: domainData?.domain ? displayName : t("Overview"), href: `/navigators/${address}` },
         ]}
       />
+
+      {isDelegatedHere && (
+        <Alert.Root status="info" borderRadius="xl">
+          <Alert.Indicator>
+            <LuUserCheck />
+          </Alert.Indicator>
+          <Alert.Title textStyle="sm">
+            {t("You are delegating {{amount}} VOT3 to this Navigator", {
+              amount: formatter.format(currentDelegatedNum),
+            })}
+            {delegationInfo?.delegatedAt &&
+              ` ${t("since {{date}}", {
+                date: new Date(delegationInfo.delegatedAt * 1000).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }),
+              })}`}
+          </Alert.Title>
+        </Alert.Root>
+      )}
 
       <NavigatorHeader
         address={address}
