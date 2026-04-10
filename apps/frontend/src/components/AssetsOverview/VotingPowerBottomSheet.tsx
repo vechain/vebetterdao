@@ -251,8 +251,44 @@ const VotingPowerContent = ({
 
   return (
     <VStack gap="4" align="stretch" w="full">
-      {/* Summary */}
+      {isDelegated && navigatorAddress && (
+        <HStack
+          gap="3"
+          p="3"
+          rounded="lg"
+          bg="status.info.subtle"
+          borderWidth="1px"
+          borderColor="status.info.muted"
+          cursor="pointer"
+          _hover={{ opacity: 0.85 }}
+          onClick={() => {
+            onClose()
+            router.push(`/navigators/${navigatorAddress}`)
+          }}>
+          <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
+          <VStack align="start" gap="0.5" flex={1}>
+            <Text textStyle="xs" color="text.subtle">
+              {t("Delegated to navigator")}
+            </Text>
+            <Text textStyle="sm" fontWeight="semibold">
+              {navigatorDisplayName}
+            </Text>
+            {navigatorData?.citizenCount != null && (
+              <HStack gap={1}>
+                <LuUsers size={12} color="var(--chakra-colors-fg-muted)" />
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Trusted by {{count}} citizens", { count: navigatorData.citizenCount })}
+                </Text>
+              </HStack>
+            )}
+          </VStack>
+          <Icon boxSize="4" color="text.subtle">
+            <NavArrowRight />
+          </Icon>
+        </HStack>
+      )}
 
+      {/* Summary */}
       <VStack gap="4" align="start" justify="space-between" w="full" p="4" rounded="lg" bg="status.positive.subtle">
         <HStack justify="space-between" align="start">
           <Box>
@@ -296,23 +332,21 @@ const VotingPowerContent = ({
         </HStack>
 
         {/* Composition breakdown */}
-        <Skeleton loading={isLoading} rounded="lg" w="full">
-          <VStack
-            align="start"
-            justify="space-between"
-            gap="0"
-            borderTopWidth="1px"
-            borderColor="border.secondary"
-            w="full">
-            <CompositionLine label={t("VOT3 balance")} value={`${vot3BalanceOnly} VOT3`} />
-            {isDelegated && delegatedFormatted && (
-              <CompositionLine label={t("VOT3 delegated")} value={`${delegatedFormatted} VOT3`} />
-            )}
-            {depositsFormatted && (
-              <CompositionLine label={t("Deposited for proposal support")} value={`${depositsFormatted} VOT3`} />
-            )}
-          </VStack>
-        </Skeleton>
+        <VStack
+          align="start"
+          justify="space-between"
+          gap="0"
+          borderTopWidth="1px"
+          borderColor="border.secondary"
+          w="full">
+          <CompositionLine label={t("VOT3 balance")} value={`${vot3BalanceOnly} VOT3`} />
+          {isDelegated && delegatedFormatted && (
+            <CompositionLine label={t("VOT3 delegated")} value={`${delegatedFormatted} VOT3`} />
+          )}
+          {depositsFormatted && (
+            <CompositionLine label={t("Deposited for proposal support")} value={`${depositsFormatted} VOT3`} />
+          )}
+        </VStack>
 
         {account?.address && (
           <Stack mt="3" gap="3" direction={"column"} w="full">
@@ -338,43 +372,6 @@ const VotingPowerContent = ({
           </Stack>
         )}
       </VStack>
-
-      {isDelegated && navigatorAddress && (
-        <HStack
-          gap="3"
-          p="3"
-          rounded="lg"
-          bg="status.info.subtle"
-          borderWidth="1px"
-          borderColor="status.info.muted"
-          cursor="pointer"
-          _hover={{ opacity: 0.85 }}
-          onClick={() => {
-            onClose()
-            router.push(`/navigators/${navigatorAddress}`)
-          }}>
-          <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
-          <VStack align="start" gap="0.5" flex={1}>
-            <Text textStyle="xs" color="text.subtle">
-              {t("Delegated to navigator")}
-            </Text>
-            <Text textStyle="sm" fontWeight="semibold">
-              {navigatorDisplayName}
-            </Text>
-            {navigatorData?.citizenCount != null && (
-              <HStack gap={1}>
-                <LuUsers size={12} color="var(--chakra-colors-fg-muted)" />
-                <Text textStyle="xs" color="text.subtle">
-                  {t("Trusted by {{count}} citizens", { count: navigatorData.citizenCount })}
-                </Text>
-              </HStack>
-            )}
-          </VStack>
-          <Icon boxSize="4" color="text.subtle">
-            <NavArrowRight />
-          </Icon>
-        </HStack>
-      )}
 
       <ActivityList eventNames={[...VOTING_POWER_EVENT_NAMES]} getActivityProps={getVotingPowerActivityProps} />
 
@@ -407,6 +404,16 @@ const VotingPowerContent = ({
           title={t("Proposal support")}
           description={t("VOT3 deposited to support proposals also counts toward your voting power.")}
         />
+
+        {isDelegated && (
+          <InfoRow
+            icon={<Icon as={LuUsers} />}
+            title={t("Delegation & voting power")}
+            description={t(
+              "Only VOT3 delegated to your navigator counts as voting power. Undelegated VOT3 won't be counted.",
+            )}
+          />
+        )}
       </VStack>
     </VStack>
   )
