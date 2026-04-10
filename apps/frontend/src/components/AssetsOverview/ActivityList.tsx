@@ -76,12 +76,16 @@ export const ActivityList = ({ eventNames, getActivityProps, pageSize = 5 }: Act
 
       <Skeleton loading={isTxLoading} rounded="lg">
         <VStack gap="0" align="stretch" divideY="1px" divideColor="border.secondary">
-          {transactions.map(transaction => {
+          {transactions.map((transaction, idx) => {
             const props = getActivityProps(transaction, account.address)
             if (!props) return null
             const translated = { ...props, label: t(props.label as "B3TR") }
             return (
-              <ActivityItem key={transaction.txId} props={translated} timestamp={transaction.blockTimestamp ?? 0} />
+              <ActivityItem
+                key={`${transaction.txId}-${idx}`}
+                props={translated}
+                timestamp={transaction.blockTimestamp ?? 0}
+              />
             )
           })}
           {hasNextPage && (

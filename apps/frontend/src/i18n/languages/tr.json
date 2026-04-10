@@ -1423,7 +1423,7 @@
   "Round info": "Tur Bilgisi",
   "rounds": "turlar",
   "Rounds history": "Turlar Geçmişi",
-  "roundSummary": "Önceki tahsis turu <bold>{{voters}} oy veren</bold>le tamamlandı, toplam oy gücü <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "Önceki tahsis turu <b1>{{voters}} oy veren</b1>le tamamlandı, toplam oy gücü <b2>{{vot3}} VOT3</b2>.",
   "Save": "Kaydet",
   "Save all changes": "Tüm değişiklikleri kaydet",
   "Save and show on feed": "Kaydet ve akışta göster",

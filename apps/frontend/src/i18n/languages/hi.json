@@ -1423,7 +1423,7 @@
   "Round info": "राउंड जानकारी",
   "rounds": "राउंड्स",
   "Rounds history": "दौर इतिहास",
-  "roundSummary": "पिछला आवंटन राउंड <bold>{{voters}} मतदाताओं</bold> के साथ पूरा हुआ, कुल मतदान शक्ति <bold>{{vot3}} VOT3</bold> के साथ।",
+  "roundSummary": "पिछला आवंटन राउंड <b1>{{voters}} मतदाताओं</b1> के साथ पूरा हुआ, कुल मतदान शक्ति <b2>{{vot3}} VOT3</b2> के साथ।",
   "Save": "सहेजें",
   "Save all changes": "सभी परिवर्तन सहेजें",
   "Save and show on feed": "सेव करें और फीड पर दिखाएँ",

@@ -3,7 +3,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import NextLink from "next/link"
 import React, { useMemo } from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import { FaRegCalendar } from "react-icons/fa6"
 import { LuLeaf, LuStar, LuTrophy } from "react-icons/lu"
 
@@ -99,11 +99,17 @@ export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
 
             <VStack gap="2" pl="8" align="flex-start">
               <Text textStyle="sm" color="text.subtle">
-                <Trans
-                  i18nKey="roundSummary"
-                  values={{ voters: votersCount.toLocaleString(), vot3: formattedVot3 }}
-                  components={{ bold: <Bold /> }}
-                />
+                {t("roundSummary", {
+                  voters: votersCount.toLocaleString(),
+                  vot3: formattedVot3,
+                  interpolation: { escapeValue: false },
+                })
+                  .split(/(<b[12]>.*?<\/b[12]>)/g)
+                  .map((part, i) => {
+                    const match = part.match(/<b[12]>(.*?)<\/b[12]>/)
+                    if (match) return <Bold key={i}>{match[1]}</Bold>
+                    return <React.Fragment key={i}>{part}</React.Fragment>
+                  })}
               </Text>
 
               {topApps.length > 0 && (

@@ -29,7 +29,7 @@ const ImageStack = ({
     <Box position="relative" isolation="isolate" w={`${containerW}px`} h={`${containerH}px`} flexShrink={0}>
       {visible.map((image, i) => (
         <Image
-          key={image}
+          key={`${image}-${i}`}
           src={image}
           alt=""
           w={imageSize}

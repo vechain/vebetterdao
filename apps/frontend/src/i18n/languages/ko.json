@@ -1423,7 +1423,7 @@
   "Round info": "라운드 정보",
   "rounds": "라운드",
   "Rounds history": "라운드 역사",
-  "roundSummary": "이전 할당 라운드가 <bold>{{voters}}명의 투표자</bold>와 함께 완료되었으며, 총 투표력은 <bold>{{vot3}} VOT3</bold>입니다.",
+  "roundSummary": "이전 할당 라운드가 <b1>{{voters}}명의 투표자</b1>와 함께 완료되었으며, 총 투표력은 <b2>{{vot3}} VOT3</b2>입니다.",
   "Save": "저장",
   "Save all changes": "모든 변경 사항 저장",
   "Save and show on feed": "저장하고 피드에 표시",

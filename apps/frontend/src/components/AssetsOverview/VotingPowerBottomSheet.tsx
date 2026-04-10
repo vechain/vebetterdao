@@ -273,6 +273,7 @@ const VotingPowerContent = ({
                   rounded="md"
                   mt="2">
                   <Trans
+                    parent="span"
                     i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
                     values={{
                       sign: votingPowerNextRound > 0n ? "+" : "",
@@ -281,6 +282,7 @@ const VotingPowerContent = ({
                     components={{
                       bold: (
                         <Text
+                          key="bold"
                           color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
                           as="span"
                         />

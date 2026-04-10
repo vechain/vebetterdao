@@ -1423,7 +1423,7 @@
   "Round info": "Omgångsinformation",
   "rounds": "omgångar",
   "Rounds history": "Rundhistorik",
-  "roundSummary": "Den föregående allokeringsrundan avslutades med <bold>{{voters}} röstande</bold>, med en total röststyrka på <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "Den föregående allokeringsrundan avslutades med <b1>{{voters}} röstande</b1>, med en total röststyrka på <b2>{{vot3}} VOT3</b2>.",
   "Save": "Spara",
   "Save all changes": "Spara alla ändringar",
   "Save and show on feed": "Spara och visa på flödet",

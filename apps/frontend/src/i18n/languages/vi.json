@@ -1423,7 +1423,7 @@
   "Round info": "Thông tin Vòng",
   "rounds": "vòng",
   "Rounds history": "Lịch sử các vòng",
-  "roundSummary": "Vòng phân bổ trước đã hoàn thành với <bold>{{voters}} cử tri</bold>, sử dụng tổng sức mạnh bỏ phiếu <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "Vòng phân bổ trước đã hoàn thành với <b1>{{voters}} cử tri</b1>, sử dụng tổng sức mạnh bỏ phiếu <b2>{{vot3}} VOT3</b2>.",
   "Save": "Lưu",
   "Save all changes": "Lưu tất cả thay đổi",
   "Save and show on feed": "Lưu và hiển thị trên nguồn cấp",

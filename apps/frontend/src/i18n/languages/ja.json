@@ -1423,7 +1423,7 @@
   "Round info": "ラウンド情報",
   "rounds": "ラウンド",
   "Rounds history": "ラウンド履歴",
-  "roundSummary": "前回のアロケーションラウンドは<bold>{{voters}}人の投票者</bold>で完了し、合計投票力は<bold>{{vot3}} VOT3</bold>でした。",
+  "roundSummary": "前回のアロケーションラウンドは<b1>{{voters}}人の投票者</b1>で完了し、合計投票力は<b2>{{vot3}} VOT3</b2>でした。",
   "Save": "保存",
   "Save all changes": "すべての変更を保存",
   "Save and show on feed": "保存してフィードに表示",

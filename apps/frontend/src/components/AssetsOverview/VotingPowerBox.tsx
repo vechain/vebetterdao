@@ -78,6 +78,7 @@ export const VotingPowerBox = () => {
                   size="sm"
                   rounded="md">
                   <Trans
+                    parent="span"
                     i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
                     values={{
                       sign: votingPowerNextRound > 0n ? "+" : "",
@@ -86,6 +87,7 @@ export const VotingPowerBox = () => {
                     components={{
                       bold: (
                         <Text
+                          key="bold"
                           color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
                           as="span"
                         />

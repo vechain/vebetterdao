@@ -1530,7 +1530,7 @@
   "Round info": "Round info",
   "rounds": "rounds",
   "Rounds history": "Rounds history",
-  "roundSummary": "The previous allocation round completed with <bold>{{voters}} voters</bold>, using a total voting power of <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "The previous allocation round completed with <b1>{{voters}} voters</b1>, using a total voting power of <b2>{{vot3}} VOT3</b2>.",
   "Save": "Save",
   "Save all changes": "Save all changes",
   "Save and show on feed": "Save and show on feed",

@@ -1423,7 +1423,7 @@
   "Round info": "Informazioni sul round",
   "rounds": "giri",
   "Rounds history": "Storia dei turni",
-  "roundSummary": "Il round di allocazione precedente si è concluso con <bold>{{voters}} votanti</bold>, con un potere di voto totale di <bold>{{vot3}} VOT3</bold>.",
+  "roundSummary": "Il round di allocazione precedente si è concluso con <b1>{{voters}} votanti</b1>, con un potere di voto totale di <b2>{{vot3}} VOT3</b2>.",
   "Save": "Salva",
   "Save all changes": "Salva tutte le modifiche",
   "Save and show on feed": "Salva e mostra nel feed",
