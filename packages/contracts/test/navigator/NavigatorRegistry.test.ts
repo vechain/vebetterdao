@@ -112,6 +112,7 @@ describe("NavigatorRegistry - @shard19a", function () {
           minorSlashPercentage: 1000,
           preferenceCutoffPeriod: 8640,
           voterRewards: owner.address,
+          xAllocationVoting: owner.address,
         }),
       ).to.be.reverted
     })

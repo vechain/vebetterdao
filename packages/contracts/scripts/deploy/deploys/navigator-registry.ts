@@ -30,6 +30,7 @@ export async function deployNavigatorRegistry() {
   const VOT3_ADDRESS = envConfig.vot3ContractAddress
   const TREASURY_ADDRESS = envConfig.treasuryContractAddress
   const VOTER_REWARDS_ADDRESS = envConfig.voterRewardsContractAddress
+  const X_ALLOCATION_VOTING_ADDRESS = envConfig.xAllocationVotingContractAddress
 
   console.log("Deploying NavigatorRegistry libraries...")
   const navLibs = await navigatorRegistryLibraries(true)
@@ -47,6 +48,7 @@ export async function deployNavigatorRegistry() {
   console.log("VOT3 Address: ", VOT3_ADDRESS)
   console.log("Treasury Address: ", TREASURY_ADDRESS)
   console.log("VoterRewards Address: ", VOTER_REWARDS_ADDRESS)
+  console.log("XAllocationVoting Address: ", X_ALLOCATION_VOTING_ADDRESS)
   console.log("Min Stake: ", contractsConfig.NAVIGATOR_MIN_STAKE.toString())
   console.log("Max Stake Percentage: ", contractsConfig.NAVIGATOR_MAX_STAKE_PERCENTAGE)
   console.log("Fee Lock Period: ", contractsConfig.NAVIGATOR_FEE_LOCK_PERIOD)
@@ -75,6 +77,7 @@ export async function deployNavigatorRegistry() {
         minorSlashPercentage: contractsConfig.NAVIGATOR_MINOR_SLASH_PERCENTAGE,
         preferenceCutoffPeriod: contractsConfig.NAVIGATOR_PREFERENCE_CUTOFF_PERIOD,
         voterRewards: VOTER_REWARDS_ADDRESS,
+        xAllocationVoting: X_ALLOCATION_VOTING_ADDRESS,
       },
     ],
     libraryAddresses,

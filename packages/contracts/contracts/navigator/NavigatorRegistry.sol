@@ -107,6 +107,7 @@ contract NavigatorRegistry is
     uint256 minorSlashPercentage;
     uint256 preferenceCutoffPeriod;
     address voterRewards;
+    address xAllocationVoting;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -121,6 +122,7 @@ contract NavigatorRegistry is
     if (params.b3trToken == address(0)) revert ZeroAddress("b3trToken");
     if (params.vot3Token == address(0)) revert ZeroAddress("vot3Token");
     if (params.treasury == address(0)) revert ZeroAddress("treasury");
+    if (params.xAllocationVoting == address(0)) revert ZeroAddress("xAllocationVoting");
 
     __AccessControl_init();
     __UUPSUpgradeable_init();
@@ -143,6 +145,7 @@ contract NavigatorRegistry is
     $.minorSlashPercentage = params.minorSlashPercentage;
     $.preferenceCutoffPeriod = params.preferenceCutoffPeriod;
     $.voterRewards = params.voterRewards;
+    $.xAllocationVoting = params.xAllocationVoting;
   }
 
   // ======================== Version & Upgrade ======================== //

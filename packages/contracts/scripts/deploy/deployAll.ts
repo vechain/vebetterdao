@@ -1229,6 +1229,7 @@ export async function deployAll(config: ContractsConfig) {
         minorSlashPercentage: config.NAVIGATOR_MINOR_SLASH_PERCENTAGE,
         preferenceCutoffPeriod: config.NAVIGATOR_PREFERENCE_CUTOFF_PERIOD,
         voterRewards: await voterRewards.getAddress(),
+        xAllocationVoting: await xAllocationVoting.getAddress(),
       },
     ],
     navigatorLibraryAddresses,

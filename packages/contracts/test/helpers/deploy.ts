@@ -1200,6 +1200,7 @@ export const getOrDeployContractInstances = async ({
         minorSlashPercentage: config.NAVIGATOR_MINOR_SLASH_PERCENTAGE,
         preferenceCutoffPeriod: config.NAVIGATOR_PREFERENCE_CUTOFF_PERIOD,
         voterRewards: await voterRewards.getAddress(),
+        xAllocationVoting: await xAllocationVoting.getAddress(),
       },
     ],
     navigatorLibraryAddresses,
@@ -1350,9 +1351,6 @@ export const getOrDeployContractInstances = async ({
 
   // Grant PROPOSAL_STATE_MANAGER_ROLE to owner in B3TRGovernor contract
   await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-
-  // Wire NavigatorRegistry with XAllocationVoting
-  await navigatorRegistry.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
 
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
