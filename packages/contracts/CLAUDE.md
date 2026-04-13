@@ -265,6 +265,8 @@ function initializeV2(address newParam) public reinitializer(2) {
 
 ### Running Tests
 
+**CRITICAL**: Contract tests MUST run against the Hardhat network, NOT Thor Solo. Always use `yarn contracts:test` or pass `--network hardhat` when running tests directly.
+
 Run single test file from monorepo root:
 
 ```bash
