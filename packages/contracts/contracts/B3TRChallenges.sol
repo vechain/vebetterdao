@@ -14,6 +14,10 @@ import { ChallengeSettlementLogic } from "./challenges/libraries/ChallengeSettle
 import { ChallengeStorageTypes } from "./challenges/libraries/ChallengeStorageTypes.sol";
 import { ChallengeTypes } from "./challenges/libraries/ChallengeTypes.sol";
 
+/// @title B3TRChallenges
+/// @notice Upgradeable entrypoint for creating, joining, settling, and administering B3TR challenges.
+/// @dev This contract owns storage, roles, and external access control while delegating challenge lifecycle and
+/// settlement logic to dedicated libraries. NatSpec for the external API is inherited from `IChallenges`.
 contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
@@ -24,6 +28,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     _disableInitializers();
   }
 
+  /// @inheritdoc IChallenges
   function initialize(
     ChallengeTypes.InitializationData calldata data,
     ChallengeTypes.InitializationRoleData calldata roles
@@ -75,30 +80,37 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
 
   function _authorizeUpgrade(address) internal override onlyRole(UPGRADER_ROLE) {}
 
+  /// @inheritdoc IChallenges
   function version() external pure returns (string memory) {
     return "1";
   }
 
+  /// @inheritdoc IChallenges
   function challengeCount() external view returns (uint256) {
     return ChallengeStorageTypes.getChallengesStorage().challengeCount;
   }
 
+  /// @inheritdoc IChallenges
   function maxChallengeDuration() external view returns (uint256) {
     return ChallengeStorageTypes.getChallengesStorage().maxChallengeDuration;
   }
 
+  /// @inheritdoc IChallenges
   function maxSelectedApps() external view returns (uint256) {
     return ChallengeStorageTypes.getChallengesStorage().maxSelectedApps;
   }
 
+  /// @inheritdoc IChallenges
   function maxParticipants() external view returns (uint256) {
     return ChallengeStorageTypes.getChallengesStorage().maxParticipants;
   }
 
+  /// @inheritdoc IChallenges
   function minBetAmount() external view returns (uint256) {
     return ChallengeStorageTypes.getChallengesStorage().minBetAmount;
   }
 
+  /// @inheritdoc IChallenges
   function getChallenge(uint256 challengeId) external view returns (ChallengeTypes.ChallengeView memory) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     _ensureChallengeExists(challengeId, $.challengeCount);
@@ -136,34 +148,40 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     });
   }
 
+  /// @inheritdoc IChallenges
   function getChallengeStatus(uint256 challengeId) external view returns (ChallengeTypes.ChallengeStatus) {
     return ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.getComputedStatus(challengeId));
   }
 
+  /// @inheritdoc IChallenges
   function getChallengeParticipants(uint256 challengeId) external view returns (address[] memory) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     _ensureChallengeExists(challengeId, $.challengeCount);
     return $.challenges[challengeId].participants;
   }
 
+  /// @inheritdoc IChallenges
   function getChallengeInvited(uint256 challengeId) external view returns (address[] memory) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     _ensureChallengeExists(challengeId, $.challengeCount);
     return $.challenges[challengeId].invited;
   }
 
+  /// @inheritdoc IChallenges
   function getChallengeDeclined(uint256 challengeId) external view returns (address[] memory) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     _ensureChallengeExists(challengeId, $.challengeCount);
     return $.challenges[challengeId].declined;
   }
 
+  /// @inheritdoc IChallenges
   function getChallengeSelectedApps(uint256 challengeId) external view returns (bytes32[] memory) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     _ensureChallengeExists(challengeId, $.challengeCount);
     return $.challenges[challengeId].appIds;
   }
 
+  /// @inheritdoc IChallenges
   function getParticipantStatus(
     uint256 challengeId,
     address account
@@ -173,60 +191,69 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     return $.participantStatus[challengeId][account];
   }
 
+  /// @inheritdoc IChallenges
   function isInvitationEligible(uint256 challengeId, address account) external view returns (bool) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     _ensureChallengeExists(challengeId, $.challengeCount);
     return $.invitationEligible[challengeId][account];
   }
 
+  /// @inheritdoc IChallenges
   function getParticipantActions(uint256 challengeId, address participant) external view returns (uint256) {
     return ChallengeSettlementLogic.getParticipantActions(challengeId, participant);
   }
 
+  /// @inheritdoc IChallenges
   function createChallenge(ChallengeTypes.CreateChallengeParams calldata params) external nonReentrant returns (uint256) {
     return ChallengeCoreLogic.createChallenge(params);
   }
 
+  /// @inheritdoc IChallenges
   function addInvites(uint256 challengeId, address[] calldata invitees) external nonReentrant {
     ChallengeCoreLogic.addInvites(challengeId, invitees);
   }
 
+  /// @inheritdoc IChallenges
   function joinChallenge(uint256 challengeId) external nonReentrant {
     ChallengeCoreLogic.joinChallenge(challengeId);
   }
 
+  /// @inheritdoc IChallenges
   function leaveChallenge(uint256 challengeId) external nonReentrant {
     ChallengeCoreLogic.leaveChallenge(challengeId);
   }
 
+  /// @inheritdoc IChallenges
   function declineChallenge(uint256 challengeId) external nonReentrant {
     ChallengeCoreLogic.declineChallenge(challengeId);
   }
 
+  /// @inheritdoc IChallenges
   function cancelChallenge(uint256 challengeId) external nonReentrant {
     ChallengeCoreLogic.cancelChallenge(challengeId);
   }
 
+  /// @inheritdoc IChallenges
   function syncChallenge(uint256 challengeId) external nonReentrant returns (ChallengeTypes.ChallengeStatus) {
     return ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.syncChallenge(challengeId));
   }
 
+  /// @inheritdoc IChallenges
   function finalizeChallenge(uint256 challengeId) external nonReentrant {
     ChallengeSettlementLogic.finalizeChallenge(challengeId);
   }
 
+  /// @inheritdoc IChallenges
   function claimChallengePayout(uint256 challengeId) external nonReentrant returns (uint256) {
     return ChallengeSettlementLogic.claimChallengePayout(challengeId);
   }
 
+  /// @inheritdoc IChallenges
   function claimChallengeRefund(uint256 challengeId) external nonReentrant returns (uint256) {
     return ChallengeSettlementLogic.claimChallengeRefund(challengeId);
   }
 
-  /// @notice Withdraws B3TR from the contract.
-  /// @dev Emergency admin function that can drain any B3TR held by the contract.
-  /// @param to Recipient of the withdrawn B3TR.
-  /// @param amount Amount of B3TR to withdraw.
+  /// @inheritdoc IChallenges
   function withdraw(address to, uint256 amount) external nonReentrant onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     if (to == address(0)) revert ZeroAddress();
     if (amount == 0) revert InvalidAmount();
@@ -240,22 +267,27 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     emit AdminWithdrawal(msg.sender, to, amount);
   }
 
+  /// @inheritdoc IChallenges
   function setB3TRAddress(address newAddress) external nonReentrant onlyRoleOrAdmin(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setB3TRAddress(newAddress);
   }
 
+  /// @inheritdoc IChallenges
   function setVeBetterPassportAddress(address newAddress) external nonReentrant onlyRoleOrAdmin(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setVeBetterPassportAddress(newAddress);
   }
 
+  /// @inheritdoc IChallenges
   function setXAllocationVotingAddress(address newAddress) external nonReentrant onlyRoleOrAdmin(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setXAllocationVotingAddress(newAddress);
   }
 
+  /// @inheritdoc IChallenges
   function setX2EarnAppsAddress(address newAddress) external nonReentrant onlyRoleOrAdmin(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setX2EarnAppsAddress(newAddress);
   }
 
+  /// @inheritdoc IChallenges
   function setMaxChallengeDuration(uint256 newValue) external nonReentrant onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
     if (newValue == 0) revert InvalidAmount();
 
@@ -266,6 +298,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     emit MaxChallengeDurationUpdated(oldValue, newValue);
   }
 
+  /// @inheritdoc IChallenges
   function setMaxSelectedApps(uint256 newValue) external nonReentrant onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
     if (newValue == 0) revert InvalidAmount();
 
@@ -276,6 +309,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     emit MaxSelectedAppsUpdated(oldValue, newValue);
   }
 
+  /// @inheritdoc IChallenges
   function setMaxParticipants(uint256 newValue) external nonReentrant onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
     if (newValue == 0) revert InvalidAmount();
 
@@ -286,6 +320,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     emit MaxParticipantsUpdated(oldValue, newValue);
   }
 
+  /// @inheritdoc IChallenges
   function setMinBetAmount(uint256 newValue) external nonReentrant onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
     _setMinBetAmount(newValue);
   }

@@ -6,7 +6,12 @@ import { ChallengeCoreLogic } from "./ChallengeCoreLogic.sol";
 import { ChallengeStorageTypes } from "./ChallengeStorageTypes.sol";
 import { ChallengeTypes } from "./ChallengeTypes.sol";
 
+/// @title ChallengeSettlementLogic Library
+/// @notice Handles challenge finalization, payout claims, refund claims, and action aggregation.
+/// @dev Settlement is computed from VeBetterPassport action counts collected over the challenge rounds and selected
+/// apps, then mapped to one of the supported settlement modes.
 library ChallengeSettlementLogic {
+  /// @notice Emitted when a challenge settlement is finalized.
   event ChallengeFinalized(
     uint256 indexed challengeId,
     ChallengeTypes.SettlementMode settlementMode,
@@ -14,9 +19,15 @@ library ChallengeSettlementLogic {
     uint256 bestCount,
     uint256 qualifiedCount
   );
+
+  /// @notice Emitted when an account claims a challenge payout.
   event ChallengePayoutClaimed(uint256 indexed challengeId, address indexed account, uint256 amount);
+
+  /// @notice Emitted when an account claims a challenge refund.
   event ChallengeRefundClaimed(uint256 indexed challengeId, address indexed account, uint256 amount);
 
+  /// @notice Finalizes a challenge after its end round and computes the settlement mode.
+  /// @param challengeId Challenge identifier.
   function finalizeChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
@@ -26,6 +37,7 @@ library ChallengeSettlementLogic {
       revert IChallenges.ChallengeNotEnded(challengeId, challenge.endRound, currentRound);
     }
 
+    // Re-sync pending challenges at finalize time so invalid or cancelled states cannot bypass settlement checks.
     ChallengeTypes.ChallengeStatus status = ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.syncChallenge(challengeId));
     if (status == ChallengeTypes.ChallengeStatus.Invalid || status == ChallengeTypes.ChallengeStatus.Cancelled) {
       revert IChallenges.ChallengeInvalidStatus(challengeId, status);
@@ -42,6 +54,9 @@ library ChallengeSettlementLogic {
     _finalizeSettlement(challengeId, challenge);
   }
 
+  /// @notice Claims the caller's payout from a finalized challenge.
+  /// @param challengeId Challenge identifier.
+  /// @return amount Amount transferred to the caller.
   function claimChallengePayout(uint256 challengeId) public returns (uint256 amount) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
@@ -71,6 +86,9 @@ library ChallengeSettlementLogic {
     emit ChallengePayoutClaimed(challengeId, msg.sender, amount);
   }
 
+  /// @notice Claims the caller's refund from a cancelled or invalid challenge.
+  /// @param challengeId Challenge identifier.
+  /// @return amount Amount transferred to the caller.
   function claimChallengeRefund(uint256 challengeId) public returns (uint256 amount) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
@@ -95,12 +113,17 @@ library ChallengeSettlementLogic {
     emit ChallengeRefundClaimed(challengeId, msg.sender, amount);
   }
 
+  /// @notice Returns the actions counted for a participant within the challenge scope.
+  /// @param challengeId Challenge identifier.
+  /// @param participant Participant address.
+  /// @return Number of counted actions.
   function getParticipantActions(uint256 challengeId, address participant) public view returns (uint256) {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
     return _getParticipantActions(challenge, participant);
   }
 
   function _updateSettlementState(ChallengeTypes.Challenge storage challenge, uint256 actions) private {
+    // Threshold modes are only meaningful for sponsored challenges. Stake challenges always resolve by top score.
     bool thresholdEnabled =
       challenge.kind == ChallengeTypes.ChallengeKind.Sponsored &&
       challenge.threshold > 0 &&
@@ -141,6 +164,7 @@ library ChallengeSettlementLogic {
       challenge.threshold > 0 &&
       challenge.thresholdMode != ChallengeTypes.ThresholdMode.None;
 
+    // If no participant qualifies in a thresholded sponsored challenge, the sponsored pool goes back to the creator.
     if (!thresholdEnabled) {
       challenge.settlementMode = ChallengeTypes.SettlementMode.TopWinners;
     } else if (challenge.thresholdMode == ChallengeTypes.ThresholdMode.SplitAboveThreshold) {
@@ -221,6 +245,7 @@ library ChallengeSettlementLogic {
   ) private pure returns (uint256) {
     uint256 baseShare = totalPrize / recipientCount;
 
+    // Leave any division remainder to the last claimant so the full prize is eventually distributed without dust.
     if (payoutsClaimed + 1 == recipientCount) {
       return totalPrize - (baseShare * (recipientCount - 1));
     }
@@ -234,6 +259,7 @@ library ChallengeSettlementLogic {
   ) private view returns (uint256 totalActions) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
 
+    // When `allApps` is enabled we can sum the per-round total once, instead of iterating app-by-app.
     if (challenge.allApps) {
       for (uint256 round = challenge.startRound; round <= challenge.endRound; round++) {
         totalActions += $.veBetterPassport.userRoundActionCount(participant, round);

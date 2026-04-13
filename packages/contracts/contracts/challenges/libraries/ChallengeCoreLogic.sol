@@ -5,12 +5,17 @@ import { IChallenges } from "../../interfaces/IChallenges.sol";
 import { ChallengeStorageTypes } from "./ChallengeStorageTypes.sol";
 import { ChallengeTypes } from "./ChallengeTypes.sol";
 
+/// @title ChallengeCoreLogic Library
+/// @notice Handles challenge creation, invitations, participation, and lazy status transitions.
+/// @dev Participant, invite, and decline arrays are paired with index-plus-one mappings so membership updates stay
+/// O(1) via swap-and-pop removals.
 library ChallengeCoreLogic {
   uint256 private constant TITLE_MAX_BYTES = 120;
   uint256 private constant DESCRIPTION_MAX_BYTES = 500;
   uint256 private constant IMAGE_URI_MAX_BYTES = 512;
   uint256 private constant METADATA_URI_MAX_BYTES = 512;
 
+  /// @notice Emitted when a challenge is created and initially funded.
   event ChallengeCreated(
     uint256 indexed challengeId,
     address indexed creator,
@@ -28,14 +33,32 @@ library ChallengeCoreLogic {
     string imageURI,
     string metadataURI
   );
+
+  /// @notice Emitted when a new invitee is added to a challenge.
   event ChallengeInviteAdded(uint256 indexed challengeId, address indexed invitee);
+
+  /// @notice Emitted when a participant joins a challenge.
   event ChallengeJoined(uint256 indexed challengeId, address indexed participant);
+
+  /// @notice Emitted when a participant leaves a challenge before it starts.
   event ChallengeLeft(uint256 indexed challengeId, address indexed participant);
+
+  /// @notice Emitted when an invitee declines a challenge.
   event ChallengeDeclined(uint256 indexed challengeId, address indexed participant);
+
+  /// @notice Emitted when a pending challenge is cancelled by its creator.
   event ChallengeCancelled(uint256 indexed challengeId);
+
+  /// @notice Emitted when a pending challenge becomes active.
   event ChallengeActivated(uint256 indexed challengeId);
+
+  /// @notice Emitted when a pending challenge becomes invalid at start time.
   event ChallengeInvalidated(uint256 indexed challengeId);
 
+  /// @notice Creates a new challenge and escrows the initial funds.
+  /// @dev An empty app list means actions from all apps are counted.
+  /// @param params Challenge creation payload.
+  /// @return challengeId Newly created challenge identifier.
   function createChallenge(ChallengeTypes.CreateChallengeParams memory params) public returns (uint256 challengeId) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     uint256 currentRound = _currentRound($);
@@ -45,6 +68,7 @@ library ChallengeCoreLogic {
       revert IChallenges.BetAmountBelowMinimum(params.stakeAmount, $.minBetAmount);
     }
 
+    // A zero start round means "start next round", so callers do not need to prefetch the current round.
     uint256 startRound = params.startRound == 0 ? currentRound + 1 : params.startRound;
     if (startRound <= currentRound) revert IChallenges.InvalidStartRound(startRound, currentRound);
     if (params.endRound < startRound) revert IChallenges.InvalidEndRound(startRound, params.endRound);
@@ -54,6 +78,7 @@ library ChallengeCoreLogic {
       revert IChallenges.MaxChallengeDurationExceeded(duration, $.maxChallengeDuration);
     }
 
+    // An empty app selection means the challenge aggregates actions across every app.
     bool allApps = params.appIds.length == 0;
     if (!allApps) {
       if (params.appIds.length > $.maxSelectedApps) {
@@ -91,6 +116,7 @@ library ChallengeCoreLogic {
 
     if (!$.b3tr.transferFrom(msg.sender, address(this), params.stakeAmount)) revert IChallenges.TransferFailed();
 
+    // In stake challenges the creator escrows the first stake and counts as the first participant.
     if (params.kind == ChallengeTypes.ChallengeKind.Stake) {
       _addParticipant(challengeId, msg.sender);
     }
@@ -102,6 +128,9 @@ library ChallengeCoreLogic {
     }
   }
 
+  /// @notice Adds invitees to a pending challenge.
+  /// @param challengeId Challenge identifier.
+  /// @param invitees Accounts to invite.
   function addInvites(uint256 challengeId, address[] memory invitees) public {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -114,6 +143,8 @@ library ChallengeCoreLogic {
     }
   }
 
+  /// @notice Joins a pending challenge.
+  /// @param challengeId Challenge identifier.
   function joinChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
@@ -146,6 +177,8 @@ library ChallengeCoreLogic {
     emit ChallengeJoined(challengeId, msg.sender);
   }
 
+  /// @notice Leaves a pending challenge before the challenge starts.
+  /// @param challengeId Challenge identifier.
   function leaveChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
@@ -173,6 +206,8 @@ library ChallengeCoreLogic {
     emit ChallengeLeft(challengeId, msg.sender);
   }
 
+  /// @notice Declines a pending challenge invitation.
+  /// @param challengeId Challenge identifier.
   function declineChallenge(uint256 challengeId) public {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
@@ -198,6 +233,8 @@ library ChallengeCoreLogic {
     emit ChallengeDeclined(challengeId, msg.sender);
   }
 
+  /// @notice Cancels a pending challenge.
+  /// @param challengeId Challenge identifier.
   function cancelChallenge(uint256 challengeId) public {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -210,6 +247,9 @@ library ChallengeCoreLogic {
     emit ChallengeCancelled(challengeId);
   }
 
+  /// @notice Syncs a pending challenge with the current round and participant state.
+  /// @param challengeId Challenge identifier.
+  /// @return Current persisted status after syncing.
   function syncChallenge(uint256 challengeId) public returns (uint8) {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -217,6 +257,7 @@ library ChallengeCoreLogic {
       return uint8(challenge.status);
     }
 
+    // Pending challenges are resolved lazily once someone interacts after the start round is reached.
     ChallengeTypes.ChallengeStatus computed = ChallengeTypes.ChallengeStatus(getComputedStatus(challengeId));
     if (computed == ChallengeTypes.ChallengeStatus.Pending) {
       return uint8(computed);
@@ -233,6 +274,9 @@ library ChallengeCoreLogic {
     return uint8(computed);
   }
 
+  /// @notice Computes the latest status for a challenge without mutating storage.
+  /// @param challengeId Challenge identifier.
+  /// @return Computed challenge status encoded as `uint8`.
   function getComputedStatus(uint256 challengeId) public view returns (uint8) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
@@ -378,6 +422,7 @@ library ChallengeCoreLogic {
     uint256 index = indexPlusOne - 1;
     uint256 lastIndex = challenge.participants.length - 1;
 
+    // Swap-and-pop keeps participant removals O(1) while preserving the index mapping for the swapped account.
     if (index != lastIndex) {
       address swapped = challenge.participants[lastIndex];
       challenge.participants[index] = swapped;
@@ -461,6 +506,7 @@ library ChallengeCoreLogic {
   }
 
   function _isChallengeValid(ChallengeTypes.Challenge storage challenge) private view returns (bool) {
+    // Sponsored challenges are funded by the creator, while stake challenges need at least two stakers to compete.
     uint256 minimumParticipants = challenge.kind == ChallengeTypes.ChallengeKind.Stake ? 2 : 1;
     return challenge.participants.length >= minimumParticipants;
   }
