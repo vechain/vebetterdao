@@ -8,6 +8,7 @@ import { useCurrentRoundProposalActivities } from "./useCurrentRoundProposalActi
 import { useEmissionsActivities } from "./useEmissionsActivities"
 import { useGmUpgradeActivities } from "./useGmUpgradeActivities"
 import { useGrantActivities } from "./useGrantActivities"
+import { useNavigatorActivities } from "./useNavigatorActivities"
 import { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalActivities"
 import { useRoundActivities } from "./useRoundActivities"
 import { useUserVotingActivities } from "./useUserVotingActivities"
@@ -26,6 +27,7 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
   const { data: rounds, isLoading: isRoundsLoading } = useRoundActivities(previousRoundId)
   const { data: emissions, isLoading: isEmissionsLoading } = useEmissionsActivities(currentRoundId, previousRoundId)
   const { data: userVoting, isLoading: isUserVotingLoading } = useUserVotingActivities(currentRoundId)
+  const { data: navigators, isLoading: isNavigatorsLoading } = useNavigatorActivities(currentRoundId)
   const data = useMemo(() => {
     return [
       ...prevProposals,
@@ -36,8 +38,9 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
       ...rounds,
       ...emissions,
       ...userVoting,
+      ...navigators,
     ].sort((a, b) => b.date - a.date)
-  }, [prevProposals, currProposals, grants, apps, gmUpgrades, rounds, emissions, userVoting])
+  }, [prevProposals, currProposals, grants, apps, gmUpgrades, rounds, emissions, userVoting, navigators])
 
   const isLoading =
     isRoundIdLoading ||
@@ -48,7 +51,8 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
     isGmUpgradesLoading ||
     isRoundsLoading ||
     isEmissionsLoading ||
-    isUserVotingLoading
+    isUserVotingLoading ||
+    isNavigatorsLoading
 
   return { data, isLoading }
 }

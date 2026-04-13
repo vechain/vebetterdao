@@ -15,6 +15,7 @@ const getActivityKey = (activity: ActivityItem): string => {
   }
   if ("upgrades" in activity.metadata)
     return `${base}-${activity.metadata.upgrades.map(u => `${u.userAddress}-${u.tokenId}`).join("-")}`
+  if ("navigatorAddress" in activity.metadata) return `${base}-${activity.metadata.navigatorAddress}`
   return base
 }
 

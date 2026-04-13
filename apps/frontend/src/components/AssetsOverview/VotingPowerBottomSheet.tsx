@@ -144,10 +144,10 @@ const getVotingPowerActivityProps = (tx: Transaction): ActivityItemProps | null 
         icon: <Icon as={LuUsers} />,
         iconBg: "status.negative.subtle",
         iconColor: "status.negative.strong",
-        amount: "",
-        token: "",
-        sign: "-",
-        amountColor: undefined,
+        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
+        token: "VOT3",
+        sign: "+",
+        amountColor: "status.positive.strong",
       }
     default:
       return null

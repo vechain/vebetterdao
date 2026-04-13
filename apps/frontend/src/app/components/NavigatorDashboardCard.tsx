@@ -43,6 +43,7 @@ export const NavigatorDashboardCard = () => {
   }, [nav, delegatedAtSnapshot])
 
   if (!isNavigator || !account?.address) return null
+  if (status === "DEACTIVATED" && Number(nav?.stakeFormatted ?? 0) === 0) return null
 
   const capacity = formatter.format(Number(nav?.stakeFormatted ?? 0) * 10)
   const delegated = formatter.format(Number(nav?.totalDelegatedFormatted ?? 0))
