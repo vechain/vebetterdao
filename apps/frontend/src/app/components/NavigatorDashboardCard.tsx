@@ -1,19 +1,29 @@
-import { Badge, Card, Heading, HStack, IconButton, Image, Skeleton, Stat, VStack } from "@chakra-ui/react"
+import { Badge, Card, Heading, HStack, Icon, IconButton, Image, Skeleton, Stat, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
+import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
+import { LuCheck, LuCircle, LuClock, LuTriangleAlert } from "react-icons/lu"
 
+import { useGetLastReportRound } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
+import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
 import { useGetTotalDelegatedAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetTotalDelegatedAtTimepoint"
+import { useHasSetDecisions } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecisions"
+import { useHasSetPreferences } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import {
   type NavigatorStatusValue,
   useNavigatorStatus,
 } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { useNavigatorCutoffDeadline } from "@/hooks/navigator/useNavigatorCutoffDeadline"
+import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 const formatter = getCompactFormatter(2)
 
@@ -33,6 +43,27 @@ export const NavigatorDashboardCard = () => {
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(account?.address ?? "")
   const { data: snapshot } = useCurrentRoundSnapshot()
   const { data: delegatedAtSnapshot } = useGetTotalDelegatedAtTimepoint(account?.address ?? "", snapshot ?? undefined)
+  const { data: roundId } = useCurrentAllocationsRoundId()
+  const { data: hasSetPrefs } = useHasSetPreferences(roundId)
+  const { data: lastReportRound } = useGetLastReportRound()
+  const { data: reportInterval } = useGetReportInterval()
+  const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+
+  const activeProposals = useMemo(
+    () => enrichedProposals.filter(p => p.state === ProposalState.Active),
+    [enrichedProposals],
+  )
+  const activeProposalIds = useMemo(() => activeProposals.map(p => p.id), [activeProposals])
+  const { data: decisionsMap } = useHasSetDecisions(activeProposalIds)
+
+  const currentRound = Number(roundId ?? 0)
+  const isReportDue =
+    reportInterval != null && lastReportRound != null && currentRound > 0
+      ? currentRound - lastReportRound >= reportInterval
+      : false
+  const hasUnvotedProposals = activeProposals.some(p => !decisionsMap?.[p.id])
+  const hasPendingTasks = !hasSetPrefs || isReportDue || hasUnvotedProposals
 
   const delegationChange = useMemo(() => {
     if (!nav || !delegatedAtSnapshot) return null
@@ -56,7 +87,7 @@ export const NavigatorDashboardCard = () => {
         <VStack gap="4" align="flex-start" w="full">
           <HStack justifyContent="space-between" w="full">
             <HStack gap={2}>
-              <Heading size="xl">{t("Navigators")}</Heading>
+              <Heading size="xl">{t("Navigator")}</Heading>
               {(status === "EXITING" || status === "DEACTIVATED") && (
                 <Badge colorPalette={statusColor[status]} size="sm">
                   {status}
@@ -115,6 +146,71 @@ export const NavigatorDashboardCard = () => {
                 <Stat.ValueText textStyle="md">{citizens}</Stat.ValueText>
               </Stat.Root>
             </Skeleton>
+
+            {(status === "ACTIVE" || status === "EXITING") && (
+              <VStack gap={2} w="full" align="stretch" pt={2} borderTop="1px solid" borderColor="border.secondary">
+                {cutoffDate && hasPendingTasks && (
+                  <HStack gap={1}>
+                    <Icon boxSize={3} color={isPastCutoff ? "status.negative.primary" : "status.warning.primary"}>
+                      {isPastCutoff ? <LuTriangleAlert /> : <LuClock />}
+                    </Icon>
+                    <Text textStyle="xs" color={isPastCutoff ? "status.negative.primary" : "text.subtle"}>
+                      {isPastCutoff ? (
+                        t("Cutoff Expired")
+                      ) : (
+                        <>
+                          {t("Cutoff in")}{" "}
+                          <Countdown
+                            date={cutoffDate}
+                            renderer={({ days, hours, minutes }) => (
+                              <Text as="span" fontWeight="bold">
+                                {days > 0 && `${days}d `}
+                                {hours}
+                                {"h "}
+                                {minutes}
+                                {"m"}
+                              </Text>
+                            )}
+                          />
+                        </>
+                      )}
+                    </Text>
+                  </HStack>
+                )}
+
+                <HStack gap={2} flexWrap="wrap">
+                  <HStack gap={1}>
+                    <Icon boxSize={3} color={hasSetPrefs ? "status.positive.primary" : "status.warning.primary"}>
+                      {hasSetPrefs ? <LuCheck /> : <LuCircle />}
+                    </Icon>
+                    <Text textStyle="xs">{hasSetPrefs ? t("Preferences Set") : t("Preferences Pending")}</Text>
+                  </HStack>
+                  {activeProposals.length > 0 && (
+                    <HStack gap={1}>
+                      <Icon
+                        boxSize={3}
+                        color={
+                          activeProposals.every(p => decisionsMap?.[p.id])
+                            ? "status.positive.primary"
+                            : "status.warning.primary"
+                        }>
+                        {activeProposals.every(p => decisionsMap?.[p.id]) ? <LuCheck /> : <LuCircle />}
+                      </Icon>
+                      <Text textStyle="xs">
+                        {t("Proposals")}{" "}
+                        {`${activeProposals.filter(p => decisionsMap?.[p.id]).length}/${activeProposals.length}`}
+                      </Text>
+                    </HStack>
+                  )}
+                  <HStack gap={1}>
+                    <Icon boxSize={3} color={isReportDue ? "status.warning.primary" : "status.positive.primary"}>
+                      {isReportDue ? <LuCircle /> : <LuCheck />}
+                    </Icon>
+                    <Text textStyle="xs">{isReportDue ? t("Report Due") : t("Report Submitted")}</Text>
+                  </HStack>
+                </HStack>
+              </VStack>
+            )}
           </VStack>
         </VStack>
       </Card.Body>

@@ -20,12 +20,14 @@ import { EditNavigatorProfileModal } from "./modals/EditNavigatorProfileModal"
 import { ManageStakeModal } from "./modals/ManageStakeModal"
 import { NavigatorCitizensModal } from "./modals/NavigatorCitizensModal"
 import { NavigatorDelegationsModal } from "./modals/NavigatorDelegationsModal"
+import { NavigatorReportModal } from "./modals/NavigatorReportModal"
 import { NavigatorStakeHistoryModal } from "./modals/NavigatorStakeHistoryModal"
 import { WithdrawStakeModal } from "./modals/WithdrawStakeModal"
 import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorHeader } from "./NavigatorHeader/NavigatorHeader"
 import { NavigatorStatsGrid } from "./NavigatorStatsGrid"
+import { NavigatorTaskList } from "./NavigatorTaskList"
 
 const formatter = getCompactFormatter(2)
 
@@ -45,6 +47,7 @@ export const NavigatorDetailContent = () => {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [isAnnounceExitOpen, setIsAnnounceExitOpen] = useState(false)
   const [isWithdrawStakeOpen, setIsWithdrawStakeOpen] = useState(false)
+  const [isReportOpen, setIsReportOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address, { waitForIndexer })
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
@@ -170,6 +173,10 @@ export const NavigatorDetailContent = () => {
         onDelegatedClick={() => setIsDelegationsOpen(true)}
       />
 
+      {isOwnPage && (status === "ACTIVE" || status === "EXITING") && (
+        <NavigatorTaskList onSubmitReport={() => setIsReportOpen(true)} />
+      )}
+
       <NavigatorGovernanceActivity address={address} />
 
       <DelegationModal
@@ -200,6 +207,7 @@ export const NavigatorDetailContent = () => {
           metadataURI={nav.metadataURI}
         />
       )}
+      <NavigatorReportModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} />
     </VStack>
   )
 }

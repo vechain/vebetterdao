@@ -8,5 +8,6 @@ export const useBestBlockCompressed = () => {
     queryKey: ["bestBlockCompressed"],
     queryFn: () => thor.blocks.getBestBlockCompressed(),
     enabled: !!thor,
+    refetchInterval: 30_000,
   })
 }

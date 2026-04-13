@@ -156,6 +156,10 @@ export const ConfirmVoteModal = ({
                 )
               }
             />
+            <SelectedAppsPreview
+              apps={selectedApps}
+              onEditSelection={showEditSelection ? onEditSelection : undefined}
+            />
             {!freshnessPreview.isLoading && (
               <FreshnessHint
                 isUpdated={freshnessPreview.isUpdated}
@@ -163,10 +167,7 @@ export const ConfirmVoteModal = ({
                 isFirstVote={freshnessPreview.isFirstVote}
               />
             )}
-            <SelectedAppsPreview
-              apps={selectedApps}
-              onEditSelection={showEditSelection ? onEditSelection : undefined}
-            />
+            {isNavigator && <AllocationAlertCard status="info" message={t("navigatorVotePropagation")} />}
           </>
         ) : (
           <>
@@ -192,6 +193,7 @@ export const ConfirmVoteModal = ({
                 isFirstVote={freshnessPreview.isFirstVote}
               />
             )}
+            {isNavigator && <AllocationAlertCard status="info" message={t("navigatorVotePropagation")} />}
             <SelectedAppsSection
               apps={selectedApps}
               allocations={allocations}
@@ -207,6 +209,7 @@ export const ConfirmVoteModal = ({
             )}
           </>
         )}
+
         {!isNavigator && (
           <>
             <AutomationToggleCard
