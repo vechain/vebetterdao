@@ -26,7 +26,12 @@ library NavigatorDelegationUtils {
   event DelegationIncreased(address indexed citizen, address indexed navigator, uint256 addedAmount, uint256 newTotal);
 
   /// @notice Emitted when a citizen reduces their delegation (but doesn't fully remove)
-  event DelegationDecreased(address indexed citizen, address indexed navigator, uint256 removedAmount, uint256 newTotal);
+  event DelegationDecreased(
+    address indexed citizen,
+    address indexed navigator,
+    uint256 removedAmount,
+    uint256 newTotal
+  );
 
   /// @notice Emitted when a citizen fully undelegates from a navigator
   event DelegationRemoved(address indexed citizen, address indexed navigator, uint256 amount);
@@ -185,6 +190,34 @@ library NavigatorDelegationUtils {
     return _currentNavigator(NavigatorStorageTypes.getNavigatorStorage(), citizen);
   }
 
+  /// @notice Get the navigator a citizen was delegated to at a past block (checkpointed)
+  /// @dev Returns address(0) if the navigator was dead (deactivated/exited) at the timepoint.
+  /// @param citizen The citizen address
+  /// @param timepoint The block number to query
+  /// @return The navigator address at the given block (address(0) if not delegated or navigator was dead)
+  function getNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    if ($.citizenToNavigator[citizen].length() == 0) return address(0);
+    uint208 raw = $.citizenToNavigator[citizen].upperLookupRecent(SafeCast.toUint48(timepoint));
+    if (raw == 0) return address(0);
+    address navigator = address(uint160(raw));
+    if (_isDeactivatedAtTimepoint($, navigator, timepoint)) return address(0);
+    return navigator;
+  }
+
+  /// @notice Get the raw navigator stored for a citizen at a past block (checkpointed)
+  /// @dev Useful for frontends to show delegation state even when navigator is dead/exiting.
+  /// @param citizen The citizen address
+  /// @param timepoint The block number to query
+  /// @return The raw navigator address from checkpoint, or address(0) if never delegated or undelegated
+  function getRawNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    if ($.citizenToNavigator[citizen].length() == 0) return address(0);
+    uint208 raw = $.citizenToNavigator[citizen].upperLookupRecent(SafeCast.toUint48(timepoint));
+    if (raw == 0) return address(0);
+    return address(uint160(raw));
+  }
+
   /// @notice Get the current VOT3 amount a citizen has delegated (0 if delegation is void)
   /// @param citizen The citizen address
   /// @return The delegated VOT3 amount
@@ -202,11 +235,12 @@ library NavigatorDelegationUtils {
   /// @param timepoint The block number to query
   /// @return The delegated VOT3 amount at the given block
   function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256) {
-    return uint256(
-      NavigatorStorageTypes.getNavigatorStorage().delegatedAmount[citizen].upperLookupRecent(
-        SafeCast.toUint48(timepoint)
-      )
-    );
+    return
+      uint256(
+        NavigatorStorageTypes.getNavigatorStorage().delegatedAmount[citizen].upperLookupRecent(
+          SafeCast.toUint48(timepoint)
+        )
+      );
   }
 
   /// @notice Get total VOT3 currently delegated to a navigator
@@ -235,21 +269,6 @@ library NavigatorDelegationUtils {
     if (navigator == address(0)) return false;
     if (_isNavigatorDead($, navigator)) return false;
     return true;
-  }
-
-  /// @notice Get the navigator a citizen was delegated to at a past block (checkpointed)
-  /// @dev Returns address(0) if the navigator was dead (deactivated/exited) at the timepoint.
-  /// @param citizen The citizen address
-  /// @param timepoint The block number to query
-  /// @return The navigator address at the given block (address(0) if not delegated or navigator was dead)
-  function getNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address) {
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    if ($.citizenToNavigator[citizen].length() == 0) return address(0);
-    uint208 raw = $.citizenToNavigator[citizen].upperLookupRecent(SafeCast.toUint48(timepoint));
-    if (raw == 0) return address(0);
-    address navigator = address(uint160(raw));
-    if (_isDeactivatedAtTimepoint($, navigator, timepoint)) return address(0);
-    return navigator;
   }
 
   /// @notice Check if a citizen was delegated to an alive navigator at a past block

@@ -26,7 +26,6 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
   const { data: rounds, isLoading: isRoundsLoading } = useRoundActivities(previousRoundId)
   const { data: emissions, isLoading: isEmissionsLoading } = useEmissionsActivities(currentRoundId, previousRoundId)
   const { data: userVoting, isLoading: isUserVotingLoading } = useUserVotingActivities(currentRoundId)
-
   const data = useMemo(() => {
     return [
       ...prevProposals,

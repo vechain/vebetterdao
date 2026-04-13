@@ -56,6 +56,9 @@ library NavigatorStakingUtils {
   /// @notice Thrown when trying to unstake while still active (must exit first)
   error NavigatorStillActive(address navigator);
 
+  /// @notice Thrown when trying to withdraw before notice period has elapsed
+  error NoticePeriodNotElapsed(uint256 currentBlock, uint256 effectiveDeadline);
+
   /// @notice Thrown when trying to withdraw more stake than is available
   error InsufficientStake(uint256 available, uint256 requested);
 
@@ -163,7 +166,7 @@ library NavigatorStakingUtils {
     emit StakeWithdrawn(navigator, amount, newStake);
   }
 
-  /// @notice Withdraw staked B3TR (only after exit is finalized or deactivation)
+  /// @notice Withdraw staked B3TR (only after notice period elapsed or governance deactivation)
   /// @param navigator The navigator address
   /// @param amount The B3TR amount to withdraw
   function withdrawStake(address navigator, uint256 amount) external {
@@ -171,11 +174,17 @@ library NavigatorStakingUtils {
 
     if (!$.isRegistered[navigator]) revert NotRegistered(navigator);
 
-    // Can only withdraw if exit is finalized or deactivated
-    // Active navigators must exit first
     bool isExiting = $.exitAnnouncedRound[navigator] > 0;
     bool isDeactivated = $.isDeactivated[navigator];
     if (!isExiting && !isDeactivated) revert NavigatorStillActive(navigator);
+
+    // For exiting navigators, enforce that the notice period has elapsed
+    if (isExiting && !isDeactivated) {
+      (bool exists, uint48 effectiveDeadline, ) = $.navigatorDeactivated[navigator].latestCheckpoint();
+      if (exists && block.number < effectiveDeadline) {
+        revert NoticePeriodNotElapsed(block.number, effectiveDeadline);
+      }
+    }
 
     if (amount > $.stakedAmount[navigator]) revert InsufficientStake($.stakedAmount[navigator], amount);
 

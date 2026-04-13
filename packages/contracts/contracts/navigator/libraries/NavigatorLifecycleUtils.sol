@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
@@ -48,6 +49,23 @@ library NavigatorLifecycleUtils {
 
   /// @notice Thrown when navigator is already deactivated
   error AlreadyDeactivated(address navigator);
+
+  // ======================== Status ======================== //
+
+  /// @notice Compute the current lifecycle status of a navigator
+  /// @param account The address to check
+  /// @return The NavigatorStatus enum value
+  function getStatus(address account) external view returns (uint8) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    if (!$.isRegistered[account]) return uint8(INavigatorRegistry.NavigatorStatus.NONE);
+    if ($.isDeactivated[account]) return uint8(INavigatorRegistry.NavigatorStatus.DEACTIVATED);
+    if ($.exitAnnouncedRound[account] > 0) {
+      (bool exists, uint48 effectiveDeadline, ) = $.navigatorDeactivated[account].latestCheckpoint();
+      if (exists && block.number >= effectiveDeadline) return uint8(INavigatorRegistry.NavigatorStatus.DEACTIVATED);
+      return uint8(INavigatorRegistry.NavigatorStatus.EXITING);
+    }
+    return uint8(INavigatorRegistry.NavigatorStatus.ACTIVE);
+  }
 
   // ======================== Exit Process ======================== //
 

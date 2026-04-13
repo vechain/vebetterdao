@@ -4,22 +4,24 @@ import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain
 import { useParams, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuBadgeCheck, LuUserCheck } from "react-icons/lu"
+import { LuBadgeCheck, LuDoorOpen, LuUserCheck } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
-import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
+import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
 
+import { AnnounceExitModal } from "./modals/AnnounceExitModal"
 import { EditNavigatorProfileModal } from "./modals/EditNavigatorProfileModal"
 import { ManageStakeModal } from "./modals/ManageStakeModal"
 import { NavigatorCitizensModal } from "./modals/NavigatorCitizensModal"
 import { NavigatorDelegationsModal } from "./modals/NavigatorDelegationsModal"
 import { NavigatorStakeHistoryModal } from "./modals/NavigatorStakeHistoryModal"
+import { WithdrawStakeModal } from "./modals/WithdrawStakeModal"
 import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorHeader } from "./NavigatorHeader/NavigatorHeader"
@@ -41,6 +43,8 @@ export const NavigatorDetailContent = () => {
   const [isDelegationsOpen, setIsDelegationsOpen] = useState(false)
   const [isManageStakeOpen, setIsManageStakeOpen] = useState(false)
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
+  const [isAnnounceExitOpen, setIsAnnounceExitOpen] = useState(false)
+  const [isWithdrawStakeOpen, setIsWithdrawStakeOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address, { waitForIndexer })
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
@@ -48,7 +52,7 @@ export const NavigatorDetailContent = () => {
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
-  const { data: isNavigator } = useIsNavigator()
+  const { data: status } = useNavigatorStatus(address)
   const { data: delegationInfo } = useMyDelegationInfo(address)
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
@@ -71,7 +75,7 @@ export const NavigatorDetailContent = () => {
     )
   }
 
-  const isActive = nav.status === "ACTIVE"
+  const isOwnPage = !!account?.address && account.address.toLowerCase() === address.toLowerCase()
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = currentNavigator?.toLowerCase() === address.toLowerCase() && currentDelegatedNum > 0
 
@@ -83,6 +87,32 @@ export const NavigatorDetailContent = () => {
           { label: domainData?.domain ? displayName : t("Overview"), href: `/navigators/${address}` },
         ]}
       />
+
+      {status === "EXITING" && (
+        <Alert.Root status="warning" borderRadius="xl">
+          <Alert.Indicator>
+            <LuDoorOpen />
+          </Alert.Indicator>
+          <Alert.Title textStyle="sm">
+            {isOwnPage
+              ? t("You have announced your exit. Continue voting during the notice period.")
+              : t("This navigator is exiting. Delegations will become void after the notice period.")}
+          </Alert.Title>
+        </Alert.Root>
+      )}
+
+      {status === "DEACTIVATED" && (
+        <Alert.Root status="error" borderRadius="xl">
+          <Alert.Indicator>
+            <LuDoorOpen />
+          </Alert.Indicator>
+          <Alert.Title textStyle="sm">
+            {isOwnPage
+              ? t("You have been deactivated. You can still withdraw your remaining stake.")
+              : t("This navigator has been deactivated.")}
+          </Alert.Title>
+        </Alert.Root>
+      )}
 
       {isDelegatedHere && (
         <Alert.Root status="info" borderRadius="xl">
@@ -113,22 +143,24 @@ export const NavigatorDetailContent = () => {
         bio={textRecords?.description}
         metadata={metadata}
         metadataLoading={metadataLoading}
-        isActive={isActive}
+        status={status ?? "NONE"}
         isDelegatedHere={isDelegatedHere}
         isConnected={!!account?.address}
-        isNavigator={!!isNavigator}
-        isOwnPage={!!isNavigator && !!account?.address && account.address.toLowerCase() === address.toLowerCase()}
+        isOwnPage={isOwnPage}
+        hasStake={Number(nav.stakeFormatted ?? 0) > 0}
         onDelegationClick={() => {
           setIsExitMode(false)
           setIsDelegationOpen(true)
         }}
         registeredAt={nav.registeredAt}
         onManageStakeClick={() => setIsManageStakeOpen(true)}
+        onWithdrawStakeClick={() => setIsWithdrawStakeOpen(true)}
         onExitDelegation={() => {
           setIsExitMode(true)
           setIsDelegationOpen(true)
         }}
         onEditProfile={() => setIsEditProfileOpen(true)}
+        onAnnounceExit={() => setIsAnnounceExitOpen(true)}
       />
 
       <NavigatorStatsGrid
@@ -158,6 +190,8 @@ export const NavigatorDetailContent = () => {
         address={address}
       />
       <ManageStakeModal isOpen={isManageStakeOpen} onClose={() => setIsManageStakeOpen(false)} navigator={nav} />
+      <WithdrawStakeModal isOpen={isWithdrawStakeOpen} onClose={() => setIsWithdrawStakeOpen(false)} navigator={nav} />
+      <AnnounceExitModal isOpen={isAnnounceExitOpen} onClose={() => setIsAnnounceExitOpen(false)} />
       {metadata && nav.metadataURI && (
         <EditNavigatorProfileModal
           isOpen={isEditProfileOpen}

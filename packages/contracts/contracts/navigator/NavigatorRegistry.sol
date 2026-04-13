@@ -424,6 +424,13 @@ contract NavigatorRegistry is
     return NavigatorStakingUtils.getStake(navigator);
   }
 
+  /// @notice Get the current lifecycle status of a navigator
+  /// @param account Address to check
+  /// @return 0=NONE, 1=ACTIVE, 2=EXITING, 3=DEACTIVATED
+  function getStatus(address account) external view returns (uint8) {
+    return NavigatorLifecycleUtils.getStatus(account);
+  }
+
   /// @notice Check if an account is a registered and active navigator
   /// @param account Address to check
   /// @return True if the account is a registered, non-deactivated navigator
@@ -475,6 +482,11 @@ contract NavigatorRegistry is
   /// @inheritdoc INavigatorRegistry
   function getRawNavigator(address citizen) external view returns (address) {
     return NavigatorDelegationUtils.getRawNavigator(citizen);
+  }
+
+  /// @inheritdoc INavigatorRegistry
+  function getRawNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address) {
+    return NavigatorDelegationUtils.getRawNavigatorAtTimepoint(citizen, timepoint);
   }
 
   /// @notice Get the VOT3 amount a citizen has delegated

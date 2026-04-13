@@ -86,6 +86,7 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
                   </Button>
                 ) : (
                   !isNavigator &&
+                  isActive &&
                   onDelegate && (
                     <Button
                       variant="primary"

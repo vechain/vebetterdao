@@ -7,6 +7,16 @@ pragma solidity 0.8.20;
  * Navigators are professional voting delegates who stake B3TR to vote on behalf of citizens.
  */
 interface INavigatorRegistry {
+  // ======================== Types ======================== //
+
+  /// @notice Navigator lifecycle status
+  enum NavigatorStatus {
+    NONE, // not registered
+    ACTIVE, // registered and active
+    EXITING, // announced exit, notice period in progress
+    DEACTIVATED // exit complete or governance deactivation — can withdraw
+  }
+
   // ======================== Errors ======================== //
 
   // -- Staking --
@@ -188,7 +198,12 @@ interface INavigatorRegistry {
   /// @param navigator The navigator address
   /// @param removedAmount The VOT3 amount removed
   /// @param newTotal The new total delegation amount
-  event DelegationDecreased(address indexed citizen, address indexed navigator, uint256 removedAmount, uint256 newTotal);
+  event DelegationDecreased(
+    address indexed citizen,
+    address indexed navigator,
+    uint256 removedAmount,
+    uint256 newTotal
+  );
 
   /// @notice Emitted when a citizen fully undelegates from a navigator
   /// @param citizen The citizen address
@@ -300,7 +315,11 @@ interface INavigatorRegistry {
   /// @param roundId The allocation round ID
   /// @param appIds Array of app IDs to vote for
   /// @param percentages Allocation percentage per app in basis points (must sum to 10000)
-  function setAllocationPreferences(uint256 roundId, bytes32[] calldata appIds, uint256[] calldata percentages) external;
+  function setAllocationPreferences(
+    uint256 roundId,
+    bytes32[] calldata appIds,
+    uint256[] calldata percentages
+  ) external;
 
   /// @notice Set a governance proposal voting decision
   /// @param proposalId The governance proposal ID
@@ -455,10 +474,24 @@ interface INavigatorRegistry {
   /// @return The navigator address (address(0) if not delegated or delegation is void)
   function getNavigator(address citizen) external view returns (address);
 
+  /// @notice Get the navigator a citizen was delegated to at a past block (checkpointed)
+  /// @dev Does NOT apply dead-navigator invalidation — callers decide.
+  /// @param citizen The citizen address
+  /// @param timepoint The block number to query
+  /// @return The navigator address at the given block (address(0) if not delegated)
+  function getNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address);
+
   /// @notice Get the raw navigator stored for a citizen, ignoring dead-navigator status
   /// @param citizen The citizen address
   /// @return The raw navigator address, or address(0) if never delegated or undelegated
   function getRawNavigator(address citizen) external view returns (address);
+
+  /// @notice Get the raw navigator stored for a citizen at a past block (checkpointed)
+  /// @dev Useful for frontends to show delegation state even when navigator is dead/exiting.
+  /// @param citizen The citizen address
+  /// @param timepoint The block number to query
+  /// @return The raw navigator address from checkpoint, or address(0) if never delegated or undelegated
+  function getRawNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address);
 
   /// @notice Get the current VOT3 amount a citizen has delegated
   /// @param citizen The citizen address
@@ -487,13 +520,6 @@ interface INavigatorRegistry {
   /// @return The delegated VOT3 amount at the given block
   function getDelegatedAmountAtTimepoint(address citizen, uint256 timepoint) external view returns (uint256);
 
-  /// @notice Get the navigator a citizen was delegated to at a past block (checkpointed)
-  /// @dev Does NOT apply dead-navigator invalidation — callers decide.
-  /// @param citizen The citizen address
-  /// @param timepoint The block number to query
-  /// @return The navigator address at the given block (address(0) if not delegated)
-  function getNavigatorAtTimepoint(address citizen, uint256 timepoint) external view returns (address);
-
   /// @notice Check if a citizen was delegated at a past block (checkpointed)
   /// @dev Does NOT apply dead-navigator invalidation — callers decide.
   /// @param citizen The citizen address
@@ -508,7 +534,10 @@ interface INavigatorRegistry {
   /// @param roundId The allocation round ID
   /// @return appIds The app IDs selected
   /// @return percentages The allocation percentages per app (basis points)
-  function getAllocationPreferences(address navigator, uint256 roundId) external view returns (bytes32[] memory appIds, uint256[] memory percentages);
+  function getAllocationPreferences(
+    address navigator,
+    uint256 roundId
+  ) external view returns (bytes32[] memory appIds, uint256[] memory percentages);
 
   /// @notice Check if a navigator has set preferences for a round
   /// @param navigator The navigator address
@@ -571,6 +600,11 @@ interface INavigatorRegistry {
   function getPreferenceCutoffPeriod() external view returns (uint256);
 
   // -- Lifecycle --
+
+  /// @notice Get the current lifecycle status of a navigator
+  /// @param account The address to check
+  /// @return 0=NONE, 1=ACTIVE, 2=EXITING, 3=DEACTIVATED
+  function getStatus(address account) external view returns (uint8);
 
   /// @notice Check if a navigator is in the exit process
   /// @param navigator The navigator address

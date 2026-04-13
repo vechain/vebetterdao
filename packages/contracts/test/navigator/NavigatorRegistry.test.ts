@@ -5,7 +5,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 import { getOrDeployContractInstances } from "../helpers/deploy"
-import { getVot3Tokens, bootstrapAndStartEmissions } from "../helpers/common"
+import { getVot3Tokens, bootstrapAndStartEmissions, waitForCurrentRoundToEnd } from "../helpers/common"
 import { B3TR, VOT3, Treasury, NavigatorRegistry } from "../../typechain-types"
 
 describe("NavigatorRegistry - @shard19a", function () {
@@ -586,6 +586,87 @@ describe("NavigatorRegistry - @shard19a", function () {
       it("should revert when caller lacks DEFAULT_ADMIN_ROLE", async function () {
         await expect(navigatorRegistry.connect(otherAccount).setVoterRewards(otherAccounts[15].address)).to.be.reverted
       })
+    })
+  })
+
+  describe.only("getStatus()", function () {
+    it("should return NONE (0) for unregistered address", async function () {
+      const status = await navigatorRegistry.getStatus(otherAccounts[10].address)
+      expect(status).to.equal(0n)
+    })
+
+    it("should return ACTIVE (1) after registration", async function () {
+      const navigator = otherAccounts[10]
+      await registerNavigator(navigator)
+
+      const status = await navigatorRegistry.getStatus(navigator.address)
+      expect(status).to.equal(1n)
+    })
+
+    it("should return EXITING (2) after announceExit while notice period is active", async function () {
+      const navigator = otherAccounts[10]
+      await registerNavigator(navigator)
+      await bootstrapAndStartEmissions()
+
+      await navigatorRegistry.connect(navigator).announceExit()
+
+      const status = await navigatorRegistry.getStatus(navigator.address)
+      expect(status).to.equal(2n)
+    })
+
+    it("should return DEACTIVATED (3) after notice period elapses", async function () {
+      const navigator = otherAccounts[10]
+      await registerNavigator(navigator)
+      await bootstrapAndStartEmissions()
+
+      await navigatorRegistry.connect(navigator).announceExit()
+      expect(await navigatorRegistry.getStatus(navigator.address)).to.equal(2n)
+
+      // Advance past exit notice period
+      const exitNoticePeriod = await navigatorRegistry.getExitNoticePeriod()
+      for (let i = 0; i <= Number(exitNoticePeriod); i++) {
+        await waitForCurrentRoundToEnd()
+      }
+
+      const status = await navigatorRegistry.getStatus(navigator.address)
+      expect(status).to.equal(3n)
+    })
+
+    it("should return DEACTIVATED (3) after governance deactivation", async function () {
+      const navigator = otherAccounts[10]
+      await registerNavigator(navigator)
+
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator.address, 0, false)
+
+      const status = await navigatorRegistry.getStatus(navigator.address)
+      expect(status).to.equal(3n)
+    })
+
+    it("should return DEACTIVATED (3) for governance-deactivated even if exit was also announced", async function () {
+      const navigator = otherAccounts[10]
+      await registerNavigator(navigator)
+      await bootstrapAndStartEmissions()
+
+      await navigatorRegistry.connect(navigator).announceExit()
+      expect(await navigatorRegistry.getStatus(navigator.address)).to.equal(2n)
+
+      // Governance deactivates while exiting
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator.address, 0, false)
+
+      const status = await navigatorRegistry.getStatus(navigator.address)
+      expect(status).to.equal(3n)
+    })
+
+    it("should still return ACTIVE (1) for an active navigator after another is deactivated", async function () {
+      const nav1 = otherAccounts[10]
+      const nav2 = otherAccounts[11]
+      await registerNavigator(nav1)
+      await registerNavigator(nav2)
+
+      await navigatorRegistry.connect(owner).deactivateNavigator(nav1.address, 0, false)
+
+      expect(await navigatorRegistry.getStatus(nav1.address)).to.equal(3n)
+      expect(await navigatorRegistry.getStatus(nav2.address)).to.equal(1n)
     })
   })
 })

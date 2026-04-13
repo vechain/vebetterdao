@@ -1,8 +1,9 @@
-import { Button, Card, Heading, HStack, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Badge, Button, Card, Heading, HStack, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuExternalLink, LuShare2 } from "react-icons/lu"
 
+import { type NavigatorStatusValue } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { AddressIcon } from "@/components/AddressIcon"
 
@@ -10,7 +11,7 @@ import { NavigatorAboutSection } from "./NavigatorAboutSection"
 import { NavigatorHeaderMenu } from "./NavigatorHeaderMenu"
 import { NavigatorShareModal } from "./NavigatorShareModal"
 
-type MainAction = "manage-delegation" | "manage-stake" | "delegate" | "share"
+type MainAction = "manage-delegation" | "manage-stake" | "withdraw-stake" | "delegate" | "share"
 
 type Props = {
   address: string
@@ -20,27 +21,32 @@ type Props = {
   metadata: NavigatorMetadata | undefined
   metadataLoading: boolean
   registeredAt: number
-  isActive: boolean
+  status: NavigatorStatusValue
   isDelegatedHere: boolean
   isConnected: boolean
-  isNavigator: boolean
   isOwnPage: boolean
+  hasStake: boolean
   onDelegationClick: () => void
   onManageStakeClick: () => void
+  onWithdrawStakeClick: () => void
   onExitDelegation: () => void
   onEditProfile: () => void
+  onAnnounceExit: () => void
 }
 
-const getMainAction = (
-  isDelegatedHere: boolean,
-  isNavigator: boolean,
-  isOwnPage: boolean,
-  isConnected: boolean,
-  isActive: boolean,
-): MainAction => {
-  if (isDelegatedHere) return "manage-delegation"
-  if (isNavigator && isOwnPage) return "manage-stake"
-  if (isConnected && !isNavigator && isActive) return "delegate"
+type MainActionInput = {
+  status: NavigatorStatusValue
+  isDelegatedHere: boolean
+  isOwnPage: boolean
+  isConnected: boolean
+  hasStake: boolean
+}
+
+const getMainAction = (input: MainActionInput): MainAction => {
+  if (input.isOwnPage && input.status === "DEACTIVATED" && input.hasStake) return "withdraw-stake"
+  if (input.isDelegatedHere) return "manage-delegation"
+  if (input.isOwnPage && input.status === "ACTIVE") return "manage-stake"
+  if (input.isConnected && input.status === "ACTIVE") return "delegate"
   return "share"
 }
 
@@ -52,20 +58,28 @@ export const NavigatorHeader = ({
   metadata,
   metadataLoading,
   registeredAt,
-  isActive,
+  status,
   isDelegatedHere,
   isConnected,
-  isNavigator,
   isOwnPage,
+  hasStake,
   onDelegationClick,
   onManageStakeClick,
+  onWithdrawStakeClick,
   onExitDelegation,
   onEditProfile,
+  onAnnounceExit,
 }: Props) => {
   const { t } = useTranslation()
   const [isShareOpen, setIsShareOpen] = useState(false)
 
-  const mainAction = getMainAction(isDelegatedHere, isNavigator, isOwnPage, isConnected, isActive)
+  const mainAction = getMainAction({
+    status,
+    isDelegatedHere,
+    isOwnPage,
+    isConnected,
+    hasStake,
+  })
   const showMenu = mainAction !== "share"
 
   const handleShare = () => setIsShareOpen(true)
@@ -74,6 +88,7 @@ export const NavigatorHeader = ({
     {
       "manage-delegation": { label: t("Manage Delegation"), onClick: onDelegationClick, variant: "primary" },
       "manage-stake": { label: t("Manage Stake"), onClick: onManageStakeClick, variant: "primary" },
+      "withdraw-stake": { label: t("Withdraw Stake"), onClick: onWithdrawStakeClick, variant: "primary" },
       delegate: { label: t("Delegate"), onClick: onDelegationClick, variant: "primary" },
       share: { label: t("Share"), onClick: handleShare, variant: "secondary" },
     }
@@ -87,7 +102,14 @@ export const NavigatorHeader = ({
           <HStack gap={4} align="center" flexWrap="wrap">
             <AddressIcon address={address} boxSize={12} borderRadius="full" />
             <Skeleton loading={domainLoading}>
-              <Heading size={{ base: "md", md: "lg" }}>{displayName}</Heading>
+              <HStack gap={2} align="center">
+                <Heading size={{ base: "md", md: "lg" }}>{displayName}</Heading>
+                {status !== "ACTIVE" && status !== "NONE" && (
+                  <Badge colorPalette={status === "EXITING" ? "yellow" : "red"} size="sm">
+                    {status}
+                  </Badge>
+                )}
+              </HStack>
             </Skeleton>
 
             <HStack flex={1} justify="end" gap={2}>
@@ -99,9 +121,11 @@ export const NavigatorHeader = ({
                 <NavigatorHeaderMenu
                   isDelegatedHere={isDelegatedHere}
                   isOwnPage={isOwnPage}
+                  status={status}
                   onExitDelegation={onExitDelegation}
                   onShareClick={handleShare}
                   onEditProfile={onEditProfile}
+                  onAnnounceExit={onAnnounceExit}
                 />
               )}
             </HStack>
