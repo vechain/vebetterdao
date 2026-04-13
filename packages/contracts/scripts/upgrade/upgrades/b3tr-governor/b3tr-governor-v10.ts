@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { saveLibrariesToFile, upgradeProxy } from "../../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
-import { B3TRGovernor } from "../../../../typechain-types"
+import { B3TRGovernor, NavigatorRegistry__factory } from "../../../../typechain-types"
 import { governanceLibraries } from "../../../libraries"
 
 async function main() {
@@ -70,6 +70,22 @@ async function main() {
   console.log(`Navigator registry: ${navigatorRegistry}`)
   if (navigatorRegistry !== config.navigatorRegistryContractAddress) {
     throw new Error("Navigator registry was not correctly set")
+  }
+
+  // Whitelist NavigatorRegistry.deactivateNavigator for governance proposals
+  console.log("Whitelisting NavigatorRegistry.deactivateNavigator...")
+  const deactivateSelector = NavigatorRegistry__factory.createInterface().getFunction("deactivateNavigator")?.selector
+  if (deactivateSelector) {
+    const tx = await governor.setWhitelistFunction(config.navigatorRegistryContractAddress, deactivateSelector, true)
+    await tx.wait()
+    const isWhitelisted = await governor.isFunctionWhitelisted(
+      config.navigatorRegistryContractAddress,
+      deactivateSelector,
+    )
+    if (!isWhitelisted) {
+      throw new Error("Failed to whitelist deactivateNavigator")
+    }
+    console.log("NavigatorRegistry.deactivateNavigator whitelisted successfully")
   }
 
   console.log("Execution completed")

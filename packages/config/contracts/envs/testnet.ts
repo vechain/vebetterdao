@@ -47,6 +47,7 @@ export function createTestnetConfig() {
       ],
       X2EarnAppsV1: ["addApp", "setVotingEligibility"],
       X2EarnApps: ["setVotingEligibility"],
+      NavigatorRegistry: ["deactivateNavigator"],
     },
     EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every x-allocation decay period

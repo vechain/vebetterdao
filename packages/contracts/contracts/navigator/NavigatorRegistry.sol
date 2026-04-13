@@ -627,6 +627,19 @@ contract NavigatorRegistry is
     return NavigatorSlashingUtils.getMinorSlashPercentage();
   }
 
+  /// @notice Check if a navigator was already slashed for a specific infraction
+  /// @param navigator The navigator address
+  /// @param id The round ID or proposal ID depending on infraction type
+  function isSlashedFor(address navigator, uint256 id) external view returns (
+    bool missedAllocation,
+    bool missedGovernance,
+    bool stalePrefs,
+    bool missedReport,
+    bool latePrefs
+  ) {
+    return NavigatorSlashingUtils.isSlashedFor(navigator, id);
+  }
+
   /// @notice Get the preference cutoff period (blocks before round end)
   /// @return The cutoff period in blocks
   function getPreferenceCutoffPeriod() external view returns (uint256) {

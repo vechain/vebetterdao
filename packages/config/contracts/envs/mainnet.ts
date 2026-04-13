@@ -31,6 +31,7 @@ export function createMainnetConfig() {
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       Treasury: ["transferB3TR"],
       B3TRGovernor: ["upgradeToAndCall"],
+      NavigatorRegistry: ["deactivateNavigator"],
     },
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR

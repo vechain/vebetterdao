@@ -228,6 +228,29 @@ library NavigatorSlashingUtils {
     return NavigatorStorageTypes.getNavigatorStorage().minorSlashPercentage;
   }
 
+  /// @notice Check if a navigator was already slashed for a specific infraction
+  /// @param navigator The navigator address
+  /// @param id The round ID or proposal ID depending on infraction type
+  /// @return missedAllocation True if slashed for missed allocation vote
+  /// @return missedGovernance True if slashed for missed governance vote
+  /// @return stalePrefs True if slashed for stale preferences
+  /// @return missedReport True if slashed for missed report
+  /// @return latePrefs True if slashed for late preferences
+  function isSlashedFor(address navigator, uint256 id) external view returns (
+    bool missedAllocation,
+    bool missedGovernance,
+    bool stalePrefs,
+    bool missedReport,
+    bool latePrefs
+  ) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    missedAllocation = $.slashedForMissedAllocationVote[navigator][id];
+    missedGovernance = $.slashedForMissedGovernanceVote[navigator][id];
+    stalePrefs = $.slashedForStalePreferences[navigator][id];
+    missedReport = $.slashedForMissedReport[navigator][id];
+    latePrefs = $.slashedForLatePreferences[navigator][id];
+  }
+
   // ======================== Internal ======================== //
 
   /// @dev Apply a minor slash (10% of current remaining stake) and send to treasury

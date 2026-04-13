@@ -26,6 +26,7 @@ import { WithdrawStakeModal } from "./modals/WithdrawStakeModal"
 import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorHeader } from "./NavigatorHeader/NavigatorHeader"
+import { NavigatorRoundHistory } from "./NavigatorRoundHistory"
 import { NavigatorStatsGrid } from "./NavigatorStatsGrid"
 import { NavigatorTaskList } from "./NavigatorTaskList"
 
@@ -178,6 +179,8 @@ export const NavigatorDetailContent = () => {
       )}
 
       <NavigatorGovernanceActivity address={address} />
+
+      <NavigatorRoundHistory address={address} isOwnPage={isOwnPage} />
 
       <DelegationModal
         isOpen={isDelegationOpen}

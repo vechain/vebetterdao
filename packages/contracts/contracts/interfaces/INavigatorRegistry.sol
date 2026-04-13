@@ -595,6 +595,22 @@ interface INavigatorRegistry {
   /// @return The minor slash percentage
   function getMinorSlashPercentage() external view returns (uint256);
 
+  /// @notice Check if a navigator was already slashed for a specific infraction
+  /// @param navigator The navigator address
+  /// @param id The round ID or proposal ID depending on infraction type
+  /// @return missedAllocation True if slashed for missed allocation vote
+  /// @return missedGovernance True if slashed for missed governance vote
+  /// @return stalePrefs True if slashed for stale preferences
+  /// @return missedReport True if slashed for missed report
+  /// @return latePrefs True if slashed for late preferences
+  function isSlashedFor(address navigator, uint256 id) external view returns (
+    bool missedAllocation,
+    bool missedGovernance,
+    bool stalePrefs,
+    bool missedReport,
+    bool latePrefs
+  );
+
   /// @notice Get the preference cutoff period (in blocks before round end)
   /// @return The cutoff period in blocks
   function getPreferenceCutoffPeriod() external view returns (uint256);

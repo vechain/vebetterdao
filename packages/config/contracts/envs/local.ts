@@ -54,6 +54,7 @@ export function createLocalConfig() {
       ],
       X2EarnAppsV1: ["addApp", "setVotingEligibility"],
       X2EarnApps: ["setVotingEligibility"],
+      NavigatorRegistry: ["deactivateNavigator"],
     },
 
     EMISSIONS_CYCLE_DURATION: 24, // 24 blocks - 4 minutes.

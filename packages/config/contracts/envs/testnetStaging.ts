@@ -48,6 +48,7 @@ export function createTestnetStagingConfig() {
       ],
       X2EarnAppsV1: ["addApp", "setVotingEligibility"],
       X2EarnApps: ["setVotingEligibility"],
+      NavigatorRegistry: ["deactivateNavigator"],
     },
 
     EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
