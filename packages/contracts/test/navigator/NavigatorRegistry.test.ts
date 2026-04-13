@@ -589,7 +589,7 @@ describe("NavigatorRegistry - @shard19a", function () {
     })
   })
 
-  describe.only("getStatus()", function () {
+  describe("getStatus()", function () {
     it("should return NONE (0) for unregistered address", async function () {
       const status = await navigatorRegistry.getStatus(otherAccounts[10].address)
       expect(status).to.equal(0n)
@@ -622,9 +622,10 @@ describe("NavigatorRegistry - @shard19a", function () {
       await navigatorRegistry.connect(navigator).announceExit()
       expect(await navigatorRegistry.getStatus(navigator.address)).to.equal(2n)
 
-      // Advance past exit notice period
+      // effectiveDeadline = currentRoundDeadline + (votingPeriod * noticePeriod)
+      // Need to advance past the current round + noticePeriod additional rounds
       const exitNoticePeriod = await navigatorRegistry.getExitNoticePeriod()
-      for (let i = 0; i <= Number(exitNoticePeriod); i++) {
+      for (let i = 0; i < Number(exitNoticePeriod) + 2; i++) {
         await waitForCurrentRoundToEnd()
       }
 
