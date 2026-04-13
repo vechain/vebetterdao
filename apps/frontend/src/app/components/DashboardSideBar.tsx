@@ -8,6 +8,7 @@ import { ManagedAppsCard } from "../../components/ManagedAppsCard/ManagedAppsCar
 import { useBreakpoints } from "../../hooks/useBreakpoints"
 
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
+import { NavigatorDashboardCard } from "./NavigatorDashboardCard"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 
@@ -18,6 +19,7 @@ export const DashboardSideBar = () => {
     <VStack gap={4}>
       {isMobile && <CantVoteCard />}
       <ManagedAppsCard />
+      <NavigatorDashboardCard />
       <GmNFTAndNodeCard />
       <YourBetterActionsCard address={account?.address ?? ""} />
       <Leaderboard />
