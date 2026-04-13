@@ -31,7 +31,6 @@ interface IChallenges {
   error ChallengeInvalidStatus(uint256 challengeId, ChallengeTypes.ChallengeStatus status);
   error CreatorCannotJoin(uint256 challengeId);
   error CreatorCannotLeave(uint256 challengeId);
- error ChallengePersonhoodVerificationFailed(address participant, string reason);
   error AlreadyParticipating(uint256 challengeId, address participant);
   error NotParticipating(uint256 challengeId, address participant);
   error NotInvited(uint256 challengeId, address participant);

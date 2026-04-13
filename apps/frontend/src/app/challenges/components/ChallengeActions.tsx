@@ -7,9 +7,8 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuTrophy } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeView, ChallengeVisibility, ParticipantStatus } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
-import { useIsPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 
 type ChallengeActionsLayout = "default" | "card"
@@ -37,10 +36,6 @@ export const ChallengeActions = ({
   const actions = useChallengeActions()
   const { t } = useTranslation()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
-  const requiresPersonhoodForPublicJoin = challenge.canJoin && challenge.visibility === ChallengeVisibility.Public
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPerson(
-    requiresPersonhoodForPublicJoin ? account?.address : undefined,
-  )
 
   const joinStakeAmount = useMemo(() => {
     if (challenge.kind !== ChallengeKind.Stake) return 0n
@@ -58,9 +53,6 @@ export const ChallengeActions = ({
     (challenge.canAccept || challenge.canJoin) &&
     joinStakeAmount > 0n &&
     BigInt(b3trBalance.original) < joinStakeAmount
-  const isPublicJoinBlocked = requiresPersonhoodForPublicJoin && !!account?.address && (isPersonLoading || !isPerson)
-  const showPublicJoinRequirementMessage =
-    requiresPersonhoodForPublicJoin && !!account?.address && !isPersonLoading && !isPerson
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const isCardLayout = layout === "card"
   const resolvedButtonSize = buttonSize ?? (isCardLayout ? "md" : "sm")
@@ -106,7 +98,7 @@ export const ChallengeActions = ({
         <Button
           size={resolvedButtonSize}
           variant="primary"
-          disabled={hasInsufficientB3trForJoin || isPublicJoinBlocked}
+          disabled={hasInsufficientB3trForJoin}
           onClick={() => actions.joinChallenge(challenge)}
           {...cardButtonProps}>
           {t("Join")}
@@ -209,11 +201,6 @@ export const ChallengeActions = ({
       {hasInsufficientB3trForJoin && (
         <Text textStyle="xs" color="status.warning.strong">
           {t("Not enough B3TR")}
-        </Text>
-      )}
-      {showPublicJoinRequirementMessage && (
-        <Text textStyle="xs" color="status.warning.strong">
-          {t("Your account must meet VeBetter Passport requirements to join public challenges.")}
         </Text>
       )}
     </VStack>

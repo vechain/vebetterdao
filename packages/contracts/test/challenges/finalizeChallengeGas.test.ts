@@ -268,6 +268,120 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
     expect(gasUsed).to.be.gt(0n)
   })
 
+  it("sweeps participant counts at 2 rounds × 5 apps to find VeChain-40M ceiling", async function () {
+    // We re-use the same mock stack and vary maxParticipants / actual joiners.
+    const CANDIDATES = [400, 600, 800, 1000]
+    const DURATION_2 = 2
+    const END_ROUND_2 = START_ROUND + DURATION_2 - 1 // rounds 2, 3
+    const results: { n: number; gas: bigint | null }[] = []
+
+    for (const N of CANDIDATES) {
+      const [admin] = await ethers.getSigners()
+      const b3tr = (await (
+        await ethers.getContractFactory("B3TR")
+      ).deploy(admin.address, admin.address, admin.address)) as B3TR
+      await b3tr.waitForDeployment()
+      const roundGovernor = (await (await ethers.getContractFactory("MockRoundGovernor")).deploy()) as MockRoundGovernor
+      await roundGovernor.waitForDeployment()
+      const passport = (await (await ethers.getContractFactory("MockPassportActions")).deploy()) as MockPassportActions
+      await passport.waitForDeployment()
+      const x2EarnApps = (await (await ethers.getContractFactory("MockX2EarnApps")).deploy()) as MockX2EarnApps
+      await x2EarnApps.waitForDeployment()
+      const { ChallengeCoreLogic: challengeCoreLogic, ChallengeSettlementLogic: challengeSettlementLogic } =
+        await challengesLibraries({ logOutput: false })
+      for (const appId of APP_IDS) await x2EarnApps.setAppExists(appId, true)
+
+      const challenges = (await deployProxy(
+        "B3TRChallenges",
+        [
+          {
+            b3trAddress: await b3tr.getAddress(),
+            veBetterPassportAddress: await passport.getAddress(),
+            xAllocationVotingAddress: await roundGovernor.getAddress(),
+            x2EarnAppsAddress: await x2EarnApps.getAddress(),
+            maxChallengeDuration: DURATION_2,
+            maxSelectedApps: 5,
+            maxParticipants: N,
+            minBetAmount: MIN_BET_AMOUNT,
+          },
+          {
+            admin: admin.address,
+            upgrader: admin.address,
+            contractsAddressManager: admin.address,
+            settingsManager: admin.address,
+          },
+        ],
+        {
+          ChallengeCoreLogic: await challengeCoreLogic.getAddress(),
+          ChallengeSettlementLogic: await challengeSettlementLogic.getAddress(),
+        },
+      )) as B3TRChallenges
+
+      await roundGovernor.setCurrentRoundId(1)
+
+      const sponsorAmount = STAKE_AMOUNT * BigInt(N)
+      await b3tr.mint(admin.address, sponsorAmount)
+      await b3tr.connect(admin).approve(await challenges.getAddress(), sponsorAmount)
+
+      await challenges.connect(admin).createChallenge({
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        thresholdMode: ThresholdMode.None,
+        stakeAmount: sponsorAmount,
+        startRound: START_ROUND,
+        endRound: END_ROUND_2,
+        threshold: 0,
+        appIds: APP_IDS,
+        invitees: [],
+        title: "",
+        description: "",
+        imageURI: "",
+        metadataURI: "",
+      })
+
+      const joiners = await makeFundedWallets(N, b3tr, await challenges.getAddress())
+      for (const w of joiners) await challenges.connect(w).joinChallenge(1)
+
+      for (const w of joiners) {
+        for (let round = START_ROUND; round <= END_ROUND_2; round++) {
+          for (const appId of APP_IDS) {
+            await passport.setUserRoundActionCountApp(w.address, round, appId, 1)
+          }
+        }
+      }
+
+      await roundGovernor.setCurrentRoundId(END_ROUND_2 + 1)
+
+      let gasUsed: bigint | null = null
+      try {
+        const tx = await challenges.connect(admin).finalizeChallenge(1, { gasLimit: 50_000_000 })
+        const receipt = await tx.wait()
+        gasUsed = receipt!.gasUsed
+      } catch {
+        gasUsed = null // out of gas
+      }
+
+      results.push({ n: N, gas: gasUsed })
+      // eslint-disable-next-line no-console
+      console.log(
+        `  N=${N}  → ${
+          gasUsed === null
+            ? "OUT OF GAS"
+            : `${gasUsed.toString()} gas  (40M frac: ${(Number(gasUsed) / 40_000_000).toFixed(3)})`
+        }`,
+      )
+    }
+
+    // eslint-disable-next-line no-console
+    console.log(`\n========== 2 rounds × 5 apps sweep ==========`)
+    for (const r of results) {
+      // eslint-disable-next-line no-console
+      console.log(`  participants=${r.n}  gas=${r.gas === null ? "OOG" : r.gas.toString()}`)
+    }
+    // eslint-disable-next-line no-console
+    console.log(`=============================================\n`)
+  })
+
   it("measures finalizeChallenge gas at worst case (allApps=true, 100 participants × 4 rounds)", async function () {
     const { admin, b3tr, roundGovernor, passport, challenges } = await deployFixtureWorstCase()
 
