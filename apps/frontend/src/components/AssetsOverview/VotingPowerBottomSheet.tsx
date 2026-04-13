@@ -85,7 +85,7 @@ const getVotingPowerActivityProps = (tx: Transaction): ActivityItemProps | null 
 }
 
 const CompositionLine = ({ label, value }: { label: string; value: string }) => (
-  <HStack justify="space-between" py="1">
+  <HStack justify="space-between" py="1" w="full">
     <Text textStyle="sm" color="text.subtle">
       {label}
     </Text>
@@ -164,15 +164,16 @@ const VotingPowerContent = ({
   }, [currentVotes])
 
   return (
-    <VStack gap="4" align="stretch">
+    <VStack gap="4" align="stretch" w="full">
       {/* Summary */}
-      <Skeleton loading={isLoading} rounded="lg">
-        <Box p="4" rounded="lg" bg="status.positive.subtle">
-          <HStack justify="space-between" align="start">
-            <Box>
-              <Text textStyle="xs" color="text.subtle" mb="1">
-                {t("Your voting power")}
-              </Text>
+
+      <VStack gap="4" align="start" justify="space-between" w="full" p="4" rounded="lg" bg="status.positive.subtle">
+        <HStack justify="space-between" align="start">
+          <Box>
+            <Text textStyle="xs" color="text.subtle" mb="1">
+              {t("Current Voting Power")}
+            </Text>
+            <Skeleton loading={isLoading}>
               <Text textStyle="2xl" fontWeight="bold">
                 {formatted}
               </Text>
@@ -202,44 +203,50 @@ const VotingPowerContent = ({
                   />
                 </Badge>
               )}
-            </Box>
+            </Skeleton>
+          </Box>
+        </HStack>
 
-            {account?.address && (
-              <Stack direction={{ base: "column", md: "row" }} gap="1">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  rounded="full"
-                  onClick={() => {
-                    onClose()
-                    onOpenPowerUp()
-                  }}>
-                  <Icon as={Flash} boxSize="3.5" />
-                  {t("Power up")}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  rounded="full"
-                  onClick={() => {
-                    onClose()
-                    onOpenPowerDown()
-                  }}>
-                  {t("Reduce")}
-                </Button>
-              </Stack>
-            )}
-          </HStack>
-
-          {/* Composition breakdown */}
-          <Box mt="3" pt="3" borderTopWidth="1px" borderColor="border.secondary">
+        {/* Composition breakdown */}
+        <Skeleton loading={isLoading} rounded="lg" w="full">
+          <VStack
+            align="start"
+            justify="space-between"
+            gap="0"
+            borderTopWidth="1px"
+            borderColor="border.secondary"
+            w="full">
             <CompositionLine label={t("VOT3 balance")} value={`${vot3BalanceOnly} VOT3`} />
             {depositsFormatted && (
               <CompositionLine label={t("From proposal support")} value={`${depositsFormatted} VOT3`} />
             )}
-          </Box>
-        </Box>
-      </Skeleton>
+          </VStack>
+        </Skeleton>
+
+        {account?.address && (
+          <Stack mt="3" gap="3" direction={"column"} w="full">
+            <Button
+              variant="primary"
+              rounded="full"
+              onClick={() => {
+                onClose()
+                onOpenPowerUp()
+              }}>
+              <Icon as={Flash} boxSize="4" />
+              {t("Power up")}
+            </Button>
+            <Button
+              variant="tertiary"
+              rounded="full"
+              onClick={() => {
+                onClose()
+                onOpenPowerDown()
+              }}>
+              {t("Power down")}
+            </Button>
+          </Stack>
+        )}
+      </VStack>
 
       {/* Educational info */}
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle">

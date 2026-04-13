@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, HStack, Icon, Text, VStack, useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Gift, NavArrowRight, RefreshDouble, InfoCircle, ArrowDown, ArrowUp, StarSolid } from "iconoir-react"
@@ -142,6 +143,8 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
             amountColor: "status.positive.strong",
           }
         case "TRANSFER_FT": {
+          const b3trAddress = getConfig().b3trContractAddress?.toLowerCase()
+          if (tx.tokenAddress?.toLowerCase() !== b3trAddress) return null
           const isOutgoing = tx.from?.toLowerCase() === account.toLowerCase()
           return {
             label: isOutgoing ? t("Outgoing transfer") : t("Incoming transfer"),

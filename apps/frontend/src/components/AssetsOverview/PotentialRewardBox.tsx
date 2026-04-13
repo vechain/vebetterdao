@@ -16,6 +16,7 @@ import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasV
 import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { ProposalFilter } from "@/store/useProposalFilters"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
 
@@ -40,6 +41,7 @@ export const PotentialRewardBox = () => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const onClose = useCallback(() => setIsOpen(false), [])
+  const { isMobile } = useBreakpoints()
 
   const { data: currentRoundId } = useCallClause({
     abi: xAllocationVotingAbi,
@@ -97,6 +99,12 @@ export const PotentialRewardBox = () => {
         functionName: "isUserAutoVotingEnabledInCurrentRound" as const,
         args: [(account?.address || "") as `0x${string}`],
       },
+      {
+        abi: relayerRewardsAbi,
+        address: relayerRewardsAddress,
+        functionName: "getFeeCap" as const,
+        args: [],
+      },
     ],
     enabled: !!thor && !!currentRoundId,
   })
@@ -123,6 +131,7 @@ export const PotentialRewardBox = () => {
         [_xAllocationsAmount, vote2EarnAmount, _treasuryAmount, gmAmount],
         relayerFee,
         autoVotingEnabled = false,
+        feeCap,
       ] = data
 
       return {
@@ -134,6 +143,7 @@ export const PotentialRewardBox = () => {
           gmWeightTotal: userGMWeight,
           cycleGMTotal: cycleTotalGMWeight,
           relayerFeePercentage: relayerFee,
+          feeCap: feeCap as bigint,
           hadAutoVotingEnabled: autoVotingEnabled,
         }),
         hasVoted: userVoterTotal > 0n,
@@ -157,7 +167,7 @@ export const PotentialRewardBox = () => {
       <StatCard
         variant="warning"
         title={t("Your rewards")}
-        icon={<Gift />}
+        icon={isMobile ? undefined : <Gift />}
         onClick={() => setIsOpen(true)}
         subtitle={
           <Skeleton asChild loading={isLoading}>
