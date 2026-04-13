@@ -110,6 +110,7 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
           <VStack gap={2} align="stretch">
             <TaskItem
               done={!!hasSetPrefs}
+              overdue={!hasSetPrefs && isPastCutoff}
               icon={<LuVote />}
               label={t("Set allocation preferences")}
               doneLabel={t("Preferences Set")}
@@ -148,6 +149,7 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
 
 type TaskItemProps = {
   done: boolean
+  overdue?: boolean
   icon: React.ReactNode
   label: string
   doneLabel: string
@@ -155,25 +157,29 @@ type TaskItemProps = {
   onClick: () => void
 }
 
-const TaskItem = ({ done, icon, label, doneLabel, pendingLabel, onClick }: TaskItemProps) => (
-  <HStack
-    gap={3}
-    p={3}
-    borderRadius="lg"
-    border="sm"
-    borderColor="border.secondary"
-    cursor={done ? "default" : "pointer"}
-    _hover={done ? undefined : { bg: "bg.subtle" }}
-    onClick={done ? undefined : onClick}>
-    <Icon color={done ? "status.positive.primary" : "text.subtle"}>{done ? <LuCheck /> : <LuCircle />}</Icon>
-    <HStack gap={2} flex={1}>
-      <Icon color="text.subtle">{icon}</Icon>
-      <Text textStyle="sm" fontWeight="medium">
-        {label}
-      </Text>
+const TaskItem = ({ done, overdue, icon, label, doneLabel, pendingLabel, onClick }: TaskItemProps) => {
+  const palette = done ? "green" : overdue ? "red" : "orange"
+
+  return (
+    <HStack
+      gap={3}
+      p={3}
+      borderRadius="lg"
+      border="sm"
+      borderColor="border.secondary"
+      cursor={done ? "default" : "pointer"}
+      _hover={done ? undefined : { bg: "bg.subtle" }}
+      onClick={done ? undefined : onClick}>
+      <Icon color={done ? "status.positive.primary" : "text.subtle"}>{done ? <LuCheck /> : <LuCircle />}</Icon>
+      <HStack gap={2} flex={1}>
+        <Icon color="text.subtle">{icon}</Icon>
+        <Text textStyle="sm" fontWeight="medium">
+          {label}
+        </Text>
+      </HStack>
+      <Badge colorPalette={palette} size="sm">
+        {done ? doneLabel : pendingLabel}
+      </Badge>
     </HStack>
-    <Badge colorPalette={done ? "green" : "orange"} size="sm">
-      {done ? doneLabel : pendingLabel}
-    </Badge>
-  </HStack>
-)
+  )
+}
