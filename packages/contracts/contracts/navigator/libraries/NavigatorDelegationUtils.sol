@@ -2,6 +2,8 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { NavigatorLifecycleUtils } from "./NavigatorLifecycleUtils.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
@@ -43,9 +45,6 @@ library NavigatorDelegationUtils {
 
   /// @notice Thrown when citizen is not delegated to any navigator
   error NotDelegated(address citizen);
-
-  /// @notice Thrown when trying to delegate to a non-navigator
-  error NotANavigator(address account);
 
   /// @notice Thrown when navigator cannot accept new delegations
   error NavigatorCannotAcceptDelegations(address navigator);
@@ -359,8 +358,10 @@ library NavigatorDelegationUtils {
     address navigator,
     uint256 amount
   ) private view {
-    if (!$.isRegistered[navigator] || $.isDeactivated[navigator]) revert NotANavigator(navigator);
-    if ($.exitAnnouncedRound[navigator] > 0 || $.stakedAmount[navigator] < $.minStake) {
+    if (NavigatorLifecycleUtils.getStatus(navigator) != uint8(INavigatorRegistry.NavigatorStatus.ACTIVE)) {
+      revert NavigatorCannotAcceptDelegations(navigator);
+    }
+    if ($.stakedAmount[navigator] < $.minStake) {
       revert NavigatorCannotAcceptDelegations(navigator);
     }
     uint256 currentTotal = _currentTotalDelegated($, navigator);

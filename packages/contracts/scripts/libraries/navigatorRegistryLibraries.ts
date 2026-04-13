@@ -9,8 +9,14 @@ export const navigatorRegistryLibraries = async (logOutput = false) => {
     return lib
   }
 
-  // NavigatorDelegationUtils must be deployed first — StakingUtils and SlashingUtils depend on it
-  const NavigatorDelegationUtils = await deploy("NavigatorDelegationUtils")
+  // LifecycleUtils must be deployed first — DelegationUtils depends on it
+  const NavigatorLifecycleUtils = await deploy("NavigatorLifecycleUtils")
+  const lifecycleAddr = await NavigatorLifecycleUtils.getAddress()
+
+  // DelegationUtils depends on LifecycleUtils; StakingUtils and SlashingUtils depend on DelegationUtils
+  const NavigatorDelegationUtils = await deploy("NavigatorDelegationUtils", {
+    "contracts/navigator/libraries/NavigatorLifecycleUtils.sol:NavigatorLifecycleUtils": lifecycleAddr,
+  })
   const delegationAddr = await NavigatorDelegationUtils.getAddress()
 
   const NavigatorStakingUtils = await deploy("NavigatorStakingUtils", {
@@ -21,7 +27,6 @@ export const navigatorRegistryLibraries = async (logOutput = false) => {
   })
   const NavigatorVotingUtils = await deploy("NavigatorVotingUtils")
   const NavigatorFeeUtils = await deploy("NavigatorFeeUtils")
-  const NavigatorLifecycleUtils = await deploy("NavigatorLifecycleUtils")
 
   return {
     NavigatorStakingUtils,

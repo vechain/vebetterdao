@@ -100,12 +100,12 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       ).to.be.revertedWithCustomError(navigatorRegistry, "AlreadyDelegated")
     })
 
-    it("should revert with NotANavigator when navigator is not registered", async function () {
+    it("should revert with NavigatorCannotAcceptDelegations when navigator is not registered", async function () {
       await getVot3Tokens(citizen1, "1000")
 
       await expect(
         navigatorRegistry.connect(citizen1).delegate(otherAccount.address, ethers.parseEther("500")),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "NotANavigator")
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NavigatorCannotAcceptDelegations")
     })
 
     it("should revert when navigator is deactivated", async function () {
@@ -116,7 +116,7 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
 
       await expect(
         navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500")),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "NotANavigator")
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NavigatorCannotAcceptDelegations")
     })
 
     it("should revert with NavigatorCannotAcceptDelegations when navigator is exiting", async function () {
