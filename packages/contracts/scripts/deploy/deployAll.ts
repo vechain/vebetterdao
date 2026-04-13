@@ -61,9 +61,6 @@ import { deployLegacyNodesMock } from "./mocks/deployLegacyNodes"
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
-const CHALLENGES_MAX_DURATION = 4
-const CHALLENGES_MAX_SELECTED_APPS = 5
-const CHALLENGES_MAX_PARTICIPANTS = 100
 
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
@@ -1137,9 +1134,9 @@ export async function deployAll(config: ContractsConfig) {
         veBetterPassportAddress: await veBetterPassport.getAddress(),
         xAllocationVotingAddress: await xAllocationVoting.getAddress(),
         x2EarnAppsAddress: await x2EarnApps.getAddress(),
-        maxChallengeDuration: CHALLENGES_MAX_DURATION,
-        maxSelectedApps: CHALLENGES_MAX_SELECTED_APPS,
-        maxParticipants: CHALLENGES_MAX_PARTICIPANTS,
+        maxChallengeDuration: config.CHALLENGES_MAX_DURATION,
+        maxSelectedApps: config.CHALLENGES_MAX_SELECTED_APPS,
+        maxParticipants: config.CHALLENGES_MAX_PARTICIPANTS,
         minBetAmount: config.CHALLENGES_MIN_BET_AMOUNT,
       },
       {
