@@ -47,7 +47,7 @@ const BADGE_CONFIG: Record<ProposalState, BadgeConfig> = {
     variant: "negative",
   },
   [ProposalState.Defeated]: {
-    text: "Cancelled",
+    text: "Rejected",
     icon: Prohibition,
     variant: "negative",
   },
