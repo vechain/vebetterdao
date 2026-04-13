@@ -87,6 +87,8 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
                   <Heading
                     textStyle={{ base: "xl", md: "2xl" }}
                     lineHeight="1.1"
+                    lineClamp={2}
+                    title={challengeTitle}
                     wordBreak="break-word"
                     overflowWrap="anywhere">
                     {challengeTitle}

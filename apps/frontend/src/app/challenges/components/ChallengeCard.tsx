@@ -120,6 +120,8 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
             <Heading
               textStyle={{ base: "xl", md: "2xl" }}
               lineHeight="1.05"
+              lineClamp={2}
+              title={challengeTitle}
               wordBreak="break-word"
               overflowWrap="anywhere">
               <LinkOverlay asChild>

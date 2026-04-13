@@ -191,7 +191,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       controls: (
         <VStack align="stretch" gap="3">
           <Field.Root invalid={hasTitleTooLong}>
-            <Field.Label>{t("Title (optional)")}</Field.Label>
             <Input
               value={form.title}
               maxLength={challengeMetadataByteLimits.title}
