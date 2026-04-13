@@ -1017,6 +1017,38 @@ describe("B3TRChallenges - @shard9a", function () {
     await expect(challenges.connect(alice).joinChallenge(1)).to.be.revertedWithCustomError(challenges, "NotInvited")
   })
 
+  it("rejects joining a public challenge when the participant is not a person", async function () {
+    const { alice, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+    await passport.setPersonhood(alice.address, false, "User has not accumulated enough actions")
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      thresholdMode: ThresholdMode.None,
+    })
+
+    await expect(challenges.connect(alice).joinChallenge(1))
+      .to.be.revertedWithCustomError(challenges, "ChallengePersonhoodVerificationFailed")
+      .withArgs(alice.address, "User has not accumulated enough actions")
+  })
+
+  it("allows invited non-person users to join private challenges", async function () {
+    const { alice, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+    await passport.setPersonhood(alice.address, false, "User has not accumulated enough actions")
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Private,
+      thresholdMode: ThresholdMode.None,
+      invitees: [alice.address],
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+
+    expect(await challenges.getParticipantStatus(1, alice.address)).to.equal(ParticipantStatus.Joined)
+  })
+
   it("transfers stake when joining a stake challenge", async function () {
     const { alice, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)

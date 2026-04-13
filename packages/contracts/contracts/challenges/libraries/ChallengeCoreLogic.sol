@@ -161,6 +161,11 @@ library ChallengeCoreLogic {
       revert IChallenges.AlreadyParticipating(challengeId, msg.sender);
     }
 
+    if (challenge.visibility == ChallengeTypes.ChallengeVisibility.Public) {
+      (bool isPerson, string memory reason) = $.veBetterPassport.isPerson(msg.sender);
+      if (!isPerson) revert IChallenges.ChallengePersonhoodVerificationFailed(msg.sender, reason);
+    }
+
     if (challenge.participants.length >= $.maxParticipants) {
       revert IChallenges.MaxParticipantsExceeded(challenge.participants.length + 1, $.maxParticipants);
     }
