@@ -3,6 +3,7 @@ import { ethers } from "hardhat"
 import { deployProxy } from "../../scripts/helpers"
 import { challengesLibraries } from "../../scripts/libraries"
 import { B3TR, B3TRChallenges, MockPassportActions, MockRoundGovernor, MockX2EarnApps } from "../../typechain-types"
+import { ChallengeCoreLogic__factory } from "../../typechain-types/factories/contracts/challenges/libraries/ChallengeCoreLogic__factory"
 
 const STAKE_AMOUNT = ethers.parseEther("100")
 const MIN_BET_AMOUNT = ethers.parseEther("100")
@@ -13,6 +14,10 @@ const APP_3 = ethers.keccak256(ethers.toUtf8Bytes("app-3"))
 const APP_4 = ethers.keccak256(ethers.toUtf8Bytes("app-4"))
 const APP_5 = ethers.keccak256(ethers.toUtf8Bytes("app-5"))
 const APP_6 = ethers.keccak256(ethers.toUtf8Bytes("app-6"))
+const TITLE_MAX_BYTES = 120
+const DESCRIPTION_MAX_BYTES = 500
+const IMAGE_URI_MAX_BYTES = 512
+const METADATA_URI_MAX_BYTES = 512
 
 const ChallengeKind = {
   Stake: 0,
@@ -124,6 +129,10 @@ async function createChallenge(
     threshold: 0,
     appIds: [APP_1],
     invitees: [],
+    title: "",
+    description: "",
+    imageURI: "",
+    metadataURI: "",
     ...overrides,
   })
 }
@@ -133,7 +142,34 @@ describe("B3TRChallenges - @shard9a", function () {
     const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    const tx = await createChallenge(challenges)
+    const receipt = await tx.wait()
+    const challengeCreated = receipt?.logs
+      .map(log => {
+        try {
+          return ChallengeCoreLogic__factory.createInterface().parseLog(log)
+        } catch {
+          return null
+        }
+      })
+      .find(log => log?.name === "ChallengeCreated")
+
+    expect(challengeCreated).to.not.equal(undefined)
+    expect(challengeCreated?.args.challengeId).to.equal(1n)
+    expect(challengeCreated?.args.creator).to.equal(admin.address)
+    expect(challengeCreated?.args.endRound).to.equal(3n)
+    expect(challengeCreated?.args.kind).to.equal(ChallengeKind.Stake)
+    expect(challengeCreated?.args.visibility).to.equal(ChallengeVisibility.Public)
+    expect(challengeCreated?.args.thresholdMode).to.equal(ThresholdMode.None)
+    expect(challengeCreated?.args.stakeAmount).to.equal(STAKE_AMOUNT)
+    expect(challengeCreated?.args.startRound).to.equal(2n)
+    expect(challengeCreated?.args.threshold).to.equal(0n)
+    expect(challengeCreated?.args.allApps).to.equal(false)
+    expect(challengeCreated?.args.selectedApps).to.deep.equal([APP_1])
+    expect(challengeCreated?.args.title).to.equal("")
+    expect(challengeCreated?.args.description).to.equal("")
+    expect(challengeCreated?.args.imageURI).to.equal("")
+    expect(challengeCreated?.args.metadataURI).to.equal("")
 
     const challenge = await challenges.getChallenge(1)
 
@@ -142,6 +178,60 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(challenge.totalPrize).to.equal(STAKE_AMOUNT)
     expect(await challenges.getParticipantStatus(1, admin.address)).to.equal(ParticipantStatus.Joined)
     expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(STAKE_AMOUNT)
+  })
+
+  it("stores title and defaults the other metadata fields to empty strings", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      title: "Spring Sprint",
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.title).to.equal("Spring Sprint")
+    expect(challenge.description).to.equal("")
+    expect(challenge.imageURI).to.equal("")
+    expect(challenge.metadataURI).to.equal("")
+  })
+
+  it("stores metadata fields at their maximum allowed lengths", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      title: "t".repeat(TITLE_MAX_BYTES),
+      description: "d".repeat(DESCRIPTION_MAX_BYTES),
+      imageURI: "i".repeat(IMAGE_URI_MAX_BYTES),
+      metadataURI: "m".repeat(METADATA_URI_MAX_BYTES),
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.title).to.equal("t".repeat(TITLE_MAX_BYTES))
+    expect(challenge.description).to.equal("d".repeat(DESCRIPTION_MAX_BYTES))
+    expect(challenge.imageURI).to.equal("i".repeat(IMAGE_URI_MAX_BYTES))
+    expect(challenge.metadataURI).to.equal("m".repeat(METADATA_URI_MAX_BYTES))
+  })
+
+  it("rejects metadata fields that exceed their maximum lengths", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(createChallenge(challenges, { title: "t".repeat(TITLE_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "TitleTooLong")
+      .withArgs(TITLE_MAX_BYTES + 1, TITLE_MAX_BYTES)
+
+    await expect(createChallenge(challenges, { description: "d".repeat(DESCRIPTION_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "DescriptionTooLong")
+      .withArgs(DESCRIPTION_MAX_BYTES + 1, DESCRIPTION_MAX_BYTES)
+
+    await expect(createChallenge(challenges, { imageURI: "i".repeat(IMAGE_URI_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "ImageURITooLong")
+      .withArgs(IMAGE_URI_MAX_BYTES + 1, IMAGE_URI_MAX_BYTES)
+
+    await expect(createChallenge(challenges, { metadataURI: "m".repeat(METADATA_URI_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "MetadataURITooLong")
+      .withArgs(METADATA_URI_MAX_BYTES + 1, METADATA_URI_MAX_BYTES)
   })
 
   it("rejects joining a sponsored challenge after reaching the participant cap", async function () {

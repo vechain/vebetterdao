@@ -1,43 +1,113 @@
-import { useQuery } from "@tanstack/react-query"
-import { useThor } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useChallengeSection } from "./indexerChallenges"
+import { ChallengesHubData, PaginatedChallengeSection } from "./types"
 
-import { fetchAllChallenges, groupChallenges } from "./getChallenges"
-import { GroupedChallenges } from "./types"
-
-const EMPTY: GroupedChallenges = {
-  activeParticipating: [],
-  pendingInvites: [],
-  publicJoinable: [],
-  claimRewards: [],
-  past: [],
+const EMPTY_SECTION: PaginatedChallengeSection = {
+  items: [],
+  hasNextPage: false,
+  isLoading: false,
+  isFetchingNextPage: false,
+  fetchNextPage: async () => undefined,
 }
 
-export const getChallengesHubQueryKey = (currentRoundId?: string, viewerAddress?: string) => [
-  "challenges",
-  "hub",
-  currentRoundId ?? "unknown",
-  viewerAddress ?? "guest",
-]
-
 export const useChallengesHub = (viewerAddress?: string) => {
-  const thor = useThor()
-  const { data: currentRoundId, isLoading: isCurrentRoundLoading } = useCurrentAllocationsRoundId()
+  const neededActionsQuery = useChallengeSection("needed-actions", viewerAddress)
+  const activeQuery = useChallengeSection("active", viewerAddress)
+  const openQuery = useChallengeSection("open", viewerAddress)
+  const exploreQuery = useChallengeSection("explore", viewerAddress)
+  const historyQuery = useChallengeSection("history", viewerAddress)
 
-  const query = useQuery({
-    queryKey: getChallengesHubQueryKey(currentRoundId, viewerAddress),
-    queryFn: () => fetchAllChallenges(thor, Number(currentRoundId), viewerAddress),
-    enabled: !!thor && currentRoundId !== undefined,
-  })
-
-  const grouped = useMemo(() => (query.data ? groupChallenges(query.data) : EMPTY), [query.data])
+  const data = useMemo<ChallengesHubData>(
+    () => ({
+      neededActions: {
+        items: neededActionsQuery.data?.pages.flatMap(page => page.data) ?? [],
+        hasNextPage: !!neededActionsQuery.hasNextPage,
+        isLoading: neededActionsQuery.isLoading,
+        isFetchingNextPage: neededActionsQuery.isFetchingNextPage,
+        fetchNextPage: neededActionsQuery.fetchNextPage,
+      },
+      active: {
+        items: activeQuery.data?.pages.flatMap(page => page.data) ?? [],
+        hasNextPage: !!activeQuery.hasNextPage,
+        isLoading: activeQuery.isLoading,
+        isFetchingNextPage: activeQuery.isFetchingNextPage,
+        fetchNextPage: activeQuery.fetchNextPage,
+      },
+      open: {
+        items: openQuery.data?.pages.flatMap(page => page.data) ?? [],
+        hasNextPage: !!openQuery.hasNextPage,
+        isLoading: openQuery.isLoading,
+        isFetchingNextPage: openQuery.isFetchingNextPage,
+        fetchNextPage: openQuery.fetchNextPage,
+      },
+      explore: {
+        items: exploreQuery.data?.pages.flatMap(page => page.data) ?? [],
+        hasNextPage: !!exploreQuery.hasNextPage,
+        isLoading: exploreQuery.isLoading,
+        isFetchingNextPage: exploreQuery.isFetchingNextPage,
+        fetchNextPage: exploreQuery.fetchNextPage,
+      },
+      history: {
+        items: historyQuery.data?.pages.flatMap(page => page.data) ?? [],
+        hasNextPage: !!historyQuery.hasNextPage,
+        isLoading: historyQuery.isLoading,
+        isFetchingNextPage: historyQuery.isFetchingNextPage,
+        fetchNextPage: historyQuery.fetchNextPage,
+      },
+    }),
+    [
+      activeQuery.data,
+      activeQuery.fetchNextPage,
+      activeQuery.hasNextPage,
+      activeQuery.isFetchingNextPage,
+      activeQuery.isLoading,
+      exploreQuery.data,
+      exploreQuery.fetchNextPage,
+      exploreQuery.hasNextPage,
+      exploreQuery.isFetchingNextPage,
+      exploreQuery.isLoading,
+      historyQuery.data,
+      historyQuery.fetchNextPage,
+      historyQuery.hasNextPage,
+      historyQuery.isFetchingNextPage,
+      historyQuery.isLoading,
+      neededActionsQuery.data,
+      neededActionsQuery.fetchNextPage,
+      neededActionsQuery.hasNextPage,
+      neededActionsQuery.isFetchingNextPage,
+      neededActionsQuery.isLoading,
+      openQuery.data,
+      openQuery.fetchNextPage,
+      openQuery.hasNextPage,
+      openQuery.isFetchingNextPage,
+      openQuery.isLoading,
+    ],
+  )
 
   return {
-    ...query,
-    data: grouped,
-    allChallenges: query.data ?? [],
-    isLoading: isCurrentRoundLoading || query.isLoading,
+    data: viewerAddress
+      ? data
+      : {
+          neededActions: EMPTY_SECTION,
+          active: EMPTY_SECTION,
+          open: EMPTY_SECTION,
+          explore: EMPTY_SECTION,
+          history: EMPTY_SECTION,
+        },
+    isLoading: viewerAddress ? Object.values(data).some(section => section.isLoading) : false,
+    isError:
+      neededActionsQuery.isError ||
+      activeQuery.isError ||
+      openQuery.isError ||
+      exploreQuery.isError ||
+      historyQuery.isError,
+    error:
+      neededActionsQuery.error ??
+      activeQuery.error ??
+      openQuery.error ??
+      exploreQuery.error ??
+      historyQuery.error ??
+      null,
   }
 }

@@ -57,6 +57,7 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
   const showSponsoringBadge = isSponsored && challenge.isCreator
   const showInviteStats = challenge.visibility === ChallengeVisibility.Private
+  const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
   const appsHelper = challenge.allApps ? null : isSelectedAppsLoading ? (
     <Box pt="1">
       <OverlappedAppsImages appsIds={[]} isLoading maxAppsToShow={4} iconSize={26} />
@@ -116,11 +117,15 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
               )}
             </Wrap>
 
-            <Heading textStyle={{ base: "xl", md: "2xl" }} lineHeight="1.05">
+            <Heading
+              textStyle={{ base: "xl", md: "2xl" }}
+              lineHeight="1.05"
+              lineClamp={2}
+              title={challengeTitle}
+              wordBreak="break-word"
+              overflowWrap="anywhere">
               <LinkOverlay asChild>
-                <NextLink href={`/challenges/${challenge.challengeId}`}>
-                  {t("Challenge #{{id}}", { id: challenge.challengeId })}
-                </NextLink>
+                <NextLink href={`/challenges/${challenge.challengeId}`}>{challengeTitle}</NextLink>
               </LinkOverlay>
             </Heading>
 

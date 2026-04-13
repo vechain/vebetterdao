@@ -6,7 +6,28 @@ import { ChallengeStorageTypes } from "./ChallengeStorageTypes.sol";
 import { ChallengeTypes } from "./ChallengeTypes.sol";
 
 library ChallengeCoreLogic {
-  event ChallengeCreated(uint256 indexed challengeId, address indexed creator, uint256 indexed endRound, uint256 startRound);
+  uint256 private constant TITLE_MAX_BYTES = 120;
+  uint256 private constant DESCRIPTION_MAX_BYTES = 500;
+  uint256 private constant IMAGE_URI_MAX_BYTES = 512;
+  uint256 private constant METADATA_URI_MAX_BYTES = 512;
+
+  event ChallengeCreated(
+    uint256 indexed challengeId,
+    address indexed creator,
+    uint256 indexed endRound,
+    ChallengeTypes.ChallengeKind kind,
+    ChallengeTypes.ChallengeVisibility visibility,
+    ChallengeTypes.ThresholdMode thresholdMode,
+    uint256 stakeAmount,
+    uint256 startRound,
+    uint256 threshold,
+    bool allApps,
+    bytes32[] selectedApps,
+    string title,
+    string description,
+    string imageURI,
+    string metadataURI
+  );
   event ChallengeInviteAdded(uint256 indexed challengeId, address indexed invitee);
   event ChallengeJoined(uint256 indexed challengeId, address indexed participant);
   event ChallengeLeft(uint256 indexed challengeId, address indexed participant);
@@ -42,6 +63,7 @@ library ChallengeCoreLogic {
     }
 
     _validateThresholdConfiguration(params);
+    _validateMetadataLengths(params);
 
     challengeId = ++$.challengeCount;
     ChallengeTypes.Challenge storage challenge = $.challenges[challengeId];
@@ -58,6 +80,10 @@ library ChallengeCoreLogic {
     challenge.threshold = params.threshold;
     challenge.allApps = allApps;
     challenge.totalPrize = params.stakeAmount;
+    challenge.title = params.title;
+    challenge.description = params.description;
+    challenge.imageURI = params.imageURI;
+    challenge.metadataURI = params.metadataURI;
 
     for (uint256 i; i < params.appIds.length; i++) {
       challenge.appIds.push(params.appIds[i]);
@@ -69,7 +95,7 @@ library ChallengeCoreLogic {
       _addParticipant(challengeId, msg.sender);
     }
 
-    emit ChallengeCreated(challengeId, msg.sender, params.endRound, startRound);
+    _emitChallengeCreated(challengeId, challenge);
 
     for (uint256 i; i < params.invitees.length; i++) {
       _addInvite(challengeId, params.invitees[i]);
@@ -239,6 +265,26 @@ library ChallengeCoreLogic {
     }
   }
 
+  function _validateMetadataLengths(ChallengeTypes.CreateChallengeParams memory params) private pure {
+    uint256 titleLength = bytes(params.title).length;
+    if (titleLength > TITLE_MAX_BYTES) revert IChallenges.TitleTooLong(titleLength, TITLE_MAX_BYTES);
+
+    uint256 descriptionLength = bytes(params.description).length;
+    if (descriptionLength > DESCRIPTION_MAX_BYTES) {
+      revert IChallenges.DescriptionTooLong(descriptionLength, DESCRIPTION_MAX_BYTES);
+    }
+
+    uint256 imageURILength = bytes(params.imageURI).length;
+    if (imageURILength > IMAGE_URI_MAX_BYTES) {
+      revert IChallenges.ImageURITooLong(imageURILength, IMAGE_URI_MAX_BYTES);
+    }
+
+    uint256 metadataURILength = bytes(params.metadataURI).length;
+    if (metadataURILength > METADATA_URI_MAX_BYTES) {
+      revert IChallenges.MetadataURITooLong(metadataURILength, METADATA_URI_MAX_BYTES);
+    }
+  }
+
   function _validateApps(bytes32[] memory appIds) private view {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
 
@@ -260,6 +306,26 @@ library ChallengeCoreLogic {
     if (_currentRound($) >= challenge.startRound) {
       revert IChallenges.ChallengeNotPending(challengeId);
     }
+  }
+
+  function _emitChallengeCreated(uint256 challengeId, ChallengeTypes.Challenge storage challenge) private {
+    emit ChallengeCreated(
+      challengeId,
+      challenge.creator,
+      challenge.endRound,
+      challenge.kind,
+      challenge.visibility,
+      challenge.thresholdMode,
+      challenge.stakeAmount,
+      challenge.startRound,
+      challenge.threshold,
+      challenge.allApps,
+      challenge.appIds,
+      challenge.title,
+      challenge.description,
+      challenge.imageURI,
+      challenge.metadataURI
+    );
   }
 
   function _addInvite(uint256 challengeId, address invitee) private {

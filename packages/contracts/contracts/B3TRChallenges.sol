@@ -128,7 +128,11 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
       bestScore: challenge.bestScore,
       bestCount: challenge.bestCount,
       qualifiedCount: challenge.qualifiedCount,
-      payoutsClaimed: challenge.payoutsClaimed
+      payoutsClaimed: challenge.payoutsClaimed,
+      title: challenge.title,
+      description: challenge.description,
+      imageURI: challenge.imageURI,
+      metadataURI: challenge.metadataURI
     });
   }
 

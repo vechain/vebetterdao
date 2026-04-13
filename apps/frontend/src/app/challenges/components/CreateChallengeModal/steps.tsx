@@ -15,7 +15,7 @@ import { TFunction } from "i18next"
 import { ReactNode } from "react"
 import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
+import { challengeMetadataByteLimits, ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
 import { AppImage } from "@/components/AppImage/AppImage"
 
 import { getInviteeValidationMessage } from "../inviteeValidation"
@@ -68,8 +68,10 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     inviteeErrorKeys,
     canConfirmInvitees,
     hasBelowMinimumBetAmount,
+    hasTitleTooLong,
 
     kindChosen,
+    titleConfirmed,
     amountConfirmed,
     startRoundChosen,
     durationChosen,
@@ -124,7 +126,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       controls: (
-        <VStack align="stretch" gap="2" w="full">
+        <VStack align="stretch" gap="2" w="80%" ml="auto">
           <Box
             as="button"
             w="full"
@@ -169,6 +171,40 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("Sponsored challenge type description")}
             </Text>
           </Box>
+        </VStack>
+      ),
+    },
+    {
+      key: "title",
+      isRelevant: true,
+      isComplete: titleConfirmed,
+      prompt: (
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("Title (optional)")}
+        </Text>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit" wordBreak="break-word" overflowWrap="anywhere">
+          {form.title || t("Skip")}
+        </Text>
+      ),
+      controls: (
+        <VStack align="stretch" gap="3">
+          <Field.Root invalid={hasTitleTooLong}>
+            <Input
+              value={form.title}
+              maxLength={challengeMetadataByteLimits.title}
+              onChange={e => flow.updateTitle(e.target.value)}
+            />
+            {hasTitleTooLong && (
+              <Field.ErrorText>{t("{{fieldName}} is too long", { fieldName: t("Title (optional)") })}</Field.ErrorText>
+            )}
+          </Field.Root>
+          <HStack justify="flex-end">
+            <Button size="sm" variant={primaryVariant} disabled={hasTitleTooLong} onClick={flow.confirmTitle}>
+              {t("Continue")}
+            </Button>
+          </HStack>
         </VStack>
       ),
     },
@@ -772,6 +808,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
                 label={t("Choose challenge type")}
                 value={t(form.kind === ChallengeKind.Stake ? "Bet" : "Sponsored")}
               />
+              <SummaryItem label={t("Title (optional)")} value={form.title || t("Skip")} />
               <SummaryItem label={t(amountLabelKey)} value={`${form.stakeAmount} B3TR`} />
               <SummaryItem label={t("Start round")} value={form.startRound} />
               <SummaryItem label={t("End round")} value={form.endRound} />

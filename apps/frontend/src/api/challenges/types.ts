@@ -22,14 +22,25 @@ export type ParticipantStatus = (typeof ParticipantStatus)[keyof typeof Particip
 export const SettlementMode = { None: 0, TopWinners: 1, QualifiedSplit: 2, CreatorRefund: 3 } as const
 export type SettlementMode = (typeof SettlementMode)[keyof typeof SettlementMode]
 
-export type ChallengeTab = "all" | "mine" | "invited" | "public"
+export const challengeMetadataByteLimits = {
+  title: 120,
+  description: 500,
+  imageURI: 512,
+  metadataURI: 512,
+} as const
 
-export interface GroupedChallenges {
-  activeParticipating: ChallengeView[]
-  pendingInvites: ChallengeView[]
-  publicJoinable: ChallengeView[]
-  claimRewards: ChallengeView[]
-  past: ChallengeView[]
+export type ChallengeMetadataField = keyof typeof challengeMetadataByteLimits
+
+export const getChallengeMetadataByteLength = (value: string) => new TextEncoder().encode(value).length
+
+export const getChallengeMetadataLengthError = (metadata: Record<ChallengeMetadataField, string>) => {
+  for (const field of Object.keys(challengeMetadataByteLimits) as ChallengeMetadataField[]) {
+    const length = getChallengeMetadataByteLength(metadata[field])
+    const max = challengeMetadataByteLimits[field]
+    if (length > max) return { field, length, max }
+  }
+
+  return null
 }
 
 export interface ChallengeView {
@@ -41,6 +52,10 @@ export interface ChallengeView {
   status: ChallengeStatus
   settlementMode: SettlementMode
   creator: string
+  title?: string
+  description?: string
+  imageURI?: string
+  metadataURI?: string
   stakeAmount: string
   totalPrize: string
   startRound: number
@@ -73,6 +88,24 @@ export interface ChallengeDetail extends ChallengeView {
   invited: string[]
   declined: string[]
   selectedApps: string[]
+}
+
+export type ChallengeSection = "needed-actions" | "active" | "open" | "explore" | "history"
+
+export interface PaginatedChallengeSection {
+  items: ChallengeView[]
+  hasNextPage: boolean
+  isLoading: boolean
+  isFetchingNextPage: boolean
+  fetchNextPage: () => Promise<unknown>
+}
+
+export interface ChallengesHubData {
+  neededActions: PaginatedChallengeSection
+  active: PaginatedChallengeSection
+  open: PaginatedChallengeSection
+  explore: PaginatedChallengeSection
+  history: PaginatedChallengeSection
 }
 
 export type ChallengeKindLabel = "Stake" | "Sponsored"

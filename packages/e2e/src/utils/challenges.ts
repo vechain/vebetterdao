@@ -53,6 +53,7 @@ export const fillCreateChallengeForm = async (
   opts: {
     amount: string
     kind?: "Stake" | "Sponsored"
+    title?: string
     visibility?: "Public" | "Private"
     duration?: 1 | 2 | 3 | 4
     splitPrize?: boolean
@@ -64,6 +65,11 @@ export const fillCreateChallengeForm = async (
   const visibility = opts.visibility ?? "Public"
 
   await dialog.getByRole("button", { name: new RegExp(`^${kind}$`, "i") }).click()
+
+  if (opts.title) {
+    await dialog.getByLabel(/title \(optional\)/i).fill(opts.title)
+  }
+  await dialog.getByRole("button", { name: /^continue$/i }).click()
 
   const amountLabel = kind === "Sponsored" ? /prize amount \(b3tr\)/i : /stake amount \(b3tr\)/i
   await dialog.getByLabel(amountLabel).fill(opts.amount)
