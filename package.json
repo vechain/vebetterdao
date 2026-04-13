@@ -24,6 +24,7 @@
     "dev:simulation": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -- turbo dev:simulation --",
     "dev:simulation-galactica": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=galactica-test -v ENDORSE_XAPPS=true -- turbo dev:simulation --",
     "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- turbo dev --",
+    "dev:redeploy": "yarn contracts:compile && rm -f packages/config/local.ts && yarn dev",
     "dev:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env -- turbo dev:staging --",
     "dev:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
     "dev:mainnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -e .env -- turbo dev:mainnet --",
