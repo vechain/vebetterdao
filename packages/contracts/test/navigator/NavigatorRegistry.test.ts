@@ -5,11 +5,12 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 import { getOrDeployContractInstances } from "../helpers/deploy"
-import { getVot3Tokens, bootstrapAndStartEmissions, waitForCurrentRoundToEnd } from "../helpers/common"
-import { B3TR, VOT3, Treasury, NavigatorRegistry } from "../../typechain-types"
+import { getVot3Tokens, bootstrapAndStartEmissions, moveBlocks } from "../helpers/common"
+import { B3TR, VOT3, Treasury, NavigatorRegistry, XAllocationVoting } from "../../typechain-types"
 
 describe("NavigatorRegistry - @shard19a", function () {
   let navigatorRegistry: NavigatorRegistry
+  let xAllocationVoting: XAllocationVoting
   let b3tr: B3TR
   let vot3: VOT3
   let treasury: Treasury
@@ -38,6 +39,17 @@ describe("NavigatorRegistry - @shard19a", function () {
     await b3tr.connect(account).approve(registryAddress, amount)
   }
 
+  // Helper: advance blocks past the exit effective deadline
+  const advancePastExitDeadline = async (navigatorAddr: string) => {
+    const filter = navigatorRegistry.filters.ExitAnnounced(navigatorAddr)
+    const events = await navigatorRegistry.queryFilter(filter)
+    const effectiveDeadline = events[events.length - 1].args.effectiveDeadline
+    const currentBlock = await xAllocationVoting.clock()
+    if (currentBlock < effectiveDeadline) {
+      await moveBlocks(Number(effectiveDeadline - currentBlock) + 1)
+    }
+  }
+
   // Helper: register a navigator with default stake (ensures VOT3 supply first)
   const registerNavigator = async (account: HardhatEthersSigner, amount: bigint = STAKE_AMOUNT, uri = METADATA_URI) => {
     await ensureVot3Supply()
@@ -50,6 +62,7 @@ describe("NavigatorRegistry - @shard19a", function () {
     if (!deployment) throw new Error("Failed to deploy contracts")
 
     navigatorRegistry = deployment.navigatorRegistry
+    xAllocationVoting = deployment.xAllocationVoting as XAllocationVoting
     b3tr = deployment.b3tr
     vot3 = deployment.vot3
     treasury = deployment.treasury
@@ -246,17 +259,14 @@ describe("NavigatorRegistry - @shard19a", function () {
     })
 
     describe("withdrawStake()", function () {
-      it("should allow withdrawal after exit is announced (exiting state)", async function () {
+      it("should allow withdrawal after exit notice period elapses", async function () {
         const navigator = otherAccounts[10]
         await registerNavigator(navigator)
 
-        // Need emissions started for currentRoundId to work
         await bootstrapAndStartEmissions()
-
-        // Announce exit
         await navigatorRegistry.connect(navigator).announceExit()
+        await advancePastExitDeadline(navigator.address)
 
-        // Withdraw stake
         const tx = await navigatorRegistry.connect(navigator).withdrawStake(STAKE_AMOUNT)
 
         expect(await navigatorRegistry.getStake(navigator.address)).to.equal(0n)
@@ -279,6 +289,7 @@ describe("NavigatorRegistry - @shard19a", function () {
 
         await bootstrapAndStartEmissions()
         await navigatorRegistry.connect(navigator).announceExit()
+        await advancePastExitDeadline(navigator.address)
 
         const tooMuch = STAKE_AMOUNT + ethers.parseEther("1")
         await expect(navigatorRegistry.connect(navigator).withdrawStake(tooMuch)).to.be.revertedWithCustomError(
@@ -622,12 +633,7 @@ describe("NavigatorRegistry - @shard19a", function () {
       await navigatorRegistry.connect(navigator).announceExit()
       expect(await navigatorRegistry.getStatus(navigator.address)).to.equal(2n)
 
-      // effectiveDeadline = currentRoundDeadline + (votingPeriod * noticePeriod)
-      // Need to advance past the current round + noticePeriod additional rounds
-      const exitNoticePeriod = await navigatorRegistry.getExitNoticePeriod()
-      for (let i = 0; i < Number(exitNoticePeriod) + 2; i++) {
-        await waitForCurrentRoundToEnd()
-      }
+      await advancePastExitDeadline(navigator.address)
 
       const status = await navigatorRegistry.getStatus(navigator.address)
       expect(status).to.equal(3n)
