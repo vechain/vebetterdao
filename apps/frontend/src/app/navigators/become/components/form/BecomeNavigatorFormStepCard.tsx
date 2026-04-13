@@ -1,7 +1,7 @@
 import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
@@ -48,8 +48,12 @@ export const BecomeNavigatorFormStepCard = () => {
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: isAutoVotingEnabled } = useIsAutoVotingEnabled()
   const [isUploading, setIsUploading] = useState(false)
+  const hasNavigatedRef = useRef(false)
 
   const handleSuccess = useCallback(() => {
+    if (hasNavigatedRef.current) return
+    hasNavigatedRef.current = true
+
     if (account?.address) {
       router.push(`/navigators/${account.address}?registered=true`)
     } else {
