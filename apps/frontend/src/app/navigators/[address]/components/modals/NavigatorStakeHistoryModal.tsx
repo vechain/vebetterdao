@@ -1,7 +1,7 @@
 import { Badge, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { LuArrowDownLeft, LuArrowUpRight, LuExternalLink, LuCompass } from "react-icons/lu"
+import { LuArrowDownLeft, LuArrowUpRight, LuExternalLink, LuCompass, LuShieldAlert } from "react-icons/lu"
 
 import { useNavigatorStakeHistory } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
@@ -52,6 +52,20 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
           <VStack maxH="60vh" overflowY="auto" gap={0} align="stretch">
             {data.map((entry, i) => {
               const isDeposit = entry.type === "registered" || entry.type === "deposit"
+              const isSlash = entry.type === "slashed"
+
+              const iconBg = isDeposit
+                ? "status.positive.subtle"
+                : isSlash
+                  ? "status.warning.subtle"
+                  : "status.negative.subtle"
+              const iconColor = isDeposit
+                ? "status.positive.primary"
+                : isSlash
+                  ? "status.warning.primary"
+                  : "status.negative.primary"
+              const amountColor = isDeposit ? "status.positive.primary" : "status.negative.primary"
+
               return (
                 <HStack
                   key={`${entry.txId}-${i}`}
@@ -69,23 +83,36 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
                       w="8"
                       h="8"
                       rounded="full"
-                      bg={isDeposit ? "status.positive.subtle" : "status.negative.subtle"}
-                      color={isDeposit ? "status.positive.primary" : "status.negative.primary"}
+                      bg={iconBg}
+                      color={iconColor}
                       flexShrink={0}>
-                      {isDeposit ? <LuArrowDownLeft size={16} /> : <LuArrowUpRight size={16} />}
+                      {isSlash ? (
+                        <LuShieldAlert size={16} />
+                      ) : isDeposit ? (
+                        <LuArrowDownLeft size={16} />
+                      ) : (
+                        <LuArrowUpRight size={16} />
+                      )}
                     </HStack>
                     <VStack gap={0} align="start">
                       <HStack gap={2}>
                         <Text textStyle="sm" fontWeight="semibold">
                           {entry.type === "registered"
                             ? t("Initial Stake")
-                            : isDeposit
-                              ? t("Deposit")
-                              : t("Withdrawal")}
+                            : isSlash
+                              ? t("Slashed")
+                              : isDeposit
+                                ? t("Deposit")
+                                : t("Withdrawal")}
                         </Text>
                         {entry.type === "registered" && (
                           <Badge size="xs" colorPalette="blue">
                             {t("Registration")}
+                          </Badge>
+                        )}
+                        {isSlash && entry.reason && (
+                          <Badge size="xs" colorPalette="red">
+                            {entry.reason}
                           </Badge>
                         )}
                       </HStack>
@@ -106,10 +133,7 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
                   </HStack>
 
                   <VStack gap={0} align="end">
-                    <Text
-                      textStyle="sm"
-                      fontWeight="semibold"
-                      color={isDeposit ? "status.positive.primary" : "status.negative.primary"}>
+                    <Text textStyle="sm" fontWeight="semibold" color={amountColor}>
                       {isDeposit ? "+" : "-"}
                       {formatter.format(Number(entry.amount))} {"B3TR"}
                     </Text>

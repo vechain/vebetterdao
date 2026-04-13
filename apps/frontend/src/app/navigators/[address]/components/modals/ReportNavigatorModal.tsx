@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { LuCheck, LuFileText, LuFlag, LuGavel, LuTriangleAlert, LuVote } from "react-icons/lu"
 
 import { useGetMinorSlashPercentage } from "@/api/contracts/navigatorRegistry/hooks/useGetMinorSlashPercentage"
-import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { getGetStakeQueryKey, useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsSlashedFor } from "@/api/contracts/navigatorRegistry/hooks/useIsSlashedFor"
 import { BaseModal } from "@/components/BaseModal"
 import {
@@ -43,7 +43,9 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
   const { data: slashBps } = useGetMinorSlashPercentage()
   const { data: reportedSet } = useIsSlashedFor(navigatorAddress, infractions)
 
-  const { sendTransaction } = useReportNavigatorInfraction({})
+  const { sendTransaction } = useReportNavigatorInfraction({
+    additionalRefetchKeys: [getGetStakeQueryKey(navigatorAddress)],
+  })
 
   const stakeNum = stake ? Number(stake.scaled) : 0
   const penaltyPct = slashBps != null ? slashBps / 100 : 10
@@ -84,28 +86,28 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
           </Text>
         ) : (
           <>
-            {!allReported && (
-              <HStack gap={2} p={3} borderRadius="lg" bg="status.warning.subtle" align="start">
-                <Icon color="status.warning.primary" mt={0.5}>
-                  <LuTriangleAlert />
-                </Icon>
-                <VStack gap={0.5} align="start">
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {t("Penalty per infraction")}
-                    {": "}
-                    {penaltyPct}
-                    {"% "}
-                    {"("}
-                    {formatter.format(penaltyAmount)}
-                    {" B3TR"}
-                    {")"}
-                  </Text>
+            <HStack
+              gap={2}
+              p={3}
+              borderRadius="lg"
+              bg={allReported ? "status.positive.subtle" : "status.warning.subtle"}
+              align="start">
+              <Icon color={allReported ? "status.positive.primary" : "status.warning.primary"} mt={0.5}>
+                {allReported ? <LuCheck /> : <LuTriangleAlert />}
+              </Icon>
+              <VStack gap={0.5} align="start">
+                <Text textStyle="sm" fontWeight="semibold">
+                  {allReported
+                    ? t("All infractions reported")
+                    : `${t("Penalty per infraction")}: ${penaltyPct}% (${formatter.format(penaltyAmount)} B3TR)`}
+                </Text>
+                {!allReported && (
                   <Text textStyle="xs" color="text.subtle">
                     {t("navigatorReportOnChainValidation")}
                   </Text>
-                </VStack>
-              </HStack>
-            )}
+                )}
+              </VStack>
+            </HStack>
 
             <VStack gap={2} align="stretch">
               {infractions.map((inf, i) => {

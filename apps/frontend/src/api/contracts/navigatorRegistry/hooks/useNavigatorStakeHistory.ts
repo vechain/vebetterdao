@@ -9,13 +9,14 @@ const address = getConfig().navigatorRegistryContractAddress
 const abi = NavigatorRegistry__factory.abi
 
 export type StakeHistoryEntry = {
-  type: "registered" | "deposit" | "withdrawal"
+  type: "registered" | "deposit" | "withdrawal" | "slashed"
   navigator: string
   amount: string
   newTotal: string
   blockNumber: number
   txId: string
   timestamp: number
+  reason?: string
 }
 
 export const useNavigatorStakeHistory = (navigator?: string) => {
@@ -75,16 +76,37 @@ export const useNavigatorStakeHistory = (navigator?: string) => {
       })),
   })
 
-  const isLoading = registeredEvents.isLoading || addedEvents.isLoading || withdrawnEvents.isLoading
+  const slashedEvents = useEvents({
+    contractAddress: address,
+    abi,
+    eventName: "NavigatorSlashed",
+    filterParams,
+    order: "desc",
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        type: "slashed" as const,
+        navigator: String(decodedData.args.navigator ?? ""),
+        amount: formatEther(decodedData.args.amount ?? 0n),
+        newTotal: formatEther(decodedData.args.remainingStake ?? 0n),
+        blockNumber: meta.blockNumber,
+        txId: meta.txID,
+        timestamp: meta.blockTimestamp,
+        reason: String(decodedData.args.reason ?? ""),
+      })),
+  })
+
+  const isLoading =
+    registeredEvents.isLoading || addedEvents.isLoading || withdrawnEvents.isLoading || slashedEvents.isLoading
 
   const data = useMemo(() => {
     const all: StakeHistoryEntry[] = [
       ...(registeredEvents.data ?? []),
       ...(addedEvents.data ?? []),
       ...(withdrawnEvents.data ?? []),
+      ...(slashedEvents.data ?? []),
     ]
     return all.sort((a, b) => b.blockNumber - a.blockNumber)
-  }, [registeredEvents.data, addedEvents.data, withdrawnEvents.data])
+  }, [registeredEvents.data, addedEvents.data, withdrawnEvents.data, slashedEvents.data])
 
   return { data, isLoading }
 }

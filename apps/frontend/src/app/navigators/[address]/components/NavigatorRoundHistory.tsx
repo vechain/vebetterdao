@@ -2,6 +2,7 @@
 
 import { Badge, Button, Card, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -18,9 +19,12 @@ import {
   LuX,
 } from "react-icons/lu"
 
+import { useGetMinorSlashPercentage } from "@/api/contracts/navigatorRegistry/hooks/useGetMinorSlashPercentage"
 import { useGetPreferenceCutoffPeriod } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferenceCutoffPeriod"
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useGetTotalDelegatedAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetTotalDelegatedAtTimepoint"
+import { useIsSlashedFor } from "@/api/contracts/navigatorRegistry/hooks/useIsSlashedFor"
 import { useNavigatorDecisionEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorDecisionEvents"
 import { useNavigatorPreferenceEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorPreferenceEvents"
 import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
@@ -34,6 +38,7 @@ import { useEvents } from "@/hooks/useEvents"
 import { ReportNavigatorModal } from "./modals/ReportNavigatorModal"
 import { ViewReportModal } from "./modals/ViewReportModal"
 
+const formatter = getCompactFormatter(2)
 const PREVIEW_ROUNDS = 5
 
 type TaskStatus = "done" | "late" | "missed"
@@ -74,6 +79,8 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { data: cutoffPeriod } = useGetPreferenceCutoffPeriod()
   const { data: reportInterval } = useGetReportInterval()
+  const { data: stake } = useGetStake(address)
+  const { data: slashBps } = useGetMinorSlashPercentage()
 
   const { data: regBlockData } = useEvents({
     contractAddress: getConfig().navigatorRegistryContractAddress,
@@ -208,6 +215,38 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
     return result
   }, [previousRound, hadDelegations])
 
+  const allInfractions = useMemo((): ReportableInfraction[] => {
+    const result: ReportableInfraction[] = []
+    for (const round of rounds) {
+      const { roundId, voteEnd, allocationStatus, proposals, reportDue, reportSubmitted } = round
+      if (allocationStatus === "missed") result.push({ type: "missedAllocationVote", roundId })
+      if (allocationStatus === "late") result.push({ type: "latePreferences", roundId, voteEnd })
+      for (const p of proposals) {
+        if (p.status === "missed") result.push({ type: "missedGovernanceVote", roundId, proposalId: p.proposalId })
+      }
+      if (reportDue && !reportSubmitted) result.push({ type: "missedReport", roundId })
+    }
+    return result
+  }, [rounds])
+
+  const { data: slashedSet } = useIsSlashedFor(address, allInfractions)
+
+  const slashedByRound = useMemo(() => {
+    const map = new Map<string, Map<string, boolean>>()
+    if (!slashedSet) return map
+    allInfractions.forEach((inf, i) => {
+      if (!slashedSet.has(i)) return
+      const key = inf.type === "missedGovernanceVote" ? `proposal:${inf.proposalId}` : inf.type
+      const roundMap = map.get(inf.roundId) ?? new Map<string, boolean>()
+      roundMap.set(key, true)
+      map.set(inf.roundId, roundMap)
+    })
+    return map
+  }, [allInfractions, slashedSet])
+
+  const stakeNum = stake ? Number(stake.scaled) : 0
+  const penaltyAmount = slashBps != null ? (stakeNum * slashBps) / 10_000 : 0
+
   const visibleRounds = rounds.slice(0, visibleCount)
   const hasMore = visibleCount < rounds.length
 
@@ -236,6 +275,8 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
                   isExpanded={expandedRound === round.roundId}
                   onToggle={() => setExpandedRound(prev => (prev === round.roundId ? null : round.roundId))}
                   onViewReport={setViewReportURI}
+                  slashedMap={slashedByRound.get(round.roundId)}
+                  penaltyAmount={penaltyAmount}
                 />
               ))}
             </VStack>
@@ -300,9 +341,11 @@ type RoundCardProps = {
   isExpanded: boolean
   onToggle: () => void
   onViewReport: (uri: string) => void
+  slashedMap?: Map<string, boolean>
+  penaltyAmount: number
 }
 
-const RoundCard = ({ round, isExpanded, onToggle, onViewReport }: RoundCardProps) => {
+const RoundCard = ({ round, isExpanded, onToggle, onViewReport, slashedMap, penaltyAmount }: RoundCardProps) => {
   const { t } = useTranslation()
 
   const issueCount =
@@ -311,6 +354,8 @@ const RoundCard = ({ round, isExpanded, onToggle, onViewReport }: RoundCardProps
     (round.reportDue && !round.reportSubmitted ? 1 : 0)
 
   const reportStatus: TaskStatus | "notDue" = round.reportSubmitted ? "done" : round.reportDue ? "missed" : "notDue"
+
+  const isSlashed = (key: string) => slashedMap?.get(key) ?? false
 
   return (
     <VStack gap={0} borderRadius="lg" border="sm" borderColor="border.secondary" align="stretch">
@@ -332,10 +377,23 @@ const RoundCard = ({ round, isExpanded, onToggle, onViewReport }: RoundCardProps
 
       {isExpanded && (
         <VStack gap={1} px={3} pb={3} align="stretch">
-          <TaskRow icon={<LuVote />} label={t("Allocation vote")} status={round.allocationStatus} />
+          <TaskRow
+            icon={<LuVote />}
+            label={t("Allocation vote")}
+            status={round.allocationStatus}
+            slashed={isSlashed(round.allocationStatus === "missed" ? "missedAllocationVote" : "latePreferences")}
+            penaltyAmount={penaltyAmount}
+          />
 
           {round.proposals.map(p => (
-            <TaskRow key={p.proposalId} icon={<LuGavel />} label={p.title} status={p.status} />
+            <TaskRow
+              key={p.proposalId}
+              icon={<LuGavel />}
+              label={p.title}
+              status={p.status}
+              slashed={isSlashed(`proposal:${p.proposalId}`)}
+              penaltyAmount={penaltyAmount}
+            />
           ))}
 
           {(round.reportDue || round.reportSubmitted) && (
@@ -356,6 +414,13 @@ const RoundCard = ({ round, isExpanded, onToggle, onViewReport }: RoundCardProps
                   <LuEye />
                   {t("View")}
                 </Button>
+              ) : isSlashed("missedReport") ? (
+                <Badge colorPalette="purple" size="sm">
+                  {t("Slashed")}
+                  {" -"}
+                  {formatter.format(penaltyAmount)}
+                  {" B3TR"}
+                </Badge>
               ) : (
                 <StatusBadge status={reportStatus} />
               )}
@@ -371,21 +436,36 @@ type TaskRowProps = {
   icon: React.ReactNode
   label: string
   status: TaskStatus
+  slashed?: boolean
+  penaltyAmount?: number
 }
 
-const TaskRow = ({ icon, label, status }: TaskRowProps) => (
-  <HStack gap={3} p={2} borderRadius="md">
-    <Icon boxSize={4} color={statusColor(status)}>
-      {statusIcon(status)}
-    </Icon>
-    <HStack gap={2} flex={1}>
-      <Icon boxSize={4} color="text.subtle">
-        {icon}
+const TaskRow = ({ icon, label, status, slashed, penaltyAmount }: TaskRowProps) => {
+  const { t } = useTranslation()
+
+  return (
+    <HStack gap={3} p={2} borderRadius="md">
+      <Icon boxSize={4} color={statusColor(status)}>
+        {statusIcon(status)}
       </Icon>
-      <Text textStyle="sm" fontWeight="medium">
-        {label}
-      </Text>
+      <HStack gap={2} flex={1}>
+        <Icon boxSize={4} color="text.subtle">
+          {icon}
+        </Icon>
+        <Text textStyle="sm" fontWeight="medium">
+          {label}
+        </Text>
+      </HStack>
+      {slashed && penaltyAmount ? (
+        <Badge colorPalette="purple" size="sm">
+          {t("Slashed")}
+          {" -"}
+          {formatter.format(penaltyAmount)}
+          {" B3TR"}
+        </Badge>
+      ) : (
+        <StatusBadge status={status} />
+      )}
     </HStack>
-    <StatusBadge status={status} />
-  </HStack>
-)
+  )
+}

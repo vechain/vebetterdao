@@ -1,4 +1,5 @@
 import { getConfig } from "@repo/config"
+import { type QueryKey } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
 
@@ -39,9 +40,10 @@ const INFRACTION_COMMENTS: Record<InfractionType, string> = {
 
 type Props = {
   onSuccess?: () => void
+  additionalRefetchKeys?: QueryKey[]
 }
 
-export const useReportNavigatorInfraction = ({ onSuccess }: Props) => {
+export const useReportNavigatorInfraction = ({ onSuccess, additionalRefetchKeys = [] }: Props) => {
   const clauseBuilder = useCallback(({ infraction, navigator }: ReportParams) => {
     const { type, roundId, voteEnd, proposalId } = infraction
 
@@ -81,7 +83,7 @@ export const useReportNavigatorInfraction = ({ onSuccess }: Props) => {
     ]
   }, [])
 
-  const refetchQueryKeys = useMemo(() => [], [])
+  const refetchQueryKeys = useMemo(() => [["isSlashedFor"], ...additionalRefetchKeys], [additionalRefetchKeys])
 
   return useBuildTransaction<ReportParams>({
     clauseBuilder,
