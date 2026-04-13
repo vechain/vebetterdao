@@ -15,7 +15,7 @@ import { TFunction } from "i18next"
 import { ReactNode } from "react"
 import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
+import { challengeMetadataByteLimits, ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
 import { AppImage } from "@/components/AppImage/AppImage"
 
 import { getInviteeValidationMessage } from "../inviteeValidation"
@@ -68,6 +68,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     inviteeErrorKeys,
     canConfirmInvitees,
     hasBelowMinimumBetAmount,
+    hasTitleTooLong,
 
     kindChosen,
     titleConfirmed,
@@ -183,18 +184,25 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         </Text>
       ),
       answer: (
-        <Text textStyle="sm" color="inherit">
+        <Text textStyle="sm" color="inherit" wordBreak="break-word" overflowWrap="anywhere">
           {form.title || t("Skip")}
         </Text>
       ),
       controls: (
         <VStack align="stretch" gap="3">
-          <Field.Root>
+          <Field.Root invalid={hasTitleTooLong}>
             <Field.Label>{t("Title (optional)")}</Field.Label>
-            <Input value={form.title} onChange={e => flow.updateTitle(e.target.value)} />
+            <Input
+              value={form.title}
+              maxLength={challengeMetadataByteLimits.title}
+              onChange={e => flow.updateTitle(e.target.value)}
+            />
+            {hasTitleTooLong && (
+              <Field.ErrorText>{t("{{fieldName}} is too long", { fieldName: t("Title (optional)") })}</Field.ErrorText>
+            )}
           </Field.Root>
           <HStack justify="flex-end">
-            <Button size="sm" variant={primaryVariant} onClick={flow.confirmTitle}>
+            <Button size="sm" variant={primaryVariant} disabled={hasTitleTooLong} onClick={flow.confirmTitle}>
               {t("Continue")}
             </Button>
           </HStack>

@@ -10,6 +10,10 @@ interface IChallenges {
   error InvalidStartRound(uint256 startRound, uint256 currentRound);
   error InvalidEndRound(uint256 startRound, uint256 endRound);
   error InvalidThresholdConfiguration();
+  error TitleTooLong(uint256 provided, uint256 maximum);
+  error DescriptionTooLong(uint256 provided, uint256 maximum);
+  error ImageURITooLong(uint256 provided, uint256 maximum);
+  error MetadataURITooLong(uint256 provided, uint256 maximum);
   error MaxChallengeDurationExceeded(uint256 provided, uint256 maximum);
   error MaxSelectedAppsExceeded(uint256 provided, uint256 maximum);
   error MaxParticipantsExceeded(uint256 provided, uint256 maximum);

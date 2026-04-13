@@ -154,7 +154,11 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                   )}
                 </Wrap>
 
-                <Heading textStyle={{ base: "2xl", md: "4xl" }} lineHeight="1.02">
+                <Heading
+                  textStyle={{ base: "2xl", md: "4xl" }}
+                  lineHeight="1.02"
+                  wordBreak="break-word"
+                  overflowWrap="anywhere">
                   {challengeTitle}
                 </Heading>
 

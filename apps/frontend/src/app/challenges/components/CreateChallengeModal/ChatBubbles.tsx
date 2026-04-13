@@ -103,7 +103,7 @@ export const SummaryItem = ({ label, value }: { label: string; value: ReactNode 
     <Text textStyle="xs" color="text.subtle">
       {label}
     </Text>
-    <Text textStyle="sm" fontWeight="semibold">
+    <Text textStyle="sm" fontWeight="semibold" wordBreak="break-word" overflowWrap="anywhere">
       {value}
     </Text>
   </VStack>

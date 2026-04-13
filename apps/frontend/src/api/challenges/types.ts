@@ -22,6 +22,27 @@ export type ParticipantStatus = (typeof ParticipantStatus)[keyof typeof Particip
 export const SettlementMode = { None: 0, TopWinners: 1, QualifiedSplit: 2, CreatorRefund: 3 } as const
 export type SettlementMode = (typeof SettlementMode)[keyof typeof SettlementMode]
 
+export const challengeMetadataByteLimits = {
+  title: 120,
+  description: 500,
+  imageURI: 512,
+  metadataURI: 512,
+} as const
+
+export type ChallengeMetadataField = keyof typeof challengeMetadataByteLimits
+
+export const getChallengeMetadataByteLength = (value: string) => new TextEncoder().encode(value).length
+
+export const getChallengeMetadataLengthError = (metadata: Record<ChallengeMetadataField, string>) => {
+  for (const field of Object.keys(challengeMetadataByteLimits) as ChallengeMetadataField[]) {
+    const length = getChallengeMetadataByteLength(metadata[field])
+    const max = challengeMetadataByteLimits[field]
+    if (length > max) return { field, length, max }
+  }
+
+  return null
+}
+
 export interface ChallengeView {
   challengeId: number
   createdAt: number

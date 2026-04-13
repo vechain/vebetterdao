@@ -1,7 +1,12 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { ChallengeKind, ChallengeVisibility, ThresholdMode } from "@/api/challenges/types"
+import {
+  ChallengeKind,
+  ChallengeVisibility,
+  getChallengeMetadataLengthError,
+  ThresholdMode,
+} from "@/api/challenges/types"
 import { CreateChallengeFormData, useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { defaultMinBetAmount, useMinBetAmount } from "@/api/challenges/useMinBetAmount"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
@@ -127,6 +132,18 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const hasBelowMinimumBetAmount = stakeAmountWei > 0n && stakeAmountWei < minBetAmountWei
   const isPrivate = form.visibility === ChallengeVisibility.Private
   const isSplitPrize = form.thresholdMode === ThresholdMode.SplitAboveThreshold
+  const metadataLengthError = useMemo(
+    () =>
+      getChallengeMetadataLengthError({
+        title: form.title.trim(),
+        description: form.description.trim(),
+        imageURI: form.imageURI.trim(),
+        metadataURI: form.metadataURI.trim(),
+      }),
+    [form.description, form.imageURI, form.metadataURI, form.title],
+  )
+  const hasTitleTooLong = metadataLengthError?.field === "title"
+  const hasMetadataLengthError = metadataLengthError !== null
   const domainInvitees = useMemo(() => form.invitees.map(value => value.trim()).filter(isVetDomain), [form.invitees])
   const {
     data: resolvedDomainAddresses = [],
@@ -279,6 +296,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   }
 
   const confirmTitle = () => {
+    if (hasTitleTooLong) return
     withTyping(() => setTitleConfirmed(true))
   }
 
@@ -346,6 +364,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     !hasInsufficientB3tr &&
     !hasBelowMinimumBetAmount &&
     !hasInvalidThresholdConfiguration &&
+    !hasMetadataLengthError &&
     !isResolvingInvitees &&
     !hasInviteeErrors
 
@@ -355,6 +374,9 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       ...form,
       invitees: sanitizedInvitees,
       title: form.title.trim(),
+      description: form.description.trim(),
+      imageURI: form.imageURI.trim(),
+      metadataURI: form.metadataURI.trim(),
     }
     actions.createChallenge(parsed)
     setOpen(false)
@@ -374,6 +396,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     minBetAmountWei,
     hasInsufficientB3tr,
     hasBelowMinimumBetAmount,
+    hasTitleTooLong,
     thresholdValue,
     minStartRound,
     hasInvalidStartRound,
@@ -391,6 +414,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     isAppsLoading,
     inviteeErrorKeys,
     canConfirmInvitees,
+    metadataLengthError,
 
     // step flags
     kindChosen,

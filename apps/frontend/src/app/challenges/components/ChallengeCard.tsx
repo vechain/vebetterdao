@@ -117,7 +117,11 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
               )}
             </Wrap>
 
-            <Heading textStyle={{ base: "xl", md: "2xl" }} lineHeight="1.05">
+            <Heading
+              textStyle={{ base: "xl", md: "2xl" }}
+              lineHeight="1.05"
+              wordBreak="break-word"
+              overflowWrap="anywhere">
               <LinkOverlay asChild>
                 <NextLink href={`/challenges/${challenge.challengeId}`}>{challengeTitle}</NextLink>
               </LinkOverlay>

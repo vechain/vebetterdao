@@ -14,6 +14,10 @@ const APP_3 = ethers.keccak256(ethers.toUtf8Bytes("app-3"))
 const APP_4 = ethers.keccak256(ethers.toUtf8Bytes("app-4"))
 const APP_5 = ethers.keccak256(ethers.toUtf8Bytes("app-5"))
 const APP_6 = ethers.keccak256(ethers.toUtf8Bytes("app-6"))
+const TITLE_MAX_BYTES = 120
+const DESCRIPTION_MAX_BYTES = 500
+const IMAGE_URI_MAX_BYTES = 512
+const METADATA_URI_MAX_BYTES = 512
 
 const ChallengeKind = {
   Stake: 0,
@@ -189,6 +193,45 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(challenge.description).to.equal("")
     expect(challenge.imageURI).to.equal("")
     expect(challenge.metadataURI).to.equal("")
+  })
+
+  it("stores metadata fields at their maximum allowed lengths", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      title: "t".repeat(TITLE_MAX_BYTES),
+      description: "d".repeat(DESCRIPTION_MAX_BYTES),
+      imageURI: "i".repeat(IMAGE_URI_MAX_BYTES),
+      metadataURI: "m".repeat(METADATA_URI_MAX_BYTES),
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.title).to.equal("t".repeat(TITLE_MAX_BYTES))
+    expect(challenge.description).to.equal("d".repeat(DESCRIPTION_MAX_BYTES))
+    expect(challenge.imageURI).to.equal("i".repeat(IMAGE_URI_MAX_BYTES))
+    expect(challenge.metadataURI).to.equal("m".repeat(METADATA_URI_MAX_BYTES))
+  })
+
+  it("rejects metadata fields that exceed their maximum lengths", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(createChallenge(challenges, { title: "t".repeat(TITLE_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "TitleTooLong")
+      .withArgs(TITLE_MAX_BYTES + 1, TITLE_MAX_BYTES)
+
+    await expect(createChallenge(challenges, { description: "d".repeat(DESCRIPTION_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "DescriptionTooLong")
+      .withArgs(DESCRIPTION_MAX_BYTES + 1, DESCRIPTION_MAX_BYTES)
+
+    await expect(createChallenge(challenges, { imageURI: "i".repeat(IMAGE_URI_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "ImageURITooLong")
+      .withArgs(IMAGE_URI_MAX_BYTES + 1, IMAGE_URI_MAX_BYTES)
+
+    await expect(createChallenge(challenges, { metadataURI: "m".repeat(METADATA_URI_MAX_BYTES + 1) }))
+      .to.be.revertedWithCustomError(challenges, "MetadataURITooLong")
+      .withArgs(METADATA_URI_MAX_BYTES + 1, METADATA_URI_MAX_BYTES)
   })
 
   it("rejects joining a sponsored challenge after reaching the participant cap", async function () {

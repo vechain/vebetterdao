@@ -6,6 +6,11 @@ import { ChallengeStorageTypes } from "./ChallengeStorageTypes.sol";
 import { ChallengeTypes } from "./ChallengeTypes.sol";
 
 library ChallengeCoreLogic {
+  uint256 private constant TITLE_MAX_BYTES = 120;
+  uint256 private constant DESCRIPTION_MAX_BYTES = 500;
+  uint256 private constant IMAGE_URI_MAX_BYTES = 512;
+  uint256 private constant METADATA_URI_MAX_BYTES = 512;
+
   event ChallengeCreated(
     uint256 indexed challengeId,
     address indexed creator,
@@ -58,6 +63,7 @@ library ChallengeCoreLogic {
     }
 
     _validateThresholdConfiguration(params);
+    _validateMetadataLengths(params);
 
     challengeId = ++$.challengeCount;
     ChallengeTypes.Challenge storage challenge = $.challenges[challengeId];
@@ -256,6 +262,26 @@ library ChallengeCoreLogic {
 
     if (params.threshold > 0 && params.thresholdMode == ChallengeTypes.ThresholdMode.None) {
       revert IChallenges.InvalidThresholdConfiguration();
+    }
+  }
+
+  function _validateMetadataLengths(ChallengeTypes.CreateChallengeParams memory params) private pure {
+    uint256 titleLength = bytes(params.title).length;
+    if (titleLength > TITLE_MAX_BYTES) revert IChallenges.TitleTooLong(titleLength, TITLE_MAX_BYTES);
+
+    uint256 descriptionLength = bytes(params.description).length;
+    if (descriptionLength > DESCRIPTION_MAX_BYTES) {
+      revert IChallenges.DescriptionTooLong(descriptionLength, DESCRIPTION_MAX_BYTES);
+    }
+
+    uint256 imageURILength = bytes(params.imageURI).length;
+    if (imageURILength > IMAGE_URI_MAX_BYTES) {
+      revert IChallenges.ImageURITooLong(imageURILength, IMAGE_URI_MAX_BYTES);
+    }
+
+    uint256 metadataURILength = bytes(params.metadataURI).length;
+    if (metadataURILength > METADATA_URI_MAX_BYTES) {
+      revert IChallenges.MetadataURITooLong(metadataURILength, METADATA_URI_MAX_BYTES);
     }
   }
 

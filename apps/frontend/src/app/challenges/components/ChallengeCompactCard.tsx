@@ -84,7 +84,11 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
               </Wrap>
               <LinkOverlay asChild>
                 <NextLink href={`/challenges/${challenge.challengeId}`}>
-                  <Heading textStyle={{ base: "xl", md: "2xl" }} lineHeight="1.1">
+                  <Heading
+                    textStyle={{ base: "xl", md: "2xl" }}
+                    lineHeight="1.1"
+                    wordBreak="break-word"
+                    overflowWrap="anywhere">
                     {challengeTitle}
                   </Heading>
                 </NextLink>
