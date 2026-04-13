@@ -3,6 +3,7 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import { indexerFetch } from "@/api/indexer/api"
 
 import {
+  ChallengeDetail,
   ChallengeKind,
   ChallengeSection,
   ChallengeStatus,
@@ -69,6 +70,13 @@ type RawChallengeView = {
   canClaim: boolean
   canRefund: boolean
   canFinalize: boolean
+}
+
+type RawChallengeDetail = RawChallengeView & {
+  participants: string[]
+  invited: string[]
+  declined: string[]
+  selectedApps: string[]
 }
 
 const SECTION_PAGE_SIZE: Record<ChallengeSection, number> = {
@@ -162,6 +170,14 @@ export const mapIndexerChallengeView = (challenge: RawChallengeView): ChallengeV
   canFinalize: challenge.canFinalize,
 })
 
+export const mapIndexerChallengeDetail = (challenge: RawChallengeDetail): ChallengeDetail => ({
+  ...mapIndexerChallengeView(challenge),
+  participants: challenge.participants,
+  invited: challenge.invited,
+  declined: challenge.declined,
+  selectedApps: challenge.selectedApps,
+})
+
 const fetchChallengeSection = async (
   section: ChallengeSection,
   wallet: string,
@@ -183,6 +199,28 @@ const fetchChallengeSection = async (
     data: payload.data.map(mapIndexerChallengeView),
     pagination: payload.pagination,
   }
+}
+
+export const fetchChallengeDetail = async (
+  challengeId: number,
+  viewerAddress?: string,
+): Promise<ChallengeDetail | null> => {
+  const params = new URLSearchParams()
+  if (viewerAddress) {
+    params.set("wallet", viewerAddress)
+  }
+
+  const query = params.toString()
+  const response = await indexerFetch(`/api/v1/b3tr/challenges/${challengeId}${query ? `?${query}` : ""}`)
+  if (response.status === 404) {
+    return null
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to fetch challenge ${challengeId}`)
+  }
+
+  const payload = (await response.json()) as RawChallengeDetail
+  return mapIndexerChallengeDetail(payload)
 }
 
 export const getChallengeSectionQueryKey = (section: ChallengeSection, viewerAddress?: string) => [
