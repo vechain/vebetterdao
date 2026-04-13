@@ -59,7 +59,7 @@ library ChallengeCoreLogic {
   /// @dev An empty app list means actions from all apps are counted.
   /// @param params Challenge creation payload.
   /// @return challengeId Newly created challenge identifier.
-  function createChallenge(ChallengeTypes.CreateChallengeParams memory params) public returns (uint256 challengeId) {
+  function createChallenge(ChallengeTypes.CreateChallengeParams memory params) external returns (uint256 challengeId) {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     uint256 currentRound = _currentRound($);
 
@@ -131,7 +131,7 @@ library ChallengeCoreLogic {
   /// @notice Adds invitees to a pending challenge.
   /// @param challengeId Challenge identifier.
   /// @param invitees Accounts to invite.
-  function addInvites(uint256 challengeId, address[] memory invitees) public {
+  function addInvites(uint256 challengeId, address[] memory invitees) external {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     _ensurePendingChallenge(challengeId, challenge);
@@ -145,7 +145,7 @@ library ChallengeCoreLogic {
 
   /// @notice Joins a pending challenge.
   /// @param challengeId Challenge identifier.
-  function joinChallenge(uint256 challengeId) public {
+  function joinChallenge(uint256 challengeId) external {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -179,7 +179,7 @@ library ChallengeCoreLogic {
 
   /// @notice Leaves a pending challenge before the challenge starts.
   /// @param challengeId Challenge identifier.
-  function leaveChallenge(uint256 challengeId) public {
+  function leaveChallenge(uint256 challengeId) external {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -208,7 +208,7 @@ library ChallengeCoreLogic {
 
   /// @notice Declines a pending challenge invitation.
   /// @param challengeId Challenge identifier.
-  function declineChallenge(uint256 challengeId) public {
+  function declineChallenge(uint256 challengeId) external {
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
@@ -235,7 +235,7 @@ library ChallengeCoreLogic {
 
   /// @notice Cancels a pending challenge.
   /// @param challengeId Challenge identifier.
-  function cancelChallenge(uint256 challengeId) public {
+  function cancelChallenge(uint256 challengeId) external {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     _ensurePendingChallenge(challengeId, challenge);
@@ -250,7 +250,7 @@ library ChallengeCoreLogic {
   /// @notice Syncs a pending challenge with the current round and participant state.
   /// @param challengeId Challenge identifier.
   /// @return Current persisted status after syncing.
-  function syncChallenge(uint256 challengeId) public returns (uint8) {
+  function syncChallenge(uint256 challengeId) external returns (uint8) {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
 
     if (challenge.status != ChallengeTypes.ChallengeStatus.Pending) {
