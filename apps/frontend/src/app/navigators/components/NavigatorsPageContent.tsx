@@ -4,7 +4,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuBadgeCheck } from "react-icons/lu"
+import { LuCompass } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
@@ -16,6 +16,7 @@ import { DelegationModal } from "../shared/DelegationModal"
 
 import { BecomeNavigatorCTA } from "./BecomeNavigatorCTA"
 import { DelegatingAlert } from "./DelegatingAlert"
+import { NavigatingAlert } from "./NavigatingAlert"
 import { NavigatorCard } from "./NavigatorCard"
 import { NavigatorCardSkeleton } from "./NavigatorCardSkeleton"
 import { NavigatorFilters, useNavigatorFilterValues } from "./NavigatorFilters"
@@ -82,6 +83,8 @@ export const NavigatorsPageContent = () => {
 
       <NavigatorStepsCard isOpen={open} onClose={onClose} />
 
+      {isNavigator && <NavigatingAlert />}
+
       {isDelegating && currentNavigatorAddr && (
         <DelegatingAlert amount={currentDelegatedNum} navigatorAddress={currentNavigatorAddr} />
       )}
@@ -105,7 +108,7 @@ export const NavigatorsPageContent = () => {
         </SimpleGrid>
       ) : !navigators || navigators.length === 0 ? (
         <VStack py={12} gap={3}>
-          <LuBadgeCheck size={48} color="var(--chakra-colors-fg-muted)" />
+          <LuCompass size={48} color="var(--chakra-colors-fg-muted)" />
           <Text textStyle="md" color="fg.muted" textAlign="center">
             {t("No navigators found.")}
           </Text>

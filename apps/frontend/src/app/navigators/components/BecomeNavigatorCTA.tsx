@@ -1,7 +1,7 @@
 import { Button, Card, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { LuArrowRight, LuBadgeCheck } from "react-icons/lu"
+import { LuArrowRight, LuCompass } from "react-icons/lu"
 
 export const BecomeNavigatorCTA = () => {
   const { t } = useTranslation()
@@ -18,7 +18,7 @@ export const BecomeNavigatorCTA = () => {
       onClick={() => router.push("/navigators/become")}>
       <Card.Body display="flex" justifyContent="center" alignItems="center">
         <VStack gap={3} align="center" textAlign="center" py={4}>
-          <LuBadgeCheck size={32} color="var(--chakra-colors-primary-500)" />
+          <LuCompass size={32} color="var(--chakra-colors-primary-500)" />
           <Text textStyle="sm" fontWeight="semibold">
             {t("Become a Navigator")}
           </Text>

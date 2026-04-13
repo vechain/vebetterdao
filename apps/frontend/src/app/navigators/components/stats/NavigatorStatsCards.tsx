@@ -2,7 +2,7 @@ import { Card, Flex, HStack, Icon, SimpleGrid, Skeleton, Text } from "@chakra-ui
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuChevronRight, LuBadgeCheck, LuUsers } from "react-icons/lu"
+import { LuChevronRight, LuCompass, LuUsers } from "react-icons/lu"
 
 import { useNavigatorOverview } from "@/api/indexer/navigators/useNavigators"
 import { NavigatorDelegationsModal } from "@/app/navigators/[address]/components/modals/NavigatorDelegationsModal"
@@ -24,7 +24,7 @@ export const NavigatorStatsCards = () => {
         id: "navigators",
         label: t("Navigators"),
         value: String(overview?.activeNavigators ?? 0),
-        icon: LuBadgeCheck,
+        icon: LuCompass,
         bg: "status.info.subtle",
         color: "status.info.primary",
       },

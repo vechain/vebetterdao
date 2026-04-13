@@ -1,7 +1,7 @@
 import { Badge, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { LuArrowDownLeft, LuArrowUpRight, LuExternalLink, LuBadgeCheck } from "react-icons/lu"
+import { LuArrowDownLeft, LuArrowUpRight, LuExternalLink, LuCompass } from "react-icons/lu"
 
 import { useNavigatorStakeHistory } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
@@ -42,7 +42,7 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
             description={t("No stake deposits or withdrawals found.")}
             icon={
               <Icon boxSize={10} color="actions.secondary.text-lighter">
-                <LuBadgeCheck />
+                <LuCompass />
               </Icon>
             }
           />
