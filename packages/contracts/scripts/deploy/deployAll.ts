@@ -1427,13 +1427,11 @@ export async function deployAll(config: ContractsConfig) {
     .then(async tx => await tx.wait())
   console.log("Cooldown period for X2Earn nodes set to 1 round")
 
-  if (config.NEXT_PUBLIC_APP_ENV === AppEnv.TESTNET) {
-    await x2EarnApps
-      .connect(deployer)
-      .updateEndorsementScoreThreshold(1)
-      .then(async tx => await tx.wait())
-    console.log("Endorsement score threshold set to 1 for testnet")
-  }
+  await x2EarnApps
+    .connect(deployer)
+    .updateEndorsementScoreThreshold(config.X2EARN_ENDORSEMENT_SCORE_THRESHOLD)
+    .then(async tx => await tx.wait())
+  console.log(`Endorsement score threshold set to ${config.X2EARN_ENDORSEMENT_SCORE_THRESHOLD}`)
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions

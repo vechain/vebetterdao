@@ -168,6 +168,7 @@ export function createTestnetConfig() {
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
 
     X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
+    X2EARN_ENDORSEMENT_SCORE_THRESHOLD: 1,
 
     MULTI_SIG_SIGNERS: [
       "0x66E9709bc01B8c0AfC99a7dC513f501821306E85",
