@@ -133,6 +133,25 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       ).to.be.revertedWithCustomError(navigatorRegistry, "NavigatorCannotAcceptDelegations")
     })
 
+    it("should not emit DelegationRemoved when auto-clearing stale delegation to a dead navigator", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+
+      // Deactivate navigator1
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+
+      // Register a second navigator
+      const navigator2 = otherAccount
+      await registerNavigator(navigator2)
+
+      // Re-delegate to navigator2 — should NOT emit DelegationRemoved for the stale delegation
+      const tx = await navigatorRegistry.connect(citizen1).delegate(navigator2.address, ethers.parseEther("500"))
+      await expect(tx).to.not.emit(navigatorRegistry, "DelegationRemoved")
+      await expect(tx)
+        .to.emit(navigatorRegistry, "DelegationCreated")
+        .withArgs(citizen1.address, navigator2.address, ethers.parseEther("500"))
+    })
+
     it("should revert with ExceedsNavigatorCapacity when delegation exceeds capacity", async function () {
       // Navigator staked 50K, capacity = 50K * 10 = 500K
       await getVot3Tokens(citizen1, "600000")
@@ -277,6 +296,17 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
         navigatorRegistry.connect(citizen1).reduceDelegation(ethers.parseEther("100")),
       ).to.be.revertedWithCustomError(navigatorRegistry, "NotDelegated")
     })
+
+    it("should revert with NotDelegated when navigator is dead", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+
+      await expect(
+        navigatorRegistry.connect(citizen1).reduceDelegation(ethers.parseEther("100")),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NotDelegated")
+    })
   })
 
   // ======================== undelegate() ======================== //
@@ -294,6 +324,18 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
     })
 
     it("should revert with NotDelegated when citizen is not delegated", async function () {
+      await expect(navigatorRegistry.connect(citizen1).undelegate()).to.be.revertedWithCustomError(
+        navigatorRegistry,
+        "NotDelegated",
+      )
+    })
+
+    it("should revert with NotDelegated when navigator is dead", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+
       await expect(navigatorRegistry.connect(citizen1).undelegate()).to.be.revertedWithCustomError(
         navigatorRegistry,
         "NotDelegated",

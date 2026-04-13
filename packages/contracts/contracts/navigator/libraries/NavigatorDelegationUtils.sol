@@ -17,6 +17,10 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 /// - No personhood check for delegated citizens
 /// - Citizens cannot vote manually while delegated
 /// - Auto-voting disabled when delegating
+/// - Lazy invalidation: when a navigator exits or is deactivated, all delegations become void
+///   immediately at the view level (isDelegated=false, getDelegatedAmount=0, undelegate/reduceDelegation
+///   revert with NotDelegated). No DelegationRemoved events are emitted — indexers must treat
+///   ExitAnnounced / NavigatorDeactivated events as implicit bulk removal of all citizen delegations.
 library NavigatorDelegationUtils {
   using Checkpoints for Checkpoints.Trace208;
   // ======================== Events ======================== //
@@ -35,7 +39,10 @@ library NavigatorDelegationUtils {
     uint256 newTotal
   );
 
-  /// @notice Emitted when a citizen fully undelegates from a navigator
+  /// @notice Emitted when a citizen explicitly undelegates from an active navigator
+  /// @dev NOT emitted when a navigator exits or is deactivated. When a navigator dies, all its
+  /// delegations become void implicitly — indexers must treat ExitAnnounced / NavigatorDeactivated
+  /// as bulk removal of all citizen delegations for that navigator.
   event DelegationRemoved(address indexed citizen, address indexed navigator, uint256 amount);
 
   // ======================== Errors ======================== //
@@ -78,12 +85,12 @@ library NavigatorDelegationUtils {
     address currentNavigator = _currentNavigator($, citizen);
     if (currentNavigator != address(0)) {
       if (_isNavigatorDead($, currentNavigator)) {
-        // Auto-clear stale delegation — navigator exited or deactivated
+        // Auto-clear stale checkpoint — delegation was conceptually removed when the navigator died.
+        // No DelegationRemoved emitted here; indexers treat navigator deactivation as implicit bulk removal.
         uint256 oldAmount = _currentDelegatedAmount($, citizen);
         _pushTotalDelegated($, currentNavigator, -int256(oldAmount));
         $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), 0);
         _removeDelegation($, citizen, currentNavigator);
-        emit DelegationRemoved(citizen, currentNavigator, oldAmount);
       } else {
         revert AlreadyDelegated(citizen, currentNavigator);
       }
@@ -130,6 +137,7 @@ library NavigatorDelegationUtils {
 
     address currentNavigator = _currentNavigator($, citizen);
     if (currentNavigator == address(0)) revert NotDelegated(citizen);
+    if (_isNavigatorDead($, currentNavigator)) revert NotDelegated(citizen);
     if (reduceBy == 0) revert ZeroDelegationAmount();
 
     uint256 current = _currentDelegatedAmount($, citizen);
@@ -158,6 +166,7 @@ library NavigatorDelegationUtils {
 
     address currentNavigator = _currentNavigator($, citizen);
     if (currentNavigator == address(0)) revert NotDelegated(citizen);
+    if (_isNavigatorDead($, currentNavigator)) revert NotDelegated(citizen);
 
     uint256 amount = _currentDelegatedAmount($, citizen);
     _pushTotalDelegated($, currentNavigator, -int256(amount));

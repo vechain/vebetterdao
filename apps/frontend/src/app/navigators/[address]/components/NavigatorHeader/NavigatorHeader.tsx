@@ -80,7 +80,7 @@ export const NavigatorHeader = ({
     isConnected,
     hasStake,
   })
-  const showMenu = mainAction !== "share"
+  const showMenu = isOwnPage || mainAction !== "share"
 
   const handleShare = () => setIsShareOpen(true)
 

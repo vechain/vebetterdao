@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
 import { ProposalBox } from "@/app/profile/components/ProfileGovernance/components/ProposalBox"
-import ProposalIcon from "@/components/Icons/svg/proposal.svg"
+import ProposalIcon from "@/components/Icons/svg/sign.svg"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useUserCreatedProposal } from "@/hooks/proposals/common/useUserCreatedProposal"
 
@@ -32,9 +32,7 @@ export const NavigatorCreatedProposalsCard = ({ address }: Props) => {
         <Card.Body asChild>
           <EmptyState
             title={t("Created proposals")}
-            description={t("{{subject}} created proposals will appear here.", {
-              subject: `${humanAddress(address, 4, 3)}`,
-            })}
+            description={t("{{subject}} created proposals will appear here.", { subject: humanAddress(address, 4, 3) })}
             icon={
               <Icon boxSize={20} color="actions.secondary.text-lighter">
                 <ProposalIcon color="rgba(117, 117, 117, 1)" />

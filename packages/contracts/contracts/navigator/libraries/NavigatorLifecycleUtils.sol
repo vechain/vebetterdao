@@ -73,6 +73,9 @@ library NavigatorLifecycleUtils {
   /// @dev Starts the notice period. The deactivation checkpoint is written at
   /// roundDeadline(currentRound + exitNoticePeriod), so the navigator remains alive
   /// and must keep voting for the notice period, then automatically becomes dead.
+  /// Once dead, all citizen delegations become void implicitly — no DelegationRemoved events
+  /// are emitted. Indexers must treat the resulting deactivation as bulk removal of all
+  /// citizen delegations for this navigator.
   /// @param navigator The navigator address
   function announceExit(address navigator) external {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
@@ -106,6 +109,8 @@ library NavigatorLifecycleUtils {
 
   /// @notice Deactivate a navigator by governance decision
   /// @dev Takes effect next round. All delegations cease. Cannot reactivate.
+  /// No DelegationRemoved events are emitted — indexers must treat NavigatorDeactivated
+  /// as implicit bulk removal of all citizen delegations for this navigator.
   /// @param navigator The navigator address
   function deactivate(address navigator) external {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
