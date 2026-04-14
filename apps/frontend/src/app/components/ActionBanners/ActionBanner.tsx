@@ -42,7 +42,9 @@ import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBann
 import { DelegatingBanner } from "./components/DelegatingBanner"
 import { DoActionBanner } from "./components/DoActionBanner/DoActionBanner"
 import { EntityBanner } from "./components/EntityBanner"
+import { FreshnessMultiplierBanner } from "./components/FreshnessMultiplierBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
+import { NavigatorsBanner } from "./components/NavigatorsBanner"
 import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
@@ -145,6 +147,10 @@ export const ActionBanner = () => {
   const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0 && (preferences?.[BannerStorageKey.SHOW_NEW_APP] ?? true)
+
+  // Feature announcement banners
+  const showFreshnessMultiplierBanner = preferences?.[BannerStorageKey.SHOW_FRESHNESS_MULTIPLIER] ?? true
+  const showNavigatorsBanner = preferences?.[BannerStorageKey.SHOW_NAVIGATORS] ?? true
 
   // Claim tokens (VOT3 deposits) banner logic
   const { data: { totalClaimableDeposits, claimableDeposits } = { totalClaimableDeposits: 0, claimableDeposits: [] } } =
@@ -261,6 +267,8 @@ export const ActionBanner = () => {
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
+    if (showFreshnessMultiplierBanner) bannerComponents.push(<FreshnessMultiplierBanner key="freshness-multiplier" />)
+    if (showNavigatorsBanner) bannerComponents.push(<NavigatorsBanner key="navigators" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
@@ -276,6 +284,8 @@ export const ActionBanner = () => {
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
+    showFreshnessMultiplierBanner,
+    showNavigatorsBanner,
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,

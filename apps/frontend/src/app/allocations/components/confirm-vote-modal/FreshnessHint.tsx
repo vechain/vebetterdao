@@ -1,8 +1,11 @@
 "use client"
 
-import { Box, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Icon, IconButton, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 import { Sparks } from "iconoir-react"
 import { useTranslation } from "react-i18next"
+
+import { FreshnessMultiplierModal } from "@/app/components/ActionBanners/modals/FreshnessMultiplierModal"
 
 interface FreshnessHintProps {
   /** Whether the user changed their app selection since last vote */
@@ -21,6 +24,7 @@ interface FreshnessHintProps {
  */
 export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote, hideDescription }: FreshnessHintProps) => {
   const { t } = useTranslation()
+  const { open: isMultiplierModalOpen, onOpen: openMultiplierModal, onClose: closeMultiplierModal } = useDisclosure()
 
   const getBgColor = () => {
     if (isFirstVote || isUpdated) return "green.subtle"
@@ -43,26 +47,41 @@ export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote, hideDescripti
   }
 
   return (
-    <Box bg={getBgColor()} borderRadius="lg" p={3}>
-      <HStack gap={2} align="start">
-        <Icon as={Sparks} boxSize={4} color={getTextColor()} mt={0.5} />
-        <VStack gap={0} align="start">
-          <HStack gap={1}>
-            <Text textStyle="sm" fontWeight="semibold" color={getTextColor()}>
-              {t("Freshness Bonus")}
-              {":"}
-            </Text>
-            <Text textStyle="sm" fontWeight="bold" color={getTextColor()}>
-              {tierLabel}
-            </Text>
-          </HStack>
-          {!hideDescription && (
-            <Text textStyle="xs" color={getTextColor()} opacity={0.8}>
-              {getMessage()}
-            </Text>
-          )}
-        </VStack>
-      </HStack>
-    </Box>
+    <>
+      <Box bg={getBgColor()} borderRadius="lg" p={3} w="full">
+        <HStack gap={2} align="start">
+          <Icon as={Sparks} boxSize={4} color={getTextColor()} mt={0.5} shrink={0} />
+          <VStack gap={0} align="start" flex={1} minW={0}>
+            <HStack gap={1} w="full" justify="space-between" align="center">
+              <HStack gap={1} flexWrap="wrap">
+                <Text textStyle="sm" fontWeight="semibold" color={getTextColor()}>
+                  {t("Freshness Bonus")}
+                  {":"}
+                </Text>
+                <Text textStyle="sm" fontWeight="bold" color={getTextColor()}>
+                  {tierLabel}
+                </Text>
+              </HStack>
+              <IconButton
+                variant="ghost"
+                size="2xs"
+                colorPalette="gray"
+                aria-label={t("How rewards multipliers work")}
+                onClick={openMultiplierModal}
+                color={getTextColor()}
+                shrink={0}>
+                <Icon as={UilInfoCircle} boxSize={4} />
+              </IconButton>
+            </HStack>
+            {!hideDescription && (
+              <Text textStyle="xs" color={getTextColor()} opacity={0.8}>
+                {getMessage()}
+              </Text>
+            )}
+          </VStack>
+        </HStack>
+      </Box>
+      <FreshnessMultiplierModal isOpen={isMultiplierModalOpen} onClose={closeMultiplierModal} infoOnly />
+    </>
   )
 }
