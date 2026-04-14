@@ -243,24 +243,18 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
     })
 
-    it("citizen can undelegate to clean up storage, or just re-delegate to new navigator", async function () {
+    it("undelegate reverts with NotDelegated when navigator is dead (delegation void)", async function () {
       await navigatorRegistry.connect(navigator1).announceExit()
 
-      // VOT3 already unlocked via lazy invalidation — but citizen can still undelegate to clean storage
-      await navigatorRegistry.connect(citizen1).undelegate()
+      // Delegation is void — undelegate is not allowed
+      await expect(navigatorRegistry.connect(citizen1).undelegate()).to.be.revertedWithCustomError(
+        navigatorRegistry,
+        "NotDelegated",
+      )
 
-      // Storage cleaned
+      // View functions confirm delegation is void
       expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
       expect(await navigatorRegistry.getNavigator(citizen1.address)).to.equal(ethers.ZeroAddress)
-    })
-
-    it("citizen can undelegate even during notice period", async function () {
-      await navigatorRegistry.connect(navigator1).announceExit()
-
-      // Don't wait for notice period — undelegate immediately
-      await navigatorRegistry.connect(citizen1).undelegate()
-
-      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
     })
 
@@ -307,13 +301,16 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
     })
 
-    it("citizen can undelegate after navigator is deactivated", async function () {
-      // Governance deactivates navigator
+    it("undelegate reverts with NotDelegated after navigator is deactivated (VOT3 auto-unlocked)", async function () {
       await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
 
-      // Citizen can still undelegate
-      await navigatorRegistry.connect(citizen1).undelegate()
+      // Delegation is void — undelegate is not allowed
+      await expect(navigatorRegistry.connect(citizen1).undelegate()).to.be.revertedWithCustomError(
+        navigatorRegistry,
+        "NotDelegated",
+      )
 
+      // VOT3 is auto-unlocked — full balance transferable without undelegating
       expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
       const balance = await vot3.balanceOf(citizen1.address)
       await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
@@ -327,7 +324,7 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
 
       await expect(
         navigatorRegistry.connect(newCitizen).delegate(navigator1.address, ethers.parseEther("500")),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "NotANavigator")
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NavigatorCannotAcceptDelegations")
     })
   })
 })
