@@ -22,6 +22,7 @@ import { LuPlus } from "react-icons/lu"
 
 import {
   ChallengeKind,
+  ParticipantStatus,
   ChallengeStatus,
   ChallengeView,
   ChallengeVisibility,
@@ -45,6 +46,7 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
   const showSponsoringBadge = isSponsored && challenge.isCreator
   const showInviteStats = challenge.visibility === ChallengeVisibility.Private
+  const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
 
   return (
@@ -63,9 +65,9 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
         _hover={{ borderColor: "border.active", boxShadow: "lg", transform: "translateY(-2px)" }}>
         <VStack gap={{ base: "5", md: "6" }} align="stretch" h="full" position="relative">
           <Stack
-            direction={{ base: "column", md: "row" }}
+            direction={isReacceptingInvite ? "column" : { base: "column", md: "row" }}
             justify="space-between"
-            align={{ base: "stretch", md: "start" }}
+            align={isReacceptingInvite ? "stretch" : { base: "stretch", md: "start" }}
             gap="4">
             <VStack align="start" gap="3" flex="1" minW="0">
               <Wrap gap="2">
@@ -115,7 +117,7 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
               </Wrap>
             </VStack>
             {hasChallengeActions(challenge) && (
-              <Box w={{ base: "full", md: "auto" }} flexShrink={0}>
+              <Box w={isReacceptingInvite ? "full" : { base: "full", md: "auto" }} flexShrink={0}>
                 <ChallengeActions challenge={challenge} layout="default" buttonSize="md" />
               </Box>
             )}
