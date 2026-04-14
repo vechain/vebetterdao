@@ -10,6 +10,8 @@ const VTHO_CONTRACT_ADDRESS = "0x0000000000000000000000000000456E65726779"
 const MAX_ACTIONS_PER_USER = 5
 const SELECTED_APP_COUNT = 5
 const SPLIT_THRESHOLD = 3
+const EXTRA_CHALLENGE_COUNT = 100
+const EXTRA_CREATOR_COUNT = 2
 const PRIMARY_WINNER_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68"
 const SECONDARY_WINNER_ADDRESS = "0x0F872421Dc479F3c11eDd89512731814D0598dB5"
 
@@ -30,6 +32,13 @@ type ChallengePlan = {
 }
 
 const VTHO_ABI = [
+  {
+    inputs: [{ internalType: "address", name: "_owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ internalType: "uint256", name: "balance", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
   {
     inputs: [
       { internalType: "address", name: "_to", type: "address" },
@@ -81,6 +90,51 @@ function getTargetActions(address: string, mode: WinnerMode): number {
   }
 
   return randomInt(SPLIT_THRESHOLD)
+}
+
+async function prepareChallengeCreators(
+  admin: HardhatEthersSigner,
+  creators: HardhatEthersSigner[],
+  challengesAddress: string,
+  b3trAddress: string,
+  sponsoredBudgetByCreator: Map<string, bigint>,
+): Promise<void> {
+  const b3tr = await ethers.getContractAt("B3TR", b3trAddress, admin)
+  const minterRole = await b3tr.MINTER_ROLE()
+  let checkedMinterRole = false
+  let canMint = false
+
+  console.log("Preparing sponsored challenge creators...")
+
+  for (const creator of creators) {
+    const requiredBudget = sponsoredBudgetByCreator.get(normalizeAddress(creator.address)) ?? 0n
+    const creatorBalance = await b3tr.balanceOf(creator.address)
+    const topUp = creatorBalance >= requiredBudget ? 0n : requiredBudget - creatorBalance
+
+    if (topUp > 0n) {
+      if (!checkedMinterRole) {
+        canMint = await b3tr.hasRole(minterRole, admin.address)
+        checkedMinterRole = true
+      }
+
+      if (!canMint) {
+        throw new Error(`Creator ${admin.address} cannot top up sponsored challenge budgets`)
+      }
+
+      await (await b3tr.mint(creator.address, topUp)).wait()
+    }
+
+    const creatorB3tr = await ethers.getContractAt("B3TR", b3trAddress, creator)
+    const allowance = await creatorB3tr.allowance(creator.address, challengesAddress)
+
+    if (allowance < requiredBudget) {
+      await (await creatorB3tr.approve(challengesAddress, requiredBudget)).wait()
+    }
+
+    console.log(`  ${creator.address}: ${ethers.formatEther(requiredBudget)} B3TR ready`)
+  }
+
+  console.log("")
 }
 
 async function joinChallengeInBatches(
@@ -168,6 +222,8 @@ async function main() {
   const config = getConfig()
   const signers = await ethers.getSigners()
   const creator = signers[0]
+  const extraCreators = signers.slice(0, EXTRA_CREATOR_COUNT)
+  const secondCreator = extraCreators[1]
   const joiners = signers.slice(1, NUM_JOINERS + 1)
 
   if (joiners.length < NUM_JOINERS) {
@@ -176,10 +232,13 @@ async function main() {
     )
   }
 
+  if (extraCreators.length < EXTRA_CREATOR_COUNT || !secondCreator) {
+    throw new Error(`Need ${EXTRA_CREATOR_COUNT} creators but only have ${extraCreators.length}`)
+  }
+
   const primaryWinner = requireSigner(joiners, PRIMARY_WINNER_ADDRESS)
   const secondaryWinner = requireSigner(joiners, SECONDARY_WINNER_ADDRESS)
 
-  const b3tr = await ethers.getContractAt("B3TR", config.b3trContractAddress, creator)
   const challenges = await ethers.getContractAt("B3TRChallenges", config.challengesContractAddress, creator)
   const xAllocationVoting = await ethers.getContractAt("XAllocationVoting", config.xAllocationVotingContractAddress)
   const x2EarnApps = await ethers.getContractAt("X2EarnApps", config.x2EarnAppsContractAddress)
@@ -245,10 +304,21 @@ async function main() {
     },
   ]
 
+  const sponsoredBudgetByCreator = new Map<string, bigint>([
+    [normalizeAddress(creator.address), SPONSORED_AMOUNT * BigInt(challengePlans.length)],
+  ])
+
+  for (let i = 0; i < EXTRA_CHALLENGE_COUNT; i++) {
+    const extraCreator = extraCreators[i % extraCreators.length]
+    const creatorKey = normalizeAddress(extraCreator.address)
+    sponsoredBudgetByCreator.set(creatorKey, (sponsoredBudgetByCreator.get(creatorKey) ?? 0n) + SPONSORED_AMOUNT)
+  }
+
   console.log(`Creator: ${creator.address} | Current round: ${currentRound}`)
   console.log(`Joiners: ${joiners.length} | Apps: ${allAppIds.length}`)
   console.log(`Primary winner: ${primaryWinner.address}`)
-  console.log(`Secondary winner: ${secondaryWinner.address}\n`)
+  console.log(`Secondary winner: ${secondaryWinner.address}`)
+  console.log(`Extra challenge creators: ${creator.address}, ${secondCreator.address}\n`)
 
   console.log(`Funding ${NUM_JOINERS} accounts with ${ethers.formatEther(VTHO_PER_ACCOUNT)} VTHO each...`)
   for (let i = 0; i < joiners.length; i++) {
@@ -257,8 +327,13 @@ async function main() {
   }
   console.log(`  Funded ${NUM_JOINERS}/${NUM_JOINERS}\n`)
 
-  const totalSponsoredAmount = SPONSORED_AMOUNT * BigInt(challengePlans.length)
-  await (await b3tr.approve(config.challengesContractAddress, totalSponsoredAmount)).wait()
+  await prepareChallengeCreators(
+    creator,
+    extraCreators,
+    config.challengesContractAddress,
+    config.b3trContractAddress,
+    sponsoredBudgetByCreator,
+  )
 
   for (const plan of challengePlans) {
     const tx = await challenges.createChallenge({
@@ -319,6 +394,41 @@ async function main() {
       )
     }
   }
+
+  const secondCreatorVthoBalance = await vtho.balanceOf(secondCreator.address)
+  if (secondCreatorVthoBalance < VTHO_PER_ACCOUNT) {
+    await (await vtho.transfer(secondCreator.address, VTHO_PER_ACCOUNT - secondCreatorVthoBalance)).wait()
+  }
+
+  console.log(`Creating ${EXTRA_CHALLENGE_COUNT} extra challenges with the first two accounts...`)
+
+  for (let i = 0; i < EXTRA_CHALLENGE_COUNT; i++) {
+    const extraCreator = extraCreators[i % extraCreators.length]
+    const extraChallenges = await ethers.getContractAt("B3TRChallenges", config.challengesContractAddress, extraCreator)
+
+    const tx = await extraChallenges.createChallenge({
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      thresholdMode: ThresholdMode.None,
+      stakeAmount: SPONSORED_AMOUNT,
+      startRound: baseStartRound,
+      endRound: baseStartRound,
+      threshold: 0,
+      appIds: [],
+      invitees: [],
+      title: "",
+      description: "",
+      imageURI: "",
+      metadataURI: "",
+    })
+    await tx.wait()
+
+    if ((i + 1) % 20 === 0 || i + 1 === EXTRA_CHALLENGE_COUNT) {
+      console.log(`  Created ${i + 1}/${EXTRA_CHALLENGE_COUNT}`)
+    }
+  }
+
+  console.log(`Total challenges after stress run: ${await challenges.challengeCount()}`)
 }
 
 main().catch(console.error)

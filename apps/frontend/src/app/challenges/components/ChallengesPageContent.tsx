@@ -12,6 +12,7 @@ import {
   Stack,
   Text,
   VStack,
+  Wrap,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
@@ -37,14 +38,80 @@ import { ChallengeHubSection } from "./ChallengeHubSection"
 import { CreateChallengeModal } from "./CreateChallengeModal"
 
 const CardSkeleton = () => (
-  <Card.Root variant="primary" p="6" borderRadius="3xl" boxShadow="sm">
-    <Skeleton h="360px" borderRadius="2xl" />
+  <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" h="full" borderRadius="3xl" boxShadow="sm">
+    <VStack align="stretch" gap="6" h="full">
+      <VStack align="stretch" gap="4">
+        <Wrap gap="2">
+          <Skeleton h="6" w="16" borderRadius="full" />
+          <Skeleton h="6" w="20" borderRadius="full" />
+        </Wrap>
+        <VStack align="stretch" gap="2">
+          <Skeleton h="7" w="72%" borderRadius="md" />
+          <Skeleton h="7" w="48%" borderRadius="md" />
+        </VStack>
+        <Wrap gap="2">
+          <Skeleton h="7" w="28" borderRadius="full" />
+          <Skeleton h="7" w="24" borderRadius="full" />
+          <Skeleton h="7" w="24" borderRadius="full" />
+        </Wrap>
+      </VStack>
+
+      <SimpleGrid columns={2} gap="3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} h="24" borderRadius="2xl" />
+        ))}
+      </SimpleGrid>
+
+      <Box mt="auto">
+        <Skeleton h="20" borderRadius="2xl" />
+      </Box>
+    </VStack>
   </Card.Root>
 )
 
 const CompactSkeleton = () => (
-  <Card.Root variant="primary" px="5" py="5" borderRadius="3xl">
-    <Skeleton h="220px" borderRadius="2xl" />
+  <Card.Root
+    variant="primary"
+    px={{ base: "5", md: "6" }}
+    py={{ base: "5", md: "6" }}
+    borderRadius="3xl"
+    h="full"
+    boxShadow="sm">
+    <VStack gap={{ base: "5", md: "6" }} align="stretch" h="full">
+      <Stack
+        direction={{ base: "column", md: "row" }}
+        justify="space-between"
+        align={{ base: "stretch", md: "start" }}
+        gap="4">
+        <VStack align="stretch" gap="3" flex="1" minW="0">
+          <Wrap gap="2">
+            <Skeleton h="6" w="14" borderRadius="full" />
+            <Skeleton h="6" w="18" borderRadius="full" />
+          </Wrap>
+          <VStack align="stretch" gap="2">
+            <Skeleton h="7" w="68%" borderRadius="md" />
+            <Skeleton h="7" w="42%" borderRadius="md" />
+          </VStack>
+          <Wrap gap="2">
+            <Skeleton h="7" w="24" borderRadius="full" />
+            <Skeleton h="7" w="22" borderRadius="full" />
+            <Skeleton h="7" w="22" borderRadius="full" />
+          </Wrap>
+        </VStack>
+        <Skeleton h="10" w={{ base: "full", md: "28" }} borderRadius="full" />
+      </Stack>
+
+      <SimpleGrid columns={2} gap="3" mt="auto">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} h="24" borderRadius="2xl" />
+        ))}
+      </SimpleGrid>
+
+      <Wrap gap="2">
+        <Skeleton h="6" w="28" borderRadius="full" />
+        <Skeleton h="6" w="32" borderRadius="full" />
+      </Wrap>
+    </VStack>
   </Card.Root>
 )
 
@@ -90,6 +157,11 @@ const CompactChallengeCarousel = ({
             <ChallengeCompactCard challenge={c} />
           </SwiperSlide>
         ))}
+        {isFetchingNextPage && (
+          <SwiperSlide key={`${navigationId}-loading`} style={{ height: "auto" }}>
+            <CompactSkeleton />
+          </SwiperSlide>
+        )}
       </Swiper>
       <IconButton
         hideBelow="md"
@@ -240,6 +312,11 @@ export const ChallengesPageContent = () => {
                       <ChallengeCard challenge={c} currentRound={round} />
                     </SwiperSlide>
                   ))}
+                  {grouped.active.isFetchingNextPage && (
+                    <SwiperSlide key="active-loading" style={{ height: "auto" }}>
+                      <CardSkeleton />
+                    </SwiperSlide>
+                  )}
                 </Swiper>
                 <IconButton
                   hideBelow="md"
