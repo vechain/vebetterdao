@@ -9,10 +9,10 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// @title NavigatorSlashingUtils
 /// @notice Handles automatic minor slashing and governance-driven major slashing.
 /// @dev Minor slashing: 10% of current remaining stake (compounding).
-/// Anyone can call the report functions — contract verifies on-chain.
+/// Anyone can call the report function — contract verifies on-chain.
 /// Slashed funds sent to treasury.
 ///
-/// Five minor infraction triggers:
+/// Five minor infraction types:
 /// 1. Missed allocation vote (had citizens, didn't set preferences for a round)
 /// 2. Missed governance proposal vote (had citizens, didn't set decision during voting period)
 /// 3. Stale allocation preferences (no update >= 3 rounds)
@@ -20,10 +20,24 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// 5. Late preferences (set after preferenceCutoffPeriod before round deadline)
 library NavigatorSlashingUtils {
   uint256 private constant BASIS_POINTS = 10000;
+  uint256 public constant FLAG_MISSED_ALLOCATION = 1 << 0;
+  uint256 public constant FLAG_LATE_PREFERENCES = 1 << 1;
+  uint256 public constant FLAG_STALE_PREFERENCES = 1 << 2;
+  uint256 public constant FLAG_MISSED_REPORT = 1 << 3;
+  uint256 public constant FLAG_MISSED_GOVERNANCE = 1 << 4;
 
   // ======================== Events ======================== //
 
-  /// @notice Emitted when a navigator is slashed
+  /// @notice Emitted when a navigator is slashed for minor infractions in a round
+  event NavigatorMinorSlashed(
+    address indexed navigator,
+    uint256 amount,
+    uint256 remainingStake,
+    uint256 roundId,
+    uint256 infractionFlags
+  );
+
+  /// @notice Emitted when a navigator is slashed by governance (major infraction)
   event NavigatorSlashed(
     address indexed navigator,
     uint256 amount,
@@ -33,11 +47,14 @@ library NavigatorSlashingUtils {
 
   // ======================== Errors ======================== //
 
-  /// @notice Thrown when navigator has already been slashed for this infraction
-  error AlreadySlashed(address navigator, string reason);
+  /// @notice Thrown when navigator has already been slashed for this round
+  error AlreadySlashed(address navigator, uint256 roundId);
 
-  /// @notice Thrown when no infraction was found (report is invalid)
-  error NoInfractionFound(address navigator, string reason);
+  /// @notice Thrown when no infraction was found for this round (report is invalid)
+  error NoInfractionFound(address navigator, uint256 roundId);
+
+  /// @notice Thrown when a report is attempted while the round is still active
+  error RoundStillActive(uint256 roundId);
 
   /// @notice Thrown when navigator has no stake to slash
   error NoStakeToSlash(address navigator);
@@ -47,134 +64,70 @@ library NavigatorSlashingUtils {
 
   // ======================== Minor Slashing ======================== //
 
-  /// @notice Report a navigator for missing allocation vote in a round
-  /// @dev Anyone can call. Verifies: navigator had citizens AND didn't set preferences.
+  /// @notice Report a navigator for all minor infractions in a completed round
+  /// @dev Applies at most one minor slash for the round, even if multiple infractions are found.
   /// @param navigator The navigator address
-  /// @param roundId The round they missed
-  function reportMissedAllocationVote(address navigator, uint256 roundId) external {
+  /// @param roundId The completed round to check
+  /// @param proposalIds Proposal IDs for this round to validate governance decisions
+  function reportRoundInfractions(address navigator, uint256 roundId, uint256[] calldata proposalIds) external {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    IXAllocationVotingGovernor xAllocationVoting = IXAllocationVotingGovernor($.xAllocationVoting);
 
-    if ($.slashedForMissedAllocationVote[navigator][roundId]) {
-      revert AlreadySlashed(navigator, "missedAllocationVote");
+    if (xAllocationVoting.isActive(roundId)) {
+      revert RoundStillActive(roundId);
     }
 
-    // Navigator must have had delegations at round snapshot and NOT have set preferences
+    if ($.slashedForRound[navigator][roundId]) {
+      revert AlreadySlashed(navigator, roundId);
+    }
+
+    // Navigator must have had delegations at round snapshot
     uint256 snapshot = _getRoundSnapshot($, roundId);
     bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
-    bool setPreferences = $.preferencesSet[navigator][roundId];
-
-    if (!hadDelegations || setPreferences) {
-      revert NoInfractionFound(navigator, "missedAllocationVote");
+    if (!hadDelegations) {
+      revert NoInfractionFound(navigator, roundId);
     }
 
-    $.slashedForMissedAllocationVote[navigator][roundId] = true;
-    _applyMinorSlash($, navigator, "missedAllocationVote");
-  }
+    uint256 infractionFlags = 0;
+    uint256 roundDeadline = xAllocationVoting.roundDeadline(roundId);
 
-  /// @notice Report a navigator for missing a governance proposal vote
-  /// @param navigator The navigator address
-  /// @param proposalId The proposal they missed
-  function reportMissedGovernanceVote(address navigator, uint256 proposalId) external {
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-
-    if ($.slashedForMissedGovernanceVote[navigator][proposalId]) {
-      revert AlreadySlashed(navigator, "missedGovernanceVote");
+    if (!$.preferencesSet[navigator][roundId]) {
+      infractionFlags |= FLAG_MISSED_ALLOCATION;
+    } else {
+      uint256 setBlock = $.preferencesSetBlock[navigator][roundId];
+      uint256 cutoff = roundDeadline > $.preferenceCutoffPeriod ? roundDeadline - $.preferenceCutoffPeriod : 0;
+      if (setBlock > cutoff) {
+        infractionFlags |= FLAG_LATE_PREFERENCES;
+      }
     }
 
-    // Navigator must have had delegations and NOT have set a decision
-    // Uses current total since we don't have the round context for governance proposals
-    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegated(navigator) > 0;
-    bool setDecision = $.proposalDecision[navigator][proposalId] != 0;
-
-    if (!hadDelegations || setDecision) {
-      revert NoInfractionFound(navigator, "missedGovernanceVote");
-    }
-
-    $.slashedForMissedGovernanceVote[navigator][proposalId] = true;
-    _applyMinorSlash($, navigator, "missedGovernanceVote");
-  }
-
-  /// @notice Report a navigator for stale allocation preferences (no update >= 3 rounds)
-  /// @param navigator The navigator address
-  /// @param roundId The round to check staleness against
-  function reportStalePreferences(address navigator, uint256 roundId) external {
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-
-    if ($.slashedForStalePreferences[navigator][roundId]) {
-      revert AlreadySlashed(navigator, "stalePreferences");
-    }
-
-    // Check that preferences haven't been set in the last 3 rounds
-    // (roundId, roundId-1, roundId-2 must all be false)
-    uint256 snapshot = _getRoundSnapshot($, roundId);
-    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
-    bool stale = hadDelegations
-      && !$.preferencesSet[navigator][roundId]
+    bool stalePreferences = !$.preferencesSet[navigator][roundId]
       && (roundId < 2 || !$.preferencesSet[navigator][roundId - 1])
       && (roundId < 3 || !$.preferencesSet[navigator][roundId - 2]);
-
-    if (!stale) {
-      revert NoInfractionFound(navigator, "stalePreferences");
+    if (stalePreferences) {
+      infractionFlags |= FLAG_STALE_PREFERENCES;
     }
 
-    $.slashedForStalePreferences[navigator][roundId] = true;
-    _applyMinorSlash($, navigator, "stalePreferences");
-  }
-
-  /// @notice Report a navigator for missing a required report
-  /// @param navigator The navigator address
-  /// @param roundId The current round to check against
-  function reportMissedReport(address navigator, uint256 roundId) external {
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-
-    if ($.slashedForMissedReport[navigator][roundId]) {
-      revert AlreadySlashed(navigator, "missedReport");
-    }
-
-    // Navigator must have had delegations at round snapshot
-    uint256 snapshot = _getRoundSnapshot($, roundId);
-    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
-    // Must have missed the report interval
     uint256 lastReport = $.lastReportRound[navigator];
-    bool missedReport = hadDelegations && (roundId > lastReport + $.reportInterval);
-
-    if (!missedReport) {
-      revert NoInfractionFound(navigator, "missedReport");
+    // Example: interval=2, last report in round 8 → rounds 9 still OK; round 10+ without a new report is a miss (roundId >= 8+2).
+    if (roundId >= lastReport + $.reportInterval) {
+      infractionFlags |= FLAG_MISSED_REPORT;
     }
 
-    $.slashedForMissedReport[navigator][roundId] = true;
-    _applyMinorSlash($, navigator, "missedReport");
-  }
-
-  /// @notice Report a navigator for setting allocation preferences too late
-  /// @dev Preferences must be set at least preferenceCutoffPeriod blocks before round deadline.
-  /// Setting them after the cutoff still works but incurs a minor slash.
-  /// @param navigator The navigator address
-  /// @param roundId The round to check
-  /// @param roundDeadline The block number when the round ends (passed by caller, verified on-chain)
-  function reportLatePreferences(address navigator, uint256 roundId, uint256 roundDeadline) external {
-    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-
-    if ($.slashedForLatePreferences[navigator][roundId]) {
-      revert AlreadySlashed(navigator, "latePreferences");
+    for (uint256 i = 0; i < proposalIds.length; i++) {
+      if ($.proposalDecision[navigator][proposalIds[i]] == 0) {
+        infractionFlags |= FLAG_MISSED_GOVERNANCE;
+        break;
+      }
     }
 
-    // Navigator must have had delegations at round snapshot
-    uint256 snapshot = _getRoundSnapshot($, roundId);
-    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
-    // Preferences must have been set
-    uint256 setBlock = $.preferencesSetBlock[navigator][roundId];
-    // Cutoff = roundDeadline - preferenceCutoffPeriod
-    uint256 cutoff = roundDeadline > $.preferenceCutoffPeriod ? roundDeadline - $.preferenceCutoffPeriod : 0;
-    // Late if: had delegations AND preferences were set after the cutoff
-    bool isLate = hadDelegations && setBlock > 0 && setBlock > cutoff;
-
-    if (!isLate) {
-      revert NoInfractionFound(navigator, "latePreferences");
+    if (infractionFlags == 0) {
+      revert NoInfractionFound(navigator, roundId);
     }
 
-    $.slashedForLatePreferences[navigator][roundId] = true;
-    _applyMinorSlash($, navigator, "latePreferences");
+    $.slashedForRound[navigator][roundId] = true;
+    $.roundInfractionFlags[navigator][roundId] = infractionFlags;
+    _applyMinorSlash($, navigator, roundId, infractionFlags);
   }
 
   // ======================== Major Slashing ======================== //
@@ -230,25 +183,13 @@ library NavigatorSlashingUtils {
 
   /// @notice Check if a navigator was already slashed for a specific infraction
   /// @param navigator The navigator address
-  /// @param id The round ID or proposal ID depending on infraction type
-  /// @return missedAllocation True if slashed for missed allocation vote
-  /// @return missedGovernance True if slashed for missed governance vote
-  /// @return stalePrefs True if slashed for stale preferences
-  /// @return missedReport True if slashed for missed report
-  /// @return latePrefs True if slashed for late preferences
-  function isSlashedFor(address navigator, uint256 id) external view returns (
-    bool missedAllocation,
-    bool missedGovernance,
-    bool stalePrefs,
-    bool missedReport,
-    bool latePrefs
-  ) {
+  /// @param roundId The round ID
+  /// @return slashed True if the navigator was slashed for this round
+  /// @return infractionFlags Bitmask of infractions found when slashed
+  function isSlashedForRound(address navigator, uint256 roundId) external view returns (bool slashed, uint256 infractionFlags) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    missedAllocation = $.slashedForMissedAllocationVote[navigator][id];
-    missedGovernance = $.slashedForMissedGovernanceVote[navigator][id];
-    stalePrefs = $.slashedForStalePreferences[navigator][id];
-    missedReport = $.slashedForMissedReport[navigator][id];
-    latePrefs = $.slashedForLatePreferences[navigator][id];
+    slashed = $.slashedForRound[navigator][roundId];
+    infractionFlags = $.roundInfractionFlags[navigator][roundId];
   }
 
   // ======================== Internal ======================== //
@@ -257,7 +198,8 @@ library NavigatorSlashingUtils {
   function _applyMinorSlash(
     NavigatorStorageTypes.NavigatorStorage storage $,
     address navigator,
-    string memory reason
+    uint256 roundId,
+    uint256 infractionFlags
   ) private {
     uint256 currentStake = $.stakedAmount[navigator];
     if (currentStake == 0) revert NoStakeToSlash(navigator);
@@ -272,7 +214,7 @@ library NavigatorSlashingUtils {
     // Transfer to treasury
     IERC20($.b3trToken).transfer($.treasury, slashAmount);
 
-    emit NavigatorSlashed(navigator, slashAmount, $.stakedAmount[navigator], reason);
+    emit NavigatorMinorSlashed(navigator, slashAmount, $.stakedAmount[navigator], roundId, infractionFlags);
   }
 
   /// @dev Get the snapshot block of a round from XAllocationVoting

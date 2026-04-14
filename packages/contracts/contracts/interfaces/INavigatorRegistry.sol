@@ -107,11 +107,14 @@ interface INavigatorRegistry {
 
   // -- Slashing --
 
-  /// @notice Thrown when navigator has already been slashed for this infraction
-  error AlreadySlashed(address navigator, string reason);
+  /// @notice Thrown when navigator has already been slashed for this round
+  error AlreadySlashed(address navigator, uint256 roundId);
 
-  /// @notice Thrown when no infraction was found (report is invalid)
-  error NoInfractionFound(address navigator, string reason);
+  /// @notice Thrown when no infraction was found for this round (report is invalid)
+  error NoInfractionFound(address navigator, uint256 roundId);
+
+  /// @notice Thrown when a report is attempted while the round is still active
+  error RoundStillActive(uint256 roundId);
 
   /// @notice Thrown when navigator has no stake to slash
   error NoStakeToSlash(address navigator);
@@ -241,11 +244,25 @@ interface INavigatorRegistry {
 
   // -- Slashing --
 
-  /// @notice Emitted when a navigator is slashed (minor or major)
+  /// @notice Emitted when a navigator is slashed for minor infractions in a round
   /// @param navigator The navigator address
   /// @param amount The B3TR amount slashed
   /// @param remainingStake The stake remaining after slash
-  /// @param reason The infraction reason string
+  /// @param roundId The round ID associated with the slash
+  /// @param infractionFlags Bitmask of infractions found in the round
+  event NavigatorMinorSlashed(
+    address indexed navigator,
+    uint256 amount,
+    uint256 remainingStake,
+    uint256 roundId,
+    uint256 infractionFlags
+  );
+
+  /// @notice Emitted when a navigator is slashed by governance (major infraction)
+  /// @param navigator The navigator address
+  /// @param amount The B3TR amount slashed
+  /// @param remainingStake The stake remaining after slash
+  /// @param reason The slash reason string
   event NavigatorSlashed(address indexed navigator, uint256 amount, uint256 remainingStake, string reason);
 
   // -- Lifecycle --
@@ -340,30 +357,11 @@ interface INavigatorRegistry {
 
   // ======================== Slashing Reports ======================== //
 
-  /// @notice Report a navigator for missing allocation vote in a round
+  /// @notice Report a navigator for minor infractions in a completed round
   /// @param navigator The navigator address
-  /// @param roundId The round they missed
-  function reportMissedAllocationVote(address navigator, uint256 roundId) external;
-
-  /// @notice Report a navigator for missing a governance proposal vote
-  /// @param navigator The navigator address
-  /// @param proposalId The proposal they missed
-  function reportMissedGovernanceVote(address navigator, uint256 proposalId) external;
-
-  /// @notice Report a navigator for stale allocation preferences (no update in 3+ rounds)
-  /// @param navigator The navigator address
-  /// @param roundId The round to check staleness against
-  function reportStalePreferences(address navigator, uint256 roundId) external;
-
-  /// @notice Report a navigator for missing a required periodic report
-  /// @param navigator The navigator address
-  /// @param roundId The current round to check against
-  function reportMissedReport(address navigator, uint256 roundId) external;
-
-  /// @notice Report a navigator for setting allocation preferences after the cutoff
-  /// @param navigator The navigator address
-  /// @param roundId The round to check
-  function reportLatePreferences(address navigator, uint256 roundId) external;
+  /// @param roundId The completed round to report
+  /// @param proposalIds Proposal IDs that were active in the round
+  function reportRoundInfractions(address navigator, uint256 roundId, uint256[] calldata proposalIds) external;
 
   /// @notice Deactivate a navigator by governance decision with optional slashing
   /// @param navigator The navigator address
@@ -595,21 +593,12 @@ interface INavigatorRegistry {
   /// @return The minor slash percentage
   function getMinorSlashPercentage() external view returns (uint256);
 
-  /// @notice Check if a navigator was already slashed for a specific infraction
+  /// @notice Check if a navigator was already slashed for a round
   /// @param navigator The navigator address
-  /// @param id The round ID or proposal ID depending on infraction type
-  /// @return missedAllocation True if slashed for missed allocation vote
-  /// @return missedGovernance True if slashed for missed governance vote
-  /// @return stalePrefs True if slashed for stale preferences
-  /// @return missedReport True if slashed for missed report
-  /// @return latePrefs True if slashed for late preferences
-  function isSlashedFor(address navigator, uint256 id) external view returns (
-    bool missedAllocation,
-    bool missedGovernance,
-    bool stalePrefs,
-    bool missedReport,
-    bool latePrefs
-  );
+  /// @param roundId The round ID
+  /// @return slashed True if slashed for this round
+  /// @return infractionFlags Bitmask of infractions found when slashed
+  function isSlashedForRound(address navigator, uint256 roundId) external view returns (bool slashed, uint256 infractionFlags);
 
   /// @notice Get the preference cutoff period (in blocks before round end)
   /// @return The cutoff period in blocks

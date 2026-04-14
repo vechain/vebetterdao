@@ -4,6 +4,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
 import { getLastReportRoundQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
+import { getNavigatorReportEventsKey } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { buildClause } from "@/utils/buildClause"
 
 import { useBuildTransaction } from "../useBuildTransaction"
@@ -35,7 +36,13 @@ export const useSubmitNavigatorReport = ({ onSuccess }: Props) => {
     [],
   )
 
-  const refetchQueryKeys = useMemo(() => [getLastReportRoundQueryKey(account?.address ?? "")], [account?.address])
+  const refetchQueryKeys = useMemo(() => {
+    const keys = [getLastReportRoundQueryKey(account?.address ?? "")]
+    if (account?.address) {
+      keys.push(getNavigatorReportEventsKey(account.address))
+    }
+    return keys
+  }, [account?.address])
 
   return useBuildTransaction<SubmitReportParams>({
     clauseBuilder,

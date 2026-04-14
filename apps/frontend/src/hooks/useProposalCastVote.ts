@@ -5,6 +5,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
 import { getHasSetDecisionQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecision"
+import { getNavigatorDecisionEventsKey } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorDecisionEvents"
 import { buildClause } from "@/utils/buildClause"
 
 import { getHasVotedQueryKey } from "../api/contracts/governance/hooks/useHasVotedInProposals"
@@ -66,6 +67,7 @@ export const useProposalCastVote = ({ proposalId, isNavigator = false, onSuccess
     ]
     if (isNavigator && account?.address) {
       keys.push(getHasSetDecisionQueryKey(account.address, proposalId))
+      keys.push(getNavigatorDecisionEventsKey(account.address))
     }
     return keys
   }, [proposalId, account?.address, isNavigator])

@@ -1,4 +1,4 @@
-import { Alert, Text, VStack } from "@chakra-ui/react"
+import { Alert, Heading, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
@@ -174,13 +174,15 @@ export const NavigatorDetailContent = () => {
         onDelegatedClick={() => setIsDelegationsOpen(true)}
       />
 
+      <Heading size="lg">{t("Activity")}</Heading>
+
       {isOwnPage && (status === "ACTIVE" || status === "EXITING") && (
         <NavigatorTaskList onSubmitReport={() => setIsReportOpen(true)} />
       )}
 
-      <NavigatorGovernanceActivity address={address} />
-
       <NavigatorRoundHistory address={address} isOwnPage={isOwnPage} />
+
+      <NavigatorGovernanceActivity address={address} />
 
       <DelegationModal
         isOpen={isDelegationOpen}

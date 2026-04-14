@@ -2,12 +2,12 @@
 
 import { Badge, Button, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCheck, LuFileText, LuFlag, LuGavel, LuTriangleAlert, LuVote } from "react-icons/lu"
 
 import { useGetMinorSlashPercentage } from "@/api/contracts/navigatorRegistry/hooks/useGetMinorSlashPercentage"
-import { getGetStakeQueryKey, useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsSlashedFor } from "@/api/contracts/navigatorRegistry/hooks/useIsSlashedFor"
 import { BaseModal } from "@/components/BaseModal"
 import {
@@ -41,22 +41,36 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
   const { isTxModalOpen } = useTransactionModal()
   const { data: stake } = useGetStake(navigatorAddress)
   const { data: slashBps } = useGetMinorSlashPercentage()
-  const { data: reportedSet } = useIsSlashedFor(navigatorAddress, infractions)
+  const roundId = infractions[0]?.roundId
+  const { data: slashedByRound } = useIsSlashedFor(navigatorAddress, roundId ? [roundId] : [])
 
   const { sendTransaction } = useReportNavigatorInfraction({
-    additionalRefetchKeys: [getGetStakeQueryKey(navigatorAddress)],
+    navigatorAddress,
   })
 
   const stakeNum = stake ? Number(stake.scaled) : 0
   const penaltyPct = slashBps != null ? slashBps / 100 : 10
   const penaltyAmount = slashBps != null ? (stakeNum * slashBps) / BASIS_POINTS : 0
 
-  const handleReport = useCallback(
-    (infraction: ReportableInfraction) => {
-      sendTransaction({ infraction, navigator: navigatorAddress })
-    },
-    [navigatorAddress, sendTransaction],
+  const proposalIds = useMemo(
+    () =>
+      [
+        ...new Set(
+          infractions
+            .filter(inf => inf.type === "missedGovernanceVote")
+            .map(inf => inf.proposalId)
+            .filter(Boolean),
+        ),
+      ] as string[],
+    [infractions],
   )
+
+  const isReported = roundId ? (slashedByRound?.get(roundId)?.slashed ?? false) : false
+
+  const handleReport = useCallback(() => {
+    if (!roundId) return
+    sendTransaction({ navigator: navigatorAddress, roundId, proposalIds })
+  }, [navigatorAddress, proposalIds, roundId, sendTransaction])
 
   const labelForType = (inf: ReportableInfraction): string => {
     switch (inf.type) {
@@ -73,7 +87,7 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
     }
   }
 
-  const allReported = reportedSet != null && infractions.every((_, i) => reportedSet.has(i))
+  const allReported = isReported
 
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose} ariaTitle={t("Report Navigator")} showCloseButton>
@@ -82,7 +96,7 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
 
         {infractions.length === 0 ? (
           <Text textStyle="sm" color="text.subtle">
-            {t("No reportable infractions found for the previous round.")}
+            {t("No reportable infractions in the latest completed allocation round.")}
           </Text>
         ) : (
           <>
@@ -99,7 +113,7 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
                 <Text textStyle="sm" fontWeight="semibold">
                   {allReported
                     ? t("All infractions reported")
-                    : `${t("Penalty per infraction")}: ${penaltyPct}% (${formatter.format(penaltyAmount)} B3TR)`}
+                    : `${t("Penalty per reported round")}: ${penaltyPct}% (${formatter.format(penaltyAmount)} B3TR)`}
                 </Text>
                 {!allReported && (
                   <Text textStyle="xs" color="text.subtle">
@@ -110,12 +124,10 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
             </HStack>
 
             <VStack gap={2} align="stretch">
-              {infractions.map((inf, i) => {
-                const isReported = reportedSet?.has(i) ?? false
-
+              {infractions.map(inf => {
                 return (
                   <HStack
-                    key={`${inf.type}-${inf.proposalId ?? inf.roundId}-${i}`}
+                    key={`${inf.type}-${inf.proposalId ?? inf.roundId}`}
                     p={3}
                     borderRadius="lg"
                     border="sm"
@@ -133,27 +145,21 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
                         {t("Round #{{round}}", { round: inf.roundId })}
                       </Text>
                     </VStack>
-                    {isReported ? (
+                    {isReported && (
                       <Badge colorPalette="green" size="sm">
                         {t("Reported")}
                       </Badge>
-                    ) : (
-                      <>
-                        <Badge colorPalette="red" size="sm">
-                          {"-"}
-                          {formatter.format(penaltyAmount)}
-                          {" B3TR"}
-                        </Badge>
-                        <Button variant="outline" size="xs" colorPalette="red" onClick={() => handleReport(inf)}>
-                          <LuFlag />
-                          {t("Report")}
-                        </Button>
-                      </>
                     )}
                   </HStack>
                 )
               })}
             </VStack>
+            {!isReported && (
+              <Button alignSelf="end" variant="outline" size="sm" colorPalette="red" onClick={handleReport}>
+                <LuFlag />
+                {t("Report")}
+              </Button>
+            )}
           </>
         )}
       </VStack>

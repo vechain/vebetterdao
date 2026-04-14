@@ -58,12 +58,14 @@ export const NavigatorDashboardCard = () => {
   const { data: decisionsMap } = useHasSetDecisions(activeProposalIds)
 
   const currentRound = Number(roundId ?? 0)
-  const isReportDue =
-    reportInterval != null && lastReportRound != null && currentRound > 0
-      ? currentRound - lastReportRound >= reportInterval
+  const lastReport = lastReportRound ?? 0
+  const hasReportThisRound = currentRound > 0 && lastReport === currentRound
+  const isReportMandatory =
+    reportInterval != null && reportInterval > 0 && currentRound > 0
+      ? currentRound >= lastReport + reportInterval
       : false
   const hasUnvotedProposals = activeProposals.some(p => !decisionsMap?.[p.id])
-  const hasPendingTasks = !hasSetPrefs || isReportDue || hasUnvotedProposals
+  const hasPendingTasks = !hasSetPrefs || (isReportMandatory && !hasReportThisRound) || hasUnvotedProposals
 
   const delegationChange = useMemo(() => {
     if (!nav || !delegatedAtSnapshot) return null
@@ -203,10 +205,20 @@ export const NavigatorDashboardCard = () => {
                     </HStack>
                   )}
                   <HStack gap={1}>
-                    <Icon boxSize={3} color={isReportDue ? "status.warning.primary" : "status.positive.primary"}>
-                      {isReportDue ? <LuCircle /> : <LuCheck />}
+                    <Icon
+                      boxSize={3}
+                      color={
+                        hasReportThisRound
+                          ? "status.positive.primary"
+                          : isReportMandatory
+                            ? "status.warning.primary"
+                            : "text.subtle"
+                      }>
+                      {hasReportThisRound ? <LuCheck /> : <LuCircle />}
                     </Icon>
-                    <Text textStyle="xs">{isReportDue ? t("Report Due") : t("Report Submitted")}</Text>
+                    <Text textStyle="xs">
+                      {hasReportThisRound ? t("Report Submitted") : isReportMandatory ? t("Report Due") : t("Optional")}
+                    </Text>
                   </HStack>
                 </HStack>
               </VStack>

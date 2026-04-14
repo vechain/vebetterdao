@@ -5,7 +5,10 @@ import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { getGetPreferencesSetBlockQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferencesSetBlock"
 import { getHasSetPreferencesQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
+import { getNavigatorPreferenceEventsKey } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorPreferenceEvents"
+import { getUserVotesInAllRoundsQueryKey } from "@/api/contracts/xApps/hooks/useUserVotesInAllRounds"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 import { getParticipatedInGovernanceQueryKey } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
@@ -117,6 +120,9 @@ export const useCastAllocationVotes = ({
     ]
     if (isNavigator && account?.address) {
       keys.push(getHasSetPreferencesQueryKey(account.address, roundId))
+      keys.push(getGetPreferencesSetBlockQueryKey(account.address, roundId))
+      keys.push(getNavigatorPreferenceEventsKey(account.address))
+      keys.push(getUserVotesInAllRoundsQueryKey(account.address))
     }
     return keys
   }, [roundId, account?.address, isNavigator])

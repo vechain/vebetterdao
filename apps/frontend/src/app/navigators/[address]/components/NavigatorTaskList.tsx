@@ -6,9 +6,12 @@ import { useTranslation } from "react-i18next"
 import { LuCheck, LuCircle, LuClock, LuFileText, LuGavel, LuInfo, LuTriangleAlert, LuVote } from "react-icons/lu"
 
 import { useGetLastReportRound } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
+import { useGetPreferenceCutoffPeriod } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferenceCutoffPeriod"
+import { useGetPreferencesSetBlock } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferencesSetBlock"
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
 import { useHasSetDecisions } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecisions"
 import { useHasSetPreferences } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
+import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useNavigatorCutoffDeadline } from "@/hooks/navigator/useNavigatorCutoffDeadline"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
@@ -26,9 +29,22 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
   const [isInfoOpen, setIsInfoOpen] = useState(false)
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: hasSetPrefs } = useHasSetPreferences(roundId)
+  const { data: prefsSetBlock } = useGetPreferencesSetBlock(roundId)
+  const { data: roundDeadlineBlock } = useCurrentAllocationsRoundDeadline()
+  const { data: preferenceCutoffPeriod } = useGetPreferenceCutoffPeriod()
   const { data: lastReportRound } = useGetLastReportRound()
   const { data: reportInterval } = useGetReportInterval()
   const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
+
+  const preferenceCutoffBlock = useMemo(() => {
+    if (roundDeadlineBlock == null || preferenceCutoffPeriod == null) return null
+    const deadline = BigInt(roundDeadlineBlock)
+    const period = BigInt(preferenceCutoffPeriod)
+    return deadline > period ? deadline - period : 0n
+  }, [roundDeadlineBlock, preferenceCutoffPeriod])
+
+  const isPreferencesSetLate =
+    !!hasSetPrefs && prefsSetBlock != null && preferenceCutoffBlock != null && prefsSetBlock > preferenceCutoffBlock
 
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
 
@@ -41,13 +57,15 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
   const { data: decisionsMap } = useHasSetDecisions(activeProposalIds)
 
   const currentRound = Number(roundId ?? 0)
-  const isReportDue =
-    reportInterval != null && lastReportRound != null && currentRound > 0
-      ? currentRound - lastReportRound >= reportInterval
+  const lastReport = lastReportRound ?? 0
+  const hasReportThisRound = currentRound > 0 && lastReport === currentRound
+  const isReportMandatory =
+    reportInterval != null && reportInterval > 0 && currentRound > 0
+      ? currentRound >= lastReport + reportInterval
       : false
 
   const hasUnvotedProposals = activeProposals.some(p => !decisionsMap?.[p.id])
-  const hasPendingTasks = !hasSetPrefs || isReportDue || hasUnvotedProposals
+  const hasPendingTasks = !hasSetPrefs || (isReportMandatory && !hasReportThisRound) || hasUnvotedProposals
 
   if (!roundId) return null
 
@@ -111,6 +129,7 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
             <TaskItem
               done={!!hasSetPrefs}
               overdue={!hasSetPrefs && isPastCutoff}
+              showOverdueWhenDone={isPreferencesSetLate}
               icon={<LuVote />}
               label={t("Set allocation preferences")}
               doneLabel={t("Preferences Set")}
@@ -131,7 +150,8 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
             ))}
 
             <TaskItem
-              done={!isReportDue}
+              done={hasReportThisRound}
+              softPending={!hasReportThisRound && !isReportMandatory}
               icon={<LuFileText />}
               label={t("Submit Report")}
               doneLabel={t("Report Submitted")}
@@ -150,6 +170,10 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
 type TaskItemProps = {
   done: boolean
   overdue?: boolean
+  /** Preferences (or similar) completed after on-chain cutoff — orange "Overdue" like Round history */
+  showOverdueWhenDone?: boolean
+  /** Report optional this round: gray badge, still clickable */
+  softPending?: boolean
   icon: React.ReactNode
   label: string
   doneLabel: string
@@ -157,8 +181,20 @@ type TaskItemProps = {
   onClick: () => void
 }
 
-const TaskItem = ({ done, overdue, icon, label, doneLabel, pendingLabel, onClick }: TaskItemProps) => {
-  const palette = done ? "green" : overdue ? "red" : "orange"
+const TaskItem = ({
+  done,
+  overdue,
+  showOverdueWhenDone,
+  softPending,
+  icon,
+  label,
+  doneLabel,
+  pendingLabel,
+  onClick,
+}: TaskItemProps) => {
+  const { t } = useTranslation()
+  const palette = done ? "green" : softPending ? "gray" : overdue ? "red" : "orange"
+  const pendingBadgeLabel = softPending ? t("Optional") : pendingLabel
 
   return (
     <HStack
@@ -177,9 +213,16 @@ const TaskItem = ({ done, overdue, icon, label, doneLabel, pendingLabel, onClick
           {label}
         </Text>
       </HStack>
-      <Badge colorPalette={palette} size="sm">
-        {done ? doneLabel : pendingLabel}
-      </Badge>
+      <HStack gap={1} flexShrink={0}>
+        <Badge colorPalette={palette} size="sm">
+          {done ? doneLabel : pendingBadgeLabel}
+        </Badge>
+        {done && showOverdueWhenDone && (
+          <Badge colorPalette="orange" size="sm">
+            {t("Overdue")}
+          </Badge>
+        )}
+      </HStack>
     </HStack>
   )
 }

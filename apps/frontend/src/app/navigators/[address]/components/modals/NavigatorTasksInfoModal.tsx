@@ -44,7 +44,7 @@ export const NavigatorTasksInfoModal = ({ isOpen, onClose }: Props) => {
           <Icon color="status.negative.primary" mt={0.5}>
             <LuShieldAlert />
           </Icon>
-          <Text textStyle="sm" color="status.negative.primary">
+          <Text textStyle="xs" color="status.negative.primary">
             {t("navigatorTasksInfoSlashing")}
           </Text>
         </HStack>

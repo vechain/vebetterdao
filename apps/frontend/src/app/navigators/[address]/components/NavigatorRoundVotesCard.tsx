@@ -1,8 +1,11 @@
 "use client"
 
-import { Button, Card, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, Icon, Text, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { ethers } from "ethers"
+import { Sparks } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -11,6 +14,7 @@ import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AppImage } from "@/components/AppImage/AppImage"
 import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
 import { EmptyState } from "@/components/ui/empty-state"
+import { useEvents } from "@/hooks/useEvents"
 
 import { NavigatorRoundVotesModal } from "./modals/NavigatorRoundVotesModal"
 
@@ -19,6 +23,9 @@ const PREVIEW_ROUNDS = 5
 export type RoundVote = {
   roundId: string
   apps: { appId: string; appName?: string; votes: number }[]
+  freshnessLabel?: string
+  isFirstVote?: boolean
+  isUpdated?: boolean
 }
 
 function groupVotesByRound(
@@ -61,7 +68,47 @@ export const NavigatorRoundVotesCard = ({ address }: Props) => {
   const [selectedRound, setSelectedRound] = useState<RoundVote | null>(null)
   const [visibleCount, setVisibleCount] = useState(PREVIEW_ROUNDS)
 
-  const roundVotes = useMemo(() => groupVotesByRound(voteEvents ?? [], xApps?.allApps), [voteEvents, xApps?.allApps])
+  const { data: freshnessEvents } = useEvents({
+    abi: XAllocationVoting__factory.abi,
+    contractAddress: getConfig().xAllocationVotingContractAddress,
+    eventName: "FreshnessMultiplierApplied",
+    filterParams: { voter: address as `0x${string}` },
+    select: events =>
+      events.map(({ decodedData }) => ({
+        roundId: decodedData.args.roundId.toString(),
+        multiplier: Number(decodedData.args.multiplier),
+        lastChangedRound: Number(decodedData.args.lastChangedRound),
+      })),
+    enabled: !!address,
+  })
+
+  const freshnessByRound = useMemo(() => {
+    const map = new Map<string, { label: string; isFirstVote: boolean; isUpdated: boolean }>()
+    if (!freshnessEvents) return map
+    for (const e of freshnessEvents) {
+      const label = `x${e.multiplier / 10000}`
+      const roundsSinceChange = Number(e.roundId) - e.lastChangedRound
+      map.set(e.roundId, {
+        label,
+        isFirstVote: e.lastChangedRound === 0,
+        isUpdated: roundsSinceChange === 0,
+      })
+    }
+    return map
+  }, [freshnessEvents])
+
+  const roundVotes = useMemo(() => {
+    const grouped = groupVotesByRound(voteEvents ?? [], xApps?.allApps)
+    return grouped.map(round => {
+      const freshness = freshnessByRound.get(round.roundId)
+      return {
+        ...round,
+        freshnessLabel: freshness?.label,
+        isFirstVote: freshness?.isFirstVote,
+        isUpdated: freshness?.isUpdated,
+      }
+    })
+  }, [voteEvents, xApps?.allApps, freshnessByRound])
 
   const visibleRounds = roundVotes.slice(0, visibleCount)
   const hasMore = visibleCount < roundVotes.length
@@ -90,9 +137,9 @@ export const NavigatorRoundVotesCard = ({ address }: Props) => {
     <>
       <Card.Root w="full" variant="primary">
         <Card.Body>
-          <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={{ base: 2, md: 4 }}>
+          <Heading size="md" mb={{ base: 2, md: 4 }}>
             {t("Voted apps")}
-          </Text>
+          </Heading>
 
           <VStack gap={3} w="full" align="stretch">
             {visibleRounds.map(round => (
@@ -107,9 +154,24 @@ export const NavigatorRoundVotesCard = ({ address }: Props) => {
                     <Text textStyle="sm" fontWeight="semibold">
                       {t("Round #{{round}}", { round: round.roundId })}
                     </Text>
-                    <Text textStyle="xs" color="text.subtle">
-                      {`${round.apps.length} ${t("apps")}`}
-                    </Text>
+                    <HStack gap={1.5}>
+                      <Text textStyle="xs" color="text.subtle">
+                        {`${round.apps.length} ${t("apps")}`}
+                      </Text>
+                      {round.freshnessLabel && (
+                        <>
+                          <Text textStyle="xs" color="text.subtle" aria-hidden>
+                            {"·"}
+                          </Text>
+                          <HStack gap={0.5}>
+                            <Icon as={Sparks} boxSize={3} color="text.subtle" />
+                            <Text textStyle="xs" color="text.subtle">
+                              {round.freshnessLabel}
+                            </Text>
+                          </HStack>
+                        </>
+                      )}
+                    </HStack>
                   </VStack>
                   <HStack gap={-1}>
                     {round.apps.slice(0, 5).map(app => (

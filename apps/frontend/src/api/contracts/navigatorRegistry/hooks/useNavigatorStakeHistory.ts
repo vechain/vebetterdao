@@ -1,4 +1,5 @@
 import { getConfig } from "@repo/config"
+import type { QueryClient } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { formatEther } from "ethers"
 import { useMemo } from "react"
@@ -17,6 +18,23 @@ export type StakeHistoryEntry = {
   txId: string
   timestamp: number
   reason?: string
+  roundId?: string
+  infractionFlags?: number
+}
+
+const STAKE_HISTORY_EVENT_NAMES = [
+  "NavigatorRegistered",
+  "StakeAdded",
+  "StakeWithdrawn",
+  "NavigatorSlashed",
+  "NavigatorMinorSlashed",
+] as const
+
+/** Prefix-invalidates `useEvents` queries merged by `useNavigatorStakeHistory` */
+export const invalidateNavigatorStakeHistoryQueries = (queryClient: QueryClient) => {
+  for (const eventName of STAKE_HISTORY_EVENT_NAMES) {
+    void queryClient.invalidateQueries({ queryKey: [eventName] })
+  }
 }
 
 export const useNavigatorStakeHistory = (navigator?: string) => {
@@ -95,8 +113,33 @@ export const useNavigatorStakeHistory = (navigator?: string) => {
       })),
   })
 
+  const minorSlashedEvents = useEvents({
+    contractAddress: address,
+    abi,
+    eventName: "NavigatorMinorSlashed",
+    filterParams,
+    order: "desc",
+    select: events =>
+      events.map(({ decodedData, meta }) => ({
+        type: "slashed" as const,
+        navigator: String(decodedData.args.navigator ?? ""),
+        amount: formatEther(decodedData.args.amount ?? 0n),
+        newTotal: formatEther(decodedData.args.remainingStake ?? 0n),
+        blockNumber: meta.blockNumber,
+        txId: meta.txID,
+        timestamp: meta.blockTimestamp,
+        reason: `Round #${String(decodedData.args.roundId ?? "")}`,
+        roundId: String(decodedData.args.roundId ?? ""),
+        infractionFlags: Number(decodedData.args.infractionFlags ?? 0n),
+      })),
+  })
+
   const isLoading =
-    registeredEvents.isLoading || addedEvents.isLoading || withdrawnEvents.isLoading || slashedEvents.isLoading
+    registeredEvents.isLoading ||
+    addedEvents.isLoading ||
+    withdrawnEvents.isLoading ||
+    slashedEvents.isLoading ||
+    minorSlashedEvents.isLoading
 
   const data = useMemo(() => {
     const all: StakeHistoryEntry[] = [
@@ -104,9 +147,10 @@ export const useNavigatorStakeHistory = (navigator?: string) => {
       ...(addedEvents.data ?? []),
       ...(withdrawnEvents.data ?? []),
       ...(slashedEvents.data ?? []),
+      ...(minorSlashedEvents.data ?? []),
     ]
     return all.sort((a, b) => b.blockNumber - a.blockNumber)
-  }, [registeredEvents.data, addedEvents.data, withdrawnEvents.data, slashedEvents.data])
+  }, [registeredEvents.data, addedEvents.data, withdrawnEvents.data, slashedEvents.data, minorSlashedEvents.data])
 
   return { data, isLoading }
 }

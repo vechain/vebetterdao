@@ -55,7 +55,7 @@ import { NavigatorLifecycleUtils } from "./libraries/NavigatorLifecycleUtils.sol
  * - Citizens delegate specific VOT3 amounts with checkpointed snapshots
  * - Navigators set allocation preferences (custom % distribution) and governance decisions
  * - 20% fee on citizen rewards, locked for configurable rounds, claimable after lock period
- * - 5 automatic minor slashing types + governance-driven major slashing with fee forfeiture
+ * - 5 automatic minor infraction types, slashed once per round + governance-driven major slashing with fee forfeiture
  * - Exit process with notice period and lazy invalidation (citizen VOT3 auto-unlocked)
  * - Self-delegation blocked, citizens cannot manually vote while delegated
  * - Stale delegations auto-cleared: citizens can re-delegate directly to new navigator
@@ -265,41 +265,12 @@ contract NavigatorRegistry is
 
   // ======================== Slashing Reports (anyone can call) ======================== //
 
-  /// @notice Report navigator for missing allocation vote
+  /// @notice Report navigator for minor infractions in a completed round
   /// @param navigator Address of the navigator to report
-  /// @param roundId The round in which the vote was missed
-  function reportMissedAllocationVote(address navigator, uint256 roundId) external {
-    NavigatorSlashingUtils.reportMissedAllocationVote(navigator, roundId);
-  }
-
-  /// @notice Report navigator for missing governance proposal vote
-  /// @param navigator Address of the navigator to report
-  /// @param proposalId The proposal that was not voted on
-  function reportMissedGovernanceVote(address navigator, uint256 proposalId) external {
-    NavigatorSlashingUtils.reportMissedGovernanceVote(navigator, proposalId);
-  }
-
-  /// @notice Report navigator for stale allocation preferences (no update >= 3 rounds)
-  /// @param navigator Address of the navigator to report
-  /// @param roundId The round used as reference for staleness check
-  function reportStalePreferences(address navigator, uint256 roundId) external {
-    NavigatorSlashingUtils.reportStalePreferences(navigator, roundId);
-  }
-
-  /// @notice Report navigator for missing required report
-  /// @param navigator Address of the navigator to report
-  /// @param roundId The round in which the report was due
-  function reportMissedReport(address navigator, uint256 roundId) external {
-    NavigatorSlashingUtils.reportMissedReport(navigator, roundId);
-  }
-
-  /// @notice Report navigator for setting allocation preferences after the cutoff
-  /// @param navigator Address of the navigator to report
-  /// @param roundId The round in which preferences were set late
-  function reportLatePreferences(address navigator, uint256 roundId) external {
-    uint256 roundDeadline = IXAllocationVotingGovernor(NavigatorStorageTypes.getNavigatorStorage().xAllocationVoting)
-      .roundDeadline(roundId);
-    NavigatorSlashingUtils.reportLatePreferences(navigator, roundId, roundDeadline);
+  /// @param roundId The completed round to report
+  /// @param proposalIds Proposal IDs that were active in this round
+  function reportRoundInfractions(address navigator, uint256 roundId, uint256[] calldata proposalIds) external {
+    NavigatorSlashingUtils.reportRoundInfractions(navigator, roundId, proposalIds);
   }
 
   /// @notice Deactivate a navigator by governance (major infraction with slash)
@@ -627,17 +598,13 @@ contract NavigatorRegistry is
     return NavigatorSlashingUtils.getMinorSlashPercentage();
   }
 
-  /// @notice Check if a navigator was already slashed for a specific infraction
+  /// @notice Check if a navigator was already slashed for a round
   /// @param navigator The navigator address
-  /// @param id The round ID or proposal ID depending on infraction type
-  function isSlashedFor(address navigator, uint256 id) external view returns (
-    bool missedAllocation,
-    bool missedGovernance,
-    bool stalePrefs,
-    bool missedReport,
-    bool latePrefs
-  ) {
-    return NavigatorSlashingUtils.isSlashedFor(navigator, id);
+  /// @param roundId The round ID
+  /// @return slashed True if slashed for that round
+  /// @return infractionFlags Bitmask of infractions found when slashed
+  function isSlashedForRound(address navigator, uint256 roundId) external view returns (bool slashed, uint256 infractionFlags) {
+    return NavigatorSlashingUtils.isSlashedForRound(navigator, roundId);
   }
 
   /// @notice Get the preference cutoff period (blocks before round end)

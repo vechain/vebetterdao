@@ -1,14 +1,16 @@
 import { getConfig } from "@repo/config"
-import { type QueryKey } from "@tanstack/react-query"
+import { type QueryKey, useQueryClient } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
 
+import { getGetStakeQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { invalidateNavigatorStakeHistoryQueries } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
 import { buildClause } from "@/utils/buildClause"
 
 import { useBuildTransaction } from "../useBuildTransaction"
 
-const NavigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
 const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress
+const navigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
 
 export type InfractionType =
   | "missedAllocationVote"
@@ -26,68 +28,57 @@ export type ReportableInfraction = {
 }
 
 type ReportParams = {
-  infraction: ReportableInfraction
   navigator: string
-}
-
-const INFRACTION_COMMENTS: Record<InfractionType, string> = {
-  missedAllocationVote: "Report missed allocation vote",
-  missedGovernanceVote: "Report missed governance vote",
-  stalePreferences: "Report stale preferences",
-  missedReport: "Report missed report",
-  latePreferences: "Report late preferences",
+  roundId: string
+  proposalIds: string[]
 }
 
 type Props = {
   onSuccess?: () => void
   additionalRefetchKeys?: QueryKey[]
+  /** When set, also refreshes on-chain stake, indexer navigator stats (e.g. Total Staked), and stake history events */
+  navigatorAddress?: string
 }
 
-export const useReportNavigatorInfraction = ({ onSuccess, additionalRefetchKeys = [] }: Props) => {
-  const clauseBuilder = useCallback(({ infraction, navigator }: ReportParams) => {
-    const { type, roundId, voteEnd, proposalId } = infraction
+export const useReportNavigatorInfraction = ({ onSuccess, additionalRefetchKeys = [], navigatorAddress }: Props) => {
+  const queryClient = useQueryClient()
 
-    const methodMap: Record<InfractionType, { method: string; args: unknown[] }> = {
-      missedAllocationVote: {
-        method: "reportMissedAllocationVote",
-        args: [navigator, BigInt(roundId)],
-      },
-      missedGovernanceVote: {
-        method: "reportMissedGovernanceVote",
-        args: [navigator, BigInt(proposalId ?? 0)],
-      },
-      stalePreferences: {
-        method: "reportStalePreferences",
-        args: [navigator, BigInt(roundId)],
-      },
-      missedReport: {
-        method: "reportMissedReport",
-        args: [navigator, BigInt(roundId)],
-      },
-      latePreferences: {
-        method: "reportLatePreferences",
-        args: [navigator, BigInt(roundId), BigInt(voteEnd ?? 0)],
-      },
-    }
-
-    const { method, args } = methodMap[type]
-
+  const clauseBuilder = useCallback(({ navigator, roundId, proposalIds }: ReportParams) => {
     return [
       buildClause({
         to: navigatorRegistryAddress,
-        contractInterface: NavigatorRegistryInterface,
-        method: method as any,
-        args,
-        comment: INFRACTION_COMMENTS[type],
+        contractInterface: navigatorRegistryInterface,
+        method: "reportRoundInfractions",
+        args: [navigator, BigInt(roundId), proposalIds.map(id => BigInt(id))],
+        comment: "Report round infractions",
       }),
     ]
   }, [])
 
-  const refetchQueryKeys = useMemo(() => [["isSlashedFor"], ...additionalRefetchKeys], [additionalRefetchKeys])
+  const invalidateKeys = useMemo((): QueryKey[] => {
+    const keys: QueryKey[] = [["isSlashedForRound"], ...additionalRefetchKeys]
+    if (navigatorAddress) {
+      keys.push(getGetStakeQueryKey(navigatorAddress))
+    }
+    return keys
+  }, [additionalRefetchKeys, navigatorAddress])
+
+  const handleSuccess = useCallback(() => {
+    for (const queryKey of invalidateKeys) {
+      void queryClient.invalidateQueries({ queryKey })
+    }
+    if (navigatorAddress) {
+      void queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators"] })
+      invalidateNavigatorStakeHistoryQueries(queryClient)
+    }
+    onSuccess?.()
+  }, [invalidateKeys, navigatorAddress, onSuccess, queryClient])
 
   return useBuildTransaction<ReportParams>({
     clauseBuilder,
-    refetchQueryKeys,
-    onSuccess,
+    // resetQueries here clears cache before refetch — slashed/stake flicker to empty / false
+    refetchQueryKeys: [],
+    invalidateCache: false,
+    onSuccess: handleSuccess,
   })
 }

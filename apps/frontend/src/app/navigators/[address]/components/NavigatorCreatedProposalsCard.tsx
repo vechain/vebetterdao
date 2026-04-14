@@ -1,4 +1,4 @@
-import { Badge, Button, Card, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Badge, Button, Card, HStack, Heading, Icon, VStack } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -50,9 +50,9 @@ export const NavigatorCreatedProposalsCard = ({ address }: Props) => {
         <Card.Body>
           <HStack w="full" justify="space-between" align="center" mb={{ base: 2, md: 4 }}>
             <HStack gap={2} align="center">
-              <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
+              <Heading size="md" mb={{ base: 2, md: 4 }}>
                 {t("Created proposals")}
-              </Text>
+              </Heading>
               <Badge variant="neutral" size="sm" rounded="sm">
                 {createdProposals.length}
               </Badge>

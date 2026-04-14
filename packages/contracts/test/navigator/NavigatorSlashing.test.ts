@@ -22,7 +22,12 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
   const STAKE_AMOUNT = ethers.parseEther("50000")
   const METADATA_URI = "ipfs://navigator-metadata"
   const app1 = ethers.keccak256(ethers.toUtf8Bytes("App1"))
-  const app2 = ethers.keccak256(ethers.toUtf8Bytes("App2"))
+
+  const FLAG_MISSED_ALLOCATION = 1n
+  const FLAG_LATE_PREFERENCES = 2n
+  const FLAG_STALE_PREFERENCES = 4n
+  const FLAG_MISSED_REPORT = 8n
+  const FLAG_MISSED_GOVERNANCE = 16n
 
   // Helper: fund account with B3TR (via owner) and approve NavigatorRegistry
   const fundAndApprove = async (account: HardhatEthersSigner, amount: bigint) => {
@@ -82,308 +87,137 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
     await registerNavigator(navigator1)
   })
 
-  // ======================== 1. reportMissedAllocationVote ======================== //
-
-  describe("reportMissedAllocationVote()", function () {
-    it("should slash navigator who has citizens but no preferences for round", async function () {
+  describe("reportRoundInfractions()", function () {
+    it("reverts when reporting an active round", async function () {
       await delegateCitizen(citizen1, navigator1)
-
       await bootstrapAndStartEmissions()
       const roundId = await xAllocationVoting.currentRoundId()
 
-      // Navigator does NOT set preferences — end round
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "RoundStillActive")
+    })
+
+    it("slashes once even when multiple infractions are true", async function () {
+      await delegateCitizen(citizen1, navigator1)
+
+      await bootstrapAndStartEmissions()
+      await advanceRounds(2)
+
+      const roundId = await xAllocationVoting.currentRoundId()
       await waitForRoundToEnd(Number(roundId))
 
       const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId)
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [999n])
       const stakeAfter = await navigatorRegistry.getStake(navigator1.address)
 
-      // 10% of 50000 = 5000 slashed
       const expectedSlash = (stakeBefore * 1000n) / 10000n
       expect(stakeAfter).to.equal(stakeBefore - expectedSlash)
-    })
 
-    it("should revert NoInfractionFound when navigator has no citizens", async function () {
-      await bootstrapAndStartEmissions()
-      const roundId = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(roundId))
-
-      await expect(
-        navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
-    })
-
-    it("should revert NoInfractionFound when preferences already set", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      await bootstrapAndStartEmissions()
-      const roundId = await xAllocationVoting.currentRoundId()
-
-      // Navigator sets preferences
-      await navigatorRegistry.connect(navigator1).setAllocationPreferences(roundId, [app1, app2], [6000, 4000])
-
-      await waitForRoundToEnd(Number(roundId))
-
-      await expect(
-        navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
-    })
-
-    it("should revert AlreadySlashed when already slashed for this round", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      await bootstrapAndStartEmissions()
-      const roundId = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(roundId))
-
-      // First slash succeeds
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId)
-
-      // Second slash reverts
-      await expect(
-        navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "AlreadySlashed")
-    })
-  })
-
-  // ======================== 2. reportMissedGovernanceVote ======================== //
-
-  describe("reportMissedGovernanceVote()", function () {
-    it("should slash navigator who has citizens but no decision for proposal", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
-      const fakeProposalId = 999n
-
-      await navigatorRegistry.reportMissedGovernanceVote(navigator1.address, fakeProposalId)
-
-      const stakeAfter = await navigatorRegistry.getStake(navigator1.address)
-      const expectedSlash = (stakeBefore * 1000n) / 10000n
-      expect(stakeAfter).to.equal(stakeBefore - expectedSlash)
-    })
-
-    it("should revert NoInfractionFound when navigator has no citizens", async function () {
-      await expect(navigatorRegistry.reportMissedGovernanceVote(navigator1.address, 999)).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NoInfractionFound",
+      const [slashed, flags] = await navigatorRegistry.isSlashedForRound(navigator1.address, roundId)
+      expect(slashed).to.equal(true)
+      expect(flags).to.equal(
+        FLAG_MISSED_ALLOCATION | FLAG_STALE_PREFERENCES | FLAG_MISSED_REPORT | FLAG_MISSED_GOVERNANCE,
       )
     })
 
-    it("should revert NoInfractionFound when decision is set", async function () {
+    it("detects late preferences as infraction", async function () {
       await delegateCitizen(citizen1, navigator1)
-
-      const fakeProposalId = 999n
-      // Navigator sets decision (2 = For)
-      await navigatorRegistry.connect(navigator1).setProposalDecision(fakeProposalId, 2)
-
-      await expect(
-        navigatorRegistry.reportMissedGovernanceVote(navigator1.address, fakeProposalId),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
-    })
-  })
-
-  // ======================== 3. reportStalePreferences ======================== //
-
-  describe("reportStalePreferences()", function () {
-    it("should slash when no preferences set in 3+ rounds", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      // Start emissions, set prefs in round 1
-      await bootstrapAndStartEmissions()
-      const round1 = await xAllocationVoting.currentRoundId()
-      await navigatorRegistry.connect(navigator1).setAllocationPreferences(round1, [app1], [10000])
-
-      // Advance to round 4 without setting preferences
-      await advanceRounds(3)
-
-      const round4 = await xAllocationVoting.currentRoundId()
-      const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
-
-      await navigatorRegistry.reportStalePreferences(navigator1.address, round4)
-
-      const stakeAfter = await navigatorRegistry.getStake(navigator1.address)
-      const expectedSlash = (stakeBefore * 1000n) / 10000n
-      expect(stakeAfter).to.equal(stakeBefore - expectedSlash)
-    })
-
-    it("should revert NoInfractionFound when prefs set in recent round", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      await bootstrapAndStartEmissions()
-      const round1 = await xAllocationVoting.currentRoundId()
-      await navigatorRegistry.connect(navigator1).setAllocationPreferences(round1, [app1], [10000])
-
-      // Advance only 1 round
-      await advanceRounds(1)
-      const round2 = await xAllocationVoting.currentRoundId()
-
-      await expect(navigatorRegistry.reportStalePreferences(navigator1.address, round2)).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NoInfractionFound",
-      )
-    })
-  })
-
-  // ======================== 4. reportMissedReport ======================== //
-
-  describe("reportMissedReport()", function () {
-    it("should slash when past reportInterval with citizens", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      await bootstrapAndStartEmissions()
-
-      // reportInterval is 2 by default. Advance 3+ rounds without submitting report.
-      await advanceRounds(3)
-
-      const currentRound = await xAllocationVoting.currentRoundId()
-      const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
-
-      await navigatorRegistry.reportMissedReport(navigator1.address, currentRound)
-
-      const stakeAfter = await navigatorRegistry.getStake(navigator1.address)
-      const expectedSlash = (stakeBefore * 1000n) / 10000n
-      expect(stakeAfter).to.equal(stakeBefore - expectedSlash)
-    })
-
-    it("should revert NoInfractionFound when report submitted recently", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      await bootstrapAndStartEmissions()
-
-      // Submit report in round 1
-      await navigatorRegistry.connect(navigator1).submitReport("ipfs://report1")
-
-      // Advance 1 round (within reportInterval of 2)
-      await advanceRounds(1)
-      const currentRound = await xAllocationVoting.currentRoundId()
-
-      await expect(
-        navigatorRegistry.reportMissedReport(navigator1.address, currentRound),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
-    })
-  })
-
-  // ======================== 5. reportLatePreferences ======================== //
-
-  describe("reportLatePreferences()", function () {
-    it("should slash when preferences set after cutoff", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
       await bootstrapAndStartEmissions()
       const roundId = await xAllocationVoting.currentRoundId()
 
-      // Set cutoff to 2 blocks so it fits within our short test rounds
       await navigatorRegistry.connect(owner).setPreferenceCutoffPeriod(2)
-
       const deadline = await xAllocationVoting.roundDeadline(roundId)
       const cutoff = deadline - 2n
-
-      // Advance to just past cutoff (deadline - 1 block = after cutoff)
       const currentBlock = await xAllocationVoting.clock()
       const blocksToAdvance = Number(cutoff - currentBlock) + 1
       if (blocksToAdvance > 0) {
         await moveBlocks(blocksToAdvance)
       }
 
-      // Set preferences late (after cutoff)
       await navigatorRegistry.connect(navigator1).setAllocationPreferences(roundId, [app1], [10000])
 
       await waitForRoundToEnd(Number(roundId))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [])
 
-      const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
-      await navigatorRegistry.reportLatePreferences(navigator1.address, roundId)
-      const stakeAfter = await navigatorRegistry.getStake(navigator1.address)
-
-      const expectedSlash = (stakeBefore * 1000n) / 10000n
-      expect(stakeAfter).to.equal(stakeBefore - expectedSlash)
+      const [slashed, flags] = await navigatorRegistry.isSlashedForRound(navigator1.address, roundId)
+      expect(slashed).to.equal(true)
+      expect(flags).to.equal(FLAG_LATE_PREFERENCES)
     })
 
-    it("should revert NoInfractionFound when preferences set before cutoff", async function () {
+    it("reverts NoInfractionFound when no infraction exists", async function () {
       await delegateCitizen(citizen1, navigator1)
-
       await bootstrapAndStartEmissions()
       const roundId = await xAllocationVoting.currentRoundId()
-
-      // Set cutoff to 2 blocks
       await navigatorRegistry.connect(owner).setPreferenceCutoffPeriod(2)
 
-      // Set preferences immediately (well before cutoff)
       await navigatorRegistry.connect(navigator1).setAllocationPreferences(roundId, [app1], [10000])
-
       await waitForRoundToEnd(Number(roundId))
 
-      await expect(navigatorRegistry.reportLatePreferences(navigator1.address, roundId)).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NoInfractionFound",
-      )
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
     })
 
-    it("should revert NoInfractionFound when no preferences set at all", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
+    it("reverts NoInfractionFound when navigator had no delegations", async function () {
       await bootstrapAndStartEmissions()
       const roundId = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(roundId))
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
+    })
 
-      await navigatorRegistry.connect(owner).setPreferenceCutoffPeriod(2)
-
+    it("reverts AlreadySlashed when reporting same round twice", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+      const roundId = await xAllocationVoting.currentRoundId()
       await waitForRoundToEnd(Number(roundId))
 
-      // No prefs set — should use reportMissedAllocationVote instead
-      await expect(navigatorRegistry.reportLatePreferences(navigator1.address, roundId)).to.be.revertedWithCustomError(
-        navigatorRegistry,
-        "NoInfractionFound",
-      )
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [])
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "AlreadySlashed")
     })
   })
-
-  // ======================== 6. Minor slash compounding ======================== //
 
   describe("Minor slash compounding", function () {
-    it("should compound: 50000 -> 45000 -> 40500", async function () {
+    it("compounds across rounds: 50000 -> 45000 -> 40500", async function () {
       await delegateCitizen(citizen1, navigator1)
-
       await bootstrapAndStartEmissions()
 
-      // First slash: 10% of 50000 = 5000
       const round1 = await xAllocationVoting.currentRoundId()
       await waitForRoundToEnd(Number(round1))
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, round1)
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
       expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("45000"))
 
-      // Advance to next round
       await emissions.distribute()
-
-      // Second slash: 10% of 45000 = 4500
       const round2 = await xAllocationVoting.currentRoundId()
       await waitForRoundToEnd(Number(round2))
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, round2)
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round2, [])
       expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("40500"))
-    })
 
-    it("should disallow delegations when stake drops below minimum", async function () {
-      // Register a navigator with exactly minStake so one slash drops below
-      const minStake = await navigatorRegistry.getMinStake()
-      const navForSlash = otherAccounts[15]
-      await b3tr.connect(minterAccount).mint(navForSlash.address, minStake)
-      await b3tr.connect(navForSlash).approve(await navigatorRegistry.getAddress(), minStake)
-      await navigatorRegistry.connect(navForSlash).register(minStake, "ipfs://test")
-
-      // Delegate so navigator has citizens (required for slashing to trigger)
-      await getVot3Tokens(citizen1, "100")
-      await navigatorRegistry.connect(citizen1).delegate(navForSlash.address, ethers.parseEther("100"))
-
-      await bootstrapAndStartEmissions()
-
-      // After 1 slash: 10% of minStake removed => below minStake => canAcceptDelegations = false
-      const round1 = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(round1))
-      await navigatorRegistry.reportMissedAllocationVote(navForSlash.address, round1)
-
-      expect(await navigatorRegistry.canAcceptDelegations(navForSlash.address)).to.equal(false)
+      const expectedTotal = ethers.parseEther("5000") + ethers.parseEther("4500")
+      expect(await navigatorRegistry.getTotalSlashed(navigator1.address)).to.equal(expectedTotal)
     })
   })
 
-  // ======================== 7. deactivateNavigator / majorSlash ======================== //
+  describe("Treasury verification", function () {
+    it("increases treasury B3TR balance by slashed amount", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(roundId))
+
+      const treasuryAddress = await treasury.getAddress()
+      const treasuryBefore = await b3tr.balanceOf(treasuryAddress)
+      const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [])
+      const expectedSlash = (stakeBefore * 1000n) / 10000n
+      const treasuryAfter = await b3tr.balanceOf(treasuryAddress)
+      expect(treasuryAfter - treasuryBefore).to.equal(expectedSlash)
+    })
+  })
 
   describe("deactivateNavigator() / majorSlash", function () {
     it("should revert when called by non-governance role", async function () {
@@ -442,54 +276,6 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
 
       expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(STAKE_AMOUNT)
       expect(await navigatorRegistry.isDeactivated(navigator1.address)).to.equal(true)
-    })
-  })
-
-  // ======================== 8. Treasury verification ======================== //
-
-  describe("Treasury verification", function () {
-    it("should increase treasury B3TR balance by slashed amount", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      await bootstrapAndStartEmissions()
-      const roundId = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(roundId))
-
-      // Capture treasury balance AFTER emissions (which change treasury balance)
-      const treasuryAddress = await treasury.getAddress()
-      const treasuryBefore = await b3tr.balanceOf(treasuryAddress)
-      const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
-      const expectedSlash = (stakeBefore * 1000n) / 10000n
-
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId)
-
-      const treasuryAfter = await b3tr.balanceOf(treasuryAddress)
-      expect(treasuryAfter - treasuryBefore).to.equal(expectedSlash)
-    })
-  })
-
-  // ======================== 9. getTotalSlashed ======================== //
-
-  describe("getTotalSlashed()", function () {
-    it("should accumulate across multiple slashes", async function () {
-      await delegateCitizen(citizen1, navigator1)
-
-      await bootstrapAndStartEmissions()
-
-      // First slash: 10% of 50000 = 5000
-      const round1 = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(round1))
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, round1)
-      const firstSlash = ethers.parseEther("5000")
-      expect(await navigatorRegistry.getTotalSlashed(navigator1.address)).to.equal(firstSlash)
-
-      // Second slash: 10% of 45000 = 4500
-      await emissions.distribute()
-      const round2 = await xAllocationVoting.currentRoundId()
-      await waitForRoundToEnd(Number(round2))
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, round2)
-      const secondSlash = ethers.parseEther("4500")
-      expect(await navigatorRegistry.getTotalSlashed(navigator1.address)).to.equal(firstSlash + secondSlash)
     })
   })
 })

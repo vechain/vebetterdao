@@ -67,16 +67,10 @@ library NavigatorStorageTypes {
     mapping(address => uint256) totalSlashed;
     // minor slash percentage in basis points (default: 1000 = 10% of current stake)
     uint256 minorSlashPercentage;
-    // navigator => round => slashed for missed allocation vote
-    mapping(address => mapping(uint256 => bool)) slashedForMissedAllocationVote;
-    // navigator => proposalId => slashed for missed governance vote
-    mapping(address => mapping(uint256 => bool)) slashedForMissedGovernanceVote;
-    // navigator => round => slashed for stale preferences (no update >= 3 rounds)
-    mapping(address => mapping(uint256 => bool)) slashedForStalePreferences;
-    // navigator => round => slashed for missed report
-    mapping(address => mapping(uint256 => bool)) slashedForMissedReport;
-    // navigator => round => slashed for late preferences (set after cutoff)
-    mapping(address => mapping(uint256 => bool)) slashedForLatePreferences;
+    // navigator => round => whether already slashed for minor infractions in this round
+    mapping(address => mapping(uint256 => bool)) slashedForRound;
+    // navigator => round => bitmask of minor infractions found when slashed
+    mapping(address => mapping(uint256 => uint256)) roundInfractionFlags;
 
     // ======================== Lifecycle ======================== //
     // navigator => whether registered (active or in exit process)

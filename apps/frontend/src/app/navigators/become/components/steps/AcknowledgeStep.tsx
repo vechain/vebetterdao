@@ -72,7 +72,7 @@ export const AcknowledgeStep = () => {
           <Checkbox.Label>
             <Text textStyle="sm">
               {t(
-                "I acknowledge that failing to vote on governance proposals and app allocations every round may result in slashing of 5% of my staked funds per infraction.",
+                "I acknowledge that failing to vote on governance proposals and app allocations may result in one minor slash per reported round.",
               )}
             </Text>
           </Checkbox.Label>
@@ -89,7 +89,7 @@ export const AcknowledgeStep = () => {
           <Checkbox.Label>
             <Text textStyle="sm">
               {t(
-                "I acknowledge that I must publish a Navigator Report at least once every two rounds, covering allocation rationale, strategy changes, dApp performance insights, and recommendations. Failure to do so may result in slashing of 5% of my staked funds.",
+                "I acknowledge that I must publish a Navigator Report at least once every two rounds, covering allocation rationale, strategy changes, dApp performance insights, and recommendations. Failure to do so may result in a minor slash when a completed round is reported (at most once per round; percentage is governance-configurable).",
               )}
             </Text>
           </Checkbox.Label>
@@ -106,7 +106,7 @@ export const AcknowledgeStep = () => {
           <Checkbox.Label>
             <Text textStyle="sm">
               {t(
-                "I acknowledge that I must provide full and timely conflict-of-interest disclosures, including compensation, token allocations, or advisory relationships with any dApp. Failure to do so may result in slashing of 5% of my staked funds.",
+                "I acknowledge that I must provide full and timely conflict-of-interest disclosures, including compensation, token allocations, or advisory relationships with any dApp. Severe or repeated failures may be addressed through governance, including slashing as outlined below.",
               )}
             </Text>
           </Checkbox.Label>

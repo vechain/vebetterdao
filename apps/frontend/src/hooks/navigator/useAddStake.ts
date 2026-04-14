@@ -7,6 +7,7 @@ import { ethers } from "ethers"
 import { useCallback } from "react"
 
 import { getGetStakeQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { invalidateNavigatorStakeHistoryQueries } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
 import { buildClause } from "@/utils/buildClause"
 
 import { useBuildTransaction } from "../useBuildTransaction"
@@ -54,6 +55,7 @@ export const useAddStake = ({ onSuccess }: Props) => {
     queryClient.invalidateQueries({ queryKey: getGetStakeQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getB3trBalanceQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators"] })
+    invalidateNavigatorStakeHistoryQueries(queryClient)
     queryClient.invalidateQueries({ queryKey: ["bestBlockCompressed"] })
     onSuccess?.()
   }, [queryClient, account, onSuccess])

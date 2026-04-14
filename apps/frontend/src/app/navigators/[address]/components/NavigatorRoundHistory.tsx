@@ -1,9 +1,10 @@
 "use client"
 
-import { Badge, Button, Card, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Badge, Button, Card, HStack, Heading, Icon, IconButton, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
+import { useCurrentBlock } from "@vechain/vechain-kit"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
@@ -15,6 +16,7 @@ import {
   LuFileText,
   LuFlag,
   LuGavel,
+  LuInfo,
   LuVote,
   LuX,
 } from "react-icons/lu"
@@ -30,18 +32,24 @@ import { useNavigatorPreferenceEvents } from "@/api/contracts/navigatorRegistry/
 import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { useAllocationRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useAllocationRoundSnapshot"
 import { useAllocationsRoundsEvents } from "@/api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useUserVotesInAllRounds } from "@/api/contracts/xApps/hooks/useUserVotesInAllRounds"
 import { type ReportableInfraction } from "@/hooks/navigator/useReportNavigatorInfraction"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useEvents } from "@/hooks/useEvents"
 
 import { ReportNavigatorModal } from "./modals/ReportNavigatorModal"
+import { TasksHistoryInfoModal } from "./modals/TasksHistoryInfoModal"
 import { ViewReportModal } from "./modals/ViewReportModal"
 
 const formatter = getCompactFormatter(2)
-const PREVIEW_ROUNDS = 5
+const PREVIEW_ROUNDS = 3
 
-type TaskStatus = "done" | "late" | "missed"
+/** `pending` = round voting period not over yet (not a compliance failure). */
+type TaskStatus = "done" | "late" | "missed" | "pending"
+
+/** Report row: open round, interval does not require a report yet, none submitted */
+type ReportRowStatus = TaskStatus | "notDue" | "optionalOpen"
 
 type ProposalTask = {
   proposalId: string
@@ -52,6 +60,8 @@ type ProposalTask = {
 type RoundCompliance = {
   roundId: string
   voteEnd: number
+  /** Matches XAllocation `state`: Active while `currentBlock <= voteEnd`. */
+  isRoundStillOpen: boolean
   allocationStatus: TaskStatus
   proposals: ProposalTask[]
   reportSubmitted: boolean
@@ -70,6 +80,7 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   const [expandedRound, setExpandedRound] = useState<string | null>(null)
   const [viewReportURI, setViewReportURI] = useState<string | null>(null)
   const [isReportOpen, setIsReportOpen] = useState(false)
+  const [isTasksHistoryInfoOpen, setIsTasksHistoryInfoOpen] = useState(false)
 
   const { data: roundsData } = useAllocationsRoundsEvents()
   const { data: prefEvents } = useNavigatorPreferenceEvents(address)
@@ -81,6 +92,8 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   const { data: reportInterval } = useGetReportInterval()
   const { data: stake } = useGetStake(address)
   const { data: slashBps } = useGetMinorSlashPercentage()
+  const { data: currentBlock } = useCurrentBlock()
+  const { data: currentAllocationsRoundId } = useCurrentAllocationsRoundId()
 
   const { data: regBlockData } = useEvents({
     contractAddress: getConfig().navigatorRegistryContractAddress,
@@ -124,17 +137,25 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
 
     const allReportRounds = new Set(reportMap.keys())
 
+    const blockNum = currentBlock != null ? Number(currentBlock.number) : null
+
     return roundsData.created
       .filter(round => registrationBlock > 0 && Number(round.voteStart) >= registrationBlock)
       .map(round => {
         const voteEnd = Number(round.voteEnd)
+        const isRoundStillOpen =
+          blockNum != null
+            ? blockNum <= voteEnd
+            : currentAllocationsRoundId != null && round.roundId === currentAllocationsRoundId
         const cutoffBlock = cutoffPeriod != null ? voteEnd - cutoffPeriod : voteEnd
 
         const voted = voteRounds.has(round.roundId)
         const prefBlock = prefMap.get(round.roundId)
 
         let allocationStatus: TaskStatus
-        if (!voted) {
+        if (isRoundStillOpen && !voted) {
+          allocationStatus = "pending"
+        } else if (!voted) {
           allocationStatus = "missed"
         } else if (prefBlock != null && prefBlock > cutoffBlock) {
           allocationStatus = "late"
@@ -146,7 +167,7 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
         const proposals: ProposalTask[] = roundProposals.map(p => ({
           proposalId: p.id,
           title: p.title,
-          status: decisionSet.has(p.id) ? "done" : "missed",
+          status: isRoundStillOpen && !decisionSet.has(p.id) ? "pending" : decisionSet.has(p.id) ? "done" : "missed",
         }))
 
         const roundNum = Number(round.roundId)
@@ -157,12 +178,14 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
             const rrNum = Number(rr)
             if (rrNum < roundNum && rrNum > lastReportBefore) lastReportBefore = rrNum
           }
-          reportDue = roundNum - lastReportBefore >= reportInterval
+          // Must match NavigatorSlashingUtils: roundId >= lastReport + reportInterval
+          reportDue = roundNum >= lastReportBefore + reportInterval
         }
 
         return {
           roundId: round.roundId,
           voteEnd,
+          isRoundStillOpen,
           allocationStatus,
           proposals,
           reportSubmitted: reportMap.has(round.roundId),
@@ -181,19 +204,22 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
     cutoffPeriod,
     reportInterval,
     registrationBlock,
+    currentBlock,
+    currentAllocationsRoundId,
   ])
 
-  const previousRound = rounds[0] ?? null
-  const prevRoundId = previousRound?.roundId ?? ""
+  /** Highest round id that has finished on-chain (`!isRoundStillOpen`); reporting is only valid for these. */
+  const reportableRound = useMemo(() => rounds.find(r => !r.isRoundStillOpen) ?? null, [rounds])
+  const reportableRoundId = reportableRound?.roundId ?? ""
 
-  const { data: snapshotBlock } = useAllocationRoundSnapshot(prevRoundId)
+  const { data: snapshotBlock } = useAllocationRoundSnapshot(reportableRoundId)
   const { data: delegatedAtSnapshot } = useGetTotalDelegatedAtTimepoint(address, snapshotBlock ?? undefined)
   const hadDelegations = delegatedAtSnapshot ? delegatedAtSnapshot.raw > 0n : false
 
   const infractions = useMemo((): ReportableInfraction[] => {
-    if (!previousRound || !hadDelegations) return []
+    if (!reportableRound || !hadDelegations) return []
     const result: ReportableInfraction[] = []
-    const { roundId, voteEnd, allocationStatus, proposals, reportDue, reportSubmitted } = previousRound
+    const { roundId, voteEnd, allocationStatus, proposals, reportDue, reportSubmitted } = reportableRound
 
     if (allocationStatus === "missed") {
       result.push({ type: "missedAllocationVote", roundId })
@@ -213,36 +239,10 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
     }
 
     return result
-  }, [previousRound, hadDelegations])
+  }, [reportableRound, hadDelegations])
 
-  const allInfractions = useMemo((): ReportableInfraction[] => {
-    const result: ReportableInfraction[] = []
-    for (const round of rounds) {
-      const { roundId, voteEnd, allocationStatus, proposals, reportDue, reportSubmitted } = round
-      if (allocationStatus === "missed") result.push({ type: "missedAllocationVote", roundId })
-      if (allocationStatus === "late") result.push({ type: "latePreferences", roundId, voteEnd })
-      for (const p of proposals) {
-        if (p.status === "missed") result.push({ type: "missedGovernanceVote", roundId, proposalId: p.proposalId })
-      }
-      if (reportDue && !reportSubmitted) result.push({ type: "missedReport", roundId })
-    }
-    return result
-  }, [rounds])
-
-  const { data: slashedSet } = useIsSlashedFor(address, allInfractions)
-
-  const slashedByRound = useMemo(() => {
-    const map = new Map<string, Map<string, boolean>>()
-    if (!slashedSet) return map
-    allInfractions.forEach((inf, i) => {
-      if (!slashedSet.has(i)) return
-      const key = inf.type === "missedGovernanceVote" ? `proposal:${inf.proposalId}` : inf.type
-      const roundMap = map.get(inf.roundId) ?? new Map<string, boolean>()
-      roundMap.set(key, true)
-      map.set(inf.roundId, roundMap)
-    })
-    return map
-  }, [allInfractions, slashedSet])
+  const allRoundIds = useMemo(() => rounds.map(round => round.roundId), [rounds])
+  const { data: slashedByRound } = useIsSlashedFor(address, allRoundIds)
 
   const stakeNum = stake ? Number(stake.scaled) : 0
   const penaltyAmount = slashBps != null ? (stakeNum * slashBps) / 10_000 : 0
@@ -258,7 +258,17 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
         <Card.Body>
           <VStack gap={4} align="stretch">
             <HStack justify="space-between">
-              <Heading size="md">{t("Round History")}</Heading>
+              <HStack gap={2}>
+                <Heading size="md">{t("Tasks History")}</Heading>
+                <IconButton
+                  variant="ghost"
+                  size="xs"
+                  rounded="full"
+                  aria-label={t("tasksHistoryInfoTitle")}
+                  onClick={() => setIsTasksHistoryInfoOpen(true)}>
+                  <LuInfo />
+                </IconButton>
+              </HStack>
               {!isOwnPage && infractions.length > 0 && (
                 <Button variant="outline" size="xs" colorPalette="red" onClick={() => setIsReportOpen(true)}>
                   <LuFlag />
@@ -275,7 +285,7 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
                   isExpanded={expandedRound === round.roundId}
                   onToggle={() => setExpandedRound(prev => (prev === round.roundId ? null : round.roundId))}
                   onViewReport={setViewReportURI}
-                  slashedMap={slashedByRound.get(round.roundId)}
+                  slashed={slashedByRound?.get(round.roundId)?.slashed ?? false}
                   penaltyAmount={penaltyAmount}
                 />
               ))}
@@ -295,6 +305,7 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
       </Card.Root>
 
       <ViewReportModal isOpen={!!viewReportURI} onClose={() => setViewReportURI(null)} reportURI={viewReportURI} />
+      <TasksHistoryInfoModal isOpen={isTasksHistoryInfoOpen} onClose={() => setIsTasksHistoryInfoOpen(false)} />
       <ReportNavigatorModal
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
@@ -305,14 +316,16 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   )
 }
 
-const StatusBadge = ({ status }: { status: TaskStatus | "notDue" }) => {
+const StatusBadge = ({ status }: { status: ReportRowStatus }) => {
   const { t } = useTranslation()
 
   const config = {
     done: { palette: "green", label: t("On Time") },
     late: { palette: "orange", label: t("Overdue") },
     missed: { palette: "red", label: t("Missed") },
+    pending: { palette: "blue", label: t("Pending") },
     notDue: { palette: "gray", label: t("Not due") },
+    optionalOpen: { palette: "gray", label: t("Optional") },
   }[status]
 
   return (
@@ -322,17 +335,19 @@ const StatusBadge = ({ status }: { status: TaskStatus | "notDue" }) => {
   )
 }
 
-const statusIcon = (status: TaskStatus | "notDue") => {
+const statusIcon = (status: ReportRowStatus) => {
   if (status === "done") return <LuCheck />
   if (status === "missed") return <LuX />
   if (status === "late") return <LuCircle />
+  if (status === "pending") return <LuCircle />
   return <LuCircle />
 }
 
-const statusColor = (status: TaskStatus | "notDue") => {
+const statusColor = (status: ReportRowStatus) => {
   if (status === "done") return "status.positive.primary"
   if (status === "missed") return "status.negative.primary"
   if (status === "late") return "status.warning.primary"
+  if (status === "pending") return "status.info.primary"
   return "text.subtle"
 }
 
@@ -341,21 +356,28 @@ type RoundCardProps = {
   isExpanded: boolean
   onToggle: () => void
   onViewReport: (uri: string) => void
-  slashedMap?: Map<string, boolean>
+  slashed: boolean
   penaltyAmount: number
 }
 
-const RoundCard = ({ round, isExpanded, onToggle, onViewReport, slashedMap, penaltyAmount }: RoundCardProps) => {
+const RoundCard = ({ round, isExpanded, onToggle, onViewReport, slashed, penaltyAmount }: RoundCardProps) => {
   const { t } = useTranslation()
 
-  const issueCount =
-    (round.allocationStatus !== "done" ? 1 : 0) +
-    round.proposals.filter(p => p.status !== "done").length +
-    (round.reportDue && !round.reportSubmitted ? 1 : 0)
+  const issueCount = round.isRoundStillOpen
+    ? 0
+    : (round.allocationStatus === "missed" || round.allocationStatus === "late" ? 1 : 0) +
+      round.proposals.filter(p => p.status === "missed" || p.status === "late").length +
+      (round.reportDue && !round.reportSubmitted ? 1 : 0)
 
-  const reportStatus: TaskStatus | "notDue" = round.reportSubmitted ? "done" : round.reportDue ? "missed" : "notDue"
-
-  const isSlashed = (key: string) => slashedMap?.get(key) ?? false
+  const reportStatus: ReportRowStatus = round.reportSubmitted
+    ? "done"
+    : round.isRoundStillOpen
+      ? round.reportDue
+        ? "pending"
+        : "optionalOpen"
+      : round.reportDue
+        ? "missed"
+        : "notDue"
 
   return (
     <VStack gap={0} borderRadius="lg" border="sm" borderColor="border.secondary" align="stretch">
@@ -364,7 +386,18 @@ const RoundCard = ({ round, isExpanded, onToggle, onViewReport, slashedMap, pena
         <Text textStyle="sm" fontWeight="semibold" flex={1}>
           {t("Round #{{round}}", { round: round.roundId })}
         </Text>
-        {issueCount > 0 ? (
+        {slashed ? (
+          <Badge colorPalette="purple" size="sm">
+            {t("Slashed")}
+            {" -"}
+            {formatter.format(penaltyAmount)}
+            {" B3TR"}
+          </Badge>
+        ) : round.isRoundStillOpen ? (
+          <Badge colorPalette="blue" size="sm">
+            {t("Round in progress")}
+          </Badge>
+        ) : issueCount > 0 ? (
           <Badge colorPalette="red" size="sm">
             {issueCount} {issueCount === 1 ? t("issue") : t("issues")}
           </Badge>
@@ -377,55 +410,33 @@ const RoundCard = ({ round, isExpanded, onToggle, onViewReport, slashedMap, pena
 
       {isExpanded && (
         <VStack gap={1} px={3} pb={3} align="stretch">
-          <TaskRow
-            icon={<LuVote />}
-            label={t("Allocation vote")}
-            status={round.allocationStatus}
-            slashed={isSlashed(round.allocationStatus === "missed" ? "missedAllocationVote" : "latePreferences")}
-            penaltyAmount={penaltyAmount}
-          />
+          <TaskRow icon={<LuVote />} label={t("Allocation vote")} status={round.allocationStatus} />
 
           {round.proposals.map(p => (
-            <TaskRow
-              key={p.proposalId}
-              icon={<LuGavel />}
-              label={p.title}
-              status={p.status}
-              slashed={isSlashed(`proposal:${p.proposalId}`)}
-              penaltyAmount={penaltyAmount}
-            />
+            <TaskRow key={p.proposalId} icon={<LuGavel />} label={p.title} status={p.status} />
           ))}
 
-          {(round.reportDue || round.reportSubmitted) && (
-            <HStack gap={3} p={2} borderRadius="md">
-              <Icon boxSize={4} color={statusColor(reportStatus)}>
-                {statusIcon(reportStatus)}
+          <HStack gap={3} p={2} borderRadius="md">
+            <Icon boxSize={4} color={statusColor(reportStatus)}>
+              {statusIcon(reportStatus)}
+            </Icon>
+            <HStack gap={2} flex={1}>
+              <Icon boxSize={4} color="text.subtle">
+                <LuFileText />
               </Icon>
-              <HStack gap={2} flex={1}>
-                <Icon boxSize={4} color="text.subtle">
-                  <LuFileText />
-                </Icon>
-                <Text textStyle="sm" fontWeight="medium">
-                  {t("Report")}
-                </Text>
-              </HStack>
-              {round.reportSubmitted && round.reportURI ? (
-                <Button variant="ghost" size="xs" onClick={() => onViewReport(round.reportURI!)}>
-                  <LuEye />
-                  {t("View")}
-                </Button>
-              ) : isSlashed("missedReport") ? (
-                <Badge colorPalette="purple" size="sm">
-                  {t("Slashed")}
-                  {" -"}
-                  {formatter.format(penaltyAmount)}
-                  {" B3TR"}
-                </Badge>
-              ) : (
-                <StatusBadge status={reportStatus} />
-              )}
+              <Text textStyle="sm" fontWeight="medium">
+                {t("Report")}
+              </Text>
             </HStack>
-          )}
+            {round.reportSubmitted && round.reportURI ? (
+              <Button variant="ghost" size="xs" onClick={() => onViewReport(round.reportURI!)}>
+                <LuEye />
+                {t("View")}
+              </Button>
+            ) : (
+              <StatusBadge status={reportStatus} />
+            )}
+          </HStack>
         </VStack>
       )}
     </VStack>
@@ -436,13 +447,9 @@ type TaskRowProps = {
   icon: React.ReactNode
   label: string
   status: TaskStatus
-  slashed?: boolean
-  penaltyAmount?: number
 }
 
-const TaskRow = ({ icon, label, status, slashed, penaltyAmount }: TaskRowProps) => {
-  const { t } = useTranslation()
-
+const TaskRow = ({ icon, label, status }: TaskRowProps) => {
   return (
     <HStack gap={3} p={2} borderRadius="md">
       <Icon boxSize={4} color={statusColor(status)}>
@@ -456,16 +463,7 @@ const TaskRow = ({ icon, label, status, slashed, penaltyAmount }: TaskRowProps) 
           {label}
         </Text>
       </HStack>
-      {slashed && penaltyAmount ? (
-        <Badge colorPalette="purple" size="sm">
-          {t("Slashed")}
-          {" -"}
-          {formatter.format(penaltyAmount)}
-          {" B3TR"}
-        </Badge>
-      ) : (
-        <StatusBadge status={status} />
-      )}
+      <StatusBadge status={status} />
     </HStack>
   )
 }

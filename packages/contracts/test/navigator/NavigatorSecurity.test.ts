@@ -260,7 +260,7 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       )
     })
 
-    it("report same infraction twice: second reportMissedAllocationVote reverts AlreadySlashed", async function () {
+    it("report same round twice: second reportRoundInfractions reverts AlreadySlashed", async function () {
       const navigator1 = otherAccounts[10]
       const citizen = otherAccounts[11]
 
@@ -277,11 +277,11 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       await waitForRoundToEnd(Number(roundId))
 
       // First report succeeds
-      await navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId)
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [])
 
       // Second report reverts
       await expect(
-        navigatorRegistry.reportMissedAllocationVote(navigator1.address, roundId),
+        navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, []),
       ).to.be.revertedWithCustomError(navigatorRegistry, "AlreadySlashed")
     })
 

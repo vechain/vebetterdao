@@ -4,6 +4,7 @@ import { Badge, Card, Grid, Heading, HStack, Text, VStack } from "@chakra-ui/rea
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { FreshnessHint } from "@/app/allocations/components/confirm-vote-modal/FreshnessHint"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { BaseModal } from "@/components/BaseModal"
 
@@ -37,6 +38,15 @@ export const NavigatorRoundVotesModal = ({ isOpen, onClose, round }: Props) => {
             {round.apps.length} {t("apps")}
           </Badge>
         </HStack>
+
+        {round.freshnessLabel && (
+          <FreshnessHint
+            isUpdated={round.isUpdated ?? false}
+            tierLabel={round.freshnessLabel}
+            isFirstVote={round.isFirstVote ?? false}
+            hideDescription
+          />
+        )}
 
         <VStack gap={1.5} align="stretch">
           {round.apps.map(app => {

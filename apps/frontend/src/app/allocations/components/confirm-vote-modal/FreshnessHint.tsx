@@ -11,13 +11,15 @@ interface FreshnessHintProps {
   tierLabel: string
   /** Whether this is a first-time voter */
   isFirstVote: boolean
+  /** Hide the description message */
+  hideDescription?: boolean
 }
 
 /**
  * Shows the user's freshness multiplier status in the vote confirmation modal.
  * Encourages users to change their app selection for higher rewards.
  */
-export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote }: FreshnessHintProps) => {
+export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote, hideDescription }: FreshnessHintProps) => {
   const { t } = useTranslation()
 
   const getBgColor = () => {
@@ -54,9 +56,11 @@ export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote }: FreshnessHi
               {tierLabel}
             </Text>
           </HStack>
-          <Text textStyle="xs" color={getTextColor()} opacity={0.8}>
-            {getMessage()}
-          </Text>
+          {!hideDescription && (
+            <Text textStyle="xs" color={getTextColor()} opacity={0.8}>
+              {getMessage()}
+            </Text>
+          )}
         </VStack>
       </HStack>
     </Box>
