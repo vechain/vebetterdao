@@ -1,5 +1,4 @@
 import { AppConfig } from "."
-
 const config: AppConfig = {
   environment: "testnet-staging",
   basePath: "https://b3tr-frontend.vercel.app",
@@ -19,7 +18,7 @@ const config: AppConfig = {
   x2EarnRewardsPoolContractAddress: "0x2d2a2207c68a46fc79325d7718e639d1047b0d8b",
   nodeManagementContractAddress: "0xde17d0a516c38c168d37685bb71465f656aa256e",
   veBetterPassportContractAddress: "0x592c756df7a5d39de1735030e8b9c18b7417e6c4",
-  challengesContractAddress: "0x0000000000000000000000000000000000000000",
+  challengesContractAddress: "0x8dd62fb5438bdce3dfdcfeb2a2a18fcef1b7e6ab",
   x2EarnCreatorContractAddress: "0xb89f0ecdaf9987f87912d6c77756435fe4085b05",
   tokenAuctionContractAddress: "0x8dbce5de4c1f1840a47ab10c682aee48e9d06c20",
   stargateNFTContractAddress: "0x887d9102f0003f1724d8fd5d4fe95a11572fcd77",
