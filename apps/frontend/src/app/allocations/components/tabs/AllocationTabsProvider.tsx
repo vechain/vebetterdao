@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
-import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
+import { useAllocationRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useAllocationRoundSnapshot"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { useIsAutoVotingEnabledInCurrentRound } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
@@ -69,7 +70,8 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const isVoteTab = pathname === "/allocations" || pathname === "/allocations/vote"
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
   const { account } = useWallet()
-  const { data: isDelegatedToNavigator } = useIsDelegated(account?.address)
+  const { data: roundSnapshotBlock } = useAllocationRoundSnapshot(roundDetails.id.toString())
+  const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, roundSnapshotBlock)
   const { data: isNavigator } = useIsNavigator(account?.address)
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const {

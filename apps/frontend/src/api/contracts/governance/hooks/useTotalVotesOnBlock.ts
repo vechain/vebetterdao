@@ -22,8 +22,8 @@ export const getDepositsVotesOnBlockQueryKey = (userAddress: string, blockNumber
  * @returns the number of deposits votes of the given address (with decimals removed)
  */
 export const useTotalVotesOnBlock = (block?: number, address?: string, enabled = true) => {
-  const { data: votes } = useGetVotesOnBlock(block, address, enabled)
-  return useCallClause({
+  const { data: votes, isLoading: isVotesLoading } = useGetVotesOnBlock(block, address, enabled)
+  const depositQuery = useCallClause({
     abi,
     address: contractAddress,
     method,
@@ -46,4 +46,9 @@ export const useTotalVotesOnBlock = (block?: number, address?: string, enabled =
       },
     },
   })
+
+  return {
+    ...depositQuery,
+    isLoading: depositQuery.isLoading || isVotesLoading,
+  }
 }

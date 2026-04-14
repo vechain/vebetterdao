@@ -70,12 +70,12 @@ export const NavigatorTaskList = ({ onSubmitReport }: Props) => {
   if (!roundId) return null
 
   return (
-    <Card.Root variant="outline" borderRadius="xl">
+    <Card.Root variant="outline" borderRadius="xl" w="full">
       <Card.Body>
         <VStack gap={4} align="stretch">
           <HStack justify="space-between">
             <HStack gap={2}>
-              <Heading size="md">{t("Navigator Tasks")}</Heading>
+              <Heading size="md">{t("Your Tasks")}</Heading>
               <IconButton
                 variant="ghost"
                 size="xs"

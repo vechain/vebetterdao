@@ -21,7 +21,7 @@ import { useProposalTotalVotes } from "@/api/contracts/governance/hooks/usePropo
 import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
-import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useVot3PastSupply } from "@/api/contracts/vot3/hooks/useVot3PastTotalSupply"
 import { useProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
 import { CountdownBoxes } from "@/components/CountdownBoxes/CountdownBoxes"
@@ -104,7 +104,7 @@ export const ProposalInteractionCard = ({
     roundSnapshot ? Number(roundSnapshot) : undefined,
     account?.address,
   )
-  const { data: isDelegatedToNavigator } = useIsDelegated(account?.address)
+  const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, roundSnapshot)
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   // ===== CONTRACT TRANSACTION HOOKS =====

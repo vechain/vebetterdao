@@ -29,6 +29,11 @@ export const useGetVotesOnBlock = (block?: number, address?: string, enabled = t
     queryOptions: {
       enabled: !!address && !!block && enabled,
       select: data => ethers.formatEther(data[0]),
+      // getPastVotes reverts with "future lookup" when timepoint >= block.number.
+      // After a new round starts, the snapshot block may equal the current block
+      // for up to ~10s (one VeChain block). Retry to wait for the block to advance.
+      retry: 3,
+      retryDelay: 10_000,
     },
   })
 }

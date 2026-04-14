@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
-import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
@@ -23,6 +23,7 @@ import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetD
 import { useUserBotSignals } from "../../../api/contracts/vePassport/hooks/useUserBotSignals"
 import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useCurrentRoundSnapshot } from "../../../api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
@@ -65,7 +66,8 @@ export const ActionBanner = () => {
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
   const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
-  const { data: isDelegatedToNavigator } = useIsDelegated(account?.address)
+  const { data: currentRoundSnapshotBlock } = useCurrentRoundSnapshot()
+  const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, currentRoundSnapshotBlock)
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
 

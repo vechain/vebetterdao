@@ -26,8 +26,8 @@ export const VotingPowerBox = () => {
   const { isMobile } = useBreakpoints()
 
   const { data: isDelegated } = useIsDelegated(account?.address)
-  const { data: snapshotBlock } = useCurrentRoundSnapshot()
-  const { data: bestBlock } = useBestBlockCompressed()
+  const { data: snapshotBlock, isLoading: isSnapshotBlockLoading } = useCurrentRoundSnapshot()
+  const { data: bestBlock, isLoading: isBestBlockLoading } = useBestBlockCompressed()
 
   // getVotes handles delegation (returns delegated amount) and includes deposits
   const { data: snapshotVotes, isLoading: isSnapshotLoading } = useGetVotesOnBlock(
@@ -47,7 +47,7 @@ export const VotingPowerBox = () => {
     return parseEther(currentVotes) - parseEther(snapshotVotes)
   }, [snapshotVotes, currentVotes])
 
-  const allLoading = isSnapshotLoading || isCurrentLoading
+  const allLoading = isSnapshotBlockLoading || isBestBlockLoading || isSnapshotLoading || isCurrentLoading
 
   return (
     <>

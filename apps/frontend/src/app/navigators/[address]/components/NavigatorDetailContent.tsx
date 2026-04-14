@@ -1,4 +1,4 @@
-import { Alert, Heading, Text, VStack } from "@chakra-ui/react"
+import { Alert, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
@@ -26,6 +26,7 @@ import { WithdrawStakeModal } from "./modals/WithdrawStakeModal"
 import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorHeader } from "./NavigatorHeader/NavigatorHeader"
+import { NavigatorRewardsCard } from "./NavigatorRewardsCard"
 import { NavigatorRoundHistory } from "./NavigatorRoundHistory"
 import { NavigatorStatsGrid } from "./NavigatorStatsGrid"
 import { NavigatorTaskList } from "./NavigatorTaskList"
@@ -174,11 +175,18 @@ export const NavigatorDetailContent = () => {
         onDelegatedClick={() => setIsDelegationsOpen(true)}
       />
 
-      <Heading size="lg">{t("Activity")}</Heading>
-
-      {isOwnPage && (status === "ACTIVE" || status === "EXITING") && (
-        <NavigatorTaskList onSubmitReport={() => setIsReportOpen(true)} />
+      {isOwnPage && (
+        <>
+          <Heading size="lg">{t("Task & Rewards")}</Heading>
+          <HStack gap={6} align="stretch" w="full">
+            {(status === "ACTIVE" || status === "EXITING") && (
+              <NavigatorTaskList onSubmitReport={() => setIsReportOpen(true)} />
+            )}
+            <NavigatorRewardsCard address={address} />
+          </HStack>
+        </>
       )}
+      <Heading size="lg">{t("Activity")}</Heading>
 
       <NavigatorRoundHistory address={address} isOwnPage={isOwnPage} />
 
