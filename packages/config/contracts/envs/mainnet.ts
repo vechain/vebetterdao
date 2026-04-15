@@ -48,6 +48,10 @@ export function createMainnetConfig() {
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
+    CHALLENGES_MAX_DURATION: 4,
+    CHALLENGES_MAX_SELECTED_APPS: 5,
+    CHALLENGES_MAX_PARTICIPANTS: 100,
+    CHALLENGES_MIN_BET_AMOUNT: 100000000000000000000n, // 100 B3TR
 
     CONTRACTS_ADMIN_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4",
     VOTE_2_EARN_POOL_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4", //temporarily pointing to CONTRACTS_ADMIN_ADDRESS, then updated in the deploy script to point to the voterReward contract
@@ -143,6 +147,7 @@ export function createMainnetConfig() {
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json", // TODO: Update this with the actual IPFS URI
 
     X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
+    X2EARN_ENDORSEMENT_SCORE_THRESHOLD: 100,
 
     MULTI_SIG_SIGNERS: [
       "0xe3d511ce183d3c53813bea223fe1e51bb9ff14a4",

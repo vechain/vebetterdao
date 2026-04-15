@@ -23,6 +23,7 @@ const config: AppConfig = {
   tokenAuctionContractAddress: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302",
   nodeManagementContractAddress: "0xB0EF9D89C6b49CbA6BBF86Bf2FDf0Eee4968c6AB",
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",
+  challengesContractAddress: "0x68669db619977e56f604386146694520c896528e",
   b3trMultiSigAddress: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
   stargateNFTContractAddress: "0x1856c533ac2d94340aaa8544d35a5c1d4a21dee7",
   stargateContractAddress: "0x03C557bE98123fdb6faD325328AC6eB77de7248C",

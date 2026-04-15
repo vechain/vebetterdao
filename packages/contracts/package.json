@@ -1,6 +1,6 @@
 {
   "name": "@vechain/vebetterdao-contracts",
-  "version": "8.4.0",
+  "version": "8.5.0",
   "main": "dist/cjs/contracts/index.js",
   "module": "dist/esm/contracts/index.js",
   "types": "dist/esm/contracts/index.d.ts",
@@ -111,7 +111,9 @@
     "endorsement-migration:seed:mainnet": "npx hardhat run scripts/endorsement-migration/3_seed.ts --network vechain_mainnet",
     "endorsement-migration:verify:local": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_solo",
     "endorsement-migration:verify:testnet-staging": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_testnet",
-    "endorsement-migration:verify:mainnet": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_mainnet"
+    "endorsement-migration:verify:mainnet": "npx hardhat run scripts/endorsement-migration/4_verify.ts --network vechain_mainnet",
+    "stress:challenges:local": "NEXT_PUBLIC_APP_ENV=local npx hardhat run scripts/stressTest/stressChallengeSponsored.ts --network vechain_solo",
+    "stress:challenges:stake:local": "NEXT_PUBLIC_APP_ENV=local npx hardhat run scripts/stressTest/stressChallengeStake.ts --network vechain_solo"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
@@ -127,7 +129,7 @@
     "@vechain/sdk-hardhat-plugin": "1.2.0-rc.2",
     "@vechain/sdk-network": "1.2.0-rc.2",
     "archiver": "^7.0.1",
-    "axios": "^1.13.5",
+    "axios": "^1.15.0",
     "chai": "^4.2.0",
     "dotenv": "^16.3.1",
     "form-data": "^4.0.0",

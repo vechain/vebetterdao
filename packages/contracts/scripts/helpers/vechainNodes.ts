@@ -14,7 +14,7 @@ export const stakeVET = async (levelId: number, owner: HardhatEthersSigner, star
   // Create fresh contract instance each call to avoid VeChain adapter bug
   // where consecutive calls from the same signer lose calldata (data: '')
   const stargateAddress = await stargateMock.getAddress()
-  const stargate = (await ethers.getContractAt("Stargate", stargateAddress)) as Stargate
+  const stargate = (await ethers.getContractAt("Stargate", stargateAddress)) as unknown as Stargate
   const stargateNFTAddress = await stargate.stargateNFT()
   const stargateNFT = await ethers.getContractAt("StargateNFT", stargateNFTAddress)
 

@@ -35,6 +35,7 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard8e**: VeBetterPassport - Entities
 - **shard8f**: VeBetterPassport - Delegation
 - **shard9**: VOT3
+- **shard9a**: B3TRChallenges
 - **shard10-core**: VoterRewards
 - **shard10a**: VoterRewards - Upgrade
 - **shard10b**: VoterRewards - Relayer Claim Rewards

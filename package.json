@@ -2,9 +2,13 @@
   "name": "b3tr-monorepo",
   "private": true,
   "scripts": {
+    "storage-location": "node ./packages/contracts/scripts/storageLocation.mjs",
     "typecheck": "yarn workspace frontend typecheck",
     "test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env.example turbo run test --",
     "test:watch": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env.example turbo run test:watch --",
+    "playwright:e2e": "yarn workspace @repo/e2e e2e",
+    "playwright:e2e:headless": "yarn workspace @repo/e2e e2e:headless",
+    "playwright:e2e:install": "yarn workspace @repo/e2e install:browsers",
     "test:coverage:solidity": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v IS_TEST_COVERAGE=true -e .env.example turbo run test:coverage:solidity",
     "build": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo build --filter='!@repo/lambda'",
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo build --filter='!@repo/lambda'",
@@ -21,6 +25,7 @@
     "dev:simulation": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -- turbo dev:simulation --",
     "dev:simulation-galactica": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=galactica-test -v ENDORSE_XAPPS=true -- turbo dev:simulation --",
     "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- turbo dev --",
+    "dev:redeploy": "yarn contracts:compile && rm -f packages/config/local.ts && yarn dev",
     "dev:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env -- turbo dev:staging --",
     "dev:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
     "dev:mainnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -e .env -- turbo dev:mainnet --",
@@ -95,7 +100,8 @@
     "contracts:endorsement-migration:seed:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:seed:mainnet --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:verify:local --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:verify:testnet-staging --filter=@vechain/vebetterdao-contracts",
-    "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts"
+    "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts",
+    "contracts:stress:challenges:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run stress:challenges:local --filter=@vechain/vebetterdao-contracts"
   },
   "dependencies": {
     "dotenv-cli": "latest",
@@ -138,7 +144,12 @@
     "hono": "^4.10.2",
     "preact": "10.28.2",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "fast-xml-parser": "5.5.7",
+    "handlebars": "4.7.9",
+    "next": "16.2.3",
+    "i18next": "24.1.2",
+    "undici": "6.24.0"
   },
   "packageManager": "yarn@1.22.22",
   "workspaces": [

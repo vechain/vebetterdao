@@ -39,16 +39,22 @@ export const useBuildTransaction = <ClausesParams = void>({
   const queryClient = useQueryClient()
   const { setupModal, updateModal } = useTransactionModal()
   const lastReportedStatusRef = useRef<string | undefined>()
+  const successHandledRef = useRef(false)
   /**
    * Callback function to be called when the transaction is successfully confirmed.
    * It cancels and refetches the specified queries if `invalidateCache` is `true`.
    */
   const handleOnSuccess = useCallback(async () => {
+    if (successHandledRef.current) {
+      return
+    }
+
+    successHandledRef.current = true
     if (invalidateCache && refetchQueryKeys?.length) {
       await Promise.all(
         refetchQueryKeys.map(async queryKey => {
           await queryClient.cancelQueries({ queryKey })
-          await queryClient.resetQueries({ queryKey })
+          await queryClient.invalidateQueries({ queryKey })
         }),
       )
     }
@@ -104,6 +110,7 @@ export const useBuildTransaction = <ClausesParams = void>({
    */
   const sendTransaction = useCallback(
     async (props?: ClausesParams, customUI?: TransactionCustomUI) => {
+      successHandledRef.current = false
       result.resetStatus()
       const uiToUse = customUI ?? transactionModalCustomUI
       setupModal(async () => result.sendTransaction(clauseBuilder(props as any)), uiToUse)

@@ -17,6 +17,7 @@ import {
   X2EarnCreator,
   GrantsManager,
   RelayerRewardsPool,
+  B3TRChallenges,
   GrantsManagerV1,
   DBAPool,
   DBAPoolV1,
@@ -42,7 +43,7 @@ import {
   saveContractsToFile,
   upgradeProxy,
 } from "../helpers"
-import { governanceLibraries, passportLibraries } from "../libraries"
+import { autoVotingLibraries, challengesLibraries, governanceLibraries, passportLibraries } from "../libraries"
 import { xAllocationVotingLibraries } from "../libraries/xAllocationVotingLibraries"
 import { navigatorRegistryLibraries } from "../libraries/navigatorRegistryLibraries"
 import {
@@ -59,8 +60,7 @@ import {
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 import { deployStargateMock } from "./mocks/deployStargate"
 import { deployNodeManagementMock } from "./mocks/deployNodeManagement"
-import { getConfig } from "@repo/config"
-import { AppEnv, EnvConfig } from "@repo/config/contracts"
+import { AppEnv } from "@repo/config/contracts"
 import { deployLegacyNodesMock } from "./mocks/deployLegacyNodes"
 import { TransactionResponse } from "ethers"
 
@@ -71,7 +71,6 @@ const symbol = "GM"
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
-  const envConfig = getConfig(config.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
   console.log(
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
@@ -311,6 +310,10 @@ export async function deployAll(config: ContractsConfig) {
   const navLibs = await navigatorRegistryLibraries(true)
   const { AutoVotingLogic } = xAllocLibs
 
+  console.log("Deploying Challenges Libraries")
+  const { ChallengeCoreLogic: ChallengeCoreLogicLib, ChallengeSettlementLogic: ChallengeSettlementLogicLib } =
+    await challengesLibraries({ logOutput: true })
+
   // Verify all required libraries are deployed
   if (!AdministrationUtilsV3 || !EndorsementUtilsV3 || !VoteEligibilityUtilsV3) {
     throw new Error("Failed to deploy X2Earn V3 libraries")
@@ -385,15 +388,15 @@ export async function deployAll(config: ContractsConfig) {
     const { vechainNodesMock: vechainNodesMockDeployed } = await deployLegacyNodesMock({ logOutput: true })
     vechainNodesMock = vechainNodesMockDeployed
   } else {
-    stargateMock = (await ethers.getContractAt("Stargate", envConfig.stargateContractAddress)) as Stargate
-    stargateNftMock = (await ethers.getContractAt("StargateNFT", envConfig.stargateNFTContractAddress)) as StargateNFT
+    stargateMock = (await ethers.getContractAt("Stargate", config.STARGATE_CONTRACT_ADDRESS)) as Stargate
+    stargateNftMock = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
     nodeManagementMock = (await ethers.getContractAt(
       "NodeManagementV3",
-      envConfig.nodeManagementContractAddress,
+      config.NODE_MANAGEMENT_CONTRACT_ADDRESS,
     )) as NodeManagementV3
     vechainNodesMock = (await ethers.getContractAt(
       "TokenAuction",
-      envConfig.tokenAuctionContractAddress,
+      config.VECHAIN_NODES_CONTRACT_ADDRESS,
     )) as TokenAuction
   }
 
@@ -1236,6 +1239,34 @@ export async function deployAll(config: ContractsConfig) {
     undefined,
   )) as NavigatorRegistry
 
+  const b3trChallenges = (await deployProxy(
+    "B3TRChallenges",
+    [
+      {
+        b3trAddress: await b3tr.getAddress(),
+        veBetterPassportAddress: await veBetterPassport.getAddress(),
+        xAllocationVotingAddress: await xAllocationVoting.getAddress(),
+        x2EarnAppsAddress: await x2EarnApps.getAddress(),
+        maxChallengeDuration: config.CHALLENGES_MAX_DURATION,
+        maxSelectedApps: config.CHALLENGES_MAX_SELECTED_APPS,
+        maxParticipants: config.CHALLENGES_MAX_PARTICIPANTS,
+        minBetAmount: config.CHALLENGES_MIN_BET_AMOUNT,
+      },
+      {
+        admin: config.CONTRACTS_ADMIN_ADDRESS,
+        upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+        contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
+        settingsManager: config.CONTRACTS_ADMIN_ADDRESS,
+      },
+    ],
+    {
+      ChallengeCoreLogic: await ChallengeCoreLogicLib.getAddress(),
+      ChallengeSettlementLogic: await ChallengeSettlementLogicLib.getAddress(),
+    },
+    undefined,
+    true,
+  )) as B3TRChallenges
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -1254,6 +1285,7 @@ export async function deployAll(config: ContractsConfig) {
     XAllocationVoting: await xAllocationVoting.getAddress(),
     vechainNodesManagement: await nodeManagementMock.getAddress(),
     VeBetterPassport: await veBetterPassport.getAddress(),
+    B3TRChallenges: await b3trChallenges.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
     GrantsManager: await grantsManager.getAddress(),
     RelayerRewardsPool: await relayerRewardsPool.getAddress(),
@@ -1267,6 +1299,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnApps: Record<string, string>
     XAllocationVoting: Record<string, string>
     NavigatorRegistry: Record<string, string>
+    B3TRChallenges: Record<string, string>
   } = {
     B3TRGovernor: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -1306,6 +1339,10 @@ export async function deployAll(config: ContractsConfig) {
       RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
     },
     NavigatorRegistry: navigatorLibraryAddresses,
+    B3TRChallenges: {
+      ChallengeCoreLogic: await ChallengeCoreLogicLib.getAddress(),
+      ChallengeSettlementLogic: await ChallengeSettlementLogicLib.getAddress(),
+    },
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries, true) // Set whitelisted functions for governor proposals
@@ -1513,6 +1550,12 @@ export async function deployAll(config: ContractsConfig) {
     .updateCooldownPeriod(1)
     .then(async (tx: TransactionResponse) => await tx.wait())
   console.log("Cooldown period for X2Earn nodes set to 1 round")
+
+  await x2EarnApps
+    .connect(deployer)
+    .updateEndorsementScoreThreshold(config.X2EARN_ENDORSEMENT_SCORE_THRESHOLD)
+    .then(async tx => await tx.wait())
+  console.log(`Endorsement score threshold set to ${config.X2EARN_ENDORSEMENT_SCORE_THRESHOLD}`)
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
@@ -1957,6 +2000,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodesMock: vechainNodesMock,
     vechainNodeManagement: nodeManagementMock,
     veBetterPassport: veBetterPassport,
+    b3trChallenges: b3trChallenges,
     x2EarnCreator: x2EarnCreator,
     grantsManager: grantsManager,
     relayerRewardsPool: relayerRewardsPool,
@@ -1982,6 +2026,8 @@ export async function deployAll(config: ContractsConfig) {
       passportSignalingLogic: PassportSignalingLogic,
       passportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogic,
       autoVotingLogic: AutoVotingLogic,
+      challengeCoreLogic: ChallengeCoreLogicLib,
+      challengeSettlementLogic: ChallengeSettlementLogicLib,
     },
   }
 }

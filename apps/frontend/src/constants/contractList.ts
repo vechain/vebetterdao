@@ -105,6 +105,11 @@ export const CONTRACT_LIST = [
     ],
   },
   {
+    name: "Challenges",
+    contractAddress: config.challengesContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "SETTINGS_MANAGER_ROLE"],
+  },
+  {
     name: "X2Earn Creator NFT",
     contractAddress: config.x2EarnCreatorContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "PAUSER_ROLE", "MINTER_ROLE", "BURNER_ROLE"],
