@@ -30,15 +30,13 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
     useNavigatorFeeStatus(address)
   const { sendTransaction, isPending } = useClaimNavigatorFees({})
 
-  const hasAnyFees = totalEarned > 0
+  const hasAnyFees = !isLoading && totalEarned > 0
   const canClaim = totalClaimable > 0
 
   const handleClaimAll = () => {
     if (!claimableRoundIds.length) return
     sendTransaction({ roundIds: claimableRoundIds })
   }
-
-  if (isLoading) return <Skeleton w="full" h="200px" borderRadius="xl" />
 
   return (
     <>
@@ -70,7 +68,15 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
               )}
             </HStack>
 
-            {!hasAnyFees ? (
+            {isLoading ? (
+              <VStack gap={3} align="stretch">
+                <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
+                  <Skeleton h="72px" borderRadius="xl" />
+                  <Skeleton h="72px" borderRadius="xl" />
+                </SimpleGrid>
+                <Skeleton h="40px" borderRadius="lg" />
+              </VStack>
+            ) : !hasAnyFees ? (
               <Text textStyle="sm" color="fg.muted">
                 {t("Fees are earned when your citizens claim their rewards")}
               </Text>

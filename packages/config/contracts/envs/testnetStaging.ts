@@ -235,7 +235,7 @@ export function createTestnetStagingConfig() {
     NAVIGATOR_FEE_PERCENTAGE: 2000, // 20% in basis points
     NAVIGATOR_EXIT_NOTICE_PERIOD: 1, // 1 round
     NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
-    NAVIGATOR_MINOR_SLASH_PERCENTAGE: 1000, // 10% in basis points
+    NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
     NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8640, // ~24hr at 10s/block
   })
 }
