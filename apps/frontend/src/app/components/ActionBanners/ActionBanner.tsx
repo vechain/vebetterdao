@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
+import { useChallengeSection } from "@/api/challenges/indexerChallenges"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
@@ -33,6 +34,7 @@ import { BannerStorageKey } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
+import { ChallengeNeededActionsBanner } from "./components/ChallengeNeededActionsBanner"
 import { ClaimDepositsBanner } from "./components/ClaimDepositsBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
@@ -78,6 +80,7 @@ export const ActionBanner = () => {
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
+  const neededActionsQuery = useChallengeSection("needed-actions", account?.address)
 
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
@@ -148,6 +151,8 @@ export const ActionBanner = () => {
   const { data: { totalClaimableDeposits, claimableDeposits } = { totalClaimableDeposits: 0, claimableDeposits: [] } } =
     useProposalClaimableUserDeposits(account?.address ?? "")
   const showClaimTokensBanner = totalClaimableDeposits > 0 && claimableDeposits.length > 0 && !!account?.address
+  const showChallengesNeededActionsBanner =
+    !!account?.address && (neededActionsQuery.data?.pages[0]?.data.length ?? 0) > 0
 
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled
@@ -255,6 +260,8 @@ export const ActionBanner = () => {
     if (showClaimTokensBanner) bannerComponents.push(<ClaimDepositsBanner key="claim-deposits" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
+    if (showChallengesNeededActionsBanner)
+      bannerComponents.push(<ChallengeNeededActionsBanner key="challenge-needed-actions" />)
     if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
@@ -272,6 +279,7 @@ export const ActionBanner = () => {
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
+    showChallengesNeededActionsBanner,
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,

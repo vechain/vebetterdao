@@ -1,0 +1,38 @@
+---
+description: Enforce i18n translations — no hardcoded user-facing strings in frontend components
+globs: apps/frontend/src/**/*.tsx
+alwaysApply: false
+---
+
+# No Hardcoded User-Facing Strings
+
+All visible text in frontend components MUST use `t("key")` from `react-i18next`. Never hardcode strings directly in JSX.
+
+## What counts as user-facing text
+
+- Labels, titles, descriptions, placeholders, tooltips, button text, tab labels, error/success messages, table headers, badges, banners
+
+## What is exempt
+
+- `aria-*` attributes that duplicate a translated visible label
+- CSS class names, test IDs, `key` props, enum values, URLs
+- Numbers, punctuation-only strings, format patterns (e.g. `"-"`, `"/"`)
+- Developer-facing strings (console.log, error codes)
+
+## Examples
+
+```tsx
+// ❌ BAD — hardcoded strings
+<Text>Prize</Text>
+<Text>Participants</Text>
+<Button>Join Challenge</Button>
+
+// ✅ GOOD — translated
+<Text>{t("Prize")}</Text>
+<Text>{t("Participants")}</Text>
+<Button>{t("Join Challenge")}</Button>
+```
+
+## When adding new translated strings
+
+Follow the `translate.mdc` rule: add the key to `en.json` and all 14 other language files, sorted alphabetically.

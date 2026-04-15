@@ -28,6 +28,10 @@ export function createTestConfig() {
 
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // min amount of X tokens that a project will get each round
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 18, // an app can get max % in allocation round
+    CHALLENGES_MAX_DURATION: 4,
+    CHALLENGES_MAX_SELECTED_APPS: 5,
+    CHALLENGES_MAX_PARTICIPANTS: 100,
+    CHALLENGES_MIN_BET_AMOUNT: 100000000000000000000n, // 100 B3TR
 
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
@@ -135,6 +139,7 @@ export function createTestConfig() {
     CREATOR_NFT_URI: "ipfs://BASE_URI",
 
     X2EARN_NODE_COOLDOWN_PERIOD: 0,
+    X2EARN_ENDORSEMENT_SCORE_THRESHOLD: 100,
 
     MULTI_SIG_SIGNERS: [
       "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",

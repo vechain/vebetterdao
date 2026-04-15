@@ -88,6 +88,11 @@ export const ContractsDetails = () => {
         roles={getContractByAddress(config.veBetterPassportContractAddress)?.roles}
       />
       <ContractDetailsCard
+        title="Challenges"
+        address={config.challengesContractAddress}
+        roles={getContractByAddress(config.challengesContractAddress)?.roles}
+      />
+      <ContractDetailsCard
         title="X2EarnCreator"
         address={config.x2EarnCreatorContractAddress}
         roles={getContractByAddress(config.x2EarnCreatorContractAddress)?.roles}

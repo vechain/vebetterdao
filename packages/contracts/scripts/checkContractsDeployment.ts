@@ -56,6 +56,7 @@ export async function overrideLocalConfigWithNewContracts(contracts: Awaited<Ret
     x2EarnCreatorContractAddress: await contracts.x2EarnCreator.getAddress(),
     nodeManagementContractAddress: await contracts.vechainNodeManagement.getAddress(),
     veBetterPassportContractAddress: await contracts.veBetterPassport.getAddress(),
+    challengesContractAddress: await contracts.b3trChallenges.getAddress(),
     grantsManagerContractAddress: await contracts.grantsManager.getAddress(),
     dbaPoolContractAddress: await contracts.dynamicBaseAllocationPool.getAddress(),
     stargateContractAddress: await contracts.stargate.getAddress(),

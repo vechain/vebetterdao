@@ -51,7 +51,7 @@ services:
       - ./genesis-vet-balances-solo.json:/usr/app/genesis-solo.json:ro
     environment:
       MONGO_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
-      SPRING_PROFILES_ACTIVE: "indexer,b3tr,explorer,accounts,transactions,transfers"
+      SPRING_PROFILES_ACTIVE: "indexer,b3tr,b3tr-challenges,explorer,accounts,transactions,transfers"
       THOR_URL: "http://thor-solo:8669"
       INDEXER_GENESIS_VET_BALANCES_RESOURCE: "file:/usr/app/genesis-solo.json"
       B3TR_CONTRACT: "${B3TR_CONTRACT}"
@@ -61,6 +61,7 @@ services:
       B3TR_DBA_POOL_CONTRACT: "${B3TR_DBA_POOL_CONTRACT}"
       GM_NFT_CONTRACT: "${GM_NFT_CONTRACT}"
       X_ALLOC_VOTING_CONTRACT: "${X_ALLOC_VOTING_CONTRACT}"
+      CHALLENGES_CONTRACT: "${CHALLENGES_CONTRACT}"
       X_ALLOC_POOL_CONTRACT: "${X_ALLOC_POOL_CONTRACT}"
       X2EARN_REWARDS_POOL_CONTRACT: "${X2EARN_REWARDS_POOL_CONTRACT}"
       VOTER_REWARDS_CONTRACT: "${VOTER_REWARDS_CONTRACT}"
@@ -74,6 +75,7 @@ services:
       INDEXER_START_BLOCK_VEVOTE: 0
       INDEXER_START_BLOCK_HISTORIC_PROPOSALS: 0
       INDEXER_START_BLOCK_B3TR: 0
+      INDEXER_START_BLOCK_B3TR_CHALLENGES: 0
       INDEXER_START_BLOCK_B3TR_PROPOSAL: 0
       INDEXER_START_BLOCK_B3TR_X_ALLOC_RESULT: 0
       INDEXER_START_BLOCK_B3TR_SUSTAINABLE_ACTIONS: 0
@@ -90,8 +92,9 @@ services:
         condition: service_completed_successfully
     environment:
       MONGO_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
-      SPRING_PROFILES_ACTIVE: "api,b3tr,explorer,accounts,transactions,transfers"
+      SPRING_PROFILES_ACTIVE: "api,b3tr,b3tr-challenges,explorer,accounts,transactions,transfers"
       THOR_URL: "http://thor-solo:8669"
+      CHALLENGES_CONTRACT: "${CHALLENGES_CONTRACT}"
     ports:
       - "8089:8080"
     networks:

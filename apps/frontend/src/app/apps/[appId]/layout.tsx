@@ -12,14 +12,16 @@ import { XApp } from "../../../api/contracts/xApps/getXApps"
 import { getNodeJsThorClient } from "../../../utils/getNodeJsThorClient"
 import { convertUriToUrl } from "../../../utils/uri"
 
-import { Props } from "./page"
-
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress
 
+type Props = {
+  params: Promise<{ appId: string }>
+}
+
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   try {
-    const id = params.appId
+    const { appId: id } = await params
 
     if (!id) {
       return getDefaultMetadata()
@@ -85,7 +87,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
       },
     }
   } catch (error) {
-    console.error("Error generating metadata for app:", params.appId, error)
+    console.error("Error generating metadata for app:", error)
     return getDefaultMetadata()
   }
 }

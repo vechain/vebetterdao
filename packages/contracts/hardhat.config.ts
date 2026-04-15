@@ -61,7 +61,7 @@ const config: HardhatUserConfig = {
       url: getSoloUrl(),
       accounts: {
         mnemonic: getMnemonic(false), // Not required for compilation
-        count: 20,
+        count: 110,
         path: HDKey.VET_DERIVATION_PATH,
         accountsBalance: "1000000000000000000000000",
       },
