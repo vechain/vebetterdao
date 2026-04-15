@@ -171,6 +171,8 @@ export const PotentialRewardBox = () => {
           relayerFeePercentage: relayerFee,
           feeCap: feeCap as bigint,
           hadAutoVotingEnabled: autoVotingEnabled,
+          isDelegating: isDelegatedResult as boolean,
+          navigatorFeePercentage: navFeePercentage as bigint,
         }),
         hasVoted: userVoterTotal > 0n,
         hasGmNft: userGMWeight > 0n,

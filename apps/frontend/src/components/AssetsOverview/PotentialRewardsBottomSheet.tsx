@@ -116,7 +116,12 @@ const RewardsContent = ({
             {reward.netGmReward > 0n && (
               <RewardLine label={t("From Galaxy Member NFT")} amount={fmt(reward.netGmReward)} />
             )}
-            {reward.fee > 0n && <RewardLine label={t("Auto-voting fee")} amount={fmt(reward.fee)} variant="fee" />}
+            {isDelegating && reward.navigatorFee > 0n && (
+              <RewardLine label={t("Navigator fee")} amount={fmt(reward.navigatorFee)} variant="fee" />
+            )}
+            {!isDelegating && reward.fee > 0n && (
+              <RewardLine label={t("Auto-voting fee")} amount={fmt(reward.fee)} variant="fee" />
+            )}
           </Box>
         </Box>
       )}
