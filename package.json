@@ -142,6 +142,7 @@
     "fast-xml-parser": "5.5.7",
     "handlebars": "4.7.9",
     "next": "16.2.3",
+    "i18next": "24.1.2",
     "undici": "6.24.0"
   },
   "packageManager": "yarn@1.22.22",
