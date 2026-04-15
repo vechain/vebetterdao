@@ -479,7 +479,7 @@ export function copySourceFiles(metadata: any, tempDir: string, contractsBaseDir
       continue
     }
 
-    let sourceFilePath: string
+    let sourceFilePath: string | undefined
 
     if (path.isAbsolute(sourcePath)) {
       sourceFilePath = sourcePath
@@ -506,9 +506,13 @@ export function copySourceFiles(metadata: any, tempDir: string, contractsBaseDir
           }
         }
       }
-      if (!sourceFilePath) {
+      if (sourceFilePath === undefined && possiblePaths.length > 0) {
         sourceFilePath = possiblePaths[0]
       }
+    }
+
+    if (!sourceFilePath) {
+      continue
     }
 
     if (fs.existsSync(sourceFilePath)) {
