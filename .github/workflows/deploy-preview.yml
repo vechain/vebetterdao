@@ -5,6 +5,14 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
+    paths-ignore:
+      # CI / repo meta - no frontend or infra change
+      - ".github/**"
+      - ".husky/**"
+      - ".cursor/**"
+      - ".claude/**"
+      # Docs only (root and nested READMEs)
+      - "**/README.md"
 
 # Only allow one preview deployment per PR at a time
 # New commits cancel any in-progress runs for the same PR
