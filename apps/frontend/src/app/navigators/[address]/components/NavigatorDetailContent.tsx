@@ -180,7 +180,7 @@ export const NavigatorDetailContent = () => {
           <Heading size="lg">{t("Task & Rewards")}</Heading>
           <HStack gap={6} align="stretch" w="full">
             {(status === "ACTIVE" || status === "EXITING") && (
-              <NavigatorTaskList onSubmitReport={() => setIsReportOpen(true)} />
+              <NavigatorTaskList address={address} onSubmitReport={() => setIsReportOpen(true)} />
             )}
             <NavigatorRewardsCard address={address} />
           </HStack>
