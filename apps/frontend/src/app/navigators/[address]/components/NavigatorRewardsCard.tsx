@@ -109,7 +109,7 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
                 <SimpleGrid columns={2} gap={3}>
                   <VStack align="start" gap={0}>
                     <Text textStyle="xs" color="fg.muted">
-                      {t("Total Earned")}
+                      {t("Total Claimed")}
                     </Text>
                     <HStack gap={2} align="baseline">
                       <Text textStyle="sm" fontWeight="semibold">

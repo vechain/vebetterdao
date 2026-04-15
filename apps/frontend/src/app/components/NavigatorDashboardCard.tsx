@@ -134,8 +134,8 @@ export const NavigatorDashboardCard = () => {
                       color={delegationChange >= 0 ? "status.positive.primary" : "status.negative.primary"}>
                       {delegationChange >= 0 ? "+" : ""}
                       {formatter.format(delegationChange)}
-                      {"% than "}
-                      {t("round start")}
+                      {"% "}
+                      {t("in this round")}
                     </Stat.HelpText>
                   )}
                 </HStack>
