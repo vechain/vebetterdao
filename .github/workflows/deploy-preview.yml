@@ -5,14 +5,6 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
-    paths-ignore:
-      # CI / repo meta - no frontend or infra change
-      - ".github/**"
-      - ".husky/**"
-      - ".cursor/**"
-      - ".claude/**"
-      # Docs only (root and nested READMEs)
-      - "**/README.md"
 
 # Only allow one preview deployment per PR at a time
 # New commits cancel any in-progress runs for the same PR
@@ -36,9 +28,33 @@ env:
   TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
+  # True when the PR touches paths that affect the frontend or preview Terraform
+  preview-relevant:
+    name: Preview relevance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      run_preview: ${{ steps.filter.outputs.run_preview }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3.0.3
+        id: filter
+        with:
+          filters: |
+            run_preview:
+              - 'apps/**'
+              - 'packages/**'
+              - 'terraform/**'
+              - 'Dockerfile*'
+              - 'package.json'
+              - 'yarn.lock'
+              - 'turbo.json'
+
   # Determine which flavors to deploy based on target branch
   setup:
     name: Setup
+    needs: [preview-relevant]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -72,7 +88,8 @@ jobs:
   # Post initial "deploying" comment
   comment-deploying:
     name: Post Deploying Comment
-    needs: setup
+    needs: [setup, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -141,7 +158,8 @@ jobs:
   # Build and push Docker image for each flavor
   build-and-push:
     name: Build (${{ matrix.flavor }})
-    needs: [setup, comment-deploying]
+    needs: [setup, comment-deploying, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true'
     permissions:
       id-token: write
       contents: read
@@ -159,11 +177,25 @@ jobs:
     secrets:
       aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
+  # Same check names as build-and-push, but instant success when nothing app/infra-related changed
+  build-skip:
+    name: Build (${{ matrix.flavor }})
+    needs: [setup, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview != 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [staging, beta]
+      fail-fast: false
+    steps:
+      - name: Skip build (no relevant changes)
+        run: echo "::notice::No frontend / preview infra changes in this PR - skipping image build."
+
   # Deploy preview environment for each flavor
   deploy:
     name: Deploy Preview (${{ matrix.flavor }})
-    needs: [setup, build-and-push]
-    if: always() && needs.build-and-push.result == 'success'
+    needs: [setup, build-and-push, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true' && always() && needs.build-and-push.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -306,17 +338,86 @@ jobs:
           echo "service_url_${FLAVOR}=${{ steps.outputs.outputs.service_url }}" >> $GITHUB_OUTPUT
           echo "status_${FLAVOR}=success" >> $GITHUB_OUTPUT
 
+  # Same check names as deploy, but instant success when preview is not needed
+  deploy-skip:
+    name: Deploy Preview (${{ matrix.flavor }})
+    needs: [setup, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview != 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [staging, beta]
+      fail-fast: false
+    steps:
+      - name: Skip deploy (no relevant changes)
+        run: echo "::notice::No frontend / preview infra changes in this PR - skipping Terraform preview deploy."
+
   # Update comment with final results
   comment-result:
     name: Update PR Comment
-    needs: [setup, build-and-push, deploy]
+    needs: [setup, preview-relevant, build-and-push, build-skip, deploy, deploy-skip]
     runs-on: ubuntu-latest
     if: always()
     permissions:
       contents: read
       pull-requests: write
     steps:
+      - name: Update PR comment - no deploy (docs / CI only)
+        if: needs.preview-relevant.outputs.run_preview != 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          FLAVORS: ${{ needs.setup.outputs.flavors }}
+          PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
+          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+        with:
+          script: |
+            const flavors = JSON.parse(process.env.FLAVORS);
+            const prNumber = process.env.PR_NUMBER;
+            const shortSha = process.env.SHORT_SHA;
+            const projectName = process.env.PROJECT_NAME;
+            const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            let rows = '';
+            for (const flavor of flavors) {
+              rows += `| **${flavor}** | ⏭️ Skipped (no app or preview-infra changes) ([${shortSha}](${commitUrl})) | — | — |\n`;
+            }
+            const commentBody = [
+              `## ${projectName} – Preview`,
+              '',
+              '| Name | Status | Preview | Updated (UTC) |',
+              '|------|--------|---------|---------------|',
+              rows.trim(),
+              '',
+              '---',
+              `<sub>Checks passed without building - PR does not touch \`apps/**\`, \`packages/**\`, \`terraform/**\`, or root build files.</sub>`
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt(prNumber),
+            });
+            const existingComment = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes(`${projectName} – Preview`)
+            );
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(prNumber),
+                body: commentBody
+              });
+            }
+
       - name: Update PR comment - Results
+        if: needs.preview-relevant.outputs.run_preview == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
@@ -444,6 +545,7 @@ jobs:
             }
 
       - name: Deployment summary
+        if: needs.preview-relevant.outputs.run_preview == 'true'
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
