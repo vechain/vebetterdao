@@ -111,7 +111,7 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
       await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [999n])
       const stakeAfter = await navigatorRegistry.getStake(navigator1.address)
 
-      const expectedSlash = (stakeBefore * 1000n) / 10000n
+      const expectedSlash = (stakeBefore * 500n) / 10000n
       expect(stakeAfter).to.equal(stakeBefore - expectedSlash)
 
       const [slashed, flags] = await navigatorRegistry.isSlashedForRound(navigator1.address, roundId)
@@ -182,22 +182,22 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
   })
 
   describe("Minor slash compounding", function () {
-    it("compounds across rounds: 50000 -> 45000 -> 40500", async function () {
+    it("compounds across rounds: 50000 -> 47500 -> 45125", async function () {
       await delegateCitizen(citizen1, navigator1)
       await bootstrapAndStartEmissions()
 
       const round1 = await xAllocationVoting.currentRoundId()
       await waitForRoundToEnd(Number(round1))
       await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
-      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("45000"))
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("47500"))
 
       await emissions.distribute()
       const round2 = await xAllocationVoting.currentRoundId()
       await waitForRoundToEnd(Number(round2))
       await navigatorRegistry.reportRoundInfractions(navigator1.address, round2, [])
-      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("40500"))
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("45125"))
 
-      const expectedTotal = ethers.parseEther("5000") + ethers.parseEther("4500")
+      const expectedTotal = ethers.parseEther("2500") + ethers.parseEther("2375")
       expect(await navigatorRegistry.getTotalSlashed(navigator1.address)).to.equal(expectedTotal)
     })
   })
@@ -213,7 +213,7 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
       const treasuryBefore = await b3tr.balanceOf(treasuryAddress)
       const stakeBefore = await navigatorRegistry.getStake(navigator1.address)
       await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [])
-      const expectedSlash = (stakeBefore * 1000n) / 10000n
+      const expectedSlash = (stakeBefore * 500n) / 10000n
       const treasuryAfter = await b3tr.balanceOf(treasuryAddress)
       expect(treasuryAfter - treasuryBefore).to.equal(expectedSlash)
     })
