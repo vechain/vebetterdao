@@ -372,7 +372,15 @@ jobs:
           PROJECT_NAME: ${{ env.PROJECT_NAME }}
         with:
           script: |
-            const flavors = JSON.parse(process.env.FLAVORS);
+            function parseFlavors(raw) {
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta'];
+              try {
+                return JSON.parse(raw);
+              } catch {
+                return ['staging', 'beta'];
+              }
+            }
+            const flavors = parseFlavors(process.env.FLAVORS);
             const prNumber = process.env.PR_NUMBER;
             const shortSha = process.env.SHORT_SHA;
             const projectName = process.env.PROJECT_NAME;
@@ -437,7 +445,15 @@ jobs:
           DEPLOY_RESULT: ${{ needs.deploy.result }}
         with:
           script: |
-            const flavors = JSON.parse(process.env.FLAVORS);
+            function parseFlavors(raw) {
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta'];
+              try {
+                return JSON.parse(raw);
+              } catch {
+                return ['staging', 'beta'];
+              }
+            }
+            const flavors = parseFlavors(process.env.FLAVORS);
             const prNumber = process.env.PR_NUMBER;
             const shortSha = process.env.SHORT_SHA;
             const runUrl = process.env.RUN_URL;
