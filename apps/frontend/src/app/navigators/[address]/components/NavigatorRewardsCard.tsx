@@ -25,13 +25,17 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [isChartOpen, setIsChartOpen] = useState(false)
   const [isInfoOpen, setIsInfoOpen] = useState(false)
+  const [claimedAmount, setClaimedAmount] = useState(0)
 
   const { totalEarned, totalClaimable, totalLocked, claimableRoundIds, nextUnlock, isLoading } =
     useNavigatorFeeStatus(address)
-  const { sendTransaction, isPending } = useClaimNavigatorFees({})
+  const { sendTransaction, isPending } = useClaimNavigatorFees({
+    onSuccess: () => setClaimedAmount(totalClaimable),
+  })
 
+  const effectiveClaimable = Math.max(0, totalClaimable - claimedAmount)
   const hasAnyFees = !isLoading && totalEarned > 0
-  const canClaim = totalClaimable > 0
+  const canClaim = effectiveClaimable > 0
 
   const handleClaimAll = () => {
     if (!claimableRoundIds.length) return
@@ -88,7 +92,7 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
                       {t("Available to Claim")}
                     </Text>
                     <Text textStyle="xl" fontWeight="bold">
-                      {formatter.format(totalClaimable)} {"B3TR"}
+                      {formatter.format(effectiveClaimable)} {"B3TR"}
                     </Text>
                   </VStack>
 
@@ -112,7 +116,8 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
                         {formatter.format(totalEarned)}
                         {" B3TR"}
                       </Text>
-                      <Link
+                      {/* TODO: Hiding chart view until we will aggregate data and have it available */}
+                      {/* <Link
                         textStyle="xs"
                         fontWeight="semibold"
                         color="actions.secondary.text-lighter"
@@ -120,7 +125,7 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
                         cursor="pointer">
                         {t("View Details")}
                         <UilArrowUpRight size={16} />
-                      </Link>
+                      </Link> */}
                     </HStack>
                   </VStack>
 
@@ -141,7 +146,7 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
 
                 {canClaim && (
                   <Button variant="primary" size="sm" onClick={handleClaimAll} loading={isPending} w="full">
-                    {t("Claim All {{amount}} B3TR", { amount: formatter.format(totalClaimable) })}
+                    {t("Claim All {{amount}} B3TR", { amount: formatter.format(effectiveClaimable) })}
                   </Button>
                 )}
               </>

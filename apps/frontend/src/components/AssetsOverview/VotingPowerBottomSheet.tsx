@@ -16,10 +16,9 @@ import {
   CloseButton,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
-import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { Flash, NavArrowRight, InfoCircle, HeartSolid, ArrowDown } from "iconoir-react"
-import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { LuUsers } from "react-icons/lu"
@@ -31,8 +30,8 @@ import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetN
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { Transaction } from "@/api/indexer/transactions/useTransactions"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
-import { AddressIcon } from "@/components/AddressIcon"
 import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/ActivityList"
+import { NavigatorDelegationCard } from "@/components/AssetsOverview/NavigatorDelegationCard"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
@@ -230,15 +229,6 @@ const VotingPowerContent = ({
     account?.address,
   )
   const { data: currentDelegated } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
-  const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
-  const { data: navigatorDomain } = useVechainDomain(isDelegated ? navigatorAddress : undefined)
-  const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
-  const router = useRouter()
-
-  const navigatorDisplayName = useMemo(() => {
-    if (!navigatorAddress) return ""
-    return navigatorDomain?.domain ? humanDomain(navigatorDomain.domain, 15, 10) : humanAddress(navigatorAddress, 8, 6)
-  }, [navigatorAddress, navigatorDomain])
 
   const vot3BalanceOnly = useMemo(() => {
     if (!currentVot3Balance) return "0"
@@ -257,42 +247,7 @@ const VotingPowerContent = ({
 
   return (
     <VStack gap="4" align="stretch" w="full">
-      {isDelegated && navigatorAddress && (
-        <HStack
-          gap="3"
-          p="3"
-          rounded="lg"
-          bg="status.info.subtle"
-          borderWidth="1px"
-          borderColor="status.info.muted"
-          cursor="pointer"
-          _hover={{ opacity: 0.85 }}
-          onClick={() => {
-            onClose()
-            router.push(`/navigators/${navigatorAddress}`)
-          }}>
-          <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
-          <VStack align="start" gap="0.5" flex={1}>
-            <Text textStyle="xs" color="text.subtle">
-              {t("Delegated to navigator")}
-            </Text>
-            <Text textStyle="sm" fontWeight="semibold">
-              {navigatorDisplayName}
-            </Text>
-            {navigatorData?.citizenCount != null && (
-              <HStack gap={1}>
-                <LuUsers size={12} color="var(--chakra-colors-fg-muted)" />
-                <Text textStyle="xs" color="text.subtle">
-                  {t("Trusted by {{count}} citizens", { count: navigatorData.citizenCount })}
-                </Text>
-              </HStack>
-            )}
-          </VStack>
-          <Icon boxSize="4" color="text.subtle">
-            <NavArrowRight />
-          </Icon>
-        </HStack>
-      )}
+      <NavigatorDelegationCard accountAddress={account?.address} onClose={onClose} />
 
       {/* Summary */}
       <VStack gap="4" align="start" justify="space-between" w="full" p="4" rounded="lg" bg="status.positive.subtle">
@@ -456,7 +411,7 @@ const VotingPowerContent = ({
 }
 
 export const VotingPowerBottomSheet = (props: Props) => {
-  const { isOpen, onClose, isDelegated } = props
+  const { isOpen, onClose } = props
   const { t } = useTranslation()
   const { account } = useWallet()
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
@@ -470,7 +425,7 @@ export const VotingPowerBottomSheet = (props: Props) => {
   const closeDelegation = useCallback(() => setIsDelegationOpen(false), [])
   const openDelegation = useCallback(() => setIsDelegationOpen(true), [])
 
-  const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
+  const { data: navigatorAddress = "" } = useGetNavigator(account?.address)
   const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
 
   const content = (

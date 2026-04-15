@@ -1,7 +1,8 @@
 import { getConfig } from "@repo/config"
+import { useQueryClient } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 
 import { getNavigatorFeeHistoryQueryKey } from "@/api/indexer/navigators/useNavigatorFeeHistory"
 import { getNavigatorFeeSummaryQueryKey } from "@/api/indexer/navigators/useNavigatorFeeSummary"
@@ -23,6 +24,7 @@ type Props = {
 
 export const useClaimNavigatorFees = ({ onSuccess }: Props) => {
   const { account } = useWallet()
+  const queryClient = useQueryClient()
 
   const clauseBuilder = useCallback(
     (params: ClaimParams) =>
@@ -38,18 +40,16 @@ export const useClaimNavigatorFees = ({ onSuccess }: Props) => {
     [],
   )
 
-  const refetchQueryKeys = useMemo(
-    () => [
-      getNavigatorFeeSummaryQueryKey(account?.address),
-      getNavigatorFeeHistoryQueryKey(account?.address ?? ""),
-      getB3trBalanceQueryKey(account?.address),
-    ],
-    [account],
-  )
+  const handleSuccess = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: getNavigatorFeeSummaryQueryKey(account?.address) })
+    await queryClient.invalidateQueries({ queryKey: getNavigatorFeeHistoryQueryKey(account?.address ?? "") })
+    await queryClient.invalidateQueries({ queryKey: getB3trBalanceQueryKey(account?.address) })
+    onSuccess?.()
+  }, [account?.address, onSuccess, queryClient])
 
   return useBuildTransaction<ClaimParams>({
     clauseBuilder,
-    refetchQueryKeys,
-    onSuccess,
+    invalidateCache: false,
+    onSuccess: handleSuccess,
   })
 }
