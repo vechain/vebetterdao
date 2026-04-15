@@ -50,7 +50,14 @@ async function verifySingleContract(
 
     // Setup temp directory
     const { contractsDir, packageDir } = getProjectPaths()
-    const tempDir = path.join(packageDir, `temp-verify-${contractAddress}`)
+    const baseDir = path.resolve(packageDir)
+    const tempDirName = `temp-verify-${contractAddress}`
+    const tempDir = path.resolve(baseDir, tempDirName)
+    const relativePath = path.relative(baseDir, tempDir)
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+      console.log(`   ✗ Invalid path`)
+      return false
+    }
 
     if (fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true })
