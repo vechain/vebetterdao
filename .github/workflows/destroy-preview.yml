@@ -6,11 +6,6 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: write
-
 env:
   AWS_REGION: eu-west-1
   TERRAFORM_VERSION: 1.6.0
@@ -28,6 +23,10 @@ jobs:
   destroy:
     name: Destroy Preview Environments
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     outputs:
       destroyed_flavors: ${{ steps.destroy.outputs.destroyed_flavors }}
 
@@ -149,6 +148,9 @@ jobs:
     name: Update PR Comment
     needs: destroy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Update PR comment - Destroyed
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0

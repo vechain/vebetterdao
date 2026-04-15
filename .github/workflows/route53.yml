@@ -8,15 +8,14 @@ on:
       - 'terraform/route53/**'
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: read
-
 jobs:
   route53-plan:
     name: Route53 Plan
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     outputs:
       plan_changes_detected: ${{ steps.check_changes.outputs.plan_changes_detected }}
     steps:
@@ -88,6 +87,10 @@ jobs:
   route53-apply:
     name: Route53 Deploy Records
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     needs: route53-plan
     if: |
       needs.route53-plan.outputs.plan_changes_detected == 'true' && 

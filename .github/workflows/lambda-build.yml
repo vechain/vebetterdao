@@ -44,10 +44,11 @@ jobs:
           TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
           NODE_OPTIONS: '--max-old-space-size=8192'
+          WORKSPACE: ${{ inputs.workspace }}
         run: |
           # Set environment variables based on workspace
           set +x  # Disable command echoing
-          if [ "${{ inputs.workspace }}" == "dev" ]; then
+          if [ "$WORKSPACE" == "dev" ]; then
             if [ -z "$TESTNET_MNEMONIC" ]; then
               echo "Error: TESTNET_MNEMONIC is required for dev workspace"
               exit 1
@@ -69,7 +70,7 @@ jobs:
           # Build lambda
           cd packages/lambda
           echo "Running yarn build..."
-          if [ "${{ inputs.workspace }}" == "dev" ]; then
+          if [ "$WORKSPACE" == "dev" ]; then
             LAMBDA_ENV=testnet-staging yarn build:lambda || { echo "Lambda build failed"; exit 1; }
           else
             LAMBDA_ENV=mainnet yarn build:lambda || { echo "Lambda build failed"; exit 1; }

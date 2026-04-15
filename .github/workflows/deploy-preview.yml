@@ -12,11 +12,6 @@ concurrency:
   group: preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: write
-
 env:
   # AWS Configuration
   AWS_REGION: eu-west-1
@@ -37,6 +32,8 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       flavors: ${{ steps.determine.outputs.flavors }}
       pr_number: ${{ steps.determine.outputs.pr_number }}
@@ -45,6 +42,8 @@ jobs:
     steps:
       - name: Determine flavors and metadata
         id: determine
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
@@ -54,11 +53,11 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
 
-          if [ "${{ github.base_ref }}" == "main" ]; then
+          if [ "$BASE_REF" == "main" ]; then
             echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
             echo "::notice::PR to main - deploying staging + beta previews"
           else
-            echo "::error::Unsupported base branch: ${{ github.base_ref }}"
+            echo "::error::Unsupported base branch: ${BASE_REF}"
             exit 1
           fi
 
@@ -67,6 +66,9 @@ jobs:
     name: Post Deploying Comment
     needs: setup
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Update PR comment - Deploying
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
@@ -132,6 +134,10 @@ jobs:
   build-and-push:
     name: Build (${{ matrix.flavor }})
     needs: [setup, comment-deploying]
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     strategy:
       matrix:
         flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
@@ -151,6 +157,9 @@ jobs:
     needs: [setup, build-and-push]
     if: always() && needs.build-and-push.result == 'success'
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       matrix:
         flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
@@ -295,6 +304,9 @@ jobs:
     needs: [setup, build-and-push, deploy]
     runs-on: ubuntu-latest
     if: always()
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Update PR comment - Results
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0

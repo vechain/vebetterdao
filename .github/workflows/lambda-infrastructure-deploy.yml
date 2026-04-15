@@ -38,15 +38,14 @@ on:
       VECHAINCI_SSH_PRIVATE_KEYS:
         required: true
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: read
-
 jobs:
   deploy:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -82,8 +81,9 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        env:
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
         run: |
-          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
           BUCKET="b3tr-terraform-state-${WORKSPACE}"
           
           terraform init -backend-config="bucket=${BUCKET}"
@@ -91,9 +91,9 @@ jobs:
       - name: Terraform Workspace
         working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         id: workspace
+        env:
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
         run: |
-          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
-          
           if ! terraform workspace list | grep -q "$WORKSPACE"; then
             terraform workspace new "$WORKSPACE"
           else
