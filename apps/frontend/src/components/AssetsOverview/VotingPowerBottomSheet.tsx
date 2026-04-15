@@ -58,7 +58,7 @@ const VOTING_POWER_EVENT_NAMES = [
 ] as const
 const compactFormatter = getCompactFormatter(2)
 
-const getVotingPowerActivityProps = (tx: Transaction): ActivityItemProps | null => {
+const getVotingPowerActivityProps = (tx: Transaction, account: string): ActivityItemProps | null => {
   switch (tx.eventName) {
     case "B3TR_SWAP_B3TR_TO_VOT3":
       return {
@@ -105,49 +105,32 @@ const getVotingPowerActivityProps = (tx: Transaction): ActivityItemProps | null 
         amountColor: "status.positive.strong",
       }
     case "B3TR_NAVIGATOR_DELEGATION_CREATED":
-      return {
-        label: "Delegated",
-        icon: <Icon as={LuUsers} />,
-        iconBg: "status.positive.subtle",
-        iconColor: "status.positive.strong",
-        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
-        token: "VOT3",
-        sign: "-",
-        amountColor: undefined,
-      }
     case "B3TR_NAVIGATOR_DELEGATION_INCREASED":
-      return {
-        label: "Increased delegation",
-        icon: <Icon as={LuUsers} />,
-        iconBg: "status.positive.subtle",
-        iconColor: "status.positive.strong",
-        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
-        token: "VOT3",
-        sign: "-",
-        amountColor: undefined,
-      }
     case "B3TR_NAVIGATOR_DELEGATION_DECREASED":
+    case "B3TR_NAVIGATOR_DELEGATION_REMOVED": {
+      const isCitizen = tx.from?.toLowerCase() === account.toLowerCase()
+      if (!isCitizen) return null
+
+      const isDelegating =
+        tx.eventName === "B3TR_NAVIGATOR_DELEGATION_CREATED" || tx.eventName === "B3TR_NAVIGATOR_DELEGATION_INCREASED"
+
       return {
-        label: "Decreased delegation",
+        label: isDelegating
+          ? tx.eventName === "B3TR_NAVIGATOR_DELEGATION_CREATED"
+            ? "Delegated to Navigator"
+            : "Increased delegation"
+          : tx.eventName === "B3TR_NAVIGATOR_DELEGATION_DECREASED"
+            ? "Decreased delegation"
+            : "Removed Delegation",
         icon: <Icon as={LuUsers} />,
-        iconBg: "status.negative.subtle",
-        iconColor: "status.negative.strong",
+        iconBg: isDelegating ? "status.positive.subtle" : "status.negative.subtle",
+        iconColor: isDelegating ? "status.positive.strong" : "status.negative.strong",
         amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
         token: "VOT3",
-        sign: "+",
-        amountColor: "status.positive.strong",
+        sign: isDelegating ? "-" : "+",
+        amountColor: isDelegating ? undefined : "status.positive.strong",
       }
-    case "B3TR_NAVIGATOR_DELEGATION_REMOVED":
-      return {
-        label: "Removed delegation",
-        icon: <Icon as={LuUsers} />,
-        iconBg: "status.negative.subtle",
-        iconColor: "status.negative.strong",
-        amount: tx.value ? compactFormatter.format(Number(formatEther(BigInt(tx.value)))) : "0",
-        token: "VOT3",
-        sign: "+",
-        amountColor: "status.positive.strong",
-      }
+    }
     default:
       return null
   }
