@@ -30,6 +30,9 @@ export const badgeRecipe = defineRecipe({
     variant: {
       warning: { bg: "status.warning.subtle", color: "status.warning.strong" },
       info: { bg: "status.info.subtle", color: "status.info.strong" },
+      teal: { bg: "status.teal.subtle", color: "status.teal.strong" },
+      yellow: { bg: "status.yellow.subtle", color: "status.yellow.strong" },
+      purple: { bg: "status.purple.subtle", color: "status.purple.strong" },
       negative: { bg: "status.negative.subtle", color: "status.negative.strong" },
       neutral: { bg: "status.neutral.subtle", color: "status.neutral.strong" },
       positive: { bg: "status.positive.subtle", color: "status.positive.strong" },

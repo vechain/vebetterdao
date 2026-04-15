@@ -175,6 +175,8 @@ jobs:
             label: VeBetterPassport - Delegation
           - shard: shard9
             label: VOT3
+          - shard: shard9a
+            label: B3TRChallenges
           - shard: shard10-core
             label: VoterRewards
           - shard: shard10a

@@ -28,6 +28,14 @@ export const pagesMetadata = {
     image: "/assets/images/allocations_page.webp",
     imageExtension: "image/webp",
   },
+  challenges: {
+    path: "/challenges",
+    title: "VeBetter Challenges | Compete in Stake and Sponsored Rounds",
+    description:
+      "Explore mock challenge flows for VeBetter users, from invitations and joins to payout, refunds, and manual finalization.",
+    image: "/assets/images/allocations_page.webp",
+    imageExtension: "image/webp",
+  },
   proposals: {
     path: "/proposals",
     title: "VeBetter Proposals | Vote, Discuss & Influence the Future",

@@ -70,6 +70,10 @@ export function createLocalConfig() {
 
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
+    CHALLENGES_MAX_DURATION: 4,
+    CHALLENGES_MAX_SELECTED_APPS: 5,
+    CHALLENGES_MAX_PARTICIPANTS: 100,
+    CHALLENGES_MIN_BET_AMOUNT: 100000000000000000000n, // 100 B3TR
 
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
@@ -141,7 +145,7 @@ export function createLocalConfig() {
       Token transfer limits. These values are not final and are for testing purposes only.
     */
     TREASURY_TRANSFER_LIMIT_VET: BigInt("200000000000000000000000"), // 200,000 VET
-    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("500000000000000000000000"), // 50,000 B3TR
+    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("100000000000000000000000000"), // 100,000,000 B3TR
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
 
@@ -177,6 +181,7 @@ export function createLocalConfig() {
     //WARNING: Cooldown depends on the current round. If the current round is 1, the cooldown cannot be greater than 1. Otherwise the endorsement will fail.
     //Check `EndorsementUtils.sol` `checkCooldown` method for more details.
     X2EARN_NODE_COOLDOWN_PERIOD: 0, // 0 rounds -> UPDATED to 1 in the deployAll script
+    X2EARN_ENDORSEMENT_SCORE_THRESHOLD: 1,
 
     MULTI_SIG_SIGNERS: [
       "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",

@@ -27,6 +27,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "b3tr-multi-sig",
     description: "Deploy only this contract",
   },
+  Challenges: {
+    name: "b3tr-challenges",
+    description: "Deploy only this contract",
+  },
   XAllocationVoting: {
     name: "x-allocation-voting",
     description: "Deploy only this contract",
@@ -92,6 +96,13 @@ async function deployContract() {
         break
       case "b3tr-multi-sig":
         console.log("Deploying Multi Sig")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
+      case "b3tr-challenges":
+        console.log("Deploying Challenges")
         // Set environment variables
         process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
         // Run the upgrade script

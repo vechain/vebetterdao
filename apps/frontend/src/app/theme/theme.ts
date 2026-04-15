@@ -310,6 +310,24 @@ const config = defineConfig({
             secondary: { value: { base: "{colors.blue.200}", _dark: "{colors.blue.700}" } },
             subtle: { value: { base: "{colors.blue.50}", _dark: "{colors.blue.900}" } },
           },
+          teal: {
+            strong: { value: { base: "{colors.teal.600}", _dark: "{colors.teal.200}" } },
+            primary: { value: { base: "{colors.teal.300}", _dark: "{colors.teal.400}" } },
+            secondary: { value: { base: "{colors.teal.200}", _dark: "{colors.teal.700}" } },
+            subtle: { value: { base: "{colors.teal.50}", _dark: "{colors.teal.900}" } },
+          },
+          yellow: {
+            strong: { value: { base: "{colors.yellow.800}", _dark: "{colors.yellow.200}" } },
+            primary: { value: { base: "{colors.yellow.300}", _dark: "{colors.yellow.400}" } },
+            secondary: { value: { base: "{colors.yellow.200}", _dark: "{colors.yellow.700}" } },
+            subtle: { value: { base: "{colors.yellow.100}", _dark: "{colors.yellow.900}" } },
+          },
+          purple: {
+            strong: { value: { base: "{colors.purple.700}", _dark: "{colors.purple.200}" } },
+            primary: { value: { base: "{colors.purple.300}", _dark: "{colors.purple.400}" } },
+            secondary: { value: { base: "{colors.purple.200}", _dark: "{colors.purple.700}" } },
+            subtle: { value: { base: "{colors.purple.50}", _dark: "{colors.purple.900}" } },
+          },
           warning: {
             strong: { value: { base: "{colors.orange.700}", _dark: "{colors.orange.200}" } },
             primary: { value: { base: "{colors.orange.300}", _dark: "{colors.orange.400}" } },

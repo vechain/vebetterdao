@@ -6,11 +6,13 @@ type Props = {
   children: React.ReactNode
   renderInnerStack?: boolean
 } & MotionVStackProps
+
+const AnimatedVStack = motion(VStack)
+
 export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps }: Props) => {
-  const MotionVStack = motion(VStack)
   if (renderInnerStack)
     return (
-      <MotionVStack
+      <AnimatedVStack
         w="full"
         gap={12}
         initial={{ opacity: 0 }}
@@ -29,10 +31,10 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
           gap={12}>
           {children}
         </Stack>
-      </MotionVStack>
+      </AnimatedVStack>
     )
   return (
-    <MotionVStack
+    <AnimatedVStack
       w="full"
       gap={12}
       initial={{ opacity: 0 }}
@@ -44,6 +46,6 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
       }}
       {...otherProps}>
       {children}
-    </MotionVStack>
+    </AnimatedVStack>
   )
 }

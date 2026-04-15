@@ -107,7 +107,7 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false }: Props) =
               variant="ghost"
               size="2xs"
               rounded="full"
-              aria-label={t("Learn more about snapshot")}
+              aria-label={t("What is a snapshot?")}
               onClick={onOpenSnapshot}>
               <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
             </IconButton>

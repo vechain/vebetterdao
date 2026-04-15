@@ -358,6 +358,10 @@
     "endorsement-migration:verify:mainnet": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "stress:challenges:local": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     }
   }
 }

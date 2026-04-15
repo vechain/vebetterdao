@@ -23,6 +23,7 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
+  B3TRChallenges,
   VeBetterPassportV2,
   B3TRMultiSig,
   VeBetterPassportV3,
@@ -40,9 +41,11 @@ import {
   EndorsementUtilsV6,
   VoteEligibilityUtilsV6,
   X2EarnAppsV7,
+  ChallengeCoreLogic,
+  ChallengeSettlementLogic,
 } from "../../typechain-types"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
-import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
+import { challengesLibraries, governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import type { GovernanceLibraries } from "../../scripts/libraries/governanceLibraries"
 import type { PassportLibraries } from "../../scripts/libraries/passportLibraries"
 import { setWhitelistedFunctions } from "./whitelistGovernance"
@@ -74,6 +77,7 @@ export interface DeployInstance
   treasury: Treasury
   nodeManagement: NodeManagementV3
   x2EarnCreator: X2EarnCreator
+  b3trChallenges: B3TRChallenges
   x2EarnRewardsPool: X2EarnRewardsPool
   veBetterPassport: VeBetterPassport
   veBetterPassportV1: VeBetterPassportV1
@@ -110,6 +114,8 @@ export interface DeployInstance
 
   // AutoVoting Libraries
   autoVotingLogic: AutoVotingLogic
+  challengeCoreLogic: ChallengeCoreLogic
+  challengeSettlementLogic: ChallengeSettlementLogic
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -304,6 +310,9 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy AutoVoting Libraries
   const { AutoVotingLogic } = await autoVotingLibraries()
+
+  const { ChallengeCoreLogic: challengeCoreLogic, ChallengeSettlementLogic: challengeSettlementLogic } =
+    await challengesLibraries({ logOutput: false })
 
   // ---------------------- Deploy Mocks ----------------------
 
@@ -1084,6 +1093,32 @@ export const getOrDeployContractInstances = async ({
     },
   })) as X2EarnApps
 
+  const b3trChallenges = (await deployProxy(
+    "B3TRChallenges",
+    [
+      {
+        b3trAddress: await b3tr.getAddress(),
+        veBetterPassportAddress: await veBetterPassport.getAddress(),
+        xAllocationVotingAddress: await xAllocationVoting.getAddress(),
+        x2EarnAppsAddress: await x2EarnApps.getAddress(),
+        maxChallengeDuration: config.CHALLENGES_MAX_DURATION,
+        maxSelectedApps: config.CHALLENGES_MAX_SELECTED_APPS,
+        maxParticipants: config.CHALLENGES_MAX_PARTICIPANTS,
+        minBetAmount: config.CHALLENGES_MIN_BET_AMOUNT,
+      },
+      {
+        admin: owner.address,
+        upgrader: owner.address,
+        contractsAddressManager: owner.address,
+        settingsManager: owner.address,
+      },
+    ],
+    {
+      ChallengeCoreLogic: await challengeCoreLogic.getAddress(),
+      ChallengeSettlementLogic: await challengeSettlementLogic.getAddress(),
+    },
+  )) as B3TRChallenges
+
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
@@ -1097,6 +1132,7 @@ export const getOrDeployContractInstances = async ({
     B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
     VeBetterPassport: veBetterPassportContractAddress,
+    B3TRChallenges: await b3trChallenges.getAddress(),
     StargateNFT: await stargateNftMock.getAddress(),
     DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
   }
@@ -1120,6 +1156,10 @@ export const getOrDeployContractInstances = async ({
     },
     XAllocationVoting: {
       AutoVotingLogic: await AutoVotingLogic.getAddress(),
+    },
+    B3TRChallenges: {
+      ChallengeCoreLogic: await challengeCoreLogic.getAddress(),
+      ChallengeSettlementLogic: await challengeSettlementLogic.getAddress(),
     },
   }
 
@@ -1244,6 +1284,7 @@ export const getOrDeployContractInstances = async ({
     creators,
     treasury,
     x2EarnRewardsPool,
+    b3trChallenges,
     veBetterPassport,
     veBetterPassportV1,
     veBetterPassportV2,
@@ -1392,6 +1433,8 @@ export const getOrDeployContractInstances = async ({
     stargateMock,
     relayerRewardsPool,
     autoVotingLogic: AutoVotingLogic,
+    challengeCoreLogic,
+    challengeSettlementLogic,
   }
   return cachedDeployInstance
 }

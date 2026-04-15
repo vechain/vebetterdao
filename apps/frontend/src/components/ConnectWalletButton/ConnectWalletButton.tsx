@@ -61,6 +61,7 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
 
   return (
     <Box
+      data-testid="wallet-connected"
       background={`linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`}
       border="2px solid transparent"
       backgroundSize="300% 100%"
