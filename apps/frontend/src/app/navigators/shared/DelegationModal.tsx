@@ -35,6 +35,9 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const formatter = getCompactFormatter(2)
 
+/** Minimum delegated VOT3 (human units); matches on-chain MIN_DELEGATION (1 ether). */
+const MIN_DELEGATION = 1
+
 type DelegationMode = "new" | "manage" | "switch"
 
 type Props = {
@@ -109,6 +112,9 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
       ? amountNum - currentDelegatedNum > balanceNum && amountNum > currentDelegatedNum
       : amountNum > effectiveBalance
 
+  /** Must be 0 (full exit) or >= 1 VOT3; values in (0, 1) are invalid on-chain for manage. */
+  const violatesMinDelegation = amountNum > 0 && amountNum < MIN_DELEGATION
+
   // --- Mode-specific validation ---
 
   const manageValidation = useMemo(() => {
@@ -125,7 +131,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   }, [mode, amountNum, currentDelegatedNum])
 
   const isValid = useMemo(() => {
-    if (exceedsCapacity || exceedsBalance) return false
+    if (exceedsCapacity || exceedsBalance || violatesMinDelegation) return false
 
     if (mode === "new" || mode === "switch") {
       if (!amount || amount === "." || amountNum === 0) return false
@@ -143,6 +149,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     amountNum,
     exceedsCapacity,
     exceedsBalance,
+    violatesMinDelegation,
     ackVoting,
     ackLocked,
     ackFee,
@@ -319,7 +326,10 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
             gap={2}
             align="start"
             w="full">
-            <Field.Root gap={2} required invalid={!!amount && amount !== "." && (exceedsBalance || exceedsCapacity)}>
+            <Field.Root
+              gap={2}
+              required
+              invalid={!!amount && amount !== "." && (exceedsBalance || exceedsCapacity || violatesMinDelegation)}>
               <Field.Label w="full" alignItems="center" justifyContent="space-between">
                 <Text textStyle="sm" color="text.subtle">
                   {inputLabel}
@@ -340,11 +350,11 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                     textOverflow="ellipsis"
                     p="0"
                     allowOverflow={false}
-                    min={0}
+                    min={mode === "manage" ? 0 : MIN_DELEGATION}
                     value={amount}
                     onValueChange={details => setAmount(handleAmountInput(details.value))}>
                     <NumberInput.Input
-                      min={0}
+                      min={mode === "manage" ? 0 : MIN_DELEGATION}
                       p="0"
                       placeholder="0"
                       onBlur={() => setAmount(prev => prev.replace(/\.$/, ""))}
@@ -356,11 +366,13 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                   </NumberInput.Root>
                   <Field.ErrorText>
                     <Icon as={WarningTriangle} boxSize="4" />
-                    {exceedsCapacity
-                      ? t("Exceeds navigator capacity. Max: {{max}} VOT3", {
-                          max: formatter.format(remainingCapacity),
-                        })
-                      : t("Insufficient VOT3 balance")}
+                    {violatesMinDelegation
+                      ? t("Minimum delegation is 1 VOT3. Set to 0 to fully exit.")
+                      : exceedsCapacity
+                        ? t("Exceeds navigator capacity. Max: {{max}} VOT3", {
+                            max: formatter.format(remainingCapacity),
+                          })
+                        : t("Insufficient VOT3 balance")}
                   </Field.ErrorText>
                 </VStack>
 

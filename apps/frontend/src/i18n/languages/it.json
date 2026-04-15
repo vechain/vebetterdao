@@ -1044,6 +1044,7 @@
   "Min: {{min}} B3TR": "Min: {{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Minimo {{min}} B3TR richiesti per mantenere la capacità di delega",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Raggiunto il <Link>quorum</Link> minimo ({{quorumNumerator}}%)",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "Delega minima: 1 VOT3. Imposta 0 per uscire completamente.",
   "Minimum stake is {{min}} B3TR": "Lo stake minimo è {{min}} B3TR",
   "Mint": "Conia",
   "Mint NFT": "Conia NFT",

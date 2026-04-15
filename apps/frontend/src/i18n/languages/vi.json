@@ -1044,6 +1044,7 @@
   "Min: {{min}} B3TR": "Tối thiểu: {{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Cần tối thiểu {{min}} B3TR để duy trì dung lượng ủy quyền",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "Ủy quyền tối thiểu là 1 VOT3. Đặt 0 để thoát hoàn toàn.",
   "Minimum stake is {{min}} B3TR": "Stake tối thiểu là {{min}} B3TR",
   "Mint": "Đúc",
   "Mint NFT": "Tạo NFT",

@@ -993,6 +993,7 @@
   "Milestone description": "Описание этапа",
   "Milestones": "Этапы",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Минимальный <Link>кворум</Link> ({{quorumNumerator}}%) достигнут",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "Минимальная делегация — 1 VOT3. Установите 0 для полного выхода.",
   "Mint": "Создать",
   "Mint NFT": "Создать NFT",
   "Minting your Creator NFT...": "Создание вашего Creator NFT...",

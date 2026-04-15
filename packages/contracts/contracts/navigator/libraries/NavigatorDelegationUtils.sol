@@ -23,6 +23,10 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 ///   ExitAnnounced / NavigatorDeactivated events as implicit bulk removal of all citizen delegations.
 library NavigatorDelegationUtils {
   using Checkpoints for Checkpoints.Trace208;
+
+  /// @dev Matches governance minimum voting power (1 VOT3, 18 decimals)
+  uint256 private constant MIN_DELEGATION = 1 ether;
+
   // ======================== Events ======================== //
 
   /// @notice Emitted when a citizen delegates VOT3 to a navigator for the first time
@@ -62,6 +66,9 @@ library NavigatorDelegationUtils {
   /// @notice Thrown when delegation amount is zero
   error ZeroDelegationAmount();
 
+  /// @notice Thrown when delegation amount is below the minimum (1 VOT3) or partial reduction would leave a sub-minimum positive balance
+  error BelowMinimumDelegation(uint256 amount, uint256 minimum);
+
   /// @notice Thrown when trying to undelegate more than delegated
   error InsufficientDelegation(uint256 requested, uint256 available);
 
@@ -80,6 +87,7 @@ library NavigatorDelegationUtils {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
 
     if (amount == 0) revert ZeroDelegationAmount();
+    if (amount < MIN_DELEGATION) revert BelowMinimumDelegation(amount, MIN_DELEGATION);
     if (citizen == navigator) revert SelfDelegationNotAllowed(citizen);
 
     address currentNavigator = _currentNavigator($, citizen);
@@ -146,6 +154,7 @@ library NavigatorDelegationUtils {
     }
 
     uint256 newAmount = current - reduceBy;
+    if (newAmount != 0 && newAmount < MIN_DELEGATION) revert BelowMinimumDelegation(newAmount, MIN_DELEGATION);
 
     $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newAmount));
     _pushTotalDelegated($, currentNavigator, -int256(reduceBy));

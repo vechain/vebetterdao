@@ -1044,6 +1044,7 @@
   "Min: {{min}} B3TR": "最小: {{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "委任容量を維持するには最低 {{min}} B3TR が必要です",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達しました",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "最低委任は1 VOT3です。完全に解除するには0にしてください。",
   "Minimum stake is {{min}} B3TR": "最小ステークは {{min}} B3TR です",
   "Mint": "ミント",
   "Mint NFT": "NFTを発行する",

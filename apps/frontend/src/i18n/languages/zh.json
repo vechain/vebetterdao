@@ -1044,6 +1044,7 @@
   "Min: {{min}} B3TR": "最低：{{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "需要最低 {{min}} B3TR 以维持委托容量",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "达到最低<Link>法定人数</Link> ({{quorumNumerator}}%)",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "最低委托为 1 VOT3。要完全退出，请设为 0。",
   "Minimum stake is {{min}} B3TR": "最低质押为 {{min}} B3TR",
   "Mint": "铸造",
   "Mint NFT": "铸造NFT",

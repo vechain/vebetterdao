@@ -74,6 +74,15 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       )
     })
 
+    it("should revert with BelowMinimumDelegation when amount is below 1 VOT3", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      const belowMin = ethers.parseEther("0.5")
+
+      await expect(
+        navigatorRegistry.connect(citizen1).delegate(navigator1.address, belowMin),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "BelowMinimumDelegation")
+    })
+
     it("should revert with AlreadyDelegated when citizen delegates again (use increaseDelegation instead)", async function () {
       await getVot3Tokens(citizen1, "2000")
       const amount = ethers.parseEther("500")
@@ -257,6 +266,26 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
         .withArgs(citizen1.address, navigator1.address, ethers.parseEther("200"), ethers.parseEther("300"))
 
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("300"))
+    })
+
+    it("should revert with BelowMinimumDelegation when partial reduction would leave between 0 and 1 VOT3", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("2"))
+
+      await expect(
+        navigatorRegistry.connect(citizen1).reduceDelegation(ethers.parseEther("1.1")),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "BelowMinimumDelegation")
+    })
+
+    it("should allow partial reduction leaving exactly 1 VOT3", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("3"))
+
+      await expect(navigatorRegistry.connect(citizen1).reduceDelegation(ethers.parseEther("2")))
+        .to.emit(navigatorRegistry, "DelegationDecreased")
+        .withArgs(citizen1.address, navigator1.address, ethers.parseEther("2"), ethers.parseEther("1"))
+
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("1"))
     })
 
     it("should fully undelegate when reducing to zero and emit DelegationRemoved", async function () {

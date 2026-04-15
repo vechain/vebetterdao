@@ -1044,6 +1044,7 @@
   "Min: {{min}} B3TR": "Mín: {{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Mínimo de {{min}} B3TR necessário para manter a capacidade de delegação",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Quórum mínimo de <Link>quorum</Link> ({{quorumNumerator}}%) alcançado",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "Delegação mínima é 1 VOT3. Defina 0 para sair por completo.",
   "Minimum stake is {{min}} B3TR": "O stake mínimo é {{min}} B3TR",
   "Mint": "Criar",
   "Mint NFT": "Criar NFT",

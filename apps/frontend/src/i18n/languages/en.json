@@ -1139,6 +1139,7 @@
   "Min: {{min}} B3TR": "Min: {{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Minimum {{min}} B3TR required to maintain delegation capacity",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "Minimum delegation is 1 VOT3. Set to 0 to fully exit.",
   "Minimum stake": "Minimum stake",
   "Minimum stake is {{amount}} B3TR": "Minimum stake is {{amount}} B3TR",
   "Minimum stake is {{min}} B3TR": "Minimum stake is {{min}} B3TR",

@@ -1044,6 +1044,7 @@
   "Min: {{min}} B3TR": "최소: {{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "위임 용량을 유지하려면 최소 {{min}} B3TR이 필요합니다",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "최소 <Link>정족수</Link> ({{quorumNumerator}}%) 달성",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "최소 위임은 1 VOT3입니다. 완전히 종료하려면 0으로 설정하세요.",
   "Minimum stake is {{min}} B3TR": "최소 스테이크는 {{min}} B3TR입니다",
   "Mint": "발행",
   "Mint NFT": "NFT 생성",

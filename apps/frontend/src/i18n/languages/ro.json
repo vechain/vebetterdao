@@ -993,6 +993,7 @@
   "Milestone description": "Descriere obiectiv",
   "Milestones": "Obiective",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>Cvorumul</Link> minim ({{quorumNumerator}}%) atins",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "Delegarea minimă este de 1 VOT3. Setează 0 pentru a ieși complet.",
   "Mint": "Creează",
   "Mint NFT": "Creează NFT",
   "Minting your Creator NFT...": "Se creează Creator NFT-ul tău...",

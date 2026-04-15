@@ -62,6 +62,9 @@ interface INavigatorRegistry {
   /// @notice Thrown when delegation amount is zero
   error ZeroDelegationAmount();
 
+  /// @notice Thrown when delegation is below 1 VOT3 or a partial reduction would leave a sub-minimum positive balance
+  error BelowMinimumDelegation(uint256 amount, uint256 minimum);
+
   /// @notice Thrown when trying to reduce more than the delegated amount
   error InsufficientDelegation(uint256 requested, uint256 available);
 

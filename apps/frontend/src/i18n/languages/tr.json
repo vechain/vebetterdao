@@ -1044,6 +1044,7 @@
   "Min: {{min}} B3TR": "Min: {{min}} B3TR",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Delegasyon kapasitesini korumak için en az {{min}} B3TR gereklidir",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı",
+  "Minimum delegation is 1 VOT3. Set to 0 to fully exit.": "Asgari delegasyon 1 VOT3. Tamamen çıkmak için 0 girin.",
   "Minimum stake is {{min}} B3TR": "Minimum stake {{min}} B3TR'dir",
   "Mint": "Bas",
   "Mint NFT": "NFT Oluştur",
