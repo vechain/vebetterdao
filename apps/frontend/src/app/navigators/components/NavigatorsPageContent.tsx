@@ -2,7 +2,7 @@ import { Button, Heading, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass } from "react-icons/lu"
 
@@ -34,6 +34,18 @@ export const NavigatorsPageContent = () => {
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigatorAddr } = useGetNavigator(account?.address)
   const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
+  const [isDelegationOpen, setIsDelegationOpen] = useState(false)
+  const rafRef = useRef<number>()
+
+  const handleDelegate = useCallback((nav: NavigatorEntityFormatted) => {
+    setDelegateTarget(nav)
+    cancelAnimationFrame(rafRef.current!)
+    rafRef.current = requestAnimationFrame(() => setIsDelegationOpen(true))
+  }, [])
+
+  const handleDelegationClose = useCallback(() => {
+    setIsDelegationOpen(false)
+  }, [])
 
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegating = !!currentNavigatorAddr && currentDelegatedNum > 0
@@ -128,13 +140,13 @@ export const NavigatorsPageContent = () => {
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4} w="full">
           {!hasActiveFilters && !isNavigator && <BecomeNavigatorCTA />}
           {navigators.map(nav => (
-            <NavigatorCard key={nav.address} navigator={nav} onDelegate={setDelegateTarget} />
+            <NavigatorCard key={nav.address} navigator={nav} onDelegate={handleDelegate} />
           ))}
         </SimpleGrid>
       )}
 
       {delegateTarget && (
-        <DelegationModal isOpen={!!delegateTarget} onClose={() => setDelegateTarget(null)} navigator={delegateTarget} />
+        <DelegationModal isOpen={isDelegationOpen} onClose={handleDelegationClose} navigator={delegateTarget} />
       )}
     </VStack>
   )
