@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/vebetterpassport/**'
-      - 'lambda/src/vebetterpassport/**'
+      - 'packages/lambda/src/veBetterPassport/**'
       - '.github/workflows/vebetterpassport-lambda-deploy.yml'
   workflow_dispatch:
     inputs:

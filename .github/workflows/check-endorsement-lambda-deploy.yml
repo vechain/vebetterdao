@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/check-endorsement/**'
-      - 'lambda/src/checkEndorsements/**'
+      - 'packages/lambda/src/checkEndorsements/**'
       - '.github/workflows/check-endorsement-lambda-deploy.yml'
   workflow_dispatch:
     inputs:

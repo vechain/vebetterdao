@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/distribute-dba/**'
-      - 'lambda/src/distributeDBA/**'
+      - 'packages/lambda/src/distributeDBA/**'
       - '.github/workflows/distribute-dba-lambda-deploy.yml'
   workflow_dispatch:
     inputs:

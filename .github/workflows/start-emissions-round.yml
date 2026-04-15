@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/start-emissions-round/**'
-      - 'lambda/src/startEmissionsRound/**'
+      - 'packages/lambda/src/startRound/**'
       - '.github/workflows/start-emissions-round.yml'
   workflow_dispatch:
     inputs:

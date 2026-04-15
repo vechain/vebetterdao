@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/relayer-claim-reward/**'
-      - 'lambda/src/relayerClaimReward/**'
+      - 'packages/lambda/src/relayerClaimReward/**'
       - '.github/workflows/relayer-claim-reward-lambda-deploy.yml'
   workflow_dispatch:
     inputs:

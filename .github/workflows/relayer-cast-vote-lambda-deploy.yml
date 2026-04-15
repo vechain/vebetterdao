@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/relayer-cast-vote/**'
-      - 'lambda/src/relayerCastVote/**'
+      - 'packages/lambda/src/relayerCastVote/**'
       - '.github/workflows/relayer-cast-vote-lambda-deploy.yml'
   workflow_dispatch:
     inputs:
