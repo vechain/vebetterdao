@@ -7,13 +7,24 @@ import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
-import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { toaster } from "@/components/ui/toaster"
+import {
+  ExpenditureReport,
+  GrantFormData,
+  GrantProposalEnriched,
+  MilestoneState,
+  ProposalState,
+} from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
+import { useExpenditureReport } from "@/hooks/proposals/grants/useExpenditureReport"
+import { useSubmitExpenditureReport } from "@/hooks/proposals/grants/useSubmitExpenditureReport"
 import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
+import { ExpenditureReportForm } from "./ExpenditureReportForm"
+import { ExpenditureReportView } from "./ExpenditureReportView"
 import { MilestoneItem } from "./MilestoneItem"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
@@ -28,6 +39,32 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
   const { onMetadataUpload, metadataUploading } = useUploadGrantProposalMetadata()
   const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
+  // Expenditure report hooks
+  const { submitReport, isSubmitting: isReportSubmitting } = useSubmitExpenditureReport(proposal?.id || "")
+  const { data: existingReport } = useExpenditureReport(proposal?.id || "")
+  const [showReportForm, setShowReportForm] = useState(false)
+
+  const isGrantReceiver = useMemo(() => {
+    return account?.address && proposal?.grantsReceiverAddress
+      ? compareAddresses(account.address, proposal.grantsReceiverAddress)
+      : false
+  }, [account?.address, proposal?.grantsReceiverAddress])
+
+  const isInDevelopment = proposal?.state === ProposalState.InDevelopment
+
+  const handleReportSubmit = useCallback(
+    async (report: ExpenditureReport) => {
+      const cid = await submitReport(report)
+      if (cid) {
+        setShowReportForm(false)
+        toaster.create({ description: t("Expenditure report submitted successfully"), type: "success", closable: true })
+      } else {
+        toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
+      }
+    },
+    [submitReport, t],
+  )
+
   const milestones = useMemo(() => {
     return (
       proposal?.milestones
@@ -112,6 +149,34 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   // ==========================================
   return (
     <Skeleton loading={isLoading}>
+      {/* Expenditure Report Section */}
+      {isInDevelopment && isGrantReceiver && !showReportForm && (
+        <VStack align="flex-start" gap={3} pb={4}>
+          <Button variant="secondary" size="sm" onClick={() => setShowReportForm(true)}>
+            {existingReport ? t("Update expenditure report") : t("Submit expenditure report")}
+          </Button>
+        </VStack>
+      )}
+
+      {showReportForm && proposal && (
+        <VStack pb={6}>
+          <ExpenditureReportForm
+            proposal={proposal}
+            currentMilestoneIndex={currentStep}
+            totalMilestones={milestones.length}
+            onSubmit={handleReportSubmit}
+            onCancel={() => setShowReportForm(false)}
+            isSubmitting={isReportSubmitting}
+          />
+        </VStack>
+      )}
+
+      {existingReport && !showReportForm && (
+        <VStack pb={6} p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary">
+          <ExpenditureReportView report={existingReport} />
+        </VStack>
+      )}
+
       <Steps.Root
         orientation="vertical"
         defaultStep={0}

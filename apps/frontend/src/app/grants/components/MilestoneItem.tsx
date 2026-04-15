@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next"
 
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
+import { useExpenditureReportStore } from "@/hooks/proposals/grants/useExpenditureReportStore"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimMilestone } from "@/hooks/useClaimMilestone"
 import { useRejectGrant } from "@/hooks/useRejectGrant"
@@ -146,6 +147,10 @@ export const MilestoneItem = ({
     )
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
+  // Expenditure report check for soft warning
+  const { getReportCid } = useExpenditureReportStore()
+  const hasExpenditureReport = !!getReportCid(proposal.id)
+
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
     return account?.address && isGrantReceiver && milestoneData.state === MilestoneState.Approved
@@ -229,6 +234,18 @@ export const MilestoneItem = ({
       )}
 
       {/* Grant receiver actions (claim) - available on any approved milestone */}
+      {shouldShowClaimAction && !hasExpenditureReport && (
+        <VStack w="full" bg="orange.50" p={3} borderRadius="xl" align="flex-start">
+          <Text textStyle="sm" color="orange.700" fontWeight="semibold">
+            {t("Expenditure report recommended")}
+          </Text>
+          <Text textStyle="sm" color="orange.600">
+            {t(
+              "Consider submitting an expenditure report before claiming. Reports are required for transparency and may be reviewed before the next tranche is released.",
+            )}
+          </Text>
+        </VStack>
+      )}
       {shouldShowClaimAction && (
         <HStack w="full">
           <Button variant="primary" onClick={handleClaim}>
