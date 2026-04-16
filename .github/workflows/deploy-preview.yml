@@ -82,7 +82,7 @@ jobs:
 
           if [ "$BASE_REF" == "main" ]; then
             echo 'flavors=["staging", "beta", "dev"]' >> $GITHUB_OUTPUT
-            echo "::notice::PR to main - deploying staging + beta previews"
+            echo "::notice::PR to main - deploying staging + beta + dev previews"
           else
             echo "::error::Unsupported base branch: ${BASE_REF}"
             exit 1
@@ -169,7 +169,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        flavor: [staging, beta]
+        flavor: [staging, beta, dev]
       fail-fast: false
     uses: ./.github/workflows/build-push-ecr.yml
     with:
@@ -188,7 +188,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flavor: [staging, beta]
+        flavor: [staging, beta, dev]
       fail-fast: false
     steps:
       - name: Skip build (no relevant changes)
@@ -205,7 +205,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        flavor: [staging, beta]
+        flavor: [staging, beta, dev]
       fail-fast: false
     outputs:
       # Store URLs and status for each flavor using dynamic keys
@@ -352,7 +352,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flavor: [staging, beta]
+        flavor: [staging, beta, dev]
       fail-fast: false
     steps:
       - name: Skip deploy (no relevant changes)
@@ -379,11 +379,11 @@ jobs:
         with:
           script: |
             function parseFlavors(raw) {
-              if (!raw || String(raw).trim() === '') return ['staging', 'beta'];
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta', 'dev'];
               try {
                 return JSON.parse(raw);
               } catch {
-                return ['staging', 'beta'];
+                return ['staging', 'beta', 'dev'];
               }
             }
             const flavors = parseFlavors(process.env.FLAVORS);
@@ -455,11 +455,11 @@ jobs:
         with:
           script: |
             function parseFlavors(raw) {
-              if (!raw || String(raw).trim() === '') return ['staging', 'beta'];
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta', 'dev'];
               try {
                 return JSON.parse(raw);
               } catch {
-                return ['staging', 'beta'];
+                return ['staging', 'beta', 'dev'];
               }
             }
             const flavors = parseFlavors(process.env.FLAVORS);
