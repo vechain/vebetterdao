@@ -31,7 +31,7 @@ export const Navbar: React.FC = () => {
           (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true) &&
           (route.name === "Nodes" ? !!account?.address : true) &&
           (route.name === "GM" ? !!account?.address : true) &&
-          (route.name === "Challenges" ? !!account?.address : true)
+          (route.name === "Quests" ? !!account?.address : true)
         )
       }),
     [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],

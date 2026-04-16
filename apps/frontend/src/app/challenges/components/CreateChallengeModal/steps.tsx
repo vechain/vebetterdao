@@ -146,7 +146,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("Bet")}
             </Text>
             <Text textStyle="xs" mt="1" opacity={0.85}>
-              {t("Challenge type description")}
+              {t("Each participant bets the same amount. Winners split the prize pool.")}
             </Text>
           </Box>
           <Box
@@ -168,7 +168,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("Sponsored")}
             </Text>
             <Text textStyle="xs" mt="1" opacity={0.85}>
-              {t("Sponsored challenge type description")}
+              {t("The creator funds the prize. Winners are chosen from participant actions.")}
             </Text>
           </Box>
         </VStack>

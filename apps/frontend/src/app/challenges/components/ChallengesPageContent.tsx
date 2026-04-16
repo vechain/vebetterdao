@@ -4,19 +4,20 @@ import {
   Box,
   Button,
   Card,
+  Heading,
   HStack,
   Icon,
   IconButton,
+  Link,
   SimpleGrid,
   Skeleton,
   Stack,
-  Text,
   VStack,
   Wrap,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 import { A11y, Navigation } from "swiper/modules"
@@ -25,8 +26,8 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import { ChallengeKind, ChallengeView } from "@/api/challenges/types"
 import { useChallengesHub } from "@/api/challenges/useChallengesHub"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { Modal } from "@/components/Modal"
 import { MotionVStack } from "@/components/MotionVStack"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 import "swiper/css"
@@ -35,7 +36,10 @@ import "swiper/css/navigation"
 import { ChallengeCard } from "./ChallengeCard"
 import { ChallengeCompactCard } from "./ChallengeCompactCard"
 import { ChallengeHubSection } from "./ChallengeHubSection"
+import { ChallengeStepsCard } from "./ChallengeStepsCard"
 import { CreateChallengeModal } from "./CreateChallengeModal"
+
+const QUESTS_STEPS_CARD_DISMISSED_KEY = "vebetterdao:quests-steps-card-dismissed"
 
 const CardSkeleton = () => (
   <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" h="full" borderRadius="3xl" boxShadow="sm">
@@ -201,12 +205,40 @@ export const ChallengesPageContent = () => {
   const { data: grouped, isLoading } = useChallengesHub(viewerAddress)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { t } = useTranslation()
-  const [isInfoOpen, setIsInfoOpen] = useState(false)
+  const { isMobile } = useBreakpoints()
+  /** null = before first client read of localStorage */
+  const [stepsOpen, setStepsOpen] = useState<boolean | null>(null)
+  const open = stepsOpen !== null ? stepsOpen : !isMobile
+
+  const onOpen = useCallback(() => setStepsOpen(true), [])
+  const onClose = useCallback(() => {
+    setStepsOpen(false)
+    try {
+      localStorage.setItem(QUESTS_STEPS_CARD_DISMISSED_KEY, "1")
+    } catch {
+      // ignore quota / private mode
+    }
+  }, [])
+
   const round = Number(currentRoundId ?? 0)
 
   useEffect(() => {
     AnalyticsUtils.trackPage("Challenges")
   }, [])
+
+  useEffect(() => {
+    let dismissed = false
+    try {
+      dismissed = localStorage.getItem(QUESTS_STEPS_CARD_DISMISSED_KEY) === "1"
+    } catch {
+      // ignore
+    }
+    if (dismissed) {
+      setStepsOpen(false)
+    } else {
+      setStepsOpen(!isMobile)
+    }
+  }, [isMobile])
 
   const hasNeededActions = grouped.neededActions.items.length > 0
   const hasActive = grouped.active.items.length > 0
@@ -219,42 +251,30 @@ export const ChallengesPageContent = () => {
       <VStack align="stretch" w="full" gap="8">
         {/* Header */}
         <Stack direction={{ base: "column", md: "row" }} justify="space-between" align={{ md: "center" }} gap="4">
-          <Text as="h1" textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
-            {t("Challenges")}
-          </Text>
-          <HStack gap="2" flexShrink={0} flexWrap="wrap">
-            <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
-              <Button variant="primary" size="sm">
-                {t("Create challenge")}
-              </Button>
-            </CreateChallengeModal>
-            <Button
-              variant="ghost"
-              size="sm"
-              borderRadius="full"
-              bg="bg.secondary"
-              borderWidth="1px"
-              borderColor="border.primary"
-              px="3.5"
-              py="2"
-              h="auto"
-              minH="unset"
-              boxShadow="xs"
-              color="text.subtle"
-              _hover={{ bg: "bg.secondary", color: "primary.500" }}
-              _active={{ bg: "bg.secondary" }}
-              display="inline-flex"
-              alignItems="center"
-              gap="2"
-              fontWeight="semibold"
-              lineHeight="1"
-              textStyle="sm"
-              onClick={() => setIsInfoOpen(true)}>
-              <Icon as={UilInfoCircle} boxSize={4} />
-              {t("More info")}
-            </Button>
+          <HStack alignItems="center" textAlign="center" justifyContent="flex-start">
+            <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Quests")}</Heading>
+            {!open && (
+              <Link
+                display="inline-flex"
+                alignItems="center"
+                fontWeight={500}
+                color="primary.500"
+                px={0}
+                textStyle={{ base: "xs", lg: "md" }}
+                onClick={onOpen}>
+                <Icon as={UilInfoCircle} boxSize={4} />
+                {!isMobile && t("More info")}
+              </Link>
+            )}
           </HStack>
+          <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
+            <Button variant="primary" size="sm">
+              {t("Create")}
+            </Button>
+          </CreateChallengeModal>
         </Stack>
+
+        <ChallengeStepsCard isOpen={open} onClose={onClose} />
 
         {/* Needed actions */}
         {(hasNeededActions || (isLoading && viewerAddress)) && (
@@ -414,112 +434,6 @@ export const ChallengesPageContent = () => {
           </ChallengeHubSection>
         )}
       </VStack>
-
-      <ChallengesInfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
     </MotionVStack>
-  )
-}
-
-const ChallengesInfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { t } = useTranslation()
-  const quickActions = [
-    t("Join open challenges, keep up with active ones, and review past participation."),
-    t("Create a challenge to invite others to take action or support an app."),
-    t("See which section needs your attention right now so you can act faster."),
-  ]
-  const challengeSections = [
-    {
-      title: t("Needed actions"),
-      description: t(
-        "Challenges waiting for your next step, such as joining, submitting proof, or confirming progress.",
-      ),
-    },
-    {
-      title: t("Your active challenges"),
-      description: t("Challenges you are currently participating in."),
-    },
-    {
-      title: t("Open to join"),
-      description: t("Challenges available for you to discover and join."),
-    },
-    {
-      title: t("What others are doing"),
-      description: t("Live challenges from other community members you may want to explore."),
-    },
-    {
-      title: t("History"),
-      description: t("Completed or past challenges, including the ones you joined before."),
-    },
-  ]
-
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={t("About Challenges")}
-      showCloseButton
-      modalContentProps={{
-        scrollbar: "hidden",
-        css: {
-          "&::-webkit-scrollbar": { display: "none" },
-          "-ms-overflow-style": "none",
-          "scrollbar-width": "none",
-        },
-      }}>
-      <VStack align="stretch" gap={4} pt={{ base: 2, md: 3 }}>
-        <Card.Root variant="primary" borderRadius="3xl" boxShadow="sm">
-          <Card.Body p={{ base: "5", md: "6" }} gap="4">
-            <HStack align="start" gap="3">
-              <Box borderRadius="2xl" bg="bg.secondary" p="2.5" flexShrink={0}>
-                <Icon as={UilInfoCircle} boxSize={5} color="primary.500" />
-              </Box>
-              <VStack align="stretch" gap="1.5">
-                <Text fontWeight="semibold" textStyle={{ base: "lg", md: "xl" }}>
-                  {t("What is the Challenges page?")}
-                </Text>
-                <Text textStyle="sm" color="text.muted">
-                  {t("Challenges description")}{" "}
-                  {t(
-                    "The Challenges page helps you discover, join, create, and track community challenges in one place.",
-                  )}
-                </Text>
-              </VStack>
-            </HStack>
-          </Card.Body>
-        </Card.Root>
-
-        <Card.Root variant="subtle" borderRadius="2xl">
-          <Card.Body p={{ base: "4", md: "5" }} gap="4">
-            <Text fontWeight="semibold">{t("What can you do here?")}</Text>
-            <VStack align="stretch" gap="3">
-              {quickActions.map(action => (
-                <HStack key={action} align="start" gap="3">
-                  <Box boxSize="2" mt="1.5" borderRadius="full" bg="primary.500" flexShrink={0} />
-                  <Text textStyle="sm" color="text.muted">
-                    {action}
-                  </Text>
-                </HStack>
-              ))}
-            </VStack>
-          </Card.Body>
-        </Card.Root>
-
-        <VStack align="stretch" gap="3">
-          <Text fontWeight="semibold">{t("How are challenges organized?")}</Text>
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap="3">
-            {challengeSections.map(section => (
-              <Card.Root key={section.title} variant="subtle" borderRadius="2xl">
-                <Card.Body p={{ base: "4", md: "5" }} gap="2">
-                  <Text fontWeight="semibold">{section.title}</Text>
-                  <Text textStyle="sm" color="text.muted">
-                    {section.description}
-                  </Text>
-                </Card.Body>
-              </Card.Root>
-            ))}
-          </SimpleGrid>
-        </VStack>
-      </VStack>
-    </Modal>
   )
 }
