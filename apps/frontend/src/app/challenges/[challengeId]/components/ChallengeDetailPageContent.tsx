@@ -5,7 +5,6 @@ import {
   Card,
   Heading,
   HStack,
-  Icon,
   IconButton,
   SimpleGrid,
   Skeleton,
@@ -19,7 +18,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { FaAngleLeft } from "react-icons/fa6"
 import { LuPlus } from "react-icons/lu"
 
 import {
@@ -33,6 +31,7 @@ import { useChallenge } from "@/api/challenges/useChallenge"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
+import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { AddressIcon } from "@/components/AddressIcon"
 import { AppImage } from "@/components/AppImage/AppImage"
 
@@ -111,18 +110,14 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
       ? `${winnerTypeLabel} · ${splitPrizePerWinnerLabel}`
       : winnerTypeLabel
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
+  const breadcrumbItems = [
+    { label: t("Quests"), href: "/challenges" },
+    { label: challengeTitle, href: `/challenges/${challengeId}` },
+  ]
 
   return (
     <VStack align="stretch" w="full" gap="5">
-      {/* Back nav */}
-      <Button asChild w="fit-content" variant="ghost" px="3">
-        <NextLink href="/challenges">
-          <Icon as={FaAngleLeft} boxSize={3} />
-          <Text color="inherit" textStyle="sm" fontWeight="semibold">
-            {t("Back to challenges")}
-          </Text>
-        </NextLink>
-      </Button>
+      <PageBreadcrumb items={breadcrumbItems} />
 
       {/* Hero card */}
       <Card.Root variant="primary" p={{ base: "6", md: "8" }} gap="6" borderRadius="3xl" boxShadow="sm">
