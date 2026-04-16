@@ -1,19 +1,48 @@
 "use client"
-import { Button, Collapsible, HStack, Icon, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import { Button, Collapsible, HStack, Icon, Menu, Portal, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronDown } from "react-icons/fa6"
 
+import { useColorModeValue } from "../ui/color-mode"
+import { Tooltip } from "../ui/tooltip"
+
 import { Route } from "./Routes"
 
 type Props = {
+  isCollapsed?: boolean
   onMenuClick?: () => void
   routesToRender: Route[]
 }
 
 const MotionVStack = motion(VStack)
+
+const getSelectedRouteStyles = (selected: boolean, selectedBg?: string) =>
+  selected && selectedBg
+    ? {
+        bg: selectedBg,
+        _hover: { bg: selectedBg },
+        _active: { bg: selectedBg },
+      }
+    : {}
+
+const RouteIcon = ({ icon, selected }: { icon?: Route["icon"]; selected: boolean }) => {
+  if (!icon) return null
+
+  return (
+    <Icon
+      as={icon}
+      color="text.subtle"
+      boxSize="6"
+      flexShrink={0}
+      transform={selected ? "scale(1.1)" : "scale(1)"}
+      transformOrigin="center"
+      transition="transform 0.2s ease"
+    />
+  )
+}
 
 const isSelected = (route: Route, pathname: string) => {
   if (route.onClick === "/") return pathname === "/"
@@ -44,10 +73,12 @@ const DesktopAccordionWithSubRoutes = ({
   route,
   selected,
   onMenuClick,
+  selectedBg,
 }: {
   route: Route
   selected: boolean
   onMenuClick?: () => void
+  selectedBg?: string
 }) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -62,9 +93,16 @@ const DesktopAccordionWithSubRoutes = ({
     <VStack w="full" align="stretch" p={0} gap={0}>
       <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
         <Collapsible.Trigger asChild>
-          <Button variant={selected ? "subtle" : "ghost"} w="full" h="auto" rounded="2xl" px={4} py={3}>
+          <Button
+            variant={selected ? "subtle" : "ghost"}
+            w="full"
+            h="auto"
+            rounded="2xl"
+            px={4}
+            py={3}
+            {...getSelectedRouteStyles(selected, selectedBg)}>
             <HStack w="full" gap={3}>
-              <Icon as={route.icon} color="text.subtle" size={"lg"} />
+              <RouteIcon icon={route.icon} selected={selected} />
               <Text textStyle="md" textAlign="left" fontWeight={selected ? "bold" : "normal"}>
                 {/* @ts-expect-error dynamic translation key */}
                 {t(route.name)}
@@ -101,7 +139,8 @@ const DesktopAccordionWithSubRoutes = ({
                   rounded="xl"
                   px={4}
                   py={3}
-                  onClick={handleClick(subRoute, router, onMenuClick)}>
+                  onClick={handleClick(subRoute, router, onMenuClick)}
+                  {...getSelectedRouteStyles(subRouteSelected, selectedBg)}>
                   <Text textStyle="sm" fontWeight={subRouteSelected ? "bold" : "normal"}>
                     {/* @ts-expect-error dynamic translation key */}
                     {t(subRoute.name)}
@@ -116,17 +155,121 @@ const DesktopAccordionWithSubRoutes = ({
   )
 }
 
-const MobileAccordionWithSubRoutes = ({
+const DesktopCollapsedRouteButton = ({
+  route,
+  selected,
+  onClick,
+  selectedBg,
+}: {
+  route: Route
+  selected: boolean
+  onClick: () => void
+  selectedBg?: string
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <Tooltip
+      content={
+        // @ts-expect-error dynamic translation key
+        t(route.name)
+      }
+      positioning={{ placement: "right", gutter: 12 }}>
+      <Button
+        border="none"
+        rounded="2xl"
+        w="full"
+        variant={selected ? "subtle" : "ghost"}
+        onClick={onClick}
+        h="52px"
+        data-testid={selected ? "current-section" : ""}
+        justifyContent="center"
+        px={0}
+        {...getSelectedRouteStyles(selected, selectedBg)}>
+        <RouteIcon icon={route.icon} selected={selected} />
+      </Button>
+    </Tooltip>
+  )
+}
+
+const DesktopCollapsedMenuWithSubRoutes = ({
   route,
   selected,
   onMenuClick,
+  selectedBg,
 }: {
   route: Route
   selected: boolean
   onMenuClick?: () => void
+  selectedBg?: string
 }) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const pathname = usePathname()
+
+  return (
+    <Menu.Root positioning={{ placement: "right-start", gutter: 12 }} lazyMount>
+      <Menu.Trigger asChild>
+        <Button
+          border="none"
+          rounded="2xl"
+          w="full"
+          variant={selected ? "subtle" : "ghost"}
+          h="52px"
+          data-testid={selected ? "current-section" : ""}
+          justifyContent="center"
+          px={0}
+          {...getSelectedRouteStyles(selected, selectedBg)}>
+          <RouteIcon icon={route.icon} selected={selected} />
+        </Button>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content
+            minW="220px"
+            rounded="2xl"
+            p={2}
+            border="sm"
+            borderColor="border.secondary"
+            bg="bg.secondary"
+            boxShadow="lg">
+            {route.subRoutes?.map(subRoute => {
+              const subRouteSelected = isSelected(subRoute, pathname)
+
+              return (
+                <Menu.Item
+                  key={subRoute.name}
+                  value={subRoute.name}
+                  rounded="xl"
+                  fontWeight={subRouteSelected ? "bold" : "normal"}
+                  onClick={handleClick(subRoute, router, onMenuClick)}
+                  {...getSelectedRouteStyles(subRouteSelected, selectedBg)}>
+                  {/* @ts-expect-error dynamic translation key */}
+                  {t(subRoute.name)}
+                </Menu.Item>
+              )
+            })}
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+  )
+}
+
+const MobileAccordionWithSubRoutes = ({
+  route,
+  selected,
+  onMenuClick,
+  selectedBg,
+}: {
+  route: Route
+  selected: boolean
+  onMenuClick?: () => void
+  selectedBg?: string
+}) => {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(selected)
 
   useEffect(() => {
@@ -137,9 +280,13 @@ const MobileAccordionWithSubRoutes = ({
     <VStack w="full" align="stretch" p={0} ml="-5px">
       <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
         <Collapsible.Trigger asChild>
-          <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
+          <Button
+            variant="ghost"
+            _expanded={selected ? { bg: selectedBg } : { bg: "transparent" }}
+            w="full"
+            {...getSelectedRouteStyles(selected, selectedBg)}>
             <HStack w="full" gap={3}>
-              <Icon as={route.icon} color="text.subtle" size={"2xl"} />
+              <RouteIcon icon={route.icon} selected={selected} />
               {/* @ts-expect-error dynamic translation key */}
               <Text textStyle="lg">{t(route.name)}</Text>
             </HStack>
@@ -158,6 +305,8 @@ const MobileAccordionWithSubRoutes = ({
         <Collapsible.Content p="1">
           <VStack w="full" align="stretch" pt={5} pl={12}>
             {route.subRoutes?.map(subRoute => {
+              const subRouteSelected = isSelected(subRoute, pathname)
+
               return (
                 <Button
                   key={subRoute.name}
@@ -168,7 +317,8 @@ const MobileAccordionWithSubRoutes = ({
                   alignItems="flex-start"
                   flexDirection="column"
                   textAlign="left"
-                  onClick={handleClick(subRoute, router, onMenuClick)}>
+                  onClick={handleClick(subRoute, router, onMenuClick)}
+                  {...getSelectedRouteStyles(subRouteSelected, selectedBg)}>
                   {/* @ts-expect-error dynamic translation key */}
                   <Text textStyle="sm">{t(subRoute.name)}</Text>
                 </Button>
@@ -181,11 +331,12 @@ const MobileAccordionWithSubRoutes = ({
   )
 }
 
-export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
+export const NavbarMenu = ({ isCollapsed = false, onMenuClick, routesToRender }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
+  const selectedRouteBg = useColorModeValue("bg.tertiary", undefined)
 
   const renderRoute = (route: Route) => {
     if (route.component) return route.component
@@ -196,8 +347,38 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
 
     if (isLargerThan1200) {
       if (hasSubRoutes) {
+        if (isCollapsed) {
+          return (
+            <DesktopCollapsedMenuWithSubRoutes
+              key={route.name}
+              route={route}
+              selected={selected}
+              onMenuClick={onMenuClick}
+              selectedBg={selectedRouteBg}
+            />
+          )
+        }
+
         return (
-          <DesktopAccordionWithSubRoutes key={route.name} route={route} selected={selected} onMenuClick={onMenuClick} />
+          <DesktopAccordionWithSubRoutes
+            key={route.name}
+            route={route}
+            selected={selected}
+            onMenuClick={onMenuClick}
+            selectedBg={selectedRouteBg}
+          />
+        )
+      }
+
+      if (isCollapsed) {
+        return (
+          <DesktopCollapsedRouteButton
+            key={route.name}
+            route={route}
+            selected={selected}
+            onClick={onClick}
+            selectedBg={selectedRouteBg}
+          />
         )
       }
 
@@ -215,8 +396,9 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           justifyContent="flex-start"
           gap={3}
           px={4}
-          py={3}>
-          <Icon as={route.icon} color="text.subtle" size={"lg"} />
+          py={3}
+          {...getSelectedRouteStyles(selected, selectedRouteBg)}>
+          <RouteIcon icon={route.icon} selected={selected} />
           <Text textStyle="md" textAlign="left">
             {/* @ts-expect-error dynamic translation key */}
             {t(route.name)}
@@ -227,7 +409,13 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
 
     if (hasSubRoutes) {
       return (
-        <MobileAccordionWithSubRoutes key={route.name} route={route} selected={selected} onMenuClick={onMenuClick} />
+        <MobileAccordionWithSubRoutes
+          key={route.name}
+          route={route}
+          selected={selected}
+          onMenuClick={onMenuClick}
+          selectedBg={selectedRouteBg}
+        />
       )
     }
 
@@ -242,8 +430,9 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         key={route.name}
         onClick={onClick}
         data-testid={selected ? "current-section" : ""}
-        gap={4}>
-        <Icon as={route.icon} color="text.subtle" size={"xl"} />
+        gap={4}
+        {...getSelectedRouteStyles(selected, selectedRouteBg)}>
+        <RouteIcon icon={route.icon} selected={selected} />
         <Text textAlign="left" textStyle="lg">
           {/* @ts-expect-error dynamic translation key */}
           {t(route.name)}

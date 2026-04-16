@@ -1,8 +1,8 @@
 "use client"
-import { ClientOnly, Button, Skeleton, Span, IconButtonProps, SpanProps } from "@chakra-ui/react"
+import { ClientOnly, Button, Skeleton, Span, IconButtonProps, SpanProps, Text } from "@chakra-ui/react"
 import { ThemeProvider, useTheme, ThemeProviderProps } from "next-themes"
 import * as React from "react"
-import { FaMoon, FaSun } from "react-icons/fa"
+import { LuMoon, LuSun } from "react-icons/lu"
 export interface ColorModeProviderProps extends ThemeProviderProps {}
 export function ColorModeProvider(props: ColorModeProviderProps) {
   return <ThemeProvider attribute="class" disableTransitionOnChange {...props} />
@@ -31,7 +31,7 @@ export function useColorModeValue<T>(light: T, dark: T) {
 }
 export function ColorModeIcon() {
   const { colorMode } = useColorMode()
-  return colorMode === "light" ? <FaMoon /> : <FaSun />
+  return colorMode === "light" ? <LuMoon /> : <LuSun />
 }
 interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {
   withText?: boolean
@@ -49,8 +49,7 @@ export const ColorModeButton = React.forwardRef<HTMLButtonElement, ColorModeButt
         alignItems="center"
         aria-label="Toggle color mode"
         size="sm"
-        fontWeight="bold"
-        textStyle="lg"
+        fontWeight="normal"
         ref={ref}
         {...props}
         css={{
@@ -60,7 +59,7 @@ export const ColorModeButton = React.forwardRef<HTMLButtonElement, ColorModeButt
           },
         }}>
         <ColorModeIcon />
-        {withText && (colorMode === "dark" ? "Light" : "Dark")}
+        {withText && <Text textStyle="md">{colorMode === "dark" ? "Light" : "Dark"}</Text>}
       </Button>
     </ClientOnly>
   )

@@ -15,13 +15,27 @@ const rotateAnimation = keyframes`
 type Props = {
   connectionVariant?: WalletButtonProps["connectionVariant"]
   buttonStyleProps?: WalletButtonProps["buttonStyle"]
+  desktopVariant?: WalletButtonProps["desktopVariant"]
+  mobileVariant?: WalletButtonProps["mobileVariant"]
 }
-export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Props) => {
+export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps, desktopVariant, mobileVariant }: Props) => {
   const { account, connection } = useWallet()
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
   const notLoggedIn = !account?.address
   const hoverBackground = useColorModeValue("#f8f8f8", "#2D2D2F")
+  const hoverFillBackground = useColorModeValue("#F1F1F1", "#4A4A4E")
   const textColor = useColorModeValue("#1A1A1A", "#E4E4E4")
+  const {
+    bg: _bg,
+    textColor: _buttonTextColor,
+    _hover: _hoverStyles,
+    _disabled: _disabledStyles,
+    _focus: _focusStyles,
+    rounded,
+    borderRadius,
+    ...layoutButtonStyleProps
+  } = buttonStyleProps ?? {}
+
   useEffect(() => {
     if (typeof window === "undefined" || !window?.localStorage) return
     if (connection.isConnected && account?.address) {
@@ -55,6 +69,8 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
           ...buttonStyleProps,
         }}
         connectionVariant={connectionVariant ?? "popover"}
+        desktopVariant={desktopVariant}
+        mobileVariant={mobileVariant}
         data-testid="connect-wallet"
       />
     )
@@ -62,28 +78,38 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
   return (
     <Box
       data-testid="wallet-connected"
+      w="full"
+      maxW="full"
+      minW={0}
       background={`linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`}
       border="2px solid transparent"
       backgroundSize="300% 100%"
       animation={`${rotateAnimation} 3s ease infinite`}
-      borderRadius={isDesktop ? "full" : "12px"}
+      borderRadius={borderRadius ?? rounded ?? (isDesktop ? "full" : "12px")}
       padding="2px"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
       _hover={{
-        background: `linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`,
+        background: `linear-gradient(${hoverFillBackground}, ${hoverFillBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`,
         backgroundSize: "300% 100%",
       }}
       transition="all 0.3s ease">
       <WalletButton
-        mobileVariant="icon"
-        desktopVariant="iconAndDomain"
+        mobileVariant={mobileVariant ?? "icon"}
+        desktopVariant={desktopVariant ?? "iconAndDomain"}
         buttonStyle={{
           border: "none",
           backgroundColor: "transparent",
           color: textColor,
           width: "100%",
+          minWidth: 0,
+          maxWidth: "100%",
           height: "100%",
-          ...(isDesktop ? { borderRadius: "full" } : { borderRadius: "10px" }),
-          _hover: { bg: "whiteAlpha.300" },
+          borderRadius: borderRadius ?? rounded ?? (isDesktop ? "full" : "10px"),
+          ...layoutButtonStyleProps,
+          _hover: { bg: "transparent" },
+          _active: { bg: "transparent" },
         }}
       />
     </Box>
