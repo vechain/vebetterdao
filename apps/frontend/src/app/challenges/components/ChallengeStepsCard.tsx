@@ -147,8 +147,8 @@ export const ChallengeStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
                 src={currentStep.image}
                 alt={`Step ${currentStepIndex + 1}`}
                 objectFit="contain"
-                width={150}
-                height={150}
+                width={220}
+                height={200}
                 unoptimized
               />
               <Heading size="sm">{currentStep.heading}</Heading>
