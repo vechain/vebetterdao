@@ -1,4 +1,4 @@
-import { HStack, Box } from "@chakra-ui/react"
+import { Box, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
 import { ColorModeButton } from "../ui/color-mode"
@@ -16,39 +16,50 @@ type Props = {
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
   return (
-    <>
-      <HStack flex="1" justifyContent={"start"}>
-        <NavbarLogo />
-      </HStack>
-      {!!routesToRender.length && (
-        <Box position="absolute" left="50%" transform="translateX(-50%)" zIndex={1}>
-          <HStack
-            gap={2}
-            justifyContent="center"
-            borderRadius="full"
-            border="sm"
-            borderColor="border.secondary"
-            bg="bg.primary"
-            p={2}>
-            <NavbarMenu routesToRender={routesToRender} />
-          </HStack>
+    <Box
+      as="aside"
+      position="sticky"
+      top={0}
+      zIndex={10}
+      alignSelf="flex-start"
+      h="100vh"
+      w="280px"
+      minW="280px"
+      borderRight="sm"
+      borderColor="border.secondary"
+      bg="bg.secondary">
+      <VStack h="full" align="stretch" gap={0} p={6}>
+        <Box px={3} pb={8}>
+          <NavbarLogo />
         </Box>
-      )}
-      <HStack flex="1" gap={4} justifyContent={"end"} alignItems={"center"}>
-        <ColorModeButton />
-        <Box as="span">
-          <ConnectWalletButton
-            buttonStyleProps={{
-              rounded: "full",
-              color: "var(--vbd-colors-actions-primary-text)",
-              bgColor: "var(--vbd-colors-actions-primary-default)",
-              _hover: { bg: "var(--vbd-colors-actions-primary-hover)" },
-              _disabled: { bg: "var(--vbd-colors-actions-primary-disabled)" },
-              _focus: { bg: "var(--vbd-colors-actions-primary-pressed)" },
-            }}
-          />
-        </Box>
-      </HStack>
-    </>
+
+        <VStack flex={1} minH={0} align="stretch" gap={2} overflowY="auto">
+          {!!routesToRender.length && <NavbarMenu routesToRender={routesToRender} />}
+        </VStack>
+
+        <VStack align="stretch" gap={3} pt={6} borderTop="sm" borderColor="border.secondary">
+          <ColorModeButton w="full" rounded="xl" justifyContent="flex-start" px={4} withText={true} />
+          <Box
+            w="full"
+            css={{
+              "& > *": {
+                width: "100%",
+              },
+            }}>
+            <ConnectWalletButton
+              buttonStyleProps={{
+                rounded: "16px",
+                width: "100%",
+                bg: "var(--vbd-colors-actions-primary-default)",
+                textColor: "var(--vbd-colors-actions-primary-text)",
+                _hover: { bg: "var(--vbd-colors-actions-primary-hover)" },
+                _disabled: { bg: "var(--vbd-colors-actions-primary-disabled)" },
+                _focus: { bg: "var(--vbd-colors-actions-primary-pressed)" },
+              }}
+            />
+          </Box>
+        </VStack>
+      </VStack>
+    </Box>
   )
 }

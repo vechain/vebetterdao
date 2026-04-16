@@ -1,5 +1,5 @@
 "use client"
-import { Container, Flex, VStack } from "@chakra-ui/react"
+import { Container, Flex, VStack, useMediaQuery } from "@chakra-ui/react"
 import { datadogRum } from "@datadog/browser-rum"
 import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
 import dynamic from "next/dynamic"
@@ -39,6 +39,8 @@ console.error = (...args: any) => {
 }
 
 export function ClientWrapper({ children }: { children: React.ReactNode }) {
+  const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
+
   // set color mode of @uiw/react-md-editor
   useEffect(() => {
     document.documentElement.setAttribute("data-color-mode", "light")
@@ -86,25 +88,46 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
       {isProduction && <FreshDeskWidget widgetId={103000007852} />}
-      <VStack minH="100vh" gap={0} align="stretch">
-        <Navbar />
-        <Flex flex={1}>
-          <Container
-            flex={1}
-            my={{ base: 4, md: 10 }}
-            px={4}
-            maxW="breakpoint-xl"
-            display={"flex"}
-            alignItems={"center"}
-            justifyContent={"flex-start"}
-            flexDirection={"column"}>
-            {children}
-          </Container>
-          <TransactionModal />
-          <Toaster />
+      {isDesktop ? (
+        <Flex minH="100vh" align="stretch">
+          <Navbar />
+          <Flex flex={1} minW={0} direction="column">
+            <Container
+              flex={1}
+              w="full"
+              py={10}
+              px={4}
+              maxW="breakpoint-xl"
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"flex-start"}
+              flexDirection={"column"}>
+              {children}
+            </Container>
+            <Footer />
+          </Flex>
         </Flex>
-        <Footer />
-      </VStack>
+      ) : (
+        <VStack minH="100vh" gap={0} align="stretch">
+          <Navbar />
+          <Flex flex={1}>
+            <Container
+              flex={1}
+              my={{ base: 4, md: 10 }}
+              px={4}
+              maxW="breakpoint-xl"
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"flex-start"}
+              flexDirection={"column"}>
+              {children}
+            </Container>
+          </Flex>
+          <Footer />
+        </VStack>
+      )}
+      <TransactionModal />
+      <Toaster />
     </Providers>
   )
 }

@@ -40,6 +40,11 @@ export const Navbar: React.FC = () => {
     if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []
     return routesToRender
   }, [routesToRender])
+
+  if (isLargerThan1200) {
+    return <DesktopNavBar routesToRender={parsedRoutesToRender} />
+  }
+
   return (
     <Box
       bg="bg.secondary"
@@ -52,11 +57,7 @@ export const Navbar: React.FC = () => {
       transition="transform 0.3s ease-in-out"
       transform={isNavbarVisible ? undefined : "translateY(-100%)"}>
       <HStack justify={"space-between"} p={isLargerThan1200 ? "16px 48px" : "8px 20px"}>
-        {isLargerThan1200 ? (
-          <DesktopNavBar routesToRender={parsedRoutesToRender} />
-        ) : (
-          <MobileNavBar routesToRender={parsedRoutesToRender} />
-        )}
+        <MobileNavBar routesToRender={parsedRoutesToRender} />
       </HStack>
     </Box>
   )
