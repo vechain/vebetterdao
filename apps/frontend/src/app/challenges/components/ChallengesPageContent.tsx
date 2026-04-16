@@ -14,11 +14,10 @@ import {
   Stack,
   VStack,
   Wrap,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
-import { useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 import { A11y, Navigation } from "swiper/modules"
@@ -39,6 +38,8 @@ import { ChallengeCompactCard } from "./ChallengeCompactCard"
 import { ChallengeHubSection } from "./ChallengeHubSection"
 import { ChallengeStepsCard } from "./ChallengeStepsCard"
 import { CreateChallengeModal } from "./CreateChallengeModal"
+
+const QUESTS_STEPS_CARD_DISMISSED_KEY = "vebetterdao:quests-steps-card-dismissed"
 
 const CardSkeleton = () => (
   <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" h="full" borderRadius="3xl" boxShadow="sm">
@@ -205,14 +206,39 @@ export const ChallengesPageContent = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-  const desktopDisclosure = useDisclosure({ defaultOpen: true })
-  const mobileDisclosure = useDisclosure({ defaultOpen: false })
-  const { open, onOpen, onClose } = isMobile ? mobileDisclosure : desktopDisclosure
+  /** null = before first client read of localStorage */
+  const [stepsOpen, setStepsOpen] = useState<boolean | null>(null)
+  const open = stepsOpen !== null ? stepsOpen : !isMobile
+
+  const onOpen = useCallback(() => setStepsOpen(true), [])
+  const onClose = useCallback(() => {
+    setStepsOpen(false)
+    try {
+      localStorage.setItem(QUESTS_STEPS_CARD_DISMISSED_KEY, "1")
+    } catch {
+      // ignore quota / private mode
+    }
+  }, [])
+
   const round = Number(currentRoundId ?? 0)
 
   useEffect(() => {
     AnalyticsUtils.trackPage("Challenges")
   }, [])
+
+  useEffect(() => {
+    let dismissed = false
+    try {
+      dismissed = localStorage.getItem(QUESTS_STEPS_CARD_DISMISSED_KEY) === "1"
+    } catch {
+      // ignore
+    }
+    if (dismissed) {
+      setStepsOpen(false)
+    } else {
+      setStepsOpen(!isMobile)
+    }
+  }, [isMobile])
 
   const hasNeededActions = grouped.neededActions.items.length > 0
   const hasActive = grouped.active.items.length > 0
