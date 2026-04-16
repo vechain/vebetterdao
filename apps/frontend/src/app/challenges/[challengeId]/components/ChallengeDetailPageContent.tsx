@@ -72,9 +72,9 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
     return (
       <Card.Root variant="primary" p={{ base: "6", md: "8" }} w="full" borderRadius="3xl" boxShadow="sm">
         <VStack gap="3" py="8">
-          <Heading size="md">{t("Challenge not found")}</Heading>
+          <Heading size="md">{t("Quest not found")}</Heading>
           <Button asChild variant="secondary" size="sm">
-            <NextLink href="/challenges">{t("Back to challenges")}</NextLink>
+            <NextLink href="/challenges">{t("Back to quests")}</NextLink>
           </Button>
         </VStack>
       </Card.Root>
@@ -109,7 +109,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
     challenge.thresholdMode === ThresholdMode.SplitAboveThreshold && splitPrizePerWinnerLabel
       ? `${winnerTypeLabel} · ${splitPrizePerWinnerLabel}`
       : winnerTypeLabel
-  const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
+  const challengeTitle = challenge.title || t("Quest #{{id}}", { id: challenge.challengeId })
   const breadcrumbItems = [
     { label: t("Quests"), href: "/challenges" },
     { label: challengeTitle, href: `/challenges/${challengeId}` },
