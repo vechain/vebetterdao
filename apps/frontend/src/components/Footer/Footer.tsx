@@ -115,8 +115,8 @@ export const Footer: React.FC = () => {
       <FooterHeading>{t("Navigation")}</FooterHeading>
       <FooterLink href="/">{t("Dashboard")}</FooterLink>
       <FooterLink href="/apps">{t("Apps")}</FooterLink>
+      <FooterLink href="/challenges">{t("Quests")}</FooterLink>
       <FooterLink href="/allocations">{t("Allocations")}</FooterLink>
-      <FooterLink href="/challenges">{t("Challenges")}</FooterLink>
       <FooterLink href="/proposals">{t("Governance")}</FooterLink>
     </VStack>
   )

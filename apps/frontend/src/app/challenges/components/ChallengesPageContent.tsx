@@ -269,7 +269,7 @@ export const ChallengesPageContent = () => {
           </HStack>
           <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
             <Button variant="primary" size="sm">
-              {t("Create")}
+              {t("Create Quest")}
             </Button>
           </CreateChallengeModal>
         </Stack>
