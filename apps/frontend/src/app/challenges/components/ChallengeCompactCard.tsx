@@ -10,6 +10,7 @@ import {
   SimpleGrid,
   Stack,
   Text,
+  useDisclosure,
   VStack,
   Wrap,
 } from "@chakra-ui/react"
@@ -26,8 +27,10 @@ import {
   ChallengeVisibility,
   ThresholdMode,
 } from "@/api/challenges/types"
+import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { AddressIcon } from "@/components/AddressIcon"
 
+import { ChallengeClaimModal } from "../[challengeId]/components/ChallengeClaimModal"
 import { AddChallengeInvitesModal } from "../shared/AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
 import { ChallengeStatTile } from "../shared/ChallengeStatTile"
@@ -36,6 +39,8 @@ import { SponsoredChallengeInfo } from "../shared/SponsoredChallengeInfo"
 
 export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
+  const actions = useChallengeActions()
+  const { onOpen: onClaimOpen, onClose: onClaimClose, open: isClaimOpen } = useDisclosure()
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const winnerTypeLabel = t(
     challenge.thresholdMode === ThresholdMode.SplitAboveThreshold ? "Split prize" : "Max actions",
@@ -116,7 +121,12 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
             </VStack>
             {hasChallengeActions(challenge) && (
               <Box w={isReacceptingInvite ? "full" : { base: "full", md: "auto" }} flexShrink={0}>
-                <ChallengeActions challenge={challenge} layout="default" buttonSize="md" />
+                <ChallengeActions
+                  challenge={challenge}
+                  layout="default"
+                  buttonSize="md"
+                  onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                />
               </Box>
             )}
           </Stack>
@@ -207,6 +217,13 @@ export const ChallengeCompactCard = ({ challenge }: { challenge: ChallengeView }
           </Wrap>
         </VStack>
       </Card.Root>
+
+      <ChallengeClaimModal
+        isOpen={isClaimOpen}
+        onClose={onClaimClose}
+        prizeLabel={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
+        onClaim={() => actions.claimChallenge(challenge.challengeId)}
+      />
     </LinkBox>
   )
 }

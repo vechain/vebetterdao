@@ -9,6 +9,7 @@ import {
   LinkOverlay,
   SimpleGrid,
   Text,
+  useDisclosure,
   VStack,
   Wrap,
 } from "@chakra-ui/react"
@@ -27,9 +28,11 @@ import {
   ThresholdMode,
 } from "@/api/challenges/types"
 import { useChallenge } from "@/api/challenges/useChallenge"
+import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { AddressIcon } from "@/components/AddressIcon"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
+import { ChallengeClaimModal } from "../[challengeId]/components/ChallengeClaimModal"
 import { AddChallengeInvitesModal } from "../shared/AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
 import { ChallengeStatTile } from "../shared/ChallengeStatTile"
@@ -38,6 +41,8 @@ import { SponsoredChallengeInfo } from "../shared/SponsoredChallengeInfo"
 
 export const ChallengeCard = ({ challenge, currentRound }: { challenge: ChallengeView; currentRound: number }) => {
   const { t } = useTranslation()
+  const actions = useChallengeActions()
+  const { onOpen: onClaimOpen, onClose: onClaimClose, open: isClaimOpen } = useDisclosure()
   const createdAtLabel = challenge.createdAt > 0 ? dayjs.unix(challenge.createdAt).format("D MMM, YYYY") : null
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const winnerTypeLabel = t(
@@ -237,11 +242,22 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
 
           {hasChallengeActions(challenge) && (
             <Box mt="auto" bg="bg.secondary" borderRadius="2xl" border="sm" borderColor="border.secondary" p="3.5">
-              <ChallengeActions challenge={challenge} layout="card" />
+              <ChallengeActions
+                challenge={challenge}
+                layout="card"
+                onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+              />
             </Box>
           )}
         </VStack>
       </Card.Root>
+
+      <ChallengeClaimModal
+        isOpen={isClaimOpen}
+        onClose={onClaimClose}
+        prizeLabel={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
+        onClaim={() => actions.claimChallenge(challenge.challengeId)}
+      />
     </LinkBox>
   )
 }
