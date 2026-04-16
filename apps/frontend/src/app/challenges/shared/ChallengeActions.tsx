@@ -25,10 +25,12 @@ export const ChallengeActions = ({
   challenge,
   layout = "default",
   buttonSize,
+  onClaimClick,
 }: {
   challenge: ChallengeView
   layout?: ChallengeActionsLayout
   buttonSize?: "sm" | "md"
+  onClaimClick?: () => void
 }) => {
   const { account } = useWallet()
   const actions = useChallengeActions()
@@ -124,17 +126,17 @@ export const ChallengeActions = ({
         <Button
           size={resolvedButtonSize}
           variant="primary"
-          onClick={() => actions.claimChallenge(id)}
+          onClick={() => (onClaimClick ? onClaimClick() : actions.claimChallenge(id))}
           gap="2"
           bg="status.yellow.primary"
-          color="status.yellow.strong"
+          color="yellow.900"
           borderWidth="1px"
           borderColor="status.yellow.secondary"
           boxShadow="sm"
           transition="all 0.2s ease"
           _hover={{
-            bg: "status.yellow.secondary",
-            borderColor: "status.yellow.primary",
+            bg: "yellow.400",
+            borderColor: "yellow.500",
             boxShadow: "md",
             transform: "translateY(-1px)",
           }}
