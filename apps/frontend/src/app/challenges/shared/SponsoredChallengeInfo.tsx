@@ -1,5 +1,3 @@
-"use client"
-
 import { HStack, Icon, Text, chakra, type TextProps } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiInfo } from "react-icons/fi"

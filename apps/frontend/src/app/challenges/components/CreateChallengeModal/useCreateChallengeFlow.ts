@@ -19,7 +19,7 @@ import {
   getSanitizedInvitees,
   isVetDomain,
   parseInviteeValues,
-} from "../inviteeValidation"
+} from "../../shared/inviteeValidation"
 
 import {
   AppScope,

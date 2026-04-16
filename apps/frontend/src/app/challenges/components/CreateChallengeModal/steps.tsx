@@ -18,7 +18,7 @@ import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 import { challengeMetadataByteLimits, ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
 import { AppImage } from "@/components/AppImage/AppImage"
 
-import { getInviteeValidationMessage } from "../inviteeValidation"
+import { getInviteeValidationMessage } from "../../shared/inviteeValidation"
 
 import { SummaryItem } from "./ChatBubbles"
 import {

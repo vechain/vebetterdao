@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Badge,
   Box,
@@ -32,11 +30,11 @@ import { useChallenge } from "@/api/challenges/useChallenge"
 import { AddressIcon } from "@/components/AddressIcon"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
-import { AddChallengeInvitesModal } from "./AddChallengeInvitesModal"
-import { ChallengeActions, hasChallengeActions } from "./ChallengeActions"
-import { ChallengeStatTile } from "./ChallengeStatTile"
-import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "./ChallengeStatusBadges"
-import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
+import { AddChallengeInvitesModal } from "../shared/AddChallengeInvitesModal"
+import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
+import { ChallengeStatTile } from "../shared/ChallengeStatTile"
+import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "../shared/ChallengeStatusBadges"
+import { SponsoredChallengeInfo } from "../shared/SponsoredChallengeInfo"
 
 export const ChallengeCard = ({ challenge, currentRound }: { challenge: ChallengeView; currentRound: number }) => {
   const { t } = useTranslation()

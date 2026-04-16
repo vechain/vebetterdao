@@ -1,5 +1,3 @@
-"use client"
-
 import { Button, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { parseEther } from "ethers"

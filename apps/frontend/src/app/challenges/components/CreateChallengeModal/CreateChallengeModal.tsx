@@ -1,5 +1,3 @@
-"use client"
-
 import "./typing-indicator.css"
 
 import { Box, Button, CloseButton, Dialog, HStack, Image, Text, VStack } from "@chakra-ui/react"

@@ -1,5 +1,3 @@
-"use client"
-
 import { Badge, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 

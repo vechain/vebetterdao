@@ -1,5 +1,3 @@
-"use client"
-
 import { Box, Heading, VStack } from "@chakra-ui/react"
 
 interface ChallengeHubSectionProps {

@@ -2321,5 +2321,6 @@
   "Your voting activity": "Your voting activity",
   "Your voting power": "Your voting power",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
-  "Your Voting Qualification": "Your Voting Qualification"
+  "Your Voting Qualification": "Your Voting Qualification",
+  "Create Quest": "Create Quest"
 }
