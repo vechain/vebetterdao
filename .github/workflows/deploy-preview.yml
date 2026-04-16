@@ -53,6 +53,8 @@ jobs:
               - 'package.json'
               - 'yarn.lock'
               - 'turbo.json'
+              - '.github/workflows/deploy*.yml'
+              - '.github/workflows/destroy*.yml'
 
   # Determine which flavors to deploy based on target branch
   setup:
