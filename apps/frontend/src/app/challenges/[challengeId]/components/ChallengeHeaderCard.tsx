@@ -1,5 +1,6 @@
 import {
   Badge,
+  Box,
   Card,
   Heading,
   HStack,
@@ -9,17 +10,16 @@ import {
   Text,
   useDisclosure,
   VStack,
-  Wrap,
 } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
+import { LuUserRound } from "react-icons/lu"
 
 import { ChallengeDetail, ChallengeKind, ChallengeStatus, challengeStatusLabel } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
-import { AddressIcon } from "@/components/AddressIcon"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 
 import { ChallengeActions, hasChallengeActions } from "../../shared/ChallengeActions"
@@ -121,20 +121,44 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
       <Card.Root variant="primary" p="4" w="full">
         <VStack align="stretch" gap="4">
           <HStack justify="space-between" align="start">
-            <Wrap gap="2">
-              <ChallengeVisibilityBadge challenge={challenge} />
+            <VStack gap="2" align="start">
+              <HStack gap="1.5">
+                <ChallengeVisibilityBadge challenge={challenge} />
+
+                <HStack
+                  as={LinkBox}
+                  w="fit-content"
+                  gap="1"
+                  bg="bg.secondary"
+                  borderRadius="full"
+                  px="2"
+                  py="0.5"
+                  align="center"
+                  cursor="pointer"
+                  _hover={{ opacity: 0.7 }}
+                  onClick={() => router.push(`/profile/${challenge.creator}`)}>
+                  <Icon as={LuUserRound} boxSize="3" />
+                  {/* <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" /> */}
+                  <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                    {creatorDisplayName}
+                  </Text>
+                </HStack>
+              </HStack>
+
               <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">
                 {statusTimeLabel ?? t(challengeStatusLabel(challenge.status))}
               </Badge>
-            </Wrap>
+            </VStack>
 
             <HStack gap="2" flexShrink={0}>
               {hasChallengeActions(challenge) && (
-                <ChallengeActions
-                  challenge={challenge}
-                  buttonSize="sm"
-                  onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
-                />
+                <Box display={{ base: "none", md: "block" }}>
+                  <ChallengeActions
+                    challenge={challenge}
+                    buttonSize="sm"
+                    onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                  />
+                </Box>
               )}
               <IconButton aria-label="share" variant="ghost" size="sm" onClick={onShareOpen}>
                 <Icon as={UilShareAlt} color="icon.subtle" />
@@ -154,23 +178,15 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
             {challengeDescription}
           </Text>
 
-          <HStack
-            as={LinkBox}
-            w="fit-content"
-            gap="1.5"
-            bg="bg.secondary"
-            borderRadius="full"
-            px="2.5"
-            py="1.5"
-            align="center"
-            cursor="pointer"
-            _hover={{ opacity: 0.7 }}
-            onClick={() => router.push(`/profile/${challenge.creator}`)}>
-            <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" />
-            <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-              {creatorDisplayName}
-            </Text>
-          </HStack>
+          {hasChallengeActions(challenge) && (
+            <Box display={{ base: "block", md: "none" }}>
+              <ChallengeActions
+                challenge={challenge}
+                layout="card"
+                onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+              />
+            </Box>
+          )}
         </VStack>
       </Card.Root>
 

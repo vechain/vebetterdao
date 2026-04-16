@@ -26,10 +26,10 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
   )
 
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
-  const durationLabel =
+  const roundsLabel =
     challenge.duration === 1
       ? t("Round #{{round}}", { round: challenge.startRound })
-      : t("Round #{{from}} to #{{to}}", { from: challenge.startRound, to: challenge.endRound })
+      : t("#{{from}} – #{{to}}", { from: challenge.startRound, to: challenge.endRound })
 
   const selectedApps = challenge.selectedApps
   const singleAppName = selectedApps.length === 1 ? appNames.get(selectedApps[0].toLowerCase()) : null
@@ -40,20 +40,14 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
     <>
       <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }} gap={{ base: 2, md: 3 }} w="full">
         {/* Prize — full width on mobile */}
-        <GridItem colSpan={{ base: 2, md: 1 }}>
+        <GridItem>
           <Card.Root variant="outline" p={{ base: 2, md: 4 }} h="full">
             <Card.Body>
               <Flex direction="column" justify="space-between" h={{ base: "full", md: "auto" }} flex={1}>
-                <HStack gap="1" mb={2}>
-                  <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
-                    {t("Prize Pool")}
-                  </Text>
-                  {!isSponsored && (
-                    <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
-                      {"·"} {t("Winner takes all")}
-                    </Text>
-                  )}
-                </HStack>
+                <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={2}>
+                  {t("Prize Pool")}
+                  {!isSponsored && ` · ${t("Winner takes all")}`}
+                </Text>
                 <HStack gap={{ base: 2, md: 3 }}>
                   <HStack
                     justify="center"
@@ -128,9 +122,14 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
                     flexShrink={0}>
                     <Icon as={LuClock} boxSize={{ base: 4, md: 5 }} />
                   </HStack>
-                  <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
-                    {durationLabel}
-                  </Text>
+                  <Flex direction="column">
+                    <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
+                      {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
+                    </Text>
+                    <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
+                      {roundsLabel}
+                    </Text>
+                  </Flex>
                 </HStack>
               </Flex>
             </Card.Body>
@@ -151,7 +150,7 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
             <Card.Body flex={1}>
               <Flex direction="column" justify="space-between" h={{ base: "full", md: "auto" }} flex={1}>
                 <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={2}>
-                  {t("Apps")}
+                  {t("Eligible Apps")}
                 </Text>
                 <HStack gap={{ base: 2, md: 3 }}>
                   {challenge.allApps ? (
