@@ -8,9 +8,9 @@ import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 
 import { ChallengeActivityCard } from "./ChallengeActivityCard"
 import { ChallengeAppsCard } from "./ChallengeAppsCard"
+import { ChallengeHeaderCard } from "./ChallengeHeaderCard"
 import { ChallengeRoleBanner } from "./ChallengeRoleBanner"
 import { ChallengeStatsGrid } from "./ChallengeStatsGrid"
-import { ChallengeHeaderCard } from "./ChallengeSummaryCard"
 
 export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: string }) => {
   const { account } = useWallet()
