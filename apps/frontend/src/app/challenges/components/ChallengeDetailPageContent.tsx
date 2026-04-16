@@ -18,7 +18,6 @@ import {
 } from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -89,7 +88,6 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
     )
   }
 
-  const createdAtLabel = challenge.createdAt > 0 ? dayjs.unix(challenge.createdAt).format("D MMM, YYYY") : null
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const winnerTypeLabel = t(
     challenge.thresholdMode === ThresholdMode.SplitAboveThreshold ? "Split prize" : "Max actions",
@@ -169,13 +167,6 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
                       {humanAddress(challenge.creator, 6, 4)}
                     </Text>
                   </HStack>
-                  {createdAtLabel && (
-                    <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
-                      <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                        {t("Created")} {createdAtLabel}
-                      </Text>
-                    </HStack>
-                  )}
                   <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
                     <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
                       {t("Start round")} {humanNumber(challenge.startRound)}
