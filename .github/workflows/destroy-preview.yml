@@ -47,9 +47,18 @@ jobs:
           terraform_wrapper: false
 
       - name: Install yq
+        env:
+          YQ_VERSION: v4.53.2
         run: |
-          wget -q https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -O /usr/local/bin/yq
-          chmod +x /usr/local/bin/yq
+          set -euo pipefail
+          YQ_BIN="${HOME}/.local/bin/yq"
+          mkdir -p "$(dirname "${YQ_BIN}")"
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \
+            -o "${YQ_BIN}"
+          chmod +x "${YQ_BIN}"
+          echo "$(dirname "${YQ_BIN}")" >> "${GITHUB_PATH}"
+          yq --version
 
       - name: Destroy all preview environments
         id: destroy
