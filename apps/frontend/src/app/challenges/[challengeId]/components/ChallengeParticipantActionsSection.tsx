@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Badge,
   Box,
@@ -32,7 +30,7 @@ import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 import { blockNumberToDate } from "@/utils/date"
 
-import { ChallengeStatTile } from "./ChallengeStatTile"
+import { ChallengeStatTile } from "../../shared/ChallengeStatTile"
 
 const compactFormatter = getCompactFormatter(1)
 

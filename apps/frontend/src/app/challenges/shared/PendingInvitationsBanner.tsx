@@ -1,5 +1,3 @@
-"use client"
-
 import { Alert, Button, HStack, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"

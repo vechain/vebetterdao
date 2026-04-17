@@ -1,5 +1,3 @@
-"use client"
-
 import { Box, HStack, Text, VStack, type BoxProps, type TextProps } from "@chakra-ui/react"
 import type { ReactNode } from "react"
 
