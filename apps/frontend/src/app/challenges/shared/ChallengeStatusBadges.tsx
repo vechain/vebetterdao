@@ -4,11 +4,13 @@ import { LuGlobe, LuLock, LuSparkles } from "react-icons/lu"
 
 import {
   ChallengeKind,
+  ChallengeStatus,
   ChallengeVisibility,
   ChallengeView,
   challengeStatusLabel,
   challengeVisibilityLabel,
 } from "@/api/challenges/types"
+import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
 
 import { getChallengeStatusBadgeVariant, getChallengeVisibilityBadgeVariant } from "./challengeBadgeVariants"
 import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
@@ -57,10 +59,26 @@ export const ChallengeKindBadges = ({ challenge }: { challenge: ChallengeView })
 
 export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
+  const statusTime = useChallengeStatusTime(challenge)
+
+  const timeLabel = (() => {
+    if (!statusTime) return null
+    const time = statusTime.fromNow()
+    switch (challenge.status) {
+      case ChallengeStatus.Pending:
+        return t("Starts {{time}}", { time })
+      case ChallengeStatus.Active:
+        return t("Ends {{time}}", { time })
+      case ChallengeStatus.Finalized:
+        return t("Ended {{time}}", { time })
+      default:
+        return null
+    }
+  })()
 
   return (
     <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">
-      {t(challengeStatusLabel(challenge.status))}
+      {timeLabel ?? t(challengeStatusLabel(challenge.status))}
     </Badge>
   )
 }

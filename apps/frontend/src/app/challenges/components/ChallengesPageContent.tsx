@@ -1,18 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Link,
-  SimpleGrid,
-  Skeleton,
-  Stack,
-  VStack,
-  Wrap,
-} from "@chakra-ui/react"
+import { Box, Button, Heading, HStack, Icon, IconButton, Link, SimpleGrid, Stack, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useState } from "react"
@@ -37,37 +23,7 @@ import { CreateChallengeModal } from "./CreateChallengeModal"
 
 const QUESTS_STEPS_CARD_DISMISSED_KEY = "vebetterdao:quests-steps-card-dismissed"
 
-const CardSkeleton = () => (
-  <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" h="full" borderRadius="3xl" boxShadow="sm">
-    <VStack align="stretch" gap="6" h="full">
-      <VStack align="stretch" gap="4">
-        <Wrap gap="2">
-          <Skeleton h="6" w="16" borderRadius="full" />
-          <Skeleton h="6" w="20" borderRadius="full" />
-        </Wrap>
-        <VStack align="stretch" gap="2">
-          <Skeleton h="7" w="72%" borderRadius="md" />
-          <Skeleton h="7" w="48%" borderRadius="md" />
-        </VStack>
-        <Wrap gap="2">
-          <Skeleton h="7" w="28" borderRadius="full" />
-          <Skeleton h="7" w="24" borderRadius="full" />
-          <Skeleton h="7" w="24" borderRadius="full" />
-        </Wrap>
-      </VStack>
-
-      <SimpleGrid columns={2} gap="3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} h="24" borderRadius="2xl" />
-        ))}
-      </SimpleGrid>
-
-      <Box mt="auto">
-        <Skeleton h="20" borderRadius="2xl" />
-      </Box>
-    </VStack>
-  </Card.Root>
-)
+const CardSkeleton = () => <CompactSkeleton />
 
 export const ChallengesPageContent = () => {
   const { account } = useWallet()
@@ -194,7 +150,7 @@ export const ChallengesPageContent = () => {
                 }}>
                 {grouped.active.items.map(c => (
                   <SwiperSlide key={c.challengeId} style={{ height: "auto" }}>
-                    <ChallengeCard challenge={c} currentRound={round} />
+                    <ChallengeCard challenge={c} />
                   </SwiperSlide>
                 ))}
                 {grouped.active.isFetchingNextPage && (

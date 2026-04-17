@@ -4,276 +4,236 @@ import {
   Card,
   Heading,
   HStack,
-  IconButton,
-  LinkBox,
-  LinkOverlay,
+  Icon,
   SimpleGrid,
+  Stack,
   Text,
   useDisclosure,
   VStack,
   Wrap,
+  Button,
 } from "@chakra-ui/react"
-import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
-import dayjs from "dayjs"
-import NextLink from "next/link"
+import { humanNumber } from "@repo/utils/FormattingUtils"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { LuPlus } from "react-icons/lu"
+import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuUsers } from "react-icons/lu"
 
-import {
-  ChallengeDetail,
-  ChallengeKind,
-  ChallengeStatus,
-  ChallengeView,
-  ChallengeVisibility,
-  ThresholdMode,
-} from "@/api/challenges/types"
-import { useChallenge } from "@/api/challenges/useChallenge"
+import { ChallengeKind, ChallengeStatus, ChallengeView, ParticipantStatus, ThresholdMode } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
-import { AddressIcon } from "@/components/AddressIcon"
-import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
+import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 
 import { ChallengeAcceptModal } from "../[challengeId]/components/ChallengeAcceptModal"
 import { ChallengeCancelModal } from "../[challengeId]/components/ChallengeCancelModal"
 import { ChallengeClaimModal } from "../[challengeId]/components/ChallengeClaimModal"
 import { ChallengeDeclineModal } from "../[challengeId]/components/ChallengeDeclineModal"
+import { ChallengeFinalizeModal } from "../[challengeId]/components/ChallengeFinalizeModal"
+import { ChallengeJoinModal } from "../[challengeId]/components/ChallengeJoinModal"
+import { ChallengeLeaveModal } from "../[challengeId]/components/ChallengeLeaveModal"
 import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefundModal"
-import { AddChallengeInvitesModal } from "../shared/AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
-import { ChallengeStatTile } from "../shared/ChallengeStatTile"
+import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
 import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "../shared/ChallengeStatusBadges"
-import { SponsoredChallengeInfo } from "../shared/SponsoredChallengeInfo"
+import { useChallengeDescription } from "../shared/useChallengeDescription"
 
-export const ChallengeCard = ({ challenge, currentRound }: { challenge: ChallengeView; currentRound: number }) => {
+interface ChallengeCardProps {
+  challenge: ChallengeView
+}
+
+export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const actions = useChallengeActions()
   const { onOpen: onClaimOpen, onClose: onClaimClose, open: isClaimOpen } = useDisclosure()
   const { onOpen: onAcceptOpen, onClose: onAcceptClose, open: isAcceptOpen } = useDisclosure()
   const { onOpen: onDeclineOpen, onClose: onDeclineClose, open: isDeclineOpen } = useDisclosure()
   const { onOpen: onCancelOpen, onClose: onCancelClose, open: isCancelOpen } = useDisclosure()
   const { onOpen: onRefundOpen, onClose: onRefundClose, open: isRefundOpen } = useDisclosure()
-  const createdAtLabel = challenge.createdAt > 0 ? dayjs.unix(challenge.createdAt).format("D MMM, YYYY") : null
+  const { onOpen: onJoinOpen, onClose: onJoinClose, open: isJoinOpen } = useDisclosure()
+  const { onOpen: onLeaveOpen, onClose: onLeaveClose, open: isLeaveOpen } = useDisclosure()
+  const { onOpen: onFinalizeOpen, onClose: onFinalizeClose, open: isFinalizeOpen } = useDisclosure()
+
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const winnerTypeLabel = t(
     challenge.thresholdMode === ThresholdMode.SplitAboveThreshold ? "Split prize" : "Max actions",
   )
-  const shouldLoadSelectedApps = !challenge.allApps && challenge.selectedAppsCount > 0
-  const { data: challengeDetail, isLoading: isSelectedAppsLoading } = useChallenge(
-    shouldLoadSelectedApps ? String(challenge.challengeId) : "",
-  )
-  const roundsProgress =
-    currentRound > 0 && challenge.duration > 0
-      ? `${Math.min(Math.max(currentRound - challenge.startRound + 1, 0), challenge.duration)} / ${challenge.duration}`
-      : `${challenge.startRound}-${challenge.endRound}`
   const showParticipatingBadge =
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
-  const showSponsoringBadge = isSponsored && challenge.isCreator
-  const showInviteStats = challenge.visibility === ChallengeVisibility.Private
+  const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
-  const appsHelper = challenge.allApps ? null : isSelectedAppsLoading ? (
-    <Box pt="1">
-      <OverlappedAppsImages appsIds={[]} isLoading maxAppsToShow={4} iconSize={26} />
-    </Box>
-  ) : challengeDetail?.selectedApps.length ? (
-    <Box pt="1">
-      <OverlappedAppsImages appsIds={challengeDetail.selectedApps} maxAppsToShow={4} iconSize={26} />
-    </Box>
-  ) : (
-    <Text textStyle="xs" color="text.subtle">
-      {t("Selected apps")}
-    </Text>
-  )
-  const participantHelper =
-    showInviteStats && (challenge.invitedCount > 0 || challenge.declinedCount > 0) ? (
-      <Wrap gap="1.5">
-        {challenge.invitedCount > 0 && (
-          <Badge variant="neutral" size="sm">
-            {t("Invited")} {humanNumber(challenge.invitedCount)}
-          </Badge>
-        )}
-        {challenge.declinedCount > 0 && (
-          <Badge variant="neutral" size="sm">
-            {t("Declined")} {humanNumber(challenge.declinedCount)}
-          </Badge>
-        )}
-      </Wrap>
-    ) : undefined
+  const challengeDescription = useChallengeDescription(challenge)
+
+  const prizeLabel = humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")
+  const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
 
   return (
-    <LinkBox h="full">
-      <Card.Root
-        variant="primary"
-        p={{ base: "6", md: "7" }}
-        gap="5"
-        h="full"
-        borderRadius="3xl"
-        boxShadow="sm"
-        position="relative"
-        overflow="hidden"
-        transform="translateY(0)"
-        _hover={{ borderColor: "border.active", boxShadow: "lg", transform: "translateY(-2px)" }}>
-        <VStack align="stretch" gap="6" h="full" position="relative">
-          <VStack align="stretch" gap="4">
-            <Wrap gap="2">
-              <ChallengeVisibilityBadge challenge={challenge} />
-              <ChallengeStatusBadge challenge={challenge} />
-              {showParticipatingBadge && (
-                <Badge variant="positive" size="sm">
-                  {t("Participating")}
-                </Badge>
-              )}
-              {showSponsoringBadge && (
-                <Badge variant="warning" size="sm">
-                  {t("Sponsoring")}
-                </Badge>
-              )}
-            </Wrap>
-
-            <Heading
-              textStyle={{ base: "xl", md: "2xl" }}
-              lineHeight="1.05"
-              lineClamp={2}
-              title={challengeTitle}
-              wordBreak="break-word"
-              overflowWrap="anywhere">
-              <LinkOverlay asChild>
-                <NextLink href={`/challenges/${challenge.challengeId}`}>{challengeTitle}</NextLink>
-              </LinkOverlay>
-            </Heading>
-
-            <Wrap gap="2">
-              <HStack gap="1.5" bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
-                <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" />
-                <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                  {humanAddress(challenge.creator, 6, 4)}
+    <>
+      <Card.Root variant="outline" h="full" overflow="hidden">
+        <Card.Body>
+          <VStack gap="4" align="stretch" h="full">
+            <Stack
+              direction={isReacceptingInvite ? "column" : { base: "column", md: "row" }}
+              justify="space-between"
+              align={isReacceptingInvite ? "stretch" : { base: "stretch", md: "start" }}
+              gap="4">
+              <VStack align="start" gap="3" flex="1" minW="0">
+                <Wrap gap="2">
+                  <ChallengeVisibilityBadge challenge={challenge} />
+                  <ChallengeStatusBadge challenge={challenge} />
+                  {showParticipatingBadge && (
+                    <Badge variant="positive" size="sm">
+                      {t("Participating")}
+                    </Badge>
+                  )}
+                </Wrap>
+                <Heading
+                  textStyle={{ base: "lg", md: "xl" }}
+                  lineHeight="1.1"
+                  lineClamp={2}
+                  title={challengeTitle}
+                  wordBreak="break-word"
+                  overflowWrap="anywhere">
+                  {challengeTitle}
+                </Heading>
+                <Text textStyle="sm" color="text.subtle">
+                  {challengeDescription}
                 </Text>
-              </HStack>
-              {createdAtLabel && (
-                <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
+              </VStack>
+            </Stack>
+
+            <VStack gap="1" py="2" px="3" bg="bg.secondary" borderRadius="xl" align="start">
+              <ChallengeEligibleAppsRow challenge={challenge} />
+              <SimpleGrid columns={{ base: 1, md: 2 }} gap="3" py="2" px="3" w="full">
+                <VStack gap="1" align="start">
                   <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                    {t("Created")} {createdAtLabel}
+                    {t("Prize")}
                   </Text>
-                </HStack>
+                  <HStack gap="2">
+                    <HStack
+                      justify="center"
+                      align="center"
+                      w="7"
+                      h="7"
+                      rounded="full"
+                      bg="status.warning.subtle"
+                      color="status.warning.primary"
+                      flexShrink={0}>
+                      <Icon as={B3trSvg} boxSize={4} />
+                    </HStack>
+                    <Text textStyle="md" fontWeight="bold" color="brand.primary">
+                      {prizeLabel}
+                    </Text>
+                  </HStack>
+                </VStack>
+                <VStack gap="1" align="start">
+                  <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                    {t("Participants")}
+                  </Text>
+                  <HStack gap="2">
+                    <HStack
+                      justify="center"
+                      align="center"
+                      w="7"
+                      h="7"
+                      rounded="full"
+                      bg="status.info.subtle"
+                      color="status.info.primary"
+                      flexShrink={0}>
+                      <Icon boxSize={4}>
+                        <LuUsers />
+                      </Icon>
+                    </HStack>
+                    <Text textStyle="md" fontWeight="bold">
+                      {humanNumber(challenge.participantCount)}
+                      <Text as="span" color="text.subtle" fontWeight="semibold">
+                        {" / "}
+                        {humanNumber(challenge.maxParticipants)}
+                      </Text>
+                    </Text>
+                  </HStack>
+                </VStack>
+              </SimpleGrid>
+            </VStack>
+
+            <Wrap gap="2">
+              {isSponsored ? (
+                <Badge variant="neutral" size="sm">
+                  <Icon boxSize={3}>
+                    <LuSparkles />
+                  </Icon>
+                  {t("No bet required!")}
+                </Badge>
+              ) : (
+                <Badge variant="neutral" size="sm">
+                  <Icon boxSize={3}>
+                    <LuTicket />
+                  </Icon>
+                  {t("Stake")} {stakeLabel}
+                </Badge>
               )}
-              <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
-                <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                  {t("Start round")} {humanNumber(challenge.startRound)}
-                </Text>
-              </HStack>
-              <HStack bg="bg.secondary" borderRadius="full" px="2.5" py="1.5" align="center">
-                <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                  {t("End round")} {humanNumber(challenge.endRound)}
-                </Text>
-              </HStack>
+              <Badge variant="neutral" size="sm">
+                <Icon boxSize={3}>
+                  <LuClock />
+                </Icon>
+                {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
+              </Badge>
+              <Badge variant="neutral" size="sm">
+                <Icon boxSize={3}>
+                  <LuScale />
+                </Icon>
+                {t("Winner")} {winnerTypeLabel}
+              </Badge>
+              {challenge.threshold !== "0" && (
+                <Badge variant="neutral" size="sm">
+                  <Icon boxSize={3}>
+                    <LuTarget />
+                  </Icon>
+                  {t("Minimum actions")} {humanNumber(challenge.threshold)}
+                </Badge>
+              )}
             </Wrap>
           </VStack>
-
-          <SimpleGrid columns={2} gap="3">
-            <ChallengeStatTile
-              label={t("Prize")}
-              value={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
-              valueProps={{ color: "brand.primary" }}
-            />
-            {isSponsored ? (
-              <ChallengeStatTile label={t("Type")}>
-                <Box pt="0.5">
-                  <SponsoredChallengeInfo textProps={{ textStyle: { base: "sm", md: "md" }, fontWeight: "bold" }} />
-                </Box>
-              </ChallengeStatTile>
-            ) : (
-              <ChallengeStatTile
-                label={t("Bet")}
-                value={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
-              />
+        </Card.Body>
+        <Card.Footer mt={4}>
+          <HStack gap="2" w="full" align="stretch">
+            {hasChallengeActions(challenge) && (
+              <Box flex="1" minW="0">
+                <ChallengeActions
+                  challenge={challenge}
+                  layout="card"
+                  buttonSize="sm"
+                  onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                  onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
+                  onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
+                  onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
+                  onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
+                  onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
+                  onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
+                  onFinalizeClick={challenge.canFinalize ? onFinalizeOpen : undefined}
+                />
+              </Box>
             )}
-            <ChallengeStatTile
-              label={t("Winner")}
-              value={winnerTypeLabel}
-              helper={
-                challenge.threshold !== "0" ? (
-                  <Text textStyle="xs" color="text.subtle">
-                    {t("Minimum actions")} {humanNumber(challenge.threshold)}
-                  </Text>
-                ) : undefined
-              }
-            />
-            <ChallengeStatTile
-              label={t("Apps")}
-              value={challenge.allApps ? t("All apps") : humanNumber(challenge.selectedAppsCount)}
-              helper={appsHelper}
-            />
-            <ChallengeStatTile
-              label={t("Participants")}
-              action={
-                challenge.canAddInvites ? (
-                  <AddChallengeInvitesModal
-                    challengeId={challenge.challengeId}
-                    creatorAddress={challenge.creator}
-                    existingInvitees={"invited" in challenge ? (challenge as ChallengeDetail).invited : undefined}>
-                    <IconButton
-                      minW="9"
-                      h="9"
-                      p="0"
-                      borderRadius="full"
-                      bg="actions.primary.default"
-                      color="actions.primary.text"
-                      fontSize="lg"
-                      lineHeight="1"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      _hover={{ bg: "actions.primary.hover" }}
-                      _active={{ bg: "actions.primary.pressed" }}
-                      aria-label={t("Add invitee")}>
-                      <LuPlus />
-                    </IconButton>
-                  </AddChallengeInvitesModal>
-                ) : undefined
-              }
-              helper={participantHelper}>
-              <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold" lineHeight="1.1">
-                {humanNumber(challenge.participantCount)}
-                <Text as="span" color="text.subtle" fontWeight="semibold">
-                  {" / "} {humanNumber(challenge.maxParticipants)}
-                </Text>
-              </Text>
-            </ChallengeStatTile>
-            <ChallengeStatTile
-              label={t("Rounds")}
-              value={roundsProgress}
-              helper={
-                <Text textStyle="xs" color="text.subtle">
-                  {t("End round")} {humanNumber(challenge.endRound)}
-                </Text>
-              }
-            />
-          </SimpleGrid>
-
-          {hasChallengeActions(challenge) && (
-            <Box mt="auto" bg="bg.secondary" borderRadius="2xl" border="sm" borderColor="border.secondary" p="3.5">
-              <ChallengeActions
-                challenge={challenge}
-                layout="card"
-                onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
-                onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
-                onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
-                onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
-                onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
-              />
-            </Box>
-          )}
-        </VStack>
+            <Button
+              variant="outline"
+              size="sm"
+              flex="1"
+              minW="0"
+              onClick={() => router.push(`/challenges/${challenge.challengeId}`)}>
+              {t("View details")}
+            </Button>
+          </HStack>
+        </Card.Footer>
       </Card.Root>
 
       <ChallengeClaimModal
         isOpen={isClaimOpen}
         onClose={onClaimClose}
-        prizeLabel={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
+        prizeLabel={prizeLabel}
         onClaim={() => actions.claimChallenge(challenge.challengeId)}
       />
       <ChallengeAcceptModal
         isOpen={isAcceptOpen}
         onClose={onAcceptClose}
-        stakeLabel={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+        stakeLabel={stakeLabel}
         onAccept={() => actions.acceptChallenge(challenge)}
       />
       <ChallengeDeclineModal
@@ -289,9 +249,25 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
       <ChallengeRefundModal
         isOpen={isRefundOpen}
         onClose={onRefundClose}
-        stakeLabel={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+        stakeLabel={stakeLabel}
         onRefund={() => actions.refundChallenge(challenge.challengeId)}
       />
-    </LinkBox>
+      <ChallengeJoinModal
+        isOpen={isJoinOpen}
+        onClose={onJoinClose}
+        stakeLabel={challenge.kind === ChallengeKind.Stake ? stakeLabel : undefined}
+        onJoin={() => actions.joinChallenge(challenge)}
+      />
+      <ChallengeLeaveModal
+        isOpen={isLeaveOpen}
+        onClose={onLeaveClose}
+        onLeave={() => actions.leaveChallenge(challenge.challengeId)}
+      />
+      <ChallengeFinalizeModal
+        isOpen={isFinalizeOpen}
+        onClose={onFinalizeClose}
+        onFinalize={() => actions.finalizeChallenge(challenge.challengeId)}
+      />
+    </>
   )
 }

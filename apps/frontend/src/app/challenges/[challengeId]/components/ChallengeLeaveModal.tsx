@@ -7,16 +7,15 @@ import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 type Props = {
   isOpen: boolean
   onClose: () => void
-  stakeLabel: string
-  onAccept: () => void
+  onLeave: () => void
 }
 
-export const ChallengeAcceptModal = ({ isOpen, onClose, stakeLabel, onAccept }: Props) => {
+export const ChallengeLeaveModal = ({ isOpen, onClose, onLeave }: Props) => {
   const { t } = useTranslation()
 
-  const handleAccept = () => {
+  const handleLeave = () => {
     onClose()
-    onAccept()
+    onLeave()
   }
 
   return (
@@ -27,28 +26,19 @@ export const ChallengeAcceptModal = ({ isOpen, onClose, stakeLabel, onAccept }: 
             <CloseButton />
           </Dialog.CloseTrigger>
           <VStack align="center" p={8} gap={6}>
-            <Image
-              src="/assets/mascot/mascot-welcoming-left-head-2.png"
-              alt="B3MO"
-              boxSize="200px"
-              objectFit="contain"
-            />
+            <Image src="/assets/mascot/mascot-warning-head.webp" alt="B3MO" boxSize="200px" objectFit="contain" />
 
             <VStack gap={1}>
               <Heading size="xl" fontWeight="bold" textAlign="center">
-                {t("Accept invitation")}
+                {t("Leave quest")}
               </Heading>
               <Text textStyle="md" color="text.subtle" textAlign="center">
-                {t("Confirm to join this quest. Your bet will be locked in the prize pool until the quest ends.")}
+                {t("Leave this quest before it starts. Your bet will be returned and your spot freed up.")}
               </Text>
             </VStack>
 
-            <Heading size="3xl" fontWeight="bold" textAlign="center" color="text.primary">
-              {stakeLabel}
-            </Heading>
-
-            <Button variant="primary" w="full" size="lg" onClick={handleAccept}>
-              {t("Accept and bet")}
+            <Button variant="outline" colorPalette="red" w="full" size="lg" onClick={handleLeave}>
+              {t("Leave quest")}
             </Button>
           </VStack>
         </ModalAnimation>
