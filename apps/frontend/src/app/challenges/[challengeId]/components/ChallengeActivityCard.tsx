@@ -47,7 +47,7 @@ export const ChallengeActivityCard = ({ challenge }: ChallengeActivityCardProps)
           <Box overflowY="auto" maxH={{ md: "400px" }}>
             <VStack align="stretch" gap="0">
               {entries.map(entry => (
-                <ChallengeActivityRow key={entry.id} entry={entry} />
+                <ChallengeActivityRow key={entry.id} entry={entry} challenge={challenge} />
               ))}
             </VStack>
           </Box>

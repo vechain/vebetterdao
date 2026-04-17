@@ -15,17 +15,25 @@ import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
 
 export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
+  const isPrivate = challenge.visibility === ChallengeVisibility.Private
 
   if (challenge.kind === ChallengeKind.Sponsored) {
     return (
-      <Badge variant="yellow" size="sm">
-        <Icon as={LuSparkles} />
-        {t("Community Quest")}
-      </Badge>
+      <>
+        <Badge variant="yellow" size="sm">
+          <Icon as={LuSparkles} />
+          {t("Community Quest")}
+        </Badge>
+        {isPrivate && (
+          <Badge variant="neutral" size="sm">
+            <Icon as={LuLock} />
+            {t(challengeVisibilityLabel(ChallengeVisibility.Private))}
+          </Badge>
+        )}
+      </>
     )
   }
 
-  const isPrivate = challenge.visibility === ChallengeVisibility.Private
   const visibilityBadgeVariant = isPrivate ? "neutral" : getChallengeVisibilityBadgeVariant(challenge.visibility)
 
   return (

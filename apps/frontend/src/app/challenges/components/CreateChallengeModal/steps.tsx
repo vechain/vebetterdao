@@ -332,13 +332,13 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       prompt: (
         <VStack align="stretch" gap="2">
           <Text textStyle="sm" fontWeight="semibold">
-            {t("How long should it run?")}
+            {t("How many rounds should it run?")}
           </Text>
         </VStack>
       ),
       answer: (
         <Text textStyle="sm" color="inherit">
-          {t("Duration: {{count}} rounds", { count: duration })}
+          {t("Duration: {{count}} {{rounds}}", { count: duration, rounds: duration === 1 ? t("round") : t("rounds") })}
         </Text>
       ),
       controls: (
@@ -349,7 +349,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               size="sm"
               variant={getExplicitChoiceVariant(durationChosen, duration === value)}
               onClick={() => flow.chooseDuration(value)}>
-              {value}
+              {value} {value === 1 ? t("round") : t("rounds")}
             </Button>
           ))}
         </HStack>

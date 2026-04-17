@@ -4,9 +4,11 @@ import { useVechainDomain } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
-import { SettlementMode } from "@/api/challenges/types"
+import { type ChallengeView, SettlementMode } from "@/api/challenges/types"
 import { type ChallengeActivityEntry, type ActivityEntryType } from "@/api/challenges/useChallengeActivityLog"
 import dayjs from "@/utils/dayjsConfig"
+
+import { getChallengeInvalidReason } from "../../shared/challengeInvalidReason"
 
 const textColor: Record<ActivityEntryType, string> = {
   created: "blue.500",
@@ -37,14 +39,16 @@ const ActivityName = ({ address }: { address: string }) => {
 
 interface ChallengeActivityRowProps {
   entry: ChallengeActivityEntry
+  challenge?: Pick<ChallengeView, "status" | "kind" | "participantCount">
 }
 
-export const ChallengeActivityRow = ({ entry }: ChallengeActivityRowProps) => {
+export const ChallengeActivityRow = ({ entry, challenge }: ChallengeActivityRowProps) => {
   const { t } = useTranslation()
   const formattedAmount = entry.amount ? humanNumber(entry.amount) : undefined
 
   const label = getActivityLabel(entry.type, formattedAmount, t as (key: string, opts?: object) => string)
   const finalizedLabel = getFinalizedLabel(entry, t as (key: string, opts?: object) => string)
+  const invalidReason = entry.type === "invalidated" && challenge ? getChallengeInvalidReason(challenge, t) : null
   const relativeTime = dayjs.unix(entry.timestamp).fromNow()
   const color = textColor[entry.type]
 
@@ -63,6 +67,11 @@ export const ChallengeActivityRow = ({ entry }: ChallengeActivityRowProps) => {
         {finalizedLabel && (
           <Text textStyle="xs" color="text.subtle">
             {finalizedLabel}
+          </Text>
+        )}
+        {invalidReason && (
+          <Text textStyle="xs" color="text.subtle">
+            {invalidReason}
           </Text>
         )}
       </Box>

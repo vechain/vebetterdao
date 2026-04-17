@@ -32,7 +32,11 @@ import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { AddressIcon } from "@/components/AddressIcon"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
+import { ChallengeAcceptModal } from "../[challengeId]/components/ChallengeAcceptModal"
+import { ChallengeCancelModal } from "../[challengeId]/components/ChallengeCancelModal"
 import { ChallengeClaimModal } from "../[challengeId]/components/ChallengeClaimModal"
+import { ChallengeDeclineModal } from "../[challengeId]/components/ChallengeDeclineModal"
+import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefundModal"
 import { AddChallengeInvitesModal } from "../shared/AddChallengeInvitesModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
 import { ChallengeStatTile } from "../shared/ChallengeStatTile"
@@ -43,6 +47,10 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
   const { t } = useTranslation()
   const actions = useChallengeActions()
   const { onOpen: onClaimOpen, onClose: onClaimClose, open: isClaimOpen } = useDisclosure()
+  const { onOpen: onAcceptOpen, onClose: onAcceptClose, open: isAcceptOpen } = useDisclosure()
+  const { onOpen: onDeclineOpen, onClose: onDeclineClose, open: isDeclineOpen } = useDisclosure()
+  const { onOpen: onCancelOpen, onClose: onCancelClose, open: isCancelOpen } = useDisclosure()
+  const { onOpen: onRefundOpen, onClose: onRefundClose, open: isRefundOpen } = useDisclosure()
   const createdAtLabel = challenge.createdAt > 0 ? dayjs.unix(challenge.createdAt).format("D MMM, YYYY") : null
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const winnerTypeLabel = t(
@@ -246,6 +254,10 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
                 challenge={challenge}
                 layout="card"
                 onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
+                onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
+                onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
+                onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
               />
             </Box>
           )}
@@ -257,6 +269,28 @@ export const ChallengeCard = ({ challenge, currentRound }: { challenge: Challeng
         onClose={onClaimClose}
         prizeLabel={humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
         onClaim={() => actions.claimChallenge(challenge.challengeId)}
+      />
+      <ChallengeAcceptModal
+        isOpen={isAcceptOpen}
+        onClose={onAcceptClose}
+        stakeLabel={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+        onAccept={() => actions.acceptChallenge(challenge)}
+      />
+      <ChallengeDeclineModal
+        isOpen={isDeclineOpen}
+        onClose={onDeclineClose}
+        onDecline={() => actions.declineChallenge(challenge.challengeId)}
+      />
+      <ChallengeCancelModal
+        isOpen={isCancelOpen}
+        onClose={onCancelClose}
+        onCancel={() => actions.cancelChallenge(challenge.challengeId)}
+      />
+      <ChallengeRefundModal
+        isOpen={isRefundOpen}
+        onClose={onRefundClose}
+        stakeLabel={humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")}
+        onRefund={() => actions.refundChallenge(challenge.challengeId)}
       />
     </LinkBox>
   )

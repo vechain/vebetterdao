@@ -6,7 +6,7 @@ import { ContractEventName } from "viem"
 
 import { useEvents } from "@/hooks/useEvents"
 
-import { ChallengeDetail, ChallengeKind, SettlementMode } from "./types"
+import { ChallengeDetail, ChallengeKind, ChallengeStatus, SettlementMode } from "./types"
 
 const abi = B3TRChallenges__factory.abi
 type ChallengesAbi = typeof abi
@@ -177,6 +177,19 @@ export const useChallengeActivityLog = (challenge: ChallengeDetail) => {
       })
     }
 
+    // When the challenge is Invalid but no on-chain event was emitted (syncChallenge not called),
+    // inject a synthetic entry so the timeline always shows invalidation.
+    if (challenge.status === ChallengeStatus.Invalid && (invalidated.data ?? []).length === 0) {
+      const lastBlock = items.reduce((max, e) => Math.max(max, e.blockNumber), 0)
+      const lastTimestamp = items.reduce((max, e) => (e.blockNumber === lastBlock ? e.timestamp : max), 0)
+      items.push({
+        id: `synthetic-invalidated-${challenge.challengeId}`,
+        type: "invalidated",
+        blockNumber: lastBlock + 1,
+        timestamp: lastTimestamp,
+      })
+    }
+
     for (const e of finalized.data ?? []) {
       const args = e.decodedData.args as {
         settlementMode: number
@@ -235,6 +248,8 @@ export const useChallengeActivityLog = (challenge: ChallengeDetail) => {
     payoutClaimed.data,
     refundClaimed.data,
     stakeDisplay,
+    challenge.status,
+    challenge.challengeId,
   ])
 
   return { entries, isLoading, isError }

@@ -30,9 +30,14 @@ import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 
 import { ChallengeActions, hasChallengeActions } from "../../shared/ChallengeActions"
 import { getChallengeStatusBadgeVariant } from "../../shared/challengeBadgeVariants"
+import { getChallengeInvalidReason } from "../../shared/challengeInvalidReason"
 import { ChallengeVisibilityBadge } from "../../shared/ChallengeStatusBadges"
 
+import { ChallengeAcceptModal } from "./ChallengeAcceptModal"
+import { ChallengeCancelModal } from "./ChallengeCancelModal"
 import { ChallengeClaimModal } from "./ChallengeClaimModal"
+import { ChallengeDeclineModal } from "./ChallengeDeclineModal"
+import { ChallengeRefundModal } from "./ChallengeRefundModal"
 import { ChallengeShareModal } from "./ChallengeShareModal"
 
 interface ChallengeHeaderCardProps {
@@ -46,6 +51,10 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
   const actions = useChallengeActions()
   const { onOpen: onShareOpen, onClose: onShareClose, open: isShareOpen } = useDisclosure()
   const { onOpen: onClaimOpen, onClose: onClaimClose, open: isClaimOpen } = useDisclosure()
+  const { onOpen: onAcceptOpen, onClose: onAcceptClose, open: isAcceptOpen } = useDisclosure()
+  const { onOpen: onDeclineOpen, onClose: onDeclineClose, open: isDeclineOpen } = useDisclosure()
+  const { onOpen: onCancelOpen, onClose: onCancelClose, open: isCancelOpen } = useDisclosure()
+  const { onOpen: onRefundOpen, onClose: onRefundClose, open: isRefundOpen } = useDisclosure()
   const { data: vetDomains } = useGetVetDomains(challenge.creator ? [challenge.creator] : undefined)
   const creatorDisplayName = vetDomains?.[0] ?? humanAddress(challenge.creator, 6, 4)
 
@@ -175,6 +184,10 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
                     challenge={challenge}
                     buttonSize="sm"
                     onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                    onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
+                    onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
+                    onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
+                    onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
                   />
                 </Box>
               )}
@@ -197,7 +210,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
           </Text>
 
           <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="md" w="fit-content">
-            {statusTimeLabel ?? t(challengeStatusLabel(challenge.status))}
+            {statusTimeLabel ?? getChallengeInvalidReason(challenge, t) ?? t(challengeStatusLabel(challenge.status))}
           </Badge>
 
           {hasChallengeActions(challenge) && (
@@ -206,6 +219,10 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
                 challenge={challenge}
                 layout="card"
                 onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
+                onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
+                onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
+                onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
               />
             </Box>
           )}
@@ -218,6 +235,28 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
         onClose={onClaimClose}
         prizeLabel={prizeLabel}
         onClaim={() => actions.claimChallenge(challenge.challengeId)}
+      />
+      <ChallengeAcceptModal
+        isOpen={isAcceptOpen}
+        onClose={onAcceptClose}
+        stakeLabel={stakeLabel}
+        onAccept={() => actions.acceptChallenge(challenge)}
+      />
+      <ChallengeDeclineModal
+        isOpen={isDeclineOpen}
+        onClose={onDeclineClose}
+        onDecline={() => actions.declineChallenge(challenge.challengeId)}
+      />
+      <ChallengeCancelModal
+        isOpen={isCancelOpen}
+        onClose={onCancelClose}
+        onCancel={() => actions.cancelChallenge(challenge.challengeId)}
+      />
+      <ChallengeRefundModal
+        isOpen={isRefundOpen}
+        onClose={onRefundClose}
+        stakeLabel={stakeLabel}
+        onRefund={() => actions.refundChallenge(challenge.challengeId)}
       />
     </>
   )

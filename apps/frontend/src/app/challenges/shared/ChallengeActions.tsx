@@ -26,11 +26,19 @@ export const ChallengeActions = ({
   layout = "default",
   buttonSize,
   onClaimClick,
+  onAcceptClick,
+  onDeclineClick,
+  onCancelClick,
+  onRefundClick,
 }: {
   challenge: ChallengeView
   layout?: ChallengeActionsLayout
   buttonSize?: "sm" | "md"
   onClaimClick?: () => void
+  onAcceptClick?: () => void
+  onDeclineClick?: () => void
+  onCancelClick?: () => void
+  onRefundClick?: () => void
 }) => {
   const { account } = useWallet()
   const actions = useChallengeActions()
@@ -73,6 +81,11 @@ export const ChallengeActions = ({
   }
 
   const id = challenge.challengeId
+  const handleAccept = onAcceptClick ?? (() => actions.acceptChallenge(challenge))
+  const handleDecline = onDeclineClick ?? (() => actions.declineChallenge(id))
+  const handleCancel = onCancelClick ?? (() => actions.cancelChallenge(id))
+  const handleRefund = onRefundClick ?? (() => actions.refundChallenge(id))
+
   const actionButtons = (
     <>
       {challenge.canAccept && (
@@ -80,17 +93,13 @@ export const ChallengeActions = ({
           size={resolvedButtonSize}
           variant="primary"
           disabled={hasInsufficientB3trForJoin}
-          onClick={() => actions.acceptChallenge(challenge)}
+          onClick={handleAccept}
           {...cardButtonProps}>
           {t("Accept")}
         </Button>
       )}
       {challenge.canDecline && (
-        <Button
-          size={resolvedButtonSize}
-          variant="negative"
-          onClick={() => actions.declineChallenge(id)}
-          {...cardButtonProps}>
+        <Button size={resolvedButtonSize} variant="negative" onClick={handleDecline} {...cardButtonProps}>
           {t("Decline")}
         </Button>
       )}
@@ -114,11 +123,7 @@ export const ChallengeActions = ({
         </Button>
       )}
       {challenge.canCancel && (
-        <Button
-          size={resolvedButtonSize}
-          variant="negative"
-          onClick={() => actions.cancelChallenge(id)}
-          {...cardButtonProps}>
+        <Button size={resolvedButtonSize} variant="negative" onClick={handleCancel} {...cardButtonProps}>
           {t("Cancel")}
         </Button>
       )}
@@ -157,11 +162,7 @@ export const ChallengeActions = ({
         </Button>
       )}
       {challenge.canRefund && (
-        <Button
-          size={resolvedButtonSize}
-          variant="primary"
-          onClick={() => actions.refundChallenge(id)}
-          {...cardButtonProps}>
+        <Button size={resolvedButtonSize} variant="primary" onClick={handleRefund} {...cardButtonProps}>
           {t("Claim refund")}
         </Button>
       )}
