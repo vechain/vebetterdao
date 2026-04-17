@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuUsers } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeStatus, ChallengeView, ParticipantStatus, ThresholdMode } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeView, ParticipantStatus, ThresholdMode } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 
@@ -56,8 +56,6 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const winnerTypeLabel = t(
     challenge.thresholdMode === ThresholdMode.SplitAboveThreshold ? "Split prize" : "Max actions",
   )
-  const showParticipatingBadge =
-    challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
@@ -79,11 +77,6 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeStatusBadge challenge={challenge} />
-                  {showParticipatingBadge && (
-                    <Badge variant="positive" size="sm">
-                      {t("Participating")}
-                    </Badge>
-                  )}
                 </Wrap>
                 <Heading
                   textStyle={{ base: "lg", md: "xl" }}
