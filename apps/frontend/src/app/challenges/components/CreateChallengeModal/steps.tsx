@@ -669,12 +669,8 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
             </VStack>
           </Box>
           <HStack justify="flex-end">
-            <Button
-              size="sm"
-              variant={primaryVariant}
-              disabled={form.appIds.length === 0}
-              onClick={flow.confirmSelectedApps}>
-              {t("Continue")}
+            <Button size="sm" variant={primaryVariant} onClick={flow.confirmSelectedApps}>
+              {form.appIds.length === 0 ? t("Use all apps") : t("Continue")}
             </Button>
           </HStack>
         </VStack>
