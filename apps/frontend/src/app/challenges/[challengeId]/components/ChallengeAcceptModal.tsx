@@ -7,12 +7,13 @@ import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 type Props = {
   isOpen: boolean
   onClose: () => void
-  stakeLabel: string
+  stakeLabel?: string
   onAccept: () => void
 }
 
 export const ChallengeAcceptModal = ({ isOpen, onClose, stakeLabel, onAccept }: Props) => {
   const { t } = useTranslation()
+  const isStake = !!stakeLabel
 
   const handleAccept = () => {
     onClose()
@@ -39,16 +40,20 @@ export const ChallengeAcceptModal = ({ isOpen, onClose, stakeLabel, onAccept }: 
                 {t("Accept invitation")}
               </Heading>
               <Text textStyle="md" color="text.subtle" textAlign="center">
-                {t("Confirm to join this quest. Your bet will be locked in the prize pool until the quest ends.")}
+                {isStake
+                  ? t("Confirm to join this quest. Your bet will be locked in the prize pool until the quest ends.")
+                  : t("Confirm to join this quest. No bet required — just bring your A-game.")}
               </Text>
             </VStack>
 
-            <Heading size="3xl" fontWeight="bold" textAlign="center" color="text.primary">
-              {stakeLabel}
-            </Heading>
+            {isStake && (
+              <Heading size="3xl" fontWeight="bold" textAlign="center" color="text.primary">
+                {stakeLabel}
+              </Heading>
+            )}
 
             <Button variant="primary" w="full" size="lg" onClick={handleAccept}>
-              {t("Accept and bet")}
+              {isStake ? t("Accept and bet") : t("Accept")}
             </Button>
           </VStack>
         </ModalAnimation>

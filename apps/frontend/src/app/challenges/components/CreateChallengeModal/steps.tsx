@@ -12,13 +12,13 @@ import {
   Wrap,
 } from "@chakra-ui/react"
 import { TFunction } from "i18next"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
 import { challengeMetadataByteLimits, ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
 import { AppImage } from "@/components/AppImage/AppImage"
 
-import { getInviteeValidationMessage } from "../../shared/inviteeValidation"
+import { getInviteeValidationMessage, InviteeValidationError } from "../../shared/inviteeValidation"
 
 import { SummaryItem } from "./ChatBubbles"
 import {
@@ -732,33 +732,19 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         <VStack align="stretch" gap="3">
           {form.invitees.length > 0 && (
             <VStack align="stretch" gap="2" w="full">
-              {form.invitees.map((addr, index) => {
-                const error = inviteeErrorKeys[index]
-                return (
-                  <VStack key={getInviteeKey(form.invitees, addr, index)} align="stretch" gap="1">
-                    <HStack gap="2">
-                      <Input
-                        placeholder="0x..."
-                        value={addr}
-                        onChange={e => flow.updateInvitee(index, e.target.value)}
-                        borderColor={error ? "border.error" : undefined}
-                      />
-                      <IconButton
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => flow.removeInvitee(index)}
-                        aria-label={t("Remove")}>
-                        <LuX />
-                      </IconButton>
-                    </HStack>
-                    {error && (
-                      <Text textStyle="xs" color="fg.error">
-                        {getInviteeValidationMessage(t, error)}
-                      </Text>
-                    )}
-                  </VStack>
-                )
-              })}
+              {form.invitees.map((addr, index) => (
+                <InviteeRow
+                  // Index-based key is intentional: using the value would remount the input
+                  // on every keystroke and steal focus.
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={`invitee-${index}`}
+                  value={addr}
+                  error={inviteeErrorKeys[index] ?? null}
+                  onChange={value => flow.updateInvitee(index, value)}
+                  onRemove={() => flow.removeInvitee(index)}
+                  t={t}
+                />
+              ))}
             </VStack>
           )}
           <Button size="sm" variant={tertiaryVariant} alignSelf="start" onClick={flow.addInvitee}>
@@ -840,7 +826,39 @@ function getCompactListLabel(items: string[]) {
   return `${items.slice(0, 2).join(", ")}, +${items.length - 2}`
 }
 
-function getInviteeKey(invitees: string[], value: string, index: number) {
-  const occurrence = invitees.slice(0, index).filter(candidate => candidate === value).length
-  return `invitee-${value || "empty"}-${occurrence}`
+interface InviteeRowProps {
+  value: string
+  error: InviteeValidationError | null
+  onChange: (value: string) => void
+  onRemove: () => void
+  t: TFunction
+}
+
+// Validation errors are only revealed after the field is blurred so the user can finish
+// typing a domain or address without being interrupted by mid-typing errors.
+const InviteeRow = ({ value, error, onChange, onRemove, t }: InviteeRowProps) => {
+  const [touched, setTouched] = useState(false)
+  const visibleError = touched ? error : null
+
+  return (
+    <VStack align="stretch" gap="1">
+      <HStack gap="2">
+        <Input
+          placeholder="0x..."
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onBlur={() => setTouched(true)}
+          borderColor={visibleError ? "border.error" : undefined}
+        />
+        <IconButton size="sm" variant="ghost" onClick={onRemove} aria-label={t("Remove")}>
+          <LuX />
+        </IconButton>
+      </HStack>
+      {visibleError && (
+        <Text textStyle="xs" color="fg.error">
+          {getInviteeValidationMessage(t, visibleError)}
+        </Text>
+      )}
+    </VStack>
+  )
 }
