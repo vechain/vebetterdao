@@ -226,7 +226,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
       <ChallengeAcceptModal
         isOpen={isAcceptOpen}
         onClose={onAcceptClose}
-        stakeLabel={stakeLabel}
+        stakeLabel={challenge.kind === ChallengeKind.Stake ? stakeLabel : undefined}
         onAccept={() => actions.acceptChallenge(challenge)}
       />
       <ChallengeDeclineModal
