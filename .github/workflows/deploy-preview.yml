@@ -68,6 +68,7 @@ jobs:
       pr_number: ${{ steps.determine.outputs.pr_number }}
       short_sha: ${{ steps.determine.outputs.short_sha }}
       run_url: ${{ steps.determine.outputs.run_url }}
+      is_fork_pr: ${{ steps.determine.outputs.is_fork_pr }}
     steps:
       - name: Determine flavors and metadata
         id: determine
@@ -90,9 +91,17 @@ jobs:
             exit 1
           fi
 
-  # Post initial "deploying" comment
-  comment-deploying:
-    name: Post Deploying Comment
+          HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
+          REPO="${{ github.repository }}"
+          if [ "$HEAD_REPO" != "$REPO" ]; then
+            echo "is_fork_pr=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_fork_pr=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Post initial comment: "deploying" for same-repo PRs, or fork notice (no self-hosted build)
+  preview-start-comment:
+    name: Preview start comment
     needs: [setup, preview-relevant]
     if: needs.preview-relevant.outputs.run_preview == 'true'
     runs-on: ubuntu-latest
@@ -101,6 +110,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Update PR comment - Deploying
+        if: needs.setup.outputs.is_fork_pr != 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
@@ -160,11 +170,68 @@ jobs:
               });
             }
 
+      - name: Update PR comment - Fork PR (preview build skipped)
+        if: needs.setup.outputs.is_fork_pr == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+        with:
+          script: |
+            const prNumber = process.env.PR_NUMBER;
+            const projectName = process.env.PROJECT_NAME;
+            const branchName = `preview/pr-${prNumber}`;
+            const commentBody = [
+              `## ${projectName} – Preview`,
+              '',
+              '**Preview ECR builds are not run for pull requests opened from forks** (self-hosted runner security).',
+              '',
+              '### Maintainers: run staging / beta / dev previews for this code',
+              '',
+              'Push these commits to a branch **on this repository**, then open a PR **from this repo** (not a fork) into `main`:',
+              '',
+              '```bash',
+              `gh pr checkout ${prNumber}`,
+              `git push -u origin HEAD:${branchName}`,
+              '```',
+              '',
+              `Then open a pull request from \`${branchName}\` → \`main\`. The preview workflow only runs when \`head.repo\` is this repository.`,
+              '',
+              `**Without GitHub CLI:** add the fork as a remote, fetch the contributor branch, then \`git push origin <local-branch>:${branchName}\`.`,
+              '',
+              '---',
+              '<sub>CI on this PR still runs on GitHub-hosted runners where configured.</sub>'
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt(prNumber),
+            });
+            const existingComment = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes(`${projectName} – Preview`)
+            );
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(prNumber),
+                body: commentBody
+              });
+            }
+
   # Build and push Docker image for each flavor
   build-and-push:
     name: Build (${{ matrix.flavor }})
-    needs: [setup, comment-deploying, preview-relevant]
-    if: needs.preview-relevant.outputs.run_preview == 'true'
+    needs: [setup, preview-start-comment, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true' && needs.setup.outputs.is_fork_pr != 'true'
     permissions:
       id-token: write
       contents: read
@@ -433,7 +500,7 @@ jobs:
             }
 
       - name: Update PR comment - Results
-        if: needs.preview-relevant.outputs.run_preview == 'true'
+        if: needs.preview-relevant.outputs.run_preview == 'true' && needs.setup.outputs.is_fork_pr != 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
@@ -577,7 +644,7 @@ jobs:
             }
 
       - name: Deployment summary
-        if: needs.preview-relevant.outputs.run_preview == 'true'
+        if: needs.preview-relevant.outputs.run_preview == 'true' && needs.setup.outputs.is_fork_pr != 'true'
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
