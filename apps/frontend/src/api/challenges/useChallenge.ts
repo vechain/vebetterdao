@@ -69,8 +69,8 @@ const formatTokenAmount = (value: ContractValue) =>
     .replace(/(\.\d*?[1-9])0+$/, "$1")
 
 const normalizeStringArray = (value: unknown) => {
-  const unwrapped = unwrapValue(value)
-  return Array.isArray(unwrapped) ? unwrapped.map(item => item.toString()) : []
+  const arrayResult = Array.isArray(value) && value.length === 1 && Array.isArray(value[0]) ? value[0] : value
+  return Array.isArray(arrayResult) ? arrayResult.map(item => String(item)) : []
 }
 
 const mapContractChallengeDetail = ({
