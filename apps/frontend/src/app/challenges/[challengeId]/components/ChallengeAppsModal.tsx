@@ -17,9 +17,16 @@ export const ChallengeAppsModal = ({ isOpen, onClose, appIds, appNames }: Challe
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton>
       <VStack gap="4" align="stretch">
-        <Heading textStyle="xl" fontWeight="bold">
-          {t("Apps")} {`(${appIds.length})`}
-        </Heading>
+        <VStack gap="2" align="stretch">
+          <Heading textStyle="xl" fontWeight="bold">
+            {t("Eligible Apps")} {`(${appIds.length})`}
+          </Heading>
+          <Text textStyle="sm" color="text.subtle">
+            {t(
+              "Use any of these apps to perform actions and earn points toward this challenge. Actions on apps not listed here will not count.",
+            )}
+          </Text>
+        </VStack>
 
         <VStack gap="2" align="stretch">
           {appIds.map(appId => (

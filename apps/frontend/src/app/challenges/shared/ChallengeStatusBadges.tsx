@@ -20,7 +20,7 @@ export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeVi
     return (
       <Badge variant="yellow" size="sm">
         <Icon as={LuSparkles} />
-        {t("Sponsored")}
+        {t("Community Quest")}
       </Badge>
     )
   }

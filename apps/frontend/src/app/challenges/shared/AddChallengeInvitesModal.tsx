@@ -1,21 +1,29 @@
 import {
+  Box,
   Button,
   ButtonProps,
   CloseButton,
   Dialog,
-  Field,
+  Heading,
   HStack,
+  Icon,
   IconButton,
   Input,
-  Portal,
+  InputGroup,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { UserPlus } from "iconoir-react"
 import { useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuPlus, LuX } from "react-icons/lu"
+import { LuCheck, LuPlus, LuX } from "react-icons/lu"
 
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
+import { AddressIcon } from "@/components/AddressIcon"
+import { CustomModalContent } from "@/components/CustomModalContent"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import { useGetAddressFromVetDomains } from "@/hooks/useGetVetDomains"
 
 import {
@@ -126,8 +134,13 @@ export const AddChallengeInvitesModal = ({
     setOpen(false)
   }
 
+  const submitLabel =
+    sanitizedInvitees.length > 0
+      ? t("Send invites ({{count}})", { count: sanitizedInvitees.length })
+      : t("Send invites")
+
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpen} scrollBehavior="inside">
+    <Dialog.Root open={open} onOpenChange={handleOpen} placement="center" size="md" scrollBehavior="inside">
       <Dialog.Trigger asChild>
         {children ?? (
           <Button size="sm" variant="secondary" {...triggerProps}>
@@ -135,67 +148,106 @@ export const AddChallengeInvitesModal = ({
           </Button>
         )}
       </Dialog.Trigger>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content maxW={{ base: "95vw", md: "lg" }} maxH={{ base: "90vh", md: "80vh" }}>
-            <Dialog.Header pb="5">
-              <Dialog.Title>{t("Invitees")}</Dialog.Title>
-            </Dialog.Header>
+      <CustomModalContent>
+        <ModalAnimation>
+          <Dialog.CloseTrigger asChild top={4} right={4}>
+            <CloseButton />
+          </Dialog.CloseTrigger>
 
-            <Dialog.Body overflowY="auto">
-              <Field.Root>
-                <Field.Label>{t("Invitees")}</Field.Label>
-                <VStack align="stretch" gap="2" w="full">
-                  {parsedInvitees.map(entry => {
-                    const error = getEntryError(entry)
-                    return (
-                      <VStack key={entry.id} align="stretch" gap="1">
-                        <HStack gap="2">
-                          <Input
-                            value={entry.value}
-                            onChange={e => updateInvitee(entry.id, e.target.value)}
-                            borderColor={error ? "border.error" : undefined}
-                          />
-                          <IconButton
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeInvitee(entry.id)}
-                            aria-label={t("Remove")}>
-                            <LuX />
-                          </IconButton>
-                        </HStack>
-                        {error && (
-                          <Text textStyle="xs" color="fg.error">
-                            {error}
-                          </Text>
-                        )}
-                      </VStack>
-                    )
-                  })}
-                  <Button size="sm" variant="tertiary" onClick={addInvitee}>
-                    <LuPlus />
-                    {t("Add invitee")}
-                  </Button>
-                </VStack>
-              </Field.Root>
-            </Dialog.Body>
+          <VStack align="stretch" p={{ base: 6, md: 8 }} gap={6}>
+            <VStack gap={3} align="center">
+              <Box
+                bg="actions.primary.subtle"
+                color="actions.primary.default"
+                rounded="full"
+                p={3}
+                display="inline-flex">
+                <Icon as={UserPlus} boxSize={6} />
+              </Box>
+              <VStack gap={1} align="center">
+                <Heading size="xl" fontWeight="bold" textAlign="center">
+                  {t("Invite friends")}
+                </Heading>
+                <Text textStyle="sm" color="text.subtle" textAlign="center">
+                  {t("Add wallet addresses or .vet domains to invite to this quest.")}
+                </Text>
+              </VStack>
+            </VStack>
 
-            <Dialog.Footer>
-              <Dialog.ActionTrigger asChild>
-                <Button variant="secondary">{t("Cancel")}</Button>
-              </Dialog.ActionTrigger>
-              <Button variant="primary" disabled={!canSubmit} onClick={handleSubmit}>
-                {t("Save")}
+            <VStack align="stretch" gap={3}>
+              {parsedInvitees.map(entry => {
+                const error = getEntryError(entry)
+                const isRowResolving = entry.isDomain && !entry.resolvedAddress && isResolvingDomains
+                const isResolved = !!entry.resolvedAddress && !error
+                const showResolvedPreview = entry.isDomain && isResolved
+
+                return (
+                  <VStack key={entry.id} align="stretch" gap={1.5}>
+                    <HStack gap={2} align="center">
+                      <InputGroup
+                        flex="1"
+                        endElement={
+                          isRowResolving ? (
+                            <Spinner size="sm" color="text.subtle" />
+                          ) : isResolved ? (
+                            <Icon as={LuCheck} color="fg.success" />
+                          ) : null
+                        }>
+                        <Input
+                          value={entry.value}
+                          placeholder={t("0x... or name.vet")}
+                          onChange={e => updateInvitee(entry.id, e.target.value)}
+                          borderColor={error ? "border.error" : undefined}
+                        />
+                      </InputGroup>
+                      {parsedInvitees.length > 1 && (
+                        <IconButton
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeInvitee(entry.id)}
+                          aria-label={t("Remove")}>
+                          <LuX />
+                        </IconButton>
+                      )}
+                    </HStack>
+
+                    {showResolvedPreview && entry.resolvedAddress && (
+                      <HStack gap={2} pl={3}>
+                        <AddressIcon address={entry.resolvedAddress} boxSize={4} rounded="full" />
+                        <Text textStyle="xs" color="text.subtle">
+                          {humanAddress(entry.resolvedAddress, 6, 4)}
+                        </Text>
+                      </HStack>
+                    )}
+
+                    {error && (
+                      <Text textStyle="xs" color="fg.error" pl={3}>
+                        {error}
+                      </Text>
+                    )}
+                  </VStack>
+                )
+              })}
+
+              <Button size="sm" variant="tertiary" onClick={addInvitee} alignSelf="flex-start">
+                <LuPlus />
+                {t("Add another")}
               </Button>
-            </Dialog.Footer>
+            </VStack>
 
-            <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
-            </Dialog.CloseTrigger>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
+            <VStack align="stretch" gap={2}>
+              <Button variant="primary" w="full" size="lg" disabled={!canSubmit} onClick={handleSubmit}>
+                {submitLabel}
+              </Button>
+              <Dialog.ActionTrigger asChild>
+                <Button variant="ghost" w="full" size="md">
+                  {t("Cancel")}
+                </Button>
+              </Dialog.ActionTrigger>
+            </VStack>
+          </VStack>
+        </ModalAnimation>
+      </CustomModalContent>
     </Dialog.Root>
   )
 }

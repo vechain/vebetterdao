@@ -1,4 +1,4 @@
-import { Button, Card, Grid, Heading, Skeleton, VStack } from "@chakra-ui/react"
+import { Button, Card, Grid, Heading, HStack, Skeleton, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
@@ -7,8 +7,8 @@ import { useChallenge } from "@/api/challenges/useChallenge"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 
 import { ChallengeActivityCard } from "./ChallengeActivityCard"
-import { ChallengeAppsCard } from "./ChallengeAppsCard"
 import { ChallengeHeaderCard } from "./ChallengeHeaderCard"
+import { ChallengeParticipantsCard } from "./ChallengeParticipantsCard"
 import { ChallengeRoleBanner } from "./ChallengeRoleBanner"
 import { ChallengeStatsGrid } from "./ChallengeStatsGrid"
 
@@ -19,11 +19,7 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   const { t } = useTranslation()
 
   if (isLoading) {
-    return (
-      <Card.Root variant="primary" p={{ base: "6", md: "8" }} w="full" borderRadius="3xl" boxShadow="sm">
-        <Skeleton h="360px" borderRadius="2xl" />
-      </Card.Root>
-    )
+    return <ChallengeDetailSkeleton />
   }
 
   if (!challenge) {
@@ -55,15 +51,60 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
       <ChallengeStatsGrid challenge={challenge} />
 
       {/* Mobile: stacked */}
-      <VStack hideFrom="md" gap="5" align="stretch">
-        <ChallengeActivityCard />
-        <ChallengeAppsCard challenge={challenge} />
+      <VStack hideFrom="md" gap={{ base: 2, md: 3 }} align="stretch">
+        <ChallengeActivityCard challenge={challenge} />
+        <ChallengeParticipantsCard challenge={challenge} />
       </VStack>
 
       {/* Desktop: 2-column grid */}
+      <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap={{ base: 2, md: 3 }}>
+        <ChallengeActivityCard challenge={challenge} />
+        <ChallengeParticipantsCard challenge={challenge} />
+      </Grid>
+    </VStack>
+  )
+}
+
+const ChallengeDetailSkeleton = () => {
+  return (
+    <VStack align="stretch" w="full" gap="5">
+      <Skeleton h="5" w="32" borderRadius="md" />
+
+      <Card.Root variant="primary" p="4" w="full">
+        <VStack align="stretch" gap="4">
+          <HStack justify="space-between" align="start">
+            <VStack gap="2" align="start">
+              <HStack gap="1.5">
+                <Skeleton h="5" w="16" borderRadius="full" />
+                <Skeleton h="5" w="24" borderRadius="full" />
+              </HStack>
+              <Skeleton h="5" w="20" borderRadius="full" />
+            </VStack>
+            <Skeleton boxSize="8" borderRadius="md" />
+          </HStack>
+          <Skeleton h={{ base: "8", md: "10" }} w="80%" borderRadius="md" />
+          <VStack align="stretch" gap="2">
+            <Skeleton h="3" w="full" borderRadius="md" />
+            <Skeleton h="3" w="90%" borderRadius="md" />
+            <Skeleton h="3" w="60%" borderRadius="md" />
+          </VStack>
+        </VStack>
+      </Card.Root>
+
+      <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }} gap={{ base: 2, md: 3 }} w="full">
+        {["prize", "rule", "duration", "apps"].map(key => (
+          <Skeleton key={key} h={{ base: "20", md: "28" }} borderRadius="lg" />
+        ))}
+      </Grid>
+
+      <VStack hideFrom="md" gap="5" align="stretch">
+        <Skeleton h="500px" borderRadius="2xl" />
+        <Skeleton h="500px" borderRadius="2xl" />
+      </VStack>
+
       <Grid hideBelow="md" gridTemplateColumns="repeat(2,1fr)" gap="6">
-        <ChallengeActivityCard />
-        <ChallengeAppsCard challenge={challenge} />
+        <Skeleton h="500px" borderRadius="2xl" />
+        <Skeleton h="500px" borderRadius="2xl" />
       </Grid>
     </VStack>
   )
