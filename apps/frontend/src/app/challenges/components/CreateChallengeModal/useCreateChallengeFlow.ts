@@ -311,7 +311,13 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   }
 
   const confirmSelectedApps = () => {
-    if (form.appIds.length === 0) return
+    if (form.appIds.length === 0) {
+      setAppSearch("")
+      setAppResultsPage(0)
+      setAppScope("all")
+      withTyping(() => setAppsConfirmed(true))
+      return
+    }
     withTyping(() => setAppsConfirmed(true))
   }
 

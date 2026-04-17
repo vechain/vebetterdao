@@ -1,81 +1,31 @@
-import {
-  Box,
-  Button,
-  Card,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Link,
-  SimpleGrid,
-  Skeleton,
-  Stack,
-  VStack,
-  Wrap,
-} from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Link, Stack, Tabs, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
-import { A11y, Navigation } from "swiper/modules"
-import { Swiper, SwiperSlide } from "swiper/react"
 
 import { ChallengeKind } from "@/api/challenges/types"
 import { useChallengesHub } from "@/api/challenges/useChallengesHub"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import "swiper/css"
-import "swiper/css/navigation"
+import { mergeSectionsForTab, TabId } from "../utils/mergeSections"
 
-import { ChallengeCard } from "./ChallengeCard"
-import { ChallengeHubSection } from "./ChallengeHubSection"
+import { ChallengeFilters, StatusFilter, TypeFilter } from "./ChallengeFilters"
+import { ChallengesGrid } from "./ChallengesGrid"
 import { ChallengeStepsCard } from "./ChallengeStepsCard"
-import { CompactChallengeCarousel, CompactSkeleton } from "./CompactChallengeCarousel"
 import { CreateChallengeModal } from "./CreateChallengeModal"
 
 const QUESTS_STEPS_CARD_DISMISSED_KEY = "vebetterdao:quests-steps-card-dismissed"
 
-const CardSkeleton = () => (
-  <Card.Root variant="primary" p={{ base: "6", md: "7" }} gap="5" h="full" borderRadius="3xl" boxShadow="sm">
-    <VStack align="stretch" gap="6" h="full">
-      <VStack align="stretch" gap="4">
-        <Wrap gap="2">
-          <Skeleton h="6" w="16" borderRadius="full" />
-          <Skeleton h="6" w="20" borderRadius="full" />
-        </Wrap>
-        <VStack align="stretch" gap="2">
-          <Skeleton h="7" w="72%" borderRadius="md" />
-          <Skeleton h="7" w="48%" borderRadius="md" />
-        </VStack>
-        <Wrap gap="2">
-          <Skeleton h="7" w="28" borderRadius="full" />
-          <Skeleton h="7" w="24" borderRadius="full" />
-          <Skeleton h="7" w="24" borderRadius="full" />
-        </Wrap>
-      </VStack>
-
-      <SimpleGrid columns={2} gap="3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} h="24" borderRadius="2xl" />
-        ))}
-      </SimpleGrid>
-
-      <Box mt="auto">
-        <Skeleton h="20" borderRadius="2xl" />
-      </Box>
-    </VStack>
-  </Card.Root>
-)
-
 export const ChallengesPageContent = () => {
   const { account } = useWallet()
   const viewerAddress = account?.address
-  const { data: grouped, isLoading } = useChallengesHub(viewerAddress)
+  const { data: grouped } = useChallengesHub(viewerAddress)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
+
   /** null = before first client read of localStorage */
   const [stepsOpen, setStepsOpen] = useState<boolean | null>(null)
   const open = stepsOpen !== null ? stepsOpen : !isMobile
@@ -106,11 +56,19 @@ export const ChallengesPageContent = () => {
     }
   }, [isMobile])
 
-  const hasNeededActions = grouped.neededActions.items.length > 0
-  const hasActive = grouped.active.items.length > 0
-  const hasOpen = grouped.open.items.length > 0
-  const hasExplore = grouped.explore.items.length > 0
-  const hasHistory = grouped.history.items.length > 0
+  const [tab, setTab] = useState<TabId>("active")
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+
+  const tabSection = useMemo(() => mergeSectionsForTab(tab, grouped), [tab, grouped])
+
+  const visibleItems = useMemo(
+    () =>
+      tabSection.items.filter(
+        c => (typeFilter === "all" || c.kind === typeFilter) && (statusFilter === "all" || c.status === statusFilter),
+      ),
+    [tabSection.items, typeFilter, statusFilter],
+  )
 
   return (
     <VStack align="stretch" w="full" gap="8">
@@ -141,163 +99,28 @@ export const ChallengesPageContent = () => {
 
       <ChallengeStepsCard isOpen={open} onClose={onClose} />
 
-      {/* Needed actions */}
-      {(hasNeededActions || (isLoading && viewerAddress)) && (
-        <ChallengeHubSection title={t("Needed actions")}>
-          {grouped.neededActions.isLoading ? (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-              {[0, 1].map(i => (
-                <CompactSkeleton key={i} />
-              ))}
-            </SimpleGrid>
-          ) : (
-            <CompactChallengeCarousel
-              navigationId="needed-actions"
-              items={grouped.neededActions.items}
-              hasNextPage={grouped.neededActions.hasNextPage}
-              isFetchingNextPage={grouped.neededActions.isFetchingNextPage}
-              fetchNextPage={grouped.neededActions.fetchNextPage}
-            />
-          )}
-        </ChallengeHubSection>
-      )}
+      {/* Tabs + Filters */}
+      <Tabs.Root
+        value={tab}
+        onValueChange={d => setTab(d.value as TabId)}
+        variant="line"
+        size={{ base: "md", md: "lg" }}>
+        <Stack direction={{ base: "column", md: "row" }} justify="space-between" align={{ md: "center" }} gap="3">
+          <Tabs.List overflowX="auto" overflowY="hidden">
+            <Tabs.Trigger value="active">{t("My Active Quests")}</Tabs.Trigger>
+            <Tabs.Trigger value="explore">{t("Explore")}</Tabs.Trigger>
+            <Tabs.Trigger value="history">{t("History")}</Tabs.Trigger>
+          </Tabs.List>
+          <ChallengeFilters
+            type={typeFilter}
+            status={statusFilter}
+            onTypeChange={setTypeFilter}
+            onStatusChange={setStatusFilter}
+          />
+        </Stack>
+      </Tabs.Root>
 
-      {/* Active participating - horizontal carousel */}
-      {(hasActive || isLoading) && (
-        <ChallengeHubSection title={t("Your active challenges")}>
-          {grouped.active.isLoading ? (
-            <HStack gap="4">
-              {[0, 1].map(i => (
-                <Box key={i} minW={{ base: "85vw", md: "420px" }}>
-                  <CardSkeleton />
-                </Box>
-              ))}
-            </HStack>
-          ) : (
-            <Box position="relative" mx={{ base: "-4", md: "0" }}>
-              <Swiper
-                modules={[A11y, Navigation]}
-                spaceBetween={16}
-                slidesPerView={1.15}
-                style={{ padding: "4px 16px 16px" }}
-                navigation={{
-                  nextEl: ".active-swiper-next",
-                  prevEl: ".active-swiper-prev",
-                }}
-                onReachEnd={() => {
-                  if (!grouped.active.hasNextPage || grouped.active.isFetchingNextPage) return
-                  void grouped.active.fetchNextPage()
-                }}
-                breakpoints={{
-                  768: { slidesPerView: 1.5, spaceBetween: 16 },
-                  1024: { slidesPerView: 2.2, spaceBetween: 20 },
-                }}>
-                {grouped.active.items.map(c => (
-                  <SwiperSlide key={c.challengeId} style={{ height: "auto" }}>
-                    <ChallengeCard challenge={c} currentRound={round} />
-                  </SwiperSlide>
-                ))}
-                {grouped.active.isFetchingNextPage && (
-                  <SwiperSlide key="active-loading" style={{ height: "auto" }}>
-                    <CardSkeleton />
-                  </SwiperSlide>
-                )}
-              </Swiper>
-              <IconButton
-                hideBelow="md"
-                className="active-swiper-prev"
-                pos="absolute"
-                zIndex={2}
-                rounded="full"
-                variant="outline"
-                size="sm"
-                left="-12"
-                top="50%"
-                transform="translateY(-50%)"
-                aria-label="Previous challenge">
-                <FaArrowLeft />
-              </IconButton>
-              <IconButton
-                hideBelow="md"
-                className="active-swiper-next"
-                pos="absolute"
-                zIndex={2}
-                rounded="full"
-                variant="outline"
-                size="sm"
-                right="-12"
-                top="50%"
-                transform="translateY(-50%)"
-                aria-label="Next challenge">
-                <FaArrowRight />
-              </IconButton>
-            </Box>
-          )}
-        </ChallengeHubSection>
-      )}
-
-      {/* Open challenges */}
-      {(hasOpen || isLoading) && (
-        <ChallengeHubSection title={t("Open to join")}>
-          {grouped.open.isLoading ? (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-              {[0, 1, 2].map(i => (
-                <CompactSkeleton key={i} />
-              ))}
-            </SimpleGrid>
-          ) : (
-            <CompactChallengeCarousel
-              navigationId="open"
-              items={grouped.open.items}
-              hasNextPage={grouped.open.hasNextPage}
-              isFetchingNextPage={grouped.open.isFetchingNextPage}
-              fetchNextPage={grouped.open.fetchNextPage}
-            />
-          )}
-        </ChallengeHubSection>
-      )}
-
-      {/* Explore active challenges */}
-      {(hasExplore || isLoading) && (
-        <ChallengeHubSection title={t("What others are doing")}>
-          {grouped.explore.isLoading ? (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-              {[0, 1, 2].map(i => (
-                <CompactSkeleton key={i} />
-              ))}
-            </SimpleGrid>
-          ) : (
-            <CompactChallengeCarousel
-              navigationId="explore"
-              items={grouped.explore.items}
-              hasNextPage={grouped.explore.hasNextPage}
-              isFetchingNextPage={grouped.explore.isFetchingNextPage}
-              fetchNextPage={grouped.explore.fetchNextPage}
-            />
-          )}
-        </ChallengeHubSection>
-      )}
-
-      {/* History */}
-      {(hasHistory || (isLoading && viewerAddress)) && (
-        <ChallengeHubSection title={t("History")}>
-          {grouped.history.isLoading ? (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="3">
-              {[0, 1].map(i => (
-                <CompactSkeleton key={i} />
-              ))}
-            </SimpleGrid>
-          ) : (
-            <CompactChallengeCarousel
-              navigationId="history"
-              items={grouped.history.items}
-              hasNextPage={grouped.history.hasNextPage}
-              isFetchingNextPage={grouped.history.isFetchingNextPage}
-              fetchNextPage={grouped.history.fetchNextPage}
-            />
-          )}
-        </ChallengeHubSection>
-      )}
+      <ChallengesGrid items={visibleItems} section={tabSection} />
     </VStack>
   )
 }
