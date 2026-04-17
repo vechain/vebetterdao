@@ -83,10 +83,10 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
       challengeId={challenge.challengeId}
       creatorAddress={challenge.creator}
       existingInvitees={challenge.invited}>
-      <Badge variant="neutral" size="sm" rounded="sm" cursor="pointer">
-        <Icon as={UserPlus} boxSize="3" />
+      <Button size="sm" variant="primary" aria-label={t("Invite users")}>
         {t("Invite")}
-      </Badge>
+        <Icon as={UserPlus} boxSize="3" />
+      </Button>
     </AddChallengeInvitesModal>
   ) : (
     <ChallengeShareButton challengeTitle={challenge.title ?? ""} />
@@ -184,16 +184,16 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
       <Card.Root variant="primary" p={{ base: "4", md: "6" }} gap="6" height={{ base: "max-content", md: "auto" }}>
         <Card.Header gap="4" p="0">
           <HStack justifyContent="space-between">
-            <Heading as={HStack} size={{ base: "md", md: "lg" }} fontWeight="semibold">
-              <Icon as={Group} boxSize="5" color="icon.default" />
-              {t("Participants")}
-            </Heading>
-            <HStack gap={2}>
-              {challenge.participants.length > 0 && inviteButton}
+            <HStack gap={4}>
+              <Heading as={HStack} size={{ base: "md", md: "lg" }} fontWeight="semibold">
+                <Icon as={Group} boxSize="5" color="icon.default" />
+                {t("Participants")}
+              </Heading>
               <Badge variant="neutral" size="sm" rounded="sm">
                 {humanNumber(challenge.participantCount)} {" / "} {humanNumber(challenge.maxParticipants)}
               </Badge>
             </HStack>
+            {challenge.participants.length > 0 && inviteButton}
           </HStack>
           <VStack gap={1} align="start">
             <Text textStyle="sm" color="text.subtle">
