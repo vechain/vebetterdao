@@ -38,8 +38,8 @@ export const ChallengeLeaderboardModal = ({
 
   const rankings = useMemo(
     () =>
-      leaderboard.map((entry, index) => ({
-        position: index + 1,
+      leaderboard.map(entry => ({
+        position: entry.position,
         address: entry.participant,
         score: entry.actions,
       })),

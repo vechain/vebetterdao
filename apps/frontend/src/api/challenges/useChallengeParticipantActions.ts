@@ -10,6 +10,7 @@ const ZERO_ADDR = "0x0000000000000000000000000000000000000000"
 export type ChallengeParticipantActionsEntry = {
   participant: string
   actions: number
+  position: number
 }
 
 export type ChallengeParticipantActionsData = {
@@ -44,12 +45,19 @@ export const useChallengeParticipantActions = (challengeId: number, participants
         })),
       })
 
-      const leaderboard = participants
+      const sorted = participants
         .map((participant, index) => ({
           participant,
           actions: Number(results[index] ?? 0),
         }))
         .sort((a, b) => b.actions - a.actions)
+
+      // Competition ranking: tied scores share the same rank (e.g. 1, 1, 3)
+      // so all top-scorers are surfaced as winners by downstream UI.
+      const leaderboard: ChallengeParticipantActionsEntry[] = sorted.map(entry => ({
+        ...entry,
+        position: sorted.findIndex(e => e.actions === entry.actions) + 1,
+      }))
 
       return {
         totalActions: leaderboard.reduce((sum, entry) => sum + entry.actions, 0),

@@ -145,34 +145,28 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
       <Card.Root variant="primary" p="4" w="full">
         <VStack align="stretch" gap="4">
           <HStack justify="space-between" align="start">
-            <VStack gap="2" align="start">
-              <HStack gap="1.5">
-                <ChallengeVisibilityBadge challenge={challenge} />
+            <HStack gap="1.5">
+              <ChallengeVisibilityBadge challenge={challenge} />
 
-                <HStack
-                  as={LinkBox}
-                  w="fit-content"
-                  gap="1"
-                  bg="bg.secondary"
-                  borderRadius="full"
-                  px="2"
-                  py="0.5"
-                  align="center"
-                  cursor="pointer"
-                  _hover={{ opacity: 0.7 }}
-                  onClick={() => router.push(`/profile/${challenge.creator}`)}>
-                  <Icon as={LuUserRound} boxSize="3" />
-                  {/* <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" /> */}
-                  <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                    {creatorDisplayName}
-                  </Text>
-                </HStack>
+              <HStack
+                as={LinkBox}
+                w="fit-content"
+                gap="1"
+                bg="bg.secondary"
+                borderRadius="full"
+                px="2"
+                py="0.5"
+                align="center"
+                cursor="pointer"
+                _hover={{ opacity: 0.7 }}
+                onClick={() => router.push(`/profile/${challenge.creator}`)}>
+                <Icon as={LuUserRound} boxSize="3" />
+                {/* <AddressIcon address={challenge.creator} boxSize="4" borderRadius="full" /> */}
+                <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                  {creatorDisplayName}
+                </Text>
               </HStack>
-
-              <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">
-                {statusTimeLabel ?? t(challengeStatusLabel(challenge.status))}
-              </Badge>
-            </VStack>
+            </HStack>
 
             <HStack gap="2" flexShrink={0}>
               {hasChallengeActions(challenge) && (
@@ -201,6 +195,10 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
           <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
             {challengeDescription}
           </Text>
+
+          <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="md" w="fit-content">
+            {statusTimeLabel ?? t(challengeStatusLabel(challenge.status))}
+          </Badge>
 
           {hasChallengeActions(challenge) && (
             <Box display={{ base: "block", md: "none" }}>

@@ -29,7 +29,7 @@ const ActivityName = ({ address }: { address: string }) => {
   return (
     <Link asChild variant="underline" fontWeight="semibold" display="inline">
       <NextLink href={`/profile/${address}`}>
-        {domain ? humanDomain(domain, 12, 6) : humanAddress(address, 6, 4)}
+        {domain ? humanDomain(domain, 18, 6) : humanAddress(address, 6, 4)}
       </NextLink>
     </Link>
   )

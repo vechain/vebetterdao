@@ -57,8 +57,8 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
 
   const rankings = useMemo(
     () =>
-      leaderboard.slice(0, LEADERBOARD_SIZE).map((entry, index) => ({
-        position: index + 1,
+      leaderboard.slice(0, LEADERBOARD_SIZE).map(entry => ({
+        position: entry.position,
         address: entry.participant,
         score: entry.actions,
       })),
@@ -67,14 +67,12 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
 
   const viewerRanking = useMemo(() => {
     if (!account?.address) return undefined
-    const index = leaderboard.findIndex(entry =>
-      AddressUtils.compareAddresses(entry.participant, account.address ?? ""),
-    )
-    if (index === -1) return undefined
+    const entry = leaderboard.find(e => AddressUtils.compareAddresses(e.participant, account.address ?? ""))
+    if (!entry) return undefined
     return {
-      position: index + 1,
+      position: entry.position,
       address: account.address,
-      score: leaderboard[index]?.actions ?? 0,
+      score: entry.actions,
     }
   }, [leaderboard, account?.address])
 
@@ -148,9 +146,9 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
             h="full"
             zIndex={2}
             bg="transparency.100">
-            <Heading size="md">{t("No actions yet")}</Heading>
+            <Heading size="md">{t("No participants yet")}</Heading>
             <Text textStyle="sm" color="text.subtle" textAlign="center">
-              {t("Be the first to complete actions and climb the leaderboard!")}
+              {t("Be the first to participate and climb the leaderboard!")}
             </Text>
           </VStack>
           {MOCK_ROWS.map(row => (
@@ -164,7 +162,7 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
       <>
         {rankings.map(ranking => (
           <ChallengeActionsRow
-            key={ranking.position}
+            key={ranking.address}
             {...ranking}
             showTrophy={showTrophy}
             hideScore={isPending}
