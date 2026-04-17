@@ -473,6 +473,7 @@
   "Claimed rewards": "Claimed rewards",
   "Claiming rewards...": "Claiming rewards...",
   "Clear": "Clear",
+  "Clear filters": "Clear filters",
   "Close": "Close",
   "Combine your GM NFT with your Node.": "Combine your GM NFT with your Node.",
   "Come back later to see how you are ranking 🥇": "Come back later to see how you are ranking 🥇",
@@ -1133,6 +1134,7 @@
   "Move to balance": "Move to balance",
   "Move to rewards pool": "Move to rewards pool",
   "My grants": "My grants",
+  "My Active Quests": "My Active Quests",
   "My Profile": "My Profile",
   "Name": "Name",
   "Name must be at least 3 characters": "Name must be at least 3 characters",
@@ -1200,6 +1202,7 @@
   "No pending invites": "No pending invites",
   "No Proposals Found": "No Proposals Found",
   "No public challenges available right now": "No public challenges available right now",
+  "No quests to show": "No quests to show",
   "No relayers found": "No relayers found",
   "No results found": "No results found",
   "No reward distributors configured": "No reward distributors configured",
@@ -2448,5 +2451,6 @@
   "Your voting power": "Your voting power",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
   "Your Voting Qualification": "Your Voting Qualification",
-  "No bet required!": "No bet required!"
+  "No bet required!": "No bet required!",
+  "Join with {{stake}}": "Join with {{stake}}"
 }
