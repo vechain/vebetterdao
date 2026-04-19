@@ -2,7 +2,7 @@ import { Badge, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text, 
 import { AddressUtils } from "@repo/utils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { Group, UserPlus } from "iconoir-react"
+import { Group } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -14,6 +14,7 @@ import { AddChallengeInvitesModal } from "../../shared/AddChallengeInvitesModal"
 import { ChallengeActionsRow } from "./ChallengeActionsRow"
 import { ChallengeLeaderboardModal } from "./ChallengeLeaderboardModal"
 import { ChallengeShareButton } from "./ChallengeShareButton"
+import { ChallengeUserActionsModal, type ChallengeUserActionsParticipant } from "./ChallengeUserActionsModal"
 
 const LEADERBOARD_SIZE = 3
 const PENDING_SIZE = 3
@@ -32,6 +33,7 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   const { t } = useTranslation()
   const { account } = useWallet()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedParticipant, setSelectedParticipant] = useState<ChallengeUserActionsParticipant | null>(null)
 
   const isPending = challenge.status === ChallengeStatus.Pending
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
@@ -85,7 +87,6 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
       existingInvitees={challenge.invited}>
       <Button size="sm" variant="primary" aria-label={t("Invite users")}>
         {t("Invite")}
-        <Icon as={UserPlus} boxSize="3" />
       </Button>
     </AddChallengeInvitesModal>
   ) : (
@@ -121,7 +122,6 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
           <Text textStyle="sm" color="text.subtle" textAlign="center">
             {t("No participant joined this quest yet")}
           </Text>
-          {inviteButton}
         </VStack>
       )
     }
@@ -167,6 +167,7 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
             showTrophy={showTrophy}
             hideScore={isPending}
             isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
+            onClick={() => setSelectedParticipant(ranking)}
           />
         ))}
         {pendingInviteeRows.length > 0 && (
@@ -193,7 +194,7 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
                 {humanNumber(challenge.participantCount)} {" / "} {humanNumber(challenge.maxParticipants)}
               </Badge>
             </HStack>
-            {challenge.participants.length > 0 && inviteButton}
+            {inviteButton}
           </HStack>
           <VStack gap={1} align="start">
             <Text textStyle="sm" color="text.subtle">
@@ -213,7 +214,13 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
             {!isViewerInTop && viewerRanking && !isLoading && (
               <>
                 <Separator w="full" h={1} color="border.secondary" />
-                <ChallengeActionsRow {...viewerRanking} isYou showTrophy={showTrophy} hideScore={isPending} />
+                <ChallengeActionsRow
+                  {...viewerRanking}
+                  isYou
+                  showTrophy={showTrophy}
+                  hideScore={isPending}
+                  onClick={() => setSelectedParticipant(viewerRanking)}
+                />
               </>
             )}
           </VStack>
@@ -234,6 +241,12 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
         leaderboard={leaderboard}
         isLoading={isLoading}
         pendingInvitees={allPendingInvitees}
+      />
+
+      <ChallengeUserActionsModal
+        onClose={() => setSelectedParticipant(null)}
+        challenge={challenge}
+        participant={selectedParticipant}
       />
     </>
   )

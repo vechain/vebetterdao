@@ -2,7 +2,7 @@ import { Heading, Icon, Separator, Skeleton, Tabs, Text, VStack } from "@chakra-
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Group, SendDiagonal } from "iconoir-react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type ChallengeDetail, ChallengeStatus } from "@/api/challenges/types"
@@ -10,6 +10,7 @@ import type { ChallengeParticipantActionsEntry } from "@/api/challenges/useChall
 import { BaseModal } from "@/components/BaseModal"
 
 import { ChallengeActionsRow } from "./ChallengeActionsRow"
+import { ChallengeUserActionsModal, type ChallengeUserActionsParticipant } from "./ChallengeUserActionsModal"
 
 interface ChallengeLeaderboardModalProps {
   isOpen: boolean
@@ -32,6 +33,7 @@ export const ChallengeLeaderboardModal = ({
 }: ChallengeLeaderboardModalProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const [selectedParticipant, setSelectedParticipant] = useState<ChallengeUserActionsParticipant | null>(null)
 
   const isPending = challenge.status === ChallengeStatus.Pending
   const showTrophy = !isPending
@@ -62,6 +64,7 @@ export const ChallengeLeaderboardModal = ({
               showTrophy={showTrophy}
               hideScore={isPending}
               isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
+              onClick={() => setSelectedParticipant(ranking)}
             />
           ))}
 
@@ -75,6 +78,7 @@ export const ChallengeLeaderboardModal = ({
             isYou
             showTrophy={showTrophy}
             hideScore={isPending}
+            onClick={() => setSelectedParticipant({ address: account.address!, position: 0, score: 0 })}
           />
         </>
       )}
@@ -111,44 +115,52 @@ export const ChallengeLeaderboardModal = ({
   const showTabs = challenge.isCreator && pendingInvitees.length > 0
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={onClose}
-      showCloseButton
-      ariaTitle={t("Quest Leaderboard")}
-      modalBodyProps={{ maxH: "70vh", overflowY: "auto" }}>
-      <VStack gap={4} align="stretch">
-        <Heading size="lg" textAlign="center">
-          {challenge.title ?? t("Quest Leaderboard")}
-        </Heading>
+    <>
+      <BaseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        showCloseButton
+        ariaTitle={t("Quest Leaderboard")}
+        modalBodyProps={{ maxH: "70vh", overflowY: "auto" }}>
+        <VStack gap={4} align="stretch">
+          <Heading size="lg" textAlign="center">
+            {challenge.title ?? t("Quest Leaderboard")}
+          </Heading>
 
-        {showTabs ? (
-          <Tabs.Root defaultValue="joined" variant="line" fitted>
-            <Tabs.List>
-              <Tabs.Trigger value="joined">
-                <Icon as={Group} boxSize="4" />
-                {t("Joined")} {`(${rankings.length})`}
-              </Tabs.Trigger>
-              <Tabs.Trigger value="pending">
-                <Icon as={SendDiagonal} boxSize="4" />
-                {t("Pending")} {`(${pendingInvitees.length})`}
-              </Tabs.Trigger>
-            </Tabs.List>
-            <Tabs.Content value="joined">
-              <VStack gap={4} align="stretch">
-                {participantsContent}
-              </VStack>
-            </Tabs.Content>
-            <Tabs.Content value="pending">
-              <VStack gap={4} align="stretch">
-                {pendingContent}
-              </VStack>
-            </Tabs.Content>
-          </Tabs.Root>
-        ) : (
-          participantsContent
-        )}
-      </VStack>
-    </BaseModal>
+          {showTabs ? (
+            <Tabs.Root defaultValue="joined" variant="line" fitted>
+              <Tabs.List>
+                <Tabs.Trigger value="joined">
+                  <Icon as={Group} boxSize="4" />
+                  {t("Joined")} {`(${rankings.length})`}
+                </Tabs.Trigger>
+                <Tabs.Trigger value="pending">
+                  <Icon as={SendDiagonal} boxSize="4" />
+                  {t("Pending")} {`(${pendingInvitees.length})`}
+                </Tabs.Trigger>
+              </Tabs.List>
+              <Tabs.Content value="joined">
+                <VStack gap={4} align="stretch">
+                  {participantsContent}
+                </VStack>
+              </Tabs.Content>
+              <Tabs.Content value="pending">
+                <VStack gap={4} align="stretch">
+                  {pendingContent}
+                </VStack>
+              </Tabs.Content>
+            </Tabs.Root>
+          ) : (
+            participantsContent
+          )}
+        </VStack>
+      </BaseModal>
+
+      <ChallengeUserActionsModal
+        onClose={() => setSelectedParticipant(null)}
+        challenge={challenge}
+        participant={selectedParticipant}
+      />
+    </>
   )
 }
