@@ -206,7 +206,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
               </Box>
             )}
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               flex="1"
               minW="0"
