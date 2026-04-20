@@ -39,14 +39,16 @@ export const useChallengeWindow = (challenge: ChallengeView): { after?: number; 
       return (edge === "start" ? crStart : crEnd) + diff * blocksPerRound
     }
 
-    const toMs = (block: number) => Date.now() + (block - currentBlock.number) * blockTime
+    // Anchor on the chain's block timestamp (seconds) instead of Date.now().
+    // currentBlock.timestamp advances by ~blockTime per block, so the formula stays
+    // invariant as new blocks come in: (block - currentBlock.number) * blockTime
+    // cancels the timestamp delta. This keeps `after`/`before` stable across polls
+    // and prevents the indexer query key from changing every ~10s.
+    const nowMs = currentBlock.timestamp * 1000
+    const toMs = (block: number) => nowMs + (block - currentBlock.number) * blockTime
 
     const after = toMs(estimateBlock(challenge.startRound, "start"))
-    let before = toMs(estimateBlock(challenge.endRound, "end"))
-
-    if (challenge.status === ChallengeStatus.Active) {
-      before = Math.min(before, Date.now())
-    }
+    const before = toMs(estimateBlock(challenge.endRound, "end"))
 
     return { after, before }
   }, [currentBlock, roundEvents, currentRoundId, challenge.status, challenge.startRound, challenge.endRound])

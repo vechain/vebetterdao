@@ -26,8 +26,8 @@ export const useChallengeUserActions = (challenge: ChallengeDetail, address: str
       before,
       direction: "DESC",
       size: PAGE_SIZE,
-      ...(enabled ? {} : { enabled: false }),
     },
+    enabled,
   )
 
   const actions = useMemo(() => {
