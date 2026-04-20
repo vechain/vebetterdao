@@ -11,11 +11,15 @@ const EMPTY_SECTION: PaginatedChallengeSection = {
   fetchNextPage: async () => undefined,
 }
 
+const GUEST_WALLET = "0xdead000000000000000000000000000000000001"
+
 export const useChallengesHub = (viewerAddress?: string) => {
+  const exploreAddress = viewerAddress ?? GUEST_WALLET
+
   const neededActionsQuery = useChallengeSection("needed-actions", viewerAddress)
   const activeQuery = useChallengeSection("active", viewerAddress)
   const openQuery = useChallengeSection("open", viewerAddress)
-  const exploreQuery = useChallengeSection("explore", viewerAddress)
+  const exploreQuery = useChallengeSection("explore", exploreAddress)
   const historyQuery = useChallengeSection("history", viewerAddress)
 
   const data = useMemo<ChallengesHubData>(
@@ -92,22 +96,20 @@ export const useChallengesHub = (viewerAddress?: string) => {
           neededActions: EMPTY_SECTION,
           active: EMPTY_SECTION,
           open: EMPTY_SECTION,
-          explore: EMPTY_SECTION,
+          explore: data.explore,
           history: EMPTY_SECTION,
         },
-    isLoading: viewerAddress ? Object.values(data).some(section => section.isLoading) : false,
+    isLoading: viewerAddress ? Object.values(data).some(section => section.isLoading) : exploreQuery.isLoading,
     isError:
-      neededActionsQuery.isError ||
-      activeQuery.isError ||
-      openQuery.isError ||
       exploreQuery.isError ||
-      historyQuery.isError,
+      (viewerAddress
+        ? neededActionsQuery.isError || activeQuery.isError || openQuery.isError || historyQuery.isError
+        : false),
     error:
-      neededActionsQuery.error ??
-      activeQuery.error ??
-      openQuery.error ??
       exploreQuery.error ??
-      historyQuery.error ??
+      (viewerAddress
+        ? (neededActionsQuery.error ?? activeQuery.error ?? openQuery.error ?? historyQuery.error)
+        : null) ??
       null,
   }
 }

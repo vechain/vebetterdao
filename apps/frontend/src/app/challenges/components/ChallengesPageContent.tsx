@@ -56,7 +56,7 @@ export const ChallengesPageContent = () => {
     }
   }, [isMobile])
 
-  const [tab, setTab] = useState<TabId>("active")
+  const [tab, setTab] = useState<TabId>(viewerAddress ? "active" : "explore")
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
 
@@ -90,11 +90,13 @@ export const ChallengesPageContent = () => {
             </Link>
           )}
         </HStack>
-        <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
-          <Button variant="primary" size="sm">
-            {t("Create Quest")}
-          </Button>
-        </CreateChallengeModal>
+        {viewerAddress && (
+          <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
+            <Button variant="primary" size="sm">
+              {t("Create Quest")}
+            </Button>
+          </CreateChallengeModal>
+        )}
       </Stack>
 
       <ChallengeStepsCard isOpen={open} onClose={onClose} />
@@ -107,9 +109,9 @@ export const ChallengesPageContent = () => {
         size={{ base: "md", md: "lg" }}>
         <Stack direction={{ base: "column", md: "row" }} justify="space-between" align={{ md: "center" }} gap="3">
           <Tabs.List overflowX="auto" overflowY="hidden">
-            <Tabs.Trigger value="active">{t("My Active Quests")}</Tabs.Trigger>
             <Tabs.Trigger value="explore">{t("Explore")}</Tabs.Trigger>
-            <Tabs.Trigger value="history">{t("History")}</Tabs.Trigger>
+            {viewerAddress && <Tabs.Trigger value="active">{t("My Active Quests")}</Tabs.Trigger>}
+            {viewerAddress && <Tabs.Trigger value="history">{t("History")}</Tabs.Trigger>}
           </Tabs.List>
           <ChallengeFilters
             type={typeFilter}

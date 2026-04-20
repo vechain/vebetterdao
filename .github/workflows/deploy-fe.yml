@@ -27,7 +27,7 @@ on:
 env:
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: governance-frontend
-  TERRAFORM_VERSION: 1.6.0
+  TERRAFORM_VERSION: 1.10.0
   TERRAFORM_DIR: terraform/frontend/frontend-env-level
   TERRAFORM_ENV_DIR: terraform/frontend/environments/env
 

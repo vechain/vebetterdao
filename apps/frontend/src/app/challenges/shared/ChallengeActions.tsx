@@ -1,5 +1,4 @@
 import { Button, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
-import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { parseEther } from "ethers"
 import { useMemo } from "react"
@@ -68,10 +67,7 @@ export const ChallengeActions = ({
     (challenge.canAccept || challenge.canJoin) &&
     joinStakeAmount > 0n &&
     BigInt(b3trBalance.original) < joinStakeAmount
-  const isStakeChallenge = challenge.kind === ChallengeKind.Stake && joinStakeAmount > 0n
-  const stakeLabel = isStakeChallenge ? humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR") : ""
-  const acceptLabel = isStakeChallenge ? t("Accept and bet {{stake}}", { stake: stakeLabel }) : t("Accept")
-  const joinLabel = isStakeChallenge ? t("Join with {{stake}}", { stake: stakeLabel }) : t("Join")
+
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const isCardLayout = layout === "card"
   const resolvedButtonSize = buttonSize ?? (isCardLayout ? "md" : "sm")
@@ -109,7 +105,7 @@ export const ChallengeActions = ({
           disabled={hasInsufficientB3trForJoin}
           onClick={handleAccept}
           {...cardButtonProps}>
-          {acceptLabel}
+          {t("Accept")}
         </Button>
       )}
       {challenge.canDecline && (
@@ -124,7 +120,7 @@ export const ChallengeActions = ({
           disabled={hasInsufficientB3trForJoin}
           onClick={handleJoin}
           {...cardButtonProps}>
-          {joinLabel}
+          {t("Join")}
         </Button>
       )}
       {challenge.canLeave && (

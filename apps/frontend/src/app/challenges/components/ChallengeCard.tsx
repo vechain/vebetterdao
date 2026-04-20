@@ -13,7 +13,7 @@ import {
   Wrap,
   Button,
 } from "@chakra-ui/react"
-import { humanNumber } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuUsers } from "react-icons/lu"
@@ -60,7 +60,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
 
-  const prizeLabel = humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")
+  const prizeLabel = `${getCompactFormatter(2).format(Number(challenge.totalPrize))} B3TR`
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
 
   return (
@@ -95,7 +95,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
 
             <VStack gap="1" py="2" px="3" bg="bg.secondary" borderRadius="xl" align="start">
               <ChallengeEligibleAppsRow challenge={challenge} />
-              <SimpleGrid columns={{ base: 1, md: 2 }} gap="3" py="2" px="3" w="full">
+              <SimpleGrid columns={{ base: 2, md: 2 }} gap="3" py="2" px="3" w="full">
                 <VStack gap="1" align="start">
                   <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
                     {t("Prize")}
@@ -206,7 +206,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
               </Box>
             )}
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               flex="1"
               minW="0"

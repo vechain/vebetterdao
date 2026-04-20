@@ -1,6 +1,8 @@
 import { Button, Card, Grid, Heading, HStack, Skeleton, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useChallenge } from "@/api/challenges/useChallenge"
@@ -15,8 +17,17 @@ import { ChallengeStatsGrid } from "./ChallengeStatsGrid"
 export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: string }) => {
   const { account } = useWallet()
   const viewerAddress = account?.address
-  const { data: challenge, isLoading } = useChallenge(challengeId, viewerAddress)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const isFresh = searchParams.get("fresh") === "1"
+  const { data: challenge, isLoading } = useChallenge(challengeId, viewerAddress, { pollWhileMissing: isFresh })
   const { t } = useTranslation()
+
+  useEffect(() => {
+    if (isFresh && challenge) {
+      router.replace(`/challenges/${challengeId}`)
+    }
+  }, [isFresh, challenge, challengeId, router])
 
   if (isLoading) {
     return <ChallengeDetailSkeleton />
@@ -52,8 +63,8 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
 
       {/* Mobile: stacked */}
       <VStack hideFrom="md" gap={{ base: 2, md: 3 }} align="stretch">
-        <ChallengeActivityCard challenge={challenge} />
         <ChallengeParticipantsCard challenge={challenge} />
+        <ChallengeActivityCard challenge={challenge} />
       </VStack>
 
       {/* Desktop: 2-column grid */}
