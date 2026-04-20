@@ -445,6 +445,7 @@
   "Check challenges": "Check challenges",
   "Check Endorsement": "Check Endorsement",
   "Check Ownership": "Check Ownership",
+  "Check quests": "Check quests",
   "Check submitted apps": "Check submitted apps",
   "Check your proposal before publishing": "Check your proposal before publishing",
   "Checking endorsement...": "Checking endorsement...",
@@ -902,6 +903,7 @@
   "Go to Allocations": "Go to Allocations",
   "Go to app": "Go to app",
   "Go to Nodes": "Go to Nodes",
+  "Go to quests": "Go to quests",
   "Go to Round Info": "Go to Round Info",
   "Go to the App": "Go to the App",
   "Go to veDelegate": "Go to veDelegate",
@@ -932,6 +934,7 @@
   "Help a project to reach {{value}} points and join the next allocations to get funding.": "Help a project to reach {{value}} points and join the next allocations to get funding.",
   "Here is a list of your GM NFTs. Soon you will be able to mint new ones, upgrade and sell them in the secondary market.": "Here is a list of your GM NFTs. Soon you will be able to mint new ones, upgrade and sell them in the secondary market.",
   "Hi, I'm B3MO. I'll guide you through your challenge setup.": "Hi, I'm B3MO. I'll guide you through your challenge setup.",
+  "Hi, I'm B3MO. I'll guide you through your quest setup.": "Hi, I'm B3MO. I'll guide you through your quest setup.",
   "Hide proof": "Hide proof",
   "High level roadmap": "High level roadmap",
   "Higher GM level means a bigger multiplier on your rewards from a separate pool.": "Higher GM level means a bigger multiplier on your rewards from a separate pool.",
@@ -966,6 +969,7 @@
   "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
   "If you cancel now, your grant will be removed and won't appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "If you cancel now, your grant will be removed and won't appear in the next voting round. Once the round begins, cancellation will no longer be possible.",
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.",
+  "If you change your mind, the creator will have to invite you again.": "If you change your mind, the creator will have to invite you again.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.",
   "If your proposal receives enough votes, it will be executed.": "If your proposal receives enough votes, it will be executed.",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.",
@@ -1682,6 +1686,7 @@
   "Social media links": "Social media links",
   "Solution": "Solution",
   "Some challenge needs your attention.": "Some challenge needs your attention.",
+  "Some quests need your attention.": "Some quests need your attention.",
   "someone else transferred to you.": "someone else transferred to you.",
   "Something went wrong while connecting your account. Please try again.": "Something went wrong while connecting your account. Please try again.",
   "Something went wrong!": "Something went wrong!",
@@ -2455,6 +2460,5 @@
   "Your voting activity": "Your voting activity",
   "Your voting power": "Your voting power",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.",
-  "Your Voting Qualification": "Your Voting Qualification",
-  "If you change your mind, the creator will have to invite you again.": "If you change your mind, the creator will have to invite you again."
+  "Your Voting Qualification": "Your Voting Qualification"
 }
