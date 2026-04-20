@@ -2265,6 +2265,7 @@
   "You can only convert Voting Power that you powered up yourself.": "Du kan bara konvertera röstkraft som du har laddat upp själv.",
   "You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools.": "Du kan pausa appens distribution. Detta kommer att <bold>stoppa din distributör från att distribuera belöningar</bold>. Du kan återuppta distributionen när som helst. Denna åtgärd påverkar inte dina appens pooler.",
   "You can revoke access anytime.": "Du kan återkalla tillgång när som helst.",
+  "You can still join later if you change your mind.": "Du kan fortfarande gå med senare om du ändrar dig.",
   "You can't delegate from an account linked as a secondary account": "Du kan inte delegera från ett konto som är länkat som ett sekundärt konto",
   "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.": "Du kan inte stödja appar med det här kontot om du har delegerat din Nod. Avbryt delegeringen för att kunna stödja appar med det här kontot igen.",
   "You can't upgrade your GM NFT anymore": "Du kan inte uppgradera din GM NFT längre",

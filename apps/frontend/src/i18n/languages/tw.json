@@ -2265,6 +2265,7 @@
   "You can only convert Voting Power that you powered up yourself.": "你只能轉換你自己充能的投票權。",
   "You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools.": "您可以暫停應用程式的分配。這將<bold>停止您的分配器分配獎勵</bold>。您可以隨時恢復分配。此操作不會影響應用程式的池子。",
   "You can revoke access anytime.": "您可以隨時撤銷存取權限。",
+  "You can still join later if you change your mind.": "若你改變主意，仍可稍後加入。",
   "You can't delegate from an account linked as a secondary account": "您不能從作為次要帳戶的連結帳戶中委託",
   "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.": "如果您將節點委託出去，則無法使用此帳戶背書應用程式。取消委託以再次使用此帳戶背書應用程式。",
   "You can't upgrade your GM NFT anymore": "您無法再升級您的 GM NFT",
