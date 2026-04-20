@@ -38,39 +38,38 @@ on:
       VECHAINCI_SSH_PRIVATE_KEYS:
         required: true
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: read
-
 jobs:
   deploy:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: lambda-build
           path: packages/lambda/dist
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
-          role-to-assume: ${{ github.event.inputs.workspace == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+          role-to-assume: ${{ (github.event.inputs.workspace || inputs.workspace) == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
           aws-region: eu-west-1
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: 1.10.0
           terraform_wrapper: false
     
       - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
         with:
           ssh-private-key: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
 
@@ -82,8 +81,9 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        env:
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
         run: |
-          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
           BUCKET="b3tr-terraform-state-${WORKSPACE}"
           
           terraform init -backend-config="bucket=${BUCKET}"
@@ -91,9 +91,9 @@ jobs:
       - name: Terraform Workspace
         working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         id: workspace
+        env:
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
         run: |
-          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
-          
           if ! terraform workspace list | grep -q "$WORKSPACE"; then
             terraform workspace new "$WORKSPACE"
           else
@@ -119,7 +119,7 @@ jobs:
           echo "exitcode=$?" >> $GITHUB_OUTPUT
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: lambda-plan
           path: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}/lambda.tfplan

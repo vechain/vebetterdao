@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - dependencies
+      - increment:patch
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - dependencies
+      - increment:patch

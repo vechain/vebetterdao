@@ -53,6 +53,8 @@ on:
 jobs:
   build-and-push:
     name: Build and Push Docker Image
+    # Fork PRs must not run on self-hosted runners (untrusted code execution).
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: b3tr-e2e
     environment: ${{ inputs.environment }}
     permissions:
@@ -66,10 +68,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Check if contracts changed
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: check-contracts
         with:
           filters: |
@@ -78,11 +80,14 @@ jobs:
 
       - name: Determine Dockerfile
         id: dockerfile
+        env:
+          DOCKERFILE_PATH: ${{ inputs.dockerfile_path }}
+          CONTRACTS_CHANGED: ${{ steps.check-contracts.outputs.contracts }}
         run: |
           # Use explicit path if provided, otherwise auto-detect
-          if [ -n "${{ inputs.dockerfile_path }}" ]; then
-            echo "path=${{ inputs.dockerfile_path }}" >> $GITHUB_OUTPUT
-          elif [ "${{ steps.check-contracts.outputs.contracts }}" == "true" ]; then
+          if [ -n "$DOCKERFILE_PATH" ]; then
+            echo "path=${DOCKERFILE_PATH}" >> $GITHUB_OUTPUT
+          elif [ "$CONTRACTS_CHANGED" == "true" ]; then
             echo "Using standard Dockerfile (contracts changed)"
             echo "path=./Dockerfile" >> $GITHUB_OUTPUT
           else
@@ -91,21 +96,23 @@ jobs:
           fi
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: ${{ secrets.aws_role_arn }}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78 # v2.1.2
 
       - name: Generate image metadata
         id: meta
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          ECR_REPOSITORY: ${{ inputs.ecr_repository }}
         run: |
-          IMAGE_TAG="${{ inputs.image_tag }}"
           REGISTRY="${{ steps.login-ecr.outputs.registry }}"
-          REPO="${{ inputs.ecr_repository }}"
+          REPO="${ECR_REPOSITORY}"
           IMAGE_URI="${REGISTRY}/${REPO}:${IMAGE_TAG}"
           echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
           echo "uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
@@ -113,7 +120,7 @@ jobs:
       # Create/reuse a persistent BuildKit builder
       # Named builder persists cache mounts on self-hosted runners
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
         with:
           driver: docker-container
           driver-opts: |
@@ -126,9 +133,11 @@ jobs:
           cleanup: false
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        env:
+          CONTEXT_PATH: ${{ inputs.context_path }}
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
-          context: ${{ inputs.context_path }}
+          context: ${{ env.CONTEXT_PATH }}
           file: ${{ steps.dockerfile.outputs.path }}
           push: true
           tags: ${{ steps.meta.outputs.uri }}

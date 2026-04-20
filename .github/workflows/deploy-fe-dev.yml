@@ -20,6 +20,10 @@ jobs:
   deploy:
     name: Deploy to Dev
     needs: prepare
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/deploy-fe.yml
     secrets: inherit
     with:
