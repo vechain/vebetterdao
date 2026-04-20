@@ -6428,10 +6428,10 @@
   dependencies:
     fs-extra "^9.1.0"
 
-"@types/archiver@^6.0.3":
-  version "6.0.4"
-  resolved "https://registry.npmjs.org/@types/archiver/-/archiver-6.0.4.tgz#c2497d7f009b97fdd9eed6fd1a15bc82abd9dc13"
-  integrity sha512-ULdQpARQ3sz9WH4nb98mJDYA0ft2A8C4f4fovvUcFwINa1cgGjY36JCAYuP5YypRq4mco1lJp1/7jEMS2oR0Hg==
+"@types/archiver@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@types/archiver/-/archiver-7.0.0.tgz#475d5aa4076ffc05f2c78dc7540b0ea4ab8c7d7a"
+  integrity sha512-/3vwGwx9n+mCQdYZ2IKGGHEFL30I96UgBlk8EtRDDFQ9uxM1l4O5Ci6r00EMAkiDaTqD9DQ6nVrWRICnBPtzzg==
   dependencies:
     "@types/readdir-glob" "*"
 
