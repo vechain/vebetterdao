@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/discourse-notify/**'
-      - 'lambda/src/discourseNotify/**'
+      - 'packages/lambda/src/discourseNotify/**'
       - '.github/workflows/discourse-notify-lambda-deploy.yml'
   workflow_dispatch:
     inputs:
@@ -16,14 +16,11 @@ on:
         options:
           - prod
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: read
-
 jobs:
   build:
     name: Build Lambda
+    permissions:
+      contents: read
     uses: ./.github/workflows/lambda-build.yml
     with:
       workspace: ${{ github.event.inputs.workspace || 'prod' }}
@@ -34,6 +31,10 @@ jobs:
   deploy:
     name: Deploy Infrastructure
     needs: build
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/lambda-infrastructure-deploy.yml
     with:
       workspace: ${{ github.event.inputs.workspace || 'prod' }}

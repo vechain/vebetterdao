@@ -10,6 +10,10 @@ on:
 jobs:
   deploy-staging:
     name: Deploy to Staging
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/deploy-fe.yml
     secrets: inherit
     with:
@@ -18,6 +22,10 @@ jobs:
 
   deploy-beta:
     name: Deploy to Beta
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/deploy-fe.yml
     secrets: inherit
     with:

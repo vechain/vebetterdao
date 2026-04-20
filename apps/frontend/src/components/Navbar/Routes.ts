@@ -35,7 +35,7 @@ export const Routes: Route[] = [
     description: "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
   },
   {
-    name: "Challenges",
+    name: "Quests",
     onClick: "/challenges",
     isVisible: true,
     icon: LuTrophy,

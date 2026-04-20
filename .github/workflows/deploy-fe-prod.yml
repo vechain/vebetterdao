@@ -22,8 +22,10 @@ jobs:
     steps:
       - name: Validate version tag format
         id: validate
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          REF="${{ github.ref_name }}"
+          REF="${REF_NAME}"
           if [[ "$REF" == v.* ]]; then
             echo "tag_name=${REF}" >> $GITHUB_OUTPUT
             echo "::notice::Deploying version ${REF} to production"
@@ -56,6 +58,10 @@ jobs:
   deploy:
     name: Deploy to Production
     needs: validate-ref
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/deploy-fe.yml
     secrets: inherit
     with:

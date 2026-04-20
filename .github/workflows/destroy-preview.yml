@@ -6,14 +6,9 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: write
-
 env:
   AWS_REGION: eu-west-1
-  TERRAFORM_VERSION: 1.6.0
+  TERRAFORM_VERSION: 1.10.0
   BASE_DOMAIN: governance.vebetterdao.org
 
   # All possible preview flavors
@@ -28,29 +23,42 @@ jobs:
   destroy:
     name: Destroy Preview Environments
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     outputs:
       destroyed_flavors: ${{ steps.destroy.outputs.destroyed_flavors }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
       - name: Install yq
+        env:
+          YQ_VERSION: v4.53.2
         run: |
-          wget -q https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -O /usr/local/bin/yq
-          chmod +x /usr/local/bin/yq
+          set -euo pipefail
+          YQ_BIN="${HOME}/.local/bin/yq"
+          mkdir -p "$(dirname "${YQ_BIN}")"
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \
+            -o "${YQ_BIN}"
+          chmod +x "${YQ_BIN}"
+          echo "$(dirname "${YQ_BIN}")" >> "${GITHUB_PATH}"
+          yq --version
 
       - name: Destroy all preview environments
         id: destroy
@@ -149,9 +157,12 @@ jobs:
     name: Update PR Comment
     needs: destroy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Update PR comment - Destroyed
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         env:
           DESTROYED_FLAVORS: ${{ needs.destroy.outputs.destroyed_flavors }}
         with:

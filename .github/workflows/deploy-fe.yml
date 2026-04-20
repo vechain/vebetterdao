@@ -24,21 +24,20 @@ on:
         description: "AWS IAM role ARN for dev account"
         required: true
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: write
-
 env:
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: governance-frontend
-  TERRAFORM_VERSION: 1.6.0
+  TERRAFORM_VERSION: 1.10.0
   TERRAFORM_DIR: terraform/frontend/frontend-env-level
   TERRAFORM_ENV_DIR: terraform/frontend/environments/env
 
 jobs:
   build-and-push-image:
     name: Build and Push Image
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     concurrency:
       group: build-fe-${{ inputs.environment }}
       cancel-in-progress: true
@@ -68,37 +67,44 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
       - name: Update environment config with new image tag
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          IMAGE_TAG: ${{ needs.build-and-push-image.outputs.tag }}
         run: |
-          CONFIG_FILE="${{ env.TERRAFORM_ENV_DIR }}/${{ inputs.environment }}/${{ inputs.environment }}.yaml"
-          echo "Updating image_tag in ${CONFIG_FILE} to: ${{ needs.build-and-push-image.outputs.tag }}"
-          sed -i "s/^image_tag:.*/image_tag: ${{ needs.build-and-push-image.outputs.tag }}/" "${CONFIG_FILE}"
+          CONFIG_FILE="${TERRAFORM_ENV_DIR}/${ENVIRONMENT}/${ENVIRONMENT}.yaml"
+          echo "Updating image_tag in ${CONFIG_FILE} to: ${IMAGE_TAG}"
+          sed -i "s/^image_tag:.*/image_tag: ${IMAGE_TAG}/" "${CONFIG_FILE}"
           echo "=== Updated config ==="
           cat "${CONFIG_FILE}"
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          terraform init -backend-config=../environments/env/${{ inputs.environment }}/backend.config
+          terraform init -backend-config=../environments/env/${ENVIRONMENT}/backend.config
 
       - name: Terraform Workspace
         working-directory: ${{ env.TERRAFORM_DIR }}
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
+          terraform workspace select "${ENVIRONMENT}" || terraform workspace new "${ENVIRONMENT}"
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_DIR }}
@@ -121,11 +127,14 @@ jobs:
 
       - name: Deployment summary
         if: inputs.terraform_action == 'deploy'
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          IMAGE_TAG: ${{ needs.build-and-push-image.outputs.tag }}
         run: |
           echo "### Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Image Tag:** \`${{ needs.build-and-push-image.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** \`${ENVIRONMENT}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image Tag:** \`${IMAGE_TAG}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -n "${{ steps.outputs.outputs.custom_url }}" ]; then
             echo "**URL:** ${{ steps.outputs.outputs.custom_url }}" >> $GITHUB_STEP_SUMMARY

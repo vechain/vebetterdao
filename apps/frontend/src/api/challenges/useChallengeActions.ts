@@ -10,6 +10,7 @@ import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 
 import { ChallengeKind, ChallengeView } from "./types"
+import { challengePayoutClaimedEventName, challengeRefundClaimedEventName } from "./useChallengeClaimState"
 
 const ChallengesInterface = B3TRChallenges__factory.createInterface()
 const B3TRInterface = B3TR__factory.createInterface()
@@ -57,8 +58,12 @@ export const useChallengeActions = () => {
   const refetchChallengeQueries = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["challenges"] }),
+      queryClient.invalidateQueries({ queryKey: [challengePayoutClaimedEventName] }),
+      queryClient.invalidateQueries({ queryKey: [challengeRefundClaimedEventName] }),
       queryClient.refetchQueries({ queryKey: ["challenges", "hub"], type: "active" }),
       queryClient.refetchQueries({ queryKey: ["challenges", "detail"], type: "active" }),
+      queryClient.refetchQueries({ queryKey: [challengePayoutClaimedEventName], type: "active" }),
+      queryClient.refetchQueries({ queryKey: [challengeRefundClaimedEventName], type: "active" }),
     ])
   }, [queryClient])
 
@@ -254,5 +259,6 @@ export const useChallengeActions = () => {
     finalizeChallenge: (id: number) => tx.sendTransaction({ type: "finalize", challengeId: id }),
 
     status: tx.status,
+    txReceipt: tx.txReceipt,
   }
 }

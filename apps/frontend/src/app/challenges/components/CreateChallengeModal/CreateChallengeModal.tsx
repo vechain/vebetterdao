@@ -1,5 +1,3 @@
-"use client"
-
 import "./typing-indicator.css"
 
 import { Box, Button, CloseButton, Dialog, HStack, Image, Text, VStack } from "@chakra-ui/react"
@@ -25,7 +23,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
 
   const steps = useMemo(() => buildSteps(flow, t), [flow, t])
 
-  const titleKey = flow.isSponsored ? "Create sponsored challenge" : "Create challenge"
+  const title = flow.isSponsored ? t("Create sponsored quest") : t("Create Quest")
 
   const currentStep = (steps.find(step => step.isRelevant && !step.isComplete) ?? steps[steps.length - 1])!
   const currentStepIndex = steps.findIndex(step => step.key === currentStep.key)
@@ -66,7 +64,7 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
               <Image src="/assets/images/B3MO_Rewards.png" alt="B3MO" boxSize="full" objectFit="contain" />
             </Box>
             <VStack align="start" gap="0">
-              <Dialog.Title>{t(titleKey)}</Dialog.Title>
+              <Dialog.Title>{title}</Dialog.Title>
               <Text textStyle="xs" color="text.subtle">
                 {"B3MO"}
               </Text>

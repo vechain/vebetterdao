@@ -1,6 +1,9 @@
 name: "Security Checks"
 on:
   pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/security-checks.yml"
   push:
     branches:
       - main

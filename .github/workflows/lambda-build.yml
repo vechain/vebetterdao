@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: '20'
           cache: 'yarn'
@@ -44,10 +44,11 @@ jobs:
           TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
           NODE_OPTIONS: '--max-old-space-size=8192'
+          WORKSPACE: ${{ inputs.workspace }}
         run: |
           # Set environment variables based on workspace
           set +x  # Disable command echoing
-          if [ "${{ inputs.workspace }}" == "dev" ]; then
+          if [ "$WORKSPACE" == "dev" ]; then
             if [ -z "$TESTNET_MNEMONIC" ]; then
               echo "Error: TESTNET_MNEMONIC is required for dev workspace"
               exit 1
@@ -69,14 +70,14 @@ jobs:
           # Build lambda
           cd packages/lambda
           echo "Running yarn build..."
-          if [ "${{ inputs.workspace }}" == "dev" ]; then
+          if [ "$WORKSPACE" == "dev" ]; then
             LAMBDA_ENV=testnet-staging yarn build:lambda || { echo "Lambda build failed"; exit 1; }
           else
             LAMBDA_ENV=mainnet yarn build:lambda || { echo "Lambda build failed"; exit 1; }
           fi
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: lambda-build
           path: packages/lambda/dist

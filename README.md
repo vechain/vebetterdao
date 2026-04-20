@@ -138,7 +138,7 @@ make indexer-clean   # Stop + remove indexer volumes
 | File                                             | Purpose                                                 |
 | ------------------------------------------------ | ------------------------------------------------------- |
 | `packages/contracts/docker-compose.yaml`         | Solo node + block explorer                              |
-| `packages/contracts/docker-compose.indexer.yaml` | MongoDB + indexer services                              |
+| `packages/indexer/docker-compose.yaml`           | MongoDB + indexer services                              |
 | `scripts/extract-local-config.sh`                | Extracts contract addresses from `local.ts` as env vars |
 
 #### Notes

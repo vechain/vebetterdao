@@ -13,14 +13,30 @@ export type LeaderboardRanking = {
   address: string
   score: number
 }
+export type LeaderboardVariant = "medals" | "challenge"
+
 type LeaderboardRankingComponentProps = {
   ranking: LeaderboardRanking
   isYourRanking?: boolean
+  variant?: LeaderboardVariant
 }
-export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
+export const LeaderboardRankingComponent = ({
+  ranking,
+  isYourRanking,
+  variant = "medals",
+}: LeaderboardRankingComponentProps) => {
   const { data: vnsData } = useVechainDomain(ranking.address)
   const domain = vnsData?.domain
   const positionStyles = useMemo(() => {
+    if (variant === "challenge") {
+      return {
+        text: ranking.position === 1 ? `🏆 #${ranking.position}` : `#${ranking.position}`,
+        borderColor: ranking.position === 1 ? "#FFD700" : "border.secondary",
+        fontSize: "xl",
+        boxShadow: "none",
+      }
+    }
+
     if (ranking.position === 1)
       return {
         text: "🥇",
@@ -48,7 +64,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
       fontSize: "xl",
       boxShadow: "none",
     }
-  }, [ranking.position])
+  }, [ranking.position, variant])
 
   return (
     <LinkBox asChild>

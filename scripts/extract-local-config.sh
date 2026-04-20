@@ -34,5 +34,7 @@ export X_ALLOC_POOL_CONTRACT="$(extract xAllocationPoolContractAddress)"
 export X2EARN_REWARDS_POOL_CONTRACT="$(extract x2EarnRewardsPoolContractAddress)"
 export VOTER_REWARDS_CONTRACT="$(extract voterRewardsContractAddress)"
 export TREASURY_CONTRACT="$(extract treasuryContractAddress)"
+export STARGATE_NFT_CONTRACT="$(extract stargateNFTContractAddress)"
+export STARGATE_DELEGATION_CONTRACT="$(extract stargateContractAddress)"
 
 echo "Extracted contract addresses from $LOCAL_CONFIG"

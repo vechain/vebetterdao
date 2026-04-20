@@ -1,5 +1,8 @@
+import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useWallet } from "@vechain/vechain-kit"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { decodeEventLog, toEventSelector } from "viem"
 
 import {
   ChallengeKind,
@@ -19,7 +22,7 @@ import {
   getSanitizedInvitees,
   isVetDomain,
   parseInviteeValues,
-} from "../inviteeValidation"
+} from "../../shared/inviteeValidation"
 
 import {
   AppScope,
@@ -30,6 +33,11 @@ import {
   STEP_ORDER,
   type ChallengeFlowStep,
 } from "./types"
+
+const challengesAbi = B3TRChallenges__factory.abi
+const challengeCreatedSelector = toEventSelector(
+  "ChallengeCreated(uint256,address,uint256,uint8,uint8,uint8,uint256,uint256,uint256,bool,bytes32[],string,string,string,string)",
+)
 
 export const useCreateChallengeFlow = (defaultKind: number, currentRound: number) => {
   const [open, setOpen] = useState(false)
@@ -51,6 +59,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
 
   const typingTimeout = useRef<ReturnType<typeof setTimeout>>()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const pendingCreateRef = useRef(false)
+  const router = useRouter()
 
   useEffect(
     () => () => {
@@ -70,6 +80,26 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
 
   const { account } = useWallet()
   const actions = useChallengeActions()
+
+  useEffect(() => {
+    if (!pendingCreateRef.current || actions.status !== "success" || !actions.txReceipt) return
+    for (const output of (actions.txReceipt as any).outputs ?? []) {
+      for (const ev of output.events ?? []) {
+        if (ev.topics?.[0]?.toLowerCase() !== challengeCreatedSelector.toLowerCase()) continue
+        const decoded = decodeEventLog({
+          abi: challengesAbi,
+          data: ev.data as `0x${string}`,
+          topics: ev.topics as [`0x${string}`, ...`0x${string}`[]],
+          eventName: "ChallengeCreated",
+        })
+        const id = (decoded.args as { challengeId: bigint }).challengeId
+        pendingCreateRef.current = false
+        router.push(`/challenges/${id.toString()}?fresh=1`)
+        return
+      }
+    }
+  }, [actions.status, actions.txReceipt, router])
+
   const { data: appsData, isLoading: isAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: minBetAmountResult } = useMinBetAmount()
@@ -311,7 +341,13 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   }
 
   const confirmSelectedApps = () => {
-    if (form.appIds.length === 0) return
+    if (form.appIds.length === 0) {
+      setAppSearch("")
+      setAppResultsPage(0)
+      setAppScope("all")
+      withTyping(() => setAppsConfirmed(true))
+      return
+    }
     withTyping(() => setAppsConfirmed(true))
   }
 
@@ -378,6 +414,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       imageURI: form.imageURI.trim(),
       metadataURI: form.metadataURI.trim(),
     }
+    pendingCreateRef.current = true
     actions.createChallenge(parsed)
     setOpen(false)
   }

@@ -12,13 +12,13 @@ import {
   Wrap,
 } from "@chakra-ui/react"
 import { TFunction } from "i18next"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
 import { challengeMetadataByteLimits, ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
 import { AppImage } from "@/components/AppImage/AppImage"
 
-import { getInviteeValidationMessage } from "../inviteeValidation"
+import { getInviteeValidationMessage, InviteeValidationError } from "../../shared/inviteeValidation"
 
 import { SummaryItem } from "./ChatBubbles"
 import {
@@ -114,9 +114,9 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       isComplete: kindChosen,
       prompt: (
         <VStack align="start" gap="1" w="full">
-          <Text textStyle="sm">{t("Hi, I'm B3MO. I'll guide you through your challenge setup.")}</Text>
+          <Text textStyle="sm">{t("Hi, I'm B3MO. I'll guide you through your quest setup.")}</Text>
           <Text textStyle="sm" fontWeight="semibold">
-            {t("Choose challenge type")}
+            {t("Choose quest type")}
           </Text>
         </VStack>
       ),
@@ -332,13 +332,13 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       prompt: (
         <VStack align="stretch" gap="2">
           <Text textStyle="sm" fontWeight="semibold">
-            {t("How long should it run?")}
+            {t("How many rounds should it run?")}
           </Text>
         </VStack>
       ),
       answer: (
         <Text textStyle="sm" color="inherit">
-          {t("Duration: {{count}} rounds", { count: duration })}
+          {t("Duration: {{count}} {{rounds}}", { count: duration, rounds: duration === 1 ? t("round") : t("rounds") })}
         </Text>
       ),
       controls: (
@@ -349,7 +349,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               size="sm"
               variant={getExplicitChoiceVariant(durationChosen, duration === value)}
               onClick={() => flow.chooseDuration(value)}>
-              {value}
+              {value} {value === 1 ? t("round") : t("rounds")}
             </Button>
           ))}
         </HStack>
@@ -669,12 +669,8 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
             </VStack>
           </Box>
           <HStack justify="flex-end">
-            <Button
-              size="sm"
-              variant={primaryVariant}
-              disabled={form.appIds.length === 0}
-              onClick={flow.confirmSelectedApps}>
-              {t("Continue")}
+            <Button size="sm" variant={primaryVariant} onClick={flow.confirmSelectedApps}>
+              {form.appIds.length === 0 ? t("Use all apps") : t("Continue")}
             </Button>
           </HStack>
         </VStack>
@@ -736,33 +732,19 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
         <VStack align="stretch" gap="3">
           {form.invitees.length > 0 && (
             <VStack align="stretch" gap="2" w="full">
-              {form.invitees.map((addr, index) => {
-                const error = inviteeErrorKeys[index]
-                return (
-                  <VStack key={getInviteeKey(form.invitees, addr, index)} align="stretch" gap="1">
-                    <HStack gap="2">
-                      <Input
-                        placeholder="0x..."
-                        value={addr}
-                        onChange={e => flow.updateInvitee(index, e.target.value)}
-                        borderColor={error ? "border.error" : undefined}
-                      />
-                      <IconButton
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => flow.removeInvitee(index)}
-                        aria-label={t("Remove")}>
-                        <LuX />
-                      </IconButton>
-                    </HStack>
-                    {error && (
-                      <Text textStyle="xs" color="fg.error">
-                        {getInviteeValidationMessage(t, error)}
-                      </Text>
-                    )}
-                  </VStack>
-                )
-              })}
+              {form.invitees.map((addr, index) => (
+                <InviteeRow
+                  // Index-based key is intentional: using the value would remount the input
+                  // on every keystroke and steal focus.
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={`invitee-${index}`}
+                  value={addr}
+                  error={inviteeErrorKeys[index] ?? null}
+                  onChange={value => flow.updateInvitee(index, value)}
+                  onRemove={() => flow.removeInvitee(index)}
+                  t={t}
+                />
+              ))}
             </VStack>
           )}
           <Button size="sm" variant={tertiaryVariant} alignSelf="start" onClick={flow.addInvitee}>
@@ -790,7 +772,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       isComplete: false,
       prompt: (
         <Text textStyle="sm" fontWeight="semibold">
-          {t("Review your challenge")}
+          {t("Review your quest")}
         </Text>
       ),
       controls: (
@@ -805,13 +787,13 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
             boxShadow="sm">
             <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
               <SummaryItem
-                label={t("Choose challenge type")}
+                label={t("Choose quest type")}
                 value={t(form.kind === ChallengeKind.Stake ? "Bet" : "Sponsored")}
               />
               <SummaryItem label={t("Title (optional)")} value={form.title || t("Skip")} />
               <SummaryItem label={t(amountLabelKey)} value={`${form.stakeAmount} B3TR`} />
               <SummaryItem label={t("Start round")} value={form.startRound} />
-              <SummaryItem label={t("End round")} value={form.endRound} />
+              <SummaryItem label={t("Duration")} value={`${duration} ${duration === 1 ? t("round") : t("rounds")}`} />
               {isSponsored && (
                 <SummaryItem label={t("Winner")} value={t(isSplitPrize ? "Split prize" : "Max actions")} />
               )}
@@ -844,7 +826,39 @@ function getCompactListLabel(items: string[]) {
   return `${items.slice(0, 2).join(", ")}, +${items.length - 2}`
 }
 
-function getInviteeKey(invitees: string[], value: string, index: number) {
-  const occurrence = invitees.slice(0, index).filter(candidate => candidate === value).length
-  return `invitee-${value || "empty"}-${occurrence}`
+interface InviteeRowProps {
+  value: string
+  error: InviteeValidationError | null
+  onChange: (value: string) => void
+  onRemove: () => void
+  t: TFunction
+}
+
+// Validation errors are only revealed after the field is blurred so the user can finish
+// typing a domain or address without being interrupted by mid-typing errors.
+const InviteeRow = ({ value, error, onChange, onRemove, t }: InviteeRowProps) => {
+  const [touched, setTouched] = useState(false)
+  const visibleError = touched ? error : null
+
+  return (
+    <VStack align="stretch" gap="1">
+      <HStack gap="2">
+        <Input
+          placeholder={t("0x... or name.vet")}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onBlur={() => setTouched(true)}
+          borderColor={visibleError ? "border.error" : undefined}
+        />
+        <IconButton size="sm" variant="ghost" onClick={onRemove} aria-label={t("Remove")}>
+          <LuX />
+        </IconButton>
+      </HStack>
+      {visibleError && (
+        <Text textStyle="xs" color="fg.error">
+          {getInviteeValidationMessage(t, visibleError)}
+        </Text>
+      )}
+    </VStack>
+  )
 }

@@ -16,12 +16,12 @@ export const ChallengeNeededActionsBanner = () => {
   return (
     <GenericBanner
       variant="b3mo"
-      title={t("Check challenges")}
-      description={t("Some challenge needs your attention.")}
-      illustration="/assets/mascot/mascot-data.png"
+      title={t("Check quests")}
+      description={t("Some quests need your attention.")}
+      illustration="/assets/mascot/present-zoom.png"
       cta={
-        <Button size={{ base: "sm", md: "md" }} variant="primary" onClick={handleOpenChallenges}>
-          {t("Challenges")}
+        <Button size={{ base: "sm", md: "md" }} variant="secondary" onClick={handleOpenChallenges}>
+          {t("Go to quests")}
         </Button>
       }
     />
