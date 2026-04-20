@@ -1,63 +1,17 @@
 import { HStack, NativeSelect, Stack } from "@chakra-ui/react"
-import { isValidAddress } from "@vechain/vechain-kit/utils"
-import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { NavigatorEntity, NavigatorOrderBy, SortDirection } from "@/api/indexer/navigators/useNavigators"
+import { NavigatorOrderBy } from "@/api/indexer/navigators/useNavigators"
 import { SearchField } from "@/components/SearchField/SearchField"
-import { useDebounce } from "@/hooks/useDebounce"
-import { useGetAddressFromVetDomains } from "@/hooks/useGetVetDomains"
-
-type StatusFilter = "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
-
-type NavigatorStatus = NavigatorEntity["status"]
-
-type NavigatorFilterValues = {
-  orderBy: NavigatorOrderBy
-  direction: SortDirection
-  status: NavigatorStatus[]
-  navigator?: string
-}
+import { NavigatorStatusFilter } from "@/hooks/navigator/useNavigatorFilterValues"
 
 type Props = {
   searchTerm: string
   onSearchChange: (value: string) => void
   orderBy: NavigatorOrderBy
   onOrderByChange: (value: NavigatorOrderBy) => void
-  statusFilter: StatusFilter
-  onStatusFilterChange: (value: StatusFilter) => void
-}
-
-const STATUS_TO_API: Record<StatusFilter, NavigatorStatus[]> = {
-  all: [],
-  ACTIVE: ["ACTIVE"],
-  EXITING: ["EXITING"],
-  DEACTIVATED: ["DEACTIVATED"],
-}
-
-const isValidVetDomain = (term: string) => !term.startsWith("0x") && term.endsWith(".vet")
-
-export const useNavigatorFilterValues = (
-  searchTerm: string,
-  orderBy: NavigatorOrderBy,
-  statusFilter: StatusFilter,
-): NavigatorFilterValues => {
-  const debouncedSearch = useDebounce(searchTerm, 300)
-  const isDomain = useMemo(() => isValidVetDomain(debouncedSearch), [debouncedSearch])
-  const { data: [resolvedAddress] = [] } = useGetAddressFromVetDomains(isDomain ? [debouncedSearch] : undefined)
-
-  const navigator = useMemo(() => {
-    if (isValidAddress(debouncedSearch)) return debouncedSearch
-    if (isDomain && resolvedAddress) return resolvedAddress.toLowerCase()
-    return undefined
-  }, [debouncedSearch, isDomain, resolvedAddress])
-
-  return {
-    orderBy,
-    direction: "DESC",
-    status: STATUS_TO_API[statusFilter],
-    navigator,
-  }
+  statusFilter: NavigatorStatusFilter
+  onStatusFilterChange: (value: NavigatorStatusFilter) => void
 }
 
 const selectFieldStyles = {
@@ -104,7 +58,7 @@ export const NavigatorFilters = ({
         <NativeSelect.Root size="sm" w="auto">
           <NativeSelect.Field
             value={statusFilter}
-            onChange={e => onStatusFilterChange(e.target.value as StatusFilter)}
+            onChange={e => onStatusFilterChange(e.target.value as NavigatorStatusFilter)}
             {...selectFieldStyles}>
             <option value="all">{`${t("Filter by:")} ${t("All")}`}</option>
             <option value="ACTIVE">{`${t("Filter by:")} ${t("Active")}`}</option>

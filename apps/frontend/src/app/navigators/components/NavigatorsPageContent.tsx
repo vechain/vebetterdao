@@ -10,6 +10,11 @@ import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/u
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { NavigatorEntityFormatted, NavigatorOrderBy, useNavigators } from "@/api/indexer/navigators/useNavigators"
+import {
+  NavigatorStatusFilter,
+  useFilteredNavigators,
+  useNavigatorFilterValues,
+} from "@/hooks/navigator/useNavigatorFilterValues"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 import { DelegationModal } from "../shared/DelegationModal"
@@ -19,11 +24,9 @@ import { DelegatingAlert } from "./DelegatingAlert"
 import { NavigatingAlert } from "./NavigatingAlert"
 import { NavigatorCard } from "./NavigatorCard"
 import { NavigatorCardSkeleton } from "./NavigatorCardSkeleton"
-import { NavigatorFilters, useNavigatorFilterValues } from "./NavigatorFilters"
+import { NavigatorFilters } from "./NavigatorFilters"
 import { NavigatorStepsCard } from "./NavigatorStepsCard"
 import { NavigatorStatsCards } from "./stats/NavigatorStatsCards"
-
-type StatusFilter = "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
 
 export const NavigatorsPageContent = () => {
   const { t } = useTranslation()
@@ -52,14 +55,15 @@ export const NavigatorsPageContent = () => {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [orderBy, setOrderBy] = useState<NavigatorOrderBy>("totalDelegated")
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+  const [statusFilter, setStatusFilter] = useState<NavigatorStatusFilter>("all")
 
   const hasActiveFilters = searchTerm !== "" || orderBy !== "totalDelegated" || statusFilter !== "all"
-  const filterValues = useNavigatorFilterValues(searchTerm, orderBy, statusFilter)
-  const { data: navigators, isLoading: navigatorsLoading } = useNavigators({
+  const filterValues = useNavigatorFilterValues(orderBy, statusFilter)
+  const { data: rawNavigators, isLoading: navigatorsLoading } = useNavigators({
     ...filterValues,
     status: filterValues.status.length > 0 ? filterValues.status : undefined,
   })
+  const navigators = useFilteredNavigators(rawNavigators, searchTerm)
 
   const STORAGE_KEY = "NAVIGATOR_STEPS_DISMISSED"
   const [open, setOpen] = useState(() => {
