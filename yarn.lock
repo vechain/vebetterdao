@@ -4146,10 +4146,10 @@
   dependencies:
     ethereumjs-util "^7.1.4"
 
-"@nomicfoundation/hardhat-toolbox@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.npmjs.org/@nomicfoundation/hardhat-toolbox/-/hardhat-toolbox-3.0.0.tgz#83e2c28a745aa4eb1236072166367b0de68b4c76"
-  integrity sha512-MsteDXd0UagMksqm9KvcFG6gNKYNa3GGNCy73iQ6bEasEgg2v8Qjl6XA5hjs8o5UD5A3153B6W2BIVJ8SxYUtA==
+"@nomicfoundation/hardhat-toolbox@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-toolbox/-/hardhat-toolbox-7.0.0.tgz#16aaed06b00ac4139a50f9a843d5cf2060eb5afb"
+  integrity sha512-pMoxUU0WWxXv5zkE6mm3JZcvLN94TCax+NVZv5TMscnfwQ42lm+qEAnNxuGNneFbo8JGbHu1B6aEzV08bhmI3w==
 
 "@nomicfoundation/hardhat-verify@^2.0.12":
   version "2.1.3"
