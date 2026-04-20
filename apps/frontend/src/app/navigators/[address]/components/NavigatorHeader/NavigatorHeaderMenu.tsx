@@ -1,8 +1,7 @@
 import { IconButton, Menu, Portal } from "@chakra-ui/react"
-import { useAccountCustomizationModal } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 import { FaEllipsisVertical } from "react-icons/fa6"
-import { LuDoorOpen, LuLogOut, LuPencil, LuShare2, LuUser } from "react-icons/lu"
+import { LuDoorOpen, LuLogOut, LuPencil, LuShare2 } from "react-icons/lu"
 
 import { type NavigatorStatusValue } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 
@@ -26,7 +25,6 @@ export const NavigatorHeaderMenu = ({
   onAnnounceExit,
 }: Props) => {
   const { t } = useTranslation()
-  const { open: openCustomization } = useAccountCustomizationModal()
 
   return (
     <Menu.Root>
@@ -39,16 +37,10 @@ export const NavigatorHeaderMenu = ({
         <Menu.Positioner>
           <Menu.Content bg={{ base: "white", _dark: "#2D3748" }}>
             {isOwnPage && (
-              <>
-                <Menu.Item value="edit-profile" cursor="pointer" onClick={onEditProfile}>
-                  <LuPencil />
-                  {t("Edit Profile")}
-                </Menu.Item>
-                <Menu.Item value="edit-bio" cursor="pointer" onClick={openCustomization}>
-                  <LuUser />
-                  {t("Edit Bio")}
-                </Menu.Item>
-              </>
+              <Menu.Item value="edit-profile" cursor="pointer" onClick={onEditProfile}>
+                <LuPencil />
+                {t("Edit Profile")}
+              </Menu.Item>
             )}
             {isDelegatedHere && (
               <Menu.Item value="exit-delegation" cursor="pointer" onClick={onExitDelegation}>

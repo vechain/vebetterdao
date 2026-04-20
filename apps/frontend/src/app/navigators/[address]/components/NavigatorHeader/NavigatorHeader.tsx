@@ -17,7 +17,6 @@ type Props = {
   address: string
   displayName: string
   domainLoading: boolean
-  bio: string | undefined
   metadata: NavigatorMetadata | undefined
   metadataLoading: boolean
   registeredAt: number
@@ -54,7 +53,6 @@ export const NavigatorHeader = ({
   address,
   displayName,
   domainLoading,
-  bio,
   metadata,
   metadataLoading,
   registeredAt,
@@ -131,9 +129,11 @@ export const NavigatorHeader = ({
             </HStack>
           </HStack>
 
-          <Text textStyle="sm" color="fg.muted">
-            {bio || t("No bio provided")}
-          </Text>
+          <Skeleton loading={metadataLoading}>
+            <Text textStyle="sm" color="fg.muted">
+              {metadata?.votingStrategy || t("No voting strategy provided")}
+            </Text>
+          </Skeleton>
 
           <HStack justify="space-between" flexWrap="wrap" gap={2}>
             {metadata?.socials && (

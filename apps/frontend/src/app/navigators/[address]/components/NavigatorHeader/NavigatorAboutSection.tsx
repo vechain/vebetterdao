@@ -36,7 +36,9 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
             {t("Motivation")}
           </Text>
           <Skeleton loading={metadataLoading}>
-            <Text textStyle="sm">{metadata?.motivation || t("No motivation provided")}</Text>
+            <Text textStyle="sm" color="fg.muted">
+              {metadata?.motivation || t("No motivation provided")}
+            </Text>
           </Skeleton>
 
           <Separator />
@@ -45,18 +47,10 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
             {t("Qualifications")}
           </Text>
           <Skeleton loading={metadataLoading}>
-            <Text textStyle="sm">{metadata?.qualifications || t("No qualifications provided")}</Text>
+            <Text textStyle="sm" color="fg.muted">
+              {metadata?.qualifications || t("No qualifications provided")}
+            </Text>
           </Skeleton>
-
-          {metadata?.votingStrategy && (
-            <>
-              <Separator />
-              <Text textStyle="sm" fontWeight="semibold">
-                {t("Voting Strategy")}
-              </Text>
-              <Text textStyle="sm">{metadata.votingStrategy}</Text>
-            </>
-          )}
 
           {metadata?.disclosures && (
             <>

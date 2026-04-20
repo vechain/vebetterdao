@@ -96,15 +96,17 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
     return (
       <Card.Root variant="outline" borderRadius="xl" w="full">
         <Card.Body>
-          <VStack gap={4} align="stretch">
+          <VStack gap={6} align="stretch">
             <HStack gap={2}>
-              <Heading size="md">{t("Your Tasks")}</Heading>
+              <Heading size={{ base: "sm", md: "md" }}>{t("Your Tasks")}</Heading>
             </HStack>
-            <HStack gap={2} p={3} borderRadius="lg" bg="status.info.subtle">
-              <Icon color="status.info.primary">
+            <HStack gap={2} p={3} borderRadius="lg" bg="status.neutral.subtle">
+              <Icon color="status.neutral.primary">
                 <LuInfo />
               </Icon>
-              <Text textStyle="sm">{t("You registered mid-round. Your tasks will begin next round.")}</Text>
+              <Text textStyle="sm">
+                {t("Currently you do not have any tasks to complete. Your tasks will begin next round.")}
+              </Text>
             </HStack>
           </VStack>
         </Card.Body>
@@ -118,7 +120,7 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
         <VStack gap={4} align="stretch">
           <HStack justify="space-between">
             <HStack gap={2}>
-              <Heading size="md">{t("Your Tasks")}</Heading>
+              <Heading size={{ base: "sm", md: "md" }}>{t("Your Tasks")}</Heading>
               <IconButton
                 variant="ghost"
                 size="xs"

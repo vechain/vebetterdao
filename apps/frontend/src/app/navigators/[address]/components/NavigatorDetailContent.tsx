@@ -2,7 +2,7 @@ import { Alert, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
-import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -59,7 +59,6 @@ export const NavigatorDetailContent = () => {
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address, { waitForIndexer })
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
-  const { data: textRecords } = useGetTextRecords(domainData?.domain)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: status } = useNavigatorStatus(address)
@@ -177,7 +176,6 @@ export const NavigatorDetailContent = () => {
         address={address}
         displayName={displayName}
         domainLoading={domainLoading}
-        bio={textRecords?.description}
         metadata={metadata}
         metadataLoading={metadataLoading}
         status={status ?? "NONE"}

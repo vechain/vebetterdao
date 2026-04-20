@@ -80,10 +80,6 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
                 </SimpleGrid>
                 <Skeleton h="40px" borderRadius="lg" />
               </VStack>
-            ) : !hasAnyFees ? (
-              <Text textStyle="sm" color="fg.muted">
-                {t("Fees are earned when your citizens claim their rewards")}
-              </Text>
             ) : (
               <>
                 <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
