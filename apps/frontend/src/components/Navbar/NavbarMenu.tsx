@@ -15,13 +15,12 @@ const MotionVStack = motion(VStack)
 const isSelected = (route: Route, pathname: string) => {
   if (route.onClick === "/") return pathname === "/"
   if (typeof route.onClick === "string") {
-    if (route.onClick.startsWith("/profile")) return pathname === "/profile"
     if (route?.subRoutes) {
-      // If it has subroutes, it's selected if any of its subroutes are selected
       return route.subRoutes.some(
         subRoute => typeof subRoute.onClick === "string" && pathname.startsWith(subRoute.onClick),
       )
     }
+    if (route.onClick.startsWith("/profile")) return pathname === "/profile"
     return pathname.startsWith(route.onClick)
   }
   return false

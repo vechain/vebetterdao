@@ -1,6 +1,4 @@
 import { Badge, Card, Heading, HStack, Icon, IconButton, Text, VStack } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
-import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import Countdown from "react-countdown"
@@ -13,13 +11,12 @@ import { useGetPreferencesSetBlock } from "@/api/contracts/navigatorRegistry/hoo
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
 import { useHasSetDecisions } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecisions"
 import { useHasSetPreferences } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
-import { useAllocationsRoundsEvents } from "@/api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useIsNavigatorRegistrationRound } from "@/hooks/navigator/useIsNavigatorRegistrationRound"
 import { useNavigatorCutoffDeadline } from "@/hooks/navigator/useNavigatorCutoffDeadline"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { ProposalState } from "@/hooks/proposals/grants/types"
-import { useEvents } from "@/hooks/useEvents"
 
 import { NavigatorTasksInfoModal } from "./modals/NavigatorTasksInfoModal"
 
@@ -40,24 +37,7 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
   const { data: lastReportRound } = useGetLastReportRound()
   const { data: reportInterval } = useGetReportInterval()
   const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
-
-  // Detect if navigator registered mid-round — tasks begin the round after registration
-  const { data: roundsData } = useAllocationsRoundsEvents()
-  const { data: regBlockData } = useEvents({
-    contractAddress: getConfig().navigatorRegistryContractAddress,
-    abi: NavigatorRegistry__factory.abi,
-    eventName: "NavigatorRegistered",
-    filterParams: { navigator: address as `0x${string}` },
-    select: events => events[0]?.meta.blockNumber ?? 0,
-  })
-  const registrationBlock = regBlockData ?? 0
-
-  const isRegistrationRound = useMemo(() => {
-    if (!registrationBlock || !roundsData?.created?.length || !roundId) return false
-    const currentRound = roundsData.created.find(r => r.roundId === roundId)
-    if (!currentRound) return false
-    return registrationBlock > Number(currentRound.voteStart)
-  }, [registrationBlock, roundsData, roundId])
+  const isRegistrationRound = useIsNavigatorRegistrationRound(address)
 
   const preferenceCutoffBlock = useMemo(() => {
     if (roundDeadlineBlock == null || preferenceCutoffPeriod == null) return null
@@ -96,15 +76,17 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
     return (
       <Card.Root variant="outline" borderRadius="xl" w="full">
         <Card.Body>
-          <VStack gap={4} align="stretch">
+          <VStack gap={6} align="stretch">
             <HStack gap={2}>
-              <Heading size="md">{t("Your Tasks")}</Heading>
+              <Heading size={{ base: "sm", md: "md" }}>{t("Your Tasks")}</Heading>
             </HStack>
-            <HStack gap={2} p={3} borderRadius="lg" bg="status.info.subtle">
-              <Icon color="status.info.primary">
+            <HStack gap={2} p={3} borderRadius="lg" bg="status.neutral.subtle">
+              <Icon color="status.neutral.primary">
                 <LuInfo />
               </Icon>
-              <Text textStyle="sm">{t("You registered mid-round. Your tasks will begin next round.")}</Text>
+              <Text textStyle="sm">
+                {t("Currently you do not have any tasks to complete. Your tasks will begin next round.")}
+              </Text>
             </HStack>
           </VStack>
         </Card.Body>
@@ -118,7 +100,7 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
         <VStack gap={4} align="stretch">
           <HStack justify="space-between">
             <HStack gap={2}>
-              <Heading size="md">{t("Your Tasks")}</Heading>
+              <Heading size={{ base: "sm", md: "md" }}>{t("Your Tasks")}</Heading>
               <IconButton
                 variant="ghost"
                 size="xs"

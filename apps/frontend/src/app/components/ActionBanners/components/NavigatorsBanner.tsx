@@ -10,7 +10,7 @@ export const NavigatorsBanner = () => {
 
   return (
     <GenericBanner
-      illustration="/assets/3d-illustrations/navigation.webp"
+      illustration="/assets/3d-illustrations/badge.webp"
       title={t("Meet the Navigators")}
       description={t(
         "Engaged community members who vote on your behalf—with public rationale, merit-based judgment, and skin in the game. Delegate your VOT3 to a strategy you trust instead of lazy voting.",

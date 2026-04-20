@@ -18,26 +18,38 @@ export const Navbar: React.FC = () => {
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
   const isNavbarVisible = useHideOnScroll()
-  const routesToRender = useMemo(
-    () =>
-      Routes.filter(route => {
-        return (
-          route.isVisible &&
-          (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Admin"
-            ? (getConfig().environment === "testnet-staging" || permissions?.isAdmin) && !!account?.address
-            : true) &&
-          (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true) &&
-          (route.name === "Nodes" ? !!account?.address : true) &&
-          (route.name === "GM" ? !!account?.address : true) &&
-          (route.name === "Quests" ? !!account?.address : true)
-        )
-      }),
-    [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
-  )
+  const hasRounds = !!allocationRoundsEvents?.created?.length
+  const isConnected = !!account?.address
+
+  const routesToRender = useMemo(() => {
+    const subRouteVisible: Record<string, boolean> = {
+      "Allocation Rounds": hasRounds,
+      Proposals: hasRounds,
+      Grants: hasRounds,
+      Treasury: hasRounds,
+      "My Profile": isConnected,
+      GM: isConnected,
+      Nodes: isConnected,
+    }
+
+    return Routes.filter(route => {
+      if (!route.isVisible) return false
+      if (route.name === "Admin")
+        return (getConfig().environment === "testnet-staging" || permissions?.isAdmin) && isConnected
+      return true
+    })
+      .map(route => {
+        if (!route.subRoutes) return route
+        const filtered = route.subRoutes.filter(sub => subRouteVisible[sub.name] ?? true)
+        if (!filtered.length) return null
+        // Collapse to flat link when only one sub-route remains
+        if (filtered.length === 1) return { ...route, subRoutes: undefined }
+        return { ...route, subRoutes: filtered }
+      })
+      .filter(Boolean) as typeof Routes
+  }, [hasRounds, isConnected, permissions])
   const parsedRoutesToRender = useMemo(() => {
-    if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []
+    if (routesToRender.length === 1 && routesToRender[0]?.name === "Home") return []
     return routesToRender
   }, [routesToRender])
   return (
