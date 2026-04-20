@@ -259,5 +259,6 @@ export const useChallengeActions = () => {
     finalizeChallenge: (id: number) => tx.sendTransaction({ type: "finalize", challengeId: id }),
 
     status: tx.status,
+    txReceipt: tx.txReceipt,
   }
 }

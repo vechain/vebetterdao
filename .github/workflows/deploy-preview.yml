@@ -16,7 +16,7 @@ env:
   # AWS Configuration
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: governance-frontend
-  TERRAFORM_VERSION: 1.6.0
+  TERRAFORM_VERSION: 1.10.0
 
   # Project Configuration
   PROJECT_NAME: Governance Frontend

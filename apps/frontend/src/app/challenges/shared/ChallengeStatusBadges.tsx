@@ -1,6 +1,6 @@
 import { Badge, HStack, Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { LuGlobe, LuLock, LuSparkles } from "react-icons/lu"
+import { LuLock, LuSparkles } from "react-icons/lu"
 
 import {
   ChallengeKind,
@@ -12,7 +12,7 @@ import {
 } from "@/api/challenges/types"
 import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
 
-import { getChallengeStatusBadgeVariant, getChallengeVisibilityBadgeVariant } from "./challengeBadgeVariants"
+import { getChallengeStatusBadgeVariant } from "./challengeBadgeVariants"
 import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
 
 export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeView }) => {
@@ -24,7 +24,7 @@ export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeVi
       <>
         <Badge variant="yellow" size="sm">
           <Icon as={LuSparkles} />
-          {t("Community Quest")}
+          {t("Sponsored")}
         </Badge>
         {isPrivate && (
           <Badge variant="neutral" size="sm">
@@ -36,11 +36,11 @@ export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeVi
     )
   }
 
-  const visibilityBadgeVariant = isPrivate ? "neutral" : getChallengeVisibilityBadgeVariant(challenge.visibility)
+  if (!isPrivate) return null
 
   return (
-    <Badge variant={visibilityBadgeVariant} size="sm">
-      <Icon as={isPrivate ? LuLock : LuGlobe} />
+    <Badge variant="neutral" size="sm">
+      <Icon as={LuLock} />
       {t(challengeVisibilityLabel(challenge.visibility))}
     </Badge>
   )
