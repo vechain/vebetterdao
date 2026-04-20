@@ -98,7 +98,7 @@ services:
       THOR_URL: "http://thor-solo:8669"
       CHALLENGES_CONTRACT: "${CHALLENGES_CONTRACT}"
     ports:
-      - "8080:8080"
+      - "8089:8080"
     networks:
       - vechain-thor
 

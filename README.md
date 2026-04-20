@@ -123,7 +123,7 @@ The local setup includes a block explorer and indexer running against the solo n
 - Block explorer: http://localhost:8088
 - Insight: http://localhost:8086
 - Inspector: http://localhost:8087
-- Indexer API health: http://localhost:8080/actuator/health
+- Indexer API health: http://localhost:8089/actuator/health
 
 #### Indexer Commands
 
