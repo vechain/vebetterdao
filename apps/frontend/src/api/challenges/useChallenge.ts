@@ -152,7 +152,12 @@ const getViewerChallengeActionsQueryKey = (challengeId: number, viewerAddress?: 
   viewerAddress ?? "guest",
 ]
 
-export const useChallenge = (challengeId: string, viewerAddress?: string) => {
+interface UseChallengeOptions {
+  pollWhileMissing?: boolean
+}
+
+export const useChallenge = (challengeId: string, viewerAddress?: string, options?: UseChallengeOptions) => {
+  const { pollWhileMissing = false } = options ?? {}
   const thor = useThor()
   const parsedChallengeId = Number(challengeId)
   const isValidChallengeId = Number.isInteger(parsedChallengeId) && parsedChallengeId > 0
@@ -208,6 +213,7 @@ export const useChallenge = (challengeId: string, viewerAddress?: string) => {
     },
     enabled:
       !!thor && isValidChallengeId && currentRoundId !== undefined && contractAddress.toLowerCase() !== ZERO_ADDRESS,
+    refetchInterval: pollWhileMissing ? 2000 : false,
   })
 
   const shouldLoadViewerActions =
@@ -261,12 +267,13 @@ export const useChallenge = (challengeId: string, viewerAddress?: string) => {
     viewerParticipantActionsQuery.data,
   ])
 
-  const isChallengeMissing = baseChallengeQuery.data === null && !baseChallengeQuery.isLoading
+  const isChallengeMissing = baseChallengeQuery.data === null && !baseChallengeQuery.isLoading && !pollWhileMissing
   const isLoading =
     !isChallengeMissing &&
     (isCurrentRoundLoading ||
       isMaxParticipantsLoading ||
       baseChallengeQuery.isLoading ||
+      (pollWhileMissing && baseChallengeQuery.data === null) ||
       (!!viewerAddress && claimState.isLoading) ||
       (shouldLoadViewerActions && viewerParticipantActionsQuery.isLoading))
 
