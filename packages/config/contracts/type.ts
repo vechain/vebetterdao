@@ -130,6 +130,6 @@ export type ContractsConfig = {
   NAVIGATOR_FEE_PERCENTAGE: number // navigator fee in basis points (default: 2000 = 20%)
   NAVIGATOR_EXIT_NOTICE_PERIOD: number // rounds of notice before exit takes effect (default: 1)
   NAVIGATOR_REPORT_INTERVAL: number // rounds between required reports (default: 2)
-  NAVIGATOR_MINOR_SLASH_PERCENTAGE: number // minor slash in basis points (default: 1000 = 10%)
+  NAVIGATOR_MINOR_SLASH_PERCENTAGE: number // minor slash in basis points (default: 500 = 5%)
   NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: number // blocks before round deadline (default: 8640 = ~24hr)
 }

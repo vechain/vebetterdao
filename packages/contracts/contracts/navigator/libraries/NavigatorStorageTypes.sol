@@ -65,7 +65,7 @@ library NavigatorStorageTypes {
     // ======================== Slashing ======================== //
     // navigator => total amount slashed over lifetime
     mapping(address => uint256) totalSlashed;
-    // minor slash percentage in basis points (default: 1000 = 10% of current stake)
+    // minor slash percentage in basis points (default: 500 = 5% of current stake)
     uint256 minorSlashPercentage;
     // navigator => round => whether already slashed for minor infractions in this round
     mapping(address => mapping(uint256 => bool)) slashedForRound;
