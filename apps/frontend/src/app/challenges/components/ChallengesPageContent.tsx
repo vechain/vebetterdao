@@ -56,7 +56,7 @@ export const ChallengesPageContent = () => {
     }
   }, [isMobile])
 
-  const [tab, setTab] = useState<TabId>(viewerAddress ? "active" : "explore")
+  const [tab, setTab] = useState<TabId>("explore")
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
 
