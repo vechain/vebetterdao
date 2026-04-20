@@ -45,10 +45,11 @@ jobs:
         id: check-release
         env:
           VERSION: ${{ needs.validate-ref.outputs.tag_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
         run: |
-          VERSION=${{ env.VERSION }}
-          RELEASES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/releases)
+          RELEASES=$(curl -s -H "Authorization: token ${GH_TOKEN}" \
+            "https://api.github.com/repos/${REPOSITORY}/releases")
           if echo "$RELEASES" | jq -e ".[] | select(.tag_name==\"$VERSION\")"; then
             echo "NEW_RELEASE=false" >> $GITHUB_OUTPUT
           else
