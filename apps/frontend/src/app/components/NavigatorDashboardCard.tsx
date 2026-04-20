@@ -21,6 +21,7 @@ import {
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { useIsNavigatorRegistrationRound } from "@/hooks/navigator/useIsNavigatorRegistrationRound"
 import { useNavigatorCutoffDeadline } from "@/hooks/navigator/useNavigatorCutoffDeadline"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { ProposalState } from "@/hooks/proposals/grants/types"
@@ -48,6 +49,7 @@ export const NavigatorDashboardCard = () => {
   const { data: lastReportRound } = useGetLastReportRound()
   const { data: reportInterval } = useGetReportInterval()
   const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
+  const isRegistrationRound = useIsNavigatorRegistrationRound(account?.address)
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
 
   const activeProposals = useMemo(
@@ -149,7 +151,15 @@ export const NavigatorDashboardCard = () => {
               </Stat.Root>
             </Skeleton>
 
-            {(status === "ACTIVE" || status === "EXITING") && (
+            {(status === "ACTIVE" || status === "EXITING") && isRegistrationRound && (
+              <VStack gap={2} w="full" align="stretch" pt={2} borderTop="1px solid" borderColor="border.secondary">
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Currently you do not have any tasks to complete. Your tasks will begin next round.")}
+                </Text>
+              </VStack>
+            )}
+
+            {(status === "ACTIVE" || status === "EXITING") && !isRegistrationRound && (
               <VStack gap={2} w="full" align="stretch" pt={2} borderTop="1px solid" borderColor="border.secondary">
                 {cutoffDate && hasPendingTasks && (
                   <HStack gap={1}>
