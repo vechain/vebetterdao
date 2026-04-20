@@ -111,7 +111,7 @@ jobs:
     steps:
       - name: Update PR comment - Deploying
         if: needs.setup.outputs.is_fork_pr != 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
@@ -172,7 +172,7 @@ jobs:
 
       - name: Update PR comment - Fork PR (preview build skipped)
         if: needs.setup.outputs.is_fork_pr == 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
           PROJECT_NAME: ${{ env.PROJECT_NAME }}
@@ -448,7 +448,7 @@ jobs:
     steps:
       - name: Update PR comment - no deploy (docs / CI only)
         if: needs.preview-relevant.outputs.run_preview != 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
@@ -510,7 +510,7 @@ jobs:
 
       - name: Update PR comment - Results
         if: needs.preview-relevant.outputs.run_preview == 'true' && needs.setup.outputs.is_fork_pr != 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
